@@ -1417,8 +1417,8 @@ class TestProgram(unittest.TestProgram):
 
         super().__init__(**kwargs)
 
-    def parseArgs(self, argv):
-        """Parse the command line for the test"""
+    def GetParser(self):
+        """Return a command line parser"""
         description = """Examples:
   %(prog)s                            - run default set of tests
   %(prog)s MyTestSuite                - run suite MyTestSuite
@@ -1533,6 +1533,11 @@ class TestProgram(unittest.TestProgram):
             help="Do not profile builtin functions",
         )
 
+        return parser
+
+    def parseArgs(self, argv):
+        """Parse the command line for the test"""
+        parser = self.GetParser()
         opts = parser.parse_args(argv[1:])
         opts.Freeze()
 
