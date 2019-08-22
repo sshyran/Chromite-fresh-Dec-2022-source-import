@@ -1918,6 +1918,12 @@
         },
         {
           "board_name": "octopus",
+          "name": "garg",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt"
+        },
+        {
+          "board_name": "octopus",
           "name": "grabbiter",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt"
@@ -2035,6 +2041,12 @@
         {
           "board_name": "octopus",
           "name": "unprovisioned_fleex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt"
+        },
+        {
+          "board_name": "octopus",
+          "name": "unprovisioned_garg",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt"
         },
