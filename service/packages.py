@@ -30,6 +30,7 @@ from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 from chromite.service import android
 
+
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib

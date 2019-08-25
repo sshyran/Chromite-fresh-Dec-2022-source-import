@@ -24,6 +24,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.utils import code_coverage_util
 
+
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib

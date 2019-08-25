@@ -11,7 +11,6 @@ import shutil
 from typing import List
 from unittest import mock
 
-from chromite.utils import code_coverage_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
@@ -30,6 +29,7 @@ from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.service import test
 from chromite.service.test import GatherCodeCoverageLlvmJsonFileResult
+from chromite.utils import code_coverage_util
 
 
 class PartialDict:

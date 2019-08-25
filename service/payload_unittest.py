@@ -4,11 +4,11 @@
 
 """Payload service tests."""
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import payload_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_test_lib
-from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import gspaths
+from chromite.lib.paygen import paygen_payload_lib
 from chromite.service import payload
 
 

@@ -8,7 +8,15 @@ import functools
 import itertools
 import os
 from pathlib import Path
-from typing import Collection, List, Mapping, Optional, Set, Tuple, TYPE_CHECKING
+from typing import (
+    Collection,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    TYPE_CHECKING,
+)
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
@@ -16,6 +24,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import dependency_lib
 from chromite.lib import portage_util
 from chromite.scripts import cros_extract_deps
+
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph

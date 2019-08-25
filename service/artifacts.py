@@ -23,10 +23,11 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 
+
 if TYPE_CHECKING:
+  from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
   from chromite.lib import sysroot_lib
-  from chromite.lib import build_target_lib
 
 # Archive type constants.
 ARCHIVE_CONTROL_FILES = 'control'

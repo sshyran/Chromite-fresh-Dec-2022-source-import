@@ -6,8 +6,8 @@
 
 import logging
 import os
-import shutil
 from pathlib import Path
+import shutil
 from typing import Iterable, List, Optional, Union
 
 from chromite.lib import chroot_lib
@@ -16,8 +16,9 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib.parser import package_info
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
+
 
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
 

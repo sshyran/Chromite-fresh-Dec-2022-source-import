@@ -14,6 +14,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
 
+
 if TYPE_CHECKING:
   from chromite.lib import chroot_lib
 

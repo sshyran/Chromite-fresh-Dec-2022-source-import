@@ -10,22 +10,24 @@ import os
 import re
 from unittest import mock
 
-import pytest
-
 from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
+import pytest
 
 import chromite as cr
 from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
-    REPLICATION_TYPE_FILTER)
+    FILE_TYPE_JSON,
+    FileReplicationRule,
+    REPLICATION_TYPE_FILTER,
+    ReplicationConfig,
+)
 from chromite.cbuildbot import manifest_version
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import depgraph
 from chromite.lib import dependency_graph
+from chromite.lib import depgraph
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -35,6 +37,7 @@ from chromite.lib.parser import package_info
 from chromite.lib.uprev_lib import GitRef
 from chromite.service import android
 from chromite.service import packages
+
 
 D = cros_test_lib.Directory
 

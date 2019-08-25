@@ -5,14 +5,23 @@
 """Sysroot service."""
 
 import contextlib
-import logging
 import glob
+import logging
 import multiprocessing
 import os
 from pathlib import Path
 import shutil
 import tempfile
-from typing import Dict, Generator, Iterator, List, NamedTuple, Optional, TYPE_CHECKING, Union
+from typing import (
+    Dict,
+    Generator,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+    TYPE_CHECKING,
+    Union,
+)
 import urllib
 
 from chromite.lib import cache
@@ -26,6 +35,7 @@ from chromite.lib import portage_util
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
+
 
 if TYPE_CHECKING:
   from chromite.lib import binpkg

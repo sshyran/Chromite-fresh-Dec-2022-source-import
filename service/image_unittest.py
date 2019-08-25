@@ -7,8 +7,8 @@
 import os
 from pathlib import Path
 
-from chromite.lib import constants
 from chromite.lib import chroot_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib

@@ -16,6 +16,7 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.utils import key_value_store
 
+
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
