@@ -11,8 +11,8 @@ import sys
 
 from chromite.lib import cros_test_lib
 from chromite.signing.lib import keys
-from chromite.signing.lib import signer
 from chromite.signing.lib import keys_unittest
+from chromite.signing.lib import signer
 
 
 class TestSignerConfig(cros_test_lib.TestCase):

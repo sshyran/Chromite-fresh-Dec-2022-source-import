@@ -7,7 +7,7 @@
 import configparser
 import os
 
-import yaml # pylint: disable=import-error
+import yaml  # pylint: disable=import-error
 
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging

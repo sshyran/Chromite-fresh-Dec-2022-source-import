@@ -5,8 +5,8 @@
 """Chrome OS sign_image unittests"""
 
 from chromite.lib import cros_test_lib
-from chromite.signing.image_signing import imagefile
 from chromite.signing.bin import sign_image
+from chromite.signing.image_signing import imagefile
 
 
 class TestMain(cros_test_lib.RunCommandTestCase):
