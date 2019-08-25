@@ -6,6 +6,7 @@
 
 from chromite.lib import cros_collections
 
+
 # firewall:!:236:236:firewall daemon:/dev/null:/bin/false
 UserEntry = cros_collections.Collection('UserEntry',
                                         user=None, encpasswd='!',

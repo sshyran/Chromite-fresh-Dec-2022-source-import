@@ -7,7 +7,6 @@
 import io
 import os
 import pickle
-
 from xml.etree import ElementTree
 
 from chromite.lib import cros_test_lib

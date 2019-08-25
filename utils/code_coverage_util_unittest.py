@@ -7,10 +7,12 @@
 import json
 import os
 from typing import List
-from chromite.lib import osutils
-from chromite.lib import cros_test_lib
-from chromite.utils import code_coverage_util
+
 from chromite.lib import constants
+from chromite.lib import cros_test_lib
+from chromite.lib import osutils
+from chromite.utils import code_coverage_util
+
 
 FILE_CONTENT_USE_CASE_1 = """
 // comment_1

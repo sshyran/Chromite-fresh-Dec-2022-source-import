@@ -7,10 +7,11 @@
 import json
 import logging
 import os
-from typing import List, Dict, Tuple
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 from chromite.lib import osutils
+
 
 ZERO_COVERAGE_EXEC_COUNT = 0
 ZERO_COVERAGE_START_COL = 1

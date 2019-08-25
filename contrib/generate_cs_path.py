@@ -41,6 +41,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 
+
 # HEAD is the ref for the codesearch repo, not the project itself.
 _PUBLIC_CS_BASE = (
     'https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:')

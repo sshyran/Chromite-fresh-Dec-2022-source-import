@@ -16,6 +16,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
 
+
 __all__ = ['Overlay', 'Package', 'Profile', 'Sysroot']
 
 _EXCLUDED_OVERLAYS = ('chromiumos', 'portage-stable')

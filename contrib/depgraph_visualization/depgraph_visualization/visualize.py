@@ -9,7 +9,8 @@ https://pyvis.readthedocs.io/en/latest/documentation.html
 """
 
 from typing import Dict, Iterator, List, Set, Tuple
-import matplotlib.pyplot as plt # pylint: disable=import-error
+
+import matplotlib.pyplot as plt  # pylint: disable=import-error
 
 
 class PackageNode(object):
@@ -105,7 +106,7 @@ class DepVisualizer(object):
       output_name: Name of the output HTML file.
       output_dir: Directory of the output HTML file.
     """
-    import pyvis # pylint: disable=import-error
+    import pyvis  # pylint: disable=import-error
     net = pyvis.network.Network(height='720px', width='60%', directed=True,
                                 bgcolor='#272727', font_color='#ffffff',
                                 heading='')

@@ -6,6 +6,7 @@ import functools
 import logging
 import sys
 
+
 assert sys.version_info >= (3, 6), 'Chromite requires Python 3.6+'
 
 # Set a custom logging class inside this module that provides the NOTICE level.

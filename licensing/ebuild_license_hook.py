@@ -9,7 +9,6 @@ package emerge.
 """
 
 from chromite.lib import commandline
-
 from chromite.licensing import licenses_lib
 
 

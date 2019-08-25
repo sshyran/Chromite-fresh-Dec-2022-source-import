@@ -10,10 +10,11 @@ import sys
 from typing import List
 
 from chromite.lib import build_target_lib
-from chromite.lib import cros_build_lib
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.lib.dependency_graph import PackageNode
 from chromite.utils import pformat
+
 
 # depgraph has imports which only resolve inside the SDK, whereas we need to
 # support being called from inside or outside. If invoked from outside we rerun
