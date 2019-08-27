@@ -484,11 +484,9 @@
     ultima-postsubmit
     veyron_fievel-postsubmit
     veyron_jaq-postsubmit
-    veyron_jerry-kernelnext-postsubmit
     veyron_jerry-postsubmit
     veyron_mickey-postsubmit
     veyron_mighty-postsubmit
-    veyron_minnie-kernelnext-postsubmit
     veyron_minnie-postsubmit
     veyron_rialto-postsubmit
     veyron_speedy-postsubmit
@@ -597,11 +595,9 @@
     ultima-release
     veyron_fievel-release
     veyron_jaq-release
-    veyron_jerry-kernelnext-release
     veyron_jerry-release
     veyron_mickey-release
     veyron_mighty-release
-    veyron_minnie-kernelnext-release
     veyron_minnie-release
     veyron_rialto-release
     veyron_speedy-release
@@ -2603,11 +2599,9 @@
     ultima-postsubmit-tryjob
     veyron_fievel-postsubmit-tryjob
     veyron_jaq-postsubmit-tryjob
-    veyron_jerry-kernelnext-postsubmit-tryjob
     veyron_jerry-postsubmit-tryjob
     veyron_mickey-postsubmit-tryjob
     veyron_mighty-postsubmit-tryjob
-    veyron_minnie-kernelnext-postsubmit-tryjob
     veyron_minnie-postsubmit-tryjob
     veyron_rialto-postsubmit-tryjob
     veyron_speedy-postsubmit-tryjob
@@ -2708,11 +2702,9 @@
     ultima-release-tryjob
     veyron_fievel-release-tryjob
     veyron_jaq-release-tryjob
-    veyron_jerry-kernelnext-release-tryjob
     veyron_jerry-release-tryjob
     veyron_mickey-release-tryjob
     veyron_mighty-release-tryjob
-    veyron_minnie-kernelnext-release-tryjob
     veyron_minnie-release-tryjob
     veyron_rialto-release-tryjob
     veyron_speedy-release-tryjob
@@ -3496,18 +3488,6 @@
   veyron_jerry-compile-only-pre-cq
   veyron_jerry-factory-veyron-6591.B-factorybranch-tryjob
   veyron_jerry-full-tryjob
-  veyron_jerry-kernelnext-chromium-pfq-tryjob
-  veyron_jerry-kernelnext-compile-only-pre-cq
-  veyron_jerry-kernelnext-full-tryjob
-  veyron_jerry-kernelnext-llvm-next-toolchain-tryjob
-  veyron_jerry-kernelnext-llvm-toolchain-tryjob
-  veyron_jerry-kernelnext-no-vmtest-pre-cq
-  veyron_jerry-kernelnext-paladin-tryjob
-  veyron_jerry-kernelnext-postsubmit-tryjob
-  veyron_jerry-kernelnext-pre-cq
-  veyron_jerry-kernelnext-release-tryjob
-  veyron_jerry-kernelnext-tot-chromium-pfq-informational-tryjob
-  veyron_jerry-kernelnext-unittest-stress
   veyron_jerry-llvm-next-toolchain-tryjob
   veyron_jerry-llvm-toolchain-tryjob
   veyron_jerry-no-vmtest-pre-cq
@@ -3568,18 +3548,6 @@
   veyron_minnie-compile-only-pre-cq
   veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob
   veyron_minnie-full-tryjob
-  veyron_minnie-kernelnext-chromium-pfq-tryjob
-  veyron_minnie-kernelnext-compile-only-pre-cq
-  veyron_minnie-kernelnext-full-tryjob
-  veyron_minnie-kernelnext-llvm-next-toolchain-tryjob
-  veyron_minnie-kernelnext-llvm-toolchain-tryjob
-  veyron_minnie-kernelnext-no-vmtest-pre-cq
-  veyron_minnie-kernelnext-paladin-tryjob
-  veyron_minnie-kernelnext-postsubmit-tryjob
-  veyron_minnie-kernelnext-pre-cq
-  veyron_minnie-kernelnext-release-tryjob
-  veyron_minnie-kernelnext-tot-chromium-pfq-informational-tryjob
-  veyron_minnie-kernelnext-unittest-stress
   veyron_minnie-llvm-next-toolchain-tryjob
   veyron_minnie-llvm-toolchain-tryjob
   veyron_minnie-no-vmtest-pre-cq
