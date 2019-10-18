@@ -404,7 +404,6 @@
     enguarde-postsubmit
     eve-arcnext-postsubmit
     eve-campfire-postsubmit
-    eve-kvm-postsubmit
     eve-postsubmit
     expresso-postsubmit
     falco_li-postsubmit
@@ -529,7 +528,6 @@
     enguarde-release
     eve-arcnext-release
     eve-campfire-release
-    eve-kvm-release
     eve-release
     expresso-release
     falco_li-release
@@ -1400,18 +1398,6 @@
   eve-compile-only-pre-cq
   eve-factory-eve-9667.B-factorybranch-tryjob
   eve-full-tryjob
-  eve-kvm-chromium-pfq-tryjob
-  eve-kvm-compile-only-pre-cq
-  eve-kvm-full-tryjob
-  eve-kvm-llvm-next-toolchain-tryjob
-  eve-kvm-llvm-toolchain-tryjob
-  eve-kvm-no-vmtest-pre-cq
-  eve-kvm-paladin-tryjob
-  eve-kvm-postsubmit-tryjob
-  eve-kvm-pre-cq
-  eve-kvm-release-tryjob
-  eve-kvm-tot-chromium-pfq-informational-tryjob
-  eve-kvm-unittest-stress
   eve-llvm-next-toolchain-tryjob
   eve-llvm-toolchain-tryjob
   eve-master-factorybranch-tryjob
@@ -2519,7 +2505,6 @@
     enguarde-postsubmit-tryjob
     eve-arcnext-postsubmit-tryjob
     eve-campfire-postsubmit-tryjob
-    eve-kvm-postsubmit-tryjob
     eve-postsubmit-tryjob
     expresso-postsubmit-tryjob
     falco_li-postsubmit-tryjob
@@ -2636,7 +2621,6 @@
     enguarde-release-tryjob
     eve-arcnext-release-tryjob
     eve-campfire-release-tryjob
-    eve-kvm-release-tryjob
     eve-release-tryjob
     expresso-release-tryjob
     falco_li-release-tryjob
