@@ -23,7 +23,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import signals as cros_signals
 
 
 class RunCommandErrorStrTest(cros_test_lib.TestCase):
@@ -317,7 +316,6 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
     self.signal_mock = self.PatchObject(signal, 'signal')
     self.getsignal_mock = self.PatchObject(signal, 'getsignal')
-    self.PatchObject(cros_signals, 'SignalModuleUsable', return_value=True)
 
   def tearDown(self):
     # Restore hidden ENVs.
@@ -361,8 +359,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     def _GetsignalChecker(sig):
       """Return the right signal values so we can check the calls."""
       if sig == signal.SIGINT:
-        self.assertFalse(ignore_sigint)
-        return normal_sigint
+        return sigint_suppress if ignore_sigint else normal_sigint
       elif sig == signal.SIGTERM:
         return normal_sigterm
       else:
@@ -387,7 +384,6 @@ class TestRunCommand(cros_test_lib.MockTestCase):
           mock.call(signal.SIGINT, sigint_suppress),
           mock.call(signal.SIGTERM, normal_sigterm),
       ])
-      self.assertEqual(self.getsignal_mock.call_count, 1)
     else:
       self.signal_mock.assert_has_calls([
           mock.call(signal.SIGINT, RejectSigIgn()),
@@ -395,7 +391,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
           mock.call(signal.SIGINT, normal_sigint),
           mock.call(signal.SIGTERM, normal_sigterm),
       ])
-      self.assertEqual(self.getsignal_mock.call_count, 2)
+    self.assertEqual(self.getsignal_mock.call_count, 2)
 
     # Verify various args are passed down to the real command.
     pargs = self.popen_mock.call_args[0][0]

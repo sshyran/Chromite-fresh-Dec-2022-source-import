@@ -853,35 +853,38 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   popen_cmd = ['true'] if dryrun else cmd
 
   proc = None
-  # Verify that the signals modules is actually usable, and won't segfault
-  # upon invocation of getsignal.  See signals.SignalModuleUsable for the
-  # details and upstream python bug.
-  use_signals = signals.SignalModuleUsable()
   try:
     proc = _Popen(popen_cmd, cwd=cwd, stdin=stdin, stdout=popen_stdout,
                   stderr=popen_stderr, shell=False, env=env,
                   close_fds=True)
 
-    if use_signals:
-      if ignore_sigint:
-        old_sigint = signal.signal(signal.SIGINT, signal.SIG_IGN)
-      else:
-        old_sigint = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT,
-                      functools.partial(_KillChildProcess, proc, int_timeout,
-                                        kill_timeout, cmd, old_sigint))
+    old_sigint = signal.getsignal(signal.SIGINT)
+    if ignore_sigint:
+      new_sigint = signal.SIG_IGN
+    else:
+      new_sigint = functools.partial(_KillChildProcess, proc, int_timeout,
+                                     kill_timeout, cmd, old_sigint)
+    # We have to ignore ValueError in case we're run from a thread.
+    try:
+      signal.signal(signal.SIGINT, new_sigint)
+    except ValueError:
+      old_sigint = None
 
-      old_sigterm = signal.getsignal(signal.SIGTERM)
-      signal.signal(signal.SIGTERM,
-                    functools.partial(_KillChildProcess, proc, int_timeout,
-                                      kill_timeout, cmd, old_sigterm))
+    old_sigterm = signal.getsignal(signal.SIGTERM)
+    new_sigterm = functools.partial(_KillChildProcess, proc, int_timeout,
+                                    kill_timeout, cmd, old_sigterm)
+    try:
+      signal.signal(signal.SIGTERM, new_sigterm)
+    except ValueError:
+      old_sigterm = None
 
     try:
       try:
         (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
       finally:
-        if use_signals:
+        if old_sigint is not None:
           signal.signal(signal.SIGINT, old_sigint)
+        if old_sigterm is not None:
           signal.signal(signal.SIGTERM, old_sigterm)
 
         if (popen_stdout and not isinstance(popen_stdout, int) and
