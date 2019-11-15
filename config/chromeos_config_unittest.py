@@ -669,6 +669,11 @@ class CBuildBotTest(ChromeosConfigTestBase):
       if build_name.startswith('clapper'):
         continue
 
+      # crbug.com/1011171: expresso, jacuzzi, and zork do not run hwtests in the
+      # release builder.
+      if build_name.startswith(('expresso', 'jacuzzi', 'zork')):
+        continue
+
       if (config.build_type == 'canary' and 'test' in config.images and
           config.upload_hw_test_artifacts and config.hwqual):
         self.assertTrue(

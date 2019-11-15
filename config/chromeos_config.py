@@ -3924,6 +3924,17 @@ def ApplyCustomOverrides(site_config):
           'useflags': [],
       },
 
+      # No hw tests for beaglebone, expresso (crbug.com/1011171).
+      'beaglebone-release': {
+          'hw_tests': [],
+          'hw_tests_override': []
+      },
+
+      'expresso-release': {
+          'hw_tests': [],
+          'hw_tests_override': []
+      },
+
       'whirlwind-release': {
           'dev_installer_prebuilts': True,
       },
@@ -4066,6 +4077,9 @@ def ApplyCustomOverrides(site_config):
 
       'jacuzzi-release': {
           'sign_types': ['recovery', 'factory'],
+          # No hw tests for jacuzzi (crbug.com/1011171).
+          'hw_tests': [],
+          'hw_tests_override': [],
       },
 
       'kukui-release': {
@@ -4083,6 +4097,11 @@ def ApplyCustomOverrides(site_config):
       },
       'cyan-release': {
           'useflags': config_lib.append_useflags(['new_tcmalloc']),
+      },
+      'zork-release': {
+          # No hw tests for zork (crbug.com/1011171).
+          'hw_tests': [],
+          'hw_tests_override': [],
       },
       'edgar-release': {
           'useflags': config_lib.append_useflags(['new_tcmalloc']),
