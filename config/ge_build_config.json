@@ -1398,7 +1398,7 @@
     {
       "name": "grunt",
       "reference_board_name": "grunt",
-      "arch": "X86_INTERNAL",
+      "arch": "UNKNOWN",
       "builder": "RELEASE",
       "experimental": false,
       "models": [
