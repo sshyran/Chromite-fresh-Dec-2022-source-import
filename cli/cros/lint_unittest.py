@@ -698,7 +698,6 @@ class SourceCheckerTest(CheckerTestCase):
     shebangs = (
         b'#!/usr/bin/python\n',
         b'#! /usr/bin/python2 \n',
-        b'#!/usr/bin/env python\n',
         b'#! /usr/bin/env python2 \n',
         b'#!/usr/bin/python2\n',
     )
@@ -707,6 +706,7 @@ class SourceCheckerTest(CheckerTestCase):
   def testGoodShebangNoExec(self):
     """Verify _check_shebang rejects shebangs on non-exec files"""
     shebangs = (
+        b'#!/usr/bin/env python\n',
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
     )
@@ -715,6 +715,7 @@ class SourceCheckerTest(CheckerTestCase):
   def testGoodShebang(self):
     """Verify _check_shebang accepts good shebangs"""
     shebangs = (
+        b'#!/usr/bin/env python\n',
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
         b'#!/usr/bin/env python2\t\n',

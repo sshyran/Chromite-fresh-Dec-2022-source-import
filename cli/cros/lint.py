@@ -637,8 +637,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
   priority = -1
   MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
   msgs = {
-      'R9200': ('Shebang should be #!/usr/bin/env python2 or '
-                '#!/usr/bin/env python3',
+      'R9200': ('Shebang should be "#!/usr/bin/env python2" or '
+                '"#!/usr/bin/env python3" or "#!/usr/bin/env python"',
                 ('bad-shebang'), _MessageR9200),
       'R9201': ('Shebang is missing, but file is executable (chmod -x to fix)',
                 ('missing-shebang'), _MessageR9201),
@@ -681,7 +681,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
       self.add_message('R9202')
 
     if shebang.strip() not in (
-        b'#!/usr/bin/env python2', b'#!/usr/bin/env python3'):
+        b'#!/usr/bin/env python2', b'#!/usr/bin/env python3',
+        b'#!/usr/bin/env python'):
       self.add_message('R9200')
 
   def _check_encoding(self, _node, stream, st):
