@@ -435,10 +435,6 @@
     kip-postsubmit
     kukui-postsubmit
     kumo-postsubmit
-    lakitu-gpu-postsubmit
-    lakitu-nc-postsubmit
-    lakitu-postsubmit
-    lakitu-st-postsubmit
     lars-postsubmit
     lasilla-ground-postsubmit
     littlejoe-postsubmit
@@ -505,6 +501,10 @@
 
 == release ==
   master-lakitu-release
+    lakitu-gpu-release
+    lakitu-nc-release
+    lakitu-release
+    lakitu-st-release
   master-release
     arkham-release
     asuka-release
@@ -551,10 +551,6 @@
     kip-release
     kukui-release
     kumo-release
-    lakitu-gpu-release
-    lakitu-nc-release
-    lakitu-release
-    lakitu-st-release
     lars-release
     lulu-release
     mistral-release
@@ -2196,7 +2192,6 @@
   lakitu-gpu-no-vmtest-pre-cq
   lakitu-gpu-paladin-tryjob
   lakitu-gpu-payloads-tryjob
-  lakitu-gpu-postsubmit-tryjob
   lakitu-gpu-pre-cq
   lakitu-gpu-release-tryjob
   lakitu-gpu-unittest-stress
@@ -2210,14 +2205,12 @@
   lakitu-nc-no-vmtest-pre-cq
   lakitu-nc-paladin-tryjob
   lakitu-nc-payloads-tryjob
-  lakitu-nc-postsubmit-tryjob
   lakitu-nc-pre-cq
   lakitu-nc-release-tryjob
   lakitu-nc-unittest-stress
   lakitu-no-vmtest-pre-cq
   lakitu-paladin-tryjob
   lakitu-payloads-tryjob
-  lakitu-postsubmit-tryjob
   lakitu-pre-cq
   lakitu-release-tryjob
   lakitu-st-compile-only-pre-cq
@@ -2228,7 +2221,6 @@
   lakitu-st-no-vmtest-pre-cq
   lakitu-st-paladin-tryjob
   lakitu-st-payloads-tryjob
-  lakitu-st-postsubmit-tryjob
   lakitu-st-pre-cq
   lakitu-st-release-tryjob
   lakitu-st-unittest-stress
@@ -2357,6 +2349,10 @@
     chell-incremental-tryjob
     lakitu-incremental-tryjob
   master-lakitu-release-tryjob
+    lakitu-gpu-release-tryjob
+    lakitu-nc-release-tryjob
+    lakitu-release-tryjob
+    lakitu-st-release-tryjob
   master-mst-android-pfq-tryjob
     eve-arcnext-mst-android-pfq-tryjob
   master-nyc-android-pfq-tryjob
@@ -2535,10 +2531,6 @@
     kip-postsubmit-tryjob
     kukui-postsubmit-tryjob
     kumo-postsubmit-tryjob
-    lakitu-gpu-postsubmit-tryjob
-    lakitu-nc-postsubmit-tryjob
-    lakitu-postsubmit-tryjob
-    lakitu-st-postsubmit-tryjob
     lars-postsubmit-tryjob
     lasilla-ground-postsubmit-tryjob
     littlejoe-postsubmit-tryjob
@@ -2643,10 +2635,6 @@
     kip-release-tryjob
     kukui-release-tryjob
     kumo-release-tryjob
-    lakitu-gpu-release-tryjob
-    lakitu-nc-release-tryjob
-    lakitu-release-tryjob
-    lakitu-st-release-tryjob
     lars-release-tryjob
     lulu-release-tryjob
     mistral-release-tryjob

@@ -3681,7 +3681,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     # out of ChromeOS support window.
     # To do this, set 'lakitu_lts_branch' to 'True' and re-run
     # 'config/chromeos_config_unittest --update'.
-    lakitu_lts_branch = False
+    lakitu_lts_branch = True
     if lakitu_lts_branch and _IsLakituConfig(config):
       master = lakitu_master_config
 
