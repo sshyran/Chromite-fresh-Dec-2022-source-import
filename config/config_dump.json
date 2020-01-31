@@ -566,7 +566,7 @@
         "nyc_android_pfq": {
             "_template": "nyc_android_pfq",
             "android_gts_build_branch": "git_nyc-mr2-dev",
-            "android_import_branch": "git_nyc-mr1-arc",
+            "android_import_branch": "git_nyc-mr1-arc-m81",
             "android_package": "android-container-nyc",
             "android_rev": "latest_release",
             "build_type": "android",
@@ -663,7 +663,7 @@
         },
         "pi_android_pfq": {
             "_template": "pi_android_pfq",
-            "android_import_branch": "git_pi-arc",
+            "android_import_branch": "git_pi-arc-m81",
             "android_package": "android-container-pi",
             "android_rev": "latest_release",
             "build_type": "android",
@@ -14634,7 +14634,7 @@
     },
     "gandof-android-nyc-pre-flight-branch": {
         "_template": "pre_flight_branch",
-        "android_import_branch": "git_nyc-mr1-arc",
+        "android_import_branch": "git_nyc-mr1-arc-m81",
         "android_package": "android-container-nyc",
         "android_rev": "latest_release",
         "boards": [
@@ -14646,7 +14646,7 @@
     },
     "gandof-android-nyc-pre-flight-branch-tryjob": {
         "_template": "pre_flight_branch",
-        "android_import_branch": "git_nyc-mr1-arc",
+        "android_import_branch": "git_nyc-mr1-arc-m81",
         "android_package": "android-container-nyc",
         "android_rev": "latest_release",
         "boards": [
@@ -15413,7 +15413,7 @@
     },
     "grunt-android-pi-pre-flight-branch": {
         "_template": "pre_flight_branch",
-        "android_import_branch": "git_pi-arc",
+        "android_import_branch": "git_pi-arc-m81",
         "android_package": "android-container-pi",
         "android_rev": "latest_release",
         "boards": [
@@ -15425,7 +15425,7 @@
     },
     "grunt-android-pi-pre-flight-branch-tryjob": {
         "_template": "pre_flight_branch",
-        "android_import_branch": "git_pi-arc",
+        "android_import_branch": "git_pi-arc-m81",
         "android_package": "android-container-pi",
         "android_rev": "latest_release",
         "boards": [
