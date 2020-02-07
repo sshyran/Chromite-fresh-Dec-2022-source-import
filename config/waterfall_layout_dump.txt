@@ -267,7 +267,6 @@
     endeavour-release
     enguarde-release
     eve-arcnext-release
-    eve-kvm-release
     eve-release
     excelsior-release
     expresso-release
@@ -724,11 +723,6 @@
   eve-arcvm-vmpi-android-pfq-tryjob
   eve-factory-eve-9667.B-factorybranch-tryjob
   eve-full-tryjob
-  eve-kvm-full-tryjob
-  eve-kvm-llvm-next-toolchain-tryjob
-  eve-kvm-llvm-toolchain-tryjob
-  eve-kvm-release-tryjob
-  eve-kvm-unittest-stress
   eve-llvm-next-toolchain-tryjob
   eve-llvm-toolchain-tryjob
   eve-llvm-tot-toolchain-tryjob
@@ -1295,7 +1289,6 @@
     endeavour-release-tryjob
     enguarde-release-tryjob
     eve-arcnext-release-tryjob
-    eve-kvm-release-tryjob
     eve-release-tryjob
     excelsior-release-tryjob
     expresso-release-tryjob
