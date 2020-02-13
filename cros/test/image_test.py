@@ -920,3 +920,35 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
                    ', '.join(available_fw))
       self.assertTrue(supported_fw & available_fw,
                       'Driver/firmware mismatch for %s' % flag)
+
+class DBusServiceTest(image_test_lib.ImageTestCase):
+  """Verify installed D-Bus service file contents."""
+
+  def TestDelegationToUpstart(self):
+    """Check D-Bus service files for delegation to Upstart.
+
+    crbug.com/1025914: To prevent D-Bus activated services from running
+    indefinitely, each D-Bus activated service file should have an associated
+    Upstart job that manages the lifecycle of the service.
+
+    The Exec clause can either start with "Exec=/sbin/start(whitespace)"
+    (delegate to upstart) or should be "Exec=/sbin/false" (D-Bus service
+    activations disabled).
+    """
+    DBUS_HEADER_RE = re.compile(r'^\[D-BUS Service]$', re.MULTILINE)
+    EXEC_CLAUSE_RE = re.compile(r'^Exec=(/sbin/start\s|/bin/false)',
+                                re.MULTILINE)
+
+    dbus_service_path_spec = ('%s/usr/share/dbus-1/*services/*.service' %
+                              image_test_lib.ROOT_A)
+    success = True
+
+    for filename in glob.iglob(dbus_service_path_spec):
+      file_contents = osutils.ReadFile(filename)
+      if (DBUS_HEADER_RE.search(file_contents) and
+          not EXEC_CLAUSE_RE.search(file_contents)):
+        success = False
+        logging.error('%s: Add an Upstart script to manage D-Bus activated '
+                      'service lifecycle: see crbug.com/1025914.', filename)
+
+    self.assertTrue(success)
