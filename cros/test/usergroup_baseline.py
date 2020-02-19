@@ -167,7 +167,6 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                users={'chronos', 'cros-disks', 'seneschal'}),
     GroupEntry(group='user-containers', gid=10000, users={'user-containers'}),
     GroupEntry(group='midis', gid=608, users={'chronos'}),
-    GroupEntry(group='avfs', gid=301, users={'cros-disks'}),
     GroupEntry(group='cfm-peripherals', gid=20103,
                users={'cfm-monitor', 'cfm-firmware-updaters'}),
     GroupEntry(group='ippusb', gid=20100, users={'ippusb', 'lp', 'lpadmin',
