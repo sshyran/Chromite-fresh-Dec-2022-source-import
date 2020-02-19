@@ -290,7 +290,7 @@ PRODUCT_TOOLCHAIN_STAGE = 'Product-Toolchain'
 # Major is used for tracking heavy API breakage- for example, no longer
 # supporting the --resume option.
 REEXEC_API_MAJOR = 0
-REEXEC_API_MINOR = 11
+REEXEC_API_MINOR = 12
 REEXEC_API_VERSION = '%i.%i' % (REEXEC_API_MAJOR, REEXEC_API_MINOR)
 
 # Support --master-build-id
@@ -311,6 +311,8 @@ REEXEC_API_WORKSPACE = 9
 REEXEC_API_MASTER_BUILDBUCKET_ID = 10
 # Support --chromeos_goma_dir
 REEXEC_API_CHROMEOS_GOMA_DIR = 11
+# Support --chrome-preload-dir
+REEXEC_API_CHROME_PRELOAD_DIR = 12
 
 # We rely on the (waterfall, builder name, build number) to uniquely identify
 # a build. However, future migrations or state wipes of the buildbot master may
