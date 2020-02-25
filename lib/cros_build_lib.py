@@ -24,6 +24,7 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
+import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -665,11 +666,13 @@ def run(
     assert not kwargs, "Unknown arguments to run: %s" % (list(kwargs),)
 
     if capture_output:
-        # TODO(vapier): Enable this once we migrate all the legacy arguments above.
-        # if stdout is not None or stderr is not None:
-        #   raise ValueError('capture_output may not be used with stdout & stderr')
-        # TODO(vapier): Drop this specialization once we're Python 3-only as we can
-        # pass this argument down to Popen directly.
+        if stdout is not None or stderr is not None:
+            # TODO(vapier): Switch from warning to error.
+            warnings.warn(
+                "run: capture_output may not be used with stdout/stderr"
+            )
+            # raise ValueError(
+            #     "capture_output may not be used with stdout & stderr")
         if stdout is None:
             stdout = True
         if stderr is None:
