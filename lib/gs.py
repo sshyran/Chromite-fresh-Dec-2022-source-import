@@ -1069,7 +1069,8 @@ wheel: <
           A CompletedProcess object.
         """
         kwargs = kwargs.copy()
-        kwargs.setdefault("stderr", True)
+        if "capture_output" not in kwargs:
+            kwargs.setdefault("stderr", True)
         kwargs.setdefault("encoding", "utf-8")
 
         cmd = self._gsutil_bin + self.gsutil_flags
@@ -1186,7 +1187,9 @@ wheel: <
                 # Don't retry on local copies.
                 kwargs.setdefault("retries", 0)
 
-            kwargs["capture_output"] = True
+            if "capture_output" not in kwargs:
+                kwargs.setdefault("stderr", True)
+                kwargs.setdefault("stdout", True)
             try:
                 result = self.DoCommand(cmd, **kwargs)
                 if self.dry_run:
@@ -1249,7 +1252,9 @@ wheel: <
             # gsutil doesn't support listing a local path, so just run 'ls'.
             kwargs.pop("retries", None)
             kwargs.pop("headers", None)
-            kwargs["capture_output"] = True
+            if "capture_output" not in kwargs:
+                kwargs.setdefault("stderr", True)
+                kwargs.setdefault("stdout", True)
             kwargs.setdefault("encoding", "utf-8")
             result = cros_build_lib.run(["ls", path], **kwargs)
             return result.stdout.splitlines()

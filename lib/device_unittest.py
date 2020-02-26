@@ -67,7 +67,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
         self._device.run(["/usr/local/autotest/bin/vm_sanity"])
         self.assertCommandContains(["/usr/local/autotest/bin/vm_sanity"])
         self.assertCommandContains(
-            capture_output=True, stderr=subprocess.STDOUT, log_output=True
+            stdout=True, stderr=subprocess.STDOUT, log_output=True
         )
 
     def testRemoteCmdStream(self):

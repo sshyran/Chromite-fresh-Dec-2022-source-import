@@ -184,7 +184,7 @@ Change-Id: %s
         )
         self.assertCommandContains(
             ["%s:refs/for/%s" % (self.PUSH_LOCAL, self.PUSH_BRANCH)],
-            capture_output=False,
+            stdout=None,
         )
 
     def testUploadCLDraft(self):
@@ -197,7 +197,7 @@ Change-Id: %s
         )
         self.assertCommandContains(
             ["%s:refs/drafts/%s" % (self.PUSH_LOCAL, self.PUSH_BRANCH)],
-            capture_output=False,
+            stdout=None,
         )
 
     def testUploadCLCaptured(self):
@@ -671,8 +671,9 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
         git.GitPush("git_path", "HEAD", git.RemoteRef("origin", "main"))
         self.assertCommandCalled(
             ["git", "push", "origin", "HEAD:main"],
-            capture_output=True,
             print_cmd=False,
+            stdout=True,
+            stderr=True,
             cwd="git_path",
             encoding="utf-8",
         )
@@ -688,8 +689,9 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
         )
         self.assertCommandCalled(
             ["git", "push", "origin", "HEAD:main", "--force", "--dry-run"],
-            capture_output=True,
             print_cmd=False,
+            stdout=True,
+            stderr=True,
             cwd="git_path",
             encoding="utf-8",
         )

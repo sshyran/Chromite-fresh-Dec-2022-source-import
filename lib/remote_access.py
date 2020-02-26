@@ -417,7 +417,9 @@ class RemoteAccess(object):
           SSHConnectionError when ssh command error is not ignored through
           the ssh_error_ok flag.
         """
-        kwargs.setdefault("capture_output", True)
+        if "capture_output" not in kwargs:
+            kwargs.setdefault("stdout", True)
+            kwargs.setdefault("stderr", True)
         kwargs.setdefault("encoding", "utf-8")
         kwargs.setdefault("debug_level", self.debug_level)
         # Force English SSH messages. SSHConnectionError.IsKnownHostsMismatch()

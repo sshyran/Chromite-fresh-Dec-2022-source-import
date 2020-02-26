@@ -780,7 +780,9 @@ def RunGit(git_repo, cmd, **kwargs):
     """
     kwargs.setdefault("print_cmd", False)
     kwargs.setdefault("cwd", git_repo)
-    kwargs.setdefault("capture_output", True)
+    if "capture_output" not in kwargs:
+        kwargs.setdefault("stdout", True)
+        kwargs.setdefault("stderr", True)
     kwargs.setdefault("encoding", "utf-8")
     return cros_build_lib.run(["git"] + cmd, **kwargs)
 
@@ -859,7 +861,7 @@ def ShallowFetch(git_repo, git_url, sparse_checkout=None):
         ["fetch", "--depth=1"],
         print_cmd=True,
         stderr=True,
-        capture_output=False,
+        stdout=None,
     )
     # Pull the files in sparse_checkout.
     RunGit(
@@ -867,7 +869,7 @@ def ShallowFetch(git_repo, git_url, sparse_checkout=None):
         ["pull", "origin", "HEAD"],
         print_cmd=True,
         stderr=True,
-        capture_output=False,
+        stdout=None,
     )
     logging.info("ShallowFetch completed in %s.", utcnow() - start)
 
@@ -1379,7 +1381,7 @@ def UploadCL(
       local_branch: Branch to upload.
       draft: Whether to upload as a draft.
       reviewers: Add the reviewers to the CL.
-      kwargs: Extra options for GitPush. capture_output defaults to False so
+      kwargs: Extra options for GitPush. Output capture defaults to False so
         that the URL for new or updated CLs is shown to the user.
     """
     ref = ("refs/drafts/%s" if draft else "refs/for/%s") % branch
@@ -1387,8 +1389,9 @@ def UploadCL(
         reviewer_list = ["r=%s" % i for i in reviewers]
         ref = ref + "%" + ",".join(reviewer_list)
     remote_ref = RemoteRef(remote, ref)
-    kwargs.setdefault("capture_output", False)
-    kwargs.setdefault("stderr", subprocess.STDOUT)
+    if "capture_output" not in kwargs:
+        kwargs.setdefault("stdout", None)
+        kwargs.setdefault("stderr", subprocess.STDOUT)
     return GitPush(git_repo, local_branch, remote_ref, **kwargs)
 
 
@@ -1398,7 +1401,6 @@ def GitPush(
     push_to,
     force=False,
     dry_run=False,
-    capture_output=True,
     skip=False,
     **kwargs,
 ):
@@ -1410,7 +1412,6 @@ def GitPush(
       push_to: A RemoteRef object representing the remote ref to push to.
       force: Whether to bypass non-fastforward checks.
       dry_run: If True, do everything except actually push the remote ref.
-      capture_output: Whether to capture output for this command.
       skip: Log the git command that would have been run, but don't run it; this
         avoids e.g. remote access checks that still apply to |dry_run|.
     """
@@ -1424,7 +1425,7 @@ def GitPush(
         logging.info('Would have run "%s"', cmd)
         return
 
-    return RunGit(git_repo, cmd, capture_output=capture_output, **kwargs)
+    return RunGit(git_repo, cmd, **kwargs)
 
 
 # TODO(build): Switch callers of this function to use CreateBranch instead.

@@ -1021,7 +1021,7 @@ class GSDoCommandTest(cros_test_lib.TestCase):
                 cmd,
                 sleep=sleep,
                 stderr=True,
-                capture_output=True,
+                stdout=True,
                 encoding="utf-8",
                 extra_env=mock.ANY,
             )

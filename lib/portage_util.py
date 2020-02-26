@@ -453,7 +453,9 @@ class EBuild(object):
 
     @classmethod
     def _RunCommand(cls, command, **kwargs):
-        kwargs.setdefault("capture_output", True)
+        if "capture_output" not in kwargs:
+            kwargs.setdefault("stdout", True)
+            kwargs.setdefault("stderr", True)
         kwargs.setdefault("encoding", "utf-8")
         return cros_build_lib.run(
             command, print_cmd=cls.VERBOSE, **kwargs
@@ -2818,7 +2820,9 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
     Raises:
       cros_build_lib.RunCommandError
     """
-    kwargs.setdefault("capture_output", True)
+    if "capture_output" not in kwargs:
+        kwargs.setdefault("stdout", True)
+        kwargs.setdefault("stderr", True)
     kwargs.setdefault("cwd", constants.SOURCE_ROOT)
     kwargs.setdefault("debug_level", logging.DEBUG)
     kwargs.setdefault("encoding", "utf-8")

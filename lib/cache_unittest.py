@@ -282,7 +282,7 @@ class RemoteCacheTest(CacheTestCase):
     def testFetchGs(self):
         """Verify we fetch from Google Storage and save the result."""
         # pylint: disable=unused-argument
-        def _Fetch(_ctx, cmd, capture_output):
+        def _Fetch(_ctx, cmd, **kwargs):
             # Touch file we tried to copy too.
             osutils.Touch(cmd[-1])
 

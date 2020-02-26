@@ -282,7 +282,9 @@ I am the first commit.
     def _run(self, cmd, cwd=None, **kwargs):
         # This is to match git.RunGit behavior.
         kwargs.setdefault("print_cmd", False)
-        kwargs.setdefault("capture_output", True)
+        if "capture_output" not in kwargs:
+            kwargs.setdefault("stdout", True)
+            kwargs.setdefault("stderr", True)
         kwargs.setdefault("encoding", "utf-8")
 
         # Note that cwd is intentionally set to a location the user can't write
