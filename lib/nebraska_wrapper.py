@@ -290,7 +290,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
     # Try to capture the output from the command so we can dump it in the case
     # of errors. Note that this will not work if we were requested to redirect
     # logs to a |log_file|.
-    cmd_kwargs = {'capture_output': True, 'stderr': subprocess.STDOUT}
+    cmd_kwargs = {'stdout': True, 'stderr': subprocess.STDOUT}
     cmd = ['python', self._nebraska_bin, '--help']
     logging.info('Checking if we can run nebraska on the device...')
     try:

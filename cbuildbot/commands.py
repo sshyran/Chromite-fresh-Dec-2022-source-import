@@ -1613,7 +1613,7 @@ def _HWTestCreate(cmd, debug=False, **kwargs):
         max_retry=_MAX_HWTEST_START_CMD_RETRY,
         error_check=swarming_lib.SwarmingRetriableErrorCheck,
         cmd=start_cmd,
-        capture_output=True,
+        stdout=True,
         encoding='utf-8',
         stderr=subprocess.STDOUT,
         **kwargs)
@@ -1652,7 +1652,7 @@ def _HWTestWait(cmd, job_id, **kwargs):
         max_retry=_MAX_HWTEST_CMD_RETRY,
         error_check=swarming_lib.SwarmingRetriableErrorCheck,
         cmd=wait_cmd,
-        capture_output=True,
+        stdout=True,
         encoding='utf-8',
         stderr=subprocess.STDOUT,
         **kwargs)
@@ -1709,7 +1709,7 @@ def _HWTestDumpJson(cmd, job_id, **kwargs):
       max_retry=_MAX_HWTEST_CMD_RETRY,
       error_check=swarming_lib.SwarmingRetriableErrorCheck,
       cmd=dump_json_cmd,
-      capture_output=True,
+      stdout=True,
       encoding='utf-8',
       stderr=subprocess.STDOUT,
       **kwargs)

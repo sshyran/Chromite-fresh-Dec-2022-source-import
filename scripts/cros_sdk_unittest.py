@@ -115,7 +115,7 @@ class CrosSdkSnapshotTest(cros_test_lib.TempDirTestCase):
 
     try:
       result = cros_build_lib.run(
-          cmd, print_cmd=False, capture_output=True, check=False,
+          cmd, print_cmd=False, stdout=True, check=False,
           stderr=subprocess.STDOUT)
     except cros_build_lib.RunCommandError as e:
       raise SystemExit('Running %r failed!: %s' % (cmd, e))

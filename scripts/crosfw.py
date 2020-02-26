@@ -506,15 +506,15 @@ def RunBuild(options, base, target, queue):
     else:
       mtarget = 'config'
     cmd = base + ['%s_%s' % (uboard, mtarget)]
-    result = cros_build_lib.run(cmd, capture_output=True,
-                                stderr=subprocess.STDOUT, **kwargs)
+    result = cros_build_lib.run(cmd, stdout=True, stderr=subprocess.STDOUT,
+                                **kwargs)
     if result.returncode:
       print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout))
       sys.exit(result.returncode)
 
   # Do the actual build.
   if options.build:
-    result = cros_build_lib.run(base + [target], capture_output=True,
+    result = cros_build_lib.run(base + [target], stdout=True,
                                 stderr=subprocess.STDOUT, **kwargs)
     if result.returncode:
       # The build failed, so output the results to stderr.

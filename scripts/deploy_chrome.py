@@ -168,8 +168,7 @@ class DeployChrome(object):
 
   def _GetStagingDirSize(self):
     result = cros_build_lib.dbg_run(['du', '-ks', self.staging_dir],
-                                    stdout=True, capture_output=True,
-                                    encoding='utf-8')
+                                    capture_output=True, encoding='utf-8')
     return int(result.stdout.split()[0])
 
   def _ChromeFileInUse(self):

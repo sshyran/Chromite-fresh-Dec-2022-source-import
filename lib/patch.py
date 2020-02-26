@@ -1605,7 +1605,7 @@ class LocalPatch(GitRepoPatch):
 
     # Depending on git/gerrit/weather, the URL might be written to stdout or
     # stderr.  Just combine them so we don't have to worry about it.
-    result = git.RunGit(self.project_url, cmd, capture_output=True,
+    result = git.RunGit(self.project_url, cmd, stdout=True,
                         stderr=subprocess.STDOUT)
     lines = result.stdout.splitlines()
     urls = []

@@ -161,7 +161,7 @@ Quoting can be tricky; the rules are the same as with ssh:
         connect_settings=self._ConnectSettings(),
         check=False,
         stderr=True,
-        capture_output=False).returncode
+        stdout=None).returncode
 
   def Run(self):
     """Runs `cros shell`."""
