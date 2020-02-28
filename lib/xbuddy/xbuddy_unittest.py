@@ -198,76 +198,76 @@ class xBuddyTest(cros_test_lib.TestCase):
     """Basic checks for splitting a path"""
     path = 'parrot/R27-2455.0.0/test'
     expected = ('test', 'parrot', 'R27-2455.0.0', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'parrot/R27-2455.0.0/full_payload'
     expected = ('full_payload', 'parrot', 'R27-2455.0.0', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'parrot/R27-2455.0.0'
     expected = ('ANY', 'parrot', 'R27-2455.0.0', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'remote/parrot/R27-2455.0.0'
     expected = ('test', 'parrot', 'R27-2455.0.0', False)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'local/parrot/R27-2455.0.0'
     expected = ('ANY', 'parrot', 'R27-2455.0.0', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = ''
     expected = ('ANY', None, 'latest', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'local'
     expected = ('ANY', None, 'latest', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
     path = 'local/parrot/latest/ANY'
     expected = ('ANY', 'parrot', 'latest', True)
-    self.assertEqual(self.mock_xb._InterpretPath(path=path), expected)
+    self.assertEqual(self.mock_xb.InterpretPath(path=path), expected)
 
   def testInterpretPathWithDefaults(self):
     """Test path splitting with default board/version."""
     path = ''
     expected = ('ANY', 'parrot', 'latest', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_board='parrot'))
 
     path = ''
     expected = ('ANY', None, '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_version='1.2.3'))
 
     path = ''
     expected = ('ANY', 'parrot', '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_board='parrot', default_version='1.2.3'))
 
     path = '1.2.3'
     expected = ('ANY', None, '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_version='1.2.3'))
 
     path = 'latest'
     expected = ('ANY', None, 'latest', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_version='1.2.3'))
 
     path = '1.2.3'
     expected = ('ANY', 'parrot', '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_board='parrot', default_version='1.2.3'))
 
     path = 'parrot'
     expected = ('ANY', 'parrot', '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_version='1.2.3'))
 
     path = 'parrot'
     expected = ('ANY', 'parrot', '1.2.3', True)
-    self.assertEqual(expected, self.mock_xb._InterpretPath(
+    self.assertEqual(expected, self.mock_xb.InterpretPath(
         path=path, default_board='parrot', default_version='1.2.3'))
 
     with mock.patch.object(
@@ -275,7 +275,7 @@ class xBuddyTest(cros_test_lib.TestCase):
             path_util.CHECKOUT_TYPE_GCLIENT, None, None)):
       path = ''
       expected = ('test', 'parrot', '1.2.3', False)
-      self.assertEqual(expected, self.mock_xb._InterpretPath(
+      self.assertEqual(expected, self.mock_xb.InterpretPath(
           path=path, default_board='parrot', default_version='1.2.3'))
 
   def testTimestampsAndList(self):

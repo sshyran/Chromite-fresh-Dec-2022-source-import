@@ -591,7 +591,7 @@ class XBuddy(object):
     raise XBuddyException('No images found in %s' % local_dir)
 
   @staticmethod
-  def _InterpretPath(path, default_board=None, default_version=None):
+  def InterpretPath(path, default_board=None, default_version=None):
     """Split and return the pieces of an xBuddy path name
 
     Args:
@@ -605,6 +605,8 @@ class XBuddy(object):
     Raises:
       XBuddyException: if the path can't be resolved into valid components
     """
+    if path.startswith('xbuddy://'):
+      path = path[9:]
     path_list = [p for p in path.split('/') if p]
 
     # Do the stuff that is well known first. We know that if paths have a
@@ -861,7 +863,7 @@ class XBuddy(object):
     path, suffix = self.LookupAlias(path, board=default_board,
                                     version=default_version)
     # Parse the path.
-    image_type, board, version, is_local = self._InterpretPath(
+    image_type, board, version, is_local = self.InterpretPath(
         path, default_board, default_version)
     if is_local:
       # Get a local image.

@@ -14,10 +14,11 @@ import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.lib import constants
+from chromite.lib import cros_test
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from chromite.lib import cros_test
+from chromite.scripts import cros_set_lsb_release
 from chromite.utils import outcap
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -90,6 +91,9 @@ class CrOSTester(CrOSTesterBase):
     # Verify that specifying the board gets the latest canary.
     self._tester.flash = True
     self._tester._device.board = 'octopus'
+    self._tester._device.remote._lsb_release = {
+        cros_set_lsb_release.LSB_KEY_VERSION: '12900.0.0',
+    }
     self._tester.Run()
     self.assertCommandContains(['cros', 'flash', 'localhost',
                                 'xbuddy://remote/octopus/latest'])
@@ -99,6 +103,19 @@ class CrOSTester(CrOSTesterBase):
     self._tester.Run()
     self.assertCommandContains(['cros', 'flash', 'localhost',
                                 'xbuddy://remote/octopus/R82-12901.0.0'])
+
+  def testFlashSkip(self):
+    """Tests flash command is skipped when not needed."""
+    self._tester.flash = True
+    self._tester._device.board = 'octopus'
+    self._tester._device.remote._lsb_release = {
+        cros_set_lsb_release.LSB_KEY_VERSION: '12901.0.0',
+    }
+    self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'
+    self._tester.Run()
+    self.assertCommandContains(['cros', 'flash', 'localhost',
+                                'xbuddy://remote/octopus/R82-12901.0.0'],
+                               expected=False)
 
   def testDeployChrome(self):
     """Tests basic deploy chrome command."""

@@ -1310,6 +1310,11 @@ class ChromiumOSDevice(RemoteDevice):
     return self.lsb_release.get(cros_set_lsb_release.LSB_KEY_BOARD, '')
 
   @property
+  def version(self):
+    """The OS version of the device."""
+    return self.lsb_release.get(cros_set_lsb_release.LSB_KEY_VERSION, '')
+
+  @property
   def app_id(self):
     """The App ID of the device."""
     return self.lsb_release.get(cros_set_lsb_release.LSB_KEY_APPID_RELEASE, '')

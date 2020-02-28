@@ -20,6 +20,7 @@ from chromite.lib import device
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import vm
+from chromite.lib.xbuddy import xbuddy
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -139,11 +140,24 @@ class CrOSTest(object):
     if not self.flash:
       return
 
-    xbuddy = self.xbuddy
-    if self._device.board:
-      xbuddy = xbuddy.format(board=self._device.board)
-    cros_build_lib.run(['cros', 'flash', self._device.device, xbuddy],
-                       dryrun=self.dryrun)
+    xbuddy_path = self.xbuddy.format(board=self._device.board)
+
+    # Skip the flash if the device is already running the requested version.
+    device_version = self._device.remote.version
+    _, _, requested_version, _ = xbuddy.XBuddy.InterpretPath(xbuddy_path)
+    # Split on the first "-" when comparing versions since xbuddy requires
+    # the RX- prefix, but the device may not advertise it.
+    if (requested_version == device_version or
+        requested_version.split('-', 1)[1] == device_version):
+      logging.info(
+          'Skipping the flash. Device running %s when %s was requested',
+          device_version, xbuddy_path)
+      return
+
+    cros_build_lib.run(
+        ['cros', 'flash', self._device.device, xbuddy_path,
+         '--board', self._device.board],
+        dryrun=self.dryrun)
 
   def _Deploy(self):
     """Deploy binary files to device."""
