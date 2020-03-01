@@ -399,19 +399,21 @@ class GerritHelper(object):
 
     return change
 
-  def SetReview(self, change, msg=None, labels=None,
-                dryrun=False, notify='ALL'):
+  def SetReview(self, change, msg=None, labels=None, notify='ALL',
+                reviewers=None, cc=None, ready=None, wip=None, dryrun=False):
     """Update the review labels on a gerrit change.
 
     Args:
       change: A gerrit change number.
       msg: A text comment to post to the review.
       labels: A dict of label/value to set on the review.
-      dryrun: If True, don't actually update the review.
       notify: A string, parameter controlling gerrit's email generation.
+      reviewers: List of people to add as reviewers.
+      cc: List of people to add to CC.
+      ready: Mark CL as ready.
+      wip: Mark CL as work-in-progress.
+      dryrun: If True, don't actually update the review.
     """
-    if not msg and not labels:
-      return
     if dryrun:
       if msg:
         logging.info('Would have added message "%s" to change "%s".', msg,
@@ -420,9 +422,18 @@ class GerritHelper(object):
         for key, val in labels.items():
           logging.info('Would have set label "%s" to "%s" for change "%s".',
                        key, val, change)
+      if reviewers:
+        logging.info('Would have add %s as reviewers', reviewers)
+      if cc:
+        logging.info('Would have add %s to CC', cc)
+      if ready:
+        logging.info('Would mark it as ready')
+      elif wip:
+        logging.info('Would mark it as WIP')
       return
-    gob_util.SetReview(self.host, self._to_changenum(change),
-                       msg=msg, labels=labels, notify=notify)
+    gob_util.SetReview(self.host, self._to_changenum(change), msg=msg,
+                       labels=labels, notify=notify, reviewers=reviewers, cc=cc,
+                       ready=ready, wip=wip)
 
   def SetTopic(self, change, topic, dryrun=False):
     """Update the topic on a gerrit change.

@@ -12,6 +12,7 @@ with the prefix "UserAct".
 
 from __future__ import print_function
 
+import argparse
 import collections
 import functools
 import inspect
@@ -827,6 +828,83 @@ class ActionCherryPick(UserAction):
           print(uri_lib.ShortenUri(uri))
 
     _run_parallel_tasks(task, *opts.branches)
+
+
+class ActionReview(_ActionSimpleParallelCLs):
+  """Review CLs with multiple settings
+
+  The label option supports extended/multiple syntax for easy use.  The --label
+  option may be specified multiple times (as settings are merges), and multiple
+  labels are allowed in a single argument.  Each label has the form:
+    <long or short name><=+-><value>
+
+  Common arguments:
+     Commit-Queue=0  Commit-Queue-1  Commit-Queue+2  CQ+2
+     'V+1 CQ+2'
+     'AS=1 V=1'
+  """
+
+  COMMAND = 'review'
+
+  class _SetLabel(argparse.Action):
+    """Argparse action for setting labels."""
+
+    LABEL_MAP = {
+        'AS': 'Auto-Submit',
+        'CQ': 'Commit-Queue',
+        'CR': 'Code-Review',
+        'V': 'Verified',
+    }
+
+    def __call__(self, parser, namespace, values, option_string=None):
+      labels = getattr(namespace, self.dest)
+      for request in values.split():
+        if '=' in request:
+          # Handle Verified=1 form.
+          short, value = request.split('=', 1)
+        elif '+' in request:
+          # Handle Verified+1 form.
+          short, value = request.split('+', 1)
+        elif '-' in request:
+          # Handle Verified-1 form.
+          short, value = request.split('-', 1)
+          value = '-%s' % (value,)
+        else:
+          parser.error('Invalid label setting "%s". Must be Commit-Queue=1 or '
+                       'CQ+1 or CR-1.' % (request,))
+
+        # Convert possible short label names like "V" to "Verified".
+        label = self.LABEL_MAP.get(short)
+        if not label:
+          label = short
+
+        # We allow existing label requests to be overridden.
+        labels[label] = value
+
+  @classmethod
+  def init_subparser(cls, parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    parser.add_argument('-l', '--label', dest='labels',
+                        action=cls._SetLabel, default={},
+                        help='Set a label with a value')
+    parser.add_argument('--ready', default=None, action='store_true',
+                        help='Set CL status to ready-for-review')
+    parser.add_argument('--wip', default=None, action='store_true',
+                        help='Set CL status to WIP')
+    parser.add_argument('--reviewers', '--re', action='append', default=[],
+                        help='Add reviewers')
+    parser.add_argument('--cc', action='append', default=[],
+                        help='Add people to CC')
+    _ActionSimpleParallelCLs.init_subparser(parser)
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetReview(cl, msg=opts.msg, labels=opts.labels, dryrun=opts.dryrun,
+                     notify=opts.notify, reviewers=opts.reviewers, cc=opts.cc,
+                     ready=opts.ready, wip=opts.wip)
 
 
 class ActionAccount(_ActionSimpleParallelCLs):

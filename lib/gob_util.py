@@ -745,20 +745,29 @@ def RemoveReviewers(host, change, remove=None, notify=None):
         raise
 
 
-def SetReview(host, change, revision=None, msg=None, labels=None, notify=None):
+def SetReview(host, change, revision=None, msg=None, labels=None, notify=None,
+              reviewers=None, cc=None, ready=None, wip=None):
   """Set labels and/or add a message to a code review."""
   if revision is None:
     revision = 'current'
   if not msg and not labels:
     return
   path = '%s/revisions/%s/review' % (_GetChangePath(change), revision)
-  body = {}
+  body = {'reviewers': []}
   if msg:
     body['message'] = msg
   if labels:
     body['labels'] = labels
   if notify:
     body['notify'] = notify
+  if reviewers:
+    body['reviewers'].extend({'reviewer': x} for x in reviewers)
+  if cc:
+    body['reviewers'].extend({'reviewer': x, 'state': 'CC'} for x in cc)
+  if ready is not None:
+    body['ready'] = ready
+  if wip is not None:
+    body['work_in_progress'] = wip
   response = FetchUrlJson(host, path, reqtype='POST', body=body)
   if response is None:
     raise GOBError(
