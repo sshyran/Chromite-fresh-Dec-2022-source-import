@@ -866,18 +866,6 @@
       ]
     },
     {
-      "name": "veyron_jerry-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "veyron_mickey",
       "configs": [
         {
@@ -910,18 +898,6 @@
           "leader_board": true,
           "board_group": "veyron",
           "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "veyron_minnie-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "ARM_INTERNAL"
         }
       ]
     },
