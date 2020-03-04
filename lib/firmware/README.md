@@ -21,6 +21,7 @@ To flash your volteer DUT via SERVO on port 1234:
 
 ## Add support for new board
 Create ${BOARD}.py in chromite/lib/firmware/ap_firmware_config.
+The __template.py file can be copied into place, it contains a skeleton config.
 
  Define the following variables:
 
@@ -32,15 +33,14 @@ Create ${BOARD}.py in chromite/lib/firmware/ap_firmware_config.
 
   Define the following functions:
 
-    is_fast_required: #TODO saklien@ is this function required for defining new boards?
+    is_fast_required:
+      Only required if it needs to return True for any cases!
       Returns true if --fast is necessary to flash successfully.
-      The configurations in this function consistently fail on the verify step,
-      adding --fast removes verification of the flash and allows these configs to
-      flash properly. Meant to be a temporary hack until b/143240576 is fixed.
+
       Args:
-        _use_futility (bool): True if futility is to be used, False if
+        use_futility (bool): True if futility is to be used, False if
           flashrom.
-        _servo (str): The type name of the servo device being used.
+        servo (str): The type name of the servo device being used.
       Returns:
         bool: True if fast is necessary, False otherwise.
 
