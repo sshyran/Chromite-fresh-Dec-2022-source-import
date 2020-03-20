@@ -8,6 +8,33 @@
 cros_logging is a wrapper around logging with additional support for NOTICE
 level. This is to be used instead of the default logging module. The new
 logging level can only be used from here.
+
+The log levels should be used as follows:
+
+DEBUG: Enabled on the CLI with --debug. This is the noisiest logging level.
+Often, as the name suggests, it may contain debugging information you wouldn't
+otherwise need.
+
+INFO: Enabled on the CLI with --verbose. Logging at this level should contain
+relatively fine-grained info about the steps the process is performing, but
+should be light on details (which should be in debug).
+
+NOTICE: The default log level. It should relay a high level overview of what
+the process is doing. It should NOT be a noisy output.
+
+WARNING: Unexpected scenarios that are well handled and do not interrupt the
+process, things like retrying an operation or missing optional information
+needed to complete a portion of a process.
+
+ERROR: Problems that are fatal to a specific operation or script, e.g.
+unable to read a file or invalid arguments.
+
+CRITICAL/FATAL: Rarely needed. These should reflect an extraordinary error that
+might require the shutdown of an application or lead to data loss.
+
+WARNING, ERROR, CRITICAL/FATAL: These levels are always included in the above
+levels as one would expect. Limiting the output of a script to just these log
+levels is rarely desirable, but the --log-level argument can be used to do so.
 """
 
 from __future__ import print_function
