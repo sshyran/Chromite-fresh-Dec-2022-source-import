@@ -796,6 +796,27 @@ class ActionAccount(UserAction):
             (acct['_account_id'], acct['name'], acct['email']))
 
 
+class ActionHelpAll(UserAction):
+  """Show all actions help output at once."""
+
+  COMMAND = 'help-all'
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    first = True
+    for action in _GetActions():
+      if first:
+        first = False
+      else:
+        print('\n\n')
+
+      try:
+        opts.parser.parse_args([action, '--help'])
+      except SystemExit:
+        pass
+
+
 @memoize.Memoize
 def _GetActions():
   """Get all the possible actions we support.
@@ -913,6 +934,9 @@ Actions:
 def main(argv):
   parser = GetParser()
   opts = parser.parse_args(argv)
+
+  # In case the action wants to throw a parser error.
+  opts.parser = parser
 
   # A cache of gerrit helpers we'll load on demand.
   opts.gerrit = {}
