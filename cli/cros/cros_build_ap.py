@@ -60,13 +60,6 @@ To build the AP Firmware only for foo-variant:
         action='store_true',
         default=False,
         help='Perform a dry run, describing the steps without running them.')
-    parser.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        default=False,
-        help='More verbose output than the default, but less than debug. An '
-             'alias for --log-level=info.')
 
   def Run(self):
     """Run cros build-ap."""

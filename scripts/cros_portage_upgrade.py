@@ -1896,8 +1896,6 @@ def _CreateParser():
                       '[default: %(default)s]')
   parser.add_argument('--unstable-ok', action='store_true', default=False,
                       help='Use latest upstream ebuild, stable or not')
-  parser.add_argument('--verbose', action='store_true', default=False,
-                      help='Enable verbose output (for debugging)')
   parser.add_argument('-l', '--local-only', action='store_true', default=False,
                       help='Do not attempt to update local portage cache')
   return parser

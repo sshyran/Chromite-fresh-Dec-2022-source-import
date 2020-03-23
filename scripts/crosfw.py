@@ -265,8 +265,6 @@ def ParseCmdline(argv):
                       help='Create Chrome OS small image')
   parser.add_argument('-t', '--trace', action='store_true', default=False,
                       help='Enable trace support')
-  parser.add_argument('-v', '--verbose', type=int, default=0,
-                      help='Make cros_bundle_firmware verbose')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
   parser.add_argument('-w', '--write', action='store_false', default=True,

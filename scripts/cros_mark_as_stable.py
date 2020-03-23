@@ -238,8 +238,6 @@ def GetParser():
   parser.add_argument('-r', '--srcroot', type='path',
                       help='Path to root src. Deprecated in favor of '
                            '--buildroot')
-  parser.add_argument('--verbose', action='store_true',
-                      help='Prints out debug info.')
   parser.add_argument('--staging_branch',
                       help='The staging branch to push changes')
   parser.add_argument('command', choices=sorted(COMMAND_DICTIONARY),

@@ -455,8 +455,6 @@ def _CreateParser():
                       help='Port of the target device to connect to.')
   parser.add_argument('-t', '--to',
                       help='The IP address of the CrOS device to deploy to.')
-  parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                      help='Show more debug output.')
   parser.add_argument('--mount-dir', type='path', default=None,
                       help='Deploy Chrome in target directory and bind it '
                            'to the directory specified by this flag.'

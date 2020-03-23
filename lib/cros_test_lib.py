@@ -1456,8 +1456,6 @@ class TestProgram(unittest.TestProgram):
         description=description, default_log_level=self.default_log_level)
 
     # These are options the standard unittest.TestProgram supports.
-    parser.add_argument('-v', '--verbose', default=False, action='store_true',
-                        help='Verbose output')
     parser.add_argument('-q', '--quiet', default=False, action='store_true',
                         help='Minimal output')
     parser.add_argument('-f', '--failfast', default=False, action='store_true',

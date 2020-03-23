@@ -49,8 +49,6 @@ def GetParser():
                            'or "both".')
   parser.add_argument('--packages',
                       help='Colon separated list of packages to rev.')
-  parser.add_argument('--verbose', action='store_true',
-                      help='Prints out debug info.')
   parser.add_argument('--dump-files', action='store_true',
                       help='Dump the revved packages, new files list, and '
                            'removed files list files. This is mostly for'

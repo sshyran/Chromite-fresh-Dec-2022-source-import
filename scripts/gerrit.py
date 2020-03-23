@@ -885,8 +885,6 @@ Actions:
   parser.add_argument('-n', '--dry-run', default=False, action='store_true',
                       dest='dryrun',
                       help='Show what would be done, but do not make changes')
-  parser.add_argument('-v', '--verbose', default=False, action='store_true',
-                      help='Be more verbose in output')
 
   # Subparsers are required by default under Python 2.  Python 3 changed to
   # not required, but didn't include a required option until 3.7.  Setting

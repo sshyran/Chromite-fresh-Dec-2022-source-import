@@ -317,8 +317,6 @@ def ParseArguments(argv):
                       help='Overwrite existing files even if newer.')
   parser.add_argument('--force', action='store_true',
                       help=argparse.SUPPRESS)
-  parser.add_argument('--verbose', action='store_true',
-                      help='Print detailed change report.')
 
   # Used only if test_that is calling autotest_quickmerge and has detected that
   # the sysroot autotest path is still in usr/local/autotest (ie the build

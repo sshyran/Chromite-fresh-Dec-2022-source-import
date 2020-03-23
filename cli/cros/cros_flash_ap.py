@@ -59,11 +59,6 @@ To flash your volteer DUT via SERVO on port 1234:
         dest='build_target',
         help='The name of the build target.')
     parser.add_argument(
-        '-v',
-        '--verbose',
-        action='store_true',
-        help='Increase output verbosity of the flash commands.')
-    parser.add_argument(
         '--flashrom',
         action='store_true',
         help='Use flashrom to flash instead of futility.')
