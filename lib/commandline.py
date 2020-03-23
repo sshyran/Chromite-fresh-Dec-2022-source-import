@@ -646,6 +646,14 @@ class BaseParser(object):
           self.debug_group, '--log_format', action='store',
           default=constants.LOGGER_FMT,
           help=argparse.SUPPRESS)
+      self.add_common_argument_to_group(
+          self.debug_group,
+          '-v',
+          '--verbose',
+          action='store_const',
+          const='info',
+          dest='log_level',
+          help='Alias for `--log-level=info`.')
       if self.debug_enabled:
         self.add_common_argument_to_group(
             self.debug_group, '--debug', action='store_const', const='debug',
@@ -703,6 +711,7 @@ class BaseParser(object):
       value = self.SetupLogging(opts)
       if self.debug_enabled:
         opts.debug = (value == 'DEBUG')
+      opts.verbose = value in ('INFO', 'DEBUG')
 
     if self.caching:
       path = os.environ.get(constants.SHARED_CACHE_ENVVAR)
