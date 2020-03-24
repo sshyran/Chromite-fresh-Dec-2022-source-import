@@ -1765,6 +1765,7 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       # Once every day. 3 PM UTC is 7 AM PST (no daylight savings).
       schedule='0 15 * * *',
       board_replace=True,
+      vm_tests=[],
   )
 
   site_config.Add(
@@ -1821,6 +1822,7 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       # Every 3 hours.
       schedule='0 */3 * * *',
       board_replace=True,
+      vm_tests=[],
   )
 
   site_config.Add(

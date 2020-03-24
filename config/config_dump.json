@@ -1331,7 +1331,8 @@
         "hw_tests_override": [],
         "luci_builder": "Informational",
         "schedule": "0 */3 * * *",
-        "uprev": false
+        "uprev": false,
+        "vm_tests": []
     },
     "amd64-generic-ubsan-fuzzer": {
         "_template": "fuzzer",
@@ -1374,7 +1375,8 @@
         "display_label": "tryjob",
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "vm_tests": []
     },
     "amd64-generic-unittest-stress": {
         "_template": "unittest_stress",
@@ -4323,7 +4325,8 @@
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
         "schedule": "0 15 * * *",
-        "uprev": false
+        "uprev": false,
+        "vm_tests": []
     },
     "betty-asan-tryjob": {
         "_template": "asan",
@@ -4340,7 +4343,8 @@
         "internal": true,
         "luci_builder": "Try",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both"
+        "overlays": "both",
+        "vm_tests": []
     },
     "betty-full": {
         "_template": "full",
