@@ -103,9 +103,10 @@ class DeployChrome(object):
     self.options = options
     self.staging_dir = staging_dir
     if not self.options.staging_only:
-      self.device = remote.RemoteDevice(options.to, port=options.port,
-                                        ping=options.ping,
-                                        private_key=options.private_key)
+      self.device = remote.ChromiumOSDevice(options.to, port=options.port,
+                                            ping=options.ping,
+                                            private_key=options.private_key,
+                                            include_dev_paths=False)
     self._root_dir_is_still_readonly = multiprocessing.Event()
 
     self.copy_paths = chrome_util.GetCopyPaths('chrome')
@@ -312,6 +313,18 @@ class DeployChrome(object):
       logging.error('Error connecting to the test device.')
       raise DeployFailure(ex)
 
+  def _CheckBoard(self):
+    """Check that the Chrome build is targeted for the device board."""
+    if self.options.board == self.device.board:
+      return
+    logging.warning('Device board is %s whereas target board is %s.',
+                    self.device.board, self.options.board)
+    if self.options.force:
+      return
+    if not cros_build_lib.BooleanPrompt('Continue despite board mismatch?',
+                                        False):
+      raise DeployFailure('Aborted.')
+
   def _CheckDeployType(self):
     if self.options.build_dir:
       def BinaryExists(filename):
@@ -369,6 +382,9 @@ class DeployChrome(object):
       self._PrepareStagingDir()
       return 0
 
+    # Check that the build matches the device.
+    self._CheckBoard()
+
     # Ensure that the target directory exists before running parallel steps.
     self._EnsureTargetDir()
 
@@ -423,9 +439,9 @@ def _CreateParser():
   # TODO(rcui): Have this use the UI-V2 format of having source and target
   # device be specified as positional arguments.
   parser.add_argument('--force', action='store_true', default=False,
-                      help='Skip all prompts (i.e., for disabling of rootfs '
-                           'verification).  This may result in the target '
-                           'machine being rebooted.')
+                      help='Skip all prompts (such as the prompt for disabling '
+                           'of rootfs verification).  This may result in the '
+                           'target machine being rebooted.')
   sdk_board_env = os.environ.get(cros_chrome_sdk.SDKFetcher.SDK_BOARD_ENV)
   parser.add_argument('--board', default=sdk_board_env,
                       help='The board the Chrome build is targeted for.  When '
@@ -543,9 +559,8 @@ def _ParseCommandLine(argv):
   if options.build_dir and any([options.gs_path, options.local_pkg_path]):
     parser.error('Cannot specify both --build_dir and '
                  '--gs-path/--local-pkg-patch')
-  if (not options.board and options.build_dir and options.dostrip and
-      not options.strip_bin):
-    parser.error('--board is required for stripping.')
+  if not options.board:
+    parser.error('--board is required outside of cros chrome_sdk')
   if options.gs_path and options.local_pkg_path:
     parser.error('Cannot specify both --gs-path and --local-pkg-path')
   if not (options.staging_only or options.to):
