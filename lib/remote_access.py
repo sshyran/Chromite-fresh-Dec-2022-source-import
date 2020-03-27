@@ -1145,7 +1145,14 @@ class RemoteDevice(object):
       ARG_MAX = 32 * 1024
 
       # What the command line would generally look like on the remote.
-      cmdline = ' '.join(flat_vars + cmd)
+      if isinstance(cmd, six.string_types):
+        if not kwargs.get('shell', False):
+          raise ValueError("'shell' must be True when 'cmd' is a string.")
+        cmdline = ' '.join(flat_vars) + ' ' + cmd
+      else:
+        if kwargs.get('shell', False):
+          raise ValueError("'shell' must be False when 'cmd' is a list.")
+        cmdline = ' '.join(flat_vars + cmd)
       if len(cmdline) > ARG_MAX:
         env_list = ['export %s' % x for x in flat_vars]
         with tempfile.NamedTemporaryFile(dir=self.tempdir.tempdir,
@@ -1162,7 +1169,10 @@ class RemoteDevice(object):
           new_cmd += ['sudo']
         new_cmd += flat_vars
 
-      cmd = new_cmd + cmd
+      if isinstance(cmd, six.string_types):
+        cmd = ' '.join(new_cmd) + ' ' + cmd
+      else:
+        cmd = new_cmd + cmd
 
     return self.BaseRunCommand(cmd, **kwargs)
 
@@ -1190,6 +1200,7 @@ class RemoteDevice(object):
     """
     return self.GetAgent().AwaitReboot(old_boot_id)
 
+
 class ChromiumOSDevice(RemoteDevice):
   """Basic commands to interact with a ChromiumOS device over SSH connection."""
 
@@ -1197,16 +1208,18 @@ class ChromiumOSDevice(RemoteDevice):
   MOUNT_ROOTFS_RW_CMD = ['mount', '-o', 'remount,rw', '/']
   LIST_MOUNTS_CMD = ['cat', '/proc/mounts']
 
-  def __init__(self, hostname, **kwargs):
+  def __init__(self, hostname, include_dev_paths=True, **kwargs):
     """Initializes this object.
 
     Args:
       hostname: A network hostname.
+      include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all commands.
       kwargs: Args to pass to the parent constructor.
     """
     super(ChromiumOSDevice, self).__init__(hostname, **kwargs)
     self._orig_path = None
     self._path = None
+    self._include_dev_paths = include_dev_paths
     self._lsb_release = {}
 
   @property
@@ -1330,21 +1343,15 @@ class ChromiumOSDevice(RemoteDevice):
     """Executes a shell command on the device with output captured by default.
 
     Also makes sure $PATH is set correctly by adding DEV_BIN_PATHS to
-    'PATH' in |extra_env|.
+    'PATH' in |extra_env| if self._include_dev_paths is True.
 
     Args:
       cmd: command to run. See RemoteAccess.RemoteSh documentation.
       **kwargs: keyword arguments to pass along with cmd. See
         RemoteAccess.RemoteSh documentation.
     """
-    extra_env = kwargs.pop('extra_env', {})
-    path_env = extra_env.get('PATH', None)
-    if path_env is None:
-      # Optimization: if the default path is already what we want, don't bother
-      # passing it through.
-      if self.orig_path != self.path:
-        path_env = self.path
-    if path_env is not None:
-      extra_env['PATH'] = path_env
-    kwargs['extra_env'] = extra_env
+    if self._include_dev_paths:
+      extra_env = kwargs.pop('extra_env', {})
+      extra_env.setdefault('PATH', self.path)
+      kwargs['extra_env'] = extra_env
     return super(ChromiumOSDevice, self).run(cmd, **kwargs)

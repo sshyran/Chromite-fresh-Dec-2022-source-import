@@ -314,6 +314,22 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
       self.assertEqual(expected_output,
                        device.BaseRunCommand(['echo', 'foo']).output)
 
+  def testCommandsExtraEnv(self):
+    """Tests simple RunCommand() usage with extra_env arg."""
+    self._SetupRemoteTempDir()
+
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
+      # RemoteSh accepts cmd as either string or list, so try both.
+      self.rsh_mock.AddCmdResult(['VAR=val', 'echo', 'foo'], stdout='foo')
+      self.assertEqual(
+          'foo',
+          device.run(['echo', 'foo'], extra_env={'VAR': 'val'}).stdout)
+
+      self.rsh_mock.AddCmdResult('VAR=val echo foo', stdout='foo')
+      self.assertEqual(
+          'foo',
+          device.run('echo foo', extra_env={'VAR': 'val'}, shell=True).stdout)
+
   def testRunCommandShortCmdline(self):
     """Verify short command lines execute env settings directly."""
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
@@ -386,6 +402,35 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
           partial_mock.ListRegex('test -f'), returncode=1)
       self.assertEqual(device.IsSELinuxAvailable(), False)
       self.assertEqual(device.IsSELinuxEnforced(), False)
+
+
+class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
+  """Tests for ChromiumOSDevice class."""
+
+  def setUp(self):
+    self.rsh_mock = self.StartPatcher(RemoteShMock())
+    self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), output='')
+
+  def testRun(self):
+    """Tests simple run() usage."""
+    path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
+
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      # RemoteSh accepts cmd as either string or list, so try both.
+      self.rsh_mock.AddCmdResult([path_env, 'echo', 'foo'], stdout='foo')
+      self.assertEqual('foo', device.run(['echo', 'foo']).stdout)
+
+      self.rsh_mock.AddCmdResult(path_env + ' echo foo', stdout='foo')
+      self.assertEqual('foo', device.run('echo foo', shell=True).stdout)
+
+      # Run the same commands, but make sure PATH isn't modified when fix_path
+      # is False.
+      device._include_dev_paths = False
+      self.rsh_mock.AddCmdResult(['echo', 'foo'], stdout='foo')
+      self.assertEqual('foo', device.run(['echo', 'foo']).stdout)
+
+      self.rsh_mock.AddCmdResult('echo foo', stdout='foo')
+      self.assertEqual('foo', device.run('echo foo', shell=True).stdout)
 
 
 class ScpTest(cros_test_lib.MockTempDirTestCase):
