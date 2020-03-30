@@ -278,7 +278,6 @@
     gale-release
     gandof-release
     gnawty-release
-    grunt-kernelnext-release
     grunt-release
     guado-cfm-release
     guado-kernelnext-release
@@ -1008,11 +1007,6 @@
   grunt-android-pi-pre-flight-branch-tryjob
   grunt-factory-grunt-11164.B-factorybranch-tryjob
   grunt-full-tryjob
-  grunt-kernelnext-full-tryjob
-  grunt-kernelnext-llvm-next-toolchain-tryjob
-  grunt-kernelnext-llvm-toolchain-tryjob
-  grunt-kernelnext-release-tryjob
-  grunt-kernelnext-unittest-stress
   grunt-llvm-next-toolchain-tryjob
   grunt-llvm-toolchain-tryjob
   grunt-payloads-tryjob
@@ -1296,7 +1290,6 @@
     gale-release-tryjob
     gandof-release-tryjob
     gnawty-release-tryjob
-    grunt-kernelnext-release-tryjob
     grunt-release-tryjob
     guado-cfm-release-tryjob
     guado-kernelnext-release-tryjob
