@@ -758,6 +758,13 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     self.assertIs(ret.error, None)
     self.assertEqual(osutils.ReadFile(log), 'monkeys4\nmonkeys5\n')
 
+  @_ForceLoggingLevel
+  def testLogStderrToFile(self):
+    log = os.path.join(self.tempdir, 'output')
+    ret = cros_build_lib.run(['sh', '-c', 'echo monkeys >&2'], stderr=log)
+    self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
   @_ForceLoggingLevel
   def testLogStdoutToFileWithOrWithoutAppend(self):

@@ -751,7 +751,10 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
     popen_stdout = _get_tempfile()
 
   log_stderr_to_file = False
-  if hasattr(stderr, 'fileno'):
+  if isinstance(stderr, str):
+    popen_stderr = open(stderr, 'w+b')
+    log_stderr_to_file = True
+  elif hasattr(stderr, 'fileno'):
     popen_stderr = stderr
     log_stderr_to_file = True
   elif isinstance(stderr, bool):
@@ -893,6 +896,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
             not log_stderr_to_file):
           popen_stderr.seek(0)
           cmd_result.stderr = popen_stderr.read()
+          popen_stderr.close()
+        elif log_stderr_to_file:
           popen_stderr.close()
     except TerminateRunCommandError as e:
       # If we were killed by a signal (like SIGTERM in case of a timeout), don't
