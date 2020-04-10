@@ -9173,7 +9173,6 @@
         "boards": [
             "eve-arcnext"
         ],
-        "chrome_sdk_build_chrome": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -9182,7 +9181,6 @@
         "boards": [
             "eve-arcnext"
         ],
-        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [
@@ -20689,7 +20687,6 @@
             "elm-release",
             "endeavour-release",
             "enguarde-release",
-            "eve-arcnext-release",
             "eve-release",
             "excelsior-release",
             "expresso-release",
@@ -20817,7 +20814,6 @@
             "elm-release-tryjob",
             "endeavour-release-tryjob",
             "enguarde-release-tryjob",
-            "eve-arcnext-release-tryjob",
             "eve-release-tryjob",
             "excelsior-release-tryjob",
             "expresso-release-tryjob",
