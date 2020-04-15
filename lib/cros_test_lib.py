@@ -48,7 +48,6 @@ try:
   pytest_skip = pytest.skip
   pytestmark_inside_only = pytest.mark.inside_only
   pytestmark_network_test = pytest.mark.network_test
-  pytestmark_sigterm = pytest.mark.sigterm
   pytestmark_skip = pytest.mark.skip
   pytestmark_skipif = pytest.mark.skipif
 except (ImportError, AttributeError):
@@ -58,7 +57,6 @@ except (ImportError, AttributeError):
   pytest_skip = lambda allow_module_level: True
   pytestmark_inside_only = null_decorator
   pytestmark_network_test = null_decorator
-  pytestmark_sigterm = null_decorator
   pytestmark_skip = null_decorator
   pytestmark_skipif = lambda condition, reason=None: None
 

@@ -6,57 +6,34 @@
 """Unittests for build_api.py"""
 
 from __future__ import print_function
+from __future__ import division
 
-import os
 import sys
 
 from chromite.api import router as router_lib
-from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import build_api
-
-pytestmark = cros_test_lib.pytestmark_sigterm
-
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-class BuildApiScriptTest(cros_test_lib.MockTempDirTestCase):
-  """Tests for main()"""
+def testSmoke(tmp_path, monkeypatch):
+  """Basic sanity check"""
 
-  def setUp(self):
-    self.find_mock = self.PatchObject(router_lib.Router, 'Route')
-    self.input_json = os.path.join(self.tempdir, 'input.json')
-    self.output_json = os.path.join(self.tempdir, 'output.json')
-    self.config_json = os.path.join(self.tempdir, 'config.json')
-    self.tee_log = os.path.join(self.tempdir, 'tee_out.txt')
+  def dummy(*_args, **_kwargs):
+    return True
 
-    tee_config = '{"log_path": "%s"}' % self.tee_log
+  monkeypatch.setattr(router_lib.Router, 'Route', dummy)
 
-    osutils.WriteFile(self.input_json, '{}')
-    osutils.WriteFile(self.config_json, tee_config)
+  input_json = tmp_path / 'input.json'
+  output_json = tmp_path / 'output.json'
 
+  osutils.WriteFile(input_json, '{}')
 
-  def testSmoke(self):
-    """Basic sanity check"""
-    build_api.main(['--input-json', self.input_json,
-                    '--output-json', self.output_json,
-                    'chromite.api.VersionService/Get'])
-
-  def testTee(self):
-    """Call build_api with tee-log set, verify log contents."""
-    build_api.main(['--input-json', self.input_json,
-                    '--output-json', self.output_json,
-                    '--config-json', self.config_json,
-                    'chromite.api.VersionService/Get'])
-    contents = osutils.ReadFile(self.tee_log)
-    self.assertIn('Teeing stdout', contents)
-
-  def testEnvTee(self):
-    """Call build_api with tee-log set, verify log contents."""
-    os.environ['BUILD_API_TEE_LOG_FILE'] = self.tee_log
-    build_api.main(['--input-json', self.input_json,
-                    '--output-json', self.output_json,
-                    'chromite.api.VersionService/Get'])
-    contents = osutils.ReadFile(self.tee_log)
-    self.assertIn('Teeing stdout and stderr to env path ', contents)
+  build_api.main([
+      '--input-json',
+      str(input_json),
+      '--output-json',
+      str(output_json),
+      'chromite.api.VersionService/Get',
+  ])
