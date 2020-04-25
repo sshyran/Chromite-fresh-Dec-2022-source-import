@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 import shutil
+import sys
 
 import mock
 
@@ -20,6 +21,9 @@ from chromite.lib import stateful_updater
 from chromite.lib import partial_mock
 
 # pylint: disable=protected-access
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ChromiumOSDeviceMock(partial_mock.PartialMock):

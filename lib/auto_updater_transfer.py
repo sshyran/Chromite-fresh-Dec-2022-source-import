@@ -40,6 +40,7 @@ from __future__ import print_function
 
 import abc
 import os
+import sys
 
 import six
 from six.moves import urllib
@@ -49,6 +50,10 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
 from chromite.lib import retry_util
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
 
 # Naming conventions for global variables:
 #   Path on remote host with slash: REMOTE_XXX_PATH

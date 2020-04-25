@@ -34,6 +34,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -52,6 +53,10 @@ from chromite.lib import stateful_updater
 from chromite.lib import timeout_util
 
 from chromite.utils import key_value_store
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
 
 # Naming conventions for global variables:
 #   File on remote host without slash: REMOTE_XXX_FILENAME

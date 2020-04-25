@@ -8,8 +8,12 @@
 from __future__ import print_function
 
 import re
+import sys
 
 from chromite.lib import cros_logging as logging
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetChromeosBuildInfo(lsb_release_content=None, regex=None):
