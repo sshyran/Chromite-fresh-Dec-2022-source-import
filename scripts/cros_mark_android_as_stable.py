@@ -50,6 +50,7 @@ BUG=None
 TEST=CQ
 """
 
+_RUNTIME_ARTIFACTS_BUCKET_URL = 'gs://chromeos-arc-images/runtime_artifacts'
 
 def IsBuildIdValid(bucket_url, build_branch, build_id, targets):
   """Checks that a specific build_id is valid.
@@ -424,9 +425,43 @@ def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
   logging.PrintBuildbotStepText(msg)
 
 
+def UpdateDataCollectorArtifacts(android_version,
+                                 runtime_artifacts_bucket_url):
+  r"""Finds and includes into variables artifacts from arc.DataCollector.
+
+  Args:
+    android_version: The \d+ build id of Android.
+    runtime_artifacts_bucket_url: root of runtime artifacts
+
+  Returns:
+    dictionary with filled ebuild variables.
+  """
+
+  variables = {}
+  buckets = ['ureadahead_pack', 'gms_core_cache']
+  archs = ['arm', 'arm64', 'x86', 'x86_64']
+  build_types = ['user', 'userdebug']
+
+  version_reference = '${PV}'
+  gs_context = gs.GSContext()
+  for bucket in buckets:
+    for arch in archs:
+      for build_type in build_types:
+        path = (f'{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_'
+                f'{android_version}')
+        if gs_context.Exists(path):
+          variables[(f'{arch}_{build_type}_{bucket}').upper()] = (
+              f'{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_'
+              f'{version_reference}.tar')
+
+  return variables
+
+
 def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
                               android_package, android_version, package_dir,
-                              build_branch, arc_bucket_url, build_targets):
+                              build_branch, arc_bucket_url,
+                              runtime_artifacts_bucket_url,
+                              build_targets):
   r"""Uprevs the Android ebuild.
 
   This is the main function that uprevs from a stable candidate
@@ -442,6 +477,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     package_dir: Path to the android-container package dir.
     build_branch: branch of Android builds.
     arc_bucket_url: URL of the target ARC build gs bucket.
+    runtime_artifacts_bucket_url: root of runtime artifacts
     build_targets: build targets for this particular Android branch.
 
   Returns:
@@ -459,6 +495,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     if stable_candidate.version_no_rev == new_ebuild.version_no_rev:
       return filecmp.cmp(
           new_ebuild.ebuild_path, stable_ebuild.ebuild_path, shallow=False)
+    return False
 
   # Case where we have the last stable candidate with same version just rev.
   if stable_candidate and stable_candidate.version_no_rev == android_version:
@@ -472,6 +509,9 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
   variables = {'BASE_URL': arc_bucket_url}
   for build, (target, _) in build_targets.items():
     variables[build + '_TARGET'] = '%s-%s' % (build_branch, target)
+
+  variables.update(UpdateDataCollectorArtifacts(
+      android_version, runtime_artifacts_bucket_url))
 
   portage_util.EBuild.MarkAsStable(
       unstable_ebuild.ebuild_path, new_ebuild_path,
@@ -532,6 +572,9 @@ def GetParser():
                       help='Path to the src directory')
   parser.add_argument('-t', '--tracking_branch', default='cros/master',
                       help='Branch we are tracking changes against')
+  parser.add_argument('--runtime_artifacts_bucket_url',
+                      default=_RUNTIME_ARTIFACTS_BUCKET_URL,
+                      type='gs_path')
   return parser
 
 
@@ -580,7 +623,8 @@ def main(argv):
   android_version_atom = MarkAndroidEBuildAsStable(
       stable_candidate, unstable_ebuild, options.android_package,
       version_to_uprev, android_package_dir,
-      options.android_build_branch, options.arc_bucket_url, build_targets)
+      options.android_build_branch, options.arc_bucket_url,
+      options.runtime_artifacts_bucket_url, build_targets)
   if android_version_atom:
     if options.boards:
       cros_mark_as_stable.CleanStalePackages(options.srcroot,

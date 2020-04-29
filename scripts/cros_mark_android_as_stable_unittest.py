@@ -99,6 +99,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.arc_bucket_url = 'gs://a'
+    self.runtime_artifacts_bucket_url = 'gs://r'
     self.targets = cros_mark_android_as_stable.MakeBuildTargetDict(
         self.android_package, self.build_branch).copy()
 
@@ -171,7 +172,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     for key in self.targets.keys():
       self.setupMockBuild(key, self.not_new_version, False)
 
-
   def setupMockBuild(self, key, version, valid=True):
     """Helper to mock a build."""
     def _RaiseGSNoSuchKey(*_args, **_kwargs):
@@ -242,6 +242,23 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     else:
       self.gs_mock.AddCmdResult(['ls', '--', src_url],
                                 side_effect=_RaiseGSNoSuchKey)
+
+  def setupMockRuntimeDataBuild(self, android_version):
+    """Helper to mock a build for runtime data."""
+    def _RaiseGSNoSuchKey(*_args, **_kwargs):
+      raise gs.GSNoSuchKey('file does not exist')
+
+    archs = ['arm', 'arm64', 'x86', 'x86_64']
+    build_types = ['user', 'userdebug']
+    runtime_datas = ['gms_core_cache', 'ureadahead_pack']
+
+    for arch in archs:
+      for build_type in build_types:
+        for runtime_data in runtime_datas:
+          path = (f'{self.runtime_artifacts_bucket_url}/{runtime_data}_{arch}_'
+                  f'{build_type}_{android_version}')
+          self.gs_mock.AddCmdResult(['stat', '--', path],
+                                    side_effect=_RaiseGSNoSuchKey)
 
   def makeSrcTargetUrl(self, target):
     """Helper to return the url for a target."""
@@ -559,10 +576,11 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     unstable = portage_util.EBuild(self.unstable)
     android_version = self.new_version
     package_dir = self.mock_android_dir
+    self.setupMockRuntimeDataBuild(android_version)
     version_atom = cros_mark_android_as_stable.MarkAndroidEBuildAsStable(
         stable_candidate, unstable, self.android_package, android_version,
         package_dir, self.build_branch, self.arc_bucket_url,
-        self.targets)
+        self.runtime_artifacts_bucket_url, self.targets)
     git_mock.assert_has_calls([
         mock.call(package_dir, ['add', self.new]),
         mock.call(package_dir, ['add', 'Manifest']),
@@ -574,3 +592,32 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         '%s-%s-r1' % (
             portage_util.GetFullAndroidPortagePackageName(self.android_package),
             self.new_version))
+
+  def testUpdateDataCollectorArtifacts(self):
+    android_version = 100
+    # Mock by default runtime artifacts are not found.
+    self.setupMockRuntimeDataBuild(android_version)
+
+    # Override few as existing.
+    path1 = (f'{self.runtime_artifacts_bucket_url}/ureadahead_pack_x86_64_'
+             f'user_{android_version}')
+    self.gs_mock.AddCmdResult(['stat', '--', path1],
+                              stdout=(self.STAT_OUTPUT) % path1)
+    path2 = (f'{self.runtime_artifacts_bucket_url}/gms_core_cache_arm_'
+             f'userdebug_{android_version}')
+    self.gs_mock.AddCmdResult(['stat', '--', path2],
+                              stdout=(self.STAT_OUTPUT) % path2)
+
+    variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
+        android_version, self.runtime_artifacts_bucket_url)
+
+    self.assertEqual(2, len(variables));
+    self.assertIn('X86_64_USER_UREADAHEAD_PACK', variables)
+    version_reference = '${PV}'
+    expectation1 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'ureadahead_pack_x86_64_user_{version_reference}.tar')
+    self.assertEqual(expectation1, variables['X86_64_USER_UREADAHEAD_PACK'])
+    self.assertIn('ARM_USERDEBUG_GMS_CORE_CACHE', variables)
+    expectation2 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'gms_core_cache_arm_userdebug_{version_reference}.tar')
+    self.assertEqual(expectation2, variables['ARM_USERDEBUG_GMS_CORE_CACHE'])
