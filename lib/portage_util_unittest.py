@@ -338,7 +338,7 @@ class ProjectAndPathTest(cros_test_lib.MockTempDirTestCase):
       """Mock function for manifest.FindCheckoutFromPath"""
       for project, localname in zip(fake_projects, fake_localnames):
         if path == os.path.join(self.tempdir, 'platform', localname):
-          return {'name': project}
+          return {'name': project, 'local_path': localname}
       return {}
 
     self.PatchObject(os.path, 'isdir', side_effect=_isdir)

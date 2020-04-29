@@ -841,6 +841,11 @@ class EBuild(object):
       if not os.path.isdir(srcbase):
         raise Error('_SRCPATH used but source path not found.')
 
+    # See what git repo the ebuild lives in to make sure the ebuild isn't
+    # tracking the same repo.  https://crbug.com/1050663
+    ebuild_git_tree = manifest.FindCheckoutFromPath(
+        self.ebuild_path).get('local_path')
+
     subdir_paths = []
     subtree_paths = []
     for local, project, srcpath, subdir, subtree in zip(
@@ -874,6 +879,10 @@ class EBuild(object):
                                                    real_project,
                                                    project))
 
+      if subdir_path == ebuild_git_tree:
+        raise Error('%s: ebuilds may not live in & track the same source '
+                    'repository (%s); use the empty-project instead' %
+                    (self.ebuild_path, subdir_path))
       subdir_paths.append(subdir_path)
       subtree_paths.extend(
           os.path.join(subdir_path, s) if s else subdir_path
