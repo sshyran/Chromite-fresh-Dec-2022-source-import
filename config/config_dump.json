@@ -7736,7 +7736,7 @@
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blacktip360\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blacktiplte\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blue\",\n    \"test_suites\": [\n        \"au\"\n    ]\n}",
-            "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"bruce\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"bruce\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"epaulette\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"lava\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"nasher\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
@@ -7777,7 +7777,7 @@
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blacktip360\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blacktiplte\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"blue\",\n    \"test_suites\": [\n        \"au\"\n    ]\n}",
-            "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"bruce\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"bruce\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"epaulette\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"lava\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"nasher\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
@@ -13227,11 +13227,6 @@
         "boards": [
             "flapjack"
         ],
-        "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"c18\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"c19\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"flapjack\",\n    \"test_suites\": []\n}"
-        ],
         "sign_types": [
             "recovery",
             "factory"
@@ -13257,11 +13252,6 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
-        "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"c18\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"c19\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"flapjack\",\n    \"name\": \"flapjack\",\n    \"test_suites\": []\n}"
-        ],
         "paygen": false,
         "push_image": false,
         "sign_types": [
@@ -20560,7 +20550,6 @@
             "fizz-cfm-release",
             "fizz-moblab-release",
             "fizz-release",
-            "flapjack-release",
             "gale-release",
             "gandof-release",
             "gnawty-release",
@@ -20687,7 +20676,6 @@
             "fizz-cfm-release-tryjob",
             "fizz-moblab-release-tryjob",
             "fizz-release-tryjob",
-            "flapjack-release-tryjob",
             "gale-release-tryjob",
             "gandof-release-tryjob",
             "gnawty-release-tryjob",

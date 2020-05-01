@@ -273,7 +273,6 @@
     fizz-cfm-release
     fizz-moblab-release
     fizz-release
-    flapjack-release
     gale-release
     gandof-release
     gnawty-release
@@ -1284,7 +1283,6 @@
     fizz-cfm-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
-    flapjack-release-tryjob
     gale-release-tryjob
     gandof-release-tryjob
     gnawty-release-tryjob
