@@ -596,6 +596,25 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         os.path.basename(bin_path) + toolchain_util.BZ2_COMPRESSION_SUFFIX)
     self.assertEqual([output], self.obj.Bundle())
 
+  def testBundleToolchainWarningLogs(self):
+    self.SetUpBundle('ToolchainWarningLogs')
+    path = '/tmp/fatal_clang_warnings'
+    in_chroot_dirs = [path, '/build/%s%s' % (self.board, path)]
+    check_dirs = [self.chroot.full_path(x) for x in in_chroot_dirs]
+    for d in check_dirs:
+      osutils.SafeMakedirs(d)
+      for l in ['log1.json', 'log2.json', 'log3.notjson']:
+        osutils.Touch(os.path.join(d, l))
+    tarball = self.obj.Bundle()
+    self.assertEqual(tarball,
+                     [os.path.join(self.outdir, 'fatal_clang_warnings.tar.xz')])
+
+    # Test internal function _CollectFatalClangWarnings, to make sure
+    # the duplicate logs are renamed and all logs are captured.
+    ret = self.obj._CollectFatalClangWarnings(self.outdir)
+    self.assertCountEqual(
+        ['log1.json', 'log2.json', 'log10.json', 'log20.json'], ret)
+
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
   """Test functions related to create a release CrOS profile.

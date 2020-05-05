@@ -70,6 +70,9 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
     BuilderConfig.Artifacts.VERIFIED_RELEASE_AFDO_FILE:
         _Handlers('VerifiedReleaseAfdoFile', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
+    BuilderConfig.Artifacts.TOOLCHAIN_WARNING_LOGS:
+        _Handlers('ToolchainWarningLogs', toolchain_util.PrepareForBuild,
+                  toolchain_util.BundleArtifacts),
 }
 
 
