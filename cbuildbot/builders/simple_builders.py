@@ -275,7 +275,7 @@ class SimpleBuilder(generic_builders.Builder):
         self._RunStage(build_stages.SetupBoardStage, board,
                        builder_run=builder_run)
 
-  def _RunMasterPaladinOrPFQBuild(self):
+  def _RunMasterAndroidPFQBuild(self):
     """Runs through the stages of the paladin or chrome PFQ master build."""
     # If there are slave builders, schedule them.
     if self._run.config.slave_configs:
@@ -286,8 +286,6 @@ class SimpleBuilder(generic_builders.Builder):
     # The CQ/Chrome PFQ master will not actually run the SyncChrome stage, but
     # we want the logic that gets triggered when SyncChrome stage is skipped.
     self._RunStage(chrome_stages.SyncChromeStage)
-    self._RunStage(android_stages.UprevAndroidStage)
-    self._RunStage(android_stages.AndroidMetadataStage)
 
   def RunEarlySyncAndSetupStages(self):
     """Runs through the early sync and board setup stages."""
@@ -426,9 +424,8 @@ class SimpleBuilder(generic_builders.Builder):
   def RunStages(self):
     """Runs through build process."""
     # TODO(sosa): Split these out into classes.
-    if (self._run.config.build_type == constants.ANDROID_PFQ_TYPE and
-        self._run.config.master):
-      self._RunMasterPaladinOrPFQBuild()
+    if config_lib.IsMasterAndroidPFQ(self._run.config):
+      self._RunMasterAndroidPFQBuild()
     else:
       self._RunDefaultTypeBuild()
 
@@ -553,6 +550,10 @@ class DistributedBuilder(SimpleBuilder):
         # PUpr in the PCQ world. See http://go/pupr.
         # There is no easy way to disable this in ChromeOS config,
         # so hack the check here.
+
+        if publish and config_lib.IsMasterAndroidPFQ(self._run.config):
+          self._RunStage(android_stages.UprevAndroidStage)
+          self._RunStage(android_stages.AndroidMetadataStage)
         self._RunStage(completion_stages.PublishUprevChangesStage,
                        self.sync_stage, publish)
 
