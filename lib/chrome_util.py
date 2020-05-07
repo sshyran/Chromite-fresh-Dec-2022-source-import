@@ -376,6 +376,8 @@ _COPY_PATHS_CHROME = (
     Path('keyboard_resources.pak'),
     Path('libassistant.so', exe=True, optional=True),
     Path('libmojo_core.so', exe=True),
+    Path('libEGL.so', exe=True, optional=True),
+    Path('libGLESv2.so', exe=True, optional=True),
 
     # The ARC++ mojo_core libraries are pre-stripped and don't play well with
     # the binutils stripping tools, hence stripping is disabled here.
