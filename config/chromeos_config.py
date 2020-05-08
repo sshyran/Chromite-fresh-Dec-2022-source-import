@@ -525,8 +525,6 @@ def GeneralTemplates(site_config):
       'release',
       site_config.templates.release_common,
       luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
-      notification_configs=[
-          config_lib.NotificationConfig(email='navil+spam@chromium.org')],
   )
 
   site_config.AddTemplate(
@@ -2398,6 +2396,40 @@ def PayloadBuilders(site_config, boards_dict):
       )
 
 
+def AddNotificationConfigs(site_config):
+  """Add NotificationConfigs to specific builders.
+
+  Set the notification_config property of specific builders enabling
+  notifications through luci-notify.
+
+  notification_config values should only be set through this method as it will
+  overwrite notification_config values set elsewhere.
+
+  Args:
+    site_config: config_lib.SiteConfig to be modified by adding
+                  NotificationConfigs.
+  """
+
+  # Notifiers is a map of builder config names to a list of NotificationConfig
+  # objects. Example:
+  # notifiers = {
+  #     'sample-release': [
+  #         config_lib(email='test1@google.com'),
+  #         config_lib(email='test2@google.com')
+  #     ],
+  #     'test-release': [config_lib(email='test1@chromium.org')],
+  # }
+  notifiers = {
+      'swanky-release': [
+          config_lib.NotificationConfig(email='navil+spam@chromium.org'),
+      ]
+  }
+
+  for config_name, notification_configs in notifiers.items():
+    site_config[config_name].apply(
+        **{'notification_configs': notification_configs})
+
+
 def ApplyCustomOverrides(site_config):
   """Method with to override specific flags for specific builders.
 
@@ -3271,6 +3303,8 @@ def GetConfig():
   AndroidPfqBuilders(site_config, boards_dict, ge_build_config)
 
   FullBuilders(site_config, boards_dict, ge_build_config)
+
+  AddNotificationConfigs(site_config)
 
   ApplyCustomOverrides(site_config)
 
