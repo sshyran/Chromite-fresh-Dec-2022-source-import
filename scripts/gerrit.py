@@ -387,10 +387,16 @@ class ActionDeps(_ActionSearchQuery):
 
     transitives = _BreadthFirstSearch(
         cls, functools.partial(self._Children, opts, _QueryChange),
-        visited_key=lambda cl: cl.gerrit_number)
+        visited_key=lambda cl: cl.PatchLink())
 
-    transitives_raw = [cl.patch_dict for cl in transitives]
-    PrintCls(opts, transitives_raw)
+    # This is a hack to avoid losing GoB host for each CL.  The PrintCls
+    # function assumes the GoB host specified by the user is the only one
+    # that is ever used, but the deps command walks across hosts.
+    if opts.raw:
+      print('\n'.join(x.PatchLink() for x in transitives))
+    else:
+      transitives_raw = [cl.patch_dict for cl in transitives]
+      PrintCls(opts, transitives_raw)
 
   @staticmethod
   def _ProcessDeps(opts, querier, cl, deps, required):
