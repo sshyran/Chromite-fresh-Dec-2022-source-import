@@ -170,6 +170,7 @@ def _PylintFile(path, output_format, debug, interp):
     vpython = os.path.join(constants.DEPOT_TOOLS_DIR, 'vpython')
   else:
     vpython = interp
+    pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
   pylintrc = _GetPylintrc(path)
   cmd = [vpython, pylint, '--rcfile=%s' % pylintrc]
   if output_format != 'default':
