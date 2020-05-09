@@ -135,18 +135,33 @@ enable=
 # TODO: Re-enable keyword-arg-before-vararg once we're on Python 3-only.
 # TODO: Re-enable useless-object-inheritance once we're on Python 3-only and
 #       we update the style guide.
+# TODO: Re-enable import-outside-toplevel.
+# TODO: Re-enable unnecessary-comprehension.
+# TODO: Re-enable consider-using-dict-comprehension.
+# TODO: Re-enable consider-using-set-comprehension.
+# TODO: Re-enable consider-using-in.
+# TODO: Re-enable try-except-raise.
+# TODO: Re-enable chained-comparison.
 disable=
     broad-except,
+    chained-comparison,
     consider-iterating-dictionary,
+    consider-using-dict-comprehension,
+    consider-using-in,
+    consider-using-set-comprehension,
     fixme,
     file-ignored,
     keyword-arg-before-vararg,
+    import-outside-toplevel,
     inconsistent-return-statements,
     invalid-name,
     locally-disabled,
     locally-enabled,
     missing-docstring,
     no-member,
+    no-else-break,
+    no-else-continue,
+    no-else-raise,
     no-else-return,
     no-self-use,
     redefined-variable-type,
@@ -162,6 +177,8 @@ disable=
     too-many-public-methods,
     too-many-return-statements,
     too-many-statements,
+    try-except-raise,
+    unnecessary-comprehension,
     useless-object-inheritance,
 
 
