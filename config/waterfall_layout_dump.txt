@@ -278,7 +278,6 @@
     gnawty-release
     grunt-release
     guado-cfm-release
-    guado-kernelnext-release
     guado-release
     hana-release
     hatch-release
@@ -316,7 +315,6 @@
     relm-release
     rikku-cfm-release
     rikku-release
-    samus-kernelnext-release
     samus-release
     sand-release
     sarien-release
@@ -1018,11 +1016,6 @@
   guado-cfm-unittest-stress
   guado-factory-auron-6772.B-factorybranch-tryjob
   guado-full-tryjob
-  guado-kernelnext-full-tryjob
-  guado-kernelnext-llvm-next-toolchain-tryjob
-  guado-kernelnext-llvm-toolchain-tryjob
-  guado-kernelnext-release-tryjob
-  guado-kernelnext-unittest-stress
   guado-llvm-next-toolchain-tryjob
   guado-llvm-toolchain-tryjob
   guado-payloads-tryjob
@@ -1288,7 +1281,6 @@
     gnawty-release-tryjob
     grunt-release-tryjob
     guado-cfm-release-tryjob
-    guado-kernelnext-release-tryjob
     guado-release-tryjob
     hana-release-tryjob
     hatch-release-tryjob
@@ -1326,7 +1318,6 @@
     relm-release-tryjob
     rikku-cfm-release-tryjob
     rikku-release-tryjob
-    samus-kernelnext-release-tryjob
     samus-release-tryjob
     sand-release-tryjob
     sarien-release-tryjob
