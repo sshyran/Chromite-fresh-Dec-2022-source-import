@@ -7,7 +7,7 @@
 
 from __future__ import print_function
 
-BUILD_WORKON_PACKAGES = (
+_COMMON_PACKAGES = (
     'chromeos-ec',
     'coreboot',
     'depthcharge',
@@ -15,7 +15,11 @@ BUILD_WORKON_PACKAGES = (
     'vboot_reference',
 )
 
-BUILD_PACKAGES = BUILD_WORKON_PACKAGES + (
+BUILD_WORKON_PACKAGES = _COMMON_PACKAGES + (
+    'coreboot-private-files-baseboard-dedede',
+)
+
+BUILD_PACKAGES = _COMMON_PACKAGES + (
     'chromeos-bootimage',
     'coreboot-private-files',
     'intel-jslfsp',
