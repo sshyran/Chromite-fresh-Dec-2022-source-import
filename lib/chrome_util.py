@@ -21,7 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
-
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
@@ -119,8 +118,12 @@ class Copier(object):
   Provides destination stripping and permission setting functionality.
   """
 
-  def __init__(self, strip_bin=None, strip_flags=None, default_mode=0o644,
-               dir_mode=0o755, exe_mode=0o755):
+  def __init__(self,
+               strip_bin=None,
+               strip_flags=None,
+               default_mode=0o644,
+               dir_mode=0o755,
+               exe_mode=0o755):
     """Initialization.
 
     Args:
@@ -160,10 +163,9 @@ class Copier(object):
 
     osutils.SafeMakedirs(os.path.dirname(dest), mode=self.dir_mode)
     if path.exe and self.strip_bin and path.strip and os.path.getsize(src) > 0:
-      strip_flags = (['--strip-unneeded'] if self.strip_flags is None else
-                     self.strip_flags)
-      cros_build_lib.dbg_run(
-          [self.strip_bin] + strip_flags + ['-o', dest, src])
+      strip_flags = (['--strip-unneeded']
+                     if self.strip_flags is None else self.strip_flags)
+      cros_build_lib.dbg_run([self.strip_bin] + strip_flags + ['-o', dest, src])
       shutil.copystat(src, dest)
     else:
       shutil.copy2(src, dest)
@@ -244,8 +246,15 @@ class Path(object):
 
   DEFAULT_BLACKLIST = (r'(^|.*/)\.git($|/.*)',)
 
-  def __init__(self, src, exe=False, cond=None, dest=None, mode=None,
-               optional=False, strip=True, blacklist=None):
+  def __init__(self,
+               src,
+               exe=False,
+               cond=None,
+               dest=None,
+               mode=None,
+               optional=False,
+               strip=True,
+               blacklist=None):
     """Initializes the object.
 
     Args:
@@ -306,14 +315,13 @@ class Path(object):
       return self.cond(gn_args, staging_flags)
     return True
 
+
 _ENABLE_NACL = 'enable_nacl'
 _IS_CHROME_BRANDED = 'is_chrome_branded'
 _IS_COMPONENT_BUILD = 'is_component_build'
 
 _HIGHDPI_FLAG = 'highdpi'
-STAGING_FLAGS = (
-    _HIGHDPI_FLAG,
-)
+STAGING_FLAGS = (_HIGHDPI_FLAG,)
 
 C = Conditions
 
@@ -331,19 +339,22 @@ _COPY_PATHS_COMMON = (
     Path('libosmesa.so', exe=True, optional=True),
     # Do not strip the nacl_helper_bootstrap binary because the binutils
     # objcopy/strip mangles the ELF program headers.
-    Path('nacl_helper_bootstrap',
-         exe=True,
-         strip=False,
-         cond=C.GnSetTo(_ENABLE_NACL, True)),
+    Path(
+        'nacl_helper_bootstrap',
+        exe=True,
+        strip=False,
+        cond=C.GnSetTo(_ENABLE_NACL, True)),
     Path('nacl_irt_*.nexe', cond=C.GnSetTo(_ENABLE_NACL, True)),
-    Path('nacl_helper',
-         exe=True,
-         optional=True,
-         cond=C.GnSetTo(_ENABLE_NACL, True)),
-    Path('nacl_helper_nonsfi',
-         exe=True,
-         optional=True,
-         cond=C.GnSetTo(_ENABLE_NACL, True)),
+    Path(
+        'nacl_helper',
+        exe=True,
+        optional=True,
+        cond=C.GnSetTo(_ENABLE_NACL, True)),
+    Path(
+        'nacl_helper_nonsfi',
+        exe=True,
+        optional=True,
+        cond=C.GnSetTo(_ENABLE_NACL, True)),
     Path('natives_blob.bin', optional=True),
     Path('pnacl/', cond=C.GnSetTo(_ENABLE_NACL, True)),
     Path('snapshot_blob.bin', optional=True),
@@ -374,17 +385,19 @@ _COPY_PATHS_CHROME = (
     # Widevine CDM is already pre-stripped.  In addition, it doesn't
     # play well with the binutils stripping tools, so skip stripping.
     # Optional for arm64 builds (http://crbug.com/881022)
-    Path('libwidevinecdm.so',
-         exe=True,
-         strip=False,
-         cond=C.GnSetTo(_IS_CHROME_BRANDED, True),
-         optional=C.GnSetTo('target_cpu', 'arm64')),
+    Path(
+        'libwidevinecdm.so',
+        exe=True,
+        strip=False,
+        cond=C.GnSetTo(_IS_CHROME_BRANDED, True),
+        optional=C.GnSetTo('target_cpu', 'arm64')),
     # In component build, copy so files (e.g. libbase.so) except for the
     # blacklist.
-    Path('*.so',
-         blacklist=(r'libwidevinecdm.so',),
-         exe=True,
-         cond=C.GnSetTo(_IS_COMPONENT_BUILD, True)),
+    Path(
+        '*.so',
+        blacklist=(r'libwidevinecdm.so',),
+        exe=True,
+        cond=C.GnSetTo(_IS_COMPONENT_BUILD, True)),
     Path('locales/*.pak', optional=True),
     Path('locales/*.pak.gz', optional=True),
     Path('Packages/chrome_content_browser/manifest.json', optional=True),
@@ -479,8 +492,7 @@ def GetChromeRuntimeDeps(build_dir, build_target):
   #   https://cs.chromium.org/chromium/src/testing/test.gni?rcl=9b95cd58&l=336
   # Check out test.gni if the file is missing and the slow "gn desc" code path
   # is used.
-  generated_runtime_deps_file = os.path.join(build_dir,
-                                             'gen.runtime',
+  generated_runtime_deps_file = os.path.join(build_dir, 'gen.runtime',
                                              gn_label.split(':')[0].lstrip('/'),
                                              build_target,
                                              build_target + '.runtime_deps')
@@ -493,12 +505,13 @@ def GetChromeRuntimeDeps(build_dir, build_target):
     runtime_deps = osutils.ReadFile(generated_runtime_deps_file).splitlines()
 
   if not runtime_deps:
-    result = cros_build_lib.run(['gn', 'desc', build_dir, gn_label,
-                                 'runtime_deps'],
-                                capture_output=True, encoding='utf-8')
+    result = cros_build_lib.run(
+        ['gn', 'desc', build_dir, gn_label, 'runtime_deps'],
+        capture_output=True,
+        encoding='utf-8')
     if result.returncode != 0:
-      raise GetRuntimeDepsError('Failed to get runtime deps for: %s' %
-                                build_target)
+      raise GetRuntimeDepsError(
+          'Failed to get runtime deps for: %s' % build_target)
 
     runtime_deps = result.output.splitlines()
 
@@ -506,8 +519,8 @@ def GetChromeRuntimeDeps(build_dir, build_target):
   src_dir = os.path.dirname(os.path.dirname(build_dir))
   rebased_runtime_deps = []
   for f in runtime_deps:
-    rebased = os.path.relpath(os.path.abspath(os.path.join(build_dir, f)),
-                              src_dir)
+    rebased = os.path.relpath(
+        os.path.abspath(os.path.join(build_dir, f)), src_dir)
     # Dirs from a "data" rule in gn file do not have trailing '/' in runtime
     # deps. Ensures such dirs are ended with a trailing '/'.
     if os.path.isdir(rebased) and not rebased.endswith('/'):
@@ -553,9 +566,14 @@ def GetChromeTestCopyPaths(build_dir, test_target):
   return copy_paths
 
 
-def StageChromeFromBuildDir(staging_dir, build_dir, strip_bin, sloppy=False,
-                            gn_args=None, staging_flags=None,
-                            strip_flags=None, copy_paths=_COPY_PATHS_CHROME):
+def StageChromeFromBuildDir(staging_dir,
+                            build_dir,
+                            strip_bin,
+                            sloppy=False,
+                            gn_args=None,
+                            staging_flags=None,
+                            strip_flags=None,
+                            copy_paths=_COPY_PATHS_CHROME):
   """Populates a staging directory with necessary build artifacts.
 
   If |gn_args| or |staging_flags| are set, then we decide what to stage
