@@ -171,8 +171,6 @@ class VM(device.Device):
 
     if opts.enable_kvm is None:
       self.enable_kvm = os.path.exists('/dev/kvm')
-      if not self.enable_kvm:
-        logging.warning('KVM is not supported; Chrome VM will be slow')
     else:
       self.enable_kvm = opts.enable_kvm
     self.copy_on_write = opts.copy_on_write
@@ -300,6 +298,7 @@ class VM(device.Device):
 
     # Check system.
     if not self.qemu_path:
+      logging.warning('Using system QEMU.')
       self.qemu_path = osutils.Which(qemu_exe)
 
     if not self.qemu_path or not os.path.isfile(self.qemu_path):
@@ -456,6 +455,8 @@ class VM(device.Device):
     Args:
       retries: Number of times to retry launching the VM if it fails to boot-up.
     """
+    if not self.enable_kvm:
+      logging.warning('KVM is not supported; Chrome VM will be slow')
     self._SetQemuPath()
     self._SetVMImagePath()
     logging.info('Pid file: %s', self.pidfile)
