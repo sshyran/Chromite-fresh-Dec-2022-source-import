@@ -909,3 +909,25 @@ def determine_firmware_versions(build_target):
   ec_fw_version = fw_versions.ec_rw or fw_versions.ec
 
   return MainEcFirmwareVersions(main_fw_version, ec_fw_version)
+
+def determine_kernel_version(build_target):
+  """Returns a string containing the kernel version for this build target.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+
+  Returns:
+    (str) The kernel versions, or None.
+  """
+  try:
+    packages = portage_util.GetPackageDependencies(build_target.name,
+                                                   'virtual/linux-sources')
+  except cros_build_lib.RunCommandError as e:
+    logging.warning('Unable to get package list for metadata: %s', e)
+    return None
+  for package in packages:
+    if package.startswith('sys-kernel/chromeos-kernel-'):
+      kernel_version = portage_util.SplitCPV(package).version
+      logging.info('Found active kernel version: %s', kernel_version)
+      return kernel_version
+  return None

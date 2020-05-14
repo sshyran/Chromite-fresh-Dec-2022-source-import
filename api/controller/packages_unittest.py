@@ -549,6 +549,12 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
                                            return_value=android_target)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
                      return_value=['arc', 'arcvm', 'big_little', 'cheets'])
+    package_result = ['sys-kernel/linux-headers-4.14-r24',
+                      'sys-devel/flex-2.6.4-r1',
+                      'sys-kernel/chromeos-kernel-4_4-4.4.223-r2209']
+    self.PatchObject(portage_util, 'GetPackageDependencies',
+                     return_value=package_result)
+
     fw_versions = packages_service.FirmwareVersions(
         None,
         'Google_Caroline.7820.263.0',
@@ -587,6 +593,9 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.assertEqual(
         self.response.build_target_metadata[0].ec_firmware_version,
         'caroline_v1.9.370-e8b9bd2')
+    self.assertEqual(
+        self.response.build_target_metadata[0].kernel_version,
+        '4.4.223-r2209')
 
 
 class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):

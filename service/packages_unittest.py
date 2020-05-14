@@ -613,6 +613,31 @@ c98ca54db130886142ad582a58e90ddc *./common.sh
     self.assertEqual(result, versions)
 
 
+class DetermineKernelVersionTest(cros_test_lib.RunCommandTempDirTestCase):
+  """Tests for determine_kernel_version."""
+
+  def setUp(self):
+    self.board = 'test-board'
+    self.build_target = build_target_lib.BuildTarget(self.board)
+
+  def test_determine_kernel_version(self):
+    """Tests that a valid kernel version is returned."""
+    package_result = ['sys-kernel/linux-headers-4.14-r24',
+                      'sys-devel/flex-2.6.4-r1',
+                      'sys-kernel/chromeos-kernel-4_4-4.4.223-r2209']
+    self.PatchObject(portage_util, 'GetPackageDependencies',
+                     return_value=package_result)
+
+    result = packages.determine_kernel_version(self.build_target)
+    self.assertEqual(result, '4.4.223-r2209')
+
+  def test_determine_kernel_version_exception(self):
+    """Tests that portage_util exceptions result in returning None."""
+    self.PatchObject(portage_util, 'GetPackageDependencies',
+                     side_effect=cros_build_lib.RunCommandError('error'))
+    result = packages.determine_kernel_version(self.build_target)
+    self.assertEqual(result, None)
+
 class ChromeVersionsTest(cros_test_lib.MockTestCase):
   """Tests getting chrome version."""
 
