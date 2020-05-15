@@ -153,6 +153,8 @@ def GetUnusedPort(ip=LOCALHOST, family=socket.AF_INET,
     s = socket.socket(family, stype)
     s.bind((ip, 0))
     return s.getsockname()[1]
+  # TODO(vapier): Drop socket.error when we're Python 3-only.
+  # pylint: disable=overlapping-except
   except (socket.error, OSError):
     pass
   finally:

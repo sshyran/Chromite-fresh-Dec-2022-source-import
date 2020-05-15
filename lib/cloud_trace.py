@@ -46,7 +46,9 @@ def LogSpan(span):
   try:
     with open(GetSpanLogFilePath(span), 'w') as fh:
       fh.write(json.dumps(span.ToDict()))
-  # Catch various configuration errors
+  # Catch various configuration errors.
+  # TODO(vapier): Drop IOError when we're Python 3-only.
+  # pylint: disable=overlapping-except
   except (OSError, IOError) as error:
     if error.errno == errno.EPERM:
       log.warning(

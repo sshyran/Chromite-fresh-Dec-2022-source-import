@@ -266,7 +266,7 @@ def _WorkOnEbuild(overlay, ebuild, manifest, new_ebuild_files,
     logging.error('An error occurred while uprevving %s: %s',
                   ebuild.package, e)
     raise
-  except (OSError, IOError):
+  except OSError:
     logging.warning(
         'Cannot rev %s\n'
         'Note you will have to go into %s '

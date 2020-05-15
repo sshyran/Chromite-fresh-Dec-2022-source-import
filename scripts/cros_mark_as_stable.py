@@ -544,7 +544,7 @@ def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
   except portage_util.EbuildVersionError as e:
     logging.warning('Unable to rev %s: %s', ebuild.package, e)
     raise
-  except (OSError, IOError):
+  except OSError:
     logging.warning(
         'Cannot rev %s\n'
         'Note you will have to go into %s '

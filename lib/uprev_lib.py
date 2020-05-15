@@ -484,7 +484,7 @@ class UprevOverlayManager(object):
       logging.warning('An error occurred while uprevving %s, skipping: %s',
                       ebuild.package, e)
       return
-    except (OSError, IOError):
+    except OSError:
       logging.warning(
           'Cannot rev %s\n'
           'Note you will have to go into %s '

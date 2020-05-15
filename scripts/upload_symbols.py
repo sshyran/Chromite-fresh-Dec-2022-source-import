@@ -457,7 +457,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
                         s.display_name, e)
         s.status = SymbolFile.ERROR
         failures += 1
-      except (httplib.HTTPException, IOError, socket.error) as e:
+      except (httplib.HTTPException, OSError) as e:
         logging.warning('could not upload: %s: %s %s', s.display_name,
                         type(e).__name__, e)
         s.status = SymbolFile.ERROR
