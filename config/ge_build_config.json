@@ -962,18 +962,6 @@
       ]
     },
     {
-      "name": "monroe",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "slippy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "ninja",
       "configs": [
         {
@@ -1289,30 +1277,6 @@
       ]
     },
     {
-      "name": "veyron_jaq",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "veyron_jerry",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
       "name": "veyron_mickey",
       "configs": [
         {
@@ -1325,43 +1289,7 @@
       ]
     },
     {
-      "name": "veyron_mighty",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "veyron_minnie",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "veyron",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
       "name": "veyron_rialto",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "veyron_speedy",
       "configs": [
         {
           "builder": "RELEASE",
@@ -4897,6 +4825,14 @@
       "builder": "RELEASE",
       "experimental": false,
       "models": [
+        {
+          "board_name": "zork",
+          "name": "berknip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 381,
+          "is_active": true
+        },
         {
           "board_name": "zork",
           "name": "dalboz",
