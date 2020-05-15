@@ -288,18 +288,18 @@ def BundlePinnedGuestImages(input_proto, output_proto, _config):
   output_proto.artifacts.add().path = os.path.join(output_dir, archive)
 
 
-def _FetchPinnedGuestImagesResponse(_input_proto, output_proto, _config):
+def _FetchPinnedGuestImageUrisResponse(_input_proto, output_proto, _config):
   """Add test fetched pinned guest image files to a successful response."""
   pinned_image = output_proto.pinned_images.add()
   pinned_image.filename = 'pinned_file.tar.gz'
   pinned_image.uri = 'https://testuri.com'
 
 
-@faux.success(_FetchPinnedGuestImagesResponse)
+@faux.success(_FetchPinnedGuestImageUrisResponse)
 @faux.empty_error
 @validate.require('sysroot.path')
 @validate.validation_complete
-def FetchPinnedGuestImages(input_proto, output_proto, _config):
+def FetchPinnedGuestImageUris(input_proto, output_proto, _config):
   """Get the pinned guest image information."""
   sysroot_path = input_proto.sysroot.path
 

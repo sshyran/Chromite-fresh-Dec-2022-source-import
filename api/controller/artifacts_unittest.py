@@ -406,8 +406,9 @@ class BundlePinnedGuestImagesTest(BundleTestCase):
     self.assertFalse(self.response.artifacts)
 
 
-class FetchPinnedGuestImagesTest(cros_test_lib.MockTempDirTestCase,
-                                 api_config.ApiConfigMixin, BundleRequestMixin):
+class FetchPinnedGuestImageUrisTest(cros_test_lib.MockTempDirTestCase,
+                                    api_config.ApiConfigMixin,
+                                    BundleRequestMixin):
   """Unittests for FetchPinnedGuestImages."""
 
   def setUp(self):
@@ -427,15 +428,15 @@ class FetchPinnedGuestImagesTest(cros_test_lib.MockTempDirTestCase,
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages')
-    artifacts.FetchPinnedGuestImages(self.input_request, self.response,
-                                     self.validate_only_config)
+    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
+                                        self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages')
-    artifacts.FetchPinnedGuestImages(self.input_request, self.response,
-                                     self.mock_call_config)
+    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
+                                        self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.pinned_images), 1)
     self.assertEqual(self.response.pinned_images[0].filename,
@@ -450,8 +451,8 @@ class FetchPinnedGuestImagesTest(cros_test_lib.MockTempDirTestCase,
         filename='my_pinned_file.tar.gz', uri='https://the_testuri.com'))
     self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages',
                      return_value=pins)
-    artifacts.FetchPinnedGuestImages(self.input_request, self.response,
-                                     self.api_config)
+    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
+                                        self.api_config)
     self.assertEqual(len(self.response.pinned_images), 1)
     self.assertEqual(self.response.pinned_images[0].filename,
                      'my_pinned_file.tar.gz')
