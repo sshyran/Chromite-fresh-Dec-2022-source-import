@@ -388,9 +388,6 @@
     wooten-release
     zork-release
 
-== rvc_android_pfq ==
-  master-rvc-android-pfq
-
 == toolchain ==
   master-toolchain
     amd64-llvm-next-toolchain
@@ -1545,7 +1542,6 @@
     wizpig-release-tryjob
     wooten-release-tryjob
     zork-release-tryjob
-  master-rvc-android-pfq-tryjob
   master-toolchain-tryjob
     amd64-llvm-next-toolchain-tryjob
     arm-llvm-next-toolchain-tryjob

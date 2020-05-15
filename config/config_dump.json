@@ -764,24 +764,6 @@
             "usepkg_build_packages": false,
             "vm_tests": []
         },
-        "rvc_android_pfq": {
-            "_template": "rvc_android_pfq",
-            "android_import_branch": "git_rvc-arc-dev",
-            "android_package": "android-container-rvc",
-            "android_rev": "latest_release",
-            "build_timeout": 28800,
-            "build_type": "android",
-            "description": "Preflight Android Uprev & Build (internal)",
-            "display_label": "rvc_android_pfq",
-            "internal": true,
-            "luci_builder": "PFQ",
-            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-            "manifest_version": true,
-            "overlays": "both",
-            "sync_chrome": true,
-            "uprev": false,
-            "vm_tests": []
-        },
         "test_ap": {
             "_template": "test_ap",
             "build_type": "binary",
@@ -22970,26 +22952,6 @@
         "suite_scheduling": false,
         "sync_chrome": true,
         "vm_tests_override": null
-    },
-    "master-rvc-android-pfq": {
-        "_template": "rvc_android_pfq",
-        "boards": [],
-        "master": true,
-        "push_overlays": "both",
-        "schedule": "with 150m interval",
-        "slave_configs": []
-    },
-    "master-rvc-android-pfq-tryjob": {
-        "_template": "rvc_android_pfq",
-        "boards": [],
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "master": true,
-        "push_overlays": "both",
-        "slave_configs": [],
-        "uprev": true
     },
     "master-toolchain": {
         "_template": "toolchain",
