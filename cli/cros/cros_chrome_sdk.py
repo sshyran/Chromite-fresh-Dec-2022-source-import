@@ -740,6 +740,12 @@ class SDKFetcher(object):
         link_ref = self.symlink_cache.Lookup(link_name)
         key_map[key] = link_ref
         link_ref.Acquire()
+        # If the link exists but points to the wrong tarball, we might be
+        # overriding a component via --toolchain-url or --target-tc. In that
+        # case, just clobber the symlink and recreate it.
+        if (link_ref.Exists() and
+            osutils.ExpandPath(link_ref.path) != tarball_ref.path):
+          link_ref.Remove()
         if not link_ref.Exists(lock=True):
           self._UpdateCacheSymlink(link_ref, tarball_ref.path)
 

@@ -150,6 +150,7 @@ class SDKFetcherMock(partial_mock.PartialMock):
     self.gs_mock = gs_unittest.GSContextMock()
     self.gs_mock.SetDefaultCmdResult()
     self.env = None
+    self.tarball_cache_key_map = {}
 
   @_DependencyMockCtx
   def _target__init__(self, inst, *args, **kwargs):
@@ -195,7 +196,9 @@ class SDKFetcherMock(partial_mock.PartialMock):
 
   @_DependencyMockCtx
   def _GetTarballCacheKey(self, _inst, component, _url):
-    return (os.path.join(component, 'some-fake-hash'),)
+    return (os.path.join(
+        component,
+        self.tarball_cache_key_map.get(component, 'some-fake-hash')),)
 
 
 class RunThroughTest(cros_test_lib.MockTempDirTestCase,
@@ -499,6 +502,46 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.assertTrue(os.path.islink(sysroot_link))
     self.assertEqual(os.path.realpath(toolchain_link), toolchain_dir)
     self.assertEqual(os.path.realpath(sysroot_link), sysroot_dir)
+
+  def testSymlinkCacheToolchainOverride(self):
+    """Ensures that the SDK picks up an overridden component."""
+    sdk = cros_chrome_sdk.SDKFetcher(os.path.join(self.tempdir),
+                                     SDKFetcherMock.BOARD)
+    board, version, _ = self.VERSION_KEY
+    toolchain_link = os.path.join(
+        self.tempdir,
+        'chrome-sdk/symlinks/%s+%s+target_toolchain' % (board, version))
+    components = [sdk.TARGET_TOOLCHAIN_KEY]
+
+    toolchain_url_1 = 'some-fake-gs-path-1'
+    toolchain_dir_1 = os.path.join(
+        self.tempdir,
+        'chrome-sdk/tarballs/target_toolchain/',
+        toolchain_url_1)
+    toolchain_url_2 = 'some-fake-gs-path-2'
+    toolchain_dir_2 = os.path.join(
+        self.tempdir,
+        'chrome-sdk/tarballs/target_toolchain/',
+        toolchain_url_2)
+
+    # Prepare the cache using 'toolchain_url_1'.
+    self.sdk_mock.tarball_cache_key_map = {
+        sdk.TARGET_TOOLCHAIN_KEY: toolchain_url_1
+    }
+    with sdk.Prepare(components, toolchain_url=toolchain_url_1):
+      self.assertEqual(toolchain_dir_1, os.path.realpath(toolchain_link))
+      self.assertExists(toolchain_dir_1)
+      self.assertNotExists(toolchain_dir_2)
+
+    # Prepare the cache with 'toolchain_url_2' and make sure the active symlink
+    # points to it and that 'toolchain_url_1' is still present.
+    self.sdk_mock.tarball_cache_key_map = {
+        sdk.TARGET_TOOLCHAIN_KEY: toolchain_url_2
+    }
+    with sdk.Prepare(components, toolchain_url=toolchain_url_2):
+      self.assertEqual(toolchain_dir_2, os.path.realpath(toolchain_link))
+      self.assertExists(toolchain_dir_2)
+      self.assertExists(toolchain_dir_1)
 
 
 class GomaTest(cros_test_lib.MockTempDirTestCase,
