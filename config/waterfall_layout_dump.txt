@@ -280,6 +280,7 @@
     eve-arc-r-release
     eve-arcvm-mesa-virgl-next-release
     eve-arm64-release
+    eve-kernelnext-release
     eve-kvm-release
     eve-lacros-release
     eve-release
@@ -795,6 +796,11 @@
   eve-arm64-unittest-stress
   eve-factory-eve-9667.B-factorybranch-tryjob
   eve-full-tryjob
+  eve-kernelnext-full-tryjob
+  eve-kernelnext-llvm-next-toolchain-tryjob
+  eve-kernelnext-llvm-toolchain-tryjob
+  eve-kernelnext-release-tryjob
+  eve-kernelnext-unittest-stress
   eve-kvm-full-tryjob
   eve-kvm-llvm-next-toolchain-tryjob
   eve-kvm-llvm-toolchain-tryjob
@@ -1427,6 +1433,7 @@
     eve-arc-r-release-tryjob
     eve-arcvm-mesa-virgl-next-release-tryjob
     eve-arm64-release-tryjob
+    eve-kernelnext-release-tryjob
     eve-kvm-release-tryjob
     eve-lacros-release-tryjob
     eve-release-tryjob
