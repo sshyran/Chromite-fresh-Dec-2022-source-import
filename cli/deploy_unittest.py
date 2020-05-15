@@ -415,7 +415,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     self.assertEqual(
         self.device.device.cmds,
-        [['dlcservice_util', '--uninstall', '--dlc_ids=foodlc'],
+        [['dlcservice_util', '--uninstall', '--id=foodlc'],
          ['restart', 'dlcservice']])
 
   def testDeployMergeWithProgressBar(self):
