@@ -126,6 +126,25 @@ def testcase_caplog(request, caplog):
   request.cls.caplog = caplog
 
 
+@pytest.fixture
+def testcase_monkeypatch(request, monkeypatch):
+  """Adds the `monkeypatch` fixture to TestCase-style test classes.
+
+  This fixture should only be used on cros_test_lib.TestCase test classes, since
+  it doesn't yield anything and just attaches the built-in pytest `monkeypatch`
+  fixture to the requesting class. Tests written as standalone functions should
+  use pytest's built-in `monkeypatch` fixture instead of this. See the
+  documentation for more information on how to use the `monkeypatch` fixture
+  that this provides:
+  https://docs.pytest.org/en/latest/reference.html#monkeypatch
+
+  See the following documentation for an explanation of why fixtures have to be
+  provided to TestCase classes in this manner:
+  https://docs.pytest.org/en/latest/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
+  """
+  request.cls.monkeypatch = monkeypatch
+
+
 def pytest_assertrepr_compare(op, left, right):
   """Global hook for defining detailed explanations for failed assertions.
 

@@ -25,6 +25,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
+from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import replication_lib
@@ -804,6 +805,28 @@ def determine_full_version():
   platform_version = determine_platform_version()
   full_version = ('R%s-%s' % (milestone_version, platform_version))
   return full_version
+
+
+def find_fingerprints(build_target):
+  """Returns a list of fingerprints for this build.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+
+  Returns:
+    list[str] - List of fingerprint strings.
+  """
+  cros_build_lib.AssertInsideChroot()
+  fp_file = 'cheets-fingerprint.txt'
+  fp_path = os.path.join(
+      image_lib.GetLatestImageLink(build_target.name),
+      fp_file)
+  if not os.path.isfile(fp_path):
+    logging.info('Fingerprint file not found: %s', fp_path)
+    return None
+  logging.info('Reading fingerprint file: %s', fp_path)
+  fingerprints = osutils.ReadFile(fp_path).splitlines()
+  return fingerprints
 
 
 FirmwareVersions = collections.namedtuple(

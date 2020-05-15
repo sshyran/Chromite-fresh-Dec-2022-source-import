@@ -571,6 +571,42 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
     self.assertEqual(target, None)
 
 
+@pytest.mark.usefixtures('testcase_caplog', 'testcase_monkeypatch')
+class FindFingerprintsTest(cros_test_lib.RunCommandTempDirTestCase):
+  """Tests for find_fingerprints."""
+
+  def setUp(self):
+    self.board = 'test-board'
+    # Create cheets-fingerprints.txt based on tempdir/src...
+    self.fingerprint_contents = (
+        'google/test-board/test-board_cheets'
+        ':9/R99-12345.0.9999/123456:user/release-keys')
+    fingerprint_path = os.path.join(
+        self.tempdir,
+        'src/build/images/test-board/latest/cheets-fingerprint.txt')
+    self.chroot = Chroot(self.tempdir)
+    osutils.WriteFile(fingerprint_path, self.fingerprint_contents,
+                      makedirs=True)
+
+  def test_find_fingerprints_with_test_path(self):
+    """Tests get_firmware_versions with mocked output."""
+    self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
+    build_target = build_target_lib.BuildTarget(self.board)
+    result = packages.find_fingerprints(build_target)
+    self.assertEqual(result, [self.fingerprint_contents])
+    self.assertIn('Reading fingerprint file', self.caplog.text)
+
+  def test_find_fingerprints(self):
+    """Tests get_firmware_versions with mocked output."""
+    # Use board name whose path for fingerprint file does not exist.
+    # Verify that fingerprint file is not found and None is returned.
+    build_target = build_target_lib.BuildTarget('wrong-boardname')
+    self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
+    result = packages.find_fingerprints(build_target)
+    self.assertEqual(result, None)
+    self.assertIn('Fingerprint file not found', self.caplog.text)
+
+
 class GetFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for get_firmware_versions."""
 

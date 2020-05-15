@@ -563,6 +563,9 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         'caroline_v1.9.370-e8b9bd2')
     self.PatchObject(packages_service, 'get_firmware_versions',
                      return_value=fw_versions)
+    fingerprints = ['fingerprint1', 'fingerprint2']
+    self.PatchObject(packages_service, 'find_fingerprints',
+                     return_value=fingerprints)
     request = self._GetRequest(board='betty')
     packages_controller.GetBuilderMetadata(request, self.response,
                                            self.api_config)
@@ -596,6 +599,12 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.assertEqual(
         self.response.build_target_metadata[0].kernel_version,
         '4.4.223-r2209')
+    self.assertEqual(
+        len(self.response.build_target_metadata[0].fingerprints),
+        2)
+    self.assertEqual(
+        self.response.build_target_metadata[0].fingerprints,
+        fingerprints)
 
 
 class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):

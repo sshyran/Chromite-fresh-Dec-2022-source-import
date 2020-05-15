@@ -308,19 +308,20 @@ def WriteLsbRelease(sysroot, fields):
       'u:object_r:cros_conf_file:s0', path])
 
 
-def GetLatestImageLink(board, force_chroot=False):
+def GetLatestImageLink(board, force_chroot=False, pointer='latest'):
   """Get the path for the `latest` image symlink for the given board.
 
   Args:
     board (str): The name of the board.
     force_chroot (bool): Get the path as if we are inside the chroot, whether
       or not we actually are.
+    pointer (str): Symlink name for image dir.
 
   Returns:
     str - The `latest` image symlink path.
   """
   base = constants.CHROOT_SOURCE_ROOT if force_chroot else constants.SOURCE_ROOT
-  return os.path.join(base, 'src/build/images', board, 'latest')
+  return os.path.join(base, 'src/build/images', board, pointer)
 
 
 class ImageDoesNotExistError(Error):
