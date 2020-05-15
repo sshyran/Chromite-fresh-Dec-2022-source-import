@@ -27,21 +27,21 @@ class Class(type):
   """
   _FROZEN_ERR_MSG = 'Attribute values are frozen, cannot alter %s.'
 
-  def __new__(mcs, clsname, bases, scope):
+  def __new__(cls, clsname, bases, scope):
     # Create Freeze method that freezes current attributes.
     if 'Freeze' in scope:
       raise TypeError('Class %s has its own Freeze method, cannot use with'
                       ' the attrs_freezer.Class metaclass.' % clsname)
 
     # Make sure cls will have _FROZEN_ERR_MSG set.
-    scope.setdefault('_FROZEN_ERR_MSG', mcs._FROZEN_ERR_MSG)
+    scope.setdefault('_FROZEN_ERR_MSG', cls._FROZEN_ERR_MSG)
 
     # Create the class.
     # pylint: disable=bad-super-call
-    cls = super(Class, mcs).__new__(mcs, clsname, bases, scope)
+    newcls = super(Class, cls).__new__(cls, clsname, bases, scope)
 
     # Replace cls.__setattr__ with the one that honors freezing.
-    orig_setattr = cls.__setattr__
+    orig_setattr = newcls.__setattr__
 
     def SetAttr(obj, name, value):
       """If the object is frozen then abort."""
@@ -51,16 +51,16 @@ class Class(type):
       if isinstance(orig_setattr, types.MethodType):
         orig_setattr(obj, name, value)
       else:
-        super(cls, obj).__setattr__(name, value)
-    cls.__setattr__ = SetAttr
+        super(newcls, obj).__setattr__(name, value)
+    newcls.__setattr__ = SetAttr
 
-    # Add new cls.Freeze method.
+    # Add new newcls.Freeze method.
     def Freeze(obj):
       # pylint: disable=protected-access
       obj._frozen = True
-    cls.Freeze = Freeze
+    newcls.Freeze = Freeze
 
-    return cls
+    return newcls
 
 
 @six.add_metaclass(Class)
