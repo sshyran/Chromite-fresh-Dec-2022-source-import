@@ -61,7 +61,12 @@ def _get_osinfo():
 
 def _get_linux_osinfo():
   # will return something like ('Ubuntu', '14.04', 'trusty')
-  os_name, os_version, _ = platform.dist()
+  try:
+    # This is removed in Python 3.8+.
+    # pylint: disable=deprecated-method
+    os_name, os_version, _ = platform.dist()
+  except AttributeError:
+    os_name = os_version = ''
   return OSInfo(name=os_name, version=os_version)
 
 
