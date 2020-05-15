@@ -26,7 +26,7 @@ from chromite.lib import toolchain
 from chromite.utils import key_value_store
 
 # Needs to be after chromite imports.
-import lddtree
+import lddtree  # pylint: disable=wrong-import-order
 
 if cros_build_lib.IsInsideChroot():
   # Only import portage after we've checked that we're inside the chroot.

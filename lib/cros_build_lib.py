@@ -212,7 +212,7 @@ class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
 
   # The linter is confused by the getattr usage above.
   # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=super-on-old-class
+  # pylint: disable=bad-option-value,super-on-old-class
   def __init__(self, args=None, returncode=None, stdout=None, stderr=None):
     if sys.version_info.major < 3:
       self.args = args
@@ -253,7 +253,7 @@ class CommandResult(CompletedProcess):
 
   # The linter is confused by the getattr usage above.
   # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
-  # pylint: disable=super-on-old-class
+  # pylint: disable=bad-option-value,super-on-old-class
   def __init__(self, cmd=None, error=None, output=None, returncode=None,
                args=None, stdout=None, stderr=None):
     if args is None:
@@ -1265,7 +1265,7 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
 
     assert result.returncode == 1
     time.sleep(timeout * (try_count + 1))
-    logging.warning('CreateTarball: tar: source modification time changed ' +
+    logging.warning('CreateTarball: tar: source modification time changed '
                     '(see crbug.com/547055), retrying')
     logging.PrintBuildbotStepWarnings()
 
@@ -1274,7 +1274,7 @@ def GetInput(prompt):
   """Helper function to grab input from a user.   Makes testing easier."""
   # We have people use GetInput() so they don't have to use these bad builtins
   # themselves or deal with version skews.
-  # pylint: disable=bad-builtin,input-builtin,raw_input-builtin
+  # pylint: disable=bad-builtin,input-builtin,raw_input-builtin,undefined-variable
   if sys.version_info.major < 3:
     return raw_input(prompt)
   else:

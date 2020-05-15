@@ -335,6 +335,8 @@ class PipeLock(object):
   """
 
   def __init__(self):
+    # TODO(vapier): Simplify this when we're Python 3 only.
+    # pylint: disable=using-constant-test
     pipe2 = getattr(os, 'pipe2', None)
     if pipe2:
       cloexec = getattr(os, 'O_CLOEXEC', 0)

@@ -336,6 +336,7 @@ class Builder(object):
     finally:
       if print_report:
         results_lib.WriteCheckpoint(self._run.options.buildroot)
+        # pylint: disable=assignment-from-none
         completion_instance = self.GetCompletionInstance()
         self._RunStage(report_stages.ReportStage, completion_instance)
         build_identifier, _ = self._run.GetCIDBHandle()

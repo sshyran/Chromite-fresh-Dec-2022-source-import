@@ -1152,6 +1152,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
                 ('foo/bar-1.2.3', 'foo/bar-1.2.4'),
                 ('foo/bar-5a', 'foo/bar-5b')]
     for (cpv1, cpv2) in lessthan:
+      # pylint: disable=bad-option-value,arguments-out-of-order
       self.assertTrue(self._TestCmpCpv(cpv1, cpv2) < 0)
       self.assertTrue(self._TestCmpCpv(cpv2, cpv1) > 0)
 

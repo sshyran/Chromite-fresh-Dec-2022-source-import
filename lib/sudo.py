@@ -123,6 +123,8 @@ class SudoKeepAlive(cros_build_lib.MasterPidContextManager):
       # Thus suppress it (which bash then inherits).
       signal.signal(signal.SIGINT, signal.SIG_IGN)
 
+    # We don't use threads here.
+    # pylint: disable=bad-option-value,subprocess-popen-preexec-fn
     self._proc = subprocess.Popen(['bash', '-c', cmd], shell=False,
                                   close_fds=True, preexec_fn=ignore_sigint,
                                   stdin=subprocess.PIPE)

@@ -69,7 +69,7 @@ def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, blacklist=None):
           # Clear the cache
           exc_info = None
           return func(*args, **kwargs)
-        except exception_tuple:
+        except exception_tuple:  # pylint: disable=catching-non-exception
           raise
         except ExceptionToCheck as e:
           _Log('%s(%s)', e.__class__, e)

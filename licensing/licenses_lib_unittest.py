@@ -24,12 +24,12 @@ class LicenseLibTest(cros_test_lib.TempDirTestCase):
     """Sets up the filesystem for the tests."""
 
     # Licenses for testing:
-    #   key: Name of the license.
-    #     contents: The contents of the license file itself.
-    #     dir: Location of the file containing the license text on the FS.
-    #     board: The board argument to use when testing the license.
-    #     type: The license type (gentoo stock or custom).
-    #     [skip_test]: Skip the tests for that license.
+    #   key - Name of the license.
+    #     contents - The contents of the license file itself.
+    #     dir - Location of the file containing the license text on the FS.
+    #     board - The board argument to use when testing the license.
+    #     type - The license type (gentoo stock or custom).
+    #     [skip_test] - Skip the tests for that license.
 
     self.licenses = {
         'TPL': {

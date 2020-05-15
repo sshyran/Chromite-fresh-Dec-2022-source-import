@@ -1085,7 +1085,7 @@ def RunHWTestSuite(build,
           json_dump_result = _HWTestParseJSONDump(s)
         except ValueError as e:
           logging.error(
-              'Failed to parse HWTest JSON dump string, ' +
+              'Failed to parse HWTest JSON dump string, '
               'subsystem based partial submission will be skipped:  %s', e)
       else:
         for output in outputs:

@@ -99,7 +99,7 @@ class PayloadConfig(object):
     Returns:
       True if successful, raises otherwise.
     """
-    should_sign = True if self.keyset != '' else False
+    should_sign = self.keyset != ''
 
     with chroot_util.TempDirInChroot() as temp_dir:
       self.paygen = paygen_payload_lib.PaygenPayload(

@@ -157,6 +157,7 @@ def FindTarget(target):
   else:
     try:
       # Python 3 way.
+      # pylint: disable=deprecated-method,no-value-for-parameter
       from importlib.machinery import SourceFileLoader
       _loader = lambda *args: SourceFileLoader(*args).load_module()
     except ImportError:

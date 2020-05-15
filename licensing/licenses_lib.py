@@ -11,8 +11,8 @@ Documentation on this script is also available here:
 
 from __future__ import print_function
 
-import cgi
 import codecs
+import html  # pylint: disable=import-error
 import os
 import re
 
@@ -1175,8 +1175,8 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     env = {
         'name': pkg.name,
         'namerev': '%s-%s' % (pkg.name, pkg.version),
-        'url': cgi.escape(pkg.homepages[0]) if pkg.homepages else '',
-        'licenses_txt': cgi.escape('\n'.join(license_text)) or '',
+        'url': html.escape(pkg.homepages[0]) if pkg.homepages else '',
+        'licenses_txt': html.escape('\n'.join(license_text)) or '',
         'licenses_ptr': '\n'.join(license_pointers) or '',
     }
     return self.EvaluateTemplate(self.entry_template, env)
@@ -1261,8 +1261,8 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     for license_name in self.sorted_licenses:
       env = {
           'license_name': license_name,
-          'license': cgi.escape(self.ReadSharedLicense(license_name,
-                                                       board=self.board)),
+          'license': html.escape(self.ReadSharedLicense(license_name,
+                                                        board=self.board)),
           'license_type': self.FindLicenseType(license_name, board=self.board),
           'license_packages': ' '.join(self.LicensedPackages(license_name)),
       }

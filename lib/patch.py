@@ -1708,7 +1708,7 @@ class UploadedLocalPatch(GitRepoPatch):
                           remote, sha1=carbon_copy_sha1)
     self.original_branch = original_branch
     self.original_sha1 = ParseSHA1(original_sha1)
-    self._original_sha1_valid = False if self.original_sha1 is None else True
+    self._original_sha1_valid = self.original_sha1 is not None
     if self._original_sha1_valid and not self.id:
       self.id = AddPrefix(self, self.original_sha1)
 

@@ -250,7 +250,7 @@ class CIDBAPITest(CIDBIntegrationTest):
                       'build_config': 'master',
                       'waterfall': '',
                       'builder_name': 'builder name',
-                      'build_number': 1L,
+                      'build_number': 1,
                       'message_type': 'message_type',
                       'message_subtype': 'message_subtype',
                       'message_value': 'message_value',

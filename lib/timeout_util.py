@@ -17,7 +17,7 @@ import time
 from chromite.lib import cros_logging as logging
 
 
-class TimeoutError(Exception):
+class TimeoutError(Exception):  # pylint: disable=redefined-builtin
   """Raises when code within Timeout has been run too long."""
 
 

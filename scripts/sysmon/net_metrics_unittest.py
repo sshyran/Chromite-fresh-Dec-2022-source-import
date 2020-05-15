@@ -58,6 +58,7 @@ class TestNetMetrics(cros_test_lib.TestCase):
       getfqdn.return_value = 'foo.example.com'
       net_if_addrs.return_value = {
           'lo': [
+              # pylint: disable=not-callable
               snic(family=psutil.AF_LINK, address='11:22:33:44:55:66',
                    netmask=None, broadcast=None, ptp=None),
               snic(family=socket.AF_INET, address='10.1.1.1', netmask=None,

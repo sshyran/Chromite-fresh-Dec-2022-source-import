@@ -475,5 +475,3 @@ def main(argv):
     releasesCandidates = ProduceFilteredCandidates(
         ctx, 'gs://chromeos-releases/', releasesExcludes, 3)
     Examine(ctx, options.dry_run, expired_cutoff, releasesCandidates)
-
-  return

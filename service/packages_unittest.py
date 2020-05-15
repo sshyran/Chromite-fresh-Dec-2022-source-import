@@ -22,7 +22,6 @@ from chromite.api.gen.config.replication_config_pb2 import (
 )
 from chromite.cbuildbot import manifest_version
 from chromite.lib import build_target_lib
-from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
