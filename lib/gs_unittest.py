@@ -603,12 +603,12 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
                         local_src_file, tempuri, version=0)
 
       # Sanity check the content is unchanged.
-      self.assertEqual(ctx.Cat(tempuri), 'gen0')
+      self.assertEqual(ctx.Cat(tempuri, encoding='utf-8'), 'gen0')
 
       # Upload the file, but with the right generation.
-      osutils.WriteFile(local_src_file, 'gen-new')
+      osutils.WriteFile(local_src_file, b'gen-new', mode='wb')
       gen = ctx.Copy(local_src_file, tempuri, version=gen)
-      self.assertEqual(ctx.Cat(tempuri), 'gen-new')
+      self.assertEqual(ctx.Cat(tempuri), b'gen-new')
 
 
 class CopyIntoTest(CopyTest):
@@ -1467,7 +1467,8 @@ class CatTest(cros_test_lib.TempDirTestCase):
     filename = os.path.join(self.tempdir, 'myfile')
     content = 'foo'
     osutils.WriteFile(filename, content)
-    self.assertEqual(content, ctx.Cat(filename))
+    self.assertEqual(content, ctx.Cat(filename, encoding='utf-8'))
+    self.assertEqual(content.encode('utf-8'), ctx.Cat(filename))
 
   def testLocalMissingFile(self):
     """Tests catting a missing local file."""
@@ -1495,7 +1496,7 @@ class CatTest(cros_test_lib.TempDirTestCase):
 
     with gs.TemporaryURL('chromite.cat') as tempuri:
       ctx.Copy(filename, tempuri)
-      self.assertEqual(content, ctx.Cat(tempuri))
+      self.assertEqual(content, ctx.Cat(tempuri, encoding='utf-8'))
 
   @cros_test_lib.NetworkTest()
   def testNetworkMissingFile(self):
@@ -1511,8 +1512,8 @@ class CatTest(cros_test_lib.TempDirTestCase):
     ctx = gs.GSContext()
     with gs.TemporaryURL('chromite.cat') as url:
       # The default chunksize is 0x100000 (1MB).
-      first_chunk = 'a' * 0x100000
-      second_chunk = 'aaaaaaaaabbbbbbccc'
+      first_chunk = b'a' * 0x100000
+      second_chunk = b'aaaaaaaaabbbbbbccc'
       ctx.CreateWithContents(url, first_chunk + second_chunk)
 
       result = ctx.StreamingCat(url)
@@ -1538,7 +1539,8 @@ class DryRunTest(cros_test_lib.RunCommandTestCase):
 
   def testCat(self):
     """Test Cat in dry_run mode."""
-    self.assertEqual(self.ctx.Cat('gs://foo/bar'), '')
+    self.assertEqual(self.ctx.Cat('gs://foo/bar'), b'')
+    self.assertEqual(self.ctx.Cat('gs://foo/bar', encoding='utf-8'), '')
 
   def testChangeACL(self):
     """Test ChangeACL in dry_run mode."""

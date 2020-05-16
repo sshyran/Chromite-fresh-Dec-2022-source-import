@@ -609,18 +609,21 @@ class GSContext(object):
   def Cat(self, path, **kwargs):
     """Returns the contents of a GS object."""
     kwargs.setdefault('stdout', True)
-    kwargs.setdefault('encoding', None)
+    encoding = kwargs.setdefault('encoding', None)
+    errors = kwargs.setdefault('errors', None)
     if not PathIsGs(path):
       # gsutil doesn't support cat-ting a local path, so read it ourselves.
+      mode = 'rb' if encoding is None else 'r'
       try:
-        return osutils.ReadFile(path)
+        return osutils.ReadFile(path, mode=mode, encoding=encoding,
+                                errors=errors)
       except Exception as e:
         if getattr(e, 'errno', None) == errno.ENOENT:
           raise GSNoSuchKey('Cat Error: file %s does not exist' % path)
         else:
           raise GSContextException(str(e))
     elif self.dry_run:
-      return ''
+      return b'' if encoding is None else ''
     else:
       return self.DoCommand(['cat', path], **kwargs).output
 
