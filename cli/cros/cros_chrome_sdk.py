@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+import textwrap
 
 from chromite.cbuildbot import archive_lib
 from chromite.cli import command
@@ -991,15 +992,21 @@ class ChromeSDKCommand(command.CliCommand):
 
   def _UpdateGnArgsIfStale(self, out_dir, build_label, gn_args, board):
     """Runs 'gn gen' if gn args are stale or logs a warning."""
-    if not self.options.use_shell:
-      gn_args_file_path = os.path.join(
-          self.options.chrome_src, self._BUILD_ARGS_DIR, board + '.gni')
-      osutils.WriteFile(gn_args_file_path, gn_helpers.ToGNString(gn_args))
-      return
-
     build_dir = os.path.join(out_dir, build_label)
     gn_args_file_path = os.path.join(
         self.options.chrome_src, build_dir, 'args.gn')
+
+    if not self.options.use_shell:
+      shared_args_file_path = os.path.join(
+          self.options.chrome_src, self._BUILD_ARGS_DIR, board + '.gni')
+      osutils.WriteFile(shared_args_file_path, gn_helpers.ToGNString(gn_args))
+      if not os.path.exists(gn_args_file_path):
+        osutils.WriteFile(gn_args_file_path, textwrap.dedent("""\
+          import("//%s%s.gni")
+          # Place any additional args or overrides below:
+
+          """ % (self._BUILD_ARGS_DIR, board)), makedirs=True)
+      return
 
     if not self._StaleGnArgs(gn_args, gn_args_file_path):
       return

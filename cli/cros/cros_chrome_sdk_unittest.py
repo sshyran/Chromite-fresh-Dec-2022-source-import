@@ -287,6 +287,10 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     """Test a runthrough when multiple boards are specified via --boards."""
     self.SetupCommandMock(many_boards=True)
     self.cmd_mock.inst.Run()
+    for board in SDKFetcherMock.BOARDS:
+      board_arg_file = os.path.join(
+          self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
+      self.assertExists(board_arg_file)
 
   def testErrorCodePassthrough(self):
     """Test that error codes are passed through."""
