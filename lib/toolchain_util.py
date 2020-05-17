@@ -1868,8 +1868,8 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
                                       self.artifact_name)
 
   def _PrepareChromeDebugBinary(self):
-    """Unused: see _PrepareUnverifiedChromeBenchmarkPerfFile."""
-    return PrepareForBuildReturn.UNKNOWN
+    """See _PrepareUnverifiedChromeBenchmarkPerfFile."""
+    return PrepareForBuildReturn.POINTLESS
 
   def _PrepareUnverifiedKernelCwpAfdoFile(self):
     """Unused: CWP is from elsewhere."""
