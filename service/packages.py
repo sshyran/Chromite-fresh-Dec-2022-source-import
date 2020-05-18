@@ -829,6 +829,32 @@ def find_fingerprints(build_target):
   return fingerprints
 
 
+def get_all_firmware_versions(build_target):
+  """Extract firmware version for all models present.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+
+  Returns:
+    A dict of FirmwareVersions namedtuple instances by model.
+    Each element will be populated based on whether it was present in the
+    command output.
+  """
+  cros_build_lib.AssertInsideChroot()
+  result = {}
+  # Note that example output for _get_firmware_version_cmd_result is available
+  # in the packages_unittest.py for testing get_all_firmware_versions.
+  cmd_result = _get_firmware_version_cmd_result(build_target)
+
+  # There is a blank line between the version info for each model.
+  firmware_version_payloads = cmd_result.split('\n\n')
+  for firmware_version_payload in firmware_version_payloads:
+    if 'BIOS' in firmware_version_payload:
+      firmware_version = _find_firmware_versions(firmware_version_payload)
+      result[firmware_version.model] = firmware_version
+  return result
+
+
 FirmwareVersions = collections.namedtuple(
     'FirmwareVersions', ['model', 'main', 'main_rw', 'ec', 'ec_rw'])
 
