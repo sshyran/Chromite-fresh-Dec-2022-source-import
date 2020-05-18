@@ -11,6 +11,7 @@ import collections
 import errno
 import glob
 import itertools
+import json
 import multiprocessing
 import os
 import re
@@ -2228,22 +2229,33 @@ def ParseDieHookStatusFile(metrics_dir):
 
 def HasPrebuilt(atom, board=None, extra_env=None):
   """Check if the atom's best visible version has a prebuilt available."""
-  best = PortageqBestVisible(atom, board=board)
+  cmd = [
+      os.path.join(constants.CHROOT_SOURCE_ROOT, 'chromite', 'scripts',
+                   'has_prebuilt'),
+      atom,
+  ]
+  if board:
+    cmd += ['--build-target', board]
 
-  emerge = 'emerge-%s' % board if board else 'emerge'
-  # Emerge args: binpkg only, no deps, pretend, quiet. --binpkg-respect-use is
-  # disabled by default when you use -K, so turn it back on.
-  cmd = [emerge, '-gKOpq', '--binpkg-respect-use=y', '=%s' % best.cpf]
-  logging.debug('Checking %s for %s.', board or 'sdk', best.cpf)
-  result = cros_build_lib.run(
-      cmd,
-      print_cmd=True,
-      enter_chroot=True,
-      extra_env=extra_env,
-      check=False,
-      debug_level=logging.DEBUG)
+  with osutils.TempDir() as tempdir:
+    output_file = os.path.join(tempdir, 'has_prebuilt.json')
+    cmd += ['--output', output_file]
+    result = cros_build_lib.run(cmd, enter_chroot=True, extra_env=extra_env,
+                                check=False)
 
-  return not result.returncode
+    if result.returncode:
+      logging.warning('Error when checking for prebuilts: %s', result.stderr)
+      return False
+
+    raw = osutils.ReadFile(output_file)
+    logging.debug('Raw result: %s', raw)
+    prebuilts = json.loads(raw)
+
+  if atom not in prebuilts:
+    logging.warning('%s not found in has_prebuilt output.', atom)
+    return False
+
+  return prebuilts[atom]
 
 
 class PortageqError(Error):
