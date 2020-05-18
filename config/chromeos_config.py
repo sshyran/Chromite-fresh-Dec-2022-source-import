@@ -1174,6 +1174,9 @@ def AndroidTemplates(site_config):
       android_rev=constants.ANDROID_REV_LATEST,
       description='Preflight Android Uprev & Build (internal)',
       luci_builder=config_lib.LUCI_BUILDER_PFQ,
+      # Raise Android PFQ timeout to 8 hours to allow for longer runs to
+      # complete successfully.
+      build_timeout=8 * 60 * 60,
   )
 
   # Template for Android Pi.
