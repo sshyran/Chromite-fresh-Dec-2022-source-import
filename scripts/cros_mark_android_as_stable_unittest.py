@@ -256,7 +256,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
       for build_type in build_types:
         for runtime_data in runtime_datas:
           path = (f'{self.runtime_artifacts_bucket_url}/{runtime_data}_{arch}_'
-                  f'{build_type}_{android_version}')
+                  f'{build_type}_{android_version}.tar')
           self.gs_mock.AddCmdResult(['stat', '--', path],
                                     side_effect=_RaiseGSNoSuchKey)
 
@@ -600,18 +600,18 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
     # Override few as existing.
     path1 = (f'{self.runtime_artifacts_bucket_url}/ureadahead_pack_x86_64_'
-             f'user_{android_version}')
+             f'user_{android_version}.tar')
     self.gs_mock.AddCmdResult(['stat', '--', path1],
                               stdout=(self.STAT_OUTPUT) % path1)
     path2 = (f'{self.runtime_artifacts_bucket_url}/gms_core_cache_arm_'
-             f'userdebug_{android_version}')
+             f'userdebug_{android_version}.tar')
     self.gs_mock.AddCmdResult(['stat', '--', path2],
                               stdout=(self.STAT_OUTPUT) % path2)
 
     variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
         android_version, self.runtime_artifacts_bucket_url)
 
-    self.assertEqual(2, len(variables));
+    self.assertEqual(2, len(variables))
     self.assertIn('X86_64_USER_UREADAHEAD_PACK', variables)
     version_reference = '${PV}'
     expectation1 = (f'{self.runtime_artifacts_bucket_url}/'

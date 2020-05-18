@@ -448,7 +448,7 @@ def UpdateDataCollectorArtifacts(android_version,
     for arch in archs:
       for build_type in build_types:
         path = (f'{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_'
-                f'{android_version}')
+                f'{android_version}.tar')
         if gs_context.Exists(path):
           variables[(f'{arch}_{build_type}_{bucket}').upper()] = (
               f'{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_'
