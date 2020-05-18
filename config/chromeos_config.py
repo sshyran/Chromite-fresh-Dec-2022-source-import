@@ -2796,7 +2796,9 @@ def ApplyCustomOverrides(site_config):
     # for k, v in overrides.items():
     #   assert config[k] != v, ('Unnecessary override: %s: %s' %
     #                           (config_name, k))
-    site_config[config_name].apply(**overrides)
+    config = site_config.get(config_name)
+    if config:
+      config.apply(**overrides)
 
 
 def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
