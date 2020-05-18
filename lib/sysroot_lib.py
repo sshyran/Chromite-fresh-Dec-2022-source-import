@@ -69,7 +69,9 @@ export PKG_CONFIG_SYSROOT_DIR="{sysroot}"
 # Undo that logic.
 unset PKG_CONFIG_PATH
 
-exec pkg-config "$@"
+# Use full path to bypass automated wrapper checks that block `pkg-config`.
+# https://crbug.com/985180
+exec /usr/bin/pkg-config "$@"
 """
 
 _wrapper_dir = '/usr/local/bin'
