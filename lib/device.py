@@ -54,11 +54,12 @@ class Device(object):
 
   def InitRemote(self):
     """Initialize remote access."""
-    self.remote = remote_access.RemoteDevice(
+    self.remote = remote_access.ChromiumOSDevice(
         self.device,
         port=self.ssh_port,
         connect_settings=self._ConnectSettings(),
-        private_key=self.private_key)
+        private_key=self.private_key,
+        include_dev_paths=False)
 
     self.device_addr = 'ssh://%s' % self.device
     if self.ssh_port:
