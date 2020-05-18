@@ -443,11 +443,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                                   'googlestorage_acl_arm.txt'))
     self.assertEqual(acls['X86'], os.path.join(self.mock_android_dir,
                                                'googlestorage_acl_x86.txt'))
-    # Test that all MST targets have their ACLs set.
-    for t in cros_mark_android_as_stable.MakeBuildTargetDict(
-        constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
-        constants.ANDROID_MST_BUILD_BRANCH).keys():
-      self.assertIn(t, acls)
     # Test that all PI targets have their ACLS set.
     for t in cros_mark_android_as_stable.MakeBuildTargetDict(
         constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
@@ -468,23 +463,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         constants.ANDROID_VM_PACKAGE_KEYWORD,
         constants.ANDROID_VMMST_BUILD_BRANCH).keys():
       self.assertIn(t, acls)
-
-  def testMakeBuildTargetDictMST(self):
-    """Test generation of MST build target dictionary.
-
-    If the number of targets is correct and MST-specific targets are
-    present, then the dictionary is correct.
-    """
-    targets = cros_mark_android_as_stable.MakeBuildTargetDict(
-        'android-container-master-arc-dev',
-        constants.ANDROID_MST_BUILD_BRANCH)
-    # Test the number of targets.
-    self.assertEqual(len(targets),
-                     len(constants.ANDROID_MST_BUILD_TARGETS))
-    # Test that all MASTER-specific targets are in the dictionary.
-    for target in constants.ANDROID_MST_BUILD_TARGETS:
-      self.assertEqual(targets[target],
-                       constants.ANDROID_MST_BUILD_TARGETS[target])
 
   def testMakeBuildTargetDictPI(self):
     """Test generation of PI build target dictionary.

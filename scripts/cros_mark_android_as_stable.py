@@ -370,8 +370,6 @@ def MakeBuildTargetDict(package_name, build_branch):
   """
   if constants.ANDROID_CONTAINER_PACKAGE_KEYWORD in package_name:
     target_list = {
-        constants.ANDROID_MST_BUILD_BRANCH:
-        constants.ANDROID_MST_BUILD_TARGETS,
         constants.ANDROID_PI_BUILD_BRANCH:
         constants.ANDROID_PI_BUILD_TARGETS,
         constants.ANDROID_QT_BUILD_BRANCH:

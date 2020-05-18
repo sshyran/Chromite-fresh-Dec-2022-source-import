@@ -275,7 +275,6 @@ ANDROID_CONTAINER_PACKAGE_KEYWORD = 'android-container'
 ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
-ANDROID_MST_BUILD_BRANCH = 'git_master-arc-dev'
 # TODO(b/155088760): Remove once R80 PFQ is gone.
 ANDROID_NYC_BUILD_BRANCH = 'git_nyc-mr1-arc'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
@@ -284,20 +283,8 @@ ANDROID_RVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMPI_BUILD_BRANCH = 'git_pi-arcvm-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
-assert ANDROID_VMMST_BUILD_BRANCH == ANDROID_MST_BUILD_BRANCH
 assert ANDROID_VMRVC_BUILD_BRANCH == ANDROID_RVC_BUILD_BRANCH
 
-ANDROID_MST_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    'ARM': ('linux-cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64': ('linux-cheets_arm64-user', r'\.zip$'),
-    'X86': ('linux-cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-cheets_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('linux-cheets_arm-userdebug', r'\.zip$'),
-    'ARM64_USERDEBUG': ('linux-cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('linux-cheets_x86-userdebug', r'\.zip$'),
-    'X86_64_USERDEBUG': ('linux-cheets_x86_64-userdebug', r'\.zip$'),
-}
 ANDROID_PI_BUILD_TARGETS = {
     # Roll XkbToKcmConverter with system image. It's a host executable and
     # doesn't depend on the target as long as it's pi-arc branch. The converter
