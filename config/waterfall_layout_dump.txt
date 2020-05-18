@@ -14,6 +14,8 @@
     tidus-factory-auron-6772.B-factorybranch
   factory-coral-10122.B-buildspec
     coral-factory-coral-10122.B-factorybranch
+  factory-drallion-13080.B-buildspec
+    drallion-factory-drallion-13080.B-factorybranch
   factory-eve-9667.B-buildspec
     eve-factory-eve-9667.B-factorybranch
   factory-excelsior-12812.B-buildspec
@@ -737,9 +739,11 @@
   deltaur-payloads-tryjob
   deltaur-release-tryjob
   deltaur-unittest-stress
+  drallion-factory-drallion-13080.B-factorybranch-tryjob
   drallion-full-tryjob
   drallion-llvm-next-toolchain-tryjob
   drallion-llvm-toolchain-tryjob
+  drallion-master-factorybranch-tryjob
   drallion-payloads-tryjob
   drallion-release-tryjob
   drallion-unittest-stress
@@ -854,6 +858,8 @@
     tidus-factory-auron-6772.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
     coral-factory-coral-10122.B-factorybranch-tryjob
+  factory-drallion-13080.B-buildspec-tryjob
+    drallion-factory-drallion-13080.B-factorybranch-tryjob
   factory-eve-9667.B-buildspec-tryjob
     eve-factory-eve-9667.B-factorybranch-tryjob
   factory-excelsior-12812.B-buildspec-tryjob
@@ -1351,6 +1357,7 @@
   master-buildspec-tryjob
     atlas-master-factorybranch-tryjob
     coral-master-factorybranch-tryjob
+    drallion-master-factorybranch-tryjob
     eve-master-factorybranch-tryjob
     mistral-master-factorybranch-tryjob
     octopus-master-factorybranch-tryjob

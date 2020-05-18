@@ -8881,6 +8881,26 @@
             "chrome_internal"
         ]
     },
+    "drallion-factory-drallion-13080.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "drallion"
+        ],
+        "workspace_branch": "factory-drallion-13080.B"
+    },
+    "drallion-factory-drallion-13080.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "drallion"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-drallion-13080.B"
+    },
     "drallion-full": {
         "_template": "full",
         "boards": [
@@ -8947,6 +8967,26 @@
         "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try"
+    },
+    "drallion-master-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "drallion"
+        ],
+        "workspace_branch": "master"
+    },
+    "drallion-master-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "drallion"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "master"
     },
     "drallion-payloads": {
         "_template": "payloads",
@@ -11315,6 +11355,28 @@
             "coral-factory-coral-10122.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-coral-10122.B"
+    },
+    "factory-drallion-13080.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 168h interval",
+        "slave_configs": [
+            "drallion-factory-drallion-13080.B-factorybranch"
+        ],
+        "workspace_branch": "factory-drallion-13080.B"
+    },
+    "factory-drallion-13080.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "drallion-factory-drallion-13080.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-drallion-13080.B"
     },
     "factory-eve-9667.B-buildspec": {
         "_template": "buildspec",
@@ -22338,6 +22400,7 @@
         "slave_configs": [
             "atlas-master-factorybranch",
             "coral-master-factorybranch",
+            "drallion-master-factorybranch",
             "eve-master-factorybranch",
             "mistral-master-factorybranch",
             "octopus-master-factorybranch",
@@ -22356,6 +22419,7 @@
         "slave_configs": [
             "atlas-master-factorybranch-tryjob",
             "coral-master-factorybranch-tryjob",
+            "drallion-master-factorybranch-tryjob",
             "eve-master-factorybranch-tryjob",
             "mistral-master-factorybranch-tryjob",
             "octopus-master-factorybranch-tryjob",
