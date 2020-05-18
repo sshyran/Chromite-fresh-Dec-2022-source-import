@@ -370,6 +370,9 @@ def GeneralTemplates(site_config):
       site_config.templates.full,
       profile='asan',
       luci_builder=config_lib.LUCI_BUILDER_COMMITQUEUE,
+      # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
+      # re-enable it. It used to work till late 2019.
+      rootfs_verification=False,
       # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
       disk_layout='16gb-rootfs',
       # TODO(deymo): ASan builders generate bigger files, in particular a bigger

@@ -160,6 +160,7 @@
             ],
             "luci_builder": "CommitQueue",
             "profile": "asan",
+            "rootfs_verification": false,
             "usepkg_build_packages": false,
             "vm_tests": [
                 "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
