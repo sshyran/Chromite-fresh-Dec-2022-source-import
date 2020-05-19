@@ -405,6 +405,12 @@ class UprevOverlayManager(object):
     self._removed_ebuild_files = None
     self._overlay_ebuilds = None
 
+    # We cleaned up self referential ebuilds by this version, but don't enforce
+    # the check on older ones to avoid breaking factory/firmware branches.
+    root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
+    no_self_repos_version = manifest_version.VersionInfo('13099.0.0')
+    self._reject_self_repo = root_version >= no_self_repos_version
+
   @property
   def modified_ebuilds(self):
     if self._new_ebuild_files is not None:
@@ -475,7 +481,8 @@ class UprevOverlayManager(object):
                   ebuild.cros_workon_vars)
     try:
       result = ebuild.RevWorkOnEBuild(
-          os.path.join(constants.SOURCE_ROOT, 'src'), self.manifest)
+          os.path.join(constants.SOURCE_ROOT, 'src'), self.manifest,
+          reject_self_repo=self._reject_self_repo)
     except portage_util.InvalidUprevSourceError as e:
       logging.error('An error occurred while uprevving %s: %s',
                     ebuild.package, e)

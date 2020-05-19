@@ -118,7 +118,7 @@ class EbuildMock(object):
     self._new_package = new_package
 
   # pylint: disable=unused-argument
-  def RevWorkOnEBuild(self, srcroot, manifest):
+  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True):
     if self._new_package:
       return ('%s_new_package' % self.path,
               '%s_new_ebuild' % self.path,

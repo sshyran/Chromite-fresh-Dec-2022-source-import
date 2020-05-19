@@ -363,6 +363,12 @@ def _WorkOnCommit(options, overlays, overlay_tracking_branch,
     manifest: The manifest of the given source root.
     package_list: A list of packages passed from commandline to work on.
   """
+  # We cleaned up self referential ebuilds by this version, but don't enforce
+  # the check on older ones to avoid breaking factory/firmware branches.
+  root_version = manifest_version.VersionInfo.from_repo(options.buildroot)
+  no_self_repos_version = manifest_version.VersionInfo('13099.0.0')
+  reject_self_repo = root_version >= no_self_repos_version
+
   overlay_ebuilds = _GetOverlayToEbuildsMap(options, overlays, package_list)
 
   with parallel.Manager() as manager:
@@ -371,7 +377,8 @@ def _WorkOnCommit(options, overlays, overlay_tracking_branch,
     new_package_atoms = manager.list()
 
     inputs = [[options, manifest, overlays_per_project, overlay_tracking_branch,
-               overlay_ebuilds, revved_packages, new_package_atoms]
+               overlay_ebuilds, revved_packages, new_package_atoms,
+               reject_self_repo]
               for overlays_per_project in git_project_overlays.values()]
     parallel.RunTasksInProcessPool(_CommitOverlays, inputs)
 
@@ -411,7 +418,8 @@ def _GetOverlayToEbuildsMap(options, overlays, package_list):
 
 
 def _CommitOverlays(options, manifest, overlays, overlay_tracking_branch,
-                    overlay_ebuilds, revved_packages, new_package_atoms):
+                    overlay_ebuilds, revved_packages, new_package_atoms,
+                    reject_self_repo=True):
   """Commit uprevs for overlays in sequence.
 
   Args:
@@ -423,6 +431,8 @@ def _CommitOverlays(options, manifest, overlays, overlay_tracking_branch,
     overlay_ebuilds: A dict mapping overlays to their ebuilds.
     revved_packages: A shared list of revved packages.
     new_package_atoms: A shared list of new package atoms.
+    reject_self_repo: Whether to abort if the ebuild lives in the same git
+        repo as it is tracking for uprevs.
   """
   for overlay in overlays:
     if not os.path.isdir(overlay):
@@ -464,7 +474,8 @@ def _CommitOverlays(options, manifest, overlays, overlay_tracking_branch,
 
         inputs = [[overlay, ebuild, manifest, options, ebuild_paths_to_add,
                    ebuild_paths_to_remove, messages, revved_packages,
-                   new_package_atoms] for ebuild in ebuilds]
+                   new_package_atoms, reject_self_repo]
+                  for ebuild in ebuilds]
         parallel.RunTasksInProcessPool(_WorkOnEbuild, inputs)
 
         if ebuild_paths_to_add:
@@ -483,7 +494,7 @@ def _CommitOverlays(options, manifest, overlays, overlay_tracking_branch,
 
 def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
                   ebuild_paths_to_remove, messages, revved_packages,
-                  new_package_atoms):
+                  new_package_atoms, reject_self_repo=True):
   """Work on a single ebuild.
 
   Args:
@@ -496,13 +507,15 @@ def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
     messages: A share list of commit messages.
     revved_packages: A shared list of revved packages.
     new_package_atoms: A shared list of new package atoms.
+    reject_self_repo: Whether to abort if the ebuild lives in the same git
+        repo as it is tracking for uprevs.
   """
   if options.verbose:
     logging.info('Working on %s, info %s', ebuild.package,
                  ebuild.cros_workon_vars)
   try:
     result = ebuild.RevWorkOnEBuild(os.path.join(options.buildroot, 'src'),
-                                    manifest)
+                                    manifest, reject_self_repo=reject_self_repo)
     if result:
       new_package, ebuild_path_to_add, ebuild_path_to_remove = result
 
@@ -515,7 +528,7 @@ def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
 
       if options.list_revisions:
         info = ebuild.GetSourceInfo(os.path.join(options.buildroot, 'src'),
-                                    manifest)
+                                    manifest, reject_self_repo=reject_self_repo)
         srcdirs = [os.path.join(options.buildroot, 'src', srcdir)
                    for srcdir in ebuild.cros_workon_vars.localname]
         old_commit_ids = dict(

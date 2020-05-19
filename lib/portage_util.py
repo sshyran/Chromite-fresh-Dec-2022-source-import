@@ -803,12 +803,14 @@ class EBuild(object):
         subdir=subdirs,
         subtrees=subtrees)
 
-  def GetSourceInfo(self, srcroot, manifest):
+  def GetSourceInfo(self, srcroot, manifest, reject_self_repo=True):
     """Get source information for this ebuild.
 
     Args:
       srcroot: Full path to the "src" subdirectory in the source repository.
       manifest: git.ManifestCheckout object.
+      reject_self_repo: Whether to abort if the ebuild lives in the same git
+          repo as it is tracking for uprevs.
 
     Returns:
       EBuild.SourceInfo namedtuple.
@@ -880,9 +882,13 @@ class EBuild(object):
                                                    project))
 
       if subdir_path == ebuild_git_tree:
-        raise Error('%s: ebuilds may not live in & track the same source '
-                    'repository (%s); use the empty-project instead' %
-                    (self.ebuild_path, subdir_path))
+        msg = ('%s: ebuilds may not live in & track the same source '
+               'repository (%s); use the empty-project instead' %
+               (self.ebuild_path, subdir_path))
+        if reject_self_repo:
+          raise Error(msg)
+        else:
+          logging.warning('Ignoring error: %s', msg)
       subdir_paths.append(subdir_path)
       subtree_paths.extend(
           os.path.join(subdir_path, s) if s else subdir_path
@@ -1005,7 +1011,7 @@ class EBuild(object):
     else:
       return '"%s"' % unformatted_list[0]
 
-  def RevWorkOnEBuild(self, srcroot, manifest):
+  def RevWorkOnEBuild(self, srcroot, manifest, reject_self_repo=True):
     """Revs a workon ebuild given the git commit hash.
 
     By default this class overwrites a new ebuild given the normal
@@ -1015,6 +1021,8 @@ class EBuild(object):
       srcroot: full path to the 'src' subdirectory in the source
         repository.
       manifest: git.ManifestCheckout object.
+      reject_self_repo: Whether to abort if the ebuild lives in the same git
+          repo as it is tracking for uprevs.
 
     Returns:
       If the revved package is different than the old ebuild, return a tuple
@@ -1047,7 +1055,8 @@ class EBuild(object):
     new_stable_ebuild_path = '%s-%s.ebuild' % (
         self._ebuild_path_no_version, new_version)
 
-    info = self.GetSourceInfo(srcroot, manifest)
+    info = self.GetSourceInfo(
+        srcroot, manifest, reject_self_repo=reject_self_repo)
     srcdirs = info.srcdirs
     subtrees = info.subtrees
     commit_ids = [self.GetCommitId(x) for x in srcdirs]
