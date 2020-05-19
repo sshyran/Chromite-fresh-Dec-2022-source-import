@@ -246,6 +246,9 @@ class CrOSUpdateTrigger(object):
             staging_server=self.staging_server,
             transfer_class=self.transfer_class)
 
+        # Get nebraska request logfiles dir from auto_updater.
+        self._request_logs_dir = chromeos_AU.request_logs_dir
+
         # Allow fall back if the quick provision does not succeed.
         invoke_autoupdate = True
 
@@ -318,9 +321,6 @@ class CrOSUpdateTrigger(object):
 
           self._WriteAUStatus('post-check for CrOS auto-update')
           chromeos_AU.PostCheckCrOSUpdate()
-
-          # Get nebraska request logfiles dir from auto_updater.
-          self._request_logs_dir = chromeos_AU.request_logs_dir
 
           self._WriteAUStatus(cros_update_progress.FINISHED)
 
