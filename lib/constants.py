@@ -324,14 +324,11 @@ ANDROID_VMRVC_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
     'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
     'ARM64': ('linux-bertha_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86': ('linux-bertha_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-bertha_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('linux-bertha_arm-userdebug', r'\.zip$'),
+    'X86_64': ('linux-bertha_x86_64-user', r'(\.zip|/XkbToKcmConverter)$'),
     'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
                         r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_USERDEBUG': ('linux-bertha_x86-userdebug',
-                      r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug', r'\.zip$'),
+    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
+                         r'(\.zip|/XkbToKcmConverter)$'),
 }
 
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
