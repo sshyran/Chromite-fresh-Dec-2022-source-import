@@ -14579,34 +14579,6 @@
             "chrome_internal"
         ]
     },
-    "gandof-android-nyc-pre-flight-branch": {
-        "_template": "pre_flight_branch",
-        "android_import_branch": "git_nyc-mr1-arc",
-        "android_package": "android-container-nyc",
-        "android_rev": "latest_release",
-        "boards": [
-            "gandof"
-        ],
-        "display_label": "nyc_android_pfq",
-        "sync_chrome": true,
-        "vm_tests_override": null
-    },
-    "gandof-android-nyc-pre-flight-branch-tryjob": {
-        "_template": "pre_flight_branch",
-        "android_import_branch": "git_nyc-mr1-arc",
-        "android_package": "android-container-nyc",
-        "android_rev": "latest_release",
-        "boards": [
-            "gandof"
-        ],
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "sync_chrome": true,
-        "vm_tests_override": null
-    },
     "gandof-factory-auron-6459.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [

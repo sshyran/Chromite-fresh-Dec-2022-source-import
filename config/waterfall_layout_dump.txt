@@ -1072,7 +1072,6 @@
   gale-release-tryjob
   gale-test-ap-tryjob
   gale-unittest-stress
-  gandof-android-nyc-pre-flight-branch-tryjob
   gandof-factory-auron-6459.B-factorybranch-tryjob
   gandof-full-tryjob
   gandof-llvm-next-toolchain-tryjob

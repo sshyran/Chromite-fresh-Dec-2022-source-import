@@ -275,8 +275,6 @@ ANDROID_CONTAINER_PACKAGE_KEYWORD = 'android-container'
 ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
-# TODO(b/155088760): Remove once R80 PFQ is gone.
-ANDROID_NYC_BUILD_BRANCH = 'git_nyc-mr1-arc'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_QT_BUILD_BRANCH = 'git_qt-arc-dev'
 ANDROID_RVC_BUILD_BRANCH = 'git_rvc-arc-dev'
