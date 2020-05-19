@@ -276,7 +276,6 @@ ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
-ANDROID_QT_BUILD_BRANCH = 'git_qt-arc-dev'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMPI_BUILD_BRANCH = 'git_pi-arcvm-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
@@ -301,14 +300,6 @@ ANDROID_PI_BUILD_TARGETS = {
     'SDK_GOOGLE_X86_USERDEBUG': ('linux-sdk_cheets_x86-userdebug', r'\.zip$'),
     'SDK_GOOGLE_X86_64_USERDEBUG': ('linux-sdk_cheets_x86_64-userdebug',
                                     r'\.zip$'),
-}
-ANDROID_QT_BUILD_TARGETS = {
-    'ARM_USERDEBUG': ('linux-cheets_arm-userdebug',
-                      r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64_USERDEBUG': ('linux-cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('linux-cheets_x86-userdebug',
-                      r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64_USERDEBUG': ('linux-cheets_x86_64-userdebug', r'\.zip$'),
 }
 ANDROID_VMPI_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
@@ -889,7 +880,6 @@ VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
 VMPI_ANDROID_PFQ_MASTER = 'master-vmpi-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
-QT_ANDROID_PFQ_MASTER = 'master-qt-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
 
 
