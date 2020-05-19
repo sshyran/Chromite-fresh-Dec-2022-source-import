@@ -374,8 +374,6 @@ def MakeBuildTargetDict(package_name, build_branch):
         constants.ANDROID_PI_BUILD_TARGETS,
         constants.ANDROID_QT_BUILD_BRANCH:
         constants.ANDROID_QT_BUILD_TARGETS,
-        constants.ANDROID_RVC_BUILD_BRANCH:
-        constants.ANDROID_RVC_BUILD_TARGETS,
     }
   elif constants.ANDROID_VM_PACKAGE_KEYWORD in package_name:
     target_list = {

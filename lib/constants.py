@@ -277,11 +277,9 @@ ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_QT_BUILD_BRANCH = 'git_qt-arc-dev'
-ANDROID_RVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMPI_BUILD_BRANCH = 'git_pi-arcvm-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
-assert ANDROID_VMRVC_BUILD_BRANCH == ANDROID_RVC_BUILD_BRANCH
 
 ANDROID_PI_BUILD_TARGETS = {
     # Roll XkbToKcmConverter with system image. It's a host executable and
@@ -330,18 +328,6 @@ ANDROID_VMMST_BUILD_TARGETS = {
     'X86_USERDEBUG': ('linux-bertha_x86-userdebug',
                       r'(\.zip|/XkbToKcmConverter)$'),
     'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug', r'\.zip$'),
-}
-ANDROID_RVC_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM': ('linux-cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64': ('linux-cheets_arm64-user', r'\.zip$'),
-    'X86': ('linux-cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-cheets_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('linux-cheets_arm-userdebug', r'\.zip$'),
-    'ARM64_USERDEBUG': ('linux-cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('linux-cheets_x86-userdebug', r'\.zip$'),
-    'X86_64_USERDEBUG': ('linux-cheets_x86_64-userdebug', r'\.zip$'),
 }
 ANDROID_VMRVC_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
@@ -902,7 +888,6 @@ PFQ_MASTER = 'master-chromium-pfq'
 VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
 VMPI_ANDROID_PFQ_MASTER = 'master-vmpi-android-pfq'
-RVC_ANDROID_PFQ_MASTER = 'master-rvc-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
 QT_ANDROID_PFQ_MASTER = 'master-qt-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
