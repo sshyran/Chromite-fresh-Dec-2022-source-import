@@ -764,6 +764,53 @@
             "usepkg_build_packages": false,
             "vm_tests": []
         },
+        "release_basic": {
+            "_template": "release_basic",
+            "archive": false,
+            "binhost_base_url": "https://commondatastorage.googleapis.com/chromeos-dev-installer",
+            "binhost_bucket": "gs://chromeos-dev-installer",
+            "binhost_key": "RELEASE_BINHOST",
+            "build_timeout": 43200,
+            "build_type": "canary",
+            "chrome_sdk": true,
+            "chroot_use_image": false,
+            "cpe_export": false,
+            "debug_symbols": false,
+            "description": "Fail Fast Release Builds (canary) (internal)",
+            "dev_installer_prebuilts": true,
+            "display_label": "release",
+            "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Canaries",
+            "gs_path": null,
+            "hw_tests_override": [],
+            "images": [
+                "base",
+                "recovery",
+                "test",
+                "factory_install"
+            ],
+            "internal": true,
+            "luci_builder": "LegacyRelease",
+            "manifest": "official.xml",
+            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+            "manifest_version": true,
+            "notification_configs": [
+                "{\n    \"email\": \"navil+spam@chromium.org\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 1\n}"
+            ],
+            "overlays": "both",
+            "paygen_skip_testing": true,
+            "sign_types": [],
+            "unittests": false,
+            "upload_hw_test_artifacts": false,
+            "upload_standalone_images": false,
+            "upload_stripped_packages": [],
+            "useflags": [
+                "-cros-debug",
+                "chrome_internal"
+            ],
+            "usepkg_build_packages": false,
+            "vm_tests": [],
+            "vm_tests_override": []
+        },
         "test_ap": {
             "_template": "test_ap",
             "build_type": "binary",
@@ -22740,6 +22787,31 @@
             "zork-release"
         ],
         "sync_chrome": true
+    },
+    "master-release-basic": {
+        "_template": "release_basic",
+        "boards": [],
+        "chrome_sdk": false,
+        "master": true,
+        "schedule": "with 5m interval",
+        "slave_configs": [],
+        "sync_chrome": true
+    },
+    "master-release-basic-tryjob": {
+        "_template": "release_basic",
+        "boards": [],
+        "chrome_sdk": false,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "gs_path": "default",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "master": true,
+        "notification_configs": [],
+        "slave_configs": [],
+        "sync_chrome": true,
+        "vm_tests_override": null
     },
     "master-release-tryjob": {
         "_template": "release",

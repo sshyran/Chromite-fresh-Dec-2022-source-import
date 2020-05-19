@@ -522,6 +522,40 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
+      'release_basic',
+      site_config.templates.release_common,
+      luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
+      description='Fail Fast Release Builds (canary) (internal)',
+      notification_configs=[
+          config_lib.NotificationConfig(email='navil+spam@chromium.org')
+      ],
+      chromeos_official=False,
+      paygen=False,
+      suite_scheduling=False,
+      unittests=False,
+      hw_tests=[],
+      hw_tests_override=[],
+      hwqual=False,
+      image_test=False,
+      paygen_skip_testing=True,
+      signer_tests=False,
+      vm_tests=[],
+      vm_tests_override=[],
+      gs_path=None,
+      push_image=False,
+      sign_types=[],
+      upload_symbols=False,
+      upload_stripped_packages=[],
+      archive=False,
+      archive_build_debug=False,
+      upload_standalone_images=False,
+      upload_hw_test_artifacts=False,
+      cpe_export=False,
+      run_cpeexport=False,
+      run_build_configs_export=False,
+      debug_symbols=False)
+
+  site_config.AddTemplate(
       'release',
       site_config.templates.release_common,
       luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
@@ -2082,10 +2116,12 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   def _IsLakituConfig(config):
     return 'lakitu' in config['name']
 
-  def _CreateMasterConfig(name):
+  def _CreateMasterConfig(name,
+                          template=site_config.templates.release,
+                          schedule='  0 2,10,18 * * *'):
     return site_config.Add(
         name,
-        site_config.templates.release,
+        template,
         boards=[],
         master=True,
         slave_configs=[],
@@ -2093,11 +2129,16 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
         chrome_sdk=False,
         # Because PST is 8 hours from UTC, these times are the same in both. But
         # daylight savings time is NOT adjusted for
-        schedule='  0 2,10,18 * * *',
+        schedule=schedule,
     )
 
   ### Master release configs.
   master_config = _CreateMasterConfig('master-release')
+  # pylint: disable=unused-variable
+  simple_master_config = _CreateMasterConfig(
+      'master-release-basic',
+      template=site_config.templates.release_basic,
+      schedule='with 5m interval')
   # pylint: disable=unused-variable
   lakitu_master_config = _CreateMasterConfig('master-lakitu-release')
 

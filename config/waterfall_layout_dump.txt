@@ -387,6 +387,7 @@
     wizpig-release
     wooten-release
     zork-release
+  master-release-basic
 
 == toolchain ==
   master-toolchain
@@ -1383,6 +1384,7 @@
     grunt-pi-android-pfq-tryjob
     kevin-pi-android-pfq-tryjob
     reef-pi-android-pfq-tryjob
+  master-release-basic-tryjob
   master-release-tryjob
     amd64-generic-cheets-release-tryjob
     arkham-release-tryjob
