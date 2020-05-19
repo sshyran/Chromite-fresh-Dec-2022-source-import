@@ -2099,7 +2099,8 @@ def MarkChromeAsStable(buildroot,
       stdout=True,
       enter_chroot=True,
       chroot_args=chroot_args,
-      extra_env=extra_env).output.rstrip()
+      extra_env=extra_env,
+      encoding='utf-8').output.rstrip()
   chrome_atom = None
   if portage_atom_string:
     chrome_atom = portage_atom_string.splitlines()[-1].partition('=')[-1]
