@@ -49,7 +49,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
     self._device.WaitForBoot()
     # Verify that ssh command is called with all of the right configurations.
     self.assertCommandContains(
-        ['ssh', '-p', '22', 'root@190.0.2.130', '--', 'true'])
+        ['ssh', 'root@190.0.2.130', '--', 'true'])
 
   @mock.patch('chromite.lib.cros_build_lib.run',
               side_effect=remote_access.SSHConnectionError())

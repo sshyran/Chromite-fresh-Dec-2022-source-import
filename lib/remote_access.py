@@ -299,7 +299,7 @@ class RemoteAccess(object):
     """
     self.tempdir = tempdir
     self.remote_host = remote_host
-    self.port = port if port else DEFAULT_SSH_PORT
+    self.port = port
     self.username = username if username else self.DEFAULT_USERNAME
     self.debug_level = debug_level
     private_key_src = private_key if private_key else TEST_PRIVATE_KEY
@@ -323,9 +323,11 @@ class RemoteAccess(object):
     if connect_settings is None:
       connect_settings = CompileSSHConnectSettings()
 
-    cmd = (['ssh', '-p', str(self.port)] +
-           connect_settings +
-           ['-oIdentitiesOnly=yes', '-i', self.private_key])
+    cmd = ['ssh']
+    if self.port:
+      cmd += ['-p', str(self.port)]
+    cmd += connect_settings
+    cmd += ['-oIdentitiesOnly=yes', '-i', self.private_key]
     if not self.interactive:
       cmd.append('-n')
 
