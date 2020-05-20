@@ -322,6 +322,7 @@ class Router(object):
           chroot_output,
           config_handler.config_arg,
           chroot_config,
+          '--debug',
       ]
 
       try:

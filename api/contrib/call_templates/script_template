@@ -23,7 +23,8 @@ echo "Running ${ENDPOINT}"
 ../../../bin/build_api "${ENDPOINT}" \
   --input-json "${INPUT}" \
   --output-json "${OUTPUT}" --output-binary "${OUTPUT_BIN}" \
-  --config-json "${CONFIG}"
+  --config-json "${CONFIG}" \
+  --debug
 RESULT=$?
 
 echo "Completed ${ENDPOINT}"
