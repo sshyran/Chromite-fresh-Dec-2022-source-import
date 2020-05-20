@@ -91,13 +91,14 @@ class DutControl(object):
       self.run(cmd, verbose=verbose, dryrun=dryrun)
 
 
-def _build_ssh_cmds(futility, ip, path, tmp_file_name, fast, verbose):
+def _build_ssh_cmds(futility, ip, port, path, tmp_file_name, fast, verbose):
   """Helper function to build commands for flashing over ssh
 
   Args:
     futility (bool): if True then flash with futility, otherwise flash
       with flashrom.
     ip (string): ip address of dut to flash.
+    port (int): The port to ssh to.
     path (string): path to BIOS image to be flashed.
     tmp_file_name (string): name of tempfile with copy of testing_rsa
       keys.
@@ -113,11 +114,13 @@ def _build_ssh_cmds(futility, ip, path, tmp_file_name, fast, verbose):
       '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no',
       '-o', 'CheckHostIP=no'
   ]
+  ssh_port = ['-p', port] if port else []
+  scp_port = ['-P', port] if port else []
   tmp = '/tmp'
   hostname = 'root@%s' % ip
-  scp_cmd = (['scp', '-i', tmp_file_name] + ssh_parameters +
+  scp_cmd = (['scp', '-i', tmp_file_name] + scp_port + ssh_parameters +
              [path, '%s:%s' % (hostname, tmp)])
-  flash_cmd = ['ssh', hostname, '-i', tmp_file_name] + ssh_parameters
+  flash_cmd = ['ssh', hostname, '-i', tmp_file_name] + ssh_port + ssh_parameters
   if futility:
     flash_cmd += [
         'futility', 'update', '-p', 'host', '-i',
@@ -140,7 +143,7 @@ def _build_ssh_cmds(futility, ip, path, tmp_file_name, fast, verbose):
   return scp_cmd, flash_cmd
 
 
-def _ssh_flash(futility, path, verbose, ip, fast, dryrun):
+def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
   """This function flashes AP firmware over ssh.
 
   Tries to ssh to ip address once. If the ssh connection is successful the
@@ -154,6 +157,7 @@ def _ssh_flash(futility, path, verbose, ip, fast, dryrun):
     verbose (bool): if True to set -v flag in flash command and
       print other debug info, if False do nothing.
     ip (str): ip address of dut to flash.
+    port (int): The port to ssh to.
     fast (bool): if True pass through --fast (-n for flashrom) to
       flashing command.
     dryrun (bool): Whether to actually execute the commands or just print
@@ -167,8 +171,8 @@ def _ssh_flash(futility, path, verbose, ip, fast, dryrun):
   tmpfile = tempfile.NamedTemporaryFile()
   shutil.copy(id_filename, tmpfile.name)
 
-  scp_cmd, flash_cmd = _build_ssh_cmds(futility, ip, path, tmpfile.name, fast,
-                                       verbose)
+  scp_cmd, flash_cmd = _build_ssh_cmds(futility, ip, port, path, tmpfile.name,
+                                       fast, verbose)
   try:
     cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
   except cros_build_lib.CalledProcessError:
@@ -255,8 +259,8 @@ def deploy(build_target,
   if device:
     port = device.port
     if device.scheme == commandline.DEVICE_SCHEME_SSH:
-      hostname = device.hostname
-      ip = '%s:%s' % (hostname, port) if port else hostname
+      ip = device.hostname
+      port = port or device.port
   else:
     ip = os.getenv('IP')
 
@@ -270,7 +274,7 @@ def deploy(build_target,
         'try again.' % build_target.name)
 
   if ip:
-    _deploy_ssh(image, module, flashrom, fast, verbose, ip, dryrun)
+    _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun)
   else:
     _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun)
 
@@ -320,7 +324,7 @@ def _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun):
                   'is correct and servod is running in the background.')
 
 
-def _deploy_ssh(image, module, flashrom, fast, verbose, ip, dryrun):
+def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun):
   """Deploy to a servo connection.
 
   Args:
@@ -330,6 +334,7 @@ def _deploy_ssh(image, module, flashrom, fast, verbose, ip, dryrun):
     fast (bool): Whether to do a fast (no verification) flash.
     verbose (bool): Whether to use verbose output for flash commands.
     ip (str): The DUT ip address.
+    port (int): The port to ssh to.
     dryrun (bool): Whether to execute the deployment or just print the
       commands that would have been executed.
   """
@@ -340,7 +345,7 @@ def _deploy_ssh(image, module, flashrom, fast, verbose, ip, dryrun):
     logging.warning('Flashing with flashrom over ssh on this device fails '
                     'consistently, flashing with futility instead.')
     flashrom = False
-  if _ssh_flash(not flashrom, image, verbose, ip, fast, dryrun):
+  if _ssh_flash(not flashrom, image, verbose, ip, port, fast, dryrun):
     logging.notice('ssh flash successful. Exiting flash_ap')
   else:
     raise DeployFailed('ssh failed, try using a servo connection instead.')
