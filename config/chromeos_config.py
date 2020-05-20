@@ -3063,8 +3063,8 @@ def BranchScheduleConfig():
       # Add non release branch schedules here, if needed.
       # <branch>, <build_config>, <display_label>, <schedule>, <triggers>
 
-      # NOTE: R69, R73 & R77 are Long Term Support (LTS) milestones for lakitu
-      # and they'd like to keep them a little longer. Please let
+      # NOTE: R69, R73, R77 and R81 are Long Term Support (LTS) milestones for
+      # lakitu and they'd like to keep them a little longer. Please let
       # lakitu-dev@google.com know before deleting this.
       ('release-R69-10895.B', 'master-lakitu-release',
        config_lib.DISPLAY_LABEL_RELEASE, '0 4 * * *', None),
@@ -3072,6 +3072,8 @@ def BranchScheduleConfig():
        config_lib.DISPLAY_LABEL_RELEASE, '0 8 * * *', None),
       ('release-R77-12371.B', 'master-lakitu-release',
        config_lib.DISPLAY_LABEL_RELEASE, '0 12 * * *', None),
+      ('release-R81-12871.B', 'master-lakitu-release',
+       config_lib.DISPLAY_LABEL_RELEASE, '0 16 * * *', None),
   ]
 
   # The three active release branches.
