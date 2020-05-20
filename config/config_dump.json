@@ -20235,7 +20235,12 @@
         "chrome_sdk": false,
         "master": true,
         "schedule": "  0 2,10,18 * * *",
-        "slave_configs": [],
+        "slave_configs": [
+            "lakitu-gpu-release",
+            "lakitu-nc-release",
+            "lakitu-release",
+            "lakitu-st-release"
+        ],
         "sync_chrome": true
     },
     "master-lakitu-release-tryjob": {
@@ -20259,7 +20264,12 @@
         "master": true,
         "paygen": false,
         "push_image": false,
-        "slave_configs": [],
+        "slave_configs": [
+            "lakitu-gpu-release-tryjob",
+            "lakitu-nc-release-tryjob",
+            "lakitu-release-tryjob",
+            "lakitu-st-release-tryjob"
+        ],
         "suite_scheduling": false,
         "sync_chrome": true,
         "vm_tests_override": null
@@ -20467,10 +20477,6 @@
             "kip-release",
             "kukui-release",
             "kumo-release",
-            "lakitu-gpu-release",
-            "lakitu-nc-release",
-            "lakitu-release",
-            "lakitu-st-release",
             "lars-release",
             "lulu-release",
             "mistral-release",
@@ -20591,10 +20597,6 @@
             "kip-release-tryjob",
             "kukui-release-tryjob",
             "kumo-release-tryjob",
-            "lakitu-gpu-release-tryjob",
-            "lakitu-nc-release-tryjob",
-            "lakitu-release-tryjob",
-            "lakitu-st-release-tryjob",
             "lars-release-tryjob",
             "lulu-release-tryjob",
             "mistral-release-tryjob",
