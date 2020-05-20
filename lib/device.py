@@ -33,6 +33,8 @@ class DeviceError(Exception):
 class Device(object):
   """Class for managing a test device."""
 
+  SSH_CONNECT_TIMEOUT = 30
+
   def __init__(self, opts):
     """Initialize Device.
 
@@ -52,12 +54,12 @@ class Device(object):
     self.log_level = getattr(opts, 'log_level', None)
     self.InitRemote()
 
-  def InitRemote(self):
+  def InitRemote(self, connect_timeout=SSH_CONNECT_TIMEOUT):
     """Initialize remote access."""
     self.remote = remote_access.ChromiumOSDevice(
         self.device,
         port=self.ssh_port,
-        connect_settings=self._ConnectSettings(),
+        connect_settings=self._ConnectSettings(connect_timeout=connect_timeout),
         private_key=self.private_key,
         include_dev_paths=False)
 
@@ -103,13 +105,20 @@ class Device(object):
     return self.remote.run(cmd, dryrun=self.dryrun,
                            debug_level=logging.INFO, **kwargs)
 
-  def _ConnectSettings(self):
+  def _ConnectSettings(self, connect_timeout):
     """Increase ServerAliveCountMax and ServerAliveInterval.
 
     Wait 2 min before dropping the SSH connection.
+
+    Args:
+      connect_timeout: SSH ConnectTimeout setting.
+
+    Returns:
+      List of arguments to pass to SSH.
     """
     return remote_access.CompileSSHConnectSettings(
-        ServerAliveInterval=15, ServerAliveCountMax=8)
+        ConnectTimeout=connect_timeout, ServerAliveInterval=15,
+        ServerAliveCountMax=8)
 
   @staticmethod
   def Create(opts):

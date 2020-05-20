@@ -146,6 +146,7 @@ class VM(device.Device):
   """Class for managing a VM."""
 
   SSH_PORT = 9222
+  SSH_NON_KVM_CONNECT_TIMEOUT = 120
   IMAGE_FORMAT = 'raw'
   # kvm_* should match kvm_intel, kvm_amd, etc.
   NESTED_KVM_GLOB = '/sys/module/kvm_*/parameters/nested'
@@ -207,7 +208,10 @@ class VM(device.Device):
     self.copy_image_on_shutdown = False
     self.image_copy_dir = None
 
-    self.InitRemote()
+    # Wait 2 min for non-KVM.
+    connect_timeout = (VM.SSH_CONNECT_TIMEOUT if self.enable_kvm else
+                       VM.SSH_NON_KVM_CONNECT_TIMEOUT)
+    self.InitRemote(connect_timeout=connect_timeout)
 
   def _CreateVMDir(self):
     """Safely create vm_dir."""
