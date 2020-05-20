@@ -311,7 +311,7 @@ class GSContext(object):
 
   # Error messages that indicate an invalid BOTO config.
   AUTHORIZATION_ERRORS = ('no configured', 'none configured',
-                          'detail=Authorization')
+                          'detail=Authorization', '401 Anonymous caller')
 
   DEFAULT_BOTO_FILE = os.path.expanduser('~/.boto')
   DEFAULT_GSUTIL_TRACKER_DIR = os.path.expanduser('~/.gsutil/tracker-files')
