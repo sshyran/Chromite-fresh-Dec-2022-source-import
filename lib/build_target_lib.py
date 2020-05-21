@@ -59,6 +59,10 @@ class BuildTarget(object):
   def name(self):
     return self._name
 
+  def full_path(self, *args):
+    """Turn a sysroot-relative path into an absolute path."""
+    return os.path.join(self.root, *[part.lstrip(os.sep) for part in args])
+
   def get_command(self, base_command):
     """Get the build target's variant of the given base command.
 

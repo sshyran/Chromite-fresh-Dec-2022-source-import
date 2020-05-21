@@ -982,3 +982,54 @@ def determine_kernel_version(build_target):
       logging.info('Found active kernel version: %s', kernel_version)
       return kernel_version
   return None
+
+
+def get_models(build_target, log_output=True):
+  """Obtain a list of models supported by a unified board.
+
+  This ignored whitelabel models since GoldenEye has no specific support for
+  these at present.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+    log_output: Whether to log the output of the cros_config_host invocation.
+
+  Returns:
+    A list of models supported by this board, if it is a unified build; None,
+    if it is not a unified build.
+  """
+  return _run_cros_config_host(build_target, ['list-models'],
+                               log_output=log_output)
+
+
+def _run_cros_config_host(build_target, args, log_output=True):
+  """Run the cros_config_host tool.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+    args: List of arguments to pass.
+    log_output: Whether to log the output of the cros_config_host.
+
+  Returns:
+    Output of the tool
+  """
+  cros_build_lib.AssertInsideChroot()
+  tool = '/usr/bin/cros_config_host'
+  if not os.path.isfile(tool):
+    return None
+
+  config_fname = build_target.full_path(
+      'usr/share/chromeos-config/yaml/config.yaml')
+
+  result = cros_build_lib.run(
+      [tool, '-c', config_fname] + args,
+      capture_output=True,
+      encoding='utf-8',
+      log_output=log_output,
+      check=False)
+  if result.returncode:
+    # Show the output for debugging purposes.
+    if 'No such file or directory' not in result.error:
+      logging.error('cros_config_host failed: %s\n', result.error)
+    return None
+  return result.output.strip().splitlines()

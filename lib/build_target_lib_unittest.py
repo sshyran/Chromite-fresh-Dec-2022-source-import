@@ -51,3 +51,16 @@ class BuildTargetTest(cros_test_lib.TempDirTestCase):
     """Test the default sysroot path."""
     target = BuildTarget('board')
     self.assertEqual('/build/board', target.root)
+
+  def testFullPath(self):
+    """Test full_path functionality."""
+    build_target = BuildTarget('board')
+    result = build_target.full_path('some/path')
+    self.assertEqual(result, '/build/board/some/path')
+
+  def testFullPathWithExtraArgs(self):
+    """Test full_path functionality with extra args passed."""
+    build_target = BuildTarget('board')
+    path1 = 'some/path'
+    result = build_target.full_path(path1, '/abc', 'def', '/g/h/i')
+    self.assertEqual(result, '/build/board/some/path/abc/def/g/h/i')

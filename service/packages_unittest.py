@@ -947,3 +947,23 @@ def test_uprev_chrome_all_files_already_exist(old_version, new_version,
 
   modified_file_count = sum(len(m.files) for m in res.modified)
   assert modified_file_count == expected_count
+
+
+@pytest.mark.usefixtures('testcase_monkeypatch')
+class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
+  """Tests for get_models."""
+
+  def setUp(self):
+    self.board = 'test-board'
+    self.rc.SetDefaultCmdResult(output='pyro\nreef\nsnappy\n')
+    self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
+    build_bin = os.path.join(self.tempdir, constants.DEFAULT_CHROOT_DIR,
+                             'usr', 'bin')
+    osutils.Touch(os.path.join(build_bin, 'cros_config_host'), makedirs=True)
+
+
+  def testGetModels(self):
+    """Test get_models."""
+    build_target = build_target_lib.BuildTarget(self.board)
+    result = packages.get_models(build_target)
+    self.assertEqual(result, ['pyro', 'reef', 'snappy'])
