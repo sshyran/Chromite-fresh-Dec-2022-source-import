@@ -121,6 +121,7 @@ class BlacklistTest(image_test_lib.ImageTestCase):
         r'.*/etc/services',
         # Python reads this file at runtime to look up install features.
         r'.*/usr/include/python[\d\.]*/pyconfig.h$',
+        r'.*/usr/lib/node_modules/.*',
         r'.*/usr/share/dev-install/portage',
         r'.*/opt/pita/qml',
     ]]
