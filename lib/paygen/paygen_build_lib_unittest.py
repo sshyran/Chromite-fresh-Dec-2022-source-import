@@ -1293,10 +1293,8 @@ payload_type = 'OMAHA'
 # found in the LICENSE file.
 
 import logging
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.client.cros import constants
-from autotest_lib.server import host_attributes
+from autotest_lib.client.common_lib import error
+from autotest_lib.client.common_lib import utils
 
 AUTHOR = "dhaddock@, ahassani@"
 NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha"
@@ -1323,10 +1321,8 @@ payload_type = 'N2N'
 # found in the LICENSE file.
 
 import logging
-from autotest_lib.client.bin import sysinfo
-from autotest_lib.client.common_lib import error, utils
-from autotest_lib.client.cros import constants
-from autotest_lib.server import host_attributes
+from autotest_lib.client.common_lib import error
+from autotest_lib.client.common_lib import utils
 
 AUTHOR = "dhaddock@, ahassani@"
 NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n"
