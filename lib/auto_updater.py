@@ -37,6 +37,8 @@ import subprocess
 import tempfile
 import time
 
+import six
+
 from chromite.cli import command
 from chromite.lib import auto_update_util
 from chromite.lib import auto_updater_transfer
@@ -917,7 +919,9 @@ class ChromiumOSUpdater(BaseUpdater):
         remote_access.SSHConnectionError,
         MAX_RETRY,
         self.device.run,
-        cmd, delay_sec=DELAY_SEC_FOR_RETRY, **kwargs)
+        cmd, delay_sec=DELAY_SEC_FOR_RETRY,
+        shell=isinstance(cmd, six.string_types),
+        **kwargs)
 
   # TODO(crbug.com/872441): cros_autoupdate in platform/dev-utils package still
   # calls this function, but in fact it needs to call the

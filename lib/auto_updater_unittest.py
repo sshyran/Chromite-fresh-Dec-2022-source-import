@@ -865,3 +865,20 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
         CrOS_AU.RunUpdate()
       except auto_updater.AutoUpdateVerifyError:
         self.fail('RunUpdate raise AutoUpdateVerifyError.')
+
+
+class RetryCommand(cros_test_lib.RunCommandTestCase):
+  """Base class for _RetryCommand tests."""
+
+  def testRetryCommand(self):
+    """Ensures that _RetryCommand can take both string and list args for cmd."""
+    with remote_access.ChromiumOSDeviceHandler(
+        remote_access.TEST_IP) as device:
+      CrOS_AU = auto_updater.ChromiumOSUpdater(
+          device, None, None, reboot=False,
+          transfer_class=auto_updater_transfer.LocalTransfer)
+      # pylint: disable=protected-access
+      CrOS_AU._RetryCommand(['some', 'list', 'command'])
+      self.assertCommandContains(['some', 'list', 'command'])
+      CrOS_AU._RetryCommand('some string command')
+      self.assertCommandContains('some string command')
