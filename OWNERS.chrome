@@ -6,3 +6,6 @@
 achuith@chromium.org
 bpastene@chromium.org
 stevenjb@chromium.org
+
+# OS: ChromeOS
+# COMPONENT: Infra>Client>Chrome
