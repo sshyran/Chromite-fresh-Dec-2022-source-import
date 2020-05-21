@@ -1,7 +1,4 @@
-include OWNERS.build
-include OWNERS.ci
-
-# Helping with Python 3 migration of chromite.
-jrosenth@chromium.org
+include /OWNERS.build
+include /OWNERS.ci
 
 # COMPONENT: Infra>ChromeOS>Build
