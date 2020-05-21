@@ -32,7 +32,6 @@ assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _REGULAR_TO = ('--to', 'monkey')
-_TARGET_BOARD = 'eve'
 _GS_PATH = 'gs://foon'
 
 
@@ -43,27 +42,27 @@ def _ParseCommandLine(argv):
 class InterfaceTest(cros_test_lib.OutputTestCase):
   """Tests the commandline interface of the script."""
 
+  BOARD = 'eve'
+
   def testGsLocalPathUnSpecified(self):
     """Test no chrome path specified."""
     with self.OutputCapturer():
-      self.assertRaises2(SystemExit, _ParseCommandLine,
-                         list(_REGULAR_TO) + ['--board', _TARGET_BOARD],
+      self.assertRaises2(SystemExit, _ParseCommandLine, list(_REGULAR_TO),
                          check_attrs={'code': 2})
 
   def testGsPathSpecified(self):
     """Test case of GS path specified."""
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH]
     _ParseCommandLine(argv)
 
   def testLocalPathSpecified(self):
     """Test case of local path specified."""
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--local-pkg-path',
-                                '/path/to/chrome']
+    argv = list(_REGULAR_TO) + ['--local-pkg-path', '/path/to/chrome']
     _ParseCommandLine(argv)
 
   def testNoTarget(self):
     """Test no target specified."""
-    argv = ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
+    argv = ['--gs-path', _GS_PATH]
     self.assertParseError(argv)
 
   def assertParseError(self, argv):
@@ -71,33 +70,44 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
       self.assertRaises2(SystemExit, _ParseCommandLine, argv,
                          check_attrs={'code': 2})
 
+  def testNoBoard(self):
+    """Test cases where --board is not specified."""
+    argv = ['--staging-only', '--build-dir=/path/to/nowhere']
+    self.assertParseError(argv)
+
+    # Don't need --board if no stripping is necessary.
+    argv_nostrip = argv + ['--nostrip']
+    _ParseCommandLine(argv_nostrip)
+
+    # Don't need --board if strip binary is provided.
+    argv_strip_bin = argv + ['--strip-bin', 'strip.bin']
+    _ParseCommandLine(argv_strip_bin)
+
   def testMountOptionSetsTargetDir(self):
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH,
-                                '--mount']
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH, '--mount']
     options = _ParseCommandLine(argv)
     self.assertIsNot(options.target_dir, None)
 
   def testMountOptionSetsMountDir(self):
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH,
-                                '--mount']
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH, '--mount']
     options = _ParseCommandLine(argv)
     self.assertIsNot(options.mount_dir, None)
 
   def testMountOptionDoesNotOverrideTargetDir(self):
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH,
-                                '--mount', '--target-dir', '/foo/bar/cow']
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH, '--mount',
+                                '--target-dir', '/foo/bar/cow']
     options = _ParseCommandLine(argv)
     self.assertEqual(options.target_dir, '/foo/bar/cow')
 
   def testMountOptionDoesNotOverrideMountDir(self):
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH,
-                                '--mount', '--mount-dir', '/foo/bar/cow']
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH, '--mount',
+                                '--mount-dir', '/foo/bar/cow']
     options = _ParseCommandLine(argv)
     self.assertEqual(options.mount_dir, '/foo/bar/cow')
 
   def testSshIdentityOptionSetsOption(self):
-    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD,
-                                '--private-key', '/foo/bar/key',
+    argv = list(_REGULAR_TO) + ['--private-key', '/foo/bar/key',
+                                '--board', 'cedar',
                                 '--build-dir', '/path/to/nowhere']
     options = _ParseCommandLine(argv)
     self.assertEqual(options.private_key, '/foo/bar/key')
@@ -149,35 +159,11 @@ class DeployTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     self.deploy_mock = self.StartPatcher(DeployChromeMock())
-    self.deploy = self._GetDeployChrome(list(_REGULAR_TO) +
-                                        ['--board', _TARGET_BOARD, '--gs-path',
-                                         _GS_PATH, '--force', '--mount'])
+    self.deploy = self._GetDeployChrome(
+        list(_REGULAR_TO) + ['--gs-path', _GS_PATH, '--force', '--mount'])
     self.remote_reboot_mock = \
       self.PatchObject(remote_access.RemoteAccess, 'RemoteReboot',
                        return_value=True)
-
-
-class TestCheckIfBoardMatches(DeployTest):
-  """Testing checking whether the DUT board matches the target board."""
-
-  def testMatchedBoard(self):
-    """Test the case where the DUT board matches the target board."""
-    self.PatchObject(remote_access.ChromiumOSDevice, 'board', _TARGET_BOARD)
-    self.assertTrue(self.deploy.options.force)
-    self.assertTrue(self.deploy._CheckBoard())
-    self.deploy.options.force = False
-    self.assertTrue(self.deploy._CheckBoard())
-
-  def testMismatchedBoard(self):
-    """Test the case where the DUT board does not match the target board."""
-    self.PatchObject(remote_access.ChromiumOSDevice, 'board', 'cedar')
-    self.assertTrue(self.deploy.options.force)
-    self.assertTrue(self.deploy._CheckBoard())
-    self.deploy.options.force = False
-    for response in (False, True):
-      self.PatchObject(cros_build_lib, 'BooleanPrompt', return_value=response)
-      self.assertEqual(response, self.deploy._CheckBoard())
-
 
 class TestDisableRootfsVerification(DeployTest):
   """Testing disabling of rootfs verification and RO mode."""
@@ -213,7 +199,7 @@ class TestMount(DeployTest):
   def testMountError(self):
     """Test that mount failure doesn't raise an exception by default."""
     self.assertFalse(self.deploy._root_dir_is_still_readonly.is_set())
-    self.PatchObject(remote_access.ChromiumOSDevice, 'IsDirWritable',
+    self.PatchObject(remote_access.RemoteDevice, 'IsDirWritable',
                      return_value=False, autospec=True)
     self.deploy._MountRootfsAsWritable()
     self.assertTrue(self.deploy._root_dir_is_still_readonly.is_set())
@@ -227,7 +213,7 @@ class TestMount(DeployTest):
   def testMountTempDir(self):
     """Test that mount succeeds if target dir is writable."""
     self.assertFalse(self.deploy._root_dir_is_still_readonly.is_set())
-    self.PatchObject(remote_access.ChromiumOSDevice, 'IsDirWritable',
+    self.PatchObject(remote_access.RemoteDevice, 'IsDirWritable',
                      return_value=True, autospec=True)
     self.deploy._MountRootfsAsWritable()
     self.assertFalse(self.deploy._root_dir_is_still_readonly.is_set())
@@ -290,9 +276,9 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     self.staging_dir = os.path.join(self.tempdir, 'staging')
     self.build_dir = os.path.join(self.tempdir, 'build_dir')
-    self.common_flags = ['--board', _TARGET_BOARD,
-                         '--build-dir', self.build_dir, '--staging-only',
-                         '--cache-dir', self.tempdir]
+    self.common_flags = ['--build-dir', self.build_dir,
+                         '--board=eve', '--staging-only', '--cache-dir',
+                         self.tempdir]
     self.sdk_mock = self.StartPatcher(cros_chrome_sdk_unittest.SDKFetcherMock())
     self.PatchObject(
         osutils, 'SourceEnvironment', autospec=True,
@@ -334,9 +320,9 @@ class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):
     self.build_dir = os.path.join(self.tempdir, 'build_dir')
     self.deploy_mock = self.StartPatcher(DeployChromeMock())
     self.deploy = self._GetDeployChrome(
-        list(_REGULAR_TO) + ['--board', _TARGET_BOARD,
-                             '--build-dir', self.build_dir, '--staging-only',
-                             '--cache-dir', self.tempdir, '--sloppy'])
+        list(_REGULAR_TO) + ['--build-dir', self.build_dir,
+                             '--board=eve', '--staging-only', '--cache-dir',
+                             self.tempdir, '--sloppy'])
 
   def getCopyPath(self, source_path):
     """Return a chrome_util.Path or None if not present."""
