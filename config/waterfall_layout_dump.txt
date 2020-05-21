@@ -388,6 +388,9 @@
     wooten-release
     zork-release
   master-release-basic
+    atlas-release-basic
+    eve-release-basic
+    grunt-release-basic
 
 == toolchain ==
   master-toolchain
@@ -485,6 +488,7 @@
   atlas-llvm-toolchain-tryjob
   atlas-master-factorybranch-tryjob
   atlas-payloads-tryjob
+  atlas-release-basic-tryjob
   atlas-release-tryjob
   atlas-unittest-stress
   atlas-vmpi-android-pfq-tryjob
@@ -820,6 +824,7 @@
   eve-master-factorybranch-tryjob
   eve-payloads-tryjob
   eve-pi-android-pfq-tryjob
+  eve-release-basic-tryjob
   eve-release-tryjob
   eve-unittest-stress
   eve-userdebug-full-tryjob
@@ -1114,6 +1119,7 @@
   grunt-llvm-toolchain-tryjob
   grunt-payloads-tryjob
   grunt-pi-android-pfq-tryjob
+  grunt-release-basic-tryjob
   grunt-release-tryjob
   grunt-unittest-stress
   guado-cfm-full-tryjob
@@ -1385,6 +1391,9 @@
     kevin-pi-android-pfq-tryjob
     reef-pi-android-pfq-tryjob
   master-release-basic-tryjob
+    atlas-release-basic-tryjob
+    eve-release-basic-tryjob
+    grunt-release-basic-tryjob
   master-release-tryjob
     amd64-generic-cheets-release-tryjob
     arkham-release-tryjob

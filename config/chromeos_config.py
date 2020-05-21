@@ -540,7 +540,7 @@ def GeneralTemplates(site_config):
       paygen_skip_testing=True,
       signer_tests=False,
       vm_tests=[],
-      vm_tests_override=[],
+      vm_tests_override=None,
       gs_path=None,
       push_image=False,
       sign_types=[],
@@ -2135,7 +2135,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   ### Master release configs.
   master_config = _CreateMasterConfig('master-release')
   # pylint: disable=unused-variable
-  simple_master_config = _CreateMasterConfig(
+  basic_master_config = _CreateMasterConfig(
       'master-release-basic',
       template=site_config.templates.release_basic,
       schedule='with 5m interval')
@@ -2146,6 +2146,10 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     """Add |config| as a slave config to the appropriate master config."""
     # Default to chromeos master release builder.
     master = master_config
+
+    # Add this config to the master release basic builder.
+    if config.name.endswith('-release-basic'):
+      master = basic_master_config
 
     # Add this config to 'master-lakitu-release' instead if this is an LTS
     # branch for lakitu. This is typically only done on a branch after it is
@@ -2358,7 +2362,18 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
           board_configs[board],
       )
 
+  def AddReleaseBasicMirrors():
+    """Create basic release builder variants for relevant build configs."""
+    release_basic_boards = ['eve', 'atlas', 'grunt']
+    for board in release_basic_boards:
+      config_name = '%s-release-basic' % board
+      site_config.Add(config_name, site_config.templates.release_basic,
+                      site_config[board + '-release'])
+      site_config[config_name].apply(site_config.templates.release_basic)
+      _AssignToMaster(site_config[config_name])
+
   _AdjustReleaseConfigs()
+  AddReleaseBasicMirrors()
 
 
 def PayloadBuilders(site_config, boards_dict):

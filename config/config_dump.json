@@ -808,8 +808,7 @@
                 "chrome_internal"
             ],
             "usepkg_build_packages": false,
-            "vm_tests": [],
-            "vm_tests_override": []
+            "vm_tests": []
         },
         "test_ap": {
             "_template": "test_ap",
@@ -2454,6 +2453,24 @@
         ],
         "vm_tests": [],
         "vm_tests_override": null
+    },
+    "atlas-release-basic": {
+        "_template": "release_basic",
+        "boards": [
+            "atlas"
+        ]
+    },
+    "atlas-release-basic-tryjob": {
+        "_template": "release_basic",
+        "boards": [
+            "atlas"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "gs_path": "default",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "notification_configs": []
     },
     "atlas-release-tryjob": {
         "_template": "release",
@@ -10802,6 +10819,26 @@
         "vm_tests": [],
         "vm_tests_override": null
     },
+    "eve-release-basic": {
+        "_template": "release_basic",
+        "boards": [
+            "eve"
+        ],
+        "chrome_sdk_build_chrome": false
+    },
+    "eve-release-basic-tryjob": {
+        "_template": "release_basic",
+        "boards": [
+            "eve"
+        ],
+        "chrome_sdk_build_chrome": false,
+        "debug": true,
+        "display_label": "tryjob",
+        "gs_path": "default",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "notification_configs": []
+    },
     "eve-release-tryjob": {
         "_template": "release",
         "boards": [
@@ -15770,6 +15807,52 @@
         "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
+    },
+    "grunt-release-basic": {
+        "_template": "release_basic",
+        "boards": [
+            "grunt"
+        ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"aleena\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"barla\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"careena\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"delan\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"grunt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"liara\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
+        ]
+    },
+    "grunt-release-basic-tryjob": {
+        "_template": "release_basic",
+        "boards": [
+            "grunt"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "gs_path": "default",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"aleena\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"barla\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"careena\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"delan\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"grunt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"liara\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
+        ],
+        "notification_configs": []
     },
     "grunt-release-tryjob": {
         "_template": "release",
@@ -22794,7 +22877,11 @@
         "chrome_sdk": false,
         "master": true,
         "schedule": "with 5m interval",
-        "slave_configs": [],
+        "slave_configs": [
+            "atlas-release-basic",
+            "eve-release-basic",
+            "grunt-release-basic"
+        ],
         "sync_chrome": true
     },
     "master-release-basic-tryjob": {
@@ -22809,9 +22896,12 @@
         "luci_builder": "Try",
         "master": true,
         "notification_configs": [],
-        "slave_configs": [],
-        "sync_chrome": true,
-        "vm_tests_override": null
+        "slave_configs": [
+            "atlas-release-basic-tryjob",
+            "eve-release-basic-tryjob",
+            "grunt-release-basic-tryjob"
+        ],
+        "sync_chrome": true
     },
     "master-release-tryjob": {
         "_template": "release",
