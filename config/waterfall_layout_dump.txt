@@ -234,6 +234,7 @@
     arkham-release
     asuka-release
     asurada-release
+    atlas-arm64-release
     atlas-blueznext-release
     atlas-kvm-release
     atlas-release
@@ -341,6 +342,7 @@
     nami-release
     nautilus-release
     ninja-release
+    nocturne-arm64-release
     nocturne-release
     novato-arc64-release
     novato-release
@@ -472,6 +474,11 @@
   asurada-payloads-tryjob
   asurada-release-tryjob
   asurada-unittest-stress
+  atlas-arm64-full-tryjob
+  atlas-arm64-llvm-next-toolchain-tryjob
+  atlas-arm64-llvm-toolchain-tryjob
+  atlas-arm64-release-tryjob
+  atlas-arm64-unittest-stress
   atlas-blueznext-full-tryjob
   atlas-blueznext-llvm-next-toolchain-tryjob
   atlas-blueznext-llvm-toolchain-tryjob
@@ -1399,6 +1406,7 @@
     arkham-release-tryjob
     asuka-release-tryjob
     asurada-release-tryjob
+    atlas-arm64-release-tryjob
     atlas-blueznext-release-tryjob
     atlas-kvm-release-tryjob
     atlas-release-tryjob
@@ -1506,6 +1514,7 @@
     nami-release-tryjob
     nautilus-release-tryjob
     ninja-release-tryjob
+    nocturne-arm64-release-tryjob
     nocturne-release-tryjob
     novato-arc64-release-tryjob
     novato-release-tryjob
@@ -1616,6 +1625,11 @@
   ninja-payloads-tryjob
   ninja-release-tryjob
   ninja-unittest-stress
+  nocturne-arm64-full-tryjob
+  nocturne-arm64-llvm-next-toolchain-tryjob
+  nocturne-arm64-llvm-toolchain-tryjob
+  nocturne-arm64-release-tryjob
+  nocturne-arm64-unittest-stress
   nocturne-factory-nocturne-11066.B-factorybranch-tryjob
   nocturne-full-tryjob
   nocturne-llvm-next-toolchain-tryjob
