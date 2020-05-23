@@ -98,8 +98,8 @@ def GetBoardTypeToBoardsDict(ge_build_config):
   x86_boards = x86_full_boards
 
   boards_dict['all_release_boards'] = (
-      chromeos_boards.arm_internal_release_boards |
-      chromeos_boards.x86_internal_release_boards
+      arm_internal_release_boards |
+      x86_internal_release_boards
   )
   boards_dict['all_full_boards'] = (
       arm_full_boards |
