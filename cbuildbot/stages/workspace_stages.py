@@ -718,14 +718,14 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
         self._current_board, 'virtual/target-os',
         buildroot=self._build_root)
 
-    android_packages = [p for p in packages
-                        if p.startswith('chromeos-base/android-container-') or \
-                        p.startswith('chromeos-base/android-vm-')]
+    android_packages = {p for p in packages
+                        if p.startswith('chromeos-base/android-container-') or
+                        p.startswith('chromeos-base/android-vm-')}
 
     assert len(android_packages) <= 1
 
     if android_packages:
-      return android_packages[0]
+      return next(iter(android_packages))
     else:
       return None
 
