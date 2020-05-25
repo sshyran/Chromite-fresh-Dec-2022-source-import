@@ -236,7 +236,6 @@
     asurada-release
     atlas-arm64-release
     atlas-blueznext-release
-    atlas-kvm-release
     atlas-release
     auron_paine-release
     auron_yuna-release
@@ -311,7 +310,6 @@
     hatch-blueznext-release
     hatch-diskswap-release
     hatch-kernelnext-release
-    hatch-kvm-release
     hatch-release
     heli-release
     jacuzzi-release
@@ -338,7 +336,6 @@
     macchiato-ground-release
     mistral-release
     mushu-release
-    nami-kvm-release
     nami-release
     nautilus-release
     ninja-release
@@ -365,7 +362,6 @@
     romer-release
     samus-release
     sand-release
-    sarien-kvm-release
     sarien-release
     scarlet-release
     sentry-release
@@ -486,11 +482,6 @@
   atlas-blueznext-unittest-stress
   atlas-factory-atlas-11907.B-factorybranch-tryjob
   atlas-full-tryjob
-  atlas-kvm-full-tryjob
-  atlas-kvm-llvm-next-toolchain-tryjob
-  atlas-kvm-llvm-toolchain-tryjob
-  atlas-kvm-release-tryjob
-  atlas-kvm-unittest-stress
   atlas-llvm-next-toolchain-tryjob
   atlas-llvm-toolchain-tryjob
   atlas-master-factorybranch-tryjob
@@ -1189,11 +1180,6 @@
   hatch-kernelnext-llvm-toolchain-tryjob
   hatch-kernelnext-release-tryjob
   hatch-kernelnext-unittest-stress
-  hatch-kvm-full-tryjob
-  hatch-kvm-llvm-next-toolchain-tryjob
-  hatch-kvm-llvm-toolchain-tryjob
-  hatch-kvm-release-tryjob
-  hatch-kvm-unittest-stress
   hatch-llvm-next-toolchain-tryjob
   hatch-llvm-toolchain-tryjob
   hatch-payloads-tryjob
@@ -1408,7 +1394,6 @@
     asurada-release-tryjob
     atlas-arm64-release-tryjob
     atlas-blueznext-release-tryjob
-    atlas-kvm-release-tryjob
     atlas-release-tryjob
     auron_paine-release-tryjob
     auron_yuna-release-tryjob
@@ -1483,7 +1468,6 @@
     hatch-blueznext-release-tryjob
     hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
-    hatch-kvm-release-tryjob
     hatch-release-tryjob
     heli-release-tryjob
     jacuzzi-release-tryjob
@@ -1510,7 +1494,6 @@
     macchiato-ground-release-tryjob
     mistral-release-tryjob
     mushu-release-tryjob
-    nami-kvm-release-tryjob
     nami-release-tryjob
     nautilus-release-tryjob
     ninja-release-tryjob
@@ -1537,7 +1520,6 @@
     romer-release-tryjob
     samus-release-tryjob
     sand-release-tryjob
-    sarien-kvm-release-tryjob
     sarien-release-tryjob
     scarlet-release-tryjob
     sentry-release-tryjob
@@ -1601,11 +1583,6 @@
   mushu-unittest-stress
   nami-factory-nami-10715.B-factorybranch-tryjob
   nami-full-tryjob
-  nami-kvm-full-tryjob
-  nami-kvm-llvm-next-toolchain-tryjob
-  nami-kvm-llvm-toolchain-tryjob
-  nami-kvm-release-tryjob
-  nami-kvm-unittest-stress
   nami-llvm-next-toolchain-tryjob
   nami-llvm-toolchain-tryjob
   nami-payloads-tryjob
@@ -1811,11 +1788,6 @@
   sand-unittest-stress
   sarien-factory-sarien-12033.B-factorybranch-tryjob
   sarien-full-tryjob
-  sarien-kvm-full-tryjob
-  sarien-kvm-llvm-next-toolchain-tryjob
-  sarien-kvm-llvm-toolchain-tryjob
-  sarien-kvm-release-tryjob
-  sarien-kvm-unittest-stress
   sarien-llvm-next-toolchain-tryjob
   sarien-llvm-toolchain-tryjob
   sarien-master-factorybranch-tryjob
