@@ -135,7 +135,7 @@
         "asan": {
             "_template": "asan",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "description": "Full Builds",
             "disk_layout": "16gb-rootfs",
@@ -171,7 +171,7 @@
             "afdo_generate_async": true,
             "afdo_use": false,
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "chromeos_official": true,
             "description": "Generate AFDO profile based on benchmarks.",
@@ -305,7 +305,7 @@
         "full": {
             "_template": "full",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "chrome_sdk": true,
             "description": "Full Builds",
@@ -334,7 +334,7 @@
         "fuzzer": {
             "_template": "fuzzer",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "builder_class_name": "fuzzer_builders.FuzzerBuilder",
             "description": "Informational Builds",
@@ -543,7 +543,7 @@
         "orderfile_generate_toolchain": {
             "_template": "orderfile_generate_toolchain",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "chromeos_official": true,
             "description": "Build Chrome and generate an orderfile for better layout",
@@ -569,7 +569,7 @@
         "orderfile_verify_toolchain": {
             "_template": "orderfile_verify_toolchain",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "chromeos_official": true,
             "description": "Verify the most recent orderfile is building correctly",
@@ -742,7 +742,7 @@
         "release_afdo_verify": {
             "_template": "release_afdo_verify",
             "archive_build_debug": true,
-            "build_timeout": 21600,
+            "build_timeout": 43200,
             "build_type": "full",
             "chromeos_official": true,
             "description": "Verify the most recent AFDO profile for release can build Chrome images correctly.",
