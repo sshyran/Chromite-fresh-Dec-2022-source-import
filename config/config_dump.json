@@ -26459,9 +26459,7 @@
         "hw_tests_override": [],
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"duffy\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"duffy_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"kaisa\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"kaisa_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"puff\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_duffy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_kaisa\",\n    \"test_suites\": []\n}",
@@ -26487,9 +26485,7 @@
         "luci_builder": "Try",
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"duffy\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"duffy_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"kaisa\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"kaisa_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"puff\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_duffy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_kaisa\",\n    \"test_suites\": []\n}",
