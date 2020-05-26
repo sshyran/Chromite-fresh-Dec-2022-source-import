@@ -626,12 +626,27 @@ def _RedactAFDOProfile(input_path, output_path):
       print_cmd=True,
   )
 
+  # Remove cold functions in the profile. Trim the profile to contain 20k
+  # functions, as our current profile has ~20k functions so this modification
+  # brings less impact on prod.
+  reduced_temp = input_path + '.reduced.temp'
+  cros_build_lib.run(
+      [
+          'remove_cold_functions',
+          '--input=' + removed_temp,
+          '--output=' + reduced_temp,
+          '--number=20000'
+      ],
+      enter_chroot=True,
+      print_cmd=True,
+  )
+
   # Convert the profiles back to compbinary profiles.
   # Using `compbinary` profiles saves us hundreds of MB of RAM per
   # compilation, since it allows profiles to be lazily loaded.
   convert_to_combinary_command = profdata_command_base + [
       '-compbinary',
-      removed_temp,
+      reduced_temp,
       '-output',
       output_path,
   ]
@@ -1565,6 +1580,22 @@ class _CommonPrepareBundle(object):
           print_cmd=True,
       )
       current_input_file = removed_temp
+
+    # Remove cold functions in the profile. Trim the profile to contain 20k
+    # functions, as our current profile has ~20k functions so this modification
+    # brings less impact on prod.
+    reduced_tmp = input_path + '.reduced.tmp'
+    cros_build_lib.run(
+        [
+            'remove_cold_functions',
+            '--input=' + self.chroot.chroot_path(current_input_file),
+            '--output=' + self.chroot.chroot_path(reduced_tmp),
+            '--number=20000'
+        ],
+        enter_chroot=True,
+        print_cmd=True,
+    )
+    current_input_file = reduced_tmp
 
     # Convert the profiles back to binary profiles.
     cmd_to_binary = profdata_command_base + [

@@ -1949,6 +1949,7 @@ class UploadReleaseChromeAFDOTest(cros_test_lib.MockTempDirTestCase):
     input_to_text = input_name + '.text.temp'
     redacted_temp = input_name + '.redacted.temp'
     removed_temp = input_name + '.removed.temp'
+    reduced_temp = input_name + '.reduced.temp'
     output_name = os.path.join(self.tempdir, self.redacted_name)
 
     mock_file_obj = io.StringIO()
@@ -1988,11 +1989,21 @@ class UploadReleaseChromeAFDOTest(cros_test_lib.MockTempDirTestCase):
         ),
         mock.call(
             [
+                'remove_cold_functions',
+                '--input=' + removed_temp,
+                '--output=' + reduced_temp,
+                '--number=20000'
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
                 'llvm-profdata',
                 'merge',
                 '-sample',
                 '-compbinary',
-                removed_temp,
+                reduced_temp,
                 '-output',
                 output_name,
             ],
