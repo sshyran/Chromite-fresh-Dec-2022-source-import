@@ -621,9 +621,11 @@ class RemoteAccess(object):
     kwargs.setdefault('debug_level', self.debug_level)
     # scp relies on 'scp' being in the $PATH of the non-interactive,
     # SSH login shell.
-    scp_cmd = (['scp', '-P', str(self.port)] +
-               CompileSSHConnectSettings(ConnectTimeout=60) +
-               ['-i', self.private_key])
+    scp_cmd = ['scp']
+    if self.port:
+      scp_cmd += ['-P', str(self.port)]
+    scp_cmd += CompileSSHConnectSettings(ConnectTimeout=60)
+    scp_cmd += ['-i', self.private_key]
 
     if not self.interactive:
       scp_cmd.append('-n')
