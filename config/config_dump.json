@@ -10612,7 +10612,6 @@
         "hw_tests": [],
         "hw_tests_disabled_bug": "https://crbug.com/1048213",
         "hw_tests_override": [],
-        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -22548,7 +22547,6 @@
             "eve-arm64-release",
             "eve-kernelnext-release",
             "eve-kvm-release",
-            "eve-lacros-release",
             "eve-release",
             "eve-userdebug-release",
             "excelsior-release",
@@ -22758,7 +22756,6 @@
             "eve-arm64-release-tryjob",
             "eve-kernelnext-release-tryjob",
             "eve-kvm-release-tryjob",
-            "eve-lacros-release-tryjob",
             "eve-release-tryjob",
             "eve-userdebug-release-tryjob",
             "excelsior-release-tryjob",
