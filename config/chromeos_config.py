@@ -1336,10 +1336,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'eve-arcvm-mesa-virgl-next',
   ])
   _vmpi_no_hwtest_experimental_boards = frozenset([])
-  _vmpi_hwtest_boards = frozenset([
-      'atlas',
-      'kukui',
-  ])
+  _vmpi_hwtest_boards = frozenset([])
   _vmpi_hwtest_experimental_boards = frozenset([])
   _vmpi_vmtest_boards = frozenset([])
   _vmpi_vmtest_experimental_boards = frozenset([])
