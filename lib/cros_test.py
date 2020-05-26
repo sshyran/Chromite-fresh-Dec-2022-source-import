@@ -390,8 +390,7 @@ class CrOSTest(object):
     for src in self.results_src:
       logging.info('Fetching %s to %s', src, self.results_dest_dir)
       self._device.remote.CopyFromDevice(src=src, dest=self.results_dest_dir,
-                                         mode='scp', check=False,
-                                         debug_level=logging.INFO)
+                                         mode='scp', debug_level=logging.INFO)
 
   def _RunDeviceCmd(self):
     """Run a command on the device.
