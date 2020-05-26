@@ -106,7 +106,6 @@ x86_internal_release_boards = frozenset([
     'eve',
     'eve-arc-r',
     'eve-arcvm-mesa-virgl-next',
-    'eve-lacros',
     'excelsior',
     'expresso',
     'falco_li',
