@@ -544,7 +544,6 @@ def GeneralTemplates(site_config):
       signer_tests=False,
       vm_tests=[],
       vm_tests_override=None,
-      gs_path=None,
       push_image=False,
       sign_types=[],
       upload_symbols=False,

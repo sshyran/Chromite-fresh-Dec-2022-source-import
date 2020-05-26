@@ -781,7 +781,6 @@
             "dev_installer_prebuilts": true,
             "display_label": "release",
             "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Canaries",
-            "gs_path": null,
             "hw_tests_override": [],
             "images": [
                 "base",
@@ -2470,7 +2469,6 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "gs_path": "default",
         "hw_tests_override": null,
         "luci_builder": "Try",
         "notification_configs": []
@@ -10798,7 +10796,6 @@
         "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
-        "gs_path": "default",
         "hw_tests_override": null,
         "luci_builder": "Try",
         "notification_configs": []
@@ -15799,7 +15796,6 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "gs_path": "default",
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
@@ -22676,7 +22672,6 @@
         "debug": true,
         "debug_cidb": true,
         "display_label": "tryjob",
-        "gs_path": "default",
         "hw_tests_override": null,
         "luci_builder": "Try",
         "master": true,
