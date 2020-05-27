@@ -675,6 +675,10 @@ def DefaultSettings():
       # This bot pushes changes to the overlays.
       master=False,
 
+      # A basic_builder is a special configuration which does not perform tests
+      # or mutate external config.
+      basic_builder=False,
+
       # If this bot triggers slave builds, this will contain a list of
       # slave config names.
       slave_configs=None,

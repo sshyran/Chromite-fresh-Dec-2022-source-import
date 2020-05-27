@@ -438,7 +438,7 @@ class ManifestVersionedSyncStage(SyncStage):
   def Initialize(self):
     """Initializes a manager that manages manifests for associated stages."""
 
-    dry_run = self._run.options.debug
+    dry_run = self._run.options.debug or self._run.config.basic_builder
 
     self._InitializeRepo()
 

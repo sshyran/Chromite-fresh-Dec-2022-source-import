@@ -12,6 +12,7 @@
         "android_rev": null,
         "archive": true,
         "archive_build_debug": false,
+        "basic_builder": false,
         "binhost_base_url": null,
         "binhost_bucket": null,
         "binhost_key": null,
@@ -768,6 +769,7 @@
         "release_basic": {
             "_template": "release_basic",
             "archive": false,
+            "basic_builder": true,
             "binhost_base_url": "https://commondatastorage.googleapis.com/chromeos-dev-installer",
             "binhost_bucket": "gs://chromeos-dev-installer",
             "binhost_key": "RELEASE_BINHOST",
