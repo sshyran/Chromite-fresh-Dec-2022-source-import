@@ -18,6 +18,7 @@ from chromite.lib import constants
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import cache
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
@@ -413,6 +414,31 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     out_dir = os.path.join(self.chrome_src_dir, 'out_%s' % SDKFetcherMock.BOARD)
 
     self.assertEqual(out_dir, self.cmd_mock.env['CHROMIUM_OUT_DIR'])
+
+  @mock.patch('chromite.lib.gclient.LoadGclientFile')
+  def testInternalGclientSpec(self, mock_gclient_load):
+    """Verify that the SDK exits with an error if the gclient spec is wrong."""
+    self.SetupCommandMock(extra_args=['--internal'])
+
+    # Simple Chrome should exit with an error if "--internal" is passed and
+    # "checkout_src_internal" isn't present in the .gclient file.
+    mock_gclient_load.return_value = [{
+        'url': 'https://chromium.googlesource.com/chromium/src.git',
+        'custom_deps': {},
+        'custom_vars': {},
+    }]
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      self.cmd_mock.inst.Run()
+
+    # With "checkout_src_internal" set, Simple Chrome should run without error.
+    mock_gclient_load.return_value = [{
+        'url': 'https://chromium.googlesource.com/chromium/src.git',
+        'custom_deps': {},
+        'custom_vars': {
+            'checkout_src_internal': True
+        },
+    }]
+    self.cmd_mock.inst.Run()
 
   def testClearSDKCache(self):
     """Verifies cache directories are removed with --clear-sdk-cache."""

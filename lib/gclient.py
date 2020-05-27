@@ -51,7 +51,7 @@ def FindGclientCheckoutRoot(path):
   return None
 
 
-def _LoadGclientFile(path):
+def LoadGclientFile(path):
   """Load a gclient file and return the solutions defined by the gclient file.
 
   Args:
@@ -157,7 +157,7 @@ def _GetGclientSolutions(internal, rev, template, managed):
   See WriteConfigFile below.
   """
   urls = _GetGclientURLs(internal, rev)
-  solutions = _LoadGclientFile(template) if template is not None else []
+  solutions = LoadGclientFile(template) if template is not None else []
   for (name, url, deps_file) in urls:
     solution = _FindOrAddSolution(solutions, name)
     # Always override 'url' and 'deps_file' of a solution as we need to specify

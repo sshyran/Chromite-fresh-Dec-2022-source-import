@@ -25,6 +25,7 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import gclient
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -1435,6 +1436,24 @@ class ChromeSDKCommand(command.CliCommand):
     if not checkout.chrome_src_dir:
       cros_build_lib.Die('Chrome checkout not found at %s', src_path)
     self.options.chrome_src = checkout.chrome_src_dir
+
+    if self.options.internal:
+      gclient_path = gclient.FindGclientFile(self.options.chrome_src)
+      if not gclient_path:
+        cros_build_lib.Die(
+            'Found a Chrome checkout at %s with no .gclient file.',
+            self.options.chrome_src)
+      gclient_solutions = gclient.LoadGclientFile(gclient_path)
+      for solution in gclient_solutions:
+        if not solution.get('url', '').startswith(gclient.CHROME_COMMITTER_URL):
+          continue
+        if solution.get('custom_vars', {}).get('checkout_src_internal'):
+          break
+        cros_build_lib.Die(
+            "You've passed in '--internal' to Simple Chrome, but your .gclient "
+            "file at %s lacks 'checkout_src_internal'. Set that var to True in "
+            "the 'custom_vars' section of your .gclient file and re-sync.",
+            gclient_path)
 
     if self.options.version and self.options.sdk_path:
       cros_build_lib.Die('Cannot specify both --version and --sdk-path.')
