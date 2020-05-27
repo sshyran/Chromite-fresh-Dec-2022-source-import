@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""DeDeDe configs."""
+"""Dedede configs."""
 
 from __future__ import print_function
 
@@ -27,7 +27,7 @@ BUILD_PACKAGES = _COMMON_PACKAGES + (
 
 
 def get_commands(servo):
-  """Get specific flash commands for octopus
+  """Get specific flash commands for Dedede
 
   Each board needs specific commands including the voltage for Vref, to turn
   on and turn off the SPI flash. The get_*_commands() functions provide a
@@ -54,7 +54,7 @@ def get_commands(servo):
     dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
-    programmer = 'raiden_debug_spi:target=AP,serial=%s ' % servo.serial
+    programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
   else:
     raise Exception('%s not supported' % servo.version)
 
