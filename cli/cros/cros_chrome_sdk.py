@@ -29,6 +29,7 @@ from chromite.lib import gclient
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.utils import memoize
@@ -512,7 +513,7 @@ class SDKFetcher(object):
       logging.info('Trying: %s', version_file)
       full_version = self._GetFullVersionFromStorage(version_file)
       if full_version is not None:
-        logging.warning(
+        logging.info(
             'Using cros version from most recent LATEST file: %s -> %s',
             version_file, full_version)
         return full_version
@@ -1469,7 +1470,14 @@ class ChromeSDKCommand(command.CliCommand):
     else:
       self.options.boards = self.options.boards.split(':')
       for board in self.options.boards:
+        start = datetime.datetime.now()
         self._RunOnceForBoard(board)
+        duration = datetime.datetime.now() - start
+        if duration > datetime.timedelta(minutes=1):
+          logging.warning(
+              'It took %s to fetch the SDK for %s. Consider removing it '
+              'from your .gclient file if you no longer need to build for it.',
+              pformat.timedelta(duration), board)
 
   def _RunOnceForBoard(self, board):
     """Internal implementation of Run() above for a single board."""
