@@ -566,6 +566,30 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     fingerprints = ['fingerprint1', 'fingerprint2']
     self.PatchObject(packages_service, 'find_fingerprints',
                      return_value=fingerprints)
+    # Patch packages.get_models, packages.get_all_firmware_versions,
+    # and packages.get_key_id for calls needed by model_metadata.
+    model_list = ['pyro', 'reef']
+    all_fw_versions = {
+        'pyro': packages_service.FirmwareVersions(
+            'pyro',
+            'Google_Pyro.9042.87.1',
+            'Google_Pyro.9042.110.0',
+            'pyro_v1.1.5900-ab1ee51',
+            'pyro_v1.1.5909-bd1f0c9'),
+        'reef': packages_service.FirmwareVersions(
+            'reef',
+            'Google_Reef.9042.87.1',
+            'Google_Reef.9042.110.0',
+            'reef_v1.1.5900-ab1ee51',
+            'reef_v1.1.5909-bd1f0c9')
+    }
+    self.PatchObject(packages_service, 'get_all_firmware_versions',
+                     return_value=all_fw_versions)
+    self.PatchObject(packages_service, 'get_models',
+                     return_value=model_list)
+    self.PatchObject(packages_service, 'get_key_id',
+                     return_value='key')
+
     request = self._GetRequest(board='betty')
     packages_controller.GetBuilderMetadata(request, self.response,
                                            self.api_config)
@@ -605,6 +629,34 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.assertEqual(
         self.response.build_target_metadata[0].fingerprints,
         fingerprints)
+    self.assertEqual(
+        len(self.response.model_metadata), 2)
+    self.assertEqual(
+        self.response.model_metadata[0].model_name, 'pyro')
+    self.assertEqual(
+        self.response.model_metadata[0].ec_firmware_version,
+        'pyro_v1.1.5909-bd1f0c9')
+    self.assertEqual(
+        self.response.model_metadata[0].firmware_key_id, 'key')
+    self.assertEqual(
+        self.response.model_metadata[0].main_readonly_firmware_version,
+        'Google_Pyro.9042.87.1')
+    self.assertEqual(
+        self.response.model_metadata[0].main_readwrite_firmware_version,
+        'Google_Pyro.9042.110.0')
+    self.assertEqual(
+        self.response.model_metadata[1].model_name, 'reef')
+    self.assertEqual(
+        self.response.model_metadata[1].ec_firmware_version,
+        'reef_v1.1.5909-bd1f0c9')
+    self.assertEqual(
+        self.response.model_metadata[1].firmware_key_id, 'key')
+    self.assertEqual(
+        self.response.model_metadata[1].main_readonly_firmware_version,
+        'Google_Reef.9042.87.1')
+    self.assertEqual(
+        self.response.model_metadata[1].main_readwrite_firmware_version,
+        'Google_Reef.9042.110.0')
 
 
 class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):

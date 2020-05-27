@@ -232,8 +232,6 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
   build_target_metadata.arc_use_set = 'arc' in portage_util.GetBoardUseFlags(
       build_target.name)
 
-  # TODO(crbug/1071620): Add service layer calls to fill out the rest of
-  # build_target_metadata and model_metadata.
   fw_versions = packages.determine_firmware_versions(build_target)
   build_target_metadata.main_firmware_version = fw_versions.main_fw_version
   build_target_metadata.ec_firmware_version = fw_versions.ec_fw_version
@@ -241,6 +239,25 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
       build_target)
   for fingerprint in packages.find_fingerprints(build_target):
     build_target_metadata.fingerprints.append(fingerprint)
+
+  models = packages.get_models(build_target)
+  if models:
+    all_fw_versions = packages.get_all_firmware_versions(build_target)
+    for model in models:
+      if model in all_fw_versions:
+        fw_versions = all_fw_versions[model]
+        ec = fw_versions.ec_rw or fw_versions.ec
+        main_ro = fw_versions.main
+        main_rw = fw_versions.main_rw or main_ro
+        # Get the firmware key-id for the current board and model.
+        key_id = packages.get_key_id(build_target, model)
+        model_metadata = output_proto.model_metadata.add()
+        model_metadata.model_name = model
+        model_metadata.ec_firmware_version = ec
+        model_metadata.firmware_key_id = key_id
+        model_metadata.main_readonly_firmware_version = main_ro
+        model_metadata.main_readwrite_firmware_version = main_rw
+
 
 def _HasPrebuiltSuccess(_input_proto, output_proto, _config):
   """The mock success case for HasChromePrebuilt."""
