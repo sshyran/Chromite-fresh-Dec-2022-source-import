@@ -1064,6 +1064,28 @@ class RemoteDevice(object):
       raise CatFileError('Failed to read file "%s" on the device' % path)
     return result.output
 
+  def DeletePath(self, path, relative_to_work_dir=False, recursive=False):
+    """Deletes a path on the remote device.
+
+    Args:
+      path: The path on the remote device that should be deleted.
+      relative_to_work_dir: If true, the path is relative to |self.work_dir|.
+      recursive: If true, the |path| is deleted recursively.
+
+    Raises:
+      cros_build_lib.RunCommandError if |path| does not exist or the remote
+      command to delete the |path| has failed.
+    """
+    if relative_to_work_dir:
+      path = os.path.join(self.work_dir, path)
+
+    cmd = ['rm', '-f']
+    if recursive:
+      cmd += ['-r']
+    cmd += [path]
+
+    self.run(cmd)
+
   def PipeOverSSH(self, filepath, cmd, **kwargs):
     """Cat a file and pipe over SSH."""
     producer_cmd = ['cat', filepath]

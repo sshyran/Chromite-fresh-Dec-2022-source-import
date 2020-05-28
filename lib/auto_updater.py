@@ -564,11 +564,18 @@ class ChromiumOSUpdater(BaseUpdater):
       payload_dir = self.device.work_dir
 
     try:
+      stateful_update_payload = os.path.join(
+          payload_dir, auto_updater_transfer.STATEFUL_FILENAME)
+
       updater = stateful_updater.StatefulUpdater(self.device)
       updater.Update(
-          os.path.join(payload_dir, auto_updater_transfer.STATEFUL_FILENAME),
+          stateful_update_payload,
           update_type=(stateful_updater.StatefulUpdater.UPDATE_TYPE_CLOBBER if
                        self._clobber_stateful else None))
+
+      # Delete the stateful update file on success so it doesn't occupy extra
+      # disk space. On failure it will get cleaned up.
+      self.device.DeletePath(stateful_update_payload)
     except stateful_updater.Error as e:
       error_msg = 'Stateful update failed with error: %s' % str(e)
       logging.exception(error_msg)
@@ -631,6 +638,11 @@ class ChromiumOSUpdater(BaseUpdater):
     self._transfer_obj.TransferRootfsUpdate()
 
     self.UpdateRootfs()
+
+    # Delete the update file so it doesn't take much space on disk for the
+    # remainder of the update process.
+    self.device.DeletePath(self.PAYLOAD_DIR_NAME, relative_to_work_dir=True,
+                           recursive=True)
 
   def RunUpdateStateful(self):
     """Run all processes needed by updating stateful.
