@@ -769,7 +769,6 @@
         "release_basic": {
             "_template": "release_basic",
             "archive": false,
-            "basic_builder": true,
             "binhost_base_url": "https://commondatastorage.googleapis.com/chromeos-dev-installer",
             "binhost_bucket": "gs://chromeos-dev-installer",
             "binhost_key": "RELEASE_BINHOST",
@@ -778,6 +777,7 @@
             "chrome_sdk": true,
             "chroot_use_image": false,
             "cpe_export": false,
+            "debug": true,
             "debug_symbols": false,
             "description": "Fail Fast Release Builds (canary) (internal)",
             "dev_installer_prebuilts": true,
@@ -2513,7 +2513,6 @@
         "boards": [
             "atlas"
         ],
-        "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try",
@@ -11022,7 +11021,6 @@
             "eve"
         ],
         "chrome_sdk_build_chrome": false,
-        "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try",
@@ -16088,7 +16086,6 @@
         "boards": [
             "grunt"
         ],
-        "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try",
@@ -23409,7 +23406,6 @@
         "_template": "release_basic",
         "boards": [],
         "chrome_sdk": false,
-        "debug": true,
         "debug_cidb": true,
         "display_label": "tryjob",
         "hw_tests_override": null,

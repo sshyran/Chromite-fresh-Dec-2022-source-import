@@ -528,7 +528,7 @@ def GeneralTemplates(site_config):
       site_config.templates.release_common,
       luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
       description='Fail Fast Release Builds (canary) (internal)',
-      basic_builder=True,
+      debug=True,
       notification_configs=[
           config_lib.NotificationConfig(email='navil+spam@chromium.org')
       ],
