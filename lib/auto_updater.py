@@ -451,7 +451,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def UpdateRootfs(self):
     """Update the rootfs partition of the device (utilizing nebraska)."""
-    logging.info('Updating rootfs partition with Nebraska.')
+    logging.notice('Updating rootfs partition...')
     nebraska_bin = os.path.join(self.device_dev_dir,
                                 self.REMOTE_NEBRASKA_FILENAME)
 
@@ -497,7 +497,7 @@ class ChromiumOSUpdater(BaseUpdater):
                      op, progress)
 
         if op == UPDATE_STATUS_UPDATED_NEED_REBOOT:
-          logging.notice('Update completed.')
+          logging.info('Update completed.')
           break
 
         if op == UPDATE_STATUS_IDLE:
@@ -519,7 +519,7 @@ class ChromiumOSUpdater(BaseUpdater):
             oper.ProgressBar(float(progress))
           elif end_message_not_printed and op == UPDATE_STATUS_FINALIZING:
             oper.Cleanup()
-            logging.notice('Finalizing image.')
+            logging.info('Finalizing image.')
             end_message_not_printed = False
 
         time.sleep(update_check_interval)

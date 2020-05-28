@@ -89,9 +89,10 @@ class StatefulUpdater(object):
 
     with tempfile.NamedTemporaryFile() as f:
       if update_type == self.UPDATE_TYPE_STANDARD:
-        logging.info('Performing standard stateful update.')
+        logging.notice('Performing standard stateful update...')
       elif update_type == self.UPDATE_TYPE_CLOBBER:
-        logging.info('Restoring stateful to factory_install with dev_image.')
+        logging.notice('Restoring stateful to factory_install '
+                       'with dev_image...')
         osutils.WriteFile(f.name, 'clobber')
 
       try:

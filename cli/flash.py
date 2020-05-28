@@ -509,6 +509,7 @@ class RemoteDeviceUpdater(object):
 
         try:
           # Get payload directory
+          logging.notice('Staging payloads...')
           payload_dir = self.GetPayloadDir(device)
 
           # Do auto-update

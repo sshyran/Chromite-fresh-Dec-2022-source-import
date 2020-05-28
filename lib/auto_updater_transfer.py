@@ -258,7 +258,7 @@ class LocalTransfer(Transfer):
 
   def _TransferUpdateUtilsPackage(self):
     """Transfer update-utils package to work directory of the remote device."""
-    logging.info('Copying nebraska to device.')
+    logging.notice('Copying update script to device...')
     source_dir = os.path.join(self._tempdir, 'src')
     osutils.SafeMakedirs(source_dir)
     nebraska_wrapper.RemoteNebraskaWrapper.GetNebraskaSrcFile(source_dir)
@@ -275,7 +275,7 @@ class LocalTransfer(Transfer):
     Copy the update payload to the remote device for rootfs update.
     """
     self._EnsureDeviceDirectory(self._device_payload_dir)
-    logging.info('Copying rootfs payload to device...')
+    logging.notice('Copying rootfs payload to device...')
     payload = os.path.join(self._payload_dir, self._payload_name)
     self._device.CopyToWorkDir(payload, self.PAYLOAD_DIR_NAME,
                                mode=self._payload_mode,
@@ -292,7 +292,7 @@ class LocalTransfer(Transfer):
     stateful update.
     """
     if self._original_payload_dir:
-      logging.info('Copying original stateful payload to device...')
+      logging.notice('Copying original stateful payload to device...')
       original_payload = os.path.join(
           self._original_payload_dir, STATEFUL_FILENAME)
       self._EnsureDeviceDirectory(self._device_restore_dir)
@@ -300,7 +300,7 @@ class LocalTransfer(Transfer):
                                 mode=self._payload_mode, log_output=True,
                                 **self._cmd_kwargs)
 
-    logging.info('Copying target stateful payload to device...')
+    logging.notice('Copying target stateful payload to device...')
     payload = os.path.join(self._payload_dir, STATEFUL_FILENAME)
     self._device.CopyToWorkDir(payload, mode=self._payload_mode,
                                log_output=True, **self._cmd_kwargs)
@@ -483,7 +483,7 @@ class LabTransfer(Transfer):
     The update-utils package will be transferred to the device from the
     staging server via curl.
     """
-    logging.info('Copying nebraska to device.')
+    logging.notice('Copying update script to device...')
     source_dir = os.path.join(self._device.work_dir, 'src')
     self._EnsureDeviceDirectory(source_dir)
 
@@ -508,14 +508,14 @@ class LabTransfer(Transfer):
     # update engine does not report the error clearly.
 
     if self._original_payload_dir:
-      logging.info('Copying original stateful payload to device...')
+      logging.notice('Copying original stateful payload to device...')
       self._EnsureDeviceDirectory(self._device_restore_dir)
       self._device.run(self._GetCurlCmdForPayloadDownload(
           payload_dir=self._device_restore_dir,
           build_id=self._original_payload_dir,
           payload_filename=STATEFUL_FILENAME))
 
-    logging.info('Copying target stateful payload to device...')
+    logging.notice('Copying target stateful payload to device...')
     self._device.run(self._GetCurlCmdForPayloadDownload(
         payload_dir=self._device.work_dir, build_id=self._payload_dir,
         payload_filename=STATEFUL_FILENAME))
@@ -528,7 +528,7 @@ class LabTransfer(Transfer):
     """
     self._EnsureDeviceDirectory(self._device_payload_dir)
 
-    logging.info('Copying rootfs payload to device...')
+    logging.notice('Copying rootfs payload to device...')
 
     # TODO(crbug.com/1024639): Another way to make the payloads available is
     # to make update_engine download it directly from the staging_server. This
