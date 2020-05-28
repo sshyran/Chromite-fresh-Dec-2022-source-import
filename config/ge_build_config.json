@@ -734,18 +734,6 @@
       ]
     },
     {
-      "name": "hatch-arc-r-userdebug",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "heli",
       "configs": [
         {
@@ -2653,6 +2641,119 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 436,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "hatch-arc-r-userdebug",
+      "reference_board_name": "hatch-arc-r-userdebug",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "akemi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "dragonair",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "hatch",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "helios",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "helios_diskswap",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "kindred",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "kled",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "kohaku",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "nightfury",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "unprovisioned_dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-userdebug",
+          "name": "unprovisioned_jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 449,
           "is_active": true
         }
       ]

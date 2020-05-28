@@ -17276,6 +17276,21 @@
             "hatch-arc-r-userdebug"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"akemi\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"dragonair\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"dratini\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"hatch\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"helios\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"helios_diskswap\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"jinlon\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kindred\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kled\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"unprovisioned_dratini\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"unprovisioned_jinlon\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -17297,6 +17312,21 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"akemi\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"dragonair\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"dratini\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"hatch\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"helios\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"helios_diskswap\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"jinlon\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kindred\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kled\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"unprovisioned_dratini\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-userdebug\",\n    \"name\": \"unprovisioned_jinlon\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
