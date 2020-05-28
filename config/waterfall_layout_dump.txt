@@ -322,6 +322,7 @@
     kevin64-release
     kip-release
     kukui-arc-r-release
+    kukui-arc64-release
     kukui-release
     kumo-release
     lakitu-gpu-release
@@ -1288,6 +1289,12 @@
   kukui-arc-r-release-tryjob
   kukui-arc-r-unittest-stress
   kukui-arc-r-vmrvc-android-pfq-tryjob
+  kukui-arc64-full-tryjob
+  kukui-arc64-llvm-next-toolchain-tryjob
+  kukui-arc64-llvm-toolchain-tryjob
+  kukui-arc64-payloads-tryjob
+  kukui-arc64-release-tryjob
+  kukui-arc64-unittest-stress
   kukui-factory-kukui-12587.B-factorybranch-tryjob
   kukui-full-tryjob
   kukui-llvm-next-toolchain-tryjob
@@ -1498,6 +1505,7 @@
     kevin64-release-tryjob
     kip-release-tryjob
     kukui-arc-r-release-tryjob
+    kukui-arc64-release-tryjob
     kukui-release-tryjob
     kumo-release-tryjob
     lakitu-gpu-release-tryjob
