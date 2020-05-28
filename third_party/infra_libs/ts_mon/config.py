@@ -235,7 +235,7 @@ def process_argparse_options(args):
     interface.state.global_monitor = monitors.HttpsMonitor(
         endpoint, monitors.CredentialFactory.from_string(credentials),
         ca_certs=args.ts_mon_ca_certs)
-  elif endpoint.lower() == 'none':
+  elif endpoint.lower() == 'none' or not endpoint:
     logging.info('ts_mon monitoring has been explicitly disabled')
   else:
     logging.error('ts_mon monitoring is disabled because the endpoint provided'
@@ -249,4 +249,3 @@ def process_argparse_options(args):
     interface.state.flush_thread.start()
 
   standard_metrics.init()
-
