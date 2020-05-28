@@ -23395,6 +23395,7 @@
         "boards": [],
         "chrome_sdk": false,
         "master": true,
+        "schedule": "triggered",
         "slave_configs": [
             "atlas-release-basic",
             "eve-release-basic",
