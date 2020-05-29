@@ -19,6 +19,7 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -1546,7 +1547,7 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     self.assertIsInstance(portage_util.PortageqBestVisible('cat/pkg'),
-                          portage_util.CPV)
+                          package_info.CPV)
 
 
 class PortageqEnvvarTest(cros_test_lib.MockTestCase):
@@ -1659,7 +1660,7 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     self.assertIsInstance(portage_util.PortageqMatch('cat/pkg'),
-                          portage_util.CPV)
+                          package_info.CPV)
 
 
 class FindEbuildTest(cros_test_lib.RunCommandTestCase):
