@@ -492,7 +492,7 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
     self.PatchObject(portage_util, 'FindEbuildForBoardPackage',
                      return_value='chromeos-base/android-container-nyc')
     FakeEnvironment = {
-        'ARM_TARGET': '3-linux-target'
+        'ARM_TARGET': '3-linux-target',
     }
     self.PatchObject(osutils, 'SourceEnvironment',
                      return_value=FakeEnvironment)
@@ -512,6 +512,13 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
 
   def test_determine_android_branch(self):
     """Tests that a valid android branch is returned."""
+    branch = packages.determine_android_branch(self.board)
+    self.assertEqual(branch, '3')
+
+  def test_determine_android_branch_64bit_targets(self):
+    """Tests that a valid android branch is returned with only 64bit targets."""
+    self.PatchObject(osutils, 'SourceEnvironment',
+                     return_value={'ARM64_TARGET': '3-linux-target'})
     branch = packages.determine_android_branch(self.board)
     self.assertEqual(branch, '3')
 
