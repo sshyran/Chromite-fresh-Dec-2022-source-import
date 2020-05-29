@@ -1005,6 +1005,26 @@ def get_models(build_target, log_output=True):
                                log_output=log_output)
 
 
+def get_key_id(build_target, model):
+  """Obtain the key_id for a model within the build_target.
+
+  Args:
+    build_target (build_target_lib.BuildTarget): The build target.
+    model (str): The model name
+
+  Returns:
+    A key_id (str) or None.
+  """
+  model_arg = '--model=' + model
+  key_id_list = _run_cros_config_host(
+      build_target,
+      [model_arg, 'get', '/firmware-signing', 'key-id'])
+  key_id = None
+  if len(key_id_list) == 1:
+    key_id = key_id_list[0]
+  return key_id
+
+
 def _run_cros_config_host(build_target, args, log_output=True):
   """Run the cros_config_host tool.
 

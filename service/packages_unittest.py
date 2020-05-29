@@ -974,3 +974,25 @@ class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
     build_target = build_target_lib.BuildTarget(self.board)
     result = packages.get_models(build_target)
     self.assertEqual(result, ['pyro', 'reef', 'snappy'])
+
+
+class GetKeyIdTest(cros_test_lib.MockTestCase):
+  """Tests for get_key_id."""
+
+  def setUp(self):
+    self.board = 'test-board'
+    self.build_target = build_target_lib.BuildTarget(self.board)
+
+  def testGetKeyId(self):
+    """Test get_key_id when _run_cros_config_host returns a key."""
+    self.PatchObject(packages, '_run_cros_config_host',
+                     return_value=['key'])
+    result = packages.get_key_id(self.build_target, 'model')
+    self.assertEqual(result, 'key')
+
+  def testGetKeyIdNoKey(self):
+    """Test get_key_id when None should be returned."""
+    self.PatchObject(packages, '_run_cros_config_host',
+                     return_value=['key1', 'key2'])
+    result = packages.get_key_id(self.build_target, 'model')
+    self.assertEqual(result, None)
