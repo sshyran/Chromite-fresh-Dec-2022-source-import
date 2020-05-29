@@ -252,13 +252,14 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   def setUp(self):
     self.CreateMockOverlay('amd64-generic')
-
     self.StartPatcher(generic_stages_unittest.ArchivingStageMixinMock())
 
     self.gen_mock = self.PatchObject(commands, 'GenerateBreakpadSymbols')
     self.gen_android_mock = self.PatchObject(commands,
                                              'GenerateAndroidBreakpadSymbols')
     self.upload_mock = self.PatchObject(commands, 'UploadSymbols')
+    self.upload_artifact_mock = self.PatchObject(
+        artifact_stages.DebugSymbolsStage, 'UploadArtifact')
     self.tar_mock = self.PatchObject(commands, 'GenerateDebugTarball')
 
     self.rc_mock = self.StartPatcher(cros_test_lib.RunCommandMock())
@@ -275,6 +276,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
           'archive_build_debug': True,
           'vm_tests': True,
           'upload_symbols': True,
+          'basic_builder': False,
       }
     super(DebugSymbolsStageTest, self)._Prepare(
         extra_config=extra_config, **kwargs)
@@ -320,6 +322,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.assertEqual(self.gen_android_mock.call_count, 0)
     self.assertEqual(self.upload_mock.call_count, 1)
     self.assertEqual(self.tar_mock.call_count, 2)
+    self.assertEqual(self.upload_artifact_mock.call_count, 2)
 
     self.assertBoardAttrEqual('breakpad_symbols_generated', True)
     self.assertBoardAttrEqual('debug_tarball_generated', True)
@@ -332,6 +335,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.assertEqual(self.gen_android_mock.call_count, 1)
     self.assertEqual(self.upload_mock.call_count, 1)
     self.assertEqual(self.tar_mock.call_count, 2)
+    self.assertEqual(self.upload_artifact_mock.call_count, 2)
 
     self.assertBoardAttrEqual('breakpad_symbols_generated', True)
     self.assertBoardAttrEqual('debug_tarball_generated', True)
@@ -342,6 +346,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
         'archive_build_debug': False,
         'vm_tests': False,
         'upload_symbols': False,
+        'basic_builder': False,
     }
     result = self._TestPerformStage(extra_config)
     self.assertIsNone(result)
@@ -349,6 +354,27 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.assertEqual(self.gen_mock.call_count, 1)
     self.assertEqual(self.gen_android_mock.call_count, 0)
     self.assertEqual(self.upload_mock.call_count, 0)
+    self.assertEqual(self.tar_mock.call_count, 2)
+    self.assertEqual(self.upload_artifact_mock.call_count, 2)
+
+    self.assertBoardAttrEqual('breakpad_symbols_generated', True)
+    self.assertBoardAttrEqual('debug_tarball_generated', True)
+
+  def testPerformStageBasicBuilder(self):
+    """Test for a PerformStage when basic_builder is enabled"""
+    extra_config = {
+        'archive_build_debug': False,
+        'vm_tests': False,
+        'upload_symbols': False,
+        'basic_builder': True,
+    }
+    result = self._TestPerformStage(extra_config)
+    self.assertIsNone(result)
+
+    self.assertEqual(self.gen_mock.call_count, 1)
+    self.assertEqual(self.gen_android_mock.call_count, 0)
+    self.assertEqual(self.upload_mock.call_count, 0)
+    self.assertEqual(self.upload_artifact_mock.call_count, 0)
     self.assertEqual(self.tar_mock.call_count, 2)
 
     self.assertBoardAttrEqual('breakpad_symbols_generated', True)
@@ -368,6 +394,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.assertEqual(self.gen_android_mock.call_count, 0)
     self.assertEqual(self.upload_mock.call_count, 0)
     self.assertEqual(self.tar_mock.call_count, 0)
+    self.assertEqual(self.upload_artifact_mock.call_count, 0)
 
     self.assertBoardAttrEqual('breakpad_symbols_generated', False)
     self.assertBoardAttrEqual('debug_tarball_generated', False)

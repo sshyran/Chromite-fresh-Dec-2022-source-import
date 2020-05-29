@@ -489,6 +489,7 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
     """Generate debug symbols and upload debug.tgz."""
     buildroot = self._build_root
     board = self._current_board
+    dryrun = self._run.config.basic_builder
 
     # Generate breakpad symbols of Chrome OS binaries.
     commands.GenerateBreakpadSymbols(buildroot, board,
@@ -506,35 +507,49 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
     self.board_runattrs.SetParallel('breakpad_symbols_generated', True)
 
     # Upload them.
-    self.UploadDebugTarball()
+    self.GenerateDebugTarball(upload=not dryrun)
 
     # Upload debug/breakpad tarball.
-    self.UploadDebugBreakpadTarball()
+    self.GenerateDebugBreakpadTarball(upload=not dryrun)
 
     # Upload them to crash server.
-    if self._run.config.upload_symbols:
+    if self._run.config.upload_symbols and not dryrun:
       self.UploadSymbols(buildroot, board)
 
     self.board_runattrs.SetParallel('debug_symbols_completed', True)
 
-  def UploadDebugTarball(self):
-    """Generate and upload the debug tarball."""
+  def GenerateDebugTarball(self, upload=True):
+    """Generate and upload the debug tarball.
+
+    Args:
+      upload: Boolean indicating whether to upload the generated debug tarball.
+    """
     filename = commands.GenerateDebugTarball(
         self._build_root, self._current_board, self.archive_path,
         self._run.config.archive_build_debug)
-    self.UploadArtifact(filename, archive=False)
+    if upload:
+      self.UploadArtifact(filename, archive=False)
+    else:
+      logging.info('DebugSymbolsStage dryrun: would have uploaded %s', filename)
     logging.info('Announcing availability of debug tarball now.')
     self.board_runattrs.SetParallel('debug_tarball_generated', True)
 
-  def UploadDebugBreakpadTarball(self):
-    """Generate and upload the debug tarball with only breakpad files."""
+  def GenerateDebugBreakpadTarball(self, upload=True):
+    """Generate and upload the debug tarball with only breakpad files.
+
+    Args:
+      upload: Boolean indicating whether to upload the generated debug tarball.
+    """
     filename = commands.GenerateDebugTarball(
         self._build_root,
         self._current_board,
         self.archive_path,
         False,
         archive_name='debug_breakpad.tar.xz')
-    self.UploadArtifact(filename, archive=False)
+    if upload:
+      self.UploadArtifact(filename, archive=False)
+    else:
+      logging.info('DebugSymbolsStage dryrun: would have uploaded %s', filename)
 
   def UploadSymbols(self, buildroot, board):
     """Upload generated debug symbols."""

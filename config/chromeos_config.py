@@ -554,8 +554,7 @@ def GeneralTemplates(site_config):
       upload_hw_test_artifacts=False,
       cpe_export=False,
       run_cpeexport=False,
-      run_build_configs_export=False,
-      debug_symbols=False)
+      run_build_configs_export=False)
 
   site_config.AddTemplate(
       'release',

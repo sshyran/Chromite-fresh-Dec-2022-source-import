@@ -778,7 +778,6 @@
             "chrome_sdk": true,
             "chroot_use_image": false,
             "cpe_export": false,
-            "debug_symbols": false,
             "description": "Fail Fast Release Builds (canary) (internal)",
             "dev_installer_prebuilts": true,
             "display_label": "release",
