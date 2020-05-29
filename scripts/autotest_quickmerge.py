@@ -18,6 +18,7 @@ import re
 import sys
 from collections import namedtuple
 
+from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -303,9 +304,9 @@ def ParseArguments(argv):
   Returns:
     parsed arguments.
   """
-  parser = argparse.ArgumentParser(description='Perform a fast approximation '
-                                   'to emerge-$board autotest-all, by '
-                                   'rsyncing source tree to sysroot.')
+  parser = commandline.ArgumentParser(
+      description='Perform a fast approximation to emerge-$board '
+                  'autotest-all, by rsyncing source tree to sysroot.')
 
   default_board = cros_build_lib.GetDefaultBoard()
   parser.add_argument('--board', metavar='BOARD', default=default_board,
