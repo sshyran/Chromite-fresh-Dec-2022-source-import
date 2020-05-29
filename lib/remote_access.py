@@ -397,7 +397,8 @@ class RemoteAccess(object):
 
       if isinstance(cmd, six.string_types):
         if kwargs.get('shell'):
-          ssh_cmd = '%s %s' % (' '.join(ssh_cmd), cmd)
+          ssh_cmd = "%s %s" % (' '.join(ssh_cmd),
+                               cros_build_lib.ShellQuote(cmd))
         else:
           ssh_cmd += [cmd]
       else:

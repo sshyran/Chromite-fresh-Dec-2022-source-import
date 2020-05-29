@@ -222,6 +222,13 @@ class RemoteShTest(RemoteAccessTest):
     self.assertEqual(result.output.strip(), self.OUTPUT)
     self.assertEqual(result.error.strip(), self.ERROR)
 
+  def testShell(self):
+    """Test normal functionality with shell=True."""
+    test_cmd = 'ls && pwd'
+    self.rsh_mock.AddCmdResult(test_cmd, returncode=0)
+    result = self.host.RemoteSh(test_cmd, shell=True)
+    self.assertTrue(result.cmd[-1].endswith("'%s'" % test_cmd))
+
   def testRemoteCmdFailure(self):
     """Test failure in remote cmd."""
     self.SetRemoteShResult(returncode=1)
