@@ -270,7 +270,6 @@
     cheza64-release
     cobblepot-release
     coral-release
-    cyan-kernelnext-release
     cyan-release
     dedede-release
     drallion-release
@@ -315,7 +314,6 @@
     jacuzzi-release
     kalista-cfm-release
     kalista-release
-    kefka-kernelnext-release
     kefka-release
     kevin-arc64-release
     kevin-release
@@ -726,12 +724,6 @@
   coral-unittest-stress
   cyan-factory-strago-7458.B-factorybranch-tryjob
   cyan-full-tryjob
-  cyan-kernelnext-full-tryjob
-  cyan-kernelnext-llvm-next-toolchain-tryjob
-  cyan-kernelnext-llvm-toolchain-tryjob
-  cyan-kernelnext-payloads-tryjob
-  cyan-kernelnext-release-tryjob
-  cyan-kernelnext-unittest-stress
   cyan-llvm-next-toolchain-tryjob
   cyan-llvm-toolchain-tryjob
   cyan-payloads-tryjob
@@ -1242,12 +1234,6 @@
   kalista-unittest-stress
   kefka-factory-strago-7458.B-factorybranch-tryjob
   kefka-full-tryjob
-  kefka-kernelnext-full-tryjob
-  kefka-kernelnext-llvm-next-toolchain-tryjob
-  kefka-kernelnext-llvm-toolchain-tryjob
-  kefka-kernelnext-payloads-tryjob
-  kefka-kernelnext-release-tryjob
-  kefka-kernelnext-unittest-stress
   kefka-llvm-next-toolchain-tryjob
   kefka-llvm-toolchain-tryjob
   kefka-payloads-tryjob
@@ -1457,7 +1443,6 @@
     cheza64-release-tryjob
     cobblepot-release-tryjob
     coral-release-tryjob
-    cyan-kernelnext-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
     drallion-release-tryjob
@@ -1502,7 +1487,6 @@
     jacuzzi-release-tryjob
     kalista-cfm-release-tryjob
     kalista-release-tryjob
-    kefka-kernelnext-release-tryjob
     kefka-release-tryjob
     kevin-arc64-release-tryjob
     kevin-release-tryjob
