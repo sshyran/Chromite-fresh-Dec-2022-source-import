@@ -3591,7 +3591,8 @@ def GeneratePayloads(target_image_path,
                      archive_dir,
                      full=False,
                      delta=False,
-                     stateful=False):
+                     stateful=False,
+                     dlc=False):
   """Generates the payloads for hw testing.
 
   Args:
@@ -3600,13 +3601,14 @@ def GeneratePayloads(target_image_path,
     full: Generate full payloads.
     delta: Generate delta payloads.
     stateful: Generate stateful payload.
+    dlc: Generate dummy-dlc payloads.
   """
   # TODO(saklein): Change to a combined call to the endpoint with
   #   GenerateQuickProvisionPayloads after the payload type arguments have been
   #   added.
   artifacts_service.GenerateTestPayloads(target_image_path, archive_dir,
                                          full=full, delta=delta,
-                                         stateful=stateful)
+                                         stateful=stateful, dlc=dlc)
 
 
 def GetChromeLKGM(revision):

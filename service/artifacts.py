@@ -399,7 +399,7 @@ def BundleTestUpdatePayloads(image_path, output_dir):
 
 
 def GenerateTestPayloads(target_image_path, archive_dir, full=False,
-                         delta=False, stateful=False):
+                         delta=False, stateful=False, dlc=False):
   """Generates the payloads for hw testing.
 
   Args:
@@ -408,6 +408,7 @@ def GenerateTestPayloads(target_image_path, archive_dir, full=False,
     full (bool): Generate full payloads.
     delta (bool): Generate delta payloads.
     stateful (bool): Generate stateful payload.
+    dlc (bool): Generate dummy-dlc payload if available.
 
   Returns:
     list[str] - The list of payloads that were generated.
@@ -437,6 +438,33 @@ def GenerateTestPayloads(target_image_path, archive_dir, full=False,
     paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, payload_path, src_image=target_image_path)
     generated.append(payload_path)
+
+  if dlc and 'dlc_test' in portage_util.GetBoardUseFlags(board):
+    dlc_prefix = 'dlc'
+    dlc_id = 'dummy-dlc'
+    dlc_package = 'package'
+    dummy_dlc_image = os.path.join(os.path.dirname(target_image_path),
+                                   dlc_prefix, dlc_id, dlc_package, 'dlc.img')
+
+    if full:
+      # Names for full dummy-dlc payloads look something like this:
+      # dlc_dummy-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+      name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, board,
+                       'full', suffix])
+      payload_path = os.path.join(archive_dir, name)
+      paygen_payload_lib.GenerateUpdatePayload(dummy_dlc_image, payload_path)
+      generated.append(payload_path)
+
+    if delta:
+      # Names for delta payloads look something like this:
+      # dlc_dummy-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-
+      # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
+      name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, os_version,
+                       board, 'delta', suffix])
+      payload_path = os.path.join(archive_dir, name)
+      paygen_payload_lib.GenerateUpdatePayload(dummy_dlc_image, payload_path,
+                                               src_image=dummy_dlc_image)
+      generated.append(payload_path)
 
   if stateful:
     generated.append(

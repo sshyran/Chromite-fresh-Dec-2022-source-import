@@ -797,7 +797,8 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
           break
     image_name = constants.IMAGE_TYPE_TO_NAME[payload_type]
     logging.info('Generating payloads to upload for %s', image_name)
-    self._GeneratePayloads(image_name, full=True, stateful=True, delta=True)
+    self._GeneratePayloads(image_name, full=True, stateful=True, delta=True,
+                           dlc=True)
 
   @failures_lib.SetFailureType(failures_lib.InfrastructureFailure)
   def PerformStage(self):

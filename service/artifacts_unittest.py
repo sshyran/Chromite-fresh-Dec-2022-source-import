@@ -547,6 +547,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'link/R37-5952.0.2014_06_12_2302-a1/chromiumos_test_image.bin')
     osutils.Touch(self.target_image, makedirs=True)
+    self.dummy_dlc_image = os.path.join(
+        self.tempdir,
+        'link/R37-5952.0.2014_06_12_2302-a1/dlc/dummy-dlc/package/dlc.img')
+    osutils.Touch(self.dummy_dlc_image, makedirs=True)
 
   def testGenerateFullTestPayloads(self):
     """Verifies correctly generating full payloads."""
@@ -565,7 +569,47 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    paygen_mock.assert_call_once_with(self.target_image, payload_path)
+    paygen_mock.assert_call_once_with(self.target_image, payload_path,
+                                      src_image=self.target_image)
+
+  def testGenerateFullDummyDlcTestPayloads(self):
+    """Verifies correctly generating full payloads for dummy-dlc."""
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
+    self.PatchObject(portage_util, 'GetBoardUseFlags',
+                     return_value=['dlc_test'])
+    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, full=True,
+                                   dlc=True)
+
+    rootfs_payload = 'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin'
+    dlc_payload = ('dlc_dummy-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_'
+                   'full_dev.bin')
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image,
+                  os.path.join(self.tempdir, rootfs_payload)),
+        mock.call(self.dummy_dlc_image,
+                  os.path.join(self.tempdir, dlc_payload)),
+    ])
+
+  def testGenerateDeltaDummyDlcTestPayloads(self):
+    """Verifies correctly generating delta payloads for dummy-dlc."""
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
+    self.PatchObject(portage_util, 'GetBoardUseFlags',
+                     return_value=['dlc_test'])
+    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, delta=True,
+                                   dlc=True)
+
+    rootfs_payload = ('chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
+                      '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    dlc_payload = ('dlc_dummy-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
+                   '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image,
+                  os.path.join(self.tempdir, rootfs_payload),
+                  src_image=self.target_image),
+        mock.call(self.dummy_dlc_image,
+                  os.path.join(self.tempdir, dlc_payload),
+                  src_image=self.dummy_dlc_image),
+    ])
 
   def testGenerateStatefulTestPayloads(self):
     """Verifies correctly generating stateful payloads."""
