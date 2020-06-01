@@ -15,6 +15,7 @@ import errno
 import functools
 import getpass
 import inspect
+import operator
 import os
 import re
 import signal
@@ -672,6 +673,11 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   Raises:
     RunCommandError: Raised on error.
   """
+  # Hide this function in pytest tracebacks when a RunCommandError is raised,
+  # as seeing the contents of this function when a command fails is not helpful.
+  # https://docs.pytest.org/en/latest/example/simple.html#writing-well-integrated-assertion-helpers
+  __tracebackhide__ = operator.methodcaller('errisinstance', RunCommandError)
+
   # Handle backwards compatible settings.
   if 'log_stdout_to_file' in kwargs:
     logging.warning('run: log_stdout_to_file=X is now stdout=X')
