@@ -746,6 +746,18 @@
       ]
     },
     {
+      "name": "kefka-kernelnext",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "strago",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "kevin",
       "configs": [
         {
@@ -1313,6 +1325,18 @@
       ]
     },
     {
+      "name": "volteer-kernelnext",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "whirlwind",
       "configs": [
         {
@@ -1357,6 +1381,18 @@
           "leader_board": false,
           "board_group": "",
           "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "zork-kernelnext",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
         }
       ]
     }
@@ -4634,7 +4670,7 @@
       "reference_board_name": "trogdor",
       "arch": "ARM_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "trogdor",

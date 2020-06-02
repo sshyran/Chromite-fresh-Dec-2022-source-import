@@ -314,6 +314,7 @@
     jacuzzi-release
     kalista-cfm-release
     kalista-release
+    kefka-kernelnext-release
     kefka-release
     kevin-arc64-release
     kevin-release
@@ -378,11 +379,13 @@
     veyron_rialto-release
     veyron_tiger-release
     viking-release
+    volteer-kernelnext-release
     volteer-release
     whirlwind-release
     winky-release
     wizpig-release
     wooten-release
+    zork-kernelnext-release
     zork-release
   master-release-basic
     atlas-release-basic
@@ -1234,6 +1237,12 @@
   kalista-unittest-stress
   kefka-factory-strago-7458.B-factorybranch-tryjob
   kefka-full-tryjob
+  kefka-kernelnext-full-tryjob
+  kefka-kernelnext-llvm-next-toolchain-tryjob
+  kefka-kernelnext-llvm-toolchain-tryjob
+  kefka-kernelnext-payloads-tryjob
+  kefka-kernelnext-release-tryjob
+  kefka-kernelnext-unittest-stress
   kefka-llvm-next-toolchain-tryjob
   kefka-llvm-toolchain-tryjob
   kefka-payloads-tryjob
@@ -1487,6 +1496,7 @@
     jacuzzi-release-tryjob
     kalista-cfm-release-tryjob
     kalista-release-tryjob
+    kefka-kernelnext-release-tryjob
     kefka-release-tryjob
     kevin-arc64-release-tryjob
     kevin-release-tryjob
@@ -1551,11 +1561,13 @@
     veyron_rialto-release-tryjob
     veyron_tiger-release-tryjob
     viking-release-tryjob
+    volteer-kernelnext-release-tryjob
     volteer-release-tryjob
     whirlwind-release-tryjob
     winky-release-tryjob
     wizpig-release-tryjob
     wooten-release-tryjob
+    zork-kernelnext-release-tryjob
     zork-release-tryjob
   master-toolchain-tryjob
     amd64-llvm-next-toolchain-tryjob
@@ -1977,6 +1989,12 @@
   viking-release-tryjob
   viking-unittest-stress
   volteer-full-tryjob
+  volteer-kernelnext-full-tryjob
+  volteer-kernelnext-llvm-next-toolchain-tryjob
+  volteer-kernelnext-llvm-toolchain-tryjob
+  volteer-kernelnext-payloads-tryjob
+  volteer-kernelnext-release-tryjob
+  volteer-kernelnext-unittest-stress
   volteer-llvm-next-toolchain-tryjob
   volteer-llvm-toolchain-tryjob
   volteer-payloads-tryjob
@@ -2023,6 +2041,12 @@
   x32-generic-llvm-toolchain-tryjob
   x32-generic-unittest-stress
   zork-full-tryjob
+  zork-kernelnext-full-tryjob
+  zork-kernelnext-llvm-next-toolchain-tryjob
+  zork-kernelnext-llvm-toolchain-tryjob
+  zork-kernelnext-payloads-tryjob
+  zork-kernelnext-release-tryjob
+  zork-kernelnext-unittest-stress
   zork-llvm-next-toolchain-tryjob
   zork-llvm-toolchain-tryjob
   zork-payloads-tryjob
