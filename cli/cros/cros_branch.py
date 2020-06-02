@@ -794,6 +794,11 @@ Delete Examples:
         help='Required for any remote operation that would delete an existing '
         'branch. Also required when trying to branch from a previously '
         'branched manifest version.')
+    remote_group.add_argument(
+        '--ack-deprecation',
+        action='store_true',
+        help='Acknowledge that this tool is deprecated and that branch_util '
+        'should be used instead. go/cros-branching')
 
     sync_group = parser.add_argument_group(
         'Sync options',
@@ -999,6 +1004,19 @@ Delete Examples:
     handlers[self.options.subcommand](checkout)
 
   def Run(self):
+    logging.warning(
+        'The `cros branch` tool will be removed by end of year 2020. '
+        'Instead, please use the new Go-based branch_util tool. Instructions '
+        'for installing this tool and example usage can be found at '
+        'http://go/cros-branching. Try `~/go/bin/branch_util help create` to '
+        'see its full branch creation usage instructions.')
+    # Require the user to ack that warning
+    if not self.options.ack_deprecation:
+      in_test_context = 'PYTEST_CURRENT_TEST' in os.environ
+      if not in_test_context:
+        cros_build_lib.Die(
+          'Please use the new tool, or add --ack-deprecation to continue with '
+          'use of `cros branch`')
     if self.options.root:
       self._RunInCheckout(self.options.root)
     else:
