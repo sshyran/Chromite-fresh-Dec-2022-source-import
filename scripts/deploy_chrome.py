@@ -708,12 +708,6 @@ def main(argv):
   options = _ParseCommandLine(argv)
   _PostParseCheck(options)
 
-  # Set cros_build_lib debug level to hide run spew.
-  if options.verbose:
-    logging.getLogger().setLevel(logging.DEBUG)
-  else:
-    logging.getLogger().setLevel(logging.INFO)
-
   with osutils.TempDir(set_global=True) as tempdir:
     staging_dir = options.staging_dir
     if not staging_dir:
