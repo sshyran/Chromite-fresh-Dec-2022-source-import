@@ -127,6 +127,11 @@ class CreateVmTest(cros_test_lib.RunCommandTestCase):
     image.CreateVm('board', is_test=False)
     self.assertCommandContains(['--test_image'], expected=False)
 
+  def testDiskLayout(self):
+    """Test the application of the --disk_layout argument."""
+    image.CreateVm('board', disk_layout='5000PB')
+    self.assertCommandContains(['--disk_layout', '5000PB'])
+
   def testCommandError(self):
     """Test handling of an error when running the command."""
     self.rc.SetDefaultCmdResult(returncode=1)

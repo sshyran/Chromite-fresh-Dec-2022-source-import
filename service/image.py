@@ -146,11 +146,12 @@ def Build(board=None, images=None, config=None, extra_env=None):
     return BuildResult(result.returncode, failed)
 
 
-def CreateVm(board, is_test=False, chroot=None):
+def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
   """Create a VM from an image.
 
   Args:
     board (str): The board for which the VM is being created.
+    disk_layout (str): The disk layout type.
     is_test (bool): Whether it is a test image.
     chroot (chroot_lib.Chroot): The chroot where the image lives.
 
@@ -162,6 +163,9 @@ def CreateVm(board, is_test=False, chroot=None):
 
   if is_test:
     cmd.append('--test_image')
+
+  if disk_layout:
+    cmd.extend(['--disk_layout', disk_layout])
 
   chroot_args = None
   if chroot and cros_build_lib.IsOutsideChroot():

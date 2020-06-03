@@ -107,7 +107,8 @@ def Create(input_proto, output_proto, _config):
           if vm_type in [_BASE_GUEST_VM_ID, _TEST_GUEST_VM_ID]:
             vm_path = image.CreateGuestVm(board, is_test=is_test)
           else:
-            vm_path = image.CreateVm(board, is_test=is_test)
+            vm_path = image.CreateVm(
+                board, disk_layout=build_config.disk_layout, is_test=is_test)
         except image.ImageToVmError as e:
           cros_build_lib.Die(e)
 
