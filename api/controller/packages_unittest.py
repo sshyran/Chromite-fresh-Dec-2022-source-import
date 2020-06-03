@@ -507,16 +507,44 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
     request = self._GetRequest(board='betty')
-    # TODO(crbug/1071620): Add/check mock for service layer calls.
+    patch_version = self.PatchObject(packages_service,
+                                     'determine_android_version')
+    patch_branch_version = self.PatchObject(packages_service,
+                                            'determine_android_branch')
+    patch_fw_versions = self.PatchObject(packages_service,
+                                         'determine_firmware_versions')
+    patch_fingerprints = self.PatchObject(packages_service,
+                                          'find_fingerprints')
+    patch_get_models = self.PatchObject(packages_service,
+                                        'get_models')
     packages_controller.GetBuilderMetadata(request, self.response,
                                            self.validate_only_config)
+    patch_version.assert_not_called()
+    patch_branch_version.assert_not_called()
+    patch_fw_versions.assert_not_called()
+    patch_fingerprints.assert_not_called()
+    patch_get_models.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     request = self._GetRequest(board='betty')
-    # TODO(crbug/1071620): Add/check mock for service layer calls.
+    patch_version = self.PatchObject(packages_service,
+                                     'determine_android_version')
+    patch_branch_version = self.PatchObject(packages_service,
+                                            'determine_android_branch')
+    patch_fw_versions = self.PatchObject(packages_service,
+                                         'determine_firmware_versions')
+    patch_fingerprints = self.PatchObject(packages_service,
+                                          'find_fingerprints')
+    patch_get_models = self.PatchObject(packages_service,
+                                        'get_models')
     packages_controller.GetBuilderMetadata(request, self.response,
                                            self.mock_call_config)
+    patch_version.assert_not_called()
+    patch_branch_version.assert_not_called()
+    patch_fw_versions.assert_not_called()
+    patch_fingerprints.assert_not_called()
+    patch_get_models.assert_not_called()
 
     self.assertEqual(len(self.response.build_target_metadata), 1)
     self.assertEqual(self.response.build_target_metadata[0].build_target,
