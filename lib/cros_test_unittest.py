@@ -201,8 +201,8 @@ class CrOSTesterMiscTests(CrOSTesterBase):
     self.assertCommandContains(['chown', '-R', 'chronos:',
                                 '/usr/local/cros_test'])
     # Ensure command runs in the target directory.
-    self.assertCommandContains('"cd /usr/local/cros_test && crypto_unittests '
-                               '--test-launcher-print-test-stdio=always"')
+    self.assertCommandContains('cd /usr/local/cros_test && crypto_unittests '
+                               '--test-launcher-print-test-stdio=always')
     # Ensure target directory is removed at the end of the test.
     self.assertCommandContains(['rm', '-rf', '/usr/local/cros_test'])
 
@@ -215,7 +215,7 @@ class CrOSTesterMiscTests(CrOSTesterBase):
     self._tester.Run()
 
     # Ensure command runs in the autotest directory.
-    self.assertCommandContains('"cd /usr/local/autotest && ./bin/vm_sanity.py"')
+    self.assertCommandContains('cd /usr/local/autotest && ./bin/vm_sanity.py')
 
   def testRunDeviceCmdWithoutSrcFiles(self):
     """Verify running a remote command when src files are not specified.
@@ -229,8 +229,8 @@ class CrOSTesterMiscTests(CrOSTesterBase):
     self.assertCommandContains(['ssh', '-p', '9222',
                                 '/usr/local/autotest/bin/vm_sanity.py'])
     self.assertCommandContains(['mkdir', '-p'], expected=False)
-    self.assertCommandContains(['"cd %s && /usr/local/autotest/bin/'
-                                'vm_sanity.py"' % self._tester.cwd],
+    self.assertCommandContains(['cd %s && /usr/local/autotest/bin/'
+                                'vm_sanity.py' % self._tester.cwd],
                                expected=False)
     self.assertCommandContains(['rm', '-rf'], expected=False)
 

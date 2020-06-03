@@ -441,7 +441,7 @@ class CrOSTest(object):
     user = 'chronos' if self.as_chronos else None
     if cwd:
       # Run the remote command with cwd.
-      cmd = '"cd %s && %s"' % (cwd, ' '.join(self.args))
+      cmd = 'cd %s && %s' % (cwd, ' '.join(self.args))
       # Pass shell=True because of && in the cmd.
       result = self._device.remote_run(cmd, stream_output=True, shell=True,
                                        remote_user=user)
