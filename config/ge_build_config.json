@@ -1325,18 +1325,6 @@
       ]
     },
     {
-      "name": "volteer-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "whirlwind",
       "configs": [
         {
@@ -4759,6 +4747,63 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 405,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "volteer-kernelnext",
+      "reference_board_name": "volteer-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "halvor",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "malefor",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "mudada",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "ripto",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "trondo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "volteer",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
           "is_active": true
         }
       ]

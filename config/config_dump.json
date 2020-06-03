@@ -34128,6 +34128,14 @@
             "volteer-kernelnext"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"malefor\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"mudada\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"ripto\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"trondo\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"volteer\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -34149,6 +34157,14 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"malefor\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"mudada\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"ripto\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"trondo\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"volteer\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
