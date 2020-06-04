@@ -1371,18 +1371,6 @@
           "arch": "ARM_INTERNAL"
         }
       ]
-    },
-    {
-      "name": "zork-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
     }
   ],
   "release_branch": false,
@@ -4875,6 +4863,55 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 381,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "zork-kernelnext",
+      "reference_board_name": "zork-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "zork-kernelnext",
+          "name": "berknip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "dalboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "ezkinil",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "morphius",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "trembyle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
           "is_active": true
         }
       ]
