@@ -418,8 +418,20 @@ class UprevOverlayManager(object):
     else:
       return []
 
-  def uprev(self):
-    self._populate_overlay_ebuilds()
+  def uprev(self, package_list=None, force=False):
+    """Uprev ebuilds.
+
+    Uprev ebuilds for the packages in package_list. If package_list is not
+    specified, uprevs all ebuilds for overlays in self.overlays.
+
+    Args:
+      package_list (list[str]): A list of packages to uprev.
+      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+    """
+    # Use all found packages if an explicit package_list is not given.
+    use_all = not bool(package_list)
+    self._populate_overlay_ebuilds(
+        use_all=use_all, package_list=package_list, force=force)
 
     with parallel.Manager() as manager:
       # Contains the list of packages we actually revved.
@@ -510,17 +522,30 @@ class UprevOverlayManager(object):
       self._revved_packages.append(ebuild.package)
       self._new_package_atoms.append('=%s' % new_package)
 
-  def _populate_overlay_ebuilds(self):
-    """Populates the overlay to ebuilds mapping."""
+  def _populate_overlay_ebuilds(self,
+                                use_all=True,
+                                package_list=None,
+                                force=False):
+    """Populates the overlay to ebuilds mapping.
+
+    Populate self._overlay_ebuilds for all overlays in self.overlays unless
+    otherwise specified by package_list.
+
+    Args:
+      use_all: Whether to include all ebuilds in the specified directories.
+        If true, then we gather all packages in the directories regardless
+        of whether they are in our set of packages.
+      package_list (list[str]): A set of the packages we want to gather. If
+      use_all is True, this argument is ignored, and should be None.
+      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+    """
     # See crrev.com/c/1257944 for origins of this.
     root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
     subdir_removal = manifest_version.VersionInfo('10363.0.0')
     require_subdir_support = root_version < subdir_removal
 
-    # Parameters lost to the current narrow implementation.
-    use_all = True
-    package_list = []
-    force = False
+    if not package_list:
+      package_list = []
 
     overlay_ebuilds = {}
     inputs = [[overlay, use_all, package_list, force, require_subdir_support]

@@ -289,6 +289,34 @@ def uprev_versioned_package(package, build_targets, refs, chroot):
   return _UPREV_FUNCS[package.cp](build_targets, refs, chroot)
 
 
+@uprevs_versioned_package('media-libs/virglrenderer')
+def uprev_virglrenderer(_build_targets, refs, _chroot):
+  """Updates virglrenderer ebuilds.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result of updating virglrenderer ebuilds.
+  """
+  repo_path = os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
+                           'virglrenderer')
+  manifest_path = os.path.join(constants.SOURCE_ROOT, repo_path, 'Manifest')
+  manifest = git.ManifestCheckout.Cached(manifest_path)
+  overlay = os.path.join(constants.SOURCE_ROOT,
+                         constants.CHROMIUMOS_OVERLAY_DIR)
+
+  uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
+  # TODO(crbug.com/1066242): Ebuilds for virglrenderer are currently
+  # blacklisted. Do not force uprevs after builder is stable and ebuilds are no
+  # longer blacklisted.
+  uprev_manager.uprev(package_list=['media-libs/virglrenderer'], force=True)
+
+  updated_files = uprev_manager.modified_ebuilds + [manifest_path]
+  result = UprevVersionedPackageResult()
+  result.add_result(refs[0].revision, updated_files)
+  return result
+
+
 @uprevs_versioned_package('afdo/kernel-profiles')
 def uprev_kernel_afdo(*_args, **_kwargs):
   """Updates kernel ebuilds with versions from kernel_afdo.json.
