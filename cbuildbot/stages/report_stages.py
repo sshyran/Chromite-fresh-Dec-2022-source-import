@@ -574,7 +574,8 @@ class ReportStage(generic_stages.BuilderStage,
       logging.info('Builder %s has %s %s time(s) in a row.',
                    builder_run.config.name, status, abs(streak_value))
 
-      if builder_run.config.notification_configs and status == 'failed':
+      if (builder_run.config.cbb_branch == 'master' and
+          builder_run.config.notification_configs and status == 'failed'):
         email_notify = alerts.GetUpdatedEmailNotify(builder_run,
                                                     abs(streak_value))
         self.buildstore.UpdateLuciNotifyProperties(email_notify=email_notify)
