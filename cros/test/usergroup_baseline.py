@@ -191,6 +191,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                                    'fwupdate-drm_dp_aux-i2c'}),
     GroupEntry(group='cups-proxy', gid=20136, users={'crosvm', 'cups-proxy',
                                                      'pluginvm'}),
+    GroupEntry(group='usbprinter', gid=20155, users={'cups', 'saned'}),
 ))
 
 GROUP_BASELINE_LAKITU = dict((e.group, e) for e in (
