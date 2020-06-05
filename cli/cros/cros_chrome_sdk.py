@@ -1031,7 +1031,9 @@ class ChromeSDKCommand(command.CliCommand):
       logging.warning('No args.gn file: %s', gn_args_file_path)
       return True
 
-    old_gn_args = gn_helpers.FromGNArgs(osutils.ReadFile(gn_args_file_path))
+    parser = gn_helpers.GNValueParser(osutils.ReadFile(gn_args_file_path),
+                                      checkout_root=self.options.chrome_src)
+    old_gn_args = parser.ParseArgs()
     if new_gn_args == old_gn_args:
       return False
 
