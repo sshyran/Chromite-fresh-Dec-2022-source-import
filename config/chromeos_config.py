@@ -2418,10 +2418,6 @@ def AddNotificationConfigs(site_config):
   notifiers = {
       'swanky-release': [
           config_lib.NotificationConfig(email='navil+spam@chromium.org'),
-      ],
-      'dedede-release': [
-          config_lib.NotificationConfig(
-              email='dedede-release-builder-alerts@google.com', threshold=2),
       ]
   }
 
