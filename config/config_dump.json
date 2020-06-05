@@ -1163,8 +1163,8 @@
         "manifest_version": true,
         "prebuilts": "public",
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ],
         "useflags": [
             "-chrome_internal"
@@ -1191,8 +1191,8 @@
         "manifest_version": true,
         "prebuilts": "public",
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ],
         "useflags": [
             "-chrome_internal"
@@ -4690,7 +4690,7 @@
         ],
         "manifest": "official.xml",
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_android_pfq\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational && \\\"dep:android*\\\")\"\n    ],\n    \"timeout\": 3600\n}"
+            "{\n    \"suite_name\": \"tast_vm_android_pfq\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational && \\\"dep:android*\\\")\"\n    ],\n    \"timeout\": 3600\n}"
         ],
         "useflags": [
             "chrome_internal"
@@ -4719,7 +4719,7 @@
         "luci_builder": "Try",
         "manifest": "official.xml",
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_android_pfq\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational && \\\"dep:android*\\\")\"\n    ],\n    \"timeout\": 3600\n}"
+            "{\n    \"suite_name\": \"tast_vm_android_pfq\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational && \\\"dep:android*\\\")\"\n    ],\n    \"timeout\": 3600\n}"
         ],
         "uprev": true,
         "useflags": [
@@ -4738,8 +4738,8 @@
         "hw_tests_disabled_bug": "https://crbug.com/1026430",
         "hw_tests_override": [],
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ]
     },
     "betty-pi-arc-release-tryjob": {
@@ -4757,8 +4757,8 @@
         "push_image": false,
         "suite_scheduling": false,
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ],
         "vm_tests_override": null
     },
@@ -4916,8 +4916,8 @@
         "hw_tests_disabled_bug": "https://crbug.com/998427",
         "hw_tests_override": [],
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ]
     },
     "betty-release-tryjob": {
@@ -4935,8 +4935,8 @@
         "push_image": false,
         "suite_scheduling": false,
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
-            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(!disabled && (\\\"group:mainline\\\" || !\\\"group:*\\\") && informational)\"\n    ],\n    \"timeout\": 7200\n}"
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
+            "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 7200\n}"
         ],
         "vm_tests_override": null
     },

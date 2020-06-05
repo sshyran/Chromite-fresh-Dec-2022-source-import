@@ -672,8 +672,7 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_paladin',
-              ['(!disabled && ("group:mainline" || !"group:*") && '
-               '!informational)'])],
+              ['("group:mainline" && !informational)'])],
   )
   # The expression specified here matches the union of the
   # tast.critical-{android,chrome} Autotest server tests, which are executed by
@@ -683,8 +682,8 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_chrome_pfq',
-              ['(!disabled && ("group:mainline" || !"group:*") && '
-               '!informational && ("dep:android*" || "dep:chrome"))'])],
+              ['("group:mainline" && !informational && '
+               '("dep:android*" || "dep:chrome"))'])],
   )
   # The expression specified here matches the tast.critical-android Autotest
   # server test, which is executed by the bvt-tast-android-pfq suite on real
@@ -694,8 +693,7 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_android_pfq',
-              ['(!disabled && ("group:mainline" || !"group:*") && '
-               '!informational && "dep:android*")'])],
+              ['("group:mainline" && !informational && "dep:android*")'])],
   )
   # The expression specified here matches the union of the tast.critical-* and
   # tast.informational-* Autotest server tests, which are executed by the
@@ -705,12 +703,10 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_canary_critical',
-              ['(!disabled && ("group:mainline" || !"group:*") && '
-               '!informational)']),
+              ['("group:mainline" && !informational)']),
           config_lib.TastVMTestConfig(
               'tast_vm_canary_informational',
-              ['(!disabled && ("group:mainline" || !"group:*") && '
-               'informational)'],
+              ['("group:mainline" && informational)'],
               timeout=2 * 60 * 60),
       ],
   )
