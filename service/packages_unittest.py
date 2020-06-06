@@ -458,6 +458,8 @@ class HasPrebuiltTest(cros_test_lib.MockTestCase):
     """Test use flags get propagated correctly."""
     # We don't really care about the result, just the env handling.
     patch = self.PatchObject(portage_util, 'HasPrebuilt', return_value=True)
+    # Ignore any flags that may be in the environment.
+    self.PatchObject(os.environ, 'get', return_value='')
 
     packages.has_prebuilt('cat/pkg-1.2.3', useflags='useflag')
     patch.assert_called_with('cat/pkg-1.2.3', board=None,
