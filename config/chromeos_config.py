@@ -2479,13 +2479,6 @@ def ApplyCustomOverrides(site_config):
           'vm_tests': [],
           'vm_tests_override': []
       },
-      'betty-arcvm-pi-release': {
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://b/144139998',
-          'vm_tests': [],
-          'vm_tests_override': []
-      },
       # Currently betty-arc-r is VM only.
       'betty-arc-r-release': {
           'hw_tests': [],
