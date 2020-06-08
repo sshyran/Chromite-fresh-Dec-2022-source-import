@@ -464,7 +464,7 @@ class DlcGenerator(object):
       imageloader_json_content = self.GetImageloaderJsonContent(
           image_hash, table_hash, int(blocks))
       with open(self.dest_imageloader_json, 'w') as f:
-        json.dump(imageloader_json_content, f)
+        json.dump(imageloader_json_content, f, sort_keys=True, indent=2)
 
   def GenerateDLC(self):
     """Generate a DLC artifact."""
