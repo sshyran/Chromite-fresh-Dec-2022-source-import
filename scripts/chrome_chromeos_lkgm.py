@@ -123,8 +123,7 @@ class ChromeLKGMCommitter(object):
     """Constructs and returns the commit message for the LKGM update."""
     commit_msg_template = (
         'LKGM %(version)s for chromeos.'
-        '\n\n%(cq_includes)s'
-        '\nBUG=762641')
+        '\n\n%(cq_includes)s')
     cq_includes = ''
     for bot in self._PRESUBMIT_BOTS:
       cq_includes += 'CQ_INCLUDE_TRYBOTS=luci.chrome.try:%s\n' % bot
