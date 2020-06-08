@@ -2134,7 +2134,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   basic_master_config = _CreateMasterConfig(
       'master-release-basic',
       template=site_config.templates.release_basic,
-      schedule='triggered')
+      schedule='30 */2 * * * *')
   # pylint: disable=unused-variable
   lakitu_master_config = _CreateMasterConfig('master-lakitu-release')
 
