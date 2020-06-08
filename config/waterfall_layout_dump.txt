@@ -247,7 +247,6 @@
     betty-arcmaster-release
     betty-arcnext-release
     betty-arcvm-master-release
-    betty-arcvm-pi-release
     betty-kernelnext-release
     betty-pi-arc-release
     betty-qt-arc-release
@@ -556,12 +555,6 @@
   betty-arcvm-master-release-tryjob
   betty-arcvm-master-unittest-stress
   betty-arcvm-master-vmmst-android-pfq-tryjob
-  betty-arcvm-pi-full-tryjob
-  betty-arcvm-pi-llvm-next-toolchain-tryjob
-  betty-arcvm-pi-llvm-toolchain-tryjob
-  betty-arcvm-pi-payloads-tryjob
-  betty-arcvm-pi-release-tryjob
-  betty-arcvm-pi-unittest-stress
   betty-asan-tryjob
   betty-full-tryjob
   betty-incremental-tryjob
@@ -1429,7 +1422,6 @@
     betty-arcmaster-release-tryjob
     betty-arcnext-release-tryjob
     betty-arcvm-master-release-tryjob
-    betty-arcvm-pi-release-tryjob
     betty-kernelnext-release-tryjob
     betty-pi-arc-release-tryjob
     betty-qt-arc-release-tryjob
