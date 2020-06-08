@@ -2509,6 +2509,13 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1026430',
       },
 
+      # No hw_tests for caroline-ndktranslation.  See crbug.com/1091053.
+      'caroline-ndktranslation-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'http://crbug.com/1091053',
+      },
+
       # No hw_tests for eve-kvm.  See crbug.com/1085769.
       'eve-kvm-release': {
           'hw_tests': [],
