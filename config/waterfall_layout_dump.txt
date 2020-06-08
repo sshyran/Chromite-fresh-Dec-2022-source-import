@@ -282,6 +282,7 @@
     eve-arcvm-mesa-virgl-next-release
     eve-arm64-release
     eve-kernelnext-release
+    eve-kvm-release
     eve-release
     eve-userdebug-release
     excelsior-release
@@ -812,6 +813,12 @@
   eve-kernelnext-payloads-tryjob
   eve-kernelnext-release-tryjob
   eve-kernelnext-unittest-stress
+  eve-kvm-full-tryjob
+  eve-kvm-llvm-next-toolchain-tryjob
+  eve-kvm-llvm-toolchain-tryjob
+  eve-kvm-payloads-tryjob
+  eve-kvm-release-tryjob
+  eve-kvm-unittest-stress
   eve-llvm-next-toolchain-tryjob
   eve-llvm-toolchain-tryjob
   eve-llvm-tot-toolchain-tryjob
@@ -1457,6 +1464,7 @@
     eve-arcvm-mesa-virgl-next-release-tryjob
     eve-arm64-release-tryjob
     eve-kernelnext-release-tryjob
+    eve-kvm-release-tryjob
     eve-release-tryjob
     eve-userdebug-release-tryjob
     excelsior-release-tryjob
