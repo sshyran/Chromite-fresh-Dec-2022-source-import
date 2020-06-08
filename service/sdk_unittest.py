@@ -111,12 +111,9 @@ class DeleteTest(cros_test_lib.RunCommandTestCase):
   def testDeleteNoChroot(self):
     """Test no chroot provided."""
     sdk.Delete()
-    # cros clean sysroots command.
-    self.assertCommandContains(['clean', '--sysroots'])
     # cros_sdk --delete.
     self.assertCommandContains(['--delete'])
-    # Double whammy: no chroot specified for cros_sdk --delete, and no
-    # cros clean --chroot.
+    # No chroot specified for cros_sdk --delete.
     self.assertCommandContains(['--chroot'], expected=False)
 
   def testDeleteWithChroot(self):

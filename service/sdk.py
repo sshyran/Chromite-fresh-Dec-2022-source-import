@@ -176,10 +176,6 @@ def Delete(chroot=None):
     chroot (chroot_lib.Chroot): The chroot being deleted, or None for the
       default chroot.
   """
-  # Manually remove the sysroots to reduce the time taken to delete the chroot.
-  logging.info('Removing sysroots.')
-  Clean(chroot, sysroots=True)
-
   # Delete the chroot itself.
   logging.info('Removing the SDK.')
   cmd = [os.path.join(constants.CHROMITE_BIN_DIR, 'cros_sdk'), '--delete']
