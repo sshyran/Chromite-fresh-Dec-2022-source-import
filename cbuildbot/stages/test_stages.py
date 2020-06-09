@@ -489,6 +489,8 @@ class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
     if builder_run.config.models:
       models = builder_run.config.models
 
+    logging.info('Testing suites: %s', str(builder_run.config.hw_tests))
+    logging.info('Testing models: %s', str(models))
     parallel_stages = []
     for suite_config in builder_run.config.hw_tests:
       # Even for blocking stages, all models can still be run in parallel since
