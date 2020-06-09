@@ -5,9 +5,12 @@
 """Test suite for pprint.py"""
 
 import datetime
+import io
+import os
 import sys
 
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib import pformat
 
 
@@ -36,3 +39,53 @@ class TestPPrintTimedelta(cros_test_lib.TestCase):
     delta = datetime.timedelta(days=1, seconds=23)
     pretty_delta = pformat.timedelta(delta)
     self.assertEqual(pretty_delta, '1d23.000s')
+
+
+class TestJson(cros_test_lib.TempDirTestCase):
+  """Tests pformat.json."""
+
+  TESTS = (
+      ([1, 2], '[\n  1,\n  2\n]\n', '[1,2]'),
+      ({'z': 1, 'a': 'カ'}, '{\n  "a": "カ",\n  "z": 1\n}\n',
+       '{"a":"カ","z":1}'),
+  )
+
+  def testStrHuman(self):
+    """Test returning a string for humans."""
+    for obj, exp, _ in self.TESTS:
+      result = pformat.json(obj)
+      self.assertEqual(exp, result)
+
+  def testStrCompact(self):
+    """Test returning a string for machines."""
+    for obj, _, exp in self.TESTS:
+      result = pformat.json(obj, compact=True)
+      self.assertEqual(exp, result)
+
+  def testFileHuman(self):
+    """Test writing a file for humans."""
+    for obj, exp, _ in self.TESTS:
+      fp = io.StringIO()
+      self.assertIsNone(pformat.json(obj, fp=fp))
+      self.assertEqual(exp, fp.getvalue())
+
+  def testFileCompact(self):
+    """Test writing a file for machines."""
+    for obj, _, exp in self.TESTS:
+      fp = io.StringIO()
+      self.assertIsNone(pformat.json(obj, fp=fp, compact=True))
+      self.assertEqual(exp, fp.getvalue())
+
+  def testStrPathHuman(self):
+    """Test writing a string path for humans."""
+    for obj, exp, _ in self.TESTS:
+      path = os.path.join(self.tempdir, 'x')
+      self.assertIsNone(pformat.json(obj, fp=path))
+      self.assertEqual(exp, osutils.ReadFile(path))
+
+  def testStringPathCompact(self):
+    """Test writing a string path for machines."""
+    for obj, _, exp in self.TESTS:
+      path = os.path.join(self.tempdir, 'x')
+      self.assertIsNone(pformat.json(obj, fp=path, compact=True))
+      self.assertEqual(exp, osutils.ReadFile(path))
