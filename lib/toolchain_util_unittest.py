@@ -204,7 +204,7 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
     self.glob = self.PatchObject(
         glob, 'glob', return_value=[self.chrome_ebuild])
     self.rc.AddCmdResult(partial_mock.In('rm'), returncode=0)
-    self.obj = toolchain_util._CommonPrepareBundle('None')
+    self.obj = toolchain_util._CommonPrepareBundle('None', chroot=self.chroot)
     self.gs_context = self.PatchObject(self.obj, '_gs_context')
     self.gsc_list = self.PatchObject(self.gs_context, 'List', return_value=[])
     self.data = b'data'
@@ -595,6 +595,248 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.outdir,
         os.path.basename(bin_path) + toolchain_util.BZ2_COMPRESSION_SUFFIX)
     self.assertEqual([output], self.obj.Bundle())
+
+
+class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
+  """Test functions related to create a release CrOS profile.
+
+  Since these functions are similar to _UploadReleaseChromeAFDO() and
+  related functions. These tests are also similar to
+  UploadReleaseChromeAFDOTest, except the setup are within recipe
+  environment.
+  """
+
+  def setUp(self):
+    self.cwp_name = 'R77-3809.38-1562580965.afdo'
+    self.cwp_full = self.cwp_name + toolchain_util.XZ_COMPRESSION_SUFFIX
+    self.arch = 'silvermont'
+    self.benchmark_name = 'chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
+    self.benchmark_full = \
+        self.benchmark_name + toolchain_util.BZ2_COMPRESSION_SUFFIX
+    cwp_string = '%s-77-3809.38-1562580965' % self.arch
+    benchmark_string = 'benchmark-77.0.3849.0-r1'
+    self.merged_name = 'chromeos-chrome-amd64-%s-%s' % (cwp_string,
+                                                        benchmark_string)
+    self.redacted_name = self.merged_name + '-redacted.afdo'
+    self.cwp_url = os.path.join(toolchain_util.CWP_AFDO_GS_URL, self.arch,
+                                self.cwp_full)
+    self.benchmark_url = os.path.join(toolchain_util.BENCHMARK_AFDO_GS_URL,
+                                      self.benchmark_full)
+    self.merge_inputs = [
+        (os.path.join(self.tempdir,
+                      self.cwp_name), toolchain_util.RELEASE_CWP_MERGE_WEIGHT),
+        (os.path.join(self.tempdir, self.benchmark_name),
+         toolchain_util.RELEASE_BENCHMARK_MERGE_WEIGHT),
+    ]
+    self.merge_output = os.path.join(self.tempdir, self.merged_name)
+
+    self.gs_copy = self.PatchObject(self.gs_context, 'Copy')
+    self.decompress = self.PatchObject(cros_build_lib, 'UncompressFile')
+    self.run_command = self.PatchObject(cros_build_lib, 'run')
+
+  def testMergeAFDOProfiles(self):
+    self.obj._MergeAFDOProfiles(self.merge_inputs, self.merge_output)
+    merge_command = [
+        'llvm-profdata',
+        'merge',
+        '-sample',
+        '-output=' + self.chroot.chroot_path(self.merge_output),
+    ] + [
+        '-weighted-input=%d,%s' % (weight, self.chroot.chroot_path(name))
+        for name, weight in self.merge_inputs
+    ]
+    self.run_command.assert_called_once_with(
+        merge_command, enter_chroot=True, print_cmd=True)
+
+  def runProcessAFDOProfileOnce(self,
+                                expected_commands,
+                                input_path=None,
+                                output_path=None,
+                                *args,
+                                **kwargs):
+    if not input_path:
+      input_path = os.path.join(self.tempdir, 'input.afdo')
+    if not output_path:
+      output_path = os.path.join(self.tempdir, 'output.afdo')
+    self.obj._ProcessAFDOProfile(input_path, output_path, *args, **kwargs)
+
+    self.run_command.assert_has_calls(expected_commands)
+
+  def testProcessAFDOProfileForAndroidLinuxProfile(self):
+    """Test call on _processAFDOProfile() for Android/Linux profiles."""
+    input_path = os.path.join(self.tempdir, 'android.prof.afdo')
+    input_path_inchroot = self.chroot.chroot_path(input_path)
+    input_to_text = input_path_inchroot + '.text.temp'
+    removed_temp = input_path_inchroot + '.removed.temp'
+    reduced_temp = input_path_inchroot + '.reduced.tmp'
+    output_path = os.path.join(self.tempdir, 'android.prof.output.afdo')
+    expected_commands = [
+        mock.call(
+            [
+                'llvm-profdata',
+                'merge',
+                '-sample',
+                '-text',
+                input_path_inchroot,
+                '-output',
+                input_to_text,
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
+                'remove_indirect_calls',
+                '--input=' + input_to_text,
+                '--output=' + removed_temp,
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
+                'remove_cold_functions',
+                '--input=' + removed_temp,
+                '--output=' + reduced_temp,
+                '--number=20000',
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
+                'llvm-profdata',
+                'merge',
+                '-sample',
+                reduced_temp,
+                '-output',
+                self.chroot.chroot_path(output_path),
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        )
+    ]
+
+    self.runProcessAFDOProfileOnce(
+        expected_commands,
+        input_path=input_path,
+        output_path=output_path,
+        remove=True)
+
+  @mock.patch.object(builtins, 'open')
+  def testProcessAFDOProfileForChromeOSReleaseProfile(self, mock_open):
+    """Test call on _processAFDOProfile() for CrOS release profiles."""
+    input_path = os.path.join(self.tempdir, self.merged_name)
+    input_path_inchroot = self.chroot.chroot_path(input_path)
+    input_to_text = input_path_inchroot + '.text.temp'
+    redacted_temp = input_path_inchroot + '.redacted.temp'
+    redacted_temp_full = input_path + '.redacted.temp'
+    removed_temp = input_path_inchroot + '.removed.temp'
+    reduced_temp = input_path_inchroot + '.reduced.tmp'
+    output_path = os.path.join(self.tempdir, self.redacted_name)
+    mock_file_obj = io.StringIO()
+    mock_open.return_value = mock_file_obj
+
+    expected_commands = [
+        mock.call(
+            [
+                'llvm-profdata',
+                'merge',
+                '-sample',
+                '-text',
+                input_path_inchroot,
+                '-output',
+                input_to_text,
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            ['redact_textual_afdo_profile'],
+            input=mock_file_obj,
+            stdout=redacted_temp_full,
+            print_cmd=True,
+            enter_chroot=True,
+        ),
+        mock.call(
+            [
+                'remove_indirect_calls',
+                '--input=' + redacted_temp,
+                '--output=' + removed_temp,
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
+                'remove_cold_functions',
+                '--input=' + removed_temp,
+                '--output=' + reduced_temp,
+                '--number=20000',
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
+                'llvm-profdata',
+                'merge',
+                '-sample',
+                reduced_temp,
+                '-output',
+                self.chroot.chroot_path(output_path),
+                '-compbinary',
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        )
+    ]
+    self.runProcessAFDOProfileOnce(
+        expected_commands,
+        input_path=input_path,
+        output_path=output_path,
+        redact=True,
+        remove=True,
+        compbinary=True)
+
+  def testCreateReleaseChromeAFDO(self):
+    merged_call = self.PatchObject(self.obj, '_MergeAFDOProfiles')
+    process_call = self.PatchObject(self.obj, '_ProcessAFDOProfile')
+    ret = self.obj._CreateReleaseChromeAFDO(self.cwp_url, self.benchmark_url,
+                                            self.tempdir, self.merged_name)
+
+    self.assertEqual(ret, os.path.join(self.tempdir, self.redacted_name))
+    self.gs_copy.assert_has_calls([
+        mock.call(self.cwp_url, os.path.join(self.tempdir, self.cwp_full)),
+        mock.call(self.benchmark_url,
+                  os.path.join(self.tempdir, self.benchmark_full))
+    ])
+
+    # Check decompress files.
+    decompress_calls = [
+        mock.call(
+            os.path.join(self.tempdir, self.cwp_full),
+            os.path.join(self.tempdir, self.cwp_name)),
+        mock.call(
+            os.path.join(self.tempdir, self.benchmark_full),
+            os.path.join(self.tempdir, self.benchmark_name))
+    ]
+    self.decompress.assert_has_calls(decompress_calls)
+
+    # Check call to merge.
+    merged_call.assert_called_once_with(
+        self.merge_inputs,
+        os.path.join(self.tempdir, self.merged_name),
+    )
+
+    # Check calls to redact.
+    process_call.assert_called_once_with(
+        self.merge_output,
+        os.path.join(self.tempdir, self.redacted_name),
+        redact=True,
+        remove=True,
+        compbinary=True,
+    )
 
 
 class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
@@ -1992,7 +2234,7 @@ class UploadReleaseChromeAFDOTest(cros_test_lib.MockTempDirTestCase):
                 'remove_cold_functions',
                 '--input=' + removed_temp,
                 '--output=' + reduced_temp,
-                '--number=20000'
+                '--number=20000',
             ],
             enter_chroot=True,
             print_cmd=True,
