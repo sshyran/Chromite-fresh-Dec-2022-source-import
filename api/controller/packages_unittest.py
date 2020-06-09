@@ -686,6 +686,22 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         self.response.model_metadata[1].main_readwrite_firmware_version,
         'Google_Reef.9042.110.0')
 
+    # Test corner case where find_fingerprints returns None.
+    # Re-patch find_fingerprints to now return None and re-execute
+    # GetBuilderMetadata to verify behavior.
+    response = packages_pb2.GetBuilderMetadataResponse()
+    self.PatchObject(packages_service, 'find_fingerprints',
+                     return_value=[])
+    request = self._GetRequest(board='betty')
+    packages_controller.GetBuilderMetadata(request, response,
+                                           self.api_config)
+    # Verify a non-fingerprint build_target_metdata field was still set.
+    self.assertEqual(
+        response.build_target_metadata[0].kernel_version,
+        '4.4.223-r2209')
+    # And then verify that fingerprints was empty.
+    self.assertEqual(response.build_target_metadata[0].fingerprints, [])
+
 
 class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):
   """HasChromePrebuilt tests."""

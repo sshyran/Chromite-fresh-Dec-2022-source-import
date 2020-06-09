@@ -612,7 +612,7 @@ class FindFingerprintsTest(cros_test_lib.RunCommandTempDirTestCase):
     build_target = build_target_lib.BuildTarget('wrong-boardname')
     self.monkeypatch.setattr(constants, 'SOURCE_ROOT', self.tempdir)
     result = packages.find_fingerprints(build_target)
-    self.assertEqual(result, None)
+    self.assertEqual(result, [])
     self.assertIn('Fingerprint file not found', self.caplog.text)
 
 

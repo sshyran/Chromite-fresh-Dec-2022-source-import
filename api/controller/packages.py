@@ -237,8 +237,8 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
   build_target_metadata.ec_firmware_version = fw_versions.ec_fw_version
   build_target_metadata.kernel_version = packages.determine_kernel_version(
       build_target)
-  for fingerprint in packages.find_fingerprints(build_target):
-    build_target_metadata.fingerprints.append(fingerprint)
+  fingerprints = packages.find_fingerprints(build_target)
+  build_target_metadata.fingerprints.extend(fingerprints)
 
   models = packages.get_models(build_target)
   if models:

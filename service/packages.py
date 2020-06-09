@@ -854,7 +854,7 @@ def find_fingerprints(build_target):
       fp_file)
   if not os.path.isfile(fp_path):
     logging.info('Fingerprint file not found: %s', fp_path)
-    return None
+    return []
   logging.info('Reading fingerprint file: %s', fp_path)
   fingerprints = osutils.ReadFile(fp_path).splitlines()
   return fingerprints
