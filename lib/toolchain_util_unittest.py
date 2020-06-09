@@ -668,7 +668,6 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
     input_path_inchroot = self.chroot.chroot_path(input_path)
     input_to_text = input_path_inchroot + '.text.temp'
     removed_temp = input_path_inchroot + '.removed.temp'
-    reduced_temp = input_path_inchroot + '.reduced.tmp'
     output_path = os.path.join(self.tempdir, 'android.prof.output.afdo')
     expected_commands = [
         mock.call(
@@ -695,20 +694,10 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         ),
         mock.call(
             [
-                'remove_cold_functions',
-                '--input=' + removed_temp,
-                '--output=' + reduced_temp,
-                '--number=20000',
-            ],
-            enter_chroot=True,
-            print_cmd=True,
-        ),
-        mock.call(
-            [
                 'llvm-profdata',
                 'merge',
                 '-sample',
-                reduced_temp,
+                removed_temp,
                 '-output',
                 self.chroot.chroot_path(output_path),
             ],
@@ -733,6 +722,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
     redacted_temp_full = input_path + '.redacted.temp'
     removed_temp = input_path_inchroot + '.removed.temp'
     reduced_temp = input_path_inchroot + '.reduced.tmp'
+    reduce_functions = 20000
     output_path = os.path.join(self.tempdir, self.redacted_name)
     mock_file_obj = io.StringIO()
     mock_open.return_value = mock_file_obj
@@ -772,7 +762,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
                 'remove_cold_functions',
                 '--input=' + removed_temp,
                 '--output=' + reduced_temp,
-                '--number=20000',
+                '--number=' + str(reduce_functions),
             ],
             enter_chroot=True,
             print_cmd=True,
@@ -797,6 +787,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         output_path=output_path,
         redact=True,
         remove=True,
+        reduce_functions=reduce_functions,
         compbinary=True)
 
   def testCreateReleaseChromeAFDO(self):
@@ -835,6 +826,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         os.path.join(self.tempdir, self.redacted_name),
         redact=True,
         remove=True,
+        reduce_functions=20000,
         compbinary=True,
     )
 

@@ -635,7 +635,7 @@ def _RedactAFDOProfile(input_path, output_path):
           'remove_cold_functions',
           '--input=' + removed_temp,
           '--output=' + reduced_temp,
-          '--number=20000'
+          '--number=20000',
       ],
       enter_chroot=True,
       print_cmd=True,
@@ -1476,8 +1476,15 @@ class _CommonPrepareBundle(object):
 
     # Redact profiles.
     redacted_path = merged_path + '-redacted.afdo'
+    # Trim the profile to contain 20k functions, as our current profile has
+    # ~20k functions so this modification brings less impact on prod.
     self._ProcessAFDOProfile(
-        merged_path, redacted_path, redact=True, remove=True, compbinary=True)
+        merged_path,
+        redacted_path,
+        redact=True,
+        remove=True,
+        reduce_functions=20000,
+        compbinary=True)
 
     return redacted_path
 
@@ -1527,6 +1534,7 @@ class _CommonPrepareBundle(object):
                           output_path,
                           redact=False,
                           remove=False,
+                          reduce_functions=None,
                           compbinary=False):
     """Process the AFDO profile with different editings.
 
@@ -1543,6 +1551,8 @@ class _CommonPrepareBundle(object):
         them from AFDO profiles used for Chrome.
         See http://crbug.com/916024 for more details.
       remove: Remove indirect call targets from the given profile.
+      reduce_functions: Remove the cold functions in the profile until the
+        given number is met.
       compbinary: Whether to convert the final profile into compbinary type.
     """
     profdata_command_base = ['llvm-profdata', 'merge', '-sample']
@@ -1581,21 +1591,22 @@ class _CommonPrepareBundle(object):
       )
       current_input_file = removed_temp
 
-    # Remove cold functions in the profile. Trim the profile to contain 20k
-    # functions, as our current profile has ~20k functions so this modification
-    # brings less impact on prod.
-    reduced_tmp = input_path + '.reduced.tmp'
-    cros_build_lib.run(
-        [
-            'remove_cold_functions',
-            '--input=' + self.chroot.chroot_path(current_input_file),
-            '--output=' + self.chroot.chroot_path(reduced_tmp),
-            '--number=20000'
-        ],
-        enter_chroot=True,
-        print_cmd=True,
-    )
-    current_input_file = reduced_tmp
+    if reduce_functions:
+      # Remove cold functions in the profile. Trim the profile to contain 20k
+      # functions, as our current profile has ~20k functions so this
+      # modification brings less impact on prod.
+      reduced_tmp = input_path + '.reduced.tmp'
+      cros_build_lib.run(
+          [
+              'remove_cold_functions',
+              '--input=' + self.chroot.chroot_path(current_input_file),
+              '--output=' + self.chroot.chroot_path(reduced_tmp),
+              '--number=' + str(reduce_functions),
+          ],
+          enter_chroot=True,
+          print_cmd=True,
+      )
+      current_input_file = reduced_tmp
 
     # Convert the profiles back to binary profiles.
     cmd_to_binary = profdata_command_base + [
