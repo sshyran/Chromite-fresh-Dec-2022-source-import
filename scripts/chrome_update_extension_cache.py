@@ -34,6 +34,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
+from chromite.lib import pformat
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -158,11 +159,7 @@ def CreateCacheTarball(extensions, outputdir, identifier, tarball):
                          cache_crx, ext)
 
     json_file = os.path.join(jsondir, '%s.json' % ext)
-    json.dump(extension,
-              open(json_file, 'w'),
-              sort_keys=True,
-              indent=2,
-              separators=(',', ': '))
+    pformat.json(extension, fp=json_file)
 
   if was_errors:
     cros_build_lib.Die('FAIL to download some extensions')

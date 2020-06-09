@@ -19,6 +19,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.lib import pformat
 
 from chromite.licensing  import licenses_lib
 from chromite.scripts import cros_set_lsb_release
@@ -463,8 +464,7 @@ class DlcGenerator(object):
       blocks = math.ceil(os.path.getsize(self.dest_image) / self._BLOCK_SIZE)
       imageloader_json_content = self.GetImageloaderJsonContent(
           image_hash, table_hash, int(blocks))
-      with open(self.dest_imageloader_json, 'w') as f:
-        json.dump(imageloader_json_content, f, sort_keys=True, indent=2)
+      pformat.json(imageloader_json_content, fp=self.dest_imageloader_json)
 
   def GenerateDLC(self):
     """Generate a DLC artifact."""

@@ -27,6 +27,7 @@ from chromite.lib import gob_util
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 
@@ -2140,10 +2141,10 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     profdata_base = '%s-%s' % (llvm_cpv.pv, head_sha)
     metadata_path = os.path.join(self.output_dir,
                                  profdata_base + '.llvm_metadata.json')
-    osutils.WriteFile(metadata_path, json.dumps({'head_sha': head_sha}))
+    pformat.json({'head_sha': head_sha}, fp=metadata_path, compact=True)
     files.append(metadata_path)
     metadata_path = os.path.join(self.output_dir, 'llvm_metadata.json')
-    osutils.WriteFile(metadata_path, json.dumps({'head_sha': head_sha}))
+    pformat.json({'head_sha': head_sha}, fp=metadata_path, compact=True)
     files.append(metadata_path)
 
     # Create a tarball with the merged profile data.  The name will be of the
@@ -2886,8 +2887,7 @@ def _PublishVettedAFDOArtifacts(json_file, uploaded, title=None):
 
     commit_message += commit_body % (package, str(old_value), artifact)
 
-  with open(json_file, 'w') as f:
-    json.dump(afdo_versions, f, indent=4)
+  pformat.json(afdo_versions, fp=json_file)
 
   modifications = git.RunGit(
       TOOLCHAIN_UTILS_PATH, ['status', '--porcelain', '-uno'],

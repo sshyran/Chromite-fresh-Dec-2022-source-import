@@ -12,6 +12,7 @@ import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
+from chromite.lib import pformat
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -105,7 +106,7 @@ class BuildSummary(object):
       val = getattr(self, a)
       if val:
         state[a] = getattr(self, a)
-    return json.dumps(state, sort_keys=True)
+    return pformat.json(state, compact=True)
 
   def is_valid(self):
     """Indicate whether this object has a valid status."""

@@ -11,7 +11,6 @@ This produces JSON output for other tools to process.
 from __future__ import print_function
 from __future__ import absolute_import
 
-import json
 import os
 import sys
 
@@ -21,6 +20,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.lib import pformat
 from chromite.lib import portage_util
 
 
@@ -328,9 +328,5 @@ def main(argv):
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
   deps_list, _ = ExtractDeps(sysroot, opts.pkgs, opts.format)
 
-  deps_output = json.dumps(deps_list, sort_keys=True, indent=2)
-  if opts.output_path:
-    with open(opts.output_path, 'w') as f:
-      f.write(deps_output)
-  else:
-    print(deps_output)
+  pformat.json(deps_list,
+               fp=opts.output_path if opts.output_path else sys.stdout)

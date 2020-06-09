@@ -21,6 +21,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib import retry_util
 
 
@@ -303,9 +304,7 @@ class MoblabVm(object):
     config = dict(self._config)
     self._ConfigAbsolutePathsToRelative(config,
                                         os.path.dirname(self._config_path))
-    with open(self._config_path, 'w') as config_file:
-      json.dump(config, config_file, sort_keys=True, indent=4,
-                separators=(',', ': '))
+    pformat.json(config, fp=self._config_path)
 
   def _ConfigRelativePathsToAbsolute(self, config_data, workspace_dir):
     """Converts all the relative paths loaded from config to absolute paths."""

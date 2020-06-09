@@ -28,6 +28,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib import portage_util
 
 _FULL_BINHOST = 'FULL_BINHOST'
@@ -464,8 +465,8 @@ class BuildConfigsExportStage(generic_stages.BoardSpecificBuilderStage,
     logging.info('Generating build configs.')
     results = commands.GenerateBuildConfigs(board, config_useflags)
 
-    results_str = json.dumps(results, indent=2)
-    logging.info('Results:\n %s', results_str)
+    results_str = pformat.json(results)
+    logging.info('Results:\n%s', results_str)
 
     logging.info('Writing build configs to files for archive.')
     results_filename = os.path.join(self.archive_path,
@@ -1021,7 +1022,7 @@ class CollectPGOProfilesStage(generic_stages.BoardSpecificBuilderStage,
     clang_version_str = check_chroot_output(['clang', '--version'])
     head_sha = self._ParseLLVMHeadSHA(clang_version_str)
     metadata_output_path = os.path.join(self.archive_path, self.LLVM_METADATA)
-    osutils.WriteFile(metadata_output_path, json.dumps({'head_sha': head_sha}))
+    pformat.json({'head_sha': head_sha}, fp=metadata_output_path, compact=True)
     # This is a tiny JSON file, so it doesn't need to be tarred/compressed.
     self._upload_queue.put([metadata_output_path])
 

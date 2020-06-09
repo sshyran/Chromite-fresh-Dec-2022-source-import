@@ -16,6 +16,7 @@ from chromite.lib import buildbucket_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
+from chromite.lib import pformat
 from chromite.lib import uri_lib
 
 
@@ -180,7 +181,7 @@ class RequestBuild(object):
 
     return {
         'bucket': self.bucket,
-        'parameters_json': json.dumps(parameters, sort_keys=True),
+        'parameters_json': pformat.json(parameters, compact=True),
         # These tags are indexed and searchable in buildbucket.
         'tags': ['%s:%s' % (k, tags[k]) for k in sorted(tags.keys())],
     }

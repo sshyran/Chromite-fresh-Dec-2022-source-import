@@ -17,6 +17,7 @@ from chromite.api.gen.config import replication_config_pb2
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.lib import pformat
 from chromite.utils import field_mask_util
 
 
@@ -128,15 +129,7 @@ def Replicate(replication_config):
       destination_json = {'chromeos': {'configs': destination_device_configs}}
 
       logging.info('Writing filtered JSON source to %s', dst)
-      with open(dst, 'w') as f:
-        # Use the print function, so the file ends in a newline.
-        print(
-            json.dumps(
-                destination_json,
-                sort_keys=True,
-                indent=2,
-                separators=(',', ': ')),
-            file=f)
+      pformat.json(destination_json, fp=dst)
     else:
       assert rule.file_type == replication_config_pb2.FILE_TYPE_OTHER
       assert (

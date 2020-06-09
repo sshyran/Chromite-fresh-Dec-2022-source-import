@@ -25,6 +25,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
+from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 
@@ -178,8 +179,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
     with osutils.TempDir(prefix='metadata') as tempdir:
       metadata_path = os.path.join(tempdir, constants.METADATA_JSON)
       logging.info('Writing metadata to %s.', metadata_path)
-      osutils.WriteFile(metadata_path,
-                        json.dumps(board_metadata, indent=2, sort_keys=True),
+      osutils.WriteFile(metadata_path, pformat.json(board_metadata),
                         atomic=True)
 
       self.UploadDummyArtifact(metadata_path)

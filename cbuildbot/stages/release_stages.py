@@ -20,6 +20,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lib import pformat
 from chromite.lib import timeout_util
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
@@ -259,7 +260,7 @@ class SigningStage(generic_stages.BoardSpecificBuilderStage):
         result_description = os.path.basename(url)
         logging.PrintBuildbotStepText(result_description)
         logging.info('Received results for: %s', result_description)
-        logging.info(json.dumps(signer_result, indent=4))
+        logging.info(pformat.json(signer_result))
 
         status = self._SigningStatusFromJson(signer_result)
         if status != constants.SIGNER_STATUS_PASSED:

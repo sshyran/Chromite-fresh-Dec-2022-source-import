@@ -26,6 +26,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib.paygen import download_cache
 from chromite.lib.paygen import filelib
 from chromite.lib.paygen import gspaths
@@ -799,10 +800,8 @@ class PaygenPayload(object):
                     ' the payload (%s) do not match.' %
                     (metadata_signature, props_map['metadata_signature']))
 
-    # Convert to Json.
-    payload_json = json.dumps(props_map, sort_keys=True)
-    # Write out the results.
-    osutils.WriteFile(self.description_file, payload_json)
+    # Convert to Json & write out the results.
+    pformat.json(props_map, fp=self.description_file, compact=True)
 
   def _StoreLog(self, log):
     """Store any log related to the payload.
@@ -1032,5 +1031,4 @@ def GenerateUpdatePayloadPropertiesFile(payload, output=None):
   with chroot_util.TempDirInChroot() as work_dir:
     paygen = PaygenPayload(None, work_dir)
     properties_map = paygen.GetPayloadPropertiesMap(payload)
-    properties_json = json.dumps(properties_map, sort_keys=True)
-    osutils.WriteFile(output, properties_json)
+    pformat.json(properties_map, fp=output, compact=True)

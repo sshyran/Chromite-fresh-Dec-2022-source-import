@@ -10,9 +10,9 @@ from __future__ import print_function
 import sys
 
 from chromite.config import chromeos_config
-from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import pformat
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -47,7 +47,7 @@ def main(argv):
   if options.builder:
     if options.builder not in site_config:
       raise Exception('%s: Not a valid build config.' % options.builder)
-    filehandle.write(config_lib.PrettyJsonDict(site_config[options.builder]))
+    pformat.json(site_config[options.builder], fp=filehandle)
   elif options.full:
     filehandle.write(site_config.DumpExpandedConfigToString())
   elif options.csv:

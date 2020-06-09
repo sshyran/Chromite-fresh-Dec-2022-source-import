@@ -44,6 +44,7 @@ from chromite.lib import metrics
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
+from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import sysroot_lib
@@ -1045,7 +1046,7 @@ def RunHWTestSuite(build,
                     result.output)
       if result.task_summary_json:
         logging.error('Invalid task summary json:\n%s',
-                      json.dumps(result.task_summary_json, indent=2))
+                      pformat.json(result.task_summary_json))
       to_raise = failures_lib.SwarmingProxyFailure(
           '** Failed to fullfill request with proxy server, code(%d) **' %
           result.returncode)
@@ -2491,7 +2492,7 @@ def GenerateUploadJSON(filepath, archive_path, uploaded):
     size = os.path.getsize(path)
     sha1, sha256 = filelib.ShaSums(path)
     result[f] = {'size': size, 'sha1': sha1, 'sha256': sha256}
-  osutils.WriteFile(filepath, json.dumps(result, indent=2, sort_keys=True))
+  osutils.WriteFile(filepath, pformat.json(result))
   logging.info('GenerateUploadJSON completed in %s.', utcnow() - start)
 
 
@@ -3465,8 +3466,7 @@ def CallBuildApiWithInputProto(buildroot, build_api_command, input_proto):
   with osutils.TempDir() as tmpdir:
     input_proto_file = os.path.join(tmpdir, 'input.json')
     output_proto_file = os.path.join(tmpdir, 'output.json')
-    with open(input_proto_file, 'w') as f:
-      json.dump(input_proto, f)
+    pformat.json(input_proto, fp=input_proto_file)
     cmd += [
         '--input-json', input_proto_file, '--output-json', output_proto_file
     ]

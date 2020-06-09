@@ -15,6 +15,7 @@ import sys
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
 
@@ -167,14 +168,14 @@ def SwarmingRetriableErrorCheck(exception):
       if internal_failure and state in RETRIABLE_INTERNAL_FAILURE_STATES:
         logging.warning(
             'Encountered retriable swarming internal failure: %s',
-            json.dumps(result.task_summary_json, indent=2))
+            pformat.json(result.task_summary_json))
         return True
     except (IndexError, KeyError) as e:
       logging.warning(
           'Could not determine if exception is retriable. Exception: %s. '
           'Error: %s. Swarming summary json: %s',
           str(exception), str(e),
-          json.dumps(result.task_summary_json, indent=2))
+          pformat.json(result.task_summary_json))
       return False
 
   logging.warning('Exception is not retriable %s', str(exception))
