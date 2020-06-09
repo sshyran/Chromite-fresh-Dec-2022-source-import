@@ -413,6 +413,7 @@ _COPY_PATHS_CHROME = (
     Path('Packages/content_browser/manifest.json', optional=True),
     Path('resources/chromeos/'),
     Path('resources.pak'),
+    Path('swiftshader/', optional=True),
     Path('xdg-settings'),
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
