@@ -298,12 +298,11 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
   Returns:
     UprevVersionedPackageResult: The result of updating virglrenderer ebuilds.
   """
-  repo_path = os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
-                           'virglrenderer')
-  manifest_path = os.path.join(constants.SOURCE_ROOT, repo_path, 'Manifest')
-  manifest = git.ManifestCheckout.Cached(manifest_path)
   overlay = os.path.join(constants.SOURCE_ROOT,
                          constants.CHROMIUMOS_OVERLAY_DIR)
+  repo_path = os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
+                           'virglrenderer')
+  manifest = git.ManifestCheckout.Cached(repo_path)
 
   uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
   # TODO(crbug.com/1066242): Ebuilds for virglrenderer are currently
@@ -311,7 +310,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
   # longer blacklisted.
   uprev_manager.uprev(package_list=['media-libs/virglrenderer'], force=True)
 
-  updated_files = uprev_manager.modified_ebuilds + [manifest_path]
+  updated_files = uprev_manager.modified_ebuilds
   result = UprevVersionedPackageResult()
   result.add_result(refs[0].revision, updated_files)
   return result
