@@ -2702,10 +2702,6 @@ def ApplyCustomOverrides(site_config):
 
       'puff-release': {
           'sign_types': ['recovery', 'factory'],
-          # Puff has no DUTs in the lab. (crbug.com/1033551)
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://crbug.com/1033551',
       },
 
       'excelsior-release': {
