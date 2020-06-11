@@ -309,12 +309,12 @@ class BundleTastFilesTest(BundleTestCase):
                      os.path.join(self.output_dir, 'tast_bundles.tar.gz'))
 
   def testBundleTastFilesNoLogs(self):
-    """BundleTasteFiles dies when no tast files found."""
+    """BundleTasteFiles succeeds when no tast files found."""
     self.PatchObject(commands, 'BuildTastBundleTarball',
                      return_value=None)
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleTastFiles(self.target_request, self.response,
-                                self.api_config)
+    artifacts.BundleTastFiles(self.target_request, self.response,
+                              self.api_config)
+    self.assertEqual(list(self.response.artifacts), [])
 
   def testBundleTastFilesLegacy(self):
     """BundleTastFiles handles legacy args correctly."""

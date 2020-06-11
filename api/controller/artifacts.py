@@ -246,12 +246,10 @@ def BundleTastFiles(input_proto, output_proto, config):
 
   archive = artifacts.BundleTastFiles(chroot, sysroot, output_dir)
 
-  if archive is None:
-    cros_build_lib.Die(
-        'Could not bundle Tast files. '
-        'No Tast directories found for %s.', target)
-
-  output_proto.artifacts.add().path = archive
+  if archive:
+    output_proto.artifacts.add().path = archive
+  else:
+    logging.warning('Found no tast files for %s.', target)
 
 
 def _BundlePinnedGuestImagesResponse(input_proto, output_proto, _config):
