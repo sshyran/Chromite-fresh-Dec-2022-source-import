@@ -1742,12 +1742,18 @@ class _CommonPrepareBundle(object):
     profile_to_upload_path = os.path.join(output_dir,
                                           profile_to_upload_basename)
 
-    # Remove indirect calls
+    # Remove indirect calls and remove cold functions
+    # Since the benchmark precisions increased, the number of functions in
+    # merged profiles also grow. To stabilize the impact on production
+    # profiles for Android/Linux, reduce the number of functions to 70k,
+    # which aligns with recent 3 merged benchmark profiles.
+    # FIXME: see if a lower number (50K? 20K?) is equally as good.
     self._ProcessAFDOProfile(
         raw_merged_output_path,
         profile_to_upload_path,
         redact=False,
         remove=True,
+        reduce_functions=70000,
         compbinary=False)
 
     result_basename = os.path.basename(profile_to_upload_path)

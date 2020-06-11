@@ -668,6 +668,8 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
     input_path_inchroot = self.chroot.chroot_path(input_path)
     input_to_text = input_path_inchroot + '.text.temp'
     removed_temp = input_path_inchroot + '.removed.temp'
+    reduced_temp = input_path_inchroot + '.reduced.tmp'
+    reduce_functions = 70000
     output_path = os.path.join(self.tempdir, 'android.prof.output.afdo')
     expected_commands = [
         mock.call(
@@ -694,10 +696,20 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         ),
         mock.call(
             [
+                'remove_cold_functions',
+                '--input=' + removed_temp,
+                '--output=' + reduced_temp,
+                '--number=' + str(reduce_functions),
+            ],
+            enter_chroot=True,
+            print_cmd=True,
+        ),
+        mock.call(
+            [
                 'llvm-profdata',
                 'merge',
                 '-sample',
-                removed_temp,
+                reduced_temp,
                 '-output',
                 self.chroot.chroot_path(output_path),
             ],
@@ -710,7 +722,8 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         expected_commands,
         input_path=input_path,
         output_path=output_path,
-        remove=True)
+        remove=True,
+        reduce_functions=reduce_functions)
 
   @mock.patch.object(builtins, 'open')
   def testProcessAFDOProfileForChromeOSReleaseProfile(self, mock_open):
@@ -1026,6 +1039,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
         os.path.join(self.output_dir, merged_name),
         redact=False,
         remove=True,
+        reduce_functions=70000,
         compbinary=False,
     )
 
