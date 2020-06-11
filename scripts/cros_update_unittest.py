@@ -26,19 +26,10 @@ class CrosUpdateTest(cros_test_lib.RunCommandTestCase):
     """Setup an instance of CrOSUpdateTrigger."""
     self._cros_update_trigger = cros_update.CrOSUpdateTrigger(
         'foo-host-name', 'foo-build-name', 'foo-static-dir',
-        original_build='foo-original-build', static_url='foo-static',
-        devserver_url='foo-devserver-url')
+        static_url='foo-static', devserver_url='foo-devserver-url')
     self._cros_updater = auto_updater.ChromiumOSUpdater(
         mock.MagicMock(work_dir='foo-dir'), 'foo-build-name', 'foo-payload-dir',
         transfer_class=auto_updater_transfer.LocalTransfer)
-
-  def test_GetOriginalPayloadDir(self):
-    """Tests getting the original payload directory."""
-    self.assertEqual(self._cros_update_trigger._GetOriginalPayloadDir(),
-                     'foo-static-dir/stable-channel/foo-original-build')
-
-    self._cros_update_trigger.original_build = None
-    self.assertIsNone(self._cros_update_trigger._GetOriginalPayloadDir())
 
   def test_MakeStatusUrl(self):
     """Tests generating a URL to post auto update status."""

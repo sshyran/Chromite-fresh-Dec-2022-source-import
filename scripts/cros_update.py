@@ -73,7 +73,7 @@ class CrOSUpdateTrigger(object):
 
   def __init__(self, host_name, build_name, static_dir, progress_tracker=None,
                log_file=None, au_tempdir=None, force_update=False,
-               full_update=False, original_build=None, payload_filename=None,
+               full_update=False, payload_filename=None,
                clobber_stateful=True, quick_provision=False,
                devserver_url=None, static_url=None, staging_server=None,
                transfer_class=None):
@@ -85,7 +85,6 @@ class CrOSUpdateTrigger(object):
     self.au_tempdir = au_tempdir
     self.force_update = force_update
     self.full_update = full_update
-    self.original_build = original_build
     self.payload_filename = payload_filename
     self.clobber_stateful = clobber_stateful
     self.quick_provision = quick_provision
@@ -133,19 +132,6 @@ class CrOSUpdateTrigger(object):
     cros_updater.UpdateRootfs()
     self._WriteAUStatus('post-check rootfs update')
     cros_updater.PostCheckRootfsUpdate()
-
-  def _GetOriginalPayloadDir(self):
-    """Get the directory of original payload.
-
-    Returns:
-      The directory of original payload, whose format is like:
-          'static/stable-channel/link/3428.210.0'
-    """
-    if self.original_build:
-      return os.path.join(self.static_dir, STABLE_BUILD_CHANNEL,
-                          self.original_build)
-    else:
-      return None
 
   def _MakeStatusUrl(self, devserver_url, host_name, pid):
     """Generates a URL to post auto update status to.
@@ -232,14 +218,12 @@ class CrOSUpdateTrigger(object):
 
         logging.debug('Remote device %s is connected', self.host_name)
         payload_dir = os.path.join(self.static_dir, self.build_name)
-        original_payload_dir = self._GetOriginalPayloadDir()
 
         chromeos_AU = auto_updater.ChromiumOSUpdater(
             device, self.build_name, payload_dir,
             dev_dir=os.path.join(constants.SOURCE_ROOT, self.DEV_DIR),
             tempdir=self.au_tempdir,
             log_file=self.log_file,
-            original_payload_dir=original_payload_dir,
             yes=True,
             payload_filename=self.payload_filename,
             clobber_stateful=self.clobber_stateful,
@@ -346,9 +330,6 @@ def ParseArguments(argv):
                            'the same')
   parser.add_argument('--full_update', action='store_true', default=False,
                       help='force a rootfs update, skip stateful update')
-  parser.add_argument('--original_build', type=str, default='',
-                      help=('force stateful update with the same version of '
-                            'previous rootfs partition'))
   parser.add_argument('--payload_filename', type=str,
                       help='A custom payload filename')
   parser.add_argument('--clobber_stateful', action='store_true', default=False,
@@ -394,7 +375,6 @@ def main(argv):
       au_tempdir=au_tempdir,
       force_update=options.force_update,
       full_update=options.full_update,
-      original_build=options.original_build,
       payload_filename=options.payload_filename,
       clobber_stateful=options.clobber_stateful,
       quick_provision=options.quick_provision,

@@ -98,8 +98,7 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
 
   def __init__(self, device, payload_dir, device_restore_dir, tempdir,
                payload_name, cmd_kwargs, device_payload_dir, dev_dir='',
-               payload_mode='scp', original_payload_dir=None,
-               transfer_stateful_update=True,
+               payload_mode='scp', transfer_stateful_update=True,
                transfer_rootfs_update=True):
     """Initialize Base Class for transferring payloads functionality.
 
@@ -119,11 +118,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
           directory.
       dev_dir: The directory of the nebraska that runs the CrOS auto-update.
       payload_mode: The payload mode - it can be 'parallel' or 'scp'.
-      original_payload_dir: The directory containing payloads whose version is
-          the same as current host's rootfs partition. If it's None, will first
-          try installing the matched stateful.tgz with the host's rootfs
-          Partition when restoring stateful. Otherwise, install the target
-          stateful.tgz.
       transfer_stateful_update: Whether to transfer payloads necessary for
           stateful update. The default is True.
       transfer_rootfs_update: Whether to transfer payloads necessary for
@@ -141,7 +135,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
       raise ValueError('The given value %s for payload mode is not valid.' %
                        payload_mode)
     self._payload_mode = payload_mode
-    self._original_payload_dir = original_payload_dir
     self._transfer_stateful_update = transfer_stateful_update
     self._transfer_rootfs_update = transfer_rootfs_update
     self._local_payload_props_path = None
@@ -291,15 +284,6 @@ class LocalTransfer(Transfer):
     The stateful update payloads are copied to the target remote device for
     stateful update.
     """
-    if self._original_payload_dir:
-      logging.notice('Copying original stateful payload to device...')
-      original_payload = os.path.join(
-          self._original_payload_dir, STATEFUL_FILENAME)
-      self._EnsureDeviceDirectory(self._device_restore_dir)
-      self._device.CopyToDevice(original_payload, self._device_restore_dir,
-                                mode=self._payload_mode, log_output=True,
-                                **self._cmd_kwargs)
-
     logging.notice('Copying target stateful payload to device...')
     payload = os.path.join(self._payload_dir, STATEFUL_FILENAME)
     self._device.CopyToWorkDir(payload, mode=self._payload_mode,
@@ -506,14 +490,6 @@ class LabTransfer(Transfer):
     # to make update_engine download it directly from the staging_server. This
     # will avoid a disk copy but has the potential to be harder to debug if
     # update engine does not report the error clearly.
-
-    if self._original_payload_dir:
-      logging.notice('Copying original stateful payload to device...')
-      self._EnsureDeviceDirectory(self._device_restore_dir)
-      self._device.run(self._GetCurlCmdForPayloadDownload(
-          payload_dir=self._device_restore_dir,
-          build_id=self._original_payload_dir,
-          payload_filename=STATEFUL_FILENAME))
 
     logging.notice('Copying target stateful payload to device...')
     self._device.run(self._GetCurlCmdForPayloadDownload(

@@ -148,8 +148,7 @@ class ChromiumOSUpdater(BaseUpdater):
   PAYLOAD_DIR_NAME = 'payloads'
 
   def __init__(self, device, build_name, payload_dir, transfer_class,
-               dev_dir='', log_file=None, tempdir=None,
-               original_payload_dir=None, clobber_stateful=True,
+               dev_dir='', log_file=None, tempdir=None, clobber_stateful=True,
                local_devserver=False, yes=False, do_rootfs_update=True,
                do_stateful_update=True, reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
@@ -168,11 +167,6 @@ class ChromiumOSUpdater(BaseUpdater):
           the tempdir for cros flash is /tmp/cros-flash****/, used to
           temporarily keep files when transferring update-utils package, and
           reserve nebraska and update engine logs.
-      original_payload_dir: The directory containing payloads whose version is
-          the same as current host's rootfs partition. If it's None, will first
-          try installing the matched stateful.tgz with the host's rootfs
-          Partition when restoring stateful. Otherwise, install the target
-          stateful.tgz.
       do_rootfs_update: whether to do rootfs partition update. The default is
           True.
       do_stateful_update: whether to do stateful partition update. The default
@@ -207,7 +201,6 @@ class ChromiumOSUpdater(BaseUpdater):
     self.update_version = None if local_devserver else build_name
 
     self.dev_dir = dev_dir
-    self.original_payload_dir = original_payload_dir
 
     # Update setting
     self._cmd_kwargs = {}
@@ -278,7 +271,6 @@ class ChromiumOSUpdater(BaseUpdater):
         cmd_kwargs=self._cmd_kwargs,
         transfer_rootfs_update=self._do_rootfs_update,
         transfer_stateful_update=self._do_rootfs_update, dev_dir=self.dev_dir,
-        original_payload_dir=self.original_payload_dir,
         device_restore_dir=self.device_restore_dir,
         device_payload_dir=self.device_payload_dir, tempdir=self.tempdir,
         payload_mode=self.payload_mode, **cls_kwargs)
@@ -551,21 +543,11 @@ class ChromiumOSUpdater(BaseUpdater):
           ignore_failures=True,
           **self._cmd_kwargs_omit_error)
 
-  def UpdateStateful(self, use_original_build=False):
-    """Update the stateful partition of the device.
-
-    Args:
-      use_original_build: True if we use stateful.tgz of original build for
-        stateful update, otherwise, as default, False.
-    """
-    if self.original_payload_dir and use_original_build:
-      payload_dir = self.device_restore_dir
-    else:
-      payload_dir = self.device.work_dir
-
+  def UpdateStateful(self):
+    """Update the stateful partition of the device."""
     try:
       stateful_update_payload = os.path.join(
-          payload_dir, auto_updater_transfer.STATEFUL_FILENAME)
+          self.device.work_dir, auto_updater_transfer.STATEFUL_FILENAME)
 
       updater = stateful_updater.StatefulUpdater(self.device)
       updater.Update(
@@ -1088,8 +1070,7 @@ class ChromiumOSUpdater(BaseUpdater):
     self.PreSetupStatefulUpdate()
     self._transfer_obj.TransferStatefulUpdate()
     self.ResetStatefulPartition()
-    use_original_build = bool(self.original_payload_dir)
-    self.UpdateStateful(use_original_build=use_original_build)
+    self.UpdateStateful()
     self.PostCheckStatefulUpdate()
     self._Reboot('stateful partition restoration')
     try:
