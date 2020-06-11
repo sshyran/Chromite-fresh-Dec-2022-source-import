@@ -67,8 +67,7 @@ class Overlay(object):
   def _write_layout_conf(self):
     """Write out the layout.conf as part of this Overlay's initialization."""
     layout_conf_path = self.path / 'metadata' / 'layout.conf'
-    master_names = ' '.join(
-        m.name for m in self.masters) if self.masters else ''
+    master_names = ' '.join(m.name for m in self.masters or [])
     conf = {
         'masters': master_names,
         'profile-formats': 'portage-2 profile-default-eapi',
