@@ -2541,6 +2541,13 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1000717',
       },
 
+      'puff-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/1093910',
+          'sign_types': ['recovery', 'factory'],
+      },
+
       'setzer-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -2690,10 +2697,6 @@ def ApplyCustomOverrides(site_config):
       },
 
       'kukui-release': {
-          'sign_types': ['recovery', 'factory'],
-      },
-
-      'puff-release': {
           'sign_types': ['recovery', 'factory'],
       },
 
