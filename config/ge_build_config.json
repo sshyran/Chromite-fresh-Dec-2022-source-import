@@ -950,30 +950,6 @@
       ]
     },
     {
-      "name": "nocturne",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "nocturne-arm64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "novato",
       "configs": [
         {
@@ -3564,6 +3540,40 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 331,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "nocturne",
+      "reference_board_name": "nocturne",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "nocturne",
+          "name": "nocturne",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 359,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "nocturne-arm64",
+      "reference_board_name": "nocturne-arm64",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "nocturne-arm64",
+          "name": "nocturne",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 448,
           "is_active": true
         }
       ]

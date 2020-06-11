@@ -24607,8 +24607,10 @@
         "boards": [
             "nocturne-arm64"
         ],
-        "chrome_sdk_build_chrome": false,
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne-arm64\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -24617,7 +24619,6 @@
         "boards": [
             "nocturne-arm64"
         ],
-        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [
@@ -24631,6 +24632,9 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne-arm64\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
@@ -24759,6 +24763,9 @@
         "boards": [
             "nocturne"
         ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+        ],
         "useflags": [
             "-cros-debug",
             "chrome_internal",
@@ -24785,6 +24792,9 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
