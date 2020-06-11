@@ -1257,17 +1257,6 @@ class ProjectMappingTest(cros_test_lib.TestCase):
     for path in (ebuild_path, './' + ebuild_path, 'foo.bar/' + ebuild_path):
       self.assertEqual(components, portage_util.SplitEbuildPath(path))
 
-  def testSplitPV(self):
-    """Test splitting PVs into package and version components."""
-    pv = 'bar-1.2.3_rc1-r5'
-    package, version_no_rev, rev = tuple(pv.split('-'))
-    split_pv = portage_util.SplitPV(pv)
-    self.assertEqual(split_pv.pv, pv)
-    self.assertEqual(split_pv.package, package)
-    self.assertEqual(split_pv.version_no_rev, version_no_rev)
-    self.assertEqual(split_pv.rev, rev)
-    self.assertEqual(split_pv.version, '%s-%s' % (version_no_rev, rev))
-
   def testSplitCPV(self):
     """Test splitting CPV into components."""
     # Test 1: Valid input.

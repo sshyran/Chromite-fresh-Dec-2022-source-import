@@ -23,11 +23,11 @@ def test_parse_cpf():
 
 def test_parse_pv():
   """Validate parsing a PV."""
-  pkg = package_info.parse('bar-1.0.0')
+  pkg = package_info.parse('bar-1.2.3_rc1-r5')
   assert not pkg.category
   assert pkg.package == 'bar'
-  assert pkg.version == '1.0.0'
-  assert not pkg.revision
+  assert pkg.version == '1.2.3_rc1'
+  assert pkg.revision == 5
 
 
 def test_parse_atom():
