@@ -97,7 +97,7 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
   PAYLOAD_DIR_NAME = 'payloads'
 
   def __init__(self, device, payload_dir, tempdir,
-               payload_name, cmd_kwargs, device_payload_dir, dev_dir='',
+               payload_name, cmd_kwargs, device_payload_dir,
                payload_mode='scp', transfer_stateful_update=True,
                transfer_rootfs_update=True):
     """Initialize Base Class for transferring payloads functionality.
@@ -114,7 +114,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
           are run on the device.
       device_payload_dir: Path to the payload directory in the device's work
           directory.
-      dev_dir: The directory of the nebraska that runs the CrOS auto-update.
       payload_mode: The payload mode - it can be 'parallel' or 'scp'.
       transfer_stateful_update: Whether to transfer payloads necessary for
           stateful update. The default is True.
@@ -127,7 +126,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     self._payload_name = payload_name
     self._cmd_kwargs = cmd_kwargs
     self._device_payload_dir = device_payload_dir
-    self._dev_dir = dev_dir
     if payload_mode not in ('scp', 'parallel'):
       raise ValueError('The given value %s for payload mode is not valid.' %
                        payload_mode)

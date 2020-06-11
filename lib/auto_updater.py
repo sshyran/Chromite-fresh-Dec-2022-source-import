@@ -148,7 +148,7 @@ class ChromiumOSUpdater(BaseUpdater):
   PAYLOAD_DIR_NAME = 'payloads'
 
   def __init__(self, device, build_name, payload_dir, transfer_class,
-               dev_dir='', log_file=None, tempdir=None, clobber_stateful=True,
+               log_file=None, tempdir=None, clobber_stateful=True,
                local_devserver=False, yes=False, do_rootfs_update=True,
                do_stateful_update=True, reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
@@ -161,7 +161,6 @@ class ChromiumOSUpdater(BaseUpdater):
       payload_dir: the directory of payload(s).
       transfer_class: A reference to any subclass of
           auto_updater_transfer.Transfer class.
-      dev_dir: the directory of the nebraska that runs the CrOS auto-update.
       log_file: The file to save running logs.
       tempdir: the temp directory in caller, not in the device. For example,
           the tempdir for cros flash is /tmp/cros-flash****/, used to
@@ -199,8 +198,6 @@ class ChromiumOSUpdater(BaseUpdater):
                     else tempfile.mkdtemp(prefix='cros-update'))
     self.inactive_kernel = None
     self.update_version = None if local_devserver else build_name
-
-    self.dev_dir = dev_dir
 
     # Update setting
     self._cmd_kwargs = {}
@@ -269,7 +266,7 @@ class ChromiumOSUpdater(BaseUpdater):
         payload_name=self._GetRootFsPayloadFileName(),
         cmd_kwargs=self._cmd_kwargs,
         transfer_rootfs_update=self._do_rootfs_update,
-        transfer_stateful_update=self._do_rootfs_update, dev_dir=self.dev_dir,
+        transfer_stateful_update=self._do_rootfs_update,
         device_payload_dir=self.device_payload_dir, tempdir=self.tempdir,
         payload_mode=self.payload_mode, **cls_kwargs)
 
