@@ -149,8 +149,8 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def __init__(self, device, build_name, payload_dir, transfer_class,
                log_file=None, tempdir=None, clobber_stateful=True,
-               local_devserver=False, yes=False, do_rootfs_update=True,
-               do_stateful_update=True, reboot=True, disable_verification=False,
+               yes=False, do_rootfs_update=True, do_stateful_update=True,
+               reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
                staging_server=None):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
@@ -175,8 +175,6 @@ class ChromiumOSUpdater(BaseUpdater):
           device. The default is False.
       clobber_stateful: whether to do a clean stateful update. The default is
           False.
-      local_devserver: Indicate whether users use their local devserver.
-          Default: False.
       yes: Assume "yes" (True) for any prompt. The default is False. However,
           it should be set as True if we want to disable all the prompts for
           auto-update.
@@ -195,7 +193,7 @@ class ChromiumOSUpdater(BaseUpdater):
     self.tempdir = (tempdir if tempdir is not None
                     else tempfile.mkdtemp(prefix='cros-update'))
     self.inactive_kernel = None
-    self.update_version = None if local_devserver else build_name
+    self.update_version = build_name
 
     # Update setting
     self._cmd_kwargs = {}
