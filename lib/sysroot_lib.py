@@ -137,13 +137,13 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
     self.failed_packages = packages
     self.args = (self.args, packages)
 
-  def Stringify(self, error=True, output=True):
+  def Stringify(self, stdout=True, stderr=True):
     """Stringify override to include the failed package info.
 
     See:
       cros_build_lib.RunCommandError.Stringify
     """
-    items = [super(PackageInstallError, self).Stringify(error, output)]
+    items = [super(PackageInstallError, self).Stringify(stdout, stderr)]
 
     pkgs = []
     for cpv in self.failed_packages:
