@@ -152,7 +152,7 @@ class ChromiumOSUpdater(BaseUpdater):
                local_devserver=False, yes=False, do_rootfs_update=True,
                do_stateful_update=True, reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
-               experimental_au=False, staging_server=None):
+               staging_server=None):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
     Args:
@@ -185,8 +185,6 @@ class ChromiumOSUpdater(BaseUpdater):
           only if you staged a payload by filename (i.e not artifact) first.
       send_payload_in_parallel: whether to transfer payload in chunks
           in parallel. The default is False.
-      experimental_au: Use experimental features of auto updater instead. It
-          should be deprecated once crbug.com/872441 is fixed.
       staging_server: URL (str) of the server that's staging the payload files.
           Assuming transfer_class is None, if value for staging_server is None
           or empty, an auto_updater_transfer.LocalTransfer reference must be
@@ -219,7 +217,6 @@ class ChromiumOSUpdater(BaseUpdater):
     else:
       self.payload_mode = self.PAYLOAD_MODE_SCP
     self.perf_id = None
-    self.experimental_au = experimental_au
 
     if log_file:
       log_kwargs = {

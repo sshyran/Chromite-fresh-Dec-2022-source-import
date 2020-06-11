@@ -364,7 +364,7 @@ class RemoteDeviceUpdater(object):
                board=None, src_image_to_delta=None, wipe=True, debug=False,
                yes=False, force=False, ssh_private_key=None, ping=True,
                disable_verification=False, send_payload_in_parallel=False,
-               experimental_au=False, version=None):
+               version=None):
     """Initializes RemoteDeviceUpdater"""
     if not stateful_update and not rootfs_update:
       raise ValueError('No update operation to perform; either stateful or'
@@ -388,7 +388,6 @@ class RemoteDeviceUpdater(object):
     self.yes = yes
     self.force = force
     self.send_payload_in_parallel = send_payload_in_parallel
-    self.experimental_au = experimental_au
     self.version = version
 
   def Cleanup(self):
@@ -525,7 +524,6 @@ class RemoteDeviceUpdater(object):
               clobber_stateful=self.clobber_stateful,
               yes=self.yes,
               send_payload_in_parallel=self.send_payload_in_parallel,
-              experimental_au=self.experimental_au,
               transfer_class=auto_updater_transfer.LocalTransfer)
           chromeos_AU.CheckPayloads()
           chromeos_AU.RunUpdate()
@@ -553,7 +551,7 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
           reboot=True, wipe=True, ssh_private_key=None, ping=True,
           disable_rootfs_verification=False, clear_cache=False, yes=False,
           force=False, debug=False, send_payload_in_parallel=False,
-          experimental_au=False, version=None):
+          version=None):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -583,8 +581,6 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
     debug: Print additional debugging messages.
     send_payload_in_parallel: Transfer payloads in chunks in parallel to speed
         up transmissions for long haul between endpoints.
-    experimental_au: Use the experimental features auto updater. It should be
-        deprecated once crbug.com/872441 is fixed.
     version: Default version.
 
   Raises:
@@ -631,7 +627,6 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
         ping=ping,
         disable_verification=disable_rootfs_verification,
         send_payload_in_parallel=send_payload_in_parallel,
-        experimental_au=experimental_au,
         version=version)
     updater.Run()
   elif device.scheme == commandline.DEVICE_SCHEME_USB:
