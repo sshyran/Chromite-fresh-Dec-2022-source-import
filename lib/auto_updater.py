@@ -145,8 +145,6 @@ class ChromiumOSUpdater(BaseUpdater):
   KERNEL_B = {'name': 'KERN-B', 'kernel': 4, 'root': 5}
   KERNEL_UPDATE_TIMEOUT = 180
 
-  PAYLOAD_DIR_NAME = 'payloads'
-
   def __init__(self, device, build_name, payload_dir, transfer_class,
                log_file=None, tempdir=None, clobber_stateful=True,
                yes=False, do_rootfs_update=True, do_stateful_update=True,
@@ -206,8 +204,9 @@ class ChromiumOSUpdater(BaseUpdater):
     self._yes = yes
     # Device's directories
     self.device_dev_dir = os.path.join(self.device.work_dir, 'src')
-    self.device_payload_dir = os.path.join(self.device.work_dir,
-                                           self.PAYLOAD_DIR_NAME)
+    self.device_payload_dir = os.path.join(
+        self.device.work_dir,
+        auto_updater_transfer.Transfer.PAYLOAD_DIR_NAME)
     # autoupdate_EndToEndTest uses exact payload filename for update
     self.payload_filename = payload_filename
     if send_payload_in_parallel:
@@ -613,8 +612,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
     # Delete the update file so it doesn't take much space on disk for the
     # remainder of the update process.
-    self.device.DeletePath(self.PAYLOAD_DIR_NAME, relative_to_work_dir=True,
-                           recursive=True)
+    self.device.DeletePath(self.device_payload_dir, recursive=True)
 
   def RunUpdateStateful(self):
     """Run all processes needed by updating stateful.
