@@ -42,14 +42,6 @@ RepositoryInfoTuple = collections.namedtuple('RepositoryInfoTuple',
 
 _PRIVATE_PREFIX = '%(buildroot)s/src/private-overlays'
 
-# Define data structures for holding PV and CPV objects.
-_PV_FIELDS = ['pv', 'package', 'version', 'version_no_rev', 'rev']
-PV = collections.namedtuple('PV', _PV_FIELDS)
-# See ebuild(5) man page for the field specs these fields are based on.
-# Notably, cpv does not include the revision, cpf does.
-_CPV_FIELDS = ['category', 'cp', 'cpv', 'cpf'] + _PV_FIELDS
-CPV = collections.namedtuple('CPV', _CPV_FIELDS)
-
 # This regex matches a category name.
 _category_re = re.compile(r'^(?P<category>\w[\w\+\.\-]*)$', re.VERBOSE)
 
@@ -984,7 +976,7 @@ class EBuild(object):
 
     # Sanity check: We should be able to parse a CPV string with the produced
     # version number.
-    if not SplitCPV('foo/bar-%s' % output):
+    if not package_info.SplitCPV('foo/bar-%s' % output):
       raise EbuildVersionError(
           'PV returned does not match the version spec: %s' % output)
 
@@ -1343,7 +1335,7 @@ class InstalledPackage(object):
     if not os.path.exists(ebuild_path):
       raise PortageDBError("Package doesn't contain an ebuild file.")
 
-    split_pv = SplitPV(self.pf)
+    split_pv = package_info.SplitPV(self.pf)
     if split_pv is None:
       raise PortageDBError('Package and version "%s" doesn\'t have a valid '
                            'format.' % self.pf)
@@ -1758,36 +1750,6 @@ def SplitEbuildPath(path):
   return os.path.splitext(path)[0].rsplit('/', 3)[-3:]
 
 
-def SplitPV(pv, strict=True):
-  """Takes a PV value and splits it into individual components.
-
-  Args:
-    pv: Package name and version.
-    strict: If True, returns None if version or package name is missing.
-      Otherwise, only package name is mandatory.
-
-  Returns:
-    A collection with named members:
-      pv, package, version, version_no_rev, rev
-  """
-  return package_info.SplitPV(pv, strict=strict)
-
-
-def SplitCPV(cpv, strict=True):
-  """Splits a CPV value into components.
-
-  Args:
-    cpv: Category, package name, and version of a package.
-    strict: If True, returns None if any of the components is missing.
-      Otherwise, only package name is mandatory.
-
-  Returns:
-    A collection with named members:
-      category, pv, package, version, version_no_rev, rev
-  """
-  return package_info.SplitCPV(cpv, strict=strict)
-
-
 def FindWorkonProjects(packages):
   """Find the projects associated with the specified cros_workon packages.
 
@@ -1876,7 +1838,7 @@ def FindPackageNameMatches(pkg_str, board=None,
 
   matches = []
   if result.returncode == 0:
-    matches = [SplitCPV(x) for x in result.output.splitlines()]
+    matches = [package_info.SplitCPV(x) for x in result.output.splitlines()]
 
   return matches
 
@@ -1958,7 +1920,7 @@ def FindEbuildsForPackages(packages_list, sysroot, include_masked=False,
   mismatches = []
   ret = dict(zip(packages_list, ebuilds_results))
   for full_package_name, ebuild_path in ret.items():
-    cpv = SplitCPV(full_package_name, strict=False)
+    cpv = package_info.SplitCPV(full_package_name, strict=False)
     path_category, path_package_name, _ = SplitEbuildPath(ebuild_path)
     if not ((cpv.category is None or path_category == cpv.category) and
             cpv.package.startswith(path_package_name)):
@@ -2304,7 +2266,7 @@ def ParseDieHookStatusFile(metrics_dir):
                        file is expected to have been generated.
 
   Returns:
-    list[CPV] - Packages that failed in the build attempt.
+    list[package_info.CPV] - Packages that failed in the build attempt.
   """
   file_path = os.path.join(metrics_dir, constants.DIE_HOOK_STATUS_FILE_NAME)
   if not os.path.exists(file_path):
@@ -2314,7 +2276,7 @@ def ParseDieHookStatusFile(metrics_dir):
     failed_pkgs = []
     for line in failed_pkgs_file:
       cpv, _phase = line.strip().split()
-      failed_pkgs.append(SplitCPV(cpv, strict=False))
+      failed_pkgs.append(package_info.SplitCPV(cpv, strict=False))
     return failed_pkgs
 
 
@@ -2405,13 +2367,13 @@ def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
     cwd: Path to use for the working directory for run.
 
   Returns:
-    A CPV object.
+    A package_info.CPV object.
   """
   if sysroot is None:
     sysroot = cros_build_lib.GetSysroot(board=board)
   cmd = ['best_visible', sysroot, pkg_type, atom]
   result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
-  return SplitCPV(result.output.strip())
+  return package_info.SplitCPV(result.output.strip())
 
 
 def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
@@ -2521,12 +2483,12 @@ def PortageqMatch(atom, board=None, sysroot=None):
     sysroot: The sysroot to query.
 
   Returns:
-    CPV|None
+    package_info.CPV|None
   """
   if sysroot is None:
     sysroot = cros_build_lib.GetSysroot(board=board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
-  return SplitCPV(result.output.strip()) if result.output else None
+  return package_info.SplitCPV(result.output.strip()) if result.output else None
 
 
 class PackageNotFoundError(Error):

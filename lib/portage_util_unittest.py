@@ -1257,74 +1257,6 @@ class ProjectMappingTest(cros_test_lib.TestCase):
     for path in (ebuild_path, './' + ebuild_path, 'foo.bar/' + ebuild_path):
       self.assertEqual(components, portage_util.SplitEbuildPath(path))
 
-  def testSplitCPV(self):
-    """Test splitting CPV into components."""
-    # Test 1: Valid input.
-    cpv = 'foo/bar-4.5.6_alpha-r6'
-    cp, ver, rev = cpv.split('-')
-    cat, pv = cpv.split('/', 1)
-
-    split_pv = portage_util.SplitPV(pv)
-    split_cpv = portage_util.SplitCPV(cpv)
-
-    self.assertEqual(split_cpv.category, cat)
-    self.assertEqual(cp, split_cpv.cp)
-    self.assertEqual('%s-%s' % (cp, ver), split_cpv.cpv)
-    self.assertEqual('%s-%s-%s' % (cp, ver, rev), split_cpv.cpf)
-    for k, v in split_pv._asdict().items():
-      self.assertEqual(getattr(split_cpv, k), v)
-
-    # Test 2: No category, valid pvr.
-    cpv = 'bar-pkg-1.2.3_rc4-r5'
-    split_cpv_ns = portage_util.SplitCPV(cpv, strict=False)
-
-    # Make sure strict parses correctly.
-    self.assertIsNone(portage_util.SplitCPV(cpv, strict=True))
-    self.assertIsNotNone(portage_util.SplitPV(cpv, strict=True))
-    # All category references should be None when not strict.
-    self.assertIsNotNone(split_cpv_ns)
-    self.assertIsNone(split_cpv_ns.category)
-    self.assertIsNone(split_cpv_ns.cp)
-    self.assertIsNone(split_cpv_ns.cpv)
-    self.assertIsNone(split_cpv_ns.cpf)
-
-    # Test 3: No version or revision, valid cp.
-    cpv = 'cat-foo/bar-pkg'
-    split_cpv_ns = portage_util.SplitCPV(cpv, strict=False)
-
-    # Make sure strict parses correctly.
-    self.assertIsNone(portage_util.SplitCPV(cpv, strict=True))
-    self.assertIsNone(portage_util.SplitPV(cpv, strict=True))
-    # Category should get parsed out, and the rest assigned to package.
-    self.assertIsNotNone(split_cpv_ns)
-    self.assertEqual('cat-foo', split_cpv_ns.category)
-    self.assertEqual('bar-pkg', split_cpv_ns.package)
-    # The cp should just have category/package. In this case it's valid.
-    self.assertEqual('cat-foo/bar-pkg', split_cpv_ns.cp)
-    self.assertIsNone(split_cpv_ns.cpv)
-    self.assertIsNone(split_cpv_ns.cpf)
-
-    # Test 4: No version - skipped to valid revision.
-    cpv = 'cat-foo/bar-pkg-r5'
-    split_cpv_ns = portage_util.SplitCPV(cpv, strict=False)
-
-    # Make sure strict parses correctly.
-    self.assertIsNone(portage_util.SplitCPV(cpv, strict=True))
-    self.assertIsNone(portage_util.SplitPV(cpv, strict=True))
-    # Category should get parsed out, and the rest assigned to package.
-    self.assertIsNotNone(split_cpv_ns)
-    self.assertEqual('cat-foo', split_cpv_ns.category)
-    self.assertEqual('bar-pkg-r5', split_cpv_ns.package)
-    # The cp should just have category/package. Invalid in this case, but
-    # meeting expectations.
-    self.assertEqual('cat-foo/bar-pkg-r5', split_cpv_ns.cp)
-    self.assertIsNone(split_cpv_ns.cpv)
-    self.assertIsNone(split_cpv_ns.cpf)
-
-    cpv = 'invalid/format/package'
-    with self.assertRaises(ValueError):
-      portage_util.SplitCPV(cpv)
-
   def testFindWorkonProjects(self):
     """Test if we can find the list of workon projects."""
     frecon = 'sys-apps/frecon'
@@ -1398,7 +1330,7 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
           # Invalid category.
           continue
         # Correct pkg.
-        pv = portage_util.SplitPV(pkg)
+        pv = package_info.SplitPV(pkg)
         key = '%s/%s' % (cat, pv.package)
         self.fake_packages.append((key, pv.version))
     # Add contents to with/files-1.
