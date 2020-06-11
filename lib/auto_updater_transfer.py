@@ -96,7 +96,7 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
 
   PAYLOAD_DIR_NAME = 'payloads'
 
-  def __init__(self, device, payload_dir, device_restore_dir, tempdir,
+  def __init__(self, device, payload_dir, tempdir,
                payload_name, cmd_kwargs, device_payload_dir, dev_dir='',
                payload_mode='scp', transfer_stateful_update=True,
                transfer_rootfs_update=True):
@@ -105,8 +105,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     Args:
       device: The ChromiumOSDevice to be updated.
       payload_dir: The directory of payload(s).
-      device_restore_dir: Path to the old payload directory in the device's work
-          directory.
       tempdir: The temp directory in caller, not in the device. For example,
           the tempdir for cros flash is /tmp/cros-flash****/, used to
           temporarily keep files when transferring update-utils package, and
@@ -125,7 +123,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     """
     self._device = device
     self._payload_dir = payload_dir
-    self._device_restore_dir = device_restore_dir
     self._tempdir = tempdir
     self._payload_name = payload_name
     self._cmd_kwargs = cmd_kwargs

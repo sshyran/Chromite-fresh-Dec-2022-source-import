@@ -31,7 +31,7 @@ from chromite.lib import retry_util
 
 _DEFAULT_ARGS = {
     'payload_dir': None, 'device_payload_dir': None, 'tempdir': None,
-    'payload_name': None, 'cmd_kwargs': None, 'device_restore_dir': None,
+    'payload_name': None, 'cmd_kwargs': None,
 }
 
 

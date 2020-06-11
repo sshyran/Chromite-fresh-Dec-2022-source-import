@@ -215,7 +215,6 @@ class ChromiumOSUpdater(BaseUpdater):
     self.device_dev_dir = os.path.join(self.device.work_dir, 'src')
     self.device_payload_dir = os.path.join(self.device.work_dir,
                                            self.PAYLOAD_DIR_NAME)
-    self.device_restore_dir = os.path.join(self.device.work_dir, 'old')
     # autoupdate_EndToEndTest uses exact payload filename for update
     self.payload_filename = payload_filename
     if send_payload_in_parallel:
@@ -271,7 +270,6 @@ class ChromiumOSUpdater(BaseUpdater):
         cmd_kwargs=self._cmd_kwargs,
         transfer_rootfs_update=self._do_rootfs_update,
         transfer_stateful_update=self._do_rootfs_update, dev_dir=self.dev_dir,
-        device_restore_dir=self.device_restore_dir,
         device_payload_dir=self.device_payload_dir, tempdir=self.tempdir,
         payload_mode=self.payload_mode, **cls_kwargs)
 
