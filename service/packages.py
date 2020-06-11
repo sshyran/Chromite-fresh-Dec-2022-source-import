@@ -272,7 +272,7 @@ def uprev_versioned_package(package, build_targets, refs, chroot):
   """Call registered uprev handler function for the package.
 
   Args:
-    package (portage_util.CPV): The package being uprevved.
+    package (package_info.CPV): The package being uprevved.
     build_targets (list[build_target_lib.BuildTarget]): The build targets to
         clean on a successful uprev.
     refs (list[uprev_lib.GitRef]):
@@ -696,7 +696,7 @@ def get_best_visible(atom, build_target=None):
         sysroot should be searched, or the SDK if not provided.
 
   Returns:
-    portage_util.CPV|None: The best visible package.
+    package_info.CPV|None: The best visible package.
   """
   assert atom
 

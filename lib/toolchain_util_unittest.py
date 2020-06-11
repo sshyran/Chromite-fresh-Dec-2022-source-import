@@ -2015,7 +2015,7 @@ class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):
     }
     self.package = 'chromeos-chrome'
     self.version = '77.0.3863.0_rc-r1'
-    self.chrome_cpv = portage_util.CPV(
+    self.chrome_cpv = package_info.CPV(
         version_no_rev=self.version.split('_')[0],
         package=self.package,
         version=self.version,

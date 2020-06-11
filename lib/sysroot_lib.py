@@ -142,7 +142,7 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      packages (list[portage_util.CPV]): The list of failed packages.
+      packages (list[package_info.CPV]): The list of failed packages.
     """
     super(PackageInstallError, self).__init__(msg, result, exception)
     self.failed_packages = packages
@@ -185,7 +185,7 @@ class ToolchainInstallError(PackageInstallError):
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      tc_info (list[portage_util.CPV]): The list of failed toolchain packages.
+      tc_info (list[package_info.CPV]): The list of failed toolchain packages.
     """
     super(ToolchainInstallError, self).__init__(msg, result, exception,
                                                 packages=tc_info)

@@ -353,7 +353,7 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
   """Test the WorkspaceSyncChromeStage."""
 
   def setUp(self):
-    # Fake portage_util.CPV with the only field we need set.
+    # Fake package_info.CPV with the only field we need set.
     fake_cpv = mock.Mock()
     fake_cpv.version_no_rev = '0.0.1'
     self.mock_best_visible = self.PatchObject(

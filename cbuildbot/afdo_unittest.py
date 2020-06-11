@@ -21,8 +21,9 @@ import time
 
 import mock
 from chromite.cbuildbot import afdo
-from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils, path_util,
-                          portage_util)
+from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils, path_util)
+from chromite.lib.parser import package_info
+
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
@@ -732,7 +733,7 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
           'cp': None,
           'cpf': None
       }
-      cpv = portage_util.CPV(version=version, **unused)
+      cpv = package_info.CPV(version=version, **unused)
       profile = afdo.GetCWPProfile(cpv, 'silvermont', 'unused', gs.GSContext())
       # Expect the most recent profile on the same branch.
       self.assertEqual(profile, profiles[idx][:-3])

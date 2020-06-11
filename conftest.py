@@ -20,8 +20,8 @@ import pytest
 import chromite as cr
 from chromite.lib import cidb
 from chromite.lib import parallel
-from chromite.lib import portage_util
 from chromite.lib import retry_stats
+from chromite.lib.parser import package_info
 
 # We use wildcard imports here to make fixtures defined in the test module
 # globally visible.
@@ -150,7 +150,7 @@ def pytest_assertrepr_compare(op, left, right):
 
   https://docs.pytest.org/en/latest/assert.html#defining-your-own-explanation-for-failed-assertions
   """
-  if isinstance(left, portage_util.CPV) and isinstance(
+  if isinstance(left, package_info.CPV) and isinstance(
       right, cr.test.Overlay) and op == 'in':
     package_path = right.path / left.category / left.package
     return [

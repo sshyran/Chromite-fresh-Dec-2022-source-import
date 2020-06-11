@@ -216,7 +216,7 @@ def GetAFDOPerfDataURL(cpv, arch):
   Build the URL for the 'perf' data file given the release and architecture.
 
   Args:
-    cpv: The portage_util.CPV object for chromeos-chrome.
+    cpv: The package_info.CPV object for chromeos-chrome.
     arch: architecture we're going to build Chrome for.
 
   Returns:
@@ -243,7 +243,7 @@ def CheckAFDOPerfData(cpv, arch, gs_context):
   in GS.
 
   Args:
-    cpv: The portage_util.CPV object for chromeos-chrome.
+    cpv: The package_info.CPV object for chromeos-chrome.
     arch: architecture we're going to build Chrome for.
     gs_context: GS context to retrieve data.
 

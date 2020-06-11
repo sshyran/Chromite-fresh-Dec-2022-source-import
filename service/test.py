@@ -37,7 +37,7 @@ class BuildTargetUnitTestResult(object):
 
     Args:
       return_code (int): The return code from the command execution.
-      failed_cpvs (list[portage_util.CPV]|None): List of packages whose tests
+      failed_cpvs (list[package_info.CPV]|None): List of packages whose tests
         failed.
     """
     self.return_code = return_code

@@ -22,6 +22,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import portage_util
 from chromite.lib import build_target_lib
+from chromite.lib.parser import package_info
 from chromite.service import packages as packages_service
 
 
@@ -216,7 +217,7 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         'version_no_rev': None,
         'rev': None,
     }
-    return portage_util.CPV(
+    return package_info.CPV(
         category=category,
         package=package,
         version=version,
@@ -260,10 +261,10 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
 
     packages_controller.GetBestVisible(request, self.response, self.api_config)
 
-    package_info = self.response.package_info
-    self.assertEqual(package_info.category, cpv.category)
-    self.assertEqual(package_info.package_name, cpv.package)
-    self.assertEqual(package_info.version, cpv.version)
+    package_info_msg = self.response.package_info
+    self.assertEqual(package_info_msg.category, cpv.category)
+    self.assertEqual(package_info_msg.package_name, cpv.package)
+    self.assertEqual(package_info_msg.version, cpv.version)
 
 
 class GetChromeVersion(cros_test_lib.MockTestCase, ApiConfigMixin):

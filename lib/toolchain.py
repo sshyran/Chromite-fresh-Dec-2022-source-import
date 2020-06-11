@@ -49,7 +49,7 @@ class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
       msg (str): Error message.
       result (cros_build_lib.CommandResult): The command result.
       exception (Exception): The original exception.
-      tc_info (list): A list of the failed packages' portage_util.CPVs.
+      tc_info (list): A list of the failed packages' package_info.CPVs.
     """
     super(ToolchainInstallError, self).__init__(msg, result, exception)
     self.failed_toolchain_info = tc_info
