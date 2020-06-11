@@ -6,8 +6,9 @@
 
 import datetime
 import json as mod_json
+import os
 import sys
-from typing import Optional, TextIO
+from typing import Optional, TextIO, Union
 
 from chromite.lib import cros_build_lib
 
@@ -41,7 +42,7 @@ def timedelta(delta):
   return formated_delta
 
 
-def json(obj, fp: Optional[TextIO] = None,
+def json(obj, fp: Optional[Union[str, os.PathLike, TextIO]] = None,
          compact: bool = False) -> Optional[str]:
   """Convert an object to JSON with the right format.
 
