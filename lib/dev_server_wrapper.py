@@ -34,6 +34,7 @@ from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import timeout_util
 from chromite.lib.xbuddy import build_artifact
+from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
 
 
@@ -87,14 +88,16 @@ def GetXbuddyPath(path):
   """A helper function to parse an xbuddy path.
 
   Args:
-    path: Either a path without no scheme or an xbuddy://path/for/xbuddy
+    path: Either an xbuddy path, gs path, or a path with no scheme.
 
   Returns:
-    path/for/xbuddy if |path| is xbuddy://path/for/xbuddy; otherwise,
-    returns |path|.
+    path/for/xbuddy if |path| is xbuddy://path/for/xbuddy;
+    path/for/gs if |path| is gs://chromeos-image-archive/path/for/gs/;
+    otherwise, |path|.
 
   Raises:
-    ValueError if |path| uses any scheme other than xbuddy://.
+    ValueError if |path| is an unrecognized scheme, or is a gs path with
+    an unrecognized bucket.
   """
   parsed = urllib.parse.urlparse(path)
 
@@ -103,6 +106,11 @@ def GetXbuddyPath(path):
   elif parsed.scheme == '':
     logging.debug('Assuming %s is an xbuddy path.', path)
     return path
+  elif parsed.scheme == 'gs':
+    if parsed.netloc != devserver_constants.GS_IMAGE_BUCKET:
+      raise ValueError('Do not support bucket %s. Only bucket %s is supported.'
+                       % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET))
+    return '%s%s' % (xbuddy.REMOTE, parsed.path)
   else:
     raise ValueError('Do not support scheme %s.' % (parsed.scheme,))
 
