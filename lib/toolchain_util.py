@@ -2220,6 +2220,9 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         '--binary=%s' % self._AfdoTmpPath(CHROME_UNSTRIPPED_NAME),
         '--profile=%s' % perf_path_inside,
         '--out=%s' % afdo_path_inside,
+        # Do not set any sample threshold, so the AFDO profile can be as
+        # precise as the raw profile.
+        '--sample_threshold_frac=0',
     ],
                        enter_chroot=True,
                        print_cmd=True)
