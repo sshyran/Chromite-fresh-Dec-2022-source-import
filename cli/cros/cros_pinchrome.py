@@ -23,6 +23,7 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 from chromite.scripts import cros_mark_as_stable
 
 
@@ -76,7 +77,7 @@ def SplitPVPath(path):
   Returns:
     The output of SplitPV.
   """
-  return portage_util.SplitPV(portage_util.SplitEbuildPath(path)[2])
+  return package_info.SplitPV(portage_util.SplitEbuildPath(path)[2])
 
 
 def RevertStableEBuild(dirname, rev):

@@ -23,6 +23,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 
 # We are imported by src/repohooks/pre-upload.py in a non chroot environment
 # where yaml may not be there, so we don't error on that since it's not needed
@@ -384,7 +385,7 @@ class PackageInfo(object):
     filename = os.path.basename(self.fullnamerev)
     license_path = os.path.join(COPYRIGHT_ATTRIBUTION_DIR,
                                 os.path.dirname(self.fullnamerev))
-    pv = portage_util.SplitPV(filename)
+    pv = package_info.SplitPV(filename)
     pv_no_rev = '%s-%s' % (pv.package, pv.version_no_rev)
     for filename in (pv.pv, pv_no_rev, pv.package):
       file_path = os.path.join(license_path, filename)
