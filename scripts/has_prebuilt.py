@@ -18,6 +18,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
@@ -56,8 +57,8 @@ def _ParseArguments(argv):
   # Manually parse the packages as CPVs.
   packages = []
   for pkg in opts.packages:
-    cpv = portage_util.SplitCPV(pkg, strict=False)
-    if not cpv.category or not cpv.package:
+    cpv = package_info.parse(pkg)
+    if not cpv.atom:
       parser.error('Invalid package atom: %s' % pkg)
 
     packages.append(cpv)
@@ -74,7 +75,7 @@ def main(argv):
   board = opts.build_target_name
   bests = {}
   for cpv in opts.packages:
-    bests[cpv.cp] = portage_util.PortageqBestVisible(cpv.cp, board=board)
+    bests[cpv.atom] = portage_util.PortageqBestVisible(cpv.atom, board=board)
 
   # Emerge args:
   #   g: use binpkgs (needed to find if we have one)

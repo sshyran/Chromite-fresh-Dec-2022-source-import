@@ -29,6 +29,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import request_build
+from chromite.lib.parser import package_info
 
 
 class CleanUpStage(generic_stages.BuilderStage):
@@ -879,7 +880,7 @@ class BuildImageStage(BuildPackagesStage):
       return None
     for package in packages:
       if package.startswith('sys-kernel/chromeos-kernel-'):
-        kernel_version = portage_util.SplitCPV(package).version
+        kernel_version = package_info.SplitCPV(package).version
         logging.info('Found active kernel version: %s', kernel_version)
         return kernel_version
     return None

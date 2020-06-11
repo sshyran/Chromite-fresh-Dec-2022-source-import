@@ -27,6 +27,7 @@ from chromite.lib import moblab_vm
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.service import test
 
 
@@ -107,7 +108,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testFailure(self):
     """Test non-zero return code and failed package handling."""
     packages = ['foo/bar', 'cat/pkg']
-    cpvs = [portage_util.SplitCPV(p, strict=False) for p in packages]
+    cpvs = [package_info.SplitCPV(p, strict=False) for p in packages]
     self.PatchObject(portage_util, 'ParseDieHookStatusFile',
                      return_value=cpvs)
     expected_rc = 1

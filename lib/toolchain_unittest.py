@@ -15,9 +15,9 @@ import mock
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -92,11 +92,11 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
   def setUp(self):
     unused_fields = {'pv': None, 'package': None, 'version_no_rev': None,
                      'rev': None, 'category': None, 'cp': None, 'cpv': None}
-    self.gcc_cpv = portage_util.CPV(cpf='sys-devel/gcc-1.2', version='1.2',
+    self.gcc_cpv = package_info.CPV(cpf='sys-devel/gcc-1.2', version='1.2',
                                     **unused_fields)
-    self.libc_cpv = portage_util.CPV(cpf='sys-libs/glibc-3.4.5',
+    self.libc_cpv = package_info.CPV(cpf='sys-libs/glibc-3.4.5',
                                      version='3.4.5', **unused_fields)
-    self.go_cpv = portage_util.CPV(cpf='dev-lang/go-6.7-r8', version='6.7-r8',
+    self.go_cpv = package_info.CPV(cpf='dev-lang/go-6.7-r8', version='6.7-r8',
                                    **unused_fields)
 
     self.matching_toolchain = toolchain.ToolchainInfo('tc', 'tc')
@@ -191,11 +191,11 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
                                                     'build/board'))
 
     # Build out the testing CPV objects.
-    self.gcc_cpv = portage_util.SplitCPV('sys-devel/gcc-1.2', strict=False)
-    self.libc_cpv = portage_util.SplitCPV('sys-libs/glibc-3.4.5', strict=False)
+    self.gcc_cpv = package_info.SplitCPV('sys-devel/gcc-1.2', strict=False)
+    self.libc_cpv = package_info.SplitCPV('sys-libs/glibc-3.4.5', strict=False)
 
-    self.go_cpv = portage_util.SplitCPV('dev-lang/go-6.7-r8', strict=False)
-    self.rpcsvc_cpv = portage_util.SplitCPV('net-libs/rpcsvc-proto-9.10',
+    self.go_cpv = package_info.SplitCPV('dev-lang/go-6.7-r8', strict=False)
+    self.rpcsvc_cpv = package_info.SplitCPV('net-libs/rpcsvc-proto-9.10',
                                             strict=False)
 
     # pylint: disable=protected-access

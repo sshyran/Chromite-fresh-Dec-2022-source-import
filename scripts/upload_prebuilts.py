@@ -41,6 +41,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import toolchain
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -421,7 +422,7 @@ class PrebuiltUploader(object):
   def _ShouldFilterPackage(self, pkg):
     if not self._packages:
       return False
-    cpv = portage_util.SplitCPV(pkg['CPV'])
+    cpv = package_info.SplitCPV(pkg['CPV'])
     self._found_packages.add(cpv.cp)
     return cpv.package not in self._packages and cpv.cp not in self._packages
 

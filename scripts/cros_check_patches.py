@@ -18,7 +18,7 @@ import tempfile
 from chromite.lib import cros_build_lib
 from chromite.lib import depgraph
 from chromite.lib import osutils
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -104,7 +104,7 @@ class PatchReporter(object):
 
   def _ObservePatches(self, temp_space, deps_map):
     for cpv in deps_map:
-      split = portage_util.SplitCPV(cpv)
+      split = package_info.SplitCPV(cpv)
       if self.Ignored(split.cp):
         continue
       cmd = self.equery_cmd[:]
@@ -142,7 +142,7 @@ class PatchReporter(object):
     for line in lines:
       cat, pv, _, patchmsg = line.split(':')
       cat = os.path.basename(cat)
-      split = portage_util.SplitCPV('%s/%s' % (cat, pv))
+      split = package_info.SplitCPV('%s/%s' % (cat, pv))
       patch_name = re.sub(patch_regex, r'\1', patchmsg)
       patches.append('%s/%s %s' % (cat, split.package, patch_name))
 

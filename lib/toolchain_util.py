@@ -30,6 +30,7 @@ from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
+from chromite.lib.parser import package_info
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
@@ -1109,7 +1110,7 @@ class _CommonPrepareBundle(object):
     if len(paths) == 1:
       PV = os.path.splitext(os.path.split(paths[0])[1])[0]
       info = _EbuildInfo(paths[0],
-                         portage_util.SplitCPV('%s/%s' % (category, PV)))
+                         package_info.SplitCPV('%s/%s' % (category, PV)))
       self._ebuild_info[constants.CHROME_PN] = info
       return info
     else:
@@ -1324,7 +1325,7 @@ class _CommonPrepareBundle(object):
     CPV_9999 = '%s/%s-9999' % (info.CPV.category, info.CPV.package)
     ebuild_9999 = os.path.join(
         os.path.dirname(info.path), '%s-9999.ebuild' % package)
-    info_9999 = _EbuildInfo(ebuild_9999, portage_util.SplitCPV(CPV_9999))
+    info_9999 = _EbuildInfo(ebuild_9999, package_info.SplitCPV(CPV_9999))
     self._PatchEbuild(info_9999, update_rules, uprev=False)
 
   def _PatchEbuild(self, info, rules, uprev):
@@ -1376,7 +1377,7 @@ class _CommonPrepareBundle(object):
       os.rename(new_name, new_path)
       osutils.SafeUnlink(old_name)
       ebuild_file = new_path
-      CPV = _EbuildInfo(new_path, portage_util.SplitCPV(new_CPV))
+      CPV = _EbuildInfo(new_path, package_info.SplitCPV(new_CPV))
     else:
       assert CPV.version == '9999'
       os.rename(new_name, old_name)

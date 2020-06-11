@@ -24,6 +24,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.lib.parser import package_info
 
 
 def _GenerateAFDOGenerateTest(chrome_version_str, expected_to_generate_profile,
@@ -34,7 +35,7 @@ def _GenerateAFDOGenerateTest(chrome_version_str, expected_to_generate_profile,
 
     def setUp(self):
       self.PatchObject(afdo, 'CanGenerateAFDOData', lambda _: True)
-      chrome_version = portage_util.SplitCPV(chrome_version_str)
+      chrome_version = package_info.SplitCPV(chrome_version_str)
       self.PatchObject(portage_util, 'PortageqBestVisible',
                        lambda *_, **_2: chrome_version)
       self.wait_for_data = self.PatchObject(

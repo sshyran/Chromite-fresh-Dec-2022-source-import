@@ -23,12 +23,14 @@ import tempfile
 from chromite.cli import command
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import dlc_lib
 from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import remote_access
-from chromite.lib import dlc_lib
 from chromite.lib import workon_helper
+from chromite.lib.parser import package_info
+
 try:
   import portage
 except ImportError:
@@ -161,7 +163,7 @@ print(json.dumps(pkg_info))
   @staticmethod
   def _GetCP(cpv):
     """Returns the CP value for a given CPV string."""
-    attrs = portage_util.SplitCPV(cpv, strict=False)
+    attrs = package_info.SplitCPV(cpv, strict=False)
     if not attrs.cp:
       raise ValueError('Cannot get CP value for %s' % cpv)
     return attrs.cp
@@ -456,7 +458,7 @@ print(json.dumps(pkg_info))
       A list of (CPV, slot) pairs of packages in the binpkgs database that
       match the pattern.
     """
-    attrs = portage_util.SplitCPV(cpv_pattern, strict=False)
+    attrs = package_info.SplitCPV(cpv_pattern, strict=False)
     cp_pattern = os.path.join(attrs.category or '*', attrs.package or '*')
     matches = []
     for cp, cp_slots in self.binpkgs_db.items():
@@ -530,8 +532,8 @@ print(json.dumps(pkg_info))
     target_pkg_info = self.target_db.get(cp, dict()).get(slot)
     if target_pkg_info is not None:
       if cpv != target_pkg_info.cpv:
-        attrs = portage_util.SplitCPV(cpv)
-        target_attrs = portage_util.SplitCPV(target_pkg_info.cpv)
+        attrs = package_info.SplitCPV(cpv)
+        target_attrs = package_info.SplitCPV(target_pkg_info.cpv)
         logging.debug('Updating %s: version (%s) different on target (%s)',
                       cp, attrs.version, target_attrs.version)
         return True, True
@@ -869,7 +871,7 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
   """Returns paths to binary packages corresponding to |cpvs|.
 
   Args:
-    cpvs: List of CPV components given by portage_util.SplitCPV().
+    cpvs: List of CPV components given by package_info.SplitCPV().
     strip: True to run strip_package.
     sysroot: Sysroot path.
 
@@ -914,7 +916,7 @@ def _GetPackagesPaths(pkgs, strip, sysroot):
   Returns:
     List of paths corresponding to |pkgs|.
   """
-  cpvs = [portage_util.SplitCPV(p) for p in pkgs]
+  cpvs = [package_info.SplitCPV(p) for p in pkgs]
   return _GetPackagesByCPV(cpvs, strip, sysroot)
 
 
@@ -1187,7 +1189,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
       # Warn when the user seems to forget `cros workon start`.
       worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
       for package in listed:
-        cp = portage_util.SplitCPV(package).cp
+        cp = package_info.SplitCPV(package).cp
         if cp not in worked_on_cps:
           logging.warning(
               'Are you intentionally deploying unmodified packages, or did '

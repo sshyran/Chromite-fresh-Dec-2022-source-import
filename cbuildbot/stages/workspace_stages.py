@@ -43,6 +43,8 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
+from chromite.lib.parser import package_info
+
 
 BUILD_PACKAGES_PREBUILTS = '10774.0.0'
 BUILD_PACKAGES_WITH_DEBUG_SYMBOLS = '6302.0.0'
@@ -775,7 +777,7 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
     Returns:
       The Android build ID of the container for the boards.
     """
-    cpv = portage_util.SplitCPV(package)
+    cpv = package_info.SplitCPV(package)
     return cpv.version_no_rev
 
   def DetermineAndroidABI(self):

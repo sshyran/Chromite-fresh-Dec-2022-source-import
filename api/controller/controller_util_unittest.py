@@ -13,9 +13,9 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib import cros_test_lib
-from chromite.lib import portage_util
 from chromite.lib import build_target_lib
+from chromite.lib import cros_test_lib
+from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
 
 
@@ -116,7 +116,7 @@ class CPVToPackageInfoTest(cros_test_lib.TestCase):
   def testAllFields(self):
     """Test handling when all fields present."""
     pi = common_pb2.PackageInfo()
-    cpv = portage_util.SplitCPV('cat/pkg-2.0.0', strict=False)
+    cpv = package_info.SplitCPV('cat/pkg-2.0.0', strict=False)
 
     controller_util.CPVToPackageInfo(cpv, pi)
     self.assertEqual('cat', pi.category)
@@ -126,7 +126,7 @@ class CPVToPackageInfoTest(cros_test_lib.TestCase):
   def testNoVersion(self):
     """Test handling when no version given."""
     pi = common_pb2.PackageInfo()
-    cpv = portage_util.SplitCPV('cat/pkg', strict=False)
+    cpv = package_info.SplitCPV('cat/pkg', strict=False)
 
     controller_util.CPVToPackageInfo(cpv, pi)
     self.assertEqual('cat', pi.category)
@@ -136,7 +136,7 @@ class CPVToPackageInfoTest(cros_test_lib.TestCase):
   def testPackageOnly(self):
     """Test handling when only given the package name."""
     pi = common_pb2.PackageInfo()
-    cpv = portage_util.SplitCPV('pkg', strict=False)
+    cpv = package_info.SplitCPV('pkg', strict=False)
 
     controller_util.CPVToPackageInfo(cpv, pi)
     self.assertEqual('', pi.category)
@@ -227,13 +227,13 @@ class CPVToStringTest(cros_test_lib.TestCase):
     ]
 
     for case in cases:
-      cpv = portage_util.SplitCPV(case, strict=False)
+      cpv = package_info.SplitCPV(case, strict=False)
       # We should end up with as much info as is available, so we should see
       # the original value in each case.
       self.assertEqual(case, controller_util.CPVToString(cpv))
 
   def testInvalidCPV(self):
     """Test invalid CPV object."""
-    cpv = portage_util.SplitCPV('', strict=False)
+    cpv = package_info.SplitCPV('', strict=False)
     with self.assertRaises(ValueError):
       controller_util.CPVToString(cpv)

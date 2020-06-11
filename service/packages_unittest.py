@@ -30,6 +30,7 @@ from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import uprev_lib
 from chromite.lib.chroot_lib import Chroot
+from chromite.lib.parser import package_info
 from chromite.lib.uprev_lib import GitRef
 from chromite.service import packages
 
@@ -96,7 +97,7 @@ class UprevsVersionedPackageTest(cros_test_lib.MockTestCase):
     """Test calling a registered function."""
     self.PatchObject(self, 'uprev_category_package')
 
-    cpv = portage_util.SplitCPV('category/package', strict=False)
+    cpv = package_info.SplitCPV('category/package', strict=False)
     packages.uprev_versioned_package(cpv, [], [], Chroot())
 
     # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
@@ -104,7 +105,7 @@ class UprevsVersionedPackageTest(cros_test_lib.MockTestCase):
 
   def test_unregistered_package(self):
     """Test calling with an unregistered package."""
-    cpv = portage_util.SplitCPV('does-not/exist', strict=False)
+    cpv = package_info.SplitCPV('does-not/exist', strict=False)
 
     with self.assertRaises(packages.UnknownPackageError):
       packages.uprev_versioned_package(cpv, [], [], Chroot())
@@ -870,7 +871,7 @@ class ChromeVersionsTest(cros_test_lib.MockTestCase):
     """Tests that a valid chrome version is returned."""
     # Mock PortageqBestVisible to return a valid chrome version string.
     r1_cpf = 'chromeos-base/chromeos-chrome-78.0.3900.0_rc-r1'
-    r1_cpv = portage_util.SplitCPV(r1_cpf)
+    r1_cpv = package_info.SplitCPV(r1_cpf)
     self.PatchObject(portage_util, 'PortageqBestVisible',
                      return_value=r1_cpv)
 

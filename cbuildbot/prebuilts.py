@@ -14,7 +14,7 @@ import sys
 from chromite.cbuildbot import commands
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
@@ -51,7 +51,7 @@ def _AddPackagesForPrebuilt(filename):
       for line in f:
         atom = line.split('#', 1)[0].strip()
         try:
-          cpv = portage_util.SplitCPV(atom)
+          cpv = package_info.SplitCPV(atom)
         except ValueError:
           logging.warning('Could not split atom %r (line: %r)', atom, line)
           continue

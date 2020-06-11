@@ -288,7 +288,7 @@ class PackageInfo(object):
     #   category, name, version, revision
     #
     try:
-      cpv = portage_util.SplitCPV(fullnamerev)
+      cpv = package_info.SplitCPV(fullnamerev)
     except ValueError:
       # A bad package can either raise a TypeError exception or return None.
       raise ValueError(

@@ -16,7 +16,7 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import android_pb2
 from chromite.lib import constants
 from chromite.lib import osutils
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 from chromite.service import packages
 
 
@@ -79,7 +79,7 @@ def MarkStable(input_proto, output_proto, _config):
     output_proto.status = android_pb2.MARK_STABLE_STATUS_PINNED
 
   if android_atom_to_build:
-    CPV = portage_util.SplitCPV(android_atom_to_build)
+    CPV = package_info.SplitCPV(android_atom_to_build)
     output_proto.android_atom.category = CPV.category
     output_proto.android_atom.package_name = CPV.package
     output_proto.android_atom.version = CPV.version

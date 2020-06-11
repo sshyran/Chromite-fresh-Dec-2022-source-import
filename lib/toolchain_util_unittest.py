@@ -35,6 +35,7 @@ from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib import toolchain_util
+from chromite.lib.parser import package_info
 
 # pylint: disable=protected-access
 
@@ -200,7 +201,7 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
             'src', 'third_party', 'chromiumos-overlay',
             os.path.dirname(self.chrome_PV), 'chromeos-chrome',
             '%s.ebuild' % os.path.basename(self.chrome_PV)))
-    self.chrome_CPV = portage_util.SplitCPV(self.chrome_PV)
+    self.chrome_CPV = package_info.SplitCPV(self.chrome_PV)
     self.glob = self.PatchObject(
         glob, 'glob', return_value=[self.chrome_ebuild])
     self.rc.AddCmdResult(partial_mock.In('rm'), returncode=0)
@@ -270,7 +271,7 @@ class CommonPrepareBundleTest(PrepareBundleTest):
                 os.path.dirname(__file__), '..', '..', 'src', 'third_party',
                 'chromiumos-overlay', 'chromeos-base', 'chromeos-chrome',
                 'chromeos-chrome-9999.ebuild')),
-        CPV=portage_util.SplitCPV('chromeos-base/chromeos-chrome-9999'))
+        CPV=package_info.SplitCPV('chromeos-base/chromeos-chrome-9999'))
     self.assertEqual([
         mock.call(info, {'var': 'val'}, uprev=True),
         mock.call(info_9999, {'var': 'val'}, uprev=False)
@@ -335,7 +336,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
     """Test that we find a file from prior branch when we have none."""
     self.obj._ebuild_info['chromeos-chrome'] = toolchain_util._EbuildInfo(
         path='path',
-        CPV=portage_util.SplitCPV(
+        CPV=package_info.SplitCPV(
             'chromeos-base/chromeos-chrome-79.0.3900.0_rc-r1'))
     latest_orderfile = self.obj._FindLatestAFDOArtifact(
         [self.gs_url], self.obj._RankValidOrderfiles)
@@ -349,7 +350,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
     """Test function fails when no files on current branch."""
     self.obj._ebuild_info['chromeos-chrome'] = toolchain_util._EbuildInfo(
         path='path',
-        CPV=portage_util.SplitCPV(
+        CPV=package_info.SplitCPV(
             'chromeos-base/chromeos-chrome-80.0.3950.0_rc-r1'))
     self.gsc_list.side_effect = gs.GSNoSuchKey('No files')
     with self.assertRaises(RuntimeError) as context:
@@ -595,7 +596,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.SetUpBundle('UnverifiedLlvmPgoFile')
     llvm_version = '10.0_pre377782_p20200113-r14'
     llvm_clang_sha = 'a21beccea2020f950845cbb68db663d0737e174c'
-    llvm_cpv = portage_util.SplitCPV('sys-devel/llvm-%s' % llvm_version)
+    llvm_cpv = package_info.SplitCPV('sys-devel/llvm-%s' % llvm_version)
     self.PatchObject(
         self.obj,
         '_GetProfileNames',

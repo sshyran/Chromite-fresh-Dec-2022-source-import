@@ -21,8 +21,8 @@ from chromite.lib import binpkg
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.service import sysroot as sysroot_service
 
 
@@ -236,10 +236,10 @@ class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase,
       package_list = []
       for pkg in pkg_list:
         pkg_string_parts = pkg.split('/')
-        package_info = common_pb2.PackageInfo(
+        package_info_msg = common_pb2.PackageInfo(
             category=pkg_string_parts[0],
             package_name=pkg_string_parts[1])
-        package_list.append(package_info)
+        package_list.append(package_info_msg)
     else:
       package_list = []
 
@@ -410,7 +410,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
                                 sysroot_path=self.sysroot)
 
     err_pkgs = ['cat/pkg', 'cat2/pkg2']
-    err_cpvs = [portage_util.SplitCPV(pkg, strict=False) for pkg in err_pkgs]
+    err_cpvs = [package_info.SplitCPV(pkg, strict=False) for pkg in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
     err = sysroot_lib.ToolchainInstallError('Error',
                                             cros_build_lib.CommandResult(),
@@ -470,7 +470,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     if packages:
       for pkg in packages:
         pkg_info = instance.packages.add()
-        cpv = portage_util.SplitCPV(pkg, strict=False)
+        cpv = package_info.SplitCPV(pkg, strict=False)
         controller_util.CPVToPackageInfo(cpv, pkg_info)
     return instance
 
@@ -745,7 +745,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
 
     # Failed package info and expected list for verification.
     err_pkgs = ['cat/pkg', 'cat2/pkg2']
-    err_cpvs = [portage_util.SplitCPV(cpv, strict=False) for cpv in err_pkgs]
+    err_cpvs = [package_info.SplitCPV(cpv, strict=False) for cpv in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
 
     # Force error to be raised with the packages.

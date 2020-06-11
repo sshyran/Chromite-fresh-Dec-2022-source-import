@@ -19,6 +19,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.service import sysroot
 
 
@@ -358,7 +359,7 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
   def testPackageFailure(self):
     """Test package failure handling."""
     failed = ['cat/pkg', 'foo/bar']
-    cpvs = [portage_util.SplitCPV(p, strict=False) for p in failed]
+    cpvs = [package_info.SplitCPV(p, strict=False) for p in failed]
     self.PatchObject(portage_util, 'ParseDieHookStatusFile',
                      return_value=cpvs)
 

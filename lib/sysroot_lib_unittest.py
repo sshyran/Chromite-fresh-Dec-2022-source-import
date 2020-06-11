@@ -16,9 +16,9 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -243,7 +243,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
   def testInstallToolchainError(self):
     """Test error handling from the libc install."""
     failed = ['cat/pkg', 'cat/pkg2']
-    failed_cpvs = [portage_util.SplitCPV(pkg, strict=False) for pkg in failed]
+    failed_cpvs = [package_info.SplitCPV(pkg, strict=False) for pkg in failed]
     result = cros_build_lib.CommandResult(returncode=1)
     error = toolchain.ToolchainInstallError('Error', result=result,
                                             tc_info=failed_cpvs)

@@ -26,6 +26,7 @@ from chromite.lib import perf_uploader
 from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.lib.parser import package_info
 from chromite.scripts import upload_prebuilts
 
 
@@ -87,7 +88,7 @@ class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,
     osutils.SafeMakedirs(self.fake_chroot)
     osutils.Touch(os.path.join(self.fake_chroot, 'file'))
     for package, v in self.fake_packages:
-      cpv = portage_util.SplitCPV('%s-%s' % (package, v))
+      cpv = package_info.SplitCPV('%s-%s' % (package, v))
       self.fake_json_data.setdefault(cpv.cp, []).append([v, {}])
 
   def ConstructStage(self):

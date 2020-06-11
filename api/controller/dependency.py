@@ -20,7 +20,7 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import depgraph_pb2
 # TODO(crbug/1081828): stop using build_target and drop it from the proto.
 from chromite.lib import cros_build_lib
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 from chromite.service import dependency
 
 
@@ -43,20 +43,21 @@ def AugmentDepGraphProtoFromJsonMap(json_map, graph):
 
   for data in json_map['package_deps'].values():
     package_dep_info = graph.package_deps.add()
-    package_info = package_dep_info.package_info
-    package_info.package_name = data['name']
-    package_info.category = data['category']
-    package_info.version = data['version']
+    package_info_msg = package_dep_info.package_info
+    package_info_msg.package_name = data['name']
+    package_info_msg.category = data['category']
+    package_info_msg.version = data['version']
     for dep in data['deps']:
-      cpv = portage_util.SplitCPV(dep, strict=False)
+      cpv = package_info.SplitCPV(dep, strict=False)
       dep_package = package_dep_info.dependency_packages.add()
       dep_package.package_name = cpv.package
       dep_package.category = cpv.category
       if cpv.version:
         dep_package.version = cpv.version
 
-    package_CPV = '%s/%s-%s' % (package_info.category,
-                                package_info.package_name, package_info.version)
+    package_CPV = '%s/%s-%s' % (package_info_msg.category,
+                                package_info_msg.package_name,
+                                package_info_msg.version)
     for path in json_map['source_path_mapping'][package_CPV]:
       source_path = package_dep_info.dependency_source_paths.add()
       source_path.path = path
@@ -129,9 +130,9 @@ def List(input_proto: depgraph_pb2.ListRequest,
       src_paths=src_paths,
       packages=packages)
   for package in package_deps:
-    package_info = output_proto.package_deps.add()
-    cpv = portage_util.SplitCPV(package, strict=False)
-    controller_util.CPVToPackageInfo(cpv, package_info)
+    pkg_info = output_proto.package_deps.add()
+    cpv = package_info.SplitCPV(package, strict=False)
+    controller_util.CPVToPackageInfo(cpv, pkg_info)
 
 
 def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):

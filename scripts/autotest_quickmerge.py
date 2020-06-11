@@ -24,7 +24,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
   # pylint: disable=import-error
@@ -159,7 +159,7 @@ def GetPackageAPI(portage_root, package_cp):
 
   # Convert string match to package dblink.
   package_cpv = matching_packages[0]
-  package_split = portage_util.SplitCPV(package_cpv)
+  package_split = package_info.SplitCPV(package_cpv)
   # pylint: disable=no-member
   package = portage.dblink(package_split.category,
                            package_split.pv, settings=vartree.settings,

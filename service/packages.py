@@ -30,6 +30,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
+from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
   from chromite.service import dependency
@@ -814,7 +815,7 @@ def determine_android_version(boards=None):
     package = determine_android_package(board)
     if not package:
       return None
-    cpv = portage_util.SplitCPV(package)
+    cpv = package_info.SplitCPV(package)
     if not cpv:
       raise NoAndroidVersionError(
           'Android version could not be determined for %s' % board)
@@ -1062,7 +1063,7 @@ def determine_kernel_version(build_target):
     return None
   for package in packages:
     if package.startswith('sys-kernel/chromeos-kernel-'):
-      kernel_version = portage_util.SplitCPV(package).version
+      kernel_version = package_info.SplitCPV(package).version
       logging.info('Found active kernel version: %s', kernel_version)
       return kernel_version
   return None

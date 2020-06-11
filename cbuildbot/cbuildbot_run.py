@@ -42,6 +42,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import uri_lib
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -915,7 +916,7 @@ class _BuilderRunBase(object):
       if not package:
         raise NoAndroidVersionError(
             'Android version could not be determined for %s' % boards)
-      cpv = portage_util.SplitCPV(package)
+      cpv = package_info.SplitCPV(package)
       if not cpv:
         raise NoAndroidVersionError(
             'Android version could not be determined for %s' % board)

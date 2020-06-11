@@ -24,8 +24,8 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test
 from chromite.utils import key_value_store
@@ -72,10 +72,10 @@ def _BuildTargetUnitTestResponse(input_proto, output_proto, _config):
 def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
   """Add failed packages to a failed response."""
   packages = ['foo/bar', 'cat/pkg']
-  failed_cpvs = [portage_util.SplitCPV(p, strict=False) for p in packages]
+  failed_cpvs = [package_info.SplitCPV(p, strict=False) for p in packages]
   for cpv in failed_cpvs:
-    package_info = output_proto.failed_packages.add()
-    controller_util.CPVToPackageInfo(cpv, package_info)
+    package_info_msg = output_proto.failed_packages.add()
+    controller_util.CPVToPackageInfo(cpv, package_info_msg)
 
 
 @faux.success(_BuildTargetUnitTestResponse)
@@ -97,14 +97,14 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   # Packages to be tested.
   packages_package_info = input_proto.packages
   packages = []
-  for package_info in packages_package_info:
-    packages.append(controller_util.PackageInfoToString(package_info))
+  for package_info_msg in packages_package_info:
+    packages.append(controller_util.PackageInfoToString(package_info_msg))
 
   # Skipped tests.
   blacklisted_package_info = input_proto.package_blacklist
   blacklist = []
-  for package_info in blacklisted_package_info:
-    blacklist.append(controller_util.PackageInfoToString(package_info))
+  for package_info_msg in blacklisted_package_info:
+    blacklist.append(controller_util.PackageInfoToString(package_info_msg))
 
   # Allow call to succeed if no tests were found.
   testable_packages_optional = input_proto.flags.testable_packages_optional
@@ -127,8 +127,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
     # Failed to run tests or some tests failed.
     # Record all failed packages.
     for cpv in result.failed_cpvs:
-      package_info = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(cpv, package_info)
+      package_info_msg = output_proto.failed_packages.add()
+      controller_util.CPVToPackageInfo(cpv, package_info_msg)
     if result.failed_cpvs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:

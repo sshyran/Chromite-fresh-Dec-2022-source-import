@@ -15,7 +15,7 @@ import pathlib  # pylint: disable=import-error
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 __all__ = ['Overlay', 'Package', 'Profile', 'Sysroot']
 
@@ -58,8 +58,8 @@ class Overlay(object):
 
     self._write_layout_conf()
 
-  def __contains__(self, item: portage_util.CPV):
-    if not isinstance(item, portage_util.CPV):
+  def __contains__(self, item: package_info.CPV):
+    if not isinstance(item, package_info.CPV):
       raise TypeError(f'Expected a CPV but received a {type(item)}')
 
     ebuild_path = self.path / item.category / item.package / f'{item.pv}.ebuild'
@@ -273,11 +273,11 @@ class Package(object):
   @classmethod
   def from_cpv(cls, pkg_str: str):
     """Creates a Package from a CPV string."""
-    cpv = portage_util.SplitCPV(pkg_str)
+    cpv = package_info.SplitCPV(pkg_str)
     return cls(category=cpv.category, package=cpv.package, version=cpv.version)
 
   @property
-  def cpv(self) -> portage_util.CPV:
+  def cpv(self) -> package_info.CPV:
     """Returns a CPV object constructed from this package's metadata."""
-    return portage_util.SplitCPV(self.category + '/' + self.package + '-' +
+    return package_info.SplitCPV(self.category + '/' + self.package + '-' +
                                  self.version)

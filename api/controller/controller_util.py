@@ -12,9 +12,9 @@ import sys
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import goma_util
-from chromite.lib import constants
-from chromite.lib import portage_util
 from chromite.lib import build_target_lib
+from chromite.lib import constants
+from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
 
 
@@ -133,33 +133,33 @@ def ParseBuildTargets(repeated_build_target_field):
   return [ParseBuildTarget(target) for target in repeated_build_target_field]
 
 
-def CPVToPackageInfo(cpv, package_info):
+def CPVToPackageInfo(cpv, package_info_msg):
   """Helper to translate CPVs into a PackageInfo message."""
-  package_info.package_name = cpv.package
+  package_info_msg.package_name = cpv.package
   if cpv.category:
-    package_info.category = cpv.category
+    package_info_msg.category = cpv.category
   if cpv.version:
-    package_info.version = cpv.version
+    package_info_msg.version = cpv.version
 
 
-def PackageInfoToCPV(package_info):
+def PackageInfoToCPV(package_info_msg):
   """Helper to translate a PackageInfo message into a CPV."""
-  if not package_info or not package_info.package_name:
+  if not package_info_msg or not package_info_msg.package_name:
     return None
 
-  return portage_util.SplitCPV(PackageInfoToString(package_info), strict=False)
+  return package_info.SplitCPV(PackageInfoToString(package_info_msg),
+                               strict=False)
 
 
-def PackageInfoToString(package_info):
+def PackageInfoToString(package_info_msg):
   # Combine the components into the full CPV string that SplitCPV parses.
-  # TODO: Turn portage_util.CPV into a class that can handle building out an
-  #  instance from components.
-  if not package_info.package_name:
-    raise ValueError('Invalid package_info.')
+  # TODO: Use the lib.parser.package_info.PackageInfo class instead.
+  if not package_info_msg.package_name:
+    raise ValueError('Invalid PackageInfo message.')
 
-  c = ('%s/' % package_info.category) if package_info.category else ''
-  p = package_info.package_name
-  v = ('-%s' % package_info.version) if package_info.version else ''
+  c = ('%s/' % package_info_msg.category) if package_info_msg.category else ''
+  p = package_info_msg.package_name
+  v = ('-%s' % package_info_msg.version) if package_info_msg.version else ''
   return '%s%s%s' % (c, p, v)
 
 
@@ -167,7 +167,7 @@ def CPVToString(cpv):
   """Get the most useful string representation from a CPV.
 
   Args:
-    cpv (portage_util.CPV): The CPV object.
+    cpv (package_info.CPV): The CPV object.
 
   Returns:
     str

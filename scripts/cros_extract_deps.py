@@ -21,7 +21,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import pformat
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -79,7 +79,7 @@ Turn something like this (the parallel_emerge DepsTree format):
     pkgtable = {}
   for cpv, record in deptree.items():
     if cpv not in pkgtable:
-      split = portage_util.SplitCPV(cpv)
+      split = package_info.SplitCPV(cpv)
       pkgtable[cpv] = {'deps': [],
                        'rev_deps': [],
                        'name': split.package,
@@ -209,7 +209,7 @@ def GenerateCPEList(deps_list, sysroot):
     if deps_list.get(sdk_cpv) is not None:
       continue
 
-    split = portage_util.SplitCPV(sdk_cpv)
+    split = package_info.SplitCPV(sdk_cpv)
     cpes = GetCPEFromCPV(split.category, split.package, split.version_no_rev)
     if cpes:
       cpe_dump.append({'ComponentName': '%s' % split.cp,

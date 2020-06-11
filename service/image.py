@@ -14,7 +14,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 
 
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
@@ -93,7 +93,7 @@ class BuildResult(object):
     """
     self.failed_packages = []
     for package in failed_packages or []:
-      self.failed_packages.append(portage_util.SplitCPV(package, strict=False))
+      self.failed_packages.append(package_info.SplitCPV(package, strict=False))
 
     # The return code should always be non-zero if there's any failed packages,
     # but it's cheap insurance, so check it.

@@ -23,9 +23,9 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import depgraph
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.lib import terminal
 from chromite.lib import upgrade_table as utable
+from chromite.lib.parser import package_info
 from chromite.scripts import cros_portage_upgrade as cpu
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -482,7 +482,7 @@ class CpuTestBase(cros_test_lib.MockTempDirTestCase):
 
     vdb = os.path.join(var_lib_portage, 'pkgs')
     for ebuild, custom_metadata in installed.items():
-      cpv = portage_util.SplitCPV(ebuild)
+      cpv = package_info.SplitCPV(ebuild)
       vdb_pkg = os.path.join(vdb, cpv.cpf)
       osutils.SafeMakedirs(vdb_pkg)
       metadata = DEFAULT_METADATA.copy()
@@ -491,7 +491,7 @@ class CpuTestBase(cros_test_lib.MockTempDirTestCase):
         osutils.WriteFile(os.path.join(vdb_pkg, key), value)
 
     for ebuild, custom_metadata in ebuilds.items():
-      cpv = portage_util.SplitCPV(ebuild)
+      cpv = package_info.SplitCPV(ebuild)
       metadata = DEFAULT_METADATA.copy()
       metadata.update(custom_metadata)
       content = 'EAPI=%s\n' % metadata.pop('EAPI')

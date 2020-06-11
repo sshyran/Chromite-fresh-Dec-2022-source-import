@@ -23,7 +23,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import portage_util
+from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
 from chromite.utils import key_value_store
@@ -205,7 +205,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     expected = [('cat', 'pkg'), ('foo', 'bar')]
 
     result = test_service.BuildTargetUnitTestResult(1, None)
-    result.failed_cpvs = [portage_util.SplitCPV(p, strict=False) for p in pkgs]
+    result.failed_cpvs = [package_info.SplitCPV(p, strict=False) for p in pkgs]
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     input_msg = self._GetInput(board='board', result_path=self.tempdir)
@@ -230,7 +230,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     pkgs = ['foo/bar', 'cat/pkg']
-    blacklist = [portage_util.SplitCPV(p, strict=False) for p in pkgs]
+    blacklist = [package_info.SplitCPV(p, strict=False) for p in pkgs]
     input_msg = self._GetInput(board='board', result_path=self.tempdir,
                                empty_sysroot=True, blacklist=blacklist)
     output_msg = self._GetOutput()
@@ -244,7 +244,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
   def testBuildTargetUnitTest(self):
     """Test BuildTargetUnitTest successful call."""
     pkgs = ['foo/bar', 'cat/pkg']
-    packages = [portage_util.SplitCPV(p, strict=False) for p in pkgs]
+    packages = [package_info.SplitCPV(p, strict=False) for p in pkgs]
     input_msg = self._GetInput(
         board='board', result_path=self.tempdir, packages=packages)
 

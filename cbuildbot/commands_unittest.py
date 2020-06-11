@@ -35,6 +35,7 @@ from chromite.lib import partial_mock
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
 from chromite.scripts import pushimage
 
 from chromite.service import artifacts as artifacts_service
@@ -1476,9 +1477,9 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(
         portage_util, 'FindPackageNameMatches',
         side_effect=[
-            [portage_util.SplitCPV('chromeos-base/chrome-1-r0')],
-            [portage_util.SplitCPV('sys-kernel/kernel-1-r0'),
-             portage_util.SplitCPV('sys-kernel/kernel-2-r0')]])
+            [package_info.SplitCPV('chromeos-base/chrome-1-r0')],
+            [package_info.SplitCPV('sys-kernel/kernel-1-r0'),
+             package_info.SplitCPV('sys-kernel/kernel-2-r0')]])
     # Drop "stripped packages".
     sysroot = os.path.join(self._buildroot, 'chroot', 'build', 'test-board')
     pkg_dir = os.path.join(sysroot, 'stripped-packages')
