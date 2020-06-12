@@ -15,10 +15,12 @@ import select
 import signal
 import sys
 import traceback
+import warnings
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 
+warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 
 # Max amount of data we're hold in the buffer at a given time.
 _BUFSIZE = 1024
