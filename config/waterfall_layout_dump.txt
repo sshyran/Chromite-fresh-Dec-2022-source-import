@@ -209,12 +209,10 @@
 
 == informational ==
   amd64-generic-asan
-  amd64-generic-coverage-fuzzer
   amd64-generic-fuzzer
   amd64-generic-msan-fuzzer
   amd64-generic-ubsan
   amd64-generic-ubsan-fuzzer
-  betty-asan
   betty-vmtest-informational
 
 == pi_android_pfq ==

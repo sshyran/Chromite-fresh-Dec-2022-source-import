@@ -1725,7 +1725,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       boards=['betty'],
       description='Build with Address Sanitizer (Clang)',
       # Once every day. 3 PM UTC is 7 AM PST (no daylight savings).
-      schedule='0 15 * * *',
+      # Currently disabled, to schedule uncomment the next line.
+      # schedule='0 15 * * *',
       board_replace=True,
       vm_tests=[],
   )
@@ -1753,7 +1754,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       disk_layout='4gb-rootfs',
       image_test=None,
       # Every 3 hours.
-      schedule='0 */3 * * *',
+      # Currently disabled, to schedule uncomment the next line.
+      # schedule='0 */3 * * *',
       board_replace=True,
   )
 

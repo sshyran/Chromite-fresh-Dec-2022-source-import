@@ -1086,8 +1086,7 @@
         "disk_layout": "4gb-rootfs",
         "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-coverage",
         "image_test": null,
-        "profile": "coverage-fuzzer",
-        "schedule": "0 */3 * * *"
+        "profile": "coverage-fuzzer"
     },
     "amd64-generic-coverage-fuzzer-tryjob": {
         "_template": "fuzzer",
@@ -4100,7 +4099,6 @@
         "luci_builder": "Informational",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "schedule": "0 15 * * *",
         "uprev": false,
         "vm_tests": []
     },
