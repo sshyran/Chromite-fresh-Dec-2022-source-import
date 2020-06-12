@@ -59,8 +59,9 @@ class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):
 
   def testArchiveDirectoryDoesNotExist(self):
     """Test archive directory that does not exist causes error."""
-    with self.assertRaises(artifacts.ArchiveBaseDirNotFound):
-      artifacts.BundleAutotestFiles(self.chroot, self.sysroot, self.output_dir)
+    self.assertEqual(
+        artifacts.BundleAutotestFiles(self.chroot, self.sysroot,
+                                      self.output_dir), {})
 
   def testSuccess(self):
     """Test a successful call handling."""

@@ -124,8 +124,7 @@ def BundleAutotestFiles(chroot, sysroot, output_directory):
   archive_basedir = os.path.dirname(archive_basedir)
 
   if not os.path.exists(archive_basedir):
-    raise ArchiveBaseDirNotFound(
-        'Archive base directory does not exist: %s' % archive_basedir)
+    return {}
 
   builder = autotest_util.AutotestTarballBuilder(archive_basedir,
                                                  output_directory)
