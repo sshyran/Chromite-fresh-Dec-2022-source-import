@@ -500,6 +500,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.perf_name = 'chromeos-chrome-amd64-78.0.3893.0.perf.data'
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
+
     self.gen_order = self.PatchObject(
         toolchain_util.GenerateChromeOrderfile, 'Bundle', new=_Bundle)
     self.PatchObject(
@@ -633,32 +634,19 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
             path=self.chrome_ebuild, CPV=self.chrome_CPV))
     run_command = self.PatchObject(cros_build_lib, 'run')
     sym_link_command = self.PatchObject(osutils, 'SafeSymlink')
-    mock_file_obj_afdo = io.StringIO()
-    mock_file_obj_merged = io.StringIO()
-    mock_open.side_effect = (mock_file_obj_afdo, mock_file_obj_merged)
-    merge_function = self.PatchObject(
-        self.obj,
-        '_CreateAndUploadMergedAFDOProfile',
-        return_value=self.merged_afdo_name)
+    mock_file_obj = io.StringIO()
+    mock_open.return_value = mock_file_obj
 
     ret = self.obj.Bundle()
     afdo_path = os.path.join(
         self.outdir, self.afdo_name + toolchain_util.BZ2_COMPRESSION_SUFFIX)
-    merged_path = os.path.join(
-        self.outdir,
-        self.merged_afdo_name + toolchain_util.BZ2_COMPRESSION_SUFFIX)
-    self.assertEqual([afdo_path, merged_path], ret)
+    self.assertEqual([afdo_path], ret)
     # Make sure the sym link to debug Chrome is created
     sym_link_command.assert_called_with(
         os.path.basename(toolchain_util._CHROME_DEBUG_BIN),
         self.chroot.full_path(
             os.path.join(self.afdo_tmp_path, 'chrome.unstripped')))
-    # Make sure merged function is called
-    merged_path_inside = os.path.join(self.afdo_tmp_path, self.merged_afdo_name)
     afdo_path_inside = os.path.join(self.afdo_tmp_path, self.afdo_name)
-    merge_function.assert_called_with(
-        self.chroot.full_path(afdo_path_inside),
-        self.chroot.full_path(os.path.join(self.afdo_tmp_path)))
     # Make sure commands are executed correctly
     mock_calls = [
         mock.call([
@@ -671,15 +659,50 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                   enter_chroot=True,
                   print_cmd=True),
         mock.call(['bzip2', '-c', afdo_path_inside],
-                  stdout=mock_file_obj_afdo,
-                  enter_chroot=True,
-                  print_cmd=True),
-        mock.call(['bzip2', '-c', merged_path_inside],
-                  stdout=mock_file_obj_merged,
+                  stdout=mock_file_obj,
                   enter_chroot=True,
                   print_cmd=True)
     ]
     run_command.assert_has_calls(mock_calls)
+
+  def testBundleChromeAFDOProfileForAndroidLinuxFailWhenNoBenchmark(self):
+    self.SetUpBundle('ChromeAFDOProfileForAndroidLinux')
+    merge_function = self.PatchObject(self.obj,
+                                      '_CreateAndUploadMergedAFDOProfile')
+    with self.assertRaises(AssertionError) as context:
+      self.obj.Bundle()
+    self.assertIn('No new AFDO profile created', str(context.exception))
+    merge_function.assert_not_called()
+
+  @mock.patch.object(builtins, 'open')
+  def testBundleChromeAFDOProfileForAndroidLinuxPass(self, mock_open):
+    self.SetUpBundle('ChromeAFDOProfileForAndroidLinux')
+    self.PatchObject(os.path, 'exists', return_value=True)
+    run_command = self.PatchObject(cros_build_lib, 'run')
+    merge_function = self.PatchObject(
+        self.obj,
+        '_CreateAndUploadMergedAFDOProfile',
+        return_value=self.merged_afdo_name)
+    mock_file_obj = io.StringIO()
+    mock_open.return_value = mock_file_obj
+
+    ret = self.obj.Bundle()
+    merged_path = os.path.join(
+        self.outdir,
+        self.merged_afdo_name + toolchain_util.BZ2_COMPRESSION_SUFFIX)
+    self.assertEqual([merged_path], ret)
+    # Make sure merged function is called
+    afdo_path_inside = os.path.join(self.afdo_tmp_path, self.afdo_name)
+    merged_path_inside = os.path.join(self.afdo_tmp_path, self.merged_afdo_name)
+    merge_function.assert_called_with(
+        self.chroot.full_path(afdo_path_inside),
+        self.chroot.full_path(os.path.join(self.afdo_tmp_path)))
+    run_command.assert_called_with(
+        ['bzip2', '-c', merged_path_inside],
+        stdout=mock_file_obj,
+        enter_chroot=True,
+        print_cmd=True,
+    )
 
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):

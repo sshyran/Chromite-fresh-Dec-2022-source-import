@@ -73,6 +73,10 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
     BuilderConfig.Artifacts.TOOLCHAIN_WARNING_LOGS:
         _Handlers('ToolchainWarningLogs', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
+    BuilderConfig.Artifacts.CHROME_AFDO_PROFILE_FOR_ANDROID_LINUX:
+        _Handlers('ChromeAFDOProfileForAndroidLinux',
+                  toolchain_util.PrepareForBuild,
+                  toolchain_util.BundleArtifacts),
 }
 
 

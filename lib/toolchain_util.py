@@ -1777,21 +1777,23 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
   def Prepare(self):
     return self._prepare_func()
 
-  def _PrepareUnverifiedChromeLlvmOrderfile(self):
-    """Prepare to build an unverified ordering file."""
-    orderfile_name = self._GetOrderfileName()
-
-    # If the (unverified) artifact already exists in our location, then the
-    # build is pointless.
-    loc = self.input_artifacts.get('UnverifiedChromeLlvmOrderfile',
-                                   [ORDERFILE_GS_URL_UNVETTED])[0]
-    path = os.path.join(loc, orderfile_name + XZ_COMPRESSION_SUFFIX)
+  def _CommonPrepareBasedOnGsPathExists(self, name, url, key):
+    """Helper function to determine if an artifact in the GS path or not."""
+    gs_url = self.input_artifacts.get(key, [url])[0]
+    path = os.path.join(gs_url, name)
     if self.gs_context.Exists(path):
       # Artifact already created.
-      logging.info('Found %s.', path)
+      logging.info('Pointless build: Found %s on %s', name, path)
       return PrepareForBuildReturn.POINTLESS
-    logging.info('No UnverifiedChromeLlvmOrderfile found.')
+    logging.info('Build needed: No %s found. %s does not exist', key, path)
     return PrepareForBuildReturn.NEEDED
+
+  def _PrepareUnverifiedChromeLlvmOrderfile(self):
+    """Prepare to build an unverified ordering file."""
+    return self._CommonPrepareBasedOnGsPathExists(
+        name=self._GetOrderfileName() + XZ_COMPRESSION_SUFFIX,
+        url=ORDERFILE_GS_URL_UNVETTED,
+        key='UnverifiedChromeLlvmOrderfile')
 
   def _PrepareVerifiedChromeLlvmOrderfile(self):
     """Prepare to verify an unvetted ordering file."""
@@ -1858,16 +1860,10 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     #
     # Check if there is already a published AFDO artifact for this version of
     # Chrome.
-    afdo_name = self._GetBenchmarkAFDOName() + BZ2_COMPRESSION_SUFFIX
-    publish_dir = self.input_artifacts.get('UnverifiedChromeBenchmarkAfdoFile',
-                                           [BENCHMARK_AFDO_GS_URL])[0]
-    publish_path = os.path.join(publish_dir, afdo_name)
-    if self.gs_context.Exists(publish_path):
-      # The artifact is already present: we are done.
-      logging.info('Pointless build: "%s" exists.', publish_path)
-      return PrepareForBuildReturn.POINTLESS
-    logging.info('Needed build: "%s" does not exist.', publish_path)
-    return PrepareForBuildReturn.NEEDED
+    return self._CommonPrepareBasedOnGsPathExists(
+        name=self._GetBenchmarkAFDOName() + BZ2_COMPRESSION_SUFFIX,
+        url=BENCHMARK_AFDO_GS_URL,
+        key='UnverifiedChromeBenchmarkAfdoFile')
 
   def _PrepareUnverifiedChromeBenchmarkPerfFile(self):
     """Prepare to build the Chrome benchmark perf.data file."""
@@ -1910,6 +1906,18 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
                          enter_chroot=True,
                          print_cmd=True)
     return ret
+
+  def _PrepareChromeAFDOProfileForAndroidLinux(self):
+    """Prepare to build Chrome AFDO profile for Android/Linux."""
+    if self._UnverifiedAfdoFileExists() == PrepareForBuildReturn.POINTLESS:
+      # Only generate new Android/Linux profiles when there's a need to
+      # generate new benchmark profiles
+      return PrepareForBuildReturn.POINTLESS
+
+    return self._CommonPrepareBasedOnGsPathExists(
+        name=self._GetBenchmarkAFDOName() + '-merged' + BZ2_COMPRESSION_SUFFIX,
+        url=BENCHMARK_AFDO_GS_URL,
+        key='ChromeAFDOProfileForAndroidLinux')
 
   def _PrepareVerifiedChromeBenchmarkAfdoFile(self):
     """Unused: see _PrepareVerifiedReleaseAfdoFile."""
@@ -2215,17 +2223,18 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     afdo_name = self._GetBenchmarkAFDOName()
     afdo_path_inside = self._AfdoTmpPath(afdo_name)
     # Generate the afdo profile.
-    cros_build_lib.run([
-        _AFDO_GENERATE_LLVM_PROF,
-        '--binary=%s' % self._AfdoTmpPath(CHROME_UNSTRIPPED_NAME),
-        '--profile=%s' % perf_path_inside,
-        '--out=%s' % afdo_path_inside,
-        # Do not set any sample threshold, so the AFDO profile can be as
-        # precise as the raw profile.
-        '--sample_threshold_frac=0',
-    ],
-                       enter_chroot=True,
-                       print_cmd=True)
+    cros_build_lib.run(
+        [
+            _AFDO_GENERATE_LLVM_PROF,
+            '--binary=%s' % self._AfdoTmpPath(CHROME_UNSTRIPPED_NAME),
+            '--profile=%s' % perf_path_inside,
+            '--out=%s' % afdo_path_inside,
+            # Do not set any sample threshold, so the AFDO profile can be as
+            # precise as the raw profile.
+            '--sample_threshold_frac=0',
+        ],
+        enter_chroot=True,
+        print_cmd=True)
     logging.info('Generated %s AFDO profile %s', self.arch, afdo_name)
 
     # Compress and deliver the profile.
@@ -2237,9 +2246,20 @@ class BundleArtifactHandler(_CommonPrepareBundle):
                          enter_chroot=True,
                          print_cmd=True)
     files.append(afdo_path)
+    return files
 
-    # Merge recent benchmark profiles for Android/Linux use
+  def _BundleChromeAFDOProfileForAndroidLinux(self):
+    """Bundle Android/Linux Chrome profiles."""
+    afdo_name = self._GetBenchmarkAFDOName()
     output_dir_full = self.chroot.full_path(self._AfdoTmpPath())
+    afdo_path = os.path.join(output_dir_full, afdo_name)
+    # The _BundleUnverifiedChromeBenchmarkAfdoFile should always run
+    # before this, so the AFDO profile should already be created.
+    assert os.path.exists(afdo_path), (
+        'No new AFDO profile created before creating Android/Linux profiles')
+
+    files = []
+    # Merge recent benchmark profiles for Android/Linux use
     merged_profile = self._CreateAndUploadMergedAFDOProfile(
         os.path.join(output_dir_full, afdo_name), output_dir_full)
     merged_profile_inside = self._AfdoTmpPath(os.path.basename(merged_profile))
@@ -2253,7 +2273,6 @@ class BundleArtifactHandler(_CommonPrepareBundle):
                          enter_chroot=True,
                          print_cmd=True)
     files.append(merged_profile_compressed)
-
     return files
 
   def _BundleVerifiedChromeBenchmarkAfdoFile(self):
