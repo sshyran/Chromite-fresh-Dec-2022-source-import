@@ -511,6 +511,9 @@ def _WorkOnEbuild(overlay, ebuild, manifest, options, ebuild_paths_to_add,
   if options.verbose:
     logging.info('Working on %s, info %s', ebuild.package,
                  ebuild.cros_workon_vars)
+  if not ebuild.cros_workon_vars:
+    logging.warning('%s: unable to parse workon settings', ebuild.ebuild_path)
+
   try:
     result = ebuild.RevWorkOnEBuild(os.path.join(options.buildroot, 'src'),
                                     manifest, reject_self_repo=reject_self_repo)
