@@ -1017,40 +1017,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
                   'build Chrome images correctly.'
   )
 
-  ### Toolchain waterfall entries.
-  ### Toolchain builder configs: 3 architectures {amd64,arm,arm64}
-  ###                          x 1 toolchains {llvm-next}
-  ### All of these builders should be slaves of 'master-toolchain'.
-
-  ### Master toolchain config.
-  master = site_config.Add(
-      'master-toolchain',
-      site_config.templates.toolchain,
-      boards=[],
-      description='Toolchain master (all others are slaves).',
-      master=True,
-      sync_chrome=True,
-      slave_configs=[],
-      # 3 PM UTC is 7 AM PST (no daylight savings)
-      schedule='0 15 * * *',
-  )
-
-  def toolchainSlaveHelper(name, board, *args, **kwargs):
-    master.AddSlaves([
-        site_config.Add(
-            name + '-llvm-next-toolchain',
-            site_config.templates.llvm_next_toolchain,
-            *args,
-            boards=[board],
-            **kwargs
-        )
-    ])
-
-  # Create all waterfall slave builders.
-  toolchainSlaveHelper('amd64', 'eve')
-  toolchainSlaveHelper('arm', 'veyron_mighty')
-  toolchainSlaveHelper('arm64', 'kevin')
-
   #
   # Create toolchain tryjob builders.
   #

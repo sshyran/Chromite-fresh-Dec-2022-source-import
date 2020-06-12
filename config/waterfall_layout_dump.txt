@@ -391,12 +391,6 @@
     eve-release-basic
     grunt-release-basic
 
-== toolchain ==
-  master-toolchain
-    amd64-llvm-next-toolchain
-    arm-llvm-next-toolchain
-    arm64-llvm-next-toolchain
-
 == utility ==
   chromeos-infra-go
   chromiumos-sdk
@@ -435,7 +429,6 @@
   amd64-generic-ubsan-fuzzer-tryjob
   amd64-generic-ubsan-tryjob
   amd64-generic-unittest-stress
-  amd64-llvm-next-toolchain-tryjob
   arkham-full-tryjob
   arkham-llvm-next-toolchain-tryjob
   arkham-llvm-toolchain-tryjob
@@ -446,12 +439,10 @@
   arm-generic-llvm-next-toolchain-tryjob
   arm-generic-llvm-toolchain-tryjob
   arm-generic-unittest-stress
-  arm-llvm-next-toolchain-tryjob
   arm64-generic-full-tryjob
   arm64-generic-llvm-next-toolchain-tryjob
   arm64-generic-llvm-toolchain-tryjob
   arm64-generic-unittest-stress
-  arm64-llvm-next-toolchain-tryjob
   arm64-llvmpipe-full-tryjob
   arm64-llvmpipe-llvm-next-toolchain-tryjob
   arm64-llvmpipe-llvm-toolchain-tryjob
@@ -1561,10 +1552,6 @@
     wooten-release-tryjob
     zork-kernelnext-release-tryjob
     zork-release-tryjob
-  master-toolchain-tryjob
-    amd64-llvm-next-toolchain-tryjob
-    arm-llvm-next-toolchain-tryjob
-    arm64-llvm-next-toolchain-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmpi-android-pfq-tryjob

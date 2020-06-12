@@ -831,56 +831,6 @@
             "profile": "testbed-ap",
             "vm_tests": []
         },
-        "toolchain": {
-            "_template": "toolchain",
-            "archive_build_debug": true,
-            "build_timeout": 57000,
-            "build_type": "toolchain",
-            "chrome_sdk": true,
-            "debuginfo_test": true,
-            "description": "Toolchain Builds (internal)",
-            "display_label": "toolchain",
-            "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
-            "enable_skylab_hw_tests": true,
-            "hw_tests_override": [
-                "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": false,\n    \"blocking\": true,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"CQ\",\n    \"quota_account\": \"bvt-sync\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-                "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-            ],
-            "image_test": true,
-            "images": [
-                "base",
-                "test",
-                "recovery"
-            ],
-            "internal": true,
-            "latest_toolchain": true,
-            "luci_builder": "Full",
-            "manifest": "official.xml",
-            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-            "manifest_version": true,
-            "overlays": "both",
-            "useflags": [
-                "-cros-debug",
-                "-tests_cheets_SELinuxTest",
-                "-tests_network_VPNConnect.l2tpipsec_psk",
-                "-tests_network_VPNConnect.l2tpipsec_xauth",
-                "-tests_platform_SyncCrash",
-                "-tests_power_DarkResumeDisplay",
-                "-tests_power_DarkResumeShutdownServer",
-                "-tests_security_OpenFDs",
-                "-tests_security_SMMLocked",
-                "chrome_internal",
-                "strict_toolchain_checks",
-                "thinlto"
-            ],
-            "usepkg_build_packages": false,
-            "vm_tests": []
-        },
         "ubsan": {
             "_template": "ubsan",
             "disk_layout": "16gb-rootfs",
@@ -1386,22 +1336,6 @@
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
-    "amd64-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "eve"
-        ]
-    },
-    "amd64-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "eve"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
     "arkham-full": {
         "_template": "full",
         "boards": [
@@ -1625,22 +1559,6 @@
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
-    "arm-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "veyron_mighty"
-        ]
-    },
-    "arm-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "veyron_mighty"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
     "arm64-generic-full": {
         "_template": "full",
         "boards": [
@@ -1717,22 +1635,6 @@
         "boards": [
             "arm64-generic"
         ],
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "arm64-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "kevin"
-        ]
-    },
-    "arm64-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "kevin"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
@@ -23352,45 +23254,6 @@
         "suite_scheduling": false,
         "sync_chrome": true,
         "vm_tests_override": null
-    },
-    "master-toolchain": {
-        "_template": "toolchain",
-        "boards": [],
-        "description": "Toolchain master (all others are slaves).",
-        "master": true,
-        "schedule": "0 15 * * *",
-        "slave_configs": [
-            "amd64-llvm-next-toolchain",
-            "arm-llvm-next-toolchain",
-            "arm64-llvm-next-toolchain"
-        ],
-        "sync_chrome": true
-    },
-    "master-toolchain-tryjob": {
-        "_template": "toolchain",
-        "boards": [],
-        "debug": true,
-        "debug_cidb": true,
-        "description": "Toolchain master (all others are slaves).",
-        "display_label": "tryjob",
-        "hw_tests": [
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"Build\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": true,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"CQ\",\n    \"quota_account\": \"bvt-sync\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"suites\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": null,\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "master": true,
-        "slave_configs": [
-            "amd64-llvm-next-toolchain-tryjob",
-            "arm-llvm-next-toolchain-tryjob",
-            "arm64-llvm-next-toolchain-tryjob"
-        ],
-        "sync_chrome": true
     },
     "master-vmmst-android-pfq": {
         "_template": "vmmst_android_pfq",
