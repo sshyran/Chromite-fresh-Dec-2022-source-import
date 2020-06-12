@@ -467,8 +467,8 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
           for_build, 'pass', CHROME_BRANCH, os.path.basename(m)))
 
     latest_builds = [{'build_config': self.build_names[0],
-                      'status':'pass',
-                      'platform_version':'1.2.5'}]
+                      'status': 'pass',
+                      'platform_version': '1.2.5'}]
     self.manager.buildstore.fake_cidb.GetBuildHistory.return_value = (
         latest_builds)
     self.manager.InitializeManifestVariables(info)
@@ -513,6 +513,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testGetNextVersionIncrement(self):
     """Tests that we create a new version if a previous one exists."""
     self.manager = self.BuildManager()
+    self.manager.dry_run = False
     m = self.PatchObject(manifest_version.VersionInfo, 'UpdateVersionFile')
     version_file = VersionInfoTest.CreateFakeVersionFile(self.tempdir)
     info = manifest_version.VersionInfo(version_file=version_file,
@@ -521,6 +522,21 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     self.manager.latest = FAKE_VERSION_STRING
     version = self.manager.GetNextVersion(info)
     self.assertEqual(FAKE_VERSION_STRING_NEXT, version)
+    m.assert_called_once_with(
+        'Automatic: %s - Updating to a new version number from %s' % (
+            self.build_names[0], FAKE_VERSION_STRING), dry_run=False)
+
+  def testGetNextVersionDryRun(self):
+    """Tests that we reuse a previous version if it is a dryrun."""
+    self.manager = self.BuildManager()
+    m = self.PatchObject(manifest_version.VersionInfo, 'UpdateVersionFile')
+    version_file = VersionInfoTest.CreateFakeVersionFile(self.tempdir)
+    info = manifest_version.VersionInfo(
+        version_file=version_file, incr_type='branch')
+
+    self.manager.latest = FAKE_VERSION_STRING
+    version = self.manager.GetNextVersion(info)
+    self.assertEqual(FAKE_VERSION_STRING, version)
     m.assert_called_once_with(
         'Automatic: %s - Updating to a new version number from %s' % (
             self.build_names[0], FAKE_VERSION_STRING), dry_run=True)
@@ -550,8 +566,8 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     """Test DidLastBuildFailReturns True."""
     self.manager = self.BuildManager()
     self._latest_build = {'build_config': self.build_names[0],
-                          'status':'fail',
-                          'platform_version':'1.2.5'}
+                          'status': 'fail',
+                          'platform_version': '1.2.5'}
     self.assertFalse(self.manager.DidLastBuildFail())
 
   def testWaitForSlavesToCompleteWithEmptyBuildersArray(self):

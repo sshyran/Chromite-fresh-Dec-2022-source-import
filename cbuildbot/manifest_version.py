@@ -742,10 +742,11 @@ class BuildSpecsManager(object):
     if self.latest == version:
       message = ('Automatic: %s - Updating to a new version number from %s' %
                  (self.build_names[0], version))
-      version = version_info.IncrementVersion()
+      if not self.dry_run:
+        version = version_info.IncrementVersion()
+        assert version != self.latest
+        logging.info('Incremented version number to  %s', version)
       version_info.UpdateVersionFile(message, dry_run=self.dry_run)
-      assert version != self.latest
-      logging.info('Incremented version number to  %s', version)
     else:
       # See https://crbug.com/927911
       logging.info(
