@@ -77,6 +77,9 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
         _Handlers('ChromeAFDOProfileForAndroidLinux',
                   toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
+    BuilderConfig.Artifacts.CLANG_CRASH_DIAGNOSES:
+        _Handlers('ClangCrashDiagnoses', toolchain_util.PrepareForBuild,
+                  toolchain_util.BundleArtifacts),
 }
 
 

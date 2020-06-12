@@ -618,9 +618,9 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.assertEqual(tarball,
                      [os.path.join(self.outdir, 'fatal_clang_warnings.tar.xz')])
 
-    # Test internal function _CollectFatalClangWarnings, to make sure
-    # the duplicate logs are renamed and all logs are captured.
-    ret = self.obj._CollectFatalClangWarnings(self.outdir)
+    # Make sure the duplicate logs are renamed and all logs are captured.
+    ret = self.obj._CollectFiles('/tmp/fatal_clang_warnings', ('.json'),
+                                 self.outdir)
     self.assertCountEqual(
         ['log1.json', 'log2.json', 'log10.json', 'log20.json'], ret)
 
@@ -704,6 +704,22 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         print_cmd=True,
     )
 
+  def testBundleClangCrashDiagnoses(self):
+    self.SetUpBundle('ClangCrashDiagnoses')
+    src_dir = '/tmp/clang_crash_diagnostics'
+    check_dirs = [
+        self.chroot.full_path(x) for x in [
+            src_dir,
+            '/build/%s%s' % (self.board, src_dir)
+        ]
+    ]
+    for d in check_dirs:
+      osutils.SafeMakedirs(d)
+      for l in ['1.cpp', '1.sh', '2.cc', '2.sh']:
+        osutils.Touch(os.path.join(d, l))
+    tarball = self.obj.Bundle()
+    self.assertEqual(
+        tarball, [os.path.join(self.outdir, 'clang_crash_diagnoses.tar.xz')])
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
   """Test functions related to create a release CrOS profile.

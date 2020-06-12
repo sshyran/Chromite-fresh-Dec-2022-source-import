@@ -2049,6 +2049,10 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     # We always build this artifact.
     return PrepareForBuildReturn.NEEDED
 
+  def _PrepareClangCrashDiagnoses(self):
+    # We always build this artifact.
+    return PrepareForBuildReturn.UNKNOWN
+
 
 class BundleArtifactHandler(_CommonPrepareBundle):
   """Methods for updating ebuilds for toolchain artifacts."""
@@ -2321,14 +2325,21 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     return _CompressAFDOFiles([profile_path], None, self.output_dir,
                               XZ_COMPRESSION_SUFFIX)
 
-  def _CollectFatalClangWarnings(self, working_dir):
-    """Collect all fatal clang warning logs in chroot."""
-    path = '/tmp/fatal_clang_warnings'
-    in_chroot_dirs = [path, '%s%s' % (self.sysroot_path, path)]
-    check_dirs = [self.chroot.full_path(x) for x in in_chroot_dirs]
+  def _CollectFiles(self, src_dir, filter_file_exts, dest_dir):
+    """Collect the files with any of file_exts from path to working_dir."""
+    if not src_dir:
+      return []
+
+    check_dirs = [
+        self.chroot.full_path(x) for x in [
+            src_dir,
+            os.path.join(self.sysroot_path,
+                         src_dir[1:] if os.path.isabs(src_dir) else src_dir)
+        ]
+    ]
 
     logging.info('toolchain-logs: checking %s', check_dirs)
-    warning_files = []
+    output = []
     for directory in check_dirs:
       if not os.path.isdir(directory):
         logging.info("toolchain-logs: %s doesn't exist", directory)
@@ -2337,29 +2348,32 @@ class BundleArtifactHandler(_CommonPrepareBundle):
       for file_basename in os.listdir(directory):
         # We could have incomplete JSON files in here -- ignore them, since
         # they'll break everything.
-        path = os.path.join(directory, file_basename)
-        logging.info('toolchain-logs: staring at %s', path)
-        if not file_basename.endswith('.json'):
-          logging.warning('toolchain-logs: non-json file found: %s', path)
+        src_path = os.path.join(directory, file_basename)
+        file_noext, file_ext = os.path.splitext(file_basename)
+        logging.info('toolchain-logs: checking %s', src_path)
+        if os.path.isfile(src_path) and filter_file_exts and (
+            file_ext not in filter_file_exts):
+          logging.warning('toolchain-logs: skipped file: %s', src_path)
           continue
 
-        file_noext = os.path.splitext(file_basename)[0]
-        workdir_path = os.path.join(working_dir, file_noext + '.json')
-        while os.path.exists(workdir_path):
+        dest_path = os.path.join(dest_dir, file_noext + file_ext)
+        while os.path.exists(dest_path):
           file_noext += '0'
-          workdir_path = os.path.join(working_dir, file_noext + '.json')
+          dest_path = os.path.join(dest_dir, file_noext + file_ext)
 
-        logging.info('toolchain-logs: adding path %s as %s', path, workdir_path)
-        shutil.copy(path, workdir_path)
-        warning_files.append(os.path.basename(workdir_path))
+        logging.info('toolchain-logs: adding path %s as %s', src_path,
+                     dest_path)
+        shutil.copy(src_path, dest_path)
+        output.append(os.path.basename(dest_path))
 
-    logging.info('%d fatal-clang-warnings files to upload', len(warning_files))
-    return warning_files
+    logging.info('%d files collected', len(output))
+    return output
 
   def _BundleToolchainWarningLogs(self):
     """Bundle the compiler warnings for upload for werror checker."""
     with self.chroot.tempdir() as tempdir:
-      warning_files = self._CollectFatalClangWarnings(tempdir)
+      warning_files = self._CollectFiles('/tmp/fatal_clang_warnings', ('.json'),
+                                         tempdir)
 
       if not warning_files:
         logging.info('No fatal-clang-warnings found, skip bundle artifact')
@@ -2371,6 +2385,20 @@ class BundleArtifactHandler(_CommonPrepareBundle):
           output_compressed, tempdir, inputs=warning_files)
 
     return [output_compressed]
+
+  def _BundleClangCrashDiagnoses(self):
+    """Bundle all clang crash diagnoses in chroot for uploading."""
+    with osutils.TempDir(prefix='clang_crash_diagnoses_tarball') as tempdir:
+      diagnoses = self._CollectFiles('/tmp/clang_crash_diagnostics', None,
+                                     tempdir)
+
+      if not diagnoses:
+        logging.info('No clang crashes found, skip bundle artifact')
+        return []
+
+      output = os.path.join(self.output_dir, 'clang_crash_diagnoses.tar.xz')
+      cros_build_lib.CreateTarball(output, tempdir)
+      return [output]
 
 
 def PrepareForBuild(artifact_name, chroot, sysroot_path, build_target,
