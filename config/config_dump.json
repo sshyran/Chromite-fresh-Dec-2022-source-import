@@ -3561,8 +3561,7 @@
         "prebuilts": "public",
         "useflags": [
             "-chrome_internal"
-        ],
-        "vm_tests": []
+        ]
     },
     "betty-arc-r-full-tryjob": {
         "_template": "full",
@@ -3585,8 +3584,7 @@
         "prebuilts": "public",
         "useflags": [
             "-chrome_internal"
-        ],
-        "vm_tests": []
+        ]
     },
     "betty-arc-r-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
@@ -3645,7 +3643,7 @@
         "hw_tests_override": [],
         "important": false,
         "vm_tests": [],
-        "vm_tests_override": null
+        "vm_tests_override": []
     },
     "betty-arc-r-release-tryjob": {
         "_template": "release",

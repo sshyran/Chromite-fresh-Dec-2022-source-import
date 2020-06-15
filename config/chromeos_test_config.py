@@ -20,6 +20,7 @@ vmtest_boards = frozenset([
     'amd64-generic', # Has kernel 4.4, used with public Chromium.
     'betty',         # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
     'betty-pi-arc',  # Like betty but P version of ARC++.
+    'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
 ]) | config_boards.lakitu_boards  # All lakitu boards have VM support.
