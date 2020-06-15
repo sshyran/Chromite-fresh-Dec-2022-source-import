@@ -324,7 +324,8 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
     board_deps, board_bdeps = cros_extract_deps.ExtractDeps(
         sysroot=sysroot_path,
         package_list=board_packages,
-        include_bdepend=False)
+        include_bdepend=False,
+        backtrack=False)
 
     results['package_deps'].update(board_deps)
     results['package_deps'].update(board_bdeps)

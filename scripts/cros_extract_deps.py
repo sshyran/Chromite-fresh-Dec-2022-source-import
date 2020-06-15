@@ -270,7 +270,8 @@ def FilterObsoleteDeps(package_deps):
 def ExtractDeps(sysroot,
                 package_list,
                 formatting='deps',
-                include_bdepend=True):
+                include_bdepend=True,
+                backtrack=True):
   """Returns the set of dependencies for the packages in package_list.
 
   For calculating dependencies graph, this should only consider packages
@@ -289,6 +290,10 @@ def ExtractDeps(sysroot,
       docstring of GenerateCPEList.
     include_bdepend: Controls whether BDEPEND packages that would be installed
       to BROOT (usually "/" instead of ROOT) are included in the output.
+    backtrack: Setting to False disables backtracking in Portage's dependency
+      solver. If the highest available version of dependencies doesn't produce
+      a solvable graph Portage will give up and return an error instead of
+      trying other candidates.
 
   Returns:
     A JSON-izable object that either follows 'deps' or 'cpe' format.
@@ -296,6 +301,8 @@ def ExtractDeps(sysroot,
   lib_argv = ['--quiet', '--pretend', '--emptytree']
   if include_bdepend:
     lib_argv += ['--include-bdepend']
+  if not backtrack:
+    lib_argv += ['--backtrack=0']
   lib_argv += ['--sysroot=%s' % sysroot]
   lib_argv.extend(package_list)
 
