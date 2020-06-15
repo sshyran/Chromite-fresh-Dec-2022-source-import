@@ -38,18 +38,6 @@
       ]
     },
     {
-      "name": "asurada",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "asurada",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "atlas",
       "configs": [
         {
@@ -1339,6 +1327,23 @@
   ],
   "release_branch": false,
   "reference_board_unified_builds": [
+    {
+      "name": "asurada",
+      "reference_board_name": "asurada",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "asurada",
+          "name": "asurada",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 435,
+          "is_active": true
+        }
+      ]
+    },
     {
       "name": "cheza",
       "reference_board_name": "cheza",
