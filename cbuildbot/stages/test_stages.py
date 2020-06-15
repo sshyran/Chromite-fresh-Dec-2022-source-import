@@ -512,11 +512,13 @@ class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
       #        off in parallel first.
       if suite_config.blocking:
         steps = [stage.Run for stage in parallel_stages]
+        logging.info('Launching %d tests', len(steps))
         parallel.RunParallelSteps(steps)
         parallel_stages = []
 
     if parallel_stages:
       steps = [stage.Run for stage in parallel_stages]
+      logging.info('Launching %d tests', len(steps))
       parallel.RunParallelSteps(steps)
 
   def _GetHWTestStage(self, builder_run, buildstore, board, model,
@@ -542,8 +544,12 @@ class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
       # Python 3.7+ made async a reserved keyword.
       if getattr(suite_config, 'async'):
         stage_class = ASyncSkylabHWTestStage
+        logging.info('Launching async suite %s on %s',
+                     suite_config.suite, model.name)
       else:
         stage_class = SkylabHWTestStage
+        logging.info('Launching sync suite %s on %s',
+                     suite_config.suite, model.name)
 
       result = stage_class(
           builder_run,
