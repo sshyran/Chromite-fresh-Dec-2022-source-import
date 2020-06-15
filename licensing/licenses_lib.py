@@ -385,9 +385,8 @@ class PackageInfo(object):
     filename = os.path.basename(self.fullnamerev)
     license_path = os.path.join(COPYRIGHT_ATTRIBUTION_DIR,
                                 os.path.dirname(self.fullnamerev))
-    pv = package_info.SplitPV(filename)
-    pv_no_rev = '%s-%s' % (pv.package, pv.version_no_rev)
-    for filename in (pv.pv, pv_no_rev, pv.package):
+    pv = package_info.parse(filename)
+    for filename in (pv.pvr, pv.pv, pv.package):
       file_path = os.path.join(license_path, filename)
       logging.debug('Looking for override copyright attribution license in %s',
                     file_path)

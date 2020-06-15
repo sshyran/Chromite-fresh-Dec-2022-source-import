@@ -77,7 +77,7 @@ def SplitPVPath(path):
   Returns:
     The output of SplitPV.
   """
-  return package_info.SplitPV(portage_util.SplitEbuildPath(path)[2])
+  return package_info.parse(portage_util.SplitEbuildPath(path)[2])
 
 
 def RevertStableEBuild(dirname, rev):
@@ -257,7 +257,7 @@ class UprevList(object):
       self.last = ChromeUprev(self.chrome_path, before=before)
     except UprevNotFound:
       raise StopIteration()
-    ver = self.last.from_parts.version + ' (%s)' % self.last.date
+    ver = self.last.from_parts.vr + ' (%s)' % self.last.date
     self.uprevs.append(self.last)
     return ver
 
@@ -440,7 +440,7 @@ class PinchromeCommand(command.CliCommand):
                                       uprev_list, group_size=5)
     pin_version = uprev_list.uprevs[choice]
     commit_subject = ('Chrome: Pin to version %s' %
-                      pin_version.from_parts.version)
+                      pin_version.from_parts.vr)
 
     # Public branch.
     git.CreateBranch(overlay, self.branch_name, track=True,

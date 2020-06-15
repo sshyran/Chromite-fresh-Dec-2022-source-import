@@ -30,7 +30,7 @@ _ver = (r'(?P<version>'
 _pvr_re = re.compile(r'^(?P<pv>%s-%s)$' % (_pkg, _ver), re.VERBOSE)
 
 
-def SplitPV(pv, strict=True):
+def _SplitPV(pv, strict=True):
   """Takes a PV value and splits it into individual components.
 
   Deprecated, use parse() instead.
@@ -78,7 +78,7 @@ def SplitCPV(cpv, strict=True):
   else:
     category = chunks[0]
 
-  m = SplitPV(chunks[-1], strict=strict)
+  m = _SplitPV(chunks[-1], strict=strict)
   if strict and (category is None or m is None):
     return None
 

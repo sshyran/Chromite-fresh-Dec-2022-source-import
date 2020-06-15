@@ -1335,12 +1335,12 @@ class InstalledPackage(object):
     if not os.path.exists(ebuild_path):
       raise PortageDBError("Package doesn't contain an ebuild file.")
 
-    split_pv = package_info.SplitPV(self.pf)
-    if split_pv is None:
+    split_pv = package_info.parse(self.pf)
+    if not split_pv.pv:
       raise PortageDBError('Package and version "%s" doesn\'t have a valid '
                            'format.' % self.pf)
     self.package = split_pv.package
-    self.version = split_pv.version
+    self.version = split_pv.vr
 
   def _ReadField(self, field_name):
     """Reads the contents of the file in the installed package directory.

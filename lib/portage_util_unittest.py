@@ -1330,9 +1330,9 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
           # Invalid category.
           continue
         # Correct pkg.
-        pv = package_info.SplitPV(pkg)
+        pv = package_info.parse(pkg)
         key = '%s/%s' % (cat, pv.package)
-        self.fake_packages.append((key, pv.version))
+        self.fake_packages.append((key, pv.vr))
     # Add contents to with/files-1.
     osutils.WriteFile(
         os.path.join(fake_pkgdb_path, 'with', 'files-1', 'CONTENTS'),
