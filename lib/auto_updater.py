@@ -1176,22 +1176,3 @@ class ChromiumOSUpdater(BaseUpdater):
     finally:
       self._CopyHostLogFromDevice(nebraska, 'reboot')
       nebraska.Stop()
-
-  def AwaitReboot(self, old_boot_id):
-    """Await a reboot, ensuring that it is no longer running old_boot_id.
-
-    Args:
-      old_boot_id: The boot_id that must be transitioned away from for success.
-
-    Returns:
-      True if the device has successfully rebooted.
-
-    Raises:
-      RebootVerificationError if a successful reboot has not occurred.
-    """
-    logging.debug('Awaiting reboot from %s...', old_boot_id)
-
-    if not self.device.AwaitReboot(old_boot_id):
-      raise RebootVerificationError('Device has not rebooted from %s' %
-                                    old_boot_id)
-    return True

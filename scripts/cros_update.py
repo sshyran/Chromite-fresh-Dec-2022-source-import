@@ -25,14 +25,11 @@ It includes two classes:
 from __future__ import print_function
 
 import os
-import re
-import time
 import traceback
 
 from chromite.lib import auto_updater
 from chromite.lib import auto_updater_transfer
 from chromite.lib import commandline
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_update_logging
 from chromite.lib import cros_update_progress
@@ -53,10 +50,6 @@ CROS_PRESERVED_PATH = ('/mnt/stateful_partition/unencrypted/'
 # Standard error tmeplate to be written into status tracking log.
 CROS_ERROR_TEMPLATE = cros_update_progress.ERROR_TAG + ' %s'
 
-# How long after a quick provision fails to wait before falling back to the
-# standard provisioning flow.
-QUICK_PROVISION_FAILURE_DELAY_SEC = 45
-
 # Setting logging level
 logConfig = cros_update_logging.loggingConfig()
 logConfig.ConfigureLogging()
@@ -71,9 +64,8 @@ class CrOSUpdateTrigger(object):
   def __init__(self, host_name, build_name, static_dir, progress_tracker=None,
                log_file=None, au_tempdir=None, force_update=False,
                full_update=False, payload_filename=None,
-               clobber_stateful=True, quick_provision=False,
-               devserver_url=None, static_url=None, staging_server=None,
-               transfer_class=None):
+               clobber_stateful=True, devserver_url=None, static_url=None,
+               staging_server=None, transfer_class=None):
     self.host_name = host_name
     self.build_name = build_name
     self.static_dir = static_dir
@@ -84,7 +76,6 @@ class CrOSUpdateTrigger(object):
     self.full_update = full_update
     self.payload_filename = payload_filename
     self.clobber_stateful = clobber_stateful
-    self.quick_provision = quick_provision
     self.devserver_url = devserver_url
     self.static_url = static_url
     self.staging_server = staging_server
@@ -130,72 +121,6 @@ class CrOSUpdateTrigger(object):
     self._WriteAUStatus('post-check rootfs update')
     cros_updater.PostCheckRootfsUpdate()
 
-  def _MakeStatusUrl(self, devserver_url, host_name, pid):
-    """Generates a URL to post auto update status to.
-
-    Args:
-      devserver_url: URL base for devserver RPCs.
-      host_name: Host to post status for.
-      pid: pid of the update process.
-
-    Returns:
-      An unescaped URL.
-    """
-    return '%s/post_au_status?host_name=%s&pid=%d' % (devserver_url, host_name,
-                                                      pid)
-
-  def _QuickProvision(self, device):
-    """Performs a quick provision of device.
-
-    Returns:
-      A dictionary of extracted key-value pairs returned from the script
-      execution.
-
-    Raises:
-      cros_build_lib.RunCommandError: error executing command or script
-      remote_access.SSHConnectionError: SSH connection error
-    """
-    pid = os.getpid()
-    pgid = os.getpgid(pid)
-    if self.progress_tracker is None:
-      self.progress_tracker = cros_update_progress.AUProgress(self.host_name,
-                                                              pgid)
-
-    dut_script = '/usr/local/tmp/quick-provision'
-    status_url = self._MakeStatusUrl(self.devserver_url, self.host_name, pgid)
-    cmd = [
-        # /usr/local/tmp may not exist on base images.
-        'mkdir', '-p', os.path.dirname(dut_script), '&&',
-        # Download the script from the devserver.
-        'curl', '-o', dut_script,
-        os.path.join(self.static_url, 'quick-provision'), '&&',
-        # Run the script.
-        'bash', dut_script, '--status_url',
-        cros_build_lib.ShellQuote(status_url),
-        self.build_name, self.static_url,
-    ]
-    # Quick provision script issues a reboot and might result in the SSH
-    # connection being terminated so set ssh_error_ok so that output can
-    # still be captured.
-    results = device.run(
-        ' '.join(cmd), log_output=True, capture_output=True,
-        ssh_error_ok=True, shell=True, encoding='utf-8')
-    key_re = re.compile(r'^KEYVAL: ([^\d\W]\w*)=(.*)$')
-    matches = [key_re.match(l) for l in results.output.splitlines()]
-    keyvals = {m.group(1): m.group(2) for m in matches if m}
-    logging.info('DUT returned keyvals: %s', keyvals)
-
-    # If there was an SSH error, check the keyvals to see if it actually
-    # completed and suppress the error if so.
-    if results.returncode == remote_access.SSH_ERROR_CODE:
-      if 'COMPLETED' in keyvals:
-        logging.warning('Quick provision completed with ssh error, ignoring...')
-      else:
-        logging.error('Incomplete quick provision failed with ssh error')
-        raise remote_access.SSHConnectionError(results.error)
-
-    return keyvals
-
   def TriggerAU(self):
     """Execute auto update for cros_host.
 
@@ -229,83 +154,58 @@ class CrOSUpdateTrigger(object):
         # Get nebraska request logfiles dir from auto_updater.
         self._request_logs_dir = chromeos_AU.request_logs_dir
 
-        # Allow fall back if the quick provision does not succeed.
-        invoke_autoupdate = True
+        chromeos_AU.CheckPayloads()
 
-        if (self.quick_provision and self.clobber_stateful and
-            not self.full_update):
-          try:
-            logging.debug('Start CrOS quick provision process...')
-            self._WriteAUStatus('Start Quick Provision')
-            keyvals = self._QuickProvision(device)
-            logging.debug('Start CrOS check process...')
-            self._WriteAUStatus('Finish Quick Provision, reboot')
-            chromeos_AU.AwaitReboot(keyvals.get('BOOT_ID'))
-            self._WriteAUStatus('Finish Quick Provision, post-check')
-            chromeos_AU.PostCheckCrOSUpdate()
-            self._WriteAUStatus(cros_update_progress.FINISHED)
-            invoke_autoupdate = False
-          except (cros_build_lib.RunCommandError,
-                  remote_access.SSHConnectionError,
-                  auto_updater.RebootVerificationError) as e:
-            logging.warning(
-                'Error during quick provision, falling back to legacy: %s: %s',
-                type(e).__name__, e)
-            time.sleep(QUICK_PROVISION_FAILURE_DELAY_SEC)
+        version_match = chromeos_AU.PreSetupCrOSUpdate()
+        self._WriteAUStatus('Transfer Devserver/Stateful Update Package')
+        chromeos_AU.TransferDevServerPackage()
+        chromeos_AU.TransferStatefulUpdate()
 
-        if invoke_autoupdate:
-          chromeos_AU.CheckPayloads()
-
-          version_match = chromeos_AU.PreSetupCrOSUpdate()
-          self._WriteAUStatus('Transfer Devserver/Stateful Update Package')
-          chromeos_AU.TransferDevServerPackage()
-          chromeos_AU.TransferStatefulUpdate()
-
-          restore_stateful = chromeos_AU.CheckRestoreStateful()
-          do_stateful_update = (not self.full_update and
-                                version_match and self.force_update)
-          stateful_update_complete = False
-          logging.debug('Start CrOS update process...')
-          try:
-            if restore_stateful:
-              self._WriteAUStatus('Restore Stateful Partition')
-              chromeos_AU.RestoreStateful()
+        restore_stateful = chromeos_AU.CheckRestoreStateful()
+        do_stateful_update = (not self.full_update and
+                              version_match and self.force_update)
+        stateful_update_complete = False
+        logging.debug('Start CrOS update process...')
+        try:
+          if restore_stateful:
+            self._WriteAUStatus('Restore Stateful Partition')
+            chromeos_AU.RestoreStateful()
+            stateful_update_complete = True
+          else:
+            # Whether to execute stateful update depends on:
+            # a. full_update=False: No full reimage is required.
+            # b. The update version is matched to the current version, And
+            #    force_update=True: Update is forced even if the version
+            #    installed is the same.
+            if do_stateful_update:
+              self._StatefulUpdate(chromeos_AU)
               stateful_update_complete = True
-            else:
-              # Whether to execute stateful update depends on:
-              # a. full_update=False: No full reimage is required.
-              # b. The update version is matched to the current version, And
-              #    force_update=True: Update is forced even if the version
-              #    installed is the same.
-              if do_stateful_update:
-                self._StatefulUpdate(chromeos_AU)
-                stateful_update_complete = True
 
-          except timeout_util.TimeoutError:
-            raise
-          except Exception as e:
-            logging.debug('Error happens in stateful update: %r', e)
+        except timeout_util.TimeoutError:
+          raise
+        except Exception as e:
+          logging.debug('Error happens in stateful update: %r', e)
 
-          # Whether to execute rootfs update depends on:
-          # a. stateful update is not completed, or completed by
-          #    update action 'restore_stateful'.
-          # b. force_update=True: Update is forced no matter what the current
-          #    version is. Or, the update version is not matched to the current
-          #    version.
-          require_rootfs_update = self.force_update or (
-              not chromeos_AU.CheckVersion())
-          if (not (do_stateful_update and stateful_update_complete)
-              and require_rootfs_update):
-            self._RootfsUpdate(chromeos_AU)
-            self._StatefulUpdate(chromeos_AU)
+        # Whether to execute rootfs update depends on:
+        # a. stateful update is not completed, or completed by
+        #    update action 'restore_stateful'.
+        # b. force_update=True: Update is forced no matter what the current
+        #    version is. Or, the update version is not matched to the current
+        #    version.
+        require_rootfs_update = self.force_update or (
+            not chromeos_AU.CheckVersion())
+        if (not (do_stateful_update and stateful_update_complete)
+            and require_rootfs_update):
+          self._RootfsUpdate(chromeos_AU)
+          self._StatefulUpdate(chromeos_AU)
 
-          self._WriteAUStatus('post-check for CrOS auto-update')
-          chromeos_AU.PostCheckCrOSUpdate()
+        self._WriteAUStatus('post-check for CrOS auto-update')
+        chromeos_AU.PostCheckCrOSUpdate()
 
-          self._WriteAUStatus(cros_update_progress.FINISHED)
+        self._WriteAUStatus(cros_update_progress.FINISHED)
 
-        logging.debug('Provision successfully completed (%s)',
-                      'legacy' if invoke_autoupdate else 'quick provision')
+        logging.debug('Autoupdate successfully completed')
+
     except Exception as e:
       logging.debug('Error happens in CrOS auto-update: %r', e)
       self._WriteAUStatus(CROS_ERROR_TEMPLATE % str(traceback.format_exc()))
@@ -330,8 +230,6 @@ def ParseArguments(argv):
                       help='A custom payload filename')
   parser.add_argument('--clobber_stateful', action='store_true', default=False,
                       help='Whether to clobber stateful')
-  parser.add_argument('--quick_provision', action='store_true', default=False,
-                      help='Whether to attempt quick provisioning path')
   parser.add_argument('--devserver_url', type=str,
                       help='Devserver URL base for RPCs')
   parser.add_argument('--static_url', type=str,
@@ -373,7 +271,6 @@ def main(argv):
       full_update=options.full_update,
       payload_filename=options.payload_filename,
       clobber_stateful=options.clobber_stateful,
-      quick_provision=options.quick_provision,
       devserver_url=options.devserver_url,
       static_url=options.static_url)
 
