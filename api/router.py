@@ -48,6 +48,10 @@ class Error(Exception):
   """Base error class for the module."""
 
 
+class InvalidSdkError(Error):
+  """Raised when the SDK is invalid or does not exist."""
+
+
 class CrosSdkNotRunError(Error):
   """Raised when the cros_sdk command could not be run to enter the chroot."""
 
@@ -276,6 +280,9 @@ class Router(object):
     """
     # Parse the chroot and clear the chroot field in the input message.
     chroot = field_handler.handle_chroot(input_msg)
+
+    if not chroot.exists():
+      raise InvalidSdkError('Chroot does not exist.')
 
     # Use a ContextManagerStack to avoid the deep nesting this many
     # context managers introduces.
