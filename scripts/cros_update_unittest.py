@@ -20,7 +20,7 @@ from chromite.scripts import cros_update
 # pylint: disable=protected-access
 
 class CrosUpdateTest(cros_test_lib.RunCommandTestCase):
-  """Tests build_dlc utility functions."""
+  """Tests cros_update functions."""
 
   def setUp(self):
     """Setup an instance of CrOSUpdateTrigger."""
