@@ -12444,6 +12444,26 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-edgar-7287.167.B"
     },
+    "firmware-endeavour-13259.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "endeavour"
+        ],
+        "schedule": "with 24h interval",
+        "workspace_branch": "firmware-endeavour-13259.B"
+    },
+    "firmware-endeavour-13259.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "endeavour"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-endeavour-13259.B"
+    },
     "firmware-enguarde-5216.201.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
