@@ -869,7 +869,8 @@ Actions:
   actions = _GetActions()
 
   site_params = config_lib.GetSiteParams()
-  parser = commandline.ArgumentParser(description=description)
+  parser = commandline.ArgumentParser(
+      description=description, default_log_level='notice')
   parser.add_argument('-i', '--internal', dest='gob', action='store_const',
                       default=site_params.EXTERNAL_GOB_INSTANCE,
                       const=site_params.INTERNAL_GOB_INSTANCE,
