@@ -349,8 +349,14 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
 
     nebraska_path = os.path.join(source_dir, NEBRASKA_FILENAME)
     checkout = path_util.DetermineCheckout()
-    if checkout.type == path_util.CHECKOUT_TYPE_GCLIENT:
-      # Chrome checkout. Download from googlesource.
+    if checkout.type == path_util.CHECKOUT_TYPE_REPO:
+      # ChromeOS checkout. Copy existing file to destination.
+      local_src = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
+                               'dev', 'nebraska', NEBRASKA_FILENAME)
+      assert os.path.isfile(local_src), "%s doesn't exist" % local_src
+      shutil.copy2(local_src, source_dir)
+    else:
+      # Download from googlesource.
       nebraska_url_path = '%s/+/%s/%s?format=text' % (
           'chromiumos/platform/dev-util', 'refs/heads/master',
           'nebraska/nebraska.py')
@@ -358,11 +364,5 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
                                        nebraska_url_path)
       osutils.WriteFile(nebraska_path,
                         base64.b64decode(contents_b64).decode('utf-8'))
-    else:
-      # ChromeOS checkout. Copy existing file to destination.
-      local_src = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
-                               'dev', 'nebraska', NEBRASKA_FILENAME)
-      assert os.path.isfile(local_src), "%s doesn't exist" % local_src
-      shutil.copy2(local_src, source_dir)
 
     return nebraska_path
