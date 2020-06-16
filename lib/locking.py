@@ -91,7 +91,7 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       elif e.errno != errno.EAGAIN:
         raise
     if self.description:
-      message = '%s: blocking while %s' % (self.description, message)
+      message = '%s: blocking (LOCK_NB) while %s' % (self.description, message)
     if not self.blocking:
       self.close()
       raise LockNotAcquiredError(message)
@@ -102,9 +102,12 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       self.locking_mechanism(self.fd, flags)
     except EnvironmentError as e:
       if e.errno != errno.EDEADLK:
+        message = ('%s: blocking wait failed errno %s'
+                   % (self.description, e))
         raise
       self.unlock()
       self.locking_mechanism(self.fd, flags)
+    logging.info('%s: lock has been acquired, continuing.', self.description)
 
   def lock(self, shared=False):
     """Take a lock of type |shared|.
