@@ -19,6 +19,7 @@ import time
 
 from collections import deque
 
+from chromite.lib import dlc_lib
 from chromite.lib import chroot_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -35,7 +36,6 @@ from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
 
-from chromite.scripts import build_dlc
 from chromite.scripts import cros_set_lsb_release
 
 
@@ -223,9 +223,9 @@ class PaygenPayload(object):
       finally:
         osutils.UmountDir(mount_point)
 
-      dlc_id = lsb_release[build_dlc.DLC_ID_KEY]
-      dlc_package = lsb_release[build_dlc.DLC_PACKAGE_KEY]
-      appid = lsb_release[build_dlc.DLC_APPID_KEY]
+      dlc_id = lsb_release[dlc_lib.DLC_ID_KEY]
+      dlc_package = lsb_release[dlc_lib.DLC_PACKAGE_KEY]
+      appid = lsb_release[dlc_lib.DLC_APPID_KEY]
 
       if gspaths.IsDLCImage(image):
         if dlc_id != image.dlc_id:

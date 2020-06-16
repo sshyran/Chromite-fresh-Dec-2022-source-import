@@ -27,7 +27,7 @@ from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import remote_access
-from chromite.scripts import build_dlc
+from chromite.lib import dlc_lib
 try:
   import portage
 except ImportError:
@@ -1007,7 +1007,7 @@ def _UninstallDLCImage(device, pkg_attrs):
 def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
   """Deploy (install and mount) a DLC image."""
   # Build the DLC image if the image is outdated or doesn't exist.
-  build_dlc.InstallDlcImages(sysroot=sysroot, dlc_id=dlc_id, board=board)
+  dlc_lib.InstallDlcImages(sysroot=sysroot, dlc_id=dlc_id, board=board)
 
   logging.debug('Uninstall DLC %s if it is installed.', dlc_id)
   try:
@@ -1023,8 +1023,8 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
   # of to dlc_a and dlc_b, and let dlcserive install the images to their final
   # location.
   logging.notice('Deploy the DLC image for %s', dlc_id)
-  dlc_img_path_src = os.path.join(sysroot, build_dlc.DLC_BUILD_DIR, dlc_id,
-                                  dlc_package, build_dlc.DLC_IMAGE)
+  dlc_img_path_src = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
+                                  dlc_package, dlc_lib.DLC_IMAGE)
   dlc_img_path = os.path.join(_DLC_INSTALL_ROOT, dlc_id, dlc_package)
   dlc_img_path_a = os.path.join(dlc_img_path, 'dlc_a')
   dlc_img_path_b = os.path.join(dlc_img_path, 'dlc_b')
@@ -1032,20 +1032,21 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
   device.run(['mkdir', '-p', dlc_img_path_a, dlc_img_path_b])
   # Copy images to the destination directories.
   device.CopyToDevice(dlc_img_path_src, os.path.join(dlc_img_path_a,
-                                                     build_dlc.DLC_IMAGE),
+                                                     dlc_lib.DLC_IMAGE),
                       mode='rsync')
-  device.run(['cp', os.path.join(dlc_img_path_a, build_dlc.DLC_IMAGE),
-              os.path.join(dlc_img_path_b, build_dlc.DLC_IMAGE)])
+  device.run(['cp', os.path.join(dlc_img_path_a, dlc_lib.DLC_IMAGE),
+              os.path.join(dlc_img_path_b, dlc_lib.DLC_IMAGE)])
 
   # Set the proper perms and ownership so dlcservice can access the image.
   device.run(['chmod', '-R', 'u+rwX,go+rX,go-w', _DLC_INSTALL_ROOT])
   device.run(['chown', '-R', 'dlcservice:dlcservice', _DLC_INSTALL_ROOT])
 
   # Copy metadata to device.
-  dest_mata_dir = os.path.join('/', build_dlc.DLC_META_DIR, dlc_id, dlc_package)
+  dest_mata_dir = os.path.join('/', dlc_lib.DLC_META_DIR, dlc_id,
+                               dlc_package)
   device.run(['mkdir', '-p', dest_mata_dir])
-  src_meta_dir = os.path.join(sysroot, build_dlc.DLC_BUILD_DIR, dlc_id,
-                              dlc_package, build_dlc.DLC_TMP_META_DIR)
+  src_meta_dir = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, dlc_id,
+                              dlc_package, dlc_lib.DLC_TMP_META_DIR)
   device.CopyToDevice(src_meta_dir + '/',
                       dest_mata_dir,
                       mode='rsync',

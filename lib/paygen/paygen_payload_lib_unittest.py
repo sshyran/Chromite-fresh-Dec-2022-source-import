@@ -15,6 +15,7 @@ import tempfile
 
 import mock
 
+from chromite.lib import dlc_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -27,8 +28,6 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
-
-from chromite.scripts import build_dlc
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -451,9 +450,9 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     self.PatchObject(osutils, 'UmountDir')
     lsb_read_mock = self.PatchObject(
         utils, 'ReadLsbRelease',
-        return_value={build_dlc.DLC_APPID_KEY: 'foo-appid',
-                      build_dlc.DLC_ID_KEY: 'dummy-dlc',
-                      build_dlc.DLC_PACKAGE_KEY: 'dummy-package'})
+        return_value={dlc_lib.DLC_APPID_KEY: 'foo-appid',
+                      dlc_lib.DLC_ID_KEY: 'dummy-dlc',
+                      dlc_lib.DLC_PACKAGE_KEY: 'dummy-package'})
 
     dlc_id, dlc_package, dlc_appid = gen._GetDlcImageParams(tgt_image)
 
