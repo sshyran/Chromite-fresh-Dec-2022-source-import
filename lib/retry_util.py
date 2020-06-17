@@ -20,7 +20,7 @@ from chromite.lib import cros_logging as logging
 
 
 # Match stderr of curl's --fail option to see HTTP status code.
-CURL_STATUS_RE = re.compile(r'The requested URL returned error: (\d+) ')
+CURL_STATUS_RE = re.compile(br'The requested URL returned error: (\d+) ')
 
 
 def _CreateExceptionRetryHandler(exception):
@@ -411,7 +411,7 @@ def RunCurl(curl_args, *args, **kwargs):
         # Unexpected stderr.  It may not be error output from --fail.
         return True
       status_code = matched.group(1)
-      return not status_code.startswith('4')
+      return not status_code.startswith(b'4')
 
     # We'll let the common exit code filter do the right thing.
     return None
