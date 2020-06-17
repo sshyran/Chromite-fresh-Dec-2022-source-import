@@ -58,6 +58,15 @@ _BOARD_WRAPPER_TEMPLATE = """#!/bin/sh
 exec {command} --board="{board}" "$@"
 """
 
+_BOARD_WRAPPER_DEPRECATED_CMD_TEMPLATE = """#!/bin/sh
+echo "{deprecated}"
+exec {command} --board="{board}" "$@"
+"""
+
+_BUILD_TARGET_WRAPPER_TEMPLATE = """#!/bin/sh
+exec {command} --build-target="{build_target}" "$@"
+"""
+
 _PKGCONFIG_WRAPPER_TEMPLATE = """#!/bin/bash
 
 PKG_CONFIG_LIBDIR=$(printf '%s:' "{sysroot}"/usr/*/pkgconfig)
@@ -365,10 +374,18 @@ class Sysroot(object):
                      _PORTAGE_WRAPPER_TEMPLATE, sysroot=self.path, chost=chost,
                      command='emerge --root-deps',
                      source_root=constants.SOURCE_ROOT)
-
-      _CreateWrapper(self._WrapperPath('cros_workon', friendly_name),
-                     _BOARD_WRAPPER_TEMPLATE, board=friendly_name,
-                     command='cros_workon')
+      # TODO(crbug.com/1108874): Delete the deprecated wrapper.
+      _CreateWrapper(
+          self._WrapperPath('cros_workon', friendly_name),
+          _BOARD_WRAPPER_DEPRECATED_CMD_TEMPLATE,
+          board=friendly_name,
+          command='cros_workon',
+          deprecated=(
+              'cros_workon-%s is deprecated, use cros-workon-%s instead.' %
+              (friendly_name, friendly_name)))
+      _CreateWrapper(self._WrapperPath('cros-workon', friendly_name),
+                     _BUILD_TARGET_WRAPPER_TEMPLATE, build_target=friendly_name,
+                     command='cros workon')
       _CreateWrapper(self._WrapperPath('gdb', friendly_name),
                      _BOARD_WRAPPER_TEMPLATE, board=friendly_name,
                      command='cros_gdb')
