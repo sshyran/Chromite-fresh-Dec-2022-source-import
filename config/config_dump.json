@@ -34842,6 +34842,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -34865,6 +34866,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -34885,6 +34887,7 @@
             "base",
             "test"
         ],
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false
     },
@@ -34904,6 +34907,7 @@
             "test"
         ],
         "luci_builder": "Try",
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false
     },
@@ -34920,6 +34924,7 @@
             "base",
             "test"
         ],
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false
     },
@@ -34939,6 +34944,7 @@
             "test"
         ],
         "luci_builder": "Try",
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false
     },
@@ -35014,6 +35020,7 @@
             "test"
         ],
         "paygen": false,
+        "rootfs_verification": false,
         "signer_tests": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
@@ -35040,6 +35047,7 @@
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
+        "rootfs_verification": false,
         "signer_tests": false,
         "suite_scheduling": false,
         "sync_chrome": false,
@@ -35058,6 +35066,7 @@
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
+        "rootfs_verification": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [

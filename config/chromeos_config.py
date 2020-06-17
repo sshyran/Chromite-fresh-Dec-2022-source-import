@@ -301,7 +301,9 @@ def GeneralTemplates(site_config):
   site_config.AddTemplate(
       'dustbuster',
       # TODO(ehislen): Starting with loonix but will diverge later.
-      site_config.templates.loonix
+      site_config.templates.loonix,
+      # Disable rootfs_verification until Dustbuster is ready.
+      rootfs_verification=False,
   )
 
   # An anchor of Laktiu' test customizations.
