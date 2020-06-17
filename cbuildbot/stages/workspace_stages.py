@@ -745,8 +745,8 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
     host_ebuild_path = path_util.FromChrootPath(ebuild_path,
                                                 source_path=self._build_root)
     # We assume all targets pull from the same branch and that we always
-    # have an ARM_TARGET or an X86_USERDEBUG_TARGET.
-    targets = ['ARM_TARGET', 'X86_USERDEBUG_TARGET']
+    # have at least one of the following targets.
+    targets = constants.ANDROID_ALL_BUILD_TARGETS
     ebuild_content = osutils.SourceEnvironment(host_ebuild_path, targets)
     logging.info('Got ebuild env: %s', ebuild_content)
     for target in targets:

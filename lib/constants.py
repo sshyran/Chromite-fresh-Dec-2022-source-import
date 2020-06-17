@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import itertools
 import os
 
 def _FindSourceRoot():
@@ -325,6 +326,19 @@ ANDROID_VMRVC_BUILD_TARGETS = {
     'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
                          r'(\.zip|/XkbToKcmConverter)$'),
 }
+
+# These refer to *_TARGET variables in Android ebuild files, used when
+# parsing ebuilds to determine the corresponding Android branch.
+# NOTE: We may use `|` operator to union dict keys after we completely go
+# Python 3.
+ANDROID_ALL_BUILD_TARGETS = frozenset(
+    x + '_TARGET' for x in itertools.chain(
+        ANDROID_PI_BUILD_TARGETS,
+        ANDROID_VMPI_BUILD_TARGETS,
+        ANDROID_VMMST_BUILD_TARGETS,
+        ANDROID_VMRVC_BUILD_TARGETS,
+    )
+)
 
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
 ARC_BUCKET_ACLS = {

@@ -799,8 +799,8 @@ class _BuilderRunBase(object):
     ebuild_path = portage_util.FindEbuildForBoardPackage(android_package, board)
     host_ebuild_path = path_util.FromChrootPath(ebuild_path)
     # We assume all targets pull from the same branch and that we always
-    # have an ARM_TARGET, ARM_USERDEBUG_TARGET, or an X86_USERDEBUG_TARGET.
-    targets = ['ARM_TARGET', 'ARM_USERDEBUG_TARGET', 'X86_USERDEBUG_TARGET']
+    # have at least one of the following targets.
+    targets = constants.ANDROID_ALL_BUILD_TARGETS
     ebuild_content = osutils.SourceEnvironment(host_ebuild_path, targets)
     for target in targets:
       if target in ebuild_content:

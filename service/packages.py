@@ -781,10 +781,7 @@ def determine_android_branch(board):
   ebuild_path = portage_util.FindEbuildForBoardPackage(android_package, board)
   # We assume all targets pull from the same branch and that we always
   # have at least one of the following targets.
-  # TODO(crbug.com/1087167): Ensure this condition in PFQ to avoid CQ breakage.
-  targets = ['ARM_TARGET', 'ARM_USERDEBUG_TARGET', 'X86_USERDEBUG_TARGET',
-             'ARM64_TARGET', 'ARM64_USERDEBUG_TARGET', 'X86_64_TARGET',
-             'X86_64_USERDEBUG_TARGET']
+  targets = constants.ANDROID_ALL_BUILD_TARGETS
   ebuild_content = osutils.SourceEnvironment(ebuild_path, targets)
   for target in targets:
     if target in ebuild_content:
