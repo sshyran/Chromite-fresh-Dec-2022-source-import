@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import contextlib
 import os
 import errno
 import fcntl
@@ -15,8 +16,9 @@ import tempfile
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import retry_util
 from chromite.lib import osutils
+from chromite.lib import retry_util
+from chromite.lib import timeout_util
 
 
 LOCKF = 'lockf'
@@ -31,11 +33,21 @@ class LockingError(Exception):
   """Signals miscellaneous problems in the locking process."""
 
 
+@contextlib.contextmanager
+def _optional_timer_context(timeout):
+  """Use the timeout_util.Timeout contextmanager if timeout is set."""
+  if timeout:
+    with timeout_util.Timeout(timeout):
+      yield
+  else:
+    yield
+
+
 class _Lock(cros_build_lib.MasterPidContextManager):
   """Base lockf based locking.  Derivatives need to override _GetFd"""
 
   def __init__(self, description=None, verbose=True, locktype=LOCKF,
-               blocking=True):
+               blocking=True, blocking_timeout=None):
     """Initialize this instance.
 
     Two types of locks are available: LOCKF and FLOCK.
@@ -58,6 +70,7 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       verbose: Verbose logging?
       locktype: Type of lock to use (lockf or flock).
       blocking: If True, use a blocking lock.
+      blocking_timeout: If not None, time is seconds to wait on blocking calls.
     """
     cros_build_lib.MasterPidContextManager.__init__(self)
     self._verbose = verbose
@@ -65,6 +78,7 @@ class _Lock(cros_build_lib.MasterPidContextManager):
     self._fd = None
     self.locking_mechanism = fcntl.flock if locktype == FLOCK else fcntl.lockf
     self.blocking = blocking
+    self.blocking_timeout = blocking_timeout
 
   @property
   def fd(self):
@@ -99,7 +113,13 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       logging.info(message)
 
     try:
-      self.locking_mechanism(self.fd, flags)
+      with _optional_timer_context(self.blocking_timeout):
+        self.locking_mechanism(self.fd, flags)
+    except timeout_util.TimeoutError:
+      description = self.description or 'locking._enforce_lock'
+      logging.error('Timed out after waiting %d seconds for blocking lock: %s',
+                    self.blocking_timeout, description)
+      raise
     except EnvironmentError as e:
       if e.errno != errno.EDEADLK:
         message = ('%s: blocking wait failed errno %s'
@@ -210,7 +230,8 @@ class FileLock(_Lock):
   """Use a specified file as a locking mechanism."""
 
   def __init__(self, path, description=None, verbose=True,
-               locktype=LOCKF, world_writable=False, blocking=True):
+               locktype=LOCKF, world_writable=False, blocking=True,
+               blocking_timeout=None):
     """Initializer for FileLock.
 
     Args:
@@ -221,11 +242,13 @@ class FileLock(_Lock):
       world_writable: If true, the lock file will be created as root and be made
         writable to all users.
       blocking: If True, use a blocking lock.
+      blocking_timeout: If not None, time is seconds to wait on blocking calls.
     """
     if description is None:
       description = 'lock %s' % (path,)
     _Lock.__init__(self, description=description, verbose=verbose,
-                   locktype=locktype, blocking=blocking)
+                   locktype=locktype, blocking=blocking,
+                   blocking_timeout=blocking_timeout)
     self.path = os.path.abspath(path)
     self.world_writable = world_writable
 

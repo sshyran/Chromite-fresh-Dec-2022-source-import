@@ -52,21 +52,26 @@ class LockingTest(cros_test_lib.TempDirTestCase):
 
     osutils.SafeUnlink(self.lock_file)
 
-  def _HelperInsideProcess(self, blocking, shared, locktype=locking.LOCKF):
+  def _HelperInsideProcess(self, blocking, shared, locktype=locking.LOCKF,
+                           blocking_timeout=None):
     """Helper method that runs a basic test with/without blocking."""
     try:
       lock = locking.FileLock(
-          self.lock_file, blocking=blocking, locktype=locktype)
+          self.lock_file, blocking=blocking, locktype=locktype,
+          blocking_timeout=blocking_timeout)
       with lock.lock(shared):
         pass
       sys.exit(LOCK_ACQUIRED)
     except locking.LockNotAcquiredError:
       sys.exit(LOCK_NOT_ACQUIRED)
 
-  def _HelperStartProcess(self, blocking=False, shared=False):
+  def _HelperStartProcess(self, blocking=False, shared=False,
+                          locktype=locking.LOCKF,
+                          blocking_timeout=None):
     """Create a process and invoke _HelperInsideProcess in it."""
     p = multiprocessing.Process(target=self._HelperInsideProcess,
-                                args=(blocking, shared))
+                                args=(blocking, shared, locktype,
+                                      blocking_timeout))
     p.start()
 
     # It's highly probably that p will have tried to grab the lock before the
@@ -115,6 +120,24 @@ class LockingTest(cros_test_lib.TempDirTestCase):
     lock2.unlock()
     self.assertFalse(lock1.IsLocked())
     self.assertFalse(lock2.IsLocked())
+
+  def testDoubleLockTimeoutWithFlock(self):
+    """Tests that double locking the same lock times out."""
+    lock1 = locking.FileLock(
+        self.lock_file, blocking=True, locktype=locking.FLOCK,
+        blocking_timeout=1, verbose=True)
+    lock2 = locking.FileLock(
+        self.lock_file, blocking=True, locktype=locking.FLOCK,
+        blocking_timeout=1, verbose=True)
+
+    # Verify that if we grab the first lock, trying to use lock2
+    # (on the same file) will throw an exception.
+    with lock1.write_lock():
+      self.assertTrue(lock1.IsLocked())
+      self.assertFalse(lock2.IsLocked())
+
+      self.assertRaises(timeout_util.TimeoutError, lock2.write_lock)
+      self.assertTrue(lock1.IsLocked())
 
   def testDoubleLockWithLockf(self):
     """Tests that double locks don't block with lockf."""
