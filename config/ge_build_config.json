@@ -4373,6 +4373,14 @@
         },
         {
           "board_name": "puff",
+          "name": "noibat",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 411,
+          "is_active": true
+        },
+        {
+          "board_name": "puff",
           "name": "puff",
           "test_suites": [
             "sanity",
