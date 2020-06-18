@@ -868,8 +868,16 @@ class ChromeSDKCommand(command.CliCommand):
              'shell.  Defaults to the current directory.')
     parser.add_argument(
         '--internal', action='store_true', default=False,
-        help='Sets up SDK for building official (internal) Chrome '
-             'Chrome, rather than Chromium.')
+        help='Enables --chrome-branding and --official.')
+    parser.add_argument(
+        '--chrome-branding', action='store_true', default=False,
+        help='Sets up SDK for building internal Chrome using src-internal, '
+             'rather than Chromium.')
+    parser.add_argument(
+        '--official', action='store_true', default=False,
+        help='Enables the official build level of optimization. This removes '
+             'development conveniences like runtime stack traces, and should '
+             'be used for performance testing rather than debugging.')
     parser.add_argument(
         '--use-external-config', action='store_true', default=False,
         help='Use the external configuration for the specified board, even if '
@@ -1162,13 +1170,18 @@ class ChromeSDKCommand(command.CliCommand):
 
     gn_args['target_sysroot'] = sysroot
     gn_args.pop('pkg_config', None)
-    if options.internal:
+
+    # --internal == --chrome-branding + --official
+    if options.chrome_branding or options.internal:
       gn_args['is_chrome_branded'] = True
-      gn_args['is_official_build'] = True
     else:
       gn_args.pop('is_chrome_branded', None)
-      gn_args.pop('is_official_build', None)
       gn_args.pop('internal_gles2_conform_tests', None)
+
+    if options.official or options.internal:
+      gn_args['is_official_build'] = True
+    else:
+      gn_args.pop('is_official_build', None)
 
     target_tc_path = sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path
     for env_path in self.EBUILD_ENV_PATHS:
@@ -1440,7 +1453,7 @@ class ChromeSDKCommand(command.CliCommand):
       cros_build_lib.Die('Chrome checkout not found at %s', src_path)
     self.options.chrome_src = checkout.chrome_src_dir
 
-    if self.options.internal:
+    if self.options.chrome_branding or self.options.internal:
       gclient_path = gclient.FindGclientFile(self.options.chrome_src)
       if not gclient_path:
         cros_build_lib.Die(
@@ -1453,9 +1466,10 @@ class ChromeSDKCommand(command.CliCommand):
         if solution.get('custom_vars', {}).get('checkout_src_internal'):
           break
         cros_build_lib.Die(
-            "You've passed in '--internal' to Simple Chrome, but your .gclient "
-            "file at %s lacks 'checkout_src_internal'. Set that var to True in "
-            "the 'custom_vars' section of your .gclient file and re-sync.",
+            "You've passed in '--chrome-branding' or '--internal' to "
+            'Simple Chrome, but your .gclient file at %s lacks '
+            "'checkout_src_internal'. Set that var to True in the "
+            "'custom_vars' section of your .gclient file and re-sync.",
             gclient_path)
 
     if self.options.version and self.options.sdk_path:
