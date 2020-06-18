@@ -553,6 +553,16 @@ class LabTransfer(Transfer):
         cmd = self._GetCurlCmdForPayloadDownload(
             payload_dir=self._tempdir, build_id=self._payload_dir,
             payload_filename=payload_props_filename)
+
+        # _GetCurlCmdForPayloadDownload removes the 'payloads/' prefix from the
+        # beginning of the payload_props_filename before creating the
+        # command. So here we need to remove that too.
+        prefix = 'payloads/'
+        if payload_props_filename.startswith(prefix):
+          payload_props_path = os.path.join(
+              self._tempdir,
+              payload_props_filename[len(prefix):])
+
         try:
           retry_util.RunCurl(cmd[1:])
         except retry_util.DownloadError as e:
