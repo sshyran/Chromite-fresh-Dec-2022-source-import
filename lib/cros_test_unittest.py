@@ -95,14 +95,18 @@ class CrOSTester(CrOSTesterBase):
         cros_set_lsb_release.LSB_KEY_VERSION: '12900.0.0',
     }
     self._tester.Run()
-    self.assertCommandContains(['cros', 'flash', 'localhost',
-                                'xbuddy://remote/octopus/latest'])
+    self.assertCommandContains([
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+        'flash', 'ssh://localhost:9222',
+        'xbuddy://remote/octopus-release/latest',])
 
     # Specify an xbuddy link.
     self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'
     self._tester.Run()
-    self.assertCommandContains(['cros', 'flash', 'localhost',
-                                'xbuddy://remote/octopus/R82-12901.0.0'])
+    self.assertCommandContains([
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+        'flash', 'ssh://localhost:9222',
+        'xbuddy://remote/octopus/R82-12901.0.0'])
 
   def testFlashSkip(self):
     """Tests flash command is skipped when not needed."""
@@ -113,9 +117,10 @@ class CrOSTester(CrOSTesterBase):
     }
     self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'
     self._tester.Run()
-    self.assertCommandContains(['cros', 'flash', 'localhost',
-                                'xbuddy://remote/octopus/R82-12901.0.0'],
-                               expected=False)
+    self.assertCommandContains(
+        [os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+         'flash', 'localhost', 'xbuddy://remote/octopus/R82-12901.0.0'],
+        expected=False)
 
   def testDeployChrome(self):
     """Tests basic deploy chrome command."""

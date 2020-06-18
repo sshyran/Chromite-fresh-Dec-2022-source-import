@@ -140,23 +140,42 @@ class CrOSTest(object):
     if not self.flash:
       return
 
-    xbuddy_path = self.xbuddy.format(board=self._device.board)
+    if self.xbuddy:
+      xbuddy_path = self.xbuddy.format(board=self._device.board)
+    else:
+      version = xbuddy.LATEST
+      if path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_REPO:
+        # Try flashing to the full version of the board used in the Simple
+        # Chrome SDK if it's present in the cache. Otherwise default to using
+        # latest.
+        cache = self.cache_dir or path_util.GetCacheDir()
+        version = cros_chrome_sdk.SDKFetcher.GetCachedFullVersion(
+            cache, self._device.board) or version
+      # TODO(crbug.com/1057152): Also support flashing a *-full image when
+      # appropriate.
+      xbuddy_path = 'xbuddy://remote/%s-release/%s' % (
+          self._device.board, version)
 
     # Skip the flash if the device is already running the requested version.
     device_version = self._device.remote.version
     _, _, requested_version, _ = xbuddy.XBuddy.InterpretPath(xbuddy_path)
     # Split on the first "-" when comparing versions since xbuddy requires
     # the RX- prefix, but the device may not advertise it.
-    if (requested_version == device_version or
-        requested_version.split('-', 1)[1] == device_version):
-      logging.info(
-          'Skipping the flash. Device running %s when %s was requested',
-          device_version, xbuddy_path)
-      return
+    if xbuddy.LATEST not in requested_version:
+      if (requested_version == device_version or
+          ('-' in requested_version and
+           requested_version.split('-', 1)[1] == device_version)):
+        logging.info(
+            'Skipping the flash. Device running %s when %s was requested',
+            device_version, xbuddy_path)
+        return
 
+    device_name = 'ssh://' + self._device.device
+    if self._device.ssh_port:
+      device_name += ':' + str(self._device.ssh_port)
     cros_build_lib.run(
-        ['cros', 'flash', self._device.device, xbuddy_path,
-         '--board', self._device.board],
+        [os.path.join(constants.CHROMITE_BIN_DIR, 'cros'), 'flash',
+         device_name, xbuddy_path, '--board', self._device.board],
         dryrun=self.dryrun)
 
   def _Deploy(self):
@@ -524,9 +543,10 @@ def ParseCommandLine(argv):
                       help='Directory for building and deploying chrome.')
   parser.add_argument('--flash', action='store_true', default=False,
                       help='Before running tests, flash the device.')
-  parser.add_argument('--xbuddy', default='xbuddy://remote/{board}/latest',
-                      help='xbuddy link to use for flashing the device '
-                      '(default: %(default)s).')
+  parser.add_argument('--xbuddy',
+                      help='xbuddy link to use for flashing the device. Will '
+                      "default to the board's version used in the cros "
+                      'chrome-sdk if available, or "latest" otherwise.')
   parser.add_argument('--deploy', action='store_true', default=False,
                       help='Before running tests, deploy chrome, '
                       '--build-dir must be specified.')
