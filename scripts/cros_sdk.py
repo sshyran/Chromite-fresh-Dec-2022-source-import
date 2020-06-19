@@ -37,6 +37,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import process_util
 from chromite.lib import retry_util
+from chromite.lib import timeout_util
 from chromite.lib import toolchain
 from chromite.utils import key_value_store
 
@@ -985,8 +986,17 @@ def main(argv):
   # commands, we exit here.  The check above should have made sure that no other
   # action was requested, anyway.
   if options.unmount:
-    with locking.FileLock(lock_path, 'chroot lock') as lock:
-      lock.write_lock()
+    # Set a timeout of 300 seconds when getting the lock.
+    with locking.FileLock(lock_path, 'chroot lock',
+                          blocking_timeout=300) as lock:
+      try:
+        lock.write_lock()
+      except timeout_util.TimeoutError as e:
+        logging.error('Acquiring write_lock on %s failed: %s', lock_path, e)
+      # We can call CleanupChroot (which calls cros_sdk_lib.CleanupChrootMount)
+      # even if we don't get the lock because it will attempt to unmount the
+      # tree and will print diagnostic information from 'fuser', 'lsof', and
+      # 'ps'.
       CleanupChroot(options.chroot)
       sys.exit(0)
 
