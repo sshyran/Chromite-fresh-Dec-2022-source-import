@@ -495,8 +495,8 @@ class HWTestConfig(object):
     suite_args: Arguments passed to the suite.  This should be a dict
                 representing keyword arguments.  The value is marshalled
                 using repr(), so the dict values should be basic types.
-    quota_account: If specified, the quotascheduler account to use for all
-                   tests in this suite.
+    quota_account: The quotascheduler account to use for all tests in this
+                   suite.
 
   Some combinations of member settings are invalid:
     * A suite config may not specify both blocking and async.
@@ -526,7 +526,7 @@ class HWTestConfig(object):
 
   def __init__(self,
                suite,
-               pool=constants.HWTEST_MACH_POOL,
+               pool=constants.HWTEST_QUOTA_POOL,
                timeout=SHARED_HW_TEST_TIMEOUT,
                warn_only=False,
                critical=False,
@@ -540,7 +540,7 @@ class HWTestConfig(object):
                suite_args=None,
                offload_failures_only=False,
                enable_skylab=True,
-               quota_account=None,
+               quota_account=constants.HWTEST_QUOTA_ACCOUNT_BVT,
                **kwargs):
     """Constructor -- see members above."""
     # Python 3.7+ made async a reserved keyword.

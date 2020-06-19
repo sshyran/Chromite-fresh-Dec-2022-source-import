@@ -556,6 +556,7 @@ HWTEST_CONTINUOUS_POOL = 'continuous'
 HWTEST_CTS_POOL = 'cts'
 HWTEST_GTS_POOL = HWTEST_CTS_POOL
 
+HWTEST_QUOTA_ACCOUNT_BVT = 'legacypool-bvt'
 HWTEST_QUOTA_ACCOUNT_SUITES = 'legacypool-suites'
 
 # How many total test retries should be done for a suite.
