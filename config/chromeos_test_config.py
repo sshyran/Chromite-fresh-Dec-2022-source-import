@@ -331,7 +331,12 @@ def InsertHwTestsOverrideDefaults(build):
 
     # Adjust for manual test environment.
     for hw_config in build['hw_tests_override']:
-      hw_config.pool = constants.HWTEST_TRYBOT_POOL
+      # Explicitly set quota account to preserve pre-QuotaScheduler behaviour:
+      # Skylab tasks created for tryjobs compete with the general
+      # suite_scheduler triggered tasks.
+      hw_config.pool = constants.HWTEST_QUOTA_POOL
+      hw_config.quota_account = constants.HWTEST_QUOTA_ACCOUNT_SUITES
+
       hw_config.file_bugs = False
       hw_config.priority = constants.HWTEST_DEFAULT_PRIORITY
 
@@ -505,7 +510,11 @@ def GeneralTemplates(site_config, ge_build_config):
   site_config.AddTemplate(
       'default_hw_tests_override',
       hw_tests_override=hw_test_list.DefaultList(
-          pool=constants.HWTEST_TRYBOT_POOL,
+          # Explicitly set quota account to preserve pre-QuotaScheduler
+          # behaviour: Skylab tasks created for tryjobs compete with the general
+          # suite_scheduler triggered tasks.
+          pool=constants.HWTEST_QUOTA_POOL,
+          quota_account=constants.HWTEST_QUOTA_ACCOUNT_SUITES,
           file_bugs=False,
       ),
   )
