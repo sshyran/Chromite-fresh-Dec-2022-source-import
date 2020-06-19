@@ -546,7 +546,10 @@ HWTEST_TRYBOT_NUM = 3
 HWTEST_QUOTA_POOL = 'quota'
 
 HWTEST_QUOTA_ACCOUNT_BVT = 'legacypool-bvt'
+HWTEST_QUOTA_ACCOUNT_BVT_SYNC = 'bvt-sync'
+HWTEST_QUOTA_ACCOUNT_PFQ = 'pfq'
 HWTEST_QUOTA_ACCOUNT_SUITES = 'legacypool-suites'
+HWTEST_QUOTA_ACCOUNT_TOOLCHAIN = 'toolchain'
 
 # How many total test retries should be done for a suite.
 HWTEST_MAX_RETRIES = 5

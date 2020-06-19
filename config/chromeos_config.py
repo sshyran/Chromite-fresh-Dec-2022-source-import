@@ -895,11 +895,11 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       useflags=config_lib.append_useflags(['next_gcc']),
       hw_tests=hw_test_list.ToolchainTestFull(
           constants.HWTEST_QUOTA_POOL,
-          quota_account='toolchain'
+          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
       ),
       hw_tests_override=hw_test_list.ToolchainTestFull(
           constants.HWTEST_QUOTA_POOL,
-          quota_account='toolchain'
+          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
       ),
   )
   site_config.AddTemplate(
@@ -908,11 +908,11 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       description='Full release build with LLVM toolchain',
       hw_tests=hw_test_list.ToolchainTestMedium(
           constants.HWTEST_QUOTA_POOL,
-          quota_account='toolchain'
+          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
       ),
       hw_tests_override=hw_test_list.ToolchainTestMedium(
           constants.HWTEST_QUOTA_POOL,
-          quota_account='toolchain'
+          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
       ),
   )
   site_config.AddTemplate(
@@ -2740,14 +2740,14 @@ def ApplyCustomOverrides(site_config):
               config_lib.HWTestConfig(
                   constants.HWTEST_JETSTREAM_COMMIT_SUITE,
                   pool=constants.HWTEST_QUOTA_POOL,
-                  quota_account='toolchain'
+                  quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
               )
           ],
           'hw_tests_override': [
               config_lib.HWTestConfig(
                   constants.HWTEST_JETSTREAM_COMMIT_SUITE,
                   pool=constants.HWTEST_QUOTA_POOL,
-                  quota_account='toolchain'
+                  quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
               )
           ]
       }

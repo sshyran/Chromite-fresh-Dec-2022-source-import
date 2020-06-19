@@ -98,7 +98,7 @@ class HWTestList(object):
     kwargs['blocking'] = True
     kwargs['async'] = False
     kwargs['priority'] = constants.HWTEST_CQ_PRIORITY
-    kwargs['quota_account'] = 'bvt-sync'
+    kwargs['quota_account'] = constants.HWTEST_QUOTA_ACCOUNT_BVT_SYNC
     return kwargs
 
   def _bvtInlineHWTestArgs(self, kwargs):
@@ -149,7 +149,7 @@ class HWTestList(object):
     """
     default_dict = dict(file_bugs=True,
                         pool=constants.HWTEST_QUOTA_POOL,
-                        quota_account='pfq',
+                        quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ,
                         timeout=config_lib.HWTestConfig.ASYNC_HW_TEST_TIMEOUT,
                         priority=constants.HWTEST_PFQ_PRIORITY, minimum_duts=3)
     # Allows kwargs overrides to default_dict for pfq.
@@ -170,7 +170,8 @@ class HWTestList(object):
     list is a blocking sanity suite that verifies the build will not break dut.
     """
     sanity_dict = dict(pool=constants.HWTEST_QUOTA_POOL,
-                       file_bugs=True, quota_account='pfq')
+                       file_bugs=True,
+                       quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ)
     sanity_dict.update(kwargs)
     sanity_dict.update(dict(minimum_duts=1, suite_min_duts=1,
                             blocking=True))
@@ -194,7 +195,7 @@ class HWTestList(object):
 
   def AFDORecordTest(self, **kwargs):
     default_dict = dict(pool=constants.HWTEST_QUOTA_POOL,
-                        quota_account='toolchain',
+                        quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
                         file_bugs=True,
                         timeout=constants.AFDO_GENERATE_TIMEOUT,
                         priority=constants.HWTEST_PFQ_PRIORITY)
