@@ -340,13 +340,14 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
     self.assertTrue(isinstance(error, failures_lib.TestFailure))
     self.assertIn('Suite failed', str(error))
 
-  def testCreateTest(self):
+  def testCreateTestPlan(self):
     """Test that function call args are mapped correctly to commandline args."""
     test_plan = '{}'
     build = 'foo-bar/R1234'
     board = 'foo-board'
     model = 'foo-model'
     pool = 'foo-pool'
+    quota_account = 'foo-qa'
     suite = 'foo-suite'
     # An OrderedDict is used to make the keyval order on the command line
     # deterministic for testing purposes.
@@ -360,6 +361,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         '-image', build,
         '-legacy-suite', suite,
         '-pool', pool,
+        '-qs-account', quota_account,
         '-board', board,
         '-model', model,
         '-timeout-mins', str(timeout_mins),
@@ -372,7 +374,8 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         create_cmd, output=self._fakeCreateJson(task_id, 'foo://foo'))
 
     result = commands.RunSkylabHWTestPlan(
-        test_plan=test_plan, build=build, pool=pool, board=board, model=model,
+        test_plan=test_plan, build=build, pool=pool,
+        quota_account=quota_account, board=board, model=model,
         timeout_mins=timeout_mins, keyvals=keyvals, legacy_suite=suite)
     self.assertTrue(isinstance(result, commands.HWTestSuiteResult))
     self.assertEqual(result.to_raise, None)

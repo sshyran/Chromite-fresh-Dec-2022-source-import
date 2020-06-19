@@ -1339,40 +1339,6 @@ DEPENDENCIES = "skip_provision"
 class HWTest(cros_test_lib.MockTestCase):
   """Test HW test invocation."""
 
-  def testScheduleAutotestTests(self):
-    run_test_mock = self.PatchObject(
-        commands,
-        'RunSkylabHWTestPlan',
-        return_value=commands.HWTestSuiteResult(None, None))
-
-    paygen_build_lib.ScheduleAutotestTests(
-        suite_name='dummy-suite',
-        board='dummy-board',
-        model='dummy-model',
-        build='dummy-build',
-        skip_duts_check=None, # ignored
-        debug=None, # ignored
-        payload_test_configs=[],
-        test_env=None, # ignored
-        job_keyvals=None) # ignored
-
-    run_test_mock.assert_called_once_with(
-        test_plan=paygen_build_lib._TestPlan(
-            payload_test_configs=[],
-            suite_name='dummy-suite',
-            build='dummy-build'),
-        build='dummy-build',
-        legacy_suite='dummy-suite',
-        pool='DUT_POOL_BVT',
-        board='dummy-board',
-        model='dummy-model',
-        timeout_mins=2*3*60,
-        tags=['build:dummy-build',
-              'suite:dummy-suite',
-              'user:PaygenTestStage'],
-        keyvals={'build': 'dummy-build',
-                 'suite': 'dummy-suite'})
-
   def testTestPlan(self):
     payload_test_configs = [
         test_params.TestConfig(

@@ -28,6 +28,7 @@ from chromite.api.gen.test_platform import request_pb2
 from chromite.cbuildbot import commands
 from chromite.lib import config_lib
 from chromite.lib import failures_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
@@ -388,6 +389,7 @@ class PaygenBuild(object):
   # Hidden class level cache value.
   _cachedPaygenJson = None
 
+  # pylint: disable=unsubscriptable-object
   @classmethod
   def GetPaygenJson(cls, board=None, channel=None):
     """Fetch the parsed Golden Eye payload generation configuration.
@@ -1163,7 +1165,6 @@ def ValidateBoardConfig(board):
     raise BoardNotConfigured(board)
 
 
-# pylint: disable=unused-argument
 def ScheduleAutotestTests(suite_name, board, model, build, skip_duts_check,
                           debug, payload_test_configs, test_env,
                           job_keyvals=None):
@@ -1199,7 +1200,8 @@ def ScheduleAutotestTests(suite_name, board, model, build, skip_duts_check,
       test_plan=test_plan,
       build=build,
       legacy_suite=suite_name,
-      pool='DUT_POOL_BVT',
+      pool=constants.HWTEST_QUOTA_POOL,
+      quota_account=constants.HWTEST_QUOTA_ACCOUNT_BVT,
       board=board,
       model=model,
       timeout_mins=timeout_mins,
