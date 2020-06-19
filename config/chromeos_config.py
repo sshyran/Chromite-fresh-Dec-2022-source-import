@@ -2216,7 +2216,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     reference_board_name = unibuild[
         config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
 
-    pool = constants.HWTEST_MACH_POOL
     config_name = '%s-release' % reference_board_name
 
     # Move unibuild to skylab.
@@ -2229,7 +2228,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
         'models': models,
         'important': important,
         'enable_skylab_hw_tests': enable_skylab_hw_tests['default'],
-        'hw_tests': hw_test_list.SharedPoolCanary(pool=pool)
+        'hw_tests': hw_test_list.SharedPoolCanary()
     }
     if config_name in _no_unittest_configs:
       props['unittests'] = False

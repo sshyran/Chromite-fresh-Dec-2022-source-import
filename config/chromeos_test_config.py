@@ -135,9 +135,7 @@ class HWTestList(object):
     Args:
       *kwargs: overrides for the configs
     """
-    afdo_dict = dict(pool=constants.HWTEST_SUITES_POOL,
-                     timeout=120 * 60, retry=False,
-                     max_retries=None)
+    afdo_dict = dict(timeout=120 * 60, retry=False, max_retries=None)
     # Python 3.7+ made async a reserved keyword.
     afdo_dict['async'] = True
     afdo_dict.update(kwargs)
@@ -168,8 +166,7 @@ class HWTestList(object):
     """
     # The informational PFQ does not honor to retry jobs. This reduces
     # hwtest times and shows flakes clearer.
-    default_dict = dict(pool=constants.HWTEST_PFQ_POOL, file_bugs=True,
-                        priority=constants.HWTEST_PFQ_PRIORITY,
+    default_dict = dict(file_bugs=True, priority=constants.HWTEST_PFQ_PRIORITY,
                         retry=False, max_retries=None, minimum_duts=1)
     # Allows kwargs overrides to default_dict for pfq.
     default_dict.update(kwargs)
@@ -226,8 +223,7 @@ class HWTestList(object):
     The returned suites will run in pool:critical by default, which is
     shared with CQs.
     """
-    default_dict = dict(pool=constants.HWTEST_MACH_POOL,
-                        suite_min_duts=6)
+    default_dict = dict(suite_min_duts=6)
     default_dict.update(kwargs)
     suite_list = self.DefaultListCanary(**default_dict)
     return suite_list
