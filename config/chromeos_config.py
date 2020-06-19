@@ -1974,6 +1974,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-hatch-12692.B', ['hatch']),
       (WEEKLY, 'factory-excelsior-12812.B', ['excelsior']),
       (WEEKLY, 'factory-drallion-13080.B', ['drallion']),
+      (WEEKLY, 'factory-endeavour-13295.B', ['endeavour']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', ['atlas', 'octopus', 'rammus', 'coral', 'eve',
@@ -2666,10 +2667,6 @@ def ApplyCustomOverrides(site_config):
       },
 
       'kukui-release': {
-          'sign_types': ['recovery', 'factory'],
-      },
-
-      'excelsior-release': {
           'sign_types': ['recovery', 'factory'],
       },
 

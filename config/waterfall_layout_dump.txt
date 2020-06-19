@@ -16,6 +16,8 @@
     coral-factory-coral-10122.B-factorybranch
   factory-drallion-13080.B-buildspec
     drallion-factory-drallion-13080.B-factorybranch
+  factory-endeavour-13295.B-buildspec
+    endeavour-factory-endeavour-13295.B-factorybranch
   factory-eve-9667.B-buildspec
     eve-factory-eve-9667.B-factorybranch
   factory-excelsior-12812.B-buildspec
@@ -748,6 +750,7 @@
   elm-payloads-tryjob
   elm-release-tryjob
   elm-unittest-stress
+  endeavour-factory-endeavour-13295.B-factorybranch-tryjob
   endeavour-full-tryjob
   endeavour-llvm-next-toolchain-tryjob
   endeavour-llvm-toolchain-tryjob
@@ -841,6 +844,8 @@
     coral-factory-coral-10122.B-factorybranch-tryjob
   factory-drallion-13080.B-buildspec-tryjob
     drallion-factory-drallion-13080.B-factorybranch-tryjob
+  factory-endeavour-13295.B-buildspec-tryjob
+    endeavour-factory-endeavour-13295.B-factorybranch-tryjob
   factory-eve-9667.B-buildspec-tryjob
     eve-factory-eve-9667.B-factorybranch-tryjob
   factory-excelsior-12812.B-buildspec-tryjob
