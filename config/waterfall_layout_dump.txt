@@ -244,7 +244,6 @@
     beaglebone_servo-release
     betty-arc-r-release
     betty-arcmaster-release
-    betty-arcnext-release
     betty-arcvm-master-release
     betty-kernelnext-release
     betty-pi-arc-release
@@ -532,12 +531,6 @@
   betty-arcmaster-payloads-tryjob
   betty-arcmaster-release-tryjob
   betty-arcmaster-unittest-stress
-  betty-arcnext-full-tryjob
-  betty-arcnext-llvm-next-toolchain-tryjob
-  betty-arcnext-llvm-toolchain-tryjob
-  betty-arcnext-payloads-tryjob
-  betty-arcnext-release-tryjob
-  betty-arcnext-unittest-stress
   betty-arcvm-master-full-tryjob
   betty-arcvm-master-llvm-next-toolchain-tryjob
   betty-arcvm-master-llvm-toolchain-tryjob
@@ -1411,7 +1404,6 @@
     beaglebone_servo-release-tryjob
     betty-arc-r-release-tryjob
     betty-arcmaster-release-tryjob
-    betty-arcnext-release-tryjob
     betty-arcvm-master-release-tryjob
     betty-kernelnext-release-tryjob
     betty-pi-arc-release-tryjob
