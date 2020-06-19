@@ -542,19 +542,8 @@ VALID_BUILD_TYPES = (
     GENERIC_TYPE,
 )
 
-# Define pool of machines for Hardware tests.
-# TODO(akeshet): Delete constants for deprecated pools, and references to them.
 HWTEST_TRYBOT_NUM = 3
-HWTEST_MACH_POOL = 'bvt'
-HWTEST_MACH_POOL_UNI = 'bvt-uni'        # Deprecated
 HWTEST_QUOTA_POOL = 'quota'
-HWTEST_PFQ_POOL = 'pfq'
-HWTEST_SUITES_POOL = 'suites'
-HWTEST_CHROME_PERF_POOL = 'chromeperf'  # Probably deprecated, no existing DUTS.
-HWTEST_TRYBOT_POOL = HWTEST_SUITES_POOL
-HWTEST_CONTINUOUS_POOL = 'continuous'
-HWTEST_CTS_POOL = 'cts'
-HWTEST_GTS_POOL = HWTEST_CTS_POOL
 
 HWTEST_QUOTA_ACCOUNT_BVT = 'legacypool-bvt'
 HWTEST_QUOTA_ACCOUNT_SUITES = 'legacypool-suites'
