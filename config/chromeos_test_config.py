@@ -124,23 +124,6 @@ class HWTestList(object):
     kwargs['async'] = True
     return self.DefaultList(**kwargs)
 
-  def AFDOList(self, **kwargs):
-    """Returns a default list of HWTestConfigs for a AFDO build.
-
-    For more details on AFDO:
-    - https://gcc.gnu.org/wiki/AutoFDO
-    - https://sites.google.com/a/google.com/chromeos-toolchain-team-home2
-      -> 11. AFDO PROFILE-GUIDED OPTIMIZATIONS
-
-    Args:
-      *kwargs: overrides for the configs
-    """
-    afdo_dict = dict(timeout=120 * 60, retry=False, max_retries=None)
-    # Python 3.7+ made async a reserved keyword.
-    afdo_dict['async'] = True
-    afdo_dict.update(kwargs)
-    return [config_lib.HWTestConfig('perf_v2', **afdo_dict)]
-
   def DefaultListNonCanary(self, **kwargs):
     """Return a default list of HWTestConfigs for a non-canary build.
 
@@ -157,25 +140,6 @@ class HWTestList(object):
                                 **kwargs),
         config_lib.HWTestConfig(constants.HWTEST_ARC_COMMIT_SUITE,
                                 **kwargs)]
-
-  def DefaultListChromePFQInformational(self, **kwargs):
-    """Return a default list of HWTestConfigs for an inform. Chrome PFQ build.
-
-    Optional arguments may be overridden in `kwargs`, except that
-    the `blocking` setting cannot be provided.
-    """
-    # The informational PFQ does not honor to retry jobs. This reduces
-    # hwtest times and shows flakes clearer.
-    default_dict = dict(file_bugs=True, priority=constants.HWTEST_PFQ_PRIORITY,
-                        retry=False, max_retries=None, minimum_duts=1)
-    # Allows kwargs overrides to default_dict for pfq.
-    default_dict.update(kwargs)
-    suite_list = self.DefaultListNonCanary(**default_dict)
-    suite_list.append(config_lib.HWTestConfig(
-        constants.HWTEST_CHROME_INFORMATIONAL, warn_only=True, **default_dict))
-    suite_list.append(self.TastConfig(constants.HWTEST_TAST_CHROME_PFQ_SUITE,
-                                      **default_dict))
-    return suite_list
 
   def DefaultListPFQ(self, **kwargs):
     """Return a default list of HWTestConfig's for a PFQ build.
