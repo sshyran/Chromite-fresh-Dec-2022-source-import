@@ -57,41 +57,17 @@ class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):
     """Mock out RebootAndVerify."""
 
 
-class ChromiumOSBaseTransferMock(partial_mock.PartialCmdMock):
-  """Mock out all transfer functions in auto_updater.ChromiumOSUpdater.
-
-  These methods have been deprecated in the auto_updater.ChromiumOSUpdater
-  class. These mocks exist to test if the methods are not being called when
-  ChromiumOSUpdater.RunUpdate() is called.
-
-  TODO (sanikak): Mocked class should be removed once the deprecated methods
-  are removed from auto_updater.ChromiumOSUpdater
-  """
-  TARGET = 'chromite.lib.auto_updater.ChromiumOSUpdater'
-  ATTRS = ('TransferUpdateUtilsPackage', 'TransferRootfsUpdate',
-           'TransferStatefulUpdate')
-
-  def __init__(self):
-    partial_mock.PartialCmdMock.__init__(self)
-
-  def TransferUpdateUtilsPackage(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater.ChromiumOSUpdater.TransferUpdateUtilsPackage."""
-
-  def TransferRootfsUpdate(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater.ChromiumOSUpdater.TransferRootfsUpdate."""
-
-  def TransferStatefulUpdate(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater.ChromiumOSUpdater.TransferStatefulUpdate."""
-
-
-class CrOSLocalTransferMock(partial_mock.PartialCmdMock):
+class TransferMock(partial_mock.PartialCmdMock):
   """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
   TARGET = 'chromite.lib.auto_updater_transfer.LocalTransfer'
   ATTRS = ('TransferUpdateUtilsPackage', 'TransferRootfsUpdate',
-           'TransferStatefulUpdate')
+           'TransferStatefulUpdate', 'CheckPayloads')
 
   def __init__(self):
     partial_mock.PartialCmdMock.__init__(self)
+
+  def CheckPayloads(self, _inst, *_args, **_kwargs):
+    """Mock auto_updater_transfer.Transfer.CheckPayloads."""
 
   def TransferUpdateUtilsPackage(self, _inst, *_args, **_kwargs):
     """Mock auto_updater_transfer.LocalTransfer.TransferUpdateUtilsPackage."""
@@ -101,25 +77,6 @@ class CrOSLocalTransferMock(partial_mock.PartialCmdMock):
 
   def TransferStatefulUpdate(self, _inst, *_args, **_kwargs):
     """Mock auto_updater_transfer.LocalTransfer.TransferStatefulUpdate."""
-
-
-class CrOSLabTransferMock(partial_mock.PartialCmdMock):
-  """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
-  TARGET = 'chromite.lib.auto_updater_transfer.LabTransfer'
-  ATTRS = ('TransferUpdateUtilsPackage', 'TransferRootfsUpdate',
-           'TransferStatefulUpdate')
-
-  def __init__(self):
-    partial_mock.PartialCmdMock.__init__(self)
-
-  def TransferUpdateUtilsPackage(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater_transfer.LabTransfer.TransferUpdateUtilsPackage."""
-
-  def TransferRootfsUpdate(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater_transfer.LabTransfer.TransferRootfsUpdate."""
-
-  def TransferStatefulUpdate(self, _inst, *_args, **_kwargs):
-    """Mock auto_updater_transfer.LabTransfer.TransferStatefulUpdate."""
 
 
 class ChromiumOSPreCheckMock(partial_mock.PartialCmdMock):
@@ -158,19 +115,17 @@ class ChromiumOSUpdaterBaseTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     self._payload_dir = self.tempdir
     self._base_updater_mock = self.StartPatcher(ChromiumOSBaseUpdaterMock())
-    self._local_xfer_mock = self.StartPatcher(CrOSLocalTransferMock())
-    self._lab_xfer_mock = self.StartPatcher(CrOSLabTransferMock())
-    self._cros_transfer_mock = self.StartPatcher(ChromiumOSBaseTransferMock())
+    self._transfer_mock = self.StartPatcher(TransferMock())
     self.PatchObject(remote_access.ChromiumOSDevice, 'Pingable',
                      return_value=True)
     m = self.StartPatcher(RemoteAccessMock())
     m.SetDefaultCmdResult()
 
 
-class CrOSLocalTransferTest(ChromiumOSUpdaterBaseTest):
+class TransferTest(ChromiumOSUpdaterBaseTest):
   """Test the transfer code path."""
 
-  def testLocalTransferForRootfs(self):
+  def testTransferForRootfs(self):
     """Test transfer functions for rootfs update.
 
     When rootfs update is enabled, update-utils and rootfs update payload are
@@ -184,34 +139,15 @@ class CrOSLocalTransferTest(ChromiumOSUpdaterBaseTest):
                        '_FixPayloadPropertiesFile')
       CrOS_AU.RunUpdate()
       self.assertTrue(
-          self._local_xfer_mock.patched['TransferUpdateUtilsPackage'].called)
+          self._transfer_mock.patched['CheckPayloads'].called)
       self.assertTrue(
-          self._local_xfer_mock.patched['TransferRootfsUpdate'].called)
+          self._transfer_mock.patched['TransferUpdateUtilsPackage'].called)
+      self.assertTrue(
+          self._transfer_mock.patched['TransferRootfsUpdate'].called)
       self.assertFalse(
-          self._local_xfer_mock.patched['TransferStatefulUpdate'].called)
+          self._transfer_mock.patched['TransferStatefulUpdate'].called)
 
-  def testLabTransferForRootfs(self):
-    """Test transfer functions for rootfs update.
-
-    When rootfs update is enabled, update-utils and rootfs update payload are
-    transferred. Stateful update payload is not.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir, do_stateful_update=False,
-          transfer_class=auto_updater_transfer.LabTransfer,
-          staging_server='http://0.0.0.0:8082/')
-      self.PatchObject(auto_updater.ChromiumOSUpdater,
-                       '_FixPayloadPropertiesFile')
-      CrOS_AU.RunUpdate()
-      self.assertTrue(
-          self._lab_xfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertTrue(
-          self._lab_xfer_mock.patched['TransferRootfsUpdate'].called)
-      self.assertFalse(
-          self._lab_xfer_mock.patched['TransferStatefulUpdate'].called)
-
-  def testLocalTransferForStateful(self):
+  def testTransferForStateful(self):
     """Test Transfer functions' code path for stateful update.
 
     When stateful update is enabled, update-utils and stateful update payload
@@ -224,78 +160,13 @@ class CrOSLocalTransferTest(ChromiumOSUpdaterBaseTest):
           transfer_class=auto_updater_transfer.LocalTransfer)
       CrOS_AU.RunUpdate()
       self.assertTrue(
-          self._local_xfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertFalse(
-          self._local_xfer_mock.patched['TransferRootfsUpdate'].called)
+          self._transfer_mock.patched['CheckPayloads'].called)
       self.assertTrue(
-          self._local_xfer_mock.patched['TransferStatefulUpdate'].called)
-
-  def testLabTransferForStateful(self):
-    """Test LabTransfer methods' code path for stateful update.
-
-    When stateful update is enabled, update-utils and stateful update payload
-    are transferred. Rootfs update payload is not.
-    """
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir, do_rootfs_update=False,
-          transfer_class=auto_updater_transfer.LabTransfer,
-          staging_server='http://0.0.0.0:8082/')
-      CrOS_AU.RunUpdate()
+          self._transfer_mock.patched['TransferUpdateUtilsPackage'].called)
+      self.assertFalse(
+          self._transfer_mock.patched['TransferRootfsUpdate'].called)
       self.assertTrue(
-          self._lab_xfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertFalse(
-          self._lab_xfer_mock.patched['TransferRootfsUpdate'].called)
-      self.assertTrue(
-          self._lab_xfer_mock.patched['TransferStatefulUpdate'].called)
-
-  def testCrosTransferForRootfs(self):
-    """Test auto_updater.ChromiumOSUpdater transfer methods for rootfs update.
-
-    None of these functions should be called when auto_updater.RunUpdate() is
-    called.
-
-    TODO (sanikak): Function should be removed once the namesake deprecated
-    methods are removed from auto_updater.ChromiumOSUpdater.
-    """
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir, do_stateful_update=False,
-          transfer_class=auto_updater_transfer.LocalTransfer)
-      self.PatchObject(auto_updater.ChromiumOSUpdater,
-                       '_FixPayloadPropertiesFile')
-      CrOS_AU.RunUpdate()
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferRootfsUpdate'].called)
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferStatefulUpdate'].called)
-
-  def testCrosTransferForStateful(self):
-    """Test auto_updater.ChromiumOSUpdater transfer methods for stateful update.
-
-    None of these functions should be called when auto_updater.RunUpdate() is
-    called.
-
-    TODO (sanikak): Function should be removed once the namesake deprecated
-    methods are removed from auto_updater.ChromiumOSUpdater.
-    """
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir, do_rootfs_update=False,
-          transfer_class=auto_updater_transfer.LocalTransfer)
-      CrOS_AU.RunUpdate()
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferRootfsUpdate'].called)
-      self.assertFalse(
-          self._cros_transfer_mock.patched['TransferStatefulUpdate'].called)
-
+          self._transfer_mock.patched['TransferStatefulUpdate'].called)
 
 class ChromiumOSUpdatePreCheckTest(ChromiumOSUpdaterBaseTest):
   """Test precheck function."""
@@ -503,35 +374,6 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
                         staging_server='http://0.0.0.0:8082/',
                         transfer_class=NotATransferSubclass)
 
-  def testCheckPayloadsLocalTransferObject(self):
-    """Tests if LocalTransfer.CheckPayloads is called.
-
-    This unittest can be removed once all callers of
-    ChromiumOSUpdater.CheckPayloads are removed.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir,
-          transfer_class=auto_updater_transfer.LocalTransfer)
-      self.PatchObject(auto_updater_transfer.LocalTransfer, 'CheckPayloads')
-      CrOS_AU.CheckPayloads()
-      self.assertTrue(auto_updater_transfer.LocalTransfer.CheckPayloads.called)
-
-  def testCheckPayloadsLabTransferObject(self):
-    """Tests if LabTransfer.CheckPayloads is called.
-
-    This unittest can be removed once all callers of
-    ChromiumOSUpdater.CheckPayloads are removed.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir,
-          staging_server='http://0.0.0.0:8082/',
-          transfer_class=auto_updater_transfer.LabTransfer)
-      self.PatchObject(auto_updater_transfer.LabTransfer, 'CheckPayloads')
-      CrOS_AU.CheckPayloads()
-      self.assertTrue(auto_updater_transfer.LabTransfer.CheckPayloads.called)
-
   def test_FixPayloadLocalTransfer(self):
     """Tests if correct LocalTransfer methods are called."""
     payload_filename = ('payloads/chromeos_9334.58.2_reef_stable-'
@@ -644,7 +486,7 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
     Since cros_test_lib.MockTestCase run all setUp & tearDown methods in the
     inheritance tree, we don't call super().setUp().
     """
-    self.StartPatcher(CrOSLocalTransferMock())
+    self.StartPatcher(TransferMock())
     self.StartPatcher(ChromiumOSPreCheckMock())
 
   def prepareRootfsUpdate(self):
@@ -671,7 +513,6 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'SetupRootfsUpdate')
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'RunUpdateRootfs')
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'PreSetupStatefulUpdate')
-      self.PatchObject(auto_updater.ChromiumOSUpdater, 'TransferStatefulUpdate')
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'ResetStatefulPartition')
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'UpdateStateful')
       self.PatchObject(auto_updater.ChromiumOSUpdater,
@@ -695,6 +536,8 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
           transfer_class=auto_updater_transfer.LocalTransfer)
       self.PatchObject(auto_updater.ChromiumOSUpdater,
                        '_StartUpdateEngineIfNotRunning')
+      self.PatchObject(auto_updater.ChromiumOSUpdater,
+                       '_FixPayloadPropertiesFile')
       self.PatchObject(auto_updater.ChromiumOSUpdater, 'GetUpdateStatus',
                        return_value=('cannot_update', ))
       self.assertRaises(auto_updater.RootfsUpdateError, CrOS_AU.RunUpdate)

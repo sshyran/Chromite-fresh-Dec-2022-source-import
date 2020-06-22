@@ -7,24 +7,18 @@
 
 from __future__ import print_function
 
-import mock
-
 from chromite.lib import auto_updater
-from chromite.lib import auto_updater_transfer
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_update
 
 
-# pylint: disable=protected-access
-
 class CrosUpdateTest(cros_test_lib.RunCommandTestCase):
   """Tests cros_update functions."""
 
-  def setUp(self):
-    """Setup an instance of CrOSUpdateTrigger."""
-    self._cros_update_trigger = cros_update.CrOSUpdateTrigger(
-        'foo-host-name', 'foo-build-name', 'foo-static-dir',
-        static_url='foo-static', devserver_url='foo-devserver-url')
-    self._cros_updater = auto_updater.ChromiumOSUpdater(
-        mock.MagicMock(work_dir='foo-dir'), 'foo-build-name', 'foo-payload-dir',
-        transfer_class=auto_updater_transfer.LocalTransfer)
+  def testTriggerAU(self):
+    cros_update_trigger = cros_update.CrOSUpdateTrigger(
+        'foo-host-name', 'foo-build-name', 'foo-static-dir')
+    run_update_mock = self.PatchObject(auto_updater.ChromiumOSUpdater,
+                                       'RunUpdate')
+    cros_update_trigger.TriggerAU()
+    run_update_mock.assert_called_once()

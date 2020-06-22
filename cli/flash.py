@@ -525,7 +525,6 @@ class RemoteDeviceUpdater(object):
               yes=self.yes,
               send_payload_in_parallel=self.send_payload_in_parallel,
               transfer_class=auto_updater_transfer.LocalTransfer)
-          chromeos_AU.CheckPayloads()
           chromeos_AU.RunUpdate()
 
         except Exception:

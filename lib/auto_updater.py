@@ -150,7 +150,7 @@ class ChromiumOSUpdater(BaseUpdater):
                yes=False, do_rootfs_update=True, do_stateful_update=True,
                reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
-               staging_server=None):
+               staging_server=None, clear_tpm_owner=False):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
     Args:
@@ -185,6 +185,7 @@ class ChromiumOSUpdater(BaseUpdater):
           Assuming transfer_class is None, if value for staging_server is None
           or empty, an auto_updater_transfer.LocalTransfer reference must be
           passed through the transfer_class parameter.
+      clear_tpm_owner: If true, it will clear the TPM owner on reboot.
     """
     super(ChromiumOSUpdater, self).__init__(device, payload_dir)
 
@@ -227,6 +228,8 @@ class ChromiumOSUpdater(BaseUpdater):
     self._staging_server = staging_server
     self._transfer_obj = self._CreateTransferObject(transfer_class)
 
+    self._clear_tpm_owner = clear_tpm_owner
+
   @property
   def is_au_endtoendtest(self):
     return self.payload_filename is not None
@@ -263,13 +266,6 @@ class ChromiumOSUpdater(BaseUpdater):
         transfer_stateful_update=self._do_rootfs_update,
         device_payload_dir=self.device_payload_dir, tempdir=self.tempdir,
         payload_mode=self.payload_mode, **cls_kwargs)
-
-  def CheckPayloads(self):
-    """DEPRECATED.  Use auto_updater_transfer.Transfer Class instead.
-
-    Verify that all required payloads are in |self.payload_dir|.
-    """
-    self._transfer_obj.CheckPayloads()
 
   def CheckRestoreStateful(self):
     """Check whether to restore stateful."""
@@ -378,6 +374,16 @@ class ChromiumOSUpdater(BaseUpdater):
 
     if status != UPDATE_STATUS_IDLE:
       raise RootfsUpdateError('Update engine is not idle. Status: %s' % status)
+
+    if self.is_au_endtoendtest:
+      # TODO(ahassani): This should only be done for jetsteam devices.
+      self._RetryCommand(['sudo', 'stop', 'ap-update-manager'],
+                         **self._cmd_kwargs_omit_error)
+
+      self._RetryCommand(['rm', '-f', self.REMOTE_UPDATED_MARKERFILE_PATH],
+                         **self._cmd_kwargs)
+      self._RetryCommand(['stop', 'ui'], **self._cmd_kwargs_omit_error)
+
 
   def _GetDevicePythonSysPath(self):
     """Get python sys.path of the given |device|."""
@@ -604,11 +610,18 @@ class ChromiumOSUpdater(BaseUpdater):
 
     self._FixPayloadPropertiesFile()
 
-    # Copy payload for rootfs update.
+    # SetupRootfsUpdate() may reboot the device and therefore should be called
+    # before any payloads are transferred to the device and only if rootfs
+    # update is required.
+    self.SetupRootfsUpdate()
 
+    # Copy payload for rootfs update.
     self._transfer_obj.TransferRootfsUpdate()
 
     self.UpdateRootfs()
+
+    if self.is_au_endtoendtest:
+      self.PostCheckRootfsUpdate()
 
     # Delete the update file so it doesn't take much space on disk for the
     # remainder of the update process.
@@ -678,12 +691,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def RunUpdate(self):
     """Update the device with image of specific version."""
-
-    # SetupRootfsUpdate() may reboot the device and therefore should be called
-    # before any payloads are transferred to the device and only if rootfs
-    # update is required.
-    if self._do_rootfs_update:
-      self.SetupRootfsUpdate()
+    self._transfer_obj.CheckPayloads()
 
     self._transfer_obj.TransferUpdateUtilsPackage()
 
@@ -700,8 +708,14 @@ class ChromiumOSUpdater(BaseUpdater):
       self.RunUpdateStateful()
       logging.info('Stateful update completed.')
 
+    if self._clear_tpm_owner:
+      self.SetClearTpmOwnerRequest()
+
     if self._reboot:
       self.RebootAndVerify()
+
+    if self.is_au_endtoendtest:
+      self.PostCheckCrOSUpdate()
 
     if self._disable_verification:
       logging.info('Disabling rootfs verification on the device...')
@@ -810,20 +824,6 @@ class ChromiumOSUpdater(BaseUpdater):
 
     return self.update_version.endswith(self._GetReleaseVersion())
 
-  def _ResetUpdateEngine(self):
-    """Resets the host to prepare for a clean update regardless of state."""
-    self._RetryCommand(['rm', '-f', self.REMOTE_UPDATED_MARKERFILE_PATH],
-                       **self._cmd_kwargs)
-    self._RetryCommand(['stop', 'ui'], **self._cmd_kwargs_omit_error)
-    self._RetryCommand(['stop', 'update-engine'],
-                       **self._cmd_kwargs_omit_error)
-    self._RetryCommand(['start', 'update-engine'], **self._cmd_kwargs)
-
-    op = self.GetUpdateStatus(self.device)[0]
-    if op != UPDATE_STATUS_IDLE:
-      raise PreSetupUpdateError('%s is not in an installable state' %
-                                self.device.hostname)
-
   def _VerifyBootExpectations(self, expected_kernel_state, rollback_message):
     """Verify that we fully booted given expected kernel state.
 
@@ -905,97 +905,13 @@ class ChromiumOSUpdater(BaseUpdater):
         shell=isinstance(cmd, six.string_types),
         **kwargs)
 
-  # TODO(crbug.com/872441): cros_autoupdate in platform/dev-utils package still
-  # calls this function, but in fact it needs to call the
-  # auto_updater_transfer.Transfer Class's TransferUpdateUtilsPackage() instead.
-  # So delete this function once all the callers have been moved.
-  def TransferDevServerPackage(self):
-    """DEPRECATED."""
-    self._transfer_obj.TransferUpdateUtilsPackage()
-
-  def TransferUpdateUtilsPackage(self):
-    """DEPRECATED. Use auto_updater_transfer.Transfer Class instead.
-
-    TODO (sanikak): Once this method is removed, remove corresponding tests in
-    chromite.lib.auto_updater_unittest.
-    """
-    self._transfer_obj.TransferUpdateUtilsPackage()
-
-  def TransferRootfsUpdate(self):
-    """Transfer files for rootfs update.
-
-    The corresponding payload are copied to the remote device for rootfs
-    update.
-
-    DEPRECATED. Use auto_updater_transfer.Transfer Class instead. Until the
-    TODOs below are addressed, new calls to
-    self._transfer_obj.TransferRootfsUpdate() must be preceded with a
-    conditional call to self._FixPayloadPropertiesFile().
-
-    TODO (sanikak): src.platform.dev.cros_updater.py calls
-    self.TransferRootfsUpdate() independently. Once the code flow in
-    cros_updater.py is cleaned up so that it calls self.RunUpdate(),
-    self.TransferRootfsUpdate() can be deprecated fully in favor of
-    self.auto_updater_transfer.TransferRootfsUpdate().
-
-    TODO (sanikak): Once this method is removed, remove corresponding tests in
-    chromite.lib.auto_updater_unittest.
-    """
-    # TODO(ahassani): This is not the ideal place to do this, but since any
-    # changes to this needs to be reflected in cros_update.py too, just do it
-    # for now here.
-    self._FixPayloadPropertiesFile()
-
-    self._transfer_obj.TransferRootfsUpdate()
-
-  def TransferStatefulUpdate(self):
-    """DEPRECATED. Use auto_updater_transfer.Transfer Class instead.
-
-    Transfer files for stateful update.
-
-    The stateful update bin and the corresponding payloads are copied to the
-    target remote device for stateful update.
-
-    TODO (sanikak): Once this method is removed, remove corresponding tests in
-    chromite.lib.auto_updater_unittest.
-    """
-    self._transfer_obj.TransferStatefulUpdate()
-
-  def PreSetupCrOSUpdate(self):
-    """Pre-setup for whole auto-update process for cros_host.
-
-    It includes:
-      1. Create a file to indicate if provision fails for cros_host.
-         The file will be removed by stateful update or full install.
-    """
-    logging.debug('Start pre-setup for the whole CrOS update process...')
-    if not self.is_au_endtoendtest:
-      self._RetryCommand(['touch', self.REMOTE_PROVISION_FAILED_FILE_PATH],
-                         **self._cmd_kwargs)
-
-    # Related to crbug.com/360944.
-    release_pattern = r'^.*-release/R[0-9]+-[0-9]+\.[0-9]+\.0$'
-    if not re.match(release_pattern, self.update_version):
-      logging.debug('The update version is not matched to release pattern')
-      return False
-
-    if not self.CheckVersion():
-      logging.debug('The update version is not matched to the current version')
-      return False
-
-    return True
-
   def PreSetupStatefulUpdate(self):
     """Pre-setup for stateful update for CrOS host."""
     logging.debug('Start pre-setup for stateful update...')
-    self._RetryCommand(['sudo', 'stop', 'ap-update-manager'],
-                       **self._cmd_kwargs_omit_error)
     if self._clobber_stateful:
       for folder in self.REMOTE_STATEFUL_PATH_TO_CHECK:
         touch_path = os.path.join(folder, self.REMOTE_STATEFUL_TEST_FILENAME)
         self._RetryCommand(['touch', touch_path], **self._cmd_kwargs)
-
-    self._ResetUpdateEngine()
 
   def PostCheckStatefulUpdate(self):
     """Post-check for stateful update for CrOS host."""
@@ -1009,14 +925,6 @@ class ChromiumOSUpdater(BaseUpdater):
         if self.device.IfFileExists(test_file_path,
                                     **self._cmd_kwargs_omit_error):
           raise StatefulUpdateError('failed to post-check stateful update.')
-
-  def PreSetupRootfsUpdate(self):
-    """Pre-setup for rootfs update for CrOS host."""
-    logging.debug('Start pre-setup for rootfs update...')
-    self._Reboot('pre-setup of rootfs update')
-    self._RetryCommand(['sudo', 'stop', 'ap-update-manager'],
-                       **self._cmd_kwargs_omit_error)
-    self._ResetUpdateEngine()
 
   def _IsUpdateUtilsPackageInstalled(self):
     """Check whether update-utils package is well installed.
@@ -1039,13 +947,6 @@ class ChromiumOSUpdater(BaseUpdater):
     except cros_build_lib.RunCommandError as e:
       logging.warning('Failed to verify whether packages still exist: %s', e)
       return False
-
-  # TODO(crbug.com/872441): cros_autoupdate in platform/dev-utils package still
-  # calls this function, but in fact it needs to call CheckNebrskaCanRun()
-  # instead. So delete this function once all the callers have been moved.
-  def CheckDevserverRun(self):
-    """DEPRECATED"""
-    self.CheckNebraskaCanRun()
 
   def CheckNebraskaCanRun(self):
     """Check if nebraska can successfully run for ChromiumOSUpdater."""
@@ -1092,18 +993,7 @@ class ChromiumOSUpdater(BaseUpdater):
       raise RootfsUpdateError('Update failed. The priority of the inactive '
                               'kernel partition is less than that of the '
                               'active kernel partition.')
-
     self.inactive_kernel = inactive_kernel
-    if not self.is_au_endtoendtest:
-      self.SetClearTpmOwnerRequest()
-
-    # If the source image during an AU test is old, the device will powerwash
-    # after applying rootfs. On older devices this is taking longer than the
-    # allowed time to reboot. So double reboot timeout for this step only.
-    timeout = self.REBOOT_TIMEOUT
-    if self.is_au_endtoendtest:
-      timeout = self.REBOOT_TIMEOUT * 2
-    self._Reboot('post check of rootfs update', timeout=timeout)
 
   def PostCheckCrOSUpdate(self):
     """Post check for the whole auto-update process."""
@@ -1144,8 +1034,7 @@ class ChromiumOSUpdater(BaseUpdater):
         raise
       break
 
-    # For autoupdate_EndToEndTest only, we have one extra step to verify.
-    if self.is_au_endtoendtest and not self._clobber_stateful:
+    if not self._clobber_stateful:
       self.PostRebootUpdateCheckForAUTest()
 
   def PostRebootUpdateCheckForAUTest(self):
@@ -1158,7 +1047,7 @@ class ChromiumOSUpdater(BaseUpdater):
                                 self.REMOTE_NEBRASKA_FILENAME)
     nebraska = nebraska_wrapper.RemoteNebraskaWrapper(
         self.device, nebraska_bin=nebraska_bin,
-        update_metadata_dir=self.device_payload_dir,
+        update_metadata_dir=self.device.work_dir,
         copy_mode=self._transfer_obj.mode)
 
     try:
