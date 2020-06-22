@@ -589,7 +589,7 @@ class LabTransfer(Transfer):
       # TODO(crbug.com/1059008): Fallback in case the try block above fails.
       # Should be removed once reliable.
       try:
-        proc = retry_util.RunCurl(cmd[1:])
+        proc = retry_util.RunCurl(cmd[1:], stdout=True)
       except cros_build_lib.RunCommandError as e:
         raise ChromiumOSTransferError('Unable to get payload size: %s' % e)
 
