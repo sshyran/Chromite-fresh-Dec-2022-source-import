@@ -15,6 +15,7 @@ limit=30
 field_limit=80
 verbose=0
 only_stdout=0
+case_insensitive=1
 string_data_array=()
 not_string_data_array=()
 
@@ -25,6 +26,7 @@ Usage:  $0 -c|--count <search_string>
            OR -s|--string <search_string>|-ns <search_string>
      [-w|-when] <when_string>
      [-l|--limit] <limit_string> [--field_limit <field_limit>]
+     [--case_sensitive)]
      [-v|--verbose] [--usage|-u|--help|-h]
 
      If -c is specified, count the occurrences of the search string.
@@ -47,6 +49,8 @@ Usage:  $0 -c|--count <search_string>
      field_limit   : Show <field_limit> characters of stdout starting with
                      <search_string> (default=80).
      only_stdout   : Show only stdout and date, not buildId, stepName, etc.
+     case_sensitive: Match (or for 'ns', don't match) case sensitive.
+                     Note that case-insensitive is the default.
      verbose       : Show dremel query before executing it.
 HELP_USAGE
   exit 0
@@ -82,6 +86,10 @@ while (( "$#" )); do
       only_stdout=1
       shift 1
       ;;
+    --case_sensitive)
+      case_insensitive=0
+      shift 1
+      ;;
     -v|--verbose)
       verbose=1
       shift
@@ -105,12 +113,23 @@ if [[ $string_data_arraylen -ne 0 ]] && [[ ! -z ${count_data} ]]; then
   print_usage
 fi
 
+source_data="stdout"
+if [[ ${case_insensitive} -eq 1 ]]; then
+  source_data="LOWER(stdout)"
+fi
+
 # If a count was requested, build and execute the query. This code path is
 # separate because it is much simpler than search queries.
 if [[ ! -z ${count_data} ]]; then
+  # Note that we use count(stdout) regardless of case-sensitivity. The WHERE
+  # part of the query will use ${source_data} to handle case-sensitivity.
   query="SELECT count(stdout) AS Count FROM
-  chromeos_ci_eng.analysis_event_log.${when}
-  WHERE stdout LIKE \"%${count_data}%\";"
+  chromeos_ci_eng.analysis_event_log.${when} WHERE ${source_data} LIKE "
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    query="${query} LOWER(\"%${count_data}%\");"
+  else
+    query="${query} \"%${count_data}%\";"
+  fi
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
     echo "Executing..."
@@ -133,7 +152,8 @@ do
 
   # Field_limit is always set (even w/o cmd line arg), so set select_field
   # based on array and field_limit.
-  select_field="SUBSTR(stdout, STRPOS(stdout, \"${string_data}\"),"
+  select_field="SUBSTR(${source_data}, STRPOS(${source_data},"
+  select_field="${select_field} \"${string_data}\"),"
   select_field="${select_field} ${field_limit}) AS Stdout$index,"
   select_fields="$select_fields $select_field"
 done
@@ -153,9 +173,14 @@ for (( index=0; index < $string_data_arraylen; index++ ))
 do
   string_data=${string_data_array[$index]}
   if [[ $index -eq 0 ]]; then
-    query="$query WHERE stdout LIKE \"%${string_data}%\""
+    query="$query WHERE ${source_data}"
   else
-    query="$query AND stdout LIKE \"%${string_data}%\""
+    query="$query AND ${source_data}"
+  fi
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    query="$query LIKE LOWER(\"%${string_data}%\")"
+  else
+    query="$query LIKE \"%${string_data}%\""
   fi
 done
 
@@ -163,9 +188,14 @@ for (( index=0; index < $not_string_data_arraylen; index++ ))
 do
   not_string_data=${not_string_data_array[$index]}
   if [[ $index -eq 0 && $string_data_arraylen -eq 0 ]]; then
-    query="$query WHERE stdout NOT LIKE \"%${not_string_data}%\""
+    query="$query WHERE ${source_data}"
   else
-    query="$query AND stdout NOT LIKE \"%${not_string_data}%\""
+    query="$query AND ${source_data}"
+  fi
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    query="${query} NOT LIKE LOWER(\"%${not_string_data}%\")"
+  else
+    query="${query} NOT LIKE \"%${not_string_data}%\""
   fi
 done
 
