@@ -22256,6 +22256,12 @@
                 [
                     "refs/heads/master"
                 ]
+            ],
+            [
+                "https://chrome-internal.googlesource.com/chromeos/infra/config",
+                [
+                    "refs/heads/master"
+                ]
             ]
         ],
         "vm_tests": []

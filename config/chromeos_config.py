@@ -2866,6 +2866,9 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       triggered_gitiles=[[
           'https://chromium.googlesource.com/chromiumos/chromite',
           ['refs/heads/master']
+      ], [
+          'https://chrome-internal.googlesource.com/chromeos/infra/config',
+          ['refs/heads/master']
       ]],
   )
 
