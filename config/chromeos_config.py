@@ -2867,10 +2867,12 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       schedule='triggered',
       triggered_gitiles=[[
           'https://chromium.googlesource.com/chromiumos/chromite',
-          ['refs/heads/master']
+          ['refs/heads/master'],
+          ['config/luci-scheduler.cfg']
       ], [
           'https://chrome-internal.googlesource.com/chromeos/infra/config',
-          ['refs/heads/master']
+          ['refs/heads/master'],
+          ['generated/luci-scheduler.cfg']
       ]],
   )
 

@@ -125,13 +125,15 @@ job {
   }
 
 
-def genSchedulerTrigger(trigger_name, repo, refs, builds):
+def genSchedulerTrigger(trigger_name, repo, refs, path_regexps, builds):
   """Generate the luci scheduler job for a given build config.
 
   Args:
     trigger_name: Name of the trigger as a string.
     repo: Gitiles URL git git repository.
     refs: Iterable of git refs to check. May use regular expressions.
+    path_regexps: Iterable of path regular expressions of files to trigger on
+        or falsy to trigger on everything.
     builds: Iterable of build config names to trigger.
 
   Returns:
@@ -144,16 +146,21 @@ trigger {
   schedule: "with 5m interval"
   gitiles: {
     repo: "%(repo)s"
-%(refs)s
+%(refs)s%(path_regexps)s
   }
 %(triggers)s
 }
 """
-
+  if path_regexps:
+    path_regexps = '\n' + '\n'.join('    path_regexps: "%s"' %
+                                    r for r in path_regexps)
+  else:
+    path_regexps = ''
   return template % {
       'trigger_name': trigger_name,
       'repo': repo,
       'refs': '\n'.join('    refs: "%s"' % r for r in refs),
+      'path_regexps': path_regexps,
       'triggers': '\n'.join('  triggers: "%s"' % b for b in builds),
   }
 
@@ -186,8 +193,13 @@ def genLuciSchedulerConfig(site_config, branch_config):
 
     # Populate trigger_collection.
     if config.triggered_gitiles:
-      for gitiles_url, ref_list in config.triggered_gitiles:
-        gitiles_key = (gitiles_url, tuple(ref_list))
+      for trigger in config.triggered_gitiles:
+        try:
+          gitiles_url, ref_list, path_regexps = trigger
+        except ValueError:
+          gitiles_url, ref_list = trigger
+          path_regexps = []
+        gitiles_key = (gitiles_url, tuple(ref_list), tuple(path_regexps))
         trigger_collection.setdefault(gitiles_key, set())
         trigger_collection[gitiles_key].add(buildJobName(config))
 
@@ -198,9 +210,9 @@ def genLuciSchedulerConfig(site_config, branch_config):
     builds = sorted(trigger_collection[gitiles_key])
 
     trigger_name = 'trigger_%s' % trigger_counter
-    gitiles_url, refs = gitiles_key
+    gitiles_url, refs, path_regexps = gitiles_key
     triggers.append(genSchedulerTrigger(
-        trigger_name, gitiles_url, refs, builds))
+        trigger_name, gitiles_url, refs, path_regexps, builds))
     trigger_counter += 1
 
   return ''.join([_CONFIG_HEADER] + triggers + jobs)

@@ -988,10 +988,15 @@ class CBuildBotTest(ChromeosConfigTestBase):
             config.name)
 
         try:
-          for gitiles_url, ref_list in config.triggered_gitiles:
+          for trigger in config.triggered_gitiles:
+            gitiles_url = trigger[0]
+            ref_list = trigger[1]
             self.assertIsInstance(gitiles_url, str)
             for ref in ref_list:
               self.assertIsInstance(ref, str)
+            if len(trigger) > 2:
+              for path_regexp in trigger[2]:
+                self.assertIsInstance(path_regexp, str)
         except (TypeError, ValueError):
           self.fail(('%s has a triggered_gitiles that is malformed: %r\n'
                      "Simple example: [['url', ['refs/heads/master']]]") %

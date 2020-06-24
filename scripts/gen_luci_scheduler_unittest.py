@@ -64,6 +64,7 @@ job {
     trigger_name = 'simple'
     repo = 'url://repo'
     refs = ['refs/path']
+    path_regexps = ['path/regexps']
     builds = ['test_build']
 
     expected = """
@@ -74,13 +75,14 @@ trigger {
   gitiles: {
     repo: "url://repo"
     refs: "refs/path"
+    path_regexps: "path/regexps"
   }
   triggers: "test_build"
 }
 """
 
     result = gen_luci_scheduler.genSchedulerTrigger(
-        trigger_name, repo, refs, builds)
+        trigger_name, repo, refs, path_regexps, builds)
 
     self.assertEqual(result, expected)
 
@@ -107,7 +109,7 @@ trigger {
 """
 
     result = gen_luci_scheduler.genSchedulerTrigger(
-        trigger_name, repo, refs, builds)
+        trigger_name, repo, refs, None, builds)
 
     self.assertEqual(result, expected)
 

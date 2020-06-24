@@ -22255,12 +22255,18 @@
                 "https://chromium.googlesource.com/chromiumos/chromite",
                 [
                     "refs/heads/master"
+                ],
+                [
+                    "config/luci-scheduler.cfg"
                 ]
             ],
             [
                 "https://chrome-internal.googlesource.com/chromeos/infra/config",
                 [
                     "refs/heads/master"
+                ],
+                [
+                    "generated/luci-scheduler.cfg"
                 ]
             ]
         ],
