@@ -39,8 +39,8 @@ class ChromeLKGMCommitter(object):
   # them, so we have to explicitly tell it to.
   _PRESUBMIT_BOTS = [
       'chromeos-betty-pi-arc-chrome',
-      'chromeos-eve-compile-chrome',
-      'chromeos-kevin-compile-chrome',
+      'chromeos-eve-chrome',
+      'chromeos-kevin-chrome',
   ]
   # Files needed in a local checkout to successfully update the LKGM. The OWNERS
   # file allows the --tbr-owners mechanism to select an appropriate OWNER to
