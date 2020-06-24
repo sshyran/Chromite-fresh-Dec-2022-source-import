@@ -787,6 +787,12 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       default=False,
       help='Delete the current SDK chroot if it exists.')
   group.add_argument(
+      '--force',
+      action='store_true',
+      default=False,
+      help='Force unmount/delete of the current SDK chroot even if '
+      'obtaining the write lock fails.')
+  group.add_argument(
       '--unmount',
       action='store_true',
       default=False,
@@ -971,8 +977,16 @@ def main(argv):
   chroot_deleted = False
   if options.delete:
     with cgroups.SimpleContainChildren('cros_sdk'):
-      with locking.FileLock(lock_path, 'chroot lock') as lock:
-        lock.write_lock()
+      # Set a timeout of 300 seconds when getting the lock.
+      with locking.FileLock(lock_path, 'chroot lock',
+                            blocking_timeout=300) as lock:
+        try:
+          lock.write_lock()
+        except timeout_util.TimeoutError as e:
+          logging.error('Acquiring write_lock on %s failed: %s', lock_path, e)
+          if not options.force:
+            logging.error('Exiting; use --force to continue w/o lock.')
+            raise e
         if missing_image_tools:
           logging.notice('Unmounting chroot.')
           osutils.UmountTree(options.chroot)
