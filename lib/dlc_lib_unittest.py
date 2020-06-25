@@ -22,16 +22,12 @@ from chromite.scripts import cros_set_lsb_release
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
-_FS_TYPE_SQUASHFS = 'squashfs'
-_FS_TYPE_EXT4 = 'ext4'
 _PRE_ALLOCATED_BLOCKS = 100
 _VERSION = '1.0'
 _ID = 'id'
 _PACKAGE = 'package'
 _NAME = 'name'
 _DESCRIPTION = 'description'
-_META_DIR = 'opt/google/dlc/'
-_IMAGE_DIR = 'build/rootfs/dlc/'
 _BOARD = 'test_board'
 _FULLNAME_REV = None
 _BLOCK_SIZE = 4096
@@ -69,6 +65,20 @@ class UtilsTest(cros_test_lib.TempDirTestCase):
 class EbuildParamsTest(cros_test_lib.TempDirTestCase):
   """Tests EbuildParams functions."""
 
+  def GetVaryingEbuildParams(self):
+    return {
+        'dlc_id': f'{_ID}_new',
+        'dlc_package': f'{_PACKAGE}_new',
+        'fs_type': dlc_lib.EXT4_TYPE,
+        'name': f'{_NAME}_new',
+        'description': f'{_DESCRIPTION}_new',
+        'pre_allocated_blocks': _PRE_ALLOCATED_BLOCKS * 2,
+        'version': f'{_VERSION}_new',
+        'preload': True,
+        'used_by': dlc_lib.USED_BY_USER,
+        'mount_file_required': True,
+    }
+
   def testGetParamsPath(self):
     """Tests EbuildParams.GetParamsPath"""
     install_root_dir = os.path.join(self.tempdir, 'install_root_dir')
@@ -82,7 +92,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   ebuild_params,
                   dlc_id=_ID,
                   dlc_package=_PACKAGE,
-                  fs_type=_FS_TYPE_SQUASHFS,
+                  fs_type=dlc_lib.SQUASHFS_TYPE,
                   name=_NAME,
                   description=_DESCRIPTION,
                   pre_allocated_blocks=_PRE_ALLOCATED_BLOCKS,
@@ -109,7 +119,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      install_root_dir,
                      dlc_id=_ID,
                      dlc_package=_PACKAGE,
-                     fs_type=_FS_TYPE_SQUASHFS,
+                     fs_type=dlc_lib.SQUASHFS_TYPE,
                      name=_NAME,
                      description=_DESCRIPTION,
                      pre_allocated_blocks=_PRE_ALLOCATED_BLOCKS,
@@ -145,6 +155,19 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
     with open(ebuild_params_path, 'rb') as f:
       self.CheckParams(json.load(f))
 
+  def testStoreVaryingDlcParameters(self):
+    """Tests EbuildParams.StoreDlcParameters with non default values"""
+    sysroot = os.path.join(self.tempdir, 'build_root')
+    params = self.GetVaryingEbuildParams()
+    self.GenerateParams(sysroot, **params)
+    ebuild_params_path = os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR,
+                                      params['dlc_id'], params['dlc_package'],
+                                      dlc_lib.EBUILD_PARAMETERS)
+    self.assertExists(ebuild_params_path)
+
+    with open(ebuild_params_path, 'rb') as f:
+      self.CheckParams(json.load(f), **params)
+
   def testLoadDlcParameters(self):
     """Tests EbuildParams.LoadDlcParameters"""
     sysroot = os.path.join(self.tempdir, 'build_root')
@@ -153,6 +176,15 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         sysroot, _ID, _PACKAGE)
     self.CheckParams(ebuild_params_class.__dict__)
 
+  def testLoadVaryingDlcParameters(self):
+    """Tests EbuildParams.LoadDlcParameters"""
+    sysroot = os.path.join(self.tempdir, 'build_root')
+    params = self.GetVaryingEbuildParams()
+    self.GenerateParams(sysroot, **params)
+    ebuild_params_class = dlc_lib.EbuildParams.LoadEbuildParams(
+        sysroot, params['dlc_id'], params['dlc_package'])
+    self.CheckParams(ebuild_params_class.__dict__, **params)
+
 
 class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
   """Tests DlcGenerator."""
@@ -160,7 +192,7 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
   def setUp(self):
     self.ExpectRootOwnedFiles()
 
-  def GetDlcGenerator(self, fs_type=_FS_TYPE_SQUASHFS):
+  def GetDlcGenerator(self, fs_type=dlc_lib.SQUASHFS_TYPE):
     """Factory method for a DcGenerator object"""
     src_dir = os.path.join(self.tempdir, 'src')
     osutils.SafeMakedirs(src_dir)
@@ -204,7 +236,7 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
     mount_mock = self.PatchObject(osutils, 'MountDir')
     umount_mock = self.PatchObject(osutils, 'UmountDir')
 
-    self.GetDlcGenerator(fs_type=_FS_TYPE_EXT4).CreateExt4Image()
+    self.GetDlcGenerator(fs_type=dlc_lib.EXT4_TYPE).CreateExt4Image()
     self.assertCommandContains(
         ['/sbin/mkfs.ext4', '-b', '4096', '-O', '^has_journal'])
     self.assertCommandContains(['/sbin/e2fsck', '-y', '-f'])
@@ -267,7 +299,7 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
         '01234567', 'deadbeef', blocks)
     self.assertEqual(
         content, {
-            'fs-type': _FS_TYPE_SQUASHFS,
+            'fs-type': dlc_lib.SQUASHFS_TYPE,
             'pre-allocated-size': str(_PRE_ALLOCATED_BLOCKS * _BLOCK_SIZE),
             'id': _ID,
             'package': _PACKAGE,
@@ -322,10 +354,12 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     """Tests InstallDlcImages to make sure all DLCs are copied correctly"""
     sysroot = os.path.join(self.tempdir, 'sysroot')
     osutils.WriteFile(
-        os.path.join(sysroot, _IMAGE_DIR, _ID, 'pkg', dlc_lib.DLC_IMAGE),
+        os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID, 'pkg',
+                     dlc_lib.DLC_IMAGE),
         'content',
         makedirs=True)
-    osutils.SafeMakedirs(os.path.join(sysroot, _IMAGE_DIR, _ID, 'pkg'))
+    osutils.SafeMakedirs(os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID,
+                                      'pkg'))
     output = os.path.join(self.tempdir, 'output')
     dlc_lib.InstallDlcImages(board=_BOARD, sysroot=sysroot,
                              install_root_dir=output)
@@ -345,8 +379,8 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     sysroot = os.path.join(self.tempdir, 'sysroot')
     for package_num in range(package_nums):
       osutils.WriteFile(
-          os.path.join(sysroot, _IMAGE_DIR, _ID, _PACKAGE + str(package_num),
-                       dlc_lib.DLC_IMAGE),
+          os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID,
+                       _PACKAGE + str(package_num), dlc_lib.DLC_IMAGE),
           'image content',
           makedirs=True)
       osutils.WriteFile(
@@ -370,8 +404,8 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     sysroot = os.path.join(self.tempdir, 'sysroot')
     for package_num in range(package_nums):
       osutils.WriteFile(
-          os.path.join(sysroot, _IMAGE_DIR, _ID, _PACKAGE + str(package_num),
-                       dlc_lib.DLC_IMAGE),
+          os.path.join(sysroot, dlc_lib.DLC_BUILD_DIR, _ID,
+                       _PACKAGE + str(package_num), dlc_lib.DLC_IMAGE),
           'image content',
           makedirs=True)
       osutils.WriteFile(
