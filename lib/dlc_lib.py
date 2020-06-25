@@ -95,12 +95,14 @@ class EbuildParams(object):
     name: (str) DLC name.
     description: (str) DLC description.
     preload: (bool) allow for preloading DLC.
+    mount_file_required: (bool) allow for mount file generation for DLC.
     used_by: (str) The user of this DLC, e.g. "system" or "user"
     fullnamerev: (str) The full package & version name.
   """
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
-               version, name, description, preload, used_by, fullnamerev):
+               version, name, description, preload, used_by,
+               mount_file_required, fullnamerev):
     self.dlc_id = dlc_id
     self.dlc_package = dlc_package
     self.fs_type = fs_type
@@ -110,6 +112,7 @@ class EbuildParams(object):
     self.description = description
     self.preload = preload
     self.used_by = used_by
+    self.mount_file_required = mount_file_required
     self.fullnamerev = fullnamerev
 
   def StoreDlcParameters(self, install_root_dir, sudo):
@@ -432,6 +435,7 @@ class DlcGenerator(object):
         'version': self.ebuild_params.version,
         'preload-allowed': self.ebuild_params.preload,
         'used-by': self.ebuild_params.used_by,
+        'mount-file-required': self.ebuild_params.mount_file_required,
     }
 
   def GenerateVerity(self):

@@ -94,6 +94,11 @@ def GetParser():
       'dlcservice does ref counting when DLC is installed/uninstalled. For '
       '"system", there will be no such provisions.')
   one_dlc.add_argument(
+      '--mount-file-required',
+      default=False,
+      action='store_true',
+      help='Allow indirect mount file generation for DLC.')
+  one_dlc.add_argument(
       '--build-package',
       default=False,
       action='store_true',
@@ -160,6 +165,7 @@ def main(argv):
         pre_allocated_blocks=opts.pre_allocated_blocks,
         version=opts.version,
         preload=opts.preload,
+        mount_file_required=opts.mount_file_required,
         used_by=opts.used_by,
         fullnamerev=opts.fullnamerev)
     params.StoreDlcParameters(install_root_dir=opts.install_root_dir, sudo=True)

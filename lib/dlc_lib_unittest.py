@@ -89,6 +89,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   version=_VERSION,
                   preload=False,
                   used_by=dlc_lib.USED_BY_SYSTEM,
+                  mount_file_required=False,
                   fullnamerev=_FULLNAME_REV):
     """Tests EbuildParams JSON values"""
     self.assertDictEqual(ebuild_params,
@@ -101,6 +102,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                           'description': description,
                           'preload': preload,
                           'used_by': used_by,
+                          'mount_file_required': mount_file_required,
                           'fullnamerev': fullnamerev})
 
   def GenerateParams(self,
@@ -114,6 +116,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      version=_VERSION,
                      preload=False,
                      used_by=dlc_lib.USED_BY_SYSTEM,
+                     mount_file_required=False,
                      fullnamerev=_FULLNAME_REV):
     """Creates and Stores DLC params at install_root_dir"""
     params = dlc_lib.EbuildParams(
@@ -126,6 +129,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         version=version,
         preload=preload,
         used_by=used_by,
+        mount_file_required=mount_file_required,
         fullnamerev=fullnamerev)
     return params.StoreDlcParameters(
         install_root_dir=install_root_dir, sudo=False)
@@ -179,6 +183,7 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
         version=_VERSION,
         preload=False,
         used_by=dlc_lib.USED_BY_SYSTEM,
+        mount_file_required=False,
         fullnamerev=_FULLNAME_REV)
     return dlc_lib.DlcGenerator(
         ebuild_params=params,
@@ -275,6 +280,7 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
             'version': _VERSION,
             'is-removable': True,
             'manifest-version': 1,
+            'mount-file-required': False,
             'preload-allowed': False,
             'used-by': dlc_lib.USED_BY_SYSTEM,
         })
