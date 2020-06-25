@@ -322,8 +322,7 @@ class VM(device.Device):
   def _GetBuiltVMImagePath(self):
     """Get path of a locally built VM image."""
     vm_image_path = os.path.join(
-        constants.SOURCE_ROOT, 'src/build/images',
-        cros_build_lib.GetBoard(self.board, strict=True),
+        constants.SOURCE_ROOT, 'src/build/images', self.board,
         'latest', constants.VM_IMAGE_BIN)
     return vm_image_path if os.path.isfile(vm_image_path) else None
 
@@ -352,6 +351,13 @@ class VM(device.Device):
       else:
         raise VMError('VM image does not exist: %s' % self.image_path)
     logging.debug('VM image path: %s', self.image_path)
+
+  def _SetDefaultBoard(self):
+    """Sets a default board if none is specified."""
+    if self.board:
+      return
+    sdk_board_env = os.environ.get(cros_chrome_sdk.SDKFetcher.SDK_BOARD_ENV)
+    self.board = cros_build_lib.GetBoard(sdk_board_env, strict=True)
 
   def _WaitForSSHPort(self, sleep=5):
     """Wait for SSH port to become available."""
@@ -461,6 +467,7 @@ class VM(device.Device):
     """
     if not self.enable_kvm:
       logging.warning('KVM is not supported; Chrome VM will be slow')
+    self._SetDefaultBoard()
     self._SetQemuPath()
     self._SetVMImagePath()
     logging.info('Pid file: %s', self.pidfile)
