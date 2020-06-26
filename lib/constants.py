@@ -276,7 +276,7 @@ ANDROID_CONTAINER_PACKAGE_KEYWORD = 'android-container'
 ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
-ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
+ANDROID_PI_BUILD_BRANCH = 'git_pi-arc-m85'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc-dev'
 ANDROID_VMPI_BUILD_BRANCH = 'git_pi-arcvm-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
