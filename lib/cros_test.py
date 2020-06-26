@@ -173,10 +173,15 @@ class CrOSTest(object):
     device_name = 'ssh://' + self._device.device
     if self._device.ssh_port:
       device_name += ':' + str(self._device.ssh_port)
-    cros_build_lib.run(
-        [os.path.join(constants.CHROMITE_BIN_DIR, 'cros'), 'flash',
-         device_name, xbuddy_path, '--board', self._device.board],
-        dryrun=self.dryrun)
+    flash_cmd = [
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
+        'flash',
+        device_name,
+        xbuddy_path,
+        '--board', self._device.board,
+        '--disable-rootfs-verification',
+    ]
+    cros_build_lib.run(flash_cmd, dryrun=self.dryrun)
 
   def _Deploy(self):
     """Deploy binary files to device."""
