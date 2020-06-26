@@ -4342,6 +4342,14 @@
         },
         {
           "board_name": "puff",
+          "name": "faffy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 411,
+          "is_active": true
+        },
+        {
+          "board_name": "puff",
           "name": "kaisa",
           "test_suites": [
             "sanity",
