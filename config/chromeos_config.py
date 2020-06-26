@@ -709,7 +709,7 @@ def GeneralTemplates(site_config):
           config_lib.TastVMTestConfig(
               'tast_vm_canary_informational',
               ['("group:mainline" && informational)'],
-              timeout=2 * 60 * 60),
+              timeout=3 * 60 * 60),
       ],
   )
 
