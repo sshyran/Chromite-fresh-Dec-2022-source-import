@@ -3116,6 +3116,16 @@ def BranchScheduleConfig():
   # (<branch>, [<android PFQs>], <chrome PFQ>, [<orderfiles>], [<Chrome AFDOs>])
 
   RELEASES = [
+      ('release-R85-13310.B',
+       ['grunt-android-pi-pre-flight-branch'],
+       'chell-chrome-no-afdo-uprev-pre-flight-branch',
+       ['orderfile-generate-toolchain',
+        'orderfile-verify-toolchain'],
+       ['benchmark-afdo-generate',
+        'chrome-silvermont-release-afdo-verify',
+        'chrome-airmont-release-afdo-verify',
+        'chrome-broadwell-release-afdo-verify']),
+
       ('release-R84-13099.B',
        ['grunt-android-pi-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
@@ -3127,16 +3137,6 @@ def BranchScheduleConfig():
         'chrome-broadwell-release-afdo-verify']),
 
       ('release-R83-13020.B',
-       ['grunt-android-pi-pre-flight-branch'],
-       'chell-chrome-no-afdo-uprev-pre-flight-branch',
-       ['orderfile-generate-toolchain',
-        'orderfile-verify-toolchain'],
-       ['benchmark-afdo-generate',
-        'chrome-silvermont-release-afdo-verify',
-        'chrome-airmont-release-afdo-verify',
-        'chrome-broadwell-release-afdo-verify']),
-
-      ('release-R81-12871.B',
        ['grunt-android-pi-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
        ['orderfile-generate-toolchain',
