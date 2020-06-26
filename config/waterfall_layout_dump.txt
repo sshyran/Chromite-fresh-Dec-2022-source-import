@@ -342,7 +342,6 @@
     nocturne-release
     novato-arc64-release
     novato-release
-    nyan_kitty-release
     octavius-release
     octopus-release
     orchestra-release
@@ -367,7 +366,6 @@
     setzer-release
     snappy-release
     soraka-release
-    sumo-release
     swanky-release
     terra-release
     tidus-release
@@ -1505,7 +1503,6 @@
     nocturne-release-tryjob
     novato-arc64-release-tryjob
     novato-release-tryjob
-    nyan_kitty-release-tryjob
     octavius-release-tryjob
     octopus-release-tryjob
     orchestra-release-tryjob
@@ -1530,7 +1527,6 @@
     setzer-release-tryjob
     snappy-release-tryjob
     soraka-release-tryjob
-    sumo-release-tryjob
     swanky-release-tryjob
     terra-release-tryjob
     tidus-release-tryjob
@@ -1642,12 +1638,6 @@
   nyan_blaze-release-tryjob
   nyan_blaze-unittest-stress
   nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob
-  nyan_kitty-full-tryjob
-  nyan_kitty-llvm-next-toolchain-tryjob
-  nyan_kitty-llvm-toolchain-tryjob
-  nyan_kitty-payloads-tryjob
-  nyan_kitty-release-tryjob
-  nyan_kitty-unittest-stress
   oak-full-tryjob
   oak-llvm-next-toolchain-tryjob
   oak-llvm-toolchain-tryjob
@@ -1840,12 +1830,6 @@
   soraka-unittest-stress
   success-build
   sumo-factory-rambi-6420.B-factorybranch-tryjob
-  sumo-full-tryjob
-  sumo-llvm-next-toolchain-tryjob
-  sumo-llvm-toolchain-tryjob
-  sumo-payloads-tryjob
-  sumo-release-tryjob
-  sumo-unittest-stress
   swanky-factory-rambi-5517.B-factorybranch-tryjob
   swanky-full-tryjob
   swanky-llvm-next-toolchain-tryjob
