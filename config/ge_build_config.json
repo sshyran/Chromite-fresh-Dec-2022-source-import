@@ -470,55 +470,7 @@
       ]
     },
     {
-      "name": "eve-arc-r",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "eve-arcvm-mesa-virgl-next",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "eve-arm64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "eve-kvm",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "eve-userdebug",
       "configs": [
         {
           "builder": "RELEASE",
@@ -1697,6 +1649,40 @@
       ]
     },
     {
+      "name": "eve-arc-r",
+      "reference_board_name": "eve-arc-r",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-arc-r",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 433,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "eve-arm64",
+      "reference_board_name": "eve-arm64",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-arm64",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 378,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "eve-kernelnext",
       "reference_board_name": "eve-kernelnext",
       "arch": "X86_INTERNAL",
@@ -1709,6 +1695,40 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 446,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "eve-kvm",
+      "reference_board_name": "eve-kvm",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-kvm",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 329,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "eve-userdebug",
+      "reference_board_name": "eve-userdebug",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-userdebug",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 328,
           "is_active": true
         }
       ]
