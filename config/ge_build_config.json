@@ -470,18 +470,6 @@
       ]
     },
     {
-      "name": "eve",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "eve-arc-r",
       "configs": [
         {
@@ -1699,6 +1687,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 428,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "eve",
+      "reference_board_name": "eve",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "eve",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 294,
           "is_active": true
         }
       ]
