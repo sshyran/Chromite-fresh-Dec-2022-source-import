@@ -1886,6 +1886,9 @@
         "boards": [
             "atlas"
         ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -1893,6 +1896,9 @@
         "_template": "release_basic",
         "boards": [
             "atlas"
+        ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
         ]
     },
     "atlas-release-basic-tryjob": {
@@ -1904,6 +1910,9 @@
         "display_label": "tryjob",
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+        ],
         "notification_configs": []
     },
     "atlas-release-tryjob": {
@@ -1924,6 +1933,9 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
