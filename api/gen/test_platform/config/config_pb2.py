@@ -12,6 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from chromite.api.gen.test_platform.migration.test_runner import config_pb2 as test__platform_dot_migration_dot_test__runner_dot_config__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.config',
   syntax='proto3',
   serialized_options=_b('Z>go.chromium.org/chromiumos/infra/proto/go/test_platform/config'),
-  serialized_pb=_b('\n!test_platform/config/config.proto\x12\x14test_platform.config\"\xa4\x06\n\x06\x43onfig\x12>\n\x0fskylab_swarming\x18\x01 \x01(\x0b\x32%.test_platform.config.Config.Swarming\x12<\n\x0eskylab_isolate\x18\x03 \x01(\x0b\x32$.test_platform.config.Config.Isolate\x12@\n\rskylab_worker\x18\x04 \x01(\x0b\x32).test_platform.config.Config.SkylabWorker\x12;\n\nversioning\x18\x07 \x01(\x0b\x32\'.test_platform.config.Config.Versioning\x12<\n\x0btest_runner\x18\x08 \x01(\x0b\x32\'.test_platform.config.Config.TestRunner\x1a\x32\n\x08Swarming\x12\x0e\n\x06server\x18\x01 \x01(\t\x12\x16\n\x0e\x61uth_json_path\x18\x02 \x01(\t\x1a!\n\x07Isolate\x12\x16\n\x0e\x61uth_json_path\x18\x01 \x01(\t\x1a:\n\x0cSkylabWorker\x12\x14\n\x0cluci_project\x18\x01 \x01(\t\x12\x14\n\x0clog_dog_host\x18\x02 \x01(\t\x1a\x9d\x01\n\nVersioning\x12\x61\n\x19\x63ros_test_platform_binary\x18\x01 \x01(\x0b\x32>.test_platform.config.Config.Versioning.CrosTestPlatformBinary\x1a,\n\x16\x43rosTestPlatformBinary\x12\x12\n\ncipd_label\x18\x01 \x01(\t\x1aM\n\x0b\x42uildbucket\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\x0e\n\x06\x62ucket\x18\x03 \x01(\t\x12\x0f\n\x07\x62uilder\x18\x04 \x01(\t\x1aK\n\nTestRunner\x12=\n\x0b\x62uildbucket\x18\x01 \x01(\x0b\x32(.test_platform.config.Config.BuildbucketJ\x04\x08\x02\x10\x03J\x04\x08\x05\x10\x06J\x04\x08\x06\x10\x07\x42@Z>go.chromium.org/chromiumos/infra/proto/go/test_platform/configb\x06proto3')
-)
+  serialized_pb=_b('\n!test_platform/config/config.proto\x12\x14test_platform.config\x1a\x30test_platform/migration/test_runner/config.proto\"\xf0\x06\n\x06\x43onfig\x12>\n\x0fskylab_swarming\x18\x01 \x01(\x0b\x32%.test_platform.config.Config.Swarming\x12<\n\x0eskylab_isolate\x18\x03 \x01(\x0b\x32$.test_platform.config.Config.Isolate\x12@\n\rskylab_worker\x18\x04 \x01(\x0b\x32).test_platform.config.Config.SkylabWorker\x12;\n\nversioning\x18\x07 \x01(\x0b\x32\'.test_platform.config.Config.Versioning\x12<\n\x0btest_runner\x18\x08 \x01(\x0b\x32\'.test_platform.config.Config.TestRunner\x12J\n\x15test_runner_migration\x18\t \x01(\x0b\x32+.test_platform.migration.test_runner.Config\x1a\x32\n\x08Swarming\x12\x0e\n\x06server\x18\x01 \x01(\t\x12\x16\n\x0e\x61uth_json_path\x18\x02 \x01(\t\x1a!\n\x07Isolate\x12\x16\n\x0e\x61uth_json_path\x18\x01 \x01(\t\x1a:\n\x0cSkylabWorker\x12\x14\n\x0cluci_project\x18\x01 \x01(\t\x12\x14\n\x0clog_dog_host\x18\x02 \x01(\t\x1a\x9d\x01\n\nVersioning\x12\x61\n\x19\x63ros_test_platform_binary\x18\x01 \x01(\x0b\x32>.test_platform.config.Config.Versioning.CrosTestPlatformBinary\x1a,\n\x16\x43rosTestPlatformBinary\x12\x12\n\ncipd_label\x18\x01 \x01(\t\x1aM\n\x0b\x42uildbucket\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\x0e\n\x06\x62ucket\x18\x03 \x01(\t\x12\x0f\n\x07\x62uilder\x18\x04 \x01(\t\x1aK\n\nTestRunner\x12=\n\x0b\x62uildbucket\x18\x01 \x01(\x0b\x32(.test_platform.config.Config.BuildbucketJ\x04\x08\x02\x10\x03J\x04\x08\x05\x10\x06J\x04\x08\x06\x10\x07\x42@Z>go.chromium.org/chromiumos/infra/proto/go/test_platform/configb\x06proto3')
+  ,
+  dependencies=[test__platform_dot_migration_dot_test__runner_dot_config__pb2.DESCRIPTOR,])
 
 
 
@@ -58,8 +60,8 @@ _CONFIG_SWARMING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=385,
-  serialized_end=435,
+  serialized_start=511,
+  serialized_end=561,
 )
 
 _CONFIG_ISOLATE = _descriptor.Descriptor(
@@ -88,8 +90,8 @@ _CONFIG_ISOLATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=437,
-  serialized_end=470,
+  serialized_start=563,
+  serialized_end=596,
 )
 
 _CONFIG_SKYLABWORKER = _descriptor.Descriptor(
@@ -125,8 +127,8 @@ _CONFIG_SKYLABWORKER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=472,
-  serialized_end=530,
+  serialized_start=598,
+  serialized_end=656,
 )
 
 _CONFIG_VERSIONING_CROSTESTPLATFORMBINARY = _descriptor.Descriptor(
@@ -155,8 +157,8 @@ _CONFIG_VERSIONING_CROSTESTPLATFORMBINARY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=646,
-  serialized_end=690,
+  serialized_start=772,
+  serialized_end=816,
 )
 
 _CONFIG_VERSIONING = _descriptor.Descriptor(
@@ -185,8 +187,8 @@ _CONFIG_VERSIONING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=533,
-  serialized_end=690,
+  serialized_start=659,
+  serialized_end=816,
 )
 
 _CONFIG_BUILDBUCKET = _descriptor.Descriptor(
@@ -236,8 +238,8 @@ _CONFIG_BUILDBUCKET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=692,
-  serialized_end=769,
+  serialized_start=818,
+  serialized_end=895,
 )
 
 _CONFIG_TESTRUNNER = _descriptor.Descriptor(
@@ -266,8 +268,8 @@ _CONFIG_TESTRUNNER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=771,
-  serialized_end=846,
+  serialized_start=897,
+  serialized_end=972,
 )
 
 _CONFIG = _descriptor.Descriptor(
@@ -312,6 +314,13 @@ _CONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='test_runner_migration', full_name='test_platform.config.Config.test_runner_migration', index=5,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -324,8 +333,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=60,
-  serialized_end=864,
+  serialized_start=110,
+  serialized_end=990,
 )
 
 _CONFIG_SWARMING.containing_type = _CONFIG
@@ -342,6 +351,7 @@ _CONFIG.fields_by_name['skylab_isolate'].message_type = _CONFIG_ISOLATE
 _CONFIG.fields_by_name['skylab_worker'].message_type = _CONFIG_SKYLABWORKER
 _CONFIG.fields_by_name['versioning'].message_type = _CONFIG_VERSIONING
 _CONFIG.fields_by_name['test_runner'].message_type = _CONFIG_TESTRUNNER
+_CONFIG.fields_by_name['test_runner_migration'].message_type = test__platform_dot_migration_dot_test__runner_dot_config__pb2._CONFIG
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
