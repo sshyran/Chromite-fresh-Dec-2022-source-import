@@ -352,8 +352,15 @@ class VM(device.Device):
         raise VMError('VM image does not exist: %s' % self.image_path)
     logging.debug('VM image path: %s', self.image_path)
 
-  def _SetDefaultBoard(self):
-    """Sets a default board if none is specified."""
+  def _SetBoard(self):
+    """Sets the board.
+
+    Picks the first non-None board from the user-specified board,
+    SDK environment variable, cros default board.
+
+    Raises:
+      DieSystemExit: If a board cannot be found.
+    """
     if self.board:
       return
     sdk_board_env = os.environ.get(cros_chrome_sdk.SDKFetcher.SDK_BOARD_ENV)
@@ -467,7 +474,7 @@ class VM(device.Device):
     """
     if not self.enable_kvm:
       logging.warning('KVM is not supported; Chrome VM will be slow')
-    self._SetDefaultBoard()
+    self._SetBoard()
     self._SetQemuPath()
     self._SetVMImagePath()
     logging.info('Pid file: %s', self.pidfile)
