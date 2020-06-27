@@ -38,42 +38,6 @@
       ]
     },
     {
-      "name": "atlas",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "atlas-arm64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "atlas-blueznext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "auron_paine",
       "configs": [
         {
@@ -1232,6 +1196,57 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 435,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "atlas",
+      "reference_board_name": "atlas",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "atlas",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 356,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "atlas-arm64",
+      "reference_board_name": "atlas-arm64",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "atlas-arm64",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 447,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "atlas-blueznext",
+      "reference_board_name": "atlas-blueznext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "atlas-blueznext",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 439,
           "is_active": true
         }
       ]
