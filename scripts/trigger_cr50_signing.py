@@ -20,6 +20,7 @@ from chromite.api.gen.chromiumos import sign_image_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import gs
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -168,6 +169,12 @@ def main(argv):
       'keyset': options.keyset,
       'signer_type': _signer_types[options.signer_type],
   }
+
+  gcs = gs.GSContext()
+  if not gcs.Exists(options.archive):
+    logging.error('The archive %s was not found on google storage.',
+                  options.archive)
+    return 1
 
   if options.target != 'node_locked':
     LaunchOne(options.dry_run, builder, properties)

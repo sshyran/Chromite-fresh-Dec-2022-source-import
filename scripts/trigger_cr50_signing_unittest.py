@@ -17,13 +17,14 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
-
+@mock.patch.object(gs.GSContext, 'Exists', lambda x, y: True)
 class TestLaunchOne(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for the LaunchOne function."""
 
@@ -49,6 +50,7 @@ class TestLaunchOne(cros_test_lib.RunCommandTempDirTestCase):
         self.rc.call_args_list)
 
 
+@mock.patch.object(gs.GSContext, 'Exists', lambda x, y: True)
 class TestMain(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for the main function."""
 
