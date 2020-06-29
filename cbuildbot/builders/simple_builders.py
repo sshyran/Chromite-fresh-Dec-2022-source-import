@@ -533,7 +533,7 @@ class DistributedBuilder(SimpleBuilder):
         self._RunStage(report_stages.SlaveFailureSummaryStage)
 
       if config_lib.IsCanaryMaster(self._run):
-        if build_finished:
+        if build_finished and not self._run.config.basic_builder:
           self._RunStage(completion_stages.UpdateChromeosLKGMStage)
         else:
           logging.info(
