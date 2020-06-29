@@ -109,6 +109,7 @@ class CommandVMTest(object):
     vm_path = vm.CreateVMImage(image=self.image_path, board=self.board,
                                updatable=True)
     vm_cmd = ['./cros_vm', '--ssh-port=%d' % self.port, '--copy-on-write',
+              '--board=%s' % self.board,
               '--image-path=%s' % vm_path, '--start']
     cros_build_lib.run(vm_cmd, cwd=constants.CHROMITE_BIN_DIR)
 
