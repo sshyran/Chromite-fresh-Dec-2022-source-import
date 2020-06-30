@@ -61,43 +61,49 @@ class AutotestTarballBuilder(object):
     """Tar up the autotest control files.
 
     Returns:
-      str - Path of the partial autotest control files tarball.
+      str|None - Path of the partial autotest control files tarball if created.
     """
     # Find the control files in autotest/.
     input_list = matching.FindFilesMatching(
         'control*', target='autotest', cwd=self.archive_basedir,
         exclude_dirs=['autotest/test_suites'])
     tarball = os.path.join(self.output_directory, self._CONTROL_FILES_ARCHIVE)
-    self._BuildTarball(input_list, tarball, compressed=False)
-    return tarball
+    if self._BuildTarball(input_list, tarball, compressed=False):
+      return tarball
+    else:
+      return None
 
   def BuildAutotestPackagesTarball(self):
     """Tar up the autotest packages.
 
     Returns:
-      str - Path of the partial autotest packages tarball.
+      str|None - Path of the partial autotest packages tarball if created.
     """
     input_list = ['autotest/packages']
     tarball = os.path.join(self.output_directory, self._PACKAGES_ARCHIVE)
-    self._BuildTarball(input_list, tarball, compressed=False)
-    return tarball
+    if self._BuildTarball(input_list, tarball, compressed=False):
+      return tarball
+    else:
+      return None
 
   def BuildAutotestTestSuitesTarball(self):
     """Tar up the autotest test suite control files.
 
     Returns:
-      str - Path of the autotest test suites tarball.
+      str|None - Path of the autotest test suites tarball if created.
     """
     input_list = ['autotest/test_suites']
     tarball = os.path.join(self.output_directory, self._TEST_SUITES_ARCHIVE)
-    self._BuildTarball(input_list, tarball)
-    return tarball
+    if self._BuildTarball(input_list, tarball):
+      return tarball
+    else:
+      return None
 
   def BuildAutotestServerPackageTarball(self):
     """Tar up the autotest files required by the server package.
 
     Returns:
-      str - The path of the autotest server package tarball.
+      str|None - The path of the autotest server package tarball if created.
     """
     # Find all files in autotest excluding certain directories.
     tast_files, transforms = self._GetTastServerFilesAndTarTransforms()
@@ -107,9 +113,11 @@ class AutotestTarballBuilder(object):
                       'autotest/client/tests', 'autotest/client/site_tests'))
 
     tarball = os.path.join(self.output_directory, self._SERVER_PACKAGE_ARCHIVE)
-    self._BuildTarball(autotest_files + tast_files, tarball,
-                       extra_args=transforms, check=False)
-    return tarball
+    if self._BuildTarball(autotest_files + tast_files, tarball,
+                          extra_args=transforms, check=False):
+      return tarball
+    else:
+      return None
 
   def _BuildTarball(self, input_list, tarball_output, compressed=True,
                     **kwargs):
@@ -124,6 +132,17 @@ class AutotestTarballBuilder(object):
     Returns:
       Return value of cros_build_lib.CreateTarball.
     """
+    for pathname in input_list:
+      if os.path.exists(os.path.join(self.archive_basedir, pathname)):
+        break
+    else:
+      # If any of them exist we can create an archive, but if none
+      # do then we need to stop. For now, since we either pass in a
+      # handful of directories we don't necessarily check, or actually
+      # search the filesystem for lots of files, this is far more
+      # efficient than building out a list of files that do exist.
+      return None
+
     compressor = cros_build_lib.COMP_NONE
     chroot = None
     if compressed:

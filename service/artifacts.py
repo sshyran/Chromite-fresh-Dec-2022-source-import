@@ -128,12 +128,15 @@ def BundleAutotestFiles(chroot, sysroot, output_directory):
 
   builder = autotest_util.AutotestTarballBuilder(archive_basedir,
                                                  output_directory)
-  return {
+  results = {
       ARCHIVE_CONTROL_FILES: builder.BuildAutotestControlFilesTarball(),
       ARCHIVE_PACKAGES: builder.BuildAutotestPackagesTarball(),
       ARCHIVE_SERVER_PACKAGES: builder.BuildAutotestServerPackageTarball(),
       ARCHIVE_TEST_SUITES: builder.BuildAutotestTestSuitesTarball(),
   }
+
+  # Strip the list down to just the successfully created archives.
+  return {k: v for k, v in results.items() if v}
 
 
 def BundleEBuildLogsTarball(chroot, sysroot, archive_dir):
