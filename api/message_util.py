@@ -20,6 +20,7 @@ import sys
 
 from google.protobuf import json_format
 
+from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 
@@ -209,17 +210,21 @@ class MessageHandler(object):
       InvalidInputFileError: When a path has not been given, does not exist,
         or cannot be read.
     """
-    if not path and not self.path:
+    target_path = path or self.path
+    if not target_path:
       raise InvalidInputFileError('No input file has been specified.')
-    if not os.path.exists(path or self.path):
+    if not os.path.exists(target_path):
       raise InvalidInputFileError('The input file does not exist.')
 
     try:
-      content = osutils.ReadFile(path or self.path, mode=self.read_mode)
+      content = osutils.ReadFile(target_path, mode=self.read_mode)
     except IOError as e:
       raise InvalidInputFileError('Unable to read input file: %s' % e)
 
-    self.serializer.deserialize(content, message)
+    if content:
+      self.serializer.deserialize(content, message)
+    else:
+      logging.warning('No content found in %s to deserialize.', target_path)
 
   def write_from(self, message, path=None):
     """Write serialized data from the message to a file.
