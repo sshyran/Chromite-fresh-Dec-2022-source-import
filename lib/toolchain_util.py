@@ -2105,9 +2105,9 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     """Bundle clang-tidy warnings file."""
     with self.chroot.tempdir() as tempdir:
       in_chroot_tempdir = self.chroot.chroot_path(tempdir)
-      clang_tidy_tarball = '%s.%s.clang_tidy_warnings.tar.xz' % (
-          self.build_target,
-          datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d'))
+      now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+      clang_tidy_tarball = (f'{self.build_target}.{now}'
+                            '.clang_tidy_warnings.tar.xz')
       cmd = [
           'cros_generate_tidy_warnings', '--out-file', clang_tidy_tarball,
           '--out-dir', in_chroot_tempdir, '--board', self.build_target,
@@ -2378,9 +2378,9 @@ class BundleArtifactHandler(_CommonPrepareBundle):
       if not warning_files:
         logging.info('No fatal-clang-warnings found, skip bundle artifact')
         return []
-
-      output_compressed = os.path.join(self.output_dir,
-                                       'fatal_clang_warnings.tar.xz')
+      now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+      name = f'{self.build_target}.{now}.fatal_clang_warnings.tar.xz'
+      output_compressed = os.path.join(self.output_dir, name)
       cros_build_lib.CreateTarball(
           output_compressed, tempdir, inputs=warning_files)
 

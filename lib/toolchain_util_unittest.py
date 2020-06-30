@@ -511,6 +511,19 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         toolchain_util, '_GetOrderfileName', return_value=self.orderfile_name)
     self.copy2 = self.PatchObject(shutil, 'copy2')
 
+    class mock_datetime(object):
+      """Class for mocking datetime.datetime."""
+
+      @staticmethod
+      def strftime(_when, _fmt):
+        return 'DATE'
+
+      @staticmethod
+      def now():
+        return -1
+
+    self.PatchObject(datetime, 'datetime', new=mock_datetime)
+
   def SetUpBundle(self, artifact_type):
     """Set up to test _Bundle${artifactType}."""
     self.artifact_type = artifact_type
@@ -542,19 +555,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
 
   def testBundleChromeClangWarningsFile(self):
     """Test that BundleChromeClangWarningsFile works."""
-
-    class mock_datetime(object):
-      """Class for mocking datetime.datetime."""
-
-      @staticmethod
-      def strftime(_when, _fmt):
-        return 'DATE'
-
-      @staticmethod
-      def now():
-        return -1
-
-    self.PatchObject(datetime, 'datetime', new=mock_datetime)
     self.SetUpBundle('ChromeClangWarningsFile')
     artifact = os.path.join(self.outdir,
                             '%s.DATE.clang_tidy_warnings.tar.xz' % self.board)
@@ -615,8 +615,10 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
       for l in ['log1.json', 'log2.json', 'log3.notjson']:
         osutils.Touch(os.path.join(d, l))
     tarball = self.obj.Bundle()
-    self.assertEqual(tarball,
-                     [os.path.join(self.outdir, 'fatal_clang_warnings.tar.xz')])
+    artifact = os.path.join(
+        self.outdir,
+        '%s.DATE.fatal_clang_warnings.tar.xz' % self.board)
+    self.assertEqual(tarball, [artifact])
 
     # Make sure the duplicate logs are renamed and all logs are captured.
     ret = self.obj._CollectFiles('/tmp/fatal_clang_warnings', ('.json'),
