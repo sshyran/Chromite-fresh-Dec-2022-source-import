@@ -300,8 +300,10 @@ class Router(object):
       stack.Add(
           field_handler.sync_dirs, input_msg, sync_tempdir, prefix=chroot.path)
 
+      # Parse goma.
       chroot.goma = field_handler.handle_goma(input_msg, chroot.path)
 
+      # Build inside-chroot paths for the input, output, and config messages.
       new_input = os.path.join(tempdir, self.REEXEC_INPUT_FILE)
       chroot_input = '/%s' % os.path.relpath(new_input, chroot.path)
       new_output = os.path.join(tempdir, self.REEXEC_OUTPUT_FILE)
@@ -309,6 +311,7 @@ class Router(object):
       new_config = os.path.join(tempdir, self.REEXEC_CONFIG_FILE)
       chroot_config = '/%s' % os.path.relpath(new_config, chroot.path)
 
+      # Setup the inside-chroot message files.
       logging.info('Writing input message to: %s', new_input)
       input_handler.write_from(input_msg, path=new_input)
       osutils.Touch(new_output)
