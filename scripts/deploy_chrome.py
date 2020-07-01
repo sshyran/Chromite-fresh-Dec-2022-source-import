@@ -64,12 +64,15 @@ _ANDROID_DIR_EXTRACT_PATH = 'system/chrome/*'
 
 _CHROME_DIR = '/opt/google/chrome'
 _CHROME_DIR_MOUNT = '/mnt/stateful_partition/deploy_rootfs/opt/google/chrome'
+_CHROME_TEST_BIN_DIR = '/usr/local/libexec/chrome-binary-tests'
 
 _UMOUNT_DIR_IF_MOUNTPOINT_CMD = (
     'if mountpoint -q %(dir)s; then umount %(dir)s; fi')
 _BIND_TO_FINAL_DIR_CMD = 'mount --rbind %s %s'
 _SET_MOUNT_FLAGS_CMD = 'mount -o remount,exec,suid %s'
 _MKDIR_P_CMD = 'mkdir -p --mode 0775 %s'
+_FIND_TEST_BIN_CMD = 'find %s -maxdepth 1 -executable -type f' % (
+    _CHROME_TEST_BIN_DIR)
 
 DF_COMMAND = 'df -k %s'
 
@@ -305,6 +308,28 @@ class DeployChrome(object):
       logging.info('Starting UI...')
       self.device.run('start ui')
 
+  def _DeployTestBinaries(self):
+    """Deploys any local test binary to _CHROME_TEST_BIN_DIR on the device.
+
+    There could be several binaries located in the local build dir, so compare
+    what's already present on the device in _CHROME_TEST_BIN_DIR , and copy
+    over any that we also built ourselves.
+    """
+    r = self.device.run(_FIND_TEST_BIN_CMD, check=False)
+    if r.returncode != 0:
+      raise DeployFailure('Unable to ls contents of %s' % _CHROME_TEST_BIN_DIR)
+    binaries_to_copy = []
+    for f in r.output.splitlines():
+      binaries_to_copy.append(
+          chrome_util.Path(os.path.basename(f), exe=True, optional=True))
+
+    staging_dir = os.path.join(
+        self.tempdir, os.path.basename(_CHROME_TEST_BIN_DIR))
+    _PrepareStagingDir(self.options, self.tempdir, staging_dir,
+                       copy_paths=binaries_to_copy)
+    self.device.CopyToDevice(
+        staging_dir, os.path.dirname(_CHROME_TEST_BIN_DIR), mode='rsync')
+
   def _CheckConnection(self):
     try:
       logging.info('Testing connection to the device...')
@@ -420,6 +445,8 @@ class DeployChrome(object):
 
     # Actually deploy Chrome to the device.
     self._Deploy()
+    if self.options.deploy_test_binaries:
+      self._DeployTestBinaries()
 
 
 def ValidateStagingFlags(value):
@@ -483,6 +510,11 @@ def _CreateParser():
                            'umounted first.')
   parser.add_argument('--noremove-rootfs-verification', action='store_true',
                       default=False, help='Never remove rootfs verification.')
+  parser.add_argument('--deploy-test-binaries', action='store_true',
+                      default=False,
+                      help='Also deploy any test binaries to %s. Useful for '
+                           'running any Tast tests that execute these '
+                           'binaries.' % _CHROME_TEST_BIN_DIR)
 
   group = parser.add_argument_group('Advanced Options')
   group.add_argument('-l', '--local-pkg-path', type='path',

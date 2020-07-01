@@ -372,3 +372,46 @@ class TestDeploymentType(DeployTestBuildDir):
     self.deploy._CheckDeployType()
     self.assertTrue(self.getCopyPath('chrome'))
     self.assertFalse(self.getCopyPath('app_shell'))
+
+
+class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
+  """Tests _DeployTestBinaries()."""
+
+  def setUp(self):
+    options = _ParseCommandLine(list(_REGULAR_TO) + [
+        '--board', _TARGET_BOARD, '--force', '--mount',
+        '--build-dir', os.path.join(self.tempdir, 'build_dir'),
+        '--nostrip'])
+    self.deploy = deploy_chrome.DeployChrome(
+        options, self.tempdir, os.path.join(self.tempdir, 'staging'))
+
+  def testFindError(self):
+    """Ensure an error is thrown if we can't inspect the device."""
+    self.rc.AddCmdResult(
+        partial_mock.In(deploy_chrome._FIND_TEST_BIN_CMD), 1)
+    self.assertRaises(
+        deploy_chrome.DeployFailure, self.deploy._DeployTestBinaries)
+
+  def testSuccess(self):
+    """Ensure the staging dir contains the right binaries to copy over."""
+    test_binaries = [
+        'run_a_tests',
+        'run_b_tests',
+        'run_c_tests',
+    ]
+    # Simulate having the binaries both on the device and in our local build
+    # dir.
+    self.rc.AddCmdResult(
+        partial_mock.In(deploy_chrome._FIND_TEST_BIN_CMD),
+        stdout='\n'.join(test_binaries))
+    for binary in test_binaries:
+      osutils.Touch(os.path.join(self.deploy.options.build_dir, binary),
+                    makedirs=True, mode=0o700)
+
+    self.deploy._DeployTestBinaries()
+
+    # Ensure the binaries were placed in the staging dir used to copy them over.
+    staging_dir = os.path.join(
+        self.tempdir, os.path.basename(deploy_chrome._CHROME_TEST_BIN_DIR))
+    for binary in test_binaries:
+      self.assertIn(binary, os.listdir(staging_dir))
