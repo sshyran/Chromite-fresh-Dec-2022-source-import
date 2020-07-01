@@ -101,7 +101,7 @@ def Update(input_proto, output_proto, _config):
 def Delete(input_proto, _output_proto, _config):
   """Delete a chroot."""
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  sdk.Delete(chroot)
+  sdk.Delete(chroot, force=True)
 
 
 @faux.all_empty

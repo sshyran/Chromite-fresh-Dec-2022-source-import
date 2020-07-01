@@ -169,16 +169,19 @@ def Create(arguments):
   return GetChrootVersion(arguments.chroot_path)
 
 
-def Delete(chroot=None):
+def Delete(chroot=None, force=False):
   """Delete the chroot.
 
   Args:
     chroot (chroot_lib.Chroot): The chroot being deleted, or None for the
       default chroot.
+    force: Boolean that applies the --force option.
   """
   # Delete the chroot itself.
   logging.info('Removing the SDK.')
   cmd = [os.path.join(constants.CHROMITE_BIN_DIR, 'cros_sdk'), '--delete']
+  if force:
+    cmd.extend(['--force'])
   if chroot:
     cmd.extend(['--chroot', chroot.path])
 

@@ -122,6 +122,12 @@ class DeleteTest(cros_test_lib.RunCommandTestCase):
     sdk.Delete(chroot=chroot_lib.Chroot(path))
     self.assertCommandContains(['--delete', '--chroot', path])
 
+  def testDeleteWithChrootAndForce(self):
+    """Test with chroot and force provided."""
+    path = '/some/path'
+    sdk.Delete(chroot=chroot_lib.Chroot(path), force=True)
+    self.assertCommandContains(['--delete', '--force', '--chroot', path])
+
 
 class UpdateTest(cros_test_lib.RunCommandTestCase):
   """Update function tests."""
