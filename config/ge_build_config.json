@@ -434,18 +434,6 @@
       ]
     },
     {
-      "name": "eve-arcvm-mesa-virgl-next",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "poppy",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "expresso",
       "configs": [
         {
@@ -1652,6 +1640,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 433,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "eve-arcvm-mesa-virgl-next",
+      "reference_board_name": "eve-arcvm-mesa-virgl-next",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-arcvm-mesa-virgl-next",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 414,
           "is_active": true
         }
       ]
