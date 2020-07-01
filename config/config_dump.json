@@ -11239,7 +11239,7 @@
         "_template": "buildspec",
         "build_timeout": 43200,
         "display_label": "factory",
-        "schedule": "with 168h interval",
+        "schedule": "with 24h interval",
         "slave_configs": [
             "endeavour-factory-endeavour-13295.B-factorybranch"
         ],
