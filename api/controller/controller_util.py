@@ -75,12 +75,11 @@ def ParseGomaConfig(goma_message, chroot_path):
 
   # Parse the goma config.
   chromeos_goma_dir = goma_message.chromeos_goma_dir or None
-  goma_approach = None
-  if goma_message.goma_approach == common_pb2.GomaConfig.RBE_PROD:
-    goma_approach = goma_util.GomaApproach('?prod', 'goma.chromium.org', True)
-  elif goma_message.goma_approach == common_pb2.GomaConfig.RBE_STAGING:
+  if goma_message.goma_approach == common_pb2.GomaConfig.RBE_STAGING:
     goma_approach = goma_util.GomaApproach('?staging',
                                            'staging-goma.chromium.org', True)
+  else:
+    goma_approach = goma_util.GomaApproach('?prod', 'goma.chromium.org', True)
 
   # Note that we are not specifying the goma log_dir so that goma will create
   # and use a tmp dir for the logs.
