@@ -232,6 +232,7 @@
   master-release
     arkham-release
     asuka-release
+    atlas-arm64-release
     atlas-release
     auron_paine-release
     auron_yuna-release
@@ -336,7 +337,6 @@
     whirlwind-release
     winky-release
     wizpig-release
-    zork-release
   master-release-basic
     atlas-release-basic
     eve-release-basic
@@ -399,6 +399,12 @@
   asuka-payloads-tryjob
   asuka-release-tryjob
   asuka-unittest-stress
+  atlas-arm64-full-tryjob
+  atlas-arm64-llvm-next-toolchain-tryjob
+  atlas-arm64-llvm-toolchain-tryjob
+  atlas-arm64-payloads-tryjob
+  atlas-arm64-release-tryjob
+  atlas-arm64-unittest-stress
   atlas-factory-atlas-11907.B-factorybranch-tryjob
   atlas-full-tryjob
   atlas-llvm-next-toolchain-tryjob
@@ -1152,6 +1158,7 @@
   master-release-tryjob
     arkham-release-tryjob
     asuka-release-tryjob
+    atlas-arm64-release-tryjob
     atlas-release-tryjob
     auron_paine-release-tryjob
     auron_yuna-release-tryjob
@@ -1256,7 +1263,6 @@
     whirlwind-release-tryjob
     winky-release-tryjob
     wizpig-release-tryjob
-    zork-release-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmpi-android-pfq-tryjob
@@ -1685,10 +1691,4 @@
   x32-generic-llvm-next-toolchain-tryjob
   x32-generic-llvm-toolchain-tryjob
   x32-generic-unittest-stress
-  zork-full-tryjob
-  zork-llvm-next-toolchain-tryjob
-  zork-llvm-toolchain-tryjob
-  zork-payloads-tryjob
-  zork-release-tryjob
-  zork-unittest-stress
 

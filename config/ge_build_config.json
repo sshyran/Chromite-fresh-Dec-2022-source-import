@@ -874,6 +874,23 @@
       ]
     },
     {
+      "name": "atlas-arm64",
+      "reference_board_name": "atlas-arm64",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "atlas-arm64",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 447,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "coral",
       "reference_board_name": "coral",
       "arch": "X86_INTERNAL",
@@ -3846,77 +3863,6 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 405,
-          "is_active": true
-        }
-      ]
-    },
-    {
-      "name": "zork",
-      "reference_board_name": "zork",
-      "arch": "X86_INTERNAL",
-      "builder": "RELEASE",
-      "experimental": false,
-      "models": [
-        {
-          "board_name": "zork",
-          "name": "berknip",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 381,
-          "is_active": true
-        },
-        {
-          "board_name": "zork",
-          "name": "dalboz",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 381,
-          "is_active": true
-        },
-        {
-          "board_name": "zork",
-          "name": "ezkinil",
-          "test_suites": [
-            "sanity",
-            "bvt-inline",
-            "bvt-tast-cq",
-            "bvt-installer",
-            "bvt-arc",
-            "au",
-            "bvt-cq",
-            "bvt-perbuild",
-            "bvt-tast-informational"
-          ],
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 381,
-          "is_active": true
-        },
-        {
-          "board_name": "zork",
-          "name": "morphius",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 381,
-          "is_active": true
-        },
-        {
-          "board_name": "zork",
-          "name": "trembyle",
-          "test_suites": [
-            "sanity",
-            "bvt-inline",
-            "bvt-tast-cq",
-            "bvt-installer",
-            "bvt-arc",
-            "au",
-            "bvt-cq",
-            "bvt-perbuild",
-            "bvt-tast-informational"
-          ],
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 381,
           "is_active": true
         }
       ]
