@@ -434,12 +434,13 @@ class VM(device.Device):
 
     qemu_args += [
         '-m', self.qemu_m, '-smp', str(self.qemu_smp), '-vga', 'virtio',
-        '-daemonize', '-usbdevice', 'tablet',
+        '-daemonize',
         '-pidfile', self.pidfile,
         '-chardev', 'pipe,id=control_pipe,path=%s' % self.kvm_monitor,
         '-serial', 'file:%s' % self.kvm_serial,
         '-mon', 'chardev=control_pipe',
         '-cpu', self.qemu_cpu,
+        '-usb', '-device', 'usb-tablet',
         '-device', 'virtio-net,netdev=eth0',
         '-device', 'virtio-scsi-pci,id=scsi',
         '-device', 'virtio-rng',

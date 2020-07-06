@@ -91,7 +91,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self._vm.Start()
     self.assertCommandContains([self._vm.qemu_path])
     self.assertCommandContains(['-m', '8G', '-smp', '8', '-vga', 'virtio',
-                                '-daemonize', '-usbdevice', 'tablet',])
+                                '-daemonize', '-device', 'usb-tablet'])
     self.assertCommandContains([
         '-pidfile', self.TempVMPath('kvm.pid'),
         '-chardev', 'pipe,id=control_pipe,path=%s'
