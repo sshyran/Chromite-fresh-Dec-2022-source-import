@@ -55,7 +55,7 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     patch.assert_not_called()
 
   def testMockCall(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Sanity check that a mock call does not execute any logic."""
     patch = self.PatchObject(sdk_service, 'Create')
 
     rc = sdk_controller.Create(self._GetRequest(), self.response,
@@ -110,6 +110,51 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         cache_dir=mock.ANY)
 
 
+class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+  """Create tests."""
+
+  def setUp(self):
+    """Setup method."""
+    # We need to run the command outside the chroot.
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
+    self.response = sdk_pb2.DeleteResponse()
+
+  def _GetRequest(self, chroot_path=None):
+    """Helper to build a delete request message."""
+    request = sdk_pb2.DeleteRequest()
+    if chroot_path:
+      request.chroot.path = chroot_path
+
+    return request
+
+  def testValidateOnly(self):
+    """Sanity check that a validate only call does not execute any logic."""
+    patch = self.PatchObject(sdk_service, 'Delete')
+
+    sdk_controller.Delete(self._GetRequest(), self.response,
+                          self.validate_only_config)
+    patch.assert_not_called()
+
+  def testMockCall(self):
+    """Sanity check that a mock call does not execute any logic."""
+    patch = self.PatchObject(sdk_service, 'Delete')
+
+    rc = sdk_controller.Delete(self._GetRequest(), self.response,
+                               self.mock_call_config)
+    patch.assert_not_called()
+    self.assertFalse(rc)
+
+  def testSuccess(self):
+    """Test the successful call by verifying service invocation."""
+    patch = self.PatchObject(sdk_service, 'Delete', return_value=1)
+
+    request = self._GetRequest()
+
+    sdk_controller.Delete(request, self.response, self.api_config)
+    # Verify that by default sdk_service.Delete is called with force=True.
+    patch.assert_called_once_with(mock.ANY, force=True)
+
+
 class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   """Update tests."""
 
@@ -140,7 +185,7 @@ class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     patch.assert_not_called()
 
   def testMockCall(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Sanity check that a mock call does not execute any logic."""
     patch = self.PatchObject(sdk_service, 'Update')
 
     rc = sdk_controller.Create(self._GetRequest(), self.response,
