@@ -4324,6 +4324,14 @@
         },
         {
           "board_name": "palkia",
+          "name": "palkia",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 427,
+          "is_active": true
+        },
+        {
+          "board_name": "palkia",
           "name": "unprovisioned_dratini",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
