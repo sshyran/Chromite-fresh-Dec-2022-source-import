@@ -2689,6 +2689,9 @@ def ApplyCustomOverrides(site_config):
       },
 
       'drallion-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://b.corp.google.com/issues/160005408',
           'sign_types': ['recovery', 'factory'],
       },
 
