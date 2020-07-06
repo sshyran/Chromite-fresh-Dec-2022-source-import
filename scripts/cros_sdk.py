@@ -985,8 +985,7 @@ def main(argv):
         except timeout_util.TimeoutError as e:
           logging.error('Acquiring write_lock on %s failed: %s', lock_path, e)
           if not options.force:
-            logging.error('Exiting; use --force to continue w/o lock.')
-            raise e
+            cros_build_lib.Die('Exiting; use --force to continue w/o lock.')
         if missing_image_tools:
           logging.notice('Unmounting chroot.')
           osutils.UmountTree(options.chroot)
