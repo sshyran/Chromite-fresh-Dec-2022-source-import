@@ -289,8 +289,8 @@ class DevServerWrapper(multiprocessing.Process):
   DEV_SERVER_TIMEOUT = 900
   KILL_TIMEOUT = 10
 
-  def __init__(self, static_dir=None, port=None, log_dir=None, src_image=None,
-               board=None):
+  def __init__(self, static_dir=DEFAULT_STATIC_DIR, port=None, log_dir=None,
+               src_image=None, board=None):
     """Initialize a DevServerWrapper instance.
 
     Args:
@@ -479,14 +479,11 @@ class DevServerWrapper(multiprocessing.Process):
     cmd = [self.devserver_bin,
            '--pidfile', path_resolver.ToChroot(self._pid_file),
            '--logfile', path_resolver.ToChroot(self.log_file),
-           '--port=%d' % port]
+           '--port=%d' % port,
+           '--static_dir=%s' % path_resolver.ToChroot(self.static_dir)]
 
     if not self.port:
       cmd.append('--portfile=%s' % path_resolver.ToChroot(self.port_file))
-
-    if self.static_dir:
-      cmd.append(
-          '--static_dir=%s' % path_resolver.ToChroot(self.static_dir))
 
     if self.src_image:
       cmd.append('--src_image=%s' % path_resolver.ToChroot(self.src_image))
