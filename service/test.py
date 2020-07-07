@@ -48,12 +48,18 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_cpvs) == 0
 
 
-def BuildTargetUnitTest(build_target, chroot, blacklist=None, was_built=True):
+def BuildTargetUnitTest(build_target,
+                        chroot,
+                        packages=None,
+                        blacklist=None,
+                        was_built=True):
   """Run the ebuild unit tests for the target.
 
   Args:
     build_target (build_target_lib.BuildTarget): The build target.
     chroot (chroot_lib.Chroot): The chroot where the tests are running.
+    packages (list[str]|None): Packages to be tested. If none, uses all testable
+      packages.
     blacklist (list[str]|None): Tests to skip.
     was_built (bool): Whether packages were built.
 
@@ -63,6 +69,9 @@ def BuildTargetUnitTest(build_target, chroot, blacklist=None, was_built=True):
   # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
   cmd = ['cros_run_unit_tests', '--board', build_target.name]
+
+  if packages:
+    cmd.extend(['--packages', ' '.join(packages)])
 
   if blacklist:
     cmd.extend(['--blacklist_packages', ' '.join(blacklist)])

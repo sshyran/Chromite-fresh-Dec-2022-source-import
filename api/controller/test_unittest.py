@@ -103,9 +103,21 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                               api_config.ApiConfigMixin):
   """Tests for the UnitTest function."""
 
-  def _GetInput(self, board=None, result_path=None, chroot_path=None,
-                cache_dir=None, empty_sysroot=None, blacklist=None):
+  def _GetInput(self,
+                board=None,
+                result_path=None,
+                chroot_path=None,
+                cache_dir=None,
+                empty_sysroot=None,
+                packages=None,
+                blacklist=None):
     """Helper to build an input message instance."""
+    formatted_packages = []
+    for pkg in packages or []:
+      formatted_packages.append({
+          'category': pkg.category,
+          'package_name': pkg.package
+      })
     formatted_blacklist = []
     for pkg in blacklist or []:
       formatted_blacklist.append({'category': pkg.category,
@@ -231,7 +243,10 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
   def testBuildTargetUnitTest(self):
     """Test BuildTargetUnitTest successful call."""
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    pkgs = ['foo/bar', 'cat/pkg']
+    packages = [portage_util.SplitCPV(p, strict=False) for p in pkgs]
+    input_msg = self._GetInput(
+        board='board', result_path=self.tempdir, packages=packages)
 
     result = test_service.BuildTargetUnitTestResult(0, None)
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)

@@ -94,6 +94,12 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   # certain boards that need to use prebuilts (e.g. grunt's unittest-only).
   was_built = not input_proto.flags.empty_sysroot
 
+  # Packages to be tested.
+  packages_package_info = input_proto.packages
+  packages = []
+  for package_info in packages_package_info:
+    packages.append(controller_util.PackageInfoToString(package_info))
+
   # Skipped tests.
   blacklisted_package_info = input_proto.package_blacklist
   blacklist = []
@@ -103,8 +109,12 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   chroot = controller_util.ParseChroot(input_proto.chroot)
 
-  result = test.BuildTargetUnitTest(build_target, chroot, blacklist=blacklist,
-                                    was_built=was_built)
+  result = test.BuildTargetUnitTest(
+      build_target,
+      chroot,
+      packages=packages,
+      blacklist=blacklist,
+      was_built=was_built)
 
   if not result.success:
     # Failed to run tests or some tests failed.
