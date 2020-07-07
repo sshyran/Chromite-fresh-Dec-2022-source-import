@@ -2416,7 +2416,7 @@
             "atlas"
         ],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "vm_tests": [],
         "vm_tests_override": null
@@ -2427,7 +2427,7 @@
             "atlas"
         ],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ]
     },
     "atlas-release-basic-tryjob": {
@@ -2440,7 +2440,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "notification_configs": []
     },
@@ -2463,7 +2463,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "paygen": false,
         "push_image": false,
@@ -10582,7 +10582,7 @@
             "eve"
         ],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "vm_tests": [],
         "vm_tests_override": null
@@ -10593,7 +10593,7 @@
             "eve"
         ],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ]
     },
     "eve-release-basic-tryjob": {
@@ -10606,7 +10606,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "notification_configs": []
     },
@@ -10629,7 +10629,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "paygen": false,
         "push_image": false,
@@ -24613,7 +24613,7 @@
             "nocturne"
         ],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "useflags": [
             "-cros-debug",
@@ -24642,7 +24642,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "paygen": false,
         "push_image": false,
