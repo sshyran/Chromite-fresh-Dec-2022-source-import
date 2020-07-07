@@ -11,12 +11,11 @@ import copy
 import os
 import sys
 import time
+from typing import List
 
 from chromite.lib import cros_test_lib
 
-
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
 
 pytestmark = [cros_test_lib.pytestmark_inside_only]
 
@@ -42,6 +41,7 @@ import portage
 # pylint: disable=ungrouped-imports
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_event
+
 # pylint: enable=wrong-import-order,wrong-import-position,ungrouped-imports
 
 
@@ -58,8 +58,14 @@ class DepGraphGenerator(object):
   """
 
   __slots__ = [
-      'board', 'emerge', 'package_db', 'show_output', 'sysroot', 'unpack_only',
-      'max_retries', 'include_bdepend',
+      'board',
+      'emerge',
+      'package_db',
+      'show_output',
+      'sysroot',
+      'unpack_only',
+      'max_retries',
+      'include_bdepend',
   ]
 
   def __init__(self):
@@ -836,6 +842,69 @@ class EmergeData(object):
     #  - porttree: A database of ebuilds, that can be used to build packages.
     #  - bintree: A database of binary packages.
     self.trees = None
+
+
+class PackageNode(object):
+  """Helper struct for the DepVisualizer class.
+
+  This struct makes it easier to traverse a directed graph while
+  retaining it's properties.
+  Variables are yielded to improve runtime and memory usage.
+  """
+
+  def __init__(self, pkg_name: str):
+    self.name = pkg_name
+    # List of child PackageNodes.
+    self.dependencies = []
+    # List of parent PackageNodes.
+    self.rvs_dependencies = []
+
+  def AddDependency(self, dependency: 'PackageNode'):
+    self.dependencies.append(dependency)
+
+  def AddRvsDependency(self, rvs_dependency: 'PackageNode'):
+    self.rvs_dependencies.append(rvs_dependency)
+
+  def GetDependencies(self):
+    yield from self.dependencies
+
+  def GetRvsDependencies(self):
+    yield from self.rvs_dependencies
+
+
+class DepVisualizer(object):
+  """Process dependency information into visualizable data.
+
+  Typical usage:
+    dep_vis = DepVisualizer()
+    dep_vis.PopulateFromDict(dep_dict)
+    dep_vis.VisualizeRoots()
+  """
+
+  def __init__(self):
+    # For purposes of speed and simplicity the dependency nodes are
+    # tracked using a dictionary where the key is the name of the
+    # package and the value is its PackageNode instance.
+    self.pkg_dict = {}
+
+  def AddNode(self,
+              pkg_name: str,
+              pkg_dependencies: List[str]):
+    """Add a package and its dependencies to the package dictionary.
+
+    Create an instance of PackageNode for both the pkg and its
+    dependencies -making sure not to duplicate any- and add
+    them to pkg_dict.
+
+    Args:
+      pkg_name: the name of a package.
+      pkg_dependencies: list of the names of the package's dependency.
+    """
+    pkg_node = self.pkg_dict.setdefault(pkg_name, PackageNode(pkg_name))
+    for dependency in pkg_dependencies:
+      dep_node = self.pkg_dict.setdefault(dependency, PackageNode(dependency))
+      pkg_node.AddDependency(dep_node)
+      dep_node.AddRvsDependency(pkg_node)
 
 
 def PrintDepsMap(deps_map):
