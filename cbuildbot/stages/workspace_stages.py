@@ -48,6 +48,7 @@ BUILD_PACKAGES_PREBUILTS = '10774.0.0'
 BUILD_PACKAGES_WITH_DEBUG_SYMBOLS = '6302.0.0'
 CROS_RUN_UNITTESTS = '6773.0.0'
 BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
+BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
 
@@ -573,6 +574,9 @@ class WorkspaceBuildImageStage(generic_stages.BoardSpecificBuilderStage,
            '--board', self._current_board,
            '--replace',
            '--version', version]
+
+    if self.AfterLimit(BUILD_IMAGE_ECLEAN_FLAG):
+      cmd += ['--noeclean']
 
     if not rootfs_verification:
       cmd += ['--noenable_rootfs_verification']

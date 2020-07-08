@@ -828,6 +828,7 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
             '--board', 'board',
             '--replace',
             '--version', 'R1-%s' % self.MODERN_VERSION,
+            '--noeclean',
             '--builder_path', 'test-factorybranch/R1-%s' % self.MODERN_VERSION,
             'test',
         ],
