@@ -117,6 +117,15 @@ def NormalizeAbUrl(value):
   return value
 
 
+def ValidateCipdURL(value):
+  """Return plain string."""
+  if not value.startswith('cipd://'):
+    msg = 'Invalid cipd:// URL format: %s' % value
+    logging.error(msg)
+    raise ValueError(msg)
+  return value
+
+
 def ParseBool(value):
   """Parse bool argument into a bool value.
 
@@ -451,6 +460,7 @@ VALID_TYPES = {
     'ab_url': NormalizeAbUrl,
     'bool': ParseBool,
     'build_target': ParseBuildTarget,
+    'cipd': ValidateCipdURL,
     'date': ParseDate,
     'path': osutils.ExpandPath,
     'gs_path': NormalizeGSPath,
