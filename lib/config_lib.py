@@ -86,6 +86,7 @@ LUCI_BUILDER_INFRA_TESTING = 'InfraTesting'
 LUCI_BUILDER_LEGACY_RELEASE = 'LegacyRelease'
 LUCI_BUILDER_PFQ = 'PFQ'
 LUCI_BUILDER_PROD = 'Prod'
+LUCI_BUILDER_RAPID = 'Rapid'
 LUCI_BUILDER_RELEASE = 'Release'
 LUCI_BUILDER_STAGING = 'Staging'
 LUCI_BUILDER_TRY = 'Try'
@@ -101,6 +102,7 @@ ALL_LUCI_BUILDER = {
     LUCI_BUILDER_LEGACY_RELEASE,
     LUCI_BUILDER_PFQ,
     LUCI_BUILDER_PROD,
+    LUCI_BUILDER_RAPID,
     LUCI_BUILDER_RELEASE,
     LUCI_BUILDER_STAGING,
     LUCI_BUILDER_TRY,
@@ -116,8 +118,7 @@ def isTryjobConfig(build_config):
   Returns:
     Boolean. True if it's a tryjob config.
   """
-  return build_config.luci_builder in {LUCI_BUILDER_TRY}
-
+  return build_config.luci_builder in [LUCI_BUILDER_RAPID, LUCI_BUILDER_TRY]
 
 # In the Json, this special build config holds the default values for all
 # other configs.

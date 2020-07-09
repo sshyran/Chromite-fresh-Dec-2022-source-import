@@ -2938,7 +2938,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
         site_config.templates.release,
         site_config.templates.loonix,
         display_label=config_lib.DISPLAY_LABEL_UTILITY,
-        luci_builder=config_lib.LUCI_BUILDER_INFORMATIONAL,
+        luci_builder=config_lib.LUCI_BUILDER_RAPID,
         boards=[board],
         debug=True,
         hwqual=False,

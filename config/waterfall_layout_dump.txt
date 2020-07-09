@@ -604,13 +604,13 @@
   capri-full-tryjob
   capri-llvm-next-toolchain-tryjob
   capri-llvm-toolchain-tryjob
-  capri-rapid-tryjob
+  capri-rapid
   capri-release-tryjob
   capri-unittest-stress
   capri-zfpga-full-tryjob
   capri-zfpga-llvm-next-toolchain-tryjob
   capri-zfpga-llvm-toolchain-tryjob
-  capri-zfpga-rapid-tryjob
+  capri-zfpga-rapid
   capri-zfpga-release-tryjob
   capri-zfpga-unittest-stress
   caroline-arc64-full-tryjob
@@ -689,7 +689,7 @@
   cobblepot-full-tryjob
   cobblepot-llvm-next-toolchain-tryjob
   cobblepot-llvm-toolchain-tryjob
-  cobblepot-rapid-tryjob
+  cobblepot-rapid
   cobblepot-release-tryjob
   cobblepot-unittest-stress
   config-updater-tryjob
@@ -1087,7 +1087,7 @@
   gonzo-full-tryjob
   gonzo-llvm-next-toolchain-tryjob
   gonzo-llvm-toolchain-tryjob
-  gonzo-rapid-tryjob
+  gonzo-rapid
   gonzo-release-tryjob
   gonzo-unittest-stress
   gru-factory-gru-9017.B-factorybranch-tryjob
@@ -1339,7 +1339,7 @@
   lasilla-ground-full-tryjob
   lasilla-ground-llvm-next-toolchain-tryjob
   lasilla-ground-llvm-toolchain-tryjob
-  lasilla-ground-rapid-tryjob
+  lasilla-ground-rapid
   lasilla-ground-release-tryjob
   lasilla-ground-unittest-stress
   littlejoe-full-tryjob
@@ -1655,7 +1655,7 @@
   octavius-full-tryjob
   octavius-llvm-next-toolchain-tryjob
   octavius-llvm-toolchain-tryjob
-  octavius-rapid-tryjob
+  octavius-rapid
   octavius-release-tryjob
   octavius-unittest-stress
   octopus-factory-octopus-11512.B-factorybranch-tryjob
@@ -1766,7 +1766,7 @@
   romer-full-tryjob
   romer-llvm-next-toolchain-tryjob
   romer-llvm-toolchain-tryjob
-  romer-rapid-tryjob
+  romer-rapid
   romer-release-tryjob
   romer-unittest-stress
   samus-full-tryjob
@@ -1994,13 +1994,13 @@
   wooten-full-tryjob
   wooten-llvm-next-toolchain-tryjob
   wooten-llvm-toolchain-tryjob
-  wooten-rapid-tryjob
+  wooten-rapid
   wooten-release-tryjob
   wooten-unittest-stress
   wristpin-full-tryjob
   wristpin-llvm-next-toolchain-tryjob
   wristpin-llvm-toolchain-tryjob
-  wristpin-rapid-tryjob
+  wristpin-rapid
   wristpin-release-tryjob
   wristpin-unittest-stress
   x32-generic-full-tryjob
