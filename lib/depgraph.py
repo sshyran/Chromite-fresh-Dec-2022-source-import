@@ -288,24 +288,6 @@ class DepGraphGenerator(object):
       vardb.counter_tick()
     vardb.flush_cache()
 
-  def HasPrebuilt(self, pkg_cpf: str):
-    """Check if the given package cpf has a prebuilt.
-
-    Args:
-      pkg_cpf: The fully qualified category/package-version-revision.
-
-    Returns:
-      bool: True if there is a prebuilt available, False otherwise.
-    """
-    if not self.package_db:
-      self.GenDependencyTree()
-
-    package = self.package_db.get(pkg_cpf)
-    if package:
-      return package.type_name == 'binary'
-
-    return False
-
   def GenDependencyTree(self):
     """Get dependency tree info from emerge.
 
@@ -426,7 +408,6 @@ class DepGraphGenerator(object):
       if isinstance(pkg, Package):
         # Save off info about the package
         deps_info[str(pkg.cpv)] = {'idx': len(deps_info)}
-        self.package_db[pkg.cpv] = pkg
 
     seconds = time.time() - start
     if '--quiet' not in emerge.opts:
