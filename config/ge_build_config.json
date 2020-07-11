@@ -566,18 +566,6 @@
       ]
     },
     {
-      "name": "hatch-borealis",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "hatch",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "heli",
       "configs": [
         {
@@ -2872,6 +2860,119 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 443,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "hatch-borealis",
+      "reference_board_name": "hatch-borealis",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "hatch-borealis",
+          "name": "akemi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "dragonair",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "hatch",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "helios",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "helios_diskswap",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "kindred",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "kled",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "kohaku",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "nightfury",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "unprovisioned_dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-borealis",
+          "name": "unprovisioned_jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 453,
           "is_active": true
         }
       ]
