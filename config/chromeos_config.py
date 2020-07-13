@@ -2703,6 +2703,23 @@ def ApplyCustomOverrides(site_config):
 
   }
 
+  # Some Unibuild boards need to have hardware tests disabled.  This means
+  # disabling it at the model level as well.
+  _unibuild_disabled_hw_tests = frozenset([
+      'drallion-release',  # b/160005408.
+  ])
+  for config_name in _unibuild_disabled_hw_tests:
+    config = site_config.get(config_name)
+    if config and 'models' in config:
+      models = []
+      for model in config['models']:
+        models.append(
+            config_lib.ModelTestConfig(
+                model.name,
+                model.lab_board_name, [],
+                enable_skylab=model.enable_skylab))
+      overwritten_configs[config_name]['models'] = models
+
   # Some boards in toolchain builder are not using the same configuration as
   # release builders. Configure it here since it's easier, for both
   # llvm-toolchain and llvm-next-toolchain builders.
