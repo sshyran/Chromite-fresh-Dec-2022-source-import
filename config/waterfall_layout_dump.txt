@@ -1345,6 +1345,7 @@
   littlejoe-full-tryjob
   littlejoe-llvm-next-toolchain-tryjob
   littlejoe-llvm-toolchain-tryjob
+  littlejoe-rapid
   littlejoe-release-tryjob
   littlejoe-unittest-stress
   luci-scheduler-updater-tryjob
@@ -1952,8 +1953,10 @@
   viking-poc2-full-tryjob
   viking-poc2-llvm-next-toolchain-tryjob
   viking-poc2-llvm-toolchain-tryjob
+  viking-poc2-rapid
   viking-poc2-release-tryjob
   viking-poc2-unittest-stress
+  viking-rapid
   viking-release-tryjob
   viking-unittest-stress
   volteer-full-tryjob

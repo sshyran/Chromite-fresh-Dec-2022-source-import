@@ -2929,7 +2929,8 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
   # Loonix release builders; no signed images nor testing
   # Associated with Rapid releases, triggered from Rapid.
   for board in frozenset.union(chromeos_boards.loonix_boards,
-                               chromeos_boards.dustbuster_boards):
+                               chromeos_boards.dustbuster_boards,
+                               chromeos_boards.wshwos_boards):
     site_config.Add(
         '{}-rapid'.format(board),
         site_config.templates.release,
