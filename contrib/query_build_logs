@@ -16,6 +16,8 @@ field_limit=80
 verbose=0
 only_stdout=0
 case_insensitive=1
+execution_failure=0
+execution_success=0
 string_data_array=()
 not_string_data_array=()
 
@@ -27,11 +29,16 @@ Usage:  $0 -c|--count <search_string>
      [-w|-when] <when_string>
      [-l|--limit] <limit_string> [--field_limit <field_limit>]
      [--case_sensitive)]
+     [--es|--ef]
      [-v|--verbose] [--usage|-u|--help|-h]
 
      If -c is specified, count the occurrences of the search string.
      If -s is specified, display the matching occurences based on the other
        arguments (-l, --field_limit, etc).
+     If --es is specified, then only steps with a successful (NULL)
+       step_execution_result are considered.
+     If --ef is specified, then only steps with a failing (non-NULL)
+       step_execution_result are considered.
      Multiple -s arguments can be supplied, which allows an AND query,
      so that
        query_build_logs -s "String1" -s "String2" -s "String3"
@@ -86,6 +93,14 @@ while (( "$#" )); do
       only_stdout=1
       shift 1
       ;;
+    --ef)
+      execution_failure=1
+      shift 1
+      ;;
+    --es)
+      execution_success=1
+      shift 1
+      ;;
     --case_sensitive)
       case_insensitive=0
       shift 1
@@ -126,9 +141,16 @@ if [[ ! -z ${count_data} ]]; then
   query="SELECT count(stdout) AS Count FROM
   chromeos_ci_eng.analysis_event_log.${when} WHERE ${source_data} LIKE "
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="${query} LOWER(\"%${count_data}%\");"
+    query="${query} LOWER(\"%${count_data}%\")"
   else
-    query="${query} \"%${count_data}%\";"
+    query="${query} \"%${count_data}%\""
+  fi
+  if [ "${execution_failure}" -eq 1 ]; then
+    query="${query} AND step_execution_result IS NOT NULL;"
+  elif [ "${execution_success}" -eq 1 ]; then
+    query="${query} AND step_execution_result IS NULL;"
+  else
+    query="${query};"
   fi
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
@@ -198,6 +220,12 @@ do
     query="${query} NOT LIKE \"%${not_string_data}%\""
   fi
 done
+
+if [ "${execution_failure}" -eq 1 ]; then
+  query="${query} AND step_execution_result IS NOT NULL"
+elif [ "${execution_success}" -eq 1 ]; then
+  query="${query} AND step_execution_result IS NULL"
+fi
 
 query="$query ORDER BY DateTime DESC LIMIT ${limit};"
 
