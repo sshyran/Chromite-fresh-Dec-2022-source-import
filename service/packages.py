@@ -358,34 +358,13 @@ def uprev_kernel_afdo(*_args, **_kwargs):
   return result
 
 
-@uprevs_versioned_package('chromeos-base/termina-image-amd64')
-def uprev_termina_amd64(_build_targets, _refs, chroot):
-  """Updates termina amd64 VM - chromeos-base/termina-image-amd64.
+@uprevs_versioned_package('chromeos-base/termina-dlc')
+def uprev_termina_dlc(_build_targets, _refs, chroot):
+  """Updates shared termina-dlc ebuild - chromeos-base/termina-dlc.
 
   See: uprev_versioned_package.
   """
-  return uprev_termina('termina-image-amd64', chroot)
-
-
-@uprevs_versioned_package('chromeos-base/termina-image-arm')
-def uprev_termina_arm(_build_targets, _refs, chroot):
-  """Updates termina arm VM - chromeos-base/termina-image-arm.
-
-  See: uprev_versioned_package.
-  """
-  return uprev_termina('termina-image-arm', chroot)
-
-
-def uprev_termina(package, chroot):
-  """Helper function to uprev termina VM.
-
-  Args:
-    package (string): name of the package
-    chroot (chroot_lib.Chroot): specify a chroot to enter.
-
-  Returns:
-    UprevVersionedPackageResult: The result.
-  """
+  package = 'termina-dlc'
   package_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base',
                               package)
   version_pin_path = os.path.join(package_path, 'VERSION-PIN')
