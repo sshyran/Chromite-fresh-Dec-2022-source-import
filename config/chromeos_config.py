@@ -1895,6 +1895,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'firmware-servo-12768.B', ['nautilus'], {}),
       (DAILY, 'firmware-drallion-12930.B', ['drallion'], {}),
       (DAILY, 'firmware-endeavour-13259.B', ['endeavour'], {}),
+      (DAILY, 'firmware-puff-13324.B', ['puff'], {}),
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:

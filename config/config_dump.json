@@ -13006,6 +13006,26 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-poppy-10431.B"
     },
+    "firmware-puff-13324.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "puff"
+        ],
+        "schedule": "with 24h interval",
+        "workspace_branch": "firmware-puff-13324.B"
+    },
+    "firmware-puff-13324.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "puff"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-puff-13324.B"
+    },
     "firmware-rammus-11275.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
