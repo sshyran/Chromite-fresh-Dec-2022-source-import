@@ -361,6 +361,11 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
                     'errors.  If the shellcheck findings are not useful, '
                     'please file a bug at:\n%s', bug_url)
     lint_result.returncode = 0
+
+  # Check whitespace.
+  if not _WhiteSpaceLintData(path, osutils.ReadFile(path)):
+    lint_result.returncode = 1
+
   return lint_result
 
 
