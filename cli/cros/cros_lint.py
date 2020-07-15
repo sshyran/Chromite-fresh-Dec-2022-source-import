@@ -53,10 +53,17 @@ def _GetPylintrc(path):
   project_path = _GetProjectPath(path)
   parent = os.path.dirname(path)
   while project_path and parent.startswith(project_path):
-    for rc_name in ('pylintrc', '.pylintrc'):
-      pylintrc = os.path.join(parent, rc_name)
-      if os.path.isfile(pylintrc):
-        return pylintrc
+    pylintrc = os.path.join(parent, 'pylintrc')
+    dotpylintrc = os.path.join(parent, '.pylintrc')
+    # Only allow one of these to exist to avoid confusing which one is used.
+    if os.path.isfile(pylintrc) and os.path.isfile(dotpylintrc):
+      cros_build_lib.Die('%s: Only one of "pylintrc" or ".pylintrc" is allowed',
+                         parent)
+    if os.path.isfile(pylintrc):
+      return pylintrc
+    if os.path.isfile(dotpylintrc):
+      return dotpylintrc
+
     parent = os.path.dirname(parent)
 
   return os.path.join(constants.SOURCE_ROOT, 'chromite', 'pylintrc')
