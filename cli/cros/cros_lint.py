@@ -35,9 +35,9 @@ SHEBANG_RE = re.compile(br'^#!\s*([^\s]+)(\s+([^\s]+))?')
 
 def _GetProjectPath(path):
   """Find the absolute path of the git checkout that contains |path|."""
-  if git.FindRepoCheckoutRoot(path):
-    manifest = git.ManifestCheckout.Cached(path)
-    return manifest.FindCheckoutFromPath(path).GetPath(absolute=True)
+  ret = git.FindGitTopLevel(path)
+  if ret:
+    return ret
   else:
     # Maybe they're running on a file outside of a checkout.
     # e.g. cros lint ~/foo.py /tmp/test.py
