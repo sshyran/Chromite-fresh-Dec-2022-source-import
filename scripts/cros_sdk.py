@@ -986,6 +986,9 @@ def main(argv):
           logging.error('Acquiring write_lock on %s failed: %s', lock_path, e)
           if not options.force:
             cros_build_lib.Die('Exiting; use --force to continue w/o lock.')
+          else:
+            logging.warning(
+                'cros_sdk was invoked with force option, continuing.')
         if missing_image_tools:
           logging.notice('Unmounting chroot.')
           osutils.UmountTree(options.chroot)
@@ -1006,6 +1009,9 @@ def main(argv):
         lock.write_lock()
       except timeout_util.TimeoutError as e:
         logging.error('Acquiring write_lock on %s failed: %s', lock_path, e)
+        logging.warning(
+            'Continuing with CleanupChroot(%s), which will umount the tree.',
+            options.chroot)
       # We can call CleanupChroot (which calls cros_sdk_lib.CleanupChrootMount)
       # even if we don't get the lock because it will attempt to unmount the
       # tree and will print diagnostic information from 'fuser', 'lsof', and
