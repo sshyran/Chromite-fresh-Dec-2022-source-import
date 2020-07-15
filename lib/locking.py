@@ -77,6 +77,8 @@ class _Lock(cros_build_lib.MasterPidContextManager):
     self.description = description
     self._fd = None
     self.locking_mechanism = fcntl.flock if locktype == FLOCK else fcntl.lockf
+    # Store (to log) the locktype string.
+    self.locktype = locktype
     self.blocking = blocking
     self.blocking_timeout = blocking_timeout
 
@@ -105,7 +107,9 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       elif e.errno != errno.EAGAIN:
         raise
     if self.description:
-      message = '%s: blocking (LOCK_NB) while %s' % (self.description, message)
+      message = '%s: blocking (LOCK_NB) (%s) while %s' % (self.description,
+                                                          self.locktype,
+                                                          message)
     if not self.blocking:
       self.close()
       raise LockNotAcquiredError(message)
@@ -117,8 +121,9 @@ class _Lock(cros_build_lib.MasterPidContextManager):
         self.locking_mechanism(self.fd, flags)
     except timeout_util.TimeoutError:
       description = self.description or 'locking._enforce_lock'
-      logging.error('Timed out after waiting %d seconds for blocking lock: %s',
-                    self.blocking_timeout, description)
+      logging.error(
+          'Timed out after waiting %d seconds for blocking lock (%s): %s',
+          self.blocking_timeout, self.locktype, description)
       raise
     except EnvironmentError as e:
       if e.errno != errno.EDEADLK:
@@ -127,7 +132,8 @@ class _Lock(cros_build_lib.MasterPidContextManager):
         raise
       self.unlock()
       self.locking_mechanism(self.fd, flags)
-    logging.info('%s: lock has been acquired, continuing.', self.description)
+    logging.info('%s: lock has been acquired (%s), continuing.',
+                 self.description, self.locktype)
 
   def lock(self, shared=False):
     """Take a lock of type |shared|.
@@ -193,6 +199,8 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       IOError if the operation fails in some way.
     """
     if self._fd is not None:
+      logging.info('%s: lock is being released (%s).',
+                   self.description, self.locktype)
       self.locking_mechanism(self._fd, fcntl.LOCK_UN)
 
   def __del__(self):
