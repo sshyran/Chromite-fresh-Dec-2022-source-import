@@ -961,7 +961,6 @@ class ChromiumOSUpdater(BaseUpdater):
     self.ResetStatefulPartition()
     self.UpdateStateful()
     self.PostCheckStatefulUpdate()
-    self._Reboot('stateful partition restoration')
     try:
       self.CheckNebraskaCanRun()
       logging.info('Stateful partition restored.')
