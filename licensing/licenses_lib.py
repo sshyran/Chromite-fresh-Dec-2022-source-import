@@ -1429,6 +1429,9 @@ def HookPackageProcess(pkg_build_path):
     pkg_build_path: unpacked being built by emerge.
   """
   build_info_dir = os.path.join(pkg_build_path, 'build-info')
+  if not os.path.isdir(build_info_dir):
+    raise ValueError('%s is not a valid build path (missing "build-info/")' %
+                     (pkg_build_path,))
 
   fullnamerev = '%s/%s' % (_BuildInfo(build_info_dir, 'CATEGORY'),
                            _BuildInfo(build_info_dir, 'PF'))
