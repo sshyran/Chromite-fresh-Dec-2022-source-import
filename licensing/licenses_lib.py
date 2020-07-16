@@ -1440,4 +1440,5 @@ def HookPackageProcess(pkg_build_path):
   src_dir = os.path.join(pkg_build_path, 'work')
   pkg.GetLicenses(build_info_dir, src_dir)
 
+  _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
   pkg.SaveLicenseDump(os.path.join(build_info_dir, 'license.yaml'))
