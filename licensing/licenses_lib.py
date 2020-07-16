@@ -879,7 +879,7 @@ def _GetLicenseDirectories(board: Optional[str] = None,
   if board is not None:
     custom_paths = portage_util.FindOverlays(
         constants.BOTH_OVERLAYS, board, buildroot)
-  elif sysroot is not None:
+  elif sysroot is not None and sysroot != '/':
     portdir_overlay = sysroot_lib.Sysroot(sysroot).GetStandardField(
         sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY) or ''
     custom_paths = portdir_overlay.split() if portdir_overlay else []
@@ -1585,13 +1585,14 @@ def _BuildInfo(build_info_path, filename):
   return bi
 
 
-def HookPackageProcess(pkg_build_path):
+def HookPackageProcess(pkg_build_path: str, sysroot: Optional[str] = '/'):
   """Different entry point to populate a packageinfo.
 
   This is called instead of LoadPackageInfo when called by a package build.
 
   Args:
     pkg_build_path: unpacked being built by emerge.
+    sysroot: The sysroot we're building for.
   """
   build_info_dir = os.path.join(pkg_build_path, 'build-info')
   if not os.path.isdir(build_info_dir):
@@ -1609,5 +1610,9 @@ def HookPackageProcess(pkg_build_path):
   pkg.GetLicenses(build_info_dir, src_dir)
 
   pkg.AssertCorrectness(build_info_dir, None)
+  # Make sure the licenses are valid at build time even if we don't load them.
   _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
+  for license_name in pkg.license_names:
+    Licensing.FindLicenseType(license_name, sysroot=sysroot)
+
   pkg.SaveLicenseDump(os.path.join(build_info_dir, 'license.yaml'))
