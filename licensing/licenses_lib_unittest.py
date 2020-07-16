@@ -14,6 +14,9 @@ from chromite.lib import osutils
 from chromite.licensing import licenses_lib
 
 
+# pylint: disable=protected-access
+
+
 class LicenseLibTest(cros_test_lib.TempDirTestCase):
   """Limited tests for license_lib."""
 
@@ -288,3 +291,19 @@ masters = %(masters)s
     osutils.WriteFile(bad_license, u'Foo\x00Bar')
     result = licenses_lib.ReadUnknownEncodedFile(bad_license)
     self.assertEqual(result, 'FooBar')
+
+  def testDeprecatedLicenses(self):
+    """Verify deprecated license checks."""
+    # These are known bad packages.
+    licenses_lib._CheckForDeprecatedLicense(
+        'chromeos-base/pepper-flash-0.0.1', {'Proprietary-Binary'})
+    licenses_lib._CheckForDeprecatedLicense(
+        'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
+
+    # These packages should not be allowed.
+    with self.assertRaises(licenses_lib.PackageLicenseError):
+      licenses_lib._CheckForDeprecatedLicense(
+          'sys-apps/portage-123', {'Proprietary-Binary'})
+    with self.assertRaises(licenses_lib.PackageLicenseError):
+      licenses_lib._CheckForDeprecatedLicense(
+          'sys-apps/portage-123', {'GPL-2', 'Google-TOS'})
