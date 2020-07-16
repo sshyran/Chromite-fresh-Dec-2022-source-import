@@ -12,7 +12,7 @@ Documentation on this script is also available here:
 from __future__ import print_function
 
 import codecs
-import html  # pylint: disable=import-error
+import html
 import os
 import re
 from typing import List, Optional

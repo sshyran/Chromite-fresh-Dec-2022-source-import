@@ -10,7 +10,7 @@ from __future__ import division
 
 import itertools
 import os
-import pathlib  # pylint: disable=import-error
+import pathlib
 from typing import Dict, Iterable, Tuple, Union
 
 from chromite.lib import constants
