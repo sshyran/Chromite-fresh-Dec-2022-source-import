@@ -30,11 +30,16 @@ Usage:  $0 -c|--count <search_string>
      [-l|--limit] <limit_string> [--field_limit <field_limit>]
      [--case_sensitive)]
      [--es|--ef]
+     [--join <string1> <string2>]
      [-v|--verbose] [--usage|-u|--help|-h]
 
      If -c is specified, count the occurrences of the search string.
      If -s is specified, display the matching occurences based on the other
        arguments (-l, --field_limit, etc).
+     if --join is specified with <string1> and <string2>, then find
+       cases where one stage matches <string1> and another stage
+       matches <string2> and both stages have the same build_id.
+     NOTE: -c, -s, and --join are mutually exclusive options.
      If --es is specified, then only steps with a successful (NULL)
        step_execution_result are considered.
      If --ef is specified, then only steps with a failing (non-NULL)
@@ -101,6 +106,11 @@ while (( "$#" )); do
       execution_success=1
       shift 1
       ;;
+    --join)
+      join_1=$2
+      join_2=$3
+      shift 3
+      ;;
     --case_sensitive)
       case_insensitive=0
       shift 1
@@ -152,6 +162,53 @@ if [[ ! -z ${count_data} ]]; then
   else
     query="${query};"
   fi
+  if [ "${verbose}" -eq 1 ]; then
+    echo "QUERY: ${query}"
+    echo "Executing..."
+  fi
+  echo "${query}" | dremel --min_completion_ratio 1
+  exit 0
+fi
+
+# This is a special branch for handling the --join case, which does an
+# INNER JOIN with the two join arguments to find cases where one step
+# matches the first arg and another step matches the second arg and
+# both steps are part of the same build.
+if [[ ! -z ${join_1} ]]; then
+  source_1="stdout"
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    source_1="LOWER(stdout)"
+  fi
+  source_2="stdout_2"
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    source_2="LOWER(stdout_2)"
+  fi
+  echo "JOIN $join_1 AND $join_2"
+  query="SELECT CONCAT('https://ci.chromium.org/b/', CAST(build_id AS STRING))
+  as BuildId, step_name, SUBSTR(${source_1}, STRPOS(${source_1}, \"${join_1}\"),
+  ${field_limit}) AS stdout_1, step_name1,
+  SUBSTR(${source_2}, STRPOS(${source_2}, \"${join_2}\"), ${field_limit})
+  AS stdout_2, DATETIME(TIMESTAMP_SECONDS(request_time.seconds)) AS DateTime"
+
+
+  query="${query} FROM chromeos_ci_eng.analysis_event_log.${when}"
+  query="${query} INNER JOIN (select build_id AS build_id1,"
+  query="${query} step_name AS step_name1, stdout AS stdout_2"
+  query="${query} FROM chromeos_ci_eng.analysis_event_log.${when})"
+  query="${query} ON build_id = build_id1 AND step_name != step_name1"
+  query="${query} WHERE $source_1 "
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    query="$query LIKE LOWER(\"%${join_1}%\")"
+  else
+    query="$query LIKE \"%${join_1}%\""
+  fi
+  query="${query} AND $source_2 "
+  if [[ ${case_insensitive} -eq 1 ]]; then
+    query="$query LIKE LOWER(\"%${join_2}%\")"
+  else
+    query="$query LIKE \"%${join_2}%\""
+  fi
+  query="$query ORDER BY DateTime DESC LIMIT ${limit};"
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
     echo "Executing..."
