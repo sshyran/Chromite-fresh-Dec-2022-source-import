@@ -90,6 +90,7 @@ class CrOSTester(CrOSTesterBase):
     """Tests flash command."""
     # Verify that specifying the board gets the latest canary.
     self._tester.flash = True
+    self._tester.public_image = True
     self._tester._device.board = 'octopus'
     self._tester._device.remote._lsb_release = {
         cros_set_lsb_release.LSB_KEY_VERSION: '12900.0.0',
@@ -98,7 +99,7 @@ class CrOSTester(CrOSTesterBase):
     self.assertCommandContains([
         os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
         'flash', 'ssh://localhost:9222',
-        'xbuddy://remote/octopus-release/latest',])
+        'xbuddy://remote/octopus-full/latest',])
 
     # Specify an xbuddy link.
     self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'

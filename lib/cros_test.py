@@ -43,6 +43,7 @@ class CrOSTest(object):
 
     self.build = opts.build
     self.flash = opts.flash
+    self.public_image = opts.public_image
     self.xbuddy = opts.xbuddy
     self.deploy = opts.deploy
     self.nostrip = opts.nostrip
@@ -151,10 +152,11 @@ class CrOSTest(object):
         cache = self.cache_dir or path_util.GetCacheDir()
         version = cros_chrome_sdk.SDKFetcher.GetCachedFullVersion(
             cache, self._device.board) or version
-      # TODO(crbug.com/1057152): Also support flashing a *-full image when
-      # appropriate.
-      xbuddy_path = 'xbuddy://remote/%s-release/%s' % (
-          self._device.board, version)
+      suffix = ''
+      if self.public_image:
+        suffix = '-full'
+      xbuddy_path = 'xbuddy://remote/%s%s/%s' % (
+          self._device.board, suffix, version)
 
     # Skip the flash if the device is already running the requested version.
     device_version = self._device.remote.version
@@ -549,6 +551,8 @@ def ParseCommandLine(argv):
                       help='Directory for building and deploying chrome.')
   parser.add_argument('--flash', action='store_true', default=False,
                       help='Before running tests, flash the device.')
+  parser.add_argument('--public-image', action='store_true', default=False,
+                      help='Flash with a public image.')
   parser.add_argument('--xbuddy',
                       help='xbuddy link to use for flashing the device. Will '
                       "default to the board's version used in the cros "
