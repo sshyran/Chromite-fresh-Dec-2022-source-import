@@ -192,6 +192,9 @@ BAD_LICENSE_PATTERNS = {
     # https://opensource.org/licenses/AGPL-3.0
     'AGPL',
     'AGPL-*',
+    # Catch all versions & variants of CC-BY-NC, CC-BY-NC-ND, and CC-BY-NC-SA.
+    # https://creativecommons.org/licenses/by-nc/3.0/
+    'CC-BY-NC*',
 }
 
 # This used to provide overrides. I can't find a valid reason to add any more
