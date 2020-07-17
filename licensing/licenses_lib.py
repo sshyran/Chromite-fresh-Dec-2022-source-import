@@ -9,6 +9,7 @@ Documentation on this script is also available here:
 """
 
 import codecs
+import fnmatch
 import html
 import logging
 import os
@@ -178,6 +179,20 @@ LOOK_IN_SOURCE_LICENSES = [
     'OFL-1.1',   # Almost single use license, do copyright attribution.
     'UoI-NCSA',  # Only used by NSCA, might as well show their custom copyright.
 ]
+
+# These are licenses we don't want to allow anyone to use.  Globs allowed.
+#
+# Gentoo normally uses a naming convention of <name> or <name>-<ver>.  We don't
+# block AGPL* in the pathological case that an unrelated license comes up with
+# the same first few letters.  Not likely, but not impossible.  But we do block
+# AGPL-* as it's much more likely we'll get a newer version using the same base
+# name which we want to be future proof against.
+BAD_LICENSE_PATTERNS = {
+    # Google policy to avoid these licenses (and all versions of them).
+    # https://opensource.org/licenses/AGPL-3.0
+    'AGPL',
+    'AGPL-*',
+}
 
 # This used to provide overrides. I can't find a valid reason to add any more
 # here, though.
@@ -896,13 +911,24 @@ def _GetLicenseDirectories(board: Optional[str] = None,
     return stock + custom
 
 
-def _CheckForDeprecatedLicense(cpf, licenses):
-  """See if |cpf| is a known package using a deprecated license.
+def _CheckForKnownBadLicenses(cpf, licenses):
+  """Make sure all the |licenses| are ones we allow.
 
   We have a bunch of licenses we don't want people to use, but some packages
   were using them by the time we noticed.  Still allow those existing ones,
   but prevent new users from showing up.
   """
+  bad_licenses = set()
+  for pattern in BAD_LICENSE_PATTERNS:
+    bad_licenses |= {x for x in licenses if fnmatch.fnmatch(x, pattern)}
+
+  # We allow ghostscript for public builds to use AGPL but nothing else.
+  if cpf.startswith('app-text/ghostscript-gpl'):
+    bad_licenses -= {'AGPL-3'}
+
+  if bad_licenses:
+    raise PackageLicenseError(f'Licenses {bad_licenses} are not allowed')
+
   # TODO(crbug.com/401332): Remove this entirely.
   # We allow a few packages for now so new packages will stop showing up.
   if 'Proprietary-Binary' in licenses:
@@ -1201,7 +1227,7 @@ class Licensing(object):
     pkg.license_text_scanned = license_texts
     self.packages[fullnamerev] = pkg
 
-    _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
+    _CheckForKnownBadLicenses(fullnamerev, pkg.license_names)
 
   # Called directly by src/repohooks/pre-upload.py
   @staticmethod
@@ -1612,7 +1638,7 @@ def HookPackageProcess(pkg_build_path: str, sysroot: Optional[str] = '/'):
 
   pkg.AssertCorrectness(build_info_dir, None)
   # Make sure the licenses are valid at build time even if we don't load them.
-  _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
+  _CheckForKnownBadLicenses(fullnamerev, pkg.license_names)
   for license_name in pkg.license_names:
     Licensing.FindLicenseType(license_name, sysroot=sysroot)
 

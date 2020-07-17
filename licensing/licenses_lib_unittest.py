@@ -353,20 +353,20 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
   def testDeprecatedLicenses(self):
     """Verify deprecated license checks."""
     # These are known bad packages.
-    licenses_lib._CheckForDeprecatedLicense(
+    licenses_lib._CheckForKnownBadLicenses(
         'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
-    licenses_lib._CheckForDeprecatedLicense(
+    licenses_lib._CheckForKnownBadLicenses(
         'sys-firmware/dell-dock-0.1', {'no-source-code'})
 
     # These packages should not be allowed.
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'Proprietary-Binary'})
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'GPL-2', 'Google-TOS'})
     with self.assertRaises(licenses_lib.PackageLicenseError):
-      licenses_lib._CheckForDeprecatedLicense(
+      licenses_lib._CheckForKnownBadLicenses(
           'sys-apps/portage-123', {'no-source-code'})
 
   def testHookPackageProcess(self):
@@ -391,3 +391,18 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
     run_mock.return_value = cros_build_lib.CommandResult(
         args=[], returncode=0, stdout=result)
     self.assertEqual(licenses_lib.ListInstalledPackages(''), ['test', 'test2'])
+
+  def testBannedLicenses(self):
+    """Verify banned license checks."""
+    # These are somewhat redundant, but we want to be overly cautious.
+    # All of these have been used in Gentoo at some point.
+    BAD_LICENSES = {
+        'AGPL', 'AGPL-1', 'AGPL-2', 'AGPL-2+', 'AGPL-3', 'AGPL-3+',
+    }
+    for lic in BAD_LICENSES:
+      with self.assertRaises(licenses_lib.PackageLicenseError):
+        licenses_lib._CheckForKnownBadLicenses(
+            'sys-libs/db-18', {lic})
+      with self.assertRaises(licenses_lib.PackageLicenseError):
+        licenses_lib._CheckForKnownBadLicenses(
+            'sys-libs/db-18', {'GPL-2', lic})
