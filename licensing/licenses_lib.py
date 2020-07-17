@@ -194,6 +194,8 @@ BAD_LICENSE_PATTERNS = {
     # Catch all versions & variants of CC-BY-NC, CC-BY-NC-ND, and CC-BY-NC-SA.
     # https://creativecommons.org/licenses/by-nc/3.0/
     'CC-BY-NC*',
+    # https://en.wikipedia.org/wiki/WTFPL  nocheck
+    'WTFPL*',  # nocheck
 
     # These aren't actual licenses :).
     'as-is',
