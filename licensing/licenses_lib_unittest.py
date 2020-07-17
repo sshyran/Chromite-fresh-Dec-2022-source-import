@@ -403,6 +403,7 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
         'CC-BY-NC-ND-2.0', 'CC-BY-NC-ND-2.5', 'CC-BY-NC-ND-3.0',
         'CC-BY-NC-SA-2.5', 'CC-BY-NC-SA-3.0', 'CC-BY-NC-SA-4.0',
         'CPAL', 'CPAL-1.0',
+        'EUPL', 'EUPL-1.1',
         'WTFPL', 'WTFPL-2',  # nocheck
     }
     for lic in BAD_LICENSES:

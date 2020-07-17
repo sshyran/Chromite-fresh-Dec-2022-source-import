@@ -197,6 +197,9 @@ BAD_LICENSE_PATTERNS = {
     # https://opensource.org/licenses/CPAL-1.0
     'CPAL',
     'CPAL-*',
+    # https://opensource.org/licenses/EUPL-1.2
+    'EUPL',
+    'EUPL-*',
     # https://en.wikipedia.org/wiki/WTFPL  nocheck
     'WTFPL*',  # nocheck
 
