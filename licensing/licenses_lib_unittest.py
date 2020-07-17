@@ -398,6 +398,7 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
     # All of these have been used in Gentoo at some point.
     BAD_LICENSES = {
         'AGPL', 'AGPL-1', 'AGPL-2', 'AGPL-2+', 'AGPL-3', 'AGPL-3+',
+        'as-is',
         'CC-BY-NC-4.0',
         'CC-BY-NC-ND-2.0', 'CC-BY-NC-ND-2.5', 'CC-BY-NC-ND-3.0',
         'CC-BY-NC-SA-2.5', 'CC-BY-NC-SA-3.0', 'CC-BY-NC-SA-4.0',

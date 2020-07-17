@@ -168,7 +168,6 @@ COPYRIGHT_ATTRIBUTION_LICENSES = {
 # found (there is no good way to know that a license we found on disk is the
 # better version of the stock version, so we show both).
 LOOK_IN_SOURCE_LICENSES = [
-    'as-is',  # The stock license is very vague, source always has more details.
     'PSF-2',  # The custom license in python is more complete than the template.
 
     # As far as I know, we have no requirement to do copyright attribution for
@@ -195,6 +194,9 @@ BAD_LICENSE_PATTERNS = {
     # Catch all versions & variants of CC-BY-NC, CC-BY-NC-ND, and CC-BY-NC-SA.
     # https://creativecommons.org/licenses/by-nc/3.0/
     'CC-BY-NC*',
+
+    # These aren't actual licenses :).
+    'as-is',
 }
 
 # This used to provide overrides. I can't find a valid reason to add any more
