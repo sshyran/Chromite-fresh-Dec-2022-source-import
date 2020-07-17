@@ -220,7 +220,7 @@ class Qemu(object):
         # If we made it all the way here, we won!
         return True
       except OSError as e:
-        if e.errno != errno.EEXISTS:
+        if e.errno != errno.EEXIST:
           raise
 
       # We only reach here when the rename above failed, so this cleans up.
