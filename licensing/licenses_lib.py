@@ -950,6 +950,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'sys-boot/coreboot-private-files-sklrvp',
         'sys-boot/coreboot-private-files-snappy',
         'sys-boot/coreboot-private-files-soraka',
+        'sys-boot/amd-picasso-fsp',
         'sys-boot/exynos-pre-boot',
         'sys-boot/intel-cflfsp',
         'sys-boot/intel-glkfsp',
