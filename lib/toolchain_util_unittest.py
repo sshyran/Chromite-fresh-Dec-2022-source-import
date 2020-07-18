@@ -615,9 +615,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
       for l in ['log1.json', 'log2.json', 'log3.notjson']:
         osutils.Touch(os.path.join(d, l))
     tarball = self.obj.Bundle()
-    artifact = os.path.join(
-        self.outdir,
-        '%s.DATE.fatal_clang_warnings.tar.xz' % self.board)
+    artifact = os.path.join(self.outdir,
+                            '%s.DATE.fatal_clang_warnings.tar.xz' % self.board)
     self.assertEqual(tarball, [artifact])
 
     # Make sure the duplicate logs are renamed and all logs are captured.
@@ -710,18 +709,19 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.SetUpBundle('ClangCrashDiagnoses')
     src_dir = '/tmp/clang_crash_diagnostics'
     check_dirs = [
-        self.chroot.full_path(x) for x in [
-            src_dir,
-            '/build/%s%s' % (self.board, src_dir)
-        ]
+        self.chroot.full_path(x)
+        for x in [src_dir, '/build/%s%s' % (self.board, src_dir)]
     ]
     for d in check_dirs:
       osutils.SafeMakedirs(d)
       for l in ['1.cpp', '1.sh', '2.cc', '2.sh']:
         osutils.Touch(os.path.join(d, l))
     tarball = self.obj.Bundle()
-    self.assertEqual(
-        tarball, [os.path.join(self.outdir, 'clang_crash_diagnoses.tar.xz')])
+    self.assertEqual(tarball, [
+        os.path.join(self.outdir,
+                     '%s.DATE.clang_crash_diagnoses.tar.xz' % self.board)
+    ])
+
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
   """Test functions related to create a release CrOS profile.

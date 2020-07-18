@@ -2396,7 +2396,10 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         logging.info('No clang crashes found, skip bundle artifact')
         return []
 
-      output = os.path.join(self.output_dir, 'clang_crash_diagnoses.tar.xz')
+      now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+      output = os.path.join(
+          self.output_dir,
+          f'{self.build_target}.{now}.clang_crash_diagnoses.tar.xz')
       cros_build_lib.CreateTarball(output, tempdir)
       return [output]
 
