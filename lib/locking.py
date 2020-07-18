@@ -132,8 +132,8 @@ class _Lock(cros_build_lib.MasterPidContextManager):
         raise
       self.unlock()
       self.locking_mechanism(self.fd, flags)
-    logging.info('%s: lock has been acquired (%s), continuing.',
-                 self.description, self.locktype)
+    logging.debug('%s: lock has been acquired (%s), continuing.',
+                  self.description, self.locktype)
 
   def lock(self, shared=False):
     """Take a lock of type |shared|.
@@ -199,8 +199,8 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       IOError if the operation fails in some way.
     """
     if self._fd is not None:
-      logging.info('%s: lock is being released (%s).',
-                   self.description, self.locktype)
+      logging.debug('%s: lock is being released (%s).',
+                    self.description, self.locktype)
       self.locking_mechanism(self._fd, fcntl.LOCK_UN)
 
   def __del__(self):
