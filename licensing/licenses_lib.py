@@ -1102,6 +1102,8 @@ class Licensing(object):
             if pkg.tainted:
                 self.tainted_pkgs.append(package_name)
 
+            _CheckForKnownBadLicenses(pkg.fullnamerev, pkg.license_names)
+
     def AddExtraPkg(self, fullnamerev, homepages, license_names, license_texts):
         """Allow adding pre-created virtual packages.
 
