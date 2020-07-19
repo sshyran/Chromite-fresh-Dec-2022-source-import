@@ -849,6 +849,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'chromeos-base/chromeos-board-default-apps-winky',
         'chromeos-base/chromeos-board-default-apps-yuna',
         'chromeos-base/chromeos-board-default-apps-zako',
+        'chromeos-base/chromeos-bsp-trogdor-private',
         'chromeos-base/chromeos-chrome',
         'chromeos-base/chromeos-default-apps',
         'chromeos-base/chromeos-disk-firmware-enguarde',
