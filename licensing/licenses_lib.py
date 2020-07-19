@@ -1389,7 +1389,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
 
     for pkg in self.packages.values():
       if pkg.skip:
-        logging.debug('Skipping package %s', pkg.fullnamerev)
+        logging.debug('Skipping empty package %s', pkg.fullnamerev)
         continue
       license_txts[pkg] = self._GeneratePackageLicenseText(pkg)
 
