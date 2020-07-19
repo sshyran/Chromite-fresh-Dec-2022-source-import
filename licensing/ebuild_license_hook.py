@@ -13,7 +13,7 @@ from chromite.licensing import licenses_lib
 
 
 def main(args):
-  parser = commandline.ArgumentParser(usage=__doc__)
+  parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('--builddir', type='path', dest='builddir',
                       help='Take $PORTAGE_BUILDDIR as argument.')
 
