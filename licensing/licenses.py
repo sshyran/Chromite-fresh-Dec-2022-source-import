@@ -139,7 +139,6 @@ def get_parser() -> commandline.ArgumentParser:
                       help='check the license of the package, e.g.,'
                       'dev-libs/libatomic_ops-7.2d')
   parser.add_argument('-a', '--all-packages', action='store_true',
-                      dest='all_packages',
                       help='Run licensing against all packages in the '
                       'build tree, instead of just virtual/target-os '
                       'dependencies.')
@@ -160,6 +159,10 @@ def main(args):
 
   sysroot = (opts.sysroot or
              build_target_lib.get_default_sysroot_path(opts.board))
+
+  if (opts.output and os.path.exists(opts.output) and
+      not os.path.isfile(opts.output)):
+    parser.error(f'--output must point to a file: {opts.output}')
 
   licensing = LoadPackageInfo(
       sysroot, opts.all_packages, opts.gen_licenses, opts.packages)

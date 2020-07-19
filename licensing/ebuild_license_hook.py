@@ -16,13 +16,16 @@ from chromite.licensing import licenses_lib
 
 def main(args):
   parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('--builddir', type='path', dest='builddir',
+  parser.add_argument('--builddir', type='path', required=True,
                       help='Take $PORTAGE_BUILDDIR as argument.')
   parser.add_argument('--sysroot', type='path',
                       help='Take $SYSROOT as argument.')
 
   opts = parser.parse_args(args)
   opts.Freeze()
+
+  if not os.path.isdir(opts.builddir):
+    parser.error(f'--builddir must be a directory: {opts.builddir}')
 
   sysroot = opts.sysroot
   if not sysroot:
