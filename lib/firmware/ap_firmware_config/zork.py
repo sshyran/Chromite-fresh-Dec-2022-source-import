@@ -7,7 +7,7 @@
 
 from __future__ import print_function
 
-BUILD_WORKON_PACKAGES = ('coreboot-zork',)
+BUILD_WORKON_PACKAGES = ('coreboot',)
 
 BUILD_PACKAGES = BUILD_WORKON_PACKAGES + ('chromeos-bootimage',)
 
