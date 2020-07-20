@@ -53,11 +53,11 @@ class PrepareForBuildReturn(object):
 # Need to use build API and recipes to communicate to GS buckets in
 # the future.
 ORDERFILE_GS_URL_UNVETTED = \
-    'gs://chromeos-prebuilt/afdo-job/orderfiles/unvetted'
+    'gs://chromeos-toolchain-artifacts/orderfile/unvetted'
 ORDERFILE_GS_URL_VETTED = \
     'gs://chromeos-prebuilt/afdo-job/orderfiles/vetted'
 BENCHMARK_AFDO_GS_URL = \
-    'gs://chromeos-prebuilt/afdo-job/llvm/'
+    'gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark'
 CWP_AFDO_GS_URL = \
     'gs://chromeos-prebuilt/afdo-job/cwp/chrome/'
 KERNEL_PROFILE_URL = \

@@ -1805,7 +1805,7 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
   @staticmethod
   def mockFindChromeAFDO(url, _pattern):
     """Mock toolchain_util._FindLatestAFDOArtifact for Chrome AFDO."""
-    if 'llvm' in url:
+    if 'benchmark' in url:
       return AFDOUpdateEbuildTests.mock_benchmark_afdo
 
     for arch in AFDOUpdateEbuildTests.mock_cwp_afdo:
