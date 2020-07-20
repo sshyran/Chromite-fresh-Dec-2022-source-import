@@ -189,6 +189,7 @@ MERGED_PROFILE_NAME_REGEX = r"""
 CHROME_ARCH_VERSION = '%(package)s-%(arch)s-%(version)s'
 CHROME_PERF_AFDO_FILE = '%(package)s-%(arch)s-%(versionnorev)s.perf.data'
 CHROME_BENCHMARK_AFDO_FILE = '%s%s' % (CHROME_ARCH_VERSION, AFDO_SUFFIX)
+CHROME_DEBUG_BINARY_NAME = '%s.debug' % CHROME_ARCH_VERSION
 
 
 class Error(Exception):
@@ -2203,9 +2204,10 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         'root': '',
         'sysroot': self.sysroot_path
     }
+    binary_name = self._GetBenchmarkAFDOName(CHROME_DEBUG_BINARY_NAME)
     bin_path = os.path.join(
         self.output_dir,
-        os.path.basename(debug_bin_inside) + BZ2_COMPRESSION_SUFFIX)
+        binary_name + BZ2_COMPRESSION_SUFFIX)
     with open(bin_path, 'w') as f:
       cros_build_lib.run(['bzip2', '-c', debug_bin_inside],
                          stdout=f,

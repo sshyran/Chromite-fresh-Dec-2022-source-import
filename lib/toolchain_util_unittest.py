@@ -498,6 +498,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         'benchmark-78.0.3893.0-r1.orderfile')
     self.afdo_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo'
     self.perf_name = 'chromeos-chrome-amd64-78.0.3893.0.perf.data'
+    self.debug_binary_name = (
+        'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug')
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
 
@@ -602,7 +604,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     osutils.WriteFile(bin_path, '', makedirs=True)
     output = os.path.join(
         self.outdir,
-        os.path.basename(bin_path) + toolchain_util.BZ2_COMPRESSION_SUFFIX)
+        self.debug_binary_name + toolchain_util.BZ2_COMPRESSION_SUFFIX)
     self.assertEqual([output], self.obj.Bundle())
 
   def testBundleToolchainWarningLogs(self):
