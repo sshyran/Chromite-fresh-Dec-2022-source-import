@@ -123,8 +123,6 @@ class ChromiumOSUpdater(BaseUpdater):
   # rootfs update files.
   REMOTE_UPDATE_ENGINE_BIN_FILENAME = 'update_engine_client'
   REMOTE_UPDATE_ENGINE_LOGFILE_PATH = '/var/log/update_engine.log'
-  REMOTE_PROVISION_FAILED_FILE_PATH = '/var/tmp/provision_failed'
-  REMOTE_QUICK_PROVISION_LOGFILE_PATH = '/var/log/quick-provision.log'
 
   UPDATE_CHECK_INTERVAL_PROGRESSBAR = 0.5
   UPDATE_CHECK_INTERVAL_NORMAL = 10
@@ -529,13 +527,6 @@ class ChromiumOSUpdater(BaseUpdater):
           os.path.join(self.tempdir, os.path.basename(
               self.REMOTE_UPDATE_ENGINE_LOGFILE_PATH)),
           follow_symlinks=True, mode=self._transfer_obj.mode,
-          **self._cmd_kwargs_omit_error)
-      self.device.CopyFromDevice(
-          self.REMOTE_QUICK_PROVISION_LOGFILE_PATH,
-          os.path.join(self.tempdir, os.path.basename(
-              self.REMOTE_QUICK_PROVISION_LOGFILE_PATH)),
-          follow_symlinks=True, mode=self._transfer_obj.mode,
-          ignore_failures=True,
           **self._cmd_kwargs_omit_error)
 
   def UpdateStateful(self):
