@@ -833,8 +833,6 @@ IMAGE_TYPE_TEST = 'test'
 IMAGE_TYPE_RECOVERY = 'recovery'
 IMAGE_TYPE_FACTORY = 'factory'
 IMAGE_TYPE_FIRMWARE = 'firmware'
-# NVidia Tegra SoC resume firmware blob.
-IMAGE_TYPE_NV_LP0_FIRMWARE = 'nv_lp0_firmware'
 # USB PD accessory microcontroller firmware (e.g. power brick, display dongle).
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
 # Standalone accessory microcontroller firmware (e.g. wireless keyboard).
