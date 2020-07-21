@@ -62,6 +62,7 @@ class RequestBuild(object):
                display_label=None,
                branch='master',
                extra_args=(),
+               extra_properties=None,
                user_email=None,
                email_template=None,
                master_cidb_id=None,
@@ -78,6 +79,7 @@ class RequestBuild(object):
       display_label: String describing how build group on waterfall, or None.
       branch: Name of branch to build for.
       extra_args: Command line arguments to pass to cbuildbot in job.
+      extra_properties: Additional input properties to add to the request.
       user_email: Email address of person requesting job, or None.
       email_template: Name of the luci-notify template to use. None for
                       default. Ignored if user_email is not set.
@@ -87,6 +89,7 @@ class RequestBuild(object):
       requested_bot: Name of bot to prefer (for performance), or None.
     """
     self.bucket = bucket
+    self.extra_properties = extra_properties or {}
 
     site_config = config_lib.GetConfig()
     if build_config in site_config:
@@ -141,6 +144,9 @@ class RequestBuild(object):
       # Used by Legoland as part of grouping slave builds. Set to False for
       # slave builds, not set otherwise.
       tags['master'] = 'False'
+
+    # Include the extra_properties we might have passed into the tags.
+    tags.update(self.extra_properties)
 
     # Don't include tags with no value, there is no point.
     # Convert tag values to strings.

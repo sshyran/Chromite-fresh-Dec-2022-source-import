@@ -12,6 +12,7 @@ import mock
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import scheduler_stages
+from chromite.cbuildbot import cbuildbot_run
 from chromite.lib import auth
 from chromite.lib import buildbucket_lib
 from chromite.lib import cidb
@@ -37,6 +38,10 @@ class ScheduleSalvesStageTest(generic_stages_unittest.AbstractStageTestCase):
     self.PatchObject(buildbucket_lib.BuildbucketClient,
                      'SendBuildbucketRequest',
                      return_value=None)
+    # pylint: disable=protected-access
+    self.PatchObject(cbuildbot_run._BuilderRunBase,
+                     'GetVersion',
+                     return_value='R84-13099.77.0')
     # Create and set up a fake cidb instance.
     self.fake_db = fake_cidb.FakeCIDBConnection()
     cidb.CIDBConnectionFactory.SetupMockCidb(self.fake_db)

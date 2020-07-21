@@ -77,6 +77,11 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
       cbb_extra_args.append('--cbb_snapshot_revision')
       cbb_extra_args.append(self._run.options.cbb_snapshot_revision)
 
+    # Add the version string to bb_extra_properties so it can be read for
+    # running builds.
+    extra_properties = {}
+    extra_properties['full_version'] = self._run.GetVersion()
+
     return request_build.RequestBuild(
         build_config=build_name,
         display_label=build_config.display_label,
@@ -84,6 +89,7 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
         master_cidb_id=master_build_id,
         master_buildbucket_id=master_buildbucket_id,
         extra_args=cbb_extra_args,
+        extra_properties=extra_properties,
         requested_bot=requested_bot,
     )
 
