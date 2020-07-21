@@ -41,6 +41,7 @@ class RequestBuildHelperTestsBase(cros_test_lib.MockTestCase):
   MASTER_CIDB_ID = 'master_cidb_id'
   MASTER_BUILDBUCKET_ID = 'master_bb_id'
   TEST_BUCKET = 'luci.chromeos.general'  # Use Prod bucket for network test.
+  EXTRA_PROPERTIES = {'full_version': 'R84-13099.77.0'}
 
   def _CreateJobMin(self):
     return request_build.RequestBuild(build_config=self.BUILD_CONFIG_MIN)
@@ -52,6 +53,7 @@ class RequestBuildHelperTestsBase(cros_test_lib.MockTestCase):
         display_label=self.DISPLAY_LABEL,
         branch=self.BRANCH,
         extra_args=self.PASS_THROUGH_ARGS,
+        extra_properties=self.EXTRA_PROPERTIES,
         user_email=self.TEST_EMAIL,
         email_template=self.TEST_TEMPLATE,
         master_cidb_id=self.MASTER_CIDB_ID,
@@ -135,6 +137,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
             'cbb_email:explicit_email',
             'cbb_master_build_id:master_cidb_id',
             'cbb_master_buildbucket_id:master_bb_id',
+            'full_version:R84-13099.77.0',
             'master:False',
         ]
     })
@@ -154,6 +157,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
             u'cbb_extra_args': [u'funky', u'cold', u'medina'],
             u'cbb_master_build_id': u'master_cidb_id',
             u'cbb_master_buildbucket_id': u'master_bb_id',
+            u'full_version': u'R84-13099.77.0',
             u'master': u'False',
         },
         u'swarming': {
