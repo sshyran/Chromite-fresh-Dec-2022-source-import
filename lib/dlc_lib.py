@@ -352,7 +352,8 @@ class DlcGenerator(object):
     if not self.ebuild_params.fullnamerev:
       return
 
-    licensing = licenses_lib.Licensing(self.board,
+    sysroot = cros_build_lib.GetSysroot(self.board)
+    licensing = licenses_lib.Licensing(sysroot,
                                        [self.ebuild_params.fullnamerev], True)
     licensing.LoadPackageInfo()
     licensing.ProcessPackageLicenses()

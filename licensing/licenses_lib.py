@@ -15,12 +15,14 @@ import codecs
 import html  # pylint: disable=import-error
 import os
 import re
+from typing import List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import sysroot_lib
 
 # We are imported by src/repohooks/pre-upload.py in a non chroot environment
 # where yaml may not be there, so we don't error on that since it's not needed
@@ -269,15 +271,15 @@ class PackageLicenseError(Exception):
 class PackageInfo(object):
   """Package specific information, mostly about licenses."""
 
-  def __init__(self, board, fullnamerev):
+  def __init__(self, sysroot, fullnamerev):
     """Package info initializer.
 
     Args:
-      board: The board this package was built for.
+      sysroot: The board this package was built for.
       fullnamerev: package name of the form 'x11-base/X.Org-1.9.3-r23'
     """
 
-    self.board = board  # This field may be None, based on entry path.
+    self.sysroot = sysroot
 
     #
     # Populate these fields from fullnamerev:
@@ -342,8 +344,8 @@ class PackageInfo(object):
 
     Only valid for packages that have already been emerged.
     """
-    return os.path.join(cros_build_lib.GetSysroot(self.board),
-                        PER_PKG_LICENSE_DIR, self.fullnamerev, 'license.yaml')
+    return os.path.join(self.sysroot, PER_PKG_LICENSE_DIR, self.fullnamerev,
+                        'license.yaml')
 
   def _RunEbuildPhases(self, ebuild_path, phases):
     """Run a list of ebuild phases on an ebuild.
@@ -355,8 +357,7 @@ class PackageInfo(object):
     Returns:
       ebuild command output
     """
-    ebuild_cmd = cros_build_lib.GetSysrootToolPath(
-        cros_build_lib.GetSysroot(self.board), 'ebuild')
+    ebuild_cmd = cros_build_lib.GetSysrootToolPath(self.sysroot, 'ebuild')
     return cros_build_lib.run(
         [ebuild_cmd, ebuild_path] + phases,
         stdout=True, encoding='utf-8')
@@ -449,7 +450,8 @@ class PackageInfo(object):
       for line in output:
         logging.info(line)
 
-      tmpdir = portage_util.PortageqEnvvar('PORTAGE_TMPDIR', board=self.board)
+      tmpdir = portage_util.PortageqEnvvar(
+          'PORTAGE_TMPDIR', sysroot=self.sysroot)
       # tmpdir gets something like /build/daisy/tmp/
       src_dir = os.path.join(tmpdir, 'portage', self.fullnamerev, 'work')
 
@@ -567,8 +569,7 @@ being scraped currently).""",
     Raises:
       AssertionError if it can't be discovered for some reason.
     """
-    equery_cmd = cros_build_lib.GetSysrootToolPath(
-        cros_build_lib.GetSysroot(self.board), 'equery')
+    equery_cmd = cros_build_lib.GetSysrootToolPath(self.sysroot, 'equery')
     args = [equery_cmd, '-q', '-C', 'which', self.fullnamerev]
     try:
       path = cros_build_lib.run(args, print_cmd=True, encoding='utf-8',
@@ -768,25 +769,36 @@ being scraped currently).""",
     osutils.WriteFile(save_file, yaml.dump(yaml_dump), makedirs=True)
 
 
-def _GetLicenseDirectories(board=None, dir_set=_BOTH_DIRS,
-                           buildroot=constants.SOURCE_ROOT):
+def _GetLicenseDirectories(board: Optional[str] = None,
+                           sysroot: Optional[str] = None,
+                           dir_set: str = _BOTH_DIRS,
+                           buildroot: str = constants.SOURCE_ROOT) -> List[str]:
   """Get the "licenses" directories for all matching overlays.
 
+  With a |board| argument, allows searching without a compiled sysroot.
+
   Args:
-    board: str|None - Which board to use to search a hierarchy.
-    dir_set: str - Whether to fetch stock, custom, or both sets of directories.
-        See the _(STOCK|CUSTOM|BOTH)_DIRS constants
-    buildroot: str - (typically) the root chromiumos path
+    board: Which board to use to search a hierarchy.  Does not require the board
+        be setup or compiled yet.
+    sysroot: A setup board sysroot to query.
+    dir_set: Whether to fetch stock, custom, or both sets of directories.
+        See the _(STOCK|CUSTOM|BOTH)_DIRS constants.
+    buildroot: (Typically) the root chromiumos path.
 
   Returns:
     list - all matching "licenses" directories
   """
   stock = [os.path.join(buildroot, d) for d in STOCK_LICENSE_DIRS]
-  if board is None:
-    custom = [os.path.join(buildroot, d) for d in CUSTOM_LICENSE_DIRS]
+  if board is not None:
+    custom_paths = portage_util.FindOverlays(
+        constants.BOTH_OVERLAYS, board, buildroot)
+  elif sysroot is not None:
+    portdir_overlay = sysroot_lib.Sysroot(sysroot).GetStandardField(
+        sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY) or ''
+    custom_paths = portdir_overlay.split() if portdir_overlay else []
   else:
-    tmp = portage_util.FindOverlays(constants.BOTH_OVERLAYS, board, buildroot)
-    custom = [os.path.join(d, 'licenses') for d in tmp]
+    custom_paths = []
+  custom = [os.path.join(d, 'licenses') for d in custom_paths]
 
   if dir_set == _STOCK_DIRS:
     return stock
@@ -975,9 +987,8 @@ def _CheckForDeprecatedLicense(cpf, licenses):
 class Licensing(object):
   """Do the actual work of extracting licensing info and outputting html."""
 
-  def __init__(self, board, package_fullnames, gen_licenses):
-    # eg x86-alex
-    self.board = board
+  def __init__(self, sysroot, package_fullnames, gen_licenses):
+    self.sysroot = sysroot
     # List of stock and custom licenses referenced in ebuilds. Used to
     # print a report. Dict value says which packages use that license.
     self.licenses = {}
@@ -1013,7 +1024,7 @@ class Licensing(object):
   def LoadPackageInfo(self):
     """Populate basic package info for all packages from their ebuild."""
     for package_name in self._package_fullnames:
-      pkg = PackageInfo(self.board, package_name)
+      pkg = PackageInfo(self.sysroot, package_name)
       self.packages[package_name] = pkg
 
   def ProcessPackageLicenses(self):
@@ -1039,8 +1050,7 @@ class Licensing(object):
         logging.error('>>> License for %s is missing, creating now <<<',
                       package_name)
         build_info_path = os.path.join(
-            cros_build_lib.GetSysroot(pkg.board),
-            PER_PKG_LICENSE_DIR, pkg.fullnamerev)
+            self.sysroot, PER_PKG_LICENSE_DIR, pkg.fullnamerev)
         pkg.GetLicenses(build_info_path, None)
 
         # We dump packages where licensing failed too.
@@ -1063,7 +1073,7 @@ class Licensing(object):
       license_names: list of license name strings.
       license_texts: custom license text to use, mostly for attribution.
     """
-    pkg = PackageInfo(self.board, fullnamerev)
+    pkg = PackageInfo(self.sysroot, fullnamerev)
     pkg.homepages = homepages
     pkg.license_names = license_names
     pkg.license_text_scanned = license_texts
@@ -1073,17 +1083,19 @@ class Licensing(object):
 
   # Called directly by src/repohooks/pre-upload.py
   @staticmethod
-  def FindLicenseType(license_name, board=None, overlay_path=None,
+  def FindLicenseType(license_name, board=None, sysroot=None, overlay_path=None,
                       buildroot=constants.SOURCE_ROOT):
     """Says if a license is stock Gentoo, custom, or doesn't exist.
 
     Will check the old, static locations by default, but supplying either the
-    overlay directory or board name allows searching in the overlay hierarchy.
-    Ignores the overlay_path if board is provided.
+    overlay directory or sysroot allows searching in the overlay hierarchy.
+    Ignores the overlay_path if sysroot is provided.
 
     Args:
       license_name: The license name
-      board: Which board to use as the search base
+      board: Which board to use to search a hierarchy.  Does not require the
+           board be setup or compiled yet.
+      sysroot: A setup board sysroot to query.
       overlay_path: Which overlay directory to use as the search base
       buildroot: source root
 
@@ -1106,7 +1118,8 @@ class Licensing(object):
       board = portage_util.GetOverlayName(overlay_path)
 
     # Check the custom licenses
-    custom = _GetLicenseDirectories(board, _CUSTOM_DIRS, buildroot)
+    custom = _GetLicenseDirectories(
+        board=board, sysroot=sysroot, dir_set=_CUSTOM_DIRS, buildroot=buildroot)
     for directory in custom:
       path = os.path.join(directory, license_name)
       if os.path.exists(path):
@@ -1131,11 +1144,11 @@ Try re-running the script with -p cat/package-ver --generate
 after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
 
   @staticmethod
-  def ReadSharedLicense(license_name, board=None,
+  def ReadSharedLicense(license_name, board=None, sysroot=None,
                         buildroot=constants.SOURCE_ROOT):
     """Read and return stock or cust license file specified in an ebuild."""
-    directories = _GetLicenseDirectories(board=board, dir_set=_BOTH_DIRS,
-                                         buildroot=buildroot)
+    directories = _GetLicenseDirectories(
+        board=board, sysroot=sysroot, dir_set=_BOTH_DIRS, buildroot=buildroot)
     license_path = None
     for directory in directories:
       path = os.path.join(directory, license_name)
@@ -1177,7 +1190,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     # sln: shared license name.
     for sln in pkg.license_names:
       # Says whether it's a stock gentoo or custom license.
-      license_type = self.FindLicenseType(sln, board=self.board)
+      license_type = self.FindLicenseType(sln, sysroot=self.sysroot)
       license_pointers.append(
           "<li><a href='#%s'>%s License %s</a></li>" % (
               sln, license_type, sln))
@@ -1230,8 +1243,8 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
         pkg_fullnamerev = self.licenses[sln][0]
         logging.info('Collapsing shared license %s into single use license '
                      '(only used by %s)', sln, pkg_fullnamerev)
-        license_type = self.FindLicenseType(sln, board=self.board)
-        license_txt = self.ReadSharedLicense(sln, board=self.board)
+        license_type = self.FindLicenseType(sln, sysroot=self.sysroot)
+        license_txt = self.ReadSharedLicense(sln, sysroot=self.sysroot)
         single_license = '%s License %s:\n\n%s' % (license_type, sln,
                                                    license_txt)
         pkg = self.packages[pkg_fullnamerev]
@@ -1277,8 +1290,9 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
       env = {
           'license_name': license_name,
           'license': html.escape(self.ReadSharedLicense(license_name,
-                                                        board=self.board)),
-          'license_type': self.FindLicenseType(license_name, board=self.board),
+                                                        sysroot=self.sysroot)),
+          'license_type': self.FindLicenseType(license_name,
+                                               sysroot=self.sysroot),
           'license_packages': ' '.join(self.LicensedPackages(license_name)),
       }
       licenses_txt += [self.EvaluateTemplate(license_template, env)]
@@ -1293,7 +1307,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
                       mode='wb')
 
 
-def ListInstalledPackages(board, all_packages=False):
+def ListInstalledPackages(sysroot, all_packages=False):
   """Return a list of all packages installed for a particular board."""
 
   # If all_packages is set to True, all packages visible in the build
@@ -1309,8 +1323,7 @@ def ListInstalledPackages(board, all_packages=False):
     # (many get built or used during the build, but do not get shipped).
     # Note that it also contains packages that are in the build as
     # defined by build_packages but not part of the image we ship.
-    equery_cmd = cros_build_lib.GetSysrootToolPath(
-        cros_build_lib.GetSysroot(board), 'equery')
+    equery_cmd = cros_build_lib.GetSysrootToolPath(sysroot, 'equery')
     args = [equery_cmd, 'list', '*']
     packages = cros_build_lib.run(args, encoding='utf-8',
                                   stdout=True).output.splitlines()
@@ -1319,8 +1332,7 @@ def ListInstalledPackages(board, all_packages=False):
     # (many get built or used during the build, but do not get shipped).
     # Note that it also contains packages that are in the build as
     # defined by build_packages but not part of the image we ship.
-    emerge_cmd = cros_build_lib.GetSysrootToolPath(
-        cros_build_lib.GetSysroot(board), 'emerge')
+    emerge_cmd = cros_build_lib.GetSysrootToolPath(sysroot, 'emerge')
     args = [emerge_cmd, '--with-bdeps=y', '--usepkgonly',
             '--emptytree', '--pretend', '--color=n', 'virtual/target-os']
     emerge = cros_build_lib.run(args, encoding='utf-8',
@@ -1346,8 +1358,8 @@ def ListInstalledPackages(board, all_packages=False):
       if match:
         packages.append(match.group(1))
       elif match2:
-        raise AssertionError('Package incorrectly installed, try eclean-%s' %
-                             board, '\n%s' % match2.group(1))
+        raise AssertionError('Package incorrectly installed, try reinstalling',
+                             '\n%s' % match2.group(1))
 
   return packages
 

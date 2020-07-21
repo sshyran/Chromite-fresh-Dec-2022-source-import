@@ -78,6 +78,7 @@ from __future__ import print_function
 import os
 
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
@@ -94,22 +95,20 @@ EXTRA_PACKAGES = (
 )
 
 
-def LoadPackageInfo(board, all_packages, generateMissing, packages):
+def LoadPackageInfo(sysroot, all_packages, generateMissing, packages):
   """Do the work when we're not called as a hook."""
-  logging.info('Using board %s.', board)
+  logging.info('Processing sysroot %s', sysroot)
 
   detect_packages = not packages
   if detect_packages:
     # If no packages were specified, we look up the full list.
-    packages = licenses_lib.ListInstalledPackages(board, all_packages)
+    packages = licenses_lib.ListInstalledPackages(sysroot, all_packages)
 
-  if not packages:
-    raise AssertionError('FATAL: Could not get any packages for board %s' %
-                         board)
+  assert packages, f'{sysroot}: could not find any packages'
 
   logging.debug('Initial Package list to work through:\n%s',
                 '\n'.join(sorted(packages)))
-  licensing = licenses_lib.Licensing(board, packages, generateMissing)
+  licensing = licenses_lib.Licensing(sysroot, packages, generateMissing)
 
   licensing.LoadPackageInfo()
   logging.debug('Package list to skip:\n%s',
@@ -129,10 +128,16 @@ def LoadPackageInfo(board, all_packages, generateMissing, packages):
   return licensing
 
 
-def main(args):
+def get_parser() -> commandline.ArgumentParser:
+  """Return a command line parser."""
   parser = commandline.ArgumentParser(usage=__doc__)
-  parser.add_argument('-b', '--board', required=True,
-                      help='which board to run for, like x86-alex')
+
+  group = parser.add_mutually_exclusive_group(required=True)
+  group.add_argument('-b', '--board',
+                     help='which board to run for, like x86-alex')
+  group.add_argument('--sysroot', type='path',
+                     help='which sysroot to run on (e.g. /build/eve)')
+
   parser.add_argument('-p', '--package', action='append', default=[],
                       dest='packages',
                       help='check the license of the package, e.g.,'
@@ -147,13 +152,20 @@ def main(args):
                       help='Generate license information, if missing.')
   parser.add_argument('-o', '--output', type='path',
                       help='which html file to create with output')
+  return parser
+
+
+def main(args):
+  parser = get_parser()
   opts = parser.parse_args(args)
 
   if not opts.output and not opts.gen_licenses:
     parser.error('You must specify --output and/or --generate-licenses')
 
+  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
+
   licensing = LoadPackageInfo(
-      opts.board, opts.all_packages, opts.gen_licenses, opts.packages)
+      sysroot, opts.all_packages, opts.gen_licenses, opts.packages)
 
   if opts.output:
     licensing.GenerateHTMLLicenseOutput(opts.output)
