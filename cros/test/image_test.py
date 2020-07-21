@@ -149,7 +149,8 @@ class BlacklistTest(image_test_lib.ImageTestCase):
     """Fail if any blacklisted packages are installed."""
     for package in self.BLACKLISTED_PACKAGES:
       self.assertFalse(
-          portage_util.PortageqHasVersion(package, root=image_test_lib.ROOT_A))
+          portage_util.PortageqHasVersion(
+              package, sysroot=image_test_lib.ROOT_A))
 
   def TestBlacklistedFiles(self):
     """Fail if any blacklisted files exist."""
@@ -219,8 +220,8 @@ class LinkageTest(image_test_lib.ImageTestCase):
     )
 
   def _IsPackageMerged(self, package_name):
-    has_version = portage_util.PortageqHasVersion(package_name,
-                                                  root=image_test_lib.ROOT_A)
+    has_version = portage_util.PortageqHasVersion(
+        package_name, sysroot=image_test_lib.ROOT_A)
     if has_version:
       logging.info('Package is available: %s', package_name)
     else:

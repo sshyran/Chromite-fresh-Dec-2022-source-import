@@ -2262,12 +2262,29 @@ class PortageqError(Error):
   """Portageq command error."""
 
 
-def _Portageq(command, board=None, **kwargs):
+def _GetPortageq(board=None, sysroot=None):
+  """Return the portageq tool to use."""
+  if sysroot is None and board is None:
+    return 'portageq'
+
+  # Prefer the sysroot tool if it exists.
+  if sysroot is None:
+    sysroot = cros_build_lib.GetSysroot(board)
+  tool = cros_build_lib.GetSysrootToolPath(sysroot, 'portageq')
+  if os.path.exists(tool):
+    return tool
+
+  # Fallback to the general PATH wrappers if possible.
+  return 'portageq' if board is None else 'portageq-%s' % board
+
+
+def _Portageq(command, board=None, sysroot=None, **kwargs):
   """Run a portageq command.
 
   Args:
     command: list - Portageq command to run excluding portageq.
     board: [str] - Specific board to query.
+    sysroot: The sysroot to query.
     kwargs: Additional run arguments.
 
   Returns:
@@ -2282,29 +2299,31 @@ def _Portageq(command, board=None, **kwargs):
   kwargs.setdefault('encoding', 'utf-8')
   kwargs.setdefault('enter_chroot', True)
 
-  portageq = 'portageq-%s' % board if board else 'portageq'
-  return cros_build_lib.run([portageq] + command, **kwargs)
+  return cros_build_lib.run([_GetPortageq(board, sysroot)] + command, **kwargs)
 
 
-def PortageqBestVisible(atom, board=None, pkg_type='ebuild', cwd=None):
+def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
+                        cwd=None):
   """Get the best visible ebuild CPV for the given atom.
 
   Args:
     atom: Portage atom.
     board: Board to look at. By default, look in chroot.
+    sysroot: The sysroot to query.
     pkg_type: Package type (ebuild, binary, or installed).
     cwd: Path to use for the working directory for run.
 
   Returns:
     A CPV object.
   """
-  root = cros_build_lib.GetSysroot(board=board)
-  cmd = ['best_visible', root, pkg_type, atom]
-  result = _Portageq(cmd, board=board, cwd=cwd)
+  if sysroot is None:
+    sysroot = cros_build_lib.GetSysroot(board=board)
+  cmd = ['best_visible', sysroot, pkg_type, atom]
+  result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
   return SplitCPV(result.output.strip())
 
 
-def PortageqEnvvar(variable, board=None, allow_undefined=False):
+def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
   """Run portageq envvar for a single variable.
 
   Like PortageqEnvvars, but returns the value of the single variable rather
@@ -2313,6 +2332,7 @@ def PortageqEnvvar(variable, board=None, allow_undefined=False):
   Args:
     variable: str - The variable to retrieve.
     board: str|None - See PortageqEnvvars.
+    sysroot: The sysroot to query.
     allow_undefined: bool - See PortageqEnvvars.
 
   Returns:
@@ -2328,17 +2348,18 @@ def PortageqEnvvar(variable, board=None, allow_undefined=False):
   elif not variable:
     raise ValueError('Variable must not be empty.')
 
-  result = PortageqEnvvars([variable], board=board,
+  result = PortageqEnvvars([variable], board=board, sysroot=sysroot,
                            allow_undefined=allow_undefined)
   return result[variable]
 
 
-def PortageqEnvvars(variables, board=None, allow_undefined=False):
+def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
   """Run portageq envvar for the given variables.
 
   Args:
     variables: List[str] - Variables to query.
     board: str|None - Specific board to query.
+    sysroot: The sysroot to query.
     allow_undefined: bool - True to quietly allow empty strings when the
         variable is undefined. False to raise an error.
 
@@ -2358,7 +2379,8 @@ def PortageqEnvvars(variables, board=None, allow_undefined=False):
     return {}
 
   try:
-    result = _Portageq(['envvar', '-v'] + variables, board=board)
+    result = _Portageq(['envvar', '-v'] + variables, board=board,
+                       sysroot=sysroot)
   except cros_build_lib.RunCommandError as e:
     if e.result.returncode != 1:
       # Actual error running command, raise.
@@ -2374,13 +2396,13 @@ def PortageqEnvvars(variables, board=None, allow_undefined=False):
   return key_value_store.LoadData(result.output, multiline=True)
 
 
-def PortageqHasVersion(category_package, root='/', board=None):
+def PortageqHasVersion(category_package, board=None, sysroot=None):
   """Run portageq has_version.
 
   Args:
     category_package: str - The atom whose version is to be verified.
-    root: str - Root directory to consider.
     board: str|None - Specific board to query.
+    sysroot: str - Root directory to consider.
 
   Returns:
     bool
@@ -2388,14 +2410,16 @@ def PortageqHasVersion(category_package, root='/', board=None):
   Raises:
     cros_build_lib.RunCommandError when the command fails to run.
   """
+  if sysroot is None:
+    sysroot = cros_build_lib.GetSysroot(board=board)
   # Exit codes 0/1+ indicate "have"/"don't have".
   # Normalize them into True/False values.
-  result = _Portageq(['has_version', root, category_package], board=board,
-                     check=False)
+  result = _Portageq(['has_version', sysroot, category_package], board=board,
+                     sysroot=sysroot, check=False)
   return not result.returncode
 
 
-def PortageqMatch(atom, board=None):
+def PortageqMatch(atom, board=None, sysroot=None):
   """Run portageq match.
 
   Find the full category/package-version for the specified atom.
@@ -2403,11 +2427,14 @@ def PortageqMatch(atom, board=None):
   Args:
     atom: str - Portage atom.
     board: str|None - Specific board to query.
+    sysroot: The sysroot to query.
 
   Returns:
     CPV|None
   """
-  result = _Portageq(['match', '/', atom], board=board)
+  if sysroot is None:
+    sysroot = cros_build_lib.GetSysroot(board=board)
+  result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
   return SplitCPV(result.output.strip()) if result.output else None
 
 
