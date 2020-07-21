@@ -959,6 +959,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'sys-boot/mma-blobs',
         'sys-boot/nhlt-blobs',
         'sys-boot/rk3399-hdcp-fw',
+        'sys-firmware/analogix-anx3429-firmware',
         'sys-firmware/displaylink-firmware',
         'sys-firmware/huddly-firmware',
         'sys-firmware/iq-firmware',
