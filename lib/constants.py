@@ -646,6 +646,10 @@ ENV_AUTOTEST = 'autotest'
 
 # The cipd package for skylab tool
 CIPD_SKYLAB_PACKAGE = 'chromiumos/infra/skylab/linux-amd64'
+# crbug.com/1108489: The skylab tool CIPD package is pinned to a specific
+# version to avoid uncontrolled tool release and so that the tool is effectively
+# branched with cbuildbot.
+CIPD_SKYLAB_INSTANCE_ID = 'o-3zi6gqaaE3Kj_-Uo3UNkrxxlJGWe4pBYoI7vktYxgC'
 
 # HWTest result statuses
 HWTEST_STATUS_PASS = 'pass'
