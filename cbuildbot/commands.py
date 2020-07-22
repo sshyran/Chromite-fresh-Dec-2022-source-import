@@ -3537,8 +3537,7 @@ def SyncChrome(build_root,
   # --reset tells sync_chrome to blow away local changes and to feel
   # free to delete any directories that get in the way of syncing. This
   # is needed for unattended operation.
-  # --ignore-locks tells sync_chrome to ignore git-cache locks.
-  cmd = [sync_chrome, '--reset', '--ignore_locks']
+  cmd = [sync_chrome, '--reset']
   if internal:
     cmd += ['--internal']
   if tag:

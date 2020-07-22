@@ -303,11 +303,10 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
       # --reset tells sync_chrome to blow away local changes and to feel
       # free to delete any directories that get in the way of syncing. This
       # is needed for unattended operation.
-      # --ignore-locks tells sync_chrome to ignore git-cache locks.
       # --gclient is not specified here, sync_chrome will locate the one
       # on the $PATH.
       cmd = [sync_chrome,
-             '--reset', '--ignore_locks',
+             '--reset',
              '--tag', chrome_version,
              '--git_cache_dir', git_cache]
 

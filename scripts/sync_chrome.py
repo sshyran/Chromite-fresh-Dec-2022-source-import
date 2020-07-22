@@ -42,8 +42,6 @@ def GetParser():
                       dest='use_cache', action='store_false')
   parser.add_argument('--git_cache_dir', type='path',
                       help='Define explicit git cache.')
-  parser.add_argument('--ignore_locks', help='Ignore git cache locks.',
-                      action='store_true', default=False)
   parser.add_argument('chrome_root', help='Directory to sync chrome in')
 
   return parser
@@ -55,8 +53,7 @@ def SyncChrome(gclient_path, options):
                           options.internal, options.version,
                           options.gclient_template, options.use_cache,
                           git_cache_dir=options.git_cache_dir)
-  gclient.Sync(gclient_path, options.chrome_root, reset=options.reset,
-               ignore_locks=options.ignore_locks)
+  gclient.Sync(gclient_path, options.chrome_root, reset=options.reset)
 
 
 def main(argv):
