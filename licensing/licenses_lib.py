@@ -135,7 +135,7 @@ PACKAGE_LICENSES = {
 # Any license listed list here found in the ebuild will make the code look for
 # license files inside the package source code in order to get copyright
 # attribution from them.
-COPYRIGHT_ATTRIBUTION_LICENSES = [
+COPYRIGHT_ATTRIBUTION_LICENSES = {
     'BSD',    # requires distribution of copyright notice
     'BSD-2',  # so does BSD-2 https://opensource.org/licenses/BSD-2-Clause
     'BSD-3',  # and BSD-3? https://opensource.org/licenses/BSD-3-Clause
@@ -145,7 +145,7 @@ COPYRIGHT_ATTRIBUTION_LICENSES = [
     'MIT',
     'MIT-with-advertising',
     'Old-MIT',
-]
+}
 
 # The following licenses are not invalid or to show as a less helpful stock
 # license, but it's better to look in the source code for a more specific
@@ -517,24 +517,28 @@ class PackageInfo(object):
 
     if not license_files:
       if need_copyright_attribution:
-        logging.error("""
+        google_bsd_msg = ''
+        if need_copyright_attribution == {'BSD'}:
+          google_bsd_msg = """
+If this source code was entirely authored by Google employees, you can instead
+just change the ebuild settings like so:
+  -LICENSE="BSD"
+  +LICENSE="BSD-Google"\
+"""
+        logging.error("""\
 %s: unable to find usable license.
-Typically this will happen because the ebuild says it's MIT or BSD, but there
-was no license file that this script could find to include along with a
-copyright attribution (required for BSD/MIT).
+The ebuild says it uses at least %s which requires copyright attribution,
+but there was no license file that this script could find in the package's
+source distribution:
+  %s
 
-If this is Google source, please change
-LICENSE="BSD"
-to
-LICENSE="BSD-Google"
-
-If not, go investigate the unpacked source in %s,
-and find which license to assign.  Once you found it, you should copy that
-license to a file under %s
-(or you can modify LICENSE_NAMES_REGEX to pickup a license file that isn't
-being scraped currently).""",
-                      self.fullnamerev, src_dir, COPYRIGHT_ATTRIBUTION_DIR)
-        raise PackageLicenseError()
+You will need to investigate that source directory to figure out which license
+to assign.  Once you've found it, copy the entire license file to:
+  %s
+%s""", self.fullnamerev, need_copyright_attribution, src_dir,
+                      COPYRIGHT_ATTRIBUTION_DIR, google_bsd_msg)
+        raise PackageLicenseError(
+            f'Missing copyright attribution for {need_copyright_attribution}')
       else:
         # We can get called for a license like as-is where it's preferable
         # to find a better one in the source, but not fatal if we didn't.
@@ -732,7 +736,7 @@ being scraped currently).""",
           license_name not in COPYRIGHT_ATTRIBUTION_LICENSES):
         or_licenses_and_one_is_no_attribution = True
 
-    need_copyright_attribution = False
+    need_copyright_attribution = set()
     scan_source_for_licenses = False
 
     for license_name in [x for x in ebuild_license_names
@@ -753,7 +757,7 @@ being scraped currently).""",
         else:
           logging.info("%s: can't use %s, will scan source code for copyright",
                        self.fullnamerev, license_name)
-          need_copyright_attribution = True
+          need_copyright_attribution.add(license_name)
           scan_source_for_licenses = True
       else:
         self.license_names.add(license_name)
