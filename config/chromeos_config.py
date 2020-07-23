@@ -2678,6 +2678,10 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'b/152055929',
       },
 
+      'shadowkeep-release': {
+          'sign_types': ['recovery', 'factory'],
+      },
+
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
       },
