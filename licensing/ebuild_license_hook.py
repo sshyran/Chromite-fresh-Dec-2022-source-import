@@ -11,6 +11,7 @@ package emerge.
 import os
 
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.licensing import licenses_lib
 
 
@@ -31,4 +32,7 @@ def main(args):
   if not sysroot:
     sysroot = os.environ.get('SYSROOT') or '/'
 
-  licenses_lib.HookPackageProcess(opts.builddir, sysroot)
+  try:
+    licenses_lib.HookPackageProcess(opts.builddir, sysroot)
+  except licenses_lib.PackageLicenseError as e:
+    cros_build_lib.Die('Licensing error needs resolving: %s', e)
