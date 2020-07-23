@@ -347,23 +347,6 @@ def ApplyCustomOverrides(site_config):
           useflags=config_lib.append_useflags(['-tests_logging_CrashSender']),
       ),
 
-      'lakitu-gpu-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_test_customizations,
-      ),
-
-      'lakitu-nc-release': config_lib.BuildConfig().apply(
-          signer_tests=False,
-      ),
-
-      'lakitu-st-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_test_customizations,
-      ),
-
-      'lakitu_next-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_test_customizations,
-          signer_tests=False,
-      ),
-
       'guado_labstation-release': {
           'hw_tests': [],
           # 'hwqual':False,
@@ -415,23 +398,6 @@ def IncrementalBuilders(site_config):
 
   site_config['x32-generic-incremental'].apply(
       site_config.templates.no_vmtest_builder,
-  )
-
-  site_config['lakitu-gpu-incremental'].apply(
-      site_config.templates.lakitu_test_customizations,
-  )
-
-  site_config['lakitu-st-incremental'].apply(
-      site_config.templates.lakitu_test_customizations,
-  )
-
-  site_config['lakitu_next-incremental'].apply(
-      site_config.templates.lakitu_test_customizations,
-  )
-
-  site_config['kumo-incremental'].apply(
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
   )
 
 
