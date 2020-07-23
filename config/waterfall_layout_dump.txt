@@ -324,12 +324,7 @@
     kukui-arc-r-release
     kukui-arc64-release
     kukui-release
-    kumo-release
-    lakitu-gpu-release
-    lakitu-nc-release
     lakitu-release
-    lakitu-st-release
-    lakitu_next-release
     lars-release
     lasilla-ground-release
     littlejoe-release
@@ -1291,47 +1286,13 @@
   kukui-payloads-tryjob
   kukui-release-tryjob
   kukui-unittest-stress
-  kumo-full-tryjob
-  kumo-incremental-tryjob
-  kumo-llvm-next-toolchain-tryjob
-  kumo-llvm-toolchain-tryjob
-  kumo-payloads-tryjob
-  kumo-release-tryjob
-  kumo-unittest-stress
   lakitu-full-tryjob
-  lakitu-gpu-full-tryjob
-  lakitu-gpu-incremental-tryjob
-  lakitu-gpu-llvm-next-toolchain-tryjob
-  lakitu-gpu-llvm-toolchain-tryjob
-  lakitu-gpu-payloads-tryjob
-  lakitu-gpu-release-tryjob
-  lakitu-gpu-unittest-stress
   lakitu-incremental-tryjob
   lakitu-llvm-next-toolchain-tryjob
   lakitu-llvm-toolchain-tryjob
-  lakitu-nc-full-tryjob
-  lakitu-nc-llvm-next-toolchain-tryjob
-  lakitu-nc-llvm-toolchain-tryjob
-  lakitu-nc-payloads-tryjob
-  lakitu-nc-release-tryjob
-  lakitu-nc-unittest-stress
   lakitu-payloads-tryjob
   lakitu-release-tryjob
-  lakitu-st-full-tryjob
-  lakitu-st-incremental-tryjob
-  lakitu-st-llvm-next-toolchain-tryjob
-  lakitu-st-llvm-toolchain-tryjob
-  lakitu-st-payloads-tryjob
-  lakitu-st-release-tryjob
-  lakitu-st-unittest-stress
   lakitu-unittest-stress
-  lakitu_next-full-tryjob
-  lakitu_next-incremental-tryjob
-  lakitu_next-llvm-next-toolchain-tryjob
-  lakitu_next-llvm-toolchain-tryjob
-  lakitu_next-payloads-tryjob
-  lakitu_next-release-tryjob
-  lakitu_next-unittest-stress
   lars-factory-glados-7828.B-factorybranch-tryjob
   lars-full-tryjob
   lars-llvm-next-toolchain-tryjob
@@ -1495,12 +1456,7 @@
     kukui-arc-r-release-tryjob
     kukui-arc64-release-tryjob
     kukui-release-tryjob
-    kumo-release-tryjob
-    lakitu-gpu-release-tryjob
-    lakitu-nc-release-tryjob
     lakitu-release-tryjob
-    lakitu-st-release-tryjob
-    lakitu_next-release-tryjob
     lars-release-tryjob
     lasilla-ground-release-tryjob
     littlejoe-release-tryjob

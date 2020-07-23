@@ -319,15 +319,6 @@ def GeneralTemplates(site_config):
                                           test_suite='gce-smoke')],
   )
 
-  # No GCE tests for lakitu-nc; Enable 'hsm' profile by default.
-  site_config.AddTemplate(
-      'lakitu_nc_customizations',
-      profile='hsm',
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
-      vm_tests_override=None,
-  )
-
   # Test customizations for lakitu boards' paladin builders.
   site_config.AddTemplate(
       'lakitu_paladin_test_customizations',
@@ -783,8 +774,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
       board_config.apply(image_test=False)
     if board in chromeos_boards.nohwqual_boards:
       board_config.apply(hwqual=False)
-    if board in chromeos_boards.norootfs_verification_boards:
-      board_config.apply(rootfs_verification=False)
     if board in chromeos_boards.base_layout_boards:
       board_config.apply(disk_layout='base')
     if board in chromeos_boards.beaglebone_boards:
@@ -1646,38 +1635,6 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.beaglebone,
       boards=['beaglebone'],
       description='Incremental Beaglebone Builder',
-  )
-
-  site_config.Add(
-      'kumo-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      site_config.templates.lakitu_notification_emails,
-      board_configs['kumo'],
-  )
-
-  site_config.Add(
-      'lakitu-gpu-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      site_config.templates.lakitu_notification_emails,
-      board_configs['lakitu-gpu'],
-  )
-
-  site_config.Add(
-      'lakitu-st-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      site_config.templates.lakitu_notification_emails,
-      board_configs['lakitu-st'],
-  )
-
-  site_config.Add(
-      'lakitu_next-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      site_config.templates.lakitu_notification_emails,
-      board_configs['lakitu_next'],
   )
 
 
@@ -2562,37 +2519,6 @@ def ApplyCustomOverrides(site_config):
 
       # This is the full build of open-source overlay.
       'lakitu-full': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-      ),
-
-      'lakitu-gpu-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-          sign_types=['base'],
-          paygen=False,
-      ),
-
-      'lakitu-nc-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_nc_customizations,
-          site_config.templates.lakitu_notification_emails,
-          paygen=False,
-      ),
-
-      'lakitu-st-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-          sign_types=['base'],
-          paygen=False,
-      ),
-
-      'kumo-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-          sign_types=['base'],
-          paygen=False,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-          vm_tests_override=None,
-      ),
-
-      'lakitu_next-release': config_lib.BuildConfig().apply(
           site_config.templates.lakitu_notification_emails,
       ),
 
