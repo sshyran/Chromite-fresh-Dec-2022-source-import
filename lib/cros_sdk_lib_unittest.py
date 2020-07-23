@@ -50,6 +50,36 @@ class VersionHookTestCase(cros_test_lib.TempDirTestCase):
     self.success_versions = (9, 10, 11, 12)
 
 
+class TestGetFileSystemDebug(cros_test_lib.RunCommandTestCase):
+  """Tests GetFileSystemDebug functionality."""
+
+  def testNoPs(self):
+    """Verify with run_ps=False."""
+    self.rc.AddCmdResult(
+        ['sudo', '--', 'fuser', '/some/path'], stdout='fuser_output')
+    self.rc.AddCmdResult(
+        ['sudo', '--', 'lsof', '/some/path'], stdout='lsof_output')
+    file_system_debug_tuple = cros_sdk_lib.GetFileSystemDebug(
+        '/some/path', run_ps=False)
+    self.assertEqual(file_system_debug_tuple.fuser, 'fuser_output')
+    self.assertEqual(file_system_debug_tuple.lsof, 'lsof_output')
+    self.assertIsNone(file_system_debug_tuple.ps)
+
+  def testWithPs(self):
+    """Verify with run_ps=False."""
+    self.rc.AddCmdResult(
+        ['sudo', '--', 'fuser', '/some/path'], stdout='fuser_output')
+    self.rc.AddCmdResult(
+        ['sudo', '--', 'lsof', '/some/path'], stdout='lsof_output')
+    self.rc.AddCmdResult(
+        ['ps', 'auxf'], stdout='ps_output')
+    file_system_debug_tuple = cros_sdk_lib.GetFileSystemDebug(
+        '/some/path', run_ps=True)
+    self.assertEqual(file_system_debug_tuple.fuser, 'fuser_output')
+    self.assertEqual(file_system_debug_tuple.lsof, 'lsof_output')
+    self.assertEqual(file_system_debug_tuple.ps, 'ps_output')
+
+
 class TestGetChrootVersion(cros_test_lib.MockTestCase):
   """Tests GetChrootVersion functionality."""
 

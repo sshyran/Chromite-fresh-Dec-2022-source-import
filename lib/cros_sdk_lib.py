@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import collections
 import os
 import re
 import sys
@@ -427,6 +428,39 @@ def FindChrootMountSource(chroot_path, proc_mounts='/proc/mounts'):
   return (match.group(1), match.group(2))
 
 
+FileSystemDebugInfo = collections.namedtuple('FileSystemDebugInfo',
+                                             ('fuser', 'lsof', 'ps'))
+
+def GetFileSystemDebug(path: str, run_ps: bool = True) -> FileSystemDebugInfo:
+  """Collect filesystem debugging information.
+
+  Dump some information to help find processes that may still be sing
+  files. Running ps auxf can also be done to see what processes are
+  still running.
+
+  Args:
+    path: Full path for directory we want information on.
+    run_ps: When true, show processes running.
+
+  Returns:
+    FileSystemDebugInfo with debug info.
+  """
+  cmd_kwargs = {
+      'check': False,
+      'capture_output': True,
+      'encoding': 'utf-8',
+      'errors': 'replace'
+  }
+  fuser = cros_build_lib.sudo_run(['fuser', path], **cmd_kwargs)
+  lsof = cros_build_lib.sudo_run(['lsof', path], **cmd_kwargs)
+  if run_ps:
+    ps = cros_build_lib.run(['ps', 'auxf'], **cmd_kwargs)
+    ps_stdout = ps.stdout
+  else:
+    ps_stdout = None
+  return FileSystemDebugInfo(fuser.stdout, lsof.stdout, ps_stdout)
+
+
 # Raise an exception if cleanup takes more than 10 minutes.
 @timeout_util.TimeoutDecorator(600)
 def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
@@ -464,14 +498,10 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
     # TODO(lamontjones): Dump some information to help find the process still
     # inside the chroot, causing crbug.com/923432.  In the end, this is likely
     # to become fuser -k.
-    fuser = cros_build_lib.sudo_run(['fuser', chroot], check=False,
-                                    capture_output=True)
-    lsof = cros_build_lib.sudo_run(['lsof', chroot], check=False,
-                                   capture_output=True)
-    ps = cros_build_lib.run(['ps', 'auxf'], check=False, capture_output=True)
+    fs_debug = GetFileSystemDebug(chroot, run_ps=True)
     raise Error(
         'Umount failed: %s.\nfuser output=%s\nlsof output=%s\nps output=%s\n' %
-        (e.result.error, fuser.output, lsof.output, ps.output))
+        (e.result.error, fs_debug.fuser, fs_debug.lsof, fs_debug.ps))
 
   # Find the loopback device by either matching the VG or the image.
   chroot_dev = None
