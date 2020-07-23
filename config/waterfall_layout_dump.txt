@@ -366,6 +366,7 @@
     scarlet-release
     sentry-release
     setzer-release
+    shadowkeep-release
     snappy-release
     soraka-release
     swanky-release
@@ -1536,6 +1537,7 @@
     scarlet-release-tryjob
     sentry-release-tryjob
     setzer-release-tryjob
+    shadowkeep-release-tryjob
     snappy-release-tryjob
     soraka-release-tryjob
     swanky-release-tryjob
@@ -1820,6 +1822,12 @@
   setzer-payloads-tryjob
   setzer-release-tryjob
   setzer-unittest-stress
+  shadowkeep-full-tryjob
+  shadowkeep-llvm-next-toolchain-tryjob
+  shadowkeep-llvm-toolchain-tryjob
+  shadowkeep-payloads-tryjob
+  shadowkeep-release-tryjob
+  shadowkeep-unittest-stress
   sludge-full-tryjob
   sludge-llvm-next-toolchain-tryjob
   sludge-llvm-toolchain-tryjob
