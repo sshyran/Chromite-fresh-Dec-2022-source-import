@@ -77,6 +77,7 @@ LICENSE_NAMES_REGEX = [
     r'^licen[cs]e.*$',
     r'^licensing.*$',                              # libatomic_ops
     r'^ipa_font_license_agreement_v1[.]0[.]txt$',  # ja-ipafonts
+    r'^MIT-LICENSE$',                              # rake
     r'^PKG-INFO$',                                 # copyright assignment for
                                                    # some python packages
                                                    # (netifaces, unittest2)
@@ -101,10 +102,11 @@ PACKAGE_LICENSES = {
     # per ChromeOS with non free bits
     'chromeos-base/chromeos-chrome': ['BSD-Google', 'Google-TOS'],
 
-    # Currently the code cannot parse LGPL-3 || ( LGPL-2.1 MPL-1.1 )
-    # Currently the code cannot parse BSD-2 BSD || ( Artistic GPL-2 LGPL-2 )
+    # Currently the code cannot parse embedded || (...) syntax.
+    'app-admin/eselect': ['GPL-2+'],
     'dev-python/pycairo': ['LGPL-3', 'LGPL-2.1'],
     'dev-lang/yasm': ['BSD-2', 'GPL-2', 'LGPL-2'],
+    'dev-ruby/rubygems': ['GPL-2', 'MIT'],
 
     # Currently the code cannot parse the license for mit-krb5
     # "openafs-krb5-a BSD MIT OPENLDAP BSD-2 HPND BSD-4 ISC RSA CC-BY-SA-3.0 ||
