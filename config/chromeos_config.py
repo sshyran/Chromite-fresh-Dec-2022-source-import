@@ -2680,6 +2680,10 @@ def ApplyCustomOverrides(site_config):
 
       'shadowkeep-release': {
           'sign_types': ['recovery', 'factory'],
+          # Shadowkeep has no DUTs in the lab (b/159934902).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/159934902',
       },
 
       'volteer-release': {
