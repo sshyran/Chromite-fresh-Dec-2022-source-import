@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.skylab_test_runner',
   syntax='proto3',
   serialized_options=_b('ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner'),
-  serialized_pb=_b('\n-test_platform/skylab_test_runner/config.proto\x12 test_platform.skylab_test_runner\"\xe3\x02\n\x06\x43onfig\x12\x39\n\x03lab\x18\x01 \x01(\x0b\x32,.test_platform.skylab_test_runner.Config.Lab\x12\x41\n\x07harness\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Config.Harness\x12?\n\x06output\x18\x03 \x01(\x0b\x32/.test_platform.skylab_test_runner.Config.Output\x1a<\n\x03Lab\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x02 \x01(\t\x1a=\n\x07Harness\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\x12\x1c\n\x14synch_offload_subdir\x18\x02 \x01(\t\x1a\x1d\n\x06Output\x12\x13\n\x0bgs_root_dir\x18\x01 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
+  serialized_pb=_b('\n-test_platform/skylab_test_runner/config.proto\x12 test_platform.skylab_test_runner\"\xa1\x03\n\x06\x43onfig\x12\x39\n\x03lab\x18\x01 \x01(\x0b\x32,.test_platform.skylab_test_runner.Config.Lab\x12\x41\n\x07harness\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Config.Harness\x12?\n\x06output\x18\x03 \x01(\x0b\x32/.test_platform.skylab_test_runner.Config.Output\x1a<\n\x03Lab\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x02 \x01(\t\x1a{\n\x07Harness\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\x12\x1c\n\x14synch_offload_subdir\x18\x02 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x03 \x01(\t\x12\x1f\n\x17prejob_deadline_seconds\x18\x04 \x01(\x03\x1a\x1d\n\x06Output\x12\x13\n\x0bgs_root_dir\x18\x01 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
 )
 
 
@@ -83,6 +83,20 @@ _CONFIG_HARNESS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='ssp_base_image_name', full_name='test_platform.skylab_test_runner.Config.Harness.ssp_base_image_name', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='prejob_deadline_seconds', full_name='test_platform.skylab_test_runner.Config.Harness.prejob_deadline_seconds', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -96,7 +110,7 @@ _CONFIG_HARNESS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=347,
-  serialized_end=408,
+  serialized_end=470,
 )
 
 _CONFIG_OUTPUT = _descriptor.Descriptor(
@@ -125,8 +139,8 @@ _CONFIG_OUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=410,
-  serialized_end=439,
+  serialized_start=472,
+  serialized_end=501,
 )
 
 _CONFIG = _descriptor.Descriptor(
@@ -170,7 +184,7 @@ _CONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=439,
+  serialized_end=501,
 )
 
 _CONFIG_LAB.containing_type = _CONFIG
