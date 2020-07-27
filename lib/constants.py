@@ -278,7 +278,6 @@ ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc-dev'
-ANDROID_VMPI_BUILD_BRANCH = 'git_pi-arcvm-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
 
 ANDROID_PI_BUILD_TARGETS = {
@@ -301,15 +300,6 @@ ANDROID_PI_BUILD_TARGETS = {
     'SDK_GOOGLE_X86_USERDEBUG': ('linux-sdk_cheets_x86-userdebug', r'\.zip$'),
     'SDK_GOOGLE_X86_64_USERDEBUG': ('linux-sdk_cheets_x86_64-userdebug',
                                     r'\.zip$'),
-}
-ANDROID_VMPI_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM_USERDEBUG': ('linux-bertha_arm-userdebug',
-                      r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_USERDEBUG': ('linux-bertha_x86-userdebug',
-                      r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug', r'\.zip$'),
 }
 ANDROID_VMMST_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
@@ -334,7 +324,6 @@ ANDROID_VMRVC_BUILD_TARGETS = {
 ANDROID_ALL_BUILD_TARGETS = frozenset(
     x + '_TARGET' for x in itertools.chain(
         ANDROID_PI_BUILD_TARGETS,
-        ANDROID_VMPI_BUILD_TARGETS,
         ANDROID_VMMST_BUILD_TARGETS,
         ANDROID_VMRVC_BUILD_TARGETS,
     )
@@ -881,7 +870,6 @@ CANARY_MASTER = 'master-release'
 PFQ_MASTER = 'master-chromium-pfq'
 VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
-VMPI_ANDROID_PFQ_MASTER = 'master-vmpi-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
 

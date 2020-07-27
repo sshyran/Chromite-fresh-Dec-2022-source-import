@@ -877,24 +877,6 @@
             "uprev": false,
             "vm_tests": []
         },
-        "vmpi_android_pfq": {
-            "_template": "vmpi_android_pfq",
-            "android_import_branch": "git_pi-arcvm-dev",
-            "android_package": "android-vm-pi",
-            "android_rev": "latest_release",
-            "build_timeout": 28800,
-            "build_type": "android",
-            "description": "Preflight Android Uprev & Build (internal)",
-            "display_label": "vmpi_android_pfq",
-            "internal": true,
-            "luci_builder": "PFQ",
-            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-            "manifest_version": true,
-            "overlays": "both",
-            "sync_chrome": true,
-            "uprev": false,
-            "vm_tests": []
-        },
         "vmrvc_android_pfq": {
             "_template": "vmrvc_android_pfq",
             "android_import_branch": "git_rvc-arc-dev",
@@ -9881,30 +9863,6 @@
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "eve-arcvm-mesa-virgl-next-vmpi-android-pfq": {
-        "_template": "vmpi_android_pfq",
-        "boards": [
-            "eve-arcvm-mesa-virgl-next"
-        ],
-        "manifest": "official.xml",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "eve-arcvm-mesa-virgl-next-vmpi-android-pfq-tryjob": {
-        "_template": "vmpi_android_pfq",
-        "boards": [
-            "eve-arcvm-mesa-virgl-next"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "uprev": true,
         "useflags": [
             "chrome_internal"
         ]
@@ -22072,30 +22030,6 @@
         "push_overlays": "both",
         "slave_configs": [
             "betty-arcvm-master-vmmst-android-pfq-tryjob"
-        ],
-        "uprev": true
-    },
-    "master-vmpi-android-pfq": {
-        "_template": "vmpi_android_pfq",
-        "boards": [],
-        "master": true,
-        "push_overlays": "both",
-        "schedule": "with 1440m interval",
-        "slave_configs": [
-            "eve-arcvm-mesa-virgl-next-vmpi-android-pfq"
-        ]
-    },
-    "master-vmpi-android-pfq-tryjob": {
-        "_template": "vmpi_android_pfq",
-        "boards": [],
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "master": true,
-        "push_overlays": "both",
-        "slave_configs": [
-            "eve-arcvm-mesa-virgl-next-vmpi-android-pfq-tryjob"
         ],
         "uprev": true
     },

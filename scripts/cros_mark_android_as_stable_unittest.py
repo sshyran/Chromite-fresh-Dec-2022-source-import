@@ -448,10 +448,10 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
         constants.ANDROID_PI_BUILD_BRANCH).keys():
       self.assertIn(t, acls)
-    # Test that all VMPI targets have their ACLS set.
+    # Test that all VMRVC targets have their ACLS set.
     for t in cros_mark_android_as_stable.MakeBuildTargetDict(
         constants.ANDROID_VM_PACKAGE_KEYWORD,
-        constants.ANDROID_VMPI_BUILD_BRANCH).keys():
+        constants.ANDROID_VMRVC_BUILD_BRANCH).keys():
       self.assertIn(t, acls)
     # Test that all VMMST targets have their ACLS set.
     for t in cros_mark_android_as_stable.MakeBuildTargetDict(
@@ -476,22 +476,22 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
       self.assertEqual(targets[target],
                        constants.ANDROID_PI_BUILD_TARGETS[target])
 
-  def testMakeBuildTargetDictVMPI(self):
-    """Test generation of VMPI build target dictionary.
+  def testMakeBuildTargetDictVMRVC(self):
+    """Test generation of VMRVC build target dictionary.
 
-    If the number of targets is correct and VMPI-specific targets are
+    If the number of targets is correct and VMRVC-specific targets are
     present, then the dictionary is correct.
     """
     targets = cros_mark_android_as_stable.MakeBuildTargetDict(
         'android-vm-pi',
-        constants.ANDROID_VMPI_BUILD_BRANCH)
+        constants.ANDROID_VMRVC_BUILD_BRANCH)
     # Test the number of targets.
     self.assertEqual(len(targets),
-                     len(constants.ANDROID_VMPI_BUILD_TARGETS))
-    # Test that all VMPI-specific targets are in the dictionary.
-    for target in constants.ANDROID_VMPI_BUILD_TARGETS:
+                     len(constants.ANDROID_VMRVC_BUILD_TARGETS))
+    # Test that all VMRVC-specific targets are in the dictionary.
+    for target in constants.ANDROID_VMRVC_BUILD_TARGETS:
       self.assertEqual(targets[target],
-                       constants.ANDROID_VMPI_BUILD_TARGETS[target])
+                       constants.ANDROID_VMRVC_BUILD_TARGETS[target])
 
   def testMakeBuildTargetDictVMMst(self):
     """Test generation of VMMst build target dictionary.
@@ -519,7 +519,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     self.assertRaises(ValueError,
                       cros_mark_android_as_stable.MakeBuildTargetDict,
                       'invalid-package',
-                      constants.ANDROID_VMPI_BUILD_BRANCH)
+                      constants.ANDROID_VMRVC_BUILD_BRANCH)
 
   def testMarkAndroidEBuildAsStable(self):
     """Test updating of ebuild."""

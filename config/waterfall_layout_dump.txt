@@ -397,10 +397,6 @@
   master-vmmst-android-pfq
     betty-arcvm-master-vmmst-android-pfq
 
-== vmpi_android_pfq ==
-  master-vmpi-android-pfq
-    eve-arcvm-mesa-virgl-next-vmpi-android-pfq
-
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
     hatch-arc-r-vmrvc-android-pfq
@@ -773,7 +769,6 @@
   eve-arcvm-mesa-virgl-next-payloads-tryjob
   eve-arcvm-mesa-virgl-next-release-tryjob
   eve-arcvm-mesa-virgl-next-unittest-stress
-  eve-arcvm-mesa-virgl-next-vmpi-android-pfq-tryjob
   eve-arm64-full-tryjob
   eve-arm64-llvm-next-toolchain-tryjob
   eve-arm64-llvm-toolchain-tryjob
@@ -1522,8 +1517,6 @@
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
-  master-vmpi-android-pfq-tryjob
-    eve-arcvm-mesa-virgl-next-vmpi-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
     hatch-arc-r-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob

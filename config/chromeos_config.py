@@ -1174,16 +1174,6 @@ def AndroidTemplates(site_config):
       android_import_branch=constants.ANDROID_PI_BUILD_BRANCH,
   )
 
-  # Template for Android VM Pi.
-  site_config.AddTemplate(
-      'vmpi_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMPI_ANDROID_PFQ,
-      android_package='android-vm-pi',
-      android_import_branch=constants.ANDROID_VMPI_BUILD_BRANCH,
-  )
-
   # Template for Android VM Rvc.
   site_config.AddTemplate(
       'vmrvc_android_pfq',
@@ -1272,23 +1262,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _pi_vmtest_experimental_boards = frozenset([
   ])
 
-  # Android VM PI master.
-  vmpi_master_config = site_config.Add(
-      constants.VMPI_ANDROID_PFQ_MASTER,
-      site_config.templates.vmpi_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 1440m interval',
-  )
-
-  _vmpi_no_hwtest_boards = frozenset([
-      'eve-arcvm-mesa-virgl-next',
-  ])
-  _vmpi_no_hwtest_experimental_boards = frozenset([])
-  _vmpi_hwtest_boards = frozenset([])
-  _vmpi_hwtest_experimental_boards = frozenset([])
-  _vmpi_vmtest_boards = frozenset([])
-  _vmpi_vmtest_experimental_boards = frozenset([])
-
   # Android VM RVC master.
   vmrvc_master_config = site_config.Add(
       constants.VMRVC_ANDROID_PFQ_MASTER,
@@ -1370,55 +1343,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _pi_vmtest_experimental_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
-          important=False,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      )
-  )
-
-  # Android VM PI slaves.
-  vmpi_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_hwtest_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
-      ) +
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
-          important=False,
-      ) +
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
-          important=False,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_vmtest_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      ) +
-      site_config.AddForBoards(
-          'vmpi-android-pfq',
-          _vmpi_vmtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmpi_android_pfq,
           important=False,
           vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
                                             test_suite='smoke')],

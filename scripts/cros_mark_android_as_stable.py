@@ -375,8 +375,6 @@ def MakeBuildTargetDict(package_name, build_branch):
     }
   elif constants.ANDROID_VM_PACKAGE_KEYWORD in package_name:
     target_list = {
-        constants.ANDROID_VMPI_BUILD_BRANCH:
-        constants.ANDROID_VMPI_BUILD_TARGETS,
         constants.ANDROID_VMMST_BUILD_BRANCH:
         constants.ANDROID_VMMST_BUILD_TARGETS,
         constants.ANDROID_VMRVC_BUILD_BRANCH:
