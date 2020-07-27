@@ -42,10 +42,14 @@ def main():
 
 def _CreateVenv():
   """Create or update chromite venv."""
-  return subprocess.check_output([
-      _CREATE_VENV_PATH,
-      _REQUIREMENTS,
-  ]).rstrip().decode('utf-8')
+  result = subprocess.run(
+      [_CREATE_VENV_PATH, _REQUIREMENTS],
+      check=False, stdout=subprocess.PIPE, encoding='utf-8')
+  if result.returncode:
+    print(f'{os.path.basename(sys.argv[0])}: error: {" ".join(result.args)}: '
+          f'exited {result.returncode}', file=sys.stderr)
+    sys.exit(result.returncode)
+  return result.stdout.strip()
 
 
 def _ExecInVenv(venvdir, args):
