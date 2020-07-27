@@ -22,6 +22,7 @@ from __future__ import print_function
 
 import filecmp
 import glob
+import json
 import os
 import re
 import time
@@ -415,6 +416,12 @@ def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
     logging.PrintBuildbotLink('Android changelog', ab_link)
 
   logging.PrintBuildbotStepText(msg)
+  logging.PrintKitchenSetBuildProperty('android_uprev', json.dumps({
+      'branch': build_branch,
+      'new': new_ebuild.version,
+      'old': stable_candidate.version,
+      'pkgname': stable_candidate.pkgname,
+  }))
 
 
 def UpdateDataCollectorArtifacts(android_version,
