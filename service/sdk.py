@@ -207,6 +207,15 @@ def Unmount(chroot=None):
   cros_build_lib.run(cmd)
 
 
+def UnmountPath(path):
+  """Unmount the chroot.
+
+  Args:
+    path (chromiumos.Path.path): The path being unmounted.
+  """
+  logging.info('Unmounting path %s', path)
+
+
 def GetChrootVersion(chroot_path=None):
   """Get the chroot version.
 

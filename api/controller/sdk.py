@@ -113,6 +113,14 @@ def Unmount(input_proto, _output_proto, _config):
 
 
 @faux.all_empty
+@validate.require('path.path')
+@validate.validation_complete
+def UnmountPath(input_proto, _output_proto, _config):
+  """Unmount a path"""
+  sdk.UnmountPath(input_proto.path)
+
+
+@faux.all_empty
 @validate.validation_complete
 def Clean(input_proto, _output_proto, _config):
   """Clean unneeded files from a chroot."""

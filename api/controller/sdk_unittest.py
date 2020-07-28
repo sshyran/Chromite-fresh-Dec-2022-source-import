@@ -155,6 +155,49 @@ class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     patch.assert_called_once_with(mock.ANY, force=True)
 
 
+class SdkUnmountPathTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+  """Update tests."""
+
+  def setUp(self):
+    """Setup method."""
+    self.response = sdk_pb2.UnmountPathResponse()
+
+  def _UnmountPathRequest(self, path=None):
+    """Helper to build a delete request message."""
+    request = sdk_pb2.UnmountPathRequest()
+    if path:
+      request.path.path = path
+    return request
+
+  def testValidateOnly(self):
+    """Sanity check that a validate only call does not execute any logic."""
+    patch = self.PatchObject(sdk_service, 'UnmountPath')
+
+    sdk_controller.UnmountPath(self._UnmountPathRequest('/test/path'),
+                               self.response, self.validate_only_config)
+    patch.assert_not_called()
+
+  def testMockCall(self):
+    """Sanity check that a mock call does not execute any logic."""
+    patch = self.PatchObject(sdk_service, 'UnmountPath')
+
+    rc = sdk_controller.UnmountPath(self._UnmountPathRequest(), self.response,
+                                    self.mock_call_config)
+    patch.assert_not_called()
+    self.assertFalse(rc)
+
+  def testSuccess(self):
+    """Test the successful call by verifying service invocation."""
+    patch = self.PatchObject(sdk_service, 'UnmountPath', return_value=1)
+
+    request = self._UnmountPathRequest('/test/path')
+
+    sdk_controller.UnmountPath(request, self.response, self.api_config)
+    # Verify that by default sdk_service.Delete is called with force=True.
+    patch.assert_called_once_with(mock.ANY)
+    # TODO(crbug/1095661): Update the test once the service is implemented.
+
+
 class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   """Update tests."""
 
