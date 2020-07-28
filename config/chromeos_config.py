@@ -2592,6 +2592,10 @@ def ApplyCustomOverrides(site_config):
           'sign_types': ['recovery', 'factory'],
       },
 
+      'kukui-tablet-release': {
+          'sign_types': ['recovery'],
+      },
+
       'sarien-release': {
           'sign_types': ['recovery', 'factory'],
       },
