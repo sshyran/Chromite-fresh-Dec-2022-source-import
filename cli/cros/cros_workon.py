@@ -94,6 +94,7 @@ Examples:
         '-b',
         '--board',
         '--build-target',
+        dest='build_target',
         type='build_target',
         help='The name of the build target whose package is being worked on.')
     target_group.add_argument(
