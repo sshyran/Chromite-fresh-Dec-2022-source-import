@@ -299,6 +299,8 @@ masters = %(masters)s
         'chromeos-base/pepper-flash-0.0.1', {'Proprietary-Binary'})
     licenses_lib._CheckForDeprecatedLicense(
         'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
+    licenses_lib._CheckForDeprecatedLicense(
+        'sys-firmware/dell-dock-0.1', {'no-source-code'})
 
     # These packages should not be allowed.
     with self.assertRaises(licenses_lib.PackageLicenseError):
@@ -307,3 +309,6 @@ masters = %(masters)s
     with self.assertRaises(licenses_lib.PackageLicenseError):
       licenses_lib._CheckForDeprecatedLicense(
           'sys-apps/portage-123', {'GPL-2', 'Google-TOS'})
+    with self.assertRaises(licenses_lib.PackageLicenseError):
+      licenses_lib._CheckForDeprecatedLicense(
+          'sys-apps/portage-123', {'no-source-code'})

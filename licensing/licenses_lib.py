@@ -830,6 +830,19 @@ def _CheckForDeprecatedLicense(cpf, licenses):
     if not any(cpf.startswith(x) for x in LEGACY_PKGS):
       raise PackageLicenseError('Proprietary-Binary is not a valid license.')
 
+  # TODO(crbug.com/1111077): Remove this entirely.
+  # We allow a few packages for now so new packages will stop showing up.
+  if 'no-source-code' in licenses:
+    # Note: DO NOT ADD ANY MORE PACKAGES HERE.
+    LEGACY_PKGS = (
+        'sys-firmware/dell-disk',
+        'sys-firmware/dell-dock',
+        'chromeos-base/chromeos-pd-firmware-deltaur-private',
+    )
+    if not any(cpf.startswith(x) for x in LEGACY_PKGS):
+      raise PackageLicenseError(
+          f'{cpf}: no-source-code is not a valid license')
+
   # TODO(crbug.com/1019728): Remove this entirely.
   # We allow a few packages for now so new packages will stop showing up.
   if 'Google-TOS' in licenses:
