@@ -195,7 +195,6 @@ class SdkUnmountPathTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     sdk_controller.UnmountPath(request, self.response, self.api_config)
     # Verify that by default sdk_service.Delete is called with force=True.
     patch.assert_called_once_with(mock.ANY)
-    # TODO(crbug/1095661): Update the test once the service is implemented.
 
 
 class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

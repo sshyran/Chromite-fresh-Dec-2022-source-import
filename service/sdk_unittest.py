@@ -9,9 +9,11 @@ from __future__ import print_function
 
 import os
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.service import sdk
 
 
@@ -75,6 +77,25 @@ class UpdateArgumentsTest(cros_test_lib.TestCase):
     """Test no toolchain boards argument."""
     self.assertEqual(
         [], self._GetArgList(build_source=False, toolchain_targets=None))
+
+
+class UnmountTest(cros_test_lib.RunCommandTempDirTestCase,
+                  cros_test_lib.MockTestCase):
+  """Unmount tests."""
+
+  def testUnmountPath(self):
+    path_proto = common_pb2.Path(path='/some/path')
+    self.PatchObject(osutils, 'UmountTree', return_value=True)
+    sdk.UnmountPath(path_proto)
+
+  def testUnmountPathFails(self):
+    path_proto = common_pb2.Path(path='/some/path')
+    self.PatchObject(osutils, 'UmountTree',
+                     side_effect=cros_build_lib.RunCommandError(
+                         'umount failure'))
+    with self.assertRaises(sdk.UnmountError) as unmount_assert:
+      sdk.UnmountPath(path_proto)
+    self.assertIn('Umount failed:', unmount_assert.exception.message)
 
 
 class CreateTest(cros_test_lib.RunCommandTempDirTestCase):

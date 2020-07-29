@@ -14,6 +14,20 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
+from chromite.lib import osutils
+
+
+
+class Error(Exception):
+  """Base module error."""
+
+
+class UnmountError(Error):
+  """An error raised when unmount fails."""
+
+  def __init__(self, message):
+    self.message = message
+    super(UnmountError, self).__init__(message)
 
 
 class CreateArguments(object):
@@ -208,12 +222,19 @@ def Unmount(chroot=None):
 
 
 def UnmountPath(path):
-  """Unmount the chroot.
+  """Unmount the specified path.
 
   Args:
     path (chromiumos.Path.path): The path being unmounted.
   """
-  logging.info('Unmounting path %s', path)
+  logging.info('Unmounting path %s', path.path)
+  try:
+    osutils.UmountTree(path.path)
+  except cros_build_lib.RunCommandError as e:
+    fs_debug = cros_sdk_lib.GetFileSystemDebug(path.path, run_ps=True)
+    msg = (f'Umount failed: {e.result.error}.\nfuser output={fs_debug.fuser}\n'
+           f'lsof output={fs_debug.lsof}\nps output=fs_debug.ps\n')
+    raise UnmountError(msg)
 
 
 def GetChrootVersion(chroot_path=None):
