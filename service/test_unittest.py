@@ -30,6 +30,17 @@ from chromite.lib import sysroot_lib
 from chromite.service import test
 
 
+class PartialDict:
+  """Used as key value matcher in a mocked call."""
+
+  def __init__(self, key, value):
+    self.key = key
+    self.value = value
+
+  def __eq__(self, other):
+    return other[self.key] == self.value
+
+
 class BuildTargetUnitTestResultTest(cros_test_lib.TestCase):
   """BuildTargetUnitTestResult tests."""
 
@@ -101,6 +112,35 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertFalse(result.success)
     self.assertEqual(expected_rc, result.return_code)
     self.assertCountEqual(cpvs, result.failed_cpvs)
+
+  def testCodeCoverage(self):
+    """Test adding use flags for coverage when requested."""
+    result = test.BuildTargetUnitTest(self.build_target, self.chroot,
+                                      code_coverage=True)
+
+    self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
+                               extra_env=PartialDict('USE', 'coverage'))
+    self.assertTrue(result.success)
+
+  def testCodeCoverageExistingFlags(self):
+    """Test adding use flags for coverage when existing flags."""
+    chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'foo bar'})
+    result = test.BuildTargetUnitTest(self.build_target, chroot,
+                                      code_coverage=True)
+
+    self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
+                               extra_env=PartialDict('USE', 'foo bar coverage'))
+    self.assertTrue(result.success)
+
+  def testCodeCoverageExistingCoverageFlag(self):
+    """Test adding use flags for coverage when already has coverage flag."""
+    chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'coverage bar'})
+    result = test.BuildTargetUnitTest(self.build_target, chroot,
+                                      code_coverage=True)
+
+    self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
+                               extra_env=PartialDict('USE', 'coverage bar'))
+    self.assertTrue(result.success)
 
 
 class BuildTargetUnitTestTarballTest(cros_test_lib.MockTestCase):

@@ -109,12 +109,15 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   chroot = controller_util.ParseChroot(input_proto.chroot)
 
+  code_coverage = input_proto.flags.code_coverage
+
   result = test.BuildTargetUnitTest(
       build_target,
       chroot,
       packages=packages,
       blacklist=blacklist,
-      was_built=was_built)
+      was_built=was_built,
+      code_coverage=code_coverage)
 
   if not result.success:
     # Failed to run tests or some tests failed.

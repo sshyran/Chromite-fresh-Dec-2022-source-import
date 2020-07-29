@@ -52,7 +52,8 @@ def BuildTargetUnitTest(build_target,
                         chroot,
                         packages=None,
                         blacklist=None,
-                        was_built=True):
+                        was_built=True,
+                        code_coverage=False):
   """Run the ebuild unit tests for the target.
 
   Args:
@@ -62,6 +63,7 @@ def BuildTargetUnitTest(build_target,
       packages.
     blacklist (list[str]|None): Tests to skip.
     was_built (bool): Whether packages were built.
+    code_coverage (bool): Whether to produce code coverage data.
 
   Returns:
     BuildTargetUnitTestResult
@@ -79,8 +81,15 @@ def BuildTargetUnitTest(build_target,
   if not was_built:
     cmd.append('--assume-empty-sysroot')
 
-  # Set up the failed package status file.
   extra_env = chroot.env
+
+  if code_coverage:
+    use_flags = extra_env.get('USE', '').split()
+    if 'coverage' not in use_flags:
+      use_flags.append('coverage')
+    extra_env['USE'] = ' '.join(use_flags)
+
+  # Set up the failed package status file.
   with chroot.tempdir() as tempdir:
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
 
