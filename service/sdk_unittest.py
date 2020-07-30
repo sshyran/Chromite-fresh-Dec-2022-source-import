@@ -95,7 +95,10 @@ class UnmountTest(cros_test_lib.RunCommandTempDirTestCase,
                          'umount failure'))
     with self.assertRaises(sdk.UnmountError) as unmount_assert:
       sdk.UnmountPath(path_proto)
-    self.assertIn('Umount failed:', unmount_assert.exception.message)
+    # Unpack the underlying (thrown) exception from the assertRaises context
+    # manager exception attribute.
+    unmount_exception = unmount_assert.exception
+    self.assertIn('Umount failed:', str(unmount_exception))
 
 
 class CreateTest(cros_test_lib.RunCommandTempDirTestCase):

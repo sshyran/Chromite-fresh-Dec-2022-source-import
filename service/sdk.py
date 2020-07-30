@@ -25,9 +25,17 @@ class Error(Exception):
 class UnmountError(Error):
   """An error raised when unmount fails."""
 
-  def __init__(self, message):
-    self.message = message
-    super(UnmountError, self).__init__(message)
+  def __init__(self, path, cmd_error=None, fs_debug=None):
+    super(UnmountError, self).__init__(path, cmd_error, fs_debug)
+    self.path = path
+    self.cmd_error = cmd_error
+    self.fs_debug = fs_debug
+
+  def __str__(self):
+    return (f'Umount failed: {self.cmd_error.result.stdout}.\n'
+            f'fuser output={self.fs_debug.fuser}\n'
+            f'lsof output={self.fs_debug.lsof}\n'
+            f'ps output={self.fs_debug.ps}\n')
 
 
 class CreateArguments(object):
@@ -232,9 +240,7 @@ def UnmountPath(path):
     osutils.UmountTree(path.path)
   except cros_build_lib.RunCommandError as e:
     fs_debug = cros_sdk_lib.GetFileSystemDebug(path.path, run_ps=True)
-    msg = (f'Umount failed: {e.result.error}.\nfuser output={fs_debug.fuser}\n'
-           f'lsof output={fs_debug.lsof}\nps output=fs_debug.ps\n')
-    raise UnmountError(msg)
+    raise UnmountError(path.path, e, fs_debug)
 
 
 def GetChrootVersion(chroot_path=None):
