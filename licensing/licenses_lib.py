@@ -980,6 +980,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'sys-firmware/iq-firmware',
         'sys-firmware/sis-firmware',
         'www-servers/spacecast',
+        'www-servers/ustreamer',
     }
     if not any(cpf.startswith(x) for x in LEGACY_PKGS):
       raise PackageLicenseError('Google-TOS is not a valid license.')
