@@ -1760,6 +1760,26 @@ class _CommonPrepareBundle(object):
     result_basename = os.path.basename(profile_to_upload_path)
     return result_basename
 
+  def _CleanupArtifactDirectory(self, src_dir):
+    """Cleanup a directory before build so we can safely use the artifacts.
+
+    Args:
+      src_dir: A temp path holding the possible artifacts. It needs to be an
+      absolute path.
+    """
+    assert os.path.isabs(src_dir), '%s needs to be an absolute path '% src_dir
+    check_dirs = [
+        self.chroot.full_path(x)
+        for x in [src_dir,
+                  os.path.join(self.sysroot_path, src_dir[1:])]
+    ]
+    for directory in check_dirs:
+      if not os.path.exists(directory):
+        continue
+
+      logging.info('toolchain-logs: Cleaning up %s before build', directory)
+      osutils.RmDir(directory, sudo=True)
+
 
 class PrepareForBuildHandler(_CommonPrepareBundle):
   """Methods for updating ebuilds for toolchain artifacts."""
@@ -2048,10 +2068,14 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
 
   def _PrepareToolchainWarningLogs(self):
     # We always build this artifact.
+    # Cleanup the temp directory that holds the artifacts
+    self._CleanupArtifactDirectory('/tmp/fatal_clang_warnings')
     return PrepareForBuildReturn.NEEDED
 
   def _PrepareClangCrashDiagnoses(self):
     # We always build this artifact.
+    # Cleanup the temp directory that holds the artifacts
+    self._CleanupArtifactDirectory('/tmp/clang_crash_diagnostics')
     return PrepareForBuildReturn.UNKNOWN
 
 
@@ -2205,9 +2229,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         'sysroot': self.sysroot_path
     }
     binary_name = self._GetBenchmarkAFDOName(CHROME_DEBUG_BINARY_NAME)
-    bin_path = os.path.join(
-        self.output_dir,
-        binary_name + BZ2_COMPRESSION_SUFFIX)
+    bin_path = os.path.join(self.output_dir,
+                            binary_name + BZ2_COMPRESSION_SUFFIX)
     with open(bin_path, 'w') as f:
       cros_build_lib.run(['bzip2', '-c', debug_bin_inside],
                          stdout=f,

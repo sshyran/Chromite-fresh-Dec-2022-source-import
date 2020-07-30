@@ -204,7 +204,8 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
     self.glob = self.PatchObject(
         glob, 'glob', return_value=[self.chrome_ebuild])
     self.rc.AddCmdResult(partial_mock.In('rm'), returncode=0)
-    self.obj = toolchain_util._CommonPrepareBundle('None', chroot=self.chroot)
+    self.obj = toolchain_util._CommonPrepareBundle(
+        'None', chroot=self.chroot, sysroot_path=self.sysroot)
     self.gs_context = self.PatchObject(self.obj, '_gs_context')
     self.gsc_list = self.PatchObject(self.gs_context, 'List', return_value=[])
     self.data = b'data'
@@ -480,6 +481,32 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
     # There is no need to patch the ebuild.
     self.patch_ebuild.assert_not_called()
 
+  def testCleanupArtifactDirectory(self):
+    mock_rmdir = self.PatchObject(osutils, 'RmDir')
+    mock_isdir = self.PatchObject(os.path, 'exists')
+    for test_dir in [
+        '/tmp/fatal_clang_warnings', '/tmp/clang_crash_diagnostics'
+    ]:
+      mock_rmdir.reset_mock()
+      # When the dirs don't exist, we shouldn't try to remove them
+      mock_isdir.return_value = False
+      self.obj._CleanupArtifactDirectory(test_dir)
+      mock_rmdir.assert_not_called()
+
+      # When the dirs exist, we should remove all of them
+      mock_isdir.return_value = True
+      self.obj._CleanupArtifactDirectory(test_dir)
+      mock_rmdir.assert_has_calls([
+          mock.call(self.chroot.full_path(test_dir), sudo=True),
+          mock.call(
+              self.chroot.full_path(os.path.join(self.sysroot, test_dir[1:])),
+              sudo=True)
+      ])
+
+    # A non-absolute path will trigger assertion
+    with self.assertRaises(Exception) as context:
+      self.obj._CleanupArtifactDirectory('non/absolute/path')
+    self.assertIn('needs to be an absolute path', str(context.exception))
 
 class BundleArtifactHandlerTest(PrepareBundleTest):
   """Test BundleArtifactHandler specific methods."""
@@ -498,8 +525,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         'benchmark-78.0.3893.0-r1.orderfile')
     self.afdo_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo'
     self.perf_name = 'chromeos-chrome-amd64-78.0.3893.0.perf.data'
-    self.debug_binary_name = (
-        'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug')
+    self.debug_binary_name = ('chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug')
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
 
