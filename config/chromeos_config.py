@@ -2088,9 +2088,15 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   ### Release configs.
 
-  # Used for future bvt migration.
+  # Attempt to keep this list in sync with current CQ, most especially for the
+  # most recent release. See crbug.com/1095094.
   _release_experimental_boards = frozenset([
-      'monroe',  # crbug/1064306
+      'elm-kernelnext',
+      'grunt-kernelnext',
+      'hana-kernelnext',
+      'hatch-kernelnext',
+      'kefka-kernelnext',
+      'lakitu',
   ])
 
   _release_enable_skylab_hwtest = frozenset([

@@ -6837,6 +6837,7 @@
         "boards": [
             "elm-kernelnext"
         ],
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -12117,6 +12118,7 @@
         "boards": [
             "grunt-kernelnext"
         ],
+        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"aleena\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"barla\",\n    \"test_suites\": []\n}",
@@ -12990,6 +12992,7 @@
         "boards": [
             "hana-kernelnext"
         ],
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -13628,6 +13631,7 @@
         "boards": [
             "hatch-kernelnext"
         ],
+        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"akemi\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"dragonair\",\n    \"test_suites\": []\n}",
@@ -14760,6 +14764,7 @@
             "kefka-kernelnext"
         ],
         "chrome_sdk_build_chrome": false,
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -15977,6 +15982,7 @@
             "recovery",
             "test"
         ],
+        "important": false,
         "paygen_skip_testing": true,
         "sign_types": [
             "base"
