@@ -425,7 +425,6 @@
                 "-tests_power_DarkResumeDisplay",
                 "-tests_power_DarkResumeShutdownServer",
                 "-tests_security_OpenFDs",
-                "-tests_security_SMMLocked",
                 "chrome_internal",
                 "llvm-next",
                 "strict_toolchain_checks",
@@ -479,7 +478,6 @@
                 "-tests_power_DarkResumeDisplay",
                 "-tests_power_DarkResumeShutdownServer",
                 "-tests_security_OpenFDs",
-                "-tests_security_SMMLocked",
                 "chrome_internal",
                 "strict_toolchain_checks",
                 "thinlto"
@@ -532,7 +530,6 @@
                 "-tests_power_DarkResumeDisplay",
                 "-tests_power_DarkResumeShutdownServer",
                 "-tests_security_OpenFDs",
-                "-tests_security_SMMLocked",
                 "chrome_internal",
                 "llvm-tot",
                 "strict_toolchain_checks",
