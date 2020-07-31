@@ -2013,7 +2013,16 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   # Used for future bvt migration.
   _release_experimental_boards = frozenset([
-      'monroe',  # crbug/1064306
+      'betty-kernelnext',
+      'caroline-kernelnext',
+      'elm-kernelnext',
+      'eve-arcvm-mesa-virgl-next',
+      'grunt-kernelnext',
+      'hana-kernelnext',
+      'hatch-kernelnext',
+      'lakitu',
+      'volteer-kernelnext',
+      'zork-kernelnet',
   ])
 
   _release_enable_skylab_hwtest = frozenset([

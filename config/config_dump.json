@@ -20410,6 +20410,7 @@
             "recovery",
             "test"
         ],
+        "important": false,
         "paygen_skip_testing": true,
         "sign_types": [
             "base"
