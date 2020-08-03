@@ -2831,6 +2831,8 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
         hwqual=False,
         push_image=False,
         suite_scheduling=False,
+        # crbug.com/1111964 - Disable rootfs verification
+        rootfs_verification=False,
         description=('Create unsigned release image for ingestion ' +
                      'into build tool'),
     )
