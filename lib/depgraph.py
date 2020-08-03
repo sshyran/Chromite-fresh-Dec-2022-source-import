@@ -906,6 +906,16 @@ class DepVisualizer(object):
       pkg_node.AddDependency(dep_node)
       dep_node.AddRvsDependency(pkg_node)
 
+def CalculateRoots(self):
+  """Determine which nodes are roots and return them in a List.
+
+  In this context a root node is one that no other depends on, in
+  other words those nodes with no reverse dependencies.
+
+  Returns:
+    A List of PackageNodes.
+  """
+  return [x for x in self.pkg_dict.values() if not x.rvs_dependencies]
 
 def PrintDepsMap(deps_map):
   """Print dependency graph, for each package list it's prerequisites."""
