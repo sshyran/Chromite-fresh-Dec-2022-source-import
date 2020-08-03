@@ -14,6 +14,7 @@ import os
 import signal
 import sys
 import tempfile
+import threading
 import time
 import unittest
 
@@ -54,10 +55,10 @@ class FakeMultiprocessManager(object):
     return None
 
   def Queue(self):
-    return multiprocessing.Queue()
+    return Queue.Queue()
 
   def RLock(self):
-    return multiprocessing.RLock()
+    return threading.RLock()
 
   def dict(self, *args, **kwargs):
     return dict(*args, **kwargs)
