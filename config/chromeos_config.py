@@ -2014,7 +2014,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   # Used for future bvt migration.
   _release_experimental_boards = frozenset([
       'betty-kernelnext',
-      'caroline-kernelnext',
       'elm-kernelnext',
       'eve-arcvm-mesa-virgl-next',
       'grunt-kernelnext',
