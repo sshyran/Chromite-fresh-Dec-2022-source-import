@@ -650,18 +650,6 @@
       ]
     },
     {
-      "name": "kukui-tablet",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
       "name": "lakitu",
       "configs": [
         {
@@ -3514,6 +3502,47 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 450,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "kukui-tablet",
+      "reference_board_name": "kukui-tablet",
+      "arch": "UNKNOWN",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "kukui-tablet",
+          "name": "kakadu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 455,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-tablet",
+          "name": "kodama",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 455,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-tablet",
+          "name": "krane",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 455,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-tablet",
+          "name": "kukui",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 455,
           "is_active": true
         }
       ]
