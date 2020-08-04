@@ -26,7 +26,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
-from chromite.lib import retry_util
 
 
 _DEFAULT_ARGS = {
@@ -622,8 +621,8 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testCheckPayloadsAllInRemoteDevserverCallError(self):
     """Test auto_updater_transfer.CheckPayloads.
 
-    Test CheckPayloads() method's fallback when transfer_rootfs_update and
-    transfer_stateful_update are both set to True and
+    Test the exception thrown by CheckPayloads() method when
+    transfer_rootfs_update and transfer_stateful_update are both set to True and
     LabTransfer._RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
@@ -636,22 +635,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl')
 
-      expected = [
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_update.gz', '--fail'],
-           'log_output': True},
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_update.gz.json', '--fail'],
-           'log_output': True},
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_stateful.tgz', '--fail'],
-           'log_output': True}]
-
-      CrOS_LabTransfer.CheckPayloads()
-      self.assertListEqual(retry_util.RunCurl.call_args_list,
-                           [mock.call(**x) for x in expected])
+      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
+                        CrOS_LabTransfer.CheckPayloads)
 
   def testCheckPayloadsNoStatefulTransfer(self):
     """Test auto_updater_transfer.CheckPayloads.
@@ -680,9 +666,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testCheckPayloadsNoStatefulTransferRemoteDevserverCallError(self):
     """Test auto_updater_transfer.CheckPayloads.
 
-    Test CheckPayloads() method's fallback when transfer_rootfs_update is True
-    and transfer_stateful_update is set to False and
-    LabTransfer._RemoteDevserver() throws an error.
+    Test the exception thrown by CheckPayloads() method when
+    transfer_rootfs_update is True and transfer_stateful_update is False
+    and LabTransfer._RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       CrOS_LabTransfer = CreateLabTransferInstance(
@@ -692,19 +678,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl')
 
-      expected = [
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_update.gz', '--fail'],
-           'log_output': True},
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_update.gz.json', '--fail'],
-           'log_output': True}]
-
-      CrOS_LabTransfer.CheckPayloads()
-      self.assertListEqual(retry_util.RunCurl.call_args_list,
-                           [mock.call(**x) for x in expected])
+      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
+                        CrOS_LabTransfer.CheckPayloads)
 
   def testCheckPayloadsNoRootfsTransfer(self):
     """Test auto_updater_transfer.CheckPayloads.
@@ -730,9 +706,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testCheckPayloadsNoRootfsTransferRemoteDevserverCallError(self):
     """Test auto_updater_transfer.CheckPayloads.
 
-    Test CheckPayloads() method's fallback when transfer_rootfs_update is False
-    and transfer_stateful_update is set to True and
-    LabTransfer._RemoteDevserver() throws an error.
+    Test exception thrown by CheckPayloads() method when
+    transfer_rootfs_update is False and transfer_stateful_update is set to True
+    and LabTransfer._RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       CrOS_LabTransfer = CreateLabTransferInstance(
@@ -743,16 +719,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl')
 
-      expected = [
-          {'curl_args': ['-I', 'http://0.0.0.0:8000/static/board-release/'
-                               '12345.6.7/test_stateful.tgz', '--fail'],
-           'log_output': True}]
-
-      CrOS_LabTransfer.CheckPayloads()
-      self.assertListEqual(retry_util.RunCurl.call_args_list,
-                           [mock.call(**x) for x in expected])
+      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
+                        CrOS_LabTransfer.CheckPayloads)
 
   def testCheckPayloadsNoPayloadError(self):
     """Test auto_updater_transfer.CheckPayloads.
@@ -766,8 +735,6 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       side_effect=retry_util.DownloadError())
 
       self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
                         CrOS_LabTransfer.CheckPayloads)
@@ -825,12 +792,10 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testGetPayloadPropsFileWrongFormat(self):
     """Test LabTransfer.GetPayloadPropsFile().
 
-    Test when the payload is not in the correct json format. Also, test if the
-    fallback is being called.
+    Test exception thrown when the payload is not in the correct json format.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      payload_props_path = os.path.join(self.tempdir, 'test_update.gz.json')
       output = 'Not in Json format'
 
       CrOS_LabTransfer = CreateLabTransferInstance(
@@ -838,36 +803,9 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
 
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
                        return_value=cros_build_lib.CommandResult(stdout=output))
-      self.PatchObject(retry_util, 'RunCurl',
-                       return_value=cros_build_lib.CommandResult(stdout=''))
-      CrOS_LabTransfer.GetPayloadPropsFile()
 
-      self.assertEqual(CrOS_LabTransfer._local_payload_props_path,
-                       payload_props_path)
-
-  def testGetPayloadPropsFileRemoteDevserverCallError(self):
-    """Test LabTransfer.GetPayloadPropsFile().
-
-    Test when the LabTransfer._RemoteDevserverCall() method throws an error.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-
-      lab_xfer = auto_updater_transfer.LabTransfer
-      payload_props_path = os.path.join(self.tempdir, 'test_update.gz.json')
-      output = ''
-
-      CrOS_LabTransfer = CreateLabTransferInstance(
-          device, tempdir=self.tempdir, payload_name='test_update.gz')
-
-      self.PatchObject(lab_xfer, '_RemoteDevserverCall',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-
-      CrOS_LabTransfer.GetPayloadPropsFile()
-
-      self.assertEqual(CrOS_LabTransfer._local_payload_props_path,
-                       payload_props_path)
+      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
+                        CrOS_LabTransfer.GetPayloadPropsFile)
 
   def testGetPayloadPropsFileError(self):
     """Test LabTransfer.GetPayloadPropsFile().
@@ -881,8 +819,6 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
           payload_dir='/test/dir')
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       side_effect=retry_util.DownloadError())
       self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
                         CrOS_LabTransfer.GetPayloadPropsFile)
       self.assertIsNone(CrOS_LabTransfer._local_payload_props_path)
@@ -911,14 +847,10 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       CrOS_LabTransfer = CreateLabTransferInstance(
           device, payload_name='test_update.gz',
           payload_dir='/test/payload/dir')
-      expected_size = 75810234
-      output = 'Content-Length: %s' % str(expected_size)
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-      size = CrOS_LabTransfer._GetPayloadSize()
-      self.assertEqual(size, expected_size)
+      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
+                        CrOS_LabTransfer._GetPayloadSize)
 
   def test_GetPayloadSizeNoRegexMatchError(self):
     """Test errors thrown by auto_updater_transfer._GetPayloadSize().
@@ -934,43 +866,6 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       output = 'No Match Output'
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
                        return_value=cros_build_lib.CommandResult(stdout=output))
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        CrOS_LabTransfer._GetPayloadSize)
-
-  def test_GetPayloadSizeNoRegexMatchRemoteDevserverCallError(self):
-    """Test errors thrown by auto_updater_transfer._GetPayloadSize().
-
-    Test error thrown when the output received from the curl command does not
-    contain expected fields and LabTransfer._RemoteDevserverCall method throws
-    an error.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      lab_xfer = auto_updater_transfer.LabTransfer
-      CrOS_LabTransfer = CreateLabTransferInstance(
-          device, payload_name='test_update.gz',
-          payload_dir='/test/payload/dir')
-      output = 'No Match Output'
-      self.PatchObject(lab_xfer, '_RemoteDevserverCall',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        CrOS_LabTransfer._GetPayloadSize)
-
-  def test_GetPayloadSizeCurlRunCommandError(self):
-    """Test errors thrown by auto_updater_transfer.GetPayloadSize().
-
-    Test error thrown when cros_build_lib.run raises a RunCommandError.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      lab_xfer = auto_updater_transfer.LabTransfer
-      CrOS_LabTransfer = CreateLabTransferInstance(
-          device, payload_name='test_update.gz',
-          payload_dir='/test/payload/dir')
-      self.PatchObject(lab_xfer, '_RemoteDevserverCall',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.PatchObject(retry_util, 'RunCurl',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
       self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
                         CrOS_LabTransfer._GetPayloadSize)
 

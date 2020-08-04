@@ -48,7 +48,6 @@ from six.moves import urllib
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import metrics
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
 from chromite.lib import retry_util
@@ -336,8 +335,6 @@ class LabTransfer(Transfer):
           complete list of accepted keyword arguments.
     """
     self._staging_server = staging_server
-    self._fallback_metrics = metrics.Counter(
-        'chromeos/autotest/devserver/remote_devserver_call')
     super(LabTransfer, self).__init__(*args, **kwargs)
 
   @property
@@ -361,22 +358,6 @@ class LabTransfer(Transfer):
     """
     return r'.*/(R[0-9]+-)(?P<image_version>.+)'
 
-  def _UpdateFallbackMetrics(self, ssh_used, success, hostname=None):
-    """Updates metrics that track the fallback devserver calls.
-
-    Args:
-      ssh_used: Indicates whether the devserver was ssh-ed into first.
-      success: Whether the command completed successfully or not.
-      hostname: Hostname of the devserver on which payloads are staged. If None,
-         then the hostname is derived from the self._staging_server URL.
-    """
-    if not hostname:
-      hostname = urllib.parse.urlparse(self._staging_server).hostname
-
-    self._fallback_metrics.increment(fields={'dev_server': hostname,
-                                             'ssh_used': ssh_used,
-                                             'success': success})
-
   def _RemoteDevserverCall(self, cmd, stdout=False):
     """Runs a command on a remote devserver by sshing into it.
 
@@ -388,16 +369,7 @@ class LabTransfer(Transfer):
       stdout: True if the stdout of the command should be captured.
     """
     ip = urllib.parse.urlparse(self._staging_server).hostname
-    try:
-      success = True
-      return cros_build_lib.run(['ssh', ip] + cmd, log_output=True,
-                                stdout=stdout)
-    except cros_build_lib.RunCommandError:
-      success = False
-      logging.error('Remote devserver call failed.')
-      raise
-    finally:
-      self._UpdateFallbackMetrics(ssh_used=True, success=success, hostname=ip)
+    return cros_build_lib.run(['ssh', ip] + cmd, log_output=True, stdout=stdout)
 
   def _CheckPayloads(self, payload_name):
     """Runs the curl command that checks if payloads have been staged."""
@@ -407,27 +379,9 @@ class LabTransfer(Transfer):
     try:
       self._RemoteDevserverCall(cmd)
     except cros_build_lib.RunCommandError as e:
-      logging.error('Could not verify if %s was staged at %s. Received '
-                    'exception: %s', payload_name, payload_url, e)
-      # TODO(crbug.com/1059008): The following code block is a fallback. It
-      # should be removed once _RemoteDevserverCall has been proven to be
-      # reliable.
-      try:
-        success = True
-        # TODO(crbug.com/1033187): Remove log_output parameter passed to
-        # retry_util.RunCurl after the bug is fixed. The log_output=True option
-        # has been added to correct what seems to be a timing issue in
-        # retry_util.RunCurl. The error ((23) Failed writing body) is usually
-        # observed when a piped program closes the read pipe before the curl
-        # command has finished writing. log_output forces the read pipe to stay
-        # open, thus avoiding the failure.
-        retry_util.RunCurl(curl_args=cmd[1:], log_output=True)
-      except retry_util.DownloadError as e:
-        success = False
-        raise ChromiumOSTransferError('Payload %s does not exist at %s: %s' %
-                                      (payload_name, payload_url, e))
-      finally:
-        self._UpdateFallbackMetrics(ssh_used=False, success=success)
+      raise ChromiumOSTransferError(
+          'Could not verify if %s was staged at %s. Received exception: %s' %
+          (payload_name, payload_url, e))
 
   def CheckPayloads(self):
     """Verify that all required payloads are staged on staging server."""
@@ -553,7 +507,6 @@ class LabTransfer(Transfer):
     if self._local_payload_props_path is None:
       payload_props_filename = GetPayloadPropertiesFileName(self._payload_name)
       payload_props_path = os.path.join(self._tempdir, payload_props_filename)
-      fallback = True
 
       # Get command to retrieve contents of the properties file.
       cmd = ['curl',
@@ -561,44 +514,16 @@ class LabTransfer(Transfer):
       try:
         result = self._RemoteDevserverCall(cmd, stdout=True)
         json.loads(result.output)
-      except cros_build_lib.RunCommandError as e:
-        logging.error('Unable to get payload properties file by running %s due '
-                      'to exception: %s.', ' '.join(cmd), e)
-      except ValueError:
-        logging.error('Could not create %s as %s not valid json.',
-                      payload_props_path, result.output)
-      else:
-        fallback = False
         osutils.WriteFile(payload_props_path, result.output, 'wb',
                           makedirs=True)
-
-      if fallback:
-        # TODO(crbug.com/1059008): Fallback in case the try block above fails.
-        # Should be removed once reliable.
-
-        # Get command to download the properties file.
-        cmd = self._GetCurlCmdForPayloadDownload(
-            payload_dir=self._tempdir, build_id=self._payload_dir,
-            payload_filename=payload_props_filename)
-
-        # _GetCurlCmdForPayloadDownload removes the 'payloads/' prefix from the
-        # beginning of the payload_props_filename before creating the
-        # command. So here we need to remove that too.
-        prefix = 'payloads/'
-        if payload_props_filename.startswith(prefix):
-          payload_props_path = os.path.join(
-              self._tempdir,
-              payload_props_filename[len(prefix):])
-
-        try:
-          success = True
-          retry_util.RunCurl(cmd[1:])
-        except retry_util.DownloadError as e:
-          success = False
-          raise ChromiumOSTransferError('Unable to download %s: %s' %
-                                        (payload_props_filename, e))
-        finally:
-          self._UpdateFallbackMetrics(ssh_used=False, success=success)
+      except cros_build_lib.RunCommandError as e:
+        raise ChromiumOSTransferError(
+            'Unable to get payload properties file by running %s due to '
+            'exception: %s.' % (' '.join(cmd), e))
+      except ValueError:
+        raise ChromiumOSTransferError(
+            'Could not create %s as %s not valid json.' %
+            (payload_props_path, result.output))
 
       self._local_payload_props_path = payload_props_path
     return self._local_payload_props_path
@@ -615,18 +540,9 @@ class LabTransfer(Transfer):
     try:
       proc = self._RemoteDevserverCall(cmd, stdout=True)
     except cros_build_lib.RunCommandError as e:
-      logging.error('Unable to get payload size by running command %s due '
-                    'to exception: %s.', ' '.join(cmd), e)
-      # TODO(crbug.com/1059008): Fallback in case the try block above fails.
-      # Should be removed once reliable.
-      try:
-        success = True
-        proc = retry_util.RunCurl(cmd[1:], stdout=True)
-      except cros_build_lib.RunCommandError as e:
-        success = False
-        raise ChromiumOSTransferError('Unable to get payload size: %s' % e)
-      finally:
-        self._UpdateFallbackMetrics(ssh_used=False, success=success)
+      raise ChromiumOSTransferError(
+          'Unable to get payload size by running command %s due to exception: '
+          '%s.' % (' '.join(cmd), e))
 
     pattern = re.compile(r'Content-Length: [0-9]+', re.I)
     match = pattern.findall(proc.output)
