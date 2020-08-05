@@ -2357,9 +2357,6 @@ class BundleArtifactHandler(_CommonPrepareBundle):
 
   def _CollectFiles(self, src_dir, filter_file_exts, dest_dir):
     """Collect the files with any of file_exts from path to working_dir."""
-    if not src_dir:
-      return []
-
     check_dirs = [
         self.chroot.full_path(x) for x in [
             src_dir,
@@ -2376,8 +2373,6 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         continue
 
       for file_basename in os.listdir(directory):
-        # We could have incomplete JSON files in here -- ignore them, since
-        # they'll break everything.
         src_path = os.path.join(directory, file_basename)
         file_noext, file_ext = os.path.splitext(file_basename)
         logging.info('toolchain-logs: checking %s', src_path)
@@ -2402,8 +2397,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
   def _BundleToolchainWarningLogs(self):
     """Bundle the compiler warnings for upload for werror checker."""
     with self.chroot.tempdir() as tempdir:
-      warning_files = self._CollectFiles('/tmp/fatal_clang_warnings', ('.json'),
-                                         tempdir)
+      warning_files = self._CollectFiles('/tmp/fatal_clang_warnings',
+                                         ('.json',), tempdir)
 
       if not warning_files:
         logging.info('No fatal-clang-warnings found, skip bundle artifact')

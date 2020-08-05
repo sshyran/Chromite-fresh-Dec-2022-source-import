@@ -642,7 +642,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     check_dirs = [self.chroot.full_path(x) for x in in_chroot_dirs]
     for d in check_dirs:
       osutils.SafeMakedirs(d)
-      for l in ['log1.json', 'log2.json', 'log3.notjson']:
+      for l in ['log1.json', 'log2.json', 'log3.notjson', 'log4']:
         osutils.Touch(os.path.join(d, l))
     tarball = self.obj.Bundle()
     artifact = os.path.join(self.outdir,
@@ -650,7 +650,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.assertEqual(tarball, [artifact])
 
     # Make sure the duplicate logs are renamed and all logs are captured.
-    ret = self.obj._CollectFiles('/tmp/fatal_clang_warnings', ('.json'),
+    ret = self.obj._CollectFiles('/tmp/fatal_clang_warnings', ('.json',),
                                  self.outdir)
     self.assertCountEqual(
         ['log1.json', 'log2.json', 'log10.json', 'log20.json'], ret)
