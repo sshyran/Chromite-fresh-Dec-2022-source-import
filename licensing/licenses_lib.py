@@ -40,11 +40,11 @@ STOCK_LICENSE_DIRS = [
     'src/third_party/portage-stable/licenses',
 ]
 
-# There are licenses for custom software we got and isn't part of
-# upstream gentoo.
-CUSTOM_LICENSE_DIRS = [
-    'src/third_party/chromiumos-overlay/licenses',
-    'src/private-overlays/chromeos-overlay/licenses',
+# The SDK does not have generated overlay info in it, so hardcode these
+# fallbacks for them.
+SDK_OVERLAY_DIRS = [
+    'src/third_party/chromiumos-overlay',
+    'src/private-overlays/chromeos-overlay',
 ]
 
 COPYRIGHT_ATTRIBUTION_DIR = (
@@ -797,7 +797,8 @@ def _GetLicenseDirectories(board: Optional[str] = None,
         sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY) or ''
     custom_paths = portdir_overlay.split() if portdir_overlay else []
   else:
-    custom_paths = []
+    custom_paths = [os.path.join(constants.SOURCE_ROOT, x)
+                    for x in SDK_OVERLAY_DIRS]
   custom = [os.path.join(d, 'licenses') for d in custom_paths]
 
   if dir_set == _STOCK_DIRS:
