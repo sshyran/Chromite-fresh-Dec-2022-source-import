@@ -838,7 +838,6 @@ def _CheckForDeprecatedLicense(cpf, licenses):
     LEGACY_PKGS = (
         'sys-firmware/dell-disk',
         'sys-firmware/dell-dock',
-        'chromeos-base/chromeos-pd-firmware-deltaur-private',
     )
     if not any(cpf.startswith(x) for x in LEGACY_PKGS):
       raise PackageLicenseError(
