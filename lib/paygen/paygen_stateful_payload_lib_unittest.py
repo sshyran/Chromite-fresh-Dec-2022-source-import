@@ -44,7 +44,6 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         '-czf',
         os.path.join(self.tempdir, 'stateful.tgz'),
         '--directory=%s/dir-1' % self.tempdir,
-        '--hard-dereference',
         '--transform=s,^dev_image,dev_image_new,',
         '--transform=s,^var_overlay,var_new,',
         'dev_image',

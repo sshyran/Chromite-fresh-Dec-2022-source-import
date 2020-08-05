@@ -45,7 +45,6 @@ def GenerateStatefulPayload(image_path, output_directory):
           '-czf',
           output_gz,
           '--directory=%s' % rootfs_dir,
-          '--hard-dereference',
           '--transform=s,^dev_image,dev_image_new,',
           '--transform=s,^var_overlay,var_new,',
           'dev_image',
