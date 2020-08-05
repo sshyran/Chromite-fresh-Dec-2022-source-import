@@ -635,26 +635,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.debug_binary_name + toolchain_util.BZ2_COMPRESSION_SUFFIX)
     self.assertEqual([output], self.obj.Bundle())
 
-  def testBundleToolchainWarningLogs(self):
-    self.SetUpBundle('ToolchainWarningLogs')
-    path = '/tmp/fatal_clang_warnings'
-    in_chroot_dirs = [path, '/build/%s%s' % (self.board, path)]
-    check_dirs = [self.chroot.full_path(x) for x in in_chroot_dirs]
-    for d in check_dirs:
-      osutils.SafeMakedirs(d)
-      for l in ['log1.json', 'log2.json', 'log3.notjson', 'log4']:
-        osutils.Touch(os.path.join(d, l))
-    tarball = self.obj.Bundle()
-    artifact = os.path.join(self.outdir,
-                            '%s.DATE.fatal_clang_warnings.tar.xz' % self.board)
-    self.assertEqual(tarball, [artifact])
-
-    # Make sure the duplicate logs are renamed and all logs are captured.
-    ret = self.obj._CollectFiles('/tmp/fatal_clang_warnings', ('.json',),
-                                 self.outdir)
-    self.assertCountEqual(
-        ['log1.json', 'log2.json', 'log10.json', 'log20.json'], ret)
-
   @mock.patch.object(builtins, 'open')
   def testBundleUnverifiedChromeBenchmarkAfdoFile(self, mock_open):
     self.SetUpBundle('UnverifiedChromeBenchmarkAfdoFile')
@@ -735,22 +715,75 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         print_cmd=True,
     )
 
+  def runToolchainBundleTest(self, artifact_path, tarball_name, input_files,
+                             expected_output_files):
+    """Asserts that the given artifact_path is tarred up properly.
+
+    Args:
+      artifact_path: the path to touch |input_files| in.
+      tarball_name: the expected name of the tarball we will produce.
+      input_files: a list of files to |touch| relative to |artifact_path|.
+      expected_output_files: a list of files that should be present in the
+        tarball.
+
+    Returns:
+      Nothing.
+    """
+    with mock.patch.object(cros_build_lib,
+                           'CreateTarball') as create_tarball_mock:
+      in_chroot_dirs = [
+          artifact_path,
+          '/build/%s%s' % (self.board, artifact_path)
+      ]
+      for d in (self.chroot.full_path(x) for x in in_chroot_dirs):
+        for l in input_files:
+          p = os.path.join(d, l)
+          osutils.SafeMakedirs(os.path.dirname(p))
+          osutils.Touch(p)
+
+      tarball = self.obj.Bundle()
+      tarball_path = os.path.join(self.outdir, tarball_name)
+      self.assertEqual(tarball, [tarball_path])
+
+      create_tarball_mock.assert_called_once()
+      output, _tempdir = create_tarball_mock.call_args[0]
+      self.assertEqual(output, tarball_path)
+      inputs = create_tarball_mock.call_args[1]['inputs']
+      self.assertCountEqual(expected_output_files, inputs)
+
+  def testBundleToolchainWarningLogs(self):
+    self.SetUpBundle('ToolchainWarningLogs')
+    self.runToolchainBundleTest(
+        artifact_path='/tmp/fatal_clang_warnings',
+        tarball_name='%s.DATE.fatal_clang_warnings.tar.xz' % self.board,
+        input_files=('log1.json', 'log2.json', 'log3.notjson', 'log4'),
+        expected_output_files=(
+            'log1.json',
+            'log10.json',
+            'log2.json',
+            'log20.json',
+        ),
+    )
+
   def testBundleClangCrashDiagnoses(self):
     self.SetUpBundle('ClangCrashDiagnoses')
-    src_dir = '/tmp/clang_crash_diagnostics'
-    check_dirs = [
-        self.chroot.full_path(x)
-        for x in [src_dir, '/build/%s%s' % (self.board, src_dir)]
-    ]
-    for d in check_dirs:
-      osutils.SafeMakedirs(d)
-      for l in ['1.cpp', '1.sh', '2.cc', '2.sh']:
-        osutils.Touch(os.path.join(d, l))
-    tarball = self.obj.Bundle()
-    self.assertEqual(tarball, [
-        os.path.join(self.outdir,
-                     '%s.DATE.clang_crash_diagnoses.tar.xz' % self.board)
-    ])
+    self.runToolchainBundleTest(
+        artifact_path='/tmp/clang_crash_diagnostics',
+        tarball_name='%s.DATE.clang_crash_diagnoses.tar.xz' % self.board,
+        input_files=('1.cpp', '1.sh', '2.cc', '2.sh', 'foo/bar.sh'),
+        expected_output_files=(
+            '1.cpp',
+            '1.sh',
+            '10.cpp',
+            '10.sh',
+            '2.cc',
+            '2.sh',
+            '20.cc',
+            '20.sh',
+            'foo/bar.sh',
+            'foo/bar0.sh',
+        ),
+    )
 
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):

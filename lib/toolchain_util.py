@@ -2355,8 +2355,25 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     return _CompressAFDOFiles([profile_path], None, self.output_dir,
                               XZ_COMPRESSION_SUFFIX)
 
-  def _CollectFiles(self, src_dir, filter_file_exts, dest_dir):
-    """Collect the files with any of file_exts from path to working_dir."""
+  @staticmethod
+  def _ListTransitiveFiles(base_directory: str):
+    for dir_path, _dir_names, file_names in os.walk(base_directory):
+      for file_name in file_names:
+        yield os.path.join(dir_path, file_name)
+
+  def _CollectFiles(self, src_dir, dest_dir, include_file):
+    """Collect the files with any of file_exts from path to working_dir.
+
+    Args:
+      src_dir: the path to the directory to copy files from.
+      dest_dir: the path of the directory to copy files to (will be created if
+                it doesn't exist and files need to be copied).
+      include_file: a callable that returns True if a file should be copied;
+                    False otherwise.
+
+    Returns:
+      A list of all files that were copied, relative to `src_dir`.
+    """
     check_dirs = [
         self.chroot.full_path(x) for x in [
             src_dir,
@@ -2372,24 +2389,25 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         logging.info("toolchain-logs: %s doesn't exist", directory)
         continue
 
-      for file_basename in os.listdir(directory):
-        src_path = os.path.join(directory, file_basename)
-        file_noext, file_ext = os.path.splitext(file_basename)
-        logging.info('toolchain-logs: checking %s', src_path)
-        if os.path.isfile(src_path) and filter_file_exts and (
-            file_ext not in filter_file_exts):
-          logging.warning('toolchain-logs: skipped file: %s', src_path)
+      for src_path in self._ListTransitiveFiles(directory):
+        rel_path = os.path.relpath(src_path, start=directory)
+        logging.info('toolchain-logs: checking %s', rel_path)
+        if not include_file(rel_path):
+          logging.warning('toolchain-logs: skipped file: %s', rel_path)
           continue
 
-        dest_path = os.path.join(dest_dir, file_noext + file_ext)
+        dest_path = os.path.join(dest_dir, rel_path)
         while os.path.exists(dest_path):
-          file_noext += '0'
-          dest_path = os.path.join(dest_dir, file_noext + file_ext)
+          file_noext, file_ext = os.path.splitext(dest_path)
+          dest_path = f'{file_noext}0{file_ext}'
+
+        osutils.SafeMakedirs(os.path.dirname(dest_path))
+        rel_dest_path = os.path.relpath(dest_path, start=dest_dir)
 
         logging.info('toolchain-logs: adding path %s as %s', src_path,
                      dest_path)
         shutil.copy(src_path, dest_path)
-        output.append(os.path.basename(dest_path))
+        output.append(rel_dest_path)
 
     logging.info('%d files collected', len(output))
     return output
@@ -2397,8 +2415,10 @@ class BundleArtifactHandler(_CommonPrepareBundle):
   def _BundleToolchainWarningLogs(self):
     """Bundle the compiler warnings for upload for werror checker."""
     with self.chroot.tempdir() as tempdir:
-      warning_files = self._CollectFiles('/tmp/fatal_clang_warnings',
-                                         ('.json',), tempdir)
+      warning_files = self._CollectFiles(
+          '/tmp/fatal_clang_warnings',
+          tempdir,
+          include_file=lambda file_path: file_path.endswith('.json'))
 
       if not warning_files:
         logging.info('No fatal-clang-warnings found, skip bundle artifact')
@@ -2414,8 +2434,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
   def _BundleClangCrashDiagnoses(self):
     """Bundle all clang crash diagnoses in chroot for uploading."""
     with osutils.TempDir(prefix='clang_crash_diagnoses_tarball') as tempdir:
-      diagnoses = self._CollectFiles('/tmp/clang_crash_diagnostics', None,
-                                     tempdir)
+      diagnoses = self._CollectFiles(
+          '/tmp/clang_crash_diagnostics', tempdir, include_file=lambda _: True)
 
       if not diagnoses:
         logging.info('No clang crashes found, skip bundle artifact')
@@ -2425,7 +2445,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
       output = os.path.join(
           self.output_dir,
           f'{self.build_target}.{now}.clang_crash_diagnoses.tar.xz')
-      cros_build_lib.CreateTarball(output, tempdir)
+      cros_build_lib.CreateTarball(output, tempdir, inputs=diagnoses)
       return [output]
 
 
