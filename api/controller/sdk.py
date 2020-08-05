@@ -117,7 +117,7 @@ def Unmount(input_proto, _output_proto, _config):
 @validate.validation_complete
 def UnmountPath(input_proto, _output_proto, _config):
   """Unmount a path"""
-  sdk.UnmountPath(input_proto.path)
+  sdk.UnmountPath(input_proto.path.path)
 
 
 @faux.all_empty

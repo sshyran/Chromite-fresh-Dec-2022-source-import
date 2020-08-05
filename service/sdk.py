@@ -229,18 +229,18 @@ def Unmount(chroot=None):
   cros_build_lib.run(cmd)
 
 
-def UnmountPath(path):
+def UnmountPath(path: str):
   """Unmount the specified path.
 
   Args:
-    path (chromiumos.Path.path): The path being unmounted.
+    path: The path being unmounted.
   """
-  logging.info('Unmounting path %s', path.path)
+  logging.info('Unmounting path %s', path)
   try:
-    osutils.UmountTree(path.path)
+    osutils.UmountTree(path)
   except cros_build_lib.RunCommandError as e:
-    fs_debug = cros_sdk_lib.GetFileSystemDebug(path.path, run_ps=True)
-    raise UnmountError(path.path, e, fs_debug)
+    fs_debug = cros_sdk_lib.GetFileSystemDebug(path, run_ps=True)
+    raise UnmountError(path, e, fs_debug)
 
 
 def GetChrootVersion(chroot_path=None):

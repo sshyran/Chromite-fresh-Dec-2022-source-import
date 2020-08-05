@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import os
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -84,17 +83,15 @@ class UnmountTest(cros_test_lib.RunCommandTempDirTestCase,
   """Unmount tests."""
 
   def testUnmountPath(self):
-    path_proto = common_pb2.Path(path='/some/path')
     self.PatchObject(osutils, 'UmountTree', return_value=True)
-    sdk.UnmountPath(path_proto)
+    sdk.UnmountPath('/some/path')
 
   def testUnmountPathFails(self):
-    path_proto = common_pb2.Path(path='/some/path')
     self.PatchObject(osutils, 'UmountTree',
                      side_effect=cros_build_lib.RunCommandError(
                          'umount failure'))
     with self.assertRaises(sdk.UnmountError) as unmount_assert:
-      sdk.UnmountPath(path_proto)
+      sdk.UnmountPath('/some/path')
     # Unpack the underlying (thrown) exception from the assertRaises context
     # manager exception attribute.
     unmount_exception = unmount_assert.exception

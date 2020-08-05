@@ -191,10 +191,8 @@ class SdkUnmountPathTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     patch = self.PatchObject(sdk_service, 'UnmountPath', return_value=1)
 
     request = self._UnmountPathRequest('/test/path')
-
     sdk_controller.UnmountPath(request, self.response, self.api_config)
-    # Verify that by default sdk_service.Delete is called with force=True.
-    patch.assert_called_once_with(mock.ANY)
+    patch.assert_called_once_with('/test/path')
 
 
 class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
