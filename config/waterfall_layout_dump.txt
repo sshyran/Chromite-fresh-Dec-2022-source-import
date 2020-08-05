@@ -324,7 +324,6 @@
     kukui-arc-r-release
     kukui-arc64-release
     kukui-release
-    kukui-tablet-release
     lakitu-release
     lars-release
     lasilla-ground-release
@@ -1458,7 +1457,6 @@
     kukui-arc-r-release-tryjob
     kukui-arc64-release-tryjob
     kukui-release-tryjob
-    kukui-tablet-release-tryjob
     lakitu-release-tryjob
     lars-release-tryjob
     lasilla-ground-release-tryjob
