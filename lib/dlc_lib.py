@@ -316,17 +316,19 @@ class DlcGenerator(object):
     Args:
       dlc_dir: (str) The path to the mounted point during image creation.
     """
-    # Reading the platform APPID and creating the DLC APPID.
-    platform_lsb_release = osutils.ReadFile(
-        os.path.join(self.sysroot, LSB_RELEASE))
     app_id = None
-    for line in platform_lsb_release.split('\n'):
-      if line.startswith(cros_set_lsb_release.LSB_KEY_APPID_RELEASE):
-        app_id = line.split('=')[1]
+    platform_lsb_rel_path = os.path.join(self.sysroot, LSB_RELEASE)
+    if os.path.isfile(platform_lsb_rel_path):
+      # Reading the platform APPID and creating the DLC APPID.
+      platform_lsb_release = osutils.ReadFile(platform_lsb_rel_path)
+      for line in platform_lsb_release.split('\n'):
+        if line.startswith(cros_set_lsb_release.LSB_KEY_APPID_RELEASE):
+          app_id = line.split('=')[1]
+
     if app_id is None:
       raise Exception(
           '%s does not have a valid key %s' %
-          (platform_lsb_release, cros_set_lsb_release.LSB_KEY_APPID_RELEASE))
+          (platform_lsb_rel_path, cros_set_lsb_release.LSB_KEY_APPID_RELEASE))
 
     fields = (
         (DLC_ID_KEY, self.ebuild_params.dlc_id),
