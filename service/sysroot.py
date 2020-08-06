@@ -41,7 +41,7 @@ class SetupBoardRunConfig(object):
   def __init__(self, set_default=False, force=False, usepkg=True, jobs=None,
                regen_configs=False, quiet=False, update_toolchain=True,
                upgrade_chroot=True, init_board_pkgs=True, local_build=False,
-               toolchain_changed=False):
+               toolchain_changed=False, package_indexes=None):
     """Initialize method.
 
     Args:
@@ -57,6 +57,8 @@ class SetupBoardRunConfig(object):
       local_build (bool): Bootstrap only from local packages?
       toolchain_changed (bool): Has a toolchain change occurred? Implies
         'force'.
+      package_indexes (list[PackageIndexInfo]): List of information about
+        available prebuilts, youngest first, or None.
     """
 
     self.set_default = set_default
@@ -69,6 +71,7 @@ class SetupBoardRunConfig(object):
     self.update_chroot = upgrade_chroot
     self.init_board_pkgs = init_board_pkgs
     self.local_build = local_build
+    self.package_indexes = package_indexes or []
 
   def GetUpdateChrootArgs(self):
     """Create a list containing the relevant update_chroot arguments.
@@ -96,7 +99,7 @@ class BuildPackagesRunConfig(object):
 
   def __init__(self, usepkg=True, install_debug_symbols=False,
                packages=None, use_flags=None, use_goma=False,
-               incremental_build=True):
+               incremental_build=True, package_indexes=None):
     """Init method.
 
     Args:
@@ -112,6 +115,8 @@ class BuildPackagesRunConfig(object):
         build or a fresh build. Always treating it as an incremental build is
         safe, but certain operations can be faster when we know we are doing
         a fresh build.
+      package_indexes (list[PackageIndexInfo]): List of information about
+        available prebuilts, youngest first, or None.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -119,6 +124,7 @@ class BuildPackagesRunConfig(object):
     self.use_flags = use_flags
     self.use_goma = use_goma
     self.is_incremental = incremental_build
+    self.package_indexes = package_indexes or []
 
   def GetBuildPackagesArgs(self):
     """Get the build_packages script arguments."""
@@ -176,6 +182,10 @@ class BuildPackagesRunConfig(object):
 
     if self.use_goma:
       env['USE_GOMA'] = 'true'
+
+    if self.package_indexes:
+      env['PORTAGE_BINHOST'] = ' '.join(
+          x.location for x in reversed(self.package_indexes))
 
     return env
 
@@ -269,7 +279,8 @@ def Create(target, run_configs, accept_licenses):
   # Refresh the workon symlinks to compensate for crbug.com/679831.
   logging.info('Setting up portage in the sysroot.')
   _InstallPortageConfigs(sysroot, target, accept_licenses,
-                         run_configs.local_build)
+                         run_configs.local_build,
+                         package_indexes=run_configs.package_indexes)
 
   # Developer Experience Step: Set default board (if requested) to allow
   # running later commands without needing to pass the --board argument.
@@ -407,7 +418,8 @@ def _InstallConfigs(sysroot, target):
   sysroot.InstallMakeConfUser()
 
 
-def _InstallPortageConfigs(sysroot, target, accept_licenses, local_build):
+def _InstallPortageConfigs(sysroot, target, accept_licenses, local_build,
+                           package_indexes=None):
   """Install portage wrappers and configurations.
 
   Dependencies: make.conf.board_setup (InstallConfigs).
@@ -420,13 +432,16 @@ def _InstallPortageConfigs(sysroot, target, accept_licenses, local_build):
       in the sysroot.
     accept_licenses (str): Additional accepted licenses as a string.
     local_build (bool): If the build is a local only build.
+    package_indexes (list[PackageIndexInfo]): List of information about
+      available prebuilts, youngest first, or None.
   """
   sysroot.CreateAllWrappers(friendly_name=target.name)
   _ChooseProfile(target, sysroot)
   _RefreshWorkonSymlinks(target.name, sysroot)
   # Must be done after the profile is chosen or binhosts may be incomplete.
   sysroot.InstallMakeConfBoard(accepted_licenses=accept_licenses,
-                               local_only=local_build)
+                               local_only=local_build,
+                               package_indexes=package_indexes)
 
 
 def _InstallToolchain(sysroot, target, local_init=True):

@@ -15,6 +15,7 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.metrics import deserialize_metrics_log
+from chromite.lib import binpkg
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import goma_lib
@@ -41,8 +42,13 @@ def Create(input_proto, output_proto, _config):
 
   build_target = controller_util.ParseBuildTarget(input_proto.build_target,
                                                   input_proto.profile)
+  package_indexes = [
+      binpkg.PackageIndexInfo.from_protobuf(x)
+      for x in input_proto.package_indexes
+  ]
   run_configs = sysroot.SetupBoardRunConfig(
-      force=replace_sysroot, upgrade_chroot=update_chroot)
+      force=replace_sysroot, upgrade_chroot=update_chroot,
+      package_indexes=package_indexes)
 
   try:
     created = sysroot.Create(build_target, run_configs,
@@ -158,6 +164,10 @@ def InstallPackages(input_proto, output_proto, _config):
       input_proto.sysroot.build_target)
   packages = [controller_util.PackageInfoToString(x)
               for x in input_proto.packages]
+  package_indexes = [
+      binpkg.PackageIndexInfo.from_protobuf(x)
+      for x in input_proto.package_indexes
+  ]
 
   if not target_sysroot.IsToolchainInstalled():
     cros_build_lib.Die('Toolchain must first be installed.')
@@ -169,6 +179,7 @@ def InstallPackages(input_proto, output_proto, _config):
       usepkg=not compile_source,
       install_debug_symbols=True,
       packages=packages,
+      package_indexes=package_indexes,
       use_flags=use_flags,
       use_goma=use_goma,
       incremental_build=False)

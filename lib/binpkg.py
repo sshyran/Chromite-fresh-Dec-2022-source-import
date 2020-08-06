@@ -22,11 +22,14 @@ import time
 
 from six.moves import urllib
 
+from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lib import sysroot_lib
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -317,6 +320,54 @@ class PackageIndex(object):
       self.header['TIMESTAMP'] = str(math.trunc(time.time()))
       self.header['PACKAGES'] = str(len(self.packages))
       self.modified = False
+
+
+class PackageIndexInfo(object):
+  """A parser for PackageIndex metadata.
+
+  Attributes:
+    snapshot_sha (str): The git SHA of the manifest snapshot.
+    snapshot_number (int): The snapshot number.
+    build_target (build_target_lib.BuildTarget): The build_target.
+    profile (Profile): The build_target.
+    location (str): The GS path for the prebuilts directory.
+  """
+
+  def __init__(self, snapshot_sha='', snapshot_number=0,
+               build_target=None, profile=None, location=''):
+    self.snapshot_sha = snapshot_sha
+    self.snapshot_number = snapshot_number
+    self.build_target = build_target or build_target_lib.BuildTarget(name='')
+    self.profile = profile or sysroot_lib.Profile()
+    self.location = location
+
+  @property
+  def as_protobuf(self):
+    """Return a chromiumos.PackageIndexInfo protobuf."""
+    return common_pb2.PackageIndexInfo(
+        snapshot_sha=self.snapshot_sha,
+        snapshot_number=self.snapshot_number,
+        build_target=self.build_target.as_protobuf,
+        profile=self.profile.as_protobuf,
+        location=self.location)
+
+  @classmethod
+  def from_protobuf(cls, message):
+    """Return a PackageIndexInfo object for the given PackageIndexInfo protobuf.
+
+    Args:
+      message (chromiumos.PackageIndexInfo): The protobuf to parse
+
+    Returns:
+      (PackageIndexInfo) the parsed instance.
+    """
+    return cls(
+        snapshot_sha=message.snapshot_sha,
+        snapshot_number=message.snapshot_number,
+        build_target=build_target_lib.BuildTarget.from_protobuf(
+            message.build_target),
+        profile=sysroot_lib.Profile.from_protobuf(message.profile),
+        location=message.location)
 
 
 def _RetryUrlOpen(url, tries=3):

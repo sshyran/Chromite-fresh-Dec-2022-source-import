@@ -12,6 +12,7 @@ import multiprocessing
 import os
 import sys
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -239,6 +240,28 @@ def _GetChrootMakeConfUserPath():
   return '/%s' % _MAKE_CONF_USER
 
 
+class Profile(object):
+  """Class that encapsulates the profile name for a sysroot."""
+
+  def __init__(self, name=''):
+    self._name = name
+
+  @property
+  def name(self):
+    return self._name
+
+  def __eq__(self, other):
+    return self.name == other.name
+
+  @property
+  def as_protobuf(self):
+    return common_pb2.Profile(name=self._name)
+
+  @classmethod
+  def from_protobuf(cls, message):
+    return cls(name=message.name)
+
+
 class Sysroot(object):
   """Class that encapsulate the interaction with sysroots."""
 
@@ -412,12 +435,15 @@ class Sysroot(object):
     config_file = _GetMakeConfGenericPath()
     osutils.SafeSymlink(config_file, self._Path(_MAKE_CONF), sudo=True)
 
-  def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False):
+  def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False,
+                           package_indexes=None):
     """Make sure the make.conf.board file exists and is up to date.
 
     Args:
       accepted_licenses (str): Any additional accepted licenses.
       local_only (bool): Whether prebuilts can be fetched from remote sources.
+      package_indexes (list[PackageIndexInfo]): List of information about
+        available prebuilts, youngest first, or None.
     """
     board_conf = self.GenerateBoardMakeConf(accepted_licenses=accepted_licenses)
     make_conf_path = self._Path(_MAKE_CONF_BOARD)
@@ -426,7 +452,8 @@ class Sysroot(object):
     # Once make.conf.board has been generated, generate the binhost config.
     # We need to do this in two steps as the binhost generation step needs
     # portageq to be available.
-    binhost_conf = self.GenerateBinhostConf(local_only=local_only)
+    binhost_conf = self.GenerateBinhostConf(local_only=local_only,
+                                            package_indexes=package_indexes)
     osutils.WriteFile(make_conf_path, '%s\n%s\n' % (board_conf, binhost_conf),
                       sudo=True)
 
@@ -554,11 +581,13 @@ class Sysroot(object):
 
     return '\n'.join(config)
 
-  def GenerateBinhostConf(self, local_only=False):
+  def GenerateBinhostConf(self, local_only=False, package_indexes=None):
     """Returns the binhost configuration.
 
     Args:
       local_only (bool): If True, use binary packages from local boards only.
+      package_indexes (list[PackageIndexInfo]): List of information about
+        available prebuilts, youngest first, or None.
 
     Returns:
       str - The config contents.
@@ -577,6 +606,17 @@ class Sysroot(object):
                         'PORTAGE_BINHOST="$LOCAL_BINHOST"'])
 
     config = []
+    if package_indexes:
+      # TODO(crbug/1088059): Drop all use of overlay commits, once the solution
+      # is in place for non-snapshot checkouts.
+      # If present, this defines PORTAGE_BINHOST.  These are independent of the
+      # overlay commits.
+      config.append('# This is the list of binhosts provided by the API.')
+      config.append('PASSED_BINHOST="%s"' % ' '.join(
+          x.location for x in reversed(package_indexes)))
+      config.append('PORTAGE_BINHOST="$PASSED_BINHOST"')
+      return '\n'.join(config)
+
     postsubmit_binhost, postsubmit_binhost_internal = self._PostsubmitBinhosts(
         board)
 

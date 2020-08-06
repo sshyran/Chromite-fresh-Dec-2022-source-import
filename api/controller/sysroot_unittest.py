@@ -121,7 +121,8 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     sysroot_controller.Create(in_proto, out_proto, self.api_config)
 
     # Default value checks.
-    rc_patch.assert_called_with(force=force, upgrade_chroot=upgrade_chroot)
+    rc_patch.assert_called_with(force=force, upgrade_chroot=upgrade_chroot,
+                                package_indexes=[])
     self.assertEqual(board, out_proto.sysroot.build_target.name)
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
@@ -137,7 +138,8 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     sysroot_controller.Create(in_proto, out_proto, self.api_config)
 
     # Not default value checks.
-    rc_patch.assert_called_with(force=force, upgrade_chroot=upgrade_chroot)
+    rc_patch.assert_called_with(force=force, upgrade_chroot=upgrade_chroot,
+                                package_indexes=[])
     self.assertEqual(board, out_proto.sysroot.build_target.name)
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
