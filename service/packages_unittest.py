@@ -118,13 +118,15 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
   new_version = '1.2.4'
   ebuild_template = 'package-%s-r1.ebuild'
   ebuild = ebuild_template % version
+  unstable_ebuild = 'package-9999.ebuild'
   version_pin = 'VERSION-PIN'
   manifest = 'Manifest'
 
   def test_uprev_ebuild(self):
     """Tests uprev of ebuild with version path"""
     file_layout = (
-        D(self.package, [self.ebuild, self.version_pin, self.manifest]),
+        D(self.package, [self.ebuild, self.unstable_ebuild,
+                         self.version_pin, self.manifest]),
     )
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
 
@@ -132,19 +134,60 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
     version_pin_path = os.path.join(package_path, self.version_pin)
     self.WriteTempFile(version_pin_path, self.new_version)
 
+    ebuild_path = os.path.join(package_path, self.ebuild)
+    self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
+
     result = packages.uprev_ebuild_from_pin(package_path, version_pin_path,
                                             chroot=Chroot())
     self.assertEqual(len(result.modified), 1,
                      'unexpected number of results: %s' % len(result.modified))
 
     mod = result.modified[0]
-    self.assertEqual(mod.new_version, self.new_version,
+    self.assertEqual(mod.new_version, self.new_version + '-r1',
                      'unexpected version number: %s' % mod.new_version)
 
     old_ebuild_path = os.path.join(package_path,
                                    self.ebuild_template % self.version)
     new_ebuild_path = os.path.join(package_path,
                                    self.ebuild_template % self.new_version)
+    manifest_path = os.path.join(package_path, 'Manifest')
+
+    expected_modified_files = [old_ebuild_path, new_ebuild_path, manifest_path]
+    self.assertCountEqual(mod.files, expected_modified_files)
+
+    self.assertCommandContains(['ebuild', 'manifest'])
+
+  def test_uprev_ebuild_same_version(self):
+    """Tests uprev of ebuild with version path when the version has not changed.
+
+       This should result in bumping the revision number.
+    """
+    file_layout = (
+        D(self.package, [self.ebuild, self.unstable_ebuild,
+                         self.version_pin, self.manifest]),
+    )
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
+
+    package_path = os.path.join(self.tempdir, self.package)
+    version_pin_path = os.path.join(package_path, self.version_pin)
+    self.WriteTempFile(version_pin_path, self.version)
+
+    ebuild_path = os.path.join(package_path, self.ebuild)
+    self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
+
+    result = packages.uprev_ebuild_from_pin(package_path, version_pin_path,
+                                            chroot=Chroot())
+    self.assertEqual(len(result.modified), 1,
+                     'unexpected number of results: %s' % len(result.modified))
+
+    mod = result.modified[0]
+    self.assertEqual(mod.new_version, self.version + '-r2',
+                     'unexpected version number: %s' % mod.new_version)
+
+    old_ebuild_path = os.path.join(package_path,
+                                   self.ebuild_template % self.version)
+    new_ebuild_path = os.path.join(package_path,
+                                   'package-%s-r2.ebuild' % self.version)
     manifest_path = os.path.join(package_path, 'Manifest')
 
     expected_modified_files = [old_ebuild_path, new_ebuild_path, manifest_path]
@@ -167,8 +210,31 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
       packages.uprev_ebuild_from_pin(package_path, version_pin_path,
                                      chroot=Chroot())
 
-  def test_multiple_ebuilds(self):
-    """Tests assertion is raised if multiple ebuilds are present for package"""
+  def test_multiple_stable_ebuilds(self):
+    """Tests assertion is raised if multiple stable ebuilds are present"""
+    file_layout = (
+        D(self.package, [self.version_pin, self.ebuild,
+                         self.ebuild_template % '1.2.1',
+                         self.manifest]),
+    )
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
+
+    package_path = os.path.join(self.tempdir, self.package)
+    version_pin_path = os.path.join(package_path, self.version_pin)
+    self.WriteTempFile(version_pin_path, self.new_version)
+
+    ebuild_path = os.path.join(package_path, self.ebuild)
+    self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
+
+    ebuild_path = os.path.join(package_path, self.ebuild_template % '1.2.1')
+    self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
+
+    with self.assertRaises(packages.UprevError):
+      packages.uprev_ebuild_from_pin(package_path, version_pin_path,
+                                     chroot=Chroot())
+
+  def test_multiple_unstable_ebuilds(self):
+    """Tests assertion is raised if multiple unstable ebuilds are present"""
     file_layout = (
         D(self.package, [self.version_pin, self.ebuild,
                          self.ebuild_template % '1.2.1',

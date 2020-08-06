@@ -403,32 +403,52 @@ def uprev_ebuild_from_pin(package_path, version_pin_path, chroot):
 
   package_src_path = os.path.join(constants.SOURCE_ROOT, package_path)
   ebuild_paths = list(portage_util.EBuild.List(package_src_path))
-  if not ebuild_paths:
-    raise UprevError('No ebuilds found for %s' % package)
-  elif len(ebuild_paths) > 1:
-    raise UprevError('Multiple ebuilds found for %s' % package)
-  else:
-    ebuild_path = ebuild_paths[0]
+  stable_ebuild = None
+  unstable_ebuild = None
+  for path in ebuild_paths:
+    ebuild = portage_util.EBuild(path)
+    if ebuild.is_stable:
+      stable_ebuild = ebuild
+    else:
+      unstable_ebuild = ebuild
+
+  if stable_ebuild is None:
+    raise UprevError('No stable ebuild found for %s' % package)
+  if unstable_ebuild is None:
+    raise UprevError('No unstable ebuild found for %s' % package)
+  if len(ebuild_paths) > 2:
+    raise UprevError('Found too many ebuilds for %s: '
+                     'expected one stable and one unstable' % package)
 
   version_pin_src_path = os.path.join(constants.SOURCE_ROOT, version_pin_path)
   version = osutils.ReadFile(version_pin_src_path).strip()
-  new_ebuild_path = os.path.join(package_path,
-                                 '%s-%s-r1.ebuild' % (package, version))
-  new_ebuild_src_path = os.path.join(constants.SOURCE_ROOT, new_ebuild_path)
-  os.rename(ebuild_path, new_ebuild_src_path)
+
+  # If the new version is the same as the old version, bump the revision number,
+  # otherwise reset it to 1
+  if version == stable_ebuild.version_no_rev:
+    version = '%s-r%d' % (version, stable_ebuild.current_revision + 1)
+  else:
+    version = version + '-r1'
+
+  new_ebuild_src_path = os.path.join(package_src_path,
+                                     '%s-%s.ebuild' % (package, version))
   manifest_src_path = os.path.join(package_src_path, 'Manifest')
-  new_ebuild_chroot_path = os.path.join(constants.CHROOT_SOURCE_ROOT,
-                                        new_ebuild_path)
+
+  portage_util.EBuild.MarkAsStable(unstable_ebuild.ebuild_path,
+                                   new_ebuild_src_path, {})
+  osutils.SafeUnlink(stable_ebuild.ebuild_path)
 
   try:
-    portage_util.UpdateEbuildManifest(new_ebuild_chroot_path, chroot=chroot)
+    portage_util.UpdateEbuildManifest(new_ebuild_src_path, chroot=chroot)
   except cros_build_lib.RunCommandError as e:
     raise EbuildManifestError(
         'Unable to update manifest for %s: %s' % (package, e.stderr))
 
   result = UprevVersionedPackageResult()
   result.add_result(version,
-                    [new_ebuild_src_path, ebuild_path, manifest_src_path])
+                    [new_ebuild_src_path,
+                     stable_ebuild.ebuild_path,
+                     manifest_src_path])
   return result
 
 
