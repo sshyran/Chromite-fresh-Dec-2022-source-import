@@ -559,6 +559,13 @@ def DeleteDraft(host, change):
                ' %r' % change)
 
 
+def CherryPick(host, change, branch, rev='current', msg=''):
+  """Cherry pick a change to a branch."""
+  path = '%s/revisions/%s/cherrypick' % (_GetChangePath(change), rev)
+  body = {'destination': branch, 'message': msg}
+  return FetchUrlJson(host, path, reqtype='POST', body=body)
+
+
 def SubmitChange(host, change, revision=None, wait_for_merge=True):
   """Submits a gerrit change via Gerrit."""
   if revision is None:

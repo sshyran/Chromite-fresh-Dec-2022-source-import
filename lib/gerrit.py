@@ -521,6 +521,23 @@ class GerritHelper(object):
       return
     gob_util.DeleteDraft(self.host, self._to_changenum(change))
 
+  def CherryPick(self, change, branch, rev='current', msg='', dryrun=False):
+    """Cherry pick a CL to a branch.
+
+    Args:
+      change: A gerrit change number.
+      branch: The destination branch.
+      rev: The specific revision to cherry pick back.
+      msg: An additional message to include.
+      dryrun: If True, don't actually set the hashtag.
+    """
+    if dryrun:
+      logging.info('Would cherry-pick change %s (revision %s) to branch %s',
+                   change, rev, branch)
+      return
+    return gob_util.CherryPick(self.host, self._to_changenum(change), branch,
+                               rev=rev, msg=msg)
+
   def GetAccount(self, account='self'):
     """Get information about the user account."""
     return gob_util.GetAccount(self.host, account=account)

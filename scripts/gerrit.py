@@ -802,6 +802,44 @@ class ActionUnignore(_ActionSimpleParallelCLs):
     helper.UnignoreChange(cl, dryrun=opts.dryrun)
 
 
+class ActionCherryPick(UserAction):
+  """Cherry pick CLs to branches."""
+
+  COMMAND = 'cherry-pick'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    # Should we add an option to walk Cq-Depend and try to cherry-pick them?
+    parser.add_argument('--rev', '--revision', default='current',
+                        help='A specific revision or patchset')
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    parser.add_argument('--branches', '--branch', '--br', action='split_extend',
+                        default=[], required=True,
+                        help='The destination branches')
+    parser.add_argument('cls', nargs='+', metavar='CL',
+                        help='The CLs to cherry-pick')
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # Process branches in parallel, but CLs in serial in case of CL stacks.
+    def task(branch):
+      for arg in opts.cls:
+        helper, cl = GetGerrit(opts, arg)
+        ret = helper.CherryPick(cl, branch, rev=opts.rev, msg=opts.msg,
+                                dryrun=opts.dryrun)
+        logging.debug('Response: %s', ret)
+        if opts.raw:
+          print(ret['_number'])
+        else:
+          uri = f'https://{helper.host}/c/{ret["_number"]}'
+          print(uri_lib.ShortenUri(uri))
+
+    _run_parallel_tasks(task, *opts.branches)
+
+
 class ActionAccount(_ActionSimpleParallelCLs):
   """Get user account information"""
 
