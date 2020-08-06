@@ -390,6 +390,7 @@
 == utility ==
   chromeos-infra-go
   chromiumos-sdk
+  chromiumos-sdk-llvm-next
   config-updater
   luci-scheduler-updater
 
@@ -678,6 +679,7 @@
   chrome-broadwell-release-afdo-verify-tryjob
   chrome-silvermont-release-afdo-verify-tryjob
   chromeos-infra-go-tryjob
+  chromiumos-sdk-llvm-next-tryjob
   chromiumos-sdk-tryjob
   cobblepot-full-tryjob
   cobblepot-llvm-next-toolchain-tryjob
