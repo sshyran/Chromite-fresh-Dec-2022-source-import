@@ -473,7 +473,8 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
     expected = [
         mock.call('gs://path/to/unvetted/'
                   'chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo.bz2'),
-        mock.call('gs://image-archive/path/chrome.debug.bz2'),
+        mock.call('gs://image-archive/path/'
+                  'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug.bz2'),
         mock.call('gs://path/to/perfdata/'
                   'chromeos-chrome-amd64-78.0.3893.0.perf.data.bz2'),
     ]
@@ -508,6 +509,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
       self.obj._CleanupArtifactDirectory('non/absolute/path')
     self.assertIn('needs to be an absolute path', str(context.exception))
 
+
 class BundleArtifactHandlerTest(PrepareBundleTest):
   """Test BundleArtifactHandler specific methods."""
 
@@ -525,7 +527,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         'benchmark-78.0.3893.0-r1.orderfile')
     self.afdo_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo'
     self.perf_name = 'chromeos-chrome-amd64-78.0.3893.0.perf.data'
-    self.debug_binary_name = ('chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug')
+    self.debug_binary_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug'
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
 
@@ -672,7 +674,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.assertEqual([afdo_path], ret)
     # Make sure the sym link to debug Chrome is created
     sym_link_command.assert_called_with(
-        os.path.basename(toolchain_util._CHROME_DEBUG_BIN),
+        self.debug_binary_name,
         self.chroot.full_path(
             os.path.join(self.afdo_tmp_path, 'chrome.unstripped')))
     afdo_path_inside = os.path.join(self.afdo_tmp_path, self.afdo_name)

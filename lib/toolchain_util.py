@@ -1767,7 +1767,7 @@ class _CommonPrepareBundle(object):
       src_dir: A temp path holding the possible artifacts. It needs to be an
       absolute path.
     """
-    assert os.path.isabs(src_dir), '%s needs to be an absolute path '% src_dir
+    assert os.path.isabs(src_dir), '%s needs to be an absolute path ' % src_dir
     check_dirs = [
         self.chroot.full_path(x)
         for x in [src_dir,
@@ -1901,7 +1901,8 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
       osutils.RmDir(workdir_full, ignore_missing=True, sudo=True)
       osutils.SafeMakedirs(workdir_full)
 
-      bin_name = os.path.basename(_CHROME_DEBUG_BIN) + BZ2_COMPRESSION_SUFFIX
+      bin_name = self._GetBenchmarkAFDOName(
+          CHROME_DEBUG_BINARY_NAME) + BZ2_COMPRESSION_SUFFIX
       bin_compressed = self._AfdoTmpPath(bin_name)
       bin_url = self._FindArtifact(
           bin_name, self.input_artifacts.get('ChromeDebugBinary', []))
@@ -2246,7 +2247,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     CHROME_UNSTRIPPED_NAME = 'chrome.unstripped'
     bin_path_in = self._AfdoTmpPath(CHROME_UNSTRIPPED_NAME)
     osutils.SafeSymlink(
-        os.path.basename(_CHROME_DEBUG_BIN), self.chroot.full_path(bin_path_in))
+        self._GetBenchmarkAFDOName(CHROME_DEBUG_BINARY_NAME),
+        self.chroot.full_path(bin_path_in))
     perf_path_inside = self._AfdoTmpPath(
         self._GetBenchmarkAFDOName(template=CHROME_PERF_AFDO_FILE))
     afdo_name = self._GetBenchmarkAFDOName()
@@ -2291,6 +2293,9 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     # Merge recent benchmark profiles for Android/Linux use
     merged_profile = self._CreateAndUploadMergedAFDOProfile(
         os.path.join(output_dir_full, afdo_name), output_dir_full)
+    if not merged_profile:
+      return []
+
     merged_profile_inside = self._AfdoTmpPath(os.path.basename(merged_profile))
     merged_profile_compressed = os.path.join(
         self.output_dir,
