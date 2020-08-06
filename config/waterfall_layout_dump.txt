@@ -327,7 +327,6 @@
     lakitu-release
     lars-release
     lasilla-ground-release
-    littlejoe-release
     lulu-release
     macchiato-ground-release
     mistral-release
@@ -1462,7 +1461,6 @@
     lakitu-release-tryjob
     lars-release-tryjob
     lasilla-ground-release-tryjob
-    littlejoe-release-tryjob
     lulu-release-tryjob
     macchiato-ground-release-tryjob
     mistral-release-tryjob
