@@ -417,9 +417,29 @@ _COPY_PATHS_CHROME = (
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
 
+_COPY_PATHS_LACROS = (
+    Path('chrome', exe=True),
+    Path(
+        'nacl_helper',
+        exe=True,
+        optional=True),
+    Path(
+        'nacl_irt_x86_64.nexe',
+        exe=True,
+        optional=False),
+    Path('locales/', optional=True),
+    Path('*.pak', optional=True),
+    Path('icudtl.dat', optional=True),
+    Path('snapshot_blob.bin', optional=True),
+    Path('swiftshader/', optional=True),
+    Path('crashpad_handler', exe=True, optional=True),
+)
+
+
 _COPY_PATHS_MAP = {
     'app_shell': _COPY_PATHS_APP_SHELL,
     'chrome': _COPY_PATHS_CHROME,
+    'lacros': _COPY_PATHS_LACROS,
 }
 
 

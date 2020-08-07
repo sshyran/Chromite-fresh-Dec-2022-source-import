@@ -76,6 +76,36 @@ _FIND_TEST_BIN_CMD = 'find %s -maxdepth 1 -executable -type f' % (
 
 DF_COMMAND = 'df -k %s'
 
+LACROS_DIR = '/usr/local/linux-chrome'
+_CONF_FILE = '/etc/chrome_dev.conf'
+_KILL_LACROS_CHROME_CMD = 'pkill -f %(lacros_dir)s/chrome'
+MODIFIED_CONF_FILE = f'modified {_CONF_FILE}'
+
+# This command checks if "--enable-features=LacrosSupport" is present in
+# /etc/chrome_dev.conf. If it is not, then it is added.
+# TODO(https://crbug.com/1112493): Automated scripts are currently not allowed
+# to modify chrome_dev.conf. Either revisit this policy or find another
+# mechanism to pass configuration to ash-chrome.
+ENABLE_LACROS_VIA_CONF_COMMAND = f"""
+    if ! grep -q "^--enable-features=LacrosSupport$" {_CONF_FILE}; then
+    echo "--enable-features=LacrosSupport" >> {_CONF_FILE};
+    echo {MODIFIED_CONF_FILE};
+    fi
+"""
+
+# This command checks if "--lacros-chrome-path=" is present with the right value
+# in /etc/chrome_dev.conf. If it is not, then all previous instances are removed
+# and the new one is added.
+# TODO(https://crbug.com/1112493): Automated scripts are currently not allowed
+# to modify chrome_dev.conf. Either revisit this policy or find another
+# mechanism to pass configuration to ash-chrome.
+_SET_LACROS_PATH_VIA_CONF_COMMAND = """
+    if ! grep -q "^--lacros-chrome-path=%(lacros_path)s$" %(conf_file)s; then
+    sed 's/--lacros-chrome-path/#--lacros-chrome-path/' %(conf_file)s;
+    echo "--lacros-chrome-path=%(lacros_path)s" >> %(conf_file)s;
+    echo %(modified_conf_file)s;
+    fi
+"""
 
 def _UrlBaseName(url):
   """Return the last component of the URL."""
@@ -112,8 +142,13 @@ class DeployChrome(object):
                                             include_dev_paths=False)
     self._root_dir_is_still_readonly = multiprocessing.Event()
 
-    self.copy_paths = chrome_util.GetCopyPaths('chrome')
-    self.chrome_dir = _CHROME_DIR
+    self._deployment_name = 'lacros' if options.lacros else 'chrome'
+    self.copy_paths = chrome_util.GetCopyPaths(self._deployment_name)
+
+    self.chrome_dir = LACROS_DIR if self.options.lacros else _CHROME_DIR
+
+    # Whether UI was stopped during setup.
+    self._stopped_ui = False
 
   def _GetRemoteMountFree(self, remote_dir):
     result = self.device.run(DF_COMMAND % remote_dir)
@@ -169,7 +204,7 @@ class DeployChrome(object):
     self._Reboot()
 
     # Now that the machine has been rebooted, we need to kill Chrome again.
-    self._KillProcsIfNeeded()
+    self._KillAshChromeIfNeeded()
 
     # Make sure the rootfs is writable now.
     self._MountRootfsAsWritable(check=True)
@@ -191,7 +226,18 @@ class DeployChrome(object):
 
     return result.output.split()[1].split('/')[0] == 'start'
 
-  def _KillProcsIfNeeded(self):
+  def _KillLacrosChrome(self):
+    """This method kills lacros-chrome on the device, if it's running."""
+    self.device.run(_KILL_LACROS_CHROME_CMD %
+                    {'lacros_dir': self.options.target_dir}, check=False)
+
+  def _KillAshChromeIfNeeded(self):
+    """This method kills ash-chrome on the device, if it's running.
+
+    This method calls 'stop ui', and then also manually pkills both ash-chrome
+    and the session manager.
+    """
+    self._stopped_ui = True
     if self._CheckUiJobStarted():
       logging.info('Shutting down Chrome...')
       self.device.run('stop ui')
@@ -272,7 +318,8 @@ class DeployChrome(object):
       return not self.device.HasGigabitEthernet()
 
   def _Deploy(self):
-    logging.info('Copying Chrome to %s on device...', self.options.target_dir)
+    logging.info('Copying %s to %s on device...', self._deployment_name,
+                 self.options.target_dir)
     # CopyToDevice will fall back to scp if rsync is corrupted on stateful.
     # This does not work for deploy.
     if not self.device.HasRsync():
@@ -288,7 +335,7 @@ class DeployChrome(object):
 
     # Set the security context on the default Chrome dir if that's where it's
     # getting deployed, and only on SELinux supported devices.
-    if (self.device.IsSELinuxAvailable() and
+    if not self.options.lacros and self.device.IsSELinuxAvailable() and (
         _CHROME_DIR in (self.options.target_dir, self.options.mount_dir)):
       self.device.run(['restorecon', '-R', _CHROME_DIR])
 
@@ -298,13 +345,17 @@ class DeployChrome(object):
         self.device.run('chmod %o %s/%s' % (
             p.mode, self.options.target_dir, p.src if not p.dest else p.dest))
 
+    if self.options.lacros:
+      self.device.run(['chown', '-R', 'chronos:chronos',
+                       self.options.target_dir])
+
     # Send SIGHUP to dbus-daemon to tell it to reload its configs. This won't
     # pick up major changes (bus type, logging, etc.), but all we care about is
     # getting the latest policy from /opt/google/chrome/dbus so that Chrome will
     # be authorized to take ownership of its service names.
     self.device.run(DBUS_RELOAD_COMMAND, check=False)
 
-    if self.options.startui:
+    if self.options.startui and self._stopped_ui:
       logging.info('Starting UI...')
       self.device.run('start ui')
 
@@ -356,14 +407,12 @@ class DeployChrome(object):
         """Checks if the passed-in file is present in the build directory."""
         return os.path.exists(os.path.join(self.options.build_dir, filename))
 
+      # In the future, lacros-chrome and ash-chrome will likely be named
+      # something other than 'chrome' to avoid confusion.
       # Handle non-Chrome deployments.
       if not BinaryExists('chrome'):
         if BinaryExists('app_shell'):
           self.copy_paths = chrome_util.GetCopyPaths('app_shell')
-
-        # TODO(derat): Update _Deploy() and remove this after figuring out how
-        # app_shell should be executed.
-        self.options.startui = False
 
   def _PrepareStagingDir(self):
     _PrepareStagingDir(self.options, self.tempdir, self.staging_dir,
@@ -407,18 +456,25 @@ class DeployChrome(object):
       self._PrepareStagingDir()
       return 0
 
-    # Check that the build matches the device.
-    self._CheckBoard()
+    # Check that the build matches the device. Lacros-chrome skips this check as
+    # it's currently board independent. This means that it's possible to deploy
+    # a build of lacros-chrome with a mismatched architecture. We don't try to
+    # prevent this developer foot-gun.
+    if not self.options.lacros:
+      self._CheckBoard()
 
     # Ensure that the target directory exists before running parallel steps.
     self._EnsureTargetDir()
 
-    # Run setup steps in parallel. If any step fails, RunParallelSteps will
-    # stop printing output at that point, and halt any running steps.
     logging.info('Preparing device')
     steps = [self._GetDeviceInfo, self._CheckConnection,
-             self._KillProcsIfNeeded, self._MountRootfsAsWritable,
+             self._MountRootfsAsWritable,
              self._PrepareStagingDir]
+
+    # If this is a lacros build, we only want to restart ash-chrome if
+    # necessary, which is done below.
+    steps += ([self._KillLacrosChrome] if self.options.lacros else
+              [self._KillAshChromeIfNeeded])
     ret = parallel.RunParallelSteps(steps, halt_on_error=True,
                                     return_values=True)
     self._CheckDeviceFreeSpace(ret[0])
@@ -435,13 +491,28 @@ class DeployChrome(object):
       # If the target dir is still not writable (i.e. the user opted out or the
       # command failed), abort.
       if not self.device.IsDirWritable(self.options.target_dir):
-        if self.options.startui:
+        if self.options.startui and self._stopped_ui:
           logging.info('Restarting Chrome...')
           self.device.run('start ui')
         raise DeployFailure('Target location is not writable. Aborting.')
 
     if self.options.mount_dir is not None:
       self._MountTarget()
+
+    if self.options.lacros:
+      # Update /etc/chrome_dev.conf to include appropriate flags.
+      restart_ui = False
+      result = self.device.run(ENABLE_LACROS_VIA_CONF_COMMAND, shell=True)
+      if result.stdout.strip() == MODIFIED_CONF_FILE:
+        restart_ui = True
+      result = self.device.run(_SET_LACROS_PATH_VIA_CONF_COMMAND % {
+          'conf_file': _CONF_FILE, 'lacros_path': self.options.target_dir,
+          'modified_conf_file': MODIFIED_CONF_FILE}, shell=True)
+      if result.stdout.strip() == MODIFIED_CONF_FILE:
+        restart_ui = True
+
+      if restart_ui:
+        self._KillAshChromeIfNeeded()
 
     # Actually deploy Chrome to the device.
     self._Deploy()
@@ -515,6 +586,8 @@ def _CreateParser():
                       help='Also deploy any test binaries to %s. Useful for '
                            'running any Tast tests that execute these '
                            'binaries.' % _CHROME_TEST_BIN_DIR)
+  parser.add_argument('--lacros', action='store_true', default=False,
+                      help='Deploys lacros-chrome rather than ash-chrome.')
 
   group = parser.add_argument_group('Advanced Options')
   group.add_argument('-l', '--local-pkg-path', type='path',
@@ -591,8 +664,23 @@ def _ParseCommandLine(argv):
   if options.build_dir and any([options.gs_path, options.local_pkg_path]):
     parser.error('Cannot specify both --build_dir and '
                  '--gs-path/--local-pkg-patch')
-  if not options.board:
-    parser.error('--board is required outside of cros chrome_sdk')
+  if options.lacros:
+    if options.board:
+      parser.error('--board is not supported with --lacros')
+    # The stripping implemented in this file rely on the cros-chrome-sdk, which
+    # is inappropriate for Lacros. Lacros stripping is currently not
+    # implemented.
+    if options.dostrip:
+      parser.error('--lacros requires --nostrip')
+    if options.mount_dir or options.mount:
+      parser.error('--lacros does not support --mount or --mount-dir')
+    if options.deploy_test_binaries:
+      parser.error('--lacros does not support --deploy-test-binaries')
+    if options.local_pkg_path:
+      parser.error('--lacros does not support --local-pkg-path')
+  else:
+    if not options.board:
+      parser.error('--board is required')
   if options.gs_path and options.local_pkg_path:
     parser.error('Cannot specify both --gs-path and --local-pkg-path')
   if not (options.staging_only or options.to):
@@ -610,7 +698,7 @@ def _ParseCommandLine(argv):
       options.target_dir = _CHROME_DIR_MOUNT
   else:
     if not options.target_dir:
-      options.target_dir = _CHROME_DIR
+      options.target_dir = LACROS_DIR if options.lacros else _CHROME_DIR
 
   if options.mount and not options.mount_dir:
     options.mount_dir = _CHROME_DIR
@@ -694,13 +782,15 @@ def _StripBinContext(options):
 
 
 def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
-                       chrome_dir=_CHROME_DIR):
+                       chrome_dir=None):
   """Place the necessary files in the staging directory.
 
   The staging directory is the directory used to rsync the build artifacts over
   to the device.  Only the necessary Chrome build artifacts are put into the
   staging directory.
   """
+  if chrome_dir is None:
+    chrome_dir = LACROS_DIR if options.lacros else _CHROME_DIR
   osutils.SafeMakedirs(staging_dir)
   os.chmod(staging_dir, 0o755)
   if options.build_dir:

@@ -19,6 +19,7 @@ from chromite.lib import chrome_util
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
@@ -66,6 +67,20 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
     argv = ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
     self.assertParseError(argv)
 
+  def testLacros(self):
+    """Test basic lacros invocation."""
+    argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+            '--to', 'localhost']
+    options = _ParseCommandLine(argv)
+    self.assertTrue(options.lacros)
+    self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
+
+  def testLacrosRequiresNostrip(self):
+    """Lacros requires --nostrip"""
+    argv = ['--lacros', '--build-dir', '/path/to/nowhere', '--to', 'localhost']
+    self.assertRaises2(SystemExit, _ParseCommandLine, argv,
+                       check_attrs={'code': 2})
+
   def assertParseError(self, argv):
     with self.OutputCapturer():
       self.assertRaises2(SystemExit, _ParseCommandLine, argv,
@@ -106,7 +121,7 @@ class DeployChromeMock(partial_mock.PartialMock):
   """Deploy Chrome Mock Class."""
 
   TARGET = 'chromite.scripts.deploy_chrome.DeployChrome'
-  ATTRS = ('_KillProcsIfNeeded', '_DisableRootfsVerification')
+  ATTRS = ('_KillAshChromeIfNeeded', '_DisableRootfsVerification')
 
   def __init__(self):
     partial_mock.PartialMock.__init__(self)
@@ -134,7 +149,7 @@ class DeployChromeMock(partial_mock.PartialMock):
     self.rsh_mock.stop()
     self.remote_device_mock.stop()
 
-  def _KillProcsIfNeeded(self, _inst):
+  def _KillAshChromeIfNeeded(self, _inst):
     # Fully stub out for now.
     pass
 
@@ -415,3 +430,58 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
         self.tempdir, os.path.basename(deploy_chrome._CHROME_TEST_BIN_DIR))
     for binary in test_binaries:
       self.assertIn(binary, os.listdir(staging_dir))
+
+
+class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
+  """Line coverage for Perform() method with --lacros option."""
+
+  def setUp(self):
+    options = _ParseCommandLine([
+        '--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+        '--to', 'localhost'])
+    self.deploy = deploy_chrome.DeployChrome(
+        options, self.tempdir, os.path.join(self.tempdir, 'staging'))
+
+    # These methods being mocked are all side effects expected for a --lacros
+    # deploy.
+    self.deploy._EnsureTargetDir = mock.Mock()
+    self.deploy._GetDeviceInfo = mock.Mock()
+    self.deploy._CheckConnection = mock.Mock()
+    self.deploy._MountRootfsAsWritable = mock.Mock()
+    self.deploy._PrepareStagingDir = mock.Mock()
+    self.deploy._CheckDeviceFreeSpace = mock.Mock()
+
+    self._ran_start_command = False
+
+    self.StartPatcher(parallel_unittest.ParallelMock())
+
+    # Common mocking shared between tests.
+    def kill_procs_side_effect():
+      self.deploy._stopped_ui = True
+    self.deploy._KillAshChromeIfNeeded = mock.Mock(
+        side_effect=kill_procs_side_effect)
+
+    def start_ui_side_effect(*args, **kwargs):
+      # pylint: disable=unused-argument
+      self._ran_start_command = True
+    self.rc.AddCmdResult(partial_mock.In('start ui'),
+                         side_effect=start_ui_side_effect)
+
+  def testConfNotModified(self):
+    """When the conf file is not modified we don't restart chrome ."""
+    self.deploy.Perform()
+    self.deploy._KillAshChromeIfNeeded.assert_not_called()
+    self.assertFalse(self._ran_start_command)
+
+  def testConfModified(self):
+    """When the conf file is modified we restart chrome."""
+
+    # We intentionally add '\n' to MODIFIED_CONF_FILE to simulate echo adding a
+    # newline when invoked in the shell.
+    self.rc.AddCmdResult(
+        partial_mock.In(deploy_chrome.ENABLE_LACROS_VIA_CONF_COMMAND),
+        stdout=deploy_chrome.MODIFIED_CONF_FILE + '\n')
+
+    self.deploy.Perform()
+    self.deploy._KillAshChromeIfNeeded.assert_called()
+    self.assertTrue(self._ran_start_command)
