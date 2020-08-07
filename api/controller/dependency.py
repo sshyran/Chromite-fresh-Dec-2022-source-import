@@ -13,9 +13,11 @@ from __future__ import print_function
 
 import sys
 
+from chromite.api import api_config
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.gen.chromite.api import depgraph_pb2
 # TODO(crbug/1081828): stop using build_target and drop it from the proto.
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
@@ -90,6 +92,45 @@ def GetBuildDependencyGraph(input_proto, output_proto, _config):
                                                          packages)
   AugmentDepGraphProtoFromJsonMap(json_map, output_proto.dep_graph)
   AugmentDepGraphProtoFromJsonMap(sdk_json_map, output_proto.sdk_dep_graph)
+
+
+def _ListResponse(_input_proto, output_proto, _config):
+  """Add fake dependency data to a successful response."""
+  package_dep = output_proto.package_deps.add()
+  package_dep.category = 'category'
+  package_dep.package_name = 'name'
+
+
+@faux.success(_ListResponse)
+@faux.empty_error
+@validate.require('sysroot.build_target.name')
+@validate.exists('sysroot.path')
+@validate.validation_complete
+def List(input_proto: depgraph_pb2.ListRequest,
+         output_proto: depgraph_pb2.ListResponse,
+         _config: api_config.ApiConfig):
+  """Get a list of package dependencies.
+
+  Args:
+    input_proto: The input arguments message.
+    output_proto: The empty output message.
+    _config: The API call config.
+  """
+  build_target = controller_util.ParseBuildTarget(
+      input_proto.sysroot.build_target)
+  sysroot_path = input_proto.sysroot.path
+  src_paths = [src_path.path for src_path in input_proto.src_paths]
+  packages = [controller_util.PackageInfoToCPV(x) for x in input_proto.packages]
+
+  package_deps = dependency.GetDependencies(
+      sysroot_path,
+      build_target=build_target,
+      src_paths=src_paths,
+      packages=packages)
+  for package in package_deps:
+    package_info = output_proto.package_deps.add()
+    cpv = portage_util.SplitCPV(package, strict=False)
+    controller_util.CPVToPackageInfo(cpv, package_info)
 
 
 def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):

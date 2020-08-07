@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -17,8 +18,62 @@ from chromite.service import dependency
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-class DependencyTests(cros_test_lib.TestCase):
+class DependencyTests(cros_test_lib.MockTestCase):
   """General unittests for dependency module."""
+
+  def setUp(self):
+    self.json_deps = {
+        'target_board': 'deathstar',
+        'sysroot_path': '/build/deathstar',
+        'package_deps': {
+            'commander/darthvader-1.49.3.3': {
+                'action': 'merge',
+                'category': 'commander',
+                'cpes': [],
+                'deps': ['troop/clone', 'troop/robot'],
+                'rev_deps': [],
+                'full_name': 'commander/darthvader-1.49.3.3',
+                'name': 'darthvader',
+                'version': '1.49.3.3'
+            },
+            'troop/clone-1.2.3': {
+                'action': 'merge',
+                'category': 'troop',
+                'cpes': [],
+                'deps': ['equipment/jetpack'],
+                'rev_deps': ['commander/darthvader'],
+                'full_name': 'troop/clone-1.2.3',
+                'name': 'clone',
+                'version': '1.2.3'
+            },
+            'troop/robot-2.3.4': {
+                'action': 'merge',
+                'category': 'troop',
+                'cpes': [],
+                'deps': [],
+                'rev_deps': ['commander/darthvader'],
+                'full_name': 'troop/robot-2.3.4',
+                'name': 'robot',
+                'version': '2.3.4'
+            },
+            'equipment/jetpack-3.4.5': {
+                'action': 'merge',
+                'category': 'equipment',
+                'cpes': [],
+                'deps': [],
+                'rev_deps': ['commander/darthvader'],
+                'full_name': 'equipment/jetpack-3.4.5',
+                'name': 'jetpack',
+                'version': '3.4.5'
+            },
+        },
+        'source_path_mapping': {
+            'commander/darthvader-1.49.3.3': ['/control/room'],
+            'troop/clone-1.2.3': ['/bunker'],
+            'troop/robot-2.3.4': ['/factory'],
+            'equipment/jetpack-3.4.5': ['/factory'],
+        },
+    }
 
   def testNormalizeSourcePathsCollapsingSubPaths(self):
     self.assertEqual(
@@ -54,3 +109,37 @@ class DependencyTests(cros_test_lib.TestCase):
       self.assertEqual(
           dependency.NormalizeSourcePaths([foo_dir, ab_cd_file, bar_baz_dir]),
           expected_paths)
+
+  def testGetDependenciesWithDefaultArgs(self):
+    """Test GetDependencies using the default args."""
+    self.PatchObject(
+        dependency,
+        'GetBuildDependency',
+        return_value=(self.json_deps, self.json_deps))
+    sysroot_path = '/build/deathstar'
+    build_target = common_pb2.BuildTarget(name='target')
+    actual_deps = dependency.GetDependencies(sysroot_path, build_target)
+    expected_deps = [
+        'commander/darthvader-1.49.3.3',
+        'troop/clone',
+        'troop/robot',
+        'equipment/jetpack',
+        'troop/clone-1.2.3',
+        'troop/robot-2.3.4',
+        'equipment/jetpack-3.4.5',
+    ]
+    self.assertCountEqual(expected_deps, actual_deps)
+
+  def testGetDependenciesWithSrcPaths(self):
+    """Test GetDependencies given a list of paths."""
+    self.PatchObject(
+        dependency,
+        'GetBuildDependency',
+        return_value=(self.json_deps, self.json_deps))
+    sysroot_path = '/build/deathstar'
+    build_target = common_pb2.BuildTarget(name='target')
+    src_paths = ['/bunker', '/nowhere']
+    actual_deps = dependency.GetDependencies(sysroot_path, build_target,
+                                             src_paths)
+    expected_deps = ['equipment/jetpack', 'troop/clone-1.2.3']
+    self.assertCountEqual(expected_deps, actual_deps)

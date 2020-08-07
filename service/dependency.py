@@ -9,7 +9,9 @@ from __future__ import print_function
 
 import os
 import re
+from typing import List, Optional
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging
@@ -354,6 +356,38 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
     sdk_results['source_path_mapping'].update(bdep_map)
 
   return results, sdk_results
+
+
+def GetDependencies(sysroot_path: str,
+                    build_target: build_target_lib.BuildTarget,
+                    src_paths: Optional[List[str]] = None,
+                    packages: Optional[List[str]] = None) -> List[str]:
+  """Return the packages dependent on the given source paths for |board|.
+
+  Args:
+    sysroot_path: The path to the sysroot.
+    build_target: The build_target whose dependencies are being calculated.
+    src_paths: List of paths for which to get a list of dependent packages. If
+      empty / None returns all package dependencies.
+    packages: The packages that need to be built, or empty / None to use the
+      default list.
+
+  Returns:
+    The relevant package dependencies based on the given list of packages and
+      src_paths.
+  """
+  json_deps, _sdk_json_deps = GetBuildDependency(
+      sysroot_path, build_target.name, packages=packages)
+
+  relevant_packages = set()
+  for cpv, dep_src_paths in json_deps['source_path_mapping'].items():
+    if not src_paths or (set(dep_src_paths) & set(src_paths)):
+      relevant_packages.add(cpv)
+
+  relevant_package_deps = set()
+  for cpv in relevant_packages:
+    relevant_package_deps.update(json_deps['package_deps'][cpv]['deps'])
+  return relevant_packages | relevant_package_deps
 
 
 def DetermineToolchainSourcePaths():

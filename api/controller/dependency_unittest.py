@@ -6,14 +6,18 @@
 
 from __future__ import print_function
 
+import os
 import sys
 
 from chromite.api import api_config
 from chromite.api.controller import controller_util
 from chromite.api.controller import dependency
 from chromite.api.gen.chromite.api import depgraph_pb2
+from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.service import dependency as dependency_service
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -46,7 +50,7 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
                 'action': 'merge',
                 'category': 'troop',
                 'cpes': [],
-                'deps': [],
+                'deps': ['equipment/jetpack'],
                 'rev_deps': ['commander/darthvader'],
                 'full_name': 'troop/clone-1.2.3',
                 'name': 'clone',
@@ -62,11 +66,22 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
                 'name': 'robot',
                 'version': '2.3.4'
             },
+            'equipment/jetpack-3.4.5': {
+                'action': 'merge',
+                'category': 'equipment',
+                'cpes': [],
+                'deps': [],
+                'rev_deps': ['commander/darthvader'],
+                'full_name': 'equipment/jetpack-3.4.5',
+                'name': 'jetpack',
+                'version': '3.4.5'
+            },
         },
         'source_path_mapping': {
             'commander/darthvader-1.49.3.3': ['/control/room'],
             'troop/clone-1.2.3': ['/bunker'],
             'troop/robot-2.3.4': ['/factory'],
+            'equipment/jetpack-3.4.5': ['/factory'],
         },
     }
 
@@ -141,3 +156,61 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
                                        self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(self.response.dep_graph.build_target.name, 'target_board')
+
+
+class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
+  """Unittests for the List endpoint."""
+
+  def setUp(self):
+    self.response = depgraph_pb2.ListResponse()
+    self.build_target = common_pb2.BuildTarget(name='target')
+    self.sysroot = os.path.join(self.tempdir, 'target')
+    osutils.SafeMakedirs(self.sysroot)
+
+  def testValidateOnly(self):
+    """Sanity check that a validate only call does not execute any logic."""
+    sysroot = sysroot_pb2.Sysroot(
+        path=self.sysroot, build_target=self.build_target)
+    input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
+    dependency.List(input_proto, self.response, self.validate_only_config)
+
+  def testArgumentValidationMissingSysrootPath(self):
+    """Test missing sysroot path."""
+    sysroot = sysroot_pb2.Sysroot(build_target=self.build_target)
+    input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      dependency.List(input_proto, self.response, self.api_config)
+
+  def testArgumentValidationMissingBuildTarget(self):
+    """Test missing build target name."""
+    sysroot = sysroot_pb2.Sysroot(
+        path=self.sysroot, build_target=common_pb2.BuildTarget())
+    input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      dependency.List(input_proto, self.response, self.api_config)
+
+  def testListResponse(self):
+    """Test calls helper method with correct args."""
+    mock_get_deps = self.PatchObject(
+        dependency_service, 'GetDependencies', return_value=['foo/bar-1.2.3'])
+    sysroot = sysroot_pb2.Sysroot(
+        path=self.sysroot, build_target=self.build_target)
+    path = '/path'
+    package = common_pb2.PackageInfo(category='foo', package_name='bar')
+    input_proto = depgraph_pb2.ListRequest(
+        sysroot=sysroot,
+        src_paths=[
+            depgraph_pb2.SourcePath(path='/path'),
+        ],
+        packages=[package])
+    dependency.List(input_proto, self.response, self.api_config)
+    mock_get_deps.assert_called_once_with(
+        self.sysroot,
+        build_target=controller_util.ParseBuildTarget(self.build_target),
+        src_paths=[path],
+        packages=[controller_util.PackageInfoToCPV(package)])
+    expected_deps = [
+        common_pb2.PackageInfo(
+            category='foo', package_name='bar', version='1.2.3')
+    ]
+    self.assertCountEqual(expected_deps, self.response.package_deps)
