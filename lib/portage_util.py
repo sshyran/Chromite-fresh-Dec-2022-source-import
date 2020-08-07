@@ -2083,17 +2083,18 @@ def GetBoardUseFlags(board):
 def GetPackageDependencies(board, package,
                            buildroot=constants.SOURCE_ROOT):
   """Returns the depgraph list of packages for a board and package."""
-  emerge = 'emerge-%s' % board
-  cmd = [emerge, '-p', '--cols', '--quiet', '--root', '/var/empty', '-e',
+  emerge = 'emerge-%s' % board if board else 'emerge'
+  cmd = [emerge, '-p', '--cols', '--quiet', '--root', '/mnt/empty', '-e',
          package]
   emerge_output = cros_build_lib.run(
       cmd, cwd=buildroot, enter_chroot=True,
       capture_output=True, encoding='utf-8').stdout.splitlines()
   packages = []
   for line in emerge_output:
-    columns = line.split()
+    # The first column is ' NRfUD '
+    columns = line[7:].split()
     try:
-      package = columns[1] + '-' + columns[2]
+      package = columns[0] + '-' + columns[1]
       packages.append(package)
     except IndexError:
       logging.error('Wrong format of output: \n%r', emerge_output)

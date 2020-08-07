@@ -17,6 +17,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import osutils
+from chromite.lib import partial_mock
 from chromite.lib import portage_util
 
 
@@ -1754,3 +1755,33 @@ class DepTreeTest(cros_test_lib.TestCase):
     ]
     self.assertEqual(expected,
                      portage_util._ParseDepTreeOutput(_EQUERY_OUTPUT_CORPUS))
+
+_EMERGE_PRETEND_SDK_OUTPUT_CORPUS = """\
+ N f   sys-devel/binutils 2.27.0-r23 to /var/empty/
+  R    dev-python/sphinxcontrib-jsmath 1.0.1-r1
+  R    virtual/perl-JSON-PP 2.273.0-r4
+  R    sys-libs/readline 6.3_p8-r2
+ N     sys-libs/readline 6.3_p8-r2 to /var/empty/
+ N     app-shells/bash 4.3_p48-r3 to /var/empty/
+ N     sys-libs/glibc 2.27-r18 to /var/empty/
+"""
+
+class PackageDependenciesTest(cros_test_lib.RunCommandTestCase):
+  """Tests for GetPackageDependencies & parsing"""
+
+  def testParseDepTreeOutput(self):
+    expected = [
+        'sys-devel/binutils-2.27.0-r23',
+        'dev-python/sphinxcontrib-jsmath-1.0.1-r1',
+        'virtual/perl-JSON-PP-2.273.0-r4',
+        'sys-libs/readline-6.3_p8-r2',
+        'sys-libs/readline-6.3_p8-r2',
+        'app-shells/bash-4.3_p48-r3',
+        'sys-libs/glibc-2.27-r18',
+    ]
+    self.rc.AddCmdResult(partial_mock.Ignore(),
+                         stdout=_EMERGE_PRETEND_SDK_OUTPUT_CORPUS)
+    self.assertEqual(
+        expected,
+        portage_util.GetPackageDependencies(None,
+                                            'target-chromium-os-sdk'))
