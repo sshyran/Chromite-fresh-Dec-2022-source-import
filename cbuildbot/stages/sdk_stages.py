@@ -84,7 +84,8 @@ class SDKBuildToolchainsStage(generic_stages.BuilderStage,
 
     # Build the toolchains first.  Since we're building & installing the
     # compilers, need to run as root.
-    self.CrosSetupToolchains(['--nousepkg'], sudo=True)
+    self.CrosSetupToolchains(['--nousepkg'], sudo=True,
+                             extra_env=self._portage_extra_env)
 
     # Create toolchain packages.
     self.CreateRedistributableToolchains(chroot_location)
