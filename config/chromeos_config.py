@@ -371,6 +371,7 @@ def GeneralTemplates(site_config):
       # Chrome binary, that update_engine can't handle in delta payloads due to
       # memory limits. Remove the following lines once crbug.com/329248 is
       # fixed.
+      images=['base', 'test'],
       chrome_sdk=False,
       vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
                                         test_suite='smoke')],
@@ -384,6 +385,7 @@ def GeneralTemplates(site_config):
       profile='ubsan',
       # Need larger rootfs for ubsan builds.
       disk_layout='16gb-rootfs',
+      images=['base', 'test'],
       chrome_sdk=False,
       vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
                                         test_suite='smoke')],
