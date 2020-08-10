@@ -1281,12 +1281,6 @@
   kukui-llvm-toolchain-tryjob
   kukui-payloads-tryjob
   kukui-release-tryjob
-  kukui-tablet-full-tryjob
-  kukui-tablet-llvm-next-toolchain-tryjob
-  kukui-tablet-llvm-toolchain-tryjob
-  kukui-tablet-payloads-tryjob
-  kukui-tablet-release-tryjob
-  kukui-tablet-unittest-stress
   kukui-unittest-stress
   lakitu-full-tryjob
   lakitu-incremental-tryjob

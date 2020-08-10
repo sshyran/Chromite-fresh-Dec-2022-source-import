@@ -28,7 +28,6 @@ arm_internal_release_boards = frozenset([
     'capri-zfpga',
     'gale',
     'kevin-arc64',
-    'kukui-tablet',
     'littlejoe',
     'nyan_big',
     'nyan_blaze',
