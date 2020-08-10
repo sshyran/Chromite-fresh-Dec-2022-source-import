@@ -156,6 +156,9 @@ pytest. It is responsible for running unit tests under Python 2 while Chromite
 is in the process of migrating to Python 3. Once Chromite runs under Python 3
 only, this script will be deprecated and removed.
 
+Tests will not run in a standalone git checkout of chromite. Use the repo-based
+flow described above to obtain a functional-testing environment.
+
 #### run_pytest
 
 This top-level script is a convenience wrapper for `scripts/run_pytest` and has
