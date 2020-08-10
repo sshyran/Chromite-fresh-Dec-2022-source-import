@@ -76,7 +76,7 @@ _FIND_TEST_BIN_CMD = 'find %s -maxdepth 1 -executable -type f' % (
 
 DF_COMMAND = 'df -k %s'
 
-LACROS_DIR = '/usr/local/linux-chrome'
+LACROS_DIR = '/usr/local/lacros-chrome'
 _CONF_FILE = '/etc/chrome_dev.conf'
 _KILL_LACROS_CHROME_CMD = 'pkill -f %(lacros_dir)s/chrome'
 MODIFIED_CONF_FILE = f'modified {_CONF_FILE}'

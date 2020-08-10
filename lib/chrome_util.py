@@ -433,6 +433,7 @@ _COPY_PATHS_LACROS = (
     Path('snapshot_blob.bin', optional=True),
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
+    Path('WidevineCdm/', optional=True),
 )
 
 
