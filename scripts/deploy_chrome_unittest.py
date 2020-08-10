@@ -67,6 +67,12 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
     argv = ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
     self.assertParseError(argv)
 
+  def testToAndDevice(self):
+    """Test no target specified."""
+    argv = ['--board', _TARGET_BOARD, '--build-dir', '/path/to/nowhere',
+            '--to', 'localhost', '--device', 'localhost']
+    self.assertParseError(argv)
+
   def testLacros(self):
     """Test basic lacros invocation."""
     argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',

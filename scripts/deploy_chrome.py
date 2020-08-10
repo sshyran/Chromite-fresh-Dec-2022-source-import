@@ -136,7 +136,13 @@ class DeployChrome(object):
     self.options = options
     self.staging_dir = staging_dir
     if not self.options.staging_only:
-      self.device = remote.ChromiumOSDevice(options.to, port=options.port,
+      if options.device:
+        hostname = options.device.hostname
+        port = options.device.port
+      else:
+        hostname = options.to
+        port = options.port
+      self.device = remote.ChromiumOSDevice(hostname, port=port,
                                             ping=options.ping,
                                             private_key=options.private_key,
                                             include_dev_paths=False)
@@ -567,9 +573,15 @@ def _CreateParser():
                       help="Don't strip binaries during deployment.  Warning: "
                            'the resulting binaries will be very large!')
   parser.add_argument('-p', '--port', type=int, default=remote.DEFAULT_SSH_PORT,
-                      help='Port of the target device to connect to.')
-  parser.add_argument('-t', '--to',
-                      help='The IP address of the CrOS device to deploy to.')
+                      help='This arg is deprecated. Please use --device '
+                           'instead.')
+  parser.add_argument('-t', '--to', deprecated='Use --device instead',
+                      help='This arg is deprecated. Please use --device '
+                           'instead.')
+  parser.add_argument(
+      '-d', '--device',
+      type=commandline.DeviceParser(commandline.DEVICE_SCHEME_SSH),
+      help='Device hostname or IP in the format hostname[:port].')
   parser.add_argument('--mount-dir', type='path', default=None,
                       help='Deploy Chrome in target directory and bind it '
                            'to the directory specified by this flag.'
@@ -684,8 +696,8 @@ def _ParseCommandLine(argv):
       parser.error('--board is required')
   if options.gs_path and options.local_pkg_path:
     parser.error('Cannot specify both --gs-path and --local-pkg-path')
-  if not (options.staging_only or options.to):
-    parser.error('Need to specify --to')
+  if not (options.staging_only or options.to or options.device):
+    parser.error('Need to specify --device')
   if options.staging_flags and not options.build_dir:
     parser.error('--staging-flags require --build-dir to be set.')
 
@@ -703,6 +715,14 @@ def _ParseCommandLine(argv):
 
   if options.mount and not options.mount_dir:
     options.mount_dir = _CHROME_DIR
+
+  if options.to:
+    if options.device:
+      parser.error('--to and --device are mutually exclusive.')
+    else:
+      logging.warning(
+          "The args '--to' & '--port' are deprecated. Please use '--device' "
+          'instead.')
 
   return options
 
