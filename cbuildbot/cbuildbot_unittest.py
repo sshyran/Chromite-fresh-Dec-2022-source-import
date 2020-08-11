@@ -196,7 +196,7 @@ class LogTest(cros_test_lib.TempDirTestCase):
 class InterfaceTest(cros_test_lib.MockTestCase, cros_test_lib.LoggingTestCase):
   """Test the command line interface."""
 
-  _GENERIC_PREFLIGHT = 'amd64-generic-paladin'
+  _GENERIC_PREFLIGHT = 'amd64-generic-release'
   _BUILD_ROOT = '/b/test_build1'
 
   def setUp(self):

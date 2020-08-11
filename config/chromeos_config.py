@@ -361,7 +361,6 @@ def GeneralTemplates(site_config):
       'asan',
       site_config.templates.full,
       profile='asan',
-      luci_builder=config_lib.LUCI_BUILDER_COMMITQUEUE,
       # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
       # re-enable it. It used to work till late 2019.
       rootfs_verification=False,
@@ -475,7 +474,7 @@ def GeneralTemplates(site_config):
       site_config.templates.internal,
       display_label=config_lib.DISPLAY_LABEL_RELEASE,
       build_type=constants.CANARY_TYPE,
-      luci_builder=config_lib.LUCI_BUILDER_PROD,
+      luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
       chroot_use_image=False,
       suite_scheduling=True,
       # Because release builders never use prebuilts, they need the
@@ -641,7 +640,7 @@ def GeneralTemplates(site_config):
       site_config.templates.no_unittest_builder,
       display_label=config_lib.DISPLAY_LABEL_TRYJOB,
       build_type=constants.PAYLOADS_TYPE,
-      luci_builder=config_lib.LUCI_BUILDER_RELEASE,
+      luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
       builder_class_name='release_builders.GeneratePayloadsBuilder',
       description='Regenerate release payloads.',
       # Sync to the code used to do the build the first time.
@@ -2681,7 +2680,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.no_vmtest_builder,
       boards=[],
       display_label=config_lib.DISPLAY_LABEL_TRYJOB,
-      luci_builder=config_lib.LUCI_BUILDER_COMMITQUEUE,
+      luci_builder=config_lib.LUCI_BUILDER_INFRA,
       builder_class_name='test_builders.SucessBuilder',
       description='Used by sync_stages_unittest.',
   )
@@ -3119,7 +3118,7 @@ def BranchScheduleConfig():
     result.append(default_config.derive(
         name=config_name,
         display_label=label,
-        luci_builder=config_lib.LUCI_BUILDER_RELEASE,
+        luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
         schedule_branch=branch,
         schedule=schedule,
         triggered_gitiles=trigger,
