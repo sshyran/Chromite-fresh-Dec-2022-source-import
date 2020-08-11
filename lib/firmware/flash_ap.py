@@ -169,7 +169,7 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
   logging.info('connecting to: %s\n', ip)
   id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
   tmpfile = tempfile.NamedTemporaryFile()
-  shutil.copy(id_filename, tmpfile.name)
+  shutil.copyfile(id_filename, tmpfile.name)
 
   scp_cmd, flash_cmd = _build_ssh_cmds(futility, ip, port, path, tmpfile.name,
                                        fast, verbose)
