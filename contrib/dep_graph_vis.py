@@ -59,4 +59,5 @@ def main(argv):
   opts = ParseArgs(argv)
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.build_target)
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)
-  _dep_vis = depgraph.DepVisualizer(runtime_tree)
+  dep_vis = depgraph.DepVisualizer(runtime_tree)
+  dep_vis.VisualizeGraph()
