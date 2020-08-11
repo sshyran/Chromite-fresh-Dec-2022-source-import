@@ -626,18 +626,6 @@
       ]
     },
     {
-      "name": "sand",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "sentry",
       "configs": [
         {
@@ -3635,6 +3623,23 @@
           "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 283,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "sand",
+      "reference_board_name": "sand",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "sand",
+          "name": "sand",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 301,
           "is_active": true
         }
       ]
