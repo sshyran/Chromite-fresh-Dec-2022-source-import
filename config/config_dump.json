@@ -71,7 +71,7 @@
         "internal": false,
         "kernel_afdo_verify": false,
         "latest_toolchain": false,
-        "luci_builder": "Prod",
+        "luci_builder": "LegacyRelease",
         "manifest": "default.xml",
         "manifest_branch": null,
         "manifest_repo_url": "https://chromium.googlesource.com/chromiumos/manifest",
@@ -159,7 +159,7 @@
                 "test",
                 "factory_install"
             ],
-            "luci_builder": "CommitQueue",
+            "luci_builder": "Full",
             "profile": "asan",
             "rootfs_verification": false,
             "usepkg_build_packages": false,
@@ -605,7 +605,6 @@
             "display_label": "tryjob",
             "hw_tests_override": [],
             "internal": true,
-            "luci_builder": "Release",
             "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
             "manifest_version": true,
             "overlays": "both",
@@ -708,7 +707,6 @@
                 "factory_install"
             ],
             "internal": true,
-            "luci_builder": "LegacyRelease",
             "manifest": "official.xml",
             "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
             "manifest_version": true,
@@ -790,7 +788,6 @@
                 "factory_install"
             ],
             "internal": true,
-            "luci_builder": "LegacyRelease",
             "manifest": "official.xml",
             "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
             "manifest_version": true,
@@ -23934,7 +23931,7 @@
         "description": "Used by sync_stages_unittest.",
         "display_label": "tryjob",
         "hw_tests_override": [],
-        "luci_builder": "CommitQueue",
+        "luci_builder": "Infra",
         "vm_tests": []
     },
     "sync-test-cbuildbot-tryjob": {

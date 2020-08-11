@@ -131,8 +131,8 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
   """Tests for stage results and reporting."""
 
   def setUp(self):
-    # Always stub RunCommmand out as we use it in every method.
-    self._bot_id = 'amd64-generic-paladin'
+    # Always stub RunCommand out as we use it in every method.
+    self._bot_id = 'amd64-generic-release'
     self.buildstore = FakeBuildStore()
     site_config = config_lib_unittest.MockSiteConfig()
     build_config = site_config[self._bot_id]

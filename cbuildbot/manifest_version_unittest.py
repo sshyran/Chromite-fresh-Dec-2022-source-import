@@ -336,7 +336,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
     self.manifest_repo = 'ssh://manifest/repo'
     self.version_file = 'version-file.sh'
     self.branch = 'master'
-    self.build_names = ['amd64-generic-paladin']
+    self.build_names = ['amd64-generic-release']
     self.incr_type = 'branch'
     # Change default to something we clean up.
     self.tmpmandir = os.path.join(self.tempdir, 'man')
@@ -367,7 +367,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testPublishManifestCommitMessageWithBuildId(self):
     """Tests that PublishManifest writes a build id."""
     self.manager = self.BuildManager()
-    expected_message = ('Automatic: Start amd64-generic-paladin master 1\n'
+    expected_message = ('Automatic: Start amd64-generic-release master 1\n'
                         'CrOS-Build-Id: %s' % MOCK_BUILD_ID)
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
@@ -386,7 +386,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testPublishManifestCommitMessageWithNegativeBuildId(self):
     """Tests that PublishManifest doesn't write a negative build_id"""
     self.manager = self.BuildManager()
-    expected_message = 'Automatic: Start amd64-generic-paladin master 1'
+    expected_message = 'Automatic: Start amd64-generic-release master 1'
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
     info = manifest_version.VersionInfo(
@@ -404,7 +404,7 @@ class BuildSpecsManagerTest(cros_test_lib.MockTempDirTestCase):
   def testPublishManifestCommitMessageWithNoneBuildId(self):
     """Tests that PublishManifest doesn't write a non-existant build_id"""
     self.manager = self.BuildManager()
-    expected_message = 'Automatic: Start amd64-generic-paladin master 1'
+    expected_message = 'Automatic: Start amd64-generic-release master 1'
     push_mock = self.PatchObject(self.manager, 'PushSpecChanges')
 
     info = manifest_version.VersionInfo(

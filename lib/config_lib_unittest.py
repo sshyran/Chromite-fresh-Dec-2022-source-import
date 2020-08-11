@@ -20,7 +20,7 @@ from chromite.lib import cros_test_lib
 def MockBuildConfig():
   """Create a BuildConfig object for convenient testing pleasure."""
   site_config = MockSiteConfig()
-  return site_config['amd64-generic-paladin']
+  return site_config['amd64-generic-release']
 
 
 def MockSiteConfig():
@@ -32,13 +32,13 @@ def MockSiteConfig():
 
   # Add a single, simple build config.
   result.Add(
-      'amd64-generic-paladin',
+      'amd64-generic-release',
       boards=['amd64-generic'],
       display_label='MockLabel',
-      build_type='paladin',
+      build_type='canary',
       chrome_sdk=True,
       chrome_sdk_build_chrome=False,
-      description='Commit Queue',
+      description='LegacyRelease',
       doc='http://mock_url/',
       image_test=True,
       images=['base', 'test'],

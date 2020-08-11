@@ -38,18 +38,18 @@ class GenLuciSchedulerTest(cros_test_lib.MockTestCase):
 
     expected = """
 job {
-  id: "amd64-generic-paladin"
+  id: "amd64-generic-release"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "Prod"
+    builder: "LegacyRelease"
     tags: "cbb_branch:master"
-    tags: "cbb_config:amd64-generic-paladin"
+    tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     properties: "cbb_branch:master"
-    properties: "cbb_config:amd64-generic-paladin"
+    properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
   }
@@ -123,18 +123,18 @@ trigger {
 
     expected = """
 job {
-  id: "mock_branch-amd64-generic-paladin"
+  id: "mock_branch-amd64-generic-release"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "Prod"
+    builder: "LegacyRelease"
     tags: "cbb_branch:mock_branch"
-    tags: "cbb_config:amd64-generic-paladin"
+    tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     properties: "cbb_branch:mock_branch"
-    properties: "cbb_config:amd64-generic-paladin"
+    properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
   }
@@ -153,19 +153,19 @@ job {
 
     expected = """
 job {
-  id: "amd64-generic-paladin"
+  id: "amd64-generic-release"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "Prod"
+    builder: "LegacyRelease"
     tags: "cbb_branch:master"
-    tags: "cbb_config:amd64-generic-paladin"
+    tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     tags: "cbb_workspace_branch:work_branch"
     properties: "cbb_branch:master"
-    properties: "cbb_config:amd64-generic-paladin"
+    properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_workspace_branch:work_branch"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -185,19 +185,19 @@ job {
 
     expected = """
 job {
-  id: "amd64-generic-paladin"
+  id: "amd64-generic-release"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "Prod"
+    builder: "LegacyRelease"
     tags: "cbb_branch:master"
-    tags: "cbb_config:amd64-generic-paladin"
+    tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     tags: "cbb_goma_client_type:client_type"
     properties: "cbb_branch:master"
-    properties: "cbb_config:amd64-generic-paladin"
+    properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_goma_client_type:client_type"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -214,13 +214,13 @@ job {
 
     site_config.Add(
         'not_scheduled',
-        luci_builder='ProdBuilder',
+        luci_builder='ReleaseBuilder',
         display_label='MockLabel',
     )
 
     site_config.Add(
         'build_prod',
-        luci_builder='ProdBuilder',
+        luci_builder='ReleaseBuilder',
         display_label='MockLabel',
         schedule='run once in a while',
     )
@@ -234,7 +234,7 @@ job {
 
     site_config.Add(
         'build_triggered_a',
-        luci_builder='ProdBuilder',
+        luci_builder='ReleaseBuilder',
         display_label='MockLabel',
         schedule='triggered',
         triggered_gitiles=[[
@@ -338,7 +338,7 @@ job {
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "ProdBuilder"
+    builder: "ReleaseBuilder"
     tags: "cbb_branch:master"
     tags: "cbb_config:build_prod"
     tags: "cbb_display_label:MockLabel"
@@ -374,7 +374,7 @@ job {
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
-    builder: "ProdBuilder"
+    builder: "ReleaseBuilder"
     tags: "cbb_branch:master"
     tags: "cbb_config:build_triggered_a"
     tags: "cbb_display_label:MockLabel"
