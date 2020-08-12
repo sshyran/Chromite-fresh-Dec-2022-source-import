@@ -794,18 +794,6 @@
       ]
     },
     {
-      "name": "pyro",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "reef",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reks",
       "configs": [
         {
@@ -4608,6 +4596,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 411,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "pyro",
+      "reference_board_name": "pyro",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "pyro",
+          "name": "pyro",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 291,
           "is_active": true
         }
       ]
