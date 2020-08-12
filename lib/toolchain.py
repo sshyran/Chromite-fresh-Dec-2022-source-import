@@ -291,20 +291,20 @@ class ToolchainInstaller(object):
     with osutils.TempDir(sudo_rm=True) as tempdir:
       # Extract to the temporary directory.
       cmd = ['tar', '-I', compressor, '-xpf', libc_path, '-C', tempdir]
-      result = cros_build_lib.sudo_run(cmd, check=False,
+      result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error extracting libc: %s' % result.output,
+        raise ToolchainInstallError('Error extracting libc: %s' % result.stdout,
                                     result)
 
       # Sync the files to the sysroot to install.
       # Trailing / on source to sync contents instead of the directory itself.
       source = os.path.join(tempdir, 'usr', board_chost)
       cmd = ['rsync', '--archive', '%s/' % source, '%s/' % sysroot.path]
-      result = cros_build_lib.sudo_run(cmd, check=False,
+      result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error installing libc: %s' % result.output,
+        raise ToolchainInstallError('Error installing libc: %s' % result.stdout,
                                     result)
 
       # Make the debug directory.
@@ -313,10 +313,10 @@ class ToolchainInstaller(object):
       # Sync the debug files to the debug directory.
       source = os.path.join(tempdir, 'usr/lib/debug/usr', board_chost)
       cmd = ['rsync', '--archive', '%s/' % source, '%s/' % debug_dir]
-      result = cros_build_lib.sudo_run(cmd, check=False,
+      result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        logging.warning('libc debug info not copied: %s', result.output)
+        logging.warning('libc debug info not copied: %s', result.stdout)
 
   def _NeedsInstalled(self, sysroot, tc_info):
     """Check if the toolchain installation needs to be run."""
