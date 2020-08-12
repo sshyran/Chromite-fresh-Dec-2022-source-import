@@ -260,7 +260,6 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             self.workspace,
             'board',
             extra_env={
-                'FEATURES': 'separatedebug',
                 'USE': '-cros-debug chrome_internal',
             }),
     ])
@@ -374,7 +373,6 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             self.workspace,
             'board',
             extra_env={
-                'FEATURES': 'separatedebug',
                 'USE': '-cros-debug chrome_internal',
             }),
     ])

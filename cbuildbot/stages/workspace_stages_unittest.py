@@ -422,7 +422,6 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
         ],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -446,7 +445,6 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
         ],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -476,7 +474,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug -separatedebug splitdebug',
+            'FEATURES': ' -separatedebug splitdebug',
         },
         cwd=self.workspace,
     )
@@ -497,7 +495,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
-            'FEATURES': 'separatedebug -separatedebug splitdebug',
+            'FEATURES': ' -separatedebug splitdebug',
             'USE': '-cros-debug chrome_internal chromeless_tty',
         },
         cwd=self.workspace,
@@ -540,7 +538,6 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -567,7 +564,6 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -594,7 +590,6 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -622,7 +617,6 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
             'USE': '-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -659,7 +653,6 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': u'-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -690,7 +683,6 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': u'-cros-debug chrome_internal chromeless_tty',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -723,7 +715,6 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
             'USE': u'-cros-debug chrome_internal',
-            'FEATURES': 'separatedebug',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -805,7 +796,6 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -836,7 +826,6 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace,
     )
@@ -882,7 +871,6 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
             'USE': '-cros-debug chrome_internal',
-            'FEATURES': 'separatedebug',
         },
         cwd=self.workspace)
 
