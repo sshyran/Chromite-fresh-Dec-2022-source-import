@@ -12,9 +12,6 @@ import re
 from chromite.lib import cros_logging as logging
 
 
-LSB_RELEASE = '/etc/lsb-release'
-
-
 def GetChromeosBuildInfo(lsb_release_content=None, regex=None):
   """Get chromeos build info in device under test as string. None on fail.
 

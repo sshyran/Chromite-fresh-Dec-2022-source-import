@@ -263,40 +263,6 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
     }
     self.assertEqual(props, expected_props)
 
-  def test_FixPayloadPropertiesFileLab(self):
-    """Tests _FixPayloadPropertiesFile() correctly fixes the properties file.
-
-    Tests if the payload properties file gets filled with correct data when
-    LabTransfer methods are invoked internally.
-    """
-    payload_dir = 'nyan_kitty-release/R76-12345.17.0'
-    payload_path = os.path.join(self.tempdir, 'test_update.gz')
-    payload_properties_path = payload_path + '.json'
-    osutils.WriteFile(payload_path, 'dummy-payload', makedirs=True)
-    # Empty properties file.
-    osutils.WriteFile(payload_properties_path, '{}')
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, payload_dir=payload_dir,
-          transfer_class=auto_updater_transfer.LabTransfer,
-          staging_server='http://0.0.0.0:8082')
-
-      self.PatchObject(auto_updater_transfer.LabTransfer, 'GetPayloadPropsFile',
-                       return_value=payload_properties_path)
-      self.PatchObject(auto_updater_transfer.LabTransfer, '_GetPayloadSize',
-                       return_value=os.path.getsize(payload_path))
-      CrOS_AU._FixPayloadPropertiesFile() # pylint: disable=protected-access
-
-    # The payload properties file should be updated with new fields.
-    props = json.loads(osutils.ReadFile(payload_properties_path))
-    expected_props = {
-        'appid': '',
-        'is_delta': False,
-        'size': os.path.getsize(payload_path),
-        'target_version': '12345.17.0',
-    }
-    self.assertEqual(props, expected_props)
-
   def testRunRootfs(self):
     """Test the update functions are called correctly.
 
@@ -403,33 +369,32 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
       self.assertTrue(
           auto_updater_transfer.LocalTransfer.GetPayloadProps.called)
 
-  def test_FixPayloadLabTransfer(self):
-    """Tests if correct LabTransfer methods are called."""
+  def test_FixPayloadLabEndToEndPayloadTransfer(self):
+    """Tests if correct LabEndToEndPayloadTransfer methods are called."""
     payload_dir = 'nyan_kitty-release/R76-12345.17.0'
     payload_path = os.path.join(self.tempdir, 'test_update.gz')
     payload_properties_path = payload_path + '.json'
     osutils.WriteFile(payload_path, 'dummy-payload', makedirs=True)
     # Empty properties file.
     osutils.WriteFile(payload_properties_path, '{}')
+    transfer_class = auto_updater_transfer.LabEndToEndPayloadTransfer
 
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       CrOS_AU = auto_updater.ChromiumOSUpdater(
           device, None, payload_dir=payload_dir,
-          transfer_class=auto_updater_transfer.LabTransfer,
+          transfer_class=transfer_class,
           staging_server='http://0.0.0.0:8082')
 
+      self.PatchObject(transfer_class,
+                       'GetPayloadPropsFile',
+                       return_value=payload_properties_path)
       self.PatchObject(
-          auto_updater_transfer.LabTransfer, 'GetPayloadPropsFile',
-          return_value=payload_properties_path)
-      self.PatchObject(
-          auto_updater_transfer.LabTransfer, 'GetPayloadProps',
+          transfer_class, 'GetPayloadProps',
           return_value={'size': '123', 'image_version': '99999.9.9'})
 
       CrOS_AU._FixPayloadPropertiesFile() # pylint: disable=protected-access
-      self.assertTrue(
-          auto_updater_transfer.LabTransfer.GetPayloadPropsFile.called)
-      self.assertTrue(
-          auto_updater_transfer.LabTransfer.GetPayloadProps.called)
+      self.assertTrue(transfer_class.GetPayloadPropsFile.called)
+      self.assertTrue(transfer_class.GetPayloadProps.called)
 
 
 class ChromiumOSUpdaterVerifyTest(ChromiumOSUpdaterBaseTest):

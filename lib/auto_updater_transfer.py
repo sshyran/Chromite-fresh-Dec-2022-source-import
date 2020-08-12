@@ -20,7 +20,7 @@ LocalTransfer includes:
   * Transfer rootfs update files if rootfs update is required.
   * Transfer stateful update files if stateful update is required.
 
-LabTransfer includes:
+LabEndToEndPayloadTransfer includes:
 
   ----Precheck---
   * Pre-check payload's existence on the staging server before auto-update.
@@ -189,23 +189,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
       Dict in the format: {'image_version': 12345.0.0, 'size': 123456789}.
     """
 
-  def _GetPayloadFormat(self):
-    """Gets the payload format that should be evaluated.
-
-    Returns:
-      The payload name as a string.
-    """
-    return self._payload_name
-
-  def _GetPayloadPattern(self):
-    """The regex pattern that the payload format must match.
-
-    Returns:
-      Regular expression.
-    """
-    return _PAYLOAD_PATTERN
-
-
 class LocalTransfer(Transfer):
   """Abstracts logic that handles transferring local files to the DUT."""
 
@@ -304,22 +287,20 @@ class LocalTransfer(Transfer):
         'size': os.path.getsize(payload_filepath)
     }
     if self._payload_name != ROOTFS_FILENAME:
-      payload_format = self._GetPayloadFormat()
-      payload_pattern = self._GetPayloadPattern()
-      m = re.match(payload_pattern, payload_format)
+      m = re.match(_PAYLOAD_PATTERN, self._payload_name)
       if not m:
         raise ValueError(
             'Regular expression %r did not match the expected payload format '
-            '%s' % (payload_pattern, payload_format))
+            '%s' % (_PAYLOAD_PATTERN, self._payload_name))
       values.update(m.groupdict())
     return values
 
 
-class LabTransfer(Transfer):
+class LabEndToEndPayloadTransfer(Transfer):
   """Abstracts logic that transfers files from staging server to the DUT."""
 
   def __init__(self, staging_server, *args, **kwargs):
-    """Initialize LabTransfer to transfer files from staging server to DUT.
+    """Initialize to transfer files from staging server to DUT.
 
     Args:
       staging_server: Url of the server that's staging the payload files.
@@ -329,23 +310,7 @@ class LabTransfer(Transfer):
           complete list of accepted keyword arguments.
     """
     self._staging_server = staging_server
-    super(LabTransfer, self).__init__(*args, **kwargs)
-
-  def _GetPayloadFormat(self):
-    """Gets the payload format that should be evaluated.
-
-    Returns:
-      The payload dir as a string.
-    """
-    return self._payload_dir
-
-  def _GetPayloadPattern(self):
-    """The regex pattern that the payload format must match.
-
-    Returns:
-      Regular expression.
-    """
-    return r'.*/(R[0-9]+-)(?P<image_version>.+)'
+    super(LabEndToEndPayloadTransfer, self).__init__(*args, **kwargs)
 
   def _RemoteDevserverCall(self, cmd, stdout=False):
     """Runs a command on a remote devserver by sshing into it.
@@ -414,17 +379,27 @@ class LabTransfer(Transfer):
       payload_dir: Path to the payload directory on the device.
       payload_filename: Name of the file by which the downloaded payload should
         be saved. This is assumed to be the same as the name of the payload.
+        If the payload_name must is in this format:
+        payloads/whatever_file_name, the 'payloads/' at the start will be
+        removed while saving the file as the files need to be saved in specific
+        directories for their subsequent installation. Keeping the 'payloads/'
+        at the beginning of the payload_filename, adds a new directory that
+        messes up its installation.
       build_id: This is the path at which the needed payload can be found. It
         is usually of the format <board_name>-release/R79-12345.6.0. By default,
         the path is set to None.
 
     Returns:
       A fully formed curl command in the format:
-        ['curl', '-o', '<path where payload should be saved>',
-         '<payload download URL>']
+      ['curl', '-o', '<path where payload should be saved>',
+      '<payload download URL>']
     """
-    return ['curl', '-o', os.path.join(payload_dir, payload_filename),
-            self._GetStagedUrl(payload_filename, build_id)]
+    saved_filename = payload_filename
+    if saved_filename.startswith('payloads/'):
+      saved_filename = '/'.join(saved_filename.split('/')[1:])
+    cmd = ['curl', '-o', os.path.join(payload_dir, saved_filename),
+           self._GetStagedUrl(payload_filename, build_id)]
+    return cmd
 
   def _TransferUpdateUtilsPackage(self):
     """Transfer update-utils package to work directory of the remote device.
@@ -550,70 +525,10 @@ class LabTransfer(Transfer):
       Dict - See parent class's function for full details.
     """
     values = {'size': self._GetPayloadSize()}
-    payload_format = self._GetPayloadFormat()
-    payload_pattern = self._GetPayloadPattern()
-    m = re.match(payload_pattern, payload_format)
+    m = re.match(_PAYLOAD_PATTERN, self._payload_name)
     if not m:
       raise ValueError('Regular expression %r did not match the expected '
-                       'payload format %s' % (payload_pattern, payload_format))
+                       'payload format %s' % (_PAYLOAD_PATTERN,
+                                              self._payload_name))
     values.update(m.groupdict())
     return values
-
-
-class LabEndToEndPayloadTransfer(LabTransfer):
-  """Abstracts logic that transfers files from staging server to the DUT.
-
-  TODO(crbug.com/1061570): AutoUpdate_endToEnd tests stage their payloads in a
-  different location on the devserver in comparison to the provision_AutoUpdate
-  test. Since we are removing the use of the cros_au RPC (see crbug.com/1049708
-  and go/devserver-deprecation) from the EndToEnd tests, it is necessary to
-  extend LabTransfer class to support this new payload staging location.
-  Ideally, the URL at which the payload is staged should be abstracted from the
-  actual transfer of payloads.
-  """
-
-  def _GetPayloadFormat(self):
-    """Gets the payload format that should be evaluated.
-
-    Returns:
-      The payload name as a string.
-    """
-    return self._payload_name
-
-  def _GetPayloadPattern(self):
-    """The regex pattern that the payload format must match.
-
-    Returns:
-      Regular expression.
-    """
-    return _PAYLOAD_PATTERN
-
-  def _GetCurlCmdForPayloadDownload(self, payload_dir, payload_filename,
-                                    build_id=None):
-    """Returns a valid curl command to download payloads into device tmp dir.
-
-    Args:
-      payload_dir: Path to the payload directory on the device.
-      payload_filename: Name of the file by which the downloaded payload should
-        be saved. This is assumed to be the same as the name of the payload.
-        If the payload_name must is in this format:
-        payloads/whatever_file_name, the 'payloads/' at the start will be
-        removed while saving the file as the files need to be saved in specific
-        directories for their subsequent installation. Keeping the 'payloads/'
-        at the beginning of the payload_filename, adds a new directory that
-        messes up its installation.
-      build_id: This is the path at which the needed payload can be found. It
-        is usually of the format <board_name>-release/R79-12345.6.0. By default,
-        the path is set to None.
-
-    Returns:
-      A fully formed curl command in the format:
-      ['curl', '-o', '<path where payload should be saved>',
-      '<payload download URL>']
-    """
-    saved_filename = payload_filename
-    if saved_filename.startswith('payloads/'):
-      saved_filename = '/'.join(saved_filename.split('/')[1:])
-    cmd = ['curl', '-o', os.path.join(payload_dir, saved_filename),
-           self._GetStagedUrl(payload_filename, build_id)]
-    return cmd
