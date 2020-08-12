@@ -237,7 +237,6 @@ class DeployChrome(object):
     This method calls 'stop ui', and then also manually pkills both ash-chrome
     and the session manager.
     """
-    self._stopped_ui = True
     if self._CheckUiJobStarted():
       logging.info('Shutting down Chrome...')
       self.device.run('stop ui')
@@ -473,6 +472,8 @@ class DeployChrome(object):
 
     # If this is a lacros build, we only want to restart ash-chrome if
     # necessary, which is done below.
+    if not self.options.lacros:
+      self._stopped_ui = True
     steps += ([self._KillLacrosChrome] if self.options.lacros else
               [self._KillAshChromeIfNeeded])
     ret = parallel.RunParallelSteps(steps, halt_on_error=True,
