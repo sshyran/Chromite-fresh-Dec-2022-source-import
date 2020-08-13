@@ -20,6 +20,7 @@ execution_failure=0
 execution_success=0
 string_data_array=()
 not_string_data_array=()
+sort_order="DESC"
 
 print_usage() {
   cat  <<HELP_USAGE
@@ -29,6 +30,7 @@ Usage:  $0 -c|--count <search_string>
      [-w|-when] <when_string>
      [-l|--limit] <limit_string> [--field_limit <field_limit>]
      [--case_sensitive)]
+     [--asc]
      [--es|--ef]
      [--join <string1> <string2>]
      [-v|--verbose] [--usage|-u|--help|-h]
@@ -36,6 +38,7 @@ Usage:  $0 -c|--count <search_string>
      If -c is specified, count the occurrences of the search string.
      If -s is specified, display the matching occurences based on the other
        arguments (-l, --field_limit, etc).
+     --asc changes sort order (for non-count queries) from DESC to ASC.
      if --join is specified with <string1> and <string2>, then find
        cases where one stage matches <string1> and another stage
        matches <string2> and both stages have the same build_id.
@@ -96,6 +99,10 @@ while (( "$#" )); do
       ;;
     --only_stdout)
       only_stdout=1
+      shift 1
+      ;;
+    --asc)
+      sort_order="ASC"
       shift 1
       ;;
     --ef)
@@ -208,7 +215,7 @@ if [[ ! -z ${join_1} ]]; then
   else
     query="$query LIKE \"%${join_2}%\""
   fi
-  query="$query ORDER BY DateTime DESC LIMIT ${limit};"
+  query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
     echo "Executing..."
@@ -284,7 +291,7 @@ elif [ "${execution_success}" -eq 1 ]; then
   query="${query} AND step_execution_result IS NULL"
 fi
 
-query="$query ORDER BY DateTime DESC LIMIT ${limit};"
+query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
 
 if [ "${verbose}" -eq 1 ]; then
   echo "QUERY: ${query}"
