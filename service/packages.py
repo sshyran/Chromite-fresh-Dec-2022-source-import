@@ -430,8 +430,10 @@ def uprev_ebuild_from_pin(package_path, version_pin_path, chroot):
   else:
     version = version + '-r1'
 
-  new_ebuild_src_path = os.path.join(package_src_path,
-                                     '%s-%s.ebuild' % (package, version))
+  new_ebuild_path = os.path.join(package_path,
+                                 '%s-%s.ebuild' % (package, version))
+  new_ebuild_src_path = os.path.join(constants.SOURCE_ROOT,
+                                     new_ebuild_path)
   manifest_src_path = os.path.join(package_src_path, 'Manifest')
 
   portage_util.EBuild.MarkAsStable(unstable_ebuild.ebuild_path,
@@ -439,7 +441,11 @@ def uprev_ebuild_from_pin(package_path, version_pin_path, chroot):
   osutils.SafeUnlink(stable_ebuild.ebuild_path)
 
   try:
-    portage_util.UpdateEbuildManifest(new_ebuild_src_path, chroot=chroot)
+    # UpdateEbuildManifest runs inside the chroot and therefore needs a
+    # chroot-relative path.
+    new_ebuild_chroot_path = os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                          new_ebuild_path)
+    portage_util.UpdateEbuildManifest(new_ebuild_chroot_path, chroot=chroot)
   except cros_build_lib.RunCommandError as e:
     raise EbuildManifestError(
         'Unable to update manifest for %s: %s' % (package, e.stderr))
