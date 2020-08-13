@@ -341,6 +341,17 @@ class PackageIndexInfo(object):
     self.profile = profile or sysroot_lib.Profile()
     self.location = location
 
+  def __eq__(self, other):
+    """Check equality."""
+    # BuildTarget is in the process of dropping Profile and root (which
+    # properly belong to the Sysroot, not the BuildTarget.  As such, they are
+    # handled separately here.
+    return (self.snapshot_sha == other.snapshot_sha and
+            self.snapshot_number == other.snapshot_number and
+            self.build_target.name == other.build_target.name and
+            self.profile == other.profile and
+            self.location == other.location)
+
   @property
   def as_protobuf(self):
     """Return a chromiumos.PackageIndexInfo protobuf."""

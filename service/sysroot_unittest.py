@@ -11,6 +11,7 @@ import os
 
 import mock
 
+from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -299,6 +300,28 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     # Packages included.
     for package in packages:
       self.assertIn(package, args)
+
+  def testGetBuildPackagesEnv(self):
+    """Test the build_packages env."""
+    instance = sysroot.BuildPackagesRunConfig()
+
+    # PORTAGE_BINHOST is not set when there are no package_indexes
+    self.assertNotIn('PORTAGE_BINHOST', instance.GetEnv())
+
+    # PORTAGE_BINHOST is correctly set when there are package_indexes.
+    pkg_indexes = [
+        binpkg.PackageIndexInfo(
+            build_target=build_target_lib.BuildTarget('board'),
+            snapshot_sha='A', location='AAAA'),
+        binpkg.PackageIndexInfo(
+            build_target=build_target_lib.BuildTarget('board'),
+            snapshot_sha='B', location='BBBB')]
+
+    instance = sysroot.BuildPackagesRunConfig(package_indexes=pkg_indexes)
+
+    env = instance.GetEnv()
+    self.assertEqual(env.get('PORTAGE_BINHOST'),
+                     ' '.join([x.location for x in reversed(pkg_indexes)]))
 
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase):

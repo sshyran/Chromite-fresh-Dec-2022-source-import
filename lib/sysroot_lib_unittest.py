@@ -10,6 +10,7 @@ from __future__ import print_function
 import os
 import sys
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -106,6 +107,32 @@ baz
     sysroot1 = sysroot_lib.Sysroot(self.tempdir)
     sysroot2 = sysroot_lib.Sysroot(self.tempdir)
     self.assertEqual(sysroot1, sysroot2)
+
+
+class ProfileTest(cros_test_lib.MockTempDirTestCase):
+  """Unittest for sysroot_lib.py"""
+
+  def testConversion(self):
+    """Test converting to/from protobuf."""
+    profile1 = sysroot_lib.Profile('profile')
+    profile2 = sysroot_lib.Profile()
+
+    proto1 = common_pb2.Profile(name='profile')
+    proto2 = common_pb2.Profile()
+
+    self.assertEqual(profile1.as_protobuf, proto1)
+    self.assertEqual(profile2.as_protobuf, proto2)
+
+    self.assertEqual(profile1, sysroot_lib.Profile.from_protobuf(proto1))
+    self.assertEqual(profile2, sysroot_lib.Profile.from_protobuf(proto2))
+
+  def testEquality(self):
+    """Test that equality functions work."""
+
+    profile = sysroot_lib.Profile('profile')
+    self.assertEqual(profile, sysroot_lib.Profile('profile'))
+    self.assertNotEqual(profile, sysroot_lib.Profile('other'))
+    self.assertNotEqual(profile, sysroot_lib.Profile(''))
 
 
 class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):

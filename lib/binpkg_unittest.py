@@ -10,10 +10,13 @@ from __future__ import print_function
 import os
 import sys
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import binpkg
+from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
+from chromite.lib import sysroot_lib
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -108,3 +111,58 @@ class PackageIndexTest(cros_test_lib.TempDirTestCase):
 
     self.assertDictEqual(pkg_index.header, read_index.header)
     self.assertCountEqual(pkg_index.packages, read_index.packages)
+
+class PackageIndexInfoTest(cros_test_lib.TempDirTestCase):
+  """Package index info tests."""
+
+  def _make_instance(self, sha, number, board, profile_name, location):
+    """Return a binpkg.PackageIndexInfo instance."""
+    return binpkg.PackageIndexInfo(
+        snapshot_sha=sha, snapshot_number=number,
+        build_target=build_target_lib.BuildTarget(
+            name=board) if board else None,
+        profile=sysroot_lib.Profile(
+            name=profile_name) if profile_name else None,
+        location=location)
+
+  def _make_proto(self, sha, number, board, profile_name, location):
+    """Return a common_pb2.PackageIndexInfo protobuf."""
+    proto = common_pb2.PackageIndexInfo()
+    if sha:
+      proto.snapshot_sha = sha
+    if number:
+      proto.snapshot_number = number
+    if board:
+      proto.build_target.name = board
+    if profile_name:
+      proto.profile.name = profile_name
+    if location:
+      proto.location = location
+    return proto
+
+  def testConversion(self):
+    """Sanity check converting to/from protobuf works."""
+
+    info = self._make_instance('SHA5', 5, 'target', 'profile', 'LOCATION')
+    proto = self._make_proto('SHA5', 5, 'target', 'profile', 'LOCATION')
+
+    self.assertEqual(str(info.as_protobuf), str(proto))
+    self.assertEqual(info.as_protobuf, proto)
+
+    self.assertEqual(binpkg.PackageIndexInfo.from_protobuf(proto), info)
+
+  def testEquality(self):
+    """Test that equality checks work."""
+    info = self._make_instance('SHA5', 5, 'target', 'profile', 'LOCATION')
+    self.assertEqual(
+        info, self._make_instance('SHA5', 5, 'target', 'profile', 'LOCATION'))
+    self.assertNotEqual(
+        info, self._make_instance('XXXX', 5, 'target', 'profile', 'LOCATION'))
+    self.assertNotEqual(
+        info, self._make_instance('SHA5', 6, 'target', 'profile', 'LOCATION'))
+    self.assertNotEqual(
+        info, self._make_instance('SHA5', 5, 'xxxxxx', 'profile', 'LOCATION'))
+    self.assertNotEqual(
+        info, self._make_instance('SHA5', 5, 'target', 'xxxxxxx', 'LOCATION'))
+    self.assertNotEqual(
+        info, self._make_instance('SHA5', 5, 'target', 'profile', 'XXXXXXXX'))

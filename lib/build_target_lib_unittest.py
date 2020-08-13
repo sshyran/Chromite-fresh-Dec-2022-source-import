@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib.build_target_lib import BuildTarget
 from chromite.lib.build_target_lib import InvalidNameError
 from chromite.lib import cros_test_lib
@@ -29,8 +30,10 @@ class BuildTargetTest(cros_test_lib.TempDirTestCase):
     bt1 = BuildTarget('board', profile='base')
     bt2 = BuildTarget('board', profile='base')
     bt3 = BuildTarget('different', profile='base')
+    bt4 = BuildTarget('board', profile='different')
     self.assertEqual(bt1, bt2)
     self.assertNotEqual(bt1, bt3)
+    self.assertNotEqual(bt1, bt4)
 
   def testInvalidName(self):
     """Test invalid name check."""
@@ -64,3 +67,19 @@ class BuildTargetTest(cros_test_lib.TempDirTestCase):
     path1 = 'some/path'
     result = build_target.full_path(path1, '/abc', 'def', '/g/h/i')
     self.assertEqual(result, '/build/board/some/path/abc/def/g/h/i')
+
+  def testConversion(self):
+    """Test protobuf conversion methods."""
+
+    build_target = BuildTarget(name='board')
+    build_target_with_profile = BuildTarget('board', profile='profile')
+    proto = common_pb2.BuildTarget(name='board')
+    profile_proto = common_pb2.Profile(name='profile')
+
+    # Profile is moving to sysroot_lib.Profile.
+    self.assertEqual(proto, build_target.as_protobuf)
+    self.assertEqual(proto, build_target_with_profile.as_protobuf)
+    self.assertEqual(build_target, BuildTarget.from_protobuf(proto))
+
+    self.assertEqual(common_pb2.Profile(), build_target.profile_protobuf)
+    self.assertEqual(profile_proto, build_target_with_profile.profile_protobuf)

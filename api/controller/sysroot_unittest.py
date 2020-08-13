@@ -16,6 +16,7 @@ from chromite.api import controller
 from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -31,7 +32,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   """Create function tests."""
 
   def _InputProto(self, build_target=None, profile=None, replace=False,
-                  current=False):
+                  current=False, package_indexes=None):
     """Helper to build and input proto instance."""
     proto = sysroot_pb2.SysrootCreateRequest()
     if build_target:
@@ -42,6 +43,8 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
       proto.flags.replace = replace
     if current:
       proto.flags.chroot_current = current
+    if package_indexes:
+      proto.package_indexes.extend(package_indexes)
 
     return proto
 
@@ -132,14 +135,28 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     profile = 'profile'
     force = True
     upgrade_chroot = False
+    package_indexes = [
+        common_pb2.PackageIndexInfo(
+            snapshot_sha='SHA', snapshot_number=5,
+            build_target=common_pb2.BuildTarget(name=board),
+            location='LOCATION', profile=common_pb2.Profile(name=profile)),
+        common_pb2.PackageIndexInfo(
+            snapshot_sha='SHA2', snapshot_number=4,
+            build_target=common_pb2.BuildTarget(name=board),
+            location='LOCATION2', profile=common_pb2.Profile(name=profile))]
+
     in_proto = self._InputProto(build_target=board, profile=profile,
-                                replace=force, current=not upgrade_chroot)
+                                replace=force, current=not upgrade_chroot,
+                                package_indexes=package_indexes)
     out_proto = self._OutputProto()
     sysroot_controller.Create(in_proto, out_proto, self.api_config)
 
     # Not default value checks.
-    rc_patch.assert_called_with(force=force, upgrade_chroot=upgrade_chroot,
-                                package_indexes=[])
+    rc_patch.assert_called_with(
+        force=force, package_indexes=[
+            binpkg.PackageIndexInfo.from_protobuf(x)
+            for x in package_indexes
+        ], upgrade_chroot=upgrade_chroot)
     self.assertEqual(board, out_proto.sysroot.build_target.name)
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
@@ -428,7 +445,8 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
 
   def _InputProto(self, build_target=None, sysroot_path=None,
                   build_source=False, goma_dir=None, goma_log_dir=None,
-                  goma_stats_file=None, goma_counterz_file=None):
+                  goma_stats_file=None, goma_counterz_file=None,
+                  package_indexes=None):
     """Helper to build an input proto instance."""
     instance = sysroot_pb2.InstallPackagesRequest()
 
@@ -446,6 +464,8 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       instance.goma_config.stats_file = goma_stats_file
     if goma_counterz_file:
       instance.goma_config.counterz_file = goma_counterz_file
+    if package_indexes:
+      instance.package_indexes.extend(package_indexes)
 
     return instance
 
@@ -549,6 +569,40 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
                                             self.api_config)
     self.assertFalse(rc)
     self.assertFalse(out_proto.failed_packages)
+
+  def testSuccessPackageIndexes(self):
+    """Test successful call with package_indexes."""
+    # Prevent argument validation error.
+    self.PatchObject(sysroot_lib.Sysroot, 'IsToolchainInstalled',
+                     return_value=True)
+    package_indexes = [
+        common_pb2.PackageIndexInfo(
+            snapshot_sha='SHA', snapshot_number=5,
+            build_target=common_pb2.BuildTarget(name='board'),
+            location='LOCATION', profile=common_pb2.Profile(name='profile')),
+        common_pb2.PackageIndexInfo(
+            snapshot_sha='SHA2', snapshot_number=4,
+            build_target=common_pb2.BuildTarget(name='board'),
+            location='LOCATION2', profile=common_pb2.Profile(name='profile'))]
+
+    in_proto = self._InputProto(build_target=self.build_target,
+                                sysroot_path=self.sysroot,
+                                package_indexes=package_indexes)
+
+    out_proto = self._OutputProto()
+    rc_patch = self.PatchObject(sysroot_service, 'BuildPackagesRunConfig')
+    self.PatchObject(sysroot_service, 'BuildPackages')
+
+    rc = sysroot_controller.InstallPackages(in_proto, out_proto,
+                                            self.api_config)
+    self.assertFalse(rc)
+    rc_patch.assert_called_with(usepkg=True, install_debug_symbols=True,
+                                packages=[],
+                                package_indexes=[
+                                    binpkg.PackageIndexInfo.from_protobuf(x)
+                                    for x in package_indexes
+                                ], use_flags=[], use_goma=False,
+                                incremental_build=False)
 
   def testSuccessWithGomaLogs(self):
     """Test successful call with goma."""
