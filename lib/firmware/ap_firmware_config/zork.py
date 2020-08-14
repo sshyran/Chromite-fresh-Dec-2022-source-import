@@ -11,9 +11,6 @@ BUILD_WORKON_PACKAGES = ('coreboot',)
 
 BUILD_PACKAGES = BUILD_WORKON_PACKAGES + ('chromeos-bootimage',)
 
-# TODO: Remove this line once VBoot is working on Zork.
-DEPLOY_SERVO_FORCE_FLASHROM = True
-
 
 def get_commands(servo):
   """Get specific flash commands for Zork
