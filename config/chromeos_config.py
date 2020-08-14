@@ -3090,7 +3090,7 @@ def BranchScheduleConfig():
   RELEASE_SCHEDULES = [
       '0 6 * * *',
       '0 5 * * *',
-      '0 7 * * 2,4',
+      'triggered',
   ]
 
   PFQ_SCHEDULE = [
@@ -3120,9 +3120,21 @@ def BranchScheduleConfig():
   for ((branch, android_pfq, chrome_pfq, orderfile, afdo),
        schedule, android_schedule) in zip(
            RELEASES, RELEASE_SCHEDULES, PFQ_SCHEDULE):
-    branch_builds.append([branch, 'master-release',
-                          config_lib.DISPLAY_LABEL_RELEASE,
-                          schedule, None])
+    release_num = re.search(r'release-R(\d+)-.*', branch).group(1)
+    # The oldest branch is only triggered by a Chrome uprev.
+    if schedule == 'triggered':
+      branch_builds.append(
+          [branch, 'master-release',
+           config_lib.DISPLAY_LABEL_RELEASE, schedule,
+           [[('https://chromium.googlesource.com/chromiumos/' +
+              'overlays/chromiumos-overlay'),
+             [r'regexp:refs/heads/%s\\..*' % branch],
+             [('chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild'
+               % release_num)]]]])
+    else:
+      branch_builds.append([branch, 'master-release',
+                            config_lib.DISPLAY_LABEL_RELEASE,
+                            schedule, None])
     branch_builds.extend([[branch, pfq,
                            config_lib.DISPLAY_LABEL_RELEASE,
                            android_schedule, None]
@@ -3131,12 +3143,10 @@ def BranchScheduleConfig():
     # We extract the release number from the branch, and use it to
     # watch for new chrome tags to trigger Chrome PFQ builds.
     # release-R71-11151.B -> 71 -> regexp:refs/tags/71\\..*
-    release_num = re.search(r'release-R(\d+)-.*', branch).group(1)
     branch_builds.append(
         [branch, chrome_pfq, config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
          [['https://chromium.googlesource.com/chromium/src',
            [r'regexp:refs/tags/%s\\..*' % release_num]]]])
-
     if orderfile:
       for b, s in zip(orderfile, ORDERFILE_SCHEDULES):
         branch_builds.append([branch, b,
