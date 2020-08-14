@@ -201,11 +201,15 @@ class CrOSTest(object):
         'deploy_chrome', '--force',
         '--build-dir', self.build_dir,
         '--process-timeout', '180',
-        '--to', self._device.device,
         '--deploy-test-binaries',
     ]
     if self._device.ssh_port:
-      deploy_cmd += ['--port', str(self._device.ssh_port)]
+      deploy_cmd += [
+          '--device',
+          '%s:%d' % (self._device.device, self._device.ssh_port)
+      ]
+    else:
+      deploy_cmd += ['--device', self._device.device]
     if self._device.board:
       deploy_cmd += ['--board', self._device.board]
     if self.cache_dir:

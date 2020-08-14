@@ -32,7 +32,7 @@ assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 # pylint: disable=protected-access
 
 
-_REGULAR_TO = ('--to', 'monkey')
+_REGULAR_TO = ('--device', 'monkey')
 _TARGET_BOARD = 'eve'
 _GS_PATH = 'gs://foon'
 
@@ -76,14 +76,15 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
   def testLacros(self):
     """Test basic lacros invocation."""
     argv = ['--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
-            '--to', 'localhost']
+            '--device', 'monkey']
     options = _ParseCommandLine(argv)
     self.assertTrue(options.lacros)
     self.assertEqual(options.target_dir, deploy_chrome.LACROS_DIR)
 
   def testLacrosRequiresNostrip(self):
     """Lacros requires --nostrip"""
-    argv = ['--lacros', '--build-dir', '/path/to/nowhere', '--to', 'localhost']
+    argv = ['--lacros', '--build-dir', '/path/to/nowhere', '--device',
+            'monkey']
     self.assertRaises2(SystemExit, _ParseCommandLine, argv,
                        check_attrs={'code': 2})
 
@@ -444,7 +445,7 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
   def setUp(self):
     options = _ParseCommandLine([
         '--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
-        '--to', 'localhost'])
+        '--device', 'monkey'])
     self.deploy = deploy_chrome.DeployChrome(
         options, self.tempdir, os.path.join(self.tempdir, 'staging'))
 

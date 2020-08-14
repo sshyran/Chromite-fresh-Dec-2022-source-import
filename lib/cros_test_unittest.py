@@ -130,8 +130,9 @@ class CrOSTester(CrOSTesterBase):
     self._tester.Run()
     self.assertCommandContains(['deploy_chrome', '--force', '--build-dir',
                                 self._tester.build_dir, '--process-timeout',
-                                '180', '--to', self._tester._device.device,
-                                '--port', '9222', '--board', 'amd64-generic',
+                                '180', '--device',
+                                self._tester._device.device + ':9222',
+                                '--board', 'amd64-generic',
                                 '--cache-dir', self._tester.cache_dir])
 
   def testDeployChromeWithArgs(self):

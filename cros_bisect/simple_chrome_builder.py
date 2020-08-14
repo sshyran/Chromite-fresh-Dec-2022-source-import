@@ -212,11 +212,12 @@ ChromeOS (board specified.) Also, it can deploy the result to ChromeOS DUT
     """
     logging.info('Deploying chromium(%s) to DUT: %s', commit_label, remote.raw)
     with cros_build_lib.TimedSection() as timer:
-      # --force: for removing rootfs verification.
-      command = ['deploy_chrome', '--build-dir', build_to_deploy,
-                 '--to', remote.hostname, '--force']
+      device = remote.hostname
       if remote.port:
-        command.extend(['--port', str(remote.port)])
+        device += ':' + str(remote.port)
+      # --force: for removing rootfs verification.
+      command = ['deploy_chrome', '--build-dir', build_to_deploy, '--force',
+                 '--device', device]
       result = self.chrome_sdk.Run(command, run_args=self.log_output_args)
       if result.returncode:
         logging.error('Deploy failed. returncode %d. stderr %s',

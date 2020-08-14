@@ -289,8 +289,8 @@ class TestSimpleChromeBuilder(cros_test_lib.MockTempDirTestCase):
     builder = self.GetBuilder()
     builder.Deploy(self.DUT, build_to_deploy, commit_label)
     chrome_sdk_run_mock.assert_called_with(
-        ['deploy_chrome', '--build-dir', build_to_deploy, '--to', self.DUT_IP,
-         '--force'],
+        ['deploy_chrome', '--build-dir', build_to_deploy, '--force',
+         '--device', self.DUT_IP],
         run_args=self.log_output_args)
 
   def testDeployWithPort(self):
@@ -304,6 +304,6 @@ class TestSimpleChromeBuilder(cros_test_lib.MockTempDirTestCase):
     builder = self.GetBuilder()
     builder.Deploy(dut, build_to_deploy, commit_label)
     chrome_sdk_run_mock.assert_called_with(
-        ['deploy_chrome', '--build-dir', build_to_deploy, '--to', self.DUT_IP,
-         '--force', '--port', port],
+        ['deploy_chrome', '--build-dir', build_to_deploy, '--force',
+         '--device', self.DUT_IP + ':' + port],
         run_args=self.log_output_args)
