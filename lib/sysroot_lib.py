@@ -119,6 +119,7 @@ _ARCH_MAPPING = {
     'amd64': 'amd64-generic',
     'x86': 'x86-generic',
     'arm': 'arm-generic',
+    'arm64': 'arm64-generic',
     'mips': 'mipsel-o32-generic',
 }
 
