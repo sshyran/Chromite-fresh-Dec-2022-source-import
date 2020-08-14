@@ -1209,9 +1209,9 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
         if sum(x.count('selinux-policy') for x in pkgs):
           logging.warning(
               'Deploying SELinux policy will not take effect until reboot. '
-              'SELinux policy is loaded by init. Also, security contexts '
-              '(labels) in files will require manual relabeling by the user '
-              'if your policy modifies the file contexts.')
+              'SELinux policy is loaded by init. Also, changing the security '
+              'contexts (labels) of a file will require building a new image '
+              'and flashing the image onto the device.')
 
       logging.warning('Please restart any updated services on the device, '
                       'or just reboot it.')
