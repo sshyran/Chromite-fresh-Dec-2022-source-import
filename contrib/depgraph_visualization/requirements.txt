@@ -1,0 +1,3 @@
+--find-links file:///mnt/host/source/infra_virtualenv/pip_packages
+portage>=2.3
+pyvis==0.1.*

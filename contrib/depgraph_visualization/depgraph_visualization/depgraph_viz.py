@@ -5,13 +5,14 @@
 
 """Command to visualize dependency tree for a given package."""
 
+import sys
 from typing import List, Dict
-
-from chromite.lib import depgraph
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import depgraph
 
+from . import visualize
 
 
 def ParseArgs(argv):
@@ -55,9 +56,9 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
   return runtime_tree
 
 
-def main(argv):
-  opts = ParseArgs(argv)
+def main():
+  opts = ParseArgs(sys.argv)
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.build_target)
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)
-  dep_vis = depgraph.DepVisualizer(runtime_tree)
+  dep_vis = visualize.DepVisualizer(runtime_tree)
   dep_vis.VisualizeGraph()
