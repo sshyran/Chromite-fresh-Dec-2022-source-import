@@ -31,9 +31,6 @@ NEBRASKA_FILENAME = 'nebraska.py'
 # Error msg in loading shared libraries when running python command.
 ERROR_MSG_IN_LOADING_LIB = 'error while loading shared libraries'
 
-# File copying mode.
-_RSYNC = 'rsync'
-
 
 class Error(Exception):
   """Base exception class of nebraska errors."""
@@ -67,8 +64,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
 
   def __init__(self, remote_device, nebraska_bin=None,
                update_payloads_address=None, update_metadata_dir=None,
-               install_payloads_address=None, install_metadata_dir=None,
-               copy_mode=_RSYNC):
+               install_payloads_address=None, install_metadata_dir=None):
     """Initializes the nebraska wrapper.
 
     Args:
@@ -83,7 +79,6 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           operations.
       install_metadata_dir: Similar to update_metadata_dir but for install
           payloads.
-      copy_mode: Mode for copying files. Must be either 'rsync' or 'scp'.
     """
     super(RemoteNebraskaWrapper, self).__init__()
 
@@ -103,7 +98,6 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
 
     self._port = None
     self._pid = None
-    self._copy_mode = copy_mode
 
   def _RemoteCommand(self, *args, **kwargs):
     """Runs a remote shell command.
@@ -271,8 +265,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
       target_log: The file to copy the log to from the device.
     """
     try:
-      self._device.CopyFromDevice(self._log_file, target_log,
-                                  mode=self._copy_mode)
+      self._device.CopyFromDevice(self._log_file, target_log)
     except (remote_access.RemoteAccessException,
             cros_build_lib.RunCommandError) as err:
       logging.error('Failed to copy nebraska logs from device, ignoring: %s',
@@ -292,8 +285,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
     try:
       self._RemoteCommand(
           ['curl', request_log_url, '-o', self.REQUEST_LOG_FILE_PATH])
-      self._device.CopyFromDevice(self.REQUEST_LOG_FILE_PATH, target_log,
-                                  mode=self._copy_mode)
+      self._device.CopyFromDevice(self.REQUEST_LOG_FILE_PATH, target_log)
     except (remote_access.RemoteAccessException,
             cros_build_lib.RunCommandError) as err:
       logging.error('Failed to get requestlog from nebraska. ignoring: %s',

@@ -947,7 +947,7 @@ class RemoteDevice(object):
 
     return RunCommandFuncWrapper(func, msg, src, dest, **kwargs)
 
-  def CopyFromDevice(self, src, dest, mode='rsync', **kwargs):
+  def CopyFromDevice(self, src, dest, mode='scp', **kwargs):
     """Copy path from device.
 
     Adding --compress recommended for text like log files.

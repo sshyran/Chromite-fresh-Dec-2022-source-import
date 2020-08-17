@@ -292,8 +292,7 @@ class ChromiumOSUpdater(BaseUpdater):
     nebraska_bin = os.path.join(self.device_dev_dir,
                                 self.REMOTE_NEBRASKA_FILENAME)
     nebraska = nebraska_wrapper.RemoteNebraskaWrapper(
-        self.device, nebraska_bin=nebraska_bin,
-        copy_mode=self._transfer_obj.mode)
+        self.device, nebraska_bin=nebraska_bin)
     nebraska.CheckNebraskaCanRun()
 
   @classmethod
@@ -443,8 +442,7 @@ class ChromiumOSUpdater(BaseUpdater):
     nebraska = nebraska_wrapper.RemoteNebraskaWrapper(
         self.device, nebraska_bin=nebraska_bin,
         update_payloads_address='file://' + self.device_payload_dir,
-        update_metadata_dir=self.device_payload_dir,
-        copy_mode=self._transfer_obj.mode)
+        update_metadata_dir=self.device_payload_dir)
 
     try:
       nebraska.Start()
@@ -521,13 +519,11 @@ class ChromiumOSUpdater(BaseUpdater):
 
       nebraska.CollectLogs(os.path.join(self.tempdir,
                                         self.LOCAL_NEBRASKA_LOG_FILENAME))
-
       self.device.CopyFromDevice(
           self.REMOTE_UPDATE_ENGINE_LOGFILE_PATH,
           os.path.join(self.tempdir, os.path.basename(
               self.REMOTE_UPDATE_ENGINE_LOGFILE_PATH)),
-          follow_symlinks=True, mode=self._transfer_obj.mode,
-          **self._cmd_kwargs_omit_error)
+          follow_symlinks=True, **self._cmd_kwargs_omit_error)
 
   def UpdateStateful(self):
     """Update the stateful partition of the device."""
@@ -828,7 +824,6 @@ class ChromiumOSUpdater(BaseUpdater):
         with the wrong partition.
     """
     logging.debug('Start verifying boot expectations...')
-
     # Figure out the newly active kernel
     active_kernel_state = self._GetKernelState()[0]
 
@@ -1037,8 +1032,7 @@ class ChromiumOSUpdater(BaseUpdater):
                                 self.REMOTE_NEBRASKA_FILENAME)
     nebraska = nebraska_wrapper.RemoteNebraskaWrapper(
         self.device, nebraska_bin=nebraska_bin,
-        update_metadata_dir=self.device.work_dir,
-        copy_mode=self._transfer_obj.mode)
+        update_metadata_dir=self.device.work_dir)
 
     try:
       nebraska.Start()

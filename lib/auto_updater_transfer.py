@@ -74,7 +74,6 @@ STATEFUL_FILENAME = 'stateful.tgz'
 _PAYLOAD_PATTERN = r'payloads/chromeos_(?P<image_version>[^_]+)_.*'
 
 # File copying modes.
-_RSYNC = 'rsync'
 _SCP = 'scp'
 
 
@@ -133,11 +132,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     self._transfer_stateful_update = transfer_stateful_update
     self._transfer_rootfs_update = transfer_rootfs_update
     self._local_payload_props_path = None
-
-  @property
-  def mode(self):
-    """Mode for copying files."""
-    return _RSYNC
 
   @abc.abstractmethod
   def CheckPayloads(self):
@@ -253,8 +247,8 @@ class LocalTransfer(Transfer):
 
     # Make sure the device.work_dir exists after any installation and reboot.
     self._EnsureDeviceDirectory(self._device.work_dir)
-    # Python packages are plain text files so we chose rsync --compress.
-    self._device.CopyToWorkDir(source_dir, mode='rsync', log_output=True,
+    # Python packages are plain text files.
+    self._device.CopyToWorkDir(source_dir, mode=_SCP, log_output=True,
                                **self._cmd_kwargs)
 
   def _TransferRootfsUpdate(self):
@@ -336,11 +330,6 @@ class LabTransfer(Transfer):
     """
     self._staging_server = staging_server
     super(LabTransfer, self).__init__(*args, **kwargs)
-
-  @property
-  def mode(self):
-    """Mode for copying files."""
-    return _SCP
 
   def _GetPayloadFormat(self):
     """Gets the payload format that should be evaluated.
