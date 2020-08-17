@@ -68,6 +68,8 @@
     octopus-factory-octopus-11512.B-factorybranch
   factory-poppy-10504.B-buildspec
     nautilus-factory-poppy-10504.B-factorybranch
+  factory-puff-13329.B-buildspec
+    puff-factory-puff-13329.B-factorybranch
   factory-rambi-5517.B-buildspec
     enguarde-factory-rambi-5517.B-factorybranch
     expresso-factory-rambi-5517.B-factorybranch
@@ -888,6 +890,8 @@
     octopus-factory-octopus-11512.B-factorybranch-tryjob
   factory-poppy-10504.B-buildspec-tryjob
     nautilus-factory-poppy-10504.B-factorybranch-tryjob
+  factory-puff-13329.B-buildspec-tryjob
+    puff-factory-puff-13329.B-factorybranch-tryjob
   factory-rambi-5517.B-buildspec-tryjob
     enguarde-factory-rambi-5517.B-factorybranch-tryjob
     expresso-factory-rambi-5517.B-factorybranch-tryjob
@@ -1647,6 +1651,7 @@
   poppy-payloads-tryjob
   poppy-release-tryjob
   poppy-unittest-stress
+  puff-factory-puff-13329.B-factorybranch-tryjob
   puff-full-tryjob
   puff-llvm-next-toolchain-tryjob
   puff-llvm-toolchain-tryjob
