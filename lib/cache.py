@@ -322,7 +322,7 @@ class RemoteCache(DiskCache):
 def Untar(path, cwd, sudo=False):
   """Untar a tarball."""
   functor = cros_build_lib.sudo_run if sudo else cros_build_lib.run
-  functor(['tar', '-xpf', path], cwd=cwd, debug_level=logging.DEBUG)
+  functor(['tar', '-xpf', path], cwd=cwd, debug_level=logging.DEBUG, quiet=True)
 
 
 class TarballCache(RemoteCache):
