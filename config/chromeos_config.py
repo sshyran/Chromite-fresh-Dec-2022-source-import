@@ -1427,6 +1427,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       external_board_configs,
       site_config.templates.full,
       site_config.templates.build_external_chrome,
+      run_cpeexport=True,
       internal=False,
       manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
       overlays=constants.PUBLIC_OVERLAYS,

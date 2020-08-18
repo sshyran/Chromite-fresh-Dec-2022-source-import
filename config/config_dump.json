@@ -934,6 +934,7 @@
             "amd64-generic-cheets"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -958,6 +959,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1089,6 +1091,7 @@
         ],
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "tast_vm_tests": [
             "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
             "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 10800\n}"
@@ -1117,6 +1120,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "tast_vm_tests": [
             "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}",
             "{\n    \"suite_name\": \"tast_vm_canary_informational\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && informational)\"\n    ],\n    \"timeout\": 10800\n}"
@@ -1320,6 +1324,7 @@
         ],
         "chrome_sdk": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -1346,6 +1351,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -1466,6 +1472,7 @@
         ],
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1491,6 +1498,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1544,6 +1552,7 @@
         "chrome_sdk_build_chrome": false,
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1570,6 +1579,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1621,6 +1631,7 @@
             "arm64-llvmpipe"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1645,6 +1656,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1736,6 +1748,7 @@
             "asuka"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1760,6 +1773,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1869,6 +1883,7 @@
             "asurada"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -1893,6 +1908,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2000,6 +2016,7 @@
             "atlas-arm64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2024,6 +2041,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2136,6 +2154,7 @@
             "atlas-blueznext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2160,6 +2179,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2292,6 +2312,7 @@
             "atlas"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2316,6 +2337,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2510,6 +2532,7 @@
             "auron_paine"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2534,6 +2557,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2679,6 +2703,7 @@
             "auron_yuna"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2703,6 +2728,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2850,6 +2876,7 @@
             "banjo"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -2874,6 +2901,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3021,6 +3049,7 @@
             "banon"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3045,6 +3074,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3158,6 +3188,7 @@
         ],
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -3189,6 +3220,7 @@
         "luci_builder": "Try",
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -3371,6 +3403,7 @@
         ],
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -3402,6 +3435,7 @@
         "luci_builder": "Try",
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -3557,6 +3591,7 @@
             "betty-arc-r"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -3580,6 +3615,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -3681,6 +3717,7 @@
             "betty-arcmaster"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3705,6 +3742,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3811,6 +3849,7 @@
             "betty-arcvm-master"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3835,6 +3874,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -3998,6 +4038,7 @@
             "betty"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -4021,6 +4062,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -4078,6 +4120,7 @@
             "betty-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4102,6 +4145,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4255,6 +4299,7 @@
             "betty-pi-arc"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -4278,6 +4323,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -4429,6 +4475,7 @@
             "betty-qt-arc"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4453,6 +4500,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4667,6 +4715,7 @@
             "bob"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4691,6 +4740,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4798,6 +4848,7 @@
             "bubs"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4822,6 +4873,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4928,6 +4980,7 @@
             "buddy-cfm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -4952,6 +5005,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5138,6 +5192,7 @@
             "buddy"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5162,6 +5217,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5309,6 +5365,7 @@
             "candy"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5333,6 +5390,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5447,6 +5505,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -5470,6 +5529,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -5656,6 +5716,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -5679,6 +5740,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -5857,6 +5919,7 @@
             "caroline-arc64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5881,6 +5944,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6029,6 +6093,7 @@
             "caroline"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6053,6 +6118,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6064,6 +6130,7 @@
             "caroline-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6088,6 +6155,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6228,6 +6296,7 @@
             "caroline-ndktranslation"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6252,6 +6321,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6454,6 +6524,7 @@
             "caroline-userdebug"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6478,6 +6549,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6626,6 +6698,7 @@
             "cave"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6650,6 +6723,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6797,6 +6871,7 @@
             "celes"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -6821,6 +6896,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7036,6 +7112,7 @@
             "chell"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7060,6 +7137,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7205,6 +7283,7 @@
             "cheza"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7229,6 +7308,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7348,6 +7428,7 @@
             "cheza64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7372,6 +7453,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -7745,6 +7827,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -7768,6 +7851,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -7994,6 +8078,7 @@
             "coral"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8018,6 +8103,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8257,6 +8343,7 @@
             "cyan"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8281,6 +8368,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8386,6 +8474,7 @@
             "dedede"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8410,6 +8499,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8539,6 +8629,7 @@
             "deltaur"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8563,6 +8654,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8688,6 +8780,7 @@
             "drallion"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8712,6 +8805,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8893,6 +8987,7 @@
             "edgar"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8917,6 +9012,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9044,6 +9140,7 @@
             "elm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9068,6 +9165,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9079,6 +9177,7 @@
             "elm-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9103,6 +9202,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9325,6 +9425,7 @@
             "endeavour"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9349,6 +9450,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9541,6 +9643,7 @@
             "enguarde"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9565,6 +9668,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9672,6 +9776,7 @@
             "eve-arc-r"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9696,6 +9801,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9808,6 +9914,7 @@
             "eve-arcvm-mesa-virgl-next"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9832,6 +9939,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9944,6 +10052,7 @@
             "eve-arm64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -9968,6 +10077,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10100,6 +10210,7 @@
             "eve"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10124,6 +10235,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10135,6 +10247,7 @@
             "eve-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10159,6 +10272,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10271,6 +10385,7 @@
             "eve-kvm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10295,6 +10410,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10603,6 +10719,7 @@
             "eve-userdebug"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10627,6 +10744,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10755,6 +10873,7 @@
             "excelsior"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10779,6 +10898,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10931,6 +11051,7 @@
             "expresso"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -10955,6 +11076,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -11988,6 +12110,7 @@
             "falco_li"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -12012,6 +12135,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13494,6 +13618,7 @@
         ],
         "chrome_sdk": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -13520,6 +13645,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -13656,6 +13782,7 @@
             "fizz-cfm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13680,6 +13807,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13820,6 +13948,7 @@
             "fizz"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13844,6 +13973,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13855,6 +13985,7 @@
             "fizz-labstation"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -13879,6 +14010,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14040,6 +14172,7 @@
         ],
         "image_test": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14065,6 +14198,7 @@
         "image_test": false,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14321,6 +14455,7 @@
         ],
         "chrome_sdk": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -14347,6 +14482,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -14547,6 +14683,7 @@
             "gandof"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14571,6 +14708,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14758,6 +14896,7 @@
             "glados"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14782,6 +14921,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14927,6 +15067,7 @@
             "gnawty"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -14951,6 +15092,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15065,6 +15207,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -15088,6 +15231,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -15335,6 +15479,7 @@
             "grunt"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "unittests": false,
         "useflags": [
             "-chrome_internal"
@@ -15360,6 +15505,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "unittests": false,
         "useflags": [
             "-chrome_internal"
@@ -15372,6 +15518,7 @@
             "grunt-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15396,6 +15543,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15746,6 +15894,7 @@
             "guado-cfm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15770,6 +15919,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15916,6 +16066,7 @@
             "guado"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15940,6 +16091,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15984,6 +16136,7 @@
         ],
         "image_test": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16009,6 +16162,7 @@
         "image_test": false,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16185,6 +16339,7 @@
             "guado_labstation"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16209,6 +16364,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16351,6 +16507,7 @@
             "hana"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16375,6 +16532,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16386,6 +16544,7 @@
             "hana-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16410,6 +16569,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16612,6 +16772,7 @@
             "hatch-arc-r"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16636,6 +16797,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16772,6 +16934,7 @@
             "hatch-arc-r-userdebug"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16796,6 +16959,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16970,6 +17134,7 @@
             "hatch-blueznext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -16994,6 +17159,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17130,6 +17296,7 @@
             "hatch-borealis"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17154,6 +17321,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17290,6 +17458,7 @@
             "hatch-diskswap"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17314,6 +17483,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17472,6 +17642,7 @@
             "hatch"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17496,6 +17667,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17507,6 +17679,7 @@
             "hatch-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17531,6 +17704,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17849,6 +18023,7 @@
             "heli"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17873,6 +18048,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -17996,6 +18172,7 @@
             "jacuzzi"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18020,6 +18197,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18145,6 +18323,7 @@
             "jecht"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18169,6 +18348,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18274,6 +18454,7 @@
             "kalista-cfm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18298,6 +18479,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18430,6 +18612,7 @@
             "kalista"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18454,6 +18637,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18605,6 +18789,7 @@
             "kefka"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18629,6 +18814,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18640,6 +18826,7 @@
             "kefka-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18664,6 +18851,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18940,6 +19128,7 @@
             "kevin-arc64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -18964,6 +19153,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19093,6 +19283,7 @@
         ],
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19118,6 +19309,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19284,6 +19476,7 @@
         "chrome_sdk_build_chrome": false,
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19310,6 +19503,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19496,6 +19690,7 @@
             "kip"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19520,6 +19715,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19627,6 +19823,7 @@
             "kukui-arc-r"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19651,6 +19848,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19807,6 +20005,7 @@
             "kukui-arc64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19831,6 +20030,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19969,6 +20169,7 @@
             "kukui"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -19993,6 +20194,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -20133,6 +20335,7 @@
         "manifest_version": true,
         "paygen_skip_testing": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal",
@@ -20162,6 +20365,7 @@
         "manifest_version": true,
         "paygen_skip_testing": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal",
@@ -20487,6 +20691,7 @@
             "lars"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -20511,6 +20716,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -20623,6 +20829,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -20646,6 +20853,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -20832,6 +21040,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -20855,6 +21064,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -21120,6 +21330,7 @@
             "lulu"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -21144,6 +21355,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -21251,6 +21463,7 @@
             "macchiato-ground"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -21275,6 +21488,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22047,6 +22261,7 @@
         ],
         "chrome_sdk": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -22073,6 +22288,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -22230,6 +22446,7 @@
         ],
         "image_test": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22255,6 +22472,7 @@
         "image_test": false,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22310,6 +22528,7 @@
             "monroe"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22334,6 +22553,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22439,6 +22659,7 @@
             "mushu"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22463,6 +22684,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22599,6 +22821,7 @@
             "nami"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22623,6 +22846,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22770,6 +22994,7 @@
             "nautilus"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22794,6 +23019,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22947,6 +23173,7 @@
             "ninja"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22971,6 +23198,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23078,6 +23306,7 @@
             "nocturne-arm64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23102,6 +23331,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23234,6 +23464,7 @@
             "nocturne"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23258,6 +23489,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23379,6 +23611,7 @@
             "novato-arc64"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -23402,6 +23635,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -23499,6 +23733,7 @@
             "novato"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -23522,6 +23757,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ]
@@ -23659,6 +23895,7 @@
             "nyan_big"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23683,6 +23920,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23828,6 +24066,7 @@
             "nyan_blaze"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23852,6 +24091,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -23998,6 +24238,7 @@
         ],
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24023,6 +24264,7 @@
         "luci_builder": "Try",
         "manifest_version": true,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24135,6 +24377,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -24158,6 +24401,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -24357,6 +24601,7 @@
             "octopus"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24381,6 +24626,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24602,6 +24848,7 @@
             "orchestra"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24626,6 +24873,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24772,6 +25020,7 @@
             "orco"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24796,6 +25045,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24935,6 +25185,7 @@
             "palkia"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -24959,6 +25210,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25095,6 +25347,7 @@
             "poppy"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25119,6 +25372,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25244,6 +25498,7 @@
             "puff"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25268,6 +25523,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25423,6 +25679,7 @@
             "pyro"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25447,6 +25704,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25558,6 +25816,7 @@
             "rammus-arc-r"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25582,6 +25841,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25754,6 +26014,7 @@
             "rammus"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25778,6 +26039,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25931,6 +26193,7 @@
             "reef"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -25955,6 +26218,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26144,6 +26408,7 @@
             "reks"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26168,6 +26433,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26331,6 +26597,7 @@
             "relm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26355,6 +26622,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26470,6 +26738,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26502,6 +26771,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26637,6 +26907,7 @@
             "rikku-cfm"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26661,6 +26932,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26809,6 +27081,7 @@
             "rikku"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26833,6 +27106,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26947,6 +27221,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -26970,6 +27245,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -27149,6 +27425,7 @@
             "samus"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27173,6 +27450,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27184,6 +27462,7 @@
             "samus-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27208,6 +27487,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27429,6 +27709,7 @@
             "sand"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27453,6 +27734,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27584,6 +27866,7 @@
             "sarien"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27608,6 +27891,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27773,6 +28057,7 @@
             "scarlet"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27797,6 +28082,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27952,6 +28238,7 @@
             "sentry"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -27976,6 +28263,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28123,6 +28411,7 @@
             "setzer"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28147,6 +28436,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28250,6 +28540,7 @@
             "shadowkeep"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28274,6 +28565,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28400,6 +28692,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -28435,6 +28728,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -28697,6 +28991,7 @@
             "snappy"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28721,6 +29016,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28856,6 +29152,7 @@
             "soraka"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28880,6 +29177,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29079,6 +29377,7 @@
             "swanky"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29103,6 +29402,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29248,6 +29548,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -29285,6 +29586,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -29463,6 +29765,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -29500,6 +29803,7 @@
             "virtual/target-os-test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
@@ -29701,6 +30005,7 @@
             "terra"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29725,6 +30030,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29937,6 +30243,7 @@
             "tidus"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29961,6 +30268,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30068,6 +30376,7 @@
             "trogdor"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30092,6 +30401,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30251,6 +30561,7 @@
             "ultima"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30275,6 +30586,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30422,6 +30734,7 @@
             "veyron_fievel"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30446,6 +30759,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30593,6 +30907,7 @@
             "veyron_jaq"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30617,6 +30932,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30762,6 +31078,7 @@
             "veyron_jerry"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30786,6 +31103,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30971,6 +31289,7 @@
             "veyron_mickey"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -30995,6 +31314,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31142,6 +31462,7 @@
             "veyron_mighty"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31166,6 +31487,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31311,6 +31633,7 @@
             "veyron_minnie"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31335,6 +31658,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31480,6 +31804,7 @@
             "veyron_rialto"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31504,6 +31829,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31647,6 +31973,7 @@
             "veyron_speedy"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31671,6 +31998,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31816,6 +32144,7 @@
             "veyron_tiger"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31840,6 +32169,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -31954,6 +32284,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -31977,6 +32308,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -32067,6 +32399,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -32090,6 +32423,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -32364,6 +32698,7 @@
             "volteer"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -32388,6 +32723,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -32399,6 +32735,7 @@
             "volteer-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -32423,6 +32760,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -32784,6 +33122,7 @@
         ],
         "chrome_sdk": false,
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -32810,6 +33149,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "useflags": [
             "-chrome_internal"
@@ -33010,6 +33350,7 @@
             "winky"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33034,6 +33375,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33181,6 +33523,7 @@
             "wizpig"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33205,6 +33548,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33319,6 +33663,7 @@
             "test"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -33342,6 +33687,7 @@
         ],
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -33529,6 +33875,7 @@
         ],
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -33553,6 +33900,7 @@
         "luci_builder": "Try",
         "prebuilts": "public",
         "rootfs_verification": false,
+        "run_cpeexport": true,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "useflags": [
@@ -33738,6 +34086,7 @@
             "x32-generic"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33763,6 +34112,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33851,6 +34201,7 @@
             "zork"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "unittests": false,
         "useflags": [
             "-chrome_internal"
@@ -33876,6 +34227,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "unittests": false,
         "useflags": [
             "-chrome_internal"
@@ -33888,6 +34240,7 @@
             "zork-kernelnext"
         ],
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
@@ -33912,6 +34265,7 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "prebuilts": "public",
+        "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
         ],
