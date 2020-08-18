@@ -480,7 +480,7 @@ class PerformSymbolFilesUploadTest(SymbolsTestBase):
 
     self.assertEqual(list(result), symbols)
     self.assertEqual(self.sym_initial.status, upload_symbols.SymbolFile.ERROR)
-    self.assertEqual(self.request_mock.call_count, 7)
+    self.assertEqual(self.request_mock.call_count, 6)
 
   def testPerformSymbolsFileUploadTransisentFailure(self):
     """We fail once, then succeed."""
@@ -629,7 +629,7 @@ class UploadSymbolsTest(SymbolsTestBase):
         failed_list=self.failure_file, api_key='testkey')
 
     self.assertEqual(result, 1)
-    self.assertEqual(upload_mock.call_count, 8)
+    self.assertEqual(upload_mock.call_count, 7)
     self.assertEqual(osutils.ReadFile(self.failure_file), 'fail.sym\n')
 
 # TODO: We removed --network integration tests.
