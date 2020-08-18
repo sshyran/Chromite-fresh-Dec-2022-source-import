@@ -21,6 +21,8 @@ execution_success=0
 string_data_array=()
 not_string_data_array=()
 sort_order="DESC"
+before_datestring=""
+after_datestring=""
 
 print_usage() {
   cat  <<HELP_USAGE
@@ -33,6 +35,8 @@ Usage:  $0 -c|--count <search_string>
      [--asc]
      [--es|--ef]
      [--join <string1> <string2>]
+     [--before <datestring>]
+     [--after <datestring>]
      [-v|--verbose] [--usage|-u|--help|-h]
 
      If -c is specified, count the occurrences of the search string.
@@ -47,6 +51,9 @@ Usage:  $0 -c|--count <search_string>
        step_execution_result are considered.
      If --ef is specified, then only steps with a failing (non-NULL)
        step_execution_result are considered.
+     The datestring for --before and --after is 'YYYY-MM-DD'.  Either
+       --before or --after (or both) can be specified, each with its
+       own datestring.
      Multiple -s arguments can be supplied, which allows an AND query,
      so that
        query_build_logs -s "String1" -s "String2" -s "String3"
@@ -95,6 +102,14 @@ while (( "$#" )); do
       ;;
     --field_limit)
       field_limit=$2
+      shift 2
+      ;;
+    --before)
+      before_datestring=$2
+      shift 2
+      ;;
+    --after)
+      after_datestring=$2
       shift 2
       ;;
     --only_stdout)
@@ -215,6 +230,17 @@ if [[ ! -z ${join_1} ]]; then
   else
     query="$query LIKE \"%${join_2}%\""
   fi
+
+  if [[ -n ${before_datestring} ]]; then
+    query+=" AND DATETIME(TIMESTAMP_SECONDS(request_time.seconds))"
+    query+=" < '${before_datestring}'"
+  fi
+
+  if [[ -n ${after_datestring} ]]; then
+    query+=" AND DATETIME(TIMESTAMP_SECONDS(request_time.seconds))"
+    query+=" > '${after_datestring}'"
+  fi
+
   query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
@@ -289,6 +315,16 @@ if [ "${execution_failure}" -eq 1 ]; then
   query="${query} AND step_execution_result IS NOT NULL"
 elif [ "${execution_success}" -eq 1 ]; then
   query="${query} AND step_execution_result IS NULL"
+fi
+
+if [[ -n ${before_datestring} ]]; then
+  query+=" AND DATETIME(TIMESTAMP_SECONDS(request_time.seconds))"
+  query+=" < '${before_datestring}'"
+fi
+
+if [[ -n ${after_datestring} ]]; then
+  query+=" AND DATETIME(TIMESTAMP_SECONDS(request_time.seconds))"
+  query+=" > '${after_datestring}'"
 fi
 
 query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
