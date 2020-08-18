@@ -91,11 +91,11 @@ INITIAL_RETRY_DELAY = 1
 
 # Allow up to 7 attempts to upload a symbol file (total delay may be
 # 1+2+4+8+16+32=63 seconds).
-MAX_RETRIES = 6
+MAX_RETRIES = 5
 
 # Number of total errors, before uploads are no longer attempted.
 # This is used to avoid lots of errors causing unreasonable delays.
-MAX_TOTAL_ERRORS_FOR_RETRY = 30
+MAX_TOTAL_ERRORS_FOR_RETRY = 6
 
 # Category to use for collection upload retry stats.
 UPLOAD_STATS = 'UPLOAD'
@@ -386,6 +386,7 @@ def UploadSymbolFile(upload_url, symbol, api_key):
     api_key: Authentication key
   """
   timeout = GetUploadTimeout(symbol)
+  logging.debug('Executing post to uploads:create: %s', symbol.display_name)
   upload = ExecRequest('post',
                        '%s/uploads:create' % upload_url, timeout, api_key)
 
@@ -395,10 +396,12 @@ def UploadSymbolFile(upload_url, symbol, api_key):
                     'debug_id': symbol.header.id.replace('-', '')}
                   }
     with open(symbol.file_name, 'r') as fp:
+      logging.debug('Executing put to uploadUrl: %s', symbol.display_name)
       ExecRequest('put',
                   upload['uploadUrl'], timeout,
                   api_key=api_key,
                   data=fp.read())
+    logging.debug('Executing post to uploads/complete: %s', symbol.display_name)
     ExecRequest('post',
                 '%s/uploads/%s:complete' % (
                     upload_url, upload['uploadKey']),
@@ -423,7 +426,9 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
     Each symbol from symbols, perhaps modified.
   """
   failures = 0
-
+  # Failures are figured per request, therefore each HTTP failure
+  # counts against the max.  This means that the process will exit
+  # at the point when HTTP errors hit the defined limit.
   for s in symbols:
     if (failures < MAX_TOTAL_ERRORS_FOR_RETRY and
         s.status in (SymbolFile.INITIAL, SymbolFile.ERROR)):
@@ -449,8 +454,8 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
               sleep=INITIAL_RETRY_DELAY,
               log_all_retries=True)
         if s.status != SymbolFile.DUPLICATE:
-          logging.info('upload of %10i bytes took %s', s.FileSize(),
-                       timer.delta)
+          logging.info('upload of %s with size %10i bytes took %s',
+                       s.display_name, s.FileSize(), timer.delta)
           s.status = SymbolFile.UPLOADED
       except requests.exceptions.RequestException as e:
         logging.warning('could not upload: %s: HTTP error: %s',
