@@ -57,7 +57,7 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
 
 
 def main():
-  opts = ParseArgs(sys.argv)
+  opts = ParseArgs(sys.argv[1:])
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.build_target)
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)
   dep_vis = visualize.DepVisualizer(runtime_tree)
