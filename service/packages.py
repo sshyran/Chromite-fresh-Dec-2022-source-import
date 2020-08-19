@@ -277,13 +277,65 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
 
   uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
   # TODO(crbug.com/1066242): Ebuilds for virglrenderer are currently
-  # blacklisted. Do not force uprevs after builder is stable and ebuilds are no
-  # longer blacklisted.
+  # denylisted. Do not force uprevs after builder is stable and ebuilds are no
+  # longer denylisted.
   uprev_manager.uprev(package_list=['media-libs/virglrenderer'], force=True)
 
   updated_files = uprev_manager.modified_ebuilds
   result = uprev_lib.UprevVersionedPackageResult()
   result.add_result(refs[0].revision, updated_files)
+  return result
+
+@uprevs_versioned_package('chromeos-base/drivefs')
+def uprev_drivefs(_build_targets, refs, chroot):
+  """Updates drivefs ebuilds.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result of updating drivefs ebuilds.
+  """
+
+  DRIVEFS_REFS = 'refs/tags/drivefs_'
+  DRIVEFS_PATH = 'src/private-overlays/chromeos-overlay/chromeos-base'
+
+  # parse like the example PUpr (go/pupr#steps)
+  valid_refs = [ref.ref for ref in refs if ref.ref.startswith(DRIVEFS_REFS)]
+  if not valid_refs:
+    # False alarm, there is no new package release. So do nothing.
+    return None
+
+  # Take the newest release, always.
+  target_version = sorted(valid_refs,
+                          reverse=True)[0][len(DRIVEFS_REFS):]
+
+  result = uprev_lib.UprevVersionedPackageResult()
+
+  pkg_path = os.path.join(constants.SOURCE_ROOT, DRIVEFS_PATH, 'drivefs')
+
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
+                                                          target_version,
+                                                          chroot)
+  all_changed_files = []
+
+  if not uprev_result:
+    return None # alternatively raise Exception
+
+  all_changed_files.extend(uprev_result.changed_files)
+
+  pkg_path = os.path.join(constants.SOURCE_ROOT, DRIVEFS_PATH, 'drivefs-ipc')
+
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
+                                                          target_version,
+                                                          chroot)
+
+  if not uprev_result:
+    return None # alternatively raise Exception
+
+  all_changed_files.extend(uprev_result.changed_files)
+
+  result.add_result(target_version, all_changed_files)
+
   return result
 
 
