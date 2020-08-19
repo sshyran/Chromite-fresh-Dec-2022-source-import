@@ -155,7 +155,7 @@ done
 string_data_arraylen=${#string_data_array[@]}
 not_string_data_arraylen=${#not_string_data_array[@]}
 
-if [[ $string_data_arraylen -ne 0 ]] && [[ ! -z ${count_data} ]]; then
+if [[ $string_data_arraylen -ne 0 ]] && [[ -n ${count_data} ]]; then
   echo "Specifying both -s and -c is not allowed."
   print_usage
 fi
@@ -167,22 +167,22 @@ fi
 
 # If a count was requested, build and execute the query. This code path is
 # separate because it is much simpler than search queries.
-if [[ ! -z ${count_data} ]]; then
+if [[ -n ${count_data} ]]; then
   # Note that we use count(stdout) regardless of case-sensitivity. The WHERE
   # part of the query will use ${source_data} to handle case-sensitivity.
   query="SELECT count(stdout) AS Count FROM
   chromeos_ci_eng.analysis_event_log.${when} WHERE ${source_data} LIKE "
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="${query} LOWER(\"%${count_data}%\")"
+    query+=" LOWER(\"%${count_data}%\")"
   else
-    query="${query} \"%${count_data}%\""
+    query+=" \"%${count_data}%\""
   fi
   if [ "${execution_failure}" -eq 1 ]; then
-    query="${query} AND step_execution_result IS NOT NULL;"
+    query+=" AND step_execution_result IS NOT NULL;"
   elif [ "${execution_success}" -eq 1 ]; then
-    query="${query} AND step_execution_result IS NULL;"
+    query+=" AND step_execution_result IS NULL;"
   else
-    query="${query};"
+    query+=";"
   fi
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
@@ -196,7 +196,7 @@ fi
 # INNER JOIN with the two join arguments to find cases where one step
 # matches the first arg and another step matches the second arg and
 # both steps are part of the same build.
-if [[ ! -z ${join_1} ]]; then
+if [[ -n ${join_1} ]]; then
   source_1="stdout"
   if [[ ${case_insensitive} -eq 1 ]]; then
     source_1="LOWER(stdout)"
@@ -213,22 +213,22 @@ if [[ ! -z ${join_1} ]]; then
   AS stdout_2, DATETIME(TIMESTAMP_SECONDS(request_time.seconds)) AS DateTime"
 
 
-  query="${query} FROM chromeos_ci_eng.analysis_event_log.${when}"
-  query="${query} INNER JOIN (select build_id AS build_id1,"
-  query="${query} step_name AS step_name1, stdout AS stdout_2"
-  query="${query} FROM chromeos_ci_eng.analysis_event_log.${when})"
-  query="${query} ON build_id = build_id1 AND step_name != step_name1"
-  query="${query} WHERE $source_1 "
+  query+=" FROM chromeos_ci_eng.analysis_event_log.${when}"
+  query+=" INNER JOIN (select build_id AS build_id1,"
+  query+=" step_name AS step_name1, stdout AS stdout_2"
+  query+=" FROM chromeos_ci_eng.analysis_event_log.${when})"
+  query+=" ON build_id = build_id1 AND step_name != step_name1"
+  query+=" WHERE $source_1 "
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="$query LIKE LOWER(\"%${join_1}%\")"
+    query+=" LIKE LOWER(\"%${join_1}%\")"
   else
-    query="$query LIKE \"%${join_1}%\""
+    query+=" LIKE \"%${join_1}%\""
   fi
-  query="${query} AND $source_2 "
+  query+=" AND $source_2 "
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="$query LIKE LOWER(\"%${join_2}%\")"
+    query+=" LIKE LOWER(\"%${join_2}%\")"
   else
-    query="$query LIKE \"%${join_2}%\""
+    query+=" LIKE \"%${join_2}%\""
   fi
 
   if [[ -n ${before_datestring} ]]; then
@@ -241,7 +241,7 @@ if [[ ! -z ${join_1} ]]; then
     query+=" > '${after_datestring}'"
   fi
 
-  query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
+  query+=" ORDER BY DateTime ${sort_order} LIMIT ${limit};"
   if [ "${verbose}" -eq 1 ]; then
     echo "QUERY: ${query}"
     echo "Executing..."
@@ -279,20 +279,20 @@ else
   DATETIME(TIMESTAMP_SECONDS(request_time.seconds)) AS DateTime"
 fi
 
-query="$query FROM chromeos_ci_eng.analysis_event_log.${when}"
+query+=" FROM chromeos_ci_eng.analysis_event_log.${when}"
 
 for (( index=0; index < $string_data_arraylen; index++ ))
 do
   string_data=${string_data_array[$index]}
   if [[ $index -eq 0 ]]; then
-    query="$query WHERE ${source_data}"
+    query+=" WHERE ${source_data}"
   else
-    query="$query AND ${source_data}"
+    query+=" AND ${source_data}"
   fi
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="$query LIKE LOWER(\"%${string_data}%\")"
+    query+=" LIKE LOWER(\"%${string_data}%\")"
   else
-    query="$query LIKE \"%${string_data}%\""
+    query+=" LIKE \"%${string_data}%\""
   fi
 done
 
@@ -300,21 +300,21 @@ for (( index=0; index < $not_string_data_arraylen; index++ ))
 do
   not_string_data=${not_string_data_array[$index]}
   if [[ $index -eq 0 && $string_data_arraylen -eq 0 ]]; then
-    query="$query WHERE ${source_data}"
+    query+=" WHERE ${source_data}"
   else
-    query="$query AND ${source_data}"
+    query+=" AND ${source_data}"
   fi
   if [[ ${case_insensitive} -eq 1 ]]; then
-    query="${query} NOT LIKE LOWER(\"%${not_string_data}%\")"
+    query+=" NOT LIKE LOWER(\"%${not_string_data}%\")"
   else
-    query="${query} NOT LIKE \"%${not_string_data}%\""
+    query+=" NOT LIKE \"%${not_string_data}%\""
   fi
 done
 
 if [ "${execution_failure}" -eq 1 ]; then
-  query="${query} AND step_execution_result IS NOT NULL"
+  query+=" AND step_execution_result IS NOT NULL"
 elif [ "${execution_success}" -eq 1 ]; then
-  query="${query} AND step_execution_result IS NULL"
+  query+=" AND step_execution_result IS NULL"
 fi
 
 if [[ -n ${before_datestring} ]]; then
@@ -327,7 +327,7 @@ if [[ -n ${after_datestring} ]]; then
   query+=" > '${after_datestring}'"
 fi
 
-query="$query ORDER BY DateTime ${sort_order} LIMIT ${limit};"
+query+=" ORDER BY DateTime ${sort_order} LIMIT ${limit};"
 
 if [ "${verbose}" -eq 1 ]; then
   echo "QUERY: ${query}"
