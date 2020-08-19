@@ -37,63 +37,6 @@ _DEFAULT_ARGS = {
 # pylint: disable=protected-access
 
 
-def CreateLocalTransferInstance(device, **kwargs):
-  """Create auto_updater_transfer.LocalTransfer instance.
-
-  Args:
-    device: a remote_access.ChromiumOSDeviceHandler object.
-    kwargs: contains parameter name and value pairs for any argument accepted
-      by auto_updater_transfer.LocalTransfer. The values provided through
-      kwargs will supersede the defaults set within this function.
-
-  Returns:
-    An instance of auto_updater_transfer.LocalTransfer.
-  """
-  default_args = copy.deepcopy(_DEFAULT_ARGS)
-
-  default_args.update(kwargs)
-  return auto_updater_transfer.LocalTransfer(device=device, **default_args)
-
-
-def CreateLabTransferInstance(device, **kwargs):
-  """Create auto_updater_transfer.LabTransfer instance.
-
-  Args:
-    device: a remote_access.ChromiumOSDeviceHandler object.
-    kwargs: contains parameter name and value pairs for any argument accepted
-      by auto_updater_transfer.LabTransfer. The values provided through
-      kwargs will supersede the defaults set within this function.
-
-  Returns:
-    An instance of auto_updater_transfer.LabTransfer.
-  """
-  default_args = copy.deepcopy(_DEFAULT_ARGS)
-  default_args['staging_server'] = 'http://0.0.0.0:8000'
-
-  default_args.update(kwargs)
-  return auto_updater_transfer.LabTransfer(device=device, **default_args)
-
-
-def CreateLabEndToEndPayloadTransferInstance(device, **kwargs):
-  """Create auto_updater_transfer.LabEndToEndPayloadTransfer instance.
-
-  Args:
-    device: a remote_access.ChromiumOSDeviceHandler object.
-    kwargs: contains parameter name and value pairs for any argument accepted
-      by auto_updater_transfer.LabEndToEndPayloadTransfer. The values provided
-      through kwargs will supersede the defaults set within this function.
-
-  Returns:
-    An instance of auto_updater_transfer.LabEndToEndPayloadTransfer.
-  """
-  default_args = copy.deepcopy(_DEFAULT_ARGS)
-  default_args['staging_server'] = 'http://0.0.0.0:8000'
-
-  default_args.update(kwargs)
-  return auto_updater_transfer.LabEndToEndPayloadTransfer(device=device,
-                                                          **default_args)
-
-
 class CrOSLocalTransferPrivateMock(partial_mock.PartialCmdMock):
   """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
   TARGET = 'chromite.lib.auto_updater_transfer.LocalTransfer'
@@ -119,10 +62,27 @@ class CrOSLocalTransferPrivateMock(partial_mock.PartialCmdMock):
 class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
   """Test whether Transfer's public transfer functions are retried correctly."""
 
+  def CreateInstance(self, device, **kwargs):
+    """Create auto_updater_transfer.LocalTransfer instance.
+
+    Args:
+      device: a remote_access.ChromiumOSDeviceHandler object.
+      kwargs: contains parameter name and value pairs for any argument accepted
+        by auto_updater_transfer.LocalTransfer. The values provided through
+        kwargs will supersede the defaults set within this function.
+
+    Returns:
+      An instance of auto_updater_transfer.LocalTransfer.
+    """
+    default_args = copy.deepcopy(_DEFAULT_ARGS)
+
+    default_args.update(kwargs)
+    return auto_updater_transfer.LocalTransfer(device=device, **default_args)
+
   def testErrorTriggerRetryTransferUpdateUtils(self):
     """Test if _TransferUpdateUtilsPackage() is retried properly."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(device)
+      transfer = self.CreateInstance(device)
       self.PatchObject(auto_updater_transfer, '_DELAY_SEC_FOR_RETRY', 1)
       _MAX_RETRY = self.PatchObject(auto_updater_transfer, '_MAX_RETRY', 1)
       transfer_update_utils = self.PatchObject(
@@ -136,7 +96,7 @@ class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
   def testErrorTriggerRetryTransferStateful(self):
     """Test if _TransferStatefulUpdate() is retried properly."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(device)
+      transfer = self.CreateInstance(device)
       self.PatchObject(auto_updater_transfer, '_DELAY_SEC_FOR_RETRY', 1)
       _MAX_RETRY = self.PatchObject(auto_updater_transfer, '_MAX_RETRY', 2)
       transfer_stateful = self.PatchObject(
@@ -150,7 +110,7 @@ class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
   def testErrorTriggerRetryTransferRootfs(self):
     """Test if _TransferRootfsUpdate() is retried properly."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(device)
+      transfer = self.CreateInstance(device)
       self.PatchObject(auto_updater_transfer, '_DELAY_SEC_FOR_RETRY', 1)
       _MAX_RETRY = self.PatchObject(auto_updater_transfer, '_MAX_RETRY', 3)
       transfer_rootfs = self.PatchObject(
@@ -164,6 +124,23 @@ class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
 
 class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
   """Test whether LocalTransfer's transfer functions are retried."""
+
+  def CreateInstance(self, device, **kwargs):
+    """Create auto_updater_transfer.LocalTransfer instance.
+
+    Args:
+      device: a remote_access.ChromiumOSDeviceHandler object.
+      kwargs: contains parameter name and value pairs for any argument accepted
+        by auto_updater_transfer.LocalTransfer. The values provided through
+        kwargs will supersede the defaults set within this function.
+
+    Returns:
+      An instance of auto_updater_transfer.LocalTransfer.
+    """
+    default_args = copy.deepcopy(_DEFAULT_ARGS)
+
+    default_args.update(kwargs)
+    return auto_updater_transfer.LocalTransfer(device=device, **default_args)
 
   def setUp(self):
     """Mock remote_access.RemoteDevice's functions for update."""
@@ -181,7 +158,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(auto_updater_transfer, 'STATEFUL_FILENAME',
                      'test_stateful.tgz')
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, cmd_kwargs={'test': 'args'}, payload_dir='/test/payload/dir')
       transfer._TransferStatefulUpdate()
       self.assertFalse(
@@ -195,7 +172,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     self.PatchObject(os.path, 'exists', return_value=False)
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='does_not_exist',
           payload_dir='/test/payload/dir')
       self.assertRaises(
@@ -209,7 +186,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     self.PatchObject(os.path, 'exists', return_value=True)
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='exists', payload_dir='/test/payload/dir')
       transfer.CheckPayloads()
 
@@ -220,7 +197,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     format payloads/chromeos_xxxx.0.0_<blah>.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir=self.tempdir,
           payload_name='payloads/chromeos_12345.100.0_board_stable_'
                        'full_v4-1a3e3fd5a2005948ce8e605b66c96b2f.bin')
@@ -236,7 +213,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     payloads/chromeos_xxxx.0.0_<blah> or called update.gz.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir=self.tempdir, payload_name='wrong_format')
       self.PatchObject(os.path, 'getsize')
       self.assertRaises(ValueError, transfer.GetPayloadProps)
@@ -248,7 +225,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     update.gz.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLocalTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir=self.tempdir, payload_name='update.gz')
       self.PatchObject(os.path, 'getsize', return_value=101)
       expected = {'image_version': '99999.0.0', 'size': 101}
@@ -256,6 +233,24 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
 
 class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   """Test all methods in auto_updater_transfer.LabTransfer."""
+
+  def CreateInstance(self, device, **kwargs):
+    """Create auto_updater_transfer.LabTransfer instance.
+
+    Args:
+      device: a remote_access.ChromiumOSDeviceHandler object.
+      kwargs: contains parameter name and value pairs for any argument accepted
+        by auto_updater_transfer.LabTransfer. The values provided through
+        kwargs will supersede the defaults set within this function.
+
+    Returns:
+      An instance of auto_updater_transfer.LabTransfer.
+    """
+    default_args = copy.deepcopy(_DEFAULT_ARGS)
+    default_args['staging_server'] = 'http://0.0.0.0:8000'
+
+    default_args.update(kwargs)
+    return auto_updater_transfer.LabTransfer(device=device, **default_args)
 
   def setUp(self):
     """Mock remote_access.RemoteDevice/ChromiumOSDevice functions for update."""
@@ -268,7 +263,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       lab_xfer = auto_updater_transfer.LabTransfer
       expected = [{'payload_dir': os.path.join(device.work_dir, 'src'),
                    'payload_filename': 'nebraska.py'}]
@@ -289,7 +284,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       lab_xfer = auto_updater_transfer.LabTransfer
       expected = [['curl', '-o', '/test/work/dir/src/nebraska.py',
                    'http://0.0.0.0:8000/static/nebraska.py']]
@@ -309,7 +304,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       lab_xfer = auto_updater_transfer.LabTransfer
       expected = [os.path.join(device.work_dir, 'src'), device.work_dir]
 
@@ -323,7 +318,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testErrorTransferUpdateUtilsServerError(self):
     """Test errors thrown by _TransferUpdateUtilsPackage()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, staging_server='http://wrong:server')
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_EnsureDeviceDirectory')
@@ -335,7 +330,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testErrorTransferStatefulServerError(self):
     """Test errors thrown by _TransferStatefulUpdate()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, staging_server='http://wrong:server')
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_EnsureDeviceDirectory')
@@ -351,7 +346,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, device_payload_dir='/test/device/payload/dir',
           payload_dir='/test/payload/dir')
       lab_xfer = auto_updater_transfer.LabTransfer
@@ -376,7 +371,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       lab_xfer = auto_updater_transfer.LabTransfer
       expected = [
           ['curl', '-o', '/test/work/dir/stateful.tgz',
@@ -397,7 +392,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, device_payload_dir='/test/device/payload/dir')
       lab_xfer = auto_updater_transfer.LabTransfer
       expected = [transfer._device_payload_dir]
@@ -412,7 +407,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testErrorTransferRootfsServerError(self):
     """Test errors thrown by _TransferRootfsUpdate()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, staging_server='http://wrong:server',
           device_payload_dir='/test/device/payload/dir',
           payload_name='test_update.gz')
@@ -430,7 +425,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, device_payload_dir='/test/device/payload/dir',
           payload_dir='test/payload/dir', payload_name='test_update.gz',
           cmd_kwargs={'test': 'args'})
@@ -458,7 +453,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           device_payload_dir='/test/device/payload/dir',
           cmd_kwargs={'test': 'args'})
@@ -483,7 +478,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     LocalPayloadPropsFile() is set to a valid local filepath.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           device_payload_dir='/test/device/payload/dir',
           cmd_kwargs={'test': 'args'})
@@ -512,7 +507,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     the correct number of times with the correct arguments.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, device_payload_dir='/test/device/payload/dir',
           payload_name='test_update.gz', cmd_kwargs={'test': 'args'})
       lab_xfer = auto_updater_transfer.LabTransfer
@@ -534,7 +529,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     LocalPayloadPropsFile() is set to a valid local filepath.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, cmd_kwargs={'test': 'test'},
           device_payload_dir='/test/device/payload/dir',
           payload_name='test_update.gz')
@@ -562,7 +557,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     Tests the typical usage of the _GetCurlCmdForPayloadDownload() method.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       expected_cmd = ['curl', '-o',
                       '/tmp/test_payload_dir/payload_filename.ext',
                       'http://0.0.0.0:8000/static/board-release/12345.0.0/'
@@ -580,7 +575,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     staging server.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       expected_cmd = ['curl', '-o',
                       '/tmp/test_payload_dir/payload_filename.ext',
                       'http://0.0.0.0:8000/static/payload_filename.ext']
@@ -597,7 +592,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='board-release/12345.6.7')
       self.PatchObject(auto_updater_transfer, 'STATEFUL_FILENAME',
@@ -624,7 +619,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     _RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='board-release/12345.6.7')
 
@@ -645,7 +640,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='board-release/12345.6.7',
           transfer_stateful_update=False)
@@ -669,7 +664,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     and Lab_RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='board-release/12345.6.7',
           transfer_stateful_update=False)
@@ -688,7 +683,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir='board-release/12345.6.7',
           transfer_rootfs_update=False)
       self.PatchObject(auto_updater_transfer, 'STATEFUL_FILENAME',
@@ -709,7 +704,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     and _RemoteDevserver() throws an error.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir='board-release/12345.6.7',
           transfer_rootfs_update=False)
       self.PatchObject(auto_updater_transfer, 'STATEFUL_FILENAME',
@@ -728,7 +723,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     on the staging server.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
 
       self.PatchObject(auto_updater_transfer.LabTransfer,
                        '_RemoteDevserverCall',
@@ -743,7 +738,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     Tests the typical usage of the _GetStagedUrl() method.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       expected_url = ('http://0.0.0.0:8000/static/board-release/12345.0.0/'
                       'payload_filename.ext')
       url = transfer._GetStagedUrl(
@@ -757,7 +752,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     Tests when the build_id parameter is defaulted to None.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
       expected_url = 'http://0.0.0.0:8000/static/payload_filename.ext'
       url = transfer._GetStagedUrl(
           staged_filename='payload_filename.ext')
@@ -776,7 +771,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
                 '"target_version": "99999.0.0", "version": 2}')
       bin_op = six.ensure_binary(output)
 
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, tempdir=self.tempdir, payload_name='test_update.gz')
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
                        return_value=cros_build_lib.CommandResult(stdout=bin_op))
@@ -796,7 +791,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
       lab_xfer = auto_updater_transfer.LabTransfer
       output = 'Not in Json format'
 
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, tempdir=self.tempdir, payload_name='test_update.gz')
 
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
@@ -812,7 +807,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, tempdir=self.tempdir, payload_name='test_update.gz',
           payload_dir='/test/dir')
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
@@ -825,7 +820,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """Test _GetPayloadSize()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='/test/payload/dir')
       expected_size = 75810234
@@ -842,7 +837,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='/test/payload/dir')
       self.PatchObject(lab_xfer, '_RemoteDevserverCall',
@@ -858,7 +853,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       lab_xfer = auto_updater_transfer.LabTransfer
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='test_update.gz',
           payload_dir='/test/payload/dir')
       output = 'No Match Output'
@@ -870,7 +865,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def testGetPayloadPropsLab(self):
     """Test GetPayloadProps()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir='test-board-name/R77-12345.0.0')
       self.PatchObject(auto_updater_transfer.LabTransfer, '_GetPayloadSize',
                        return_value=123)
@@ -884,7 +879,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     <board-name>/Rxx-12345.6.7.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_dir='/wrong/format/will/fail')
       self.PatchObject(auto_updater_transfer.LabTransfer, '_GetPayloadSize')
       self.assertRaises(ValueError, transfer.GetPayloadProps)
@@ -892,7 +887,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def test_RemoteDevserverCall(self):
     """Test _RemoteDevserverCall()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
 
       self.PatchObject(cros_build_lib, 'run')
       cmd = ['test', 'command']
@@ -905,7 +900,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
   def test_RemoteDevserverCallWithStdout(self):
     """Test _RemoteDevserverCall()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
 
       self.PatchObject(cros_build_lib, 'run')
       cmd = ['test', 'command']
@@ -921,7 +916,7 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
     Test method when error is thrown by cros_build_lib.run() method.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabTransferInstance(device)
+      transfer = self.CreateInstance(device)
 
       self.PatchObject(cros_build_lib, 'run',
                        side_effect=cros_build_lib.RunCommandError(msg=''))
@@ -934,6 +929,25 @@ class CrosLabTransferTest(cros_test_lib.MockTempDirTestCase):
 class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
   """Test all methods in LabEndToEndPayloadTransfer()."""
 
+  def CreateInstance(self, device, **kwargs):
+    """Create auto_updater_transfer.LabEndToEndPayloadTransfer instance.
+
+    Args:
+      device: a remote_access.ChromiumOSDeviceHandler object.
+      kwargs: contains parameter name and value pairs for any argument accepted
+        by auto_updater_transfer.LabEndToEndPayloadTransfer. The values provided
+        through kwargs will supersede the defaults set within this function.
+
+    Returns:
+      An instance of auto_updater_transfer.LabEndToEndPayloadTransfer.
+    """
+    default_args = copy.deepcopy(_DEFAULT_ARGS)
+    default_args['staging_server'] = 'http://0.0.0.0:8000'
+
+    default_args.update(kwargs)
+    return auto_updater_transfer.LabEndToEndPayloadTransfer(device=device,
+                                                            **default_args)
+
   def setUp(self):
     """Mock remote_access.RemoteDevice/ChromiumOSDevice functions for update."""
     self.PatchObject(remote_access.RemoteDevice, 'work_dir', '/test/work/dir')
@@ -942,7 +956,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
     """Test GetPayloadProps()."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       payload_name = 'payloads/chromeos_12345.0.0_board_channel_test.bin-blah'
-      transfer = CreateLabEndToEndPayloadTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name=payload_name)
       self.PatchObject(auto_updater_transfer.LabTransfer, '_GetPayloadSize',
                        return_value=123)
@@ -956,7 +970,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
     payloads/chromeos_12345.0.0_board_channel_full_test.bin-blah.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabEndToEndPayloadTransferInstance(
+      transfer = self.CreateInstance(
           device, payload_name='/wrong/format/will/fail')
       self.PatchObject(auto_updater_transfer.LabTransfer, '_GetPayloadSize')
       self.assertRaises(ValueError, transfer.GetPayloadProps)
@@ -967,7 +981,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
     Tests the typical usage of the _GetCurlCmdForPayloadDownload() method.
     """
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = CreateLabEndToEndPayloadTransferInstance(device)
+      transfer = self.CreateInstance(device)
       expected_cmd = ['curl', '-o',
                       '/tmp/test_payload_dir/payload_filename.ext',
                       'http://0.0.0.0:8000/static/stable-channel/board/'
@@ -992,7 +1006,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
                 '"target_version": "99999.0.0", "version": 2}')
       bin_op = six.ensure_binary(output)
 
-      transfer = CreateLabEndToEndPayloadTransferInstance(
+      transfer = self.CreateInstance(
           device, tempdir=self.tempdir, payload_name=payload_name)
 
       self.PatchObject(lab_ete_xfer, '_RemoteDevserverCall',
