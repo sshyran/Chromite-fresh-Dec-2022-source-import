@@ -381,6 +381,7 @@
     winky-release
     wizpig-release
     wooten-release
+    zork-borealis-release
     zork-kernelnext-release
     zork-release
   master-release-basic
@@ -1511,6 +1512,7 @@
     winky-release-tryjob
     wizpig-release-tryjob
     wooten-release-tryjob
+    zork-borealis-release-tryjob
     zork-kernelnext-release-tryjob
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
@@ -1975,6 +1977,9 @@
   x32-generic-llvm-next-toolchain-tryjob
   x32-generic-llvm-toolchain-tryjob
   x32-generic-unittest-stress
+  zork-borealis-llvm-next-toolchain-tryjob
+  zork-borealis-llvm-toolchain-tryjob
+  zork-borealis-release-tryjob
   zork-full-tryjob
   zork-kernelnext-full-tryjob
   zork-kernelnext-llvm-next-toolchain-tryjob

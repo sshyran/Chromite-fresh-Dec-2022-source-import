@@ -1071,6 +1071,18 @@
           "arch": "ARM_INTERNAL"
         }
       ]
+    },
+    {
+      "name": "zork-borealis",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "UNKNOWN"
+        }
+      ]
     }
   ],
   "release_branch": false,
