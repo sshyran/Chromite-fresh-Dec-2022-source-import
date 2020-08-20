@@ -448,15 +448,16 @@ class PrebuiltUploader(object):
     remote_location = '%s/%s' % (self._upload_location.rstrip('/'), url_suffix)
     assert remote_location.startswith('gs://')
 
-    # Build list of files to upload. Manually include the dev-only files but
-    # skip them if not present.
-    # TODO(deymo): Upload dev-only-extras.tbz2 as dev-only-extras.tar.bz2
-    # outside packages/ directory. See crbug.com/448178 for details.
-    if os.path.exists(os.path.join(package_path, 'dev-only-extras.tbz2')):
-      uploads.append({'CPV': 'dev-only-extras'})
     upload_files = GenerateUploadDict(package_path, remote_location, uploads)
     remote_file = '%s/Packages' % remote_location.rstrip('/')
     upload_files[tmp_packages_file.name] = remote_file
+
+    # Build list of files to upload. Manually include the dev-only files but
+    # skip them if not present.
+    dev_only = os.path.join(package_path, 'dev-only-extras.tar.xz')
+    if os.path.exists(dev_only):
+      upload_files[dev_only] = '%s/%s' % (
+          remote_location.rstrip('/'), os.path.basename(dev_only))
 
     RemoteUpload(self._gs_context, self._acl, upload_files)
 

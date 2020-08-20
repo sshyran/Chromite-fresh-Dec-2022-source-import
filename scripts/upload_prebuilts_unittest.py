@@ -319,13 +319,13 @@ class TestUploadPrebuilt(cros_test_lib.MockTempDirTestCase):
   def testSuccessfulGsUpload(self):
     uploads = {
         os.path.join(self.tempdir, 'private.tbz2'): 'gs://foo/private.tbz2'}
-    packages = list(PRIVATE_PACKAGES)
-    packages.append({'CPV': 'dev-only-extras'})
-    osutils.Touch(os.path.join(self.tempdir, 'dev-only-extras.tbz2'))
+    dev_extras = os.path.join(self.tempdir, 'dev-only-extras.tar.xz')
+    osutils.Touch(dev_extras)
     self.PatchObject(prebuilt, 'GenerateUploadDict',
                      return_value=uploads)
     uploads = uploads.copy()
     uploads['fake'] = 'gs://foo/suffix/Packages'
+    uploads[dev_extras] = 'gs://foo/suffix/dev-only-extras.tar.xz'
     acl = 'public-read'
     uri = self.pkgindex.header['URI']
     uploader = prebuilt.PrebuiltUploader('gs://foo', acl, uri, [], '/', [],
