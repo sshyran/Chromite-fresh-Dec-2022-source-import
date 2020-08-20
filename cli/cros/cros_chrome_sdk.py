@@ -1270,14 +1270,14 @@ class ChromeSDKCommand(command.CliCommand):
     full_version = sdk_ctx.version
     if full_version != CUSTOM_VERSION:
       full_version = self.sdk.GetFullVersion(sdk_ctx.version)
-    env['PS1'] = self._CreatePS1(self.board, full_version,
+    env['PS1'] = self._CreatePS1(board, full_version,
                                  chroot=options.chroot)
 
     # Set the useful part of PS1 for users with a custom PROMPT_COMMAND.
-    env['CROS_PS1_PREFIX'] = self._PS1Prefix(self.board, full_version,
+    env['CROS_PS1_PREFIX'] = self._PS1Prefix(board, full_version,
                                              chroot=options.chroot)
 
-    out_dir = 'out_%s' % self.board
+    out_dir = 'out_%s' % board
     env['builddir_name'] = out_dir
 
     # This is used by landmines.py to prevent collisions when building both
@@ -1286,7 +1286,7 @@ class ChromeSDKCommand(command.CliCommand):
     env['CHROMIUM_OUT_DIR'] = os.path.join(options.chrome_src, out_dir)
 
     self._UpdateGnArgsIfStale(
-        out_dir, options.build_label, gn_args, env['SDK_BOARD'])
+        out_dir, options.build_label, gn_args, board)
 
     return env
 
