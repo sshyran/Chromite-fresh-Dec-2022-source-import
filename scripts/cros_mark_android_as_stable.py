@@ -424,25 +424,34 @@ def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
   }))
 
 
-def UpdateDataCollectorArtifacts(android_version,
-                                 runtime_artifacts_bucket_url):
+def FindDataCollectorArtifacts(gs_context,
+                               android_version,
+                               runtime_artifacts_bucket_url,
+                               version_reference):
   r"""Finds and includes into variables artifacts from arc.DataCollector.
 
+  This is used from UpdateDataCollectorArtifacts in order to check the
+  particular version.
+
   Args:
+    gs_context: context to execute gsutil
     android_version: The \d+ build id of Android.
     runtime_artifacts_bucket_url: root of runtime artifacts
+    build_branch: build branch. Used to determine the pinned version if exists.
+    version_reference: which version to use as a reference. Could be '${PV}' in
+                       case version of data collector artifacts matches the
+                       Android version or direct version in case of override.
 
   Returns:
-    dictionary with filled ebuild variables.
+    dictionary with filled ebuild variables. This dictionary is empty in case
+    no artificats are found.
   """
-
   variables = {}
+
   buckets = ['ureadahead_pack', 'gms_core_cache']
   archs = ['arm', 'arm64', 'x86', 'x86_64']
   build_types = ['user', 'userdebug']
 
-  version_reference = '${PV}'
-  gs_context = gs.GSContext()
   for bucket in buckets:
     for arch in archs:
       for build_type in build_types:
@@ -452,6 +461,59 @@ def UpdateDataCollectorArtifacts(android_version,
           variables[(f'{arch}_{build_type}_{bucket}').upper()] = (
               f'{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}_'
               f'{version_reference}.tar')
+
+  return variables
+
+
+def UpdateDataCollectorArtifacts(android_version,
+                                 runtime_artifacts_bucket_url,
+                                 build_branch):
+  r"""Finds and includes into variables artifacts from arc.DataCollector.
+
+  This verifies default android version. In case artificts are not found for
+  default Android version it tries to find artifacts for pinned version. If
+  pinned version is provided, it is required artifacts exist for the pinned
+  version.
+
+  Args:
+    android_version: The \d+ build id of Android.
+    runtime_artifacts_bucket_url: root of runtime artifacts
+    build_branch: build branch. Used to determine the pinned version if exists.
+
+  Returns:
+    dictionary with filled ebuild variables.
+  """
+
+  gs_context = gs.GSContext()
+  # Check the existing version. If we find any artifacts, use them.
+  variables = FindDataCollectorArtifacts(gs_context,
+                                         android_version,
+                                         runtime_artifacts_bucket_url,
+                                         '${PV}')
+  if variables:
+    # Data artificts were found.
+    return variables
+
+  # Check pinned version for the current branch.
+  pin_path = (f'{runtime_artifacts_bucket_url}/{build_branch}_pin_version')
+  if not gs_context.Exists(pin_path):
+    # No pinned version.
+    logging.warning(
+        'No data collector artifacts were found for %s',
+        android_version)
+    return variables
+
+  pin_version = gs_context.Cat(pin_path, encoding='utf-8').rstrip()
+  logging.info('Pinned version %s overrides %s',
+               pin_version, android_version)
+  variables = FindDataCollectorArtifacts(gs_context,
+                                         pin_version,
+                                         runtime_artifacts_bucket_url,
+                                         pin_version)
+  if not variables:
+    # If pin version set it must contain data.
+    raise Exception('Pinned version %s:%s does not contain artificats' % (
+        build_branch, pin_version))
 
   return variables
 
@@ -510,7 +572,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     variables[build + '_TARGET'] = '%s-%s' % (build_branch, target)
 
   variables.update(UpdateDataCollectorArtifacts(
-      android_version, runtime_artifacts_bucket_url))
+      android_version, runtime_artifacts_bucket_url, build_branch))
 
   portage_util.EBuild.MarkAsStable(
       unstable_ebuild.ebuild_path, new_ebuild_path,

@@ -259,6 +259,10 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                   f'{build_type}_{android_version}.tar')
           self.gs_mock.AddCmdResult(['stat', '--', path],
                                     side_effect=_RaiseGSNoSuchKey)
+    pin_path = (f'{self.runtime_artifacts_bucket_url}/'
+                f'{constants.ANDROID_PI_BUILD_BRANCH}_pin_version')
+    self.gs_mock.AddCmdResult(['stat', '--', pin_path],
+                              side_effect=_RaiseGSNoSuchKey)
 
   def makeSrcTargetUrl(self, target):
     """Helper to return the url for a target."""
@@ -565,15 +569,54 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                               stdout=(self.STAT_OUTPUT) % path2)
 
     variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
-        android_version, self.runtime_artifacts_bucket_url)
+        android_version,
+        self.runtime_artifacts_bucket_url,
+        constants.ANDROID_PI_BUILD_BRANCH)
 
-    self.assertEqual(2, len(variables))
-    self.assertIn('X86_64_USER_UREADAHEAD_PACK', variables)
     version_reference = '${PV}'
     expectation1 = (f'{self.runtime_artifacts_bucket_url}/'
                     f'ureadahead_pack_x86_64_user_{version_reference}.tar')
-    self.assertEqual(expectation1, variables['X86_64_USER_UREADAHEAD_PACK'])
-    self.assertIn('ARM_USERDEBUG_GMS_CORE_CACHE', variables)
     expectation2 = (f'{self.runtime_artifacts_bucket_url}/'
                     f'gms_core_cache_arm_userdebug_{version_reference}.tar')
-    self.assertEqual(expectation2, variables['ARM_USERDEBUG_GMS_CORE_CACHE'])
+    self.assertEqual({
+        'X86_64_USER_UREADAHEAD_PACK': expectation1,
+        'ARM_USERDEBUG_GMS_CORE_CACHE': expectation2,
+    }, variables)
+
+  def testUpdateDataCollectorArtifactsPin(self):
+    android_version = 100
+    android_pin_version = 50
+    # Mock by default runtime artifacts are not found.
+    self.setupMockRuntimeDataBuild(android_version)
+    self.setupMockRuntimeDataBuild(android_pin_version)
+
+    # Override few as existing.
+    path1 = (f'{self.runtime_artifacts_bucket_url}/ureadahead_pack_x86_64_'
+             f'user_{android_pin_version}.tar')
+    self.gs_mock.AddCmdResult(['stat', '--', path1],
+                              stdout=(self.STAT_OUTPUT) % path1)
+    path2 = (f'{self.runtime_artifacts_bucket_url}/gms_core_cache_arm_'
+             f'userdebug_{android_pin_version}.tar')
+    self.gs_mock.AddCmdResult(['stat', '--', path2],
+                              stdout=(self.STAT_OUTPUT) % path2)
+    pin_path = (f'{self.runtime_artifacts_bucket_url}/'
+                f'{constants.ANDROID_PI_BUILD_BRANCH}_pin_version')
+    self.gs_mock.AddCmdResult(['stat', '--', pin_path],
+                              stdout=(self.STAT_OUTPUT) % pin_path)
+    self.gs_mock.AddCmdResult(['cat', pin_path],
+                              stdout=str(android_pin_version))
+
+    variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
+        android_version,
+        self.runtime_artifacts_bucket_url,
+        constants.ANDROID_PI_BUILD_BRANCH)
+
+    version_reference = '50'
+    expectation1 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'ureadahead_pack_x86_64_user_{version_reference}.tar')
+    expectation2 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'gms_core_cache_arm_userdebug_{version_reference}.tar')
+    self.assertEqual({
+        'X86_64_USER_UREADAHEAD_PACK': expectation1,
+        'ARM_USERDEBUG_GMS_CORE_CACHE': expectation2,
+    }, variables)
