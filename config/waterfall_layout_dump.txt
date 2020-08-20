@@ -1977,9 +1977,12 @@
   x32-generic-llvm-next-toolchain-tryjob
   x32-generic-llvm-toolchain-tryjob
   x32-generic-unittest-stress
+  zork-borealis-full-tryjob
   zork-borealis-llvm-next-toolchain-tryjob
   zork-borealis-llvm-toolchain-tryjob
+  zork-borealis-payloads-tryjob
   zork-borealis-release-tryjob
+  zork-borealis-unittest-stress
   zork-full-tryjob
   zork-kernelnext-full-tryjob
   zork-kernelnext-llvm-next-toolchain-tryjob
