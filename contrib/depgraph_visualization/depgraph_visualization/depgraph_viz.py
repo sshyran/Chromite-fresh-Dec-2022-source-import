@@ -14,6 +14,8 @@ from chromite.lib import depgraph
 
 from . import visualize
 
+_DEFAULT_PACKAGES = ['virtual/target-os', 'virtual/target-os-dev',
+                     'virtual/target-os-test', 'virtual/target-os-factory']
 
 def ParseArgs(argv):
   """Parse command line arguments."""
@@ -21,7 +23,11 @@ def ParseArgs(argv):
   target = parser.add_mutually_exclusive_group(required=True)
   target.add_argument('--sysroot', type='path', help='Path to the sysroot.')
   target.add_argument('-b', '--build-target', help='Name of the target build')
-  parser.add_argument('pkgs', nargs='*')
+  parser.add_argument('--output-path', default=None,
+                      help='Write output to the given path.')
+  parser.add_argument('--output-name', default='DepGraph',
+                      help='Write output file name.')
+  parser.add_argument('pkgs', nargs='*', default=_DEFAULT_PACKAGES)
   opts = parser.parse_args(argv)
   opts.Freeze()
   return opts
@@ -51,7 +57,14 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
   dep_graph.Initialize(lib_argv)
   deps_tree, _deps_info, _bdeps_tree = dep_graph.GenDependencyTree()
 
-  runtime_tree = {pkg: deps_tree[pkg]['deps'].keys() for pkg in deps_tree}
+  # Portage returns nothing if the packages given had no dependencies.
+  # In those cases we add the given packages so that the output file has
+  # something and doesn't appear broken.
+  if deps_tree:
+    runtime_tree = {pkg: deps_tree[pkg]['deps'].keys() for pkg in deps_tree}
+  else:
+    runtime_tree = {pkg: [] for pkg in pkg_list}
+
 
   return runtime_tree
 
@@ -59,6 +72,8 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
 def main():
   opts = ParseArgs(sys.argv[1:])
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.build_target)
+  out_dir = opts.output_path or '.'
+  out_name = opts.output_name
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)
   dep_vis = visualize.DepVisualizer(runtime_tree)
-  dep_vis.VisualizeGraph()
+  dep_vis.VisualizeGraph(output_name=out_name, output_dir=out_dir)

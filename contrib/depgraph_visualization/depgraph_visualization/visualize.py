@@ -3,7 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Helper classes and functions for depgraph visualization."""
+"""Helper classes and functions for depgraph visualization.
+
+Here is the pyvis documentation
+https://pyvis.readthedocs.io/en/latest/documentation.html
+"""
 
 from typing import Dict, Iterator, List, Set, Tuple
 
@@ -88,19 +92,23 @@ class DepVisualizer(object):
     """
     return (x for x in self.pkg_dict.values() if not x.rvs_dependencies)
 
-  def VisualizeGraph(self):
+  def VisualizeGraph(self, output_name='DepGraph', output_dir='.'):
     """Create a HTML file with the visualization of the dependency graph.
 
     Pyvis helps us create a HTML file with all the packages and their
     relationships in a timely manner; average execution time for this function
     is 2-3 seconds (in a cloud top instance).
-    The resulting HTML file is named 'DepGraph' and is written in the current
-    directory of this file; this will be updated in the future to
-    optionally get a path.
+    The resulting HTML file by default is named 'DepGraph'
+    and is written in the current directory of this file.
+
+    Args:
+      output_name: Name of the output HTML file.
+      output_dir: Directory of the output HTML file.
     """
     import pyvis # pylint: disable=import-error
     net = pyvis.network.Network(height='720px', width='60%', directed=True,
-                                bgcolor='#272727', font_color='#ffffff')
+                                bgcolor='#272727', font_color='#ffffff',
+                                heading='')
     roots = self.CalculateRoots()
     # queue is a list of iterators that yield node dependencies.
     queue = []
@@ -129,11 +137,13 @@ class DepVisualizer(object):
     # force_atlas_2based is a mathematical model to calculate
     # particle (nodes in our case) distribution in a 2D plane.
     net.force_atlas_2based(gravity=-200, damping=1)
+
     # Displays fun physics options to play around.
+    # Here is the documentation for this function.
+    # https://pyvis.readthedocs.io/en/latest/_modules/pyvis/network.html#Network.show_buttons
     net.show_buttons(filter_=['physics'])
-    # Writes and displays the graph in the default browser;
-    # to only create the file use the "write" method instead.
-    net.show('DepGraph.html')
+    # Writes an HTML file with the graph on it.
+    net.write_html(f'{output_dir}/{output_name}.html')
 
 
 def _BfsColoring(net,
