@@ -81,15 +81,20 @@ class BlacklistTest(image_test_lib.ImageTestCase):
       'app-text/iso-codes',
       'dev-java/icedtea',
       'dev-java/icedtea6-bin',
+      'dev-java/openjdk-bin',
       'dev-lang/perl',
       'dev-lang/python',
+      'dev-lang/tcl',
       'media-sound/pulseaudio',
       'x11-libs/libxklavier',
   )
 
   BLACKLISTED_FILES = (
+      '/usr/bin/java',
+      '/usr/bin/javac',
       '/usr/bin/perl',
       '/usr/bin/python',
+      '/usr/bin/tclsh',
   )
 
   def TestBlacklistedDirectories(self):
