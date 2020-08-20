@@ -1,4 +1,4 @@
-# Depgraph visualizer
+# Depgraph Visualizer
 
 ## Installation
 Enter your SDK, go to this modules location,
@@ -10,6 +10,7 @@ cros_sdk --enter
 cd ~/trunk/chromite/contrib/depgraph_visualization
 ./install.sh
 source my_visualizations/bin/activate
+cd my_visualizations
 ```
 
 This will put a script called `visualize_depgraph` on your PATH. From there you
@@ -41,6 +42,16 @@ and `--output-path`.
 ```bash
 visualize_depgraph net-fs/samba -b=amd64-generic --output-path=bar/foo --output-name=SambaGraph
 ```
+## Secondary usage
+With the argument `--include-histograms` you can also generate four png files
+with histograms for dependency and reverse dependency distribution.
+These plots are partition in two because the number of packages Y with a range
+X of (reverse)dependencies goes from 600 to 1.
+```bash
+visualize_depgraph --include-Histograms=True --output-path=foo/bar -b=arm64-generic
+```
+These files are saved in the same directory as the main output file.
+
 ## Important notes
 
 If you were to use a package with no dependencies

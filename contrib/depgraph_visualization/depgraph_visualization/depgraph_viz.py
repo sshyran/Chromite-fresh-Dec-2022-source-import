@@ -27,6 +27,8 @@ def ParseArgs(argv):
                       help='Write output to the given path.')
   parser.add_argument('--output-name', default='DepGraph',
                       help='Write output file name.')
+  parser.add_argument('--include-histograms', default=False,
+                      help='Create and save histograms about dependencies.')
   parser.add_argument('pkgs', nargs='*', default=_DEFAULT_PACKAGES)
   opts = parser.parse_args(argv)
   opts.Freeze()
@@ -77,3 +79,5 @@ def main():
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)
   dep_vis = visualize.DepVisualizer(runtime_tree)
   dep_vis.VisualizeGraph(output_name=out_name, output_dir=out_dir)
+  if opts.include_histograms:
+    dep_vis.GenerateHistograms(opts.build_target, out_dir)

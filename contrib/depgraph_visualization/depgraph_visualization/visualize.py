@@ -10,6 +10,7 @@ https://pyvis.readthedocs.io/en/latest/documentation.html
 """
 
 from typing import Dict, Iterator, List, Set, Tuple
+import matplotlib.pyplot as plt # pylint: disable=import-error
 
 
 class PackageNode(object):
@@ -144,6 +145,97 @@ class DepVisualizer(object):
     net.show_buttons(filter_=['physics'])
     # Writes an HTML file with the graph on it.
     net.write_html(f'{output_dir}/{output_name}.html')
+
+  def GenerateHistograms(self, build_name: str, path: str):
+    """Creates 4 histograms with dependency and rvs dependency distribution.
+
+    The amount of packages with a certain range of dependencies and
+    reverse dependencies ranges from 600 to 1 so we split the histograms
+    of both into two; giving us four in total.
+
+    Args:
+      build_name: Name of the target build
+      path: Path to output files.
+    """
+    # Prepare data to plot.
+    dep_count = [len(n.dependencies) for n in self.pkg_dict.values()]
+    # There isn't a good explanation for the values of the bins other than
+    # they yield a good result.
+    dep_bins_low = [0, 1, 3, 5, 9, 13, 17, 20]
+    # The bigger bins start from 21 and go on multiples of 50
+    # until the highest value of the data points.
+    highest_dep = max(dep_count)
+    top = (highest_dep // 50)+1
+    dep_bins_high = [21] + [i*50 for i in range(1, top)] + [highest_dep]
+
+    # The histogram gets created and saved.
+    _SaveHistogram(dep_count,
+                   dep_bins_low,
+                   f'({build_name}): Dependency_distribution_low',
+                   path,
+                   '#205973')
+
+    _SaveHistogram(dep_count,
+                   dep_bins_high,
+                   f'({build_name}): Dependency_distribution_high',
+                   path,
+                   '#205973')
+
+    # Do the same for the reverse dependencies.
+    rvs_count = [len(n.rvs_dependencies) for n in self.pkg_dict.values()]
+    rvs_bins_low = [1, 2, 10, 20]
+    highest_rvs = max(rvs_count)
+    top = (highest_rvs // 50)+1
+    rvs_bins_high = [21] + [i*50 for i in range(1, top)] + [highest_rvs]
+
+    _SaveHistogram(rvs_count,
+                   rvs_bins_low,
+                   f'({build_name}): Reverse_Dependency_distribution_low',
+                   path,
+                   '#ef7e56')
+
+    _SaveHistogram(rvs_count,
+                   rvs_bins_high,
+                   f'({build_name}): Reverse_Dependency_distribution_high',
+                   path,
+                   '#ef7e56')
+
+
+def _SaveHistogram(data: List[int],
+                   bins: List[int],
+                   name: str,
+                   path: str,
+                   color: str):
+  """Streamline the process of plotting histograms.
+
+  Plots and saves a histogram as a png file.
+
+  Args:
+    data: List with data points.
+    bins: List with ranges for the histogram.
+    name: Name of the output file.
+    path: Path of the output file.
+    color: Color in either rgb or hexadecimal format.
+  """
+
+  plt.hist(data,
+           bins=bins,
+           edgecolor='black',
+           color=[color])
+
+  # Location for the labels in the x-ticks.
+  xplace = [(a+b) // 2 for a, b in zip(bins[:-1], bins[1:])]
+  # Create labels accurately portraying bin ranges.
+  xlabels = [f'{a}-{b-1}' for a, b in zip(bins[:-2], bins[1:-1])]
+  # Last range is inclusive.
+  xlabels += [f'{bins[-2]}-{bins[-1]}']
+  plt.xticks(xplace, xlabels)
+
+  plt.ylabel('Number of Packages')
+  plt.title(name)
+  plt.savefig(f'{path}/{name}.png')
+  # The plot needs to be cleaned otherwise all the graphs clump together.
+  plt.clf()
 
 
 def _BfsColoring(net,
