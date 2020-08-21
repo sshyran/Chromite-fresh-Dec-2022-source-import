@@ -13591,6 +13591,26 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-yuna-6301.59.B"
     },
+    "firmware-zork-13421.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "zork"
+        ],
+        "schedule": "with 24h interval",
+        "workspace_branch": "firmware-zork-13421.B"
+    },
+    "firmware-zork-13421.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "zork"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-zork-13421.B"
+    },
     "fizz-accelerator-factory-fizz-10167.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
