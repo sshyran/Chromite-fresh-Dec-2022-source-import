@@ -1071,18 +1071,6 @@
           "arch": "ARM_INTERNAL"
         }
       ]
-    },
-    {
-      "name": "zork-borealis",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
     }
   ],
   "release_branch": false,
@@ -5379,6 +5367,55 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 381,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "zork-borealis",
+      "reference_board_name": "zork-borealis",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "zork-borealis",
+          "name": "berknip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "dalboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "ezkinil",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "morphius",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "trembyle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
           "is_active": true
         }
       ]
