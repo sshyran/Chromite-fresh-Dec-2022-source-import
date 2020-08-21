@@ -371,7 +371,6 @@
     trogdor-release
     ultima-release
     veyron_fievel-release
-    veyron_mickey-release
     veyron_rialto-release
     veyron_tiger-release
     viking-release
@@ -1502,7 +1501,6 @@
     trogdor-release-tryjob
     ultima-release-tryjob
     veyron_fievel-release-tryjob
-    veyron_mickey-release-tryjob
     veyron_rialto-release-tryjob
     veyron_tiger-release-tryjob
     viking-release-tryjob
@@ -1872,12 +1870,6 @@
   veyron_jerry-unittest-stress
   veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob
   veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob
-  veyron_mickey-full-tryjob
-  veyron_mickey-llvm-next-toolchain-tryjob
-  veyron_mickey-llvm-toolchain-tryjob
-  veyron_mickey-payloads-tryjob
-  veyron_mickey-release-tryjob
-  veyron_mickey-unittest-stress
   veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob
   veyron_mighty-full-tryjob
   veyron_mighty-llvm-next-toolchain-tryjob
