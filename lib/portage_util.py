@@ -561,7 +561,8 @@ class EBuild(object):
         elif line.startswith('CROS_WORKON_BLACKLIST='):
           is_blacklisted = True
         elif (line.startswith('src_test()') or
-              line.startswith('platform_pkg_test()')):
+              line.startswith('platform_pkg_test()') or
+              line.startswith('multilib_src_test()')):
           has_test = True
         elif line.startswith('RESTRICT=') and 'test' in line:
           restrict_tests = True
