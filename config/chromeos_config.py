@@ -2555,9 +2555,6 @@ def ApplyCustomOverrides(site_config):
       },
 
       'drallion-release': {
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://b.corp.google.com/issues/160005408',
           'sign_types': ['recovery', 'factory'],
       },
 
@@ -2580,8 +2577,8 @@ def ApplyCustomOverrides(site_config):
   # Some Unibuild boards need to have hardware tests disabled.  This means
   # disabling it at the model level as well.
   _unibuild_disabled_hw_tests = frozenset([
-      'drallion-release',  # b/160005408.
   ])
+
   for config_name in _unibuild_disabled_hw_tests:
     config = site_config.get(config_name)
     if config and 'models' in config:
