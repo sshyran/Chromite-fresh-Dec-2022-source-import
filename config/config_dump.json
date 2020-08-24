@@ -34093,6 +34093,7 @@
         ],
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -34118,6 +34119,7 @@
         "luci_builder": "Try",
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -34127,7 +34129,8 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "zork-borealis"
-        ]
+        ],
+        "unittests": false
     },
     "zork-borealis-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
@@ -34137,13 +34140,15 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "zork-borealis-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "zork-borealis"
-        ]
+        ],
+        "unittests": false
     },
     "zork-borealis-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
@@ -34153,7 +34158,8 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "zork-borealis-payloads": {
         "_template": "payloads",
@@ -34183,6 +34189,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-borealis\",\n    \"name\": \"morphius\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-borealis\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}"
         ],
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -34214,6 +34221,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },

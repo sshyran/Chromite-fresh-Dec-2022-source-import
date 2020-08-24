@@ -158,4 +158,5 @@ base_layout_boards = lakitu_boards | termina_boards
 builder_incompatible_binaries_boards = frozenset([
     'grunt',
     'zork',
+    'zork-borealis',
 ])
