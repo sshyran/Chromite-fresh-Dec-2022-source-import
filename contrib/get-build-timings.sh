@@ -8,8 +8,8 @@
 
 build_id="$1"
 
-# Make sure we have prod access so we don't fail without getting any work done.
-prodcertstatus 1>/dev/null 2>/dev/null || prodaccess
+# Make sure we have gcert access so we don't fail without getting any work done.
+gcertstatus >&/dev/null || gcert
 
 # Run the query.
 (f1-sql -quiet=1 -csv_output=1 \
