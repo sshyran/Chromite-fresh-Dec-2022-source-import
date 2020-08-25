@@ -15,6 +15,7 @@ import os
 import pwd
 import stat
 import sys
+import unittest
 
 import mock
 
@@ -22,6 +23,9 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+
+if sys.version_info.major >= 3:
+  from pathlib import Path
 
 
 class TestOsutils(cros_test_lib.TempDirTestCase):
@@ -166,6 +170,15 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
   def testSafeMakedirs(self):
     """Test creating directory trees work (existing or not)."""
     path = os.path.join(self.tempdir, 'a', 'b', 'c', 'd', 'e')
+    self.assertTrue(osutils.SafeMakedirs(path))
+    self.assertExists(path)
+    self.assertFalse(osutils.SafeMakedirs(path))
+    self.assertExists(path)
+
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
+  def testSafeMakedirsWithPathObject(self):
+    """Test creating directory trees work (existing or not) on |Path|s."""
+    path = Path(self.tempdir) / 'a' / 'b' / 'c' / 'd' / 'e'
     self.assertTrue(osutils.SafeMakedirs(path))
     self.assertExists(path)
     self.assertFalse(osutils.SafeMakedirs(path))

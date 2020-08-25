@@ -357,7 +357,7 @@ def SafeMakedirs(path, mode=0o775, sudo=False, user='root'):
 
   Args:
     path: The path to create.  Intermediate directories will be created as
-          needed.
+          needed. This can be either a |Path| or |str|.
     mode: The access permissions in the style of chmod.
     sudo: If True, create it via sudo, thus root owned.
     user: If |sudo| is True, run sudo as |user|.
@@ -373,10 +373,10 @@ def SafeMakedirs(path, mode=0o775, sudo=False, user='root'):
     if os.path.isdir(path):
       return False
     cros_build_lib.sudo_run(
-        ['mkdir', '-p', '--mode', '%o' % mode, path], user=user,
+        ['mkdir', '-p', '--mode', '%o' % mode, str(path)], user=user,
         print_cmd=False, stderr=True, stdout=True)
     cros_build_lib.sudo_run(
-        ['chmod', '%o' % mode, path],
+        ['chmod', '%o' % mode, str(path)],
         print_cmd=False, stderr=True, stdout=True)
     return True
 
