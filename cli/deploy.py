@@ -28,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import remote_access
 from chromite.lib import dlc_lib
+from chromite.lib import workon_helper
 try:
   import portage
 except ImportError:
@@ -1182,6 +1183,15 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
       if not pkgs:
         logging.notice('No packages to %s', action_str)
         return
+
+      # Warn when the user seems to forget `cros workon start`.
+      worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
+      for package in listed:
+        cp = portage_util.SplitCPV(package).cp
+        if cp not in worked_on_cps:
+          logging.warning(
+              'Are you intentionally deploying unmodified packages, or did '
+              'you forget to run `cros workon --board=$BOARD start %s`?', cp)
 
       logging.notice('These are the packages to %s:', action_str)
       for i, pkg in enumerate(pkgs):
