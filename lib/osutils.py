@@ -503,7 +503,7 @@ def RmDir(path, ignore_missing=False, sudo=False):
   """Recursively remove a directory.
 
   Args:
-    path: Path of directory to remove.
+    path: Path of directory to remove. Either a |Path| or |str|.
     ignore_missing: Do not error when path does not exist.
     sudo: Remove directories as root.
   """
@@ -521,9 +521,9 @@ def RmDir(path, ignore_missing=False, sudo=False):
   # If we're still here, we're falling back to sudo.
   try:
     cros_build_lib.sudo_run(
-        ['rm', '-r%s' % ('f' if ignore_missing else '',), '--', path],
+        ['rm', '-r%s' % ('f' if ignore_missing else '',), '--', str(path)],
         debug_level=logging.DEBUG, stdout=True, stderr=True)
-  except cros_build_lib.RunCommandError as e:
+  except cros_build_lib.RunCommandError:
     if not ignore_missing or os.path.exists(path):
       # If we're not ignoring the rm ENOENT equivalent, throw it;
       # if the pathway still exists, something failed, thus throw it.

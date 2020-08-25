@@ -238,27 +238,36 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
   def testRmDir(self):
     """Test that removing dirs work."""
-    path = os.path.join(self.tempdir, 'a', 'b', 'c', 'd', 'e')
+    main_path = os.path.join(self.tempdir, 'a', 'b', 'c', 'd', 'e')
+    paths_to_test = [main_path]
+    if sys.version_info.major >= 3:
+      paths_to_test.append(Path(main_path))
 
-    self.assertRaises(EnvironmentError, osutils.RmDir, path)
-    osutils.SafeMakedirs(path)
-    osutils.RmDir(path)
-    osutils.RmDir(path, ignore_missing=True)
-    self.assertRaises(EnvironmentError, osutils.RmDir, path)
+    for path in paths_to_test:
+      self.assertRaises(EnvironmentError, osutils.RmDir, path)
+      osutils.SafeMakedirs(path)
+      osutils.RmDir(path)
+      osutils.RmDir(path, ignore_missing=True)
+      self.assertRaises(EnvironmentError, osutils.RmDir, path)
 
-    osutils.SafeMakedirs(path)
-    osutils.RmDir(path)
-    self.assertNotExists(path)
+      osutils.SafeMakedirs(path)
+      osutils.RmDir(path)
+      self.assertNotExists(path)
 
   def testRmDirSudo(self):
     """Test that removing dirs via sudo works."""
     subpath = os.path.join(self.tempdir, 'a')
-    path = os.path.join(subpath, 'b', 'c', 'd', 'e')
-    self.assertTrue(osutils.SafeMakedirs(path, sudo=True))
-    self.assertRaises(OSError, osutils.RmDir, path)
-    osutils.RmDir(subpath, sudo=True)
-    self.assertRaises(cros_build_lib.RunCommandError,
-                      osutils.RmDir, subpath, sudo=True)
+    main_path = os.path.join(subpath, 'b', 'c', 'd', 'e')
+    paths_to_test = [main_path]
+    if sys.version_info.major >= 3:
+      paths_to_test.append(Path(main_path))
+
+    for path in paths_to_test:
+      self.assertTrue(osutils.SafeMakedirs(path, sudo=True))
+      self.assertRaises(OSError, osutils.RmDir, path)
+      osutils.RmDir(subpath, sudo=True)
+      self.assertRaises(
+          cros_build_lib.RunCommandError, osutils.RmDir, subpath, sudo=True)
 
   def testTouchFile(self):
     """Test that we can touch files."""
