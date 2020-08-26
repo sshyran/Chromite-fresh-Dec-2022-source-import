@@ -230,30 +230,6 @@
       ]
     },
     {
-      "name": "elm",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "oak",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "elm-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "enguarde",
       "configs": [
         {
@@ -1120,6 +1096,40 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 402,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "elm",
+      "reference_board_name": "elm",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "elm",
+          "name": "elm",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 265,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "elm-kernelnext",
+      "reference_board_name": "elm-kernelnext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "elm-kernelnext",
+          "name": "elm",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 425,
           "is_active": true
         }
       ]
