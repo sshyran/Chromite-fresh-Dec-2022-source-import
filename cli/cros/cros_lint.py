@@ -180,6 +180,8 @@ def _PylintFile(path, output_format, debug, interp):
     pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
   pylintrc = _GetPylintrc(path)
   cmd = [vpython, pylint, '--rcfile=%s' % pylintrc]
+  if interp == 'python3':
+    cmd += ['--disable=old-division']
   if output_format != 'default':
     cmd.append('--output-format=%s' % output_format)
   cmd.append(path)
