@@ -110,6 +110,27 @@ class DependencyTests(cros_test_lib.MockTestCase):
           dependency.NormalizeSourcePaths([foo_dir, ab_cd_file, bar_baz_dir]),
           expected_paths)
 
+  def testDeterminePackageRelevanceNotRelevant(self):
+    """Test determine_package_relevance with no matching paths."""
+    src_paths = ['foo/bar/baz', 'foo/bar/b', 'foo/bar', 'bar/foo']
+    dep_src_paths = ['foo/bar/ba']
+    self.assertFalse(
+        dependency.determine_package_relevance(dep_src_paths, src_paths))
+
+  def testDeterminePackageRelevanceExactMatch(self):
+    """Test determine_package_relevance given an exact match."""
+    src_paths = ['foo/bar/baz']
+    dep_src_paths = ['foo/bar/baz']
+    self.assertTrue(
+        dependency.determine_package_relevance(dep_src_paths, src_paths))
+
+  def testDeterminePackageRelevanceDirectoryMatch(self):
+    """Test determine_package_relevance given a directory match."""
+    src_paths = ['foo/bar/baz']
+    dep_src_paths = ['foo/bar']
+    self.assertTrue(
+        dependency.determine_package_relevance(dep_src_paths, src_paths))
+
   def testGetDependenciesWithDefaultArgs(self):
     """Test GetDependencies using the default args."""
     self.PatchObject(

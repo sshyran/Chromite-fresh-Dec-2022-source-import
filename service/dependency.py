@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import os
+from pathlib import Path
 import re
 from typing import List, Optional
 
@@ -358,6 +359,30 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
   return results, sdk_results
 
 
+def determine_package_relevance(dep_src_paths: List[str],
+                                src_paths: Optional[List[str]] = None) -> bool:
+  """Determine if the package is relevant to the given source paths.
+
+  A package is relevant if any of its dependent source paths is in the given
+  list of source paths. If no source paths are given, the default is True.
+
+  Args:
+    dep_src_paths: List of source paths the package depends on.
+    src_paths: List of source paths of interest.
+  """
+  if not src_paths:
+    return True
+  for src_path in (Path(x) for x in src_paths):
+    for dep_src_path in (Path(x) for x in dep_src_paths):
+      try:
+        # Will throw an error if src_path isn't under dep_src_path.
+        src_path.relative_to(dep_src_path)
+        return True
+      except ValueError:
+        pass
+  return False
+
+
 def GetDependencies(sysroot_path: str,
                     build_target: build_target_lib.BuildTarget,
                     src_paths: Optional[List[str]] = None,
@@ -381,7 +406,7 @@ def GetDependencies(sysroot_path: str,
 
   relevant_packages = set()
   for cpv, dep_src_paths in json_deps['source_path_mapping'].items():
-    if not src_paths or (set(dep_src_paths) & set(src_paths)):
+    if determine_package_relevance(dep_src_paths, src_paths):
       relevant_packages.add(cpv)
 
   relevant_package_deps = set()
