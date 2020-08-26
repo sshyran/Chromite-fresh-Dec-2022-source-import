@@ -880,6 +880,9 @@ class PaygenPayload(object):
         logging.info('Failed to acquire the lock in 10 minutes (reason: %s)'
                      ', trying again ...', acq_result.reason)
     try:
+      # Time the actual paygen operation started.
+      start_time = datetime.datetime.now()
+
       # Fetch and prepare the tgt image.
       self._PrepareImage(self.payload.tgt_image, self.tgt_image_file)
 
@@ -895,6 +898,9 @@ class PaygenPayload(object):
       self._GenerateUnsignedPayload()
     finally:
       _mem_semaphore.release()
+      # Time the actual paygen operation ended.
+      end_time = datetime.datetime.now()
+      logging.info('* Finished payload generation in %s', end_time - start_time)
 
     # Sign the payload, if needed.
     _, metadata_signatures = self._SignPayload()
@@ -971,7 +977,8 @@ class PaygenPayload(object):
       self._UploadResults()
 
     end_time = datetime.datetime.now()
-    logging.info('* Finished payload generation in %s', end_time - start_time)
+    logging.info('* Total elapsed payload generation in %s',
+                 end_time - start_time)
 
 def CreateAndUploadPayload(payload, sign=True, verify=True):
   """Helper to create a PaygenPayloadLib instance and use it.
