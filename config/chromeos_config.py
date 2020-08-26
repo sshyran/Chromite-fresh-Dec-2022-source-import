@@ -2023,7 +2023,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'hatch-kernelnext',
       'lakitu',
       'volteer-kernelnext',
-      'zork-kernelnet',
+      'zork-kernelnext',
   ])
 
   _release_enable_skylab_hwtest = frozenset([
