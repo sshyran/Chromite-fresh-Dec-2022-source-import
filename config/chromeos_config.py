@@ -1858,6 +1858,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-drallion-13080.B', ['drallion']),
       (DAILY, 'factory-endeavour-13295.B', ['endeavour']),
       (WEEKLY, 'factory-puff-13329.B', ['puff']),
+      (WEEKLY, 'factory-zork-13427.B', ['zork']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', ['atlas', 'octopus', 'rammus', 'coral', 'eve',

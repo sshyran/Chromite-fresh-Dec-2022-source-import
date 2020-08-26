@@ -127,6 +127,8 @@
     whirlwind-factory-whirlwind-6509.B-factorybranch
   factory-whirlwind-6812.41.B-buildspec
     whirlwind-factory-whirlwind-6812.41.B-factorybranch
+  factory-zork-13427.B-buildspec
+    zork-factory-zork-13427.B-factorybranch
 
 == firmware ==
   firmware-atlas-11827.B-firmwarebranch
@@ -950,6 +952,8 @@
     whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob
   factory-whirlwind-6812.41.B-buildspec-tryjob
     whirlwind-factory-whirlwind-6812.41.B-factorybranch-tryjob
+  factory-zork-13427.B-buildspec-tryjob
+    zork-factory-zork-13427.B-factorybranch-tryjob
   fail-build
   falco_li-full-tryjob
   falco_li-llvm-next-toolchain-tryjob
@@ -1977,6 +1981,7 @@
   zork-borealis-payloads-tryjob
   zork-borealis-release-tryjob
   zork-borealis-unittest-stress
+  zork-factory-zork-13427.B-factorybranch-tryjob
   zork-full-tryjob
   zork-kernelnext-full-tryjob
   zork-kernelnext-llvm-next-toolchain-tryjob
