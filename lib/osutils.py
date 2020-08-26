@@ -469,8 +469,10 @@ def CopyDirContents(from_dir, to_dir, symlinks=False, allow_nonempty=False):
     y.py
 
   Args:
-    from_dir: The directory whose contents should be copied. Must exist.
+    from_dir: The directory whose contents should be copied. Must exist. Either
+      a |Path| or a |str|.
     to_dir: The directory to which contents should be copied. Must exist.
+      Either a |Path| or a |str|.
     symlinks: Whether symlinks should be copied or dereferenced. When True, all
         symlinks will be copied as symlinks into the destination. When False,
         the symlinks will be dereferenced and the contents copied over.

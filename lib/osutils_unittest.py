@@ -1155,6 +1155,44 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
         filecmp.cmp(os.path.join(out_dir_symlinks_dir_subdir, 'b.txt'),
                     tmp_subdir_file))
 
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
+  def testCopyingSymlinksAndFilesWithPathArgs(self):
+    """Copying given |Path| arguments works properly for symlinks+files."""
+    in_dir = Path(self.tempdir) / 'input'
+    osutils.SafeMakedirs(in_dir)
+
+    tmp_file = in_dir / 'a.txt'
+    tmp_file.write_text('aaa', encoding='utf-8')
+    tmp_file_link = tmp_file.with_suffix('.link')
+    tmp_file_link.symlink_to(tmp_file)
+
+    out_dir = Path(self.tempdir) / 'output'
+    osutils.SafeMakedirs(out_dir)
+    osutils.CopyDirContents(in_dir, out_dir, symlinks=True)
+
+    out_tmp_file = out_dir / tmp_file.name
+    self.assertEqual(out_tmp_file.read_text(encoding='utf-8'), 'aaa')
+    out_tmp_file_link = out_dir / tmp_file_link.name
+    self.assertEqual(Path(os.readlink(out_tmp_file_link)), tmp_file)
+
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
+  def testCopyingSubDirWithPathArgs(self):
+    """Copying given |Path| arguments works properly for subdirectories."""
+    in_dir = Path(self.tempdir) / 'input'
+    osutils.SafeMakedirs(in_dir)
+
+    tmp_file = in_dir / 'subdir' / 'a.txt'
+    osutils.SafeMakedirs(tmp_file.parent)
+
+    tmp_file.write_text('aaa', encoding='utf-8')
+
+    out_dir = Path(self.tempdir) / 'output'
+    osutils.SafeMakedirs(out_dir)
+    osutils.CopyDirContents(in_dir, out_dir, symlinks=True)
+
+    out_tmp_file = out_dir / 'subdir' / tmp_file.name
+    self.assertEqual(out_tmp_file.read_text(encoding='utf-8'), 'aaa')
+
 
 class WhichTests(cros_test_lib.TempDirTestCase):
   """Test Which."""
