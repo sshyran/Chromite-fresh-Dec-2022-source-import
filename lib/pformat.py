@@ -74,3 +74,23 @@ def json(obj, fp: Optional[Union[str, os.PathLike, TextIO]] = None,
     if not compact:
       ret += '\n'
     return ret
+
+
+def size(bytesize: float) -> str:
+  """Convert bytes to human readable format.
+
+  Args:
+    bytesize: Number to humanize
+
+  Returns:
+    Size as string in human-readable format (e.g. 1.8MiB)
+  """
+  if bytesize < 1024:
+    return f'{bytesize}B'
+
+  for suffix in 'BKMGTPEZY':
+    if bytesize < 1024:
+      break
+    bytesize /= 1024
+
+  return f'{bytesize:.1f}{suffix}iB'  # pylint: disable=undefined-loop-variable

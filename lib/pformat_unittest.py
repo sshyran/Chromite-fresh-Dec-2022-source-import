@@ -89,3 +89,19 @@ class TestJson(cros_test_lib.TempDirTestCase):
       path = os.path.join(self.tempdir, 'x')
       self.assertIsNone(pformat.json(obj, fp=path, compact=True))
       self.assertEqual(exp, osutils.ReadFile(path))
+
+
+class TestSize(cros_test_lib.TestCase):
+  """Tests pformat.size."""
+
+  def testBytes(self):
+    self.assertEqual(pformat.size(100), '100B')
+
+  def testKilobytes(self):
+    self.assertEqual(pformat.size(340216), '332.2KiB')
+
+  def testMegabytes(self):
+    self.assertEqual(pformat.size(1930135), '1.8MiB')
+
+  def testGigabytes(self):
+    self.assertEqual(pformat.size(30040023123), '28.0GiB')
