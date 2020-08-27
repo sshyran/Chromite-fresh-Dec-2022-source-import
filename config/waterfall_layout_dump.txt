@@ -195,7 +195,7 @@
   firmware-veyron-6588.B-firmwarebranch
   firmware-winky-5216.265.B-firmwarebranch
   firmware-yuna-6301.59.B-firmwarebranch
-  firmware-zork-13421.B-firmwarebranch
+  firmware-zork-13434.B-firmwarebranch
 
 == full ==
   master-full
@@ -1027,7 +1027,7 @@
   firmware-veyron-6588.B-firmwarebranch-tryjob
   firmware-winky-5216.265.B-firmwarebranch-tryjob
   firmware-yuna-6301.59.B-firmwarebranch-tryjob
-  firmware-zork-13421.B-firmwarebranch-tryjob
+  firmware-zork-13434.B-firmwarebranch-tryjob
   fizz-accelerator-factory-fizz-10167.B-factorybranch-tryjob
   fizz-accelerator-full-tryjob
   fizz-accelerator-llvm-next-toolchain-tryjob
