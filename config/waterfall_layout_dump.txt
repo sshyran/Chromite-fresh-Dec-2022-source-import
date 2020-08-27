@@ -301,6 +301,7 @@
     gandof-release
     gnawty-release
     gonzo-release
+    grunt-arc-r-release
     grunt-kernelnext-release
     grunt-release
     guado-cfm-release
@@ -351,6 +352,7 @@
     puff-release
     pyro-release
     rammus-arc-r-release
+    rammus-arc-r-userdebug-release
     rammus-release
     reef-release
     reks-release
@@ -1096,6 +1098,12 @@
   gonzo-unittest-stress
   gru-factory-gru-9017.B-factorybranch-tryjob
   grunt-android-pi-pre-flight-branch-tryjob
+  grunt-arc-r-full-tryjob
+  grunt-arc-r-llvm-next-toolchain-tryjob
+  grunt-arc-r-llvm-toolchain-tryjob
+  grunt-arc-r-payloads-tryjob
+  grunt-arc-r-release-tryjob
+  grunt-arc-r-unittest-stress
   grunt-factory-grunt-11164.B-factorybranch-tryjob
   grunt-full-tryjob
   grunt-kernelnext-full-tryjob
@@ -1434,6 +1442,7 @@
     gandof-release-tryjob
     gnawty-release-tryjob
     gonzo-release-tryjob
+    grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob
     grunt-release-tryjob
     guado-cfm-release-tryjob
@@ -1484,6 +1493,7 @@
     puff-release-tryjob
     pyro-release-tryjob
     rammus-arc-r-release-tryjob
+    rammus-arc-r-userdebug-release-tryjob
     rammus-release-tryjob
     reef-release-tryjob
     reks-release-tryjob
@@ -1677,6 +1687,12 @@
   rammus-arc-r-payloads-tryjob
   rammus-arc-r-release-tryjob
   rammus-arc-r-unittest-stress
+  rammus-arc-r-userdebug-full-tryjob
+  rammus-arc-r-userdebug-llvm-next-toolchain-tryjob
+  rammus-arc-r-userdebug-llvm-toolchain-tryjob
+  rammus-arc-r-userdebug-payloads-tryjob
+  rammus-arc-r-userdebug-release-tryjob
+  rammus-arc-r-userdebug-unittest-stress
   rammus-arc-r-vmrvc-android-pfq-tryjob
   rammus-factory-rammus-11289.B-factorybranch-tryjob
   rammus-full-tryjob
