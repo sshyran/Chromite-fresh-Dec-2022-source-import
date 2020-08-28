@@ -470,18 +470,6 @@
       ]
     },
     {
-      "name": "grunt-arc-r",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "guado",
       "configs": [
         {
@@ -2162,6 +2150,103 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 333,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "grunt-arc-r",
+      "reference_board_name": "grunt-arc-r",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "grunt-arc-r",
+          "name": "aleena",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "barla",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "careena",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "grunt",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "kasumi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "kasumi360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "liara",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "nuwani",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "nuwani360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "treeya",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
+          "is_active": true
+        },
+        {
+          "board_name": "grunt-arc-r",
+          "name": "treeya360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 458,
           "is_active": true
         }
       ]

@@ -15599,6 +15599,19 @@
             "grunt-arc-r"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"aleena\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"barla\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"careena\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"grunt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"liara\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -15620,6 +15633,19 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"aleena\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"barla\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"careena\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"grunt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"kasumi360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"liara\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"nuwani360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
