@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.skylab_test_runner',
   syntax='proto3',
   serialized_options=_b('ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner'),
-  serialized_pb=_b('\n-test_platform/skylab_test_runner/config.proto\x12 test_platform.skylab_test_runner\"\xa1\x03\n\x06\x43onfig\x12\x39\n\x03lab\x18\x01 \x01(\x0b\x32,.test_platform.skylab_test_runner.Config.Lab\x12\x41\n\x07harness\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Config.Harness\x12?\n\x06output\x18\x03 \x01(\x0b\x32/.test_platform.skylab_test_runner.Config.Output\x1a<\n\x03Lab\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x02 \x01(\t\x1a{\n\x07Harness\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\x12\x1c\n\x14synch_offload_subdir\x18\x02 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x03 \x01(\t\x12\x1f\n\x17prejob_deadline_seconds\x18\x04 \x01(\x03\x1a\x1d\n\x06Output\x12\x13\n\x0bgs_root_dir\x18\x01 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
+  serialized_pb=_b('\n-test_platform/skylab_test_runner/config.proto\x12 test_platform.skylab_test_runner\"\xb2\x04\n\x06\x43onfig\x12\x39\n\x03lab\x18\x01 \x01(\x0b\x32,.test_platform.skylab_test_runner.Config.Lab\x12\x41\n\x07harness\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Config.Harness\x12?\n\x06output\x18\x03 \x01(\x0b\x32/.test_platform.skylab_test_runner.Config.Output\x12K\n\x12result_flow_pubsub\x18\x04 \x01(\x0b\x32/.test_platform.skylab_test_runner.Config.PubSub\x1aV\n\x03Lab\x12\x15\n\radmin_service\x18\x01 \x01(\t\x12\x1e\n\x16\x63ros_inventory_service\x18\x02 \x01(\t\x12\x18\n\x10\x63ros_ufs_service\x18\x03 \x01(\t\x1a{\n\x07Harness\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\x12\x1c\n\x14synch_offload_subdir\x18\x02 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x03 \x01(\t\x12\x1f\n\x17prejob_deadline_seconds\x18\x04 \x01(\x03\x1a\x1d\n\x06Output\x12\x13\n\x0bgs_root_dir\x18\x01 \x01(\t\x1a(\n\x06PubSub\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
 )
 
 
@@ -46,6 +46,13 @@ _CONFIG_LAB = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='cros_ufs_service', full_name='test_platform.skylab_test_runner.Config.Lab.cros_ufs_service', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -58,8 +65,8 @@ _CONFIG_LAB = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=285,
-  serialized_end=345,
+  serialized_start=362,
+  serialized_end=448,
 )
 
 _CONFIG_HARNESS = _descriptor.Descriptor(
@@ -109,8 +116,8 @@ _CONFIG_HARNESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=347,
-  serialized_end=470,
+  serialized_start=450,
+  serialized_end=573,
 )
 
 _CONFIG_OUTPUT = _descriptor.Descriptor(
@@ -139,8 +146,45 @@ _CONFIG_OUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=472,
-  serialized_end=501,
+  serialized_start=575,
+  serialized_end=604,
+)
+
+_CONFIG_PUBSUB = _descriptor.Descriptor(
+  name='PubSub',
+  full_name='test_platform.skylab_test_runner.Config.PubSub',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='test_platform.skylab_test_runner.Config.PubSub.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='topic', full_name='test_platform.skylab_test_runner.Config.PubSub.topic', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=606,
+  serialized_end=646,
 )
 
 _CONFIG = _descriptor.Descriptor(
@@ -171,10 +215,17 @@ _CONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='result_flow_pubsub', full_name='test_platform.skylab_test_runner.Config.result_flow_pubsub', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_CONFIG_LAB, _CONFIG_HARNESS, _CONFIG_OUTPUT, ],
+  nested_types=[_CONFIG_LAB, _CONFIG_HARNESS, _CONFIG_OUTPUT, _CONFIG_PUBSUB, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -184,15 +235,17 @@ _CONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=501,
+  serialized_end=646,
 )
 
 _CONFIG_LAB.containing_type = _CONFIG
 _CONFIG_HARNESS.containing_type = _CONFIG
 _CONFIG_OUTPUT.containing_type = _CONFIG
+_CONFIG_PUBSUB.containing_type = _CONFIG
 _CONFIG.fields_by_name['lab'].message_type = _CONFIG_LAB
 _CONFIG.fields_by_name['harness'].message_type = _CONFIG_HARNESS
 _CONFIG.fields_by_name['output'].message_type = _CONFIG_OUTPUT
+_CONFIG.fields_by_name['result_flow_pubsub'].message_type = _CONFIG_PUBSUB
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -218,6 +271,13 @@ Config = _reflection.GeneratedProtocolMessageType('Config', (_message.Message,),
     # @@protoc_insertion_point(class_scope:test_platform.skylab_test_runner.Config.Output)
     ))
   ,
+
+  PubSub = _reflection.GeneratedProtocolMessageType('PubSub', (_message.Message,), dict(
+    DESCRIPTOR = _CONFIG_PUBSUB,
+    __module__ = 'test_platform.skylab_test_runner.config_pb2'
+    # @@protoc_insertion_point(class_scope:test_platform.skylab_test_runner.Config.PubSub)
+    ))
+  ,
   DESCRIPTOR = _CONFIG,
   __module__ = 'test_platform.skylab_test_runner.config_pb2'
   # @@protoc_insertion_point(class_scope:test_platform.skylab_test_runner.Config)
@@ -226,6 +286,7 @@ _sym_db.RegisterMessage(Config)
 _sym_db.RegisterMessage(Config.Lab)
 _sym_db.RegisterMessage(Config.Harness)
 _sym_db.RegisterMessage(Config.Output)
+_sym_db.RegisterMessage(Config.PubSub)
 
 
 DESCRIPTOR._options = None
