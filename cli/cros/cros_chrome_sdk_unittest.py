@@ -293,6 +293,21 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
           self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
       self.assertExists(board_arg_file)
 
+  def testManyBoardsBrokenArgs(self):
+    """Tests that malformed args.gn files will be fixed in --boards."""
+    self.SetupCommandMock(many_boards=True)
+    for board in SDKFetcherMock.BOARDS:
+      gn_args_file = os.path.join(
+          self.chrome_src_dir, 'out_%s' % board, 'Release', 'args.gn')
+      osutils.WriteFile(gn_args_file, 'foo\nbar', makedirs=True)
+
+    self.cmd_mock.inst.Run()
+
+    for board in SDKFetcherMock.BOARDS:
+      gn_args_file = os.path.join(
+          self.chrome_src_dir, 'out_%s' % board, 'Release', 'args.gn')
+      self.assertTrue(osutils.ReadFile(gn_args_file).startswith('import'))
+
   def testErrorCodePassthrough(self):
     """Test that error codes are passed through."""
     self.SetupCommandMock()

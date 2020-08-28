@@ -1010,12 +1010,18 @@ class ChromeSDKCommand(command.CliCommand):
       shared_args_file_path = os.path.join(
           self.options.chrome_src, self._BUILD_ARGS_DIR, board + '.gni')
       osutils.WriteFile(shared_args_file_path, gn_helpers.ToGNString(gn_args))
+      import_line = 'import("//%s%s.gni")' % (self._BUILD_ARGS_DIR, board)
+      if (os.path.exists(gn_args_file_path) and
+          not import_line in osutils.ReadFile(gn_args_file_path)):
+        logging.warning('Stale or malformed args.gn file at %s. Regenerating.',
+                        gn_args_file_path)
+        osutils.SafeUnlink(gn_args_file_path)
       if not os.path.exists(gn_args_file_path):
         osutils.WriteFile(gn_args_file_path, textwrap.dedent("""\
-          import("//%s%s.gni")
+          %s
           # Place any additional args or overrides below:
 
-          """ % (self._BUILD_ARGS_DIR, board)), makedirs=True)
+          """ % import_line), makedirs=True)
       return
 
     if not self._StaleGnArgs(gn_args, gn_args_file_path):
