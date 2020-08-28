@@ -770,18 +770,6 @@
       ]
     },
     {
-      "name": "rammus-arc-r-userdebug",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reks",
       "configs": [
         {
@@ -4822,6 +4810,31 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 445,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "rammus-arc-r-userdebug",
+      "reference_board_name": "rammus-arc-r-userdebug",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "rammus-arc-r-userdebug",
+          "name": "leona",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 457,
+          "is_active": true
+        },
+        {
+          "board_name": "rammus-arc-r-userdebug",
+          "name": "shyvana",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 457,
           "is_active": true
         }
       ]
