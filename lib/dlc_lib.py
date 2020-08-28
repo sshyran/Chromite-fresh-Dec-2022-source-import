@@ -41,7 +41,7 @@ UPDATE_ENGINE_CONF = 'etc/update_engine.conf'
 _EXTRA_RESOURCES = (UPDATE_ENGINE_CONF,)
 # The following boards don't have AppIds, but we allow DLCs to be generated for
 # those boards for testing purposes.
-_TEST_BOARDS_ALLOWLIST = ('amd64-generic', 'arm-generic')
+_TEST_BOARDS_ALLOWLIST = ('amd64-generic', 'arm-generic', 'galaxy')
 
 DLC_ID_KEY = 'DLC_ID'
 DLC_PACKAGE_KEY = 'DLC_PACKAGE'
