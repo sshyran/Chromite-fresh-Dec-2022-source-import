@@ -27,6 +27,7 @@ from chromite.lib import toolchain_util
 from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
+from chromite.utils import matching
 
 
 # Archive type constants.
@@ -87,8 +88,20 @@ def BuildFirmwareArchive(chroot, sysroot, output_directory):
   """
   firmware_root = os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
                                'firmware')
-  source_list = [os.path.relpath(f, firmware_root)
-                 for f in glob.iglob(os.path.join(firmware_root, '*'))]
+  if not os.path.exists(firmware_root):
+    return None
+
+  # Private fingerprint libraries should not be uploaded. Prepend './' to work
+  # with matching.FindFilesMatching.
+  private_fingerprint_dirs = [
+      os.path.join('./', os.path.relpath(d, firmware_root))
+      for d in glob.glob(os.path.join(firmware_root,
+                                      '**/ec-private/fingerprint'),
+                         recursive=True)
+  ]
+  source_list = matching.FindFilesMatching(
+      '*', target='./', cwd=firmware_root,
+      exclude_dirs=private_fingerprint_dirs)
   if not source_list:
     return None
 

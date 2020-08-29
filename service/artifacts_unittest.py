@@ -395,8 +395,6 @@ class BuildFirmwareArchiveTest(cros_test_lib.TempDirTestCase):
         'x86-memtest',
     )
 
-    # Files which should be included in the archive.
-    fw_archived_files = fw_files + ('dts/',)
     board = 'link'
     # fw_test_root = os.path.join(self.tempdir, os.path.basename(__file__))
     fw_test_root = self.tempdir
@@ -416,7 +414,7 @@ class BuildFirmwareArchiveTest(cros_test_lib.TempDirTestCase):
         artifacts.BuildFirmwareArchive(chroot, sysroot, fw_test_root))
 
     # Verify the tarball contents.
-    cros_test_lib.VerifyTarball(tarball, fw_archived_files)
+    cros_test_lib.VerifyTarball(tarball, fw_files)
 
 
 class BundleAFDOGenerationArtifacts(cros_test_lib.MockTempDirTestCase):
