@@ -1176,6 +1176,7 @@ class GSContext(object):
       raise TypeError('"recurse" has been renamed to "recursive"')
     if recursive:
       cmd.append('-R')
+    cmd.append('--')
     cmd.append(path)
     try:
       self.DoCommand(cmd, **kwargs)

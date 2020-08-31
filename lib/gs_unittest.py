@@ -631,7 +631,7 @@ class RemoveTest(AbstractGSContextTest):
 
   def testMissing(self):
     """Test behavior w/missing files."""
-    self.gs_mock.AddCmdResult(['rm', 'gs://foo/bar'],
+    self.gs_mock.AddCmdResult(['rm', '--', 'gs://foo/bar'],
                               error='CommandException: No URLs matched: '
                                     'gs://foo/bar',
                               returncode=1)
