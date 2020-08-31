@@ -170,7 +170,7 @@ Examples:
 
     full_version = cros_chrome_sdk.SDKFetcher.GetCachedFullVersion(
         self.options.cache_dir or path_util.GetCacheDir(), board) or 'latest'
-    logging.debug('Using default version %s', full_version)
+    logging.notice('CrOS SDK version: %s', full_version)
     return full_version
 
   def Run(self):
