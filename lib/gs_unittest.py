@@ -61,7 +61,9 @@ PreconditionException: 412 Precondition Failed"""
     tempfile = os.path.join(self.tempdir, 'tempfile')
     osutils.WriteFile(tempfile, 'some content')
     gsutil_path = os.path.join(self.tempdir, gs.GSContext.GSUTIL_TAR)
-    cros_build_lib.CreateTarball(gsutil_path, self.tempdir, inputs=[tempfile])
+    cros_build_lib.CreateTarball(
+        gsutil_path, self.tempdir, inputs=[os.path.basename(tempfile)],
+        compression=cros_build_lib.COMP_NONE)
     self.GSUTIL_URL = 'file://%s' % gsutil_path
 
   def PreStart(self):
