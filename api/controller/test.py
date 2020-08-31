@@ -208,7 +208,7 @@ def VmTest(input_proto, _output_proto, _config):
   # TODO(evanhernandez): Find a nice way to pass test_that-args through
   # the build API. Or obviate them.
   if test_harness == test_pb2.VmTestRequest.AUTOTEST:
-    cmd.append('--test_that-args=--whitelist-chrome-crashes')
+    cmd.append('--test_that-args=--allow-chrome-crashes')
 
   with osutils.TempDir(prefix='vm-test-results.') as results_dir:
     cmd.extend(['--results-dir', results_dir])

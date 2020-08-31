@@ -416,13 +416,13 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
                             constants.CHROOT_SOURCE_ROOT, path)
     )
 
-  def _RunTestSuite(self, test_config, whitelist_chrome_crashes=False):
+  def _RunTestSuite(self, test_config, allow_chrome_crashes=False):
     vm_test_stages.RunTestSuite(
         self.BUILD_ROOT,
         self.TEST_BOARD,
         self.TEST_IMAGE_OUTSIDE_CHROOT,
         self.RESULTS_DIR,
-        whitelist_chrome_crashes=whitelist_chrome_crashes,
+        allow_chrome_crashes=allow_chrome_crashes,
         test_config=test_config,
         ssh_private_key=self.PRIVATE_KEY_OUTSIDE_CHROOT,
         ssh_port=self.SSH_PORT)
@@ -484,16 +484,16 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
         constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)
     self._RunTestSuite(config)
     self.assertCommandContains(['--autotest=suite:smoke'])
-    self.assertCommandContains(['---test_that-args=-whitelist_chrome_crashes'],
+    self.assertCommandContains(['---test_that-args=-allow_chrome_crashes'],
                                expected=False)
 
   def testWhitelistChromeCrashes(self):
-    """Test SMOKE config with whitelisting chrome crashes."""
+    """Test SMOKE config with allowing chrome crashes."""
     config = config_lib.VMTestConfig(
         constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)
-    self._RunTestSuite(config, whitelist_chrome_crashes=True)
+    self._RunTestSuite(config, allow_chrome_crashes=True)
     self.assertCommandContains(['--autotest=suite:smoke'])
-    self.assertCommandContains(['--test_that-args=--whitelist-chrome-crashes'])
+    self.assertCommandContains(['--test_that-args=--allow-chrome-crashes'])
 
 
 class UnmockedTests(cros_test_lib.TempDirTestCase):

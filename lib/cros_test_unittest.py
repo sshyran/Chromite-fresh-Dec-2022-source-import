@@ -302,7 +302,7 @@ class CrOSTesterAutotest(CrOSTesterBase):
     self._tester._device.ssh_port = None
     self._tester._device.device = '100.90.29.199'
     self._tester.test_that_args = ['--test_that-args',
-                                   '--whitelist-chrome-crashes']
+                                   '--allow-chrome-crashes']
 
     cwd = os.path.join('/mnt/host/source',
                        os.path.relpath(os.getcwd(), constants.SOURCE_ROOT))
@@ -314,7 +314,7 @@ class CrOSTesterAutotest(CrOSTesterBase):
     self.assertCommandCalled(
         ['test_that', '--board', 'amd64-generic', '--results_dir',
          test_results_dir, '--ssh_private_key', testing_rsa_dir, '--debug',
-         '--whitelist-chrome-crashes', '--no-quickmerge', '--ssh_options',
+         '--allow-chrome-crashes', '--no-quickmerge', '--ssh_options',
          '-F /dev/null -i /dev/null', '100.90.29.199', 'accessibility_Sanity'],
         dryrun=False, enter_chroot=True)
 

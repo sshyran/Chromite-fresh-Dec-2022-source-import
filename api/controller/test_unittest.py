@@ -502,7 +502,7 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
         '--autotest', 'suite',
         '--ssh-port', '1234',
         '--private-key', '/path/to/id_rsa',
-        '--test_that-args=--whitelist-chrome-crashes',
+        '--test_that-args=--allow-chrome-crashes',
     ])
 
   def testMissingBuildTarget(self):

@@ -254,7 +254,7 @@ class VMTestStage(generic_stages.BoardSpecificBuilderStage,
           image_path,
           os.path.join(test_results_dir, 'test_harness'),
           test_config=test_config,
-          whitelist_chrome_crashes=self._chrome_rev is None,
+          allow_chrome_crashes=self._chrome_rev is None,
           ssh_private_key=ssh_private_key,
           ssh_port=self._ssh_port)
 
@@ -377,7 +377,7 @@ class GCETestStage(VMTestStage):
         image_path,
         os.path.join(test_results_dir, 'test_harness'),
         test_config=test_config,
-        whitelist_chrome_crashes=self._chrome_rev is None,
+        allow_chrome_crashes=self._chrome_rev is None,
         ssh_private_key=ssh_private_key,
         ssh_port=self._ssh_port)
 
@@ -782,18 +782,18 @@ def RunTestSuite(buildroot,
                  image_path,
                  results_dir,
                  test_config,
-                 whitelist_chrome_crashes,
+                 allow_chrome_crashes,
                  ssh_private_key=None,
                  ssh_port=9228):
   """Runs the test harness suite."""
   if (test_config.use_ctest or
       test_config.test_type != constants.VM_SUITE_TEST_TYPE):
     _RunTestSuiteUsingCtest(buildroot, board, image_path, results_dir,
-                            test_config, whitelist_chrome_crashes,
+                            test_config, allow_chrome_crashes,
                             ssh_private_key, ssh_port)
   else:
     _RunTestSuiteUsingChromite(board, image_path, results_dir, test_config,
-                               whitelist_chrome_crashes, ssh_private_key,
+                               allow_chrome_crashes, ssh_private_key,
                                ssh_port)
 
 
@@ -803,7 +803,7 @@ def _RunTestSuiteUsingChromite(board,
                                image_path,
                                results_dir,
                                test_config,
-                               whitelist_chrome_crashes,
+                               allow_chrome_crashes,
                                ssh_private_key=None,
                                ssh_port=9228):
   """Runs the test harness suite using the chromite code path."""
@@ -820,8 +820,8 @@ def _RunTestSuiteUsingChromite(board,
       '--results-dir=%s' % results_dir,
   ]
 
-  if whitelist_chrome_crashes:
-    cmd.append('--test_that-args=--whitelist-chrome-crashes')
+  if allow_chrome_crashes:
+    cmd.append('--test_that-args=--allow-chrome-crashes')
 
   if ssh_private_key is not None:
     cmd.append('--private-key=%s' % path_util.ToChrootPath(ssh_private_key))
@@ -847,7 +847,7 @@ def _RunTestSuiteUsingCtest(buildroot,
                             image_path,
                             results_dir,
                             test_config,
-                            whitelist_chrome_crashes,
+                            allow_chrome_crashes,
                             ssh_private_key=None,
                             ssh_port=9228):
   """Runs the test harness suite using the ctest code path."""
@@ -879,8 +879,8 @@ def _RunTestSuiteUsingCtest(buildroot,
 
   cmd.append('--test_prefix=SimpleTestVerify')
 
-  if whitelist_chrome_crashes:
-    cmd.append('--whitelist_chrome_crashes')
+  if allow_chrome_crashes:
+    cmd.append('--allow_chrome_crashes')
 
   if ssh_private_key is not None:
     cmd.append('--ssh_private_key=%s' % ssh_private_key)
