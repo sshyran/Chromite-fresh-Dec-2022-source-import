@@ -493,13 +493,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
            '--out_file=' + gen.payload_file,
            '--partition_names=' + ':'.join(gen.partition_names),
            '--new_partitions=' + ':'.join(gen.tgt_partitions),
-           '--new_postinstall_config_file=' + gen._postinst_config_file,
-           '--new_channel=dev-channel',
-           '--new_board=x86-alex',
-           '--new_version=1620.0.0',
-           '--new_build_channel=dev-channel',
-           '--new_build_version=1620.0.0',
-           '--new_key=mp-v3']
+           '--new_postinstall_config_file=' + gen._postinst_config_file]
     run_mock.assert_called_once_with(cmd, squawk_wrap=True)
 
   def testGenerateUnsignedPayloadDelta(self):
@@ -519,19 +513,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
            '--out_file=' + gen.payload_file,
            '--partition_names=' + ':'.join(gen.partition_names),
            '--new_partitions=' + ':'.join(gen.tgt_partitions),
-           '--new_channel=dev-channel',
-           '--new_board=x86-alex',
-           '--new_version=4171.0.0',
-           '--new_build_channel=dev-channel',
-           '--new_build_version=4171.0.0',
-           '--new_key=mp-v3',
-           '--old_partitions=' + ':'.join(gen.src_partitions),
-           '--old_channel=dev-channel',
-           '--old_board=x86-alex',
-           '--old_version=1620.0.0',
-           '--old_build_channel=dev-channel',
-           '--old_build_version=1620.0.0',
-           '--old_key=mp-v3']
+           '--old_partitions=' + ':'.join(gen.src_partitions)]
     run_mock.assert_called_once_with(cmd, squawk_wrap=True)
 
   def testGenerateHashes(self):

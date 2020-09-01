@@ -515,7 +515,6 @@ class PaygenPayload(object):
     # Note that the command run here requires sudo access.
     logging.info('Generating unsigned payload as %s', self.payload_file)
 
-    tgt_image = self.payload.tgt_image
     cmd = ['delta_generator',
            '--major_version=2',
            '--out_file=' + path_util.ToChrootPath(self.payload_file),
@@ -528,42 +527,9 @@ class PaygenPayload(object):
       cmd += ['--new_postinstall_config_file=' +
               path_util.ToChrootPath(self._postinst_config_file)]
 
-    if tgt_image.build:
-      # These next 6 parameters are basically optional and the update engine
-      # client ignores them, but we can keep them to identify parameters of a
-      # payload by looking at itself.  Either all of the build options should be
-      # passed or non of them. So, set the default key to 'test' only if it
-      # didn't have a key but it had other build options like channel, board,
-      # etc.
-      cmd += ['--new_channel=' + tgt_image.build.channel,
-              '--new_board=' + tgt_image.build.board,
-              '--new_version=' + tgt_image.build.version,
-              self._BuildArg('--new_build_channel', tgt_image, 'image_channel',
-                             default=tgt_image.build.channel),
-              self._BuildArg('--new_build_version', tgt_image, 'image_version',
-                             default=tgt_image.build.version),
-              self._BuildArg('--new_key', tgt_image, 'key',
-                             default='test' if tgt_image.build.channel else '')]
-
     if self.payload.src_image:
-      src_image = self.payload.src_image
       cmd += ['--old_partitions=' +
               ':'.join(path_util.ToChrootPath(x) for x in self.src_partitions)]
-
-      if src_image.build:
-        # See above comment for new_channel.
-        cmd += ['--old_channel=' + src_image.build.channel,
-                '--old_board=' + src_image.build.board,
-                '--old_version=' + src_image.build.version,
-                self._BuildArg('--old_build_channel', src_image,
-                               'image_channel',
-                               default=src_image.build.channel),
-                self._BuildArg('--old_build_version', src_image,
-                               'image_version',
-                               default=src_image.build.version),
-                self._BuildArg(
-                    '--old_key', src_image, 'key',
-                    default='test' if src_image.build.channel else '')]
 
     # This can take a very long time with no output, so wrap the call.
     self._RunGeneratorCmd(cmd, squawk_wrap=True)
