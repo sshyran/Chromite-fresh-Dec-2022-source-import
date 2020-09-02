@@ -1862,7 +1862,8 @@ def GetNonUniBuildLabBoardName(board):
   # We strip those string from the board so that lab can handle it correctly.
   SPECIAL_SUFFIX = [
       '-arcnext$', '-arcvm$', '-arc-r$', '-arc-r-userdebug$', '-blueznext$',
-      '-kernelnext$', '-kvm$', '-ndktranslation$', '-cfm$', '-campfire$'
+      '-kernelnext$', '-kvm$', '-ndktranslation$', '-cfm$', '-campfire$',
+      '-borealis$',
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
