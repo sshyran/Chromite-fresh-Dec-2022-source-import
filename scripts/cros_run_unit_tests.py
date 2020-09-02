@@ -71,6 +71,12 @@ def ParseArgs(argv):
       type=int,
       default=multiprocessing.cpu_count(),
       help='The limit for the number of possible concurrent jobs.')
+  parser.add_argument(
+      '--no-testable-packages-ok',
+      default=False,
+      action='store_true',
+      dest='testable_packages_optional',
+      help="If specified, don't fail if no testable packages are found.")
 
   options = parser.parse_args(argv)
   options.Freeze()
@@ -128,6 +134,9 @@ def main(argv):
                     '\n  '.join(sorted(packages - pkg_with_test)))
 
   if not pkg_with_test:
+    if opts.testable_packages_optional:
+      logging.warning('No testable packages found!')
+      return 0
     logging.error('No testable packages found!')
     return 1
 
