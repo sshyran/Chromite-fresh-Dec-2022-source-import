@@ -467,6 +467,61 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     # Verify call to determine_android_target passes a board name.
     android_target_mock.assert_called_with('betty')
 
+  def testGetTargetVersionsWithPackagesSet(self):
+    """Verify packages pass through and basic return values."""
+    # TODO(crbug.com/1124393): Migrate this test to use portage_testables
+    # rather than mocking the boundary to portage calls such as
+    # packages_service.builds).
+    builds_mock = self.PatchObject(packages_service, 'builds',
+                                   return_value=True)
+    # Mock that chrome is built and set the chrome_version.
+    chrome_version = '76.0.1.2'
+    self.PatchObject(packages_service, 'determine_chrome_version',
+                     return_value=chrome_version)
+    android_version = 'android_test_version'
+    self.PatchObject(packages_service, 'determine_android_version',
+                     return_value=android_version)
+    android_branch = 'android_test_branch'
+    self.PatchObject(packages_service, 'determine_android_branch',
+                     return_value=android_branch)
+    android_target = 'android_test_target'
+    self.PatchObject(packages_service, 'determine_android_target',
+                     return_value=android_target)
+    platform_version = '12345.1.2'
+    self.PatchObject(packages_service, 'determine_platform_version',
+                     return_value=platform_version)
+    milestone_version = '79'
+    self.PatchObject(packages_service, 'determine_milestone_version',
+                     return_value=milestone_version)
+    full_version = 'R79-12345.1.2'
+    self.PatchObject(packages_service, 'determine_full_version',
+                     return_value=full_version)
+    request = self._GetRequest(board='betty')
+    # Add optional packages to the request.
+    cpv_package_list = []
+    package = request.packages.add()
+    package.package_name = 'test'
+    package.category = 'chromeos-base'
+    package.version = '0.0.1-r1'
+    cpv_package_list.append(controller_util.PackageInfoToCPV(package))
+    package = request.packages.add()
+    package.package_name = 'target-fuzzers'
+    package.category = 'virtual'
+    cpv_package_list.append(controller_util.PackageInfoToCPV(package))
+
+    packages_controller.GetTargetVersions(request, self.response,
+                                          self.api_config)
+    self.assertEqual(self.response.android_version, android_version)
+    self.assertEqual(self.response.android_branch_version, android_branch)
+    self.assertEqual(self.response.android_target_version, android_target)
+    self.assertEqual(self.response.chrome_version, chrome_version)
+    self.assertEqual(self.response.platform_version, platform_version)
+    self.assertEqual(self.response.milestone_version, milestone_version)
+    # Verify call to packages.builds passes the package list.
+    builds_mock.assert_called_with(constants.CHROME_CP,
+                                   mock.ANY,  # Match the build target object
+                                   packages=cpv_package_list)
+
   def testGetTargetVersionNoAndroidNoChrome(self):
     """Verify return values on a board that does not have android."""
     platform_version = '12345.1.2'

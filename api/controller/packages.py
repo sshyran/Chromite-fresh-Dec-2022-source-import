@@ -179,7 +179,16 @@ def GetTargetVersions(input_proto, output_proto, _config):
 
   # TODO(crbug/1019770): Investigate cases where builds_chrome is true but
   # chrome_version is None.
-  builds_chrome = packages.builds(constants.CHROME_CP, build_target)
+
+  # If input_proto.packages is empty, then the default set of packages will
+  # be used as defined in dependency.GetBuildDependency.
+  package_list = None
+  if input_proto.packages:
+    package_list = [
+        controller_util.PackageInfoToCPV(x) for x in input_proto.packages
+    ]
+  builds_chrome = packages.builds(constants.CHROME_CP, build_target,
+                                  packages=package_list)
   if builds_chrome:
     # Chrome version fetch.
     chrome_version = packages.determine_chrome_version(build_target)
