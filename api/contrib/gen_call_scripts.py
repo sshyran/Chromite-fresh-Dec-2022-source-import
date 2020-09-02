@@ -29,6 +29,7 @@ import sys
 from chromite.api import message_util
 from chromite.api import router as router_lib
 from chromite.api.gen.chromite.api import build_api_config_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
@@ -160,8 +161,7 @@ def GetParser():
   parser.add_argument(
       '-b',
       '--build-target',
-      type='build_target',
-      dest='build_target',
+      dest='build_target_name',
       default='amd64-generic',
       help='Generate the configs with the given build target. Implies --force '
            'when generating for a new build target. Defaults to amd64-generic.')
@@ -200,6 +200,7 @@ def _ParseArgs(argv):
   parser = GetParser()
   opts = parser.parse_args(argv)
 
+  opts.build_target = build_target_lib.BuildTarget(opts.build_target_name)
   opts.force = opts.force or opts.build_target.name != read_build_target_file()
 
   opts.Freeze()

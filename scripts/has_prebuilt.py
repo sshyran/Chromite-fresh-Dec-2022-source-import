@@ -30,7 +30,7 @@ def GetParser():
   parser.add_argument(
       '-b',
       '--build-target',
-      type='build_target',
+      dest='build_target_name',
       help='The build target that is being checked.')
   parser.add_argument(
       '--output',
@@ -71,7 +71,7 @@ def main(argv):
   opts = _ParseArguments(argv)
   cros_build_lib.AssertInsideChroot()
 
-  board = opts.build_target.name if opts.build_target else None
+  board = opts.build_target_name
   bests = {}
   for cpv in opts.packages:
     bests[cpv.cp] = portage_util.PortageqBestVisible(cpv.cp, board=board)

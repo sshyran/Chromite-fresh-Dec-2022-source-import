@@ -16,6 +16,7 @@ from __future__ import print_function
 import sys
 
 from chromite.cli import command
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import terminal
@@ -94,8 +95,7 @@ Examples:
         '-b',
         '--board',
         '--build-target',
-        dest='build_target',
-        type='build_target',
+        dest='build_target_name',
         help='The name of the build target whose package is being worked on.')
     target_group.add_argument(
         '--host',
@@ -124,6 +124,12 @@ Examples:
     return parser
 
   def Run(self):
+    if self.options.build_target_name:
+      self.options.build_target = build_target_lib.BuildTarget(
+          self.options.build_target_name)
+    else:
+      self.options.build_target = None
+
     self.options.Freeze()
 
     has_target = self.options.host or self.options.build_target
