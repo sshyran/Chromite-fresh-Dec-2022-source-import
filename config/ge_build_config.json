@@ -2364,7 +2364,23 @@
       "models": [
         {
           "board_name": "jacuzzi",
+          "name": "burnet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 401,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi",
           "name": "damu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 401,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi",
+          "name": "esche",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 401,
