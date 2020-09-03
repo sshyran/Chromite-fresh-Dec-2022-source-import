@@ -13,6 +13,7 @@ import sys
 
 from chromite.api import api_config
 from chromite.api import controller
+from chromite.api.controller import controller_util
 from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -446,7 +447,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
   def _InputProto(self, build_target=None, sysroot_path=None,
                   build_source=False, goma_dir=None, goma_log_dir=None,
                   goma_stats_file=None, goma_counterz_file=None,
-                  package_indexes=None):
+                  package_indexes=None, packages=None):
     """Helper to build an input proto instance."""
     instance = sysroot_pb2.InstallPackagesRequest()
 
@@ -466,7 +467,11 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       instance.goma_config.counterz_file = goma_counterz_file
     if package_indexes:
       instance.package_indexes.extend(package_indexes)
-
+    if packages:
+      for pkg in packages:
+        pkg_info = instance.packages.add()
+        cpv = portage_util.SplitCPV(pkg, strict=False)
+        controller_util.CPVToPackageInfo(cpv, pkg_info)
     return instance
 
   def _OutputProto(self):
@@ -551,6 +556,14 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
                                 sysroot_path=self.sysroot)
     self.PatchObject(sysroot_lib.Sysroot, 'IsToolchainInstalled',
                      return_value=False)
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      sysroot_controller.InstallPackages(in_proto, out_proto, self.api_config)
+
+  def testArgumentValidationInvalidPackage(self):
+    out_proto = self._OutputProto()
+    in_proto = self._InputProto(build_target=self.build_target,
+                                sysroot_path=self.sysroot,
+                                packages=['package-1.0.0-r2'])
     with self.assertRaises(cros_build_lib.DieSystemExit):
       sysroot_controller.InstallPackages(in_proto, out_proto, self.api_config)
 

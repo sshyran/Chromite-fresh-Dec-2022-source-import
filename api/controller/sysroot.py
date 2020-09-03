@@ -162,8 +162,15 @@ def InstallPackages(input_proto, output_proto, _config):
   target_sysroot = sysroot_lib.Sysroot(input_proto.sysroot.path)
   build_target = controller_util.ParseBuildTarget(
       input_proto.sysroot.build_target)
-  packages = [controller_util.PackageInfoToString(x)
+
+  # Get the package atom for each specified package. The field is optional, so
+  # error only when we cannot parse an atom for each of the given packages.
+  packages = [controller_util.PackageInfoToCPV(x).cp
               for x in input_proto.packages]
+  if input_proto.packages and not all(packages):
+    cros_build_lib.Die(
+        'Invalid package(s) specified. Unable to parse atom from all packages.')
+
   package_indexes = [
       binpkg.PackageIndexInfo.from_protobuf(x)
       for x in input_proto.package_indexes
