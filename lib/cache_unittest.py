@@ -326,3 +326,14 @@ class UntarTest(cros_test_lib.RunCommandTestCase):
     cache.Untar('/some/tarball.tar.xz', '/')
     self.assertCommandContains(
         ['tar', '-I', '/bin/custom/xz', '-xpf', '/some/tarball.tar.xz'])
+
+  @mock.patch('chromite.lib.cros_build_lib.CompressionExtToType')
+  @mock.patch('chromite.lib.cros_build_lib.FindCompressor')
+  def testPbzip2Compression(self, mock_find_compressor, mock_compression_type):
+    """Tests decompressing a tarball using pbzip2."""
+    mock_compression_type.return_value = 'some-compression'
+    mock_find_compressor.return_value = '/bin/custom/pbzip2'
+    cache.Untar('/some/tarball.tbz2', '/')
+    self.assertCommandContains(
+        ['tar', '-I', '/bin/custom/pbzip2 --ignore-trailing-garbage=1',
+         '-xpf', '/some/tarball.tbz2'])
