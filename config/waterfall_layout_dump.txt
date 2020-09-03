@@ -111,6 +111,8 @@
     terra-factory-strago-7458.B-factorybranch
     ultima-factory-strago-7458.B-factorybranch
     wizpig-factory-strago-7458.B-factorybranch
+  factory-trogdor-13443.B-buildspec
+    trogdor-factory-trogdor-13443.B-factorybranch
   factory-veyron-6591.B-buildspec
     veyron_jaq-factory-veyron-6591.B-factorybranch
     veyron_jerry-factory-veyron-6591.B-factorybranch
@@ -931,6 +933,8 @@
     terra-factory-strago-7458.B-factorybranch-tryjob
     ultima-factory-strago-7458.B-factorybranch-tryjob
     wizpig-factory-strago-7458.B-factorybranch-tryjob
+  factory-trogdor-13443.B-buildspec-tryjob
+    trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   factory-veyron-6591.B-buildspec-tryjob
     veyron_jaq-factory-veyron-6591.B-factorybranch-tryjob
     veyron_jerry-factory-veyron-6591.B-factorybranch-tryjob
@@ -1848,6 +1852,7 @@
   tidus-payloads-tryjob
   tidus-release-tryjob
   tidus-unittest-stress
+  trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-llvm-next-toolchain-tryjob
   trogdor-llvm-toolchain-tryjob
