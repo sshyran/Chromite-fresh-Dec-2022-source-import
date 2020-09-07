@@ -275,40 +275,6 @@ class ProjectCheckout(dict):
       remote = self['remote']
       raise AssertionError('Remote %s is not pushable.' % (remote,))
 
-  def IsBranchableProject(self):
-    """Return whether we can create a branch in the repo for this project."""
-    # Backwards compatibility is an issue here. Older manifests used a heuristic
-    # based on where the project is hosted. We must continue supporting it.
-    # (crbug.com/470690)
-    # Prefer explicit tagging.
-    if (self[constants.MANIFEST_ATTR_BRANCHING] ==
-        constants.MANIFEST_ATTR_BRANCHING_CREATE):
-      return True
-    if self[constants.MANIFEST_ATTR_BRANCHING] in (
-        constants.MANIFEST_ATTR_BRANCHING_PIN,
-        constants.MANIFEST_ATTR_BRANCHING_TOT):
-      return False
-
-    # Old heuristic.
-    site_params = config_lib.GetSiteParams()
-    if (self['remote'] not in site_params.CROS_REMOTES or
-        self['remote'] not in site_params.BRANCHABLE_PROJECTS):
-      return False
-    return re.match(site_params.BRANCHABLE_PROJECTS[self['remote']],
-                    self['name'])
-
-  def IsPinnableProject(self):
-    """Return whether we should pin to a revision on the CrOS branch."""
-    # Backwards compatibility is an issue here. Older manifests used a different
-    # tag to spcify pinning behaviour. Support both for now. (crbug.com/470690)
-    # Prefer explicit tagging.
-    if self[constants.MANIFEST_ATTR_BRANCHING] != '':
-      return (self[constants.MANIFEST_ATTR_BRANCHING] ==
-              constants.MANIFEST_ATTR_BRANCHING_PIN)
-
-    # Old heuristic.
-    return cros_build_lib.BooleanShellValue(self.get('pin'), True)
-
   def GetPath(self, absolute=False):
     """Get the path to the checkout.
 
