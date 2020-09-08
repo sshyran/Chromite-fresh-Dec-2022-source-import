@@ -4634,14 +4634,7 @@
           "name": "faffy",
           "test_suites": [
             "sanity",
-            "bvt-inline",
-            "bvt-tast-cq",
-            "bvt-installer",
-            "bvt-arc",
-            "au",
-            "bvt-cq",
-            "bvt-perbuild",
-            "bvt-tast-informational"
+            "au"
           ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -4734,14 +4727,7 @@
           "name": "wyvern",
           "test_suites": [
             "sanity",
-            "bvt-inline",
-            "bvt-tast-cq",
-            "bvt-installer",
-            "bvt-arc",
-            "au",
-            "bvt-cq",
-            "bvt-perbuild",
-            "bvt-tast-informational"
+            "au"
           ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
