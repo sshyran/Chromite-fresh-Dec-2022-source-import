@@ -43,7 +43,7 @@ UPGRADED = 'Upgraded'
 STANDARD_BOARD_ARCHS = set(('amd64', 'arm'))
 
 # Files we do not include in our upgrades by convention.
-BLACKLISTED_FILES = set(['Manifest', 'ChangeLog*'])
+IGNORE_FILES = set(['Manifest', 'ChangeLog*'])
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -735,13 +735,13 @@ class Upgrader(object):
 
     osutils.SafeMakedirs(pkgdir)
 
-    # Grab all non-blacklisted, non-ebuilds from upstream plus the specific
+    # Grab all non-ignored, non-ebuilds from upstream plus the specific
     # ebuild requested.
     items = os.listdir(upstream_pkgdir)
     for item in items:
-      blacklisted = [b for b in BLACKLISTED_FILES
-                     if fnmatch.fnmatch(os.path.basename(item), b)]
-      if not blacklisted:
+      ignored = [x for x in IGNORE_FILES
+                 if fnmatch.fnmatch(os.path.basename(item), x)]
+      if not ignored:
         if not item.endswith('.ebuild') or item == ebuild:
           src = os.path.join(upstream_pkgdir, item)
           dst = os.path.join(pkgdir, item)
