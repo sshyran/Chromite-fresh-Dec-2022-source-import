@@ -74,10 +74,10 @@ def _GuessMimeType(magic_obj, file_name):
   return mime_type
 
 
-class BlacklistTest(image_test_lib.ImageTestCase):
-  """Verify that rootfs does not contain blacklisted items."""
+class BlockedTest(image_test_lib.ImageTestCase):
+  """Verify that rootfs does not contain blocked items."""
 
-  BLACKLISTED_PACKAGES = (
+  BLOCKED_PACKAGES = (
       'app-text/iso-codes',
       'dev-java/icedtea',
       'dev-java/icedtea6-bin',
@@ -89,7 +89,7 @@ class BlacklistTest(image_test_lib.ImageTestCase):
       'x11-libs/libxklavier',
   )
 
-  BLACKLISTED_FILES = (
+  BLOCKED_FILES = (
       '/usr/bin/java',
       '/usr/bin/javac',
       '/usr/bin/perl',
@@ -97,21 +97,26 @@ class BlacklistTest(image_test_lib.ImageTestCase):
       '/usr/bin/tclsh',
   )
 
-  def TestBlacklistedDirectories(self):
-    dirs = [os.path.join(image_test_lib.ROOT_A, 'usr', 'share', 'locale')]
-    for d in dirs:
-      self.assertFalse(os.path.isdir(d), 'Directory %s is blacklisted.' % d)
+  BLOCKED_DIRS = (
+      '/usr/share/locale',
+  )
 
-  def TestBlacklistedFileTypes(self):
+  def TestBlockedDirectories(self):
+    for path in self.BLOCKED_DIRS:
+      full_path = os.path.join(image_test_lib.ROOT_A, path.lstrip(os.sep))
+      self.assertFalse(os.path.isdir(full_path),
+                       'Directory %s is not allowed.' % path)
+
+  def TestBlockedFileTypes(self):
     """Fail if there are files of prohibited types (such as C++ source code).
 
-    The whitelist has higher precedence than the blacklist.
+    The allow list has higher precedence than the block list.
     """
-    blacklisted_patterns = [re.compile(x) for x in [
+    blocked_patterns = [re.compile(x) for x in [
         r'text/x-c\+\+',
         r'text/x-c',
     ]]
-    whitelisted_patterns = [re.compile(x) for x in [
+    allowed_patterns = [re.compile(x) for x in [
         r'.*/braille/.*',
         r'.*/brltty/.*',
         r'.*/etc/sudoers$',
@@ -142,24 +147,24 @@ class BlacklistTest(image_test_lib.ImageTestCase):
           continue
 
         mime_type = _GuessMimeType(magic_obj, full_name)
-        if (any(x.match(mime_type) for x in blacklisted_patterns) and not
-            any(x.match(full_name) for x in whitelisted_patterns)):
-          failures.append('File %s has blacklisted type %s.' %
+        if (any(x.match(mime_type) for x in blocked_patterns) and not
+            any(x.match(full_name) for x in allowed_patterns)):
+          failures.append('File %s type %s is not allowed.' %
                           (full_name, mime_type))
     magic_obj.close()
 
     self.assertFalse(failures, '\n'.join(failures))
 
-  def TestBlacklistedPackages(self):
-    """Fail if any blacklisted packages are installed."""
-    for package in self.BLACKLISTED_PACKAGES:
+  def TestBlockedPackages(self):
+    """Fail if any blocked packages are installed."""
+    for package in self.BLOCKED_PACKAGES:
       self.assertFalse(
           portage_util.PortageqHasVersion(
               package, sysroot=image_test_lib.ROOT_A))
 
-  def TestBlacklistedFiles(self):
-    """Fail if any blacklisted files exist."""
-    for path in self.BLACKLISTED_FILES:
+  def TestBlockedFiles(self):
+    """Fail if any blocked files exist."""
+    for path in self.BLOCKED_FILES:
       full_path = os.path.join(image_test_lib.ROOT_A, path.lstrip(os.sep))
       # TODO(saklein) Convert ImageTestCase to extend cros_build_lib.unittest
       # and change to an assertNotExists. Currently produces an error importing
@@ -386,7 +391,7 @@ class SymbolsTest(image_test_lib.ImageTestCase):
     # All exported symbols.
     exported = set()
 
-    # Whitelist firmware binaries which are mostly provided by various
+    # Allow firmware binaries which are mostly provided by various
     # vendors, some in proprietary format. This is OK because the files are
     # not executable on the main CPU, so we treat them as blobs that we load
     # into external hardware/devices. This is ensured by PermissionTest.
@@ -639,11 +644,11 @@ class UserGroupTest(image_test_lib.ImageTestCase):
     self.assertTrue(success)
 
   def TestUsers(self):
-    """Enforces a whitelist of known user IDs."""
+    """Enforces known user IDs."""
     self._CheckFile('passwd')
 
   def TestGroups(self):
-    """Enforces a whitelist of known group IDs."""
+    """Enforces known group IDs."""
     self._CheckFile('group')
 
 
@@ -654,18 +659,18 @@ class CroshTest(image_test_lib.ImageTestCase):
   CROSH_DIR = 'usr/share/crosh'
 
   def TestUnknownModules(self):
-    """Only permit a whitelist of known, allowed crosh modules on the system."""
+    """Only permit known crosh modules on the system."""
     # Do *not* add modules to this list until they've been reviewed by security
     # or someone in the crosh/OWNERS list.  Insecure code here can easily cause
     # compromise of CrOS system security in verified mode.  It has happened.
-    WHITELIST = {
+    ALLOWED = {
         'dev.d': {'50-crosh.sh'},
         'extra.d': set(),
         'removable.d': {'50-crosh.sh'},
     }
 
     base_path = os.path.join(image_test_lib.ROOT_A, self.CROSH_DIR)
-    for mod_dir, good_modules in WHITELIST.items():
+    for mod_dir, good_modules in ALLOWED.items():
       mod_path = os.path.join(base_path, mod_dir)
       if not os.path.exists(mod_path):
         continue
@@ -780,7 +785,7 @@ class PermissionTest(image_test_lib.ImageTestCase):
   def TestNoExecutableInFirmwareFolder(self):
     """Ensure all files in ROOT-A/lib/firmware are not executable.
 
-    Files under ROOT-A/lib/firmware will be whitelisted in
+    Files under ROOT-A/lib/firmware will be allowed in
     "TestImportedSymbolsAreAvailable".
     """
     firmware_path = os.path.join(image_test_lib.ROOT_A, 'lib', 'firmware')
