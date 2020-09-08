@@ -10,7 +10,6 @@ For a description of AFDO see gcc.gnu.org/wiki/AutoFDO.
 
 from __future__ import print_function
 
-import bisect
 import collections
 import datetime
 import glob
@@ -24,9 +23,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import (failures_lib, git, gs, osutils, path_util,
                           timeout_util)
 
-
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
 
 # AFDO-specific constants.
 AFDO_SUFFIX = '.afdo'
@@ -1082,15 +1079,21 @@ def FindLatestProfile(target, versions):
 
   Args:
     target: the target version
-    versions: a list of versions
+    versions: a list of versions, and should be sorted
 
   Returns:
     latest profile that is older than the target
   """
-  cand = bisect.bisect(versions, target) - 1
-  if cand >= 0:
-    return versions[cand]
-  return None
+  # Versions are sorted, and target doesn't have a timestamp. Since we just
+  # want to find out the newest profile that is older than the target, we
+  # just essentially want to find out the largest profile with smaller
+  # (milestone, build, patch) tuple.
+  assert len(target) == 3, 'target CWP version should have 3 parts'
+  candidates = [x for x in versions
+                if (x[0], x[1], x[2]) < tuple(target)]
+  if len(candidates) == 0:
+    return None
+  return candidates[-1]
 
 
 def PatchKernelEbuild(filename, version):
@@ -1176,7 +1179,8 @@ def GetCWPProfile(cpv, source, _buildroot, gs_context):
     logging.info('profile not found for: %s', cpv.version)
     return None
 
-  versions.sort()
+  # crbug.com/984153: Sort the CWP profiles only by (milestone, timestamp)
+  versions.sort(key=lambda x: (x[0], x[3]))
   cand = FindLatestProfile(target, versions)
   # reconstruct the filename and strip .xz
   return (CWP_CHROME_PROFILE_NAME_PATTERN % tuple(cand))[:-3]
@@ -1206,7 +1210,8 @@ def GetAvailableKernelProfiles():
   for m in matches:
     versions.setdefault(m.group(1), []).append([int(x) for x in m.groups()[1:]])
   for v in versions:
-    versions[v].sort()
+    # crbug.com/984153: Sort the kernel profiles only by (milestone, timestamp)
+    versions[v].sort(key=lambda x: (x[0], x[3]))
   return versions
 
 

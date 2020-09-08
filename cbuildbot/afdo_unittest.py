@@ -21,12 +21,10 @@ import time
 
 import mock
 from chromite.cbuildbot import afdo
-from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils,
-                          path_util, portage_util)
-
+from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils, path_util,
+                          portage_util)
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
 
 MockGsFile = collections.namedtuple('MockGsFile', ['url', 'creation_time'])
 
@@ -644,14 +642,10 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
         ))
 
   def testFindLatestProfile(self):
-    versions = [[1, 0, 0, 0], [1, 2, 3, 4], [2, 2, 2, 2]]
-    self.assertEqual(afdo.FindLatestProfile([0, 0, 0, 0], versions), None)
-    self.assertEqual(
-        afdo.FindLatestProfile([1, 0, 0, 0], versions), [1, 0, 0, 0])
-    self.assertEqual(
-        afdo.FindLatestProfile([1, 2, 0, 0], versions), [1, 0, 0, 0])
-    self.assertEqual(
-        afdo.FindLatestProfile([9, 9, 9, 9], versions), [2, 2, 2, 2])
+    versions = [[1, 0, 0, 0], [1, 2, 3, 4], [2, 3, 4, 1], [2, 2, 2, 2]]
+    self.assertEqual(afdo.FindLatestProfile([1, 0, 0], versions), None)
+    self.assertEqual(afdo.FindLatestProfile([1, 2, 0], versions), [1, 0, 0, 0])
+    self.assertEqual(afdo.FindLatestProfile([9, 9, 9], versions), [2, 2, 2, 2])
 
   def testPatchKernelEbuild(self):
     before = [
@@ -682,14 +676,17 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
           gs.GSListResult(
               url=(path % ('4.4', 'R63-9901.21-1506581597')), **unused),
           gs.GSListResult(
+              url=(path % ('4.4', 'R63-9999.99-1500000000')), **unused),
+          gs.GSListResult(
               url=(path % ('3.8', 'R61-9765.70-1506575230')), **unused),
       ]
 
-    self.PatchObject(gs.GSContext, 'List',
-                     lambda _, path, **kwargs: MockGsList(path))
+    self.PatchObject(gs.GSContext,
+                     'List', lambda _, path, **kwargs: MockGsList(path))
     profiles = afdo.GetAvailableKernelProfiles()
-    self.assertIn([63, 9901, 21, 1506581597], profiles['4.4'])
-    self.assertIn([61, 9765, 70, 1506575230], profiles['3.8'])
+    self.assertEqual([[61, 9765, 70, 1506575230]], profiles['3.8'])
+    self.assertEqual([[63, 9999, 99, 1500000000], [63, 9901, 21, 1506581597]],
+                     profiles['4.4'])
 
   def testFindKernelEbuilds(self):
     ebuilds = [(os.path.basename(ebuild[0]), ebuild[1])
@@ -721,8 +718,8 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
           gs.GSListResult(url=os.path.join(path, f), **unused) for f in profiles
       ]
 
-    self.PatchObject(gs.GSContext, 'List',
-                     lambda _, path, **kwargs: MockGsList(path))
+    self.PatchObject(gs.GSContext,
+                     'List', lambda _, path, **kwargs: MockGsList(path))
 
     def _test(version, idx):
       unused = {
