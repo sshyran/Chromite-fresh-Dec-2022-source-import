@@ -2548,6 +2548,14 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'b/159934902',
       },
 
+      'brya-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Brya has no DUTs in the lab (b/167721012).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/167721012',
+      },
+
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
       },
