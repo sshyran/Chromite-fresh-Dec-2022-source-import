@@ -194,6 +194,18 @@
       ]
     },
     {
+      "name": "brya",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": true,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "bubs",
       "configs": [
         {

@@ -259,6 +259,7 @@
     betty-qt-arc-release
     betty-release
     bob-release
+    brya-release
     bubs-release
     buddy-cfm-release
     buddy-release
@@ -569,6 +570,12 @@
   bob-payloads-tryjob
   bob-release-tryjob
   bob-unittest-stress
+  brya-full-tryjob
+  brya-llvm-next-toolchain-tryjob
+  brya-llvm-toolchain-tryjob
+  brya-payloads-tryjob
+  brya-release-tryjob
+  brya-unittest-stress
   bubs-full-tryjob
   bubs-llvm-next-toolchain-tryjob
   bubs-llvm-toolchain-tryjob
@@ -1395,6 +1402,7 @@
     betty-qt-arc-release-tryjob
     betty-release-tryjob
     bob-release-tryjob
+    brya-release-tryjob
     bubs-release-tryjob
     buddy-cfm-release-tryjob
     buddy-release-tryjob
