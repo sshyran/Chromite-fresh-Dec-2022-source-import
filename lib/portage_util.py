@@ -527,8 +527,11 @@ class EBuild(object):
     workon is determined by whether the ebuild inherits from the
     'cros-workon' eclass. stable is determined by whether there's a '~'
     in the KEYWORDS setting in the ebuild. An ebuild is considered blacklisted
-    if a line in it starts with 'CROS_WORKON_BLACKLIST='
+    if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
     """
+    # TODO(crbug.com/1125947): Drop CROS_WORKON_BLACKLIST.
+    re_manual_uprev = re.compile(
+        r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
     is_workon = False
     is_stable = False
     is_blacklisted = False
@@ -558,7 +561,7 @@ class EBuild(object):
           for keyword in line.split():
             if not keyword.startswith('~') and keyword != '-*':
               is_stable = True
-        elif line.startswith('CROS_WORKON_BLACKLIST='):
+        elif re_manual_uprev.match(line.strip()):
           is_blacklisted = True
         elif (line.startswith('src_test()') or
               line.startswith('platform_pkg_test()') or

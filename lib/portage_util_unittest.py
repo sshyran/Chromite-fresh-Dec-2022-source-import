@@ -184,9 +184,35 @@ inherit cros-workon superpower
     fake_ebuild = self._MakeFakeEbuild(fake_ebuild_path)
     self.assertEqual(fake_ebuild.is_blacklisted, False)
 
-    fake_ebuild = self._MakeFakeEbuild(
-        fake_ebuild_path, fake_ebuild_content=['CROS_WORKON_BLACKLIST="1"\n'])
-    self.assertEqual(fake_ebuild.is_blacklisted, True)
+    PATTERNS = (
+        'CROS_WORKON_BLACKLIST=1',
+        'CROS_WORKON_BLACKLIST="1"',
+        "CROS_WORKON_BLACKLIST='1'",
+        'CROS_WORKON_MANUAL_UPREV=1',
+        'CROS_WORKON_MANUAL_UPREV="1"',
+        "CROS_WORKON_MANUAL_UPREV='1'",
+    )
+    for pattern in PATTERNS:
+      fake_ebuild = self._MakeFakeEbuild(
+          fake_ebuild_path, fake_ebuild_content=[pattern + '\n'])
+      self.assertTrue(fake_ebuild.is_blacklisted, msg=pattern)
+
+  def testEBuildAutoUprev(self):
+    """Test auto uprev ebuild"""
+    basedir = os.path.join(self.tempdir, 'cat', 'test_package')
+    fake_ebuild_path = os.path.join(basedir, 'test_package-9999.ebuild')
+
+    fake_ebuild = self._MakeFakeEbuild(fake_ebuild_path)
+    self.assertEqual(fake_ebuild.is_blacklisted, False)
+
+    PATTERNS = (
+        'CROS_WORKON_MANUAL_UPREV=',
+        'CROS_WORKON_MANUAL_UPREV=0',
+    )
+    for pattern in PATTERNS:
+      fake_ebuild = self._MakeFakeEbuild(
+          fake_ebuild_path, fake_ebuild_content=[pattern + '\n'])
+      self.assertFalse(fake_ebuild.is_blacklisted, msg=pattern)
 
   def testHasTest(self):
     """Tests that we detect test stanzas correctly."""
@@ -1151,7 +1177,7 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
     """Helper that creates an ebuild."""
     package_path = os.path.join(self.overlay, name,
                                 'test_package-0.0.1.ebuild')
-    content = 'CROS_WORKON_BLACKLIST=1' if blacklisted else ''
+    content = 'CROS_WORKON_MANUAL_UPREV=1' if blacklisted else ''
     osutils.WriteFile(package_path, content, makedirs=True)
 
   @staticmethod
@@ -1163,7 +1189,7 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
     """
     for f in files:
       if (f.endswith('.ebuild') and
-          (not 'CROS_WORKON_BLACKLIST=1' in osutils.ReadFile(f) or
+          (not 'CROS_WORKON_MANUAL_UPREV=1' in osutils.ReadFile(f) or
            allow_blacklisted)):
         pkgdir = os.path.dirname(f)
         return _Package(os.path.join(os.path.basename(os.path.dirname(pkgdir)),
