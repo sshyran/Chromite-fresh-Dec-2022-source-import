@@ -5599,6 +5599,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 456,
           "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "woomax",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
         }
       ]
     },
@@ -5655,6 +5663,14 @@
         {
           "board_name": "zork-kernelnext",
           "name": "trembyle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "woomax",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 452,
