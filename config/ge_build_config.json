@@ -3000,6 +3000,10 @@
         {
           "board_name": "hatch-borealis",
           "name": "helios",
+          "test_suites": [
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 453,
