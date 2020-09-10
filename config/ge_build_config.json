@@ -5206,6 +5206,14 @@
         },
         {
           "board_name": "volteer",
+          "name": "eldrid",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
           "name": "halvor",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -5344,6 +5352,14 @@
         {
           "board_name": "volteer-kernelnext",
           "name": "delbin",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "eldrid",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 451,
