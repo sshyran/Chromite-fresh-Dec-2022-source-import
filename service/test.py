@@ -53,7 +53,8 @@ def BuildTargetUnitTest(build_target,
                         packages=None,
                         blacklist=None,
                         was_built=True,
-                        code_coverage=False):
+                        code_coverage=False,
+                        testable_packages_optional=False):
   """Run the ebuild unit tests for the target.
 
   Args:
@@ -64,6 +65,8 @@ def BuildTargetUnitTest(build_target,
     blacklist (list[str]|None): Tests to skip.
     was_built (bool): Whether packages were built.
     code_coverage (bool): Whether to produce code coverage data.
+    testable_packages_optional (bool): Whether to allow no testable packages to
+    be found.
 
   Returns:
     BuildTargetUnitTestResult
@@ -77,6 +80,9 @@ def BuildTargetUnitTest(build_target,
 
   if blacklist:
     cmd.extend(['--blacklist_packages', ' '.join(blacklist)])
+
+  if testable_packages_optional:
+    cmd.append('--no-testable-packages-ok')
 
   if not was_built:
     cmd.append('--assume-empty-sysroot')

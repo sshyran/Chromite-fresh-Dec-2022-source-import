@@ -98,6 +98,12 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
                              blacklist=blacklist)
     self.assertCommandContains(['--blacklist_packages', 'foo/bar cat/pkg'])
 
+  def testTestablePackagesOptional(self):
+    """Test the testable packages optional argument."""
+    test.BuildTargetUnitTest(
+        self.build_target, self.chroot, testable_packages_optional=True)
+    self.assertCommandContains(['--no-testable-packages-ok'])
+
   def testFailure(self):
     """Test non-zero return code and failed package handling."""
     packages = ['foo/bar', 'cat/pkg']

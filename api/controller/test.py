@@ -106,6 +106,9 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   for package_info in blacklisted_package_info:
     blacklist.append(controller_util.PackageInfoToString(package_info))
 
+  # Allow call to succeed if no tests were found.
+  testable_packages_optional = input_proto.flags.testable_packages_optional
+
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   chroot = controller_util.ParseChroot(input_proto.chroot)
 
@@ -117,7 +120,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       packages=packages,
       blacklist=blacklist,
       was_built=was_built,
-      code_coverage=code_coverage)
+      code_coverage=code_coverage,
+      testable_packages_optional=testable_packages_optional)
 
   if not result.success:
     # Failed to run tests or some tests failed.
