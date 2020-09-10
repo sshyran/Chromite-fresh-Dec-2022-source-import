@@ -1547,6 +1547,24 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
     # Verify that we get back an archive file using the specified name.
     self.assertEqual(archive_name, returned_archive_name)
 
+  def testBuildFpmcuUnittestsArchive(self):
+    """Verifies that a tarball with the right name is created."""
+    unittest_files = (
+        'bloonchipper/test_rsa.bin',
+        'dartmonkey/test_utils.bin',
+    )
+    board = 'hatch'
+    unittest_files_root = os.path.join(
+        self.tempdir,
+        'chroot/build/%s/firmware/chromeos-fpmcu-unittests' % board)
+    cros_test_lib.CreateOnDiskHierarchy(unittest_files_root, unittest_files)
+
+    returned_archive_name = commands.BuildFpmcuUnittestsArchive(self.tempdir,
+                                                                board,
+                                                                self.tempdir)
+    self.assertEqual(
+        returned_archive_name,
+        os.path.join(self.tempdir, constants.FPMCU_UNITTESTS_ARCHIVE_NAME))
 
   def findFilesWithPatternExpectedResults(self, root, files):
     """Generate the expected results for testFindFilesWithPattern"""

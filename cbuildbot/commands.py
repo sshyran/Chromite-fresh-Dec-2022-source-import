@@ -3343,6 +3343,25 @@ def BuildFirmwareArchive(buildroot,
     shutil.move(archive_file, os.path.join(archive_dir, archive_name))
     return archive_name
 
+def BuildFpmcuUnittestsArchive(buildroot,
+                               board,
+                               tarball_dir):
+  """Build fpmcu_unittests.tar.bz2 for fingerprint MCU on-device testing.
+
+  Args:
+    buildroot: Root directory where build occurs.
+    board: Board name of build target.
+    tarball_dir: Directory to store output file.
+
+  Returns:
+    The path of the archived file, or None if the target board does
+    not have fingerprint MCU unittest binaries.
+  """
+  sysroot = sysroot_lib.Sysroot(os.path.join('build', board))
+  chroot = chroot_lib.Chroot(path=os.path.join(buildroot, 'chroot'))
+
+  return artifacts_service.BundleFpmcuUnittests(
+      chroot, sysroot, tarball_dir)
 
 def CallBuildApiWithInputProto(buildroot, build_api_command, input_proto):
   """Call BuildApi with the input_proto and buildroot.

@@ -416,6 +416,32 @@ class BuildFirmwareArchiveTest(cros_test_lib.TempDirTestCase):
     # Verify the tarball contents.
     cros_test_lib.VerifyTarball(tarball, fw_files)
 
+class BundleFpmcuUnittestsTest(cros_test_lib.TempDirTestCase):
+  """BundleFpmcuUnittests tests."""
+
+  def testBundleFpmcuUnittests(self):
+    """Verifies that the resulting tarball includes proper files"""
+    unittest_files = (
+        'bloonchipper/test_rsa.bin',
+        'dartmonkey/test_utils.bin',
+    )
+
+    board = 'hatch'
+    unittest_files_root = os.path.join(
+        self.tempdir,
+        'chroot/build/%s/firmware/chromeos-fpmcu-unittests' % board)
+    cros_test_lib.CreateOnDiskHierarchy(unittest_files_root, unittest_files)
+
+    chroot_path = os.path.join(self.tempdir, 'chroot')
+    chroot = chroot_lib.Chroot(path=chroot_path)
+    sysroot = sysroot_lib.Sysroot('/build/%s' % board)
+
+    tarball = os.path.join(
+        self.tempdir,
+        artifacts.BundleFpmcuUnittests(chroot, sysroot, self.tempdir))
+    cros_test_lib.VerifyTarball(
+        tarball,
+        unittest_files + ('bloonchipper/', 'dartmonkey/'))
 
 class BundleAFDOGenerationArtifacts(cros_test_lib.MockTempDirTestCase):
   """BundleAFDOGenerationArtifacts tests."""

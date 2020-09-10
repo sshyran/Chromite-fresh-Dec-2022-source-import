@@ -848,6 +848,7 @@ DELTA_SYSROOT_TAR = 'delta_sysroot.tar.xz'
 DELTA_SYSROOT_BATCH = 'batch'
 
 FIRMWARE_ARCHIVE_NAME = 'firmware_from_source.tar.bz2'
+FPMCU_UNITTESTS_ARCHIVE_NAME = 'fpmcu_unittests.tar.bz2'
 
 # Global configuration constants.
 CHROMITE_CONFIG_DIR = os.path.expanduser('~/.chromite')

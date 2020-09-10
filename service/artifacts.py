@@ -113,6 +113,32 @@ def BuildFirmwareArchive(chroot, sysroot, output_directory):
 
   return archive_file
 
+def BundleFpmcuUnittests(chroot, sysroot, output_directory):
+  """Create artifact tarball for fingerprint MCU on-device unittests.
+
+  Args:
+    chroot (chroot_lib.Chroot): The chroot containing the sysroot.
+    sysroot (sysroot_lib.Sysroot): The sysroot whose artifacts are being
+      archived.
+    output_directory (str): The path were the completed archives should be put.
+
+  Returns:
+    str|None - The archive file path if created, None otherwise.
+  """
+  fpmcu_unittests_root = os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
+                                      'firmware', 'chromeos-fpmcu-unittests')
+  files = [os.path.relpath(f, fpmcu_unittests_root)
+           for f in glob.iglob(os.path.join(fpmcu_unittests_root, '*'))]
+  if not files:
+    return None
+
+  archive_file = os.path.join(output_directory,
+                              constants.FPMCU_UNITTESTS_ARCHIVE_NAME)
+  cros_build_lib.CreateTarball(
+      archive_file, fpmcu_unittests_root, compression=cros_build_lib.COMP_BZIP2,
+      chroot=chroot.path, inputs=files)
+
+  return archive_file
 
 def BundleAutotestFiles(chroot, sysroot, output_directory):
   """Create the Autotest Hardware Test archives.

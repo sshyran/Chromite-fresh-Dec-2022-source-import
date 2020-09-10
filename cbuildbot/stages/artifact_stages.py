@@ -774,6 +774,15 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
       if tarball:
         self.UploadArtifact(tarball)
 
+  def BuildFpmcuUnittestsTarball(self):
+    """Build the tarball containing fingerprint MCU on-device unittests."""
+    with osutils.TempDir(prefix='cbuildbot-fpmcu-unittests') as tempdir:
+      logging.info('Running commands.BuildFpmcuUnittestsArchive')
+      tarball = commands.BuildFpmcuUnittestsArchive(
+          self._build_root, self._current_board, tempdir)
+      if tarball:
+        self.UploadArtifact(tarball)
+
   def _GeneratePayloads(self, image_name, **kwargs):
     """Generate and upload payloads for |image_name|.
 
@@ -827,6 +836,7 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
       steps.append(self.BuildAutotestTarballs)
       steps.append(self.BuildTastTarball)
       steps.append(self.BuildGuestImagesTarball)
+      steps.append(self.BuildFpmcuUnittestsTarball)
 
     parallel.RunParallelSteps(steps)
     # If we encountered any exceptions with any of the steps, they should have
