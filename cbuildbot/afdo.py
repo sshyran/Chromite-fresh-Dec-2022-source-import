@@ -1084,13 +1084,7 @@ def FindLatestProfile(target, versions):
   Returns:
     latest profile that is older than the target
   """
-  # Versions are sorted, and target doesn't have a timestamp. Since we just
-  # want to find out the newest profile that is older than the target, we
-  # just essentially want to find out the largest profile with smaller
-  # (milestone, build, patch) tuple.
-  assert len(target) == 3, 'target CWP version should have 3 parts'
-  candidates = [x for x in versions
-                if (x[0], x[1], x[2]) < tuple(target)]
+  candidates = [x for x in versions if tuple(x) < tuple(target)]
   if len(candidates) == 0:
     return None
   return candidates[-1]
