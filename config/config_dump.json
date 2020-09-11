@@ -22218,7 +22218,6 @@
             "veyron_fievel-release",
             "veyron_rialto-release",
             "veyron_tiger-release",
-            "viking-release",
             "volteer-kernelnext-release",
             "volteer-release",
             "whirlwind-release",
@@ -22425,7 +22424,6 @@
             "veyron_fievel-release-tryjob",
             "veyron_rialto-release-tryjob",
             "veyron_tiger-release-tryjob",
-            "viking-release-tryjob",
             "volteer-kernelnext-release-tryjob",
             "volteer-release-tryjob",
             "whirlwind-release-tryjob",
@@ -32925,7 +32923,6 @@
             "base",
             "test"
         ],
-        "important": false,
         "paygen": false,
         "signer_tests": false,
         "sync_chrome": false,
