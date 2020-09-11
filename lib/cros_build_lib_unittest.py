@@ -17,6 +17,7 @@ import signal
 import socket
 import subprocess
 import sys
+import unittest
 
 import mock
 from six.moves import builtins
@@ -1267,3 +1268,33 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.mockRun.call_count, 3)
     self.assertEqual(cm.exception.args[1].returncode, 1)
+
+
+class OpenTests(cros_test_lib.TempDirTestCase):
+  """Tests for cros_build_lib.Open."""
+
+  def testFile(self):
+    """Read/write a file by path."""
+    path = os.path.join(self.tempdir, 'test.txt')
+    with cros_build_lib.Open(path, mode='w') as fp:
+      fp.write('foo')
+    with cros_build_lib.Open(path, mode='r') as fp:
+      self.assertEqual('foo', fp.read())
+
+  def testHandle(self):
+    """Read/write a file by an open handle."""
+    path = os.path.join(self.tempdir, 'test.txt')
+    with open(path, mode='w') as fp:
+      with cros_build_lib.Open(fp) as fp2:
+        fp2.write('foo')
+    with open(path, mode='r') as fp:
+      with cros_build_lib.Open(fp) as fp2:
+        self.assertEqual('foo', fp2.read())
+
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires py3')
+  def testEncoding(self):
+    """Verify we pass kwargs down."""
+    path = os.path.join(self.tempdir, 'test.txt')
+    with cros_build_lib.Open(path, mode='w', encoding='utf-8') as fp:
+      fp.write(u'ßomß')
+    self.assertEqual(u'ßomß', osutils.ReadFile(path))

@@ -1577,10 +1577,10 @@ def iflatten_instance(iterable,
 
 
 @contextlib.contextmanager
-def Open(obj, mode='r'):
+def Open(obj, mode='r', **kwargs):
   """Convenience ctx that accepts a file path or an already open file object."""
   if isinstance(obj, six.string_types):
-    with open(obj, mode=mode) as f:
+    with open(obj, mode=mode, **kwargs) as f:
       yield f
   else:
     yield obj
