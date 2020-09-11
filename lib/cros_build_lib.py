@@ -1162,14 +1162,7 @@ def CompressFile(infile, outfile):
   comp_type = CompressionExtToType(outfile)
   assert comp_type and comp_type != COMP_NONE
   comp = FindCompressor(comp_type)
-  if os.path.basename(comp) == 'pixz':
-    # pixz does not accept '-c'; instead an explicit '-i' indicates input file
-    # should not be deleted, and '-o' specifies output file.
-    cmd = [comp, '-i', infile, '-o', outfile]
-    run(cmd)
-  else:
-    cmd = [comp, '-c', infile]
-    run(cmd, stdout=outfile)
+  run([comp, '-c', infile], stdout=outfile)
 
 
 def UncompressFile(infile, outfile):
@@ -1183,14 +1176,7 @@ def UncompressFile(infile, outfile):
   comp_type = CompressionExtToType(infile)
   assert comp_type and comp_type != COMP_NONE
   comp = FindCompressor(comp_type)
-  if os.path.basename(comp) == 'pixz':
-    # pixz does not accept '-c'; instead an explicit '-i' indicates input file
-    # should not be deleted, and '-o' specifies output file.
-    cmd = [comp, '-d', '-i', infile, '-o', outfile]
-    run(cmd)
-  else:
-    cmd = [comp, '-dc', infile]
-    run(cmd, stdout=outfile)
+  run([comp, '-dc', infile], stdout=outfile)
 
 
 class CreateTarballError(RunCommandError):

@@ -16,7 +16,6 @@ from chromite.lib import commandline
 from chromite.lib import osutils
 from chromite.utils import memoize
 
-
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
@@ -36,10 +35,17 @@ def GetJobCount():
   return str(int(max(1, multiprocessing.cpu_count() / 2)))
 
 
-def GetDecompressCommand():
+def GetDecompressCommand(stdout):
   """Returns decompression command."""
   if HasPixz():
-    return ['pixz', '-d', '-p', GetJobCount()]
+    cmd = ['pixz', '-d', '-p', GetJobCount()]
+    if stdout:
+      # Explicitly tell pixz the file is the input, so it will dump the output
+      # to stdout, instead of automatically choosing an output name.
+      cmd.append('-i')
+    return cmd
+  if stdout:
+    return ['xz', '-dc']
   return ['xz', '-d']
 
 
@@ -47,17 +53,31 @@ def GetParser():
   """Return a command line parser."""
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument(
-      '-d', '--decompress', '--uncompress',
+      '-d',
+      '--decompress',
+      '--uncompress',
       help='Decompress rather than compress.',
       action='store_true')
+  parser.add_argument(
+      '-c',
+      dest='stdout',
+      action='store_true',
+      help="Write to standard output and don't delete input files.")
   return parser
 
 
 def main(argv):
   parser = GetParser()
   known_args, argv = parser.parse_known_args()
+  if '-i' in argv or '-o' in argv:
+    parser.error('It is invalid to use -i or -o with xz_auto')
+
   # xz doesn't support multi-threaded decompression, so try using pixz for that.
   if known_args.decompress:
-    args = GetDecompressCommand()
+    args = GetDecompressCommand(known_args.stdout)
     os.execvp(args[0], args + argv)
-  os.execvp('xz', ['xz', '-T0'] + argv)
+  else:
+    cmd = ['xz', '-T0']
+    if known_args.stdout:
+      cmd.append('-c')
+    os.execvp(cmd[0], cmd + argv)
