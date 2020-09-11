@@ -120,8 +120,10 @@ def BuildTargetUnitTestTarball(chroot, sysroot, result_path):
   tarball = 'unit_tests.tar'
   tarball_path = os.path.join(result_path, tarball)
 
-  cwd = os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
-                     constants.UNITTEST_PKG_PATH)
+  cwd = chroot.full_path(sysroot.path, constants.UNITTEST_PKG_PATH)
+
+  if not os.path.exists(cwd):
+    return None
 
   result = cros_build_lib.CreateTarball(tarball_path, cwd, chroot=chroot.path,
                                         compression=cros_build_lib.COMP_NONE,
