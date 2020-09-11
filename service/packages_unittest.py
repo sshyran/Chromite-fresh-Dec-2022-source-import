@@ -17,14 +17,16 @@ import pytest
 
 import chromite as cr
 from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
-    REPLICATION_TYPE_FILTER
+  ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
+  REPLICATION_TYPE_FILTER
 )
 from chromite.cbuildbot import manifest_version
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import depgraph
+from chromite.lib import dependency_graph
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -1026,7 +1028,6 @@ class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
                              'usr', 'bin')
     osutils.Touch(os.path.join(build_bin, 'cros_config_host'), makedirs=True)
 
-
   def testGetModels(self):
     """Test get_models."""
     build_target = build_target_lib.BuildTarget(self.board)
@@ -1082,6 +1083,139 @@ class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
   def test_no_refs_returns_none(self):
     """Test no refs supplied."""
     self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)
+
+
+class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
+  """Tests for needs_chrome_source."""
+
+  def _build_graph(self, with_chrome: bool, with_followers: bool):
+    root = '/build/build_target'
+    foo_bar = package_info.parse('foo/bar-1')
+    chrome = package_info.parse(f'{constants.CHROME_CP}-1.2.3.4')
+    followers = [
+        package_info.parse(f'{pkg}-1.2.3.4')
+        for pkg in constants.OTHER_CHROME_PACKAGES
+    ]
+    nodes = [dependency_graph.PackageNode(foo_bar, root)]
+    root_pkgs = ['foo/bar-1']
+    if with_chrome:
+      nodes.append(dependency_graph.PackageNode(chrome, root))
+      root_pkgs.append(chrome.cpvr)
+    if with_followers:
+      nodes.extend([dependency_graph.PackageNode(f, root) for f in followers])
+      root_pkgs.extend([f.cpvr for f in followers])
+
+    return dependency_graph.DependencyGraph(nodes, root, root_pkgs)
+
+  def test_needs_all(self):
+    """Verify we need source when we have no prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+
+  def test_needs_none(self):
+    """Verify not building any of the chrome packages prevents needing it."""
+    graph = self._build_graph(with_chrome=False, with_followers=False)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertFalse(result.needs_chrome_source)
+    self.assertFalse(result.builds_chrome)
+    self.assertFalse(result.packages)
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_needs_chrome_only(self):
+    """Verify only chrome triggers needs chrome source."""
+    graph = self._build_graph(with_chrome=True, with_followers=False)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(set([p.atom for p in result.packages]),
+                     {constants.CHROME_CP})
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_needs_followers_only(self):
+    """Verify only chrome followers triggers needs chrome source."""
+    graph = self._build_graph(with_chrome=False, with_followers=True)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertFalse(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(set([p.atom for p in result.packages]),
+                     set(constants.OTHER_CHROME_PACKAGES))
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+
+  def test_has_prebuilts(self):
+    """Test prebuilts prevent us from needing chrome source."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=True)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertFalse(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertFalse(result.packages)
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_compile_source(self):
+    """Test compile source ignores prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=True)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target, compile_source=True)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
 
 
 class UprevDrivefsTest(cros_test_lib.MockTestCase):

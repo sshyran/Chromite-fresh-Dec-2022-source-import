@@ -42,7 +42,7 @@ class ChrootHandler(object):
   def __init__(self, clear_field):
     self.clear_field = clear_field
 
-  def handle(self, message):
+  def handle(self, message, recurse=True):
     """Parse a message for a chroot field."""
     # Find the Chroot field. Search for the field by type to prevent it being
     # tied to a naming convention.
@@ -53,6 +53,17 @@ class ChrootHandler(object):
         if self.clear_field:
           message.ClearField(descriptor.name)
         return self.parse_chroot(chroot)
+
+    # Recurse down one level. This is handy for meta-endpoints that use another
+    # endpoint's request to produce data for or about the second endpoint.
+    # e.g. PackageService/NeedsChromeSource.
+    if recurse:
+      for descriptor in message.DESCRIPTOR.fields:
+        field = getattr(message, descriptor.name)
+        if isinstance(field, protobuf_message.Message):
+          chroot = self.handle(field, recurse=False)
+          if chroot:
+            return chroot
 
     return None
 

@@ -250,3 +250,12 @@ class PackageInfo(object):
   def with_version(self, version):
     """Get a PackageInfo instance with the new, specified version."""
     return PackageInfo(self.category, self.package, version)
+
+  def to_cpv(self):
+    """Get a CPV instance of this PackageInfo.
+
+    This method is provided only to allow compatibility with functions that
+    have not yet been converted to use PackageInfo objects. This function will
+    be removed when the CPV namedtuple is removed.
+    """
+    return SplitCPV(self.cpvr)

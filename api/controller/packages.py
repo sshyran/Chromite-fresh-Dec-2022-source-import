@@ -11,12 +11,14 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import binhost_pb2
+from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
 from chromite.lib.uprev_lib import GitRef
+from chromite.lib.parser import package_info
 from chromite.service import packages
 
 
@@ -97,12 +99,12 @@ def UprevVersionedPackage(input_proto, output_proto, _config):
 
 def _GetBestVisibleResponse(_input_proto, output_proto, _config):
   """Add fake paths to a successful GetBestVisible response."""
-  package_info = common_pb2.PackageInfo(
+  pkg_info_msg = common_pb2.PackageInfo(
       category='category',
       package_name='name',
       version='1.01',
   )
-  output_proto.package_info.CopyFrom(package_info)
+  output_proto.package_info.CopyFrom(pkg_info_msg)
 
 
 @faux.success(_GetBestVisibleResponse)
@@ -116,9 +118,9 @@ def GetBestVisible(input_proto, output_proto, _config):
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
 
   cpv = packages.get_best_visible(input_proto.atom, build_target=build_target)
-  package_info = common_pb2.PackageInfo()
-  controller_util.CPVToPackageInfo(cpv, package_info)
-  output_proto.package_info.CopyFrom(package_info)
+  pkg_info_msg = common_pb2.PackageInfo()
+  controller_util.CPVToPackageInfo(cpv, pkg_info_msg)
+  output_proto.package_info.CopyFrom(pkg_info_msg)
 
 
 def _ChromeVersionResponse(_input_proto, output_proto, _config):
@@ -315,3 +317,67 @@ def BuildsChrome(input_proto, output_proto, _config):
   cpvs = [controller_util.PackageInfoToCPV(pi) for pi in input_proto.packages]
   builds_chrome = packages.builds(constants.CHROME_CP, build_target, cpvs)
   output_proto.builds_chrome = builds_chrome
+
+
+def _NeedsChromeSourceSuccess(_input_proto, output_proto, _config):
+  """Mock success case for NeedsChromeSource."""
+  output_proto.needs_chrome_source = True
+  output_proto.builds_chrome = True
+
+  output_proto.reasons.append(
+      packages_pb2.NeedsChromeSourceResponse.NO_PREBUILT)
+  pkg_info_msg = output_proto.packages.add()
+  pkg_info_msg.category = constants.CHROME_CN
+  pkg_info_msg.package_name = constants.CHROME_PN
+
+  output_proto.reasons.append(
+      packages_pb2.NeedsChromeSourceResponse.FOLLOWER_LACKS_PREBUILT)
+  for pkg in constants.OTHER_CHROME_PACKAGES:
+    pkg_info_msg = output_proto.packages.add()
+    pkg_info = package_info.parse(pkg)
+    controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+
+
+@faux.success(_NeedsChromeSourceSuccess)
+@faux.empty_error
+@validate.require('install_request.sysroot.build_target.name')
+@validate.exists('install_request.sysroot.path')
+@validate.validation_complete
+def NeedsChromeSource(input_proto, output_proto, _config):
+  """Check if the build will need the chrome source."""
+  # Input parsing.
+  build_target = controller_util.ParseBuildTarget(
+      input_proto.install_request.sysroot.build_target)
+  compile_source = input_proto.install_request.flags.compile_source
+  pkgs = [controller_util.deserialize_package_info(pi) for pi in
+          input_proto.install_request.packages]
+  use_flags = input_proto.install_request.use_flags
+
+  result = packages.needs_chrome_source(
+      build_target,
+      compile_source=compile_source,
+      packages=pkgs,
+      useflags=use_flags)
+
+  # Record everything in the response.
+  output_proto.needs_chrome_source = result.needs_chrome_source
+  output_proto.builds_chrome = result.builds_chrome
+
+  # Compile source reason.
+  if compile_source:
+    output_proto.reasons.append(
+        packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE)
+
+  # No chrome prebuilt reason.
+  if result.missing_chrome_prebuilt:
+    output_proto.reasons.append(
+        packages_pb2.NeedsChromeSourceResponse.NO_PREBUILT)
+
+  # Follower package(s) lack prebuilt reason.
+  if result.missing_follower_prebuilt:
+    output_proto.reasons.append(
+        packages_pb2.NeedsChromeSourceResponse.FOLLOWER_LACKS_PREBUILT)
+
+  for pkg in result.packages:
+    pkg_info = output_proto.packages.add()
+    controller_util.serialize_package_info(pkg, pkg_info)

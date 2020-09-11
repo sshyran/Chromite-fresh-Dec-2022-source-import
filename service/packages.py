@@ -15,7 +15,7 @@ import json
 import os
 import re
 import sys
-from typing import List
+from typing import List, Optional
 
 from google.protobuf import json_format
 
@@ -33,8 +33,8 @@ from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
   from chromite.service import dependency
-
 
 # Registered handlers for uprevving versioned packages.
 _UPREV_FUNCS = {}
@@ -88,6 +88,15 @@ class GeneratedCrosConfigFilesError(Error):
     msg = ('Expected to find generated C files: %s. Actually found: %s' %
            (expected_files, found_files))
     super(GeneratedCrosConfigFilesError, self).__init__(msg)
+
+
+NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (
+    'needs_chrome_source',
+    'builds_chrome',
+    'packages',
+    'missing_chrome_prebuilt',
+    'missing_follower_prebuilt',
+))
 
 
 def patch_ebuild_vars(ebuild_path, variables):
@@ -720,6 +729,69 @@ def builds(atom, build_target, packages=None):
   graph, _sdk_graph = dependency.GetBuildDependency(
       build_target.root, build_target.name, pkgs)
   return any(atom in package for package in graph['package_deps'])
+
+
+def needs_chrome_source(
+    build_target: 'build_target_lib.BuildTarget',
+    compile_source=False,
+    packages: Optional[List[package_info.PackageInfo]] = None,
+    useflags=None):
+  """Check if the chrome source is needed.
+
+  The chrome source is needed if the build target builds chrome or any of its
+  follower packages, and can't use a prebuilt for them either because it's not
+  available, or because we can't use prebuilts because it must build from
+  source.
+  """
+  cros_build_lib.AssertInsideChroot()
+
+  # Check if it builds chrome and/or a follower package.
+  graph = depgraph.get_build_target_dependency_graph(build_target.root,
+                                                     packages)
+  builds_chrome = constants.CHROME_CP in graph
+  builds_follower = {
+      pkg: pkg in graph for pkg in constants.OTHER_CHROME_PACKAGES
+  }
+
+  # When we are compiling source set False since we do not use prebuilts.
+  # When not compiling from source, start with True, i.e. we have every prebuilt
+  # we've checked for up to this point.
+  has_chrome_prebuilt = not compile_source
+  has_follower_prebuilts = not compile_source
+  # Save packages that need prebuilts for reporting.
+  pkgs_needing_prebuilts = []
+  if compile_source:
+    # Need everything.
+    pkgs_needing_prebuilts.append(constants.CHROME_CP)
+    pkgs_needing_prebuilts.extend(
+        [pkg for pkg, builds_pkg in builds_follower.items() if builds_pkg])
+  else:
+    # Check chrome itself.
+    if builds_chrome:
+      has_chrome_prebuilt = has_prebuilt(
+          constants.CHROME_CP, build_target=build_target, useflags=useflags)
+      if not has_chrome_prebuilt:
+        pkgs_needing_prebuilts.append(constants.CHROME_CP)
+    # Check follower packages.
+    for pkg, builds_pkg in builds_follower.items():
+      if not builds_pkg:
+        continue
+      prebuilt = has_prebuilt(pkg, build_target=build_target, useflags=useflags)
+      has_follower_prebuilts &= prebuilt
+      if not prebuilt:
+        pkgs_needing_prebuilts.append(pkg)
+  # Postcondition: has_chrome_prebuilt and has_follower_prebuilts now correctly
+  # reflect whether we actually have the corresponding prebuilts for the build.
+
+  needs_chrome = builds_chrome and not has_chrome_prebuilt
+  needs_follower = any(builds_follower.values()) and not has_follower_prebuilts
+
+  return NeedsChromeSourceResult(
+      needs_chrome_source=needs_chrome or needs_follower,
+      builds_chrome=builds_chrome,
+      packages=[package_info.parse(p) for p in pkgs_needing_prebuilts],
+      missing_chrome_prebuilt=not has_chrome_prebuilt,
+      missing_follower_prebuilt=not has_follower_prebuilts)
 
 
 def determine_chrome_version(build_target):
