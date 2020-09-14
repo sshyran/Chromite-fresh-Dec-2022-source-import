@@ -182,6 +182,7 @@ class CrOSTest(object):
         xbuddy_path,
         '--board', self._device.board,
         '--disable-rootfs-verification',
+        '--clobber-stateful',
     ]
     cros_build_lib.run(flash_cmd, dryrun=self.dryrun)
 
