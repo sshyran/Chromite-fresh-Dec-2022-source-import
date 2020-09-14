@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import functools
 import os
 from pathlib import Path
 import re
@@ -278,6 +279,7 @@ def GenerateSourcePathMapping(packages, sysroot_path, board):
   return results
 
 
+@functools.lru_cache()
 def GetBuildDependency(sysroot_path, board=None, packages=None):
   """Return the build dependency and package -> source path map for |board|.
 
@@ -286,7 +288,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
         used.
     board (str): The name of the board whose artifacts are being created, or
         None if no sysroot is being used.
-    packages (list[CPV]): The packages that need to be built, or empty / None
+    packages (tuple[CPV]): The packages that need to be built, or empty / None
         to use the default list.
 
   Returns:
@@ -401,8 +403,9 @@ def GetDependencies(sysroot_path: str,
     The relevant package dependencies based on the given list of packages and
       src_paths.
   """
+  pkgs = tuple(packages) if packages else None
   json_deps, _sdk_json_deps = GetBuildDependency(
-      sysroot_path, build_target.name, packages=packages)
+      sysroot_path, build_target.name, packages=pkgs)
 
   relevant_packages = set()
   for cpv, dep_src_paths in json_deps['source_path_mapping'].items():

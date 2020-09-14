@@ -86,7 +86,8 @@ def GetBuildDependencyGraph(input_proto, output_proto, _config):
     board = input_proto.build_target.name
     sysroot_path = cros_build_lib.GetSysroot(board or None)
 
-  packages = [controller_util.PackageInfoToCPV(x) for x in input_proto.packages]
+  packages = tuple(
+      controller_util.PackageInfoToCPV(x) for x in input_proto.packages)
 
   json_map, sdk_json_map = dependency.GetBuildDependency(sysroot_path, board,
                                                          packages)

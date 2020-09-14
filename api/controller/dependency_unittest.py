@@ -136,7 +136,7 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
                                        self.api_config)
     self.assertEqual(self.response.dep_graph.build_target.name, 'deathstar')
     pkg_to_cpv.assert_called_once_with(package)
-    get_dep.assert_called_once_with('/build/target', 'target', [pkg_mock])
+    get_dep.assert_called_once_with('/build/target', 'target', (pkg_mock,))
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
