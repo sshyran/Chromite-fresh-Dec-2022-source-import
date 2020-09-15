@@ -19,6 +19,8 @@ from chromite.lib import portage_util
 
 __all__ = ['Overlay', 'Package', 'Profile', 'Sysroot']
 
+_EXCLUDED_OVERLAYS = ('chromiumos', 'portage-stable')
+
 
 def _dict_to_conf(dictionary):
   """Helper to format a dictionary into a layout.conf file."""
@@ -207,6 +209,9 @@ class Sysroot(object):
 
     osutils.WriteFile(self.path / 'etc' / 'portage' / 'make.conf',
                       _dict_to_ebuild(sysroot_conf))
+
+    osutils.WriteFile(self.path / 'etc' / 'portage' / 'package.mask',
+                      ''.join(f'*/*::{o}\n' for o in _EXCLUDED_OVERLAYS))
 
   @property
   def _env(self):
