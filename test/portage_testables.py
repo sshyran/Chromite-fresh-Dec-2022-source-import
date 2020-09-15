@@ -233,9 +233,10 @@ class Sysroot(object):
     """
     extra_env = self._env
     extra_env.update(kwargs.pop('extra_env', {}))
+    kwargs.setdefault('encoding', 'utf-8')
 
     return cros_build_lib.run(
-        cmd, extra_env=extra_env, encoding='utf-8', **kwargs)
+        cmd, extra_env=extra_env, **kwargs)
 
 
 class Profile(object):
