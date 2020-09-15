@@ -54,6 +54,10 @@ def GetOptions(cmd_name=None):
     else:
       subparsers.add_parser(subcommand, add_help=False)
 
+  help_parser = subparsers.add_parser('help', add_help=False)
+  help_parser.add_argument('help_subcommand', nargs='?',
+                           help='The command to show help for')
+
   return parser
 
 
@@ -75,6 +79,15 @@ def main(argv):
       return 1
 
     namespace, _ = parser.parse_known_args(argv)
+
+    if namespace.subcommand == 'help':
+      if namespace.help_subcommand is None:
+        parser.print_help()
+        return
+
+      parser = GetOptions(namespace.help_subcommand)
+      parser.parse_args([namespace.help_subcommand, '--help'])
+
     # The user has selected a subcommand now, so get the full parser after we
     # import the single subcommand.
     parser = GetOptions(namespace.subcommand)
