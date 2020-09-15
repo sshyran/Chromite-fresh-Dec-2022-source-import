@@ -3027,6 +3027,9 @@ def BranchScheduleConfig():
 
   # The three active release branches.
   # (<branch>, [<android PFQs>], <chrome PFQ>, [<orderfiles>], [<Chrome AFDOs>])
+  # Note: <chrome PFQ> is no longer actually doing anything pre-flight: pupr
+  # does that as of 2020-09-15.  It needs to run because it *does* update the
+  # CWP profiles.
 
   RELEASES = [
       ('release-R86-13421.B',
@@ -3061,8 +3064,8 @@ def BranchScheduleConfig():
   ]
 
   RELEASE_SCHEDULES = [
-      '0 6 * * *',
-      '0 5 * * *',
+      'triggered',
+      'triggered',
       'triggered',
   ]
 
