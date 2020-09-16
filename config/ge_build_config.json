@@ -2391,6 +2391,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 401,
           "is_active": true
+        },
+        {
+          "board_name": "jacuzzi",
+          "name": "willow",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 401,
+          "is_active": true
         }
       ]
     },
