@@ -367,8 +367,56 @@ def uprev_termina_dlc(_build_targets, _refs, chroot):
   package = 'termina-dlc'
   package_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base',
                               package)
-  version_pin_path = os.path.join(package_path, 'VERSION-PIN')
-  return uprev_ebuild_from_pin(package_path, version_pin_path, chroot)
+
+  version_pin_src_path = _get_version_pin_src_path(package_path)
+  version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
+
+  return uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+
+
+@uprevs_versioned_package('app-emulation/parallels-desktop')
+def uprev_parallels_desktop(_build_targets, _refs, chroot):
+  """Updates Parallels Desktop ebuild - app-emulation/parallels-desktop.
+
+  See: uprev_versioned_package
+
+  Returns:
+    UprevVersionedPackageResult: The result.
+  """
+  package = 'parallels-desktop'
+  package_path = os.path.join(constants.CHROMEOS_PARTNER_OVERLAY_DIR,
+                              'app-emulation', package)
+  version_pin_src_path = _get_version_pin_src_path(package_path)
+
+  # Expect a JSON blob like the following:
+  # {
+  #   "version": "1.2.3",
+  #   "test_image": { "url": "...", "size": 12345678,
+  #                   "sha256sum": "<32 bytes of hexadecimal>" }
+  # }
+  with open(version_pin_src_path, 'r') as f:
+    pinned = json.load(f)
+
+  if 'version' not in pinned or 'test_image' not in pinned:
+    raise UprevError('VERSION-PIN for %s missing version and/or '
+                     'test_image field' % package)
+
+  version = pinned['version']
+  if not isinstance(version, str):
+    raise UprevError('version in VERSION-PIN for %s not a string' % package)
+
+  # Update the ebuild.
+  result = uprev_ebuild_from_pin(package_path, version, chroot)
+
+  # Update the VM image used for testing.
+  test_image_path = ('src/platform/tast-tests-pita/src/chromiumos/tast/local/'
+                     'bundles/pita/pita/data/pluginvm_image.zip.external')
+  test_image_src_path = os.path.join(constants.SOURCE_ROOT, test_image_path)
+  with open(test_image_src_path, 'w') as f:
+    json.dump(pinned['test_image'], f, indent=2)
+  result.add_result(version, [test_image_src_path])
+
+  return result
 
 
 @uprevs_versioned_package('chromeos-base/chromeos-dtc-vm')
@@ -380,20 +428,26 @@ def uprev_sludge(_build_targets, _refs, chroot):
   package = 'chromeos-dtc-vm'
   package_path = os.path.join('src', 'private-overlays',
                               'project-wilco-private', 'chromeos-base', package)
-  version_pin_path = os.path.join(package_path, 'VERSION-PIN')
+  version_pin_src_path = _get_version_pin_src_path(package_path)
+  version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
-  return uprev_ebuild_from_pin(package_path, version_pin_path, chroot)
+  return uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
 
 
-def uprev_ebuild_from_pin(package_path, version_pin_path, chroot):
+def _get_version_pin_src_path(package_path):
+  """Returns the path to the VERSION-PIN file for the given package."""
+  return os.path.join(constants.SOURCE_ROOT, package_path, 'VERSION-PIN')
+
+
+def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
   """Changes the package ebuild's version to match the version pin file.
 
   Args:
     package_path: The path of the package relative to the src root. This path
-      should contain a single ebuild with the same name as the package.
-    version_pin_path: The path of the version_pin file that contains only a
-      version string. The ebuild's version will be directly set to this
-      number.
+      should contain a stable and an unstable ebuild with the same name
+      as the package.
+    version_no_rev: The version string to uprev to (excluding revision). The
+      ebuild's version will be directly set to this number.
     chroot (chroot_lib.Chroot): specify a chroot to enter.
 
   Returns:
@@ -420,15 +474,12 @@ def uprev_ebuild_from_pin(package_path, version_pin_path, chroot):
     raise UprevError('Found too many ebuilds for %s: '
                      'expected one stable and one unstable' % package)
 
-  version_pin_src_path = os.path.join(constants.SOURCE_ROOT, version_pin_path)
-  version = osutils.ReadFile(version_pin_src_path).strip()
-
   # If the new version is the same as the old version, bump the revision number,
   # otherwise reset it to 1
-  if version == stable_ebuild.version_no_rev:
-    version = '%s-r%d' % (version, stable_ebuild.current_revision + 1)
+  if version_no_rev == stable_ebuild.version_no_rev:
+    version = '%s-r%d' % (version_no_rev, stable_ebuild.current_revision + 1)
   else:
-    version = version + '-r1'
+    version = version_no_rev + '-r1'
 
   new_ebuild_path = os.path.join(package_path,
                                  '%s-%s.ebuild' % (package, version))
