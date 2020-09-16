@@ -1405,13 +1405,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       'tatl',
   ])
 
-  # These full builders are used to produce released VMs and so need to upload
-  # debug symbols to the crash server.
-  symbol_upload_builders = frozenset([
-      'tael',
-      'tatl',
-  ])
-
   # Move the following builders to active_builders once they are consistently
   # green.
   unstable_builders = frozenset([
@@ -1444,12 +1437,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       overlays=constants.PUBLIC_OVERLAYS,
       slave_configs=[],
       schedule='0 */3 * * *',
-  )
-
-  site_config.ApplyForBoards(
-      config_lib.CONFIG_TYPE_FULL,
-      symbol_upload_builders,
-      upload_symbols=True,
   )
 
   master_config.AddSlaves(
