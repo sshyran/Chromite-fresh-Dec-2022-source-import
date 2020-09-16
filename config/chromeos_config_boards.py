@@ -128,6 +128,7 @@ moblab_boards = frozenset([
 
 scribe_boards = frozenset([
     'guado-macrophage',
+    'puff-macrophage',
 ])
 
 termina_boards = frozenset([
