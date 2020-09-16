@@ -875,7 +875,7 @@
         },
         "vmrvc_android_pfq": {
             "_template": "vmrvc_android_pfq",
-            "android_import_branch": "git_rvc-arc-dev",
+            "android_import_branch": "git_rvc-arc",
             "android_package": "android-vm-rvc",
             "android_rev": "latest_release",
             "build_timeout": 28800,
