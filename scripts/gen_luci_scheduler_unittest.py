@@ -303,6 +303,9 @@ acl_sets {
   acls {
     role: TRIGGERER
     granted_to: "group:mdb/chromeos-build-access"
+  }
+  acls {
+    role: TRIGGERER
     granted_to: "group:project-chromeos-buildbucket-schedulers"
   }
 }
