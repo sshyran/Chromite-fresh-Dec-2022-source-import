@@ -726,6 +726,12 @@ class PaygenPayload(object):
 
     props_map['appid'] = self._appid
 
+    if self.payload.tgt_image.build:
+      props_map['target_version'] = self.payload.tgt_image.build.version
+
+    if self.payload.src_image and self.payload.src_image.build:
+      props_map['source_version'] = self.payload.src_image.build.version
+
     # Add the public key if it exists.
     if self._public_key:
       props_map['public_key'] = base64.b64encode(

@@ -795,7 +795,34 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
                      # converts it to None.
                      {'metadata_signature': None,
                       'metadata_size': 10,
-                      'appid': 'foo-appid'})
+                      'appid': 'foo-appid',
+                      'target_version': '1620.0.0'})
+
+  def testGetDeltaPayloadPropertiesMap(self):
+    """Tests getting the delta payload properties as a dict."""
+    gen = self._GetStdGenerator(sign=False, payload=self.delta_payload)
+    gen._appid = 'foo-appid'
+    run_mock = self.PatchObject(gen, '_RunGeneratorCmd')
+
+    props_file = os.path.join(self.tempdir, 'properties.json')
+    osutils.WriteFile(props_file, json.dumps({'metadata_signature': '',
+                                              'metadata_size': 10}))
+    payload_path = '/foo'
+    props_map = gen.GetPayloadPropertiesMap(payload_path)
+
+    cmd = ['delta_generator',
+           '--in_file=' + payload_path,
+           '--properties_file=' + props_file,
+           '--properties_format=json']
+    run_mock.assert_called_once_with(cmd)
+    self.assertEqual(props_map,
+                     # This tests that if metadata_signature is empty, the code
+                     # converts it to None.
+                     {'metadata_signature': None,
+                      'metadata_size': 10,
+                      'appid': 'foo-appid',
+                      'target_version': '4171.0.0',
+                      'source_version': '1620.0.0'})
 
   def testGetPayloadPropertiesMapSigned(self):
     """Tests getting the payload properties as a dict for signed payloads."""
@@ -816,7 +843,8 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
                       # properties file even if it is empty.
                       'appid': '',
                       # This is the base64 encode of 'foo-pubkey'.
-                      'public_key': 'Zm9vLXB1YmtleQ=='})
+                      'public_key': 'Zm9vLXB1YmtleQ==',
+                      'target_version': '1620.0.0'})
 
 
 class PaygenPayloadLibEndToEndTest(PaygenPayloadLibTest):
