@@ -56,6 +56,8 @@ USED_BY_SYSTEM = 'system'
 
 _MAX_ID_NAME = 40
 
+_IMAGE_SIZE_NEARING_RATIO = 1.05
+_IMAGE_SIZE_GROWTH_RATIO = 1.2
 
 def HashFile(file_path):
   """Calculate the sha256 hash of a file.
@@ -398,7 +400,7 @@ class DlcGenerator(object):
     image_bytes = os.path.getsize(self.dest_image)
     preallocated_bytes = (self.ebuild_params.pre_allocated_blocks *
                           self._BLOCK_SIZE)
-    # Verifies the actual size of the DLC image is NOT smaller than the
+    # Verifies the actual size of the DLC image is NOT larger than the
     # preallocated space.
     if preallocated_bytes < image_bytes:
       raise ValueError(
@@ -409,6 +411,21 @@ class DlcGenerator(object):
           'least %d.' %
           (self.ebuild_params.pre_allocated_blocks, preallocated_bytes,
            image_bytes, self.GetOptimalImageBlockSize(image_bytes)))
+
+    image_size_ratio = preallocated_bytes / image_bytes
+
+    # Warn if the DLC image size is nearing the preallocated size.
+    if image_size_ratio <= _IMAGE_SIZE_NEARING_RATIO:
+      logging.warning(
+          'The %s DLC image size (%s) is nearing the preallocated size (%s).',
+          self.ebuild_params.dlc_id, image_bytes, preallocated_bytes)
+
+    # Warn if the DLC preallocated size is too much.
+    if image_size_ratio >= _IMAGE_SIZE_GROWTH_RATIO:
+      logging.warning(
+          'The %s DLC image size (%s) is significantly less than the '
+          'preallocated size (%s). Reduce the DLC_PREALLOC_BLOCKS in your '
+          'ebuild', self.ebuild_params.dlc_id, image_bytes, preallocated_bytes)
 
   def GetOptimalImageBlockSize(self, image_bytes):
     """Given the image bytes, get the least amount of blocks required."""

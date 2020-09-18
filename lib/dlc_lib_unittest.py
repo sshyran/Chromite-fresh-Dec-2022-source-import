@@ -31,6 +31,8 @@ _DESCRIPTION = 'description'
 _BOARD = 'test_board'
 _FULLNAME_REV = None
 _BLOCK_SIZE = 4096
+_IMAGE_SIZE_NEARING_RATIO = 1.05
+_IMAGE_SIZE_GROWTH_RATIO = 1.2
 
 # pylint: disable=protected-access
 
@@ -186,7 +188,8 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
     self.CheckParams(ebuild_params_class.__dict__, **params)
 
 
-class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
+class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
+                       cros_test_lib.RunCommandTempDirTestCase):
   """Tests DlcGenerator."""
 
   def setUp(self):
@@ -333,6 +336,32 @@ class DlcGeneratorTest(cros_test_lib.RunCommandTempDirTestCase):
           'getsize',
           return_value=(_PRE_ALLOCATED_BLOCKS + 1) * _BLOCK_SIZE)
       self.GetDlcGenerator().VerifyImageSize()
+
+  def testVerifyImageSizeNearingWarning(self):
+    """Test that VerifyImageSize logs the correct nearing warning."""
+    # Logs a warning that actual size is near the preallocated size.
+    with cros_test_lib.LoggingCapturer() as logs:
+      self.PatchObject(
+          os.path,
+          'getsize',
+          return_value=(_PRE_ALLOCATED_BLOCKS * _BLOCK_SIZE
+                        / _IMAGE_SIZE_NEARING_RATIO))
+      self.GetDlcGenerator().VerifyImageSize()
+      self.AssertLogsContain(logs, 'is nearing the preallocated size')
+
+  def testVerifyImageSizeGrowthWarning(self):
+    """Test that VerifyImageSize logs the correct growth warning."""
+    # Logs a warning that actual size is significantly less than the
+    # preallocated size.
+    with cros_test_lib.LoggingCapturer() as logs:
+      self.PatchObject(
+          os.path,
+          'getsize',
+          return_value=(_PRE_ALLOCATED_BLOCKS * _BLOCK_SIZE
+                        / _IMAGE_SIZE_GROWTH_RATIO))
+      self.GetDlcGenerator().VerifyImageSize()
+      self.AssertLogsContain(logs,
+                             'is significantly less than the preallocated size')
 
   def testGetOptimalImageBlockSize(self):
     """Test that GetOptimalImageBlockSize returns the valid block size."""
