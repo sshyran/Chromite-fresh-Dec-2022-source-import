@@ -132,6 +132,44 @@ def require(*fields):
   return decorator
 
 
+def require_each(field, subfields, allow_empty=True):
+  """Verify |field| each have all of the |subfields| set.
+
+  When |allow_empty| is True, |field| may be empty, and |subfields| are only
+  validated when it is not empty. When |allow_empty| is False, |field| must
+  also have at least one entry.
+
+  Args:
+    field (str): The repeated field being checked. May be . separated nested
+        fields.
+    subfields (list[str]): The fields of the repeated message to validate.
+    allow_empty (bool): Also require at least one entry in the repeated field.
+  """
+  assert field
+  assert subfields
+  assert not isinstance(subfields, str)
+
+  def decorator(func):
+    @functools.wraps(func)
+    def _require_each(input_proto, output_proto, config, *args, **kwargs):
+      if config.do_validation:
+        members = _value(field, input_proto) or []
+        if not allow_empty and not members:
+          cros_build_lib.Die('The %s field is empty.', field)
+        for member in members:
+          for subfield in subfields:
+            logging.debug('Validating %s.[each].%s is set.', field, subfield)
+            value = _value(subfield, member)
+            if not value:
+              cros_build_lib.Die('%s is required.', field)
+
+      return func(input_proto, output_proto, config, *args, **kwargs)
+
+    return _require_each
+
+  return decorator
+
+
 def validation_complete(func):
   """Automatically skip the endpoint when called after all other validators.
 
