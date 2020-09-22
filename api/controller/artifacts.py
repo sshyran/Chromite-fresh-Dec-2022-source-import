@@ -359,6 +359,46 @@ def BundleFirmware(input_proto, output_proto, _config):
   output_proto.artifacts.add().path = archive
 
 
+def _BundleFpmcuUnittestsResponse(input_proto, output_proto, _config):
+  """Add fingerprint MCU unittest binaries to a successful response."""
+  output_proto.artifacts.add().path = os.path.join(
+      input_proto.output_dir, 'fpmcu_unittests.tar.gz')
+
+
+@faux.success(_BundleFpmcuUnittestsResponse)
+@faux.empty_error
+@validate.require('output_dir', 'sysroot.path')
+@validate.exists('output_dir')
+@validate.validation_complete
+def BundleFpmcuUnittests(input_proto, output_proto, _config):
+  """Tar the fingerprint MCU unittest binaries for a build target.
+
+  Args:
+    input_proto (BundleRequest): The input proto.
+    output_proto (BundleResponse): The output proto.
+    _config (api_config.ApiConfig): The API call config.
+  """
+  output_dir = input_proto.output_dir
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  sysroot_path = input_proto.sysroot.path
+  sysroot = sysroot_lib.Sysroot(sysroot_path)
+
+  if not chroot.exists():
+    cros_build_lib.Die('Chroot does not exist: %s', chroot.path)
+  elif not sysroot.Exists(chroot=chroot):
+    cros_build_lib.Die('Sysroot does not exist: %s',
+                       chroot.full_path(sysroot.path))
+
+  archive = artifacts.BundleFpmcuUnittests(chroot, sysroot, output_dir)
+
+  if archive is None:
+    logging.warning(
+        'No fpmcu unittests found for %s.', sysroot_path)
+    return
+
+  output_proto.artifacts.add().path = archive
+
+
 def _BundleEbuildLogsResponse(input_proto, output_proto, _config):
   """Add test log files to a successful response."""
   output_proto.artifacts.add().path = os.path.join(

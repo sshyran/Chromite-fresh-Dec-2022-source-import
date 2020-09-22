@@ -501,6 +501,48 @@ class BundleFirmwareTest(BundleTestCase):
                                self.api_config)
 
 
+class BundleFpmcuUnittestsTest(BundleTestCase):
+  """Unittests for BundleFpmcuUnittests."""
+
+  def testValidateOnly(self):
+    """Sanity check that a validate only call does not execute any logic."""
+    patch = self.PatchObject(artifacts_svc, 'BundleFpmcuUnittests')
+    artifacts.BundleFpmcuUnittests(self.sysroot_request, self.response,
+                                   self.validate_only_config)
+    patch.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    patch = self.PatchObject(artifacts_svc, 'BundleFpmcuUnittests')
+    artifacts.BundleFpmcuUnittests(self.sysroot_request, self.response,
+                                   self.mock_call_config)
+    patch.assert_not_called()
+    self.assertEqual(len(self.response.artifacts), 1)
+    self.assertEqual(self.response.artifacts[0].path,
+                     os.path.join(self.output_dir,
+                                  'fpmcu_unittests.tar.gz'))
+
+  def testBundleFpmcuUnittests(self):
+    """BundleFpmcuUnittests calls cbuildbot/commands with correct args."""
+    self.PatchObject(
+        artifacts_svc,
+        'BundleFpmcuUnittests',
+        return_value=os.path.join(self.output_dir, 'fpmcu_unittests.tar.gz'))
+    artifacts.BundleFpmcuUnittests(self.sysroot_request, self.response,
+                                   self.api_config)
+    self.assertEqual(
+        [artifact.path for artifact in self.response.artifacts],
+        [os.path.join(self.output_dir, 'fpmcu_unittests.tar.gz')])
+
+  def testBundleFpmcuUnittestsNoLogs(self):
+    """BundleFpmcuUnittests does not die when no fpmcu unittests found."""
+    self.PatchObject(artifacts_svc, 'BundleFpmcuUnittests',
+                     return_value=None)
+    artifacts.BundleFpmcuUnittests(self.sysroot_request, self.response,
+                                   self.api_config)
+    self.assertFalse(self.response.artifacts)
+
+
 class BundleEbuildLogsTest(BundleTestCase):
   """Unittests for BundleEbuildLogs."""
 
