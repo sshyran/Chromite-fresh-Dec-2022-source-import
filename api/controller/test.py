@@ -76,8 +76,9 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
 
 @faux.success(_BuildTargetUnitTestResponse)
 @faux.error(_BuildTargetUnitTestFailedResponse)
-@validate.require('build_target.name', 'result_path')
+@validate.require('build_target.name')
 @validate.exists('result_path')
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 @metrics.collect_metrics
 def BuildTargetUnitTest(input_proto, output_proto, _config):
@@ -94,7 +95,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   packages_package_info = input_proto.packages
   packages = []
   for package_info_msg in packages_package_info:
-    packages.append(controller_util.PackageInfoToString(package_info_msg))
+    cpv = controller_util.PackageInfoToCPV(package_info_msg)
+    packages.append(cpv.cp)
 
   # Skipped tests.
   # TODO: Remove blacklist when we fully switch to blocklist.

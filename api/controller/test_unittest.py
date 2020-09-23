@@ -123,6 +123,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
         build_target={'name': board}, result_path=result_path,
         chroot={'path': chroot_path, 'cache_dir': cache_dir},
         flags={'empty_sysroot': empty_sysroot},
+        packages=formatted_packages,
         package_blacklist=formatted_blocklist,
     )
 
@@ -187,6 +188,17 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Test missing result path fails."""
     # Missing result_path.
     input_msg = self._GetInput(board='board')
+    output_msg = self._GetOutput()
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      test_controller.BuildTargetUnitTest(input_msg, output_msg,
+                                          self.api_config)
+
+  def testInvalidPackageFails(self):
+    """Test missing result path fails."""
+    # Missing result_path.
+    pkg = package_info.PackageInfo(package='bar')
+    input_msg = self._GetInput(board='board', result_path=self.tempdir,
+                               packages=[pkg])
     output_msg = self._GetOutput()
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.BuildTargetUnitTest(input_msg, output_msg,
