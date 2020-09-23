@@ -51,7 +51,7 @@ class BuildTargetUnitTestResult(object):
 def BuildTargetUnitTest(build_target,
                         chroot,
                         packages=None,
-                        blacklist=None,
+                        blocklist=None,
                         was_built=True,
                         code_coverage=False,
                         testable_packages_optional=False):
@@ -62,7 +62,7 @@ def BuildTargetUnitTest(build_target,
     chroot (chroot_lib.Chroot): The chroot where the tests are running.
     packages (list[str]|None): Packages to be tested. If none, uses all testable
       packages.
-    blacklist (list[str]|None): Tests to skip.
+    blocklist (list[str]|None): Tests to skip.
     was_built (bool): Whether packages were built.
     code_coverage (bool): Whether to produce code coverage data.
     testable_packages_optional (bool): Whether to allow no testable packages to
@@ -78,8 +78,8 @@ def BuildTargetUnitTest(build_target,
   if packages:
     cmd.extend(['--packages', ' '.join(packages)])
 
-  if blacklist:
-    cmd.extend(['--blacklist_packages', ' '.join(blacklist)])
+  if blocklist:
+    cmd.extend(['--blacklist_packages', ' '.join(blocklist)])
 
   if testable_packages_optional:
     cmd.append('--no-testable-packages-ok')

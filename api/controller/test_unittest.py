@@ -110,7 +110,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                 cache_dir=None,
                 empty_sysroot=None,
                 packages=None,
-                blacklist=None):
+                blocklist=None):
     """Helper to build an input message instance."""
     formatted_packages = []
     for pkg in packages or []:
@@ -118,16 +118,16 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
           'category': pkg.category,
           'package_name': pkg.package
       })
-    formatted_blacklist = []
-    for pkg in blacklist or []:
-      formatted_blacklist.append({'category': pkg.category,
+    formatted_blocklist = []
+    for pkg in blocklist or []:
+      formatted_blocklist.append({'category': pkg.category,
                                   'package_name': pkg.package})
 
     return test_pb2.BuildTargetUnitTestRequest(
         build_target={'name': board}, result_path=result_path,
         chroot={'path': chroot_path, 'cache_dir': cache_dir},
         flags={'empty_sysroot': empty_sysroot},
-        package_blacklist=formatted_blacklist,
+        package_blacklist=formatted_blocklist,
     )
 
   def _GetOutput(self):
@@ -230,9 +230,9 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     pkgs = ['foo/bar', 'cat/pkg']
-    blacklist = [package_info.SplitCPV(p, strict=False) for p in pkgs]
+    blocklist = [package_info.SplitCPV(p, strict=False) for p in pkgs]
     input_msg = self._GetInput(board='board', result_path=self.tempdir,
-                               empty_sysroot=True, blacklist=blacklist)
+                               empty_sysroot=True, blocklist=blocklist)
     output_msg = self._GetOutput()
 
     rc = test_controller.BuildTargetUnitTest(input_msg, output_msg,

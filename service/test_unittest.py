@@ -92,11 +92,11 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     test.BuildTargetUnitTest(self.build_target, self.chroot, packages=packages)
     self.assertCommandContains(['--packages', 'foo/bar cat/pkg'])
 
-  def testBlacklist(self):
-    """Test the blacklist argument."""
-    blacklist = ['foo/bar', 'cat/pkg']
+  def testBlocklist(self):
+    """Test the blocklist argument."""
+    blocklist = ['foo/bar', 'cat/pkg']
     test.BuildTargetUnitTest(self.build_target, self.chroot,
-                             blacklist=blacklist)
+                             blocklist=blocklist)
     self.assertCommandContains(['--blacklist_packages', 'foo/bar cat/pkg'])
 
   def testTestablePackagesOptional(self):

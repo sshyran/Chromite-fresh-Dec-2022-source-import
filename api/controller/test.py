@@ -101,10 +101,12 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
     packages.append(controller_util.PackageInfoToString(package_info_msg))
 
   # Skipped tests.
-  blacklisted_package_info = input_proto.package_blacklist
-  blacklist = []
-  for package_info_msg in blacklisted_package_info:
-    blacklist.append(controller_util.PackageInfoToString(package_info_msg))
+  # TODO: Remove blacklist when we fully switch to blocklist.
+  blocklisted_package_info = (
+      input_proto.package_blacklist or input_proto.package_blocklist)
+  blocklist = []
+  for package_info_msg in blocklisted_package_info:
+    blocklist.append(controller_util.PackageInfoToString(package_info_msg))
 
   # Allow call to succeed if no tests were found.
   testable_packages_optional = input_proto.flags.testable_packages_optional
@@ -118,7 +120,7 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       build_target,
       chroot,
       packages=packages,
-      blacklist=blacklist,
+      blocklist=blocklist,
       was_built=was_built,
       code_coverage=code_coverage,
       testable_packages_optional=testable_packages_optional)
