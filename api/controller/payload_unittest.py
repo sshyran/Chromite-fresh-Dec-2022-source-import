@@ -20,7 +20,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   """Unittests for SetBinhost."""
 
   def setUp(self):
-    self.response = payload_pb2.PayloadGenerationResult()
+    self.response = payload_pb2.GenerationResponse()
 
     src_build = payload_pb2.Build(version='1.0.0', bucket='test',
                                   channel='test-channel', build_target=
@@ -36,7 +36,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     tgt_image = payload_pb2.UnsignedImage(
         build=tgt_build, image_type=6, milestone='R70')
 
-    self.req = payload_pb2.PayloadGenerationRequest(
+    self.req = payload_pb2.GenerationRequest(
         tgt_unsigned_image=tgt_image,
         src_unsigned_image=src_image,
         bucket='test-destination-bucket',
@@ -44,7 +44,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         keyset='update_signer',
         dryrun=False)
 
-    self.result = payload_pb2.PayloadGenerationResult()
+    self.result = payload_pb2.GenerationResponse()
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
@@ -54,7 +54,7 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.assertEqual(res, controller.RETURN_CODE_VALID_INPUT)
 
   def testCallSucceeds(self):
-    """Check that a call is made succesfully."""
+    """Check that a call is made successfully."""
     # Deep patch the paygen lib, this is a full run through service as well.
     self.PatchObject(paygen_payload_lib, 'PaygenPayload')
     res = payload.GeneratePayload(self.req, self.result, self.api_config)
