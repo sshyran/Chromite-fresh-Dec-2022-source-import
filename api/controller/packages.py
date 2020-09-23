@@ -152,6 +152,7 @@ def _GetTargetVersionsResponse(_input_proto, output_proto, _config):
 @faux.success(_GetTargetVersionsResponse)
 @faux.empty_error
 @validate.require('build_target.name')
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 def GetTargetVersions(input_proto, output_proto, _config):
   """Returns the target versions."""
@@ -306,6 +307,7 @@ def _BuildsChromeSuccess(_input_proto, output_proto, _config):
 @faux.success(_BuildsChromeSuccess)
 @faux.empty_error
 @validate.require('build_target.name')
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 def BuildsChrome(input_proto, output_proto, _config):
   """Check if the board builds chrome."""

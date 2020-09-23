@@ -77,6 +77,7 @@ def CreateSimpleChromeSysroot(input_proto, output_proto, _config):
 
 @faux.all_empty
 @validate.require('build_target.name', 'packages')
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 def GenerateArchive(input_proto, output_proto, _config):
   """Generate a sysroot. Typically used by informational builders."""
@@ -144,6 +145,8 @@ def InstallToolchain(input_proto, output_proto, _config):
 @faux.error(_MockFailedPackagesResponse)
 @validate.require('sysroot.build_target.name')
 @validate.exists('sysroot.path')
+@validate.require_each('packages', ['category', 'package_name'])
+@validate.require_each('use_flags', ['flag'])
 @validate.validation_complete
 @metrics.collect_metrics
 def InstallPackages(input_proto, output_proto, _config):
@@ -161,9 +164,6 @@ def InstallPackages(input_proto, output_proto, _config):
   # error only when we cannot parse an atom for each of the given packages.
   packages = [controller_util.PackageInfoToCPV(x).cp
               for x in input_proto.packages]
-  if input_proto.packages and not all(packages):
-    cros_build_lib.Die(
-        'Invalid package(s) specified. Unable to parse atom from all packages.')
 
   package_indexes = [
       binpkg.PackageIndexInfo.from_protobuf(x)

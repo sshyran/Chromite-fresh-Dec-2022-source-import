@@ -64,6 +64,7 @@ def Create(input_proto, output_proto, config):
 
 @faux.success(_ChrootVersionResponse)
 @faux.empty_error
+@validate.require_each('toolchain_targets', ['name'])
 @validate.validation_complete
 def Update(input_proto, output_proto, _config):
   """Update the chroot.

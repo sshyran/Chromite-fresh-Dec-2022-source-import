@@ -65,6 +65,7 @@ def _GetBuildDependencyGraphResponse(_input_proto, output_proto, _config):
 
 @faux.success(_GetBuildDependencyGraphResponse)
 @faux.empty_error
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 def GetBuildDependencyGraph(input_proto, output_proto, _config):
   """Create the build dependency graph.
@@ -102,6 +103,8 @@ def _ListResponse(_input_proto, output_proto, _config):
 @faux.empty_error
 @validate.require('sysroot.build_target.name')
 @validate.exists('sysroot.path')
+@validate.require_each('src_paths', ['path'])
+@validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 def List(input_proto: depgraph_pb2.ListRequest,
          output_proto: depgraph_pb2.ListResponse,

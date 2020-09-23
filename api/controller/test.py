@@ -221,6 +221,7 @@ def VmTest(input_proto, _output_proto, _config):
 
 @faux.all_empty
 @validate.require('image_payload.path.path', 'cache_payloads')
+@validate.require_each('cache_payloads', ['path.path'])
 @validate.validation_complete
 def MoblabVmTest(input_proto, _output_proto, _config):
   """Run Moblab VM tests."""
