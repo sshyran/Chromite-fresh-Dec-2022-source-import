@@ -17,6 +17,7 @@ import os
 import re
 import shutil
 import sys
+from typing import Dict, List, Optional
 
 import six
 
@@ -1553,6 +1554,25 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
   return ebuilds
 
 
+def _Egencache(repo_name: str, overlay: str, chroot_args: List[str] = None,
+               log_output: bool = True) -> cros_build_lib.CommandResult:
+  """Execute egencache for repo_name inside the chroot.
+
+  Args:
+    repo_name: Name of the repo for the overlay.
+    overlay: The tree to regenerate the cache for.
+    chroot_args: chroot enter args.
+    log_output: Log output of cros_build_run commands.
+
+  Returns:
+    A cros_build_lib.CommandResult object.
+  """
+  return cros_build_lib.run(['egencache', '--update', '--repo', repo_name,
+                             '--jobs', str(multiprocessing.cpu_count())],
+                            cwd=overlay, enter_chroot=True,
+                            chroot_args=chroot_args, log_output=log_output)
+
+
 def RegenCache(overlay, commit_changes=True, chroot=None):
   """Regenerate the cache of the specified overlay.
 
@@ -1582,9 +1602,7 @@ def RegenCache(overlay, commit_changes=True, chroot=None):
     chroot_args = chroot.get_enter_args()
 
   # Regen for the whole repo.
-  cros_build_lib.run(['egencache', '--update', '--repo', repo_name,
-                      '--jobs', str(multiprocessing.cpu_count())],
-                     cwd=overlay, enter_chroot=True, chroot_args=chroot_args)
+  _Egencache(repo_name, overlay, chroot_args)
   # If there was nothing new generated, then let's just bail.
   result = git.RunGit(overlay, ['status', '-s', 'metadata/'])
   if not result.output:
@@ -1818,6 +1836,30 @@ def IsPackageInstalled(package, sysroot='/'):
   return False
 
 
+def _EqueryList(
+    pkg_str: str,
+    board: Optional[str] = None,
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+  """Executes equery list command.
+
+  Args:
+    pkg_str: The package name with optional category, version, and slot.
+    board: The board to inspect.
+    buildroot: Source root to find overlays.
+
+  Returns:
+    A cros_build_lib.CommandResult object.
+  """
+  cmd = ['equery']
+  if board:
+    cmd = ['equery-%s' % board]
+
+  cmd += ['list', pkg_str]
+  return cros_build_lib.run(
+      cmd, cwd=buildroot, enter_chroot=True, capture_output=True,
+      check=False, encoding='utf-8')
+
+
 def FindPackageNameMatches(pkg_str, board=None,
                            buildroot=constants.SOURCE_ROOT):
   """Finds a list of installed packages matching |pkg_str|.
@@ -1830,14 +1872,7 @@ def FindPackageNameMatches(pkg_str, board=None,
   Returns:
     A list of matched CPV objects.
   """
-  cmd = ['equery']
-  if board:
-    cmd = ['equery-%s' % board]
-
-  cmd += ['list', pkg_str]
-  result = cros_build_lib.run(
-      cmd, cwd=buildroot, enter_chroot=True, capture_output=True,
-      check=False, encoding='utf-8')
+  result = _EqueryList(pkg_str, board, buildroot)
 
   matches = []
   if result.returncode == 0:
@@ -1854,6 +1889,40 @@ def FindEbuildForBoardPackage(pkg_str, board,
   return cros_build_lib.run(
       cmd, cwd=buildroot, enter_chroot=True,
       capture_output=True, encoding='utf-8').stdout.strip()
+
+
+def _EqueryWhich(
+    packages_list: List[str],
+    sysroot: str,
+    include_masked: bool = False,
+    extra_env: Optional[Dict[str, str]] = None,
+    check: bool = False) -> cros_build_lib.CommandResult:
+  """Executes an equery command, returns the result of the cmd.
+
+  Args:
+    packages_list: The list of package (string) names with optional category,
+      version, and slot.
+    sysroot: The root directory being inspected.
+    include_masked: True iff we should include masked ebuilds in our query.
+    equery_cmd_args: List containing equery command args.
+    extra_env: optional dictionary of extra string/string pairs to use as the
+      environment of equery command.
+    check: If False, do not raise an exception when run returns
+      a non-zero exit code.
+      If any package does not exist causing the run to fail, we will
+      return information for none of the packages, i.e: return an
+      empty dictionary.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
+  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'equery'), 'which']
+  if include_masked:
+    cmd += ['--include-masked']
+  cmd += packages_list
+  return cros_build_lib.run(
+      cmd, extra_env=extra_env, print_cmd=False, capture_output=True,
+      check=check, encoding='utf-8')
 
 
 def FindEbuildsForPackages(packages_list, sysroot, include_masked=False,
@@ -1879,15 +1948,8 @@ def FindEbuildsForPackages(packages_list, sysroot, include_masked=False,
   if not packages_list:
     return {}
 
-  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'equery'), 'which']
-  if include_masked:
-    cmd += ['--include-masked']
-  cmd += packages_list
-
-  result = cros_build_lib.run(
-      cmd, extra_env=extra_env, print_cmd=False, capture_output=True,
-      check=check, encoding='utf-8')
-
+  result = _EqueryWhich(packages_list, sysroot, include_masked,
+                        extra_env=extra_env, check=check)
   if result.returncode:
     return {}
 
@@ -1932,6 +1994,31 @@ def FindEbuildForPackage(pkg_str, sysroot, include_masked=False,
   return ebuilds_map[pkg_str]
 
 
+def _EqueryDepgraph(pkg_str: str, sysroot: str,
+                    depth: int = 0) -> cros_build_lib.CommandResult:
+  """Executes equery depgraph to find dependencies.
+
+  Args:
+    pkg_str: The package name with optional category, version, and slot.
+    sysroot: The root directory being inspected.
+    depth: The depth of the transitive dependency tree to explore. 0 for
+      unlimited.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
+  cmd = [
+      cros_build_lib.GetSysrootToolPath(sysroot, 'equery'),
+      '-CNq',
+      'depgraph',
+      '--depth=%d' % depth,
+  ]
+
+  cmd += [pkg_str]
+  return cros_build_lib.run(cmd, print_cmd=False, capture_output=True,
+                            check=True, encoding='utf-8')
+
+
 def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
   """Returns a depth-limited list of the dependencies for a given package.
 
@@ -1948,17 +2035,7 @@ def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
   if not pkg_str:
     raise ValueError('pkg_str must be non-empty')
 
-  cmd = [
-      cros_build_lib.GetSysrootToolPath(sysroot, 'equery'),
-      '-CNq',
-      'depgraph',
-      '--depth=%d' % depth,
-  ]
-
-  cmd += [pkg_str]
-
-  result = cros_build_lib.run(
-      cmd, print_cmd=False, capture_output=True, check=True, encoding='utf-8')
+  result = _EqueryDepgraph(pkg_str, sysroot, depth)
 
   return _ParseDepTreeOutput(result.output)
 
@@ -1983,6 +2060,30 @@ def _ParseDepTreeOutput(equery_output):
   return re.findall(equery_output_regex, equery_output)
 
 
+def _Qlist(
+    pkg_str: str,
+    board: Optional[str] = None,
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+  """Use qlist to get USE flags for installed packages matching |pkg_str|.
+
+  Args:
+    pkg_str: The package name with optional category, version, and slot.
+    board: The board to inspect.
+    buildroot: Source root to find overlays.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
+  cmd = ['qlist']
+  if board:
+    cmd = ['qlist-%s' % board]
+
+  cmd += ['-CqU', pkg_str]
+  return cros_build_lib.run(
+      cmd, enter_chroot=True, capture_output=True, check=False,
+      encoding='utf-8', cwd=buildroot)
+
+
 def GetInstalledPackageUseFlags(pkg_str, board=None,
                                 buildroot=constants.SOURCE_ROOT):
   """Gets the list of USE flags for installed packages matching |pkg_str|.
@@ -1996,15 +2097,7 @@ def GetInstalledPackageUseFlags(pkg_str, board=None,
     A dictionary with the key being a package CP and the value being the list
     of USE flags for that package.
   """
-  cmd = ['qlist']
-  if board:
-    cmd = ['qlist-%s' % board]
-
-  cmd += ['-CqU', pkg_str]
-  result = cros_build_lib.run(
-      cmd, enter_chroot=True, capture_output=True, check=False,
-      encoding='utf-8', cwd=buildroot)
-
+  result = _Qlist(pkg_str, board, buildroot)
   use_flags = {}
   if result.returncode == 0:
     for line in result.output.splitlines():
@@ -2046,15 +2139,32 @@ def GetBoardUseFlags(board):
   return PortageqEnvvar('USE', board=board).split()
 
 
-def GetPackageDependencies(board, package,
-                           buildroot=constants.SOURCE_ROOT):
-  """Returns the depgraph list of packages for a board and package."""
+def _EmergeBoard(
+    board: str,
+    package: str,
+    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+  """Call emerge board to get dependences of package.
+
+  Args:
+    board: The board to inspect.
+    package: The package name with optional category, version, and slot.
+    buildroot: Source root to find overlays.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
   emerge = 'emerge-%s' % board if board else 'emerge'
   cmd = [emerge, '-p', '--cols', '--quiet', '--root', '/mnt/empty', '-e',
          package]
-  emerge_output = cros_build_lib.run(
+  return cros_build_lib.run(
       cmd, cwd=buildroot, enter_chroot=True,
-      capture_output=True, encoding='utf-8').stdout.splitlines()
+      capture_output=True, encoding='utf-8')
+
+
+def GetPackageDependencies(board, package,
+                           buildroot=constants.SOURCE_ROOT):
+  """Returns the depgraph list of packages for a board and package."""
+  emerge_output = _EmergeBoard(board, package, buildroot).stdout.splitlines()
   packages = []
   for line in emerge_output:
     # The first column is ' NRfUD '
@@ -2104,6 +2214,23 @@ def GetRepositoryFromEbuildInfo(info):
           for srcdir, project in zip(srcdirs, projects)]
 
 
+def _EbuildInfo(ebuild_path: str,
+                sysroot: str) -> cros_build_lib.CommandResult:
+  """Get ebuild info for <ebuild_path>.
+
+  Args:
+    ebuild_path: string full path to ebuild file.
+    sysroot: The root directory being inspected.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
+  cmd = (cros_build_lib.GetSysrootToolPath(sysroot, 'ebuild'),
+         ebuild_path, 'info')
+  return cros_build_lib.run(
+      cmd, capture_output=True, print_cmd=False, check=False, encoding='utf-8')
+
+
 def GetRepositoryForEbuild(ebuild_path, sysroot):
   """Get parsed output of `ebuild <ebuild_path> info`
 
@@ -2117,10 +2244,7 @@ def GetRepositoryForEbuild(ebuild_path, sysroot):
   Returns:
     list of RepositoryInfoTuples.
   """
-  cmd = (cros_build_lib.GetSysrootToolPath(sysroot, 'ebuild'),
-         ebuild_path, 'info')
-  result = cros_build_lib.run(
-      cmd, capture_output=True, print_cmd=False, check=False, encoding='utf-8')
+  result = _EbuildInfo(ebuild_path, sysroot)
   return GetRepositoryFromEbuildInfo(result.output)
 
 
