@@ -81,10 +81,6 @@ class AndroidIsPinnedUprevError(UprevError):
     self.new_android_atom = new_android_atom
 
 
-class EbuildManifestError(Error):
-  """Error when running ebuild manifest."""
-
-
 class GeneratedCrosConfigFilesError(Error):
   """Error when cros_config_schema does not produce expected files"""
 
@@ -92,32 +88,6 @@ class GeneratedCrosConfigFilesError(Error):
     msg = ('Expected to find generated C files: %s. Actually found: %s' %
            (expected_files, found_files))
     super(GeneratedCrosConfigFilesError, self).__init__(msg)
-
-
-UprevVersionedPackageModifications = collections.namedtuple(
-    'UprevVersionedPackageModifications', ('new_version', 'files'))
-
-
-class UprevVersionedPackageResult(object):
-  """Data object for uprev_versioned_package."""
-
-  def __init__(self):
-    self.modified = []
-
-  def add_result(self, new_version, modified_files):
-    """Adds version/ebuilds tuple to result.
-
-    Args:
-      new_version: New version number of package.
-      modified_files: List of files modified for the given version.
-    """
-    result = UprevVersionedPackageModifications(new_version, modified_files)
-    self.modified.append(result)
-    return self
-
-  @property
-  def uprevved(self):
-    return bool(self.modified)
 
 
 def patch_ebuild_vars(ebuild_path, variables):
@@ -312,7 +282,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
   uprev_manager.uprev(package_list=['media-libs/virglrenderer'], force=True)
 
   updated_files = uprev_manager.modified_ebuilds
-  result = UprevVersionedPackageResult()
+  result = uprev_lib.UprevVersionedPackageResult()
   result.add_result(refs[0].revision, updated_files)
   return result
 
@@ -332,7 +302,7 @@ def uprev_kernel_afdo(*_args, **_kwargs):
   with open(path, 'r') as f:
     versions = json.load(f)
 
-  result = UprevVersionedPackageResult()
+  result = uprev_lib.UprevVersionedPackageResult()
   for version, version_info in versions.items():
     path = os.path.join('src', 'third_party', 'chromiumos-overlay',
                         'sys-kernel', version)
@@ -348,7 +318,7 @@ def uprev_kernel_afdo(*_args, **_kwargs):
       cmd = ['ebuild', chroot_ebuild_path, 'manifest', '--force']
       cros_build_lib.run(cmd, enter_chroot=True)
     except cros_build_lib.RunCommandError as e:
-      raise EbuildManifestError(
+      raise uprev_lib.EbuildManifestError(
           'Error encountered when regenerating the manifest for ebuild: %s\n%s'
           % (chroot_ebuild_path, e), e)
 
@@ -372,7 +342,7 @@ def uprev_termina_dlc(_build_targets, _refs, chroot):
   version_pin_src_path = _get_version_pin_src_path(package_path)
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
-  return uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+  return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
 
 
 @uprevs_versioned_package('app-emulation/parallels-desktop')
@@ -407,7 +377,7 @@ def uprev_parallels_desktop(_build_targets, _refs, chroot):
     raise UprevError('version in VERSION-PIN for %s not a string' % package)
 
   # Update the ebuild.
-  result = uprev_ebuild_from_pin(package_path, version, chroot)
+  result = uprev_lib.uprev_ebuild_from_pin(package_path, version, chroot)
 
   # Update the VM image used for testing.
   test_image_path = ('src/platform/tast-tests-pita/src/chromiumos/tast/local/'
@@ -432,82 +402,12 @@ def uprev_sludge(_build_targets, _refs, chroot):
   version_pin_src_path = _get_version_pin_src_path(package_path)
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
-  return uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+  return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
 
 
 def _get_version_pin_src_path(package_path):
   """Returns the path to the VERSION-PIN file for the given package."""
   return os.path.join(constants.SOURCE_ROOT, package_path, 'VERSION-PIN')
-
-
-def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
-  """Changes the package ebuild's version to match the version pin file.
-
-  Args:
-    package_path: The path of the package relative to the src root. This path
-      should contain a stable and an unstable ebuild with the same name
-      as the package.
-    version_no_rev: The version string to uprev to (excluding revision). The
-      ebuild's version will be directly set to this number.
-    chroot (chroot_lib.Chroot): specify a chroot to enter.
-
-  Returns:
-    UprevVersionedPackageResult: The result.
-  """
-  package = os.path.basename(package_path)
-
-  package_src_path = os.path.join(constants.SOURCE_ROOT, package_path)
-  ebuild_paths = list(portage_util.EBuild.List(package_src_path))
-  stable_ebuild = None
-  unstable_ebuild = None
-  for path in ebuild_paths:
-    ebuild = portage_util.EBuild(path)
-    if ebuild.is_stable:
-      stable_ebuild = ebuild
-    else:
-      unstable_ebuild = ebuild
-
-  if stable_ebuild is None:
-    raise UprevError('No stable ebuild found for %s' % package)
-  if unstable_ebuild is None:
-    raise UprevError('No unstable ebuild found for %s' % package)
-  if len(ebuild_paths) > 2:
-    raise UprevError('Found too many ebuilds for %s: '
-                     'expected one stable and one unstable' % package)
-
-  # If the new version is the same as the old version, bump the revision number,
-  # otherwise reset it to 1
-  if version_no_rev == stable_ebuild.version_no_rev:
-    version = '%s-r%d' % (version_no_rev, stable_ebuild.current_revision + 1)
-  else:
-    version = version_no_rev + '-r1'
-
-  new_ebuild_path = os.path.join(package_path,
-                                 '%s-%s.ebuild' % (package, version))
-  new_ebuild_src_path = os.path.join(constants.SOURCE_ROOT,
-                                     new_ebuild_path)
-  manifest_src_path = os.path.join(package_src_path, 'Manifest')
-
-  portage_util.EBuild.MarkAsStable(unstable_ebuild.ebuild_path,
-                                   new_ebuild_src_path, {})
-  osutils.SafeUnlink(stable_ebuild.ebuild_path)
-
-  try:
-    # UpdateEbuildManifest runs inside the chroot and therefore needs a
-    # chroot-relative path.
-    new_ebuild_chroot_path = os.path.join(constants.CHROOT_SOURCE_ROOT,
-                                          new_ebuild_path)
-    portage_util.UpdateEbuildManifest(new_ebuild_chroot_path, chroot=chroot)
-  except cros_build_lib.RunCommandError as e:
-    raise EbuildManifestError(
-        'Unable to update manifest for %s: %s' % (package, e.stderr))
-
-  result = UprevVersionedPackageResult()
-  result.add_result(version,
-                    [new_ebuild_src_path,
-                     stable_ebuild.ebuild_path,
-                     manifest_src_path])
-  return result
 
 
 @uprevs_versioned_package(constants.CHROME_CP)
@@ -523,7 +423,7 @@ def uprev_chrome(build_targets, refs, chroot):
 
   uprev_manager = uprev_lib.UprevChromeManager(
       chrome_version, build_targets=build_targets, chroot=chroot)
-  result = UprevVersionedPackageResult()
+  result = uprev_lib.UprevVersionedPackageResult()
   # Start with chrome itself, as we can't do anything else unless chrome
   # uprevs successfully.
   # TODO(crbug.com/1080429): Handle all possible outcomes of a Chrome uprev
@@ -683,8 +583,8 @@ def replicate_private_config(_build_targets, refs, chroot):
     assert not os.path.isabs(modified_file)
     modified_files[i] = os.path.join(constants.SOURCE_ROOT, modified_file)
 
-  return UprevVersionedPackageResult().add_result(new_private_version,
-                                                  modified_files)
+  return uprev_lib.UprevVersionedPackageResult().add_result(
+      new_private_version, modified_files)
 
 
 def get_best_visible(atom, build_target=None):

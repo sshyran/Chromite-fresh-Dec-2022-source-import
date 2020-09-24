@@ -15,11 +15,12 @@ from chromite.api.controller import packages as packages_controller
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import binhost_pb2
 from chromite.api.gen.chromite.api import packages_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import portage_util
-from chromite.lib import build_target_lib
+from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 from chromite.service import packages as packages_service
 
@@ -171,7 +172,7 @@ class UprevVersionedPackageTest(cros_test_lib.MockTestCase, ApiConfigMixin):
   def testOutputHandling(self):
     """Test the modified files are getting correctly added to the output."""
     version = '1.2.3.4'
-    result = packages_service.UprevVersionedPackageResult().add_result(
+    result = uprev_lib.UprevVersionedPackageResult().add_result(
         version, ['/file/one', '/file/two'])
 
     self.PatchObject(

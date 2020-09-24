@@ -135,8 +135,8 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
     ebuild_path = os.path.join(package_path, self.ebuild)
     self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
 
-    result = packages.uprev_ebuild_from_pin(package_path, self.new_version,
-                                            chroot=Chroot())
+    result = uprev_lib.uprev_ebuild_from_pin(
+        package_path, self.new_version, chroot=Chroot())
     self.assertEqual(len(result.modified), 1,
                      'unexpected number of results: %s' % len(result.modified))
 
@@ -171,8 +171,8 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
     ebuild_path = os.path.join(package_path, self.ebuild)
     self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
 
-    result = packages.uprev_ebuild_from_pin(package_path, self.version,
-                                            chroot=Chroot())
+    result = uprev_lib.uprev_ebuild_from_pin(
+        package_path, self.version, chroot=Chroot())
     self.assertEqual(len(result.modified), 1,
                      'unexpected number of results: %s' % len(result.modified))
 
@@ -200,9 +200,9 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
 
     package_path = os.path.join(self.tempdir, self.package)
 
-    with self.assertRaises(packages.UprevError):
-      packages.uprev_ebuild_from_pin(package_path, self.new_version,
-                                     chroot=Chroot())
+    with self.assertRaises(uprev_lib.EbuildUprevError):
+      uprev_lib.uprev_ebuild_from_pin(
+          package_path, self.new_version, chroot=Chroot())
 
   def test_multiple_stable_ebuilds(self):
     """Tests assertion is raised if multiple stable ebuilds are present"""
@@ -221,9 +221,9 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
     ebuild_path = os.path.join(package_path, self.ebuild_template % '1.2.1')
     self.WriteTempFile(ebuild_path, 'KEYWORDS="*"\n')
 
-    with self.assertRaises(packages.UprevError):
-      packages.uprev_ebuild_from_pin(package_path, self.new_version,
-                                     chroot=Chroot())
+    with self.assertRaises(uprev_lib.EbuildUprevError):
+      uprev_lib.uprev_ebuild_from_pin(
+          package_path, self.new_version, chroot=Chroot())
 
   def test_multiple_unstable_ebuilds(self):
     """Tests assertion is raised if multiple unstable ebuilds are present"""
@@ -236,9 +236,9 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
 
     package_path = os.path.join(self.tempdir, self.package)
 
-    with self.assertRaises(packages.UprevError):
-      packages.uprev_ebuild_from_pin(package_path, self.new_version,
-                                     chroot=Chroot())
+    with self.assertRaises(uprev_lib.EbuildUprevError):
+      uprev_lib.uprev_ebuild_from_pin(
+          package_path, self.new_version, chroot=Chroot())
 
 
 class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):

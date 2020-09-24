@@ -45,6 +45,11 @@ class Error(Exception):
 class NoUnstableEbuildError(Error):
   """When no unstable ebuild can be found."""
 
+class EbuildUprevError(Error):
+  """An error occurred while uprevving packages."""
+
+class EbuildManifestError(Error):
+  """Error when running ebuild manifest."""
 
 class ChromeEBuild(portage_util.EBuild):
   """Thin sub-class of EBuild that adds a few small helpers."""
@@ -612,3 +617,97 @@ def clean_stale_packages(new_package_atoms, build_targets, chroot=None):
   tasks.append([None])
 
   parallel.RunTasksInProcessPool(_do_clean_stale_packages, tasks)
+
+UprevVersionedPackageModifications = collections.namedtuple(
+    'UprevVersionedPackageModifications', ('new_version', 'files'))
+
+class UprevVersionedPackageResult(object):
+  """Data object for uprev_versioned_package."""
+
+  def __init__(self):
+    self.modified = []
+
+  def add_result(self, new_version, modified_files):
+    """Adds version/ebuilds tuple to result.
+
+    Args:
+      new_version: New version number of package.
+      modified_files: List of files modified for the given version.
+    """
+    result = UprevVersionedPackageModifications(new_version, modified_files)
+    self.modified.append(result)
+    return self
+
+  @property
+  def uprevved(self):
+    return bool(self.modified)
+
+
+def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
+  """Changes the package ebuild's version to match the version pin file.
+
+  Args:
+    package_path: The path of the package relative to the src root. This path
+      should contain a stable and an unstable ebuild with the same name
+      as the package.
+    version_no_rev: The version string to uprev to (excluding revision). The
+      ebuild's version will be directly set to this number.
+    chroot (chroot_lib.Chroot): specify a chroot to enter.
+
+  Returns:
+    UprevVersionedPackageResult: The result.
+  """
+  package = os.path.basename(package_path)
+
+  package_src_path = os.path.join(constants.SOURCE_ROOT, package_path)
+  ebuild_paths = list(portage_util.EBuild.List(package_src_path))
+  stable_ebuild = None
+  unstable_ebuild = None
+  for path in ebuild_paths:
+    ebuild = portage_util.EBuild(path)
+    if ebuild.is_stable:
+      stable_ebuild = ebuild
+    else:
+      unstable_ebuild = ebuild
+
+  if stable_ebuild is None:
+    raise EbuildUprevError('No stable ebuild found for %s' % package)
+  if unstable_ebuild is None:
+    raise EbuildUprevError('No unstable ebuild found for %s' % package)
+  if len(ebuild_paths) > 2:
+    raise EbuildUprevError('Found too many ebuilds for %s: '
+                           'expected one stable and one unstable' % package)
+
+  # If the new version is the same as the old version, bump the revision number,
+  # otherwise reset it to 1
+  if version_no_rev == stable_ebuild.version_no_rev:
+    version = '%s-r%d' % (version_no_rev, stable_ebuild.current_revision + 1)
+  else:
+    version = version_no_rev + '-r1'
+
+  new_ebuild_path = os.path.join(package_path,
+                                 '%s-%s.ebuild' % (package, version))
+  new_ebuild_src_path = os.path.join(constants.SOURCE_ROOT,
+                                     new_ebuild_path)
+  manifest_src_path = os.path.join(package_src_path, 'Manifest')
+
+  portage_util.EBuild.MarkAsStable(unstable_ebuild.ebuild_path,
+                                   new_ebuild_src_path, {})
+  osutils.SafeUnlink(stable_ebuild.ebuild_path)
+
+  try:
+    # UpdateEbuildManifest runs inside the chroot and therefore needs a
+    # chroot-relative path.
+    new_ebuild_chroot_path = os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                          new_ebuild_path)
+    portage_util.UpdateEbuildManifest(new_ebuild_chroot_path, chroot=chroot)
+  except cros_build_lib.RunCommandError as e:
+    raise EbuildManifestError(
+        'Unable to update manifest for %s: %s' % (package, e.stderr))
+
+  result = UprevVersionedPackageResult()
+  result.add_result(version,
+                    [new_ebuild_src_path,
+                     stable_ebuild.ebuild_path,
+                     manifest_src_path])
+  return result
