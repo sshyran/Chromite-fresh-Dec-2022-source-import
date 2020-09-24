@@ -7,8 +7,6 @@
 
 from __future__ import print_function
 
-import sys
-
 import mock
 
 from chromite.api.api_config import ApiConfigMixin
@@ -24,9 +22,6 @@ from chromite.lib import portage_util
 from chromite.lib import build_target_lib
 from chromite.lib.parser import package_info
 from chromite.service import packages as packages_service
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):

@@ -7,8 +7,6 @@
 
 from __future__ import print_function
 
-import sys
-
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import goma_util
@@ -16,9 +14,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

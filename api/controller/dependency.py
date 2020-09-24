@@ -11,8 +11,6 @@ graphs mapping from portage packages to the dependency source.
 
 from __future__ import print_function
 
-import sys
-
 from chromite.api import api_config
 from chromite.api import faux
 from chromite.api import validate
@@ -22,9 +20,6 @@ from chromite.api.gen.chromite.api import depgraph_pb2
 from chromite.lib import cros_build_lib
 from chromite.lib.parser import package_info
 from chromite.service import dependency
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def AugmentDepGraphProtoFromJsonMap(json_map, graph):

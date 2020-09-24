@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import datetime
 import os
-import sys
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -24,9 +23,6 @@ from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.service import sysroot as sysroot_service
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

@@ -8,7 +8,6 @@
 from __future__ import print_function
 
 import collections
-import sys
 
 from chromite.api import controller
 from chromite.api import faux
@@ -19,9 +18,6 @@ from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import cros_logging as logging
 from chromite.lib import toolchain_util
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])

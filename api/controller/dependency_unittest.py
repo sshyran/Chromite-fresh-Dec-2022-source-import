@@ -7,7 +7,6 @@
 from __future__ import print_function
 
 import os
-import sys
 
 from chromite.api import api_config
 from chromite.api.controller import controller_util
@@ -21,9 +20,6 @@ from chromite.lib import osutils
 from chromite.service import dependency as dependency_service
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
