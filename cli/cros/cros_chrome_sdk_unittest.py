@@ -11,6 +11,7 @@ import copy
 import os
 import shutil
 import sys
+import threading
 
 import mock
 
@@ -152,6 +153,7 @@ class SDKFetcherMock(partial_mock.PartialMock):
     self.gs_mock.SetDefaultCmdResult()
     self.env = None
     self.tarball_cache_key_map = {}
+    self.tarball_fetch_lock = threading.Lock()
 
   @_DependencyMockCtx
   def _target__init__(self, inst, *args, **kwargs):
@@ -167,10 +169,14 @@ class SDKFetcherMock(partial_mock.PartialMock):
 
   @_DependencyMockCtx
   def _UpdateTarball(self, inst, *args, **kwargs):
-    with mock.patch.object(gs.GSContext, 'Copy', autospec=True,
-                           side_effect=_GSCopyMock):
-      with mock.patch.object(cache, 'Untar'):
-        return self.backup['_UpdateTarball'](inst, *args, **kwargs)
+    # The mocks here can fall off in the middle of the test unreliably, likely
+    # due to a race condition when running _UpdateTarball across multiple
+    # threads. So lock around the mocks to avoid.
+    with self.tarball_fetch_lock:
+      with mock.patch.object(gs.GSContext, 'Copy', autospec=True,
+                             side_effect=_GSCopyMock):
+        with mock.patch.object(cache, 'Untar'):
+          return self.backup['_UpdateTarball'](inst, *args, **kwargs)
 
   @_DependencyMockCtx
   def GetFullVersion(self, _inst, version):
@@ -346,6 +352,18 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         self.assertExists(ctx.key_map[c].path)
       for c in [constants.IMAGE_SCRIPTS_TAR, constants.CHROME_ENV_TAR]:
         self.assertFalse(c in ctx.key_map)
+
+  def testExceptionDuringUpdateTarball(self):
+    """Tests that an exception thrown in _UpdateTarball is surfaced.
+
+    _UpdateTarball is ran across multiple threads. This test ensures an
+    exception raised in one of those threads is surfaced to the caller.
+    """
+    self.SetupCommandMock()
+    with mock.patch.object(cache.CacheReference, 'SetDefault',
+                           side_effect=ValueError('uh oh')):
+      with self.assertRaises(ValueError):
+        self.cmd_mock.inst.Run()
 
   @staticmethod
   def FindInPath(paths, endswith):

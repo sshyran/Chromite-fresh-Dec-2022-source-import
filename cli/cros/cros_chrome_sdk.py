@@ -16,7 +16,9 @@ import json
 import os
 import re
 import sys
+import queue
 import textwrap
+import threading
 
 from chromite.cbuildbot import archive_lib
 from chromite.cli import command
@@ -166,13 +168,32 @@ class SDKFetcher(object):
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
 
-  def _UpdateTarball(self, url, ref):
-    """Worker function to fetch tarballs"""
-    with osutils.TempDir(base_dir=self.tarball_cache.staging_dir) as tempdir:
-      local_path = os.path.join(tempdir, os.path.basename(url))
-      Log('SDK: Fetching %s', url, silent=self.silent)
-      self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
-      ref.SetDefault(local_path, lock=True)
+  def _UpdateTarball(self, ref_queue):
+    """Worker function to fetch tarballs.
+
+    Args:
+      ref_queue: A queue.PriorityQueue of tuples containing (pri, cache key,
+          GS url, cache.CacheReference)
+    """
+    while True:
+      try:
+        _, key, url, ref = ref_queue.get(block=False)
+      except queue.Empty:
+        return
+      with osutils.TempDir(base_dir=self.tarball_cache.staging_dir) as tempdir:
+        local_path = os.path.join(tempdir, os.path.basename(url))
+        Log('SDK: Fetching %s', url, silent=self.silent)
+        try:
+          self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
+          ref.SetDefault(local_path, lock=True)
+        except gs.GSNoSuchKey:
+          if key == constants.VM_IMAGE_TAR:
+            logging.warning(
+                'No VM available for board %s. Please try a different '
+                'board, e.g. amd64-generic.',
+                self.board)
+          else:
+            raise
 
   def _UpdateCacheSymlink(self, ref, source_path):
     """Adds a symlink to the cache pointing at the given source.
@@ -713,32 +734,29 @@ class SDKFetcher(object):
 
     version_base = self._GetVersionGSBase(version)
     fetch_urls.update((t, os.path.join(version_base, t)) for t in components)
+    ref_queue = queue.PriorityQueue()
     try:
       for key, url in fetch_urls.items():
         tarball_cache_key = self._GetTarballCacheKey(key, url)
         tarball_ref = self.tarball_cache.Lookup(tarball_cache_key)
         key_map[tarball_cache_key] = tarball_ref
         tarball_ref.Acquire()
+        # Starting with the larger components first when fetching the SDK helps
+        # ensure we don't save them for a single thread at the very end while
+        # the remaining threads sit idle.
         if not tarball_ref.Exists(lock=True):
-          # TODO(rcui): Parallelize this.  Requires acquiring locks *before*
-          # generating worker processes; therefore the functionality needs to
-          # be moved into the DiskCache class itself -
-          # i.e.,DiskCache.ParallelSetDefault().
-          try:
-            self._UpdateTarball(url, tarball_ref)
-          except gs.GSNoSuchKey:
-            if key == constants.VM_IMAGE_TAR:
-              logging.warning(
-                  'No VM available for board %s. '
-                  'Please try a different board, e.g. amd64-generic.',
-                  self.board)
-            else:
-              raise
+          pri = 3
+          if key == constants.VM_IMAGE_TAR:
+            pri = 1
+          elif key == constants.CHROME_SYSROOT_TAR:
+            pri = 2
+          ref_queue.put((pri, key, url, tarball_ref))
 
         # Create a symlink in a separate cache dir that points to the tarball
         # component. Since the tarball cache is keyed based off of GS URLs,
         # these symlinks can be used to identify tarball components without
-        # knowing the GS URL.
+        # knowing the GS URL. This can safely be done before actually fetching
+        # the SDK components.
         link_name = self._GetLinkNameForComponent(version, key)
         link_ref = self.symlink_cache.Lookup(link_name)
         key_map[key] = link_ref
@@ -751,6 +769,17 @@ class SDKFetcher(object):
           link_ref.Remove()
         if not link_ref.Exists(lock=True):
           self._UpdateCacheSymlink(link_ref, tarball_ref.path)
+
+      if not ref_queue.empty():
+        num_threads = 2
+        threads = []
+        for _ in range(num_threads):
+          threads.append(threading.Thread(target=self._UpdateTarball,
+                                          args=[ref_queue]))
+        for t in threads:
+          t.start()
+        for t in threads:
+          t.join()
 
       self._FinalizePackages(version)
       ctx_version = version
