@@ -75,7 +75,9 @@ class CreateArguments(object):
     if self.bootstrap:
       args.append('--bootstrap')
 
-    if not self.use_image:
+    if self.use_image:
+      args.append('--use-image')
+    else:
       args.append('--nouse-image')
 
     if self.cache_dir:
