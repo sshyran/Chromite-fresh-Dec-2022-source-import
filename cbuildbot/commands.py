@@ -218,7 +218,9 @@ def MakeChroot(buildroot,
                cache_dir=None):
   """Wrapper around make_chroot."""
   cmd = ['cros_sdk', '--buildbot-log-version']
-  if not use_image:
+  if use_image:
+    cmd.append('--use-image')
+  else:
     cmd.append('--nouse-image')
   if use_sdk:
     cmd.append('--create')
