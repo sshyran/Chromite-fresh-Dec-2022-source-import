@@ -716,6 +716,13 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       default=True,
       help='Do not mount the chroot on a loopback image; '
       'instead, create it directly in a directory.')
+  parser.add_argument(
+      '--use-image',
+      dest='use_image',
+      action='store_true',
+      default=True,
+      help='Mount the chroot on a loopback image '
+      'instead of creating it directly in a directory.')
 
   parser.add_argument(
       '--chrome-root',
