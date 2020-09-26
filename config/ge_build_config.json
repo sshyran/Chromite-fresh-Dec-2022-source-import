@@ -770,18 +770,6 @@
       ]
     },
     {
-      "name": "puff-macrophage",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reks",
       "configs": [
         {
@@ -4794,6 +4782,79 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 411,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "puff-macrophage",
+      "reference_board_name": "puff-macrophage",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "puff-macrophage",
+          "name": "duffy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "duffy_legacy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "faffy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "kaisa",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "kaisa_legacy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "noibat",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "puff",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "wyvern",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
           "is_active": true
         }
       ]
