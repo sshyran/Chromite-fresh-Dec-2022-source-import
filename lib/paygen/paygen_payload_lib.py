@@ -136,6 +136,9 @@ class PaygenPayload(object):
 
     self._postinst_config_file = os.path.join(work_dir, 'postinst_config')
 
+    # How big will the signatures be.
+    self._signature_sizes = [str(size) for size in
+                             self.PAYLOAD_SIGNATURE_SIZES_BYTES]
     self.signer = None
     if sign:
       self._SetupSigner(payload.build)
@@ -544,12 +547,9 @@ class PaygenPayload(object):
     """
     logging.info('Calculating hashes on %s.', self.payload_file)
 
-    # How big will the signatures be.
-    signature_sizes = [str(size) for size in self.PAYLOAD_SIGNATURE_SIZES_BYTES]
-
     cmd = ['delta_generator',
            '--in_file=' + path_util.ToChrootPath(self.payload_file),
-           '--signature_size=' + ':'.join(signature_sizes),
+           '--signature_size=' + ':'.join(self._signature_sizes),
            '--out_hash_file=' +
            path_util.ToChrootPath(self.payload_hash_file),
            '--out_metadata_hash_file=' +
@@ -650,6 +650,7 @@ class PaygenPayload(object):
 
     cmd = ['delta_generator',
            '--in_file=' + path_util.ToChrootPath(self.payload_file),
+           '--signature_size=' + ':'.join(self._signature_sizes),
            '--payload_signature_file=' + ':'.join(payload_signature_file_names),
            '--metadata_signature_file=' +
            ':'.join(metadata_signature_file_names),

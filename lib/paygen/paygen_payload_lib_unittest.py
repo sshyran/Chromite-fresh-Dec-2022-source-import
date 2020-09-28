@@ -586,6 +586,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     # Check the expected function calls.
     cmd = ['delta_generator',
            '--in_file=' + gen.payload_file,
+           '--signature_size=256',
            partial_mock.HasString('payload_signature_file'),
            partial_mock.HasString('metadata_signature_file'),
            '--out_file=' + gen.signed_payload_file]
