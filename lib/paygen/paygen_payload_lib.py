@@ -729,6 +729,8 @@ class PaygenPayload(object):
 
     if self.payload.tgt_image.build:
       props_map['target_version'] = self.payload.tgt_image.build.version
+    else:
+      props_map['target_version'] = '99999.0.0'
 
     if self.payload.src_image and self.payload.src_image.build:
       props_map['source_version'] = self.payload.src_image.build.version
