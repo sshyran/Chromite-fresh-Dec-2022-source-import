@@ -10231,6 +10231,8 @@
         "boards": [
             "eve"
         ],
+        "important": false,
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "useflags": [
@@ -10256,6 +10258,7 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "useflags": [
@@ -21894,6 +21897,7 @@
             "amd64-generic-full",
             "arm-generic-full",
             "arm64-generic-full",
+            "eve-full",
             "kevin-full",
             "kevin64-full",
             "lakitu-full",
@@ -21931,6 +21935,7 @@
             "amd64-generic-full-tryjob",
             "arm-generic-full-tryjob",
             "arm64-generic-full-tryjob",
+            "eve-full-tryjob",
             "kevin-full-tryjob",
             "kevin64-full-tryjob",
             "lakitu-full-tryjob",
