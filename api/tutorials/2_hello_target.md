@@ -102,3 +102,8 @@ Return Code: 0
 Result:
 {}
 ```
+
+Success!
+
+Continue to [Part 3](3_hello_validation.md), where we'll look at validating the
+input.
