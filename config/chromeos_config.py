@@ -2555,8 +2555,10 @@ def ApplyCustomOverrides(site_config):
           'sign_types': ['recovery', 'factory'],
       },
 
+      # See go/cros-fingerprint-firmware-branching-and-signing for details on
+      # accessory_rwsig signing.
       'zork-release': {
-          'sign_types': ['recovery', 'factory'],
+          'sign_types': ['recovery', 'factory', 'accessory_rwsig'],
       },
 
       'drallion-release': {

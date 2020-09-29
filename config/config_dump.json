@@ -35230,7 +35230,8 @@
         ],
         "sign_types": [
             "recovery",
-            "factory"
+            "factory",
+            "accessory_rwsig"
         ],
         "unittests": false,
         "vm_tests": [],
@@ -35270,7 +35271,8 @@
         "push_image": false,
         "sign_types": [
             "recovery",
-            "factory"
+            "factory",
+            "accessory_rwsig"
         ],
         "suite_scheduling": false,
         "unittests": false,
