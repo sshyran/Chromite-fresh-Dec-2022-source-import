@@ -517,55 +517,6 @@ class BundleAFDOGenerationArtifacts(cros_test_lib.MockTempDirTestCase):
         os.remove(f)
 
 
-class FetchPinnedGuestImagesTest(cros_test_lib.TempDirTestCase):
-  """FetchPinnedGuestImages tests."""
-
-  def setUp(self):
-    self.chroot = chroot_lib.Chroot(self.tempdir)
-    self.sysroot = sysroot_lib.Sysroot('/sysroot')
-    sysroot_path = os.path.join(self.tempdir, 'sysroot')
-    osutils.SafeMakedirs(sysroot_path)
-
-    self.pin_dir = os.path.join(sysroot_path, constants.GUEST_IMAGES_PINS_PATH)
-    osutils.SafeMakedirs(self.pin_dir)
-
-  def testSuccess(self):
-    """Tests that generating a guest images tarball."""
-    for filename in ('file1', 'file2'):
-      pin_file = os.path.join(self.pin_dir, filename + '.json')
-      with open(pin_file, 'w') as f:
-        pin = {
-            'filename': filename + '.tar.gz',
-            'gsuri': 'gs://%s' % filename,
-        }
-        json.dump(pin, f)
-
-    expected = [
-        artifacts.PinnedGuestImage(filename='file1.tar.gz', uri='gs://file1'),
-        artifacts.PinnedGuestImage(filename='file2.tar.gz', uri='gs://file2'),
-    ]
-
-    pins = artifacts.FetchPinnedGuestImages(self.chroot, self.sysroot)
-    self.assertCountEqual(expected, pins)
-
-  def testBadPin(self):
-    """Tests that generating a guest images tarball with a bad pin file."""
-    pin_file = os.path.join(self.pin_dir, 'file1.json')
-    with open(pin_file, 'w') as f:
-      pin = {
-          'gsuri': 'gs://%s' % 'file1',
-      }
-      json.dump(pin, f)
-
-    pins = artifacts.FetchPinnedGuestImages(self.chroot, self.sysroot)
-    self.assertFalse(pins)
-
-  def testNoPins(self):
-    """Tests that generating a guest images tarball with no pins."""
-    pins = artifacts.FetchPinnedGuestImages(self.chroot, self.sysroot)
-    self.assertFalse(pins)
-
-
 class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
   """Test cases for the payload generation functions."""
 

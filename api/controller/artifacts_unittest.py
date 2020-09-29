@@ -7,7 +7,6 @@
 
 from __future__ import print_function
 
-import collections
 import os
 
 import mock
@@ -24,10 +23,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.service import artifacts as artifacts_svc
-
-
-PinnedGuestImage = collections.namedtuple('PinnedGuestImage',
-                                          ['filename', 'uri'])
 
 
 class BundleRequestMixin(object):
@@ -356,104 +351,6 @@ class BundleTastFilesTest(BundleTestCase):
     self.assertEqual(expected_archive, self.response.artifacts[0].path)
     # Make sure the service got called correctly.
     bundle_patch.assert_called_once_with(chroot, self.sysroot, self.output_dir)
-
-
-class BundlePinnedGuestImagesTest(BundleTestCase):
-  """Unittests for BundlePinnedGuestImages."""
-
-  def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    patch = self.PatchObject(commands, 'BuildPinnedGuestImagesTarball')
-    artifacts.BundlePinnedGuestImages(self.target_request, self.response,
-                                      self.validate_only_config)
-    patch.assert_not_called()
-
-  def testMockCall(self):
-    """Test that a mock call does not execute logic, returns mocked value."""
-    patch = self.PatchObject(commands, 'BuildPinnedGuestImagesTarball')
-    artifacts.BundlePinnedGuestImages(self.target_request, self.response,
-                                      self.mock_call_config)
-    patch.assert_not_called()
-    self.assertEqual(len(self.response.artifacts), 1)
-    self.assertEqual(self.response.artifacts[0].path,
-                     os.path.join(self.output_dir,
-                                  'pinned-guest-images.tar.gz'))
-
-  def testBundlePinnedGuestImages(self):
-    """BundlePinnedGuestImages calls cbuildbot/commands with correct args."""
-    build_pinned_guest_images_tarball = self.PatchObject(
-        commands,
-        'BuildPinnedGuestImagesTarball',
-        return_value='pinned-guest-images.tar.gz')
-    artifacts.BundlePinnedGuestImages(self.target_request, self.response,
-                                      self.api_config)
-    self.assertEqual(
-        [artifact.path for artifact in self.response.artifacts],
-        [os.path.join(self.output_dir, 'pinned-guest-images.tar.gz')])
-    self.assertEqual(build_pinned_guest_images_tarball.call_args_list,
-                     [mock.call(self.source_root, 'target', self.output_dir)])
-
-  def testBundlePinnedGuestImagesNoLogs(self):
-    """BundlePinnedGuestImages does not die when no pinned images found."""
-    self.PatchObject(commands, 'BuildPinnedGuestImagesTarball',
-                     return_value=None)
-    artifacts.BundlePinnedGuestImages(self.target_request, self.response,
-                                      self.api_config)
-    self.assertFalse(self.response.artifacts)
-
-
-class FetchPinnedGuestImageUrisTest(cros_test_lib.MockTempDirTestCase,
-                                    api_config.ApiConfigMixin,
-                                    BundleRequestMixin):
-  """Unittests for FetchPinnedGuestImages."""
-
-  def setUp(self):
-    self.build_target = 'board'
-    self.chroot_dir = os.path.join(self.tempdir, 'chroot_dir')
-    self.sysroot_path = '/sysroot'
-    self.sysroot_dir = os.path.join(self.chroot_dir, 'sysroot')
-    osutils.SafeMakedirs(self.sysroot_dir)
-
-    self.input_request = artifacts_pb2.PinnedGuestImageUriRequest(
-        sysroot={'path': self.sysroot_path,
-                 'build_target': {'name': self.build_target}},
-        chroot={'path': self.chroot_dir})
-
-    self.response = artifacts_pb2.PinnedGuestImageUriResponse()
-
-  def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    patch = self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages')
-    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
-                                        self.validate_only_config)
-    patch.assert_not_called()
-
-  def testMockCall(self):
-    """Test that a mock call does not execute logic, returns mocked value."""
-    patch = self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages')
-    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
-                                        self.mock_call_config)
-    patch.assert_not_called()
-    self.assertEqual(len(self.response.pinned_images), 1)
-    self.assertEqual(self.response.pinned_images[0].filename,
-                     'pinned_file.tar.gz')
-    self.assertEqual(self.response.pinned_images[0].uri,
-                     'https://testuri.com')
-
-  def testFetchPinnedGuestImages(self):
-    """FetchPinnedGuestImages calls service with correct args."""
-    pins = []
-    pins.append(PinnedGuestImage(
-        filename='my_pinned_file.tar.gz', uri='https://the_testuri.com'))
-    self.PatchObject(artifacts_svc, 'FetchPinnedGuestImages',
-                     return_value=pins)
-    artifacts.FetchPinnedGuestImageUris(self.input_request, self.response,
-                                        self.api_config)
-    self.assertEqual(len(self.response.pinned_images), 1)
-    self.assertEqual(self.response.pinned_images[0].filename,
-                     'my_pinned_file.tar.gz')
-    self.assertEqual(self.response.pinned_images[0].uri,
-                     'https://the_testuri.com')
 
 
 class BundleFirmwareTest(BundleTestCase):

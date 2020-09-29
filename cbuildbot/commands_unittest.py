@@ -29,7 +29,6 @@ from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gob_util
-from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import path_util
@@ -1406,71 +1405,6 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
                                               self._sysroot_build,
                                               self._tarball_dir)
     self.assertIsNone(tarball)
-
-  def testBuildPinnedGuestImagesTarball(self):
-    """Tests that generating a guest images tarball."""
-    expected_tarball = os.path.join(self._tarball_dir, 'guest_images.tar')
-
-    pin_dir = os.path.join(self._buildroot, 'chroot', 'build', self._board,
-                           constants.GUEST_IMAGES_PINS_PATH)
-    os.makedirs(pin_dir)
-    for filename in ('file1', 'file2'):
-      pin_file = os.path.join(pin_dir, filename + '.json')
-      with open(pin_file, 'w') as f:
-        pin = {
-            'filename': filename + '.tar.gz',
-            'gsuri': 'gs://%s' % filename,
-        }
-        json.dump(pin, f)
-
-    gs_mock = self.PatchObject(gs.GSContext, 'Copy')
-
-    with mock.patch.object(commands, 'BuildTarball') as m:
-      tarball = commands.BuildPinnedGuestImagesTarball(self._buildroot,
-                                                       self._board,
-                                                       self._tarball_dir)
-      self.assertEqual(expected_tarball, tarball)
-      gs_mock.assert_called_with('gs://file2', os.path.join(self._tarball_dir,
-                                                            'file2.tar.gz'))
-      m.assert_called_once_with(self._buildroot,
-                                ['file1.tar.gz', 'file2.tar.gz'],
-                                expected_tarball,
-                                cwd=self._tarball_dir,
-                                compressed=False)
-
-  def testBuildPinnedGuestImagesTarballBadPin(self):
-    """Tests that generating a guest images tarball with a bad pin file."""
-    pin_dir = os.path.join(self._buildroot, 'chroot', 'build', self._board,
-                           constants.GUEST_IMAGES_PINS_PATH)
-    os.makedirs(pin_dir)
-    pin_file = os.path.join(pin_dir, 'file1.json')
-    with open(pin_file, 'w') as f:
-      pin = {
-          'gsuri': 'gs://%s' % 'file1',
-      }
-      json.dump(pin, f)
-
-    gs_mock = self.PatchObject(gs.GSContext, 'Copy')
-
-    with mock.patch.object(commands, 'BuildTarball') as m:
-      tarball = commands.BuildPinnedGuestImagesTarball(self._buildroot,
-                                                       self._board,
-                                                       self._tarball_dir)
-      self.assertIs(tarball, None)
-      gs_mock.assert_not_called()
-      m.assert_not_called()
-
-  def testBuildPinnedGuestImagesTarballNoPins(self):
-    """Tests that generating a guest images tarball with no pins."""
-    gs_mock = self.PatchObject(gs.GSContext, 'Copy')
-
-    with mock.patch.object(commands, 'BuildTarball') as m:
-      tarball = commands.BuildPinnedGuestImagesTarball(self._buildroot,
-                                                       self._board,
-                                                       self._tarball_dir)
-      self.assertIs(tarball, None)
-      gs_mock.assert_not_called()
-      m.assert_not_called()
 
   def testBuildStrippedPackagesArchive(self):
     """Test generation of stripped package tarball using globs."""

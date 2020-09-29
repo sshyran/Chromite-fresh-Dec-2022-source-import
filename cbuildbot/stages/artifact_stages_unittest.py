@@ -434,8 +434,7 @@ class UploadTestArtifactsStageMock(
   TARGET = 'chromite.cbuildbot.stages.artifact_stages.UploadTestArtifactsStage'
   ATTRS = (
       generic_stages_unittest.ArchivingStageMixinMock.ATTRS +
-      ('BuildAutotestTarballs', 'BuildTastTarball',
-       'BuildGuestImagesTarball'))
+      ('BuildAutotestTarballs', 'BuildTastTarball'))
 
   def BuildAutotestTarballs(self, *args, **kwargs):
     with patches(
@@ -446,9 +445,6 @@ class UploadTestArtifactsStageMock(
   def BuildTastTarball(self, *args, **kwargs):
     with patch(commands, 'BuildTarball'):
       self.backup['BuildTastTarball'](*args, **kwargs)
-
-  def BuildGuestImagesTarball(self, *args, **kwargs):
-    self.backup['BuildGuestImagesTarball'](*args, **kwargs)
 
 class UploadTestArtifactsStageTest(build_stages_unittest.AllConfigsTestCase,
                                    cbuildbot_unittest.SimpleBuilderTestCase):

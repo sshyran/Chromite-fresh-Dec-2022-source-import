@@ -14,7 +14,6 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import toolchain_pb2
-from chromite.cbuildbot import commands
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -249,70 +248,13 @@ def BundleTastFiles(input_proto, output_proto, config):
     logging.warning('Found no tast files for %s.', target)
 
 
-def _BundlePinnedGuestImagesResponse(input_proto, output_proto, _config):
-  """Add test pinned guest image files to a successful response."""
-  output_proto.artifacts.add().path = os.path.join(
-      input_proto.output_dir, 'pinned-guest-images.tar.gz')
+def BundlePinnedGuestImages(_input_proto, _output_proto, _config):
+  # TODO(crbug/1034529): Remove this endpoint
+  pass
 
-
-@faux.success(_BundlePinnedGuestImagesResponse)
-@faux.empty_error
-@validate.require('build_target.name', 'output_dir')
-@validate.exists('output_dir')
-@validate.validation_complete
-def BundlePinnedGuestImages(input_proto, output_proto, _config):
-  """Tar the pinned guest images for a build target.
-
-  Args:
-    input_proto (BundleRequest): The input proto.
-    output_proto (BundleResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
-  """
-  target = input_proto.build_target.name
-  output_dir = input_proto.output_dir
-  build_root = constants.SOURCE_ROOT
-
-  # TODO(crbug.com/954299): Replace with a chromite/service implementation.
-  archive = commands.BuildPinnedGuestImagesTarball(build_root, target,
-                                                   output_dir)
-
-  if archive is None:
-    logging.warning('Found no pinned guest images for %s.', target)
-    return
-
-  output_proto.artifacts.add().path = os.path.join(output_dir, archive)
-
-
-def _FetchPinnedGuestImageUrisResponse(_input_proto, output_proto, _config):
-  """Add test fetched pinned guest image files to a successful response."""
-  pinned_image = output_proto.pinned_images.add()
-  pinned_image.filename = 'pinned_file.tar.gz'
-  pinned_image.uri = 'https://testuri.com'
-
-
-@faux.success(_FetchPinnedGuestImageUrisResponse)
-@faux.empty_error
-@validate.require('sysroot.path')
-@validate.validation_complete
-def FetchPinnedGuestImageUris(input_proto, output_proto, _config):
-  """Get the pinned guest image information."""
-  sysroot_path = input_proto.sysroot.path
-
-  chroot = controller_util.ParseChroot(input_proto.chroot)
-  sysroot = sysroot_lib.Sysroot(sysroot_path)
-
-  if not chroot.exists():
-    cros_build_lib.Die('Chroot does not exist: %s', chroot.path)
-  elif not sysroot.Exists(chroot=chroot):
-    cros_build_lib.Die('Sysroot does not exist: %s',
-                       chroot.full_path(sysroot.path))
-
-  pins = artifacts.FetchPinnedGuestImages(chroot, sysroot)
-
-  for pin in pins:
-    pinned_image = output_proto.pinned_images.add()
-    pinned_image.filename = pin.filename
-    pinned_image.uri = pin.uri
+def FetchPinnedGuestImageUris(_input_proto, _output_proto, _config):
+  # TODO(crbug/1034529): Remove this endpoint
+  pass
 
 
 def _BundleFirmwareResponse(input_proto, output_proto, _config):

@@ -765,15 +765,6 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
       if tarball:
         self.UploadArtifact(tarball)
 
-  def BuildGuestImagesTarball(self):
-    """Build the tarball containing guest images test bundles."""
-    with osutils.TempDir(prefix='cbuildbot-guest-images') as tempdir:
-      logging.info('Running commands.BuildPinnedGuestImagesTarball')
-      tarball = commands.BuildPinnedGuestImagesTarball(
-          self._build_root, self._current_board, tempdir)
-      if tarball:
-        self.UploadArtifact(tarball)
-
   def BuildFpmcuUnittestsTarball(self):
     """Build the tarball containing fingerprint MCU on-device unittests."""
     with osutils.TempDir(prefix='cbuildbot-fpmcu-unittests') as tempdir:
@@ -835,7 +826,6 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
         self._run.config.upload_hw_test_artifacts):
       steps.append(self.BuildAutotestTarballs)
       steps.append(self.BuildTastTarball)
-      steps.append(self.BuildGuestImagesTarball)
       steps.append(self.BuildFpmcuUnittestsTarball)
 
     parallel.RunParallelSteps(steps)

@@ -13,7 +13,6 @@ from __future__ import print_function
 import collections
 import fnmatch
 import glob
-import json
 import os
 import shutil
 import tempfile
@@ -54,9 +53,6 @@ TAST_BUNDLE_NAME = 'tast_bundles.tar.bz2'
 TAST_COMPRESSOR = cros_build_lib.COMP_BZIP2
 
 CpeResult = collections.namedtuple('CpeResult', ['report', 'warnings'])
-
-PinnedGuestImage = collections.namedtuple('PinnedGuestImage',
-                                          ['filename', 'uri'])
 
 
 class Error(Exception):
@@ -623,38 +619,6 @@ def BundleTastFiles(chroot, sysroot, output_dir):
                                chroot=chroot.path, inputs=dirs)
 
   return tarball
-
-
-def FetchPinnedGuestImages(chroot, sysroot):
-  """Fetch the file names and uris of Guest VM and Container images for testing.
-
-  Args:
-    chroot (chroot_lib.Chroot): Chroot where the sysroot lives.
-    sysroot (sysroot_lib.Sysroot): Sysroot whose images are being fetched.
-
-  Returns:
-    list[PinnedGuestImage] - The pinned guest image uris.
-  """
-  pins_root = os.path.abspath(
-      os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
-                   constants.GUEST_IMAGES_PINS_PATH))
-
-  pins = []
-  for pin_file in sorted(glob.iglob(os.path.join(pins_root, '*.json'))):
-    with open(pin_file) as f:
-      pin = json.load(f)
-
-      filename = pin.get(constants.PIN_KEY_FILENAME)
-      uri = pin.get(constants.PIN_KEY_GSURI)
-      if not filename or not uri:
-        logging.warning("Skipping invalid pin file: '%s'.", pin_file)
-        logging.debug("'%s' data: filename='%s' uri='%s'", pin_file, filename,
-                      uri)
-        continue
-
-      pins.append(PinnedGuestImage(filename=filename, uri=uri))
-
-  return pins
 
 
 def GenerateCpeReport(chroot, sysroot, output_dir):
