@@ -3030,6 +3030,7 @@ def BranchScheduleConfig():
   # CWP profiles.
 
   RELEASES = [
+      # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       ('release-R86-13421.B',
        ['grunt-android-pi-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
