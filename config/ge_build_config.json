@@ -4783,6 +4783,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 411,
           "is_active": true
+        },
+        {
+          "board_name": "puff",
+          "name": "wyvern_accelerator",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 411,
+          "is_active": true
         }
       ]
     },
@@ -4852,6 +4860,14 @@
         {
           "board_name": "puff-macrophage",
           "name": "wyvern",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 460,
+          "is_active": true
+        },
+        {
+          "board_name": "puff-macrophage",
+          "name": "wyvern_accelerator",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 460,

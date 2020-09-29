@@ -25930,7 +25930,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"kaisa_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"noibat\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"puff\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
         "vm_tests": [],
         "vm_tests_override": null
@@ -25962,7 +25963,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"kaisa_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"noibat\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"puff\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
         "push_image": false,
@@ -26014,7 +26016,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_duffy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_kaisa\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_puff\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern\",\n    \"test_suites\": [\n        \"sanity\",\n        \"au\"\n    ]\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern\",\n    \"test_suites\": [\n        \"sanity\",\n        \"au\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
         "sign_types": [
             "recovery",
@@ -26050,7 +26053,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_duffy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_kaisa\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"unprovisioned_puff\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern\",\n    \"test_suites\": [\n        \"sanity\",\n        \"au\"\n    ]\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern\",\n    \"test_suites\": [\n        \"sanity\",\n        \"au\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
         "push_image": false,
