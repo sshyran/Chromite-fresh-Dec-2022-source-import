@@ -34891,6 +34891,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "unittests": false,
@@ -34923,6 +34925,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
@@ -35220,6 +35224,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "sign_types": [
@@ -35256,6 +35262,8 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
