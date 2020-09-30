@@ -298,6 +298,9 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       (relative to the repo checkout root, i.e: ~/trunk/ in your cros_sdk) it
       depends on
   """
+  if not sysroot_path:
+    sysroot_path = cros_build_lib.GetSysroot(board)
+
   results = {
       'sysroot_path': sysroot_path,
       'target_board': board,
