@@ -532,7 +532,14 @@ class Branch(object):
       branches: List of ProjectBranches describing the repairs needed.
     """
     for project_name in config_lib.GetSiteParams().MANIFEST_PROJECTS:
-      manifest_project = self.checkout.manifest.GetUniqueProject(project_name)
+      # The manifest projects are adding multiple branches in the checkout.
+      # First try with no branch name (since there wasn't one before), and if
+      # that fails, try with 'master'. See crbug.com/1110753.
+      try:
+        manifest_project = self.checkout.manifest.GetUniqueProject(project_name)
+      except ValueError:
+        manifest_project = self.checkout.manifest.GetUniqueProject(project_name,
+                                                                   'master')
       manifest_repo = ManifestRepository(self.checkout, manifest_project)
       manifest_repo.RepairManifestsOnDisk(branches)
       self.checkout.RunGit(
@@ -624,8 +631,12 @@ class Branch(object):
       if not source_ref:
         # Otherwise, use the source version's upstream,
         # e.g. refs/heads/release-R77-12371.B
-        source_ref = self.checkout.manifest.GetUniqueProject(
-            'chromeos/manifest-internal').upstream
+        try:
+          source_ref = self.checkout.manifest.GetUniqueProject(
+              'chromeos/manifest-internal').upstream
+        except ValueError:
+          source_ref = self.checkout.manifest.GetUniqueProject(
+              'chromeos/manifest-internal', 'master').upstream
       self.checkout.BumpVersion(
           source_version,
           git.StripRefs(source_ref),
@@ -933,8 +944,12 @@ Delete Examples:
 
     # Second, check that we did not already branch from this version.
     # manifest-internal serves as the sentinel project.
-    manifest_internal = checkout.manifest.GetUniqueProject(
-        'chromeos/manifest-internal')
+    try:
+      manifest_internal = checkout.manifest.GetUniqueProject(
+          'chromeos/manifest-internal')
+    except ValueError:
+      manifest_internal = checkout.manifest.GetUniqueProject(
+          'chromeos/manifest-internal', 'master')
     pattern = '.*-%s\\.B$' % '\\.'.join(
         str(comp) for comp in vinfo.VersionComponents() if comp)
     if (checkout.BranchExists(manifest_internal, pattern) and
@@ -1015,8 +1030,8 @@ Delete Examples:
       in_test_context = 'PYTEST_CURRENT_TEST' in os.environ
       if not in_test_context:
         cros_build_lib.Die(
-          'Please use the new tool, or add --ack-deprecation to continue with '
-          'use of `cros branch`')
+            'Please use the new tool, or add --ack-deprecation to continue '
+            'with use of `cros branch`')
     if self.options.root:
       self._RunInCheckout(self.options.root)
     else:
