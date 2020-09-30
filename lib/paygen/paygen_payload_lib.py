@@ -732,8 +732,12 @@ class PaygenPayload(object):
     else:
       props_map['target_version'] = '99999.0.0'
 
-    if self.payload.src_image and self.payload.src_image.build:
-      props_map['source_version'] = self.payload.src_image.build.version
+    if self.payload.src_image:
+      if self.payload.src_image.build:
+        props_map['source_version'] = self.payload.src_image.build.version
+      else:
+        props_map['source_version'] = ''
+
 
     # Add the public key if it exists.
     if self._public_key:
