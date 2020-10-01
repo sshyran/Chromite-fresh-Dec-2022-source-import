@@ -195,7 +195,6 @@ _TEST_GOLO_ARCHIVE_TEST_TARBALL_CONTENT = [
     'autotest/test_suites/control.cr50_stress',
     'autotest/test_suites/control.cellular_ota_tmobile',
     'autotest/test_suites/control.wifi_interop',
-    'autotest/test_suites/control.arc-unit-test',
     'autotest/test_suites/control.bluestreak-partners',
     'autotest/test_suites/control.chameleon_hdmi_unstable',
     'autotest/test_suites/control.graphics',
