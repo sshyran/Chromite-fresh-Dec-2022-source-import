@@ -136,6 +136,7 @@ class Crossdev(object):
   # Packages that needs separate handling, in addition to what we have from
   # crossdev.
   MANUAL_PKGS = {
+      'rust': 'dev-lang',
       'llvm': 'sys-devel',
       'libcxxabi': 'sys-libs',
       'libcxx': 'sys-libs',
@@ -1234,10 +1235,11 @@ def CreatePackagableRoot(target, output_dir, ldpaths, root='/'):
   def MoveUsrBinToBin(path):
     """Move /usr/bin to /bin so people can just use that toplevel dir
 
-    Note we do not apply this to clang - there is correlation between clang's
-    search path for libraries / inclusion and its installation path.
+    Note we do not apply this to clang or rust - there is correlation between
+    clang's search path for libraries / inclusion and its installation path.
     """
-    if path.startswith('/usr/bin/') and path.find('clang') == -1:
+    if (path.startswith('/usr/bin/') and
+        not any(x in path for x in ('clang', 'rust', 'cargo'))):
       return path[4:]
     return path
   _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,
