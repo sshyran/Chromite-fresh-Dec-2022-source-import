@@ -2182,7 +2182,11 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         enter_chroot=True,
         stdout=True,
         encoding='utf-8').output.splitlines()[0].strip()
-    match = re.search(r'llvm-project ([A-Fa-f0-9]{40})\)$', clang_version_str)
+    # TODO(crbug.com/1132918): There's a git-r3 bug that caused the LLVM build
+    # failed to find the upstream URL, so use the string contains the local
+    # path to clang source instead.
+    match = re.search(r'(?:llvm-project|clang) ([A-Fa-f0-9]{40})\)$',
+                      clang_version_str)
     if not match:
       raise BundleArtifactsHandlerError(
           "Can't recognize the version string %s" % clang_version_str)

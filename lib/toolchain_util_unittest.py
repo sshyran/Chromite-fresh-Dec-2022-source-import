@@ -592,7 +592,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.assertEqual([artifact], self.obj.Bundle())
     self.copy2.assert_called_once_with(mock.ANY, artifact)
 
-  def testBundleUnverifiedLlvmPgoFile(self):
+  def testBundleUnverifiedLlvmPgoFile(self, llvm_path='llvm-project'):
     self.SetUpBundle('UnverifiedLlvmPgoFile')
     llvm_version = '10.0_pre377782_p20200113-r14'
     llvm_clang_sha = 'a21beccea2020f950845cbb68db663d0737e174c'
@@ -610,15 +610,18 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.rc.AddCmdResult(
         partial_mock.In('clang'),
         returncode=0,
-        stdout=('Chromium OS %s clang version 10.0.0 (/path/to/'
-                'llvm-project %s)\n' % (llvm_version, llvm_clang_sha)))
-    base = '%s-%s' % (llvm_cpv.pv, llvm_clang_sha)
+        stdout=(f'Chromium OS {llvm_version} clang version 10.0.0 '
+                f'(/path/to/{llvm_path} {llvm_clang_sha})'))
+    base = f'{llvm_cpv.pv}-{llvm_clang_sha}'
     artifacts = [
         os.path.join(self.outdir, x)
-        for x in ('%s.llvm_metadata.json' % base, 'llvm_metadata.json',
-                  '%s.llvm.profdata.tar.xz' % base)
+        for x in (f'{base}.llvm_metadata.json', 'llvm_metadata.json',
+                  f'{base}.llvm.profdata.tar.xz')
     ]
     self.assertEqual(artifacts, self.obj.Bundle())
+
+  def testBundleUnverifiedLlvmPgoFileWorkaround(self):
+    self.testBundleUnverifiedLlvmPgoFile('clang')
 
   def testBundleUnverifiedChromeBenchmarkPerfFile(self):
     self.SetUpBundle('UnverifiedChromeBenchmarkPerfFile')
