@@ -166,6 +166,14 @@ def _GetGclientSolutions(internal, rev, template, managed):
   solution['url'] = url
   if deps_file:
     solution['deps_file'] = deps_file
+
+  # TODO(engeg@): Remove this ugly hack once we get an acceptable build.
+  #               See crbug.com/1044411 for more information. We landed
+  #               this custom dep here: crrev.com/i/3304125.
+  #               Also relanded for b:187795779.
+  if deps_file == 'releases/51.0.2701.0/DEPS':
+    solution['deps_file'] = 'releases/51.0.2701.0/DEPS_crbug_1044411'
+
   # Use 'custom_deps' and 'custom_vars' of a solution when specified by the
   # template gclient file.
   solution.setdefault('custom_deps', {})
