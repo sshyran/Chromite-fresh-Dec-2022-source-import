@@ -333,6 +333,8 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
   if output_format != 'default':
     cmd.extend(SHLINT_OUTPUT_FORMAT_MAP[output_format])
   cmd.append('-x')
+  # No warning for using local with /bin/sh.
+  cmd.append('--exclude=SC3043')
   if gentoo_format:
     # ebuilds don't explicitly export variables or contain a shebang.
     cmd.append('--exclude=SC2148')
