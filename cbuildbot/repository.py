@@ -375,7 +375,7 @@ class RepoRepository(object):
 
     logging.info("Preloading '%s' from '%s'.", self.directory, source_repo)
     repo_util.Repository(source_repo).Copy(self.directory)
-    logging.info('Preload Finsihed.')
+    logging.info('Preload Finished.')
 
 
   def Initialize(self, local_manifest=None, manifest_repo_url=None,
