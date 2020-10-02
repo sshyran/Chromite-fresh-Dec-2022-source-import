@@ -930,6 +930,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'media-libs/mfc-fw-v8',
         'media-libs/rk3399-hotword-support',
         'media-libs/skl-hotword-support',
+        'net-print/brother_mlaser',
         'sys-apps/accelerator-bootstrap',
         'sys-apps/eid',
         'sys-apps/loonix-hydrogen',
