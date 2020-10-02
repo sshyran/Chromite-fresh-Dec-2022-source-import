@@ -3034,6 +3034,16 @@ def BranchScheduleConfig():
   # CWP profiles.
 
   RELEASES = [
+      ('release-R87-13505.B',
+       ['grunt-android-pi-pre-flight-branch'],
+       'chell-chrome-no-afdo-uprev-pre-flight-branch',
+       ['orderfile-generate-toolchain',
+        'orderfile-verify-toolchain'],
+       ['benchmark-afdo-generate',
+        'chrome-silvermont-release-afdo-verify',
+        'chrome-airmont-release-afdo-verify',
+        'chrome-broadwell-release-afdo-verify']),
+
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       ('release-R86-13421.B',
        ['grunt-android-pi-pre-flight-branch'],
