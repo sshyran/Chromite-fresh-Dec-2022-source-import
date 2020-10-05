@@ -106,9 +106,8 @@ _CHROME_DEBUG_BIN = os.path.join('%(root)s', '%(sysroot)s/usr/lib/debug',
 # This must be consistent with the definitions in autotest.
 AFDO_DATA_GENERATORS_LLVM = ('chell', 'samus')
 CHROME_AFDO_VERIFIER_BOARDS = {
-    'samus': 'silvermont',
-    'snappy': 'airmont',
-    'eve': 'broadwell'
+    'samus': 'atom',
+    'eve': 'bigcore'
 }
 KERNEL_AFDO_VERIFIER_BOARDS = {
     'lulu': '3.14',
@@ -170,7 +169,7 @@ MERGED_PROFILE_NAME_REGEX = r"""
       -(?:orderfile|amd64)                       # prefix for either orderfile
                                                  # or release profile.
       # CWP parts
-      -(?:field|silvermont|airmont|broadwell)    # Valid names
+      -(?:field|atom|bigcore)                    # Valid names
       -(\d+)                                     # Major
       -(\d+)                                     # Build
       \.(\d+)                                    # Patch
@@ -348,8 +347,7 @@ def _GetArtifactVersionInChromium(arch, chrome_root):
   """Find the version (name) of AFDO artifact from chromium source.
 
   Args:
-    arch: There are three AFDO profiles in chromium:
-    silvermont, broadwell, and airmont.
+    arch: There are two AFDO profiles in chromium: atom or bigcore
     chrome_root: The path to Chrome root.
 
   Returns:
@@ -415,9 +413,9 @@ def _GetCombinedAFDOName(cwp_versions, cwp_arch, benchmark_versions):
       major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False)
     and CWP AFDO is CWPProfileVersion(
       major=77, build=3809, patch=38, clock=1562580965),
-    and cwp_arch is 'silvermont',
+    and cwp_arch is 'atom',
     the returned name is:
-    silvermont-77-3809.38-1562580965-benchmark-77.0.3849.0-r1
+    atom-77-3809.38-1562580965-benchmark-77.0.3849.0-r1
 
   Args:
     cwp_versions: CWP profile as a namedtuple CWPProfileVersion.
@@ -448,7 +446,7 @@ def _GetOrderfileName(chrome_root):
     An orderfile name using CWP + benchmark AFDO name.
   """
   benchmark_afdo_version, cwp_afdo_version = _ParseMergedProfileName(
-      _GetArtifactVersionInChromium(arch='silvermont', chrome_root=chrome_root))
+      _GetArtifactVersionInChromium(arch='atom', chrome_root=chrome_root))
   return 'chromeos-chrome-orderfile-%s' % (
       _GetCombinedAFDOName(cwp_afdo_version, 'field', benchmark_afdo_version))
 
@@ -1133,8 +1131,7 @@ class _CommonPrepareBundle(object):
     """Find the version (name) of AFDO artifact from GoB.
 
     Args:
-      arch: There are three AFDO profiles in chromium:
-           silvermont, broadwell, and airmont.
+      arch: There are two AFDO profiles in chromium: atom or bigcore.
 
     Returns:
       The name of the AFDO artifact found on GoB, or None if not found.
@@ -1188,7 +1185,7 @@ class _CommonPrepareBundle(object):
 
   def _GetOrderfileName(self):
     """Get the name of the orderfile."""
-    artifact_version = self._GetArtifactVersionInGob(arch='silvermont')
+    artifact_version = self._GetArtifactVersionInGob(arch='atom')
     logging.info('Orderfile artifact version = %s', artifact_version)
     benchmark_afdo, cwp_afdo = _ParseMergedProfileName(artifact_version)
     return 'chromeos-chrome-orderfile-%s.orderfile' % (

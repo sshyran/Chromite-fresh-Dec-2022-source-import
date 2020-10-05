@@ -102,7 +102,7 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
                      major=77, build=3809, patch=38, clock=1562580965)))
 
     # Test parse release AFDO success
-    afdo_name = ('chromeos-chrome-amd64-airmont-77-3809.38-1562580965'
+    afdo_name = ('chromeos-chrome-amd64-atom-77-3809.38-1562580965'
                  '-benchmark-77.0.3849.0-r1-redacted.afdo.xz')
     result = toolchain_util._ParseMergedProfileName(afdo_name)
     self.assertEqual(
@@ -132,7 +132,7 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
 
   def testGetOrderfileName(self):
     """Test method _GetOrderfileName and related methods."""
-    profile_name = ('chromeos-chrome-amd64-silvermont-77-3809.38-1562580965-'
+    profile_name = ('chromeos-chrome-amd64-atom-77-3809.38-1562580965-'
                     'benchmark-77.0.3849.0-r1-redacted.afdo.xz')
     self.PatchObject(
         toolchain_util,
@@ -210,7 +210,7 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
     self.gs_context = self.PatchObject(self.obj, '_gs_context')
     self.gsc_list = self.PatchObject(self.gs_context, 'List', return_value=[])
     self.data = b'data'
-    self.arch = 'silvermont'
+    self.arch = 'atom'
     self.fetch = self.PatchObject(
         gob_util, 'FetchUrl', return_value=base64.encodebytes(self.data))
 
@@ -251,7 +251,7 @@ class CommonPrepareBundleTest(PrepareBundleTest):
     vers = self.PatchObject(
         self.obj,
         '_GetArtifactVersionInGob',
-        return_value=('chromeos-chrome-amd64-silvermont-78-1111.0-'
+        return_value=('chromeos-chrome-amd64-atom-78-1111.0-'
                       '157000000-benchmark-78.0.3893.0-r1-redacted.afdo.xz'))
     self.assertEqual(
         'chromeos-chrome-orderfile-field-78-1111.0-'
@@ -285,7 +285,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
     self.board = 'board'
     self.gs_url = 'gs://path/to/any_gs_url'
     self.current_branch = '78'
-    self.current_arch = 'airmont'
+    self.current_arch = 'atom'
     self.MockListResult = collections.namedtuple('MockListResult',
                                                  ('url', 'creation_time'))
     files_in_gs_bucket = [
@@ -802,7 +802,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
   def setUp(self):
     self.cwp_name = 'R77-3809.38-1562580965.afdo'
     self.cwp_full = self.cwp_name + toolchain_util.XZ_COMPRESSION_SUFFIX
-    self.arch = 'silvermont'
+    self.arch = 'atom'
     self.benchmark_name = 'chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
     self.benchmark_full = \
         self.benchmark_name + toolchain_util.BZ2_COMPRESSION_SUFFIX
@@ -1432,7 +1432,7 @@ class LatestAFDOArtifactTest(cros_test_lib.RunCommandTempDirTestCase):
     self.board = 'board'
     self.gs_url = 'gs://path/to/any_gs_url'
     self.current_branch = '78'
-    self.current_arch = 'airmont'
+    self.current_arch = 'atom'
     self.MockListResult = collections.namedtuple('MockListResult',
                                                  ('url', 'creation_time'))
     files_in_gs_bucket = [
@@ -1864,9 +1864,8 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
 
   mock_benchmark_afdo = 'chromeos-chrome-amd64-78.0.3877.0.afdo.bz2'
   mock_cwp_afdo = {
-      'silvermont': 'R78-3877.0-1566814872.afdo.xz',
-      'airmont': 'R78-3877.0-1566812873.afdo.xz',
-      'broadwell': 'R78-3865.35-1566812043.afdo.xz'
+      'atom': 'R78-3877.0-1566814872.afdo.xz',
+      'bigcore': 'R78-3865.35-1566812043.afdo.xz'
   }
 
   @staticmethod
@@ -1882,7 +1881,7 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
   # pylint: disable=protected-access
   def setUp(self):
     self.board = 'eve'
-    self.arch = 'broadwell'
+    self.arch = 'bigcore'
     self.kver = '4_4'
     self.orderfile = 'chrome.orderfile.xz'
     self.orderfile_stripped = 'chrome.orderfile'
@@ -2204,7 +2203,7 @@ class UploadVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     self.artifact = 'some-artifact-1.0'
     self.kver = '3.18'
-    self.cwp_arch = 'broadwell'
+    self.cwp_arch = 'bigcore'
     self.mock_get = self.PatchObject(
         toolchain_util,
         '_GetArtifactVersionInEbuild',
@@ -2265,7 +2264,7 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
 
   # pylint: disable=protected-access
   def setUp(self):
-    self.package = 'silvermont'
+    self.package = 'atom'
     self.package2 = 'benchmark'
     self.afdo_sorted_by_freshness = [
         'R78-3865.0-1560000000.afdo', 'R78-3869.38-1562580965.afdo',
@@ -2363,7 +2362,7 @@ class UploadReleaseChromeAFDOTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     self.cwp_name = 'R77-3809.38-1562580965.afdo'
     self.cwp_full = self.cwp_name + toolchain_util.XZ_COMPRESSION_SUFFIX
-    self.arch = 'silvermont'
+    self.arch = 'atom'
     self.benchmark_name = 'chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
     self.benchmark_full = \
         self.benchmark_name + toolchain_util.BZ2_COMPRESSION_SUFFIX
