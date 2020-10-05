@@ -29949,6 +29949,7 @@
         "boards": [
             "strongbad"
         ],
+        "chrome_sdk_build_chrome": false,
         "hw_tests": [],
         "hw_tests_disabled_bug": "b/152055929",
         "hw_tests_override": [],
@@ -29965,6 +29966,7 @@
         "boards": [
             "strongbad"
         ],
+        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [],
