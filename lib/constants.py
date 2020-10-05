@@ -429,6 +429,7 @@ TARGET_OS_PKG = 'virtual/target-os'
 TARGET_OS_DEV_PKG = 'virtual/target-os-dev'
 TARGET_OS_TEST_PKG = 'virtual/target-os-test'
 TARGET_OS_FACTORY_PKG = 'virtual/target-os-factory'
+TARGET_OS_FACTORY_SHIM_PKG = 'virtual/target-os-factory-shim'
 
 # Constants for uprevving Chrome
 

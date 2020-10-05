@@ -322,8 +322,11 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       board_packages.extend([cpv.cp for cpv in packages])
     else:
       board_packages.extend([
-          'virtual/target-os', 'virtual/target-os-dev',
-          'virtual/target-os-test', 'virtual/target-os-factory'
+          constants.TARGET_OS_PKG,
+          constants.TARGET_OS_DEV_PKG,
+          constants.TARGET_OS_TEST_PKG,
+          constants.TARGET_OS_FACTORY_PKG,
+          constants.TARGET_OS_FACTORY_SHIM_PKG,
       ])
       # Since we don’t have a clear mapping from autotests to git repos
       # and/or portage packages, we assume every board run all autotests.
