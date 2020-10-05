@@ -153,7 +153,7 @@ def fetch_image(board: str, version: str, local_path: str = None) -> str:
 
 def write_sizes(sizes: dict, required_paths: list, human_readable: bool,
                 output_format: str,
-                output_path: typing.Union(str, typing.TextIO)):
+                output_path: typing.Union[str, typing.TextIO]):
   """Writes the sizes in CSV format.
 
   Args:
