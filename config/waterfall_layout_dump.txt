@@ -411,6 +411,7 @@
 
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
+    grunt-arc-r-vmrvc-android-pfq
     hatch-arc-r-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
     rammus-arc-r-vmrvc-android-pfq
@@ -1111,6 +1112,7 @@
   grunt-arc-r-payloads-tryjob
   grunt-arc-r-release-tryjob
   grunt-arc-r-unittest-stress
+  grunt-arc-r-vmrvc-android-pfq-tryjob
   grunt-factory-grunt-11164.B-factorybranch-tryjob
   grunt-full-tryjob
   grunt-kernelnext-full-tryjob
@@ -1542,6 +1544,7 @@
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
+    grunt-arc-r-vmrvc-android-pfq-tryjob
     hatch-arc-r-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
     rammus-arc-r-vmrvc-android-pfq-tryjob

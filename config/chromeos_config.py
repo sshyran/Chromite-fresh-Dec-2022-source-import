@@ -1216,7 +1216,10 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   board_configs = CreateInternalBoardConfigs(
       site_config, boards_dict, ge_build_config)
   hw_test_list = HWTestList(ge_build_config)
-
+  # TODO(b/153392483): Temporarily remove bvt-arc from list of test
+  # suites blocking RVC PFQ.
+  vmrvc_hwtest_list = [hwtest for hwtest in hw_test_list.SharedPoolPFQ()
+                       if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE]
 
   # Android VM MST master
   vmmst_master_config = site_config.Add(
@@ -1276,7 +1279,9 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'kukui-arc-r',
       'rammus-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = frozenset([])
+  _vmrvc_hwtest_experimental_boards = frozenset([
+      'grunt-arc-r',
+  ])
   _vmrvc_vmtest_boards = frozenset([])
   _vmrvc_vmtest_experimental_boards = frozenset([])
 
@@ -1356,10 +1361,16 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           board_configs,
           site_config.templates.vmrvc_android_pfq,
           enable_skylab_hw_tests=True,
-          # TODO(b/153392483): Temporarily remove bvt-arc from list of test
-          # suites blocking RVC PFQ.
-          hw_tests=[hwtest for hwtest in hw_test_list.SharedPoolPFQ()
-                    if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE],
+          hw_tests=vmrvc_hwtest_list,
+      ) +
+      site_config.AddForBoards(
+          'vmrvc-android-pfq',
+          _vmrvc_hwtest_experimental_boards,
+          board_configs,
+          site_config.templates.vmrvc_android_pfq,
+          enable_skylab_hw_tests=True,
+          hw_tests=vmrvc_hwtest_list,
+          important=False,
       ) +
       site_config.AddForBoards(
           'vmrvc-android-pfq',
