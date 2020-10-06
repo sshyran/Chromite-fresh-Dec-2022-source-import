@@ -137,6 +137,20 @@ def CPVToPackageInfo(cpv, package_info_msg):
     package_info_msg.version = cpv.version
 
 
+def serialize_package_info(pkg_info: 'package_info.PackageInfo', pkg_info_msg):
+  """Serialize a PackageInfo object to a PackageInfo proto."""
+  pkg_info_msg.package_name = pkg_info.package
+  if pkg_info.category:
+    pkg_info_msg.category = pkg_info.category
+  if pkg_info.vr:
+    pkg_info_msg.version = pkg_info.vr
+
+
+def deserialize_package_info(pkg_info_msg):
+  """Deserialize a PackageInfo message to a PackageInfo object."""
+  return package_info.parse(PackageInfoToString(pkg_info_msg))
+
+
 def PackageInfoToCPV(package_info_msg):
   """Helper to translate a PackageInfo message into a CPV."""
   if not package_info_msg or not package_info_msg.package_name:

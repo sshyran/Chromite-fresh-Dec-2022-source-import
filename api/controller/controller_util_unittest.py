@@ -232,3 +232,21 @@ class CPVToStringTest(cros_test_lib.TestCase):
     cpv = package_info.SplitCPV('', strict=False)
     with self.assertRaises(ValueError):
       controller_util.CPVToString(cpv)
+
+
+def test_serialize_package_info():
+  pkg_info = package_info.parse('foo/bar-1.2.3-r4')
+  pkg_info_msg = common_pb2.PackageInfo()
+  controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+  assert pkg_info_msg.category == 'foo'
+  assert pkg_info_msg.package_name == 'bar'
+  assert pkg_info_msg.version == '1.2.3-r4'
+
+
+def test_deserialize_package_info():
+  pkg_info_msg = common_pb2.PackageInfo()
+  pkg_info_msg.category = 'foo'
+  pkg_info_msg.package_name = 'bar'
+  pkg_info_msg.version = '1.2.3-r4'
+  pkg_info = controller_util.deserialize_package_info(pkg_info_msg)
+  assert pkg_info.cpvr == 'foo/bar-1.2.3-r4'
