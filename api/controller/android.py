@@ -75,10 +75,8 @@ def MarkStable(input_proto, output_proto, _config):
     output_proto.status = android_pb2.MARK_STABLE_STATUS_PINNED
 
   if android_atom_to_build:
-    CPV = package_info.SplitCPV(android_atom_to_build)
-    output_proto.android_atom.category = CPV.category
-    output_proto.android_atom.package_name = CPV.package
-    output_proto.android_atom.version = CPV.version
+    pkg = package_info.parse(android_atom_to_build)
+    controller_util.serialize_package_info(pkg, output_proto.android_atom)
   else:
     output_proto.status = android_pb2.MARK_STABLE_STATUS_EARLY_EXIT
 
