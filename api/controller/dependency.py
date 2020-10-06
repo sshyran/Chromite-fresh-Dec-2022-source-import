@@ -43,16 +43,11 @@ def AugmentDepGraphProtoFromJsonMap(json_map, graph):
     package_info_msg.category = data['category']
     package_info_msg.version = data['version']
     for dep in data['deps']:
-      cpv = package_info.SplitCPV(dep, strict=False)
+      cpv = package_info.parse(dep)
       dep_package = package_dep_info.dependency_packages.add()
-      dep_package.package_name = cpv.package
-      dep_package.category = cpv.category
-      if cpv.version:
-        dep_package.version = cpv.version
+      controller_util.serialize_package_info(cpv, dep_package)
 
-    package_CPV = '%s/%s-%s' % (package_info_msg.category,
-                                package_info_msg.package_name,
-                                package_info_msg.version)
+    package_CPV = controller_util.PackageInfoToString(package_info_msg)
     for path in json_map['source_path_mapping'][package_CPV]:
       source_path = package_dep_info.dependency_source_paths.add()
       source_path.path = path
@@ -128,9 +123,9 @@ def List(input_proto: depgraph_pb2.ListRequest,
       src_paths=src_paths,
       packages=packages)
   for package in package_deps:
-    pkg_info = output_proto.package_deps.add()
-    cpv = package_info.SplitCPV(package, strict=False)
-    controller_util.CPVToPackageInfo(cpv, pkg_info)
+    pkg_info_msg = output_proto.package_deps.add()
+    pkg_info = package_info.parse(package)
+    controller_util.serialize_package_info(pkg_info, pkg_info_msg)
 
 
 def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):
