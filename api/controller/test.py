@@ -68,10 +68,10 @@ def _BuildTargetUnitTestResponse(input_proto, output_proto, _config):
 def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
   """Add failed packages to a failed response."""
   packages = ['foo/bar', 'cat/pkg']
-  failed_cpvs = [package_info.SplitCPV(p, strict=False) for p in packages]
-  for cpv in failed_cpvs:
-    package_info_msg = output_proto.failed_packages.add()
-    controller_util.CPVToPackageInfo(cpv, package_info_msg)
+  for pkg in packages:
+    pkg_info = package_info.parse(pkg)
+    pkg_info_msg = output_proto.failed_packages.add()
+    controller_util.serialize_package_info(pkg_info, pkg_info_msg)
 
 
 @faux.success(_BuildTargetUnitTestResponse)
