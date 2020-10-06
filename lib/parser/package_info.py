@@ -11,6 +11,7 @@ import collections
 import functools
 import re
 import string
+from typing import Union
 
 # Define data structures for holding PV and CPV objects.
 _PV_FIELDS = ['pv', 'package', 'version', 'version_no_rev', 'rev']
@@ -95,9 +96,23 @@ def SplitCPV(cpv, strict=True):
   return CPV(category=category, cp=cp, cpv=real_cpv, cpf=cpf, **m._asdict())
 
 
-def parse(cpv):
-  """Parse a CPV string as a PackageInfo object."""
-  parsed = SplitCPV(cpv, strict=False)
+def parse(cpv: Union[str, CPV, 'PackageInfo']):
+  """Parse a package to a PackageInfo object.
+
+  Args:
+    cpv: Any package type. This function can parse strings, translate CPVs to a
+      PackageInfo instance, and will simply return the argument if given a
+      PackageInfo instance.
+
+  Returns:
+    PackageInfo
+  """
+  if isinstance(cpv, PackageInfo):
+    return cpv
+  elif isinstance(cpv, CPV):
+    parsed = cpv
+  else:
+    parsed = SplitCPV(cpv, strict=False)
   # Temporary measure. SplitCPV parses X-r1 with the revision as r1.
   # Once the SplitCPV function has been fully deprecated we can switch
   # the regex to exclude the r from what it parses as the revision instead.

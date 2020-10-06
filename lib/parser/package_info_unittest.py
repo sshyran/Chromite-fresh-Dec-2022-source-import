@@ -45,7 +45,23 @@ def test_parse_invalid():
   package_info.parse('invalid/package/format')
 
 
+def test_parse_cpv():
+  """Verify CPV instance parsing."""
+  cpv = package_info.SplitCPV('foo/bar-1.2.3-r3')
+  parsed = package_info.parse('foo/bar-1.2.3-r3')
+  parsed_cpv = package_info.parse(cpv)
+  assert parsed == parsed_cpv
+
+
+def test_parse_pkg_info():
+  """Verify PackageInfo instance parsing."""
+  pkg = package_info.parse('foo/bar-1.2.3-r3')
+  pkg2 = package_info.parse(pkg)
+  assert pkg == pkg2
+
+
 def test_package_info_eq():
+  """Test __eq__ method."""
   pkg = package_info.PackageInfo('foo', 'bar', 1, 2)
   pkg2 = package_info.PackageInfo('foo', 'bar', '1', '2')
   assert pkg == pkg2
