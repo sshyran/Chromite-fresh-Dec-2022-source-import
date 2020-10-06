@@ -50,13 +50,11 @@ def _AddPackagesForPrebuilt(filename):
       # matches on.
       for line in f:
         atom = line.split('#', 1)[0].strip()
-        try:
-          cpv = package_info.SplitCPV(atom)
-        except ValueError:
+        cpv = package_info.parse(atom)
+        if not cpv.atom:
           logging.warning('Could not split atom %r (line: %r)', atom, line)
           continue
-        if cpv:
-          cmd.extend(['--packages=%s' % cpv.cp])
+        cmd.extend(['--packages=%s' % cpv.atom])
     return cmd
   except IOError as e:
     logging.warning('Problem with package file %s', filename)
