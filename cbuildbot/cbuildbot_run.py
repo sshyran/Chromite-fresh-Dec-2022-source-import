@@ -916,16 +916,16 @@ class _BuilderRunBase(object):
       if not package:
         raise NoAndroidVersionError(
             'Android version could not be determined for %s' % boards)
-      cpv = package_info.SplitCPV(package)
-      if not cpv:
+      cpv = package_info.parse(package)
+      if not cpv.cpvr:
         raise NoAndroidVersionError(
             'Android version could not be determined for %s' % board)
       if not version:
-        version = cpv.version_no_rev
-      elif version != cpv.version_no_rev:
+        version = cpv.version
+      elif version != cpv.version:
         raise NoAndroidVersionError(
             'Different Android versions (%s vs %s) for %s' %
-            (version, cpv.version_no_rev, boards))
+            (version, cpv.version, boards))
     return version
 
   def DetermineChromeVersion(self):
