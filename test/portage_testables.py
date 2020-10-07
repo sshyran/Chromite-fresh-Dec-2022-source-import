@@ -274,8 +274,8 @@ class Package(object):
   @classmethod
   def from_cpv(cls, pkg_str: str):
     """Creates a Package from a CPV string."""
-    cpv = package_info.SplitCPV(pkg_str)
-    return cls(category=cpv.category, package=cpv.package, version=cpv.version)
+    cpv = package_info.parse(pkg_str)
+    return cls(category=cpv.category, package=cpv.package, version=cpv.vr)
 
   @property
   def cpv(self) -> package_info.CPV:
