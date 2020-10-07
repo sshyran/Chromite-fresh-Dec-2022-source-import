@@ -15,6 +15,7 @@ import os
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
+from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import cros_build_lib
@@ -124,10 +125,7 @@ def Create(input_proto, output_proto, _config):
 
     for package in result.failed_packages:
       current = output_proto.failed_packages.add()
-      current.category = package.category
-      current.package_name = package.package
-      if package.version:
-        current.version = package.version
+      controller_util.serialize_package_info(package, current)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 

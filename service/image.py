@@ -93,7 +93,7 @@ class BuildResult(object):
     """
     self.failed_packages = []
     for package in failed_packages or []:
-      self.failed_packages.append(package_info.SplitCPV(package, strict=False))
+      self.failed_packages.append(package_info.parse(package))
 
     # The return code should always be non-zero if there's any failed packages,
     # but it's cheap insurance, so check it.
