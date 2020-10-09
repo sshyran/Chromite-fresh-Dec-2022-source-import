@@ -235,6 +235,8 @@ we're generating a mock response.
 For our mock success, our goal is just to fill out a static, valid output.
 So we just choose a message that looks sort of like something we might return
 normally, and hard code it in.
+For more information about the `faux` decorators, see the
+[faux reference](../references/faux.md).
 
 Now let's try running it.
 
