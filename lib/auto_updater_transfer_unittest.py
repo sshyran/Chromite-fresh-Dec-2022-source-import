@@ -18,12 +18,10 @@ import copy
 import os
 
 import mock
-import six
 
 from chromite.lib import auto_updater_transfer
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 
@@ -190,46 +188,6 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
           device, payload_name='exists', payload_dir='/test/payload/dir')
       transfer.CheckPayloads()
 
-  def testGetPayloadProps(self):
-    """Tests GetPayloadProps().
-
-    Tests GetPayloadProps() when payload_name is in the
-    format payloads/chromeos_xxxx.0.0_<blah>.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_dir=self.tempdir,
-          payload_name='payloads/chromeos_12345.100.0_board_stable_'
-                       'full_v4-1a3e3fd5a2005948ce8e605b66c96b2f.bin')
-      self.PatchObject(os.path, 'getsize', return_value=100)
-      expected = {'image_version': '12345.100.0', 'size': 100}
-      self.assertDictEqual(transfer.GetPayloadProps(),
-                           expected)
-
-  def testGetPayloadPropsError(self):
-    """Tests error thrown by GetPayloadProps().
-
-    Test error thrown when payload_name is not in the expected format of
-    payloads/chromeos_xxxx.0.0_<blah> or called update.gz.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_dir=self.tempdir, payload_name='wrong_format')
-      self.PatchObject(os.path, 'getsize')
-      self.assertRaises(ValueError, transfer.GetPayloadProps)
-
-  def testGetPayloadPropsDefaultFilename(self):
-    """Tests GetPayloadProps().
-
-    Tests GetPayloadProps() when payload_name is named
-    update.gz.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_dir=self.tempdir, payload_name='update.gz')
-      self.PatchObject(os.path, 'getsize', return_value=101)
-      expected = {'image_version': '99999.0.0', 'size': 101}
-      self.assertDictEqual(transfer.GetPayloadProps(), expected)
 
 class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
   """Test all methods in auto_updater_transfer.LabEndToEndPayloadTransfer."""
@@ -432,7 +390,11 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
       expected = [
           {'payload_dir': transfer._device_payload_dir,
            'payload_filename': transfer._payload_name,
-           'build_id': transfer._payload_dir}]
+           'build_id': transfer._payload_dir},
+          {'payload_dir': transfer._device_payload_dir,
+           'payload_filename': transfer._payload_name + '.json',
+           'build_id': transfer._payload_dir}
+      ]
 
       self.PatchObject(self._transfer_class, '_EnsureDeviceDirectory')
       self.PatchObject(self._transfer_class, '_GetCurlCmdForPayloadDownload')
@@ -457,7 +419,9 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
           device_payload_dir='/test/device/payload/dir',
           cmd_kwargs={'test': 'args'})
       expected = [['curl', '-o', '/test/device/payload/dir/test_update.gz',
-                   'http://0.0.0.0:8000/static/test_update.gz']]
+                   'http://0.0.0.0:8000/static/test_update.gz'],
+                  ['curl', '-o', '/test/device/payload/dir/test_update.gz.json',
+                   'http://0.0.0.0:8000/static/test_update.gz.json']]
 
       self.PatchObject(self._transfer_class, '_EnsureDeviceDirectory')
       self.PatchObject(remote_access.ChromiumOSDevice, 'run')
@@ -467,83 +431,6 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
       self.assertListEqual(
           remote_access.ChromiumOSDevice.run.call_args_list,
           [mock.call(x) for x in expected])
-
-  def testTransferRootfsRunCmdPayloadProps(self):
-    """Test method calls of _TransferRootfsUpdate().
-
-    Test whether remote_access.ChromiumOSDevice.run() is being called
-    the correct number of times with the correct arguments when
-    LocalPayloadPropsFile() is set to a valid local filepath.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_name='test_update.gz',
-          device_payload_dir='/test/device/payload/dir',
-          cmd_kwargs={'test': 'args'})
-
-      self.PatchObject(os.path, 'isfile', return_value=True)
-      transfer.LocalPayloadPropsFile = '/existent/test.gz.json'
-      expected = [
-          ['curl', '-o', '/test/device/payload/dir/test_update.gz',
-           'http://0.0.0.0:8000/static/test_update.gz']]
-
-      self.PatchObject(self._transfer_class, '_EnsureDeviceDirectory')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'run')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'CopyToWorkDir')
-
-      transfer._TransferRootfsUpdate()
-      self.assertListEqual(
-          remote_access.ChromiumOSDevice.run.call_args_list,
-          [mock.call(x) for x in expected])
-
-  def testTransferRootfsEnsureDirCalls(self):
-    """Test method calls of _TransferRootfsUpdate().
-
-    Test whether _EnsureDeviceDirectory() is being called
-    the correct number of times with the correct arguments.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, device_payload_dir='/test/device/payload/dir',
-          payload_name='test_update.gz', cmd_kwargs={'test': 'args'})
-      expected = [transfer._device_payload_dir]
-
-      self.PatchObject(self._transfer_class, '_EnsureDeviceDirectory')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'run')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'CopyToWorkDir')
-
-      transfer._TransferRootfsUpdate()
-      self.assertListEqual(
-          self._transfer_class._EnsureDeviceDirectory.call_args_list,
-          [mock.call(x) for x in expected])
-
-  def testTransferRootfsCopyToWorkdirLocalPayloadProps(self):
-    """Test method calls of _TransferRootfsUpdate().
-
-    Test whether device.CopyToWorkDir() is being called
-    the correct number of times with the correct arguments when
-    LocalPayloadPropsFile() is set to a valid local filepath.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, cmd_kwargs={'test': 'test'},
-          device_payload_dir='/test/device/payload/dir',
-          payload_name='test_update.gz')
-
-      transfer._local_payload_props_path = '/existent/test.gz.json'
-      expected = [{'src': transfer._local_payload_props_path,
-                   'dest': transfer.PAYLOAD_DIR_NAME,
-                   'mode': transfer._payload_mode,
-                   'log_output': True, 'test': 'test'}]
-
-      self.PatchObject(self._transfer_class, '_EnsureDeviceDirectory')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'run')
-      self.PatchObject(remote_access.ChromiumOSDevice, 'CopyToWorkDir')
-
-      transfer._TransferRootfsUpdate()
-      self.assertListEqual(
-          remote_access.ChromiumOSDevice.CopyToWorkDir.call_args_list,
-          [mock.call(**x) for x in expected])
 
   def testGetCurlCmdStandard(self):
     """Test _GetCurlCmdForPayloadDownload().
@@ -751,104 +638,6 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
       url = transfer._GetStagedUrl(
           staged_filename='payload_filename.ext')
       self.assertEqual(url, expected_url)
-
-  def testGetPayloadPropsFile(self):
-    """Test GetPayloadPropsFile()."""
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      payload_props_path = os.path.join(self.tempdir, 'test_update.gz.json')
-      output = ('{"appid": "{0BB3F9E1-A066-9352-50B8-5C1356D09AEB}", '
-                '"is_delta": false, "metadata_signature": null, '
-                '"metadata_size": 57053, '
-                '"sha256_hex": "aspPgQRWLu5wPM5NucqAYVmVCvL5lxQJ/n9ckhZS83Y=", '
-                '"size": 998103540, '
-                '"target_version": "99999.0.0", "version": 2}')
-      bin_op = six.ensure_binary(output)
-
-      transfer = self.CreateInstance(
-          device, tempdir=self.tempdir, payload_name='test_update.gz')
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       return_value=cros_build_lib.CommandResult(stdout=bin_op))
-      transfer.GetPayloadPropsFile()
-      props = osutils.ReadFile(payload_props_path)
-
-      self.assertEqual(props, output)
-      self.assertEqual(transfer._local_payload_props_path,
-                       payload_props_path)
-
-  def testGetPayloadPropsFileWrongFormat(self):
-    """Test GetPayloadPropsFile().
-
-    Test exception thrown when the payload is not in the correct json format.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      output = 'Not in Json format'
-
-      transfer = self.CreateInstance(
-          device, tempdir=self.tempdir, payload_name='test_update.gz')
-
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        transfer.GetPayloadPropsFile)
-
-  def testGetPayloadPropsFileError(self):
-    """Test GetPayloadPropsFile().
-
-    Test when the payload is not available.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, tempdir=self.tempdir, payload_name='test_update.gz',
-          payload_dir='/test/dir')
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        transfer.GetPayloadPropsFile)
-      self.assertIsNone(transfer._local_payload_props_path)
-
-  def test_GetPayloadSize(self):
-    """Test _GetPayloadSize()."""
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_name='test_update.gz',
-          payload_dir='/test/payload/dir')
-      expected_size = 75810234
-      output = 'Content-Length: %s' % str(expected_size)
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-      size = transfer._GetPayloadSize()
-      self.assertEqual(size, expected_size)
-
-  def test_GetPayloadSizeRemoteDevserverError(self):
-    """Test _GetPayloadSize().
-
-    Test when _RemoteDevserverCall() throws an error.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_name='test_update.gz',
-          payload_dir='/test/payload/dir')
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       side_effect=cros_build_lib.RunCommandError(msg=''))
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        transfer._GetPayloadSize)
-
-  def test_GetPayloadSizeNoRegexMatchError(self):
-    """Test errors thrown by _GetPayloadSize().
-
-    Test error thrown when the output received from the curl command does not
-    contain expected fields.
-    """
-    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
-      transfer = self.CreateInstance(
-          device, payload_name='test_update.gz',
-          payload_dir='/test/payload/dir')
-      output = 'No Match Output'
-      self.PatchObject(self._transfer_class, '_RemoteDevserverCall',
-                       return_value=cros_build_lib.CommandResult(stdout=output))
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        transfer._GetPayloadSize)
 
   def test_RemoteDevserverCall(self):
     """Test _RemoteDevserverCall()."""

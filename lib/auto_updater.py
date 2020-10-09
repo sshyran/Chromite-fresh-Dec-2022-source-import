@@ -46,7 +46,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import operation
-from chromite.lib import osutils
 from chromite.lib import remote_access
 from chromite.lib import retry_util
 from chromite.lib import stateful_updater
@@ -545,40 +544,6 @@ class ChromiumOSUpdater(BaseUpdater):
       self.ResetStatefulPartition()
       raise StatefulUpdateError(error_msg)
 
-  def _FixPayloadPropertiesFile(self):
-    """Fix the update payload properties file so nebraska can use it.
-
-    Update the payload properties file to make sure that nebraska can use it.
-    The reason is that very old payloads are still being used for provisioning
-    the AU tests, but those properties files are not compatible with recent
-    nebraska protocols.
-
-    TODO(ahassani): Once we only test delta or full payload with
-    source image of M77 or higher, this function can be deprecated.
-    """
-    logging.info('Fixing payload properties file.')
-    payload_properties_path = self._transfer_obj.GetPayloadPropsFile()
-    props = json.loads(osutils.ReadFile(payload_properties_path))
-    props['appid'] = self.ResolveAPPIDMismatchIfAny(props.get('appid'))
-    values = self._transfer_obj.GetPayloadProps()
-
-    # TODO(ahassani): Use the keys form nebraska.py once it is moved to
-    # chromite.
-    valid_entries = {
-        # Since only old payloads don't have this and they are only used for
-        # provisioning, they will be full payloads.
-        'is_delta': False,
-        'size': values['size'],
-        'target_version': values['image_version'],
-    }
-
-    for key, value in valid_entries.items():
-      if props.get(key) is None:
-        props[key] = value
-
-    with open(payload_properties_path, 'w') as fp:
-      json.dump(props, fp)
-
   def RunUpdateRootfs(self):
     """Run all processes needed by updating rootfs.
 
@@ -586,15 +551,6 @@ class ChromiumOSUpdater(BaseUpdater):
     2. Copy files to remote device needed for rootfs update.
     3. Do root updating.
     """
-
-    # Any call to self._transfer_obj.TransferRootfsUpdate() must be preceeded by
-    # a conditional call to self._FixPayloadPropertiesFile() as this handles the
-    # usecase in reported in crbug.com/1012520. Whenever
-    # self._FixPayloadPropertiesFile() gets deprecated, this call can be safely
-    # removed. For more details on TODOs, refer to self.TransferRootfsUpdate()
-    # docstrings.
-
-    self._FixPayloadPropertiesFile()
 
     # SetupRootfsUpdate() may reboot the device and therefore should be called
     # before any payloads are transferred to the device and only if rootfs

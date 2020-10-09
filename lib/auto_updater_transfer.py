@@ -39,9 +39,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-import json
 import os
-import re
 
 import six
 from six.moves import urllib
@@ -131,7 +129,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     self._payload_mode = payload_mode
     self._transfer_stateful_update = transfer_stateful_update
     self._transfer_rootfs_update = transfer_rootfs_update
-    self._local_payload_props_path = None
 
   @abc.abstractmethod
   def CheckPayloads(self):
@@ -177,17 +174,6 @@ class Transfer(six.with_metaclass(abc.ABCMeta, object)):
     """
     self._device.run(['mkdir', '-p', directory], **self._cmd_kwargs)
 
-  @abc.abstractmethod
-  def GetPayloadPropsFile(self):
-    """Get the payload properties file path."""
-
-  @abc.abstractmethod
-  def GetPayloadProps(self):
-    """Gets properties necessary to fix the payload properties file.
-
-    Returns:
-      Dict in the format: {'image_version': 12345.0.0, 'size': 123456789}.
-    """
 
 class LocalTransfer(Transfer):
   """Abstracts logic that handles transferring local files to the DUT."""
@@ -260,40 +246,6 @@ class LocalTransfer(Transfer):
     payload = os.path.join(self._payload_dir, STATEFUL_FILENAME)
     self._device.CopyToWorkDir(payload, mode=self._payload_mode,
                                log_output=True, **self._cmd_kwargs)
-
-  def GetPayloadPropsFile(self):
-    """Finds the local payload properties file."""
-    # Payload properties file is available locally so just catch it next to the
-    # payload file.
-    if self._local_payload_props_path is None:
-      self._local_payload_props_path = os.path.join(
-          self._payload_dir, GetPayloadPropertiesFileName(self._payload_name))
-    return self._local_payload_props_path
-
-  def GetPayloadProps(self):
-    """Gets image_version from the payload_name and size of the payload.
-
-    The payload_dir must be in the format <board>/Rxx-12345.0.0 for a complete
-    match; else a ValueError will be raised. In case the payload filename is
-    update.gz, then image_version cannot be extracted from its name; therefore,
-    image_version is set to a dummy 99999.0.0.
-
-    Returns:
-      Dict - See parent class's function for full details.
-    """
-    payload_filepath = os.path.join(self._payload_dir, self._payload_name)
-    values = {
-        'image_version': '99999.0.0',
-        'size': os.path.getsize(payload_filepath)
-    }
-    if self._payload_name != ROOTFS_FILENAME:
-      m = re.match(_PAYLOAD_PATTERN, self._payload_name)
-      if not m:
-        raise ValueError(
-            'Regular expression %r did not match the expected payload format '
-            '%s' % (_PAYLOAD_PATTERN, self._payload_name))
-      values.update(m.groupdict())
-    return values
 
 
 class LabEndToEndPayloadTransfer(Transfer):
@@ -455,80 +407,6 @@ class LabEndToEndPayloadTransfer(Transfer):
         payload_dir=self._device_payload_dir, build_id=self._payload_dir,
         payload_filename=self._payload_name))
 
-    self._device.CopyToWorkDir(src=self._local_payload_props_path,
-                               dest=self.PAYLOAD_DIR_NAME,
-                               mode=self._payload_mode,
-                               log_output=True, **self._cmd_kwargs)
-
-  def GetPayloadPropsFile(self):
-    """Downloads the PayloadProperties file onto the drone.
-
-    The payload properties file may be required to be updated in
-    auto_updater.ResolveAppIsMismatchIfAny(). Download the file from where it
-    has been staged on the staging server into the tempdir of the drone, so that
-    the file is available locally for any updates.
-    """
-    if self._local_payload_props_path is None:
-      payload_props_filename = GetPayloadPropertiesFileName(self._payload_name)
-      payload_props_path = os.path.join(self._tempdir, payload_props_filename)
-
-      # Get command to retrieve contents of the properties file.
-      cmd = ['curl',
-             self._GetStagedUrl(payload_props_filename, self._payload_dir)]
-      try:
-        result = self._RemoteDevserverCall(cmd, stdout=True)
-        json.loads(result.output)
-        osutils.WriteFile(payload_props_path, result.output, 'wb',
-                          makedirs=True)
-      except cros_build_lib.RunCommandError as e:
-        raise ChromiumOSTransferError(
-            'Unable to get payload properties file by running %s due to '
-            'exception: %s.' % (' '.join(cmd), e))
-      except ValueError:
-        raise ChromiumOSTransferError(
-            'Could not create %s as %s not valid json.' %
-            (payload_props_path, result.output))
-
-      self._local_payload_props_path = payload_props_path
-    return self._local_payload_props_path
-
-  def _GetPayloadSize(self):
-    """Returns the size of the payload by running a curl -I command.
-
-    Returns:
-      Payload size in bytes.
-    """
-    payload_url = self._GetStagedUrl(staged_filename=self._payload_name,
-                                     build_id=self._payload_dir)
-    cmd = ['curl', '-I', payload_url, '--fail']
-    try:
-      proc = self._RemoteDevserverCall(cmd, stdout=True)
-    except cros_build_lib.RunCommandError as e:
-      raise ChromiumOSTransferError(
-          'Unable to get payload size by running command %s due to exception: '
-          '%s.' % (' '.join(cmd), e))
-
-    pattern = re.compile(r'Content-Length: [0-9]+', re.I)
-    match = pattern.findall(proc.output)
-    if not match:
-      raise ChromiumOSTransferError('Could not get payload size from output: '
-                                    '%s ' % proc.output)
-    return int(match[0].split()[1].strip())
-
-  def GetPayloadProps(self):
-    """Gets image_version from the payload_dir name and gets payload size.
-
-    The payload_dir must be in the format <board>/Rxx-12345.0.0 for a complete
-    match; else a ValueError will be raised.
-
-    Returns:
-      Dict - See parent class's function for full details.
-    """
-    values = {'size': self._GetPayloadSize()}
-    m = re.match(_PAYLOAD_PATTERN, self._payload_name)
-    if not m:
-      raise ValueError('Regular expression %r did not match the expected '
-                       'payload format %s' % (_PAYLOAD_PATTERN,
-                                              self._payload_name))
-    values.update(m.groupdict())
-    return values
+    self._device.run(self._GetCurlCmdForPayloadDownload(
+        payload_dir=self._device_payload_dir, build_id=self._payload_dir,
+        payload_filename=GetPayloadPropertiesFileName(self._payload_name)))
