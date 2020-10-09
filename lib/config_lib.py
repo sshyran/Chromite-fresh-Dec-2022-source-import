@@ -1867,7 +1867,7 @@ def GetNonUniBuildLabBoardName(board):
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
-  ARM64_BOARDS = ['cheza64', 'kevin64']
+  ARM64_BOARDS = ['cheza64', 'kevin64', 'trogdor64']
   for suffix in SPECIAL_SUFFIX:
     board = re.sub(suffix, '', board)
   if board in ARM64_BOARDS:
