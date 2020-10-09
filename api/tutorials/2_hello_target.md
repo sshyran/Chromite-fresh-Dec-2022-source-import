@@ -105,5 +105,7 @@ Result:
 
 Success!
 
+## Up Next
+
 Continue to [Part 3](3_hello_validation.md), where we'll look at validating the
 input.

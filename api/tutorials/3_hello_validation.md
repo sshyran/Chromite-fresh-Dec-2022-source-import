@@ -125,3 +125,9 @@ Result:
 ```
 
 Success!
+
+
+## Up Next
+
+Continue to [Part 4](4_hello_faux.md), where we'll look at mock calls and
+the faux decorators.
