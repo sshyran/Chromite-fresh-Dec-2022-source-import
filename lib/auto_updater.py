@@ -173,9 +173,7 @@ class ChromiumOSUpdater(BaseUpdater):
       yes: Assume "yes" (True) for any prompt. The default is False. However,
           it should be set as True if we want to disable all the prompts for
           auto-update.
-      payload_filename: Filename of exact payload file to use for
-          update instead of the default: update.gz. Defaults to None. Use
-          only if you staged a payload by filename (i.e not artifact) first.
+      payload_filename: Filename of exact payload file to use for update.
       send_payload_in_parallel: whether to transfer payload in chunks
           in parallel. The default is False.
       staging_server: URL (str) of the server that's staging the payload files.
@@ -205,7 +203,6 @@ class ChromiumOSUpdater(BaseUpdater):
     self.device_payload_dir = os.path.join(
         self.device.work_dir,
         auto_updater_transfer.Transfer.PAYLOAD_DIR_NAME)
-    # autoupdate_EndToEndTest uses exact payload filename for update
     self.payload_filename = payload_filename
     if send_payload_in_parallel:
       self.payload_mode = self.PAYLOAD_MODE_PARALLEL
@@ -229,7 +226,8 @@ class ChromiumOSUpdater(BaseUpdater):
 
   @property
   def is_au_endtoendtest(self):
-    return self.payload_filename is not None
+    return isinstance(self._transfer_obj,
+                      auto_updater_transfer.LabEndToEndPayloadTransfer)
 
   @property
   def request_logs_dir(self):
@@ -257,7 +255,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
     return transfer_class(
         device=self.device, payload_dir=self.payload_dir,
-        payload_name=self._GetRootFsPayloadFileName(),
+        payload_name=self.payload_filename,
         cmd_kwargs=self._cmd_kwargs,
         transfer_rootfs_update=self._do_rootfs_update,
         transfer_stateful_update=self._do_rootfs_update,
@@ -403,17 +401,6 @@ class ChromiumOSUpdater(BaseUpdater):
           'sys.path for storing packages: %s' % sys_path)
 
     return third_party_host_dir
-
-  def _GetRootFsPayloadFileName(self):
-    """Get the correct RootFs payload filename.
-
-    Returns:
-      The payload filename. (update.gz or a custom payload filename).
-    """
-    if self.is_au_endtoendtest:
-      return self.payload_filename
-    else:
-      return auto_updater_transfer.ROOTFS_FILENAME
 
   def ResetStatefulPartition(self):
     """Clear any pending stateful update request."""

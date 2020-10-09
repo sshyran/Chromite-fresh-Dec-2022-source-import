@@ -516,6 +516,7 @@ class RemoteDeviceUpdater(object):
               device=device,
               build_name=None,
               payload_dir=payload_dir,
+              payload_filename=auto_updater_transfer.ROOTFS_FILENAME,
               tempdir=self.tempdir,
               do_rootfs_update=self.do_rootfs_update,
               do_stateful_update=self.do_stateful_update,
