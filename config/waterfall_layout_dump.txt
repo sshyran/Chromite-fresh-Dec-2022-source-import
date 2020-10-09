@@ -195,6 +195,7 @@
   firmware-tidus-6301.109.B-firmwarebranch
   firmware-ultima-7287.131.B-firmwarebranch
   firmware-veyron-6588.B-firmwarebranch
+  firmware-volteer-13521.B-firmwarebranch
   firmware-winky-5216.265.B-firmwarebranch
   firmware-yuna-6301.59.B-firmwarebranch
   firmware-zork-13434.B-firmwarebranch
@@ -1033,6 +1034,7 @@
   firmware-tidus-6301.109.B-firmwarebranch-tryjob
   firmware-ultima-7287.131.B-firmwarebranch-tryjob
   firmware-veyron-6588.B-firmwarebranch-tryjob
+  firmware-volteer-13521.B-firmwarebranch-tryjob
   firmware-winky-5216.265.B-firmwarebranch-tryjob
   firmware-yuna-6301.59.B-firmwarebranch-tryjob
   firmware-zork-13434.B-firmwarebranch-tryjob
