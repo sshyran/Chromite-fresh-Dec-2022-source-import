@@ -247,7 +247,16 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     cmd.extend(additional_args)
 
   # ThinLTO opens lots of files at the same time.
-  resource.setrlimit(resource.RLIMIT_NOFILE, (32768, 32768))
+  # Set rlimit and vm.max_map_count to accommodate this.
+  file_limit = 262144
+  soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+  resource.setrlimit(resource.RLIMIT_NOFILE,
+                     (max(soft, file_limit), max(hard, file_limit)))
+  max_map_count = int(open('/proc/sys/vm/max_map_count').read())
+  if max_map_count < file_limit:
+    logging.notice(
+        'Raising vm.max_map_count from %s to %s', max_map_count, file_limit)
+    open('/proc/sys/vm/max_map_count', 'w').write(f'{file_limit}\n')
   ret = cros_build_lib.dbg_run(cmd, check=False)
   # If we were in interactive mode, ignore the exit code; it'll be whatever
   # they last ran w/in the chroot and won't matter to us one way or another.
