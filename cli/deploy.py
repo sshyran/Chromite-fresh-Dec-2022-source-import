@@ -163,7 +163,7 @@ print(json.dumps(pkg_info))
   @staticmethod
   def _GetCP(cpv):
     """Returns the CP value for a given CPV string."""
-    attrs = package_info.parse(cpv)
+    attrs = package_info.SplitCPV(cpv, strict=False)
     if not attrs.cp:
       raise ValueError('Cannot get CP value for %s' % cpv)
     return attrs.cp
@@ -458,7 +458,7 @@ print(json.dumps(pkg_info))
       A list of (CPV, slot) pairs of packages in the binpkgs database that
       match the pattern.
     """
-    attrs = package_info.parse(cpv_pattern)
+    attrs = package_info.SplitCPV(cpv_pattern, strict=False)
     cp_pattern = os.path.join(attrs.category or '*', attrs.package or '*')
     matches = []
     for cp, cp_slots in self.binpkgs_db.items():
@@ -467,10 +467,10 @@ print(json.dumps(pkg_info))
 
       # If no version attribute was given or there's only one slot, omit the
       # slot qualifier.
-      if not attrs.vr or len(cp_slots) == 1:
+      if not attrs.version or len(cp_slots) == 1:
         matches.append((cp, None))
       else:
-        cpv_pattern = '%s-%s' % (cp, attrs.vr)
+        cpv_pattern = '%s-%s' % (cp, attrs.version)
         for slot, pkg_info in cp_slots.items():
           if fnmatch.fnmatchcase(pkg_info.cpv, cpv_pattern):
             matches.append((cp, slot))
@@ -532,10 +532,10 @@ print(json.dumps(pkg_info))
     target_pkg_info = self.target_db.get(cp, dict()).get(slot)
     if target_pkg_info is not None:
       if cpv != target_pkg_info.cpv:
-        attrs = package_info.parse(cpv)
-        target_attrs = package_info.parse(target_pkg_info.cpv)
+        attrs = package_info.SplitCPV(cpv)
+        target_attrs = package_info.SplitCPV(target_pkg_info.cpv)
         logging.debug('Updating %s: version (%s) different on target (%s)',
-                      cp, attrs.vr, target_attrs.vr)
+                      cp, attrs.version, target_attrs.version)
         return True, True
 
       if build_time != target_pkg_info.build_time:
@@ -871,7 +871,7 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
   """Returns paths to binary packages corresponding to |cpvs|.
 
   Args:
-    cpvs: List of PackageInfo components given by package_info.parse().
+    cpvs: List of CPV components given by package_info.SplitCPV().
     strip: True to run strip_package.
     sysroot: Sysroot path.
 
@@ -886,11 +886,11 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
     try:
       cros_build_lib.run(
           ['strip_package', '--sysroot', sysroot] +
-          [cpv.cpvr for cpv in cpvs])
+          [cpv.cpf for cpv in cpvs])
       packages_dir = _STRIPPED_PACKAGES_DIR
     except cros_build_lib.RunCommandError:
       logging.error('Cannot strip packages %s',
-                    ' '.join([str(cpv.cpvr) for cpv in cpvs]))
+                    ' '.join([str(cpv) for cpv in cpvs]))
       raise
 
   paths = []
@@ -916,7 +916,7 @@ def _GetPackagesPaths(pkgs, strip, sysroot):
   Returns:
     List of paths corresponding to |pkgs|.
   """
-  cpvs = [package_info.parse(p) for p in pkgs]
+  cpvs = [package_info.SplitCPV(p) for p in pkgs]
   return _GetPackagesByCPV(cpvs, strip, sysroot)
 
 
@@ -1189,7 +1189,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
       # Warn when the user seems to forget `cros workon start`.
       worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
       for package in listed:
-        cp = package_info.parse(package).atom
+        cp = package_info.SplitCPV(package).cp
         if cp not in worked_on_cps:
           logging.warning(
               'Are you intentionally deploying unmodified packages, or did '

@@ -342,7 +342,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     # Check that package names were correctly resolved into binary packages.
     self.get_packages_paths.assert_called_once_with(
-        [package_info.parse(p) for p in cpvs], True, 'sysroot')
+        [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
     # Check that deploy._Emerge is called the right number of times.
     self.assertEqual(self.emerge.call_count, len(packages))
     self.assertEqual(self.unmerge.call_count, 0)
@@ -388,7 +388,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     # Check that package names were correctly resolved into binary packages.
     self.get_packages_paths.assert_called_once_with(
-        [package_info.parse(p) for p in cpvs], True, 'sysroot')
+        [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
     # Check that deploy._Emerge is called the right number of times.
     self.assertEqual(self.emerge.call_count, len(packages))
     self.assertEqual(self.unmerge.call_count, 0)
