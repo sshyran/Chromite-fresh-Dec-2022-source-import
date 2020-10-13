@@ -1409,6 +1409,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       'amd64-generic',
       'arm-generic',
       'arm64-generic',
+      'eve',
       'kevin',
       'kevin64',
       'oak',
@@ -1420,7 +1421,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
   # green.
   unstable_builders = frozenset([
       'lakitu',  # TODO: Re-enable after crbug.com/919630 resolved.
-      'eve',  # crbug.com/1007590
   ])
 
   external_board_configs = CreateBoardConfigs(

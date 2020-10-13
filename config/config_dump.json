@@ -10233,7 +10233,6 @@
         "boards": [
             "eve"
         ],
-        "important": false,
         "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
