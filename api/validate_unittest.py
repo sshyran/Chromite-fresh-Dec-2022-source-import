@@ -100,8 +100,8 @@ class IsInTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
     impl(common_pb2.Chroot(), None, self.no_validate_config)
 
 
-class RequiredTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
-  """Tests for the required validator."""
+class RequireTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
+  """Tests for the require validator."""
 
   def test_invalid_field(self):
     """Test validator fails when given an unset value."""
@@ -135,7 +135,7 @@ class RequiredTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
     impl(in_proto, None, self.api_config)
 
   def test_mixed(self):
-    """Test validator passes when given a set value."""
+    """Test validator fails when given a set value and an unset value."""
 
     @validate.require('path', 'env.use_flags')
     def impl(_input_proto, _output_proto, _config):
@@ -152,6 +152,54 @@ class RequiredTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
 
     # This would otherwise raise an error for an invalid path.
     impl(common_pb2.Chroot(), None, self.no_validate_config)
+
+
+class RequireAnyTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
+  """Tests for the require_any validator."""
+
+  def _get_request(self, mid: int = None, name: str = None, flag: bool = None):
+    """Build a request instance from the given data."""
+    request = build_api_test_pb2.MultiFieldMessage()
+
+    if mid:
+      request.id = mid
+    if name:
+      request.name = name
+    if flag:
+      request.flag = flag
+
+    return request
+
+  def test_invalid_field(self):
+    """Test validator fails when given an invalid field."""
+
+    @validate.require_any('does.not.exist', 'also.invalid')
+    def impl(_input_proto, _output_proto, _config):
+      self.fail('Incorrectly allowed method to execute.')
+
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      impl(self._get_request(), None, self.api_config)
+
+  def test_not_set(self):
+    """Test validator fails when given unset values."""
+
+    @validate.require_any('id', 'name')
+    def impl(_input_proto, _output_proto, _config):
+      self.fail('Incorrectly allowed method to execute.')
+
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      impl(self._get_request(flag=True), None, self.api_config)
+
+  def test_set(self):
+    """Test validator passes when given set values."""
+
+    @validate.require_any('id', 'name')
+    def impl(_input_proto, _output_proto, _config):
+      pass
+
+    impl(self._get_request(1), None, self.api_config)
+    impl(self._get_request(name='foo'), None, self.api_config)
+    impl(self._get_request(1, name='foo'), None, self.api_config)
 
 
 class RequireEachTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):

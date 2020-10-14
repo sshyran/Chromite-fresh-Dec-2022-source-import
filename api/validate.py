@@ -132,6 +132,35 @@ def require(*fields):
   return decorator
 
 
+# pylint: disable=docstring-misnamed-args
+def require_any(*fields):
+  """Verify at least one of |fields| have been set.
+
+  Args:
+    fields (str): The fields being checked. May be . separated nested fields.
+  """
+  assert fields
+
+  def decorator(func):
+    @functools.wraps(func)
+    def _require(input_proto, output_proto, config, *args, **kwargs):
+      if config.do_validation:
+        for field in fields:
+          logging.debug('Validating %s is set.', field)
+          value = _value(field, input_proto)
+          if value:
+            break
+        else:
+          cros_build_lib.Die('At least one of the following must be set: %s',
+                             ', '.join(fields))
+
+      return func(input_proto, output_proto, config, *args, **kwargs)
+
+    return _require
+
+  return decorator
+
+
 def require_each(field, subfields, allow_empty=True):
   """Verify |field| each have all of the |subfields| set.
 
