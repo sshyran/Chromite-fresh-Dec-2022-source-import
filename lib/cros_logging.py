@@ -39,6 +39,7 @@ levels is rarely desirable, but the --log-level argument can be used to do so.
 
 from __future__ import print_function
 
+import os
 import sys
 # pylint: disable=unused-wildcard-import, wildcard-import
 from logging import *
@@ -53,7 +54,6 @@ from logging import shutdown
 # Import as private to avoid polluting module namespace.
 from chromite.lib import buildbot_annotations as _annotations
 
-
 # Remove deprecated APIs to force use of new ones.
 del WARN
 del warn
@@ -62,6 +62,50 @@ del warn
 # Notice Level.
 NOTICE = 25
 addLevelName(NOTICE, 'NOTICE')
+
+
+def _SetupCloudLogging():
+  """If appropriate environment variables are set, enable cloud logging.
+
+  Cloud logging is only enabled when the environment has
+   CHROMITE_CLOUD_LOGGING=1 and GOOGLE_APPLICATION_CREDENTIALS=<local.json>.
+  If these are set, then cloud logging is enable, see
+  https://cloud.google.com/docs/authentication/getting-started#cloud-console
+  """
+  try:
+    import google.cloud.logging as cloud_logging  # pylint: disable=import-error,no-name-in-module
+  except ImportError as e:
+    # TODO(mmortensen): Change to python3's ModuleNotFoundError when this
+    # code is only used by python3. Beware though with branches and bisection
+    # this could need to be ImportError for a long time. ImportError is the
+    # parent class of ModuleNotFoundError and works on both python2 and python3.
+    log(NOTICE, 'Could not import google.cloud.logging %s', e)
+    return
+
+  client = cloud_logging.Client()
+  # Retrieves a Cloud Logging handler based on the environment
+  # you're running in and integrates the handler with the
+  # Python logging module. By default this captures all logs
+  # at INFO level and higher
+  client.get_default_handler()
+  client.setup_logging()
+
+
+def _CloudLoggingEnvVariablesAreDefined():
+  """Check for cloud-logging ENV variables."""
+  cloud_logging_env_value = os.environ.get('CHROMITE_CLOUD_LOGGING')
+  google_app_creds_env_value = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+  # If both variables are set, log their values and return True.
+  if cloud_logging_env_value == '1' and google_app_creds_env_value:
+    log(NOTICE, 'CHROMITE_CLOUD_LOGGING is ', cloud_logging_env_value)
+    log(NOTICE,
+        'GOOGLE_APPLICATION_CREDENTIALS is ', google_app_creds_env_value)
+    return True
+  return False
+
+
+if _CloudLoggingEnvVariablesAreDefined():
+  _SetupCloudLogging()
 
 
 # Notice implementation.
