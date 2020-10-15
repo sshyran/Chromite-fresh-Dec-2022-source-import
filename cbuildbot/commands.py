@@ -3515,7 +3515,7 @@ def GeneratePayloads(target_image_path,
     full: Generate full payloads.
     delta: Generate delta payloads.
     stateful: Generate stateful payload.
-    dlc: Generate dummy-dlc payloads.
+    dlc: Generate sample-dlc payloads.
   """
   # TODO(saklein): Change to a combined call to the endpoint with
   #   GenerateQuickProvisionPayloads after the payload type arguments have been

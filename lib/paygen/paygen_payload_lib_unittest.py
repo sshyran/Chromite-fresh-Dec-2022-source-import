@@ -74,18 +74,18 @@ class PaygenPayloadLibTest(cros_test_lib.RunCommandTempDirTestCase):
     self.new_dlc_image = gspaths.DLCImage(
         build=self.new_build,
         key='dlc',
-        dlc_id='dummy-dlc',
-        dlc_package='dummy-package',
+        dlc_id='sample-dlc',
+        dlc_package='sample-package',
         uri=('gs://chromeos-releases/dev-channel/x86-alex/4171.0.0/dlc/'
-             'dummy-dlc/dummy-package/dlc.img'))
+             'sample-dlc/sample-package/dlc.img'))
 
     self.old_dlc_image = gspaths.DLCImage(
         build=self.old_build,
         key='dlc',
-        dlc_id='dummy-dlc',
-        dlc_package='dummy-package',
+        dlc_id='sample-dlc',
+        dlc_package='sample-package',
         uri=('gs://chromeos-releases/dev-channel/x86-alex/1620.0.0/dlc/'
-             'dummy-dlc/dummy-package/dlc.img'))
+             'sample-dlc/sample-package/dlc.img'))
 
 
     self.old_test_image = gspaths.UnsignedImageArchive(
@@ -451,29 +451,29 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     lsb_read_mock = self.PatchObject(
         utils, 'ReadLsbRelease',
         return_value={dlc_lib.DLC_APPID_KEY: 'foo-appid',
-                      dlc_lib.DLC_ID_KEY: 'dummy-dlc',
-                      dlc_lib.DLC_PACKAGE_KEY: 'dummy-package'})
+                      dlc_lib.DLC_ID_KEY: 'sample-dlc',
+                      dlc_lib.DLC_PACKAGE_KEY: 'sample-package'})
 
     dlc_id, dlc_package, dlc_appid = gen._GetDlcImageParams(tgt_image)
 
-    self.assertEqual(dlc_id, 'dummy-dlc')
-    self.assertEqual(dlc_package, 'dummy-package')
+    self.assertEqual(dlc_id, 'sample-dlc')
+    self.assertEqual(dlc_package, 'sample-package')
     self.assertEqual(dlc_appid, 'foo-appid')
     lsb_read_mock.assert_called_once()
 
   def testGetDlcImageParamsCorrect(self):
     """Tests _GetDlcImageParams function."""
-    self._TestGetDlcImageParams('dummy-dlc', 'dummy-package')
+    self._TestGetDlcImageParams('sample-dlc', 'sample-package')
 
   def testGetDlcImageParamsMismatchId(self):
     """Tests _GetDlcImageParams function with mismatched DLC ID."""
     with self.assertRaises(paygen_payload_lib.Error):
-      self._TestGetDlcImageParams('dummy-dlc2', 'dummy-package')
+      self._TestGetDlcImageParams('sample-dlc2', 'sample-package')
 
   def testGetDlcImageParamsMismatchPackage(self):
     """Tests _GetDlcImageParams function with mismatched DLC package."""
     with self.assertRaises(paygen_payload_lib.Error):
-      self._TestGetDlcImageParams('dummy-dlc', 'dummy-package2')
+      self._TestGetDlcImageParams('sample-dlc', 'sample-package2')
 
   def testGenerateUnsignedPayloadFull(self):
     """Test _GenerateUnsignedPayload with full payload."""

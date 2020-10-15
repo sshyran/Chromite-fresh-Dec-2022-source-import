@@ -94,8 +94,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
                                        version=self.version)
 
     # Attributes for DLC.
-    self.dlc_id = 'dummy-dlc'
-    self.dlc_package = 'dummy-package'
+    self.dlc_id = 'sample-dlc'
+    self.dlc_package = 'sample-package'
 
     # Signed image attributes.
     self.key = 'mp-v3'

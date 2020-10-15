@@ -14,7 +14,6 @@ import tarfile
 
 import mock
 
-from chromite.cbuildbot import commands
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -131,10 +130,10 @@ class BasePaygenBuildLibTestWithBuilds(BasePaygenBuildLibTest,
   """Test PaygenBuildLib class."""
 
   def setUp(self):
-    self.dlc_id = 'dummy-dlc'
-    self.dlc_id2 = 'dummy-dlc2'
-    self.dlc_package = 'dummy-package'
-    self.dlc_package2 = 'dummy-package2'
+    self.dlc_id = 'sample-dlc'
+    self.dlc_id2 = 'sample-dlc2'
+    self.dlc_package = 'sample-package'
+    self.dlc_package2 = 'sample-package2'
 
     self.prev_build = gspaths.Build(bucket='crt',
                                     channel='foo-channel',
@@ -485,15 +484,15 @@ class TestPaygenBuildLibTestGSSearch(BasePaygenBuildLibTestWithBuilds):
     """Test _DiscoverDLCImages."""
     paygen = self._GetPaygenBuildInstance()
     self.mockUriList.return_value = [
-        ('gs://crt/foo-channel/foo-board/1.2.3/dlc/dummy-dlc/dummy-package/'
+        ('gs://crt/foo-channel/foo-board/1.2.3/dlc/sample-dlc/sample-package/'
          'dlc.img')]
     dlc_module_images = paygen._DiscoverDLCImages(self.target_build)
     dlc_module_images_expected = [
         gspaths.DLCImage(
             build=self.target_build, key=None,
-            uri='gs://crt/foo-channel/foo-board/1.2.3/dlc/dummy-dlc/'
-                'dummy-package/dlc.img',
-            dlc_id='dummy-dlc', dlc_package='dummy-package',
+            uri='gs://crt/foo-channel/foo-board/1.2.3/dlc/sample-dlc/'
+                'sample-package/dlc.img',
+            dlc_id='sample-dlc', dlc_package='sample-package',
             dlc_image=gspaths.ChromeosReleases.DLCImageName())]
     self.assertEqual(dlc_module_images, dlc_module_images_expected)
 
@@ -608,8 +607,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
                                board='auron-yuna',
                                version='9756.0.0')
 
-    dlc_id = 'dummy-dlc'
-    dlc_package = 'dummy-package'
+    dlc_id = 'sample-dlc'
+    dlc_package = 'sample-package'
 
     # Create our images.
     premp_image = self.addSignedImage(target_build, key='premp')
@@ -1342,21 +1341,21 @@ class HWTest(cros_test_lib.MockTestCase):
   def testTestPlan(self):
     payload_test_configs = [
         test_params.TestConfig(
-            board='dummy-board',
-            name='dummy-test',
+            board='sample-board',
+            name='sample-test',
             is_delta_update=True,
             source_release='source-release',
             target_release='target-release',
             source_payload_uri='source-uri',
             target_payload_uri='target-uri',
-            suite_name='dummy-suite',
+            suite_name='sample-suite',
             payload_type=paygen_build_lib.PAYLOAD_TYPE_N2N,
             applicable_models=None)]
 
     test_plan_string = paygen_build_lib._TestPlan(
         payload_test_configs=payload_test_configs,
-        suite_name='dummy-suite',
-        build='dummy-build')
+        suite_name='sample-suite',
+        build='sample-build')
     test_plan_dict = json.loads(test_plan_string)
     test_args_string = test_plan_dict[
         'enumeration']['autotestInvocations'][0].pop('testArgs')
@@ -1372,18 +1371,18 @@ class HWTest(cros_test_lib.MockTestCase):
                     'maxRetries': 1,
                     'executionEnvironment': 'EXECUTION_ENVIRONMENT_SERVER'
                 },
-                'displayName': 'dummy-build/dummy-suite/' +
+                'displayName': 'sample-build/sample-suite/' +
                                'autoupdate_EndToEndTest_' +
-                               'dummy-test_delta_source-release_n2n'
+                               'sample-test_delta_source-release_n2n'
             }]
         }
     }
-    expected_test_args = set(['name=dummy-test',
+    expected_test_args = set(['name=sample-test',
                               'update_type=delta',
                               'source_release=source-release',
                               'target_release=target-release',
                               'target_payload_uri=target-uri',
-                              'SUITE=dummy-suite',
+                              'SUITE=sample-suite',
                               'source_payload_uri=source-uri',
                               'payload_type=N2N'])
 

@@ -478,7 +478,7 @@ class ChromeosReleases(object):
 
     Returns:
       The name for the specified build's payloads. Should be in the form of:
-      dlc_dummy-dlc_dummy-package_11869.0.0_kevin-arcnext_canary-channel_full
+      dlc_sample-dlc_sample-package_11869.0.0_kevin-arcnext_canary-channel_full
       .bin-250bc111ea4955aebc2af08db1f1773c.signed
     """
     if random_str is None:
