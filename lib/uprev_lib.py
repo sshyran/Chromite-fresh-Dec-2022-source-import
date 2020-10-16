@@ -14,7 +14,7 @@ import functools
 import os
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple, Union
 
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
@@ -192,14 +192,21 @@ class UprevResult(object):
 
   Attributes:
     outcome: An instance of Outcome documenting what change took place.
-    best_ebuild: An Ebuild object representing the highest available version of
-        the package after the uprev. May differ from the requested version in
-        some cases.
+    changed_files: A list of the paths of the files that were altered by this
+        uprev attempt.
   """
 
-  def __init__(self, outcome: Outcome, best_ebuild: portage_util.EBuild):
+  outcome: Outcome
+  changed_files: List[str]
+
+  def __init__(self,
+               outcome: Outcome,
+               changed_files: Optional[Iterable[str]] = None):
     self.outcome = outcome
-    self.best_ebuild = best_ebuild
+
+    if isinstance(changed_files, str):
+      raise TypeError('changed_files must be a list of str, not a bare str.')
+    self.changed_files = list(changed_files or [])
 
   def __bool__(self):
     """Returns True only if this Result indicates that a file was modified."""
@@ -237,7 +244,7 @@ class UprevChromeManager(object):
     should_uprev, candidate = self._find_chrome_uprev_candidate(stable_ebuilds)
 
     if not should_uprev and candidate:
-      return UprevResult(Outcome.NEWER_VERSION_EXISTS, candidate)
+      return UprevResult(Outcome.NEWER_VERSION_EXISTS)
 
     result = self._mark_as_stable(candidate, unstable_ebuild, package_name,
                                   package_dir)
@@ -247,7 +254,7 @@ class UprevChromeManager(object):
     if not result:
       return result
 
-    self._new_ebuild_files.append(result.best_ebuild.ebuild_path)
+    self._new_ebuild_files.extend(result.changed_files)
     if candidate and not candidate.IsSticky():
       osutils.SafeUnlink(candidate.ebuild_path)
       self._removed_ebuild_files.append(candidate.ebuild_path)
@@ -356,18 +363,18 @@ class UprevChromeManager(object):
       msg = 'Previous ebuild with same version found and ebuild is redundant.'
       logging.info(msg)
       os.unlink(new_ebuild_path)
-      return UprevResult(Outcome.SAME_VERSION_EXISTS, stable_candidate)
+      return UprevResult(Outcome.SAME_VERSION_EXISTS)
 
     if rev_bump:
-      return UprevResult(Outcome.REVISION_BUMP, new_ebuild)
+      return UprevResult(Outcome.REVISION_BUMP, [new_ebuild.ebuild_path])
     elif stable_candidate:
       # If a stable ebuild already existed and rev_bump is False, then a stable
       # ebuild with a new major version has been generated.
-      return UprevResult(Outcome.VERSION_BUMP, new_ebuild)
+      return UprevResult(Outcome.VERSION_BUMP, [new_ebuild.ebuild_path])
     else:
       # If no stable ebuild existed, then we've created the first stable ebuild
       # for this package.
-      return UprevResult(Outcome.NEW_EBUILD_CREATED, new_ebuild)
+      return UprevResult(Outcome.NEW_EBUILD_CREATED, [new_ebuild.ebuild_path])
 
   def _clean_stale_package(self, package):
     clean_stale_packages([package], self._build_targets, chroot=self._chroot)
