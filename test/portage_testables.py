@@ -11,6 +11,8 @@ from __future__ import division
 import itertools
 import os
 import pathlib  # pylint: disable=import-error
+import shlex
+from typing import Dict, Iterable, Tuple, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -35,8 +37,8 @@ def _dict_to_conf(dictionary):
 def _dict_to_ebuild(dictionary):
   """Helper to format a dictionary into an ebuild file."""
   output = []
-  for key in sorted(dictionary.keys()):
-    output.append('%s="%s"' % (key, dictionary[key]))
+  for key in dictionary.keys():
+    output.append(f'{key}={shlex.quote(dictionary[key])}')
 
   output.append('\n')
   return '\n'.join(output)
@@ -58,11 +60,16 @@ class Overlay(object):
 
     self._write_layout_conf()
 
-  def __contains__(self, item: package_info.CPV):
-    if not isinstance(item, package_info.CPV):
+  def __contains__(self, item: Union[package_info.CPV,
+                                     package_info.PackageInfo]):
+    if not isinstance(item, (package_info.CPV, package_info.PackageInfo)):
       raise TypeError(f'Expected a CPV but received a {type(item)}')
 
-    ebuild_path = self.path / item.category / item.package / f'{item.pv}.ebuild'
+    if isinstance(item, package_info.CPV):
+      ebuild_path = (
+          self.path / item.category / item.package / f'{item.pv}.ebuild')
+    else:
+      ebuild_path = self.path / item.relative_path
 
     return ebuild_path.is_file()
 
@@ -71,7 +78,7 @@ class Overlay(object):
     layout_conf_path = self.path / 'metadata' / 'layout.conf'
     master_names = ' '.join(m.name for m in self.masters or [])
     conf = {
-        'masters': master_names,
+        'masters': 'portage-stable chromiumos eclass-overlay' + master_names,
         'profile-formats': 'portage-2 profile-default-eapi',
         'profile_eapi_when_unspecified': '5-progress',
         'repo-name': str(self.name),
@@ -97,7 +104,7 @@ class Overlay(object):
           mode='a',
           makedirs=True)
 
-  def _write_ebuild(self, pkg):
+  def _write_ebuild(self, pkg: 'Package'):
     """Write a Package object out to an ebuild file in this Overlay."""
     ebuild_path = self.path / pkg.category / pkg.package / (
         pkg.package + '-' + pkg.version + '.ebuild')
@@ -111,6 +118,14 @@ class Overlay(object):
     }
 
     osutils.WriteFile(ebuild_path, _dict_to_ebuild(base_conf), makedirs=True)
+
+    # Write additional miscellaneous variables declared in the Package object.
+    for k, v in pkg.variables.items():
+      osutils.WriteFile(ebuild_path, f'{k}="{v}"\n', mode='a')
+
+    # Write an eclass inheritance line, if needed.
+    if pkg.format_eclass_line():
+      osutils.WriteFile(ebuild_path, pkg.format_eclass_line(), mode='a')
 
     extra_conf = {
         'DEPEND': pkg.depend,
@@ -235,8 +250,7 @@ class Sysroot(object):
     extra_env.update(kwargs.pop('extra_env', {}))
     kwargs.setdefault('encoding', 'utf-8')
 
-    return cros_build_lib.run(
-        cmd, extra_env=extra_env, **kwargs)
+    return cros_build_lib.run(cmd, extra_env=extra_env, **kwargs)
 
 
 class Profile(object):
@@ -253,6 +267,9 @@ class Profile(object):
 class Package(object):
   """Portage package, lives in an overlay."""
 
+  inherit: Tuple[str]
+  variables: Dict[str, str]
+
   def __init__(self,
                category,
                package,
@@ -261,7 +278,9 @@ class Package(object):
                keywords='*',
                slot='0',
                depend='',
-               rdepend=''):
+               rdepend='',
+               inherit: Union[Iterable[str], str] = tuple(),
+               **kwargs):
     self.category = category
     self.package = package
     self.version = version
@@ -270,6 +289,8 @@ class Package(object):
     self.slot = slot
     self.depend = depend
     self.rdepend = rdepend
+    self.inherit = (inherit,) if isinstance(inherit, str) else tuple(inherit)
+    self.variables = kwargs
 
   @classmethod
   def from_cpv(cls, pkg_str: str):
@@ -282,3 +303,12 @@ class Package(object):
     """Returns a CPV object constructed from this package's metadata."""
     return package_info.SplitCPV(self.category + '/' + self.package + '-' +
                                  self.version)
+
+  def format_eclass_line(self) -> str:
+    """Returns a string containing this package's eclass inheritance line."""
+    if self.inherit and isinstance(self.inherit, str):
+      return f'inherit {self.inherit}\n'
+    elif self.inherit:
+      return f'inherit {" ".join(self.inherit)}\n'
+    else:
+      return ''
