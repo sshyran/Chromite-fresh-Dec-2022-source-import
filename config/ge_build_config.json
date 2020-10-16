@@ -890,18 +890,6 @@
       ]
     },
     {
-      "name": "strongbad",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "strongbad",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "swanky",
       "configs": [
         {
@@ -5340,6 +5328,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 311,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "strongbad",
+      "reference_board_name": "strongbad",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "strongbad",
+          "name": "coachz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 461,
           "is_active": true
         }
       ]
