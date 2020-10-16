@@ -296,8 +296,6 @@ masters = %(masters)s
     """Verify deprecated license checks."""
     # These are known bad packages.
     licenses_lib._CheckForDeprecatedLicense(
-        'chromeos-base/pepper-flash-0.0.1', {'Proprietary-Binary'})
-    licenses_lib._CheckForDeprecatedLicense(
         'chromeos-base/google-sans-fonts-1-r13', {'Google-TOS'})
     licenses_lib._CheckForDeprecatedLicense(
         'sys-firmware/dell-dock-0.1', {'no-source-code'})

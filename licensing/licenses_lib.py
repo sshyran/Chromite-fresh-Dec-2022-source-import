@@ -823,7 +823,6 @@ def _CheckForDeprecatedLicense(cpf, licenses):
     # Note: DO NOT ADD ANY MORE PACKAGES HERE.
     LEGACY_PKGS = (
         'chromeos-base/infineon-firmware',
-        'chromeos-base/pepper-flash',
         'sys-boot/coreboot-private-files-',
         'sys-boot/exynos-pre-boot',
         'sys-boot/nhlt-blobs',
@@ -1369,7 +1368,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     # [binary   R    ] x11-libs/libva-1.1.1 to /build/x86-alex/
     pkg_rgx = re.compile(r'\[[^]]+R[^]]+\] (.+) to /build/.*')
     # If we match something else without the 'R' like
-    # [binary     U  ] chromeos-base/pepper-flash-13.0.0.133-r1 [12.0.0.77-r1]
+    # [binary     U  ] chromeos-base/some-package-13.0.0.133-r1 [12.0.0.77-r1]
     # this is bad and we should die on this.
     pkg_rgx2 = re.compile(r'(\[[^]]+\] .+) to /build/.*')
     for line in emerge:
