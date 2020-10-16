@@ -183,6 +183,7 @@ class CrOSTest(object):
         '--board', self._device.board,
         '--disable-rootfs-verification',
         '--clobber-stateful',
+        '--clear-tpm-owner',
     ]
     cros_build_lib.run(flash_cmd, dryrun=self.dryrun)
 

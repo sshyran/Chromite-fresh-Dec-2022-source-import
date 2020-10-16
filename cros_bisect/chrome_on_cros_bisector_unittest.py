@@ -397,7 +397,7 @@ class TestChromeOnCrosBisector(cros_test_lib.MockTempDirTestCase):
     self.bisector.FlashCrosImage(xbuddy_path)
     flash_mock.assert_called_with(
         self.DUT, xbuddy_path, board=self.BOARD, clobber_stateful=True,
-        disable_rootfs_verification=True)
+        clear_tpm_owner=True, disable_rootfs_verification=True)
 
   def testFlashImageRetry(self):
     """Tests FlashImage() with retry success."""
@@ -414,7 +414,7 @@ class TestChromeOnCrosBisector(cros_test_lib.MockTempDirTestCase):
     self.bisector.FlashCrosImage(xbuddy_path)
     flash_mock.assert_called_with(
         self.DUT, xbuddy_path, board=self.BOARD, clobber_stateful=True,
-        disable_rootfs_verification=True)
+        clear_tpm_owner=True, disable_rootfs_verification=True)
 
   def testFlashImageRetryFailed(self):
     """Tests FlashImage() with retry failed."""
@@ -425,7 +425,7 @@ class TestChromeOnCrosBisector(cros_test_lib.MockTempDirTestCase):
       self.bisector.FlashCrosImage(xbuddy_path)
     flash_mock.assert_called_with(
         self.DUT, xbuddy_path, board=self.BOARD, clobber_stateful=True,
-        disable_rootfs_verification=True)
+        clear_tpm_owner=True, disable_rootfs_verification=True)
 
   def testCrosVersionToChromeCommit(self):
     """Tests CrosVersionToChromeCommit()."""

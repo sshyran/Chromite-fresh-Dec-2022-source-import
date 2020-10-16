@@ -143,7 +143,7 @@ class ChromiumOSUpdater(BaseUpdater):
   KERNEL_UPDATE_TIMEOUT = 180
 
   def __init__(self, device, build_name, payload_dir, transfer_class,
-               log_file=None, tempdir=None, clobber_stateful=True,
+               log_file=None, tempdir=None, clobber_stateful=False,
                yes=False, do_rootfs_update=True, do_stateful_update=True,
                reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
@@ -181,7 +181,8 @@ class ChromiumOSUpdater(BaseUpdater):
           Assuming transfer_class is None, if value for staging_server is None
           or empty, an auto_updater_transfer.LocalTransfer reference must be
           passed through the transfer_class parameter.
-      clear_tpm_owner: If true, it will clear the TPM owner on reboot.
+      clear_tpm_owner: If true, it will clear the TPM owner on reboot. The
+          default is False.
       resolve_app_id_mismatch: Fixes the update payloads App ID if it is
           different than the devices's App ID so the nebraska.py can properly
           create a response.

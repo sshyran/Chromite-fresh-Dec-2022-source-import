@@ -210,7 +210,8 @@ class ChromeOnCrosBisector(git_bisector.GitBisector):
         backoff_factor=self.cros_flash_backoff)
     def flash_with_retry():
       flash.Flash(self.remote, xbuddy_path, board=self.board,
-                  clobber_stateful=True, disable_rootfs_verification=True)
+                  clobber_stateful=True, clear_tpm_owner=True,
+                  disable_rootfs_verification=True)
 
     flash_with_retry()
     return True
