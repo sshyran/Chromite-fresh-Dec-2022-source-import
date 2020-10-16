@@ -9,9 +9,11 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import pathlib
 import sys
 
 import mock
+import pytest
 
 import chromite as cr
 from chromite.lib import constants
@@ -21,6 +23,7 @@ from chromite.lib import parallel
 from chromite.lib import uprev_lib
 from chromite.lib.build_target_lib import BuildTarget
 from chromite.lib.chroot_lib import Chroot
+from chromite.lib.parser import package_info
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
@@ -461,3 +464,68 @@ def test_chrome_uprev_no_existing_stable(overlay_stack):
       'chromeos-base', 'chromeos-chrome', version=f'{NEW_CHROME_VERSION}_rc-r1')
 
   assert stable_chrome.cpv in overlay
+
+
+@pytest.mark.inside_only
+def test_non_workon_fails_uprev_workon_ebuild_to_version(overlay_stack):
+  overlay, = overlay_stack(1)
+  unstable_package = cr.test.Package(
+      'chromeos-base',
+      'test-package',
+      version='9999',
+      keywords='~*',
+  )
+
+  overlay.add_package(unstable_package)
+
+  with pytest.raises(uprev_lib.EbuildUprevError):
+    uprev_lib.uprev_workon_ebuild_to_version(
+        pathlib.Path(unstable_package.category) / unstable_package.package,
+        target_version='1',
+        chroot=None,
+        src_root=overlay.path,
+        chroot_src_root=overlay.path,
+    )
+
+  stable_package = package_info.PackageInfo(
+      'chromeos-base',
+      'test-package',
+      version='1',
+      revision='1',
+  )
+
+  assert not stable_package in overlay
+
+
+@pytest.mark.inside_only
+def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
+  overlay, = overlay_stack(1)
+  unstable_package = cr.test.Package(
+      'chromeos-base',
+      'test-package',
+      version='9999',
+      keywords='~*',
+      inherit='cros-workon',
+      CROS_WORKON_PROJECT='chromiumos/infra/build/empty-project',
+      CROS_WORKON_LOCALNAME='empty-project')
+
+  overlay.add_package(unstable_package)
+
+  res = uprev_lib.uprev_workon_ebuild_to_version(
+      pathlib.Path(unstable_package.category) / unstable_package.package,
+      target_version='1',
+      chroot=None,
+      src_root=overlay.path,
+      chroot_src_root=overlay.path,
+  )
+
+  assert res.outcome is uprev_lib.Outcome.NEW_EBUILD_CREATED
+
+  stable_package = package_info.PackageInfo(
+      'chromeos-base',
+      'test-package',
+      version='1',
+      revision='1',
+  )
+
+  assert stable_package in overlay

@@ -363,7 +363,7 @@ class ProjectAndPathTest(cros_test_lib.MockTempDirTestCase):
 
       raise Exception('unhandled path: %s' % path)
 
-    def _FindCheckoutFromPath(path):
+    def _FindCheckoutFromPath(path, strict=True): # pylint: disable=unused-argument
       """Mock function for manifest.FindCheckoutFromPath"""
       for project, localname in zip(fake_projects, fake_localnames):
         if path == os.path.join(self.tempdir, 'platform', localname):

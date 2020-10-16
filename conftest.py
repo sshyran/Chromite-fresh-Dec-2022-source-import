@@ -76,6 +76,10 @@ def clear_retry_stats_manager():
   # pylint: disable=protected-access
   retry_stats._STATS_COLLECTION = None
 
+@pytest.fixture(autouse=True)
+def set_testing_environment_variable(monkeypatch):
+  """Set an environment marker to relax certain strict checks for test code."""
+  monkeypatch.setenv('CHROMITE_INSIDE_PYTEST', '1')
 
 @pytest.fixture
 def singleton_manager(monkeypatch):

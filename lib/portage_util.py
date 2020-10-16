@@ -835,8 +835,15 @@ class EBuild(object):
 
     # See what git repo the ebuild lives in to make sure the ebuild isn't
     # tracking the same repo.  https://crbug.com/1050663
+    # We set strict=False if we're running under pytest because it's valid for
+    # ebuilds created in tests to not live in a git tree.
+    under_test = os.environ.get('CHROMITE_INSIDE_PYTEST') == '1'
     ebuild_git_tree = manifest.FindCheckoutFromPath(
-        self.ebuild_path).get('local_path')
+        self.ebuild_path, strict=not under_test)
+    if ebuild_git_tree:
+      ebuild_git_tree_path = ebuild_git_tree.get('local_path')
+    else:
+      ebuild_git_tree_path = None
 
     subdir_paths = []
     subtree_paths = []
@@ -871,7 +878,7 @@ class EBuild(object):
                                                    real_project,
                                                    project))
 
-      if subdir_path == ebuild_git_tree:
+      if subdir_path == ebuild_git_tree_path:
         msg = ('%s: ebuilds may not live in & track the same source '
                'repository (%s); use the empty-project instead' %
                (self.ebuild_path, subdir_path))

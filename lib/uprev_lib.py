@@ -20,6 +20,7 @@ from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
@@ -717,4 +718,115 @@ def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
                     [new_ebuild_src_path,
                      stable_ebuild.ebuild_path,
                      manifest_src_path])
+  return result
+
+
+def uprev_workon_ebuild_to_version(
+    package_path: Union[str, 'pathlib.Path'],
+    target_version: str,
+    chroot: Optional['chromite.lib.chroot_lib.Chroot'] = None,
+    *,
+    src_root: str = constants.SOURCE_ROOT,
+    chroot_src_root: str = constants.CHROOT_SOURCE_ROOT) -> UprevResult:
+  """Uprev a cros-workon ebuild to a specified version.
+
+  Args:
+    package_path: The path of the package relative to the src root. This path
+      should contain an unstable 9999 ebuild that inherits from cros-workon.
+    target_version: The version to use for the stable ebuild to be generated.
+      Should not contain a revision number.
+    chroot: The path to the chroot to enter, if not the default.
+    srcroot: Path to the root of the source checkout. Only override for testing.
+    chroot_src_root: Path to the root of the source checkout when inside the
+      chroot. Only override for testing.
+  """
+
+  package_path = str(package_path)
+  package = os.path.basename(package_path)
+
+  package_src_path = os.path.join(src_root, package_path)
+  ebuild_paths = list(portage_util.EBuild.List(package_src_path))
+  stable_ebuild = None
+  unstable_ebuild = None
+  for path in ebuild_paths:
+    ebuild = portage_util.EBuild(path)
+    if ebuild.is_stable:
+      stable_ebuild = ebuild
+    else:
+      unstable_ebuild = ebuild
+
+  outcome = None
+
+  if stable_ebuild is None:
+    outcome = outcome or Outcome.NEW_EBUILD_CREATED
+  if unstable_ebuild is None:
+    raise EbuildUprevError(f'No unstable ebuild found for {package}')
+  if len(ebuild_paths) > 2:
+    raise EbuildUprevError(f'Found too many ebuilds for {package}: '
+                           'expected one stable and one unstable')
+
+  if not unstable_ebuild.is_workon:
+    raise EbuildUprevError('A workon ebuild was expected '
+                           f'but {unstable_ebuild.ebuild_path} is not workon.')
+  # If the new version is the same as the old version, bump the revision number,
+  # otherwise reset it to 1
+  if stable_ebuild and target_version == stable_ebuild.version_no_rev:
+    output_version = f'{target_version}-r{stable_ebuild.current_revision + 1}'
+    outcome = outcome or Outcome.REVISION_BUMP
+  else:
+    output_version = f'{target_version}-r1'
+    outcome = outcome or Outcome.VERSION_BUMP
+
+  new_ebuild_path = os.path.join(package_path,
+                                 f'{package}-{output_version}.ebuild')
+  new_ebuild_src_path = os.path.join(src_root, new_ebuild_path)
+  manifest_src_path = os.path.join(package_src_path, 'Manifest')
+
+  # Go through the normal uprev process for a cros-workon ebuild, by calculating
+  # and writing out the commit & tree IDs for the projects and subtrees
+  # specified in the unstable ebuild.
+  manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
+  info = unstable_ebuild.GetSourceInfo(
+      os.path.join(constants.SOURCE_ROOT, 'src'), manifest)
+  commit_ids = [unstable_ebuild.GetCommitId(x) for x in info.srcdirs]
+  if not commit_ids:
+    raise EbuildUprevError('No commit_ids found for %s' % info.srcdirs)
+
+  tree_ids = [unstable_ebuild.GetTreeId(x) for x in info.subtrees]
+  tree_ids = [tree_id for tree_id in tree_ids if tree_id]
+  if not tree_ids:
+    raise EbuildUprevError('No tree_ids found for %s' % info.subtrees)
+
+  variables = dict(
+      CROS_WORKON_COMMIT=unstable_ebuild.FormatBashArray(commit_ids),
+      CROS_WORKON_TREE=unstable_ebuild.FormatBashArray(tree_ids))
+
+  portage_util.EBuild.MarkAsStable(unstable_ebuild.ebuild_path,
+                                   new_ebuild_src_path, variables)
+
+  # If the newly generated stable ebuild is identical to the previous one,
+  # early return without incrementing the revision number.
+  if stable_ebuild and target_version == stable_ebuild.version_no_rev and \
+    filecmp.cmp(
+        new_ebuild_src_path, stable_ebuild.ebuild_path, shallow=False):
+    return UprevResult(outcome=Outcome.SAME_VERSION_EXISTS)
+
+  if stable_ebuild is not None:
+    osutils.SafeUnlink(stable_ebuild.ebuild_path)
+
+  try:
+    # UpdateEbuildManifest runs inside the chroot and therefore needs a
+    # chroot-relative path.
+    new_ebuild_chroot_path = os.path.join(chroot_src_root, new_ebuild_path)
+    portage_util.UpdateEbuildManifest(new_ebuild_chroot_path, chroot=chroot)
+  except cros_build_lib.RunCommandError as e:
+    raise EbuildManifestError(
+        f'Unable to update manifest for {package}: {e.stderr}')
+
+  result = UprevResult(
+      outcome=outcome, changed_files=[new_ebuild_src_path, manifest_src_path])
+
+  if stable_ebuild is not None:
+    result.changed_files.append(stable_ebuild.ebuild_path)
+
   return result
