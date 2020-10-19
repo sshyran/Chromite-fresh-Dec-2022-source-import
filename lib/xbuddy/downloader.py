@@ -146,7 +146,7 @@ class Downloader(cherrypy_log_util.Loggable):
       build_dir_info += output_format % ls_info._asdict()
     return build_dir_info
 
-  def Download(self, factory, is_async=False):
+  def Download(self, factory):
     """Downloads and caches the |artifacts|.
 
     Downloads and caches the |artifacts|. Returns once these are present on the
@@ -155,7 +155,6 @@ class Downloader(cherrypy_log_util.Loggable):
 
     Args:
       factory: The artifact factory.
-      is_async: If True, return without waiting for download to complete.
 
     Raises:
       build_artifact.ArtifactDownloadError: If failed to download the artifact.
@@ -175,10 +174,7 @@ class Downloader(cherrypy_log_util.Loggable):
     str_repr = [str(a) for a in required_artifacts]
     self._Log('Downloading artifacts %s.', ' '.join(str_repr))
 
-    if is_async:
-      self._DownloadArtifactsInBackground(required_artifacts)
-    else:
-      self._DownloadArtifactsSerially(required_artifacts, no_wait=True)
+    self._DownloadArtifactsSerially(required_artifacts, no_wait=True)
 
   def IsStaged(self, factory):
     """Check if all artifacts have been downloaded.

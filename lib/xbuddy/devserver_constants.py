@@ -34,13 +34,6 @@ RECOVERY_IMAGE_FILE = 'recovery_image.bin'
 SIGNED_IMAGE_FILE = 'signed_image.bin'
 TEST_IMAGE_FILE = 'chromiumos_test_image.bin'
 
-ALL_IMAGES = (
-    BASE_IMAGE_FILE,
-    IMAGE_FILE,
-    RECOVERY_IMAGE_FILE,
-    TEST_IMAGE_FILE,
-)
-
 #### Update files
 CACHE_DIR = 'cache'
 STATEFUL_FILE = 'stateful.tgz'

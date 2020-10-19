@@ -342,7 +342,7 @@ class xBuddyTest(cros_test_lib.TestCase):
           time.sleep(0.05)
 
         # Requires default capacity.
-        self.assertEqual(self.mock_xb.Capacity(), '5')
+        self.assertEqual(self.mock_xb._Capacity(), 5)
 
         # Get 6 different images: a,b,c,d,e,f.
         images = ['a', 'b', 'c', 'd', 'e', 'f']
