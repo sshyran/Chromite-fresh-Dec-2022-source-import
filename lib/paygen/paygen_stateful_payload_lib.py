@@ -40,16 +40,13 @@ def GenerateStatefulPayload(image_path, output_directory):
 
     try:
       logging.info('Tarring up /usr/local and /var!')
-      cros_build_lib.sudo_run([
-          'tar',
-          '-czf',
-          output_gz,
-          '--directory=%s' % rootfs_dir,
-          '--transform=s,^dev_image,dev_image_new,',
-          '--transform=s,^var_overlay,var_new,',
-          'dev_image',
-          'var_overlay',
-      ])
+      cros_build_lib.CreateTarball(
+          output_gz, '.', sudo=True, compression=cros_build_lib.COMP_GZIP,
+          inputs=['dev_image', 'var_overlay'],
+          extra_args=[
+              '--directory=%s' % rootfs_dir,
+              '--transform=s,^dev_image,dev_image_new,',
+              '--transform=s,^var_overlay,var_new,'])
     except:
       logging.error('Failed to create stateful update file')
       raise

@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import image_lib_unittest
@@ -35,17 +36,15 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
     )
     self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
                      return_value=fake_partitions)
+    create_tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
 
     paygen_stateful_payload_lib.GenerateStatefulPayload('dev/null',
                                                         self.tempdir)
 
-    self.assertCommandContains([
-        'tar',
-        '-czf',
-        os.path.join(self.tempdir, 'stateful.tgz'),
-        '--directory=%s/dir-1' % self.tempdir,
-        '--transform=s,^dev_image,dev_image_new,',
-        '--transform=s,^var_overlay,var_new,',
-        'dev_image',
-        'var_overlay',
-    ])
+    create_tarball_mock.assert_called_once_with(
+        os.path.join(self.tempdir, 'stateful.tgz'), '.', sudo=True,
+        compression=cros_build_lib.COMP_GZIP,
+        inputs=['dev_image', 'var_overlay'],
+        extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
+                    '--transform=s,^dev_image,dev_image_new,',
+                    '--transform=s,^var_overlay,var_new,'])
