@@ -69,14 +69,8 @@ class HWTestList(object):
         # former run even if the latter fails: https://crbug.com/911921
         self.TastConfig(constants.HWTEST_TAST_INFORMATIONAL_SUITE,
                         **self._asyncHWTestArgs(kwargs)),
-        # Context: crbug.com/976834
-        # Because this blocking suite fails a fair bit, it effectively acts as a
-        # rate limiter to the Autotest scheduling system since all of the
-        # subsequent test suites aren't run if this fails.
-        # Making this non-blocking and async will cause Autotest scheduling to
-        # fail.
         config_lib.HWTestConfig(constants.HWTEST_INSTALLER_SUITE,
-                                **self._blockingHWTestArgs(kwargs)),
+                                **self._asyncHWTestArgs(kwargs)),
         config_lib.HWTestConfig(constants.HWTEST_COMMIT_SUITE,
                                 **self._asyncHWTestArgs(kwargs)),
         config_lib.HWTestConfig(constants.HWTEST_CANARY_SUITE,
