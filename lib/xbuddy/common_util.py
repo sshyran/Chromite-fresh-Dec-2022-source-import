@@ -317,65 +317,6 @@ class LockDict(object):
         self._dict[key] = lock
       return lock
 
-
-# TODO(ahassani, achuith, vapier): Move to cros_build_lib, which has a
-# CreateTarball utility function.
-def ExtractTarball(tarball_path, install_path, files_to_extract=None,
-                   excluded_files=None, return_extracted_files=False):
-  """Extracts a tarball using tar.
-
-  Detects whether the tarball is compressed or not based on the file
-  extension and extracts the tarball into the install_path.
-
-  Args:
-    tarball_path: Path to the tarball to extract.
-    install_path: Path to extract the tarball to.
-    files_to_extract: String of specific files in the tarball to extract.
-    excluded_files: String of files to not extract.
-    return_extracted_files: whether or not the caller expects the list of
-      files extracted; if False, returns an empty list.
-
-  Returns:
-    List of absolute paths of the files extracted (possibly empty).
-  """
-  # Deal with exclusions.
-  # Add 'm' for not extracting file's modified time. All extracted files are
-  # marked with current system time.
-  cmd = ['tar', 'xf', tarball_path, '--directory', install_path]
-
-  # If caller requires the list of extracted files, get verbose.
-  if return_extracted_files:
-    cmd += ['--verbose']
-
-  # Determine how to decompress.
-  tarball = os.path.basename(tarball_path)
-  if tarball.endswith('.tgz') or tarball.endswith('.tar.gz'):
-    cmd.append('--gzip')
-
-  if excluded_files:
-    for exclude in excluded_files:
-      cmd.extend(['--exclude', exclude])
-
-  if files_to_extract:
-    cmd.extend(files_to_extract)
-
-  try:
-    result = cros_build_lib.run(cmd, capture_output=True, encoding='utf-8')
-    if result.stderr:
-      _Log('Error happened while in extracting tarball: %s',
-           result.stderr.rstrip())
-
-    if return_extracted_files:
-      return [os.path.join(install_path, filename)
-              for filename in result.stdout.splitlines()
-              if not filename.endswith('/')]
-    return []
-  except cros_build_lib.RunCommandError as e:
-    raise CommonUtilError(
-        'An error occurred when attempting to untar %s:\n%s' %
-        (tarball_path, e))
-
-
 def IsInsideChroot():
   """Returns True if we are inside chroot."""
   return os.path.exists('/etc/debian_chroot')

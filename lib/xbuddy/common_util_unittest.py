@@ -146,16 +146,3 @@ class CommonUtilTest(cros_test_lib.TestCase):
     os.unlink(link_b)
     os.unlink(link_a)
     os.unlink(link_base)
-
-  def testExtractTarballMissingFile(self):
-    """Verify that stderr from tar is printed if in encounters an error."""
-    tarball = 'a-tarball-which-does-not-exist.tar.gz'
-    dest = self._static_dir
-
-    try:
-      common_util.ExtractTarball(tarball, dest)
-    except common_util.CommonUtilError as e:
-      # Check to see that tar's error message is printed in the exception.
-      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
-                      ("tar's stderr is missing from the exception.\n%s" %
-                       e.args[0]))

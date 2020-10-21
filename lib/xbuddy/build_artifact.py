@@ -464,11 +464,12 @@ class BundledArtifact(Artifact):
     extension and extracts the tarball into the install_path.
     """
     try:
-      return common_util.ExtractTarball(self.install_path, self.install_dir,
-                                        files_to_extract=self._files_to_extract,
-                                        excluded_files=self._exclude,
-                                        return_extracted_files=True)
-    except common_util.CommonUtilError as e:
+      return cros_build_lib.ExtractTarball(
+          self.install_path, self.install_dir,
+          files_to_extract=self._files_to_extract,
+          excluded_files=self._exclude,
+          return_extracted_files=True)
+    except cros_build_lib.TarballError as e:
       raise ArtifactDownloadError(str(e))
 
 

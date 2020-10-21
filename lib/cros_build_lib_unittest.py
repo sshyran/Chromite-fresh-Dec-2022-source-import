@@ -1204,7 +1204,7 @@ class FailedCreateTarballExceptionTests(cros_test_lib.TempDirTestCase,
     working_dir = os.path.join(self.tempdir, 'working_dir')
     osutils.SafeMakedirs(working_dir)
     with cros_test_lib.LoggingCapturer() as logs:
-      with self.assertRaises(cros_build_lib.CreateTarballError):
+      with self.assertRaises(cros_build_lib.TarballError):
         cros_build_lib.CreateTarball(target_file, working_dir)
       self.AssertLogsContain(logs, 'CreateTarball failed creating')
 
@@ -1298,3 +1298,19 @@ class OpenTests(cros_test_lib.TempDirTestCase):
     with cros_build_lib.Open(path, mode='w', encoding='utf-8') as fp:
       fp.write(u'ßomß')
     self.assertEqual(u'ßomß', osutils.ReadFile(path))
+
+
+class ExtractTarballTests(cros_test_lib.TempDirTestCase):
+  """Test the ExtractTarball function."""
+
+  def testExtractTarballMissingFile(self):
+    """Verify that stderr from tar is printed if in encounters an error."""
+    tarball = 'a-tarball-which-does-not-exist.tar.gz'
+
+    try:
+      cros_build_lib.ExtractTarball(tarball, self.tempdir)
+    except cros_build_lib.TarballError as e:
+      # Check to see that tar's error message is printed in the exception.
+      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
+                      ("tar's stderr is missing from the exception.\n%s" %
+                       e.args[0]))

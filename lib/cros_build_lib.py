@@ -1179,7 +1179,7 @@ def UncompressFile(infile, outfile):
   run([comp, '-dc', infile], stdout=outfile)
 
 
-class CreateTarballError(RunCommandError):
+class TarballError(RunCommandError):
   """Error while running tar.
 
   We may run tar multiple times because of "soft" errors.  The result is from
@@ -1208,7 +1208,7 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
     The cmd_result object returned by the run invocation.
 
   Raises:
-    CreateTarballError: if the tar command failed, possibly after retry.
+    TarballError: if the tar command failed, possibly after retry.
   """
   if inputs is None:
     inputs = ['.']
@@ -1253,13 +1253,70 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
       # of the tar command (target file, current working dir).
       logging.error('CreateTarball failed creating %s in %s. cmd={%s}',
                     target, cwd, cmd)
-      raise CreateTarballError('CreateTarball', result)
+      raise TarballError('CreateTarball', result)
 
     assert result.returncode == 1
     time.sleep(timeout * (try_count + 1))
     logging.warning('CreateTarball: tar: source modification time changed '
                     '(see crbug.com/547055), retrying')
     logging.PrintBuildbotStepWarnings()
+
+
+def ExtractTarball(tarball_path, install_path, files_to_extract=None,
+                   excluded_files=None, return_extracted_files=False):
+  """Extracts a tarball using tar.
+
+  Detects whether the tarball is compressed or not based on the file
+  extension and extracts the tarball into the install_path.
+
+  Args:
+    tarball_path: Path to the tarball to extract.
+    install_path: Path to extract the tarball to.
+    files_to_extract: String of specific files in the tarball to extract.
+    excluded_files: String of files to not extract.
+    return_extracted_files: whether or not the caller expects the list of
+      files extracted; if False, returns an empty list.
+
+  Returns:
+    List of absolute paths of the files extracted (possibly empty).
+
+  Raises:
+    TarballError: if the tar command failed
+  """
+  cmd = ['tar', 'xf', tarball_path, '--directory', install_path]
+
+  # If caller requires the list of extracted files, get verbose.
+  if return_extracted_files:
+    cmd += ['--verbose']
+
+  # Determine how to decompress.
+  tarball = os.path.basename(tarball_path)
+  if tarball.endswith('.tgz') or tarball.endswith('.tar.gz'):
+    cmd.append('--gzip')
+
+  if excluded_files:
+    for exclude in excluded_files:
+      cmd.extend(['--exclude', exclude])
+
+  if files_to_extract:
+    cmd.extend(files_to_extract)
+
+  try:
+    result = run(cmd, capture_output=True, encoding='utf-8')
+  except RunCommandError as e:
+    raise TarballError(
+        'An error occurred when attempting to untar %s:\n%s' %
+        (tarball_path, e))
+
+  if result.returncode != 0:
+    logging.error('ExtractTarball failed extracting %s. cmd={%s}', tarball, cmd)
+    raise TarballError('ExtractTarball', result)
+
+  if return_extracted_files:
+    return [os.path.join(install_path, filename)
+            for filename in result.stdout.splitlines()
+            if not filename.endswith('/')]
+  return []
 
 
 def GetInput(prompt):
