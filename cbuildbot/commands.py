@@ -1307,7 +1307,8 @@ def RunSkylabHWTestSuite(
 
     error = None
     if not report['task-result']['success']:
-      error = failures_lib.TestFailure('Suite failed.')
+      error = failures_lib.TestFailure(
+          'Suite failed: (%s, %s, %s)' % (suite, board, model))
 
     return HWTestSuiteResult(error, None)
 
