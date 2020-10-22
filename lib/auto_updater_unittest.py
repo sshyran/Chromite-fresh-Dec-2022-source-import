@@ -15,6 +15,9 @@ The main parts of unittest include:
 
 from __future__ import print_function
 
+import json
+import os
+
 import mock
 
 from chromite.lib import auto_updater
@@ -251,29 +254,33 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
 
   def testMismatchedAppId(self):
     """Tests if App ID is set to empty when there's a mismatch."""
-    self._payload_dir = self.tempdir
-
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir,
+          device, None, self._payload_dir, payload_filename='payload',
           transfer_class=auto_updater_transfer.LocalTransfer)
-      type(CrOS_AU.device).app_id = mock.PropertyMock(return_value='different')
-      resolved_appid = CrOS_AU.ResolveAPPIDMismatchIfAny('helloworld!')
-      self.assertEqual(resolved_appid, '')
+      prop_file = os.path.join(self._payload_dir, 'payload.json')
+      with open(prop_file, 'w') as fp:
+        json.dump({'appid': 'helloworld!'}, fp)
+      type(device).app_id = mock.PropertyMock(return_value='different')
+      # pylint: disable=protected-access
+      CrOS_AU._ResolveAPPIDMismatchIfAny()
+      with open(prop_file) as fp:
+        self.assertEqual(json.load(fp), {'appid': ''})
 
   def testMatchedAppId(self):
     """Tests if App ID is unchanged when there's a match."""
-    self._payload_dir = self.tempdir
-
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir,
+          device, None, self._payload_dir, payload_filename='payload',
           transfer_class=auto_updater_transfer.LocalTransfer)
-      type(CrOS_AU.device).app_id = mock.PropertyMock(return_value='same')
-      resolved_appid = CrOS_AU.ResolveAPPIDMismatchIfAny('same')
-      self.assertEqual(resolved_appid, 'same')
+      prop_file = os.path.join(self._payload_dir, 'payload.json')
+      with open(prop_file, 'w') as fp:
+        json.dump({'appid': 'same'}, fp)
+      type(device).app_id = mock.PropertyMock(return_value='same')
+      # pylint: disable=protected-access
+      CrOS_AU._ResolveAPPIDMismatchIfAny()
+      with open(prop_file) as fp:
+        self.assertEqual(json.load(fp), {'appid': 'same'})
 
   def testCreateTransferObjectError(self):
     """Test ChromiumOSUpdater.CreateTransferObject method.

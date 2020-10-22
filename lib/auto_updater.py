@@ -147,7 +147,8 @@ class ChromiumOSUpdater(BaseUpdater):
                yes=False, do_rootfs_update=True, do_stateful_update=True,
                reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
-               staging_server=None, clear_tpm_owner=False):
+               staging_server=None, clear_tpm_owner=False,
+               resolve_app_id_mismatch=False):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
     Args:
@@ -181,6 +182,9 @@ class ChromiumOSUpdater(BaseUpdater):
           or empty, an auto_updater_transfer.LocalTransfer reference must be
           passed through the transfer_class parameter.
       clear_tpm_owner: If true, it will clear the TPM owner on reboot.
+      resolve_app_id_mismatch: Fixes the update payloads App ID if it is
+          different than the devices's App ID so the nebraska.py can properly
+          create a response.
     """
     super(ChromiumOSUpdater, self).__init__(device, payload_dir)
 
@@ -223,6 +227,7 @@ class ChromiumOSUpdater(BaseUpdater):
     self._transfer_obj = self._CreateTransferObject(transfer_class)
 
     self._clear_tpm_owner = clear_tpm_owner
+    self._resolve_app_id_mismatch = resolve_app_id_mismatch
 
   @property
   def is_au_endtoendtest(self):
@@ -544,6 +549,9 @@ class ChromiumOSUpdater(BaseUpdater):
     # update is required.
     self.SetupRootfsUpdate()
 
+    if self._resolve_app_id_mismatch:
+      self._ResolveAPPIDMismatchIfAny()
+
     # Copy payload for rootfs update.
     self._transfer_obj.TransferRootfsUpdate()
 
@@ -602,21 +610,33 @@ class ChromiumOSUpdater(BaseUpdater):
             'signing problem, or an automated rollback occurred because '
             'your new image failed to boot.')
 
-  def ResolveAPPIDMismatchIfAny(self, payload_app_id):
+  def _ResolveAPPIDMismatchIfAny(self):
     """Resolves and APP ID mismatch between the payload and device.
 
     If the APP ID of the payload is different than the device, then the nebraska
-    will fail. We empty the payload's AppID so nebraska can do partial APP ID
+    will fail. We empty the payload's App ID so nebraska can do partial APP ID
     matching.
     """
-    if ((self.device.app_id and self.device.app_id == payload_app_id) or
-        payload_app_id == ''):
-      return payload_app_id
+    if not self.device.app_id:
+      logging.warning('Device does not have a propper APP ID!')
+      return
 
-    logging.warning('You are installing an image with a different release '
-                    'App ID than the device (%s vs %s), we are forcing the '
-                    'install!', payload_app_id, self.device.app_id)
-    return ''
+    prop_file = os.path.join(self.payload_dir, self.payload_filename + '.json')
+    with open(prop_file) as fp:
+      content = json.load(fp)
+      payload_app_id = content.get('appid', '')
+      if not payload_app_id:
+        # Payload's App ID is empty, we don't care, it is already partial match.
+        return
+
+    if self.device.app_id != payload_app_id:
+      logging.warning('You are installing an image with a different release '
+                      'App ID than the device (%s vs %s), we are forcing the '
+                      'install!', payload_app_id, self.device.app_id)
+      # Override the properties file with the new empty APP ID.
+      content['appid'] = ''
+      with open(prop_file, 'w') as fp:
+        json.dump(content, fp)
 
   def RunUpdate(self):
     """Update the device with image of specific version."""

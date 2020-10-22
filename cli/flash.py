@@ -525,6 +525,7 @@ class RemoteDeviceUpdater(object):
               clobber_stateful=self.clobber_stateful,
               yes=self.yes,
               send_payload_in_parallel=self.send_payload_in_parallel,
+              resolve_app_id_mismatch=True,
               transfer_class=auto_updater_transfer.LocalTransfer)
           chromeos_AU.RunUpdate()
 
