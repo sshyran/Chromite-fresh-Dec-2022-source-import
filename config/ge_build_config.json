@@ -470,6 +470,18 @@
       ]
     },
     {
+      "name": "nyan_kitty",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": false,
+          "leader_board": false,
+          "board_group": "nyan",
+          "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "orchestra",
       "configs": [
         {
