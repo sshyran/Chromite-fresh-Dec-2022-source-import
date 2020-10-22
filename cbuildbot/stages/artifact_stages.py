@@ -339,10 +339,10 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
 
     def ArchiveImageScripts():
       """Archive tarball of generated image manipulation scripts."""
-      target = os.path.join(archive_path, constants.IMAGE_SCRIPTS_TAR)
+      tarball_path = os.path.join(archive_path, constants.IMAGE_SCRIPTS_TAR)
       files = glob.glob(os.path.join(image_dir, '*.sh'))
       files = [os.path.basename(f) for f in files]
-      cros_build_lib.CreateTarball(target, image_dir, inputs=files)
+      cros_build_lib.CreateTarball(tarball_path, image_dir, inputs=files)
       self._upload_queue.put([constants.IMAGE_SCRIPTS_TAR])
 
     def PushImage():

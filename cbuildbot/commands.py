@@ -928,11 +928,12 @@ def BuildAndArchiveTestResultsTarball(src_dir, buildroot):
   Returns:
     The name of the tarball.
   """
-  target = '%s.tgz' % src_dir.rstrip(os.path.sep)
+  tarball_path = '%s.tgz' % src_dir.rstrip(os.path.sep)
   chroot = os.path.join(buildroot, constants.DEFAULT_CHROOT_DIR)
   cros_build_lib.CreateTarball(
-      target, src_dir, compression=cros_build_lib.COMP_GZIP, chroot=chroot)
-  return os.path.basename(target)
+      tarball_path, src_dir, compression=cros_build_lib.COMP_GZIP,
+      chroot=chroot)
+  return os.path.basename(tarball_path)
 
 
 # TODO(akeshet): Deprecate this undocumented type.
@@ -2794,16 +2795,16 @@ def BuildRecoveryImage(buildroot, board, image_dir, extra_env):
 
 def BuildTarball(buildroot,
                  input_list,
-                 tarball_output,
+                 tarball_path,
                  cwd=None,
                  compressed=True,
                  **kwargs):
-  """Tars and zips files and directories from input_list to tarball_output.
+  """Tars and zips files and directories from input_list to tarball_path.
 
   Args:
     buildroot: Root directory where build occurs.
     input_list: A list of files and directories to be archived.
-    tarball_output: Path of output tar archive file.
+    tarball_path: Path of output tar archive file.
     cwd: Current working directory when tar command is executed.
     compressed: Whether or not the tarball should be compressed with pbzip2.
     **kwargs: Keyword arguments to pass to CreateTarball.
@@ -2817,7 +2818,7 @@ def BuildTarball(buildroot,
     compressor = cros_build_lib.COMP_BZIP2
     chroot = os.path.join(buildroot, 'chroot')
   return cros_build_lib.CreateTarball(
-      tarball_output,
+      tarball_path,
       cwd,
       compression=compressor,
       chroot=chroot,
@@ -3306,16 +3307,16 @@ def BuildGceTarball(archive_dir, image_dir, image):
   with osutils.TempDir() as tempdir:
     temp_disk_raw = os.path.join(tempdir, 'disk.raw')
     output = constants.ImageBinToGceTar(image)
-    output_file = os.path.join(archive_dir, output)
+    tarball_path = os.path.join(archive_dir, output)
     os.symlink(os.path.join(image_dir, image), temp_disk_raw)
 
     cros_build_lib.CreateTarball(
-        output_file,
+        tarball_path,
         tempdir,
         inputs=['disk.raw'],
         compression=cros_build_lib.COMP_GZIP,
         extra_args=['--dereference'])
-    return os.path.basename(output_file)
+    return os.path.basename(tarball_path)
 
 
 def BuildFirmwareArchive(buildroot,

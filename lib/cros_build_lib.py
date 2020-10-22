@@ -1187,12 +1187,13 @@ class TarballError(RunCommandError):
   """
 
 
-def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
-                  inputs=None, timeout=300, extra_args=None, **kwargs):
+def CreateTarball(
+    tarball_path, cwd, sudo=False, compression=COMP_XZ, chroot=None,
+    inputs=None, timeout=300, extra_args=None, **kwargs):
   """Create a tarball.  Executes 'tar' on the commandline.
 
   Args:
-    target: The path of the tar file to generate.
+    tarball_path: The path of the tar file to generate.
     cwd: The directory to run the tar command.
     sudo: Whether to run with "sudo".
     compression: The type of compression desired.  See the FindCompressor
@@ -1217,10 +1218,12 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
     extra_args = []
   kwargs.setdefault('debug_level', logging.INFO)
 
+  # Use a separate compression program - this enables parallel compression
+  # in some cases.
   comp = FindCompressor(compression, chroot=chroot)
   cmd = (['tar'] +
          extra_args +
-         ['--sparse', '-I', comp, '-cf', target])
+         ['--sparse', '--use-compress-program', comp, '-cf', tarball_path])
   if len(inputs) > _THRESHOLD_TO_USE_T_FOR_TAR:
     cmd += ['--null', '-T', '/dev/stdin']
     rc_input = b'\0'.join(x.encode('utf-8') for x in inputs)
@@ -1242,7 +1245,7 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
       # command will show low-level problems, we also want to log the context
       # of what CreateTarball was trying to do.
       logging.error('CreateTarball unable to run tar for %s in %s. cmd={%s}',
-                    target, cwd, cmd)
+                    tarball_path, cwd, cmd)
       raise rce
     if result.returncode == 0:
       return result
@@ -1250,9 +1253,9 @@ def CreateTarball(target, cwd, sudo=False, compression=COMP_XZ, chroot=None,
       # Since the build is abandoned at this point, we will take 5
       # entire minutes to track down the competing process.
       # Error will have the low-level tar command error, so log the context
-      # of the tar command (target file, current working dir).
+      # of the tar command (tarball_path file, current working dir).
       logging.error('CreateTarball failed creating %s in %s. cmd={%s}',
-                    target, cwd, cmd)
+                    tarball_path, cwd, cmd)
       raise TarballError('CreateTarball', result)
 
     assert result.returncode == 1
@@ -1283,16 +1286,16 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   Raises:
     TarballError: if the tar command failed
   """
-  cmd = ['tar', 'xf', tarball_path, '--directory', install_path]
+  # Use a separate decompression program - this enables parallel decompression
+  # in some cases.
+  comp_type = CompressionExtToType(tarball_path)
+  comp = FindCompressor(comp_type)
+  cmd = ['tar', '--sparse', '--use-compress-program', comp, '-xf', tarball_path,
+         '--directory', install_path]
 
   # If caller requires the list of extracted files, get verbose.
   if return_extracted_files:
     cmd += ['--verbose']
-
-  # Determine how to decompress.
-  tarball = os.path.basename(tarball_path)
-  if tarball.endswith('.tgz') or tarball.endswith('.tar.gz'):
-    cmd.append('--gzip')
 
   if excluded_files:
     for exclude in excluded_files:
@@ -1304,12 +1307,12 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   try:
     result = run(cmd, capture_output=True, encoding='utf-8')
   except RunCommandError as e:
-    raise TarballError(
-        'An error occurred when attempting to untar %s:\n%s' %
-        (tarball_path, e))
+    raise TarballError('An error occurred when attempting to untar %s:\n%s' %
+                       (tarball_path, e))
 
   if result.returncode != 0:
-    logging.error('ExtractTarball failed extracting %s. cmd={%s}', tarball, cmd)
+    logging.error('ExtractTarball failed extracting %s. cmd={%s}',
+                  tarball_path, cmd)
     raise TarballError('ExtractTarball', result)
 
   if return_extracted_files:

@@ -179,12 +179,12 @@ Instead it copies Goma files to a client-specified archive directory.
       logging.info('No gomacc logs found')
       return None
 
-    tgz_name = os.path.basename(min(gomacc_paths)) + '.tar.gz'
-    tgz_path = os.path.join(self._dest_dir, tgz_name)
-    cros_build_lib.CreateTarball(target=tgz_path,
+    tarball_name = os.path.basename(min(gomacc_paths)) + '.tar.gz'
+    tarball_path = os.path.join(self._dest_dir, tarball_name)
+    cros_build_lib.CreateTarball(tarball_path,
                                  cwd=self._log_dir,
                                  compression=cros_build_lib.COMP_GZIP)
-    return tgz_name
+    return tarball_name
 
   def _ArchiveNinjaLog(self, compiler_proxy_path):
     """Archives .ninja_log file and its related metadata.

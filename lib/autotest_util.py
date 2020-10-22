@@ -119,13 +119,12 @@ class AutotestTarballBuilder(object):
     else:
       return None
 
-  def _BuildTarball(self, input_list, tarball_output, compressed=True,
-                    **kwargs):
-    """Tars and zips files and directories from input_list to tarball_output.
+  def _BuildTarball(self, input_list, tarball_path, compressed=True, **kwargs):
+    """Tars and zips files and directories from input_list to tarball_path.
 
     Args:
       input_list: A list of files and directories to be archived.
-      tarball_output: Path of output tar archive file.
+      tarball_path: Path of output tar archive file.
       compressed: Whether or not the tarball should be compressed with pbzip2.
       **kwargs: Keyword arguments to pass to CreateTarball.
 
@@ -151,7 +150,7 @@ class AutotestTarballBuilder(object):
         chroot = path_util.FromChrootPath('/')
 
     return cros_build_lib.CreateTarball(
-        tarball_output, self.archive_basedir, compression=compressor,
+        tarball_path, self.archive_basedir, compression=compressor,
         chroot=chroot, inputs=input_list, **kwargs)
 
   def _GetTastServerFilesAndTarTransforms(self):

@@ -1134,7 +1134,7 @@ class CreateTarballTests(cros_test_lib.TempDirTestCase):
 
   def setUp(self):
     """Create files/dirs needed for tar test."""
-    self.target = os.path.join(self.tempdir, 'test.tar.xz')
+    self.tarball_path = os.path.join(self.tempdir, 'test.tar.xz')
     self.inputDir = os.path.join(self.tempdir, 'inputs')
     self.inputs = [
         'inputA',
@@ -1157,12 +1157,12 @@ class CreateTarballTests(cros_test_lib.TempDirTestCase):
 
   def testSuccess(self):
     """Create a tarfile."""
-    cros_build_lib.CreateTarball(self.target, self.inputDir,
+    cros_build_lib.CreateTarball(self.tarball_path, self.inputDir,
                                  inputs=self.inputs)
 
   def testSuccessWithDirs(self):
     """Create a tarfile."""
-    cros_build_lib.CreateTarball(self.target, self.inputDir,
+    cros_build_lib.CreateTarball(self.tarball_path, self.inputDir,
                                  inputs=self.inputsWithDirs)
 
   def testSuccessWithTooManyFiles(self):
@@ -1173,7 +1173,8 @@ class CreateTarballTests(cros_test_lib.TempDirTestCase):
     largeInputDir = os.path.join(self.tempdir, 'largeinputs')
     for i in inputs:
       osutils.WriteFile(os.path.join(largeInputDir, i), i, makedirs=True)
-    cros_build_lib.CreateTarball(self.target, largeInputDir, inputs=inputs)
+    cros_build_lib.CreateTarball(
+        self.tarball_path, largeInputDir, inputs=inputs)
 
 
 # Tests for tar exceptions.

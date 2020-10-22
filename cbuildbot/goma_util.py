@@ -464,20 +464,20 @@ class GomaLogUploader(object):
       return None
 
     # Taking the alphabetically first name as uploaded_filename.
-    tgz_name = os.path.basename(min(gomacc_paths)) + '.tar.gz'
+    tarball_name = os.path.basename(min(gomacc_paths)) + '.tar.gz'
     # When using the pigz compressor (what we use for gzip) to create an
     # archive in a folder that is also a source for contents, there is a race
     # condition involving the created archive itself that can cause it to fail
     # creating the archive. To avoid this, make the archive in a tempdir.
     with osutils.TempDir() as tempdir:
-      tgz_path = os.path.join(tempdir, tgz_name)
-      cros_build_lib.CreateTarball(target=tgz_path,
+      tarball_path = os.path.join(tempdir, tarball_name)
+      cros_build_lib.CreateTarball(tarball_path,
                                    cwd=self._goma_log_dir,
                                    compression=cros_build_lib.COMP_GZIP)
-      self._gs_context.CopyInto(tgz_path, self._remote_dir,
-                                filename=tgz_name,
+      self._gs_context.CopyInto(tarball_path, self._remote_dir,
+                                filename=tarball_name,
                                 headers=self._headers)
-    return tgz_name
+    return tarball_name
 
   def _UploadNinjaLog(self, compiler_proxy_path):
     """Uploads .ninja_log file and its related metadata.

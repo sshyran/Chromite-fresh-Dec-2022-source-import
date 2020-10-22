@@ -277,16 +277,16 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
     chromiumos_test_image.bin.
     """
     with osutils.TempDir(prefix='test_image_dir') as tempdir:
-      target = os.path.join(tempdir, constants.TEST_IMAGE_TAR)
+      tarball_path = os.path.join(tempdir, constants.TEST_IMAGE_TAR)
 
       cros_build_lib.CreateTarball(
-          target,
+          tarball_path,
           inputs=[constants.TEST_IMAGE_BIN],
           cwd=self.GetImageDirSymlink(pointer='latest',
                                       buildroot=self._build_root),
           compression=cros_build_lib.COMP_GZIP)
 
-      self.UploadDummyArtifact(target)
+      self.UploadDummyArtifact(tarball_path)
 
   def PerformStage(self):
     """Archive and publish the factory build artifacts."""

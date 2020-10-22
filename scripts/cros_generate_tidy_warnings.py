@@ -74,8 +74,8 @@ class GenerateTidyWarnings(object):
       shutil.copy2(f, self.warnings_dir)
 
   def _CreateTarball(self):
-    target = os.path.join(self.options.out_dir, self.options.out_file)
-    cros_build_lib.CreateTarball(target, self.warnings_dir, sudo=True)
+    tarball_path = os.path.join(self.options.out_dir, self.options.out_file)
+    cros_build_lib.CreateTarball(tarball_path, self.warnings_dir, sudo=True)
 
   def Perform(self):
     """Generate the warnings files."""

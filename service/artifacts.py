@@ -358,8 +358,8 @@ def ArchiveImages(image_dir, output_dir):
   # Filter down to the ones that exist first.
   images = {img: tar for img, tar in IMAGE_TARS.items() if img in files}
   for img, tar in images.items():
-    target = os.path.join(output_dir, tar)
-    cros_build_lib.CreateTarball(target, image_dir, inputs=(img,),
+    tarball_path = os.path.join(output_dir, tar)
+    cros_build_lib.CreateTarball(tarball_path, image_dir, inputs=(img,),
                                  print_cmd=False)
     archives.append(tar)
 
