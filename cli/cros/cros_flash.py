@@ -133,7 +133,11 @@ Examples:
         'delta payloads.')
     update.add_argument(
         '--clobber-stateful', action='store_true', default=False,
-        help='Clobber stateful partition when performing update.')
+        help='Clobber stateful partition when performing update. '
+        'Recommend to set clear-tpm-owner to true when this option is true.')
+    update.add_argument(
+        '--clear-tpm-owner', action='store_true', default=False,
+        help='Clear the TPM owner on reboot.')
     update.add_argument(
         '--restore-stateful', action='store_false', dest='rootfs_update',
         help='Restore the stateful partition. Same as --no-rootfs-update.')
@@ -188,6 +192,7 @@ Examples:
           rootfs_update=self.options.rootfs_update,
           stateful_update=self.options.stateful_update,
           clobber_stateful=self.options.clobber_stateful,
+          clear_tpm_owner=self.options.clear_tpm_owner,
           reboot=self.options.reboot,
           wipe=self.options.wipe,
           ssh_private_key=self.options.private_key,

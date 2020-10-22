@@ -364,7 +364,7 @@ class RemoteDeviceUpdater(object):
                board=None, src_image_to_delta=None, wipe=True, debug=False,
                yes=False, force=False, ssh_private_key=None, ping=True,
                disable_verification=False, send_payload_in_parallel=False,
-               version=None):
+               clear_tpm_owner=False, version=None):
     """Initializes RemoteDeviceUpdater"""
     if not stateful_update and not rootfs_update:
       raise ValueError('No update operation to perform; either stateful or'
@@ -379,6 +379,7 @@ class RemoteDeviceUpdater(object):
     self.do_rootfs_update = rootfs_update
     self.disable_verification = disable_verification
     self.clobber_stateful = clobber_stateful
+    self.clear_tpm_owner = clear_tpm_owner
     self.reboot = reboot
     self.debug = debug
     self.ssh_private_key = ssh_private_key
@@ -523,6 +524,7 @@ class RemoteDeviceUpdater(object):
               reboot=self.reboot,
               disable_verification=self.disable_verification,
               clobber_stateful=self.clobber_stateful,
+              clear_tpm_owner=self.clear_tpm_owner,
               yes=self.yes,
               send_payload_in_parallel=self.send_payload_in_parallel,
               resolve_app_id_mismatch=True,
@@ -552,7 +554,7 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
           reboot=True, wipe=True, ssh_private_key=None, ping=True,
           disable_rootfs_verification=False, clear_cache=False, yes=False,
           force=False, debug=False, send_payload_in_parallel=False,
-          version=None):
+          clear_tpm_owner=False, version=None):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -570,6 +572,7 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
     rootfs_update: Update rootfs partition; SSH |device| scheme only.
     stateful_update: Update stateful partition; SSH |device| scheme only.
     clobber_stateful: Clobber stateful partition; SSH |device| scheme only.
+    clear_tpm_owner: Clear the TPM owner on reboot; SSH |device| scheme only.
     reboot: Reboot device after update; SSH |device| scheme only.
     wipe: Wipe temporary working directory; SSH |device| scheme only.
     ssh_private_key: Path to an SSH private key file; None to use test keys.
@@ -619,6 +622,7 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
         rootfs_update=rootfs_update,
         stateful_update=stateful_update,
         clobber_stateful=clobber_stateful,
+        clear_tpm_owner=clear_tpm_owner,
         reboot=reboot,
         wipe=wipe,
         debug=debug,
