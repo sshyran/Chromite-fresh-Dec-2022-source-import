@@ -112,6 +112,7 @@
     ultima-factory-strago-7458.B-factorybranch
     wizpig-factory-strago-7458.B-factorybranch
   factory-trogdor-13443.B-buildspec
+    strongbad-factory-trogdor-13443.B-factorybranch
     trogdor-factory-trogdor-13443.B-factorybranch
   factory-veyron-6591.B-buildspec
     veyron_jaq-factory-veyron-6591.B-factorybranch
@@ -946,6 +947,7 @@
     ultima-factory-strago-7458.B-factorybranch-tryjob
     wizpig-factory-strago-7458.B-factorybranch-tryjob
   factory-trogdor-13443.B-buildspec-tryjob
+    strongbad-factory-trogdor-13443.B-factorybranch-tryjob
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   factory-veyron-6591.B-buildspec-tryjob
     veyron_jaq-factory-veyron-6591.B-factorybranch-tryjob
@@ -1844,6 +1846,7 @@
   soraka-payloads-tryjob
   soraka-release-tryjob
   soraka-unittest-stress
+  strongbad-factory-trogdor-13443.B-factorybranch-tryjob
   strongbad-full-tryjob
   strongbad-llvm-next-toolchain-tryjob
   strongbad-llvm-toolchain-tryjob
