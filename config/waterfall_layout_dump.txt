@@ -375,6 +375,7 @@
     setzer-release
     shadowkeep-release
     snappy-release
+    soraka-libcamera-release
     soraka-release
     strongbad-release
     swanky-release
@@ -1525,6 +1526,7 @@
     setzer-release-tryjob
     shadowkeep-release-tryjob
     snappy-release-tryjob
+    soraka-libcamera-release-tryjob
     soraka-release-tryjob
     strongbad-release-tryjob
     swanky-release-tryjob
@@ -1841,6 +1843,12 @@
   snappy-unittest-stress
   soraka-factory-soraka-10323.39.B-factorybranch-tryjob
   soraka-full-tryjob
+  soraka-libcamera-full-tryjob
+  soraka-libcamera-llvm-next-toolchain-tryjob
+  soraka-libcamera-llvm-toolchain-tryjob
+  soraka-libcamera-payloads-tryjob
+  soraka-libcamera-release-tryjob
+  soraka-libcamera-unittest-stress
   soraka-llvm-next-toolchain-tryjob
   soraka-llvm-toolchain-tryjob
   soraka-payloads-tryjob
