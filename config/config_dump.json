@@ -8563,6 +8563,8 @@
         ],
         "important": false,
         "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawcia\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawcia_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawlat\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
@@ -8602,6 +8604,8 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawcia\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawcia_legacy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"drawlat\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
