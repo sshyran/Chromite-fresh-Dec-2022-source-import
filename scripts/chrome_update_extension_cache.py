@@ -62,6 +62,10 @@ def DownloadCrx(ext, extension, crxdir):
     return False
 
   node = dom.getElementsByTagName('updatecheck')[0]
+  if node.getAttribute('status') == 'noupdate':
+    logging.info('No CRX available (may have been removed from the webstore).')
+    return True
+
   url = node.getAttribute('codebase')
   version = node.getAttribute('version')
   filename = '%s-%s.crx' % (ext, version)
@@ -72,7 +76,7 @@ def DownloadCrx(ext, extension, crxdir):
     return False
 
   osutils.WriteFile(os.path.join(crxdir, 'extensions', filename),
-                    response.read())
+                    response.read(), mode='wb')
 
   # Keep external_update_url in json file, ExternalCache will take care about
   # replacing it with proper external_crx path and version.
