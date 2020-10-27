@@ -251,11 +251,9 @@ class PaygenPayload(object):
       if tgt_dlc_package != src_dlc_package:
         raise Error('Source (%s) and target (%s) DLC packages do not match.'
                     % (src_dlc_package, tgt_dlc_package))
-      # This may cause problems when we try to switch a board to a different App
-      # ID. If that ever happens the following few lines should be deleted.
       if tgt_appid != src_appid:
-        raise Error('Source (%s) and target (%s) App IDs do not match.' %
-                    (src_appid, tgt_appid))
+        logging.warning('Source (%s) and target (%s) App IDs do not match.',
+                        src_appid, tgt_appid)
 
     return tgt_dlc_id, tgt_dlc_package, tgt_appid
 
