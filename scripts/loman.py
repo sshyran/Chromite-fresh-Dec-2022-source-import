@@ -156,7 +156,7 @@ def main(argv):
   options.local_manifest_path = os.path.join(repo_dir, 'local_manifest.xml')
 
   manifest_sym_path = os.path.join(repo_dir, 'manifest.xml')
-  if os.path.basename(os.readlink(manifest_sym_path)) == 'minilayout.xml':
+  if os.path.basename(os.path.realpath(manifest_sym_path)) == 'minilayout.xml':
     _AssertNotMiniLayout()
 
   # For now, we only support the add command.
