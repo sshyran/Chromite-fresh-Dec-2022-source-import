@@ -554,18 +554,6 @@
       ]
     },
     {
-      "name": "hatch-arc-r-ack",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "heli",
       "configs": [
         {
@@ -2850,6 +2838,119 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 436,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "hatch-arc-r-ack",
+      "reference_board_name": "hatch-arc-r-ack",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "akemi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "dragonair",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "hatch",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "helios",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "helios_diskswap",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "kindred",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "kled",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "kohaku",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "nightfury",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "unprovisioned_dratini",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
+          "is_active": true
+        },
+        {
+          "board_name": "hatch-arc-r-ack",
+          "name": "unprovisioned_jinlon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 465,
           "is_active": true
         }
       ]
