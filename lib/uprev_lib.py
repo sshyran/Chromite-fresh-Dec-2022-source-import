@@ -260,9 +260,6 @@ class UprevChromeManager(object):
       osutils.SafeUnlink(candidate.ebuild_path)
       self._removed_ebuild_files.append(candidate.ebuild_path)
 
-    if self._build_targets:
-      self._clean_stale_package(result.best_ebuild.atom)
-
     return result
 
   def _find_chrome_uprev_candidate(
