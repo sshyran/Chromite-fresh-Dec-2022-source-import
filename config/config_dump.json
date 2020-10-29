@@ -2102,7 +2102,8 @@
         "hw_tests_disabled_bug": "https://b/150746591",
         "hw_tests_override": [],
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"asurada\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"asurada\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}"
         ],
         "vm_tests": [],
         "vm_tests_override": null
@@ -2119,7 +2120,8 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"asurada\",\n    \"test_suites\": []\n}"
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"asurada\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
         "push_image": false,
