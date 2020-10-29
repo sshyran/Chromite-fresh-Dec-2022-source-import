@@ -2268,18 +2268,28 @@ def AddNotificationConfigs(site_config):
   # objects. Example:
   # notifiers = {
   #     'sample-release': [
-  #         config_lib(email='test1@google.com'),
-  #         config_lib(email='test2@google.com')
+  #         config_lib.NotificationConfig(email='test1@google.com'),
+  #         config_lib.NotificationConfig(email='test2@google.com')
   #     ],
-  #     'test-release': [config_lib(email='test1@chromium.org')],
+  #     'test-release': [
+  #         config_lib.NotificationConfig(email='test1@chromium.org')
+  #     ],
   # }
   notifiers = {
-      'swanky-release': [
-          config_lib.NotificationConfig(email='navil+spam@chromium.org'),
-      ],
       'dedede-release': [
           config_lib.NotificationConfig(
               email='dedede-release-builder-alerts@google.com', threshold=2),
+      ],
+      'hatch-borealis-release': [
+          config_lib.NotificationConfig(
+              email='borealis-release-builder-alerts@google.com', threshold=2),
+      ],
+      'swanky-release': [
+          config_lib.NotificationConfig(email='navil+spam@chromium.org'),
+      ],
+      'zork-borealis-release': [
+          config_lib.NotificationConfig(
+              email='borealis-release-builder-alerts@google.com', threshold=2),
       ],
   }
 
