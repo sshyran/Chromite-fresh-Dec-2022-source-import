@@ -77,7 +77,6 @@ LOCAL_ALIASES = [
     RECOVERY,
     FACTORY_SHIM,
     FULL,
-    DELTA,
     STATEFUL,
     ANY,
 ]
@@ -108,17 +107,6 @@ GS_ALIASES = [
     AUTOTEST,
 ]
 
-GS_FILE_NAMES = [
-    devserver_constants.TEST_IMAGE_FILE,
-    devserver_constants.BASE_IMAGE_FILE,
-    devserver_constants.RECOVERY_IMAGE_FILE,
-    devserver_constants.SIGNED_IMAGE_FILE,
-    devserver_constants.FACTORY_SHIM_IMAGE_FILE,
-    devserver_constants.UPDATE_FILE,
-    devserver_constants.STATEFUL_FILE,
-    devserver_constants.AUTOTEST_DIR,
-]
-
 ARTIFACTS = [
     artifact_info.TEST_IMAGE,
     artifact_info.BASE_IMAGE,
@@ -131,7 +119,6 @@ ARTIFACTS = [
     artifact_info.AUTOTEST,
 ]
 
-GS_ALIAS_TO_FILENAME = dict(zip(GS_ALIASES, GS_FILE_NAMES))
 GS_ALIAS_TO_ARTIFACT = dict(zip(GS_ALIASES, ARTIFACTS))
 
 LATEST_OFFICIAL = 'latest-official'
@@ -708,6 +695,10 @@ class XBuddy(object):
   def _Download(self, gs_url, artifacts, build_id):
     """Download the artifacts from the given gs_url.
 
+    Returns:
+      A list containing lists of downloaded files for each artifact.
+      e.g.: artifacts = ['a', 'b'] -> return [['f1', 'f2'], ['f3']]
+
     Raises:
       build_artifact.ArtifactDownloadError: If we failed to download the
                                             artifact.
@@ -720,6 +711,8 @@ class XBuddy(object):
       factory = build_artifact.ChromeOSArtifactFactory(
           dl.GetBuildDir(), artifacts, [], dl.GetBuild())
       dl.Download(factory)
+      downloaded_artifacts = factory.RequiredArtifacts()
+      return [x.StagedFiles() for x in downloaded_artifacts]
     finally:
       with XBuddy._staging_thread_count_lock:
         XBuddy._staging_thread_count -= 1
@@ -808,25 +801,21 @@ class XBuddy(object):
       channel: The channel for the image. If none, it tries to guess it in
         order of stability.
 
+    Returns:
+      The list of files downloaded for the given image_type.
+
     Raises:
       build_artifact.ArtifactDownloadError: If we failed to download the
         artifact.
     """
-    # Stage image if not found in cache.
-    file_name = GS_ALIAS_TO_FILENAME[image_type]
-    file_loc = os.path.join(self.static_dir, build_id, file_name)
-    cached = os.path.exists(file_loc)
-
-    if not cached:
-      artifact = GS_ALIAS_TO_ARTIFACT[image_type]
-      if image_type == SIGNED:
-        gs_url = self._TranslateSignedGSUrl(build_id, channel=channel)
-      else:
-        image_dir = XBuddy._ResolveImageDir(image_dir)
-        gs_url = os.path.join(image_dir, build_id)
-      self._Download(gs_url, [artifact], build_id)
+    artifact = GS_ALIAS_TO_ARTIFACT[image_type]
+    if image_type == SIGNED:
+      gs_url = self._TranslateSignedGSUrl(build_id, channel=channel)
     else:
-      _Log('Image already cached.')
+      image_dir = XBuddy._ResolveImageDir(image_dir)
+      gs_url = os.path.join(image_dir, build_id)
+
+    return self._Download(gs_url, [artifact], build_id)[0]
 
   def _GetArtifact(self, path_list, board=None, version=None, image_dir=None):
     """Interpret an xBuddy path and return directory/file_name to resource.
@@ -878,7 +867,6 @@ class XBuddy(object):
       if not os.path.exists(artifact_path):
         raise XBuddyException('Local %s artifact not in static_dir at %s' %
                               (image_type, artifact_path))
-
     else:
       # Get a remote image.
       if image_type not in GS_ALIASES:
@@ -887,9 +875,8 @@ class XBuddy(object):
       build_id, channel = self._ResolveVersionToBuildIdAndChannel(
           board, suffix, version, image_dir=image_dir)
       _Log('Resolved version %s to %s.', version, build_id)
-      file_name = GS_ALIAS_TO_FILENAME[image_type]
-      self._GetFromGS(build_id, image_type, image_dir=image_dir,
-                      channel=channel)
+      file_name = self._GetFromGS(build_id, image_type, image_dir=image_dir,
+                                  channel=channel)[0]
 
     return build_id, file_name
 

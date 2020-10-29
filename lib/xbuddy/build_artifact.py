@@ -25,8 +25,6 @@ from chromite.lib.xbuddy import cherrypy_log_util
 # We do a number of things with args/kwargs arguments that confuse pylint.
 # pylint: disable=docstring-misnamed-args
 
-AU_NTON_DIR = 'au_nton'
-
 ############ Actual filenames of artifacts in Google Storage ############
 
 AU_SUITE_FILE = 'au_control.tar.bz2'
@@ -236,6 +234,12 @@ class Artifact(cherrypy_log_util.Loggable):
     self._Log('ArtifactStaged() -> yes, %s is staged.', self)
     return True
 
+  def StagedFiles(self):
+    """Returns the installed/staged files for this artifact."""
+    with open(os.path.join(self.install_dir, self.marker_name)) as f:
+      return [line.strip() for line in f]
+
+
   def _MarkArtifactStaged(self):
     """Marks the artifact as staged."""
     with open(os.path.join(self.install_dir, self.marker_name), 'w') as f:
@@ -353,8 +357,6 @@ class Artifact(cherrypy_log_util.Loggable):
           # Save the exception to a file for downloader.IsStaged to retrieve.
           self._SaveException(e)
           raise e
-      else:
-        self._Log('%s is already staged.', self)
 
   def __str__(self):
     """String representation for the download."""
@@ -385,31 +387,6 @@ class MultiArtifact(Artifact):
 
     self.installed_files = [os.path.join(self.install_dir, self.install_subdir,
                                          name) for name in self.name]
-
-
-class AUTestPayload(MultiArtifact):
-  """Wrapper for AUTest delta payloads which need additional setup."""
-
-  def _Setup(self):
-    super(AUTestPayload, self)._Setup()
-
-    # Rename to update.gz.
-    # TODO(crbug.com/1008058): Change the devserver such that this renaming is
-    # not needed anymore.
-    for name in self.name:
-      dest_name = (devserver_constants.UPDATE_METADATA_FILE
-                   if name.endswith('.json')
-                   else devserver_constants.UPDATE_FILE)
-
-      install_path = os.path.join(self.install_dir, self.install_subdir, name)
-      new_install_path = os.path.join(self.install_dir, self.install_subdir,
-                                      dest_name)
-      self._Log('moving %s to %s', install_path, new_install_path)
-      shutil.move(install_path, new_install_path)
-
-      # Reflect the rename in the list of installed files.
-      self.installed_files.remove(install_path)
-      self.installed_files.append(new_install_path)
 
 
 class BundledArtifact(Artifact):
@@ -593,13 +570,12 @@ def _AddCrOSArtifact(tag, base, name, *fixed_args, **fixed_kwargs):
   chromeos_artifact_map.setdefault(tag, []).append(artifact)
 
 
-_AddCrOSArtifact(artifact_info.FULL_PAYLOAD, AUTestPayload,
+_AddCrOSArtifact(artifact_info.FULL_PAYLOAD, MultiArtifact,
                  r'chromeos_.*_full_dev.*bin(\.json)?\Z', is_regex_name=True,
                  alt_name=[u'chromeos_{build}_{board}_dev.bin',
                            u'chromeos_{build}_{board}_dev.bin.json'])
-_AddCrOSArtifact(artifact_info.DELTA_PAYLOAD, AUTestPayload,
-                 r'chromeos_.*_delta_dev.*bin(\.json)?\Z', is_regex_name=True,
-                 install_subdir=AU_NTON_DIR)
+_AddCrOSArtifact(artifact_info.DELTA_PAYLOAD, MultiArtifact,
+                 r'chromeos_.*_delta_dev.*bin(\.json)?\Z', is_regex_name=True)
 _AddCrOSArtifact(artifact_info.STATEFUL_PAYLOAD, Artifact,
                  devserver_constants.STATEFUL_FILE)
 _AddCrOSArtifact(artifact_info.BASE_IMAGE, BundledArtifact, IMAGE_FILE,

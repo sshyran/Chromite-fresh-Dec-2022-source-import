@@ -400,8 +400,8 @@ class RemoteDeviceUpdater(object):
       logging.info('You can find the log files and/or payloads in %s',
                    self.tempdir)
 
-  def GetPayloadDir(self, device):
-    """Get directory of payload for update.
+  def GetPayloadPaths(self, device):
+    """Get directory of payload and rootfs payload file name for update.
 
     This method is used to obtain the directory of payload for cros-flash. The
     given path 'self.image' is passed in when initializing RemoteDeviceUpdater.
@@ -427,19 +427,21 @@ class RemoteDeviceUpdater(object):
       device: A ChromiumOSDevice object.
 
     Returns:
-      A string payload_dir, that represents the payload directory.
+      A string tuple (payload_dir, rootfs_filename). payload_dir is the
+      directory where the update payloads are located. rootfs_filename is the
+      name of the rootfs update payload (sometimes update.gz).
     """
+    rootfs_filename = auto_updater_transfer.ROOTFS_FILENAME
+
     if os.path.isdir(self.image):
       # The given path is a directory.
       logging.info('Using provided payloads in %s', self.image)
-      return self.image
+      return self.image, rootfs_filename
 
-    image_path = None
-    if os.path.isfile(self.image):
-      # The given path is an image.
-      image_path = self.image
-      payload_dir = self.tempdir
-    else:
+    image_path = self.image
+    payload_dir = self.tempdir
+
+    if not os.path.isfile(self.image):
       # Assuming it is an xbuddy path.
       self.board = cros_build_lib.GetBoard(
           device_board=device.board or GetDefaultBoard(),
@@ -461,8 +463,9 @@ class RemoteDeviceUpdater(object):
         translated_path, _ = ds_wrapper.GetImagePathWithXbuddy(
             os.path.join(self.image, artifact_info.FULL_PAYLOAD),
             self.board, self.version, silent=True)
-        payload_dir = os.path.dirname(
-            ds_wrapper.TranslatedPathToLocalPath(translated_path))
+        local_path = ds_wrapper.TranslatedPathToLocalPath(translated_path)
+        payload_dir, rootfs_filename = os.path.split(local_path)
+
         ds_wrapper.GetImagePathWithXbuddy(
             os.path.join(self.image, artifact_info.STATEFUL_PAYLOAD),
             self.board, self.version, silent=True)
@@ -482,8 +485,7 @@ class RemoteDeviceUpdater(object):
                        image_path, payload_dir)
 
     # Generate rootfs and stateful update payloads if they do not exist.
-    payload_path = os.path.join(payload_dir,
-                                auto_updater_transfer.ROOTFS_FILENAME)
+    payload_path = os.path.join(payload_dir, rootfs_filename)
     if not os.path.exists(payload_path):
       paygen_payload_lib.GenerateUpdatePayload(
           image_path, payload_path, src_image=self.src_image_to_delta)
@@ -491,7 +493,7 @@ class RemoteDeviceUpdater(object):
         payload_dir, auto_updater_transfer.STATEFUL_FILENAME)):
       paygen_stateful_payload_lib.GenerateStatefulPayload(image_path,
                                                           payload_dir)
-    return payload_dir
+    return payload_dir, rootfs_filename
 
   def Run(self):
     """Perform remote device update.
@@ -510,14 +512,14 @@ class RemoteDeviceUpdater(object):
         try:
           # Get payload directory
           logging.notice('Staging payloads...')
-          payload_dir = self.GetPayloadDir(device)
+          payload_dir, rootfs_filename = self.GetPayloadPaths(device)
 
           # Do auto-update
           chromeos_AU = auto_updater.ChromiumOSUpdater(
               device=device,
               build_name=None,
               payload_dir=payload_dir,
-              payload_filename=auto_updater_transfer.ROOTFS_FILENAME,
+              payload_filename=rootfs_filename,
               tempdir=self.tempdir,
               do_rootfs_update=self.do_rootfs_update,
               do_stateful_update=self.do_stateful_update,
