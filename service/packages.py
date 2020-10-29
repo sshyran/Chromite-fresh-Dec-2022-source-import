@@ -311,7 +311,7 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   result = uprev_lib.UprevVersionedPackageResult()
 
-  pkg_path = os.path.join(constants.SOURCE_ROOT, DRIVEFS_PATH, 'drivefs')
+  pkg_path = os.path.join(DRIVEFS_PATH, 'drivefs')
 
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           target_version,
@@ -323,7 +323,7 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   all_changed_files.extend(uprev_result.changed_files)
 
-  pkg_path = os.path.join(constants.SOURCE_ROOT, DRIVEFS_PATH, 'drivefs-ipc')
+  pkg_path = os.path.join(DRIVEFS_PATH, 'drivefs-ipc')
 
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           target_version,
