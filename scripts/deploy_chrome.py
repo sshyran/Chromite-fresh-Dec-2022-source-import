@@ -41,6 +41,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access as remote
+from chromite.lib import retry_util
 from chromite.lib import timeout_util
 from gn_helpers import gn_helpers
 
@@ -383,8 +384,12 @@ class DeployChrome(object):
         self.tempdir, os.path.basename(_CHROME_TEST_BIN_DIR))
     _PrepareStagingDir(self.options, self.tempdir, staging_dir,
                        copy_paths=binaries_to_copy)
-    self.device.CopyToDevice(
-        staging_dir, os.path.dirname(_CHROME_TEST_BIN_DIR), mode='rsync')
+    # Deploying can occasionally run into issues with rsync getting a broken
+    # pipe, so retry several times. See crbug.com/1141618 for more
+    # information.
+    retry_util.RetryException(
+        None, 3, self.device.CopyToDevice, staging_dir,
+        os.path.dirname(_CHROME_TEST_BIN_DIR), mode='rsync')
 
   def _CheckConnection(self):
     try:

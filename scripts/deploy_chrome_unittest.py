@@ -407,15 +407,8 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
     self.deploy = deploy_chrome.DeployChrome(
         options, self.tempdir, os.path.join(self.tempdir, 'staging'))
 
-  def testFindError(self):
-    """Ensure an error is thrown if we can't inspect the device."""
-    self.rc.AddCmdResult(
-        partial_mock.In(deploy_chrome._FIND_TEST_BIN_CMD), 1)
-    self.assertRaises(
-        deploy_chrome.DeployFailure, self.deploy._DeployTestBinaries)
-
-  def testSuccess(self):
-    """Ensure the staging dir contains the right binaries to copy over."""
+  def _SimulateBinaries(self):
+    # Ensure the staging dir contains the right binaries to copy over.
     test_binaries = [
         'run_a_tests',
         'run_b_tests',
@@ -429,14 +422,54 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
     for binary in test_binaries:
       osutils.Touch(os.path.join(self.deploy.options.build_dir, binary),
                     makedirs=True, mode=0o700)
+    return test_binaries
 
-    self.deploy._DeployTestBinaries()
-
+  def _AssertBinariesInStagingDir(self, test_binaries):
     # Ensure the binaries were placed in the staging dir used to copy them over.
     staging_dir = os.path.join(
         self.tempdir, os.path.basename(deploy_chrome._CHROME_TEST_BIN_DIR))
     for binary in test_binaries:
       self.assertIn(binary, os.listdir(staging_dir))
+
+  def testFindError(self):
+    """Ensure an error is thrown if we can't inspect the device."""
+    self.rc.AddCmdResult(
+        partial_mock.In(deploy_chrome._FIND_TEST_BIN_CMD), 1)
+    self.assertRaises(
+        deploy_chrome.DeployFailure, self.deploy._DeployTestBinaries)
+
+  def testSuccess(self):
+    """Ensure that the happy path succeeds as expected."""
+    test_binaries = self._SimulateBinaries()
+    self.deploy._DeployTestBinaries()
+    self._AssertBinariesInStagingDir(test_binaries)
+
+  def testRetrySuccess(self):
+    """Ensure that a transient exception still results in success."""
+    # Raises a RunCommandError on its first invocation, but passes on subsequent
+    # calls.
+    def SideEffect(*args, **kwargs):
+      if not SideEffect.called:
+        SideEffect.called = True
+        raise cros_build_lib.RunCommandError('fail')
+    SideEffect.called = False
+
+    test_binaries = self._SimulateBinaries()
+    with mock.patch.object(
+        remote_access.ChromiumOSDevice, 'CopyToDevice',
+        side_effect=SideEffect) as copy_mock:
+      self.deploy._DeployTestBinaries()
+      self.assertEqual(copy_mock.call_count, 2)
+    self._AssertBinariesInStagingDir(test_binaries)
+
+  def testRetryFailure(self):
+    """Ensure that consistent exceptions result in failure."""
+    self._SimulateBinaries()
+    with self.assertRaises(cros_build_lib.RunCommandError):
+      with mock.patch.object(
+          remote_access.ChromiumOSDevice, 'CopyToDevice',
+          side_effect=cros_build_lib.RunCommandError('fail')):
+        self.deploy._DeployTestBinaries()
 
 
 class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
