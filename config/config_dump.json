@@ -13259,7 +13259,8 @@
     "firmware-puff-13324.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
-            "puff"
+            "puff",
+            "ambassador"
         ],
         "schedule": "with 24h interval",
         "workspace_branch": "firmware-puff-13324.B"
@@ -13267,7 +13268,8 @@
     "firmware-puff-13324.B-firmwarebranch-tryjob": {
         "_template": "firmwarebranch",
         "boards": [
-            "puff"
+            "puff",
+            "ambassador"
         ],
         "debug": true,
         "display_label": "tryjob",
