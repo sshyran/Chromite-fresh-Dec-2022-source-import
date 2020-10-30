@@ -432,8 +432,9 @@ def uprev_parallels_desktop(_build_targets, _refs, chroot):
   result = uprev_lib.uprev_ebuild_from_pin(package_path, version, chroot)
 
   # Update the VM image used for testing.
-  test_image_path = ('src/platform/tast-tests-pita/src/chromiumos/tast/local/'
-                     'bundles/pita/pita/data/pluginvm_image.zip.external')
+  test_image_path = ('src/platform/tast-tests-private/src/chromiumos/tast/'
+                     'local/bundles/crosint/pita/data/'
+                     'pluginvm_image.zip.external')
   test_image_src_path = os.path.join(constants.SOURCE_ROOT, test_image_path)
   with open(test_image_src_path, 'w') as f:
     json.dump(pinned['test_image'], f, indent=2)
