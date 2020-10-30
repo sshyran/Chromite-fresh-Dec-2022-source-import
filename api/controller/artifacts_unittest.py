@@ -1186,3 +1186,50 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
 
     for artifact in self.response.artifacts:
       self.assertIn(artifact.path, [expected.report, expected.warnings])
+
+
+class BundleGceTarballTest(BundleTestCase):
+  """Unittests for BundleGceTarball."""
+
+  def testValidateOnly(self):
+    """Check that a validate only call does not execute any logic."""
+    patch = self.PatchObject(artifacts_svc, 'BundleGceTarball')
+    artifacts.BundleGceTarball(self.target_request, self.response,
+                               self.validate_only_config)
+    patch.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    patch = self.PatchObject(artifacts_svc, 'BundleGceTarball')
+    artifacts.BundleGceTarball(self.target_request, self.response,
+                               self.mock_call_config)
+    patch.assert_not_called()
+    self.assertEqual(len(self.response.artifacts), 1)
+    self.assertEqual(self.response.artifacts[0].path,
+                     os.path.join(self.output_dir,
+                                  constants.TEST_IMAGE_GCE_TAR))
+
+  def testBundleGceTarball(self):
+    """BundleGceTarball calls cbuildbot/commands with correct args."""
+    bundle_gce_tarball = self.PatchObject(
+        artifacts_svc, 'BundleGceTarball',
+        return_value=os.path.join(self.output_dir,
+                                  constants.TEST_IMAGE_GCE_TAR))
+    self.PatchObject(os.path, 'exists', return_value=True)
+    artifacts.BundleGceTarball(self.target_request, self.response,
+                               self.api_config)
+    self.assertEqual(
+        [artifact.path for artifact in self.response.artifacts],
+        [os.path.join(self.output_dir, constants.TEST_IMAGE_GCE_TAR)])
+
+    latest = os.path.join(self.source_root, 'src/build/images/target/latest')
+    self.assertEqual(
+        bundle_gce_tarball.call_args_list,
+        [mock.call(self.output_dir, latest)])
+
+  def testBundleGceTarballNoImageDir(self):
+    """BundleGceTarball dies when image dir does not exist."""
+    self.PatchObject(os.path, 'exists', return_value=False)
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      artifacts.BundleGceTarball(self.target_request, self.response,
+                                 self.api_config)

@@ -709,3 +709,33 @@ class GenerateCpeExportTest(cros_test_lib.RunCommandTempDirTestCase):
     # are mocking  cros_extract_deps, but we verified the args to
     # cros_extract_deps.
     self.assertFileContents(self.warnings_file, warnings)
+
+
+class BundleGceTarballTest(cros_test_lib.MockTempDirTestCase):
+  """BundleGceTarball tests."""
+
+  def setUp(self):
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    self.image_dir = os.path.join(self.tempdir, 'image_dir')
+    osutils.SafeMakedirs(self.output_dir)
+    osutils.SafeMakedirs(self.image_dir)
+
+    self.image_file = os.path.join(self.image_dir, constants.TEST_IMAGE_BIN)
+    osutils.Touch(self.image_file)
+
+  def testSuccess(self):
+    # Prepare tempdir for use by the function as tarball root.
+    call_tempdir = os.path.join(self.tempdir, 'call_tempdir')
+    osutils.SafeMakedirs(call_tempdir)
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=call_tempdir)
+
+    tarball = artifacts.BundleGceTarball(self.output_dir, self.image_dir)
+
+    # Verify location and content of the tarball.
+    self.assertEqual(tarball, os.path.join(self.output_dir,
+                                           constants.TEST_IMAGE_GCE_TAR))
+    cros_test_lib.VerifyTarball(tarball, ('disk.raw',))
+
+    # Verify the symlink points the the test image.
+    disk_raw = os.path.join(call_tempdir, 'disk.raw')
+    self.assertEqual(os.readlink(disk_raw), self.image_file)

@@ -694,3 +694,27 @@ def GenerateCpeReport(chroot, sysroot, output_dir):
   osutils.WriteFile(warnings_path, result.stderr, mode='wb')
 
   return CpeResult(report=report_path, warnings=warnings_path)
+
+
+def BundleGceTarball(output_dir, image_dir):
+  """Bundle the test image into a tarball suitable for importing into GCE.
+
+  Args:
+    output_dir (str): The location outside the chroot where the files should be
+      stored.
+    image_dir (str): The directory containing the image.
+
+  Returns:
+    Path to the generated tarball.
+  """
+  test_image = os.path.join(image_dir, constants.TEST_IMAGE_BIN)
+  tarball = os.path.join(output_dir, constants.TEST_IMAGE_GCE_TAR)
+
+  with osutils.TempDir() as tempdir:
+    disk_raw = os.path.join(tempdir, 'disk.raw')
+    osutils.SafeSymlink(test_image, disk_raw)
+    cros_build_lib.CreateTarball(
+        tarball, tempdir, compression=cros_build_lib.COMP_GZIP,
+        inputs=('disk.raw',), extra_args=['--dereference', '--format=oldgnu'])
+
+  return tarball

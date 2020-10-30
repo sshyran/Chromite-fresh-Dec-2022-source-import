@@ -627,3 +627,32 @@ def ExportCpeReport(input_proto, output_proto, config):
 
   output_proto.artifacts.add().path = cpe_result.report
   output_proto.artifacts.add().path = cpe_result.warnings
+
+
+def _BundleGceTarballResponse(input_proto, output_proto, _config):
+  """Add artifact tarball to a successful response."""
+  output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
+                                                   constants.TEST_IMAGE_GCE_TAR)
+
+
+@faux.success(_BundleGceTarballResponse)
+@faux.empty_error
+@validate.require('build_target.name', 'output_dir')
+@validate.exists('output_dir')
+@validate.validation_complete
+def BundleGceTarball(input_proto, output_proto, _config):
+  """Bundle the test image into a tarball suitable for importing into GCE.
+
+  Args:
+    input_proto (BundleRequest): The input proto.
+    output_proto (BundleResponse): The output proto.
+    _config (api_config.ApiConfig): The API call config.
+  """
+  target = input_proto.build_target.name
+  output_dir = input_proto.output_dir
+  image_dir = _GetImageDir(constants.SOURCE_ROOT, target)
+  if image_dir is None:
+    return None
+
+  tarball = artifacts.BundleGceTarball(output_dir, image_dir)
+  output_proto.artifacts.add().path = tarball
