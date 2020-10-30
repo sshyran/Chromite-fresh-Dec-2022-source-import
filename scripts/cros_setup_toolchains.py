@@ -108,6 +108,7 @@ TARGET_LLVM_PKGS_ENABLED = (
     'armv7a-cros-linux-gnueabi',
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
+    'i686-pc-linux-gnu',
     'x86_64-cros-linux-gnu',
 )
 
@@ -1346,6 +1347,18 @@ def main(argv):
   targets_wanted = set(options.targets.split(','))
   boards_wanted = (set(options.include_boards.split(','))
                    if options.include_boards else set())
+
+  # pylint: disable=global-statement
+  # Disable installing llvm library pkgs till new binary prebuilt packages are
+  # available for i686-pc-linux-gnu tuple. Remove once done.
+  global TARGET_LLVM_PKGS_ENABLED
+  if options.usepkg:
+    TARGET_LLVM_PKGS_ENABLED = (
+      'armv7a-cros-linux-gnueabi',
+      'armv7a-cros-linux-gnueabihf',
+      'aarch64-cros-linux-gnu',
+      'x86_64-cros-linux-gnu',
+    )
 
   if options.cfg_name:
     ShowConfig(options.cfg_name)
