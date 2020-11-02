@@ -713,14 +713,14 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       '--nouse-image',
       dest='use_image',
       action='store_false',
-      default=True,
+      default=False,
       help='Do not mount the chroot on a loopback image; '
       'instead, create it directly in a directory.')
   parser.add_argument(
       '--use-image',
       dest='use_image',
       action='store_true',
-      default=True,
+      default=False,
       help='Mount the chroot on a loopback image '
       'instead of creating it directly in a directory.')
 
@@ -969,11 +969,21 @@ def main(argv):
   if options.working_dir is not None and not os.path.isabs(options.working_dir):
     options.working_dir = path_util.ToChrootPath(options.working_dir)
 
-  # Discern if we need to create the chroot.
+  # If there is an existing chroot image and we're not removing it then force
+  # use_image on.  This ensures that people don't have to remember to pass
+  # --use-image after a reboot to avoid losing access to their existing chroot.
   chroot_exists = cros_sdk_lib.IsChrootReady(options.chroot)
+  img_path = _ImageFileForChroot(options.chroot)
+  if (not options.use_image and not chroot_exists and not options.delete and
+      not options.unmount and os.path.exists(img_path)):
+    logging.notice('Existing chroot image %s found.  Forcing --use-image on.',
+                   img_path)
+    options.use_image = True
+
+  # Discern if we need to create the chroot.
   if (options.use_image and not chroot_exists and not options.delete and
       not options.unmount and not missing_image_tools and
-      os.path.exists(_ImageFileForChroot(options.chroot))):
+      os.path.exists(img_path)):
     # Try to re-mount an existing image in case the user has rebooted.
     with cgroups.SimpleContainChildren('cros_sdk'):
       with locking.FileLock(lock_path, 'chroot lock') as lock:
@@ -982,8 +992,7 @@ def main(argv):
         cros_sdk_lib.MountChroot(options.chroot, create=False)
         chroot_exists = cros_sdk_lib.IsChrootReady(options.chroot)
         if chroot_exists:
-          logging.notice('Mounted existing image %s on chroot',
-                         _ImageFileForChroot(options.chroot))
+          logging.notice('Mounted existing image %s on chroot', img_path)
 
   # Finally, flip create if necessary.
   if options.enter or options.snapshot_create:
