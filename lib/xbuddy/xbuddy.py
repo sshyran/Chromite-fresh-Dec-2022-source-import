@@ -865,11 +865,11 @@ class XBuddy(object):
       if image_type == ANY:
         image_type = self._FindAny(artifact_dir)
 
-      file_name = LOCAL_ALIAS_TO_FILENAME[image_type]
-      artifact_path = os.path.join(artifact_dir, file_name)
-      if not os.path.exists(artifact_path):
+      file_name = os.path.join(artifact_dir,
+                               LOCAL_ALIAS_TO_FILENAME[image_type])
+      if not os.path.exists(file_name):
         raise XBuddyException('Local %s artifact not in static_dir at %s' %
-                              (image_type, artifact_path))
+                              (image_type, file_name))
     else:
       # Get a remote image.
       if image_type not in GS_ALIASES:
@@ -950,5 +950,5 @@ class XBuddy(object):
     # TODO(joyc): Run in separate thread.
     self.CleanCache()
 
-    _Log('Returning path to payload: %s/%s', build_id, file_name)
+    _Log('Returning build id: %s and path to payload: %s', build_id, file_name)
     return build_id, file_name

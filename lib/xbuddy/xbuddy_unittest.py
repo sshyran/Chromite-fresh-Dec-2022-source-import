@@ -369,3 +369,18 @@ class xBuddyTest(cros_test_lib.TestCase):
         images_expected = ['a', 'b', 'f', 'e', 'd']
         for i in range(5):
           self.assertEqual(result[i][0], '%s-release/R0' % images_expected[i])
+
+  @mock.patch.object(xbuddy.XBuddy, '_Download',
+                     return_value=[['/path/to/image.bin']])
+  @mock.patch.object(xbuddy.XBuddy, '_ResolveVersionToBuildIdAndChannel',
+                     return_value=('reef/R1-1.2.3', 'stable'))
+  # pylint: disable=unused-argument
+  def testGet(self, resolve_mock, downloader_mock):
+    """Tests _GetArtifact method."""
+    self.assertEqual(
+        self.mock_xb.Get(['remote', 'reef', 'R1-1.2.3', 'test']),
+        ('reef/R1-1.2.3', '/path/to/image.bin'))
+
+    self.assertEqual(
+        self.mock_xb.Get(['remote', 'reef', 'R1-1.2.3']),
+        ('reef/R1-1.2.3', '/path/to/image.bin'))

@@ -411,6 +411,17 @@ class BundledArtifact(Artifact):
       self.marker_name = self._SanitizeName(
           '_'.join(['.' + self.name] + self._files_to_extract))
 
+  def StagedFiles(self):
+    """Returns the installed/staged files for this artifact.
+
+    If there are any files to unzip, only returns the extracted files since
+    there is usually no need for the compressed files.
+    """
+    files = super(BundledArtifact, self).StagedFiles()
+    if self._files_to_extract:
+      return [x for x in files if os.path.basename(x) in self._files_to_extract]
+    return files
+
   def _RunUnzip(self, list_only):
     # Unzip is weird. It expects its args before any excludes and expects its
     # excludes in a list following the -x.

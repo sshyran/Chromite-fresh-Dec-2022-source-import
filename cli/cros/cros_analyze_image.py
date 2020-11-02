@@ -136,9 +136,8 @@ def fetch_image(board: str, version: str, local_path: str = None) -> str:
   Returns:
     Local path to image file.
   """
-  translated_path, _ = ds_wrapper.GetImagePathWithXbuddy(
+  _, image_path = ds_wrapper.GetImagePathWithXbuddy(
       'xBuddy://remote', board, version)
-  image_path = ds_wrapper.TranslatedPathToLocalPath(translated_path)
 
   if local_path:
     try:

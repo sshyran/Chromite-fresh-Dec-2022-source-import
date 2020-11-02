@@ -268,7 +268,7 @@ class USBImager(object):
 
   def _GetImagePath(self):
     """Returns the image path to use."""
-    image_path = translated_path = None
+    image_path = None
     if os.path.isfile(self.image):
       if not self.yes and not _IsFilePathGPTDiskImage(self.image):
         # TODO(wnwen): Open the tarball and if there is just one file in it,
@@ -284,11 +284,10 @@ class USBImager(object):
       image_path = _ChooseImageFromDirectory(self.image)
     else:
       # Translate the xbuddy path to get the exact image to use.
-      translated_path, _ = ds_wrapper.GetImagePathWithXbuddy(
+      _, image_path = ds_wrapper.GetImagePathWithXbuddy(
           self.image, self.board, self.version)
-      image_path = ds_wrapper.TranslatedPathToLocalPath(translated_path)
 
-    logging.info('Using image %s', translated_path or image_path)
+    logging.info('Using image %s', image_path)
     return image_path
 
   def Run(self):
@@ -454,16 +453,14 @@ class RemoteDeviceUpdater(object):
                          (device.board, self.board))
       logging.info('Board is %s', self.board)
 
-
       # TODO(crbug.com/872441): Once devserver code has been moved to chromite,
       # use xbuddy library directly instead of the devserver_wrapper.
       # Fetch the full payload and properties, and stateful files. If this
       # fails, fallback to downloading the image.
       try:
-        translated_path, _ = ds_wrapper.GetImagePathWithXbuddy(
+        _, local_path = ds_wrapper.GetImagePathWithXbuddy(
             os.path.join(self.image, artifact_info.FULL_PAYLOAD),
             self.board, self.version, silent=True)
-        local_path = ds_wrapper.TranslatedPathToLocalPath(translated_path)
         payload_dir, rootfs_filename = os.path.split(local_path)
 
         ds_wrapper.GetImagePathWithXbuddy(
@@ -477,9 +474,8 @@ class RemoteDeviceUpdater(object):
 
       # We didn't find the full_payload, attempt to download the image.
       if fetch_image:
-        translated_path, _ = ds_wrapper.GetImagePathWithXbuddy(
+        _, image_path = ds_wrapper.GetImagePathWithXbuddy(
             self.image, self.board, self.version)
-        image_path = ds_wrapper.TranslatedPathToLocalPath(translated_path)
         payload_dir = os.path.join(os.path.dirname(image_path), 'payloads')
         logging.notice('Using image path %s and payload directory %s',
                        image_path, payload_dir)

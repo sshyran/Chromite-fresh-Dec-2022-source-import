@@ -7,11 +7,6 @@
 
 from __future__ import print_function
 
-import os
-
-import mock
-
-from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import partial_mock
@@ -72,33 +67,6 @@ class TestXbuddyHelpers(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(dev_server_wrapper.ConvertTranslatedPath(path,
                                                               translated_path),
                      'local/taco/R36-5600.0.0/dev')
-
-  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=True)
-  def testTranslatedPathToLocalPath(self, _mock1):
-    """Tests that we convert a translated path to a local path correctly."""
-    translated_path = 'peppy-release/R33-5116.87.0/chromiumos_image.bin'
-    base_path = os.path.join(self.tempdir, 'peppy-release/R33-5116.87.0')
-
-    local_path = os.path.join(base_path, 'chromiumos_image.bin')
-    self.assertEqual(
-        dev_server_wrapper.TranslatedPathToLocalPath(translated_path,
-                                                     self.tempdir),
-        local_path)
-
-  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
-  def testTranslatedPathToLocalPathOutsideChroot(self, _mock1):
-    """Tests that we convert a translated path when outside the chroot."""
-    translated_path = 'peppy-release/R33-5116.87.0/chromiumos_image.bin'
-    chroot_dir = os.path.join(constants.SOURCE_ROOT,
-                              constants.DEFAULT_CHROOT_DIR)
-    static_dir = os.path.join('devserver', 'static')
-    chroot_static_dir = os.path.join('/', static_dir)
-
-    local_path = os.path.join(chroot_dir, static_dir, translated_path)
-    self.assertEqual(
-        dev_server_wrapper.TranslatedPathToLocalPath(
-            translated_path, chroot_static_dir),
-        local_path)
 
 
 class TestGetIPv4Address(cros_test_lib.RunCommandTestCase):

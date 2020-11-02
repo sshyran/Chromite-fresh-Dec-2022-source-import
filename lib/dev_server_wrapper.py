@@ -132,9 +132,7 @@ def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
     silent: Suppress error messages.
 
   Returns:
-    A tuple consisting of a translated path to the image
-    (build-id/version/image_name) as well as the fully resolved XBuddy path (in
-    the case where |path| is an XBuddy alias).
+    A tuple consisting of the build id and full path to the image.
   """
   # Since xbuddy often wants to use gsutil from $PATH, make sure our local copy
   # shows up first.
@@ -155,9 +153,7 @@ def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
                      static_dir=static_dir)
   path_list = GetXbuddyPath(path).rsplit(os.path.sep)
   try:
-    build_id, file_name = xb.Get(path_list)
-    resolved_path, _ = xb.LookupAlias(os.path.sep.join(path_list))
-    return os.path.join(build_id, file_name), resolved_path
+    return xb.Get(path_list)
   except xbuddy.XBuddyException as e:
     if not silent:
       logging.error('Locating image "%s" failed. The path might not be valid '
@@ -192,25 +188,6 @@ def GenerateXbuddyRequest(path, req_type):
     return 'xbuddy_translate/%s' % GetXbuddyPath(path)
   else:
     raise ValueError('Does not support xbuddy request type %s' % req_type)
-
-
-def TranslatedPathToLocalPath(translated_path, static_dir=DEFAULT_STATIC_DIR):
-  """Convert the translated path to a local path to the image file.
-
-  Args:
-    translated_path: the translated xbuddy path
-      (e.g., peppy-release/R36-5760.0.0/chromiumos_image).
-    static_dir: The static directory used by the devserver.
-
-  Returns:
-    A local path to the image file.
-  """
-  real_path = osutils.ExpandPath(os.path.join(static_dir, translated_path))
-
-  if os.path.exists(real_path):
-    return real_path
-  else:
-    return path_util.FromChrootPath(real_path)
 
 
 def GenerateUpdateId(target, src, key, for_vm):
