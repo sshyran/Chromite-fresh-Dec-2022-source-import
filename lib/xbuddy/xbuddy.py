@@ -817,7 +817,8 @@ class XBuddy(object):
 
     return self._Download(gs_url, [artifact], build_id)[0]
 
-  def _GetArtifact(self, path_list, board=None, version=None, image_dir=None):
+  def _GetArtifact(self, path_list, board=None, version=None,
+                   lookup_only=False, image_dir=None):
     """Interpret an xBuddy path and return directory/file_name to resource.
 
     Note board can be passed that in but by default if self._board is set,
@@ -829,6 +830,8 @@ class XBuddy(object):
         given during XBuddy initialization.
       version: Version whose artifacts we are looking for. Used if no version
         was given during XBuddy initialization. If None, defers to LATEST.
+      lookup_only: If true just look up the artifact, if False stage it.
+        TODO(ahassani): If true, it should also return the file name.
       image_dir: Google Storage image archive to search in if requesting a
         remote artifact. If none uses the default bucket.
 
@@ -875,12 +878,47 @@ class XBuddy(object):
       build_id, channel = self._ResolveVersionToBuildIdAndChannel(
           board, suffix, version, image_dir=image_dir)
       _Log('Resolved version %s to %s.', version, build_id)
-      file_name = self._GetFromGS(build_id, image_type, image_dir=image_dir,
-                                  channel=channel)[0]
+
+      file_name = None
+      if not lookup_only:
+        file_name = self._GetFromGS(build_id, image_type, image_dir=image_dir,
+                                    channel=channel)[0]
 
     return build_id, file_name
 
   ############################ BEGIN PUBLIC METHODS
+
+  def Translate(self, path_list, board=None, version=None, image_dir=None):
+    """Translates an xBuddy path to a real path to artifact if it exists.
+
+    Equivalent to the Get call, minus downloading and updating timestamps,
+
+    Args:
+      path_list: [board, version, alias] as split from the xbuddy call url.
+      board: Board whos artifacts we are looking for. If None, use the board
+        XBuddy was initialized to use.
+      version: Version whose artifacts we are looking for. If None, use the
+        version XBuddy was initialized with, or LATEST.
+      image_dir: image directory to check in Google Storage. If none,
+        the default bucket is used.
+
+    Returns:
+      build_id: Path to the image or update directory on the devserver.
+        e.g. 'x86-generic/R26-4000.0.0'
+        The returned path is always the path to the directory within
+        static_dir, so it is always the build_id of the image.
+      file_name: The file name of the artifact. Can take any of the file
+        values in devserver_constants.
+        e.g. 'chromiumos_test_image.bin' or 'update.gz' if the path list
+        specified 'test' or 'full_payload' artifacts, respectively.
+
+    Raises:
+      XBuddyException: if the path couldn't be translated
+    """
+    self._SyncRegistryWithBuildImages()
+    return self._GetArtifact(path_list, board=board, version=version,
+                             lookup_only=True, image_dir=image_dir)
+
   def Get(self, path_list, image_dir=None):
     """The full xBuddy call, returns resource specified by path_list.
 
