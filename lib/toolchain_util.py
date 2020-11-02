@@ -105,10 +105,7 @@ _CHROME_DEBUG_BIN = os.path.join('%(root)s', '%(sysroot)s/usr/lib/debug',
 #
 # This must be consistent with the definitions in autotest.
 AFDO_DATA_GENERATORS_LLVM = ('chell', 'samus')
-CHROME_AFDO_VERIFIER_BOARDS = {
-    'samus': 'atom',
-    'eve': 'bigcore'
-}
+CHROME_AFDO_VERIFIER_BOARDS = {'samus': 'atom', 'eve': 'bigcore'}
 KERNEL_AFDO_VERIFIER_BOARDS = {
     'lulu': '3.14',
     'chell': '3.18',
@@ -131,6 +128,9 @@ CHROOT_TMP_DIR = os.path.join('%(root)s', 'tmp')
 AFDO_VARIABLE_REGEX = r'AFDO_FILE\["%s"\]'
 AFDO_ARTIFACT_EBUILD_REGEX = r'^(?P<bef>%s=)(?P<name>("[^"]*"|.*))(?P<aft>.*)'
 AFDO_ARTIFACT_EBUILD_REPL = r'\g<bef>"%s"\g<aft>'
+
+ChromeVersion = collections.namedtuple(
+    'ChromeVersion', ['major', 'minor', 'build', 'patch', 'revision'])
 
 BENCHMARK_PROFILE_NAME_REGEX = r"""
        ^chromeos-chrome-amd64-
@@ -1112,9 +1112,27 @@ class _CommonPrepareBundle(object):
       self._ebuild_info[constants.CHROME_PN] = info
       return info
     else:
-      raise PrepareForBuildHandlerError(
-          'Wrong number of %s/%s ebuilds found: %s' %
-          (category, package, ', '.join(paths)))
+      latest_version = ChromeVersion(0, 0, 0, 0, 0)
+      candidate = None
+      for p in paths:
+        PV = os.path.splitext(os.path.split(p)[1])[0]
+        info = _EbuildInfo(p, package_info.SplitCPV('%s/%s' % (category, PV)))
+        if not info.CPV.rev:
+          # Ignore versions without a rev
+          continue
+        version_re = re.compile(
+            r'^chromeos-chrome-(\d+)\.(\d+)\.(\d+)\.(\d+)_rc-r(\d+)')
+        m = version_re.search(PV)
+        assert m, f'failed to recognize Chrome ebuild name {p}'
+        version = ChromeVersion(*[int(x) for x in m.groups()])
+        if version > latest_version:
+          latest_version = version
+          candidate = info
+      if not candidate:
+        raise PrepareForBuildHandlerError(
+            f'No valid Chrome ebuild found among: {paths}')
+      self._ebuild_info[constants.CHROME_PN] = candidate
+      return candidate
 
   def _GetBenchmarkAFDOName(self, template=CHROME_BENCHMARK_AFDO_FILE):
     """Get the name of the benchmark AFDO file from the Chrome ebuild."""
