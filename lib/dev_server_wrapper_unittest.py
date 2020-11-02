@@ -17,56 +17,6 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 # pylint: disable=protected-access
 class TestXbuddyHelpers(cros_test_lib.MockTempDirTestCase):
   """Test xbuddy helper functions."""
-  def testGenerateXbuddyRequestForUpdate(self):
-    """Test we generate correct xbuddy requests."""
-    # Use the latest build when 'latest' is given.
-    req = 'xbuddy/latest?for_update=true&return_dir=true'
-    self.assertEqual(
-        dev_server_wrapper.GenerateXbuddyRequest('latest', 'update'), req)
-
-    # Convert the path starting with 'xbuddy://' to 'xbuddy/'
-    path = 'xbuddy://remote/stumpy/version'
-    req = 'xbuddy/remote/stumpy/version?for_update=true&return_dir=true'
-    self.assertEqual(
-        dev_server_wrapper.GenerateXbuddyRequest(path, 'update'), req)
-
-  def testGenerateXbuddyRequestForImage(self):
-    """Tests that we generate correct requests to get images."""
-    image_path = 'foo/bar/taco'
-    self.assertEqual(dev_server_wrapper.GenerateXbuddyRequest(image_path,
-                                                              'image'),
-                     'xbuddy/foo/bar/taco?return_dir=true')
-
-    image_path = 'xbuddy://foo/bar/taco'
-    self.assertEqual(dev_server_wrapper.GenerateXbuddyRequest(image_path,
-                                                              'image'),
-                     'xbuddy/foo/bar/taco?return_dir=true')
-
-  def testGenerateXbuddyRequestForTranslate(self):
-    """Tests that we generate correct requests for translation."""
-    image_path = 'foo/bar/taco'
-    self.assertEqual(dev_server_wrapper.GenerateXbuddyRequest(image_path,
-                                                              'translate'),
-                     'xbuddy_translate/foo/bar/taco')
-
-    image_path = 'xbuddy://foo/bar/taco'
-    self.assertEqual(dev_server_wrapper.GenerateXbuddyRequest(image_path,
-                                                              'translate'),
-                     'xbuddy_translate/foo/bar/taco')
-
-  def testConvertTranslatedPath(self):
-    """Tests that we convert a translated path to a usable xbuddy path."""
-    path = 'remote/latest-canary'
-    translated_path = 'taco-release/R36-5761.0.0/chromiumos_test_image.bin'
-    self.assertEqual(dev_server_wrapper.ConvertTranslatedPath(path,
-                                                              translated_path),
-                     'remote/taco-release/R36-5761.0.0/test')
-
-    path = 'latest'
-    translated_path = 'taco/R36-5600.0.0/chromiumos_image.bin'
-    self.assertEqual(dev_server_wrapper.ConvertTranslatedPath(path,
-                                                              translated_path),
-                     'local/taco/R36-5600.0.0/dev')
 
 
 class TestGetIPv4Address(cros_test_lib.RunCommandTestCase):

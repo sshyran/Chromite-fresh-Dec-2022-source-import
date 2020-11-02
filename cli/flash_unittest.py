@@ -75,8 +75,6 @@ class RemoteDeviceUpdaterTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     """Patches objects."""
     self.updater_mock = self.StartPatcher(RemoteDeviceUpdaterMock())
-    self.PatchObject(dev_server_wrapper, 'GenerateXbuddyRequest',
-                     return_value='xbuddy/local/latest')
     self.PatchObject(dev_server_wrapper, 'GetImagePathWithXbuddy',
                      return_value=('taco-paladin/R36/chromiumos_test_image.bin',
                                    'remote/taco-paladin/R36/test'))
@@ -211,8 +209,6 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
     """Patches objects."""
     self.usb_mock = USBImagerMock()
     self.imager_mock = self.StartPatcher(self.usb_mock)
-    self.PatchObject(dev_server_wrapper, 'GenerateXbuddyRequest',
-                     return_value='xbuddy/local/latest')
     self.PatchObject(dev_server_wrapper, 'GetImagePathWithXbuddy',
                      return_value=('taco-paladin/R36/chromiumos_test_image.bin',
                                    'remote/taco-paladin/R36/test'))

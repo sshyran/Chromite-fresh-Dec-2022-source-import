@@ -55,35 +55,6 @@ class ArtifactDownloadError(Exception):
   """Raised when the artifact could not be downloaded."""
 
 
-def ConvertTranslatedPath(original_path, translated_path):
-  """Converts a translated xbuddy path to an xbuddy path.
-
-  Devserver/xbuddy does not accept requests with translated xbuddy
-  path (build-id/version/image-name). This function converts such a
-  translated path to an xbuddy path that is suitable to used in
-  devserver requests.
-
-  Args:
-    original_path: the xbuddy path before translation.
-      (e.g., remote/peppy/latest-canary).
-    translated_path: the translated xbuddy path
-      (e.g., peppy-release/R36-5760.0.0).
-
-  Returns:
-    A xbuddy path uniquely identifies a build and can be used in devserver
-      requests: {local|remote}/build-id/version/image_type
-  """
-  chunks = translated_path.split(os.path.sep)
-  chunks[-1] = constants.IMAGE_NAME_TO_TYPE[chunks[-1]]
-
-  if GetXbuddyPath(original_path).startswith(XBUDDY_REMOTE):
-    chunks = [XBUDDY_REMOTE] + chunks
-  else:
-    chunks = [XBUDDY_LOCAL] + chunks
-
-  return os.path.sep.join(chunks)
-
-
 def GetXbuddyPath(path):
   """A helper function to parse an xbuddy path.
 
@@ -163,53 +134,6 @@ def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
     if not silent:
       logging.error('Downloading image "%s" failed.', path)
     raise ArtifactDownloadError('Cannot download image %s: %s' % (path, e))
-
-
-def GenerateXbuddyRequest(path, req_type):
-  """Generate an xbuddy request used to retreive payloads.
-
-  This function generates a xbuddy request based on |path| and
-  |req_type|, which can be used to query the devserver. For request
-  type 'image' ('update'), the devserver will repond with a URL
-  pointing to the folder where the image (update payloads) is stored.
-
-  Args:
-    path: An xbuddy path (with or without xbuddy://).
-    req_type: xbuddy request type ('update', 'image', or 'translate').
-
-  Returns:
-    A xbuddy request.
-  """
-  if req_type == 'update':
-    return 'xbuddy/%s?for_update=true&return_dir=true' % GetXbuddyPath(path)
-  elif req_type == 'image':
-    return 'xbuddy/%s?return_dir=true' % GetXbuddyPath(path)
-  elif req_type == 'translate':
-    return 'xbuddy_translate/%s' % GetXbuddyPath(path)
-  else:
-    raise ValueError('Does not support xbuddy request type %s' % req_type)
-
-
-def GenerateUpdateId(target, src, key, for_vm):
-  """Returns a simple representation id of |target| and |src| paths.
-
-  Args:
-    target: Target image of the update payloads.
-    src: Base image to of the delta update payloads.
-    key: Private key used to sign the payloads.
-    for_vm: Whether the update payloads are to be used in a VM .
-  """
-  update_id = target
-  if src:
-    update_id = '->'.join([src, update_id])
-
-  if key:
-    update_id = '+'.join([update_id, key])
-
-  if not for_vm:
-    update_id = '+'.join([update_id, 'patched_kernel'])
-
-  return update_id
 
 
 def GetIPv4Address(dev=None, global_ip=True):
