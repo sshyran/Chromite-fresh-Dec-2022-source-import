@@ -53,13 +53,18 @@ class ParseDateTest(ParseDateTestBase):
 
     # Sysinfo
     dt = merge_logs.ParseDate('2017-07-31T09:17:25.907285-07:00')
-    self.assertEqual(dt, datetime.datetime(2017, 7, 31, 9, 17, 25, 907285,
-                                           TZOFFSET))
+    self.assertEqual(
+        dt, datetime.datetime(2017, 7, 31, 9, 17, 25, 907285, TZOFFSET))
 
   def testUTC(self):
     dt = merge_logs.ParseDate('2017-07-31T13:55:29.455280+00:00')
     self.assertEqual(dt, datetime.datetime(2017, 7, 31, 13, 55, 29, 455280,
                                            dateutil.tz.tzutc()))
+
+    dt = merge_logs.ParseDate('2017-07-31T09:17:25.907285Z')
+    self.assertEqual(
+        dt,
+        datetime.datetime(2017, 7, 31, 9, 17, 25, 907285, dateutil.tz.tzutc()))
 
 
 class ParseAutoservDateTest(ParseDateTestBase):
@@ -87,3 +92,25 @@ class ParsePowerdDateTest(ParseDateTestBase):
     dt = merge_logs.ParsePowerdDate('0731/070232')
     self.assertEqual(dt, datetime.datetime(2017, 7, 31, 7, 2, 32, 0,
                                            TZOFFSET))
+
+
+class ParseFileContentsTest(cros_test_lib.TestCase):
+  """Test that ParseFileContents behaves correctly."""
+
+  def testParseSysinfoPatterns(self):
+    filename = 'messages'
+    content = """2017-07-31T07:05:10.257860-07:00 INFO ag[12]: Memory leak.
+2017-07-31T07:05:10.257860Z INFO ag[12]: Memory leak."""
+
+    logs = merge_logs.ParseFileContents(filename, content)
+    lines = content.splitlines()
+
+    self.assertEqual(len(logs), 2)
+    self.assertEqual(logs[0].filename, filename)
+    self.assertEqual(logs[0].date,
+                     datetime.datetime(2017, 7, 31, 7, 5, 10, 257860, TZOFFSET))
+    self.assertEqual(logs[0].log, lines[0])
+    self.assertEqual(
+        logs[1].date,
+        datetime.datetime(2017, 7, 31, 7, 5, 10, 257860, dateutil.tz.tzutc()))
+    self.assertEqual(logs[1].log, lines[1])

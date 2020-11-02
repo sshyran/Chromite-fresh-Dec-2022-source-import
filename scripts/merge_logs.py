@@ -143,18 +143,21 @@ Pattern = collections.namedtuple('Patern', ('regexp', 'func', 'key'))
 # 2017-07-31 07:05:10.257860139-07:00: Starting arc-removable-media
 ARC_DATE_RE = re.compile(
     r'^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d.\d\d\d\d\d\d)\d\d\d([+-]\d\d:\d\d):')
-ARCPatterns = [Pattern(ARC_DATE_RE, ParseDate,
-                       lambda m: m.group(1) + m.group(2))]
+ARCPatterns = [
+    Pattern(ARC_DATE_RE, ParseDate, lambda m: m.group(1) + m.group(2))
+]
 
 # 07/31 09:17:27.919 DEBUG|             utils:0212| Running 'test -d /tmp/sysinfo/autoserv-LOMvzK'
 AUTOSERV_DATE_RE = re.compile(r'^(\d\d/\d\d \d\d:\d\d:\d\d.\d\d\d) ')
-AutoservPatterns = [Pattern(AUTOSERV_DATE_RE, ParseAutoservDate,
-                            lambda m: m.group(1))]
+AutoservPatterns = [
+    Pattern(AUTOSERV_DATE_RE, ParseAutoservDate, lambda m: m.group(1))
+]
 
 # [8525:8525:0731/072833.409065:VERBOSE1:gaia_screen_handler.cc(480)] OnPortalDetectionCompleted Online
 CHROME_DATE_RE = re.compile(r'^\[\d+:\d+:(\d{4}/\d{6}.\d{6}):')
-ChromePatterns = [Pattern(CHROME_DATE_RE, ParseChromeDate,
-                          lambda m: m.group(1))]
+ChromePatterns = [
+    Pattern(CHROME_DATE_RE, ParseChromeDate, lambda m: m.group(1))
+]
 
 # 2017/07/31 09:18:08.871 DEBUG|     remote_access:0659| The temporary working directory on the device is /mnt/stateful_partition/unencrypted/preserve/cros-update/tmp.S7y5vF3xQE
 CROS_DATE_RE = re.compile(r'^(\d\d\d\d/\d\d/\d\d \d\d:\d\d:\d\d.\d\d\d) ')
@@ -162,24 +165,37 @@ CrOSPatterns = [Pattern(CROS_DATE_RE, ParseDate, lambda m: m.group(1))]
 
 # [0731/070232:INFO:main.cc(289)] System uptime: 5s
 POWERD_DATE_RE = re.compile(r'^\[(\d{4}/\d{6}):')
-PowerdPatterns = [Pattern(POWERD_DATE_RE, ParsePowerdDate,
-                          lambda m: m.group(1))]
+PowerdPatterns = [
+    Pattern(POWERD_DATE_RE, ParsePowerdDate, lambda m: m.group(1))
+]
 
 # 2017-07-31 07:00:46,650 - DEBUG - Running hook: /usr/local/bin/hooks/check_ethernet.hook
 RECOVER_DUTS_DATE_RE = re.compile(
     r'^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d),(\d\d\d) ')
-RecoverDutsPatterns = [Pattern(RECOVER_DUTS_DATE_RE, ParseDate,
-                               lambda m: m.group(1) + '.' + m.group(2))]
+RecoverDutsPatterns = [
+    Pattern(RECOVER_DUTS_DATE_RE,
+            ParseDate, lambda m: m.group(1) + '.' + m.group(2))
+]
 
 #         START   provision_AutoUpdate    provision_AutoUpdate    timestamp=1501517822    localtime=Jul 31 09:17:02
 STATUS_LOG_DATE_RE = re.compile(r'.*localtime=(... \d\d \d\d:\d\d:\d\d)')
-StatusLogPatterns = [Pattern(STATUS_LOG_DATE_RE, ParseDate,
-                             lambda m: m.group(1))]
+StatusLogPatterns = [
+    Pattern(STATUS_LOG_DATE_RE, ParseDate, lambda m: m.group(1))
+]
+
+# 2017-07-31T09:17:25.907285Z NOTICE ag[9829]: autotest server[stack::get_tmp_dir|run|wrapper] -> ssh_run(mktemp -d /tmp/autoserv-XXXXXX)
+SYSINFO_DATE_NEW_RE = re.compile(
+    r'^(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\d\d\d\dZ) ')
 
 # 2017-07-31T09:17:25.907285-07:00 NOTICE ag[9829]: autotest server[stack::get_tmp_dir|run|wrapper] -> ssh_run(mktemp -d /tmp/autoserv-XXXXXX)
-SYSINFO_DATE_RE = re.compile(
+SYSINFO_DATE_OLD_RE = re.compile(
     r'^(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\d\d\d\d[+-]\d\d:\d\d) ')
-SysinfoPatterns = [Pattern(SYSINFO_DATE_RE, ParseDate, lambda m: m.group(1))]
+
+# Syslog format now uses UTC instead of local time zone.
+SysinfoPatterns = [
+    Pattern(SYSINFO_DATE_NEW_RE, ParseDate, lambda m: m.group(1)),
+    Pattern(SYSINFO_DATE_OLD_RE, ParseDate, lambda m: m.group(1)),
+]
 
 AllPatterns = (ARCPatterns + AutoservPatterns + ChromePatterns +
                CrOSPatterns + PowerdPatterns + RecoverDutsPatterns +
