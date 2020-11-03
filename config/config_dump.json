@@ -8557,7 +8557,6 @@
         "boards": [
             "dedede"
         ],
-        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"dedede\",\n    \"name\": \"boten_legacy\",\n    \"test_suites\": []\n}",
