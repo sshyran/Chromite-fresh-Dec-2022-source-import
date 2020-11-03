@@ -122,6 +122,7 @@ wshwos_boards = frozenset([
 ])
 
 moblab_boards = frozenset([
+    'puff-moblab',
     'fizz-moblab',
     'moblab-generic-vm',
 ])

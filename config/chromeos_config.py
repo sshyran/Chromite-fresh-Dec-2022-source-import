@@ -2596,6 +2596,21 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1066311',
       },
 
+      # puff-moblab board does not exist in the lab.
+      'puff-moblab-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/1145306',
+      },
+
+      # fizz-moblab board fails are not being monitored.
+      'fizz-moblab-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/1145306',
+      },
+
+
       # --- end from here ---
 
       # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
