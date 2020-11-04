@@ -91,7 +91,8 @@ class PaygenPayload(object):
                sign=False,
                verify=False,
                private_key=None,
-               upload=True):
+               upload=True,
+               cache_dir=None):
     """Init for PaygenPayload.
 
     Args:
@@ -110,6 +111,7 @@ class PaygenPayload(object):
                    If also verify is True, the public key is extracted from the
                    private key and is used for verification.
       upload: Boolean saying if payload generation results should be uploaded.
+      cache_dir: If passed, override the default cache dir (useful on bots).
     """
     self.payload = payload
     self.work_dir = work_dir
@@ -145,8 +147,9 @@ class PaygenPayload(object):
 
     # This cache dir will be shared with other processes, but we need our own
     # instance of the cache manager to properly coordinate.
+    cache_dir = cache_dir or self._FindCacheDir()
     self._cache = download_cache.DownloadCache(
-        self._FindCacheDir(), cache_size=PaygenPayload.CACHE_SIZE)
+        cache_dir, cache_size=PaygenPayload.CACHE_SIZE)
 
   def _MetadataUri(self, uri):
     """Given a payload uri, find the uri for the metadata signature."""

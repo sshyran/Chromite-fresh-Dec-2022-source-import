@@ -19,6 +19,7 @@ _VALID_IMAGE_PAIRS = (('src_signed_image', 'tgt_signed_image'),
                       ('full_update', 'tgt_unsigned_image'),
                       ('full_update', 'tgt_signed_image'))
 
+_DEFAULT_PAYGEN_CACHE_DIR = '.paygen_cache'
 
 # We have more fields we might validate however, they're either
 # 'oneof' or allowed to be the empty value by design. If @validate
@@ -77,7 +78,8 @@ def GeneratePayload(input_proto, output_proto, config):
   # we're still involved in config we'll keep it before the validate_only.
   payload_config = payload.PayloadConfig(tgt_image, src_image,
                                          destination_bucket, input_proto.verify,
-                                         keyset, upload)
+                                         keyset, upload,
+                                         cache_dir=_DEFAULT_PAYGEN_CACHE_DIR)
 
   # If configured for validation only we're done here.
   if config.validate_only:

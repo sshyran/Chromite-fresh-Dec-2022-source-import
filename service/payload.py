@@ -38,7 +38,8 @@ class PayloadConfig(object):
                dest_bucket=None,
                verify=True,
                keyset=None,
-               upload=True):
+               upload=True,
+               cache_dir=None):
     """Init method, sets up all the paths and configuration.
 
     Args:
@@ -48,6 +49,7 @@ class PayloadConfig(object):
       verify (bool): If delta is made, verify the integrity of the payload.
       keyset (str): The key to sign the image with.
       upload (bool): Whether the payload generation results should be uploaded.
+      cache_dir (str): The cache dir for paygen to use or None for default.
     """
 
     # Set when we call GeneratePayload on this object.
@@ -60,6 +62,7 @@ class PayloadConfig(object):
     self.upload = upload
     self.delta_type = 'delta' if self.src_image else 'full'
     self.image_type = _ImageTypeToStr(tgt_image.image_type)
+    self.cache_dir = cache_dir
 
     # This block ensures that we have paths to the correct perm of images.
     if self.delta_type == 'delta':
@@ -107,7 +110,8 @@ class PayloadConfig(object):
           temp_dir,
           sign=should_sign,
           verify=self.verify,
-          upload=self.upload)
+          upload=self.upload,
+          cache_dir=self.cache_dir)
       self.paygen.Run()
 
     return True
