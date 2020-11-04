@@ -172,14 +172,10 @@ def _CpplintFile(path, output_format, debug):
 def _PylintFile(path, output_format, debug, interp):
   """Returns result of running pylint on |path|."""
   pylint = os.path.join(constants.DEPOT_TOOLS_DIR, 'pylint-1.9')
-  # vpython3 isn't actually Python 3.  But maybe it will be someday.
-  if interp != 'python3':
-    vpython = os.path.join(constants.DEPOT_TOOLS_DIR, 'vpython')
-  else:
-    vpython = os.path.join(constants.DEPOT_TOOLS_DIR, 'vpython3')
+  if interp == 'python3':
     pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
   pylintrc = _GetPylintrc(path)
-  cmd = [vpython, pylint, '--rcfile=%s' % pylintrc]
+  cmd = [pylint, '--rcfile=%s' % pylintrc]
   if interp == 'python3':
     cmd += ['--disable=old-division']
   if output_format != 'default':
