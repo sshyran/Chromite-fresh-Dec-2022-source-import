@@ -1129,8 +1129,8 @@ class TestGetHostname(cros_test_lib.MockTestCase):
         fq_hostname=fq_hostname_gce_1, golo_only=True))
 
 
-class CreateTarballTests(cros_test_lib.TempDirTestCase):
-  """Test the CreateTarball function."""
+class TarballTests(cros_test_lib.TempDirTestCase):
+  """Test tarball handling functions."""
 
   def setUp(self):
     """Create files/dirs needed for tar test."""
@@ -1155,17 +1155,17 @@ class CreateTarballTests(cros_test_lib.TempDirTestCase):
     for i in self.inputs:
       osutils.WriteFile(os.path.join(self.inputDir, i), i, makedirs=True)
 
-  def testSuccess(self):
+  def testCreateSuccess(self):
     """Create a tarfile."""
     cros_build_lib.CreateTarball(self.tarball_path, self.inputDir,
                                  inputs=self.inputs)
 
-  def testSuccessWithDirs(self):
+  def testCreateSuccessWithDirs(self):
     """Create a tarfile."""
     cros_build_lib.CreateTarball(self.tarball_path, self.inputDir,
                                  inputs=self.inputsWithDirs)
 
-  def testSuccessWithTooManyFiles(self):
+  def testCreateSuccessWithTooManyFiles(self):
     """Test a tarfile creation with -T /dev/stdin."""
     # pylint: disable=protected-access
     num_inputs = cros_build_lib._THRESHOLD_TO_USE_T_FOR_TAR + 1
@@ -1175,6 +1175,25 @@ class CreateTarballTests(cros_test_lib.TempDirTestCase):
       osutils.WriteFile(os.path.join(largeInputDir, i), i, makedirs=True)
     cros_build_lib.CreateTarball(
         self.tarball_path, largeInputDir, inputs=inputs)
+
+  def testCreateExtractSuccessWithNoCompressionProgram(self):
+    """Create a tarfile without any compression, then extract it."""
+    TARBALL_PATH = os.path.join(self.tempdir, 'test.tar')
+    cros_build_lib.CreateTarball(
+        TARBALL_PATH, self.inputDir, inputs=self.inputs)
+    cros_build_lib.ExtractTarball(TARBALL_PATH, self.tempdir)
+
+  def testExtractFailureWithMissingFile(self):
+    """Verify that stderr from tar is printed if in encounters an error."""
+    tarball = 'a-tarball-which-does-not-exist.tar.gz'
+
+    try:
+      cros_build_lib.ExtractTarball(tarball, self.tempdir)
+    except cros_build_lib.TarballError as e:
+      # Check to see that tar's error message is printed in the exception.
+      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
+                      ("tar's stderr is missing from the exception.\n%s" %
+                       e.args[0]))
 
 
 # Tests for tar exceptions.
@@ -1299,19 +1318,3 @@ class OpenTests(cros_test_lib.TempDirTestCase):
     with cros_build_lib.Open(path, mode='w', encoding='utf-8') as fp:
       fp.write(u'ßomß')
     self.assertEqual(u'ßomß', osutils.ReadFile(path))
-
-
-class ExtractTarballTests(cros_test_lib.TempDirTestCase):
-  """Test the ExtractTarball function."""
-
-  def testExtractTarballMissingFile(self):
-    """Verify that stderr from tar is printed if in encounters an error."""
-    tarball = 'a-tarball-which-does-not-exist.tar.gz'
-
-    try:
-      cros_build_lib.ExtractTarball(tarball, self.tempdir)
-    except cros_build_lib.TarballError as e:
-      # Check to see that tar's error message is printed in the exception.
-      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
-                      ("tar's stderr is missing from the exception.\n%s" %
-                       e.args[0]))

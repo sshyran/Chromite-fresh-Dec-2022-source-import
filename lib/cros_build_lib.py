@@ -1288,10 +1288,11 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   """
   # Use a separate decompression program - this enables parallel decompression
   # in some cases.
+  cmd = ['tar', '--sparse', '-xf', tarball_path, '--directory', install_path]
+
   comp_type = CompressionExtToType(tarball_path)
-  comp = FindCompressor(comp_type)
-  cmd = ['tar', '--sparse', '--use-compress-program', comp, '-xf', tarball_path,
-         '--directory', install_path]
+  if comp_type != COMP_NONE:
+    cmd += ['--use-compress-program', FindCompressor(comp_type)]
 
   # If caller requires the list of extracted files, get verbose.
   if return_extracted_files:
