@@ -7,8 +7,6 @@
 # network to see if there are any updates.
 
 # [VPYTHON:BEGIN]
-# python_version: "3.8"
-#
 # # Third party dependencies.  These are only listed because pylint itself needs
 # # them.  Feel free to add/remove anything here.
 #
@@ -21,12 +19,12 @@
 #   version: "version:4.3.4"
 # >
 # wheel: <
-#   name: "chromiumos/infra/virtualenv/lazy_object_proxy/${vpython_platform}"
-#   version: "BZZ2lpKxOuUSSlCxtVkcaX705fzRPCLN3hqFrDrKUu4C"
+#   name: "infra/python/wheels/lazy-object-proxy/${vpython_platform}"
+#   version: "version:1.4.3"
 # >
 # wheel: <
-#   name: "chromiumos/infra/virtualenv/wrapt/${vpython_platform}"
-#   version: "BZKIIQkByohiOwQsEZzmhW0moGDOnOx2oh-xBd1pcCcC"
+#   name: "infra/python/wheels/wrapt/${vpython_platform}"
+#   version: "version:1.10.11"
 # >
 # wheel: <
 #   name: "infra/python/wheels/mccabe-py2_py3"
