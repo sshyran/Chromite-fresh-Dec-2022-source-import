@@ -13578,6 +13578,28 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-tidus-6301.109.B"
     },
+    "firmware-trogdor-13577.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "strongbad",
+            "trogdor"
+        ],
+        "schedule": "with 24h interval",
+        "workspace_branch": "firmware-trogdor-13577.B"
+    },
+    "firmware-trogdor-13577.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "strongbad",
+            "trogdor"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-trogdor-13577.B"
+    },
     "firmware-ultima-7287.131.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [

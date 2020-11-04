@@ -194,6 +194,7 @@
   firmware-swanky-5216.238.B-firmwarebranch
   firmware-terra-7287.154.B-firmwarebranch
   firmware-tidus-6301.109.B-firmwarebranch
+  firmware-trogdor-13577.B-firmwarebranch
   firmware-ultima-7287.131.B-firmwarebranch
   firmware-veyron-6588.B-firmwarebranch
   firmware-volteer-13521.B-firmwarebranch
@@ -1036,6 +1037,7 @@
   firmware-swanky-5216.238.B-firmwarebranch-tryjob
   firmware-terra-7287.154.B-firmwarebranch-tryjob
   firmware-tidus-6301.109.B-firmwarebranch-tryjob
+  firmware-trogdor-13577.B-firmwarebranch-tryjob
   firmware-ultima-7287.131.B-firmwarebranch-tryjob
   firmware-veyron-6588.B-firmwarebranch-tryjob
   firmware-volteer-13521.B-firmwarebranch-tryjob
