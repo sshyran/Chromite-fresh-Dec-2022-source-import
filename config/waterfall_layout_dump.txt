@@ -355,6 +355,7 @@
     orco-release
     palkia-release
     puff-macrophage-release
+    puff-moblab-release
     puff-release
     pyro-release
     rammus-arc-r-release
@@ -1512,6 +1513,7 @@
     orco-release-tryjob
     palkia-release-tryjob
     puff-macrophage-release-tryjob
+    puff-moblab-release-tryjob
     puff-release-tryjob
     pyro-release-tryjob
     rammus-arc-r-release-tryjob
@@ -1696,6 +1698,12 @@
   puff-macrophage-payloads-tryjob
   puff-macrophage-release-tryjob
   puff-macrophage-unittest-stress
+  puff-moblab-full-tryjob
+  puff-moblab-llvm-next-toolchain-tryjob
+  puff-moblab-llvm-toolchain-tryjob
+  puff-moblab-payloads-tryjob
+  puff-moblab-release-tryjob
+  puff-moblab-unittest-stress
   puff-payloads-tryjob
   puff-release-tryjob
   puff-unittest-stress
