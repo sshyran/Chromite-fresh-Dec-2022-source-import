@@ -271,7 +271,6 @@
     guado-release
     hana-kernelnext-release
     hana-release
-    hatch-arc-r-release
     hatch-borealis-release
     hatch-diskswap-release
     hatch-kernelnext-release
@@ -925,12 +924,6 @@
   hana-payloads-tryjob
   hana-release-tryjob
   hana-unittest-stress
-  hatch-arc-r-full-tryjob
-  hatch-arc-r-llvm-next-toolchain-tryjob
-  hatch-arc-r-llvm-toolchain-tryjob
-  hatch-arc-r-payloads-tryjob
-  hatch-arc-r-release-tryjob
-  hatch-arc-r-unittest-stress
   hatch-arc-r-vmrvc-android-pfq-tryjob
   hatch-borealis-full-tryjob
   hatch-borealis-llvm-next-toolchain-tryjob
@@ -1144,7 +1137,6 @@
     guado-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
-    hatch-arc-r-release-tryjob
     hatch-borealis-release-tryjob
     hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
