@@ -1024,7 +1024,7 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
 class GSContextTest(AbstractGSContextTest):
   """Tests for GSContext()"""
 
-  URL = 'gs://chromeos-image-archive/x86-mario-release/''R17-1413.0.0-a1-b1346'
+  URL = 'gs://chromeos-image-archive/x86-mario-release/R17-1413.0.0-a1-b1346'
   FILE_NAME = 'chromeos_R17-1413.0.0-a1_x86-mario_full_dev.bin'
   GS_PATH = 'gs://test/path/to/list'
   DT = datetime.datetime(2000, 1, 2, 10, 10, 10)

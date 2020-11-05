@@ -40,11 +40,6 @@ from chromite.lib import repo_util
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-def FileUrl(*args):
-  """Map path components to a qualified local URL."""
-  return 'file://%s' % os.path.join(*args)
-
-
 def ManifestXml(*args):
   """Joins arbitrary XML and wraps it in a <manifest> element."""
   xml = '\n'.join(args)
