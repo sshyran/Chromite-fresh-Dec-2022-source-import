@@ -391,11 +391,6 @@ class PaygenStage(generic_stages.BoardSpecificBuilderStage):
           'Golden Eye (%s) has no entry for board %s. Get a TPM to fix.' %
           (paygen_build_lib.PAYGEN_URI, board))
 
-    # Default to False, set to True if it's a canary type build
-    skip_duts_check = False
-    if config_lib.IsCanaryType(self._run.config.build_type):
-      skip_duts_check = True
-
     with parallel.BackgroundTaskRunner(self._RunPaygenInProcess) as per_channel:
       logging.info('Using channels: %s', self.channels)
 
@@ -407,15 +402,13 @@ class PaygenStage(generic_stages.BoardSpecificBuilderStage):
       for channel in self.channels:
         per_channel.put((channel, board, version, self._run.options.debug,
                          self._run.config.paygen_skip_testing,
-                         self._run.config.paygen_skip_delta_payloads,
-                         skip_duts_check))
+                         self._run.config.paygen_skip_delta_payloads))
 
   def _RunPaygenInProcess(self, channel, board, version, debug,
-                          disable_tests, skip_delta_payloads,
-                          skip_duts_check):
+                          disable_tests, skip_delta_payloads):
     """Runs the PaygenBuild and PaygenTest stage (if applicable)"""
     PaygenBuildStage(self._run, self.buildstore, board, channel, version, debug,
-                     disable_tests, skip_delta_payloads, skip_duts_check).Run()
+                     disable_tests, skip_delta_payloads).Run()
 
 
 class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
@@ -424,7 +417,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, board, channel, version, debug,
-               skip_testing, skip_delta_payloads, skip_duts_check, **kwargs):
+               skip_testing, skip_delta_payloads, **kwargs):
     """Init that accepts the channels argument, if present.
 
     Args:
@@ -436,7 +429,6 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
       debug: Flag telling if this is a real run, or a test run.
       skip_testing: Do not generate test artifacts or run payload tests.
       skip_delta_payloads: Skip generating delta payloads.
-      skip_duts_check: Do not check minimum available DUTs before tests.
     """
     super(PaygenBuildStage, self).__init__(
         builder_run, buildstore, board, suffix=channel.capitalize(), **kwargs)
@@ -447,7 +439,6 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
     self.debug = debug
     self.skip_testing = skip_testing
     self.skip_delta_payloads = skip_delta_payloads
-    self.skip_duts_check = skip_duts_check
 
   def PerformStage(self):
     """Invoke payload generation. If testing is enabled, schedule tests.
@@ -478,8 +469,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
             work_dir=tempdir,
             site_config=self._run.site_config,
             dry_run=self.debug,
-            skip_delta_payloads=self.skip_delta_payloads,
-            skip_duts_check=self.skip_duts_check)
+            skip_delta_payloads=self.skip_delta_payloads)
 
         testdata = paygen.CreatePayloads()
 
@@ -513,8 +503,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
               PaygenTestStage(
                   self._run, self.buildstore, suite_name, archive_board,
                   model.name, model.lab_board_name, self.channel,
-                  archive_build, self.skip_duts_check, self.debug,
-                  payload_test_configs,
+                  archive_build, self.debug, payload_test_configs,
                   config_lib.GetHWTestEnv(self._run.config,
                                           model_config=model)).Run()
           else:
@@ -522,8 +511,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
                 archive_board)
             PaygenTestStage(self._run, self.buildstore, suite_name,
                             archive_board, None, lab_board_name,
-                            self.channel, archive_build, self.skip_duts_check,
-                            self.debug,
+                            self.channel, archive_build, self.debug,
                             payload_test_configs,
                             config_lib.GetHWTestEnv(self._run.config)).Run()
 
@@ -550,8 +538,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
         PaygenTestStage(
             self._run, self.buildstore, suite_name, archive_board,
             model.name, model.lab_board_name, self.channel,
-            archive_build, self.skip_duts_check, self.debug,
-            non_fsi_configs,
+            archive_build, self.debug, non_fsi_configs,
             config_lib.GetHWTestEnv(self._run.config, model_config=model))
         for model in models
     ]
@@ -589,8 +576,8 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, suite_name, board, model,
-               lab_board_name, channel, build, skip_duts_check, debug,
-               payload_test_configs, test_env, **kwargs):
+               lab_board_name, channel, build, debug, payload_test_configs,
+               test_env, **kwargs):
     """Init that accepts the channels argument, if present.
 
     Args:
@@ -602,7 +589,6 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
       lab_board_name: The actual board label tested against in Autotest
       channel: Channel of payloads to generate ('stable', 'beta', etc)
       build: Version of payloads to generate.
-      skip_duts_check: Do not check minimum available DUTs before tests.
       debug: Boolean indicating if this is a test run or a real run.
       payload_test_configs: A list of test_params.TestConfig objects. Only used
                             for scheduling HWTest with skylab tool.
@@ -615,7 +601,6 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
     self.lab_board_name = lab_board_name
 
     self.build = build
-    self.skip_duts_check = skip_duts_check
     self.debug = debug
     self.payload_test_configs = payload_test_configs
     assert test_env in [constants.ENV_SKYLAB, constants.ENV_AUTOTEST]
@@ -637,11 +622,7 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
                                            self.lab_board_name,
                                            self.model,
                                            self.build,
-                                           self.skip_duts_check,
-                                           self.debug,
-                                           self.payload_test_configs,
-                                           self.test_env,
-                                           job_keyvals=self.GetJobKeyvals())
+                                           self.payload_test_configs)
 
   def _HandleStageException(self, exc_info):
     """Override and don't set status to FAIL but FORGIVEN instead."""

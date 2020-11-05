@@ -364,8 +364,8 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
       # Verify that we queue up work
       self.assertEqual(queue.put.call_args_list, [
           mock.call(
-              ('stable', 'auron-yuna', '0.0.1', False, False, False, True)),
-          mock.call(('beta', 'auron-yuna', '0.0.1', False, False, False, True))
+              ('stable', 'auron-yuna', '0.0.1', False, False, False)),
+          mock.call(('beta', 'auron-yuna', '0.0.1', False, False, False))
       ])
 
   def testPerformStageNoChannels(self):
@@ -393,8 +393,8 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
       # Notice that we didn't put anything in _wait_for_channel_signing, but
       # still got results right away.
       self.assertEqual(queue.put.call_args_list, [
-          mock.call(('foo', 'auron-yuna', '0.0.1', False, False, False, True)),
-          mock.call(('bar', 'auron-yuna', '0.0.1', False, False, False, True))
+          mock.call(('foo', 'auron-yuna', '0.0.1', False, False, False)),
+          mock.call(('bar', 'auron-yuna', '0.0.1', False, False, False)),
       ])
 
   def testPerformStageUnknownBoard(self):
@@ -423,8 +423,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-version',
           True,
           False,
-          False,
-          skip_duts_check=False)
+          False)
       # Ensure that PaygenTestStage is created and schedules the test suite
       # with the correct arguments.
       sched_tests.assert_called_once_with(
@@ -432,11 +431,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-archive-board',
           None,
           'foo-archive-build',
-          False,
-          True,
-          [self.payload_config1, self.payload_config2],
-          constants.ENV_AUTOTEST,
-          job_keyvals=mock.ANY)
+          [self.payload_config1, self.payload_config2])
 
     # Ensure arguments are properly converted and passed along.
     self.paygenBuildMock.assert_called_with(
@@ -447,8 +442,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
         work_dir=mock.ANY,
         site_config=stage._run.site_config,
         dry_run=True,
-        skip_delta_payloads=False,
-        skip_duts_check=False)
+        skip_delta_payloads=False)
 
   def testRunPaygenInProcessInSkylab(self):
     """Test that _RunPaygenInProcess works in Skylab."""
@@ -464,8 +458,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-version',
           True,
           False,
-          False,
-          skip_duts_check=False)
+          False)
       # Ensure that PaygenTestStage is created and schedules the test suite
       # with the correct arguments.
       sched_tests.assert_called_once_with(
@@ -473,11 +466,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-archive-board',
           None,
           'foo-archive-build',
-          False,
-          True,
-          [self.payload_config1, self.payload_config2],
-          constants.ENV_SKYLAB,
-          job_keyvals=mock.ANY)
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInProcessComplex(self):
     """Test that _RunPaygenInProcess with arguments that are more unusual."""
@@ -490,8 +479,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
         'foo-version',
         True,
         True,
-        True,
-        skip_duts_check=False)
+        True)
 
     # Ensure arguments are properly converted and passed along.
     self.paygenBuildMock.assert_called_with(
@@ -504,8 +492,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
         dry_run=True,
         work_dir=mock.ANY,
         site_config=stage._run.site_config,
-        skip_delta_payloads=True,
-        skip_duts_check=False)
+        skip_delta_payloads=True)
 
   def testRunPaygenInProcessWithUnifiedBuild(self):
     self._run.config.models = [
@@ -524,8 +511,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-version',
           True,
           False,
-          False,
-          skip_duts_check=False)
+          False)
       # Ensure that the first model from the unified build was selected
       # as the platform to be tested
       sched_tests.assert_called_once_with(
@@ -533,11 +519,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'board',
           'model2',
           'foo-archive-build',
-          False,
-          True,
-          [self.payload_config1, self.payload_config2],
-          constants.ENV_AUTOTEST,
-          job_keyvals=mock.ANY)
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInProcessWithUnifiedBuildInSkylab(self):
     """Test that _RunPaygenInProcess works for unibuild in Skylab."""
@@ -558,8 +540,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-version',
           True,
           False,
-          False,
-          skip_duts_check=False)
+          False)
       # Ensure that the first model from the unified build was selected
       # as the platform to be tested
       sched_tests.assert_called_once_with(
@@ -567,11 +548,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'board',
           'model2',
           'foo-archive-build',
-          False,
-          True,
-          [self.payload_config1, self.payload_config2],
-          constants.ENV_SKYLAB,
-          job_keyvals=mock.ANY)
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInParallelWithUnifiedBuild(self):
     # payload_config1 defines applicable_models as model1 and model3.
@@ -594,8 +571,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-version',
           True,
           False,
-          False,
-          skip_duts_check=False)
+          False)
       parallel_tests.assert_called_once_with([mock.ANY, mock.ANY, mock.ANY,
                                               mock.ANY])
 
@@ -606,7 +582,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
 
     # Call the method under test.
     stage._RunPaygenInProcess('foo', 'foo-board', 'foo-version', False, False,
-                              False, skip_duts_check=False)
+                              False)
 
     # Ensure arguments are properly converted and passed along.
     build = gspaths.Build(version='foo-version', board='foo-board',
@@ -618,8 +594,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
         work_dir=mock.ANY,
         site_config=stage._run.site_config,
         dry_run=False,
-        skip_delta_payloads=False,
-        skip_duts_check=False)
+        skip_delta_payloads=False)
 
   def testTestPayloadBuildSetCorrectly(self):
     """Test that test payload build is passed correctly to PaygenBuild."""
@@ -628,7 +603,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
 
     # Call the method under test.
     stage._RunPaygenInProcess('foo', 'foo-board', 'foo-version', True, False,
-                              False, skip_duts_check=False)
+                              False)
 
     # Ensure arguments are properly converted and passed along.
     build = gspaths.Build(version='foo-version', board='foo-board',
@@ -643,8 +618,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
         work_dir=mock.ANY,
         site_config=stage._run.site_config,
         dry_run=True,
-        skip_delta_payloads=False,
-        skip_duts_check=False)
+        skip_delta_payloads=False)
 
 
 class PaygenBuildStageTest(generic_stages_unittest.AbstractStageTestCase,
@@ -669,8 +643,7 @@ class PaygenBuildStageTest(generic_stages_unittest.AbstractStageTestCase,
         version='foo-version',
         debug=True,
         skip_testing=False,
-        skip_delta_payloads=False,
-        skip_duts_check=False)
+        skip_delta_payloads=False)
 
   def testStageName(self):
     """See if the stage name is correctly formed."""
@@ -703,7 +676,6 @@ class PaygenTestStageTest(generic_stages_unittest.AbstractStageTestCase,
         # when converting to release tools naming.
         channel='foochan-channel',
         build='foo-version',
-        skip_duts_check=False,
         debug=True,
         payload_test_configs=[],
         test_env=constants.ENV_AUTOTEST)

@@ -371,7 +371,7 @@ class PaygenBuild(object):
 
 
   def __init__(self, build, payload_build, work_dir, site_config, dry_run=False,
-               skip_delta_payloads=False, skip_duts_check=False):
+               skip_delta_payloads=False):
     """Initializer."""
     self._build = build
     self._work_dir = work_dir
@@ -382,7 +382,6 @@ class PaygenBuild(object):
     self._archive_board = None
     self._archive_build = None
     self._archive_build_uri = None
-    self._skip_duts_check = skip_duts_check
     self._payload_build = payload_build
     self._payload_test_configs = []
 
@@ -1165,9 +1164,8 @@ def ValidateBoardConfig(board):
     raise BoardNotConfigured(board)
 
 
-def ScheduleAutotestTests(suite_name, board, model, build, skip_duts_check,
-                          debug, payload_test_configs, test_env,
-                          job_keyvals=None):
+def ScheduleAutotestTests(suite_name, board, model, build,
+                          payload_test_configs):
   """Run the appropriate command to schedule the Autotests we have prepped.
 
   Args:
@@ -1175,12 +1173,8 @@ def ScheduleAutotestTests(suite_name, board, model, build, skip_duts_check,
     board: A string representing the name of the archive board.
     model: The model that will be tested against.
     build: A string representing the name of the archive build.
-    skip_duts_check: Deprecated (ignored).
-    debug: Deprecated (ignored).
     payload_test_configs: A list of test_params.TestConfig objets to be
                           scheduled with.
-    test_env: Deprecated (ignored).
-    job_keyvals: Deprecated (ignored).
   """
   test_plan = _TestPlan(
       payload_test_configs=payload_test_configs,
