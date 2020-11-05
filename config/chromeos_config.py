@@ -1709,7 +1709,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   WEEKLY = 'with 168h interval'  # 1 week interval
   MONTHLY = 'with 720h interval'  # 30 day interval
   # Override these template variables via kwargs.
-  CR50 = {'sign_types': ['cr50_firmware']}
+  GSC = {'sign_types': ['gsc_firmware']}
   firmware_branch_builders = [
       (MONTHLY, 'firmware-monroe-4921.B', ['monroe'], {}),
       (MONTHLY, 'firmware-enguarde-5216.201.B', ['enguarde'], {}),
@@ -1719,9 +1719,9 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-gnawty-5216.239.B', ['gnawty'], {}),
       (MONTHLY, 'firmware-winky-5216.265.B', ['winky'], {}),
       (MONTHLY, 'firmware-candy-5216.310.B', ['candy'], {}),
-      (MONTHLY, 'firmware-cr50-9308.B', ['reef'], CR50),
-      (MONTHLY, 'firmware-cr50-guc-factory-9308.26.B', ['reef'], CR50),
-      (MONTHLY, 'firmware-cr50-mp-release-9308.87.B', ['reef'], CR50),
+      (MONTHLY, 'firmware-cr50-9308.B', ['reef'], GSC),
+      (MONTHLY, 'firmware-cr50-guc-factory-9308.26.B', ['reef'], GSC),
+      (MONTHLY, 'firmware-cr50-mp-release-9308.87.B', ['reef'], GSC),
       (MONTHLY, 'firmware-banjo-5216.334.B', ['banjo'], {}),
       (MONTHLY, 'firmware-orco-5216.362.B', ['orco'], {}),
       (MONTHLY, 'firmware-sumo-5216.382.B', ['sumo'], {}),

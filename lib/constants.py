@@ -822,8 +822,8 @@ IMAGE_TYPE_FIRMWARE = 'firmware'
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
 # Standalone accessory microcontroller firmware (e.g. wireless keyboard).
 IMAGE_TYPE_ACCESSORY_RWSIG = 'accessory_rwsig'
-# Cr50 Firmware.
-IMAGE_TYPE_CR50_FIRMWARE = 'cr50_firmware'
+# GSC Firmware.
+IMAGE_TYPE_GSC_FIRMWARE = 'gsc_firmware'
 
 IMAGE_TYPE_TO_NAME = {
     IMAGE_TYPE_BASE: BASE_IMAGE_BIN,

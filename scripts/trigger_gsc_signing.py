@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Trigger signing for cr50 images.
+"""Trigger signing for gsc images.
 
 Causes signing to occur for a given artifact.
 """
@@ -26,8 +26,9 @@ from chromite.lib import gs
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-CR50_PRODUCTION_JOB = 'chromeos/packaging/sign-image'
-CR50_STAGING_JOB = 'chromeos/staging/staging-sign-image'
+GSC_PRODUCTION_JOB = 'chromeos/packaging/sign-image'
+GSC_STAGING_JOB = 'chromeos/staging/staging-sign-image'
+_IMAGE_TYPE = 'gsc_firmware'
 
 # See ../infra/proto/src/chromiumos/common.proto.
 _channels = {k.lower().replace('channel_', ''): v
@@ -42,7 +43,7 @@ _signer_types = {k.lower().replace('signer_', ''): v
 
 # See ../infra/proto/src/chromiumos/sign_image.proto.
 _target_types = {k.lower(): v
-                 for k, v in sign_image_pb2.Cr50Instructions.Target.items()
+                 for k, v in sign_image_pb2.GscInstructions.Target.items()
                  if v}
 
 
@@ -86,10 +87,6 @@ def GetParser():
 
   parser.add_argument(
       '--keyset', default='cr50-accessory-mp', help='The keyset to use.')
-
-  parser.add_argument(
-      '--image-type', choices=_image_types, default='cr50_firmware',
-      help='The image type.')
 
   parser.add_argument(
       '--signer-type', choices=_signer_types,
@@ -136,9 +133,6 @@ def main(argv):
   options.Freeze()
 
   passes = True
-  if options.image_type != 'cr50_firmware':
-    logging.error('Unsupported --image-type %s', options.image_type)
-    passes = False
 
   if options.target == 'node_locked':
     if not options.dev_ids:
@@ -156,16 +150,16 @@ def main(argv):
   if not passes:
     return 1
 
-  builder = CR50_STAGING_JOB if options.staging else CR50_PRODUCTION_JOB
+  builder = GSC_STAGING_JOB if options.staging else GSC_PRODUCTION_JOB
 
   properties = {
       'archive': options.archive,
       'build_target': {'name': options.build_target},
       'channel': _channels[options.channel],
-      'cr50_instructions': {
+      'gsc_instructions': {
           'target': _target_types[options.target],
       },
-      'image_type': _image_types[options.image_type],
+      'image_type': _image_types[_IMAGE_TYPE],
       'keyset': options.keyset,
       'signer_type': _signer_types[options.signer_type],
   }
@@ -180,6 +174,6 @@ def main(argv):
     LaunchOne(options.dry_run, builder, properties)
   else:
     for dev in options.dev_ids:
-      properties['cr50_instructions']['device_id'] = dev
+      properties['gsc_instructions']['device_id'] = dev
       LaunchOne(options.dry_run, builder, properties)
   return 0

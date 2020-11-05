@@ -56,7 +56,7 @@ _SUPPORTED_IMAGE_TYPES = (
     constants.IMAGE_TYPE_ACCESSORY_USBPD,
     constants.IMAGE_TYPE_ACCESSORY_RWSIG,
     constants.IMAGE_TYPE_BASE,
-    constants.IMAGE_TYPE_CR50_FIRMWARE,
+    constants.IMAGE_TYPE_GSC_FIRMWARE,
 )
 
 
@@ -408,7 +408,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
     firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_FIRMWARE)
     acc_usbpd_basename = _ImageNameBase(constants.IMAGE_TYPE_ACCESSORY_USBPD)
     acc_rwsig_basename = _ImageNameBase(constants.IMAGE_TYPE_ACCESSORY_RWSIG)
-    cr50_firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_CR50_FIRMWARE)
+    gsc_firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_GSC_FIRMWARE)
     test_basename = _ImageNameBase(constants.IMAGE_TYPE_TEST)
     base_basename = _ImageNameBase(constants.IMAGE_TYPE_BASE)
     hwqual_tarball = 'chromeos-hwqual-%s-%s.tar.bz2' % (board, versionrev)
@@ -447,8 +447,8 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
         ('firmware_from_source.tar.bz2', acc_rwsig_basename, 'tar.bz2',
          constants.IMAGE_TYPE_ACCESSORY_RWSIG),
 
-        ('firmware_from_source.tar.bz2', cr50_firmware_basename, 'tar.bz2',
-         constants.IMAGE_TYPE_CR50_FIRMWARE),
+        ('firmware_from_source.tar.bz2', gsc_firmware_basename, 'tar.bz2',
+         constants.IMAGE_TYPE_GSC_FIRMWARE),
     )
 
     # The following build artifacts are copied and marked for signing, if

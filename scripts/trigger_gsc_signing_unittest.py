@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unittests for trigger_cr50_signing.py."""
+"""Unittests for trigger_gsc_signing.py."""
 
 from __future__ import print_function
 
@@ -12,7 +12,7 @@ import sys
 
 import mock
 
-from chromite.scripts import trigger_cr50_signing as trigger
+from chromite.scripts import trigger_gsc_signing as trigger
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
 from chromite.lib import cros_logging as logging
@@ -63,13 +63,13 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
     args = ['--archive', 'gs://test/file.bin', '--keyset', 'test-keyset']
     self.assertEqual(0, trigger.main(args))
     launch.assert_called_once_with(
-        False, trigger.CR50_PRODUCTION_JOB, {
+        False, trigger.GSC_PRODUCTION_JOB, {
             'archive': 'gs://test/file.bin',
             'build_target': {'name': 'unknown'},
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
-            'cr50_instructions': {
-                'target': sign_image_pb2.Cr50Instructions.PREPVT},
-            'image_type': common_pb2.CR50_FIRMWARE,
+            'gsc_instructions': {
+                'target': sign_image_pb2.GscInstructions.PREPVT},
+            'image_type': common_pb2.GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -82,18 +82,18 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
     build_target = 'board'
     target = 'prepvt'
     signer = 'production'
-    image = 'cr50_firmware'
+    image = 'gsc_firmware'
 
     args = ['--archive', archive, '--keyset', keyset, '--channel', channel,
             '--build-target', build_target, '--target', target,
-            '--signer-type', signer, '--image-type', image]
+            '--signer-type', signer]
     self.assertEqual(0, trigger.main(args))
     launch.assert_called_once_with(
-        False, trigger.CR50_PRODUCTION_JOB, {
+        False, trigger.GSC_PRODUCTION_JOB, {
             'archive': archive,
             'build_target': {'name': build_target},
             'channel': trigger._channels[channel],
-            'cr50_instructions': {'target': trigger._target_types[target]},
+            'gsc_instructions': {'target': trigger._target_types[target]},
             'image_type': trigger._image_types[image],
             'keyset': keyset,
             'signer_type': trigger._signer_types[signer]})
@@ -105,13 +105,13 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
             '--staging']
     self.assertEqual(0, trigger.main(args))
     launch.assert_called_once_with(
-        False, trigger.CR50_STAGING_JOB, {
+        False, trigger.GSC_STAGING_JOB, {
             'archive': 'gs://test/file.bin',
             'build_target': {'name': 'unknown'},
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
-            'cr50_instructions': {
-                'target': sign_image_pb2.Cr50Instructions.PREPVT},
-            'image_type': common_pb2.CR50_FIRMWARE,
+            'gsc_instructions': {
+                'target': sign_image_pb2.GscInstructions.PREPVT},
+            'image_type': common_pb2.GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -122,13 +122,13 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
             '--dry-run']
     self.assertEqual(0, trigger.main(args))
     launch.assert_called_once_with(
-        True, trigger.CR50_PRODUCTION_JOB, {
+        True, trigger.GSC_PRODUCTION_JOB, {
             'archive': 'gs://test/file.bin',
             'build_target': {'name': 'unknown'},
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
-            'cr50_instructions': {
-                'target': sign_image_pb2.Cr50Instructions.PREPVT},
-            'image_type': common_pb2.CR50_FIRMWARE,
+            'gsc_instructions': {
+                'target': sign_image_pb2.GscInstructions.PREPVT},
+            'image_type': common_pb2.GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -171,21 +171,21 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
     expected_properties = [
         {'archive': 'gs://test/file.bin', 'build_target': {'name': 'unknown'},
          'channel': 0,
-         'cr50_instructions': {'target': trigger._target_types['node_locked'],
+         'gsc_instructions': {'target': trigger._target_types['node_locked'],
                                'device_id': '00000001-00001234'},
          'signer_type': sign_image_pb2.SIGNER_PRODUCTION,
-         'image_type': common_pb2.CR50_FIRMWARE, 'keyset': 'test-keyset'},
+         'image_type': common_pb2.GSC_FIRMWARE, 'keyset': 'test-keyset'},
         {'archive': 'gs://test/file.bin', 'build_target': {'name': 'unknown'},
          'channel': 0,
-         'cr50_instructions': {'target': trigger._target_types['node_locked'],
+         'gsc_instructions': {'target': trigger._target_types['node_locked'],
                                'device_id': '00000002-00000021'},
          'signer_type': sign_image_pb2.SIGNER_PRODUCTION,
-         'image_type': common_pb2.CR50_FIRMWARE, 'keyset': 'test-keyset'}]
+         'image_type': common_pb2.GSC_FIRMWARE, 'keyset': 'test-keyset'}]
     # Check the calls in two parts, since we need to convert the json string
     # back to a dict.
     self.assertEqual(self.rc.call_args_list, [
         mock.call(
-            ['bb', 'add', '-p', '@/dev/stdin', trigger.CR50_PRODUCTION_JOB],
+            ['bb', 'add', '-p', '@/dev/stdin', trigger.GSC_PRODUCTION_JOB],
             log_output=True, input=mock.ANY) for _ in expected_properties])
     self.assertEqual(
         expected_properties,

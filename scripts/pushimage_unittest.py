@@ -320,20 +320,20 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
     self.assertTrue(self.mark_mock.called)
     self.assertEqual(urls, EXPECTED)
 
-  def testSignTypesCr50Firmware(self):
+  def testSignTypesGscFirmware(self):
     """Only sign the requested type"""
     EXPECTED = {
         'canary': [
             ('gs://chromeos-releases/canary-channel/board2/5126.0.0/'
-             'ChromeOS-cr50_firmware-R34-5126.0.0-board2.instructions')],
+             'ChromeOS-gsc_firmware-R34-5126.0.0-board2.instructions')],
         'dev': [
             ('gs://chromeos-releases/dev-channel/board2/5126.0.0/'
-             'ChromeOS-cr50_firmware-R34-5126.0.0-board2.instructions')],
+             'ChromeOS-gsc_firmware-R34-5126.0.0-board2.instructions')],
     }
 
     with mock.patch.object(gs.GSContext, 'Exists', return_value=True):
       urls = pushimage.PushImage('/src', 'board2', 'R34-5126.0.0',
-                                 sign_types=['cr50_firmware'])
+                                 sign_types=['gsc_firmware'])
     self.assertEqual(self.gs_mock.call_count, 30)
     self.assertTrue(self.mark_mock.called)
     self.assertEqual(urls, EXPECTED)

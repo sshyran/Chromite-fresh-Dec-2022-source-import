@@ -12859,7 +12859,7 @@
         ],
         "schedule": "with 720h interval",
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "workspace_branch": "firmware-cr50-9308.B"
     },
@@ -12873,7 +12873,7 @@
         "luci_builder": "Try",
         "push_image": false,
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "suite_scheduling": false,
         "workspace_branch": "firmware-cr50-9308.B"
@@ -12885,7 +12885,7 @@
         ],
         "schedule": "with 720h interval",
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "workspace_branch": "firmware-cr50-guc-factory-9308.26.B"
     },
@@ -12899,7 +12899,7 @@
         "luci_builder": "Try",
         "push_image": false,
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "suite_scheduling": false,
         "workspace_branch": "firmware-cr50-guc-factory-9308.26.B"
@@ -12911,7 +12911,7 @@
         ],
         "schedule": "with 720h interval",
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "workspace_branch": "firmware-cr50-mp-release-9308.87.B"
     },
@@ -12925,7 +12925,7 @@
         "luci_builder": "Try",
         "push_image": false,
         "sign_types": [
-            "cr50_firmware"
+            "gsc_firmware"
         ],
         "suite_scheduling": false,
         "workspace_branch": "firmware-cr50-mp-release-9308.87.B"
