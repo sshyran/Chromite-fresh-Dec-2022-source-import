@@ -190,6 +190,19 @@ class _BackgroundTask(multiprocessing.Process):
     msg = 'Process failed to start in %d seconds' % self.STARTUP_TIMEOUT
     assert self._started.is_set(), msg
 
+  def _DecodeToUtf8(self, raw_bytes):
+    """Decode buffer to utf-8 in python2 or python3."""
+    try:
+      buf = raw_bytes.decode('utf-8', 'backslashreplace')
+    except TypeError:
+      # For python < 3.5 we may encounter errors decoding. One approximate
+      # workaround is to decode using latin1, then re-encode and decode
+      # with backslashreplace so that something like 0x80 ends up as
+      # u'\\x80' and not u'\x80'.
+      buf = raw_bytes.decode('latin1').encode(
+          'ascii', 'backslashreplace').decode('ascii')
+    return buf
+
   @classmethod
   def _DebugRunCommand(cls, cmd, **kwargs):
     """Swallow any exception run raises.
@@ -272,9 +285,11 @@ class _BackgroundTask(multiprocessing.Process):
     try:
       # Print output from subprocess.
       if not silent and logging.getLogger().isEnabledFor(logging.DEBUG):
-        with open(self._output.name, 'r') as f:
+        # Read as binary to avoid utf-8 decoding issues.
+        with open(self._output.name, 'rb') as f:
           for line in f:
-            logging.debug(line.rstrip('\n'))
+            textline = self._DecodeToUtf8(line)
+            logging.debug(textline.rstrip('\n'))
     finally:
       # Clean up our temporary file.
       osutils.SafeUnlink(self._output.name)
@@ -298,7 +313,8 @@ class _BackgroundTask(multiprocessing.Process):
       self._WaitForStartup()
       silent_death_time = time.time() + self.SILENT_TIMEOUT
       results = []
-      with open(self._output.name, 'r') as output:
+      # Read as binary to avoid utf-8 decoding issues.
+      with open(self._output.name, 'rb') as output:
         pos = 0
         running, exited_cleanly, task_errors, run_errors = (True, False, [], [])
         while running:
@@ -333,8 +349,7 @@ class _BackgroundTask(multiprocessing.Process):
 
           # Read output from process.
           output.seek(pos)
-          buf = output.read(_BUFSIZE)
-
+          buf = self._DecodeToUtf8(output.read(_BUFSIZE))
           if buf:
             silent_death_time = time.time() + self.SILENT_TIMEOUT
           elif running and time.time() > silent_death_time:
@@ -346,7 +361,7 @@ class _BackgroundTask(multiprocessing.Process):
 
             # Read remaining output from the process.
             output.seek(pos)
-            buf = output.read(_BUFSIZE)
+            buf = self._DecodeToUtf8(output.read(_BUFSIZE))
             running = False
 
           # Print output so far.
@@ -355,7 +370,7 @@ class _BackgroundTask(multiprocessing.Process):
             pos += len(buf)
             if len(buf) < _BUFSIZE:
               break
-            buf = output.read(_BUFSIZE)
+            buf = self._DecodeToUtf8(output.read(_BUFSIZE))
 
           # Print error messages if anything exceptional occurred.
           if run_errors:

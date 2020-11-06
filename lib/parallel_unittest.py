@@ -39,6 +39,14 @@ _NUM_WRITES = 100
 _NUM_THREADS = 50
 _TOTAL_BYTES = _NUM_THREADS * _NUM_WRITES * _BUFSIZE
 _GREETING = 'hello world'
+# Include x80 in the binary greeting since that can't be decoded
+# as utf-8 (see https://docs.python.org/3/howto/unicode.html).
+# We use _BINARY_GREETING_START to begin writing the message without
+# a continuation, then use _BINARY_GREETING have the full message with
+# the continuation character.
+_BINARY_GREETING_START = b'hello'
+_BINARY_GREETING = b'hello world\x80'
+_ESCAPED_GREETING = u'hello world\\x80'
 _SKIP_FLAKY_TESTS = True
 
 
@@ -196,7 +204,55 @@ class TestBackgroundWrapper(cros_test_lib.TestCase):
         return osutils.ReadFile(temp.name)
 
 
-class TestHelloWorld(TestBackgroundWrapper):
+class TestUnicodeContinuation(TestBackgroundWrapper):
+  """Test handling unicode continuation output from background environments."""
+
+  def setUp(self):
+    self.printed_message = multiprocessing.Event()
+
+  def _WriteMessageToStdout(self):
+    """Write binary message to stdout."""
+    if sys.version_info > (3,0):
+      # Python3 has sys.stdout.buffer to handle binary output.
+      sys.stdout.buffer.write(_BINARY_GREETING_START)
+    else:
+      # Python2 does not have sys.stdout.buffer, but sys.stdout.write can handle
+      # binary strings.
+      sys.stdout.write(_BINARY_GREETING_START)
+    sys.stdout.flush()
+    sys.stdout.seek(0)
+    self.printed_message.set()
+
+    # Wait for the parent process to read the output. Once the output
+    # has been read, try writing the full message again, including the
+    # continuation character, to be sure that rewritten output is not read
+    # twice and that the continuation(0x80) is handled.
+    time.sleep(parallel._BackgroundTask.PRINT_INTERVAL * 10)
+    # Like above, handle writing binary in Python2 or Python3.
+    if sys.version_info > (3,0):
+      sys.stdout.buffer.write(_BINARY_GREETING)
+    else:
+      sys.stdout.write(_BINARY_GREETING)
+    sys.stdout.flush()
+
+  def _ParallelWriteMessage(self):
+    """Write binary message to stdout using multiple processes."""
+    with parallel.Manager() as manager:
+      queue = manager.Queue()
+      with parallel.BackgroundTaskRunner(
+          self._WriteMessageToStdout, queue=queue):
+        queue.put([])
+        self.printed_message.wait()
+
+  def testParallelHelloWorld(self):
+    """Test that output is not written multiple times when seeking."""
+    out = self.wrapOutputTest(self._ParallelWriteMessage)
+    # Verify that the _BINARY_GREETING gets read (because it's decoded)
+    # as _ESCAPED_GREETING.
+    self.assertEqual(out, _ESCAPED_GREETING)
+
+
+class BackgroundHelloWorldTests(TestBackgroundWrapper):
   """Test HelloWorld output in various background environments."""
 
   def setUp(self):
