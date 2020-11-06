@@ -902,18 +902,6 @@
       ]
     },
     {
-      "name": "soraka-libcamera",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "swanky",
       "configs": [
         {
@@ -5513,6 +5501,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 311,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "soraka-libcamera",
+      "reference_board_name": "soraka-libcamera",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "soraka-libcamera",
+          "name": "soraka",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 464,
           "is_active": true
         }
       ]
