@@ -21,7 +21,6 @@ from xml import sax
 import six
 
 from chromite.lib import config_lib
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
@@ -232,13 +231,6 @@ def StripRefs(ref):
   ref = StripRefsHeads(ref, False)
   if ref.startswith('refs/remotes/'):
     return ref.split('/', 3)[-1]
-  return ref
-
-
-def NormalizeRef(ref):
-  """Convert git branch refs into fully qualified form."""
-  if ref and not ref.startswith('refs/'):
-    ref = 'refs/heads/%s' % ref
   return ref
 
 
@@ -457,12 +449,6 @@ class Manifest(object):
     attrs.setdefault('path', attrs['name'])
     for key in ('name', 'path'):
       attrs[key] = os.path.normpath(attrs[key])
-
-    if constants.MANIFEST_ATTR_BRANCHING in attrs:
-      assert (attrs[constants.MANIFEST_ATTR_BRANCHING] in
-              constants.MANIFEST_ATTR_BRANCHING_ALL)
-    else:
-      attrs[constants.MANIFEST_ATTR_BRANCHING] = ''
 
   @staticmethod
   def _GetManifestHash(source, ignore_missing=False):
