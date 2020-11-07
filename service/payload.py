@@ -65,18 +65,18 @@ class PayloadConfig(object):
     self.cache_dir = cache_dir
 
     # This block ensures that we have paths to the correct perm of images.
+    src_image_path = None
+    if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
+      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
+    elif isinstance(self.tgt_image, payload_pb2.SignedImage):
+      tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
+
     if self.delta_type == 'delta':
       if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
-        tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
         src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type)
-
-      elif isinstance(self.tgt_image, payload_pb2.SignedImage):
-        tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
+      if isinstance(self.tgt_image, payload_pb2.SignedImage):
         src_image_path = _GenSignedGSPath(self.src_image, self.image_type)
 
-    elif self.delta_type == 'full':
-      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
-      src_image_path = None
 
     # Set your output location.
     if self.upload:
