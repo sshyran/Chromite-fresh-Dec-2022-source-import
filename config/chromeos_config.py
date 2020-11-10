@@ -1244,19 +1244,24 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _pi_no_hwtest_boards = frozenset([
       'caroline',
       'coral',
+      'eve', # TODO(b/172889735): Temporary no_hwtest.
       'reef',
   ])
   _pi_no_hwtest_experimental_boards = frozenset([])
   _pi_hwtest_boards = frozenset([
-      'eve',
+      # TODO(b/172889735): Temporary disable eve because DUTs are reserved
+      # due to crbug/1141713. Instead, adding rammus to cover x86_64.
+      # 'eve',
       'grunt',
       'kevin',
+      'rammus',
   ])
   _pi_hwtest_experimental_boards = frozenset([])
   _pi_hwtest_skylab_boards = frozenset([
-      'eve',
+      # 'eve', TODO(b/172889735): See above.
       'grunt',
       'kevin',
+      'rammus',
   ])
   _pi_vmtest_boards = frozenset([
       'betty-pi-arc',
