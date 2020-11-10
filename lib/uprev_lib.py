@@ -817,8 +817,11 @@ def uprev_workon_ebuild_to_version(
     raise EbuildManifestError(
         f'Unable to update manifest for {package}: {e.stderr}')
 
-  result = UprevResult(
-      outcome=outcome, changed_files=[new_ebuild_src_path, manifest_src_path])
+  changed_files = [new_ebuild_src_path]
+  if os.path.exists(manifest_src_path):
+    changed_files.append(manifest_src_path)
+
+  result = UprevResult(outcome=outcome, changed_files=changed_files)
 
   if stable_ebuild is not None:
     result.changed_files.append(stable_ebuild.ebuild_path)
