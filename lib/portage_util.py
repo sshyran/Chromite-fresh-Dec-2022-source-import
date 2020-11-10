@@ -356,6 +356,10 @@ class EBuild(object):
       r'.*-(([0-9][0-9a-z_.]*)(-r[0-9]+)?)[.]ebuild')
   _WORKON_COMMIT_PATTERN = re.compile(r'^CROS_WORKON_COMMIT=')
 
+  # TODO(crbug.com/1125947): Drop CROS_WORKON_BLACKLIST.
+  _RE_MANUAL_UPREV = re.compile(
+      r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
+
   # These eclass files imply that src_test is defined for an ebuild.
   _ECLASS_IMPLIES_TEST = set((
       'cros-common.mk',
@@ -514,9 +518,6 @@ class EBuild(object):
     in the KEYWORDS setting in the ebuild. An ebuild is considered blacklisted
     if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
     """
-    # TODO(crbug.com/1125947): Drop CROS_WORKON_BLACKLIST.
-    re_manual_uprev = re.compile(
-        r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
     is_workon = False
     is_stable = False
     is_blacklisted = False
@@ -546,7 +547,7 @@ class EBuild(object):
           for keyword in line.split():
             if not keyword.startswith('~') and keyword != '-*':
               is_stable = True
-        elif re_manual_uprev.match(line.strip()):
+        elif EBuild._RE_MANUAL_UPREV.match(line.strip()):
           is_blacklisted = True
         elif (line.startswith('src_test()') or
               line.startswith('platform_pkg_test()') or
