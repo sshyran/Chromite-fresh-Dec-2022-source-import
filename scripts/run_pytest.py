@@ -35,7 +35,6 @@ def main(argv):
     ensure_chroot_exists()
     re_execute_inside_chroot(argv)
   else:
-    os.chdir(constants.CHROMITE_DIR)
     pytest_args += ['--no-chroot']
 
   # This is a cheesy hack to make sure gsutil is populated in the cache before
@@ -81,15 +80,22 @@ def re_execute_with_namespace(argv, network=False):
 
 def re_execute_inside_chroot(argv):
   """Re-execute the test wrapper inside the chroot."""
+  if cros_build_lib.IsInsideChroot():
+    return
+
+  target = os.path.join(constants.CHROMITE_DIR, 'scripts', 'run_pytest')
+  relpath = os.path.relpath(target, '.')
+  # If we're in the scripts dir, make sure we always have a relative path,
+  # otherwise cros_sdk will search $PATH and fail.
+  if os.path.sep not in relpath:
+    relpath = os.path.join('.', relpath)
   cmd = [
       'cros_sdk',
+      '--working-dir', '.',
       '--',
-      os.path.join('..', '..', 'chromite', 'run_pytest'),
+      relpath,
   ]
-  if not cros_build_lib.IsInsideChroot():
-    os.execvp(cmd[0], cmd + argv)
-  else:
-    os.chdir(constants.CHROMITE_DIR)
+  os.execvp(cmd[0], cmd + argv)
 
 
 def ensure_chroot_exists():
