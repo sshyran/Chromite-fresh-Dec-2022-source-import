@@ -303,18 +303,29 @@ ANDROID_PI_BUILD_TARGETS = {
 }
 ANDROID_VMMST_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
+    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+    # installed on the board, but not into the VM.
     'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
-                         r'(\.zip|/XkbToKcmConverter)$'),
+                         (r'(\.zip|/XkbToKcmConverter'
+                          r'|/org.chromium.arc.cts.helpers.apk)$')),
 }
 ANDROID_VMRVC_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
+    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+    # installed on the board, but not into the VM.
     'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM64': ('linux-bertha_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-bertha_x86_64-user', r'(\.zip|/XkbToKcmConverter)$'),
+    'ARM64': ('linux-bertha_arm64-user',
+              (r'(\.zip|/XkbToKcmConverter'
+               r'|/org.chromium.arc.cts.helpers.apk)$')),
+    'X86_64': ('linux-bertha_x86_64-user',
+               (r'(\.zip|/XkbToKcmConverter'
+                r'|/org.chromium.arc.cts.helpers.apk)$')),
     'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
-                        r'(\.zip|/XkbToKcmConverter)$'),
+                        (r'(\.zip|/XkbToKcmConverter'
+                         r'|/org.chromium.arc.cts.helpers.apk)$')),
     'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
-                         r'(\.zip|/XkbToKcmConverter)$'),
+                         (r'(\.zip|/XkbToKcmConverter'
+                          r'|/org.chromium.arc.cts.helpers.apk)$')),
 }
 
 # These refer to *_TARGET variables in Android ebuild files, used when
