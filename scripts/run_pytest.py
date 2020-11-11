@@ -7,13 +7,13 @@
 
 from __future__ import print_function
 
-import argparse
 import os
 import sys
 
 import pytest  # pylint: disable=import-error
 
 from chromite.lib import cgroups
+from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
@@ -23,7 +23,10 @@ from chromite.lib import namespaces
 
 def main(argv):
   parser = get_parser()
-  opts, pytest_args = parser.parse_known_args()
+  opts = parser.parse_args()
+
+  pytest_args = opts.pytest_args
+
   if opts.quick:
     if not cros_build_lib.IsInsideChroot() and opts.chroot:
       logging.warning('Tests start up faster when run from inside the chroot.')
@@ -98,10 +101,9 @@ def ensure_chroot_exists():
 
 def get_parser():
   """Build the parser for command line arguments."""
-  parser = argparse.ArgumentParser(
+  parser = commandline.ArgumentParser(
       description=__doc__,
-      epilog='To see the help output for pytest, run `pytest --help` inside '
-      'the chroot.',
+      epilog='To see the help output for pytest:\n$ %(prog)s -- --help',
   )
   parser.add_argument(
       '--quickstart',
@@ -116,5 +118,11 @@ def get_parser():
       action='store_false',
       help="Don't initialize or enter a chroot for the test invocation. May "
       'cause tests to unexpectedly fail!',
+  )
+  parser.add_argument(
+      'pytest_args',
+      metavar='pytest arguments',
+      nargs='*',
+      help='Arguments to pass down to pytest (use -- to help separate)',
   )
   return parser
