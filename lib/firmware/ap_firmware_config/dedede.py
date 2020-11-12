@@ -70,7 +70,8 @@ def get_commands(servo):
     dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
-    programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
+    dut_control_off.append(['power_state:reset'])
+    programmer = 'raiden_debug_spi:target=AP,custom_rst=True,serial=%s' % servo.serial
   else:
     raise Exception('%s not supported' % servo.version)
 
