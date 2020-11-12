@@ -86,20 +86,23 @@ def GeneratePayload(input_proto, output_proto, config):
     return controller.RETURN_CODE_VALID_INPUT
 
   # Do payload generation.
-  paygen_ok = payload_config.GeneratePayload()
-  _SetGeneratePayloadOutputProto(output_proto, paygen_ok)
+  local_path, remote_uri = payload_config.GeneratePayload()
+  _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
 
-  if paygen_ok:
+  if remote_uri or not upload and local_path:
     return controller.RETURN_CODE_SUCCESS
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
 
-def _SetGeneratePayloadOutputProto(output_proto, generate_payload_ok):
+def _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri):
   """Set the output proto with the results from the service class.
 
   Args:
     output_proto (PayloadGenerationResult_pb2): The output proto.
-    generate_payload_ok (bool): value to set output_proto.success.
+    local_path (str): set output_proto with the local path, or None.
+    remote_uri (str): set output_proto with the remote uri, or None.
   """
-  output_proto.success = generate_payload_ok
+  output_proto.success = True
+  output_proto.local_path = local_path
+  output_proto.remote_uri = remote_uri

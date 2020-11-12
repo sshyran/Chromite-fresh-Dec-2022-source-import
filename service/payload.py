@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 from copy import deepcopy
+import os
 
 from chromite.lib import chroot_util
 from chromite.lib.paygen import gspaths
@@ -97,14 +98,22 @@ class PayloadConfig(object):
 
 
   def GeneratePayload(self):
-    """Do payload generation (& maybe sign) on Google Storage cros images.
+    """Do payload generation (& maybe sign) on Google Storage CrOS images.
 
     Returns:
-      True if successful, raises otherwise.
+      A tuple of (string, string) containing:
+          The location of the local generated artifact.
+            (e.g. /tmp/wdjaio/delta.bin)
+          The remote location that the payload was uploaded or None.
+            (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
     """
     should_sign = self.keyset != ''
 
-    with chroot_util.TempDirInChroot() as temp_dir:
+    # Leave the generated artifact local. This is ok because if we're testing
+    # it's likely we want the artifact anyway, and in production this is ran on
+    # single shot bots in the context of an overlayfs and will get cleaned up
+    # anyway.
+    with chroot_util.TempDirInChroot(delete=False) as temp_dir:
       self.paygen = paygen_payload_lib.PaygenPayload(
           self.payload,
           temp_dir,
@@ -112,9 +121,12 @@ class PayloadConfig(object):
           verify=self.verify,
           upload=self.upload,
           cache_dir=self.cache_dir)
-      self.paygen.Run()
 
-    return True
+      # We run and expect failures to raise, so if we get passed
+      # self.paygen.Run() then it's safe to assume the bin is in place.
+      local_path = os.path.join(temp_dir, 'delta.bin')
+      remote_uri = self.paygen.Run()
+      return (local_path, remote_uri)
 
 
 class GeneratePayloadResult(object):

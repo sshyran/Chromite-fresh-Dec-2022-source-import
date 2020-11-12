@@ -946,7 +946,12 @@ class PaygenPayload(object):
     urilib.Copy(self.description_file, self._JsonUri(self.payload.uri))
 
   def Run(self):
-    """Create, verify and upload the results."""
+    """Create, verify and upload the results.
+
+    Returns:
+        A string uri to payload, if uploaded, otherwise None.
+    """
+    ret_uri = None
     logging.info('* Starting payload generation')
     start_time = datetime.datetime.now()
 
@@ -955,10 +960,13 @@ class PaygenPayload(object):
       self._VerifyPayload()
     if self._upload:
       self._UploadResults()
+      ret_uri = self.payload.uri
 
     end_time = datetime.datetime.now()
     logging.info('* Total elapsed payload generation in %s',
                  end_time - start_time)
+    return ret_uri
+
 
 def CreateAndUploadPayload(payload, sign=True, verify=True):
   """Helper to create a PaygenPayloadLib instance and use it.

@@ -17,7 +17,7 @@ from chromite.lib.paygen import paygen_payload_lib
 
 
 class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
-  """Unittests for SetBinhost."""
+  """Unittests for PayloadApi."""
 
   def setUp(self):
     self.response = payload_pb2.GenerationResponse()
@@ -44,7 +44,10 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         keyset='update_signer',
         dryrun=False)
 
-    self.result = payload_pb2.GenerationResponse()
+    self.result = payload_pb2.GenerationResponse(
+        success=True,
+        local_path='/tmp/aohiwdadoi/delta.bin',
+        remote_uri='gs://something')
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
@@ -56,7 +59,8 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
   def testCallSucceeds(self):
     """Check that a call is made successfully."""
     # Deep patch the paygen lib, this is a full run through service as well.
-    self.PatchObject(paygen_payload_lib, 'PaygenPayload')
+    patch_obj = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
+    patch_obj.return_value.Run.return_value = 'gs://something'
     res = payload.GeneratePayload(self.req, self.result, self.api_config)
     self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
 
