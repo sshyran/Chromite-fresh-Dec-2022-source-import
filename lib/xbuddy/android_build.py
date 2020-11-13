@@ -171,7 +171,7 @@ class BuildAccessor(object):
 
   @classmethod
   @retry.retry(Exception, timeout_min=QUERY_TIMEOUT_MINS,
-               blacklist=[AndroidBuildFetchError])
+               denylist=[AndroidBuildFetchError])
   def GetLatestBuildID(cls, target, branch):
     """Get the latest build ID for the given target and branch.
 
