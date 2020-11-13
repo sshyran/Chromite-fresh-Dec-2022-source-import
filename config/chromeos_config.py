@@ -3099,23 +3099,12 @@ def BranchScheduleConfig():
         'chrome-silvermont-release-afdo-verify',
         'chrome-airmont-release-afdo-verify',
         'chrome-broadwell-release-afdo-verify']),
-
-      ('release-R85-13310.B',
-       ['grunt-android-pi-pre-flight-branch'],
-       'chell-chrome-no-afdo-uprev-pre-flight-branch',
-       ['orderfile-generate-toolchain',
-        'orderfile-verify-toolchain'],
-       ['benchmark-afdo-generate',
-        'chrome-silvermont-release-afdo-verify',
-        'chrome-airmont-release-afdo-verify',
-        'chrome-broadwell-release-afdo-verify']),
   ]
 
   PFQ_SCHEDULE = [
       '0 3,7,11,15,19,23 * * *',
       '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
-      '0 3,7,11,15,19,23 * * *',
   ]
 
   ORDERFILE_SCHEDULES = [
