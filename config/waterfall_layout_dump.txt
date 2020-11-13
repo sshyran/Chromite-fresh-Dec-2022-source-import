@@ -355,6 +355,7 @@
     octopus-release
     orco-release
     palkia-release
+    puff-borealis-release
     puff-macrophage-release
     puff-moblab-release
     puff-release
@@ -1515,6 +1516,7 @@
     octopus-release-tryjob
     orco-release-tryjob
     palkia-release-tryjob
+    puff-borealis-release-tryjob
     puff-macrophage-release-tryjob
     puff-moblab-release-tryjob
     puff-release-tryjob
@@ -1686,6 +1688,12 @@
   poppy-payloads-tryjob
   poppy-release-tryjob
   poppy-unittest-stress
+  puff-borealis-full-tryjob
+  puff-borealis-llvm-next-toolchain-tryjob
+  puff-borealis-llvm-toolchain-tryjob
+  puff-borealis-payloads-tryjob
+  puff-borealis-release-tryjob
+  puff-borealis-unittest-stress
   puff-factory-puff-13329.B-factorybranch-tryjob
   puff-full-tryjob
   puff-llvm-next-toolchain-tryjob
