@@ -100,9 +100,9 @@ def _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri):
 
   Args:
     output_proto (PayloadGenerationResult_pb2): The output proto.
-    local_path (str): set output_proto with the local path, or None.
-    remote_uri (str): set output_proto with the remote uri, or None.
+    local_path (str): set output_proto with the local path, or ''.
+    remote_uri (str): set output_proto with the remote uri, or ''.
   """
   output_proto.success = True
-  output_proto.local_path = local_path
-  output_proto.remote_uri = remote_uri
+  output_proto.local_path = local_path or ''
+  output_proto.remote_uri = remote_uri or ''
