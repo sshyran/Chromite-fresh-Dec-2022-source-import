@@ -3073,6 +3073,12 @@ def BranchScheduleConfig():
   # CWP profiles.
 
   RELEASES = [
+      ('release-R88-13597.B',
+       ['grunt-android-pi-pre-flight-branch'],
+       '',
+       [],
+       []),
+
       ('release-R87-13505.B',
        ['grunt-android-pi-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
@@ -3103,22 +3109,6 @@ def BranchScheduleConfig():
         'chrome-silvermont-release-afdo-verify',
         'chrome-airmont-release-afdo-verify',
         'chrome-broadwell-release-afdo-verify']),
-
-      ('release-R84-13099.B',
-       ['grunt-android-pi-pre-flight-branch'],
-       'chell-chrome-no-afdo-uprev-pre-flight-branch',
-       ['orderfile-generate-toolchain',
-        'orderfile-verify-toolchain'],
-       ['benchmark-afdo-generate',
-        'chrome-silvermont-release-afdo-verify',
-        'chrome-airmont-release-afdo-verify',
-        'chrome-broadwell-release-afdo-verify']),
-  ]
-
-  RELEASE_SCHEDULES = [
-      'triggered',
-      'triggered',
-      'triggered',
   ]
 
   PFQ_SCHEDULE = [
@@ -3143,43 +3133,43 @@ def BranchScheduleConfig():
       '0 3/12 * * *',
   ]
 
+  assert len(RELEASES) == len(PFQ_SCHEDULE)
   for ((branch, android_pfq, chrome_pfq, orderfile, afdo),
-       schedule, android_schedule) in zip(
-           RELEASES, RELEASE_SCHEDULES, PFQ_SCHEDULE):
+       android_schedule) in zip(
+           RELEASES, PFQ_SCHEDULE):
     release_num = re.search(r'release-R(\d+)-.*', branch).group(1)
-    # The oldest branch is only triggered by a Chrome uprev.
-    if schedule == 'triggered':
-      branch_builds.append(
-          [branch, 'master-release',
-           config_lib.DISPLAY_LABEL_RELEASE, schedule,
-           [[('https://chromium.googlesource.com/chromiumos/' +
-              'overlays/chromiumos-overlay'),
-             [r'regexp:refs/heads/%s\\..*' % branch],
-             [('chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild'
-               % release_num)]]]])
-    else:
-      branch_builds.append([branch, 'master-release',
-                            config_lib.DISPLAY_LABEL_RELEASE,
-                            schedule, None])
+    # All branches are only triggered by a Chrome uprev, or manually.
+    branch_builds.append(
+        [branch, 'master-release',
+         config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
+         [[('https://chromium.googlesource.com/chromiumos/' +
+            'overlays/chromiumos-overlay'),
+           [r'regexp:refs/heads/%s\\..*' % branch],
+           [('chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild'
+             % release_num)]]]])
     branch_builds.extend([[branch, pfq,
                            config_lib.DISPLAY_LABEL_RELEASE,
                            android_schedule, None]
                           for pfq in android_pfq])
 
-    # We extract the release number from the branch, and use it to
-    # watch for new chrome tags to trigger Chrome PFQ builds.
-    # release-R71-11151.B -> 71 -> regexp:refs/tags/71\\..*
-    branch_builds.append(
-        [branch, chrome_pfq, config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
-         [['https://chromium.googlesource.com/chromium/src',
-           [r'regexp:refs/tags/%s\\..*' % release_num]]]])
+    if chrome_pfq:
+      # We extract the release number from the branch, and use it to
+      # watch for new chrome tags to trigger Chrome PFQ builds.
+      # release-R71-11151.B -> 71 -> regexp:refs/tags/71\\..*
+      # Chrome PFQ is retired as of R88, so chrome_pfq may be empty.
+      branch_builds.append(
+          [branch, chrome_pfq, config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
+           [['https://chromium.googlesource.com/chromium/src',
+             [r'regexp:refs/tags/%s\\..*' % release_num]]]])
     if orderfile:
+      assert len(orderfile) == len(ORDERFILE_SCHEDULES)
       for b, s in zip(orderfile, ORDERFILE_SCHEDULES):
         branch_builds.append([branch, b,
                               config_lib.DISPLAY_LABEL_RELEASE,
                               s, None])
 
     if afdo:
+      assert len(afdo) == len(AFDO_SCHEDULES)
       for b, s in zip(afdo, AFDO_SCHEDULES):
         branch_builds.append([branch, b,
                               config_lib.DISPLAY_LABEL_RELEASE,
