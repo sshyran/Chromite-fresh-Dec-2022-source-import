@@ -148,7 +148,7 @@ class ChromiumOSUpdater(BaseUpdater):
                reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
                staging_server=None, clear_tpm_owner=False,
-               resolve_app_id_mismatch=False):
+               resolve_app_id_mismatch=False, ignore_appid=False):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
     Args:
@@ -186,6 +186,10 @@ class ChromiumOSUpdater(BaseUpdater):
       resolve_app_id_mismatch: Fixes the update payloads App ID if it is
           different than the devices's App ID so the nebraska.py can properly
           create a response.
+      ignore_appid: True to tell Nebraska to ignore the update request's
+          App ID. This allows mismatching the source and target version boards.
+          One specific use case is updating between <board> and
+          <board>-kernelnext images which have different App IDs.
     """
     super(ChromiumOSUpdater, self).__init__(device, payload_dir)
 
@@ -229,6 +233,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
     self._clear_tpm_owner = clear_tpm_owner
     self._resolve_app_id_mismatch = resolve_app_id_mismatch
+    self._ignore_appid = ignore_appid
 
   @property
   def is_au_endtoendtest(self):
@@ -434,7 +439,8 @@ class ChromiumOSUpdater(BaseUpdater):
     nebraska = nebraska_wrapper.RemoteNebraskaWrapper(
         self.device, nebraska_bin=nebraska_bin,
         update_payloads_address='file://' + self.device_payload_dir,
-        update_metadata_dir=self.device_payload_dir)
+        update_metadata_dir=self.device_payload_dir,
+        ignore_appid=self._ignore_appid)
 
     try:
       nebraska.Start()
