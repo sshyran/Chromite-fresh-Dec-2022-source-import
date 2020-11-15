@@ -350,7 +350,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
     else:
       # Download from googlesource.
       nebraska_url_path = '%s/+/%s/%s?format=text' % (
-          'chromiumos/platform/dev-util', 'refs/heads/master',
+          'chromiumos/platform/dev-util', 'HEAD',
           'nebraska/nebraska.py')
       contents_b64 = gob_util.FetchUrl(constants.EXTERNAL_GOB_HOST,
                                        nebraska_url_path)

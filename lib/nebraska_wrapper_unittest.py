@@ -202,8 +202,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     nebraska_wrapper.RemoteNebraskaWrapper.GetNebraskaSrcFile(download_dir)
     fetch_mock.assert_called_with(
         'chromium.googlesource.com',
-        'chromiumos/platform/dev-util/+/'
-        'refs/heads/master/nebraska/nebraska.py?format=text')
+        'chromiumos/platform/dev-util/+/HEAD/nebraska/nebraska.py?format=text')
 
   @cros_test_lib.NetworkTest()
   @mock.patch.object(path_util, 'DetermineCheckout',
