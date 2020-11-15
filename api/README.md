@@ -10,8 +10,7 @@ The Build API is a CLI-only, proto based API to execute build steps.
 It was created to provide a stable interface for the CI builders.
 The proto files (in [chromite/infra/proto](#chromite/infra/proto/)) define the
 services/RPCs provided by the API.
-The modules in
-[controller/](https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/api/controller/)
+The modules in [controller/](./controller/)
 are the entry points for the RPCs defined in the proto files.
 The Build API is invoked via the `build_api` script, which takes 4 arguments;
 the name of the endpoint being called (e.g. chromite.api.SdkService/Create),
@@ -21,7 +20,7 @@ to files containing the respective JSON or protobuf-binary encoded messages.
 ### Calling An Endpoint
 
 To manually call an endpoint, e.g. for testing, the
-[gen_call_scripts](https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/api/contrib/README.md#gen_call_scripts_call_templates_and-call_scripts)
+[gen_call_scripts](./contrib/README.md#gen_call_scripts_call_templates_and-call_scripts)
 process is recommended, it makes calling a specific endpoint much
 simpler. Please also contribute new example input files when you
 add new endpoints!
@@ -192,6 +191,7 @@ When we do go back to the pinned revision:
    the CLs.
 
 ### gen/
+
 The generated protobuf messages.
 
 **Do not edit files in this package directly!**
@@ -212,5 +212,4 @@ service(s), then translates their output to a specified response format.
 ### contrib/
 
 This directory contains scripts that may not be 100% supported yet.
-See [`contrib/README.md`](https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/api/contrib/README.md)
-for information about the scripts.
+See [contrib/README.md](./contrib/README.md) for information about the scripts.

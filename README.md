@@ -11,7 +11,7 @@ Chromite development.
 
 Before you get started on Chromite, we recommend that you go through ChromeOS
 developer guides at
-[external (first)](https://chromium.googlesource.com/chromiumos/docs/+/master/developer_guide.md)
+[external (first)](https://chromium.googlesource.com/chromiumos/docs/+/HEAD/developer_guide.md)
 and then [goto/chromeos-building](http://goto/chromeos-building) for internal.
 The
 [Gerrit starter guide](https://sites.google.com/a/google.com/android/development/repo-gerrit-git-workflow)

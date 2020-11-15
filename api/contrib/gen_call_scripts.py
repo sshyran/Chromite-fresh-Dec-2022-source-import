@@ -16,8 +16,8 @@ When not found, it will write out an empty json dict to the input file.
 
 See the api/contrib and api/ READMEs for more info about the gen_call_scripts
 script and the Build API itself, respectively.
-https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/api/contrib/README.md
-https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/api/README.md
+https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/contrib/README.md
+https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/README.md
 """
 
 from __future__ import print_function

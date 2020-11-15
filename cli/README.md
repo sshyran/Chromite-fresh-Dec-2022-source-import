@@ -116,7 +116,7 @@ the standards.
 The build target option comes with parsing support in the form of the
 build_target type.
 The build target type will validate the name and construct a
-[BuildTarget](https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/master/lib/build_target_lib.py)
+[BuildTarget](/lib/build_target_lib.py)
 instance to assign to the variable rather than just storing the string.
 
 ```python

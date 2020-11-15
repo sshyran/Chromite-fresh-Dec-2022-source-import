@@ -72,8 +72,7 @@ ALL_DISPLAY_LABEL = {
 
 # These values must be kept in sync with the ChromeOS LUCI builders.
 #
-# https://chrome-internal.googlesource.com/chromeos/
-#     infra/config/+/refs/heads/master/luci/cr-buildbucket.cfg
+# https://chrome-internal.googlesource.com/chromeos/infra/config/+/HEAD/luci/cr-buildbucket.cfg
 LUCI_BUILDER_FACTORY = 'Factory'
 LUCI_BUILDER_FULL = 'Full'
 LUCI_BUILDER_INCREMENTAL = 'Incremental'

@@ -7,8 +7,8 @@ The real files used by releases live in [crostools/signer_instructions/].
 The program managers would prefer to keep them internal for now.
 ***
 
-[chromite/signing/signer_instructions/]: https://chromium.googlesource.com/chromiumos/chromite/+/master/signing/signer_instructions/
-[crostools/signer_instructions/]: https://chrome-internal.googlesource.com/chromeos/crostools/+/master/signer_instructions/
+[chromite/signing/signer_instructions/]: ./
+[crostools/signer_instructions/]: https://chrome-internal.googlesource.com/chromeos/crostools/+/HEAD/signer_instructions/
 
 ## Overview
 
@@ -100,6 +100,6 @@ input_files = hoho/ec.bin
 ## References
 
 For details on the fields that the signer uses:
-https://sites.google.com/a/google.com/chromeos/resources/engineering/releng/signer-documentation
+http://go/cros-sites-archive/resources/engineering/releng/signer-documentation
 
 [pushimage]: /scripts/pushimage.py
