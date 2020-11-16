@@ -219,8 +219,20 @@ GROUP_BASELINE_JETSTREAM = dict((e.group, e) for e in (
     # Add gwifi users to a common gwifi group to allow access of some shared
     # resources by multiple users.
     GroupEntry(group='gwifi', gid=2028,
-               users={'gwifi', 'ap-controller', 'ap-update-manager',
-                      'ap-ipv6'}),
+               users={'gwifi', 'ap-api-server', 'ap-backhaul-manager',
+                      'ap-bridge-client', 'ap-certificate', 'ap-coex',
+                      'ap-controller', 'ap-csi-collector', 'ap-csi-inference',
+                      'ap-csi-preproc', 'ap-diagnostics', 'ap-dns',
+                      'ap-fresh-dns', 'ap-gpn-client', 'ap-gpn-manager',
+                      'ap-group-monitor', 'ap-hal', 'ap-health-monitor',
+                      'ap-https-server', 'ap-ipv6', 'ap-lb-ip-filter',
+                      'ap-lb-update-manager', 'ap-monitor', 'ap-monlog',
+                      'ap-net-acc-manager', 'ap-net-controller',
+                      'ap-net-monitor', 'ap-pal', 'ap-pcap-manager', 'ap-pfd',
+                      'ap-pipe-reader', 'ap-qos-monitor', 'ap-rodizio',
+                      'ap-taxonomy', 'ap-update-manager', 'ap-vorlon-client',
+                      'ap-wifi-diagnostics', 'ap-wifi-manager',
+                      'ap-wireless-optimizer', 'gdisp'}),
 ))
 
 # rialtod:!:400:rialto
