@@ -5727,6 +5727,14 @@
         },
         {
           "board_name": "volteer",
+          "name": "elemi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
           "name": "halvor",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -5823,6 +5831,14 @@
         },
         {
           "board_name": "volteer",
+          "name": "voema",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
           "name": "volta",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -5884,6 +5900,14 @@
         {
           "board_name": "volteer-kernelnext",
           "name": "eldrid",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "elemi",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 451,
@@ -5964,6 +5988,14 @@
         {
           "board_name": "volteer-kernelnext",
           "name": "trondo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "voema",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 451,
