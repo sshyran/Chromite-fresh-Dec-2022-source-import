@@ -73,6 +73,8 @@ def ParseGomaConfig(goma_message, chroot_path):
   if goma_message.goma_approach == common_pb2.GomaConfig.RBE_STAGING:
     goma_approach = goma_util.GomaApproach('?staging',
                                            'staging-goma.chromium.org', True)
+  elif goma_message.goma_approach == common_pb2.GomaConfig.RBE_CHROMEOS:
+    goma_approach = goma_util.GomaApproach('?cros', 'goma.chromium.org', True)
   else:
     goma_approach = goma_util.GomaApproach('?prod', 'goma.chromium.org', True)
 
