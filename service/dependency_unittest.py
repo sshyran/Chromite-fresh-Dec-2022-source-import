@@ -142,9 +142,6 @@ class DependencyTests(cros_test_lib.MockTestCase):
     actual_deps = dependency.GetDependencies(sysroot_path, build_target)
     expected_deps = [
         'commander/darthvader-1.49.3.3',
-        'troop/clone',
-        'troop/robot',
-        'equipment/jetpack',
         'troop/clone-1.2.3',
         'troop/robot-2.3.4',
         'equipment/jetpack-3.4.5',
@@ -162,5 +159,5 @@ class DependencyTests(cros_test_lib.MockTestCase):
     src_paths = ['/bunker', '/nowhere']
     actual_deps = dependency.GetDependencies(sysroot_path, build_target,
                                              src_paths)
-    expected_deps = ['equipment/jetpack', 'troop/clone-1.2.3']
+    expected_deps = ['troop/clone-1.2.3']
     self.assertCountEqual(expected_deps, actual_deps)

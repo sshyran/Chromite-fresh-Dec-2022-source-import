@@ -418,10 +418,7 @@ def GetDependencies(sysroot_path: str,
     if determine_package_relevance(dep_src_paths, src_paths):
       relevant_packages.add(cpv)
 
-  relevant_package_deps = set()
-  for cpv in relevant_packages:
-    relevant_package_deps.update(json_deps['package_deps'][cpv]['deps'])
-  return relevant_packages | relevant_package_deps
+  return relevant_packages
 
 
 def DetermineToolchainSourcePaths():
