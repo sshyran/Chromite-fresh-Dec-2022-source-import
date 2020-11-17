@@ -739,3 +739,116 @@ class BundleGceTarballTest(cros_test_lib.MockTempDirTestCase):
     # Verify the symlink points the the test image.
     disk_raw = os.path.join(call_tempdir, 'disk.raw')
     self.assertEqual(os.readlink(disk_raw), self.image_file)
+
+
+class TestGatherSymbolFiles(cros_test_lib.MockTempDirTestCase):
+  """Base class for testing GatherSymbolFiles."""
+
+  SLIM_CONTENT = """
+some junk
+"""
+
+  FAT_CONTENT = """
+STACK CFI 1234
+some junk
+STACK CFI 1234
+"""
+
+
+  def createSymbolFile(self, filename, content=FAT_CONTENT, size=0):
+    """Create a symbol file using content with minimum size."""
+    osutils.SafeMakedirs(os.path.dirname(filename))
+
+    # If a file size is given, force that to be the minimum file size. Create
+    # a sparse file so large files are practical.
+    with open(filename, 'w+b') as f:
+      f.truncate(size)
+      f.seek(0)
+      f.write(content.encode('utf-8'))
+
+  def test_GatherSymbolFiles(self):
+    """Test that files are found and copied."""
+    # Create directory with some symbol files.
+    tar_tmp_dir = os.path.join(self.tempdir, 'tar_tmp')
+    dest_dir = os.path.join(self.tempdir, 'output')
+    osutils.SafeMakedirs(dest_dir)
+    self.createSymbolFile(os.path.join(self.tempdir, 'a/b/c/file1.sym'))
+    self.createSymbolFile(os.path.join(self.tempdir, 'a/b/c/d/file2.sym'))
+    self.createSymbolFile(os.path.join(self.tempdir, 'a/file3.sym'))
+    self.createSymbolFile(os.path.join(self.tempdir, 'a/b/c/d/e/file1.sym'))
+
+    # Call artifacts.GatherSymbolFiles to find symbol files under self.tempdir
+    # and copy them to dest_dir.
+    symbol_files = list(artifacts.GatherSymbolFiles(
+        tar_tmp_dir, dest_dir, [self.tempdir]))
+    self.assertEqual(len(symbol_files), 4)
+
+    # Verify that the files in dest_dir match the SymbolFile display_paths.
+    files_in_dest_dir = self.getFilesWithRelativeDir(dest_dir)
+    files_in_dest_dir.sort()
+    symbol_file_display_paths = [obj.display_path for obj in symbol_files]
+    symbol_file_display_paths.sort()
+    self.assertEqual(files_in_dest_dir, symbol_file_display_paths)
+
+    # Verify that the display_name of each symbol does not contain pathsep.
+    symbol_file_display_names = [
+        os.path.basename(obj.display_path) for obj in symbol_files
+    ]
+    for display_name in symbol_file_display_names:
+      self.assertEqual(-1, display_name.find(os.path.sep))
+
+  def test_FindSymbolTarFiles(self):
+    """Test that symbol files in tar files are extracted."""
+    dest_dir = os.path.join(self.tempdir, 'output')
+    osutils.SafeMakedirs(dest_dir)
+
+    # Set up test input directory.
+    tarball_dir = os.path.join(self.tempdir, 'some/path')
+    files_in_tarball = ['dir1/fileZ.sym', 'dir2/fileY.sym', 'dir2/fileX.sym',
+                        'fileA.sym', 'fileB.sym', 'fileC.sym']
+    for filename in files_in_tarball:
+      self.createSymbolFile(os.path.join(tarball_dir, filename))
+    temp_tarball_file_path = os.path.join(self.tempdir, 'symfiles.tar')
+    cros_build_lib.CreateTarball(temp_tarball_file_path, tarball_dir)
+    # Now that we've created the tarball, remove the .sym files in
+    # the tarball dir and move the tarball to that dir.
+    for filename in files_in_tarball:
+      os.remove(os.path.join(tarball_dir, filename))
+    tarball_path = os.path.join(tarball_dir, 'symfiles.tar')
+    shutil.move(temp_tarball_file_path, tarball_path)
+
+    # Execute artifacts.GatherSymbolFiles where the path contains the tarball.
+    symbol_files = list(artifacts.GatherSymbolFiles(
+        tarball_dir, dest_dir, [tarball_path]))
+
+    self.assertEqual(len(symbol_files), 6)
+    symbol_file_display_names = [
+        os.path.basename(obj.display_path) for obj in symbol_files
+    ]
+    symbol_file_display_names.sort()
+    self.assertEqual(symbol_file_display_names,
+                     ['fileA.sym', 'fileB.sym', 'fileC.sym',
+                      'fileX.sym', 'fileY.sym', 'fileZ.sym'])
+
+    # Verify that the files in dest_dir match the SymbolFile display_paths.
+    files_in_dest_dir = self.getFilesWithRelativeDir(dest_dir)
+    files_in_dest_dir.sort()
+    symbol_file_display_paths = [obj.display_path for obj in symbol_files]
+    symbol_file_display_paths.sort()
+    self.assertEqual(files_in_dest_dir, symbol_file_display_paths)
+    # Verify that the display_name of each symbol does not contain pathsep.
+    symbol_file_display_names = [
+        os.path.basename(obj.display_path) for obj in symbol_files
+    ]
+    for display_name in symbol_file_display_names:
+      self.assertEqual(-1, display_name.find(os.path.sep))
+
+  def getFilesWithRelativeDir(self, dest_dir):
+    """Find all files below dest_dir using dir relative to dest_dir."""
+    relative_files = []
+    for path, __, files in os.walk(dest_dir):
+      for filename in files:
+        fullpath = os.path.join(path, filename)
+        relpath = os.path.relpath(fullpath, dest_dir)
+        relative_files.append(relpath)
+    return relative_files
