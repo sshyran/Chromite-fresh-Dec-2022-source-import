@@ -44,8 +44,10 @@ class PayloadConfig(object):
     """Init method, sets up all the paths and configuration.
 
     Args:
-      tgt_image (UnsignedImage or SignedImage): Proto for destination image.
-      src_image (UnsignedImage or SignedImage or None): Proto for source image.
+      tgt_image (UnsignedImage, SignedImage, or DLCImage):
+          Proto for destination image.
+      src_image (UnsignedImage, SignedImage, DLCImage, or None):
+          Proto for source image.
       dest_bucket (str): Destination bucket to place the final artifacts in.
       verify (bool): If delta is made, verify the integrity of the payload.
       keyset (str): The key to sign the image with.
@@ -71,12 +73,15 @@ class PayloadConfig(object):
       tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
       tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
-
+    elif isinstance(self.tgt_image, payload_pb2.DLCImage):
+      tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
       if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
         src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type)
       if isinstance(self.tgt_image, payload_pb2.SignedImage):
         src_image_path = _GenSignedGSPath(self.src_image, self.image_type)
+      elif isinstance(self.tgt_image, payload_pb2.DLCImage):
+        src_image_path = _GenDLCImageGSPath(self.src_image)
 
 
     # Set your output location.
@@ -172,7 +177,7 @@ def _GenSignedGSPath(image, image_type):
 
 
 def _GenUnsignedGSPath(image, image_type):
-  """Take a UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
+  """Take an UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
 
   Args:
     image (UnsignedImage_pb2): The build to create the gspath from.
@@ -195,3 +200,32 @@ def _GenUnsignedGSPath(image, image_type):
                                       milestone=image.milestone,
                                       image_type=image_type,
                                       uri=build_uri)
+
+
+def _GenDLCImageGSPath(image):
+  """Take a DLCImage_pb2 and return a gspaths.DLCImage.
+
+  Args:
+    image (DLCImage_pb2): The dlc image to create the gspath from.
+
+  Returns:
+    A gspaths.DLCImage instance.
+  """
+  build = gspaths.Build(
+      board=image.build.build_target.name,
+      version=image.build.version,
+      channel=image.build.channel,
+      bucket=image.build.bucket)
+
+  dlc_image_uri = gspaths.ChromeosReleases.DLCImageUri(build, image.dlc_id,
+                                                       image.dlc_package,
+                                                       image.dlc_image)
+
+  return gspaths.DLCImage(
+      build=build,
+      image_type=image.image_type,
+      key='',
+      uri=dlc_image_uri,
+      dlc_id=image.dlc_id,
+      dlc_package=image.dlc_package,
+      dlc_image=image.dlc_image)

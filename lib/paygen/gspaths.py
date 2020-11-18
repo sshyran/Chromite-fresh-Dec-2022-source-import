@@ -391,6 +391,24 @@ class ChromeosReleases(object):
                                                   milestone, image_type))
 
   @staticmethod
+  def DLCImageUri(build, dlc_id, dlc_package, dlc_image):
+    """Creates the gspath for a given dlc image archive.
+
+    Args:
+      build: An instance of gspaths.Build that defines the build.
+      dlc_id: The dlc's id (e.g. 'termina-dlc').
+      dlc_package: The dlc's package (e.g. 'package').
+      dlc_image: The dlc's image name (currently always 'dlc.img').
+
+    Returns:
+      The url for the specified dlc's image. Should be of the form:
+        gs://chromeos-releases/beta-channel/fizz/13505.33.0/
+          dlc/termina-dlc/package/dlc.img
+    """
+    return os.path.join(
+        ChromeosReleases.BuildUri(build), 'dlc', dlc_id, dlc_package, dlc_image)
+
+  @staticmethod
   def DLCImagesUri(build):
     """Creates the gspath for DLC images for a given build image archive."""
 

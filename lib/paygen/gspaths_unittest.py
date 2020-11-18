@@ -196,6 +196,12 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
   def testDLCImageName(self):
     self.assertEqual(gspaths.ChromeosReleases.DLCImageName(), 'dlc.img')
 
+  def testDLCImageUri(self):
+    self.assertEqual(
+        gspaths.ChromeosReleases.DLCImageUri(self.build, 'termina-dlc',
+                                             'package', 'dlc.img'),
+        'gs://crt/foo-channel/board-name/1.2.3/dlc/termina-dlc/package/dlc.img')
+
   def testUnsignedImageArchiveName(self):
     self.assertEqual(
         gspaths.ChromeosReleases.UnsignedImageArchiveName(

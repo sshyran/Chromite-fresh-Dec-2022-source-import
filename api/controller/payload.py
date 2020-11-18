@@ -16,8 +16,10 @@ from chromite.service import payload
 
 _VALID_IMAGE_PAIRS = (('src_signed_image', 'tgt_signed_image'),
                       ('src_unsigned_image', 'tgt_unsigned_image'),
+                      ('src_dlc_image', 'tgt_dlc_image'),
                       ('full_update', 'tgt_unsigned_image'),
-                      ('full_update', 'tgt_signed_image'))
+                      ('full_update', 'tgt_signed_image'),
+                      ('full_update', 'tgt_dlc_image'))
 
 _DEFAULT_PAYGEN_CACHE_DIR = '.paygen_cache'
 
