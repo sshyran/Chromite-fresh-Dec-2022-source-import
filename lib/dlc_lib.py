@@ -25,14 +25,14 @@ from chromite.scripts import cros_set_lsb_release
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
-DLC_META_DIR = 'opt/google/dlc/'
+DLC_BUILD_DIR = 'build/rootfs/dlc'
+DLC_IMAGE = 'dlc.img'
+DLC_META_DIR = 'opt/google/dlc'
 DLC_TMP_META_DIR = 'meta'
-DLC_BUILD_DIR = 'build/rootfs/dlc/'
+EBUILD_PARAMETERS = 'ebuild_parameters.json'
+IMAGELOADER_JSON = 'imageloader.json'
 LICENSE = 'LICENSE'
 LSB_RELEASE = 'etc/lsb-release'
-DLC_IMAGE = 'dlc.img'
-IMAGELOADER_JSON = 'imageloader.json'
-EBUILD_PARAMETERS = 'ebuild_parameters.json'
 
 # This file has major and minor version numbers that the update_engine client
 # supports. These values are needed for generating a delta/full payload.
