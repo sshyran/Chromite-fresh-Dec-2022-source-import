@@ -926,9 +926,6 @@ def main(argv):
   any_snapshot_operation = (
       options.snapshot_create or options.snapshot_restore or
       options.snapshot_delete or options.snapshot_list)
-  if any_snapshot_operation and not options.use_image:
-    cros_build_lib.Die('Snapshot operations are not compatible with '
-                       '--nouse-image.')
 
   if (options.snapshot_delete and
       options.snapshot_delete == options.snapshot_restore):
@@ -979,6 +976,13 @@ def main(argv):
     logging.notice('Existing chroot image %s found.  Forcing --use-image on.',
                    img_path)
     options.use_image = True
+
+  if any_snapshot_operation and not options.use_image:
+    if os.path.exists(img_path):
+      options.use_image = True
+    else:
+      cros_build_lib.Die('Snapshot operations are not compatible with '
+                         '--nouse-image.')
 
   # Discern if we need to create the chroot.
   if (options.use_image and not chroot_exists and not options.delete and
