@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import os
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
@@ -71,6 +72,7 @@ def CreateSimpleChromeSysroot(input_proto, output_proto, _config):
   # By assigning this Path variable to the tar path, the tar file will be
   # copied out to the input_proto's ResultPath location.
   output_proto.sysroot_archive.path = sysroot_tar_path
+  output_proto.sysroot_archive.location = common_pb2.Path.INSIDE
 
   return controller.RETURN_CODE_SUCCESS
 
@@ -94,6 +96,7 @@ def GenerateArchive(input_proto, output_proto, _config):
   # By assigning this Path variable to the tar path, the tar file will be
   # copied out to the input_proto's ResultPath location.
   output_proto.sysroot_archive.path = sysroot_tar_path
+  output_proto.sysroot_archive.location = common_pb2.Path.INSIDE
 
 
 def _MockFailedPackagesResponse(_input_proto, output_proto, _config):
