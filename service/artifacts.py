@@ -16,13 +16,8 @@ import glob
 import json
 import os
 import shutil
-import tempfile
-
-from typing import List
-from six.moves import urllib
 
 from chromite.lib import autotest_util
-from chromite.lib import cache
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -700,6 +695,7 @@ def GenerateCpeReport(chroot, sysroot, output_dir):
 
   return CpeResult(report=report_path, warnings=warnings_path)
 
+
 def BundleGceTarball(output_dir, image_dir):
   """Bundle the test image into a tarball suitable for importing into GCE.
 
@@ -722,95 +718,3 @@ def BundleGceTarball(output_dir, image_dir):
         inputs=('disk.raw',), extra_args=['--dereference', '--format=oldgnu'])
 
   return tarball
-
-
-# A SymbolFileTuple is a data object that contains:
-#  display_path (str): Relative path to the file based on initial search path.
-#  file_name (str): Full path to the SymbolFile.
-# For example, if the search path for symbol files is '/some/path/'
-# and a symbol file is found at '/some/path/a/b/c/file1.sym',
-# then the display_path would be 'a/b/c/file1.sym' and the file_name
-# would be '/some/path/a/b/c/file1.sym'.
-SymbolFileTuple = collections.namedtuple(
-    'SymbolFileTuple', ['display_path', 'file_name'])
-
-def IsTarball(path: str) -> bool:
-  """Guess if this is a tarball based on the filename."""
-  parts = path.split('.')
-  if len(parts) <= 1:
-    return False
-
-  if parts[-1] == 'tar':
-    return True
-
-  if parts[-2] == 'tar':
-    return parts[-1] in ('bz2', 'gz', 'xz')
-
-  return parts[-1] in ('tbz2', 'tbz', 'tgz', 'txz')
-
-
-def GatherSymbolFiles(tempdir:str, destdir:str,
-                    paths: List[str]) -> List[SymbolFileTuple]:
-  """Locate symbol files in |paths|
-
-  This generator function searches all paths for .sym files and copies them to
-  destdir. A path to a tarball will result in the tarball being unpacked and
-  examined. A path to a directory will result in the directory being searched
-  for .sym files. The generator yields SymbolFileTuple objects that contain
-  symbol file references which are valid after this exits. Those files may exist
-  externally, or be created in the tempdir (when expanding tarballs).
-  Note: the caller must clean up the tempdir.
-  Note: this function is recursive for tar files.
-
-  Args:
-    tempdir: Path to use for temporary files.
-    destdir: All .sym files are copied to this path.
-    paths: A list of input paths to walk. Files are returned based on .sym name
-      w/out any checking internal symbol file format.
-      Dirs are searched for files that end in ".sym". Urls are not handled.
-      Tarballs are unpacked and walked.
-
-  Yields:
-    A SymbolFileTuple for every symbol file found in paths.
-  """
-  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s',
-               tempdir, destdir, paths)
-  for p in paths:
-    o = urllib.parse.urlparse(p)
-    if o.scheme:
-      raise NotImplementedError('URL paths are not expected/handled: ',p)
-
-    elif os.path.isdir(p):
-      for root, _, files in os.walk(p):
-        for f in files:
-          if f.endswith('.sym'):
-            # If p is '/tmp/foo' and filename is '/tmp/foo/bar/bar.sym',
-            # display_path = 'bar/bar.sym'
-            filename = os.path.join(root, f)
-            display_path = filename[len(p):].lstrip('/')
-            try:
-              # TODO(crbug.com/1031380): Put calls to shutil.copy in a function
-              # that handles collisions in destdir due to different paths
-              # to the same filename (foo/a/a.sym from path foo, bar/a/a.sym
-              # from path bar) since the last shutil.copy will overwrite
-              # previous one.
-              shutil.copy(filename, os.path.join(destdir, display_path))
-            except IOError:
-              # Handles pre-3.3 Python where we may need to make the target
-              # path's dirname before copying.
-              os.makedirs(os.path.join(destdir, os.path.dirname(display_path)))
-              shutil.copy(filename, os.path.join(destdir, display_path))
-            yield SymbolFileTuple(display_path=display_path,
-                             file_name=filename)
-
-    elif IsTarball(p):
-      tardir = tempfile.mkdtemp(dir=tempdir)
-      cache.Untar(os.path.realpath(p), tardir)
-      for sym in GatherSymbolFiles(tardir, destdir, [tardir]):
-        yield sym
-
-    else:
-      # Path p is a file.
-      # TODO(crbug.com/1031380): Before copying verify that p ends with .sym.
-      shutil.copy(p, destdir)
-      yield SymbolFileTuple(display_path=p, file_name=p)
