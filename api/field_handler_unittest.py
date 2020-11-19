@@ -383,7 +383,11 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
       self.assertFileContents(path, contents)
 
   def test_single_file(self):
-    """Test a single file."""
+    """Test a single file.
+
+    Verify:
+    /path/to/chroot/file -> /path/to/destination/file
+    """
     self.response.artifact.path = self.source_file1_inside
     self.response.artifact.location = common_pb2.Path.INSIDE
 
@@ -393,7 +397,11 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
                       contents=self.file1_contents)
 
   def test_single_directory(self):
-    """Test a single directory."""
+    """Test a single directory.
+
+    Verify:
+    /path/to/chroot/directory/* -> /path/to/destination/directory/*
+    """
     self.response.artifact.path = self.source_dir
     self.response.artifact.location = common_pb2.Path.INSIDE
 
@@ -404,7 +412,13 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
                           os.listdir(self.response.artifact.path))
 
   def test_multiple_files(self):
-    """Test multiple files."""
+    """Test multiple files.
+
+    Verify:
+    /path/to/chroot/some/path/file1 -> /path/to/destination/file1
+    /path/to/chroot/different/path/file2 -> /path/to/destination/file2
+    etc.
+    """
     self.response.artifact.path = self.source_file1_inside
     self.response.artifact.location = common_pb2.Path.INSIDE
     self.response.nested_artifact.path.path = self.source_file2_inside
@@ -427,7 +441,13 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
                         contents=self.file3_contents)
 
   def test_multiple_directories(self):
-    """Test multiple directories."""
+    """Test multiple directories.
+
+    Verify:
+    /path/to/chroot/some/directory -> /path/to/destination/directory
+    /path/to/chroot/another/directory2 -> /path/to/destination/directory2
+    etc.
+    """
     self.response.artifact.path = self.source_dir
     self.response.artifact.location = common_pb2.Path.INSIDE
     self.response.nested_artifact.path.path = self.source_dir2
