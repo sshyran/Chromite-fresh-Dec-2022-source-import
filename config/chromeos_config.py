@@ -205,6 +205,7 @@ def GeneralTemplates(site_config):
       internal=False,
       overlays=constants.PUBLIC_OVERLAYS,
       manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
+      manifest_branch='main',
       manifest=constants.DEFAULT_MANIFEST,
   )
 
@@ -1439,6 +1440,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       run_cpeexport=True,
       internal=False,
       manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
+      manifest_branch='main',
       overlays=constants.PUBLIC_OVERLAYS,
       prebuilts=constants.PUBLIC)
 
@@ -1450,6 +1452,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       boards=[],
       master=True,
       manifest_version=True,
+      manifest_branch='main',
       overlays=constants.PUBLIC_OVERLAYS,
       slave_configs=[],
       schedule='0 */3 * * *',
