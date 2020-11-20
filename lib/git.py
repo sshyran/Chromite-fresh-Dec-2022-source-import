@@ -91,8 +91,18 @@ def GetGitGitdir(pwd):
   Returns:
     Path of the gitdir directory. None if the directory is not a git repo.
   """
-  if os.path.isdir(os.path.join(pwd, '.git')):
-    return os.path.join(pwd, '.git')
+  dotgit = os.path.join(pwd, '.git')
+
+  # A "normal" git checkout.
+  if os.path.isdir(dotgit):
+    return dotgit
+
+  # A git worktree checkout.
+  if os.path.isfile(dotgit):
+    with open(dotgit, 'r') as fp:
+      if fp.read(7) == 'gitdir:':
+        return dotgit
+
   # Is this directory a bare repo with no checkout?
   if os.path.isdir(os.path.join(
       pwd, 'objects')) and os.path.isdir(os.path.join(pwd, 'refs')):

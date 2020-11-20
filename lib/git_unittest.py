@@ -190,6 +190,12 @@ Change-Id: %s
     ret = git.GetGitGitdir(self.fake_git_dir)
     self.assertEqual(ret, self.fake_git_dir)
 
+  def testGetGitGitdir_worktree(self):
+    dotgit = os.path.join(self.tempdir, '.git')
+    osutils.WriteFile(dotgit, 'gitdir: /foo')
+    ret = git.GetGitGitdir(self.tempdir)
+    self.assertEqual(ret, dotgit)
+
   def testGetGitGitdir_negative(self):
     ret = git.GetGitGitdir(self.tempdir)
     self.assertFalse(ret)
