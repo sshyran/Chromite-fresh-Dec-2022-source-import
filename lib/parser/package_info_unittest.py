@@ -71,6 +71,92 @@ def test_package_info_eq():
   assert pkg == pkg2 == pkg3
 
 
+def test_package_info_eq_valid_types():
+  """Test __eq__ method with different, valid types."""
+  pkg = package_info.PackageInfo('foo', 'bar', 1, 2)
+  pkg2 = 'foo/bar-1-r2'
+  assert pkg == pkg2
+  pkg2cpv = package_info.SplitCPV(pkg2)
+  assert pkg == pkg2cpv
+
+
+def test_package_info_eq_invalid_types():
+  """Test __eq__ method with invalid types."""
+  class Foo:
+    """Empty class for test."""
+
+  pkg = package_info.PackageInfo('foo', 'bar', 1, 2)
+  pkg2 = Foo()
+  # pylint: disable=unneeded-not
+  assert not pkg == pkg2
+  assert pkg != pkg2
+
+
+def _compare_unequal_packages(lesser, greater):
+  """Run through the comparison operators for the two given package strings."""
+  b_str = greater
+  b_cpv = package_info.SplitCPV(b_str)
+  a = package_info.parse(lesser)
+  b = package_info.parse(b_str)
+
+  # __lt__.
+  assert a < b
+  # __le__.
+  assert a <= b
+  # __gt__.
+  assert b > a
+  # __ge__.
+  assert b >= a
+  # __eq__.
+  assert a != b
+  assert a != b_cpv
+  assert a != b_str
+
+
+def test_package_info_comparisons_category_diff():
+  """Test comparison methods with different categories."""
+  _compare_unequal_packages('a/pkg-1', 'b/pkg-1')
+
+
+def test_package_info_comparisons_package_diff():
+  """Test comparison methods with different packages."""
+  _compare_unequal_packages('cat/a-1', 'cat/b-1')
+
+
+def test_package_info_comparisons_simple_version_diff():
+  """Test comparison methods with simple version difference."""
+  _compare_unequal_packages('cat/pkg-1', 'cat/pkg-2')
+
+
+def test_package_info_comparisons_multi_part_version_diff():
+  """Test comparison methods with a multiple part version difference."""
+  _compare_unequal_packages('cat/pkg-1.2.3.4', 'cat/pkg-1.2.3.8')
+
+
+def test_package_info_comparisons_revision_diff():
+  """Test comparison methods with a revision difference."""
+  _compare_unequal_packages('cat/pkg-1.2.3-r1', 'cat/pkg-1.2.3-r2')
+
+
+def test_package_info_comparisons_invalid_type():
+  """Test comparison methods with invalid types."""
+  class Foo:
+    """Empty class for test."""
+
+  a = package_info.PackageInfo('cat', 'pkg', '1.2.3', 1)
+  b = Foo()
+
+  # pylint: disable=pointless-statement
+  with pytest.raises(package_info.InvalidComparisonTypeError):
+    a > b
+  with pytest.raises(package_info.InvalidComparisonTypeError):
+    a >= b
+  with pytest.raises(package_info.InvalidComparisonTypeError):
+    a < b
+  with pytest.raises(package_info.InvalidComparisonTypeError):
+    a <= b
+
+
 def test_cpf():
   """Validate CPF handling."""
   pkg = package_info.PackageInfo('foo', 'bar', '1')

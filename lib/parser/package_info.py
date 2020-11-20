@@ -13,6 +13,8 @@ import re
 import string
 from typing import Union
 
+from chromite.utils import pms
+
 # Define data structures for holding PV and CPV objects.
 _PV_FIELDS = ['pv', 'package', 'version', 'version_no_rev', 'rev']
 PV = collections.namedtuple('PV', _PV_FIELDS)
@@ -29,6 +31,18 @@ _ver = (r'(?P<version>'
         r'((_(pre|p|beta|alpha|rc)\d*)*))'
         r'(-(?P<rev>r(\d+)))?)')
 _pvr_re = re.compile(r'^(?P<pv>%s-%s)$' % (_pkg, _ver), re.VERBOSE)
+
+
+class Error(Exception):
+  """Base error class for the module."""
+
+
+class InvalidComparisonTypeError(Error, TypeError):
+  """Known class compared to an unknown type that cannot be resolved."""
+
+
+class ParseTypeError(Error, TypeError):
+  """Attempted parse of a type that could not be handled."""
 
 
 def _SplitPV(pv, strict=True):
@@ -111,8 +125,11 @@ def parse(cpv: Union[str, CPV, 'PackageInfo']):
     return cpv
   elif isinstance(cpv, CPV):
     parsed = cpv
-  else:
+  elif isinstance(cpv, str):
     parsed = SplitCPV(cpv, strict=False)
+  else:
+    raise ParseTypeError(f'Unable to parse type: {type(cpv)}')
+
   # Temporary measure. SplitCPV parses X-r1 with the revision as r1.
   # Once the SplitCPV function has been fully deprecated we can switch
   # the regex to exclude the r from what it parses as the revision instead.
@@ -133,17 +150,62 @@ class PackageInfo(object):
     # lru_cache for formatting.
     self._category = category
     self._package = package
-    self._version = version
+    self._version = str(version) if version is not None else None
     self._revision = int(revision) if revision else 0
 
   def __eq__(self, other):
-    try:
-      return (self.category == other.category and
-              self.package == other.package and
-              str(self.version) == str(other.version) and
-              str(self.revision) == str(other.revision))
-    except AttributeError:
+    if not isinstance(other, PackageInfo):
+      try:
+        return self == parse(other)
+      except ParseTypeError:
+        return False
+
+    # Simple comparisons for category, package, and revision. Do manual
+    # revision comparison to avoid recursion with the LRU Cache when
+    # comparing the `.vr`s.
+    if (self.category != other.category or self.package != other.package or
+        self.revision != other.revision):
+      # Early return to skip version logic when possible.
       return False
+
+    if self.version and other.version:
+      return pms.version_eq(self.version, other.version)
+    else:
+      return self.version == other.version
+
+  def __ge__(self, other):
+    return self == other or self > other
+
+  def __gt__(self, other):
+    if not isinstance(other, PackageInfo):
+      raise InvalidComparisonTypeError(
+          f"'>' not supported between '{type(self)}' and '{type(other)}'.")
+
+    # Compare as much of the "category/package" as we have.
+    if self.atom and other.atom and self.atom != other.atom:
+      return self.atom > other.atom
+    elif self.category != other.category:
+      return self.category > other.category
+    elif self.package != other.package:
+      return self.package > other.package
+
+    if self.vr and other.vr:
+      # Both have versions, do full comparison.
+      return pms.version_gt(self.vr, other.vr)
+    else:
+      # Simple compare since only one or neither has a version.
+      return self.vr > other.vr
+
+  def __le__(self, other):
+    return self == other or self < other
+
+  def __lt__(self, other):
+    if isinstance(other, PackageInfo):
+      # x < y == y > x, so just do that when we can.
+      return other > self
+    else:
+      raise InvalidComparisonTypeError(
+          f"'<' not supported between '{type(self)}' and '{type(other)}'.")
 
   def __hash__(self):
     return hash((self._category, self._package, self._version, self._revision))
