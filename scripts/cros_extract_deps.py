@@ -11,6 +11,7 @@ This produces JSON output for other tools to process.
 from __future__ import print_function
 from __future__ import absolute_import
 
+import os
 import sys
 
 from chromite.lib.depgraph import DepGraphGenerator
@@ -18,8 +19,8 @@ from chromite.lib.depgraph import DepGraphGenerator
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import osutils
 from chromite.lib import pformat
-from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 
 
@@ -153,6 +154,27 @@ def GetCPEFromCPV(category, package, version):
   return cpes
 
 
+def GenerateSDKCPVList(sysroot):
+  """Find all SDK packages from package.provided
+
+  Args:
+    sysroot: The board directory to use when finding SDK packages.
+
+  Returns:
+    A list of CPV Name strings, e.g.
+    ["sys-libs/glibc-2.23-r9", "dev-lang/go-1.8.3-r1"]
+  """
+  # Look at packages in package.provided.
+  sdk_file_path = os.path.join(sysroot, 'etc', 'portage',
+                               'profile', 'package.provided')
+  for line in osutils.ReadFile(sdk_file_path).splitlines():
+    # Skip comments and empty lines.
+    line = line.split('#', 1)[0].strip()
+    if not line:
+      continue
+    yield line
+
+
 def GenerateCPEList(deps_list, sysroot):
   """Generate all CPEs for the packages included in deps_list and SDK packages
 
@@ -181,19 +203,20 @@ def GenerateCPEList(deps_list, sysroot):
   """
   cpe_dump = []
 
-  # Generate CPEs for SDK packages.
-  for pkg_info in sorted(sysroot_lib.get_sdk_provided_packages(sysroot)):
+  # Generage CPEs for SDK packages.
+  for sdk_cpv in sorted(GenerateSDKCPVList(sysroot)):
     # Only add CPE for SDK CPVs missing in deps_list.
-    if deps_list.get(pkg_info.cpvr) is not None:
+    if deps_list.get(sdk_cpv) is not None:
       continue
 
-    cpes = GetCPEFromCPV(pkg_info.category, pkg_info.package, pkg_info.version)
+    split = package_info.SplitCPV(sdk_cpv)
+    cpes = GetCPEFromCPV(split.category, split.package, split.version_no_rev)
     if cpes:
-      cpe_dump.append({'ComponentName': '%s' % pkg_info.atom,
+      cpe_dump.append({'ComponentName': '%s' % split.cp,
                        'Repository': 'cros',
                        'Targets': sorted(cpes)})
     else:
-      logging.warning('No CPE entry for %s', pkg_info.cpvr)
+      logging.warning('No CPE entry for %s', sdk_cpv)
 
   # Generage CPEs for packages in deps_list.
   for cpv, record in sorted(deps_list.items()):

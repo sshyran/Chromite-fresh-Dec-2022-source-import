@@ -43,13 +43,3 @@ def overlay_stack(tmp_path_factory):
       yield overlays[i]
 
   return make_overlay_stack
-
-
-# pylint: disable=redefined-outer-name
-@pytest.fixture
-def simple_sysroot(overlay_stack, tmp_path):
-  """Create the simplest possible sysroot."""
-  # pylint: disable=redefined-outer-name
-  overlay, = overlay_stack(1)
-  profile = overlay.create_profile()
-  return cr.test.Sysroot(tmp_path, profile, [overlay])

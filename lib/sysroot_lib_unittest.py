@@ -271,17 +271,3 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
 
     with self.assertRaises(sysroot_lib.ToolchainInstallError):
       self.sysroot.UpdateToolchain('board', local_init=True)
-
-
-def test_get_sdk_provided_packages(simple_sysroot):
-  pkg_provided = simple_sysroot.path / 'etc/portage/profile/package.provided'
-  content = """
-foo/bar-2-r3
-
-# Comment line.
-cat/pkg-1.0.0 # Comment after package.
-"""
-  osutils.WriteFile(pkg_provided, content, makedirs=True)
-  pkgs = list(sysroot_lib.get_sdk_provided_packages(simple_sysroot.path))
-  expected = [package_info.parse(p) for p in ('foo/bar-2-r3', 'cat/pkg-1.0.0')]
-  assert pkgs == expected
