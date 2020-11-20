@@ -144,6 +144,7 @@
   firmware-cr50-guc-factory-9308.26.B-firmwarebranch
   firmware-cr50-mp-release-9308.87.B-firmwarebranch
   firmware-cyan-7287.57.B-firmwarebranch
+  firmware-dedede-13606.B-firmwarebranch
   firmware-drallion-12930.B-firmwarebranch
   firmware-edgar-7287.167.B-firmwarebranch
   firmware-endeavour-13259.B-firmwarebranch
@@ -989,6 +990,7 @@
   firmware-cr50-guc-factory-9308.26.B-firmwarebranch-tryjob
   firmware-cr50-mp-release-9308.87.B-firmwarebranch-tryjob
   firmware-cyan-7287.57.B-firmwarebranch-tryjob
+  firmware-dedede-13606.B-firmwarebranch-tryjob
   firmware-drallion-12930.B-firmwarebranch-tryjob
   firmware-edgar-7287.167.B-firmwarebranch-tryjob
   firmware-endeavour-13259.B-firmwarebranch-tryjob
