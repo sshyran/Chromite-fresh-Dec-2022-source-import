@@ -725,14 +725,21 @@ def BundleGceTarball(output_dir, image_dir):
 
 
 # A SymbolFileTuple is a data object that contains:
-#  display_path (str): Relative path to the file based on initial search path.
-#  file_name (str): Full path to where the SymbolFile was found.
+#  relative_path (str): Relative path to the file based on initial search path.
+#  source_file_name (str): Full path to where the SymbolFile was found.
 # For example, if the search path for symbol files is '/some/bot/path/'
 # and a symbol file is found at '/some/bot/path/a/b/c/file1.sym',
-# then the display_path would be 'a/b/c/file1.sym' and the file_name
+# then the relative_path would be 'a/b/c/file1.sym' and the source_file_name
 # would be '/some/bot/path/a/b/c/file1.sym'.
+# The source_file_name is informational for two reasons:
+# 1) They are typically copied off a machine (such as a build bot) where
+#    that path will disappear, which is why when we find them they get
+#    copied to a destination directory.
+# 2) For tar files, the source_file_name is not a full path that can be
+#    opened, since it is the path the tar file plus the relative path of
+#    the file when we untar it.
 SymbolFileTuple = collections.namedtuple(
-    'SymbolFileTuple', ['display_path', 'file_name'])
+    'SymbolFileTuple', ['relative_path', 'source_file_name'])
 
 def IsTarball(path: str) -> bool:
   """Guess if this is a tarball based on the filename."""
@@ -785,32 +792,41 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
         for f in files:
           if f.endswith('.sym'):
             # If p is '/tmp/foo' and filename is '/tmp/foo/bar/bar.sym',
-            # display_path = 'bar/bar.sym'
+            # relative_path = 'bar/bar.sym'
             filename = os.path.join(root, f)
-            display_path = filename[len(p):].lstrip('/')
+            relative_path = filename[len(p):].lstrip('/')
             try:
               # TODO(crbug.com/1031380): Put calls to shutil.copy in a function
               # that handles collisions in destdir due to different paths
               # to the same filename (foo/a/a.sym from path foo, bar/a/a.sym
               # from path bar) since the last shutil.copy will overwrite
               # previous one.
-              shutil.copy(filename, os.path.join(destdir, display_path))
+              shutil.copy(filename, os.path.join(destdir, relative_path))
             except IOError:
               # Handles pre-3.3 Python where we may need to make the target
               # path's dirname before copying.
-              os.makedirs(os.path.join(destdir, os.path.dirname(display_path)))
-              shutil.copy(filename, os.path.join(destdir, display_path))
-            yield SymbolFileTuple(display_path=display_path,
-                             file_name=filename)
+              os.makedirs(os.path.join(destdir, os.path.dirname(relative_path)))
+              shutil.copy(filename, os.path.join(destdir, relative_path))
+            yield SymbolFileTuple(relative_path=relative_path,
+                                  source_file_name=filename)
 
     elif IsTarball(p):
       tardir = tempfile.mkdtemp(dir=tempdir)
       cache.Untar(os.path.realpath(p), tardir)
       for sym in GatherSymbolFiles(tardir, destdir, [tardir]):
-        yield sym
+        # The SymbolFileTuple is generated from [tardir], but we want the
+        # source_file_name (which informational) to reflect the tar path
+        # plus the relative path after the file is untarred.
+        # Thus, something like /botpath/some/path/tmp22dl33sa/dir1/fileB.sym
+        # where the tardir is /botpath/some/path/tmp22dl33sa becomes
+        # this resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
+        new_source_file_name = sym.source_file_name.replace(tardir, p)
+        yield SymbolFileTuple(
+            relative_path=sym.relative_path,
+            source_file_name=new_source_file_name)
 
     else:
       # Path p is a file.
       # TODO(crbug.com/1031380): Before copying verify that p ends with .sym.
       shutil.copy(p, destdir)
-      yield SymbolFileTuple(display_path=p, file_name=p)
+      yield SymbolFileTuple(relative_path=p, source_file_name=p)

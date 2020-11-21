@@ -786,44 +786,45 @@ STACK CFI 1234
         tar_tmp_dir, output_dir, [input_dir]))
 
     # Construct the expected symbol files. Note that the SymbolFileTuple
-    # field file_name is the full path to where a symbol file was found,
-    # while display_path is the relative path (from the search) where
+    # field source_file_name is the full path to where a symbol file was found,
+    # while relative_path is the relative path (from the search) where
     # it is created in the output directory.
     expected_symbol_files = [
         artifacts.SymbolFileTuple(
-            file_name=os.path.join(input_dir, 'a/b/c/file1.sym'),
-            display_path='a/b/c/file1.sym'),
+            source_file_name=os.path.join(input_dir, 'a/b/c/file1.sym'),
+            relative_path='a/b/c/file1.sym'),
         artifacts.SymbolFileTuple(
-            file_name=os.path.join(input_dir, 'a/b/c/d/file2.sym'),
-            display_path='a/b/c/d/file2.sym'),
+            source_file_name=os.path.join(input_dir, 'a/b/c/d/file2.sym'),
+            relative_path='a/b/c/d/file2.sym'),
         artifacts.SymbolFileTuple(
-            file_name=os.path.join(input_dir, 'a/file3.sym'),
-            display_path='a/file3.sym'),
+            source_file_name=os.path.join(input_dir, 'a/file3.sym'),
+            relative_path='a/file3.sym'),
         artifacts.SymbolFileTuple(
-            file_name=os.path.join(input_dir, 'a/b/c/d/e/file1.sym'),
-            display_path='a/b/c/d/e/file1.sym')
+            source_file_name=os.path.join(input_dir, 'a/b/c/d/e/file1.sym'),
+            relative_path='a/b/c/d/e/file1.sym')
     ]
 
-    # Sort symbol_files and expected_output_files by the display_path attribute.
-    symbol_files = sorted(symbol_files, key=attrgetter('display_path'))
+    # Sort symbol_files and expected_output_files by the relative_path
+    # attribute.
+    symbol_files = sorted(symbol_files, key=attrgetter('relative_path'))
     expected_symbol_files = sorted(expected_symbol_files,
-                                   key=attrgetter('display_path'))
+                                   key=attrgetter('relative_path'))
     # Compare the files to the expected files. This verifies the size and
     # contents, and on failure shows the full contents.
     self.assertEqual(symbol_files, expected_symbol_files)
 
-    # Verify that the files in output_dir match the SymbolFile display_paths.
+    # Verify that the files in output_dir match the SymbolFile relative_paths.
     files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
     files_in_output_dir.sort()
-    symbol_file_display_paths = [obj.display_path for obj in symbol_files]
-    symbol_file_display_paths.sort()
-    self.assertEqual(files_in_output_dir, symbol_file_display_paths)
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(files_in_output_dir, symbol_file_relative_paths)
 
     # Verify that the display_name of each symbol does not contain pathsep.
-    symbol_file_display_names = [
-        os.path.basename(obj.display_path) for obj in symbol_files
+    symbol_file_relative_paths = [
+        os.path.basename(obj.relative_path) for obj in symbol_files
     ]
-    for display_name in symbol_file_display_names:
+    for display_name in symbol_file_relative_paths:
       self.assertEqual(-1, display_name.find(os.path.sep))
 
   def test_FindSymbolTarFiles(self):
@@ -851,25 +852,44 @@ STACK CFI 1234
         tarball_dir, output_dir, [tarball_path]))
 
     self.assertEqual(len(symbol_files), 6)
-    symbol_file_display_names = [
-        os.path.basename(obj.display_path) for obj in symbol_files
+    # Verify the symbol_file relative_paths.
+    symbol_file_relative_paths = [
+        obj.relative_path for obj in symbol_files
     ]
-    symbol_file_display_names.sort()
-    self.assertEqual(symbol_file_display_names,
-                     ['fileA.sym', 'fileB.sym', 'fileC.sym',
-                      'fileX.sym', 'fileY.sym', 'fileZ.sym'])
+    symbol_file_relative_paths.sort()
+    self.assertEqual(symbol_file_relative_paths,
+                     ['dir1/fileZ.sym', 'dir2/fileX.sym', 'dir2/fileY.sym',
+                      'fileA.sym', 'fileB.sym', 'fileC.sym'])
+    # Verify the symbol_file source_file_names.
+    symbol_file_source_file_names = [
+        obj.source_file_name for obj in symbol_files
+    ]
+    symbol_file_source_file_names.sort()
+    # Note that the expected symbol_file_source_names are the full path to
+    # the tarfile followed by the relative path, such as
+    # /tmp/chromite.test2ng92vzo/some/path/symfiles.tar/dir1/fileZ.sym
+    expected_symbol_file_source_names = [
+        os.path.join(tarball_path, 'dir1/fileZ.sym'),
+        os.path.join(tarball_path, 'dir2/fileX.sym'),
+        os.path.join(tarball_path, 'dir2/fileY.sym'),
+        os.path.join(tarball_path, 'fileA.sym'),
+        os.path.join(tarball_path, 'fileB.sym'),
+        os.path.join(tarball_path, 'fileC.sym')
+    ]
+    self.assertEqual(symbol_file_source_file_names,
+                     expected_symbol_file_source_names)
 
-    # Verify that the files in output_dir match the SymbolFile display_paths.
+    # Verify that the files in output_dir match the SymbolFile relative_paths.
     files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
     files_in_output_dir.sort()
-    symbol_file_display_paths = [obj.display_path for obj in symbol_files]
-    symbol_file_display_paths.sort()
-    self.assertEqual(files_in_output_dir, symbol_file_display_paths)
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(files_in_output_dir, symbol_file_relative_paths)
     # Verify that the display_name of each symbol does not contain pathsep.
-    symbol_file_display_names = [
-        os.path.basename(obj.display_path) for obj in symbol_files
+    symbol_file_relative_paths = [
+        os.path.basename(obj.relative_path) for obj in symbol_files
     ]
-    for display_name in symbol_file_display_names:
+    for display_name in symbol_file_relative_paths:
       self.assertEqual(-1, display_name.find(os.path.sep))
 
   def getFilesWithRelativeDir(self, dest_dir):
