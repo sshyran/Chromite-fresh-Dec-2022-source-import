@@ -395,7 +395,8 @@ class DepGraphGenerator(object):
               break
 
           deps[cpv] = dict(
-              action=action, deptypes=[str(x) for x in priorities], deps={})
+              action=action, deptypes=[str(x) for x in priorities], deps={},
+              root=child.root)
 
       # We've built our list of deps, so we can add our package to the tree.
 
@@ -409,7 +410,8 @@ class DepGraphGenerator(object):
         # for a board and the package is a BDEPEND. We only want to add that
         # package to the deps_tree if include_bdepend is set.
         if (node.root == root or self.include_bdepend):
-          deps_tree[str(node.cpv)] = dict(action=str(node.operation), deps=deps)
+          deps_tree[str(node.cpv)] = dict(action=str(node.operation), deps=deps,
+                                          root=node.root)
 
         # The only packages that will have a distinct root (in the Chrome OS
         # build) are BDEPEND packages for a board target. If we are building
@@ -422,7 +424,7 @@ class DepGraphGenerator(object):
         # bdeps_tree.
         if node.root != root:
           bdeps_tree[str(node.cpv)] = dict(
-              action=str(node.operation), deps=deps)
+              action=str(node.operation), deps=deps, root=node.root)
 
     # Ask portage for its install plan, so that we can only throw out
     # dependencies that portage throws out.
