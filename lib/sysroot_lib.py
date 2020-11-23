@@ -11,6 +11,7 @@ import glob
 import multiprocessing
 import os
 import sys
+from typing import Iterable
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -20,6 +21,7 @@ from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain
+from chromite.lib.parser import package_info
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -801,3 +803,30 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
         os._exit(result.returncode)
     else:
       cros_build_lib.sudo_run(rm + [self.path], quiet=True)
+
+  def get_sdk_provided_packages(self) -> Iterable[package_info.PackageInfo]:
+    """Find all packages provided by the SDK (i.e. package.provided)."""
+    # Look at packages in package.provided.
+    sdk_file_path = self._Path('etc', 'portage', 'profile', 'package.provided')
+    for line in osutils.ReadFile(sdk_file_path).splitlines():
+      # Skip comments and empty lines.
+      line = line.split('#', 1)[0].strip()
+      if not line:
+        continue
+      yield package_info.parse(line)
+
+
+def get_sdk_provided_packages(
+    sysroot_path: str) -> Iterable[package_info.PackageInfo]:
+  """Find all packages provided by the SDK (i.e. package.provided).
+
+  Convenience wrapper for the Sysroot method.
+
+  Args:
+    sysroot_path: The sysroot to use when finding SDK packages.
+
+  Returns:
+    The provided packages.
+  """
+  sysroot = Sysroot(sysroot_path)
+  return sysroot.get_sdk_provided_packages()
