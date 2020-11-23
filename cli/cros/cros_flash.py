@@ -153,7 +153,12 @@ Examples:
     update.add_argument(
         '--send-payload-in-parallel', default=False, action='store_true',
         help=('To speed up transfer payload files for long haul, chop '
-              'payload in chunks and transfer them in parallel'))
+              'payload in chunks and transfer them in parallel.'))
+    update.add_argument(
+        '--no-copy-payloads-to-device', dest='copy_payloads_to_device',
+        action='store_false', default=True,
+        help=('Do not copy the update payloads to the device. For now this '
+              'only works for the stateful payload.'))
     usb = parser.add_argument_group('USB specific options')
     usb.add_argument(
         '--install', default=False, action='store_true',
@@ -202,7 +207,8 @@ Examples:
           yes=self.options.yes,
           force=self.options.force,
           debug=self.options.debug,
-          send_payload_in_parallel=self.options.send_payload_in_parallel)
+          send_payload_in_parallel=self.options.send_payload_in_parallel,
+          copy_payloads_to_device=self.options.copy_payloads_to_device)
       logging.notice('cros flash completed successfully.')
     except dev_server_wrapper.ImagePathError:
       logging.error('To get the latest remote image, please run:\n'

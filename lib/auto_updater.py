@@ -148,7 +148,8 @@ class ChromiumOSUpdater(BaseUpdater):
                reboot=True, disable_verification=False,
                send_payload_in_parallel=False, payload_filename=None,
                staging_server=None, clear_tpm_owner=False,
-               resolve_app_id_mismatch=False, ignore_appid=False):
+               resolve_app_id_mismatch=False, ignore_appid=False,
+               copy_payloads_to_device=True):
     """Initialize a ChromiumOSUpdater for auto-update a chromium OS device.
 
     Args:
@@ -190,6 +191,9 @@ class ChromiumOSUpdater(BaseUpdater):
           App ID. This allows mismatching the source and target version boards.
           One specific use case is updating between <board> and
           <board>-kernelnext images which have different App IDs.
+      copy_payloads_to_device: If True, update payloads are copied to the
+          Chromium OS device first. Otherwise, they are piped through SSH.
+          Currently, this only applies to the stateful payloads.
     """
     super(ChromiumOSUpdater, self).__init__(device, payload_dir)
 
@@ -234,6 +238,7 @@ class ChromiumOSUpdater(BaseUpdater):
     self._clear_tpm_owner = clear_tpm_owner
     self._resolve_app_id_mismatch = resolve_app_id_mismatch
     self._ignore_appid = ignore_appid
+    self._copy_payloads_to_device = copy_payloads_to_device
 
   @property
   def is_au_endtoendtest(self):
@@ -525,18 +530,25 @@ class ChromiumOSUpdater(BaseUpdater):
   def UpdateStateful(self):
     """Update the stateful partition of the device."""
     try:
-      stateful_update_payload = os.path.join(
-          self.device.work_dir, auto_updater_transfer.STATEFUL_FILENAME)
+      if self._copy_payloads_to_device:
+        self._transfer_obj.TransferStatefulUpdate()
+        stateful_update_payload = os.path.join(
+            self.device.work_dir, auto_updater_transfer.STATEFUL_FILENAME)
+      else:
+        stateful_update_payload = os.path.join(
+            self.payload_dir, auto_updater_transfer.STATEFUL_FILENAME)
 
       updater = stateful_updater.StatefulUpdater(self.device)
       updater.Update(
           stateful_update_payload,
+          is_payload_on_device=self._copy_payloads_to_device,
           update_type=(stateful_updater.StatefulUpdater.UPDATE_TYPE_CLOBBER if
                        self._clobber_stateful else None))
 
-      # Delete the stateful update file on success so it doesn't occupy extra
-      # disk space. On failure it will get cleaned up.
-      self.device.DeletePath(stateful_update_payload)
+      if self._copy_payloads_to_device:
+        # Delete the stateful update file on success so it doesn't occupy extra
+        # disk space. On failure it will get cleaned up.
+        self.device.DeletePath(stateful_update_payload)
     except stateful_updater.Error as e:
       error_msg = 'Stateful update failed with error: %s' % str(e)
       logging.exception(error_msg)
@@ -570,15 +582,6 @@ class ChromiumOSUpdater(BaseUpdater):
     # Delete the update file so it doesn't take much space on disk for the
     # remainder of the update process.
     self.device.DeletePath(self.device_payload_dir, recursive=True)
-
-  def RunUpdateStateful(self):
-    """Run all processes needed by updating stateful.
-
-    1. Copy files to remote device needed by stateful update.
-    2. Do stateful update.
-    """
-    self._transfer_obj.TransferStatefulUpdate()
-    self.UpdateStateful()
 
   def RebootAndVerify(self):
     """Reboot and verify the remote device.
@@ -649,19 +652,20 @@ class ChromiumOSUpdater(BaseUpdater):
     """Update the device with image of specific version."""
     self._transfer_obj.CheckPayloads()
 
-    self._transfer_obj.TransferUpdateUtilsPackage()
-
-    restore_stateful = self.CheckRestoreStateful()
-    if restore_stateful:
-      self.RestoreStateful()
-
-    # Perform device updates.
+    restore_stateful = False
     if self._do_rootfs_update:
+      self._transfer_obj.TransferUpdateUtilsPackage()
+
+      restore_stateful = self.CheckRestoreStateful()
+      if restore_stateful:
+        self.RestoreStateful()
+
+      # Perform device updates.
       self.RunUpdateRootfs()
       logging.info('Rootfs update completed.')
 
     if self._do_stateful_update and not restore_stateful:
-      self.RunUpdateStateful()
+      self.UpdateStateful()
       logging.info('Stateful update completed.')
 
     if self._clear_tpm_owner:
@@ -897,7 +901,6 @@ class ChromiumOSUpdater(BaseUpdater):
     """Restore stateful partition for device."""
     logging.warning('Restoring the stateful partition.')
     self.PreSetupStatefulUpdate()
-    self._transfer_obj.TransferStatefulUpdate()
     self.ResetStatefulPartition()
     self.UpdateStateful()
     self.PostCheckStatefulUpdate()

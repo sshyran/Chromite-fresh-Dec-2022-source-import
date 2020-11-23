@@ -34,7 +34,7 @@ from chromite.lib import stateful_updater
 class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):
   """Mock out all update and verify functions in ChromiumOSUpdater."""
   TARGET = 'chromite.lib.auto_updater.ChromiumOSUpdater'
-  ATTRS = ('RestoreStateful', 'UpdateStateful', 'UpdateRootfs',
+  ATTRS = ('RestoreStateful', 'UpdateRootfs',
            'SetupRootfsUpdate', 'RebootAndVerify')
 
   def __init__(self):
@@ -42,9 +42,6 @@ class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):
 
   def RestoreStateful(self, _inst, *_args, **_kwargs):
     """Mock out RestoreStateful."""
-
-  def UpdateStateful(self, _inst, *_args, **_kwargs):
-    """Mock out UpdateStateful."""
 
   def UpdateRootfs(self, _inst, *_args, **_kwargs):
     """Mock out UpdateRootfs."""
@@ -144,26 +141,6 @@ class TransferTest(ChromiumOSUpdaterBaseTest):
       self.assertFalse(
           self._transfer_mock.patched['TransferStatefulUpdate'].called)
 
-  def testTransferForStateful(self):
-    """Test Transfer functions' code path for stateful update.
-
-    When stateful update is enabled, update-utils and stateful update payload
-    are transferred. Rootfs update payload is not.
-    """
-    with remote_access.ChromiumOSDeviceHandler(
-        remote_access.TEST_IP) as device:
-      CrOS_AU = auto_updater.ChromiumOSUpdater(
-          device, None, self._payload_dir, do_rootfs_update=False,
-          transfer_class=auto_updater_transfer.LocalTransfer)
-      CrOS_AU.RunUpdate()
-      self.assertTrue(
-          self._transfer_mock.patched['CheckPayloads'].called)
-      self.assertTrue(
-          self._transfer_mock.patched['TransferUpdateUtilsPackage'].called)
-      self.assertFalse(
-          self._transfer_mock.patched['TransferRootfsUpdate'].called)
-      self.assertTrue(
-          self._transfer_mock.patched['TransferStatefulUpdate'].called)
 
 class ChromiumOSUpdatePreCheckTest(ChromiumOSUpdaterBaseTest):
   """Test precheck function."""
@@ -230,27 +207,47 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
       CrOS_AU = auto_updater.ChromiumOSUpdater(
           device, None, self._payload_dir, do_stateful_update=False,
           transfer_class=auto_updater_transfer.LocalTransfer)
+      stateful_update_mock = self.PatchObject(auto_updater.ChromiumOSUpdater,
+                                              'UpdateStateful')
+
       CrOS_AU.RunUpdate()
       self.assertTrue(
           self._base_updater_mock.patched['SetupRootfsUpdate'].called)
       self.assertTrue(self._base_updater_mock.patched['UpdateRootfs'].called)
-      self.assertFalse(self._base_updater_mock.patched['UpdateStateful'].called)
+      stateful_update_mock.assert_not_called()
 
-  def testRunStateful(self):
-    """Test the update functions are called correctly.
-
-    Only UpdateStateful is called for stateful update.
-    """
+  def testUpdateStatefulCopyStateful(self):
+    """Tests stateful update when stateful payload is copied to device."""
     with remote_access.ChromiumOSDeviceHandler(
         remote_access.TEST_IP) as device:
       CrOS_AU = auto_updater.ChromiumOSUpdater(
           device, None, self._payload_dir, do_rootfs_update=False,
           transfer_class=auto_updater_transfer.LocalTransfer)
+      update_mock = self.PatchObject(stateful_updater.StatefulUpdater, 'Update')
+
       CrOS_AU.RunUpdate()
-      self.assertFalse(
-          self._base_updater_mock.patched['SetupRootfsUpdate'].called)
-      self.assertFalse(self._base_updater_mock.patched['UpdateRootfs'].called)
-      self.assertTrue(self._base_updater_mock.patched['UpdateStateful'].called)
+      update_mock.assert_called_with(
+          auto_updater_transfer.STATEFUL_FILENAME, is_payload_on_device=True,
+          update_type=None)
+      self.assertTrue(
+          self._transfer_mock.patched['TransferStatefulUpdate'].called)
+
+  def testUpdateStatefulNoCopyStateful(self):
+    """Tests stateful update when stateful payload is not copied to device."""
+    with remote_access.ChromiumOSDeviceHandler(
+        remote_access.TEST_IP) as device:
+      CrOS_AU = auto_updater.ChromiumOSUpdater(
+          device, None, self._payload_dir, do_rootfs_update=False,
+          transfer_class=auto_updater_transfer.LocalTransfer,
+          copy_payloads_to_device=False)
+      update_mock = self.PatchObject(stateful_updater.StatefulUpdater, 'Update')
+
+      CrOS_AU.RunUpdate()
+      update_mock.assert_called_with(
+          os.path.join(self._payload_dir,
+                       auto_updater_transfer.STATEFUL_FILENAME),
+          is_payload_on_device=False,
+          update_type=None)
 
   def testMismatchedAppId(self):
     """Tests if App ID is set to empty when there's a mismatch."""

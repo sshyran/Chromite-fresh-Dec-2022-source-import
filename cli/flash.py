@@ -363,7 +363,8 @@ class RemoteDeviceUpdater(object):
                board=None, src_image_to_delta=None, wipe=True, debug=False,
                yes=False, force=False, ssh_private_key=None, ping=True,
                disable_verification=False, send_payload_in_parallel=False,
-               clear_tpm_owner=False, version=None):
+               clear_tpm_owner=False, version=None,
+               copy_payloads_to_device=True):
     """Initializes RemoteDeviceUpdater"""
     if not stateful_update and not rootfs_update:
       raise ValueError('No update operation to perform; either stateful or'
@@ -389,6 +390,7 @@ class RemoteDeviceUpdater(object):
     self.force = force
     self.send_payload_in_parallel = send_payload_in_parallel
     self.version = version
+    self.copy_payloads_to_device = copy_payloads_to_device
 
   def Cleanup(self):
     """Cleans up the temporary directory."""
@@ -526,7 +528,8 @@ class RemoteDeviceUpdater(object):
               yes=self.yes,
               send_payload_in_parallel=self.send_payload_in_parallel,
               resolve_app_id_mismatch=True,
-              transfer_class=auto_updater_transfer.LocalTransfer)
+              transfer_class=auto_updater_transfer.LocalTransfer,
+              copy_payloads_to_device=self.copy_payloads_to_device)
           chromeos_AU.RunUpdate()
 
         except Exception:
@@ -552,7 +555,7 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
           reboot=True, wipe=True, ssh_private_key=None, ping=True,
           disable_rootfs_verification=False, clear_cache=False, yes=False,
           force=False, debug=False, send_payload_in_parallel=False,
-          clear_tpm_owner=False, version=None):
+          clear_tpm_owner=False, version=None, copy_payloads_to_device=True):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -584,6 +587,9 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
     send_payload_in_parallel: Transfer payloads in chunks in parallel to speed
         up transmissions for long haul between endpoints.
     version: Default version.
+    copy_payloads_to_device: If True, update payloads are copied to the
+        Chromium OS device first. Otherwise, they are piped through SSH.
+        Currently, this only applies to the stateful payloads.
 
   Raises:
     FlashError: An unrecoverable error occured.
@@ -630,7 +636,8 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
         ping=ping,
         disable_verification=disable_rootfs_verification,
         send_payload_in_parallel=send_payload_in_parallel,
-        version=version)
+        version=version,
+        copy_payloads_to_device=copy_payloads_to_device)
     updater.Run()
   elif device.scheme == commandline.DEVICE_SCHEME_USB:
     path = osutils.ExpandPath(device.path) if device.path else ''

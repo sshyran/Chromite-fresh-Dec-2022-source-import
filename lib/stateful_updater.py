@@ -51,22 +51,29 @@ class StatefulUpdater(object):
     self._update_type_file = os.path.join(self._stateful_dir,
                                           self._UPDATE_TYPE_FILE)
 
-  def Update(self, payload_path_on_device, update_type=None):
+  def Update(self, payload_path, is_payload_on_device=True, update_type=None):
     """Updates the stateful partition given the update file.
 
     Args:
-      payload_path_on_device: The path to the stateful update (stateful.tgz)
-        on the DUT.
+      payload_path: The path to the stateful update (stateful.tgz).
+      is_payload_on_device: True if the payload is on the device. False if it
+        is on the workstation.
       update_type: The type of the stateful update to be marked. Accepted
         values: 'standard' (default) and 'clobber'.
     """
-    if not self._device.IfPathExists(payload_path_on_device):
-      raise Error('Missing the file: %s' % payload_path_on_device)
-
     try:
       cmd = ['tar', '--ignore-command-error', '--overwrite',
-             '--directory', self._stateful_dir, '-xzf', payload_path_on_device]
-      self._device.run(cmd)
+             '--directory', self._stateful_dir, '-xzf']
+      if is_payload_on_device:
+        if not self._device.IfPathExists(payload_path):
+          raise Error('Missing the file: %s' % payload_path)
+
+        cmd += [payload_path]
+        self._device.run(cmd)
+      else:
+        with open(payload_path, 'rb') as f:
+          cmd += ['-']
+          self._device.run(cmd, input=f)
     except cros_build_lib.RunCommandError as e:
       raise Error('Failed to untar the stateful update with error %s' % e)
 
