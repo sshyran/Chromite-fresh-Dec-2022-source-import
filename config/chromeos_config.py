@@ -1452,7 +1452,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       boards=[],
       master=True,
       manifest_version=True,
-      manifest_branch='main',
       overlays=constants.PUBLIC_OVERLAYS,
       slave_configs=[],
       schedule='0 */3 * * *',
