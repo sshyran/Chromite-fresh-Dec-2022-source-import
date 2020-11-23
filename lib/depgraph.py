@@ -17,6 +17,7 @@ from typing import List, Optional, Union
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
+from chromite.lib import dependency_graph
 from chromite.lib.parser import package_info
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -862,8 +863,9 @@ def PrintDepsMap(deps_map):
 
 
 # Depgraph results data container used by the raw depgraph functions. The
-# deps attribute has the main depgraph info, while the bdeps attribute
-# contains just the bdepends depgraph, i.e. the depgraph installed to the SDK.
+# deps attribute has the main depgraph info (DEPEND, RDEPEND, and optionally
+# BDEPEND), while the bdeps attribute contains just the bdepends depgraph,
+# i.e. the depgraph installed to the SDK.
 DepgraphResult = collections.namedtuple('DepgraphResult',
                                         ('deps', 'bdeps', 'packages'))
 
@@ -981,3 +983,60 @@ def _get_raw_build_target_depgraph(
   deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree()
   return DepgraphResult(deps=deps_tree, bdeps=bdeps_tree, packages=packages)
 
+
+def get_sdk_dependency_graph(
+    pkgs: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the SDK itself."""
+  result = _get_raw_sdk_depgraph(packages=pkgs)
+  return _create_graph_from_deps(result.deps,
+                                 sysroot=cros_build_lib.GetSysroot(board=None),
+                                 packages=result.packages)
+
+
+def get_sysroot_dependency_graph(
+    sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the sysroot only."""
+  result = _get_raw_sysroot_depgraph(sysroot, packages=packages)
+  return _create_graph_from_deps(result.deps, sysroot, result.packages)
+
+
+def get_build_target_dependency_graph(
+    sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the sysroot and its bdeps."""
+  result = _get_raw_build_target_depgraph(sysroot, packages=packages)
+  return _create_graph_from_deps(result.deps, sysroot, result.packages)
+
+
+def _create_graph_from_deps(
+    deps: dict, sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Union[List[str], List[package_info.PackageInfo]]
+) -> dependency_graph.DependencyGraph:
+  """Create DependencyGraph from the raw DepGraphGenerator deps.
+
+  Translate the raw DepGraphGenerator deps into PackageNodes for a
+  DependencyGraph. This is extracted from the DependencyGraph class to make
+  testing the DependencyGraph class itself much easier.
+  """
+  node_dict = collections.defaultdict(dict)
+  nodes = []
+  for pkg_cpv, pkg_data in deps.items():
+    pkg_info = package_info.parse(pkg_cpv)
+    node = dependency_graph.PackageNode(pkg_info, pkg_data['root'])
+    node_dict[pkg_info][pkg_data['root']] = node
+    nodes.append(node)
+
+  for pkg_cpv, pkg_data in deps.items():
+    pkg_info = package_info.parse(pkg_cpv)
+    pkg_node = node_dict[pkg_info][pkg_data['root']]
+    for dep_cpv, dep_data in pkg_data['deps'].items():
+      dep_info = package_info.parse(dep_cpv)
+      dep_node = node_dict[dep_info][dep_data['root']]
+      pkg_node.add_dependency(dep_node)
+
+  return dependency_graph.DependencyGraph(
+      nodes, sysroot=sysroot, root_packages=packages)
