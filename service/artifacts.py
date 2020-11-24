@@ -729,13 +729,18 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
   examined. A path to a directory will result in the directory being searched
   for .sym files. The generator yields SymbolFileTuple objects that contain
   symbol file references which are valid after this exits. Those files may exist
-  externally, or be created in the tempdir (when expanding tarballs).
+  externally, or be created in the tempdir (when expanding tarballs). Typical
+  usage in the BuildAPI will be for the .sym files to exist under a directory
+  such as /build/<board>/usr/lib/debug/breakpad so that the path to a sym file
+  will always be unique.
   Note: the caller must clean up the tempdir.
   Note: this function is recursive for tar files.
 
   Args:
     tempdir: Path to use for temporary files.
-    destdir: All .sym files are copied to this path.
+    destdir: All .sym files are copied to this path. Tarfiles are opened inside
+      a tempdir and any .sym files within them are copied to destdir from within
+      that temp path.
     paths: A list of input paths to walk. Files are returned based on .sym name
       w/out any checking internal symbol file format.
       Dirs are searched for files that end in ".sym". Urls are not handled.
@@ -760,11 +765,6 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
             filename = os.path.join(root, f)
             relative_path = filename[len(p):].lstrip('/')
             try:
-              # TODO(crbug.com/1031380): Put calls to shutil.copy in a function
-              # that handles collisions in destdir due to different paths
-              # to the same filename (foo/a/a.sym from path foo, bar/a/a.sym
-              # from path bar) since the last shutil.copy will overwrite
-              # previous one.
               shutil.copy(filename, os.path.join(destdir, relative_path))
             except IOError:
               # Handles pre-3.3 Python where we may need to make the target

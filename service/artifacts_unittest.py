@@ -876,6 +876,9 @@ STACK CFI 1234
     symbol_file_relative_paths.sort()
     self.assertEqual(symbol_file_relative_paths,
                      ['dir1/fileU.sym', 'fileD.sym'])
+    for symfile in symbol_file_relative_paths:
+      extension = symfile.split('.')[1]
+      self.assertEqual(extension, 'sym')
 
   def test_GatherSymbolFileFullFilePaths(self):
     """Test full filepaths (.sym and .txt) only gather .sym files."""
@@ -910,6 +913,17 @@ STACK CFI 1234
     # Verify that only a_file.sym is in the output_dir.
     files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
     self.assertEqual(files_in_output_dir, ['a_file.sym'])
+
+  def test_IsTarball(self):
+    """Test IsTarball helper function."""
+    self.assertTrue(artifacts.IsTarball('file.tar'))
+    self.assertTrue(artifacts.IsTarball('file.tar.bz2'))
+    self.assertTrue(artifacts.IsTarball('file.tar.gz'))
+    self.assertTrue(artifacts.IsTarball('file.tbz'))
+    self.assertTrue(artifacts.IsTarball('file.txz'))
+    self.assertFalse(artifacts.IsTarball('file.txt'))
+    self.assertFalse(artifacts.IsTarball('file.tart'))
+    self.assertFalse(artifacts.IsTarball('file.bz2'))
 
   def getFilesWithRelativeDir(self, dest_dir):
     """Find all files below dest_dir using dir relative to dest_dir."""
