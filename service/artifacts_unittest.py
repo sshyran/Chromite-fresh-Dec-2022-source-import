@@ -827,7 +827,7 @@ STACK CFI 1234
     for display_name in symbol_file_relative_paths:
       self.assertEqual(-1, display_name.find(os.path.sep))
 
-  def test_FindSymbolTarFiles(self):
+  def test_GatherSymbolTarFiles(self):
     """Test that symbol files in tar files are extracted."""
     output_dir = os.path.join(self.tempdir, 'output')
     osutils.SafeMakedirs(output_dir)
@@ -891,6 +891,74 @@ STACK CFI 1234
     ]
     for display_name in symbol_file_relative_paths:
       self.assertEqual(-1, display_name.find(os.path.sep))
+
+  def test_GatherSymbolTarFilesWithNonSymFiles(self):
+    """Test that non-symbol files in tar files are not extracted."""
+    output_dir = os.path.join(self.tempdir, 'output')
+    osutils.SafeMakedirs(output_dir)
+
+    # Set up test input directory.
+    tarball_dir = os.path.join(self.tempdir, 'some/path')
+    files_in_tarball = ['dir1/fileU.sym', 'dir1/fileU.txt',
+                        'fileD.sym', 'fileD.txt']
+    for filename in files_in_tarball:
+      # we don't care about file contents, so we are using createSymbolFile
+      # for files whether they end with .sym or not.
+      self.createSymbolFile(os.path.join(tarball_dir, filename))
+    temp_tarball_file_path = os.path.join(self.tempdir, 'symfiles.tar')
+    cros_build_lib.CreateTarball(temp_tarball_file_path, tarball_dir)
+    # Now that we've created the tarball, remove the .sym files in
+    # the tarball dir and move the tarball to that dir.
+    for filename in files_in_tarball:
+      os.remove(os.path.join(tarball_dir, filename))
+    tarball_path = os.path.join(tarball_dir, 'symfiles.tar')
+    shutil.move(temp_tarball_file_path, tarball_path)
+
+    # Execute artifacts.GatherSymbolFiles where the path contains the tarball.
+    symbol_files = list(artifacts.GatherSymbolFiles(
+        tarball_dir, output_dir, [tarball_path]))
+
+    # Verify the symbol_file relative_paths only has .sym files.
+    symbol_file_relative_paths = [
+        obj.relative_path for obj in symbol_files
+    ]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(symbol_file_relative_paths,
+                     ['dir1/fileU.sym', 'fileD.sym'])
+
+  def test_GatherSymbolFileFullFilePaths(self):
+    """Test full filepaths (.sym and .txt) only gather .sym files."""
+    tar_tmp_dir = os.path.join(self.tempdir, 'tar_tmp')
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    # We don't care about contents, so use createSymbolFiles for all files.
+    self.createSymbolFile(os.path.join(input_dir, 'a_file.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a_file.txt'))
+
+    # Call artifacts.GatherSymbolFiles with full paths to files, some of which
+    # don't end in .sym, verify that only .sym files get copied to output_dir.
+    symbol_files = list(artifacts.GatherSymbolFiles(
+        tar_tmp_dir, output_dir,
+        [os.path.join(input_dir, 'a_file.sym'),
+         os.path.join(input_dir, 'a_file.txt')]))
+
+    # Construct the expected symbol files. Note that the SymbolFileTuple
+    # field source_file_name is the full path to where a symbol file was found,
+    # while relative_path is the relative path (from the search) where
+    # it is created in the output directory.
+    expected_symbol_files = [
+        artifacts.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a_file.sym'),
+            relative_path='a_file.sym')
+    ]
+
+    # Compare the files to the expected files. This verifies the size and
+    # contents, and on failure shows the full contents.
+    self.assertEqual(symbol_files, expected_symbol_files)
+    # Verify that only a_file.sym is in the output_dir.
+    files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
+    self.assertEqual(files_in_output_dir, ['a_file.sym'])
 
   def getFilesWithRelativeDir(self, dest_dir):
     """Find all files below dest_dir using dir relative to dest_dir."""

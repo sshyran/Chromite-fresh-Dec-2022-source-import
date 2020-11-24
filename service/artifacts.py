@@ -818,15 +818,26 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
         # source_file_name (which informational) to reflect the tar path
         # plus the relative path after the file is untarred.
         # Thus, something like /botpath/some/path/tmp22dl33sa/dir1/fileB.sym
-        # where the tardir is /botpath/some/path/tmp22dl33sa becomes
-        # this resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
+        # (where the tardir is /botpath/some/path/tmp22dl33sa)
+        # has a resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
+        # When we call GatherSymbolFiles with [tardir] as the argument,
+        # the os.path.isdir case above will walk the tar contents,
+        # processing only .sym. Non-sym files within the tar file will be
+        # ignored (even tar files within tar files, which we don't expect).
         new_source_file_name = sym.source_file_name.replace(tardir, p)
         yield SymbolFileTuple(
             relative_path=sym.relative_path,
             source_file_name=new_source_file_name)
 
     else:
-      # Path p is a file.
-      # TODO(crbug.com/1031380): Before copying verify that p ends with .sym.
-      shutil.copy(p, destdir)
-      yield SymbolFileTuple(relative_path=p, source_file_name=p)
+      # Path p is a file. This code path is only executed when a full file path
+      # is one of the elements in the 'paths' argument. When a directory is an
+      # element of the 'paths' argument, we walk the tree (above) and process
+      # each file. When a tarball is an element of the 'paths' argument, we
+      # untar it into a directory and recurse with the temp tardir as the
+      # directory, so that tarfile contents are processed (above) in the os.walk
+      # of the directory.
+      if p.endswith('.sym'):
+        shutil.copy(p, destdir)
+        yield SymbolFileTuple(relative_path=os.path.basename(p),
+                              source_file_name=p)
