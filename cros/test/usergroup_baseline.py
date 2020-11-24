@@ -19,8 +19,8 @@ UserEntry = cros_collections.Collection('UserEntry',
 GroupEntry = cros_collections.Collection('GroupEntry', group=None,
                                          encpasswd='!', gid=None, users=set())
 
-# For users that we allow to login to the system, whitelist a number of
-# alternative shells.  These are equivalent from a security POV.
+# For users that we allow to login to the system, allow a number of alternative
+# shells.  These are equivalent from a security POV.
 _VALID_LOGIN_SHELLS = set((
     '/bin/sh',
     '/bin/bash',
