@@ -376,6 +376,8 @@ class CrOSTest(object):
         cmd,
         dryrun=self.dryrun,
         extra_env=extra_env,
+        # Don't raise an exception if the command fails.
+        check=False,
         enter_chroot=need_chroot and not cros_build_lib.IsInsideChroot())
 
   def _RunTests(self):
