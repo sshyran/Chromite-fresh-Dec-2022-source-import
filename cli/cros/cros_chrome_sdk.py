@@ -1462,7 +1462,8 @@ class ChromeSDKCommand(command.CliCommand):
       Log('Starting Goma.', silent=self.silent)
       # TODO(crbug.com/1007384): Stop forcing Python 2.
       cros_build_lib.dbg_run(
-          ['python2', os.path.join(goma_dir, 'goma_ctl.py'), 'ensure_start'])
+          ['python2', os.path.join(goma_dir, 'goma_ctl.py'), 'ensure_start'],
+          extra_env={'GOMA_ARBITRARY_TOOLCHAIN_SUPPORT': 'true'})
       port = self._GomaPort(goma_dir)
       Log('Goma is started on port %s', port, silent=self.silent)
       if not port:
