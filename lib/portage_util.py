@@ -366,6 +366,7 @@ class EBuild(object):
       'cros-ec',      # defines src_test
       'cros-firmware',
       'cros-go',      # defines src_test
+      'cros-rust',    # defines src_test
       'tast-bundle',  # inherits cros-go
   ))
 
