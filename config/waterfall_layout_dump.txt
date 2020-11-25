@@ -1163,6 +1163,12 @@
   guado_labstation-payloads-tryjob
   guado_labstation-release-tryjob
   guado_labstation-unittest-stress
+  guybrush-full-tryjob
+  guybrush-llvm-next-toolchain-tryjob
+  guybrush-llvm-toolchain-tryjob
+  guybrush-payloads-tryjob
+  guybrush-release-tryjob
+  guybrush-unittest-stress
   hana-factory-oak-8182.B-factorybranch-tryjob
   hana-full-tryjob
   hana-kernelnext-full-tryjob
@@ -1365,6 +1371,18 @@
   macchiato-ground-payloads-tryjob
   macchiato-ground-release-tryjob
   macchiato-ground-unittest-stress
+  majolica-full-tryjob
+  majolica-llvm-next-toolchain-tryjob
+  majolica-llvm-toolchain-tryjob
+  majolica-payloads-tryjob
+  majolica-release-tryjob
+  majolica-unittest-stress
+  mancomb-full-tryjob
+  mancomb-llvm-next-toolchain-tryjob
+  mancomb-llvm-toolchain-tryjob
+  mancomb-payloads-tryjob
+  mancomb-release-tryjob
+  mancomb-unittest-stress
   master-buildspec-tryjob
     atlas-master-factorybranch-tryjob
     coral-master-factorybranch-tryjob
