@@ -13,7 +13,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.licensing import licenses_lib
 
-
 # pylint: disable=protected-access
 
 
@@ -69,6 +68,12 @@ class LicenseLibTest(cros_test_lib.TempDirTestCase):
             'contents': 'Out Of Reach',
             'dir': 'src/overlays/overlay-bar/licenses/OOR',
             'skip_test': True,
+        },
+        licenses_lib.TAINTED: {
+            'contents': licenses_lib.TAINTED,
+            'dir': 'src/overlays/overlay-foo/licenses/TAINTED',
+            'board': 'foo',
+            'type': licenses_lib.TAINTED,
         },
     }
 
@@ -139,6 +144,11 @@ masters = %(masters)s
             'board': 'foo',
             'license': 'FTL',
         },
+        'ttl-pkg': {
+            'dir': os.path.join(foo_eb_dir, 'ttl-pkg/ttl-pkg-1.ebuild'),
+            'board': 'foo',
+            'license': licenses_lib.TAINTED,
+        },
         'pub-pkg': {
             'dir': os.path.join(foo_eb_dir, 'pub-pkg/pub-pkg-1.ebuild'),
             'board': 'foo',
@@ -175,6 +185,7 @@ masters = %(masters)s
                         D('ftl-pkg', ('ftl-pkg-1.ebuild',)),
                         D('pub-pkg', ('pub-pkg-1.ebuild',)),
                         D('tpl-pkg', ('tpl-pkg-1.ebuild',)),
+                        D('ttl-pkg', ('ttl-pkg-1.ebuild',)),
                     )),
                     D('eclass', ('pub-cls.eclass',)),
                     D('licenses', ('FTL',)),
@@ -240,6 +251,17 @@ masters = %(masters)s
     result = licenses_lib.GetLicenseTypesFromEbuild(ebuild_content,
                                                     overlay_path, self.tempdir)
     expected = ['FTL']
+    self.assertEqual(expected, sorted(result))
+
+  def testGetLicenseTypeFromEbuildTainted(self):
+    """Tests the fetched tainted license from ebuilds is correct."""
+    ebuild_content = self.ebuilds['ttl-pkg']['content']
+    overlay_path = os.sep.join(
+        self.ebuilds['ttl-pkg']['dir'].split(os.sep)[:-3])
+
+    result = licenses_lib.GetLicenseTypesFromEbuild(ebuild_content,
+                                                    overlay_path, self.tempdir)
+    expected = [licenses_lib.TAINTED]
     self.assertEqual(expected, sorted(result))
 
   def testFindLicenseType(self):

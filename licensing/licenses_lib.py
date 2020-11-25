@@ -60,16 +60,19 @@ SKIPPED_CATEGORIES = [
     'virtual',
 ]
 
+# If you have an early package for which license terms have yet to be decided,
+# use this. It will cause licensing for the package to be mostly ignored.
+# Tainted builds will fail signing with official keys.
+TAINTED = 'TAINTED'
+
+# HTML outputs will include this tag if tainted.
+TAINTED_COMMENT_TAG = '<!-- tainted -->'
+
 SKIPPED_LICENSES = [
     # Some of our packages contain binary blobs for which we have special
     # negotiated licenses, and no need to display anything publicly. Strongly
     # consider using Google-TOS instead, if possible.
     'Proprietary-Binary',
-
-    # If you have an early repo for which license terms have yet to be decided
-    # use this. It will cause licensing for the package to be mostly ignored.
-    # Official should error for any package with this license.
-    'TAINTED', # TODO(dgarrett): Error on official builds with this license.
 ]
 
 LICENSE_NAMES_REGEX = [
@@ -325,8 +328,11 @@ class PackageInfo(object):
     # one to skip in licensing.
     self.skip = False
 
-    # Intellegently populate initial skip information.
+    # Intelligently populate initial skip information.
     self.LookForSkip()
+
+    # Set to something by GetLicenses().
+    self.tainted = None
 
   @property
   def fullnamerev(self):
@@ -596,7 +602,7 @@ being scraped currently).""",
     """Populate the license related fields.
 
     Fields populated:
-      license_names, license_text_scanned, homepages, skip
+      license_names, license_text_scanned, homepages, skip, tainted
 
     Some packages have static license mappings applied to them that get
     retrieved from the ebuild.
@@ -624,6 +630,11 @@ being scraped currently).""",
 
     self.homepages = _BuildInfo(build_info_dir, 'HOMEPAGE').split()
     ebuild_license_names = _BuildInfo(build_info_dir, 'LICENSE').split()
+
+    # Is this tainted?
+    self.tainted = TAINTED in ebuild_license_names
+    if self.tainted:
+      logging.warning('Package %s is tainted', self.fullnamerev)
 
     # If this ebuild only uses skipped licenses, skip it.
     if (ebuild_license_names and
@@ -1026,6 +1037,9 @@ class Licensing(object):
     self.packages = {}
     self._package_fullnames = package_fullnames
 
+    # Set by ProcessPackageLicenses().
+    self.tainted_pkgs = []
+
   @property
   def sorted_licenses(self):
     return sorted(self.licenses, key=lambda x: x.lower())
@@ -1081,6 +1095,11 @@ class Licensing(object):
         logging.debug('loading dump for %s', pkg.fullnamerev)
         self._LoadLicenseDump(pkg)
 
+      # Store all tainted packages to print at the top of generated license.
+      # If any package is tainted, the whole thing is tainted.
+      if pkg.tainted:
+        self.tainted_pkgs.append(package_name)
+
   def AddExtraPkg(self, fullnamerev, homepages, license_names, license_texts):
     """Allow adding pre-created virtual packages.
 
@@ -1105,7 +1124,7 @@ class Licensing(object):
   @staticmethod
   def FindLicenseType(license_name, board=None, sysroot=None, overlay_path=None,
                       buildroot=constants.SOURCE_ROOT):
-    """Says if a license is stock Gentoo, custom, or doesn't exist.
+    """Says if a license is stock Gentoo, custom, tainted, or doesn't exist.
 
     Will check the old, static locations by default, but supplying either the
     overlay directory or sysroot allows searching in the overlay hierarchy.
@@ -1125,6 +1144,9 @@ class Licensing(object):
     Raises:
       AssertionError when the license couldn't be found
     """
+    if license_name == TAINTED:
+      return TAINTED
+
     # Check the stock licenses first since those may appear in the generated
     # list of overlay directories for a board
     stock = _GetLicenseDirectories(dir_set=_STOCK_DIRS, buildroot=buildroot)
@@ -1221,6 +1243,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
                            pkg.fullnamerev)
 
     env = {
+        'comments': TAINTED_COMMENT_TAG if pkg.tainted else '',
         'name': pkg.name,
         'namerev': '%s-%s' % (pkg.name, pkg.version),
         'url': html.escape(pkg.homepages[0]) if pkg.homepages else '',
@@ -1250,6 +1273,9 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     license_txts = {}
     # Keep track of which licenses are used by which packages.
     for pkg in self.packages.values():
+      if pkg.tainted:
+        license_txts[pkg] = TAINTED
+        continue
       if pkg.skip:
         continue
       for sln in pkg.license_names:
@@ -1318,7 +1344,19 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
       licenses_txt += [self.EvaluateTemplate(license_template, env)]
 
     file_template = ReadUnknownEncodedFile(output_template)
+    tainted_warning = ''
+    if self.tainted_pkgs:
+      tainted_warning = (TAINTED_COMMENT_TAG + '\n' +
+            '<h1>Image is TAINTED due to the following packages:</h1>\n' +
+            '<ul style="font-size:large">\n' +
+            '\n'.join(f'  <li>{x}</li>' for x in self.tainted_pkgs) +
+            '\n</ul>\n')
+      for tainted_pkg in self.tainted_pkgs:
+        logging.warning('Package %s is tainted', tainted_pkg)
+      logging.warning('Image is tainted. See licensing docs to fix this: '
+                      'https://dev.chromium.org/chromium-os/licensing')
     env = {
+        'tainted_warning_if_any': tainted_warning,
         'entries': '\n'.join(sorted_license_txt),
         'licenses': '\n'.join(licenses_txt),
     }
