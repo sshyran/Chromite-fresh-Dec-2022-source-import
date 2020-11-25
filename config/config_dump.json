@@ -12228,6 +12228,28 @@
         ],
         "workspace_branch": "factory-veyron-7505.B"
     },
+    "factory-volteer-13600.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 24h interval",
+        "slave_configs": [
+            "volteer-factory-volteer-13600.B-factorybranch"
+        ],
+        "workspace_branch": "factory-volteer-13600.B"
+    },
+    "factory-volteer-13600.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "volteer-factory-volteer-13600.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-volteer-13600.B"
+    },
     "factory-whirlwind-6509.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -34838,6 +34860,26 @@
         "useflags": [
             "chrome_internal"
         ]
+    },
+    "volteer-factory-volteer-13600.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "volteer"
+        ],
+        "workspace_branch": "factory-volteer-13600.B"
+    },
+    "volteer-factory-volteer-13600.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "volteer"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-volteer-13600.B"
     },
     "volteer-full": {
         "_template": "full",

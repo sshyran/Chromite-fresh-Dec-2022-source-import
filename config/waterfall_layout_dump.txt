@@ -126,6 +126,8 @@
     veyron_mickey-factory-veyron-7505.B-factorybranch
     veyron_rialto-factory-veyron-7505.B-factorybranch
     veyron_tiger-factory-veyron-7505.B-factorybranch
+  factory-volteer-13600.B-buildspec
+    volteer-factory-volteer-13600.B-factorybranch
   factory-whirlwind-6509.B-buildspec
     whirlwind-factory-whirlwind-6509.B-factorybranch
   factory-whirlwind-6812.41.B-buildspec
@@ -969,6 +971,8 @@
     veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob
     veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob
     veyron_tiger-factory-veyron-7505.B-factorybranch-tryjob
+  factory-volteer-13600.B-buildspec-tryjob
+    volteer-factory-volteer-13600.B-factorybranch-tryjob
   factory-whirlwind-6509.B-buildspec-tryjob
     whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob
   factory-whirlwind-6812.41.B-buildspec-tryjob
@@ -2029,6 +2033,7 @@
   viking-rapid
   viking-release-tryjob
   viking-unittest-stress
+  volteer-factory-volteer-13600.B-factorybranch-tryjob
   volteer-full-tryjob
   volteer-kernelnext-full-tryjob
   volteer-kernelnext-llvm-next-toolchain-tryjob
