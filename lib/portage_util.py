@@ -356,7 +356,8 @@ class EBuild(object):
       r'.*-(([0-9][0-9a-z_.]*)(-r[0-9]+)?)[.]ebuild')
   _WORKON_COMMIT_PATTERN = re.compile(r'^CROS_WORKON_COMMIT=')
 
-  # TODO(crbug.com/1125947): Drop CROS_WORKON_BLACKLIST.
+  # TODO(crbug.com/1125947): Drop CROS_WORKON_BLACKLIST.  We can do this once
+  # we no longer support branches <R89 / 13623.0.0.
   _RE_MANUAL_UPREV = re.compile(
       r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
 
