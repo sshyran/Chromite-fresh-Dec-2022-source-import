@@ -422,7 +422,7 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def VersionIncrementType(self):
     """Return which part of the version number should be incremented."""
-    if self._run.manifest_branch == 'master':
+    if self._run.manifest_branch in ('main', 'master'):
       return 'build'
 
     return 'branch'

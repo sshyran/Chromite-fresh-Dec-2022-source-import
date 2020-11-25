@@ -580,7 +580,7 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     # Sanity check: If we didn't check out Chrome (and we're running on ToT),
     # we should be building Chrome from a binary package.
     if (not self._run.options.managed_chrome and
-        self._run.manifest_branch == 'master'):
+        self._run.manifest_branch in ('main', 'master')):
       commands.VerifyBinpkg(
           self._build_root,
           self._current_board,

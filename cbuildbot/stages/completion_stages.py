@@ -197,7 +197,8 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
     # TODO(build): Run this logic in debug mode too.
     if (not self._run.options.debug and
         config_lib.IsPFQType(self._run.config.build_type) and
-        self._run.config.master and self._run.manifest_branch == 'master'):
+        self._run.config.master and
+        self._run.manifest_branch in ('main', 'master')):
       self._run.attrs.manifest_manager.PromoteCandidate()
       if sync_stages.MasterSlaveLKGMSyncStage.external_manager:
         sync_stages.MasterSlaveLKGMSyncStage.external_manager.PromoteCandidate()
@@ -515,7 +516,7 @@ class CanaryCompletionStage(MasterSlaveSyncCompletionStage):
       inflight: Names of the builders that timed out.
       no_stat: Set of builder names of slave builders that had status None.
     """
-    if self._run.manifest_branch == 'master':
+    if self._run.manifest_branch in ('main', 'master'):
       self.SendCanaryFailureAlert(failing, inflight, no_stat)
       # Note: We used to throttle the tree here. As of
       # https://chromium-review.googlesource.com/#/c/325821/ we no longer do.
