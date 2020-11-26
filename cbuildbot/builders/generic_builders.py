@@ -260,10 +260,16 @@ class Builder(object):
     patches_needed = sync_stages.BootstrapStage.BootstrapPatchesNeeded(
         self._run, self.patch_pool)
 
+    # Consider "main" & "master" equiv as we keep them in sync.
     chromite_branch = git.GetChromiteTrackingBranch()
+    if chromite_branch in ('main', 'master'):
+      chromite_branch = '%ToT%'
+    cbuildbot_branch = self._run.options.branch
+    if cbuildbot_branch in ('main', 'master'):
+      cbuildbot_branch = '%ToT%'
 
     if (patches_needed or self._run.options.test_bootstrap or
-        chromite_branch != self._run.options.branch):
+        chromite_branch != cbuildbot_branch):
       buildstore = BuildStore()
       stage = sync_stages.BootstrapStage(self._run, buildstore, self.patch_pool)
     return stage
