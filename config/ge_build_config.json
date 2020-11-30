@@ -518,6 +518,18 @@
       ]
     },
     {
+      "name": "guybrush",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": true,
+          "board_group": "",
+          "arch": "UNKNOWN"
+        }
+      ]
+    },
+    {
       "name": "hana",
       "configs": [
         {
@@ -682,6 +694,30 @@
           "leader_board": false,
           "board_group": "",
           "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "majolica",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": true,
+          "board_group": "",
+          "arch": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "name": "mancomb",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": true,
+          "board_group": "",
+          "arch": "UNKNOWN"
         }
       ]
     },

@@ -17067,6 +17067,7 @@
         "boards": [
             "guybrush"
         ],
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -22549,6 +22550,7 @@
         "boards": [
             "majolica"
         ],
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -22682,6 +22684,7 @@
         "boards": [
             "mancomb"
         ],
+        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -23033,6 +23036,7 @@
             "guado-macrophage-release",
             "guado-release",
             "guado_labstation-release",
+            "guybrush-release",
             "hana-kernelnext-release",
             "hana-release",
             "hatch-arc-r-ack-release",
@@ -23061,6 +23065,8 @@
             "lasilla-ground-release",
             "lulu-release",
             "macchiato-ground-release",
+            "majolica-release",
+            "mancomb-release",
             "mistral-release",
             "mushu-release",
             "nami-release",
@@ -23245,6 +23251,7 @@
             "guado-macrophage-release-tryjob",
             "guado-release-tryjob",
             "guado_labstation-release-tryjob",
+            "guybrush-release-tryjob",
             "hana-kernelnext-release-tryjob",
             "hana-release-tryjob",
             "hatch-arc-r-ack-release-tryjob",
@@ -23273,6 +23280,8 @@
             "lasilla-ground-release-tryjob",
             "lulu-release-tryjob",
             "macchiato-ground-release-tryjob",
+            "majolica-release-tryjob",
+            "mancomb-release-tryjob",
             "mistral-release-tryjob",
             "mushu-release-tryjob",
             "nami-release-tryjob",
