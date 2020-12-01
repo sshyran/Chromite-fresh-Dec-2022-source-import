@@ -21,9 +21,10 @@ from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import cros_build_lib
 from chromite.lib import constants
 from chromite.lib import image_lib
+from chromite.lib import cros_logging as logging
+from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
-
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.BASE
@@ -60,6 +61,17 @@ _VM_IMAGE_MAPPING = {
     _TEST_GUEST_VM_ID: _IMAGE_MAPPING[_TEST_ID],
 }
 
+# Supported image types for PushImage.
+SUPPORTED_IMAGE_TYPES = {
+    common_pb2.IMAGE_TYPE_RECOVERY: constants.IMAGE_TYPE_RECOVERY,
+    common_pb2.IMAGE_TYPE_FACTORY: constants.IMAGE_TYPE_FACTORY,
+    common_pb2.IMAGE_TYPE_FIRMWARE: constants.IMAGE_TYPE_FIRMWARE,
+    common_pb2.IMAGE_TYPE_ACCESSORY_USBPD: constants.IMAGE_TYPE_ACCESSORY_USBPD,
+    common_pb2.IMAGE_TYPE_ACCESSORY_RWSIG: constants.IMAGE_TYPE_ACCESSORY_RWSIG,
+    common_pb2.IMAGE_TYPE_BASE: constants.IMAGE_TYPE_BASE,
+    common_pb2.IMAGE_TYPE_CR50_FIRMWARE: constants.IMAGE_TYPE_CR50_FIRMWARE
+}
+
 
 def _CreateResponse(_input_proto, output_proto, _config):
   """Set output_proto success field on a successful Create response."""
@@ -88,8 +100,8 @@ def Create(input_proto, output_proto, _config):
   build_config = _ParseCreateBuildConfig(input_proto)
 
   # Sorted isn't really necessary here, but it's much easier to test.
-  result = image.Build(board=board, images=sorted(list(image_types)),
-                       config=build_config)
+  result = image.Build(
+      board=board, images=sorted(list(image_types)), config=build_config)
 
   output_proto.success = result.success
 
@@ -171,8 +183,11 @@ def _ParseCreateBuildConfig(input_proto):
   disk_layout = input_proto.disk_layout or None
   builder_path = input_proto.builder_path or None
   return image.BuildConfig(
-      enable_rootfs_verification=enable_rootfs_verification, replace=True,
-      version=version, disk_layout=disk_layout, builder_path=builder_path,
+      enable_rootfs_verification=enable_rootfs_verification,
+      replace=True,
+      version=version,
+      disk_layout=disk_layout,
+      builder_path=builder_path,
   )
 
 
@@ -257,4 +272,44 @@ def Test(input_proto, output_proto, config):
   if success:
     return controller.RETURN_CODE_SUCCESS
   else:
+    return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+
+
+@faux.empty_success
+@faux.empty_completed_unsuccessfully_error
+@validate.require('gs_image_dir', 'sysroot.build_target.name')
+def PushImage(input_proto, _output_proto, config):
+  """Push artifacts from the archive bucket to the release bucket.
+
+  Wraps chromite/scripts/pushimage.py.
+
+  Args:
+    input_proto (PushImageRequest): Input proto.
+    _output_proto (PushImageResponse): Output proto.
+    config (api.config.ApiConfig): The API call config.
+
+  Returns:
+    A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
+  """
+  sign_types = []
+  if input_proto.sign_types:
+    for sign_type in input_proto.sign_types:
+      if sign_type not in SUPPORTED_IMAGE_TYPES:
+        logging.error('unsupported sign type %g', sign_type)
+        return controller.RETURN_CODE_INVALID_INPUT
+      sign_types.append(SUPPORTED_IMAGE_TYPES[sign_type])
+
+  # If configured for validation only we're done here.
+  if config.validate_only:
+    return controller.RETURN_CODE_VALID_INPUT
+
+  try:
+    pushimage.PushImage(
+        input_proto.gs_image_dir,
+        input_proto.sysroot.build_target.name,
+        dry_run=input_proto.dryrun,
+        profile=input_proto.profile.name,
+        sign_types=sign_types)
+    return controller.RETURN_CODE_SUCCESS
+  except Exception:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
