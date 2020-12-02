@@ -92,5 +92,5 @@ class PayloadUtilitiesTest(cros_test_lib.TestCase):
   def testImageType(self):
     """Test _ImageTypeToStr works."""
     # pylint: disable=protected-access
-    self.assertEqual('base', payload._ImageTypeToStr(1))
+    self.assertEqual('image_type_base', payload._ImageTypeToStr(1))
     # pylint: enable=protected-access
