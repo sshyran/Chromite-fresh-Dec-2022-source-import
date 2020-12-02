@@ -1301,9 +1301,6 @@ TIME = "MEDIUM"
 TEST_CATEGORY = "Functional"
 TEST_CLASS = "platform"
 TEST_TYPE = "server"
-
-# Skip provision special task for AU tests.
-DEPENDENCIES = "skip_provision"
 """))
     # We only checking the beginning to avoid the very long doc string.
     self.assertTrue(full_contents.startswith(b"""name = 'paygen_au_foo'
@@ -1329,9 +1326,6 @@ TIME = "MEDIUM"
 TEST_CATEGORY = "Functional"
 TEST_CLASS = "platform"
 TEST_TYPE = "server"
-
-# Skip provision special task for AU tests.
-DEPENDENCIES = "skip_provision"
 """))
 
 
