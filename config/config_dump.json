@@ -26946,6 +26946,10 @@
             "test"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
+        ],
         "signer_tests": false,
         "vm_tests": [],
         "vm_tests_override": null
@@ -26968,6 +26972,10 @@
             "test"
         ],
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "signer_tests": false,
