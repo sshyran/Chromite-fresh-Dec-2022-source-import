@@ -1,6 +1,7 @@
 include /OWNERS.build
 include /OWNERS.ci
 
+per-file OWNERS.au = file://OWNERS.au
 per-file OWNERS.kernel = file://OWNERS.kernel
 per-file OWNERS.testplatform = file://OWNERS.testplatform
 
