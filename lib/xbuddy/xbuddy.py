@@ -575,7 +575,7 @@ class XBuddy(object):
     if os.path.exists(dev_image):
       return 'dev'
 
-    raise XBuddyException('No images found in %s' % local_dir)
+    return None
 
   @staticmethod
   def InterpretPath(path, default_board=None, default_version=None):
@@ -854,6 +854,7 @@ class XBuddy(object):
     # Parse the path.
     image_type, board, version, is_local = self.InterpretPath(
         path, default_board, default_version)
+    file_name = None
     if is_local:
       # Get a local image.
       if version == LATEST:
@@ -865,10 +866,13 @@ class XBuddy(object):
       if image_type == ANY:
         image_type = self._FindAny(artifact_dir)
 
-      file_name = os.path.join(artifact_dir,
-                               LOCAL_ALIAS_TO_FILENAME[image_type])
-      if not os.path.exists(file_name):
-        raise XBuddyException('Local %s artifact not in static_dir at %s' %
+      # If there was an image type discovered, get the file name otherwise, just
+      # return with no file name.
+      if image_type:
+        file_name = os.path.join(artifact_dir,
+                                 LOCAL_ALIAS_TO_FILENAME[image_type])
+        if not os.path.exists(file_name):
+          raise XBuddyException('Local %s artifact not in static_dir at %s' %
                               (image_type, file_name))
     else:
       # Get a remote image.
@@ -879,7 +883,6 @@ class XBuddy(object):
           board, suffix, version, image_dir=image_dir)
       _Log('Resolved version %s to %s.', version, build_id)
 
-      file_name = None
       if not lookup_only:
         file_name = self._GetFromGS(build_id, image_type, image_dir=image_dir,
                                     channel=channel)[0]
