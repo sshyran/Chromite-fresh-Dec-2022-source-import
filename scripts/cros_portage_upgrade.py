@@ -1866,7 +1866,7 @@ def _CreateParser():
       '\n'
   )
 
-  parser = commandline.ArgumentParser(epilog=epilog)
+  parser = commandline.ArgumentParser(epilog=epilog, default_log_level='notice')
   parser.add_argument('packages', nargs='*', default=None,
                       help='Packages to process.')
   parser.add_argument('--amend', action='store_true', default=False,
