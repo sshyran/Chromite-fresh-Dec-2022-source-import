@@ -36,6 +36,9 @@ def _value(field, message):
   Returns:
     str|None|int|list|Message|bool - The value of the field.
   """
+  if not field:
+    return message
+
   value = message
   for part in field.split('.'):
     if not isinstance(value, protobuf_message.Message):
@@ -79,7 +82,7 @@ def exists(*fields):
 
 
 def is_in(field, values):
-  """Validate |field| contains |value|.
+  """Validate |field| is an element of |values|.
 
   Args:
     field (str): The field being checked. May be . separated nested fields.
@@ -97,6 +100,41 @@ def is_in(field, values):
 
         if value not in values:
           cros_build_lib.Die('%s (%r) must be in %r', field, value, values)
+
+      return func(input_proto, output_proto, config, *args, **kwargs)
+
+    return _is_in
+
+  return decorator
+
+
+def each_in(field, subfield, values, optional=False):
+  """Validate each |subfield| of the repeated |field| is in |values|.
+
+  Args:
+    field (str): The field being checked. May be . separated nested fields.
+    subfield (str|None): The field in the repeated |field| to validate, or None
+      when |field| is not a repeated message, e.g. enum, scalars.
+    values (list): The possible values field may take.
+    optional (bool): Also allow the field to be empty when True.
+  """
+  assert field
+  assert values
+
+  def decorator(func):
+    @functools.wraps(func)
+    def _is_in(input_proto, output_proto, config, *args, **kwargs):
+      if config.do_validation:
+        members = _value(field, input_proto) or []
+        if not optional and not members:
+          cros_build_lib.Die('The %s field is empty.', field)
+        for member in members:
+          logging.debug('Validating %s.[each].%s is in %r.', field, subfield,
+                        values)
+          value = _value(subfield, member)
+          if value not in values:
+            cros_build_lib.Die('%s.[each].%s (%r) must be in %r is required.',
+                               field, subfield, value, values)
 
       return func(input_proto, output_proto, config, *args, **kwargs)
 
