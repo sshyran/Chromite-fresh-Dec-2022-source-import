@@ -388,6 +388,8 @@
     strongbad-release
     sumo-release
     swanky-release
+    tael-release
+    tatl-release
     terra-release
     tidus-release
     trogdor-release
@@ -1572,6 +1574,8 @@
     strongbad-release-tryjob
     sumo-release-tryjob
     swanky-release-tryjob
+    tael-release-tryjob
+    tatl-release-tryjob
     terra-release-tryjob
     tidus-release-tryjob
     trogdor-release-tryjob
@@ -1923,10 +1927,12 @@
   tael-full-tryjob
   tael-llvm-next-toolchain-tryjob
   tael-llvm-toolchain-tryjob
+  tael-release-tryjob
   tael-unittest-stress
   tatl-full-tryjob
   tatl-llvm-next-toolchain-tryjob
   tatl-llvm-toolchain-tryjob
+  tatl-release-tryjob
   tatl-unittest-stress
   terra-factory-strago-7458.B-factorybranch-tryjob
   terra-full-tryjob

@@ -23130,6 +23130,8 @@
             "strongbad-release",
             "sumo-release",
             "swanky-release",
+            "tael-release",
+            "tatl-release",
             "terra-release",
             "tidus-release",
             "trogdor-release",
@@ -23345,6 +23347,8 @@
             "strongbad-release-tryjob",
             "sumo-release-tryjob",
             "swanky-release-tryjob",
+            "tael-release-tryjob",
+            "tatl-release-tryjob",
             "terra-release-tryjob",
             "tidus-release-tryjob",
             "trogdor-release-tryjob",
@@ -31823,6 +31827,82 @@
             "sys-kernel/*kernel*"
         ]
     },
+    "tael-release": {
+        "_template": "release",
+        "boards": [
+            "tael"
+        ],
+        "chrome_sdk": false,
+        "dev_installer_prebuilts": false,
+        "disk_layout": "base",
+        "factory": false,
+        "factory_install_netboot": false,
+        "factory_toolkit": false,
+        "hw_tests": [],
+        "hw_tests_override": [],
+        "hwqual": false,
+        "image_test": false,
+        "images": [
+            "base",
+            "test"
+        ],
+        "important": false,
+        "packages": [
+            "virtual/target-os",
+            "virtual/target-os-dev",
+            "virtual/target-os-test"
+        ],
+        "paygen": false,
+        "sign_types": null,
+        "signer_tests": false,
+        "sync_chrome": false,
+        "upload_hw_test_artifacts": false,
+        "upload_stripped_packages": [
+            "sys-kernel/*kernel*"
+        ],
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "tael-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "tael"
+        ],
+        "chrome_sdk": false,
+        "debug": true,
+        "dev_installer_prebuilts": false,
+        "disk_layout": "base",
+        "display_label": "tryjob",
+        "factory": false,
+        "factory_install_netboot": false,
+        "factory_toolkit": false,
+        "hw_tests": [],
+        "hw_tests_override": null,
+        "hwqual": false,
+        "image_test": false,
+        "images": [
+            "base",
+            "test"
+        ],
+        "luci_builder": "Try",
+        "packages": [
+            "virtual/target-os",
+            "virtual/target-os-dev",
+            "virtual/target-os-test"
+        ],
+        "paygen": false,
+        "push_image": false,
+        "sign_types": null,
+        "signer_tests": false,
+        "suite_scheduling": false,
+        "sync_chrome": false,
+        "upload_hw_test_artifacts": false,
+        "upload_stripped_packages": [
+            "sys-kernel/*kernel*"
+        ],
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
     "tael-unittest-stress": {
         "_template": "unittest_stress",
         "boards": [
@@ -31837,7 +31917,11 @@
             "base",
             "test"
         ],
+        "internal": true,
         "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
         "packages": [
             "virtual/target-os",
             "virtual/target-os-dev",
@@ -31847,6 +31931,9 @@
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
+        ],
+        "useflags": [
+            "chrome_internal"
         ]
     },
     "tatl-full": {
@@ -32040,6 +32127,82 @@
             "sys-kernel/*kernel*"
         ]
     },
+    "tatl-release": {
+        "_template": "release",
+        "boards": [
+            "tatl"
+        ],
+        "chrome_sdk": false,
+        "dev_installer_prebuilts": false,
+        "disk_layout": "base",
+        "factory": false,
+        "factory_install_netboot": false,
+        "factory_toolkit": false,
+        "hw_tests": [],
+        "hw_tests_override": [],
+        "hwqual": false,
+        "image_test": false,
+        "images": [
+            "base",
+            "test"
+        ],
+        "important": false,
+        "packages": [
+            "virtual/target-os",
+            "virtual/target-os-dev",
+            "virtual/target-os-test"
+        ],
+        "paygen": false,
+        "sign_types": null,
+        "signer_tests": false,
+        "sync_chrome": false,
+        "upload_hw_test_artifacts": false,
+        "upload_stripped_packages": [
+            "sys-kernel/*kernel*"
+        ],
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "tatl-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "tatl"
+        ],
+        "chrome_sdk": false,
+        "debug": true,
+        "dev_installer_prebuilts": false,
+        "disk_layout": "base",
+        "display_label": "tryjob",
+        "factory": false,
+        "factory_install_netboot": false,
+        "factory_toolkit": false,
+        "hw_tests": [],
+        "hw_tests_override": null,
+        "hwqual": false,
+        "image_test": false,
+        "images": [
+            "base",
+            "test"
+        ],
+        "luci_builder": "Try",
+        "packages": [
+            "virtual/target-os",
+            "virtual/target-os-dev",
+            "virtual/target-os-test"
+        ],
+        "paygen": false,
+        "push_image": false,
+        "sign_types": null,
+        "signer_tests": false,
+        "suite_scheduling": false,
+        "sync_chrome": false,
+        "upload_hw_test_artifacts": false,
+        "upload_stripped_packages": [
+            "sys-kernel/*kernel*"
+        ],
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
     "tatl-unittest-stress": {
         "_template": "unittest_stress",
         "boards": [
@@ -32054,7 +32217,11 @@
             "base",
             "test"
         ],
+        "internal": true,
         "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
         "packages": [
             "virtual/target-os",
             "virtual/target-os-dev",
@@ -32064,6 +32231,9 @@
         "upload_hw_test_artifacts": false,
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
+        ],
+        "useflags": [
+            "chrome_internal"
         ]
     },
     "terra-factory-strago-7458.B-factorybranch": {
