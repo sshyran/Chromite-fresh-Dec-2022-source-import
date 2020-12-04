@@ -936,7 +936,7 @@ def _Unmerge(device, pkg, root):
   if device.run(['qmerge', '--version'], check=False).returncode != 0:
     cmd = ['emerge']
 
-  cmd.extend(['--unmerge', pkg, '--root=%s' % root])
+  cmd.extend(['--unmerge', f'={pkg}', '--root=%s' % root])
   try:
     # Always showing the emerge output for clarity.
     device.run(cmd, capture_output=False, remote_sudo=True,
