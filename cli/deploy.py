@@ -1164,7 +1164,9 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
 
       sysroot = cros_build_lib.GetSysroot(board=board)
 
-      if clean_binpkg:
+      # Don't bother trying to clean for unmerges.  We won't use the local db,
+      # and it just slows things down for the user.
+      if emerge and clean_binpkg:
         logging.notice('Cleaning outdated binary packages from %s', sysroot)
         portage_util.CleanOutdatedBinaryPackages(sysroot)
 
@@ -1186,14 +1188,15 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
         logging.notice('No packages to %s', action_str)
         return
 
-      # Warn when the user seems to forget `cros workon start`.
-      worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
-      for package in listed:
-        cp = package_info.SplitCPV(package).cp
-        if cp not in worked_on_cps:
-          logging.warning(
-              'Are you intentionally deploying unmodified packages, or did '
-              'you forget to run `cros workon --board=$BOARD start %s`?', cp)
+      # Warn when the user installs & didn't `cros workon start`.
+      if emerge:
+        worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
+        for package in listed:
+          cp = package_info.SplitCPV(package).cp
+          if cp not in worked_on_cps:
+            logging.warning(
+                'Are you intentionally deploying unmodified packages, or did '
+                'you forget to run `cros workon --board=$BOARD start %s`?', cp)
 
       logging.notice('These are the packages to %s:', action_str)
       for i, pkg in enumerate(pkgs):
