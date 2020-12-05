@@ -134,11 +134,10 @@ PACKAGE_LICENSES = {
 # attribution from them.
 COPYRIGHT_ATTRIBUTION_LICENSES = [
     'BSD',    # requires distribution of copyright notice
-    'BSD-2',  # so does BSD-2 https://opensource.org/licenses/BSD-2-Clause
-    'BSD-3',  # and BSD-3? https://opensource.org/licenses/BSD-3-Clause
+    'BSD-2',  # so does BSD-2 http://opensource.org/licenses/BSD-2-Clause
+    'BSD-3',  # and BSD-3? http://opensource.org/licenses/BSD-3-Clause
     'BSD-4',  # and 4?
     'BSD-with-attribution',
-    'ISC',    # so does ISC https://opensource.org/licenses/ISC
     'MIT',
     'MIT-with-advertising',
     'Old-MIT',
