@@ -32,6 +32,7 @@ arm_internal_release_boards = frozenset([
     'nyan_big',
     'nyan_blaze',
     'oak',
+    'tael',
     'veyron_jaq',
     'veyron_jerry',
     'veyron_mighty',
@@ -47,7 +48,6 @@ arm_external_boards = frozenset([
     'arm-generic',
     'arm64-generic',
     'arm64-llvmpipe',
-    'tael',
 ])
 
 x86_internal_release_boards = frozenset([
@@ -64,13 +64,13 @@ x86_internal_release_boards = frozenset([
     'poppy',
     'samus-kernelnext',
     'sludge',
+    'tatl',
     'wristpin',
 ])
 
 x86_external_boards = frozenset([
     'amd64-generic',
     'moblab-generic-vm',
-    'tatl',
     'x32-generic',
 ])
 
