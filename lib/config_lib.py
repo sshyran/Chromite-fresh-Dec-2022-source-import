@@ -951,6 +951,9 @@ def DefaultSettings():
       # List of images we want to build -- see build_image for more details.
       images=['test'],
 
+      # Whether to convert the image into a guest VM image.
+      guest_vm_image=False,
+
       # Image from which we will build update payloads.  Must either be None
       # or name one of the images in the 'images' list, above.
       payload_image=None,

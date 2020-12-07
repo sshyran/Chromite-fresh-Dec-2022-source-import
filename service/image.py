@@ -197,14 +197,17 @@ def CreateGuestVm(board, is_test=False, chroot=None):
     str: Path to the created guest VM folder.
   """
   assert board
+
   cmd = [os.path.join(constants.TERMINA_TOOLS_DIR, 'termina_build_image.py')]
 
+  image_dir = image_lib.GetLatestImageLink(board, force_chroot=True)
+
   image_file = constants.TEST_IMAGE_BIN if is_test else constants.BASE_IMAGE_BIN
-  image_path = os.path.join(image_lib.GetLatestImageLink(board), image_file)
+  image_path = os.path.join(image_dir, image_file)
 
   output_dir = (constants.TEST_GUEST_VM_DIR if is_test
                 else constants.BASE_GUEST_VM_DIR)
-  output_path = os.path.join(image_lib.GetLatestImageLink(board), output_dir)
+  output_path = os.path.join(image_dir, output_dir)
 
   cmd.append(image_path)
   cmd.append(output_path)

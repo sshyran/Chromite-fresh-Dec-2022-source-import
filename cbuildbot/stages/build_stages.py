@@ -19,6 +19,7 @@ from chromite.cbuildbot.stages import test_stages
 from chromite.lib import buildbucket_lib
 from chromite.lib import builder_status_lib
 from chromite.lib import build_summary
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -30,6 +31,7 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
+from chromite.service import image as image_service
 
 
 class CleanUpStage(generic_stages.BuilderStage):
@@ -811,7 +813,9 @@ class BuildImageStage(BuildPackagesStage):
 
     self.board_runattrs.SetParallel('images_generated', True)
 
-    parallel.RunParallelSteps([self._BuildVMImage, self._BuildGceTarballs])
+    parallel.RunParallelSteps([self._BuildVMImage,
+                               self._BuildGuestVMImage,
+                               self._BuildGceTarballs])
 
   def _BuildVMImage(self):
     # Adding startswith('betty') hack to create VM image for betty-arc-r.
@@ -825,6 +829,20 @@ class BuildImageStage(BuildPackagesStage):
           self._current_board,
           extra_env=self._portage_extra_env,
           disk_layout=self._run.config.disk_layout)
+
+  def _BuildGuestVMImage(self):
+    if self._run.config.guest_vm_image:
+      chroot_path = os.path.join(self._build_root, constants.DEFAULT_CHROOT_DIR)
+      chroot = chroot_lib.Chroot(path=chroot_path)
+      for image in self._run.config.images:
+        if image in (constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_TEST):
+          image_service.CreateGuestVm(
+              self._current_board,
+              is_test=(image == constants.IMAGE_TYPE_TEST),
+              chroot=chroot)
+        else:
+          # ignore other kinds of image
+          pass
 
   def _BuildGceTarballs(self):
     """Creates .tar.gz files that can be converted to GCE images.

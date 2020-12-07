@@ -126,6 +126,12 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
         basename = os.path.basename(image_file)
         info = {'input': [basename], 'archive': 'tar', 'compress': 'xz'}
         artifacts.append(info)
+      if self._run.config.guest_vm_image:
+        for image in (constants.BASE_GUEST_VM_DIR, constants.TEST_GUEST_VM_DIR):
+          artifacts.append({'input': [image + '/*'],
+                            'output': image + '.tbz',
+                            'archive': 'tar',
+                            'compress': 'bz2'})
       # We add the dlc folder (if exists) as artifact so we can copy all DLC
       # artifacts as is.
       if os.path.isdir(os.path.join(image_dir, 'dlc')):

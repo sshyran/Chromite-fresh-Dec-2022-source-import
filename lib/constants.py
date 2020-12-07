@@ -40,7 +40,7 @@ PATH_TO_CBUILDBOT = os.path.join(CHROMITE_BIN_SUBDIR, 'cbuildbot')
 DEFAULT_CHROOT_DIR = 'chroot'
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
 TERMINA_TOOLS_DIR = os.path.join(
-    SOURCE_ROOT, 'src/platform/container-guest-tools/termina')
+    CHROOT_SOURCE_ROOT, 'src/platform/container-guest-tools/termina')
 
 STATEFUL_DIR = '/mnt/stateful_partition'
 
