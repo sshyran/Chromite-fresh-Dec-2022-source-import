@@ -196,7 +196,8 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='usbprinter', gid=20155, users={'cups', 'saned'}),
     GroupEntry(group='traced-producer', gid=20162, users={'traced',
                                                           'traced-probes',
-                                                          'chronos'}),
+                                                          'chronos',
+                                                          'crosvm'}),
     GroupEntry(group='traced-consumer', gid=20164, users={'traced',
                                                           'chronos'}),
 ))
