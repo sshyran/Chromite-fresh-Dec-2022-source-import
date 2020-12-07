@@ -4605,6 +4605,140 @@
             "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"vmtest-informational4\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 43200,\n    \"use_ctest\": true,\n    \"warn_only\": true\n}"
         ]
     },
+    "bob-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "bob-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "bob-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "bob-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "bob-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "bob-arc64"
+        ]
+    },
+    "bob-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "bob-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "bob-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "bob-arc64"
+        ]
+    },
+    "bob-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "bob-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "bob-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "bob-arc64"
+        ]
+    },
+    "bob-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "bob-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "bob-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "bob-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "bob-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "bob-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "bob-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "bob-arc64"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "bob-factory-gru-9017.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -9224,6 +9358,140 @@
         "_template": "unittest_stress",
         "boards": [
             "edgar"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "elm-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "elm-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "elm-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "elm-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "elm-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "elm-arc64"
+        ]
+    },
+    "elm-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "elm-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "elm-arc64"
+        ]
+    },
+    "elm-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "elm-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "elm-arc64"
+        ]
+    },
+    "elm-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "elm-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "elm-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "elm-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "elm-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "elm-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "elm-arc64"
         ],
         "hw_tests_override": null,
         "internal": true,
@@ -15959,6 +16227,140 @@
             "chrome_internal"
         ]
     },
+    "grunt-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "grunt-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "grunt-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "grunt-arc64"
+        ]
+    },
+    "grunt-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "grunt-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "grunt-arc64"
+        ]
+    },
+    "grunt-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "grunt-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "grunt-arc64"
+        ]
+    },
+    "grunt-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "grunt-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "grunt-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "grunt-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "grunt-arc64"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "grunt-factory-grunt-11164.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -17122,6 +17524,140 @@
         "_template": "unittest_stress",
         "boards": [
             "guybrush"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "hana-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "hana-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "hana-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "hana-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "hana-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "hana-arc64"
+        ]
+    },
+    "hana-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "hana-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hana-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "hana-arc64"
+        ]
+    },
+    "hana-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "hana-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hana-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "hana-arc64"
+        ]
+    },
+    "hana-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "hana-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hana-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "hana-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "hana-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "hana-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "hana-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "hana-arc64"
         ],
         "hw_tests_override": null,
         "internal": true,
@@ -18974,6 +19510,140 @@
         "_template": "unittest_stress",
         "boards": [
             "heli"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "jacuzzi-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "jacuzzi-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "jacuzzi-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "jacuzzi-arc64"
+        ]
+    },
+    "jacuzzi-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "jacuzzi-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "jacuzzi-arc64"
+        ]
+    },
+    "jacuzzi-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "jacuzzi-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "jacuzzi-arc64"
+        ]
+    },
+    "jacuzzi-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "jacuzzi-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "jacuzzi-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "jacuzzi-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "jacuzzi-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "jacuzzi-arc64"
         ],
         "hw_tests_override": null,
         "internal": true,
@@ -23007,6 +23677,7 @@
             "betty-pi-arc-release",
             "betty-qt-arc-release",
             "betty-release",
+            "bob-arc64-release",
             "bob-release",
             "brya-release",
             "bubs-release",
@@ -23030,6 +23701,7 @@
             "dedede-release",
             "drallion-release",
             "edgar-release",
+            "elm-arc64-release",
             "elm-kernelnext-release",
             "elm-release",
             "endeavour-release",
@@ -23053,6 +23725,7 @@
             "gnawty-release",
             "gonzo-release",
             "grunt-arc-r-release",
+            "grunt-arc64-release",
             "grunt-kernelnext-release",
             "grunt-release",
             "guado-cfm-release",
@@ -23060,6 +23733,7 @@
             "guado-release",
             "guado_labstation-release",
             "guybrush-release",
+            "hana-arc64-release",
             "hana-kernelnext-release",
             "hana-release",
             "hatch-arc-r-ack-release",
@@ -23071,6 +23745,7 @@
             "hatch-kernelnext-release",
             "hatch-release",
             "heli-release",
+            "jacuzzi-arc64-release",
             "jacuzzi-release",
             "kalista-cfm-release",
             "kalista-release",
@@ -23119,7 +23794,9 @@
             "romer-release",
             "samus-release",
             "sand-release",
+            "sarien-arc64-release",
             "sarien-release",
+            "scarlet-arc64-release",
             "scarlet-release",
             "sentry-release",
             "setzer-release",
@@ -23224,6 +23901,7 @@
             "betty-pi-arc-release-tryjob",
             "betty-qt-arc-release-tryjob",
             "betty-release-tryjob",
+            "bob-arc64-release-tryjob",
             "bob-release-tryjob",
             "brya-release-tryjob",
             "bubs-release-tryjob",
@@ -23247,6 +23925,7 @@
             "dedede-release-tryjob",
             "drallion-release-tryjob",
             "edgar-release-tryjob",
+            "elm-arc64-release-tryjob",
             "elm-kernelnext-release-tryjob",
             "elm-release-tryjob",
             "endeavour-release-tryjob",
@@ -23270,6 +23949,7 @@
             "gnawty-release-tryjob",
             "gonzo-release-tryjob",
             "grunt-arc-r-release-tryjob",
+            "grunt-arc64-release-tryjob",
             "grunt-kernelnext-release-tryjob",
             "grunt-release-tryjob",
             "guado-cfm-release-tryjob",
@@ -23277,6 +23957,7 @@
             "guado-release-tryjob",
             "guado_labstation-release-tryjob",
             "guybrush-release-tryjob",
+            "hana-arc64-release-tryjob",
             "hana-kernelnext-release-tryjob",
             "hana-release-tryjob",
             "hatch-arc-r-ack-release-tryjob",
@@ -23288,6 +23969,7 @@
             "hatch-kernelnext-release-tryjob",
             "hatch-release-tryjob",
             "heli-release-tryjob",
+            "jacuzzi-arc64-release-tryjob",
             "jacuzzi-release-tryjob",
             "kalista-cfm-release-tryjob",
             "kalista-release-tryjob",
@@ -23336,7 +24018,9 @@
             "romer-release-tryjob",
             "samus-release-tryjob",
             "sand-release-tryjob",
+            "sarien-arc64-release-tryjob",
             "sarien-release-tryjob",
+            "scarlet-arc64-release-tryjob",
             "scarlet-release-tryjob",
             "sentry-release-tryjob",
             "setzer-release-tryjob",
@@ -29494,6 +30178,140 @@
             "chrome_internal"
         ]
     },
+    "sarien-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "sarien-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "sarien-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "sarien-arc64"
+        ]
+    },
+    "sarien-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "sarien-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "sarien-arc64"
+        ]
+    },
+    "sarien-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "sarien-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "sarien-arc64"
+        ]
+    },
+    "sarien-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "sarien-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "sarien-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "sarien-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "sarien-arc64"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "sarien-factory-sarien-12033.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -29676,6 +30494,140 @@
         "_template": "unittest_stress",
         "boards": [
             "sarien"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "scarlet-arc64-full": {
+        "_template": "full",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "scarlet-arc64-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "manifest_branch": "main",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "scarlet-arc64-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "scarlet-arc64"
+        ]
+    },
+    "scarlet-arc64-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "scarlet-arc64-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "scarlet-arc64"
+        ]
+    },
+    "scarlet-arc64-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "scarlet-arc64-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "scarlet-arc64"
+        ]
+    },
+    "scarlet-arc64-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "scarlet-arc64-release": {
+        "_template": "release",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "scarlet-arc64-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "scarlet-arc64"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "scarlet-arc64-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "scarlet-arc64"
         ],
         "hw_tests_override": null,
         "internal": true,
@@ -31833,6 +32785,7 @@
             "tael"
         ],
         "chrome_sdk": false,
+        "chrome_sdk_build_chrome": false,
         "dev_installer_prebuilts": false,
         "disk_layout": "base",
         "factory": false,
@@ -31869,6 +32822,7 @@
             "tael"
         ],
         "chrome_sdk": false,
+        "chrome_sdk_build_chrome": false,
         "debug": true,
         "dev_installer_prebuilts": false,
         "disk_layout": "base",
@@ -32133,6 +33087,7 @@
             "tatl"
         ],
         "chrome_sdk": false,
+        "chrome_sdk_build_chrome": false,
         "dev_installer_prebuilts": false,
         "disk_layout": "base",
         "factory": false,
@@ -32169,6 +33124,7 @@
             "tatl"
         ],
         "chrome_sdk": false,
+        "chrome_sdk_build_chrome": false,
         "debug": true,
         "dev_installer_prebuilts": false,
         "disk_layout": "base",
@@ -35192,6 +36148,7 @@
         "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin_npcx796fc\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"eldrid\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"elemi\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
@@ -35234,6 +36191,7 @@
         "luci_builder": "Try",
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin_npcx796fc\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"eldrid\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"elemi\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
@@ -35328,6 +36286,7 @@
         ],
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin_npcx796fc\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"elemi\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"lillipup\",\n    \"test_suites\": []\n}",
@@ -35375,6 +36334,7 @@
         "luci_builder": "Try",
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"delbin_npcx796fc\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"elemi\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"halvor\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"lillipup\",\n    \"test_suites\": []\n}",
