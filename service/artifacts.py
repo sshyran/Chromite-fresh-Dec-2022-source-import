@@ -13,6 +13,7 @@ from __future__ import print_function
 import collections
 import fnmatch
 import glob
+import multiprocessing
 import os
 import shutil
 import tempfile
@@ -21,7 +22,9 @@ from typing import List
 from six.moves import urllib
 
 from chromite.lib import autotest_util
+from chromite.lib import build_target_lib
 from chromite.lib import cache
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -805,3 +808,44 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
         shutil.copy(p, destdir)
         yield SymbolFileTuple(relative_path=os.path.basename(p),
                               source_file_name=p)
+
+
+def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
+                            build_target: build_target_lib.BuildTarget,
+                            debug: bool) -> cros_build_lib.CommandResult:
+  """Generate breakpad (go/breakpad) symbols for debugging.
+
+  This function generates .sym files to /build/<board>/usr/lib/debug/breakpad
+  from .debug files found in /build/<board>/usr/lib/debug by calling
+  cros_generate_breakpad_symbols.
+
+  Args:
+    chroot (chroot_lib.Chroot): The chroot in which the sysroot should be built.
+    build_target: The sysroot's build target.
+    debug: Include extra debugging output.
+  """
+  # The firmware directory contains elf symbols that we have trouble parsing
+  # and that don't help with breakpad debugging (see https://crbug.com/213670).
+  exclude_dirs = ['firmware']
+
+  cmd = [
+      'cros_generate_breakpad_symbols'
+  ]
+  if debug:
+    cmd += ['--debug']
+
+  # Execute for board in parallel with half # of cpus available to avoid
+  # starving other parallel processes on the same machine.
+  cmd += [
+      '--board=%s' % build_target.name,
+      '--jobs', max(1, multiprocessing.cpu_count() // 2)
+  ]
+  cmd += ['--exclude-dir=%s' % x for x in exclude_dirs]
+
+  logging.info('Generating breakpad symbols: %s.', cmd)
+  result = cros_build_lib.run(
+      cmd,
+      capture_output=True,
+      enter_chroot=True,
+      chroot_args=chroot.get_enter_args())
+  return result

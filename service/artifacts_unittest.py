@@ -694,7 +694,7 @@ class BundleGceTarballTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(os.readlink(disk_raw), self.image_file)
 
 
-class TestGatherSymbolFiles(cros_test_lib.MockTempDirTestCase):
+class GatherSymbolFilesTest(cros_test_lib.MockTempDirTestCase):
   """Base class for testing GatherSymbolFiles."""
 
   SLIM_CONTENT = """
@@ -934,3 +934,46 @@ STACK CFI 1234
         relpath = os.path.relpath(fullpath, dest_dir)
         relative_files.append(relpath)
     return relative_files
+
+
+class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
+  """Base class for testing GenerateBreakpadSymbols."""
+
+  def setUp(self):
+    self.chroot_dir = os.path.join(self.tempdir, 'chroot_dir')
+    osutils.SafeMakedirs(self.chroot_dir)
+
+  def test_generateBreakpadSymbols(self):
+    """Verify that calling the service layer invokes the script as expected."""
+    chroot = chroot_lib.Chroot(self.chroot_dir)
+    build_target = build_target_lib.BuildTarget('board')
+    self.PatchObject(cros_build_lib, 'run')
+
+    # Call the method being tested.
+    artifacts.GenerateBreakpadSymbols(chroot, build_target, False)
+
+    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
+                                           '--board=board',
+                                           '--jobs', mock.ANY,
+                                           '--exclude-dir=firmware'],
+                                          capture_output=True,
+                                          enter_chroot=True,
+                                          chroot_args=['--chroot', mock.ANY])
+
+  def test_generateBreakpadSymbolsWithDebug(self):
+    """Verify that calling with debug invokes the script as expected."""
+    chroot = chroot_lib.Chroot(self.chroot_dir)
+    build_target = build_target_lib.BuildTarget('board')
+    self.PatchObject(cros_build_lib, 'run')
+
+    # Call the method being tested.
+    artifacts.GenerateBreakpadSymbols(chroot, build_target, True)
+
+    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
+                                           '--debug',
+                                           '--board=board',
+                                           '--jobs', mock.ANY,
+                                           '--exclude-dir=firmware'],
+                                          capture_output=True,
+                                          enter_chroot=True,
+                                          chroot_args=['--chroot', mock.ANY])
