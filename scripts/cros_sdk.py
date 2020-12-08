@@ -971,11 +971,19 @@ def main(argv):
   # --use-image after a reboot to avoid losing access to their existing chroot.
   chroot_exists = cros_sdk_lib.IsChrootReady(options.chroot)
   img_path = _ImageFileForChroot(options.chroot)
-  if (not options.use_image and not chroot_exists and not options.delete and
-      not options.unmount and os.path.exists(img_path)):
-    logging.notice('Existing chroot image %s found.  Forcing --use-image on.',
-                   img_path)
-    options.use_image = True
+  if (not options.use_image and not options.delete and not options.unmount
+      and os.path.exists(img_path)):
+    if chroot_exists:
+      # If the chroot is already populated, make sure it has something
+      # mounted on it before we assume it came from an image.
+      cmd = ['mountpoint', '-q', options.chroot]
+      if cros_build_lib.dbg_run(cmd, check=False).returncode == 0:
+        options.use_image = True
+
+    else:
+      logging.notice('Existing chroot image %s found.  Forcing --use-image on.',
+                     img_path)
+      options.use_image = True
 
   if any_snapshot_operation and not options.use_image:
     if os.path.exists(img_path):
