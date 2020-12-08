@@ -113,8 +113,8 @@ class BlockedTest(image_test_lib.ImageTestCase):
     The allow list has higher precedence than the block list.
     """
     blocked_patterns = [re.compile(x) for x in [
-        r'text/x-c\+\+',
-        r'text/x-c',
+        r'^text/x-c\+\+$',
+        r'^text/x-c$',
     ]]
     allowed_patterns = [re.compile(x) for x in [
         r'.*/braille/.*',
