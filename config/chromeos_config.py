@@ -2302,6 +2302,14 @@ def AddNotificationConfigs(site_config):
           config_lib.NotificationConfig(
               email='borealis-release-builder-alerts@google.com', threshold=2),
       ],
+      'tatl-release': [
+          config_lib.NotificationConfig(
+              email='clumptini+release-builder-alerts@google.com'),
+      ],
+      'tael-release': [
+          config_lib.NotificationConfig(
+              email='clumptini+release-builder-alerts@google.com'),
+      ],
   }
 
   for config_name, notification_configs in notifiers.items():

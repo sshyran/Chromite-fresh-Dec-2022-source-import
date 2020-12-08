@@ -32969,6 +32969,9 @@
             "test"
         ],
         "important": false,
+        "notification_configs": [
+            "{\n    \"email\": \"clumptini+release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 1\n}"
+        ],
         "packages": [
             "virtual/target-os",
             "virtual/target-os-dev",
@@ -33280,6 +33283,9 @@
             "test"
         ],
         "important": false,
+        "notification_configs": [
+            "{\n    \"email\": \"clumptini+release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 1\n}"
+        ],
         "packages": [
             "virtual/target-os",
             "virtual/target-os-dev",
