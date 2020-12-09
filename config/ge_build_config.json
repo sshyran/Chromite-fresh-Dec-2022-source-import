@@ -410,18 +410,6 @@
       ]
     },
     {
-      "name": "elm-arc64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "enguarde",
       "configs": [
         {
@@ -610,18 +598,6 @@
           "leader_board": false,
           "board_group": "rambi",
           "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "jacuzzi-arc64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
         }
       ]
     },
@@ -934,30 +910,6 @@
           "leader_board": false,
           "board_group": "",
           "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "sarien-arc64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "scarlet-arc64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
         }
       ]
     },
@@ -1738,6 +1690,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 265,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "elm-arc64",
+      "reference_board_name": "elm-arc64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "elm-arc64",
+          "name": "elm",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7156,
           "is_active": true
         }
       ]
@@ -3796,6 +3765,111 @@
       ]
     },
     {
+      "name": "jacuzzi-arc64",
+      "reference_board_name": "jacuzzi-arc64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "burnet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "cerise",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "damu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "esche",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "fennel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "fennel14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "jacuzzi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "juniper",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "kappa",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "kenzo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "stern",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "willow",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "kalista",
       "reference_board_name": "kalista",
       "arch": "X86_INTERNAL",
@@ -5628,6 +5702,47 @@
       ]
     },
     {
+      "name": "sarien-arc64",
+      "reference_board_name": "sarien-arc64",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "sarien-arc64",
+          "name": "arcada",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7158,
+          "is_active": true
+        },
+        {
+          "board_name": "sarien-arc64",
+          "name": "arcada_signed",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7158,
+          "is_active": true
+        },
+        {
+          "board_name": "sarien-arc64",
+          "name": "sarien",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7158,
+          "is_active": true
+        },
+        {
+          "board_name": "sarien-arc64",
+          "name": "sarien_signed",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7158,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "scarlet",
       "reference_board_name": "scarlet",
       "arch": "ARM_INTERNAL",
@@ -5677,6 +5792,39 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 297,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "scarlet-arc64",
+      "reference_board_name": "scarlet-arc64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "scarlet-arc64",
+          "name": "dru",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7155,
+          "is_active": true
+        },
+        {
+          "board_name": "scarlet-arc64",
+          "name": "druwl",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7155,
+          "is_active": true
+        },
+        {
+          "board_name": "scarlet-arc64",
+          "name": "dumo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7155,
           "is_active": true
         }
       ]
