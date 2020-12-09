@@ -203,6 +203,10 @@ class BundleArtifactsHandlerError(Error):
   """Error for BundleArtifactsHandler class."""
 
 
+class NoArtifactsToBundleError(Error):
+  """Error for bundling empty collection of artifacts."""
+
+
 class GenerateChromeOrderfileError(Error):
   """Error for GenerateChromeOrderfile class."""
 
@@ -2094,6 +2098,12 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     self._CleanupArtifactDirectory('/tmp/clang_crash_diagnostics')
     return PrepareForBuildReturn.UNKNOWN
 
+  def _PrepareCompilerRusageLogs(self):
+    # We always build this artifact.
+    # Cleanup the temp directory that holds the artifacts
+    self._CleanupArtifactDirectory('/tmp/compiler_rusage')
+    return PrepareForBuildReturn.UNKNOWN
+
 
 class BundleArtifactHandler(_CommonPrepareBundle):
   """Methods for updating ebuilds for toolchain artifacts."""
@@ -2456,42 +2466,87 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     logging.info('%d files collected', len(output))
     return output
 
+  def _CreateBundle(self, src_dir, tarball, destination, extension=None):
+    """Bundle the files from src_dir into a tar.xz file.
+
+    Args:
+      src_dir: the path to the directory to copy files from.
+      tarball: name of the generated tarballfile (build target, time stamp,
+        and .tar.xz extension will be added automatically)
+      destination: path to create tarball in
+      extension: type of file to search for in src_dir.
+        If extension is None (default), all file types will be allowed.
+
+    Returns:
+      Path to the generated tar.xz file
+    """
+
+    def FilterFile(file_path):
+      return extension is None or file_path.endswith(extension)
+
+    files = self._CollectFiles(
+        src_dir,
+        destination,
+        include_file=FilterFile)
+    if not files:
+      logging.info('No data found for %s, skip bundle artifact', tarball)
+      raise NoArtifactsToBundleError(f'No {extension} files in {src_dir}')
+
+    now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
+    name = f'{self.build_target}.{now}.{tarball}.tar.xz'
+    output_compressed = os.path.join(self.output_dir, name)
+    cros_build_lib.CreateTarball(output_compressed, destination, inputs=files)
+
+    return output_compressed
+
   def _BundleToolchainWarningLogs(self):
     """Bundle the compiler warnings for upload for werror checker."""
     with self.chroot.tempdir() as tempdir:
-      warning_files = self._CollectFiles(
-          '/tmp/fatal_clang_warnings',
-          tempdir,
-          include_file=lambda file_path: file_path.endswith('.json'))
-
-      if not warning_files:
-        logging.info('No fatal-clang-warnings found, skip bundle artifact')
+      try:
+        return [
+          self._CreateBundle(
+            '/tmp/fatal_clang_warnings',
+            'fatal_clang_warnings',
+            tempdir,
+            '.json')
+        ]
+      except NoArtifactsToBundleError:
         return []
-      now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
-      name = f'{self.build_target}.{now}.fatal_clang_warnings.tar.xz'
-      output_compressed = os.path.join(self.output_dir, name)
-      cros_build_lib.CreateTarball(
-          output_compressed, tempdir, inputs=warning_files)
-
-    return [output_compressed]
 
   def _BundleClangCrashDiagnoses(self):
-    """Bundle all clang crash diagnoses in chroot for uploading."""
-    with osutils.TempDir(prefix='clang_crash_diagnoses_tarball') as tempdir:
-      diagnoses = self._CollectFiles(
-          '/tmp/clang_crash_diagnostics', tempdir, include_file=lambda _: True)
+    """Bundle all clang crash diagnoses in chroot for uploading.
 
-      if not diagnoses:
-        logging.info('No clang crashes found, skip bundle artifact')
+      See bugs.chromium.org/p/chromium/issues/detail?id=1056904 for context.
+    """
+    with osutils.TempDir(prefix='clang_crash_diagnoses_tarball') as tempdir:
+      try:
+        return [
+          self._CreateBundle(
+            '/tmp/clang_crash_diagnostics',
+            'clang_crash_diagnoses',
+            tempdir)
+        ]
+      except NoArtifactsToBundleError:
         return []
 
-      now = datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d')
-      output = os.path.join(
-          self.output_dir,
-          f'{self.build_target}.{now}.clang_crash_diagnoses.tar.xz')
-      cros_build_lib.CreateTarball(output, tempdir, inputs=diagnoses)
-      return [output]
+  def _BundleCompilerRusageLogs(self):
+    """Bundle the rusage files created by compiler invocations.
 
+    This is useful for monitoring changes in compiler performance.
+    These files are created when the TOOLCHAIN_RUSAGE_OUTPUT variable
+    is set in the environment for monitoring compiler performance.
+    """
+    with self.chroot.tempdir() as tempdir:
+      try:
+        return [
+          self._CreateBundle(
+            '/tmp/compiler_rusage',
+            'compiler_rusage_logs',
+            tempdir,
+            '.json')
+        ]
+      except NoArtifactsToBundleError:
+        return []
 
 def PrepareForBuild(artifact_name, chroot, sysroot_path, build_target,
                     input_artifacts, profile_info):

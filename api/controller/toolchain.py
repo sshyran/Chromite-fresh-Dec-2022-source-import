@@ -76,6 +76,9 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
     BuilderConfig.Artifacts.CLANG_CRASH_DIAGNOSES:
         _Handlers('ClangCrashDiagnoses', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
+    BuilderConfig.Artifacts.COMPILER_RUSAGE_LOG:
+        _Handlers('CompilerRusageLogs', toolchain_util.PrepareForBuild,
+                  toolchain_util.BundleArtifacts),
 }
 
 
