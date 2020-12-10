@@ -21,6 +21,7 @@ import pwd
 import random
 import re
 import resource
+import subprocess
 import sys
 
 from six.moves import urllib
@@ -1146,14 +1147,19 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
     extra_gbs = (img_used_bytes - mount_used_bytes) // 2**30
     if extra_gbs > MAX_UNUSED_IMAGE_GBS:
       logging.notice('%s is using %s GiB more than needed.  Running '
-                     'fstrim.', img_path, extra_gbs)
-      cmd = ['fstrim', options.chroot]
-      try:
-        cros_build_lib.dbg_run(cmd)
-      except cros_build_lib.RunCommandError as e:
-        logging.warning(
-            'Running fstrim failed. Consider running fstrim on '
-            'your chroot manually.\n%s', e)
+                     'fstrim in background.', img_path, extra_gbs)
+      pid = os.fork()
+      if pid == 0:
+        try:
+          # Directly call Popen to run fstrim concurrently.
+          cmd = ['fstrim', options.chroot]
+          subprocess.Popen(cmd, close_fds=True, shell=False)
+        except subprocess.SubprocessError as e:
+          logging.warning(
+              'Running fstrim failed. Consider running fstrim on '
+              'your chroot manually.\n%s', e)
+        os._exit(0)  # pylint: disable=protected-access
+      os.waitpid(pid, 0)
 
   # Enter a new set of namespaces.  Everything after here cannot directly affect
   # the hosts's mounts or alter LVM volumes.
