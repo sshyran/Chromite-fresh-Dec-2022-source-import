@@ -11,7 +11,6 @@ from __future__ import division
 import itertools
 import os
 import pathlib  # pylint: disable=import-error
-import shlex
 from typing import Dict, Iterable, Tuple, Union
 
 from chromite.lib import constants
@@ -38,7 +37,7 @@ def _dict_to_ebuild(dictionary):
   """Helper to format a dictionary into an ebuild file."""
   output = []
   for key in dictionary.keys():
-    output.append(f'{key}={shlex.quote(dictionary[key])}')
+    output.append(f'{key}="{dictionary[key]}"')
 
   output.append('\n')
   return '\n'.join(output)
