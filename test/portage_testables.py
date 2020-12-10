@@ -300,9 +300,17 @@ class Package(object):
 
   @property
   def cpv(self) -> package_info.CPV:
-    """Returns a CPV object constructed from this package's metadata."""
+    """Returns a CPV object constructed from this package's metadata.
+
+    Deprecated, use package_info instead.
+    """
     return package_info.SplitCPV(self.category + '/' + self.package + '-' +
                                  self.version)
+
+  @property
+  def package_info(self) -> package_info.PackageInfo:
+    """Returns a PackageInfo object constructed from this package's metadata."""
+    return package_info.parse(f'{self.category}/{self.package}-{self.version}')
 
   def format_eclass_line(self) -> str:
     """Returns a string containing this package's eclass inheritance line."""
