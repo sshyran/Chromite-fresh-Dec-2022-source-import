@@ -505,14 +505,11 @@ class UprevOverlayManager(object):
       result = ebuild.RevWorkOnEBuild(
           os.path.join(constants.SOURCE_ROOT, 'src'), self.manifest,
           reject_self_repo=self._reject_self_repo)
-    except portage_util.InvalidUprevSourceError as e:
+    except (portage_util.InvalidUprevSourceError,
+            portage_util.EbuildVersionError) as e:
       logging.error('An error occurred while uprevving %s: %s',
                     ebuild.package, e)
       raise
-    except portage_util.EbuildVersionError as e:
-      logging.warning('An error occurred while uprevving %s, skipping: %s',
-                      ebuild.package, e)
-      return
     except OSError:
       logging.warning(
           'Cannot rev %s\n'
