@@ -3093,7 +3093,7 @@ def BranchScheduleConfig():
 
       ('release-R87-13505.B',
        ['grunt-android-pi-pre-flight-branch'],
-       'chell-chrome-no-afdo-uprev-pre-flight-branch',
+       '',
        ['orderfile-generate-toolchain',
         'orderfile-verify-toolchain'],
        ['benchmark-afdo-generate',
