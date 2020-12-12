@@ -1035,7 +1035,11 @@ class GSContext(object):
     cmd = ['ls']
     if details:
       cmd += ['-l']
-    cmd += ['--', path]
+    cmd += ['--']
+    if isinstance(path, str):
+      cmd.append(path)
+    else:
+      cmd.extend(path)
 
     # We always request the extended details as the overhead compared to a plain
     # listing is negligible.
@@ -1090,11 +1094,11 @@ class GSContext(object):
     cmd = ['mv', '--', src_path, dest_path]
     return self.DoCommand(cmd, **kwargs)
 
-  def SetACL(self, upload_url, acl=None, **kwargs):
+  def SetACL(self, path, acl=None, **kwargs):
     """Set access on a file already in google storage.
 
     Args:
-      upload_url: gs:// url that will have acl applied to it.
+      path: gs:// url that will have acl applied to it.
       acl: An ACL permissions file or canned ACL.
       kwargs: See options that DoCommand takes.
     """
@@ -1104,7 +1108,13 @@ class GSContext(object):
             'SetAcl invoked w/out a specified acl, nor a default acl.')
       acl = self.acl
 
-    self.DoCommand(['acl', 'set', acl, upload_url], **kwargs)
+    cmd = ['acl', 'set', '--', acl]
+    if isinstance(path, str):
+      cmd.append(path)
+    else:
+      cmd.extend(path)
+
+    self.DoCommand(cmd, **kwargs)
 
   def ChangeACL(self, upload_url, acl_args_file=None, acl_args=None, **kwargs):
     """Change access on a file already in google storage with "acl ch".
@@ -1177,7 +1187,10 @@ class GSContext(object):
     if recursive:
       cmd.append('-R')
     cmd.append('--')
-    cmd.append(path)
+    if isinstance(path, str):
+      cmd.append(path)
+    else:
+      cmd.extend(path)
     try:
       self.DoCommand(cmd, **kwargs)
     except GSNoSuchKey:

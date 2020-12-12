@@ -405,6 +405,10 @@ class UnmockedLSTest(cros_test_lib.TempDirTestCase):
       found = ctx.List(tempuri, details=True)
       self.assertEqual(files, sorted([os.path.basename(x.url) for x in found]))
 
+      # Check the detailed listing with multiple paths.
+      found = ctx.List(['%s/%s' % (tempuri, x) for x in files], details=True)
+      self.assertEqual(files, sorted([os.path.basename(x.url) for x in found]))
+
       # Make sure sizes line up.
       for f in found:
         l = len(os.path.basename(f.url)) * 10
@@ -646,6 +650,12 @@ class RemoveTest(AbstractGSContextTest):
     self.ctx.Remove('gs://foo/bar', recursive=True)
     self.gs_mock.assertCommandContains(['rm', '-R'])
 
+  def testMultiple(self):
+    """Test handling of multiple paths."""
+    self.ctx.Remove(['gs://foo/bar', 'gs://fat/cow'], recursive=True)
+    self.gs_mock.assertCommandContains(
+        ['rm', '-R', '--', 'gs://foo/bar', 'gs://fat/cow'])
+
 
 class UnmockedRemoveTest(cros_test_lib.TestCase):
   """Tests Remove functionality w/out mocks."""
@@ -676,6 +686,18 @@ class UnmockedRemoveTest(cros_test_lib.TestCase):
       for p in files:
         ctx.Copy('/dev/null', os.path.join(tempuri, p))
       ctx.Remove(tempuri, recursive=True)
+      for p in files:
+        self.assertFalse(ctx.Exists(os.path.join(tempuri, p)))
+
+  @cros_test_lib.NetworkTest()
+  def testMultiple(self):
+    """Test handling of multiple paths."""
+    files = ('a', 'b/c', 'd/e/ffff')
+    ctx = gs.GSContext()
+    with gs.TemporaryURL('chromite.rm') as tempuri:
+      for p in files:
+        ctx.Copy('/dev/null', os.path.join(tempuri, p))
+      ctx.Remove(['%s/%s' % (tempuri, x) for x in files])
       for p in files:
         self.assertFalse(ctx.Exists(os.path.join(tempuri, p)))
 
@@ -1074,7 +1096,8 @@ class GSContextTest(AbstractGSContextTest):
   def testSetDefaultAcl(self):
     """Test default ACL behavior."""
     self.ctx.SetACL('gs://abc/1', 'monkeys')
-    self.gs_mock.assertCommandContains(['acl', 'set', 'monkeys', 'gs://abc/1'])
+    self.gs_mock.assertCommandContains(
+        ['acl', 'set', '--', 'monkeys', 'gs://abc/1'])
 
   def testSetAcl(self):
     """Base ACL setting functionality."""
@@ -1082,6 +1105,13 @@ class GSContextTest(AbstractGSContextTest):
     ctx.SetACL('gs://abc/1')
     self.gs_mock.assertCommandContains(['acl', 'set', '/my/file/acl',
                                         'gs://abc/1'])
+
+  def testSetAclMultiple(self):
+    """Test multiple paths at once."""
+    ctx = gs.GSContext(acl='/my/file/acl')
+    ctx.SetACL(['gs://abc/1', 'gs://abc/2'])
+    self.gs_mock.assertCommandContains(
+        ['acl', 'set', '--', '/my/file/acl', 'gs://abc/1', 'gs://abc/2'])
 
   def testChangeAcl(self):
     """Test changing an ACL."""
