@@ -598,3 +598,55 @@ def BundleGceTarball(input_proto, output_proto, _config):
 
   tarball = artifacts.BundleGceTarball(output_dir, image_dir)
   output_proto.artifacts.add().path = tarball
+
+
+def _BundleDebugSymbolsResponse(input_proto, output_proto, _config):
+  """Add artifact tarball to a successful response."""
+  output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
+                                                   constants.DEBUG_SYMBOLS_TAR)
+
+
+@faux.success(_BundleDebugSymbolsResponse)
+@faux.empty_error
+@validate.require('build_target.name', 'output_dir')
+@validate.exists('output_dir')
+@validate.validation_complete
+def BundleDebugSymbols(input_proto, output_proto, _config):
+  """Bundle the debug symbols into a tarball suitable for importing into GCE.
+
+  Args:
+    input_proto (BundleRequest): The input proto.
+    output_proto (BundleResponse): The output proto.
+    _config (api_config.ApiConfig): The API call config.
+  """
+  target = input_proto.build_target.name
+  output_dir = input_proto.output_dir
+
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  result = artifacts.GenerateBreakpadSymbols(chroot,
+                                             target,
+                                             debug=True)
+
+  # Verify breakpad symbol generation before gathering the sym files.
+  if result.returncode != 0:
+    return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+
+  with chroot.tempdir() as symbol_tmpdir, chroot.tempdir() as dest_tmpdir:
+    breakpad_dir = os.path.join('/build', target, 'usr/lib/debug/breakpad')
+    sym_file_list = artifacts.GatherSymbolFiles(tempdir=symbol_tmpdir,
+                                                destdir=dest_tmpdir,
+                                                paths=[breakpad_dir])
+    if len(sym_file_list) == 0:
+      logging.warning('No sym files found in %s.', breakpad_dir)
+    # Create tarball from destination_tmp, then copy it...
+    tarball_path = os.path.join(output_dir, constants.DEBUG_SYMBOLS_TAR)
+    result = cros_build_lib.CreateTarball(tarball_path, dest_tmpdir)
+    if result.returncode != 0:
+      logging.error('Error (%d) when creating tarball %s from %s',
+                    result.returncode,
+                    tarball_path,
+                    dest_tmpdir)
+      return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+    output_proto.artifacts.add().path = tarball_path
+
+  return controller.RETURN_CODE_SUCCESS

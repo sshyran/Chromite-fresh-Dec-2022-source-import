@@ -724,7 +724,7 @@ def IsTarball(path: str) -> bool:
 
 
 def GatherSymbolFiles(tempdir:str, destdir:str,
-                    paths: List[str]) -> List[SymbolFileTuple]:
+                      paths: List[str]) -> List[SymbolFileTuple]:
   """Locate symbol files in |paths|
 
   This generator function searches all paths for .sym files and copies them to

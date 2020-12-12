@@ -815,6 +815,9 @@ TEST_IMAGE_GCE_TAR = ImageBinToGceTar(TEST_IMAGE_BIN)
 TEST_KEY_PRIVATE = 'id_rsa'
 TEST_KEY_PUBLIC = 'id_rsa.pub'
 
+DEBUG_SYMBOLS_NAME = 'debug_breakpad'
+DEBUG_SYMBOLS_TAR = '%s.tar.xz' % DEBUG_SYMBOLS_NAME
+
 DEV_IMAGE_NAME = 'chromiumos_image'
 DEV_IMAGE_BIN = '%s.bin' % DEV_IMAGE_NAME
 
