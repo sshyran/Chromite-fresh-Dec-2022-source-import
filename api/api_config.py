@@ -90,6 +90,12 @@ class ApiConfig(object):
   def mock_invalid(self):
     return self._call_type == self.CALL_TYPE_MOCK_INVALID
 
+  @property
+  def run_endpoint(self) -> bool:
+    """Run the endpoint when none of the special calls are invoked."""
+    return (not self.validate_only and not self.mock_call and
+            not self.mock_error and not self.mock_invalid)
+
   def get_proto(self, for_inside_execution=True):
     """Get the config as a proto.
 

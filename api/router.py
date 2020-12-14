@@ -208,7 +208,7 @@ class Router(object):
 
     # Check the chroot settings before running.
     service_options = self._get_service_options(service_name, method_name)
-    if self._ChrootCheck(service_options, method_options):
+    if self._ChrootCheck(service_options, method_options, config):
       # Run inside the chroot instead.
       logging.info('Re-executing the endpoint inside the chroot.')
       return self._ReexecuteInside(input_msg, output_msg, config, input_handler,
@@ -235,12 +235,14 @@ class Router(object):
 
     return return_code
 
-  def _ChrootCheck(self, service_options, method_options):
+  def _ChrootCheck(self, service_options, method_options,
+                   config: 'api_config.ApiConfig'):
     """Check the chroot options, and execute assertion or note reexec as needed.
 
     Args:
       service_options (google.protobuf.Message): The service options.
       method_options (google.protobuf.Message): The method options.
+      config: The Build API call config instance.
 
     Returns:
       bool - True iff it needs to be reexeced inside the chroot.
@@ -248,6 +250,10 @@ class Router(object):
     Raises:
       cros_build_lib.DieSystemExit when the chroot setting cannot be satisfied.
     """
+    if not config.run_endpoint:
+      # Do not enter the chroot for validate only and mock calls.
+      return False
+
     chroot_assert = build_api_pb2.NO_ASSERTION
     if method_options.HasField('method_chroot_assert'):
       # Prefer the method option when set.
