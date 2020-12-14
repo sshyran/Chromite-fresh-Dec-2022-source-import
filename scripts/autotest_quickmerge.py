@@ -35,6 +35,7 @@ assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 INCLUDE_PATTERNS_FILENAME = 'autotest-quickmerge-includepatterns'
+AUTOTEST_SYMLINK = 'autotest_lib'
 AUTOTEST_PROJECT_NAME = 'chromiumos/third_party/autotest'
 AUTOTEST_EBUILD = 'chromeos-base/autotest'
 DOWNGRADE_EBUILDS = ['chromeos-base/autotest']
@@ -281,17 +282,24 @@ def RsyncQuickmerge(source_path, sysroot_autotest_path,
   command += ['--exclude=**.pyc']
   command += ['--exclude=**.pyo']
 
+  # Always exclude the autotest symlink to avoid a possible recursion hole.
+  # The order here is (unfortunately) extremely important.
+  if AUTOTEST_SYMLINK not in source_path:
+    command += ['--exclude=%s/' % AUTOTEST_SYMLINK]
+
   # Exclude files with a specific substring in their name, because
   # they create an ambiguous itemized report. (see unit test file for details)
   command += ['--exclude=** -> *']
 
+  # Order seems important here, and this include must come before the possible
+  # exclude below...
   if include_pattern_file:
     command += ['--include-from=%s' % include_pattern_file]
 
-  command += ['--exclude=*']
-
-  # Some tests use symlinks. Follow these.
-  command += ['-L']
+  if AUTOTEST_SYMLINK in source_path:
+    command += ['-l']
+  else:
+    command += ['-L', '--exclude=*']
 
   command += [source_path, sysroot_autotest_path]
 
@@ -326,6 +334,17 @@ def ParseArguments(argv):
                       help=argparse.SUPPRESS)
 
   return parser.parse_args(argv)
+
+
+def _maybe_add_autotest_symlink(src_paths, path, dest_path):
+  """If the symlink folders exists, add them to the src to quickmerge."""
+  autotest_client_symlink = os.path.join(path, 'client', AUTOTEST_SYMLINK)
+  if os.path.exists(autotest_client_symlink):
+    src_paths.append((autotest_client_symlink,
+                      os.path.join(dest_path, 'client/')))
+  autotest_main_symlink = os.path.join(path, AUTOTEST_SYMLINK)
+  if os.path.exists(autotest_main_symlink):
+    src_paths.append((autotest_main_symlink, dest_path))
 
 
 def main(argv):
@@ -371,10 +390,21 @@ def main(argv):
       logging.error('Could not quickmerge for project: %s',
                     os.path.basename(quickmerge_file))
 
+  # Autotest uses a circular symlink in client that *must* be added after the
+  # other sections of Autotest.
+  src_paths = list(src_paths)
+
+  # All destination paths up to this point are the same, but other sources
+  # added below might have a different one.
+  src_dest_paths = [(src_path + '/', sysroot_autotest_path)
+                    for src_path in src_paths]
+
+  _maybe_add_autotest_symlink(src_dest_paths, brillo_autotest_src_path,
+                              sysroot_autotest_path)
   num_new_files = 0
   num_modified_files = 0
-  for src_path in src_paths:
-    rsync_output = RsyncQuickmerge(src_path +'/', sysroot_autotest_path,
+  for src_path, dest_path in src_dest_paths:
+    rsync_output = RsyncQuickmerge(src_path, dest_path,
                                    include_pattern_file, args.pretend,
                                    args.overwrite)
 
