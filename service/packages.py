@@ -15,8 +15,6 @@ import os
 import re
 import sys
 
-import six
-
 from google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
@@ -676,7 +674,7 @@ def has_prebuilt(atom, build_target=None, useflags=None):
   extra_env = None
   if useflags:
     new_flags = useflags
-    if not isinstance(useflags, six.string_types):
+    if not isinstance(useflags, str):
       new_flags = ' '.join(useflags)
 
     existing = os.environ.get('USE', '')
