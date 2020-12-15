@@ -1125,6 +1125,14 @@
           "release_builder_test_pool": "bvt",
           "board_id": 466,
           "is_active": true
+        },
+        {
+          "board_name": "ambassador",
+          "name": "genesis",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 466,
+          "is_active": true
         }
       ]
     },
