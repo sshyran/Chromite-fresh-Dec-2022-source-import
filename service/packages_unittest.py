@@ -1054,3 +1054,31 @@ class GetKeyIdTest(cros_test_lib.MockTestCase):
                      return_value=['key1', 'key2'])
     result = packages.get_key_id(self.build_target, 'model')
     self.assertEqual(result, None)
+
+
+class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
+  """Tests for get_latest_drivefs_version_from_refs."""
+
+  def setUp(self):
+    # The tag ref template.
+    ref_tpl = 'refs/tags/drivefs_%s'
+
+    self.latest = '44.0.20'
+    self.versions = ['42.0.1', self.latest, '44.0.19', '39.0.15']
+    self.latest_ref = uprev_lib.GitRef('/path', ref_tpl % self.latest, 'abc123')
+    self.refs = [uprev_lib.GitRef('/path', ref_tpl % v, 'abc123')
+                 for v in self.versions]
+
+  def test_single_ref(self):
+    """Test a single ref is supplied."""
+    self.assertEqual(self.latest,
+        packages.get_latest_drivefs_version_from_refs([self.latest_ref]))
+
+  def test_multiple_ref_versions(self):
+    """Test multiple refs supplied."""
+    self.assertEqual(self.latest,
+        packages.get_latest_drivefs_version_from_refs(self.refs))
+
+  def test_no_refs_returns_none(self):
+    """Test no refs supplied."""
+    self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)

@@ -8,12 +8,14 @@
 from __future__ import print_function
 
 import collections
+from distutils.version import LooseVersion
 import fileinput
 import functools
 import json
 import os
 import re
 import sys
+from typing import List
 
 from google.protobuf import json_format
 
@@ -294,25 +296,20 @@ def uprev_drivefs(_build_targets, refs, chroot):
     UprevVersionedPackageResult: The result of updating drivefs ebuilds.
   """
 
-  DRIVEFS_REFS = 'refs/tags/drivefs_'
-  DRIVEFS_PATH = 'src/private-overlays/chromeos-overlay/chromeos-base'
+  DRIVEFS_PATH_PREFIX = 'src/private-overlays/chromeos-overlay/chromeos-base'
 
-  # parse like the example PUpr (go/pupr#steps)
-  valid_refs = [ref.ref for ref in refs if ref.ref.startswith(DRIVEFS_REFS)]
-  if not valid_refs:
-    # False alarm, there is no new package release. So do nothing.
+  drivefs_version = get_latest_drivefs_version_from_refs(refs)
+  if not drivefs_version:
+    # No valid DriveFS version is identified.
     return None
 
-  # Take the newest release, always.
-  target_version = sorted(valid_refs,
-                          reverse=True)[0][len(DRIVEFS_REFS):]
+  logging.debug('DriveFS version determined from refs: %s', drivefs_version)
 
   result = uprev_lib.UprevVersionedPackageResult()
 
-  pkg_path = os.path.join(DRIVEFS_PATH, 'drivefs')
-
+  pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
-                                                          target_version,
+                                                          drivefs_version,
                                                           chroot)
   all_changed_files = []
 
@@ -321,10 +318,10 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   all_changed_files.extend(uprev_result.changed_files)
 
-  pkg_path = os.path.join(DRIVEFS_PATH, 'drivefs-ipc')
+  pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
 
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
-                                                          target_version,
+                                                          drivefs_version,
                                                           chroot)
 
   if not uprev_result:
@@ -332,7 +329,7 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   all_changed_files.extend(uprev_result.changed_files)
 
-  result.add_result(target_version, all_changed_files)
+  result.add_result(drivefs_version, all_changed_files)
 
   return result
 
@@ -497,6 +494,36 @@ def uprev_chrome(build_targets, refs, chroot):
     uprev_manager.uprev(package)
 
   return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
+
+
+def get_latest_drivefs_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
+  """Get the latest DriveFS version from refs
+
+  DriveFS versions follow the tag format of refs/tags/drivefs_1.2.3.
+  Versions are compared using |distutils.version.LooseVersion| and
+  the latest version is returned.
+
+  Args:
+    refs: The tags to parse for the latest DriveFS version.
+
+  Returns:
+    The latest DriveFS version to use.
+  """
+  DRIVEFS_REFS_PREFIX = 'refs/tags/drivefs_'
+
+  valid_refs = []
+  for gitiles in refs:
+    if gitiles.ref.startswith(DRIVEFS_REFS_PREFIX):
+      valid_refs.append(gitiles.ref)
+
+  if not valid_refs:
+    return None
+
+  # Sort by version and take the latest version.
+  target_version_ref = sorted(valid_refs,
+                              key=LooseVersion,
+                              reverse=True)[0]
+  return target_version_ref.replace(DRIVEFS_REFS_PREFIX, '')
 
 
 def _generate_platform_c_files(replication_config, chroot):
