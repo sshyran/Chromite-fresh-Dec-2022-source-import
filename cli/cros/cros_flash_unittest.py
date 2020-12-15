@@ -79,7 +79,6 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
     expected_kwargs = {
         'board': None,
         'version': 'latest',
-        'install': False,
         'src_image_to_delta': None,
         'rootfs_update': True,
         'stateful_update': True,

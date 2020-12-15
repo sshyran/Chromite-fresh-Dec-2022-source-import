@@ -159,10 +159,6 @@ Examples:
         action='store_false', default=True,
         help=('Do not copy the update payloads to the device. For now this '
               'only works for the stateful payload.'))
-    usb = parser.add_argument_group('USB specific options')
-    usb.add_argument(
-        '--install', default=False, action='store_true',
-        help='Install to the USB device using the base disk layout.')
 
   def _GetDefaultVersion(self):
     """Get default full SDK version.
@@ -192,7 +188,6 @@ Examples:
           self.options.image,
           board=self.options.board,
           version=self._GetDefaultVersion(),
-          install=self.options.install,
           src_image_to_delta=self.options.src_image_to_delta,
           rootfs_update=self.options.rootfs_update,
           stateful_update=self.options.stateful_update,

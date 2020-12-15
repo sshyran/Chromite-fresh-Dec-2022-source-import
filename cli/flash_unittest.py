@@ -171,9 +171,8 @@ class RemoteDeviceUpdaterTest(cros_test_lib.MockTempDirTestCase):
 class USBImagerMock(partial_mock.PartialCmdMock):
   """Mock out USBImager."""
   TARGET = 'chromite.cli.flash.USBImager'
-  ATTRS = ('CopyImageToDevice', 'InstallImageToDevice',
-           'ChooseRemovableDevice', 'ListAllRemovableDevices',
-           'GetRemovableDeviceDescription')
+  ATTRS = ('CopyImageToDevice', 'ChooseRemovableDevice',
+           'ListAllRemovableDevices', 'GetRemovableDeviceDescription')
   VALID_IMAGE = True
 
   def __init__(self):
@@ -181,9 +180,6 @@ class USBImagerMock(partial_mock.PartialCmdMock):
 
   def CopyImageToDevice(self, _inst, *_args, **_kwargs):
     """Mock out CopyImageToDevice."""
-
-  def InstallImageToDevice(self, _inst, *_args, **_kwargs):
-    """Mock out InstallImageToDevice."""
 
   def ChooseRemovableDevice(self, _inst, *_args, **_kwargs):
     """Mock out ChooseRemovableDevice."""
@@ -221,13 +217,6 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
     with mock.patch('os.path.isfile', return_value=True):
       flash.Flash(self.Device('/dev/foo'), self.IMAGE)
       self.assertTrue(self.imager_mock.patched['CopyImageToDevice'].called)
-
-  def testLocalImagePathInstall(self):
-    """Tests that imaging methods are called correctly."""
-    with mock.patch('os.path.isfile', return_value=True):
-      flash.Flash(self.Device('/dev/foo'), self.IMAGE, board='taco',
-                  install=True)
-      self.assertTrue(self.imager_mock.patched['InstallImageToDevice'].called)
 
   def testLocalBadImagePath(self):
     """Tests that using an image not having the magic bytes has prompt."""

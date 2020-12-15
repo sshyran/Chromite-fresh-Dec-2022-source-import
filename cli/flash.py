@@ -11,7 +11,6 @@ from __future__ import print_function
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 
@@ -152,8 +151,7 @@ class FlashError(Exception):
 class USBImager(object):
   """Copy image to the target removable device."""
 
-  def __init__(self, device, board, image, version, debug=False,
-               install=False, yes=False):
+  def __init__(self, device, board, image, version, debug=False, yes=False):
     """Initializes USBImager."""
     self.device = device
     self.board = board if board else GetDefaultBoard()
@@ -161,7 +159,6 @@ class USBImager(object):
     self.version = version
     self.debug = debug
     self.debug_level = logging.DEBUG if debug else logging.INFO
-    self.install = install
     self.yes = yes
 
   def DeviceNameToPath(self, device_name):
@@ -212,28 +209,6 @@ class USBImager(object):
         [self.GetRemovableDeviceDescription(x) for x in devices])
 
     return devices[idx]
-
-  def InstallImageToDevice(self, image, device):
-    """Installs |image| to the removable |device|.
-
-    Args:
-      image: Path to the image to copy.
-      device: Device to copy to.
-    """
-    cmd = [
-        'chromeos-install',
-        '--yes',
-        '--skip_src_removable',
-        '--skip_dst_removable',
-        '--payload_image=%s' % image,
-        '--dst=%s' % device,
-        '--skip_postinstall',
-    ]
-    cros_build_lib.sudo_run(cmd,
-                            print_cmd=True,
-                            debug_level=logging.NOTICE,
-                            stderr=subprocess.STDOUT,
-                            log_output=True)
 
   def CopyImageToDevice(self, image, device):
     """Copies |image| to the removable |device|.
@@ -319,10 +294,7 @@ class USBImager(object):
     image_path = self._GetImagePath()
     try:
       device = self.DeviceNameToPath(target)
-      if self.install:
-        self.InstallImageToDevice(image_path, device)
-      else:
-        self.CopyImageToDevice(image_path, device)
+      self.CopyImageToDevice(image_path, device)
     except cros_build_lib.RunCommandError:
       logging.error('Failed copying image to device %s',
                     self.DeviceNameToPath(target))
@@ -550,7 +522,7 @@ class RemoteDeviceUpdater(object):
       self.Cleanup()
 
 
-def Flash(device, image, board=None, install=False, src_image_to_delta=None,
+def Flash(device, image, board=None, src_image_to_delta=None,
           rootfs_update=True, stateful_update=True, clobber_stateful=False,
           reboot=True, wipe=True, ssh_private_key=None, ping=True,
           disable_rootfs_verification=False, clear_cache=False, yes=False,
@@ -567,7 +539,6 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
     image: Path (string) to the update image. Can be a local or xbuddy path;
         non-existant local paths are converted to xbuddy.
     board: Board to use; None to automatically detect.
-    install: Install to USB using base disk layout; USB |device| scheme only.
     src_image_to_delta: Local path to an image to be used as the base to
         generate delta payloads; SSH |device| scheme only.
     rootfs_update: Update rootfs partition; SSH |device| scheme only.
@@ -601,13 +572,6 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
   if clear_cache:
     ds_wrapper.DevServerWrapper.WipeStaticDirectory()
   ds_wrapper.DevServerWrapper.CreateStaticDirectory()
-
-  if install:
-    if not device or device.scheme != commandline.DEVICE_SCHEME_USB:
-      raise ValueError(
-          '--install can only be used when writing to a USB device')
-    if not cros_build_lib.IsInsideChroot():
-      raise ValueError('--install can only be used inside the chroot')
 
   # The user may not have specified a source image, use version as the default.
   image = image or version
@@ -647,7 +611,6 @@ def Flash(device, image, board=None, install=False, src_image_to_delta=None,
                        image,
                        version,
                        debug=debug,
-                       install=install,
                        yes=yes)
     imager.Run()
   elif device.scheme == commandline.DEVICE_SCHEME_FILE:
