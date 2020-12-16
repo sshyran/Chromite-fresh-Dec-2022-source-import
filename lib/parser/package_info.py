@@ -148,6 +148,12 @@ class PackageInfo(object):
   def __hash__(self):
     return hash((self._category, self._package, self._version, self._revision))
 
+  def __repr__(self):
+    return f'PackageInfo<{str(self)}>'
+
+  def __str__(self):
+    return self.cpvr or self.atom
+
   @functools.lru_cache()
   def __format__(self, format_spec):
     """Formatter function.
