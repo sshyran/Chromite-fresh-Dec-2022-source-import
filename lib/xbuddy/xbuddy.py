@@ -20,6 +20,7 @@ import threading
 from six.moves import configparser
 
 from chromite.lib import constants
+from chromite.lib import cros_logging as logging
 from chromite.lib import image_lib
 from chromite.lib import gs
 from chromite.lib import path_util
@@ -568,12 +569,19 @@ class XBuddy(object):
     """Returns the image_type for ANY given the local_dir."""
     test_image = os.path.join(local_dir, devserver_constants.TEST_IMAGE_FILE)
     dev_image = os.path.join(local_dir, devserver_constants.IMAGE_FILE)
+    base_image = os.path.join(local_dir, devserver_constants.BASE_IMAGE_FILE)
     # Prioritize test images over dev images.
     if os.path.exists(test_image):
       return 'test'
 
     if os.path.exists(dev_image):
       return 'dev'
+
+    if os.path.exists(base_image):
+      logging.warning('Using base image as test and dev images were not found. '
+                      'This will likely cause cros flash to fail leading to '
+                      'needing to repair the device with a USB stick.')
+      return 'base'
 
     return None
 
