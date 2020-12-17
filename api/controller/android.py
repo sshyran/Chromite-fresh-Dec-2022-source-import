@@ -35,7 +35,7 @@ def _MarkStableResponse(_input_proto, output_proto, _config):
 
 @faux.success(_MarkStableResponse)
 @faux.empty_error
-@validate.require('tracking_branch', 'package_name', 'android_build_branch')
+@validate.require('package_name', 'android_build_branch')
 @validate.validation_complete
 def MarkStable(input_proto, output_proto, _config):
   """Uprev Android, if able.

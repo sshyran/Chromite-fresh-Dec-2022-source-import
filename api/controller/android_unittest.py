@@ -57,13 +57,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
                      'android-package-name')
     self.assertEqual(self.response.android_atom.version, '1.2')
 
-  def testFailsIfTrackingBranchMissing(self):
-    """Fails if tracking_branch is missing."""
-    self.input_proto.tracking_branch = ''
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      android.MarkStable(self.input_proto, self.response, self.api_config)
-    self.uprev.assert_not_called()
-
   def testFailsIfPackageNameMissing(self):
     """Fails if package_name is missing."""
     self.input_proto.package_name = ''
