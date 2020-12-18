@@ -346,6 +346,7 @@
             "image_test": true,
             "images": [],
             "luci_builder": "Informational",
+            "manifest_branch": "main",
             "packages": [
                 "virtual/target-fuzzers"
             ],
@@ -376,7 +377,8 @@
             "_template": "informational",
             "description": "Informational Builds",
             "display_label": "informational",
-            "luci_builder": "Informational"
+            "luci_builder": "Informational",
+            "manifest_branch": "main"
         },
         "llvm_next_toolchain": {
             "_template": "llvm_next_toolchain",
@@ -1045,6 +1047,7 @@
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": [],
         "luci_builder": "Informational",
+        "manifest_branch": "main",
         "schedule": "0 */3 * * *",
         "uprev": false,
         "useflags": [
@@ -1064,6 +1067,7 @@
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "manifest_branch": "main",
         "useflags": [
             "-chrome_internal"
         ]
@@ -1405,6 +1409,7 @@
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": [],
         "luci_builder": "Informational",
+        "manifest_branch": "main",
         "schedule": "0 */3 * * *",
         "uprev": false,
         "vm_tests": []
@@ -1451,6 +1456,7 @@
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "manifest_branch": "main",
         "vm_tests": []
     },
     "amd64-generic-unittest-stress": {
@@ -3917,6 +3923,7 @@
         "hw_tests_override": [],
         "internal": true,
         "luci_builder": "Informational",
+        "manifest_branch": "main",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
         "uprev": false,
@@ -3936,6 +3943,7 @@
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
+        "manifest_branch": "main",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
         "vm_tests": []
@@ -7804,6 +7812,7 @@
             "factory_install"
         ],
         "luci_builder": "Full",
+        "manifest_branch": "main",
         "prebuilts": "public",
         "schedule": "with 30m interval",
         "use_sdk": false,
@@ -7897,6 +7906,7 @@
             "factory_install"
         ],
         "luci_builder": "Try",
+        "manifest_branch": "main",
         "prebuilts": "public",
         "use_sdk": false,
         "usepkg_build_packages": false,
