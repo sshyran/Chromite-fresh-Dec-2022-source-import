@@ -79,9 +79,8 @@ AFDO_SUFFIX = '.afdo'
 BZ2_COMPRESSION_SUFFIX = '.bz2'
 XZ_COMPRESSION_SUFFIX = '.xz'
 KERNEL_AFDO_COMPRESSION_SUFFIX = '.gcov.xz'
-TOOLCHAIN_UTILS_PATH = '/mnt/host/source/src/third_party/toolchain-utils/'
-TOOLCHAIN_UTILS_REPO = \
-    'https://chromium.googlesource.com/chromiumos/third_party/toolchain-utils'
+TOOLCHAIN_UTILS_PATH = os.path.join(
+    constants.SOURCE_ROOT, 'src/third_party/toolchain-utils')
 AFDO_PROFILE_PATH_IN_CHROMIUM = 'src/chromeos/profiles/%s.afdo.newest.txt'
 MERGED_AFDO_NAME = 'chromeos-chrome-amd64-%s'
 
@@ -3018,6 +3017,9 @@ def _PublishVettedAFDOArtifacts(json_file, uploaded, title=None):
     if the uploaded artifact is the same as in metadata file (no new
     AFDO artifact uploaded). This should be caught earlier before uploading.
   """
+  branch = git.GetTrackingBranch(
+      TOOLCHAIN_UTILS_PATH, for_checkout=False, for_push=True)
+
   # Perform a git pull first to sync the checkout containing metadata,
   # in case there are some updates during the builder was running.
   # Possible race conditions are:
@@ -3028,9 +3030,7 @@ def _PublishVettedAFDOArtifacts(json_file, uploaded, title=None):
   # we might update an entry with an older profile. The checking logic in the
   # function should guarantee we always update to a newer artifact, otherwise
   # the builder fails.
-  git.RunGit(
-      TOOLCHAIN_UTILS_PATH, ['pull', TOOLCHAIN_UTILS_REPO, 'refs/heads/master'],
-      print_cmd=True)
+  git.RunGit(TOOLCHAIN_UTILS_PATH, ['pull', branch.remote], print_cmd=True)
 
   afdo_versions = json.loads(osutils.ReadFile(json_file))
   if title:
@@ -3088,7 +3088,7 @@ def _PublishVettedAFDOArtifacts(json_file, uploaded, title=None):
   git.GitPush(
       TOOLCHAIN_UTILS_PATH,
       'HEAD',
-      git.RemoteRef(TOOLCHAIN_UTILS_REPO, 'refs/for/master%submit'),
+      git.RemoteRef(branch.remote, f'{branch.ref}%submit'),
       print_cmd=True)
 
 

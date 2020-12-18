@@ -2303,6 +2303,8 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
 
     with open(self.json_file, 'w') as f:
       json.dump(self.afdo_versions, f)
+    self.PatchObject(git, 'GetTrackingBranch',
+                     return_value=git.RemoteRef('origin', 'main'))
     GitStatus = collections.namedtuple('GitStatus', ['output'])
     self.mock_git = self.PatchObject(
         git, 'RunGit', return_value=GitStatus(output='non-empty'))
@@ -2337,12 +2339,7 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
                                               self.afdo_sorted_by_freshness[2])
     calls = [
         mock.call(
-            self.tempdir, [
-                'pull',
-                toolchain_util.TOOLCHAIN_UTILS_REPO,
-                'refs/heads/master',
-            ],
-            print_cmd=True),
+            self.tempdir, ['pull', 'origin'], print_cmd=True),
         mock.call(
             self.tempdir, ['status', '--porcelain', '-uno'],
             capture_output=True,
@@ -2352,8 +2349,8 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
             self.tempdir, ['commit', '-a', '-m', message], print_cmd=True),
         mock.call(
             self.tempdir, [
-                'push', toolchain_util.TOOLCHAIN_UTILS_REPO,
-                'HEAD:refs/for/master%submit'
+                'push', 'origin',
+                'HEAD:main%submit'
             ],
             capture_output=True,
             print_cmd=True)
