@@ -297,38 +297,39 @@ def uprev_drivefs(_build_targets, refs, chroot):
   """
 
   DRIVEFS_PATH_PREFIX = 'src/private-overlays/chromeos-overlay/chromeos-base'
+  result = uprev_lib.UprevVersionedPackageResult()
+  all_changed_files = []
 
   drivefs_version = get_latest_drivefs_version_from_refs(refs)
   if not drivefs_version:
     # No valid DriveFS version is identified.
-    return None
+    return result
 
   logging.debug('DriveFS version determined from refs: %s', drivefs_version)
 
-  result = uprev_lib.UprevVersionedPackageResult()
-
+  # Attempt to uprev drivefs package.
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
                                                           chroot)
-  all_changed_files = []
 
   if not uprev_result:
-    return None # alternatively raise Exception
-
+    return result
   all_changed_files.extend(uprev_result.changed_files)
 
+  # Attempt to uprev drivefs-ipc package.
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
-
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
                                                           chroot)
 
   if not uprev_result:
-    return None # alternatively raise Exception
+    logging.warning(
+        'drivefs package has changed files %s but drivefs-ipc does not',
+        all_changed_files)
+    return result
 
   all_changed_files.extend(uprev_result.changed_files)
-
   result.add_result(drivefs_version, all_changed_files)
 
   return result

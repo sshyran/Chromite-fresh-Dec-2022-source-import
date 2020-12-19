@@ -1082,3 +1082,93 @@ class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
   def test_no_refs_returns_none(self):
     """Test no refs supplied."""
     self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)
+
+
+class UprevDrivefsTest(cros_test_lib.MockTestCase):
+  """Tests for uprev_drivefs."""
+
+  def setUp(self):
+    self.refs = [
+        GitRef(
+            path='/chromeos/platform/drivefs-google3/',
+            ref='refs/tags/drivefs_45.0.2',
+            revision='123')
+    ]
+    self.MOCK_DRIVEFS_EBUILD_PATH = 'drivefs.45.0.2-r1.ebuild'
+    self.MOCK_DRIVEFS_IPC_EBUILD_PATH = 'drivefs-ipc.45.0.2-r1.ebuild'
+
+  def revisionBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
+
+  def majorBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
+
+  def sameVersionOutcome(self):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.SAME_VERSION_EXISTS)
+
+  def test_latest_version_returns_none(self):
+    """Test no refs were supplied"""
+    output = packages.uprev_drivefs(None, [], None)
+    self.assertFalse(output.uprevved)
+
+  def test_drivefs_uprev_fails(self):
+    """Test a single ref is supplied."""
+    self.PatchObject(
+        uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None, None])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_same_version_exists(self):
+    """Test the same version exists uprev should not happen."""
+    drivefs_outcome = self.sameVersionOutcome()
+    drivefs_ipc_outcome = self.sameVersionOutcome()
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_revision_bump_just_drivefs_package(self):
+    """Test drivefs package uprevs not drivefs-ipc, should not uprev."""
+    drivefs_outcome = self.revisionBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[drivefs_outcome, None])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_revision_bump_both_packages(self):
+    """Test both packages uprev, should succeed."""
+    drivefs_outcome = self.revisionBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
+    drivefs_ipc_outcome = self.revisionBumpOutcome(
+        self.MOCK_DRIVEFS_IPC_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_major_bump_only_drivefs_packages(self):
+    """Test drivefs package uprevs not drivefs-ipc, should not uprev."""
+    drivefs_outcome = self.majorBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[drivefs_outcome, None])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_major_bump_both_packages(self):
+    """Test both packages uprev, should succeed."""
+    drivefs_outcome = self.majorBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
+    drivefs_ipc_outcome = self.majorBumpOutcome(
+        self.MOCK_DRIVEFS_IPC_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
+    output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertTrue(output.uprevved)
