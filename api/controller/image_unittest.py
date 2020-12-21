@@ -415,13 +415,14 @@ class PushImageTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     request = self._GetRequest(
         dryrun=False, profile='', sign_types=[common_pb2.IMAGE_TYPE_RECOVERY])
+    request.dest_bucket = 'gs://foo'
     image_controller.PushImage(request, self.response, self.api_config)
     patch.assert_called_with(
         request.gs_image_dir,
         request.sysroot.build_target.name,
         dry_run=request.dryrun,
-        profile=request.profile.name,
-        sign_types=['recovery'])
+        sign_types=['recovery'],
+        dest_bucket=request.dest_bucket)
 
   def testCallSucceeds(self):
     """Check that a (dry run) call is made successfully."""

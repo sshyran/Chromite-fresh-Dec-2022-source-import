@@ -303,13 +303,18 @@ def PushImage(input_proto, _output_proto, config):
   if config.validate_only:
     return controller.RETURN_CODE_VALID_INPUT
 
+  kwargs = {}
+  if input_proto.profile.name:
+    kwargs['profile'] = input_proto.profile.name
+  if input_proto.dest_bucket:
+    kwargs['dest_bucket'] = input_proto.dest_bucket
   try:
     pushimage.PushImage(
         input_proto.gs_image_dir,
         input_proto.sysroot.build_target.name,
         dry_run=input_proto.dryrun,
-        profile=input_proto.profile.name,
-        sign_types=sign_types)
+        sign_types=sign_types,
+        **kwargs)
     return controller.RETURN_CODE_SUCCESS
   except Exception:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY

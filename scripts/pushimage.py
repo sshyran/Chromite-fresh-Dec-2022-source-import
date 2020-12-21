@@ -292,7 +292,8 @@ def MarkImageToBeSigned(ctx, tbs_base, insns_path, priority):
 
 def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
               sign_types=None, dry_run=False, mock=False, force_keysets=(),
-              force_channels=None, buildroot=constants.SOURCE_ROOT):
+              force_channels=None, buildroot=constants.SOURCE_ROOT,
+              dest_bucket=constants.RELEASE_BUCKET):
   """Push the image from the archive bucket to the release bucket.
 
   Args:
@@ -309,6 +310,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
     force_keysets: Set of keysets to use rather than what the inputs say.
     force_channels: Set of channels to use rather than what the inputs say.
     buildroot: Buildroot in which to look for signing instructions.
+    dest_bucket: Bucket to push results to.
 
   Returns:
     A dictionary that maps 'channel' -> ['gs://signer_instruction_uri1',
@@ -371,7 +373,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
     gs_base = os.path.join(tbs_base, getpass.getuser())
   else:
     logging.info('Upload mode: normal; signers will process the images')
-    tbs_base = gs_base = constants.RELEASE_BUCKET
+    tbs_base = gs_base = dest_bucket
 
   sect_general = {
       'config_board': board,
@@ -616,6 +618,8 @@ def GetParser():
                       help='Buildroot to use. Defaults to current.')
   parser.add_argument('--yes', action='store_true', default=False,
                       help='answer yes to all prompts')
+  parser.add_argument('--dest-bucket', default=constants.RELEASE_BUCKET,
+                      help='dest bucket. Default to %(default)s')
 
   return parser
 
@@ -644,4 +648,4 @@ def main(argv):
             profile=opts.profile, priority=opts.priority,
             sign_types=opts.sign_types, dry_run=opts.dry_run, mock=opts.mock,
             force_keysets=force_keysets, force_channels=opts.channels,
-            buildroot=opts.buildroot)
+            buildroot=opts.buildroot, dest_bucket=opts.dest_bucket)
