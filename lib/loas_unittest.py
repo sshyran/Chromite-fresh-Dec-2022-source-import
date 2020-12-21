@@ -41,34 +41,34 @@ class TestLoas(cros_test_lib.MockTestCase):
     self.assertRaises(loas.LoasError, self.loas.Check)
 
   def testStatusError(self):
-    """Verify that errors from prodcertstatus result in an e-mail."""
+    """Verify that errors from gcertstatus result in an e-mail."""
     self.rc_mock.AddCmdResult(
-        partial_mock.In('prodcertstatus'), returncode=1,
-        error='No valid SSL-ENROLLED CERT certs')
+        partial_mock.In('gcertstatus'), returncode=1,
+        error='WARNING no LOAS2 certificate found')
     self.loas.Status()
     self.assertEqual(self.email_mock.call_count, 1)
 
   def testStatusUpToDate(self):
     """Verify that up-to-date certs delay further checks for a while."""
     self.rc_mock.AddCmdResult(
-        partial_mock.In('prodcertstatus'), returncode=0,
-        error='SSL-ENROLLED CERT cert expires in about 39 days')
+        partial_mock.In('gcertstatus'), returncode=0,
+        error='LOAS2 expires in 1234h')
 
-    # This should invoke prodcertstatus.
+    # This should invoke gcertstatus.
     self.loas.Status()
-    self.assertEqual(self.email_mock.call_count, 1)
+    self.assertEqual(self.rc_mock.call_count, 1)
 
     # While this should return quickly.
     self.loas.Status()
-    self.assertEqual(self.email_mock.call_count, 1)
+    self.assertEqual(self.rc_mock.call_count, 1)
 
   def testStatusExpiresSoon(self):
     """Verify that expiring certs generate e-mails once a day."""
     self.rc_mock.AddCmdResult(
-        partial_mock.In('prodcertstatus'), returncode=0,
-        error='SSL-ENROLLED CERT cert expires in about 3 days')
+        partial_mock.In('gcertstatus'), returncode=1,
+        error='  WARNING LOAS2 expires in 76h')
 
-    # This should invoke prodcertstatus & send an e-mail.
+    # This should invoke gcertstatus & send an e-mail.
     self.loas.Status()
     self.assertEqual(self.email_mock.call_count, 1)
 

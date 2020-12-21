@@ -14,7 +14,6 @@ If you don't know what any of this means, then you don't need this module :).
 from __future__ import print_function
 
 import datetime
-import re
 import socket
 import sys
 
@@ -44,7 +43,7 @@ class Loas(object):
     self.user = user
     self.email_notify = email_notify
     self.email_server = email_server
-    self.enroll_msg = 'become -t -c "prodaccess --sslenroll" %s@%s' % (
+    self.enroll_msg = 'become -t -c "gcert --loas2" %s@%s' % (
         self.user, socket.getfqdn())
     self.last_notification = (
         datetime.date.today() - datetime.timedelta(weeks=10))
@@ -70,24 +69,18 @@ class Loas(object):
         self.last_notification + datetime.timedelta(days=1)):
       return
 
-    cmd = ['prodcertstatus', '--check_loas_cert_location', 'sslenrolled']
+    # Let the tool tell us whether things will fail soon.
+    cmd = ['gcertstatus', '--check_loas2', '--nocheck_ssh',
+           f'--check_remaining={7 * 24}h']
     result = cros_build_lib.sudo_run(cmd,
                                      user=self.user,
                                      check=False,
                                      stdout=True,
                                      encoding='utf-8')
 
-    # Figure out how many days are left.  The command should display:
-    # SSL-ENROLLED CERT cert expires in about 22 days
-    m = re.search(r'cert expires in about ([0-9]+) days', result.output)
-    if m:
-      days_left = int(m.group(1))
-    else:
-      days_left = 0
-
     # Send out one notification a day if there's a week or less left
     # before our creds expire.
-    if days_left <= 7:
+    if result.returncode:
       alerts.SendEmail(
           'Loas certs expiring soon!',
           self.email_notify,
@@ -98,4 +91,4 @@ class Loas(object):
     else:
       # We won't expire for a while, so stop the periodic polling.
       self.last_notification = (
-          datetime.date.today() + datetime.timedelta(days=days_left - 8))
+          datetime.date.today() + datetime.timedelta(days=7))
