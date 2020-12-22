@@ -1786,9 +1786,9 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-endeavour-13259.B', ['endeavour'], {}),
       (DAILY, 'firmware-puff-13324.B', ['puff', 'ambassador'], {}),
       (DAILY, 'firmware-zork-13434.B', ['zork'], {}),
-      (DAILY, 'firmware-volteer-13521.B', ['volteer'], {}),
       (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
+      (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
