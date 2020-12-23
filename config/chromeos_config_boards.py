@@ -162,6 +162,7 @@ base_layout_boards = lakitu_boards | termina_boards
 
 builder_incompatible_binaries_boards = frozenset([
     'grunt',
+    'grunt-arc64',
     'grunt-arc-r',
     'guybrush',
     'majolica',
