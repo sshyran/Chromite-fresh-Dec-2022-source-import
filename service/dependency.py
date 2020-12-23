@@ -89,16 +89,15 @@ def GetRelevantEclassesForEbuild(ebuild_path, path_cache, overlay_dirs):
   md5_cache_file_path = os.path.join(overlay_head, 'metadata', 'md5-cache',
                                      category, package_name)
 
-  relevant_eclass_paths = []
-
   if os.path.isfile(edb_cache_file_path):
-    cache_entries = parse_edb_cache_entry(edb_cache_file_path)
+    cache_entries = _parse_ebuild_cache_entry(edb_cache_file_path)
   elif os.path.isfile(md5_cache_file_path):
-    cache_entries = parse_md5_cache_entry(md5_cache_file_path)
+    cache_entries = _parse_ebuild_cache_entry(md5_cache_file_path)
   else:
     raise MissingCacheEntry(
         'No cache entry found for package: %s' % package_name)
 
+  relevant_eclass_paths = []
   for eclass, digest in cache_entries:
     if digest in path_cache:
       relevant_eclass_paths.append(path_cache[digest])
@@ -133,32 +132,26 @@ def find_matching_eclass_file(eclass, digest, overlay_dirs):
       'No matching eclass file found: %s %s' % (eclass, digest))
 
 
-def parse_edb_cache_entry(edb_cache_file_path):
-  ECLASS_REGEX = re.compile(r'_eclasses_=(.*)')
-  ECLASS_CLAUSE_REGEX = (r'(?P<eclass>[^\s]+)\s+(?P<overlay_path>[^\s]+)\s+'
-                         r'(?P<digest>[\da-fA-F]+)\s?')
+def _parse_ebuild_cache_entry(cache_file_path):
+  """Extract the eclasses with their digest from an ebuild's cache file."""
+  eclass_regex = re.compile(r'_eclasses_=(.*)')
+  eclass_clause_regex = (
+      # The eclass name, e.g. cros-workon.
+      r'(?P<eclass>[^\s]+)\s+'
+      # The edb cache files contain the overlay path, the md5 cache file does
+      # not, so optionally parse the path.
+      r'((?P<overlay_path>[^\s]+)\s+)?'
+      # The eclass digest followed by a word boundary -- \b prevents parsing md5
+      # digests as paths when the next class begins with a-f.
+      r'(?P<digest>[\da-fA-F]+)\b\s*')
 
-  cachefile = osutils.ReadFile(edb_cache_file_path)
-  m = ECLASS_REGEX.search(cachefile)
+  cachefile = osutils.ReadFile(cache_file_path)
+  m = eclass_regex.search(cachefile)
   if not m:
     return []
 
   start, end = m.start(1), m.end(1)
-  entries = re.finditer(ECLASS_CLAUSE_REGEX, cachefile[start:end])
-  return [(c.group('eclass'), c.group('digest')) for c in entries]
-
-
-def parse_md5_cache_entry(md5_cache_file_path):
-  ECLASS_REGEX = re.compile(r'_eclasses_=(.*)')
-  ECLASS_CLAUSE_REGEX = r'(?P<eclass>[^\s]+)\s+(?P<digest>[\da-fA-F]+)\s?'
-
-  cachefile = osutils.ReadFile(md5_cache_file_path)
-  m = ECLASS_REGEX.search(cachefile)
-  if not m:
-    return []
-
-  start, end = m.start(1), m.end(1)
-  entries = re.finditer(ECLASS_CLAUSE_REGEX, cachefile[start:end])
+  entries = re.finditer(eclass_clause_regex, cachefile[start:end])
   return [(c.group('eclass'), c.group('digest')) for c in entries]
 
 
