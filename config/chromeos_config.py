@@ -2393,6 +2393,19 @@ def ApplyCustomOverrides(site_config):
           'hw_tests_disabled_bug': 'http://crbug.com/1091053',
       },
 
+      # No hw_tests for eve-kernelnext and eve-arc-r.  See crbug.com/1161335
+      'eve-kernelnext-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'http://crbug.com/1161335',
+      },
+
+      'eve-arc-r-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'http://crbug.com/1161335',
+      },
+
       # No hw_tests for eve-kvm.  See crbug.com/1085769.
       'eve-kvm-release': {
           'hw_tests': [],
@@ -2635,6 +2648,8 @@ def ApplyCustomOverrides(site_config):
   # Some Unibuild boards need to have hardware tests disabled.  This means
   # disabling it at the model level as well.
   _unibuild_disabled_hw_tests = frozenset([
+      'eve-kernelnext-release',  # crbug.com/1161335
+      'eve-arc-r-release',  # crbug.com/1161335
   ])
 
   for config_name in _unibuild_disabled_hw_tests:
