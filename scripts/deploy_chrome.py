@@ -481,12 +481,15 @@ class DeployChrome(object):
              self._MountRootfsAsWritable,
              self._PrepareStagingDir]
 
-    # If this is a lacros build, we only want to restart ash-chrome if
-    # necessary, which is done below.
-    if not self.options.lacros:
+    # If this is a lacros build, we only want to restart ash-chrome if needed.
+    restart_ui = True
+    if self.options.lacros:
+      steps.append(self._KillLacrosChrome)
+      restart_ui = self._ModifyConfigFileIfNeededForLacros()
+    if restart_ui:
+      steps.append(self._KillAshChromeIfNeeded)
       self._stopped_ui = True
-    steps += ([self._KillLacrosChrome] if self.options.lacros else
-              [self._KillAshChromeIfNeeded])
+
     ret = parallel.RunParallelSteps(steps, halt_on_error=True,
                                     return_values=True)
     self._CheckDeviceFreeSpace(ret[0])
@@ -511,25 +514,37 @@ class DeployChrome(object):
     if self.options.mount_dir is not None:
       self._MountTarget()
 
-    if self.options.lacros:
-      # Update /etc/chrome_dev.conf to include appropriate flags.
-      restart_ui = False
-      result = self.device.run(ENABLE_LACROS_VIA_CONF_COMMAND, shell=True)
-      if result.stdout.strip() == MODIFIED_CONF_FILE:
-        restart_ui = True
-      result = self.device.run(_SET_LACROS_PATH_VIA_CONF_COMMAND % {
-          'conf_file': _CONF_FILE, 'lacros_path': self.options.target_dir,
-          'modified_conf_file': MODIFIED_CONF_FILE}, shell=True)
-      if result.stdout.strip() == MODIFIED_CONF_FILE:
-        restart_ui = True
-
-      if restart_ui:
-        self._KillAshChromeIfNeeded()
-
     # Actually deploy Chrome to the device.
     self._Deploy()
     if self.options.deploy_test_binaries:
       self._DeployTestBinaries()
+
+
+  def _ModifyConfigFileIfNeededForLacros(self):
+    """Modifies the /etc/chrome_dev.conf file for lacros-chrome.
+
+    Returns:
+      True if the file is modified, and the return value is usually used to
+      determine whether restarting ash-chrome is needed.
+    """
+    assert self.options.lacros, (
+        'Only deploying lacros-chrome needs to modify the config file.')
+    # Update /etc/chrome_dev.conf to include appropriate flags.
+    modified = False
+    result = self.device.run(ENABLE_LACROS_VIA_CONF_COMMAND, shell=True)
+    if result.stdout.strip() == MODIFIED_CONF_FILE:
+      modified = True
+    result = self.device.run(
+        _SET_LACROS_PATH_VIA_CONF_COMMAND % {
+            'conf_file': _CONF_FILE,
+            'lacros_path': self.options.target_dir,
+            'modified_conf_file': MODIFIED_CONF_FILE
+        },
+        shell=True)
+    if result.stdout.strip() == MODIFIED_CONF_FILE:
+      modified = True
+
+    return modified
 
 
 def ValidateStagingFlags(value):

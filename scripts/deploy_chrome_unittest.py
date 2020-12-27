@@ -449,6 +449,7 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
     # Raises a RunCommandError on its first invocation, but passes on subsequent
     # calls.
     def SideEffect(*args, **kwargs):
+      # pylint: disable=unused-argument
       if not SideEffect.called:
         SideEffect.called = True
         raise cros_build_lib.RunCommandError('fail')
@@ -490,16 +491,10 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
     self.deploy._MountRootfsAsWritable = mock.Mock()
     self.deploy._PrepareStagingDir = mock.Mock()
     self.deploy._CheckDeviceFreeSpace = mock.Mock()
-
-    self._ran_start_command = False
-
+    self.deploy._KillAshChromeIfNeeded = mock.Mock()
     self.StartPatcher(parallel_unittest.ParallelMock())
 
-    # Common mocking shared between tests.
-    def kill_procs_side_effect():
-      self.deploy._stopped_ui = True
-    self.deploy._KillAshChromeIfNeeded = mock.Mock(
-        side_effect=kill_procs_side_effect)
+    self._ran_start_command = False
 
     def start_ui_side_effect(*args, **kwargs):
       # pylint: disable=unused-argument
