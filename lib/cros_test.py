@@ -55,6 +55,7 @@ class CrOSTest(object):
 
     self.autotest = opts.autotest
     self.tast = opts.tast
+    self.tast_vars = opts.tast_vars
     self.results_dir = opts.results_dir
     self.test_that_args = opts.test_that_args
     self.test_timeout = opts.test_timeout
@@ -367,6 +368,8 @@ class CrOSTest(object):
       if need_chroot:
         results_dir = path_util.ToChrootPath(self.results_dir)
       cmd += ['-resultsdir', results_dir]
+    if self.tast_vars:
+      cmd += ['-var=%s' % v for v in self.tast_vars]
     if self._device.ssh_port:
       cmd += ['%s:%d' % (self._device.device, self._device.ssh_port)]
     else:
@@ -545,6 +548,9 @@ def ParseCommandLine(argv):
   parser.add_argument('--tast', nargs='+',
                       help='Tast test pattern to run, passed to tast. '
                       'See go/tast-running for patterns.')
+  parser.add_argument('--tast-var', dest='tast_vars', action='append',
+                      help='Runtime variables for Tast tests, and the format '
+                      'are expected to be "key=value" pairs.')
   parser.add_argument('--chrome-test', action='store_true', default=False,
                       help='Run chrome test on device. The first arg in the '
                       'remote command should be the test binary name, such as '
@@ -623,6 +629,9 @@ def ParseCommandLine(argv):
       parser.error('Must specify --build-dir with --build or --deploy.')
     if not os.path.isdir(opts.build_dir):
       parser.error('%s is not a directory.' % opts.build_dir)
+
+  if opts.tast_vars and not opts.tast:
+    parser.error('--tast-var is only applicable to Tast tests.')
 
   if opts.results_src:
     for src in opts.results_src:

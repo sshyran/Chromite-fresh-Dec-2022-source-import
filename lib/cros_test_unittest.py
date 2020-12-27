@@ -375,6 +375,17 @@ class CrOSTesterTast(CrOSTesterBase):
         '(("dep:chrome" || "dep:android") && !flaky && !disabled)'
     ])
 
+  def testTastTestWithVars(self):
+    """Verify running tast tests with vars specified."""
+    self._tester.tast = ['ui.ChromeLogin']
+    self._tester.tast_vars = ['key=value']
+    self._tester.Run()
+    self.assertCommandContains([
+        'tast', 'run', '-build=false', '-waituntilready',
+        '-extrauseflags=tast_vm', '-var=key=value', 'localhost:9222',
+        'ui.ChromeLogin'
+    ])
+
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot')
   def testTastTestWithOtherArgs(self, check_inside_chroot_mock):
     """Verify running a single tast test with various arguments."""
@@ -628,3 +639,10 @@ class CrOSTesterParser(CrOSTesterBase):
 
     # Parser error when a non-existent file is passed to --files.
     self.CheckParserError(['--files', 'fake/file'], 'does not exist')
+
+  def testParserVars(self):
+    """Verify we get parser errors when specifying vars with non-tast tests."""
+    self.CheckParserError([
+        '--tast-var', 'key=value', '--chrome-test', '--',
+        './out_amd64-generic/Release/base_unittests'
+    ], '--tast-var is only applicable to Tast tests.')
