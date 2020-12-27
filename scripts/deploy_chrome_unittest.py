@@ -477,9 +477,23 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
   """Line coverage for Perform() method with --lacros option."""
 
   def setUp(self):
-    options = _ParseCommandLine([
-        '--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
-        '--device', 'monkey'])
+    self.deploy = None
+    self._ran_start_command = False
+    self.StartPatcher(parallel_unittest.ParallelMock())
+
+    def start_ui_side_effect(*args, **kwargs):
+      # pylint: disable=unused-argument
+      self._ran_start_command = True
+
+    self.rc.AddCmdResult(partial_mock.In('start ui'),
+                         side_effect=start_ui_side_effect)
+
+  def prepareDeploy(self, options=None):
+    if not options:
+      options = _ParseCommandLine([
+          '--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+          '--device', 'monkey'
+      ])
     self.deploy = deploy_chrome.DeployChrome(
         options, self.tempdir, os.path.join(self.tempdir, 'staging'))
 
@@ -492,24 +506,17 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
     self.deploy._PrepareStagingDir = mock.Mock()
     self.deploy._CheckDeviceFreeSpace = mock.Mock()
     self.deploy._KillAshChromeIfNeeded = mock.Mock()
-    self.StartPatcher(parallel_unittest.ParallelMock())
-
-    self._ran_start_command = False
-
-    def start_ui_side_effect(*args, **kwargs):
-      # pylint: disable=unused-argument
-      self._ran_start_command = True
-    self.rc.AddCmdResult(partial_mock.In('start ui'),
-                         side_effect=start_ui_side_effect)
 
   def testConfNotModified(self):
     """When the conf file is not modified we don't restart chrome ."""
+    self.prepareDeploy()
     self.deploy.Perform()
     self.deploy._KillAshChromeIfNeeded.assert_not_called()
     self.assertFalse(self._ran_start_command)
 
   def testConfModified(self):
     """When the conf file is modified we restart chrome."""
+    self.prepareDeploy()
 
     # We intentionally add '\n' to MODIFIED_CONF_FILE to simulate echo adding a
     # newline when invoked in the shell.
@@ -520,3 +527,19 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
     self.deploy.Perform()
     self.deploy._KillAshChromeIfNeeded.assert_called()
     self.assertTrue(self._ran_start_command)
+
+  def testSkipModifyingConf(self):
+    """SKip modifying the config file when the argument is specified."""
+    self.prepareDeploy(
+        _ParseCommandLine([
+            '--lacros', '--nostrip', '--build-dir', '/path/to/nowhere',
+            '--device', 'monkey', '--skip-modifying-config-file'
+        ]))
+
+    self.rc.AddCmdResult(
+        partial_mock.In(deploy_chrome.ENABLE_LACROS_VIA_CONF_COMMAND),
+        stdout=deploy_chrome.MODIFIED_CONF_FILE + '\n')
+
+    self.deploy.Perform()
+    self.deploy._KillAshChromeIfNeeded.assert_not_called()
+    self.assertFalse(self._ran_start_command)

@@ -481,11 +481,14 @@ class DeployChrome(object):
              self._MountRootfsAsWritable,
              self._PrepareStagingDir]
 
-    # If this is a lacros build, we only want to restart ash-chrome if needed.
     restart_ui = True
     if self.options.lacros:
+      # If this is a lacros build, we only want to restart ash-chrome if needed.
+      restart_ui = False
       steps.append(self._KillLacrosChrome)
-      restart_ui = self._ModifyConfigFileIfNeededForLacros()
+      if self.options.modify_config_file:
+        restart_ui = self._ModifyConfigFileIfNeededForLacros()
+
     if restart_ui:
       steps.append(self._KillAshChromeIfNeeded)
       self._stopped_ui = True
@@ -621,6 +624,11 @@ def _CreateParser():
                            'binaries.' % _CHROME_TEST_BIN_DIR)
   parser.add_argument('--lacros', action='store_true', default=False,
                       help='Deploys lacros-chrome rather than ash-chrome.')
+  parser.add_argument('--skip-modifying-config-file', action='store_false',
+                      dest='modify_config_file',
+                      help='By default, deploying lacros-chrome modifies the '
+                           '/etc/chrome_dev.conf file, which interferes with '
+                           'automated testing, and this argument disables it.')
 
   group = parser.add_argument_group('Advanced Options')
   group.add_argument('-l', '--local-pkg-path', type='path',

@@ -110,7 +110,7 @@ class CrOSTester(CrOSTesterBase):
         'xbuddy://remote/octopus/R82-12901.0.0'])
 
   def testFlashSkip(self):
-    """Tests flash command is skipped when not needed."""
+    """Tests flash command is skipped when not needed for ash-chrome."""
     self._tester.flash = True
     self._tester._device.board = 'octopus'
     self._tester._device.remote._lsb_release = {
@@ -119,24 +119,56 @@ class CrOSTester(CrOSTesterBase):
     self._tester.xbuddy = 'xbuddy://remote/octopus/R82-12901.0.0'
     self._tester.Run()
     self.assertCommandContains(
-        [os.path.join(constants.CHROMITE_BIN_DIR, 'cros'),
-         'flash', 'localhost', 'xbuddy://remote/octopus/R82-12901.0.0'],
-        expected=False)
+        [
+            os.path.join(constants.CHROMITE_BIN_DIR, 'cros'), 'flash',
+            'localhost', 'xbuddy://remote/octopus/R82-12901.0.0'
+        ],
+        expected=False,
+    )
 
-  def testDeployChrome(self):
-    """Tests basic deploy chrome command."""
+  def testAlwaysFlashForLacros(self):
+    """Tests flash command is always executed for lacros-chrome tests."""
+    self._tester.deploy_lacros = True
+    self._tester.build_dir = self.TempFilePath('out/Lacros')
+    self._tester.flash = True
+    self._tester.public_image = True
+    self._tester._device.board = 'octopus'
+    self._tester._device.remote._lsb_release = {
+        cros_set_lsb_release.LSB_KEY_VERSION: '12900.0.0',
+    }
+    self._tester.Run()
+    self.assertCommandContains([
+        os.path.join(constants.CHROMITE_BIN_DIR, 'cros'), 'flash',
+        'ssh://localhost:9222', 'xbuddy://remote/octopus-full/latest'
+    ])
+
+  def testDeployAshChrome(self):
+    """Tests basic deploy ash-chrome command."""
     self._tester.deploy = True
     self._tester.build_dir = self.TempFilePath('out_amd64-generic/Release')
     self._tester.Run()
-    self.assertCommandContains(['deploy_chrome', '--force', '--build-dir',
-                                self._tester.build_dir, '--process-timeout',
-                                '180', '--device',
-                                self._tester._device.device + ':9222',
-                                '--board', 'amd64-generic',
-                                '--cache-dir', self._tester.cache_dir])
+    self.assertCommandContains([
+        'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
+        '--process-timeout', '180', '--device',
+        self._tester._device.device + ':9222', '--cache-dir',
+        self._tester.cache_dir, '--board', 'amd64-generic'
+    ])
+
+  def testDeployLacrosChrome(self):
+    """Tests basic deploy lacros-chrome command."""
+    self._tester.deploy_lacros = True
+    self._tester.build_dir = self.TempFilePath('out/Lacros')
+    self._tester.Run()
+    self.assertCommandContains([
+        'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
+        '--process-timeout', '180', '--device',
+        self._tester._device.device + ':9222', '--cache-dir',
+        self._tester.cache_dir, '--lacros', '--nostrip',
+        '--skip-updating-config-file'
+    ])
 
   def testDeployChromeWithArgs(self):
-    """Tests deploy chrome command with additional arguments."""
+    """Tests deploy ash-chrome command with additional arguments."""
     self._tester.deploy = True
     self._tester.build_dir = self.TempFilePath('out_amd64-generic/Release')
     self._tester.nostrip = True
@@ -658,3 +690,12 @@ class CrOSTesterParser(CrOSTesterBase):
     # Parser error when shard index > total shards.
     self.CheckParserError(['--tast', 'dep:chrome', '--tast-total-shards=1',
                            '--tast-shard-index=10'], 'index must be < total')
+
+  def testParserErrorLacros(self):
+    """Verify parser errors for deploying/running lacros-chrome tests."""
+    build_dir = self.TempFilePath('out/Lacros')
+    osutils.SafeMakedirs(build_dir)
+
+    self.CheckParserError(
+        ['--deploy-lacros', '--deploy', '--build-dir', build_dir],
+        'Cannot deploy lacros-chrome and ash-chrome at the same time.')

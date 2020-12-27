@@ -46,6 +46,7 @@ class CrOSTest(object):
     self.public_image = opts.public_image
     self.xbuddy = opts.xbuddy
     self.deploy = opts.deploy
+    self.deploy_lacros = opts.deploy_lacros
     self.nostrip = opts.nostrip
     self.build_dir = opts.build_dir
     self.mount = opts.mount
@@ -161,19 +162,23 @@ class CrOSTest(object):
       xbuddy_path = 'xbuddy://remote/%s%s/%s' % (
           self._device.board, suffix, version)
 
-    # Skip the flash if the device is already running the requested version.
-    device_version = self._device.remote.version
-    _, _, requested_version, _ = xbuddy.XBuddy.InterpretPath(xbuddy_path)
-    # Split on the first "-" when comparing versions since xbuddy requires
-    # the RX- prefix, but the device may not advertise it.
-    if xbuddy.LATEST not in requested_version:
-      if (requested_version == device_version or
-          ('-' in requested_version and
-           requested_version.split('-', 1)[1] == device_version)):
-        logging.info(
-            'Skipping the flash. Device running %s when %s was requested',
-            device_version, xbuddy_path)
-        return
+    # Only considers skipping flashing if it's NOT for lacros-chrome tests
+    # because at this time, automated/CI tests can't assume that ash-chrome is
+    # left in a clean state and lacros-chrome depends on ash-chrome.
+    if not self.deploy_lacros:
+      # Skip the flash if the device is already running the requested version.
+      device_version = self._device.remote.version
+      _, _, requested_version, _ = xbuddy.XBuddy.InterpretPath(xbuddy_path)
+      # Split on the first "-" when comparing versions since xbuddy requires
+      # the RX- prefix, but the device may not advertise it.
+      if xbuddy.LATEST not in requested_version:
+        if (requested_version == device_version or
+            ('-' in requested_version and
+             requested_version.split('-', 1)[1] == device_version)):
+          logging.info(
+              'Skipping the flash. Device running %s when %s was requested',
+              device_version, xbuddy_path)
+          return
 
     device_name = 'ssh://' + self._device.device
     if self._device.ssh_port:
@@ -192,7 +197,7 @@ class CrOSTest(object):
 
   def _Deploy(self):
     """Deploy binary files to device."""
-    if not self.build and not self.deploy:
+    if not self.build and not self.deploy and not self.deploy_lacros:
       return
 
     if self.chrome_test:
@@ -201,12 +206,14 @@ class CrOSTest(object):
       self._DeployChrome()
 
   def _DeployChrome(self):
-    """Deploy chrome."""
+    """Deploy lacros-chrome or ash-chrome."""
     deploy_cmd = [
-        'deploy_chrome', '--force',
-        '--build-dir', self.build_dir,
-        '--process-timeout', '180',
-        '--deploy-test-binaries',
+        'deploy_chrome',
+        '--force',
+        '--build-dir',
+        self.build_dir,
+        '--process-timeout',
+        '180',
     ]
     if self._device.ssh_port:
       deploy_cmd += [
@@ -215,14 +222,24 @@ class CrOSTest(object):
       ]
     else:
       deploy_cmd += ['--device', self._device.device]
-    if self._device.board:
-      deploy_cmd += ['--board', self._device.board]
+
     if self.cache_dir:
       deploy_cmd += ['--cache-dir', self.cache_dir]
-    if self.nostrip:
-      deploy_cmd += ['--nostrip']
-    if self.mount:
-      deploy_cmd += ['--mount']
+
+    if self.deploy_lacros:
+      # By default, deploying lacros-chrome modifies the /etc/chrome_dev.conf
+      # file, which is desired behavior for local development, however, a
+      # modified config file interferes with automated testing.
+      deploy_cmd += ['--lacros', '--nostrip', '--skip-updating-config-file']
+    else:
+      deploy_cmd.append('--deploy-test-binaries')
+      if self._device.board:
+        deploy_cmd += ['--board', self._device.board]
+      if self.nostrip:
+        deploy_cmd += ['--nostrip']
+      if self.mount:
+        deploy_cmd += ['--mount']
+
     cros_build_lib.run(deploy_cmd, dryrun=self.dryrun)
     self._device.WaitForBoot()
 
@@ -582,15 +599,18 @@ def ParseCommandLine(argv):
                       help='xbuddy link to use for flashing the device. Will '
                       "default to the board's version used in the cros "
                       'chrome-sdk if available, or "latest" otherwise.')
+  parser.add_argument('--deploy-lacros', action='store_true', default=False,
+                      help='Before running tests, deploy lacros-chrome, '
+                      '--build-dir must be specified.')
   parser.add_argument('--deploy', action='store_true', default=False,
-                      help='Before running tests, deploy chrome, '
+                      help='Before running tests, deploy ash-chrome, '
                       '--build-dir must be specified.')
   parser.add_argument('--nostrip', action='store_true', default=False,
                       help="Don't strip symbols from binaries if deploying.")
   parser.add_argument('--mount', action='store_true', default=False,
-                      help='Deploy chrome to the default target directory and '
-                      'bind it to the default mount directory. Useful for '
-                      'large Chrome binaries.')
+                      help='Deploy ash-chrome to the default target directory '
+                      'and bind it to the default mount directory. Useful for '
+                      'large ash-chrome binaries.')
   # type='path' converts a relative path for cwd into an absolute one on the
   # host, which we don't want.
   parser.add_argument('--cwd', help='Change working directory. '
@@ -635,7 +655,7 @@ def ParseCommandLine(argv):
     if not opts.build_dir:
       opts.build_dir = os.path.dirname(opts.args[1])
 
-  if opts.build or opts.deploy:
+  if opts.build or opts.deploy or opts.deploy_lacros:
     if not opts.build_dir:
       parser.error('Must specify --build-dir with --build or --deploy.')
     if not os.path.isdir(opts.build_dir):
@@ -643,6 +663,9 @@ def ParseCommandLine(argv):
 
   if opts.tast_vars and not opts.tast:
     parser.error('--tast-var is only applicable to Tast tests.')
+
+  if opts.deploy and opts.deploy_lacros:
+    parser.error('Cannot deploy lacros-chrome and ash-chrome at the same time.')
 
   if opts.results_src:
     for src in opts.results_src:
