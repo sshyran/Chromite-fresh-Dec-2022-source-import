@@ -7,12 +7,8 @@
 
 from __future__ import print_function
 
-import os
-
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import osutils
 from chromite.service import dependency
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -74,41 +70,6 @@ class DependencyTests(cros_test_lib.MockTestCase):
             'equipment/jetpack-3.4.5': ['/factory'],
         },
     }
-
-  def testNormalizeSourcePathsCollapsingSubPaths(self):
-    self.assertEqual(
-        dependency.NormalizeSourcePaths(
-            ['/mnt/host/source/foo', '/mnt/host/source/ab/cd',
-             '/mnt/host/source/foo/bar']),
-        ['ab/cd', 'foo'])
-
-    self.assertEqual(
-        dependency.NormalizeSourcePaths(
-            ['/mnt/host/source/foo/bar',
-             '/mnt/host/source/ab/cd',
-             '/mnt/host/source/foo/bar/..',
-             '/mnt/host/source/ab/cde']),
-        ['ab/cd', 'ab/cde', 'foo'])
-
-  def testNormalizeSourcePathsFormatingDirectoryPaths(self):
-    with osutils.TempDir() as tempdir:
-      foo_dir = os.path.join(tempdir, 'foo')
-      bar_baz_dir = os.path.join(tempdir, 'bar', 'baz')
-      osutils.SafeMakedirs(os.path.join(tempdir, 'ab'))
-      ab_cd_file = os.path.join(tempdir, 'ab', 'cd')
-
-      osutils.SafeMakedirs(foo_dir)
-      osutils.SafeMakedirs(bar_baz_dir)
-      osutils.WriteFile(ab_cd_file, 'alphabet')
-
-
-      expected_paths = [ab_cd_file, bar_baz_dir + '/', foo_dir + '/']
-      expected_paths = [os.path.relpath(p, constants.CHROOT_SOURCE_ROOT) for
-                        p in expected_paths]
-
-      self.assertEqual(
-          dependency.NormalizeSourcePaths([foo_dir, ab_cd_file, bar_baz_dir]),
-          expected_paths)
 
   def testDeterminePackageRelevanceNotRelevant(self):
     """Test determine_package_relevance with no matching paths."""
