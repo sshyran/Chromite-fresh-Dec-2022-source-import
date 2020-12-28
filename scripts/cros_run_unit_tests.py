@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import argparse
 import multiprocessing
 import os
 import sys
@@ -52,11 +53,16 @@ def ParseArgs(argv):
                       'currently installed.')
   parser.add_argument('--package_file', type='path',
                       help='Path to a file containing the list of packages '
-                      'that should be tested.')
-  parser.add_argument('--blacklist_packages', dest='package_blacklist',
-                      help='Space-separated list of blacklisted packages.')
+                           'that should be tested.')
   parser.add_argument('--packages',
                       help='Space-separated list of packages to test.')
+  parser.add_argument('--blacklist_packages',
+                      dest='skip_packages',
+                      deprecated='Use --skip-packages instead.',
+                      help=argparse.SUPPRESS)
+  parser.add_argument('--skip-packages',
+                      help='Space-separated list of packages to NOT test even '
+                           'if they otherwise would have been tested.')
   parser.add_argument('--nowithdebug', action='store_true',
                       help="Don't build the tests with USE=cros-debug")
   parser.add_argument('--assume-empty-sysroot', default=False,
@@ -97,9 +103,9 @@ def main(argv):
   cros_build_lib.AssertInsideChroot()
 
   sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
-  package_blacklist = set()
-  if opts.package_blacklist:
-    package_blacklist |= set(opts.package_blacklist.split())
+  skipped_packages = set()
+  if opts.skip_packages:
+    skipped_packages |= set(opts.skip_packages.split())
 
   packages = set()
   # The list of packages to test can be passed as a file containing a
@@ -123,10 +129,10 @@ def main(argv):
     workon_packages = set(workon.ListAtoms(use_all=True))
     packages &= workon_packages
 
-  for cp in packages & package_blacklist:
-    logging.info('Skipping blacklisted package %s.', cp)
+  for cp in packages & skipped_packages:
+    logging.info('Skipping package %s.', cp)
 
-  packages = packages - package_blacklist
+  packages = packages - skipped_packages
   pkg_with_test = portage_util.PackagesWithTest(sysroot, packages)
 
   if packages - pkg_with_test:
