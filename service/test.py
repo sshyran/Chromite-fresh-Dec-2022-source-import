@@ -79,7 +79,7 @@ def BuildTargetUnitTest(build_target,
     cmd.extend(['--packages', ' '.join(packages)])
 
   if blocklist:
-    cmd.extend(['--blacklist_packages', ' '.join(blocklist)])
+    cmd.extend(['--skip-packages', ' '.join(blocklist)])
 
   if testable_packages_optional:
     cmd.append('--no-testable-packages-ok')

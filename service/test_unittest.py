@@ -97,7 +97,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     blocklist = ['foo/bar', 'cat/pkg']
     test.BuildTargetUnitTest(self.build_target, self.chroot,
                              blocklist=blocklist)
-    self.assertCommandContains(['--blacklist_packages', 'foo/bar cat/pkg'])
+    self.assertCommandContains(['--skip-packages', 'foo/bar cat/pkg'])
 
   def testTestablePackagesOptional(self):
     """Test the testable packages optional argument."""
