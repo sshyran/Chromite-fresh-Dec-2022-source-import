@@ -332,7 +332,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     refs = [
         GitRef(
             path='/chromeos/overlays/overlay-coral-private',
-            ref='master',
+            ref='main',
             revision='123')
     ]
     chroot = Chroot()
@@ -393,7 +393,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     refs = [
         GitRef(
             path='/chromeos/overlays/overlay-coral-private',
-            ref='master',
+            ref='main',
             revision='123')
     ]
     result = packages.replicate_private_config(
@@ -426,7 +426,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     refs = [
         GitRef(
             path='/chromeos/overlays/overlay-coral-private',
-            ref='master',
+            ref='main',
             revision='123')
     ]
     with self.assertRaisesRegex(
@@ -442,7 +442,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     refs = [
         GitRef(
             path='/chromeos/overlays/overlay-coral-private',
-            ref='master',
+            ref='main',
             revision='123')
     ]
     chroot = Chroot()
@@ -460,8 +460,8 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
 
     with self.assertRaisesRegex(ValueError, 'Expected exactly one ref'):
       refs = [
-          GitRef(path='a', ref='master', revision='1'),
-          GitRef(path='a', ref='master', revision='2')
+          GitRef(path='a', ref='main', revision='1'),
+          GitRef(path='a', ref='main', revision='2')
       ]
       packages.replicate_private_config(
           _build_targets=None, refs=refs, chroot=None)
@@ -475,7 +475,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
       refs = [
           GitRef(
               path='/chromeos/overlays/overlay-coral-private',
-              ref='master',
+              ref='main',
               revision='123')
       ]
       packages.replicate_private_config(
@@ -487,7 +487,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
       refs = [
           GitRef(
               path='a/b/c',
-              ref='master',
+              ref='main',
               revision='123')
       ]
       packages.replicate_private_config(
