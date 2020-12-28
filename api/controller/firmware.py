@@ -26,6 +26,8 @@ def _call_entry(fw_loc, metric_proto, subcmd):
     fw_path = 'src/platform/ec/'
   elif fw_loc == firmware_pb2.PLATFORM_ZEPHYR:
     fw_path = 'src/platform/zephyr-chrome/'
+  elif fw_loc == firmware_pb2.PLATFORM_TI50:
+    fw_path = 'src/platform/ti50/'
   else:
     cros_build_lib.Die(f'Unknown firmware location {fw_loc}!')
 
