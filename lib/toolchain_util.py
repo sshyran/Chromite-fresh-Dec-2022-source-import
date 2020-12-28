@@ -79,8 +79,8 @@ AFDO_SUFFIX = '.afdo'
 BZ2_COMPRESSION_SUFFIX = '.bz2'
 XZ_COMPRESSION_SUFFIX = '.xz'
 KERNEL_AFDO_COMPRESSION_SUFFIX = '.gcov.xz'
-TOOLCHAIN_UTILS_PATH = os.path.join(
-    constants.SOURCE_ROOT, 'src/third_party/toolchain-utils')
+TOOLCHAIN_UTILS_PATH = os.path.join(constants.SOURCE_ROOT,
+                                    'src/third_party/toolchain-utils')
 AFDO_PROFILE_PATH_IN_CHROMIUM = 'src/chromeos/profiles/%s.afdo.newest.txt'
 MERGED_AFDO_NAME = 'chromeos-chrome-amd64-%s'
 
@@ -2344,16 +2344,19 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     if not kernel_version:
       raise BundleArtifactsHandlerError('kernel_version not provided.')
     kernel_version = kernel_version.replace('.', '_')
-    profile_name = self._GetArtifactVersionInEbuild(
-        'chromeos-kernel-%s' % kernel_version,
-        'AFDO_PROFILE_VERSION') + KERNEL_AFDO_COMPRESSION_SUFFIX
+    profile_version = self._GetArtifactVersionInEbuild(
+        f'chromeos-kernel-{kernel_version}', 'AFDO_PROFILE_VERSION')
+    profile_name = profile_version + KERNEL_AFDO_COMPRESSION_SUFFIX
     # The verified profile is in the sysroot with a name similar to:
     # /usr/lib/debug/boot/chromeos-kernel-4_4-R82-12874.0-1581935639.gcov.xz
     profile_path = os.path.join(
         self.chroot.path, self.sysroot_path[1:], 'usr', 'lib', 'debug', 'boot',
-        'chromeos-kernel-%s-%s' % (kernel_version, profile_name))
+        f'chromeos-kernel-{kernel_version}-{profile_name}')
     verified_profile = os.path.join(self.output_dir, profile_name)
     shutil.copy2(profile_path, verified_profile)
+
+    # Also change the kernel JSON file, in order for PUpr to pick up the change
+    self._UpdateKernelMetadata(kernel_version, profile_version)
     return [verified_profile]
 
   def _BundleUnverifiedChromeCwpAfdoFile(self):
@@ -2373,6 +2376,28 @@ class BundleArtifactHandler(_CommonPrepareBundle):
                                          'UNVETTED_AFDO_FILE'))
     return _CompressAFDOFiles([profile_path], None, self.output_dir,
                               XZ_COMPRESSION_SUFFIX)
+
+  @staticmethod
+  def _UpdateKernelMetadata(kernel_version: str, profile_version: str):
+    """Update afdo_metadata json file"""
+    json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
+                             'kernel_afdo.json')
+    afdo_versions = json.loads(osutils.ReadFile(json_file))
+    assert kernel_version in afdo_versions, \
+      f'To update {kernel_version}, the entry should be in kernel_afdo.json'
+    old_value = afdo_versions[kernel_version]['name']
+    update_to_newer_profile = _RankValidCWPProfiles(
+        old_value) < _RankValidCWPProfiles(profile_version)
+    # This function is called by Bundle, so normally the profile is newer
+    # is guaranteed because Bundle function only runs when a new profile is
+    # needed to verify at the beginning of the builder. This check is to
+    # make sure there's no other updates happen between the start of the
+    # builder and the time of this function call.
+    assert update_to_newer_profile, (
+        f'Failed to update JSON file because {profile_version} is not '
+        f'newer than {old_value}')
+    afdo_versions[kernel_version]['name'] = profile_version
+    pformat.json(afdo_versions, fp=json_file)
 
   @staticmethod
   def _ListTransitiveFiles(base_directory: str):
