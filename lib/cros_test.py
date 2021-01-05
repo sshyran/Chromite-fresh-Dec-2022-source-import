@@ -56,6 +56,8 @@ class CrOSTest(object):
     self.autotest = opts.autotest
     self.tast = opts.tast
     self.tast_vars = opts.tast_vars
+    self.tast_total_shards = opts.tast_total_shards
+    self.tast_shard_index = opts.tast_shard_index
     self.results_dir = opts.results_dir
     self.test_that_args = opts.test_that_args
     self.test_timeout = opts.test_timeout
@@ -370,6 +372,11 @@ class CrOSTest(object):
       cmd += ['-resultsdir', results_dir]
     if self.tast_vars:
       cmd += ['-var=%s' % v for v in self.tast_vars]
+    if self.tast_total_shards:
+      cmd += [
+          '-totalshards=%d' % self.tast_total_shards,
+          '-shardindex=%d' % self.tast_shard_index
+      ]
     if self._device.ssh_port:
       cmd += ['%s:%d' % (self._device.device, self._device.ssh_port)]
     else:
@@ -551,6 +558,10 @@ def ParseCommandLine(argv):
   parser.add_argument('--tast-var', dest='tast_vars', action='append',
                       help='Runtime variables for Tast tests, and the format '
                       'are expected to be "key=value" pairs.')
+  parser.add_argument('--tast-shard-index', type=int, default=0,
+                      help='Shard index to use when running Tast tests.')
+  parser.add_argument('--tast-total-shards', type=int, default=0,
+                      help='Total number of shards when running Tast tests.')
   parser.add_argument('--chrome-test', action='store_true', default=False,
                       help='Run chrome test on device. The first arg in the '
                       'remote command should be the test binary name, such as '
@@ -690,6 +701,14 @@ def ParseCommandLine(argv):
       parser.error('%s cannot start with ..' % f)
     if not os.path.exists(f):
       parser.error('%s does not exist' % f)
+
+  # Verify Tast.
+  if opts.tast_shard_index or opts.tast_total_shards:
+    if not opts.tast:
+      parser.error('Can only specify --tast-total-shards and '
+                   '--tast-shard-index with --tast.')
+    if opts.tast_shard_index >= opts.tast_total_shards:
+      parser.error('Shard index must be < total shards.')
 
   return opts
 

@@ -396,11 +396,14 @@ class CrOSTesterTast(CrOSTesterBase):
     self._tester._device.ssh_port = None
     self._tester._device.device = '100.90.29.199'
     self._tester.results_dir = '/tmp/results'
+    self._tester.tast_total_shards = 2
+    self._tester.tast_shard_index = 1
     self._tester.Run()
     check_inside_chroot_mock.assert_called()
     self.assertCommandContains(['tast', '-verbose', 'run', '-build=false',
                                 '-waituntilready', '-timeout=100',
-                                '-resultsdir', '/tmp/results', '100.90.29.199',
+                                '-resultsdir', '/tmp/results', '-totalshards=2',
+                                '-shardindex=1', '100.90.29.199',
                                 'ui.ChromeLogin'])
 
   def testTastTestSDK(self):
@@ -640,9 +643,18 @@ class CrOSTesterParser(CrOSTesterBase):
     # Parser error when a non-existent file is passed to --files.
     self.CheckParserError(['--files', 'fake/file'], 'does not exist')
 
-  def testParserVars(self):
-    """Verify we get parser errors when specifying vars with non-tast tests."""
+  def testParserErrorTast(self):
+    """Verify we get parser errors with Tast-specific args."""
+    # Parser error when specifying vars with non-tast tests.
     self.CheckParserError([
         '--tast-var', 'key=value', '--chrome-test', '--',
         './out_amd64-generic/Release/base_unittests'
     ], '--tast-var is only applicable to Tast tests.')
+
+    # Parser error when using Tast shard args with non-tast tests.
+    self.CheckParserError(['--tast-shard-index=1', '--tast-total-shards=10',
+                           '--remote-cmd', '--', '/run/test'], 'with --tast.')
+
+    # Parser error when shard index > total shards.
+    self.CheckParserError(['--tast', 'dep:chrome', '--tast-total-shards=1',
+                           '--tast-shard-index=10'], 'index must be < total')
