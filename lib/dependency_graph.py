@@ -13,8 +13,10 @@ imports to parse.
 
 import collections
 import enum
+import os
+from pathlib import Path
 import sys
-from typing import Iterable, Iterator, List, Set, Union
+from typing import Iterable, Iterator, List, Optional, Set, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -29,6 +31,10 @@ class Error(Exception):
 
 class NodeCollisionError(Error):
   """Found multiple nodes representing the same package."""
+
+
+class NoSourcePathsError(Error):
+  """Source paths were queried but none were provided."""
 
 
 class SysrootValueError(Error, ValueError):
@@ -47,11 +53,13 @@ class PackageNode:
   pkg_info: package_info.PackageInfo
   root: str
 
-  def __init__(self, pkg_info: package_info.PackageInfo, root: str):
+  def __init__(self, pkg_info: package_info.PackageInfo, root: str,
+               src_paths: Optional[Iterable[Union[str, os.PathLike]]] = None):
     self.pkg_info = pkg_info
     self.root = root
     self._deps = set()
     self._rev_deps = set()
+    self.source_paths = list(src_paths) if src_paths else []
 
   def __eq__(self, other: Union['PackageNode', package_info.PackageInfo]):
     if isinstance(other, PackageNode):
@@ -71,18 +79,32 @@ class PackageNode:
     return f'PackageNode<{self.pkg_info} in {self.root}>'
 
   def __repr__(self):
-    # Build truncated strings for deps and rdeps.
+    # Build truncated strings for deps, rdeps, and source paths.
     truncated_len = 3
+
     deplen = min(len(self._deps), truncated_len)
     deps = ', '.join(str(p) for p in list(self._deps)[:deplen])
     if len(self._deps) > deplen:
       deps += ', ...'
+
     rdeplen = min(len(self._rev_deps), truncated_len)
     rdeps = ', '.join(str(p) for p in list(self._rev_deps)[:rdeplen])
     if len(self._rev_deps) > rdeplen:
       rdeps += ', ...'
-    return (f'PackageNode<pkg_info: "{self.pkg_info}", root: "{self.root}", '
-            f'deps: "{deps}", reverse deps: "{rdeps}">')
+
+    src_paths_len = min(len(self.source_paths), truncated_len)
+    src_paths = ', '.join(x for x in self.source_paths[:src_paths_len])
+    if len(self.source_paths) > src_paths_len:
+      src_paths += ', ...'
+
+    data = ', '.join([
+        f'pkg_info: "{self.pkg_info}"',
+        f'root: "{self.root}"',
+        f'deps: "{deps}"',
+        f'reverse deps: "{rdeps}"',
+        f'source paths: "{src_paths}"',
+    ])
+    return f'PackageNode<{data}>'
 
   @property
   def dependencies(self) -> Iterable['PackageNode']:
@@ -100,9 +122,13 @@ class PackageNode:
     return self.pkg_info.atom
 
   @property
+  def cpvr(self):
+    return self.pkg_info.cpvr
+
+  @property
   def name(self):
     """Get the node name, a unique identifier for the package itself."""
-    return self.pkg_info.cpvr
+    return self.cpvr
 
   def add_dependency(self, dependency: 'PackageNode'):
     """Add a package as a dependency of this node.
@@ -119,6 +145,32 @@ class PackageNode:
     to build out a DependencyGraph.
     """
     self._rev_deps.add(dependency)
+
+  def is_relevant(self, src_path: Union[str, os.PathLike]) -> bool:
+    """Check if |src_path| is relevant to the node.
+
+    Relevant here means a change in a file in the source paths could affect the
+    result of building the package.
+    """
+    if not self.source_paths:
+      # By definition every package has at least 1 relevant path, the ebuild
+      # itself, so no paths must mean the info wasn't provided.
+      raise NoSourcePathsError(
+          'Must add source paths to nodes to perform this operation.')
+    path = Path(src_path)
+    for p in self.source_paths:
+      # TODO(python3.9): Change to use Path.is_realtive_to().
+      try:
+        path.relative_to(p)
+        return True
+      except ValueError:
+        pass
+
+    return False
+
+  def any_relevant(self, src_paths: Iterable[Union[str, os.PathLike]]) -> bool:
+    """Check if any of the paths in |src_paths| are relevant to the node."""
+    return any(self.is_relevant(p) for p in src_paths)
 
 
 @enum.unique
@@ -331,3 +383,11 @@ class DependencyGraph:
     """
     for node in self.get_nodes(pkg, root_type):
       yield from node.reverse_dependencies
+
+  def is_relevant(self,  src_path: Union[str, os.PathLike]) -> bool:
+    """Check if |src_path| is relevant to any nodes in the graph."""
+    return any(x.is_relevant(src_path) for x in self)
+
+  def any_relevant(self, src_paths: Iterable[Union[str, os.PathLike]]) -> bool:
+    """Check if any of the paths in |src_paths| are relevant to any nodes."""
+    return any(self.is_relevant(p) for p in src_paths)

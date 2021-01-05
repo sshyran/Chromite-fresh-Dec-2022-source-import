@@ -20,11 +20,17 @@ def _build_depgraph():
   depdep = package_info.parse('cat/depdep-2.0.1-r5')
   bdep = package_info.parse('cat/bdep-3.4')
 
-  virtual_node = dependency_graph.PackageNode(virtual, sysroot)
-  dep_node = dependency_graph.PackageNode(dep, sysroot)
-  depdep_node = dependency_graph.PackageNode(depdep, sysroot)
-  bdep_node = dependency_graph.PackageNode(bdep, sdk_root)
-  depbdep_node = dependency_graph.PackageNode(dep, sdk_root)
+  virtual_node = dependency_graph.PackageNode(virtual, sysroot,
+                                              src_paths=['/virtual/foo'])
+  dep_node = dependency_graph.PackageNode(dep, sysroot,
+                                          src_paths=['/cat/dep'])
+  depdep_node = dependency_graph.PackageNode(depdep, sysroot,
+                                             src_paths=['/cat/depdep',
+                                                        '/other/depdep'])
+  bdep_node = dependency_graph.PackageNode(bdep, sdk_root,
+                                           src_paths=['/cat/bdep'])
+  depbdep_node = dependency_graph.PackageNode(dep, sdk_root,
+                                              src_paths=['/cat/dep'])
 
   virtual_node.add_dependency(dep_node)
   virtual_node.add_dependency(bdep_node)
@@ -304,3 +310,30 @@ def test_dependency_graph_is_dependency_root_types():
   # virtual is not in the SDK.
   assert not graph.is_dependency(
       bdep, virtual, src_root_type=dependency_graph.RootType.SDK)
+
+
+def test_depedency_graph_is_relevant():
+  """Test the is_relevant method."""
+  graph = _build_depgraph()
+  # Dependency.
+  # Fetch node and call directly.
+  assert graph.get_nodes('cat/depdep')[0].is_relevant('/cat/depdep')
+  # Search the depgraph.
+  assert graph.is_relevant('/cat/depdep')
+
+  # Reverse dependency.
+  assert graph.is_relevant('/cat/bdep')
+
+  # Irrelevant path.
+  assert not graph.is_relevant('/not/relevant')
+
+
+def test_dependency_graph_any_relevant():
+  """Test the any_relevant method."""
+  graph = _build_depgraph()
+  # Both relevant.
+  assert graph.any_relevant(['/cat/dep', '/cat/bdep'])
+  # One relevant.
+  assert graph.any_relevant(['/not/relevant', '/cat/bdep'])
+  # Neither relevant.
+  assert not graph.any_relevant(['/not/relevant', '/also/not/relevant'])
