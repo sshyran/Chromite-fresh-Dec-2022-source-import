@@ -227,8 +227,7 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
                 goma_dir, goma_client_json, working_dir, additional_args):
   """Enters an existing SDK chroot"""
   st = os.statvfs(os.path.join(chroot_path, 'usr', 'bin', 'sudo'))
-  # The os.ST_NOSUID constant wasn't added until python-3.2.
-  if st.f_flag & 0x2:
+  if st.f_flag & os.ST_NOSUID:
     cros_build_lib.Die('chroot cannot be in a nosuid mount')
 
   cmd = ENTER_CHROOT + ['--chroot', chroot_path, '--cache_dir', cache_dir]
