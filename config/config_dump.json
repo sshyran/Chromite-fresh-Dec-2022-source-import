@@ -12609,6 +12609,28 @@
         ],
         "workspace_branch": "factory-zork-13427.B"
     },
+    "factory-zork-13700.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 168h interval",
+        "slave_configs": [
+            "zork-factory-zork-13700.B-factorybranch"
+        ],
+        "workspace_branch": "factory-zork-13700.B"
+    },
+    "factory-zork-13700.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "zork-factory-zork-13700.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-zork-13700.B"
+    },
     "fail-build": {
         "boards": [],
         "builder_class_name": "test_builders.FailBuilder",
@@ -37909,6 +37931,26 @@
         "push_image": false,
         "suite_scheduling": false,
         "workspace_branch": "factory-zork-13427.B"
+    },
+    "zork-factory-zork-13700.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "zork"
+        ],
+        "workspace_branch": "factory-zork-13700.B"
+    },
+    "zork-factory-zork-13700.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "zork"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-zork-13700.B"
     },
     "zork-full": {
         "_template": "full",
