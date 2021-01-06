@@ -1149,7 +1149,8 @@ def _GetSkylabCreateSuiteArgs(build,
                               timeout_mins=None,
                               max_retries=None,
                               job_keyvals=None,
-                              quota_account=None):
+                              quota_account=None,
+                              upload_crashes=False):
   """Get arguments for the `skylab create-suite` command.
 
   Command will run in -json mode.
@@ -1167,6 +1168,8 @@ def _GetSkylabCreateSuiteArgs(build,
     job_keyvals: (optional) dictionary of {'key': 'value'} keyvals to be
                  injected into all children of suite.
     quota_account: (optional) quotascheduler account to use for child tasks
+    upload_crashes: If set, upload crashes detected on DUT during tests to crash
+                    server.
 
   Returns:
     A list of args for the `skylab create-suite` subcommand (not including)
@@ -1194,6 +1197,9 @@ def _GetSkylabCreateSuiteArgs(build,
 
   if quota_account is not None:
     args += ['-qs-account', quota_account]
+
+  if upload_crashes:
+    args += ['-upload-crashes']
 
   args += ['-json']
 
@@ -1237,7 +1243,9 @@ def RunSkylabHWTestSuite(
     # TODO(akeshet): Delete this ignored argument.
     suite_args=None,
     job_keyvals=None,
-    quota_account=None):
+    quota_account=None,
+    upload_crashes=False,
+  ):
   """Run the test suite in the Autotest lab using Skylab.
 
   Args:
@@ -1277,7 +1285,9 @@ def RunSkylabHWTestSuite(
       timeout_mins=timeout_mins,
       max_retries=max_retries,
       job_keyvals=job_keyvals,
-      quota_account=quota_account)
+      quota_account=quota_account,
+      upload_crashes=upload_crashes,
+  )
 
   try:
     output = cros_build_lib.run(cmd, stdout=True)
