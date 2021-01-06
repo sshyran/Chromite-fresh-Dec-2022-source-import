@@ -183,6 +183,14 @@ LICENCES_IGNORE = [
     '||',
 ]
 
+# List of overlays that must use 'metapackage' license for virtual packages.
+# Throw error for those, print a warning for others.
+OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
+    'chromiumos-overlay',
+    'chromeos-overlay',
+    'chromeos-partner-overlay',
+]
+
 # The full names of packages which we want to generate license information for
 # even though they have an empty installation size.
 SIZE_EXEMPT_PACKAGES = [
@@ -274,6 +282,14 @@ class PackageLicenseError(Exception):
   """
 
 
+class PackageCorrectnessError(Exception):
+  """Thrown if a package has build info incompatible with the license.
+
+  For example, thrown when a package with LICENSE=metapackage installs files.
+  This will cause the processing to error in the end.
+  """
+
+
 class PackageInfo(object):
   """Package specific information, mostly about licenses."""
 
@@ -333,6 +349,8 @@ class PackageInfo(object):
 
     # Set to something by GetLicenses().
     self.tainted = None
+
+    self.ebuild_path = None
 
   @property
   def fullnamerev(self):
@@ -436,9 +454,9 @@ class PackageInfo(object):
       return
 
     if not src_dir:
-      ebuild_path = self._FindEbuildPath()
-      self._RunEbuildPhases(ebuild_path, ['clean', 'fetch'])
-      raw_output = self._RunEbuildPhases(ebuild_path, ['unpack'])
+      self.ebuild_path = self._FindEbuildPath()
+      self._RunEbuildPhases(self.ebuild_path, ['clean', 'fetch'])
+      raw_output = self._RunEbuildPhases(self.ebuild_path, ['unpack'])
       output = raw_output.output.splitlines()
       # Output is spammy, it looks like this:
       #  * gc-7.2d.tar.gz RMD160 SHA1 SHA256 size ;-) ...                 [ ok ]
@@ -781,6 +799,61 @@ being scraped currently).""",
     yaml_dump = list(self.__dict__.items())
     osutils.WriteFile(save_file, yaml.dump(yaml_dump), makedirs=True)
 
+  def AssertCorrectness(self, build_info_dir, ebuild_path):
+    """AssertCorrectness runs various correctness checks on the package.
+
+    Args:
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+      ebuild_path: Path to the ebuild. Unknown and therefore None during the
+        emerge hook.
+
+    Raises:
+      PackageCorrectnessError: if one of the checks fails.
+    """
+    self._AssertMetapackageNoContent(build_info_dir)
+    if ebuild_path is not None:
+      self._AssertVirtualIsMetapackage(build_info_dir, ebuild_path)
+
+  def _AssertMetapackageNoContent(self, build_info_dir):
+    """_AssertMetapackageNoContent ensures metapackages do not install files.
+
+    Args:
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+
+    Raises:
+      PackageCorrectnessError: if metapackage installs files.
+    """
+    if _BuildInfo(build_info_dir, 'LICENSE') == 'metapackage':
+      content = _BuildInfo(build_info_dir, 'CONTENTS')
+      if content:
+        content_list = ', '.join(x.split()[1] for x in content.splitlines())
+        raise PackageCorrectnessError('Metapackage %s installs files: %s.' %
+                                      (self.fullnamerev, content_list))
+
+  def _AssertVirtualIsMetapackage(self, build_info_dir, ebuild_path):
+    """_AssertVirtualIsMetapackage ensures that virtual pkgs are metapackages.
+
+    Args:
+      ebuild_path: Path to the ebuild.
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+
+    Raises:
+      PackageCorrectnessError: if virtual pkg does not use metapackage license.
+    """
+    category = ebuild_path.split('/')[-3]
+    overlay = ebuild_path.split('/')[-4]
+    license_name = _BuildInfo(build_info_dir, 'LICENSE')
+    if category == 'virtual' and license_name != 'metapackage':
+      err_msg = (f'Virtual package {ebuild_path} must use LICENSE='
+                 f'"metapackage". Got: {self.license_names}.')
+      if overlay in OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL:
+        raise PackageCorrectnessError(err_msg)
+      else:
+        logging.warning(err_msg)
+
 
 def _GetLicenseDirectories(board: Optional[str] = None,
                            sysroot: Optional[str] = None,
@@ -1089,6 +1162,7 @@ class Licensing(object):
         build_info_path = os.path.join(
             self.sysroot, PER_PKG_LICENSE_DIR, pkg.fullnamerev)
         pkg.GetLicenses(build_info_path, None)
+        pkg.AssertCorrectness(build_info_path, self.ebuild_path)
 
         # We dump packages where licensing failed too.
         pkg.SaveLicenseDump(pkg.license_dump_path)
@@ -1530,5 +1604,6 @@ def HookPackageProcess(pkg_build_path):
   src_dir = os.path.join(pkg_build_path, 'work')
   pkg.GetLicenses(build_info_dir, src_dir)
 
+  pkg.AssertCorrectness(build_info_dir, None)
   _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
   pkg.SaveLicenseDump(os.path.join(build_info_dir, 'license.yaml'))
