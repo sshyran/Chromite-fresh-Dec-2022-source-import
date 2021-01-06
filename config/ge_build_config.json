@@ -537,7 +537,7 @@
           "experimental": true,
           "leader_board": true,
           "board_group": "",
-          "arch": "UNKNOWN"
+          "arch": "X86_INTERNAL"
         }
       ]
     },
