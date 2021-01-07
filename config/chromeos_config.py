@@ -1283,14 +1283,12 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_no_hwtest_boards = frozenset([])
   _vmrvc_no_hwtest_experimental_boards = frozenset([])
   _vmrvc_hwtest_boards = frozenset([
+      'grunt-arc-r',
       'hatch-arc-r',
       'kukui-arc-r',
       'rammus-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = frozenset([
-      # Grunt-arc-r demoted from critical because of https://crbug.com/1151502
-      'grunt-arc-r',
-  ])
+  _vmrvc_hwtest_experimental_boards = frozenset([])
   _vmrvc_vmtest_boards = frozenset([])
   _vmrvc_vmtest_experimental_boards = frozenset([])
 
