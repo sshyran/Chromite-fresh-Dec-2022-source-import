@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.skylab_test_runner',
   syntax='proto3',
   serialized_options=_b('ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner'),
-  serialized_pb=_b('\n.test_platform/skylab_test_runner/request.proto\x12 test_platform.skylab_test_runner\x1a\x1fgoogle/protobuf/timestamp.proto\x1a#test_platform/execution/param.proto\x1a\x1btest_platform/request.proto\"\xa3\t\n\x07Request\x12@\n\x06prejob\x18\x01 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Request.Prejob\x12<\n\x04test\x18\x02 \x01(\x0b\x32..test_platform.skylab_test_runner.Request.Test\x12,\n\x08\x64\x65\x61\x64line\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12parent_request_uid\x18\x04 \x01(\t\x12\x17\n\x0fparent_build_id\x18\x05 \x01(\x03\x12\x43\n\x05tests\x18\x06 \x03(\x0b\x32\x34.test_platform.skylab_test_runner.Request.TestsEntry\x12\x37\n\x0f\x65xecution_param\x18\x07 \x01(\x0b\x32\x1e.test_platform.execution.Param\x1a\x93\x02\n\x06Prejob\x12S\n\x15software_dependencies\x18\x01 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependencyB\x02\x18\x01\x12g\n\x14provisionable_labels\x18\x02 \x03(\x0b\x32I.test_platform.skylab_test_runner.Request.Prejob.ProvisionableLabelsEntry\x12\x0f\n\x07use_tls\x18\x03 \x01(\x08\x1a:\n\x18ProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xc2\x03\n\x04Test\x12K\n\x08\x61utotest\x18\x01 \x01(\x0b\x32\x37.test_platform.skylab_test_runner.Request.Test.AutotestH\x00\x12N\n\x07offload\x18\x02 \x01(\x0b\x32=.test_platform.skylab_test_runner.Request.Test.OffloadOptions\x1a\xe0\x01\n\x08\x41utotest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\ttest_args\x18\x02 \x01(\t\x12U\n\x07keyvals\x18\x03 \x03(\x0b\x32\x44.test_platform.skylab_test_runner.Request.Test.Autotest.KeyvalsEntry\x12\x16\n\x0eis_client_test\x18\x04 \x01(\x08\x12\x14\n\x0c\x64isplay_name\x18\x05 \x01(\t\x1a.\n\x0cKeyvalsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a/\n\x0eOffloadOptions\x12\x1d\n\x15synchronous_gs_enable\x18\x01 \x01(\x08\x42\t\n\x07harness\x1a\\\n\nTestsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12=\n\x05value\x18\x02 \x01(\x0b\x32..test_platform.skylab_test_runner.Request.Test:\x02\x38\x01\x42LZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
+  serialized_pb=_b('\n.test_platform/skylab_test_runner/request.proto\x12 test_platform.skylab_test_runner\x1a\x1fgoogle/protobuf/timestamp.proto\x1a#test_platform/execution/param.proto\x1a\x1btest_platform/request.proto\"\xa3\t\n\x07Request\x12@\n\x06prejob\x18\x01 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Request.Prejob\x12<\n\x04test\x18\x02 \x01(\x0b\x32..test_platform.skylab_test_runner.Request.Test\x12,\n\x08\x64\x65\x61\x64line\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12parent_request_uid\x18\x04 \x01(\t\x12\x17\n\x0fparent_build_id\x18\x05 \x01(\x03\x12\x43\n\x05tests\x18\x06 \x03(\x0b\x32\x34.test_platform.skylab_test_runner.Request.TestsEntry\x12\x37\n\x0f\x65xecution_param\x18\x07 \x01(\x0b\x32\x1e.test_platform.execution.Param\x1a\x93\x02\n\x06Prejob\x12O\n\x15software_dependencies\x18\x01 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependency\x12k\n\x14provisionable_labels\x18\x02 \x03(\x0b\x32I.test_platform.skylab_test_runner.Request.Prejob.ProvisionableLabelsEntryB\x02\x18\x01\x12\x0f\n\x07use_tls\x18\x03 \x01(\x08\x1a:\n\x18ProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xc2\x03\n\x04Test\x12K\n\x08\x61utotest\x18\x01 \x01(\x0b\x32\x37.test_platform.skylab_test_runner.Request.Test.AutotestH\x00\x12N\n\x07offload\x18\x02 \x01(\x0b\x32=.test_platform.skylab_test_runner.Request.Test.OffloadOptions\x1a\xe0\x01\n\x08\x41utotest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x11\n\ttest_args\x18\x02 \x01(\t\x12U\n\x07keyvals\x18\x03 \x03(\x0b\x32\x44.test_platform.skylab_test_runner.Request.Test.Autotest.KeyvalsEntry\x12\x16\n\x0eis_client_test\x18\x04 \x01(\x08\x12\x14\n\x0c\x64isplay_name\x18\x05 \x01(\t\x1a.\n\x0cKeyvalsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a/\n\x0eOffloadOptions\x12\x1d\n\x15synchronous_gs_enable\x18\x01 \x01(\x08\x42\t\n\x07harness\x1a\\\n\nTestsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12=\n\x05value\x18\x02 \x01(\x0b\x32..test_platform.skylab_test_runner.Request.Test:\x02\x38\x01\x42LZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,test__platform_dot_execution_dot_param__pb2.DESCRIPTOR,test__platform_dot_request__pb2.DESCRIPTOR,])
 
@@ -79,14 +79,14 @@ _REQUEST_PREJOB = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=_b('\030\001'), file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='provisionable_labels', full_name='test_platform.skylab_test_runner.Request.Prejob.provisionable_labels', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=_b('\030\001'), file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='use_tls', full_name='test_platform.skylab_test_runner.Request.Prejob.use_tls', index=2,
       number=3, type=8, cpp_type=7, label=1,
@@ -474,7 +474,7 @@ _sym_db.RegisterMessage(Request.TestsEntry)
 
 DESCRIPTOR._options = None
 _REQUEST_PREJOB_PROVISIONABLELABELSENTRY._options = None
-_REQUEST_PREJOB.fields_by_name['software_dependencies']._options = None
+_REQUEST_PREJOB.fields_by_name['provisionable_labels']._options = None
 _REQUEST_TEST_AUTOTEST_KEYVALSENTRY._options = None
 _REQUEST_TESTSENTRY._options = None
 # @@protoc_insertion_point(module_scope)

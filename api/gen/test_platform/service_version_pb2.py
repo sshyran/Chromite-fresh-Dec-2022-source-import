@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform',
   syntax='proto3',
   serialized_options=_b('Z7go.chromium.org/chromiumos/infra/proto/go/test_platform'),
-  serialized_pb=_b('\n#test_platform/service_version.proto\x12\rtest_platform\" \n\x0eServiceVersion\x12\x0e\n\x06global\x18\x01 \x01(\x03\x42\x39Z7go.chromium.org/chromiumos/infra/proto/go/test_platformb\x06proto3')
+  serialized_pb=_b('\n#test_platform/service_version.proto\x12\rtest_platform\"3\n\x0eServiceVersion\x12\x13\n\x0bskylab_tool\x18\x02 \x01(\x03J\x04\x08\x01\x10\x02R\x06globalB9Z7go.chromium.org/chromiumos/infra/proto/go/test_platformb\x06proto3')
 )
 
 
@@ -33,8 +33,8 @@ _SERVICEVERSION = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='global', full_name='test_platform.ServiceVersion.global', index=0,
-      number=1, type=3, cpp_type=2, label=1,
+      name='skylab_tool', full_name='test_platform.ServiceVersion.skylab_tool', index=0,
+      number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -52,7 +52,7 @@ _SERVICEVERSION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=54,
-  serialized_end=86,
+  serialized_end=105,
 )
 
 DESCRIPTOR.message_types_by_name['ServiceVersion'] = _SERVICEVERSION
