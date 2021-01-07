@@ -1233,6 +1233,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   )
   _vmmst_no_hwtest_boards = frozenset([
       'betty-arcvm-master', # No HWTest, No VMTest.
+      'hatch-arc-s',
   ])
 
   # Android PI master.

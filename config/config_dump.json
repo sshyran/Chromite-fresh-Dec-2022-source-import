@@ -18740,6 +18740,30 @@
             "chrome_internal"
         ]
     },
+    "hatch-arc-s-vmmst-android-pfq": {
+        "_template": "vmmst_android_pfq",
+        "boards": [
+            "hatch-arc-s"
+        ],
+        "manifest": "official.xml",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "hatch-arc-s-vmmst-android-pfq-tryjob": {
+        "_template": "vmmst_android_pfq",
+        "boards": [
+            "hatch-arc-s"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "uprev": true,
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "hatch-blueznext-full": {
         "_template": "full",
         "boards": [
@@ -24359,7 +24383,8 @@
         "push_overlays": "both",
         "schedule": "with 150m interval",
         "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq"
+            "betty-arcvm-master-vmmst-android-pfq",
+            "hatch-arc-s-vmmst-android-pfq"
         ]
     },
     "master-vmmst-android-pfq-tryjob": {
@@ -24372,7 +24397,8 @@
         "master": true,
         "push_overlays": "both",
         "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq-tryjob"
+            "betty-arcvm-master-vmmst-android-pfq-tryjob",
+            "hatch-arc-s-vmmst-android-pfq-tryjob"
         ],
         "uprev": true
     },

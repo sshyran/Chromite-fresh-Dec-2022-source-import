@@ -432,6 +432,7 @@
 == vmmst_android_pfq ==
   master-vmmst-android-pfq
     betty-arcvm-master-vmmst-android-pfq
+    hatch-arc-s-vmmst-android-pfq
 
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
@@ -1252,6 +1253,7 @@
   hatch-arc-s-payloads-tryjob
   hatch-arc-s-release-tryjob
   hatch-arc-s-unittest-stress
+  hatch-arc-s-vmmst-android-pfq-tryjob
   hatch-blueznext-full-tryjob
   hatch-blueznext-llvm-next-toolchain-tryjob
   hatch-blueznext-llvm-toolchain-tryjob
@@ -1651,6 +1653,7 @@
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
+    hatch-arc-s-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
     hatch-arc-r-vmrvc-android-pfq-tryjob
