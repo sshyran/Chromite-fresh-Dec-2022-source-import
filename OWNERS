@@ -1,5 +1,6 @@
 include /OWNERS.build
 include /OWNERS.ci
+include /OWNERS.testplatform
 
 per-file OWNERS.au = file://OWNERS.au
 per-file OWNERS.kernel = file://OWNERS.kernel
