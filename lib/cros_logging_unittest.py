@@ -36,7 +36,6 @@ class CrosCloudloggingTest(cros_test_lib.MockOutputTestCase):
   def testSetupCloudLogging(self):
     if self.cloud_logging_import_error:
       return
-    ### client_mock = self.PatchObject(google.cloud.logging, 'Client')
     # Invoke the code that calls logging when env vars are set.
     logging._SetupCloudLogging()
 
@@ -56,6 +55,8 @@ class CrosCloudloggingTest(cros_test_lib.MockOutputTestCase):
   def testCloudLoggingEnvVariablesAreDefined_envSet(self):
     if self.cloud_logging_import_error:
       return
+    # Set logger to INFO level to check for CHROMITE_CLOUD_LOGGING info message.
+    self.logger.setLevel(logging.INFO)
     # Set the env vars
     os.environ['CHROMITE_CLOUD_LOGGING'] = '1'
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/some/path/to/creds.json'
@@ -63,18 +64,17 @@ class CrosCloudloggingTest(cros_test_lib.MockOutputTestCase):
       cloud_env_defined = logging._CloudLoggingEnvVariablesAreDefined()
     # Verify that both variables are logged.
     self.assertTrue(cloud_env_defined)
-    self.assertIn('CHROMITE_CLOUD_LOGGING', output.GetStderr())
-    self.assertIn('GOOGLE_APPLICATION_CREDENTIALS', output.GetStderr())
+    self.assertIn('CHROMITE_CLOUD_LOGGING', output.GetStdout())
 
   def testCloudLoggingEnvVariablesAreDefined_noAllEnvSet(self):
     if self.cloud_logging_import_error:
       return
-    # Set the env vars
+    # Set only one env var.
     os.environ['CHROMITE_CLOUD_LOGGING'] = '1'
     with self.OutputCapturer() as output:
       cloud_env_defined = logging._CloudLoggingEnvVariablesAreDefined()
     # If both are not set, there should be no output.
-    self.assertEqual(output.GetStdout(), '')
+    self.assertIn('GOOGLE_APPLICATION_CREDENTIALS is not', output.GetStdout())
     self.assertEqual(output.GetStderr(), '')
     self.assertFalse(cloud_env_defined)
 

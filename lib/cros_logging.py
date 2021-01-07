@@ -79,7 +79,7 @@ def _SetupCloudLogging():
     # code is only used by python3. Beware though with branches and bisection
     # this could need to be ImportError for a long time. ImportError is the
     # parent class of ModuleNotFoundError and works on both python2 and python3.
-    log(NOTICE, 'Could not import google.cloud.logging %s', e)
+    log(ERROR, 'Could not import google.cloud.logging %s', e)
     return
 
   client = cloud_logging.Client()
@@ -97,10 +97,11 @@ def _CloudLoggingEnvVariablesAreDefined():
   google_app_creds_env_value = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
   # If both variables are set, log their values and return True.
   if cloud_logging_env_value == '1' and google_app_creds_env_value:
-    log(NOTICE, 'CHROMITE_CLOUD_LOGGING is ', cloud_logging_env_value)
-    log(NOTICE,
-        'GOOGLE_APPLICATION_CREDENTIALS is ', google_app_creds_env_value)
+    log(INFO, 'CHROMITE_CLOUD_LOGGING is %s', cloud_logging_env_value)
     return True
+  if cloud_logging_env_value == '1' and not google_app_creds_env_value:
+    log(WARNING,
+        'CHROMITE_CLOUD_LOGGING is set, GOOGLE_APPLICATION_CREDENTIALS is not.')
   return False
 
 
