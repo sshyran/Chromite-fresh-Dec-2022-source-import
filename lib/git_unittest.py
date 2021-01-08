@@ -109,6 +109,20 @@ Change-Id: %s
     git.FindGitTopLevel(self.fake_path)
     self.assertCommandContains(['--show-toplevel'])
 
+  def testGetCurrentBranchOrId_NoBranch(self):
+    test_hash = '5' * 40
+    self.rc.AddCmdResult(partial_mock.In('symbolic-ref'), returncode=1)
+    self.rc.AddCmdResult(
+        partial_mock.In('rev-parse'), output='%s\n' % test_hash)
+    self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), test_hash)
+    self.assertCommandContains(['rev-parse', 'HEAD'])
+
+  def testGetCurrentBranchOrId_OnBranch(self):
+    self.rc.AddCmdResult(
+        partial_mock.In('symbolic-ref'), output='refs/heads/branch\n')
+    self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), 'branch')
+    self.assertCommandContains(['symbolic-ref', '-q', 'HEAD'])
+
   def testAddPath(self):
     git.AddPath(self.fake_path)
     self.assertCommandContains(['add'])

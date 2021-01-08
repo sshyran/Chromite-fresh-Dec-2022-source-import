@@ -213,6 +213,12 @@ def DoesCommitExistInRepo(cwd, commit):
   return True
 
 
+def GetCurrentBranchOrId(cwd):
+  """Returns current branch of a repo, commit ID if repo is on detached HEAD."""
+  return GetCurrentBranch(cwd) or RunGit(cwd,
+                                         ['rev-parse', 'HEAD']).output.strip()
+
+
 def GetCurrentBranch(cwd):
   """Returns current branch of a repo, and None if repo is on detached HEAD."""
   try:

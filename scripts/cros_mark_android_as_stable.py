@@ -670,7 +670,7 @@ def main(argv):
     logging.info('No stable candidate found.')
 
   tracking_branch = 'remotes/m/%s' % os.path.basename(options.tracking_branch)
-  existing_branch = git.GetCurrentBranch(android_package_dir)
+  existing_branch = git.GetCurrentBranchOrId(android_package_dir)
   work_branch = cros_mark_as_stable.GitBranch(constants.STABLE_EBUILD_BRANCH,
                                               tracking_branch,
                                               android_package_dir)
