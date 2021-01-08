@@ -64,7 +64,7 @@ def get_commands(servo):
   dut_control_on.append(['ec_uart_cmd:gpioset ec_ap_rsmrst_l 0'])
 
   if servo.is_c2d2:
-    dut_control_on.append(['ap_flash_select:on'])
+    dut_control_on.append(['ap_flash_select:off'])
     dut_control_on.append(['spi2_vref:pp3300'])
     dut_control_off.append(['spi2_vref:off'])
     dut_control_off.append(['ap_flash_select:off'])
