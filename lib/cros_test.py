@@ -230,7 +230,7 @@ class CrOSTest(object):
       # By default, deploying lacros-chrome modifies the /etc/chrome_dev.conf
       # file, which is desired behavior for local development, however, a
       # modified config file interferes with automated testing.
-      deploy_cmd += ['--lacros', '--nostrip', '--skip-updating-config-file']
+      deploy_cmd += ['--lacros', '--nostrip', '--skip-modifying-config-file']
     else:
       deploy_cmd.append('--deploy-test-binaries')
       if self._device.board:

@@ -164,7 +164,7 @@ class CrOSTester(CrOSTesterBase):
         '--process-timeout', '180', '--device',
         self._tester._device.device + ':9222', '--cache-dir',
         self._tester.cache_dir, '--lacros', '--nostrip',
-        '--skip-updating-config-file'
+        '--skip-modifying-config-file'
     ])
 
   def testDeployChromeWithArgs(self):
