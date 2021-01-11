@@ -841,7 +841,8 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'sys-boot/mma-blobs',
     )
     if not any(cpf.startswith(x) for x in LEGACY_PKGS):
-      raise PackageLicenseError('Proprietary-Binary is not a valid license.')
+      raise PackageLicenseError(
+          f'{cpf}: Proprietary-Binary is not a valid license.')
 
   # TODO(crbug.com/1111077): Remove this entirely.
   # We allow a few packages for now so new packages will stop showing up.
@@ -1012,7 +1013,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'www-servers/ustreamer',
     }
     if not any(cpf.startswith(x) for x in LEGACY_PKGS):
-      raise PackageLicenseError('Google-TOS is not a valid license.')
+      raise PackageLicenseError(f'{cpf}: Google-TOS is not a valid license.')
 
 
 class Licensing(object):
@@ -1079,10 +1080,12 @@ class Licensing(object):
       # Other skipped packages get dumped with incomplete info and the skip flag
       if not os.path.exists(pkg.license_dump_path):
         if not self.gen_licenses:
-          raise PackageLicenseError('License for %s is missing' % package_name)
+          logging.error('Run licenses.py with --generate-licenses to try to '
+                        'generate the missing licenses.')
+          raise PackageLicenseError(f'{pkg.fullnamerev}: license is missing')
 
-        logging.error('>>> License for %s is missing, creating now <<<',
-                      package_name)
+        logging.warning('>>> License for %s is missing, creating now <<<',
+                        package_name)
         build_info_path = os.path.join(
             self.sysroot, PER_PKG_LICENSE_DIR, pkg.fullnamerev)
         pkg.GetLicenses(build_info_path, None)
@@ -1232,7 +1235,16 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     # sln: shared license name.
     for sln in pkg.license_names:
       # Says whether it's a stock gentoo or custom license.
-      license_type = self.FindLicenseType(sln, sysroot=self.sysroot)
+      try:
+        license_type = self.FindLicenseType(sln, sysroot=self.sysroot)
+      except Exception as e:
+        logging.error(
+            'Failed to find the type of %s license, used by %s package. '
+            'If this license is not used anymore, it may be still cached as a '
+            'binpkg—run emerge on the package to rebuild. See more info at '
+            'https://dev.chromium.org/chromium-os/licensing',
+            sln, pkg.fullnamerev)
+        raise e
       license_pointers.append(
           "<li><a href='#%s'>%s License %s</a></li>" % (
               sln, license_type, sln))
