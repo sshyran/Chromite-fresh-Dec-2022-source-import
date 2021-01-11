@@ -107,6 +107,7 @@ def genSchedulerJob(build_config):
   template = """
 job {
   id: "%(job_name)s"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "%(schedule)s"
   buildbucket: {
@@ -146,6 +147,7 @@ def genSchedulerTrigger(trigger_name, repo, refs, path_regexps, builds):
   template = """
 trigger {
   id: "%(trigger_name)s"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "with 5m interval"
   gitiles: {

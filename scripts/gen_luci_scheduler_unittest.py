@@ -39,6 +39,7 @@ class GenLuciSchedulerTest(cros_test_lib.MockTestCase):
     expected = """
 job {
   id: "amd64-generic-release"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
@@ -70,6 +71,7 @@ job {
     expected = """
 trigger {
   id: "simple"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "with 5m interval"
   gitiles: {
@@ -96,6 +98,7 @@ trigger {
     expected = """
 trigger {
   id: "complex"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "with 5m interval"
   gitiles: {
@@ -124,6 +127,7 @@ trigger {
     expected = """
 job {
   id: "mock_branch-amd64-generic-release"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
@@ -154,6 +158,7 @@ job {
     expected = """
 job {
   id: "amd64-generic-release"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
@@ -186,6 +191,7 @@ job {
     expected = """
 job {
   id: "amd64-generic-release"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "funky schedule"
   buildbucket: {
@@ -312,6 +318,7 @@ acl_sets {
 
 trigger {
   id: "trigger_0"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "with 5m interval"
   gitiles: {
@@ -325,6 +332,7 @@ trigger {
 
 trigger {
   id: "trigger_1"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "with 5m interval"
   gitiles: {
@@ -337,6 +345,7 @@ trigger {
 
 job {
   id: "build_prod"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "run once in a while"
   buildbucket: {
@@ -355,6 +364,7 @@ job {
 
 job {
   id: "build_tester"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "run daily"
   buildbucket: {
@@ -373,6 +383,7 @@ job {
 
 job {
   id: "build_triggered_a"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "triggered"
   buildbucket: {
@@ -391,6 +402,7 @@ job {
 
 job {
   id: "build_triggered_b"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "triggered"
   buildbucket: {
@@ -409,6 +421,7 @@ job {
 
 job {
   id: "test-branch-branch_tester"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "run daily"
   buildbucket: {
@@ -427,6 +440,7 @@ job {
 
 job {
   id: "test-branch-branch_tester_triggered"
+  realm: "cbb-jobs"
   acl_sets: "default"
   schedule: "run daily"
   buildbucket: {
