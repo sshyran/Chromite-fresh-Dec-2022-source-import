@@ -79,6 +79,11 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
                   toolchain_util.BundleArtifacts),
 }
 
+_TOOLCHAIN_COMMIT_HANDLERS = {
+    BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE:
+        'VerifiedKernelCwpAfdoFile'
+}
+
 
 def _GetProfileInfoDict(profile_info):
   """Convert profile_info to a dict.
@@ -225,6 +230,54 @@ def BundleArtifacts(input_proto, output_proto, _config):
         art_info.artifact_type = artifact_type
         for artifact in artifacts:
           art_info.artifacts.add().path = artifact
+
+
+def _GetUpdatedFilesResponse(_input_proto, output_proto, _config):
+  """Add successful status to the faux response."""
+  file_info = output_proto.updated_files.add()
+  file_info.path = '/any/modified/file'
+  output_proto.commit_message = 'Commit message'
+
+
+@faux.empty_error
+@faux.success(_GetUpdatedFilesResponse)
+@validate.require('uploaded_artifacts')
+@validate.validation_complete
+def GetUpdatedFiles(input_proto, output_proto, _config):
+  """Use uploaded artifacts to update some updates in a chromeos checkout.
+
+  The function will call toolchain_util.GetUpdatedFiles using the type of
+  uploaded artifacts to make some changes in a checkout, and return the list
+  of change files together with commit message.
+     updated_artifacts: A list of UpdatedArtifacts type which contains a tuple
+        of artifact info and profile info.
+  Note: the actual creation of the commit is done by CI, not here.
+
+  Args:
+    input_proto (GetUpdatedFilesRequest): The input proto
+    output_proto (GetUpdatedFilesResponse): The output proto
+    _config (api_config.ApiConfig): The API call config.
+  """
+  commit_message = ''
+  for artifact in input_proto.uploaded_artifacts:
+    artifact_type = artifact.artifact_info.artifact_type
+    if artifact_type not in _TOOLCHAIN_COMMIT_HANDLERS:
+      logging.error('%s not understood', artifact_type)
+      return controller.RETURN_CODE_UNRECOVERABLE
+    artifact_name = _TOOLCHAIN_COMMIT_HANDLERS[artifact_type]
+    if artifact_name:
+      assert len(artifact.artifact_info.artifacts) == 1, (
+          'Only one file to update per each artifact')
+      updated_files, message = toolchain_util.GetUpdatedFiles(
+          artifact_name, artifact.artifact_info.artifacts[0].path,
+          _GetProfileInfoDict(artifact.profile_info))
+      for f in updated_files:
+        file_info = output_proto.updated_files.add()
+        file_info.path = f
+
+      commit_message += message + '\n'
+    output_proto.commit_message = commit_message
+    # No commit footer is added for now. Can add more here if needed
 
 
 # TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.

@@ -372,3 +372,60 @@ class BundleToolchainTest(cros_test_lib.MockTempDirTestCase,
             artifacts=[
                 artifacts_pb2.Artifact(path=self.bundle.return_value[0])
             ]))
+
+
+class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase,
+                          api_config.ApiConfigMixin):
+  """Unittests for GetUpdatedFiles."""
+
+  def setUp(self):
+    self.response = toolchain_pb2.GetUpdatedFilesResponse()
+    self.artifact_path = '/any/path/to/metadata'
+    self.profile_info = common_pb2.ArtifactProfileInfo(kernel_version='4.4')
+    self.update = self.PatchObject(
+        toolchain_util, 'GetUpdatedFiles', return_value=([], ''))
+
+  def _GetRequest(self, uploaded_artifacts):
+    uploaded = []
+    for artifact_type, artifact_path, profile_info in uploaded_artifacts:
+      uploaded.append(
+          toolchain_pb2.GetUpdatedFilesRequest.UploadedArtifacts(
+              artifact_info=toolchain_pb2.ArtifactInfo(
+                  artifact_type=artifact_type,
+                  artifacts=[artifacts_pb2.Artifact(path=artifact_path)]),
+              profile_info=profile_info))
+    return toolchain_pb2.GetUpdatedFilesRequest(uploaded_artifacts=uploaded)
+
+  def testRaisesForUnknown(self):
+    request = self._GetRequest([
+        (BuilderConfig.Artifacts.UNVERIFIED_KERNEL_CWP_AFDO_FILE,
+         self.artifact_path, self.profile_info)
+    ])
+    self.assertEqual(
+        controller.RETURN_CODE_UNRECOVERABLE,
+        toolchain.GetUpdatedFiles(request, self.response, self.api_config))
+
+  def testValidateOnly(self):
+    """Sanity check that a validate only call does not execute any logic."""
+    request = self._GetRequest([
+        (BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE,
+         self.artifact_path, self.profile_info)
+    ])
+    toolchain.GetUpdatedFiles(request, self.response, self.validate_only_config)
+
+  def testUpdateSuccess(self):
+    updated_file = '/path/to/updated_file'
+    self.update.return_value = ([updated_file], 'Commit Message')
+    request = self._GetRequest([
+        (BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE,
+         self.artifact_path, self.profile_info)
+    ])
+    toolchain.GetUpdatedFiles(request, self.response, self.api_config)
+    print(self.response.updated_files)
+    self.assertEqual(len(self.response.updated_files), 1)
+    self.assertEqual(
+        self.response.updated_files[0],
+        toolchain_pb2.GetUpdatedFilesResponse.UpdatedFile(path=updated_file),
+    )
+    self.assertIn('Commit Message', self.response.commit_message)
+    self.assertEqual(len(self.response.commit_footer), 0)

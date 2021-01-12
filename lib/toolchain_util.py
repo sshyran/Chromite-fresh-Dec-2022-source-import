@@ -207,6 +207,10 @@ class BundleArtifactsHandlerError(Error):
   """Error for BundleArtifactsHandler class."""
 
 
+class GetUpdatedFilesForCommitError(Error):
+  """Error for GetUpdatedFilesForCommit class."""
+
+
 class NoArtifactsToBundleError(Error):
   """Error for bundling empty collection of artifacts."""
 
@@ -2575,6 +2579,71 @@ def BundleArtifacts(name, chroot, sysroot_path, build_target, output_dir,
       build_target,
       output_dir,
       profile_info=profile_info).Bundle()
+
+
+class GetUpdatedFilesHandler(object):
+  """Find all changed files in the checkout and create a commit message."""
+
+  @staticmethod
+  def _UpdateKernelMetadata(kernel_version: str, profile_version: str):
+    """Update afdo_metadata json file"""
+    kernel_version = kernel_version.replace('.', '_')
+    json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
+                             f'kernel_afdo_{kernel_version}.json')
+    assert os.path.exists(json_file), \
+      f'Metadata for {kernel_version} does not exist'
+    afdo_versions = json.loads(osutils.ReadFile(json_file))
+    kernel_name = f'chromeos-kernel-{kernel_version}'
+    assert kernel_name in afdo_versions, \
+      f'To update {kernel_name}, the entry should be in kernel_afdo.json'
+    old_value = afdo_versions[kernel_name]['name']
+    update_to_newer_profile = _RankValidCWPProfiles(
+        old_value) < _RankValidCWPProfiles(profile_version)
+    # This function is called after Bundle, so normally the profile is newer
+    # is guaranteed because Bundle function only runs when a new profile is
+    # needed to verify at the beginning of the builder. This check is to
+    # make sure there's no other updates happen between the start of the
+    # builder and the time of this function call.
+    assert update_to_newer_profile, (
+        f'Failed to update JSON file because {profile_version} is not '
+        f'newer than {old_value}')
+    afdo_versions[kernel_name]['name'] = profile_version
+    pformat.json(afdo_versions, fp=json_file)
+    return [json_file]
+
+  def __init__(self, artifact_type, artifact_path, profile_info):
+    self.artifact_path = artifact_path
+    self.profile_info = profile_info
+    if artifact_type == 'VerifiedKernelCwpAfdoFile':
+      self._update_func = self.UpdateKernelProfileMetadata
+    else:
+      raise GetUpdatedFilesForCommitError(
+          f'{artifact_type} has no handler in GetUpdatedFiles')
+
+  def UpdateKernelProfileMetadata(self):
+    kernel_version = self.profile_info.get('kernel_version')
+    if not kernel_version:
+      raise GetUpdatedFilesForCommitError('kernel_version not provided')
+    # The path obtained from artifact_path is the full path, containing
+    # extension, so we need to remove it here.
+    profile_version = os.path.basename(self.artifact_path).replace(
+        KERNEL_AFDO_COMPRESSION_SUFFIX, '')
+    files = self._UpdateKernelMetadata(kernel_version, profile_version)
+    commit_message = (
+        f'afdo_metadata: Publish new kernel profiles for {kernel_version}\n\n'
+        f'Update {kernel_version} to {profile_version}\n\n'
+        'Automatically generated in kernel verifier.\n\n'
+        'BUG=None\n'
+        'TEST=Verified in kernel-release-afdo-verify-orchestrator\n')
+    return files, commit_message
+
+  def Update(self):
+    return self._update_func()
+
+
+def GetUpdatedFiles(artifact_type, artifact_path, profile_info):
+  return GetUpdatedFilesHandler(artifact_type, artifact_path,
+                                profile_info).Update()
 
 
 # ###########################################################################

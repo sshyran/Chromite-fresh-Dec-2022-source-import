@@ -528,7 +528,10 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.artifact_type = 'Unspecified'
     self.outdir = None
     self.afdo_tmp_path = None
-    self.profile_info = {}
+    self.kernel_version = '4_4'
+    self.profile_info = {
+        'kernel_version': self.kernel_version.replace('_', '.'),
+    }
     self.orderfile_name = (
         'chromeos-chrome-orderfile-field-78-3877.0-1567418235-'
         'benchmark-78.0.3893.0-r1.orderfile')
@@ -537,6 +540,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.debug_binary_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug'
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
+    self.kernel_name = 'R89-13638.0-1607337135'
 
     self.gen_order = self.PatchObject(
         toolchain_util.GenerateChromeOrderfile, 'Bundle', new=_Bundle)
@@ -724,6 +728,22 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         enter_chroot=True,
         print_cmd=True,
     )
+
+  def testBundleVerifiedKernelCwpAfdoFile(self):
+    self.SetUpBundle('VerifiedKernelCwpAfdoFile')
+    mock_ebuild = self.PatchObject(
+        self.obj, '_GetArtifactVersionInEbuild', return_value=self.kernel_name)
+    ret = self.obj.Bundle()
+    profile_name = self.kernel_name + \
+      toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
+    verified_profile = os.path.join(self.outdir, profile_name)
+    self.assertEqual([verified_profile], ret)
+    mock_ebuild.assert_called_once_with(
+        f'chromeos-kernel-{self.kernel_version}', 'AFDO_PROFILE_VERSION')
+    profile_path = os.path.join(
+        self.chroot.path, self.sysroot[1:], 'usr', 'lib', 'debug', 'boot',
+        f'chromeos-kernel-{self.kernel_version}-{profile_name}')
+    self.copy2.assert_called_once_with(profile_path, verified_profile)
 
   def runToolchainBundleTest(self, artifact_path, tarball_name, input_files,
                              expected_output_files):
@@ -1419,6 +1439,78 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
       mocks.run_command.assert_not_called()
       mocks.uncompress_file.assert_not_called()
       mocks.compress_file.assert_not_called()
+
+
+class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
+  """Test functions in class GetUpdatedFilesForCommit."""
+
+  def setUp(self):
+    # Prepare a JSON file containing metadata
+    toolchain_util.TOOLCHAIN_UTILS_PATH = self.tempdir
+    osutils.SafeMakedirs(os.path.join(self.tempdir, 'afdo_metadata'))
+    self.json_file = os.path.join(self.tempdir,
+                                  'afdo_metadata/kernel_afdo_4_14.json')
+    self.kernel = '4.14'
+    self.kernel_name = self.kernel.replace('.', '_')
+    self.kernel_key_name = f'chromeos-kernel-{self.kernel_name}'
+    self.afdo_sorted_by_freshness = [
+        'R78-3865.0-1560000000.afdo', 'R78-3869.38-1562580965.afdo',
+        'R78-3866.0-1570000000.afdo'
+    ]
+    self.afdo_versions = {
+        self.kernel_key_name: {
+            'name': self.afdo_sorted_by_freshness[1],
+        },
+    }
+
+    with open(self.json_file, 'w') as f:
+      json.dump(self.afdo_versions, f)
+    self.artifact_path = os.path.join(
+        '/any/path/to/',
+        self.afdo_sorted_by_freshness[2] + \
+        toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
+    )
+    self.profile_info = {'kernel_version': self.kernel}
+
+  def testUpdateKernelMetadataFailureWithInvalidKernel(self):
+    with self.assertRaises(AssertionError) as context:
+      toolchain_util.GetUpdatedFilesHandler._UpdateKernelMetadata('3.8', None)
+    self.assertIn('does not exist', str(context.exception))
+
+  def testUpdateKernelMetadataFailureWithOlderProfile(self):
+    with self.assertRaises(AssertionError) as context:
+      toolchain_util.GetUpdatedFilesHandler._UpdateKernelMetadata(
+          self.kernel, self.afdo_sorted_by_freshness[0])
+    self.assertIn('is not newer than', str(context.exception))
+
+  def testUpdateKernelMetadataPass(self):
+    toolchain_util.GetUpdatedFilesHandler._UpdateKernelMetadata(
+        self.kernel, self.afdo_sorted_by_freshness[2])
+    # Check changes in JSON file
+    new_afdo_versions = json.loads(osutils.ReadFile(self.json_file))
+    self.assertEqual(len(self.afdo_versions), len(new_afdo_versions))
+    self.assertEqual(new_afdo_versions[self.kernel_key_name]['name'],
+                     self.afdo_sorted_by_freshness[2])
+    for k in self.afdo_versions:
+      # Make sure other fields are not changed
+      if k != self.kernel_key_name:
+        self.assertEqual(self.afdo_versions[k], new_afdo_versions[k])
+
+  def testUpdateKernelProfileMetadata(self):
+    ret_files, ret_commit = toolchain_util.GetUpdatedFiles(
+        'VerifiedKernelCwpAfdoFile', self.artifact_path, self.profile_info)
+    file_to_update = os.path.join(self.tempdir, 'afdo_metadata',
+                                  f'kernel_afdo_{self.kernel_name}.json')
+    self.assertEqual(ret_files, [file_to_update])
+    self.assertIn('Publish new kernel profiles', ret_commit)
+    self.assertIn(f'Update 4.14 to {self.afdo_sorted_by_freshness[2]}',
+                  ret_commit)
+
+  def testUpdateFailWithOtherTypes(self):
+    with self.assertRaises(
+        toolchain_util.GetUpdatedFilesForCommitError) as context:
+      toolchain_util.GetUpdatedFiles('OtherType', '', '')
+    self.assertIn('has no handler in GetUpdatedFiles', str(context.exception))
 
 
 class FindEbuildPathTest(cros_test_lib.MockTempDirTestCase):
