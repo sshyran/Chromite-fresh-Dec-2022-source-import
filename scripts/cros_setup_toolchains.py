@@ -525,7 +525,12 @@ def UpdateTargets(targets, usepkg, root='/'):
   # these, but they need to be regenerated on every update.
   logging.info('Determining required toolchain updates...')
   mergemap = {}
+  # Used to keep track of post-cross packages. These are allowed to have
+  # implicit dependencies on toolchain packages, and therefore need to
+  # be built last.
+  post_cross_pkgs = set()
   for target in targets:
+    is_post_cross_target = target.endswith('-post-cross')
     logging.debug('Updating target %s', target)
     # Record the highest needed version for each target, for masking purposes.
     RemovePackageMask(target)
@@ -541,6 +546,8 @@ def UpdateTargets(targets, usepkg, root='/'):
         continue
       mergemap[pkg] = set(desired_num).difference(current)
       logging.debug('      %s -> %s', current, desired_num)
+      if is_post_cross_target:
+        post_cross_pkgs.add(pkg)
 
   packages = [pkg for pkg, vers in mergemap.items() if vers]
   if not packages:
@@ -556,8 +563,18 @@ def UpdateTargets(targets, usepkg, root='/'):
   if root != '/':
     cmd.extend(['--sysroot=%s' % root, '--root=%s' % root])
 
-  cmd.extend(packages)
-  cros_build_lib.run(cmd)
+  if usepkg:
+    # Since we are not building from source, we can handle
+    # all packages in one go.
+    cmd.extend(packages)
+    cros_build_lib.run(cmd)
+  else:
+    post_cross_cmd = cmd[:]
+    cmd.extend([pkg for pkg in packages if pkg not in post_cross_pkgs])
+    cros_build_lib.run(cmd)
+    post_cross_items = [pkg for pkg in packages if pkg in post_cross_pkgs]
+    if len(post_cross_items) > 0:
+      cros_build_lib.run(post_cross_cmd + post_cross_items)
   return True
 
 
