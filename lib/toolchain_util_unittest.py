@@ -528,10 +528,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.artifact_type = 'Unspecified'
     self.outdir = None
     self.afdo_tmp_path = None
-    self.kernel_version = '4_4'
-    self.profile_info = {
-        'kernel_version': self.kernel_version.replace('_', '.'),
-    }
+    self.profile_info = {}
     self.orderfile_name = (
         'chromeos-chrome-orderfile-field-78-3877.0-1567418235-'
         'benchmark-78.0.3893.0-r1.orderfile')
@@ -540,7 +537,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.debug_binary_name = 'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug'
     self.merged_afdo_name = (
         'chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo')
-    self.kernel_name = 'R89-13638.0-1607337135'
 
     self.gen_order = self.PatchObject(
         toolchain_util.GenerateChromeOrderfile, 'Bundle', new=_Bundle)
@@ -729,24 +725,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         print_cmd=True,
     )
 
-  def testBundleVerifiedKernelCwpAfdoFile(self):
-    self.SetUpBundle('VerifiedKernelCwpAfdoFile')
-    mock_update = self.PatchObject(self.obj, '_UpdateKernelMetadata')
-    mock_ebuild = self.PatchObject(
-        self.obj, '_GetArtifactVersionInEbuild', return_value=self.kernel_name)
-    ret = self.obj.Bundle()
-    profile_name = self.kernel_name + \
-      toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
-    verified_profile = os.path.join(self.outdir, profile_name)
-    self.assertEqual([verified_profile], ret)
-    mock_update.assert_called_once_with(self.kernel_version, self.kernel_name)
-    mock_ebuild.assert_called_once_with(
-        f'chromeos-kernel-{self.kernel_version}', 'AFDO_PROFILE_VERSION')
-    profile_path = os.path.join(
-        self.chroot.path, self.sysroot[1:], 'usr', 'lib', 'debug', 'boot',
-        f'chromeos-kernel-{self.kernel_version}-{profile_name}')
-    self.copy2.assert_called_once_with(profile_path, verified_profile)
-
   def runToolchainBundleTest(self, artifact_path, tarball_name, input_files,
                              expected_output_files):
     """Asserts that the given artifact_path is tarred up properly.
@@ -863,58 +841,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
           'good30.json',
       ),
     )
-
-
-class UpdateKernelMetadataTest(PrepareBundleTest):
-  """Test _UpdateKernelMetadata() function in BundleArtifactHandler."""
-
-  def setUp(self):
-    # Prepare a JSON file containing metadata
-    toolchain_util.TOOLCHAIN_UTILS_PATH = self.tempdir
-    osutils.SafeMakedirs(os.path.join(self.tempdir, 'afdo_metadata'))
-    self.json_file = os.path.join(self.tempdir,
-                                  'afdo_metadata/kernel_afdo.json')
-    self.kernel = '4_14'
-    self.kernel2 = '4_4'
-    self.afdo_sorted_by_freshness = [
-        'R78-3865.0-1560000000.afdo', 'R78-3869.38-1562580965.afdo',
-        'R78-3866.0-1570000000.afdo'
-    ]
-    self.afdo_versions = {
-        self.kernel: {
-            'name': self.afdo_sorted_by_freshness[0],
-        },
-        self.kernel2: {
-            'name': self.afdo_sorted_by_freshness[1],
-        },
-    }
-
-    with open(self.json_file, 'w') as f:
-      json.dump(self.afdo_versions, f)
-
-  def testUpdateKernelMetadataFailureWithInvalidKernel(self):
-    with self.assertRaises(AssertionError) as context:
-      toolchain_util.BundleArtifactHandler._UpdateKernelMetadata('3_8', None)
-    self.assertIn('the entry should be in', str(context.exception))
-
-  def testUpdateKernelMetadataFailureWithOlderProfile(self):
-    with self.assertRaises(AssertionError) as context:
-      toolchain_util.BundleArtifactHandler._UpdateKernelMetadata(
-          self.kernel2, self.afdo_sorted_by_freshness[0])
-    self.assertIn('is not newer than', str(context.exception))
-
-  def testUpdateKernelMetadataPass(self):
-    toolchain_util.BundleArtifactHandler._UpdateKernelMetadata(
-        self.kernel, self.afdo_sorted_by_freshness[2])
-    # Check changes in JSON file
-    new_afdo_versions = json.loads(osutils.ReadFile(self.json_file))
-    self.assertEqual(len(self.afdo_versions), len(new_afdo_versions))
-    self.assertEqual(new_afdo_versions[self.kernel]['name'],
-                     self.afdo_sorted_by_freshness[2])
-    for k in self.afdo_versions:
-      # Make sure other fields are not changed
-      if k != self.kernel:
-        self.assertEqual(self.afdo_versions[k], new_afdo_versions[k])
 
 
 class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
@@ -2424,8 +2350,8 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
 
     with open(self.json_file, 'w') as f:
       json.dump(self.afdo_versions, f)
-    self.PatchObject(
-        git, 'GetTrackingBranch', return_value=git.RemoteRef('origin', 'main'))
+    self.PatchObject(git, 'GetTrackingBranch',
+                     return_value=git.RemoteRef('origin', 'main'))
     GitStatus = collections.namedtuple('GitStatus', ['output'])
     self.mock_git = self.PatchObject(
         git, 'RunGit', return_value=GitStatus(output='non-empty'))
@@ -2459,7 +2385,8 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
                                               self.afdo_sorted_by_freshness[1],
                                               self.afdo_sorted_by_freshness[2])
     calls = [
-        mock.call(self.tempdir, ['pull', 'origin'], print_cmd=True),
+        mock.call(
+            self.tempdir, ['pull', 'origin'], print_cmd=True),
         mock.call(
             self.tempdir, ['status', '--porcelain', '-uno'],
             capture_output=True,
@@ -2468,7 +2395,10 @@ class PublishVettedAFDOArtifactTest(cros_test_lib.MockTempDirTestCase):
         mock.call(
             self.tempdir, ['commit', '-a', '-m', message], print_cmd=True),
         mock.call(
-            self.tempdir, ['push', 'origin', 'HEAD:main%submit'],
+            self.tempdir, [
+                'push', 'origin',
+                'HEAD:main%submit'
+            ],
             capture_output=True,
             print_cmd=True)
     ]
