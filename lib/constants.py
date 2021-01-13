@@ -230,8 +230,6 @@ REEXEC_API_CHROME_PRELOAD_DIR = 12
 # buildbot generation) is a unique identifier of builds.
 BUILDBOT_GENERATION = 1
 
-ISOLATESERVER = 'https://isolateserver.appspot.com'
-
 GOOGLE_EMAIL = '@google.com'
 CHROMIUM_EMAIL = '@chromium.org'
 
