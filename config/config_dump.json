@@ -38054,6 +38054,19 @@
             "zork-arc-r"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"berknip\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"dalboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"dirinboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"ezkinil\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"gumboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -38075,6 +38088,19 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"berknip\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"dalboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"dirinboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"ezkinil\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"gumboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"morphius\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"trembyle\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz14\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
