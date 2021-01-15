@@ -3171,6 +3171,13 @@ def BranchScheduleConfig():
   # CWP profiles.
 
   RELEASES = [
+      ('release-R89-13597.B',
+       ['grunt-android-pi-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+
       ('release-R88-13597.B',
        ['grunt-android-pi-pre-flight-branch'],
        '',
@@ -3204,6 +3211,7 @@ def BranchScheduleConfig():
 
   PFQ_SCHEDULE = [
       '0 3,7,11,15,19,23 * * *',
+      '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
       '0 2,6,10,14,18,22 * * *',
   ]
