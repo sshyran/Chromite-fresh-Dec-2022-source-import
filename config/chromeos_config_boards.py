@@ -168,5 +168,6 @@ builder_incompatible_binaries_boards = frozenset([
     'majolica',
     'mancomb',
     'zork',
+    'zork-arc-r',
     'zork-borealis',
 ])

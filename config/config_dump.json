@@ -38152,6 +38152,7 @@
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -38178,6 +38179,7 @@
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -38187,7 +38189,8 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "zork-arc-r"
-        ]
+        ],
+        "unittests": false
     },
     "zork-arc-r-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
@@ -38197,13 +38200,15 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "zork-arc-r-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "zork-arc-r"
-        ]
+        ],
+        "unittests": false
     },
     "zork-arc-r-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
@@ -38213,7 +38218,8 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "zork-arc-r-payloads": {
         "_template": "payloads",
@@ -38249,6 +38255,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -38286,6 +38293,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
