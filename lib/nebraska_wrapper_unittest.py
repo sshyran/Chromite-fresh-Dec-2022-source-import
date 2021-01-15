@@ -139,18 +139,6 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     log = self._nebraska.PrintLog()
     self.assertTrue('blah blah' in log)
 
-  def testCollectRequestLogs(self):
-    """Tests CollectRequestLogs."""
-    self.PatchObject(multiprocessing.Process, 'is_alive', return_value=True)
-    run_command_mock = self._PatchRemoteCommand()
-    self._nebraska._port = 10
-
-    # The success case.
-    self._nebraska.CollectRequestLogs('/path/to/file')
-    run_command_mock.assert_called_once_with(
-        ['curl', 'http://127.0.0.1:10/requestlog', '-o',
-         nebraska_wrapper.RemoteNebraskaWrapper.REQUEST_LOG_FILE_PATH])
-
   def testStart(self):
     """Tests Start."""
     # Since the run() function runs in a different thread, its exception doesn't
