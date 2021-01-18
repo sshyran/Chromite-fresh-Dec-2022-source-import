@@ -8709,6 +8709,26 @@
             "chrome_internal"
         ]
     },
+    "dedede-factory-dedede-13683.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "dedede"
+        ],
+        "workspace_branch": "factory-dedede-13683.B"
+    },
+    "dedede-factory-dedede-13683.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "dedede"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-dedede-13683.B"
+    },
     "dedede-full": {
         "_template": "full",
         "boards": [
@@ -11720,6 +11740,28 @@
             "coral-factory-coral-10122.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-coral-10122.B"
+    },
+    "factory-dedede-13683.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 24h interval",
+        "slave_configs": [
+            "dedede-factory-dedede-13683.B-factorybranch"
+        ],
+        "workspace_branch": "factory-dedede-13683.B"
+    },
+    "factory-dedede-13683.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "dedede-factory-dedede-13683.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-dedede-13683.B"
     },
     "factory-drallion-13080.B-buildspec": {
         "_template": "buildspec",

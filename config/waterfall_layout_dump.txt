@@ -14,6 +14,8 @@
     tidus-factory-auron-6772.B-factorybranch
   factory-coral-10122.B-buildspec
     coral-factory-coral-10122.B-factorybranch
+  factory-dedede-13683.B-buildspec
+    dedede-factory-dedede-13683.B-factorybranch
   factory-drallion-13080.B-buildspec
     drallion-factory-drallion-13080.B-factorybranch
   factory-endeavour-13295.B-buildspec
@@ -749,6 +751,7 @@
   cyan-payloads-tryjob
   cyan-release-tryjob
   cyan-unittest-stress
+  dedede-factory-dedede-13683.B-factorybranch-tryjob
   dedede-full-tryjob
   dedede-llvm-next-toolchain-tryjob
   dedede-llvm-toolchain-tryjob
@@ -886,6 +889,8 @@
     tidus-factory-auron-6772.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
     coral-factory-coral-10122.B-factorybranch-tryjob
+  factory-dedede-13683.B-buildspec-tryjob
+    dedede-factory-dedede-13683.B-factorybranch-tryjob
   factory-drallion-13080.B-buildspec-tryjob
     drallion-factory-drallion-13080.B-factorybranch-tryjob
   factory-endeavour-13295.B-buildspec-tryjob
