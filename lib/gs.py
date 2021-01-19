@@ -1036,7 +1036,7 @@ class GSContext(object):
     if details:
       cmd += ['-l']
     cmd += ['--']
-    if isinstance(path, str):
+    if isinstance(path, six.string_types):
       cmd.append(path)
     else:
       cmd.extend(path)
@@ -1109,7 +1109,7 @@ class GSContext(object):
       acl = self.acl
 
     cmd = ['acl', 'set', '--', acl]
-    if isinstance(path, str):
+    if isinstance(path, six.string_types):
       cmd.append(path)
     else:
       cmd.extend(path)
@@ -1187,7 +1187,7 @@ class GSContext(object):
     if recursive:
       cmd.append('-R')
     cmd.append('--')
-    if isinstance(path, str):
+    if isinstance(path, six.string_types):
       cmd.append(path)
     else:
       cmd.extend(path)
