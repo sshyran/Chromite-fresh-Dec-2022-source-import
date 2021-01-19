@@ -3172,7 +3172,7 @@ def BranchScheduleConfig():
   # CWP profiles.
 
   RELEASES = [
-      ('release-R89-13597.B',
+      ('release-R89-13729.B',
        ['grunt-android-pi-pre-flight-branch'],
        '',
        [],
