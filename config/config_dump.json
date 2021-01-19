@@ -5707,6 +5707,7 @@
             "capri"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -5731,6 +5732,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -5754,6 +5756,7 @@
             "capri"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -5772,6 +5775,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -5789,6 +5793,7 @@
             "capri"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -5807,6 +5812,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -5828,6 +5834,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -5854,6 +5861,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -5879,6 +5887,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -5902,6 +5911,7 @@
         "boards": [
             "capri"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -5920,6 +5930,7 @@
             "capri-zfpga"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -5944,6 +5955,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -5967,6 +5979,7 @@
             "capri-zfpga"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -5985,6 +5998,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -6002,6 +6016,7 @@
             "capri-zfpga"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -6020,6 +6035,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -6041,6 +6057,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -6067,6 +6084,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -6091,6 +6109,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -6114,6 +6133,7 @@
         "boards": [
             "capri-zfpga"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -8055,6 +8075,7 @@
             "cobblepot"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -8079,6 +8100,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -8102,6 +8124,7 @@
             "cobblepot"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -8120,6 +8143,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -8137,6 +8161,7 @@
             "cobblepot"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -8155,6 +8180,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -8176,6 +8202,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -8202,6 +8229,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -8227,6 +8255,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -8250,6 +8279,7 @@
         "boards": [
             "cobblepot"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -15856,6 +15886,7 @@
             "gonzo"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -15880,6 +15911,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -15903,6 +15935,7 @@
             "gonzo"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -15921,6 +15954,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -15938,6 +15972,7 @@
             "gonzo"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -15956,6 +15991,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -15977,6 +16013,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -16003,6 +16040,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -16028,6 +16066,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -16051,6 +16090,7 @@
         "boards": [
             "gonzo"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -22871,6 +22911,7 @@
             "lasilla-ground"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -22895,6 +22936,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -22918,6 +22960,7 @@
             "lasilla-ground"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -22936,6 +22979,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -22953,6 +22997,7 @@
             "lasilla-ground"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -22971,6 +23016,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -22992,6 +23038,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -23018,6 +23065,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -23043,6 +23091,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -23066,6 +23115,7 @@
         "boards": [
             "lasilla-ground"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -23084,6 +23134,7 @@
             "littlejoe"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -23108,6 +23159,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -23131,6 +23183,7 @@
             "littlejoe"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -23149,6 +23202,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -23166,6 +23220,7 @@
             "littlejoe"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -23184,6 +23239,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -23205,6 +23261,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -23231,6 +23288,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -23255,6 +23313,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -23278,6 +23337,7 @@
         "boards": [
             "littlejoe"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -26650,6 +26710,7 @@
             "octavius"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -26674,6 +26735,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -26697,6 +26759,7 @@
             "octavius"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -26715,6 +26778,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -26732,6 +26796,7 @@
             "octavius"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -26750,6 +26815,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -26771,6 +26837,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -26797,6 +26864,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -26822,6 +26890,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -26845,6 +26914,7 @@
         "boards": [
             "octavius"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -30071,6 +30141,7 @@
             "romer"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -30095,6 +30166,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -30118,6 +30190,7 @@
             "romer"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -30136,6 +30209,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -30153,6 +30227,7 @@
             "romer"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -30171,6 +30246,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -30192,6 +30268,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -30218,6 +30295,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -30243,6 +30321,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -30266,6 +30345,7 @@
         "boards": [
             "romer"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -36159,6 +36239,7 @@
             "viking"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -36183,6 +36264,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -36206,6 +36288,7 @@
             "viking"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -36224,6 +36307,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -36241,6 +36325,7 @@
             "viking"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -36259,6 +36344,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -36276,6 +36362,7 @@
             "viking-poc2"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -36300,6 +36387,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -36323,6 +36411,7 @@
             "viking-poc2"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -36341,6 +36430,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -36358,6 +36448,7 @@
             "viking-poc2"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -36376,6 +36467,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -36397,6 +36489,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -36423,6 +36516,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -36447,6 +36541,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -36470,6 +36565,7 @@
         "boards": [
             "viking-poc2"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -36492,6 +36588,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -36518,6 +36615,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -36542,6 +36640,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -36565,6 +36664,7 @@
         "boards": [
             "viking"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -37599,6 +37699,7 @@
             "wooten"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -37623,6 +37724,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -37646,6 +37748,7 @@
             "wooten"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -37664,6 +37767,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -37681,6 +37785,7 @@
             "wooten"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -37699,6 +37804,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -37720,6 +37826,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -37746,6 +37853,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -37771,6 +37879,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -37794,6 +37903,7 @@
         "boards": [
             "wooten"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
@@ -37812,6 +37922,7 @@
             "wristpin"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests_override": [],
         "image_test": false,
         "images": [
@@ -37837,6 +37948,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests_override": null,
         "image_test": false,
         "images": [
@@ -37861,6 +37973,7 @@
             "wristpin"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -37880,6 +37993,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -37898,6 +38012,7 @@
             "wristpin"
         ],
         "chrome_sdk": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "image_test": false,
@@ -37917,6 +38032,7 @@
         "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "image_test": false,
@@ -37939,6 +38055,7 @@
         "description": "Create unsigned release image for ingestion into build tool",
         "dev_installer_prebuilts": false,
         "display_label": "utility",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -37965,6 +38082,7 @@
         ],
         "chrome_sdk": false,
         "dev_installer_prebuilts": false,
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": [],
         "hwqual": false,
@@ -37990,6 +38108,7 @@
         "debug": true,
         "dev_installer_prebuilts": false,
         "display_label": "tryjob",
+        "factory": false,
         "hw_tests": [],
         "hw_tests_override": null,
         "hwqual": false,
@@ -38014,6 +38133,7 @@
         "boards": [
             "wristpin"
         ],
+        "factory": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",

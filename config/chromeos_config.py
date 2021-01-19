@@ -285,6 +285,7 @@ def GeneralTemplates(site_config):
 
   site_config.AddTemplate(
       'loonix',
+      factory=False,
       sync_chrome=False,
       chrome_sdk=False,
       dev_installer_prebuilts=False,
