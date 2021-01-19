@@ -19,7 +19,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import toolchain_util
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
 
-
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
 _TOOLCHAIN_ARTIFACT_HANDLERS = {
     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE:
@@ -40,8 +39,7 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
                   toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
     BuilderConfig.Artifacts.CHROME_DEBUG_BINARY:
-        _Handlers('ChromeDebugBinary',
-                  toolchain_util.PrepareForBuild,
+        _Handlers('ChromeDebugBinary', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
     BuilderConfig.Artifacts.UNVERIFIED_CHROME_BENCHMARK_PERF_FILE:
         _Handlers('UnverifiedChromeBenchmarkPerfFile',
@@ -161,9 +159,9 @@ def PrepareForBuild(input_proto, output_proto, _config):
     # Unknown artifact_types are an error.
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
     if handler.prepare:
-      results.add(handler.prepare(
-          handler.name, chroot, sysroot_path, build_target, input_artifacts,
-          profile_info))
+      results.add(
+          handler.prepare(handler.name, chroot, sysroot_path, build_target,
+                          input_artifacts, profile_info))
 
   # Translate the returns from the handlers we called.
   #   If any NEEDED => NEEDED
@@ -219,10 +217,9 @@ def BundleArtifacts(input_proto, output_proto, _config):
       return controller.RETURN_CODE_UNRECOVERABLE
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
     if handler and handler.bundle:
-      artifacts = handler.bundle(
-          handler.name, chroot, input_proto.sysroot.path,
-          input_proto.sysroot.build_target.name, input_proto.output_dir,
-          profile_info)
+      artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
+                                 input_proto.sysroot.build_target.name,
+                                 input_proto.output_dir, profile_info)
       if artifacts:
         art_info = output_proto.artifacts_info.add()
         art_info.artifact_type = artifact_type
@@ -236,6 +233,7 @@ _NAMES_FOR_AFDO_ARTIFACTS = {
     toolchain_pb2.KERNEL_AFDO: 'kernel_afdo',
     toolchain_pb2.CHROME_AFDO: 'chrome_afdo'
 }
+
 
 # TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
 # Using a function instead of a dict because we need to mock these
