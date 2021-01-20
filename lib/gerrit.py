@@ -133,6 +133,26 @@ class GerritHelper(object):
       else:
         gob_util.RemoveReviewers(self.host, change, remove, notify=notify)
 
+  def SetWorkInProgress(self, change, wip, msg='', dryrun=False):
+    """Sets the work in progress bit on the given CL.
+
+    Args:
+      change: CL number.
+      wip: bool to indicate what value to set for the work in progress bit.
+      msg: Message to post to the CL.
+      dryrun: If True, only print what would have been done.
+    """
+    if wip:
+      if dryrun:
+        logging.info('Would have made "%s" work in progress', change)
+      else:
+        gob_util.MarkWorkInProgress(self.host, change, msg)
+    else:
+      if dryrun:
+        logging.info('Would have made "%s" ready for review', change)
+      else:
+        gob_util.MarkReadyForReview(self.host, change, msg)
+
   def GetChangeDetail(self, change_num, verbose=False):
     """Return detailed information about a gerrit change.
 

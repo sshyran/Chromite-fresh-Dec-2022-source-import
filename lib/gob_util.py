@@ -657,6 +657,32 @@ def MarkNotPrivate(host, change):
     )
 
 
+def MarkWorkInProgress(host, change, msg=''):
+  """Marks the given CL as Work-In-Progress.
+
+  Args:
+    host: The gob host to interact with.
+    change: CL number on the given host.
+    msg: Message to post together with the action.
+  """
+  path = '%s/wip' % _GetChangePath(change)
+  body = {'message': msg}
+  return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+
+
+def MarkReadyForReview(host, change, msg=''):
+  """Marks the given CL as Ready-For-Review.
+
+  Args:
+    host: The gob host to interact with.
+    change: CL number on the given host.
+    msg: Message to post together with the action.
+  """
+  path = '%s/ready' % _GetChangePath(change)
+  body = {'message': msg}
+  return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+
+
 def GetReviewers(host, change):
   """Get information about all reviewers attached to a change.
 

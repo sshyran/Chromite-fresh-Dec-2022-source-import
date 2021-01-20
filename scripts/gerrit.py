@@ -580,6 +580,28 @@ class ActionRestore(_ActionSimpleParallelCLs):
     helper.RestoreChange(cl, dryrun=opts.dryrun)
 
 
+class ActionWorkInProgress(_ActionSimpleParallelCLs):
+  """Mark CLs as work in progress"""
+
+  COMMAND = 'wip'
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetWorkInProgress(cl, True, dryrun=opts.dryrun)
+
+
+class ActionReadyForReview(_ActionSimpleParallelCLs):
+  """Mark CLs as ready for review"""
+
+  COMMAND = 'ready'
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetWorkInProgress(cl, False, dryrun=opts.dryrun)
+
+
 class ActionReviewers(UserAction):
   """Add/remove reviewers' emails for a CL (prepend with '~' to remove)"""
 
