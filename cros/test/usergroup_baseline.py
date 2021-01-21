@@ -242,7 +242,7 @@ GROUP_BASELINE_JETSTREAM = dict((e.group, e) for e in (
             'ap-monlog', 'ap-net-acc-manager', 'ap-net-controller',
             'ap-net-monitor', 'ap-pal', 'ap-pcap-manager', 'ap-pfd',
             'ap-pipe-reader', 'ap-process-manager', 'ap-qos-monitor',
-            'ap-rodizio', 'ap-taxonomy', 'ap-update-manager',
+            'ap-rodizio', 'ap-speed-test', 'ap-taxonomy', 'ap-update-manager',
             'ap-vorlon-client', 'ap-wifi-diagnostics', 'ap-wifi-manager',
             'ap-wireless-optimizer', 'gdisp'
         }),
