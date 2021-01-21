@@ -12,7 +12,6 @@ import sys
 
 import pytest  # pylint: disable=import-error
 
-from chromite.lib import cgroups
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -66,7 +65,6 @@ def re_execute_with_namespace(argv, network=False):
     ] + argv
     os.execvp(cmd[0], cmd)
   else:
-    cgroups.Cgroup.InitSystem()
     namespaces.SimpleUnshare(net=not network, pid=True)
     # We got our namespaces, so switch back to the user to run the tests.
     gid = int(os.environ.pop('SUDO_GID'))

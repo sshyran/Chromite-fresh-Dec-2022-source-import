@@ -26,7 +26,6 @@ import sys
 import tempfile
 
 from chromite.lib import constants
-from chromite.lib import cgroups
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -492,7 +491,6 @@ def _ReExecuteIfNeeded(argv, network):
            'PATH=%s' % os.environ['PATH'], '--'] + argv
     os.execvp(cmd[0], cmd)
   else:
-    cgroups.Cgroup.InitSystem()
     namespaces.SimpleUnshare(net=not network, pid=True)
     # We got our namespaces, so switch back to the user to run the tests.
     gid = int(os.environ.pop('SUDO_GID'))
@@ -588,10 +586,6 @@ def main(argv):
   jobs = opts.jobs or multiprocessing.cpu_count()
 
   with cros_build_lib.ContextManagerStack() as stack:
-    # If we're running outside the chroot, try to contain ourselves.
-    if cgroups.Cgroup.IsSupported() and not cros_build_lib.IsInsideChroot():
-      stack.Add(cgroups.SimpleContainChildren, 'run_tests')
-
     # Throw all the tests into a custom tempdir so that if we do CTRL+C, we can
     # quickly clean up all the files they might have left behind.
     stack.Add(osutils.TempDir, prefix='chromite.run_tests.', set_global=True,
