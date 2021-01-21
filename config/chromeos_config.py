@@ -1706,7 +1706,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   # Defines "interval", "branch", "boards", "kwargs" for firmwarebranch builds.
   #
   # Intervals:
-  # NONE = ''  # Do not schedule automatically.
+  NONE = ''  # Do not schedule automatically.
   DAILY = 'with 24h interval'  # 1 day interval
   WEEKLY = 'with 168h interval'  # 1 week interval
   MONTHLY = 'with 720h interval'  # 30 day interval
@@ -1789,6 +1789,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
+      (NONE, 'firmware-octopus-11297.196.B', ['octopus'], {}), # b/178093560
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
