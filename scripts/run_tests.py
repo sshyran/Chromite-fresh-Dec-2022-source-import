@@ -75,12 +75,6 @@ SPECIAL_TESTS = {
     # Tests that need to run inside the chroot.
     'lib/cros_test_lib_unittest': INSIDE,
     'lib/operation_unittest': INSIDE,
-
-    # These require 3rd party modules that are in the chroot.
-    'lib/xbuddy/build_artifact_unittest': INSIDE,
-    'lib/xbuddy/common_util_unittest': INSIDE,
-    'lib/xbuddy/downloader_unittest': INSIDE,
-    'lib/xbuddy/xbuddy_unittest': INSIDE,
 }
 
 SLOW_TESTS = {
