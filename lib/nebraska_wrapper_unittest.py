@@ -10,6 +10,7 @@ from __future__ import print_function
 import multiprocessing
 import os
 import subprocess
+import sys
 
 import mock
 
@@ -21,6 +22,9 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import timeout_util
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
