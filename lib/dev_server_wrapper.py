@@ -13,6 +13,7 @@ import os
 import re
 import socket
 import subprocess
+import sys
 import tempfile
 
 from six.moves import http_client as httplib
@@ -36,6 +37,9 @@ from chromite.lib import timeout_util
 from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 DEFAULT_PORT = 8080

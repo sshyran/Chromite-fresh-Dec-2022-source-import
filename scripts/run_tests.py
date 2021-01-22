@@ -77,7 +77,6 @@ SPECIAL_TESTS = {
     'lib/operation_unittest': INSIDE,
 
     # These require 3rd party modules that are in the chroot.
-    'lib/dev_server_wrapper_unittest': INSIDE,
     'lib/xbuddy/build_artifact_unittest': INSIDE,
     'lib/xbuddy/common_util_unittest': INSIDE,
     'lib/xbuddy/downloader_unittest': INSIDE,
