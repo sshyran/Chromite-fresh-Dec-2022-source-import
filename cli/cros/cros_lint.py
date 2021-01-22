@@ -226,7 +226,7 @@ def _PylintProbeFile(path, output_format, debug):
     if e.errno != errno.ENOENT:
       raise
 
-  return _Pylint23File(path, output_format, debug)
+  return _Pylint3File(path, output_format, debug)
 
 
 def _GolintFile(path, _, debug):
