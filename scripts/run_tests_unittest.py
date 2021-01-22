@@ -163,16 +163,6 @@ class MainTest(cros_test_lib.MockOutputTestCase):
     self.assertNotEqual(exit_code, 0,
                         msg='run_tests wrongly accepted %s' % bad_arg)
 
-  def testQuick(self):
-    """Verify --quick filters out slow tests"""
-    self.PatchObject(run_tests, 'RunTests', return_value=True)
-    # Pick a test that is in SLOW_TESTS but not in SPECIAL_TESTS.
-    slow_test = 'lib/cros_build_lib_unittest'
-    self.assertIn(slow_test, run_tests.SLOW_TESTS)
-    self.assertNotIn(slow_test, run_tests.SPECIAL_TESTS)
-    run_tests.main(['--quick'])
-    self.assertIn(slow_test, run_tests.SPECIAL_TESTS)
-
   def testSpecificTests(self):
     """Verify user specified tests are run."""
     m = self.PatchObject(run_tests, 'RunTests', return_value=True)

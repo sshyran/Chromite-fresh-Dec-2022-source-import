@@ -8,6 +8,9 @@ from __future__ import print_function
 import sys
 
 
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
+
 # This is to work around a Python bug:  The first call to
 # datetime.datetime.strptime() within the Python VM can fail if it
 # happens in a multi-threaded context.  To work around that, we force a

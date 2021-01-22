@@ -71,14 +71,9 @@ SKIP = 'skip'
 
 # List all exceptions, with a token describing what's odd here.
 SPECIAL_TESTS = {
-    # Tests that need to run inside the chroot.
-    'lib/cros_test_lib_unittest': INSIDE,
-    'lib/operation_unittest': INSIDE,
 }
 
 SLOW_TESTS = {
-    # Tests that require network can be really slow.
-    'lib/cros_build_lib_unittest': SKIP,
 }
 
 
