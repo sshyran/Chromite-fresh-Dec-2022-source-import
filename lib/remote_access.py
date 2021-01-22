@@ -14,6 +14,7 @@ import shutil
 import socket
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -27,6 +28,9 @@ from chromite.lib import parallel
 from chromite.lib import timeout_util
 from chromite.scripts import cros_set_lsb_release
 from chromite.utils import memoize
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _path = os.path.dirname(os.path.realpath(__file__))
