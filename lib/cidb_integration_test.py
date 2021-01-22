@@ -20,6 +20,9 @@ from chromite.lib import cidb
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import parallel
+from chromite.lib import remote_access
+from chromite.lib import retry_util
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -43,7 +46,123 @@ SERIES_1_TEST_DATA_PATH = os.path.join(
     constants.CHROMITE_DIR, 'cidb', 'test_data', 'series_1')
 
 
-class CIDBIntegrationTest(cros_test_lib.LocalSqlServerTestCase):
+class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
+  """A TestCase that launches a local mysqld server in the background.
+
+  - This test must run insde the chroot.
+  - This class provides attributes:
+    - mysqld_host: The IP of the local mysqld server.
+    - mysqld_port: The port of the local mysqld server.
+  """
+
+  # Neither of these are in the PATH for a non-sudo user.
+  MYSQL_INSTALL_DB = '/usr/share/mysql/scripts/mysql_install_db'
+  MYSQLD = '/usr/sbin/mysqld'
+  MYSQLD_SHUTDOWN_TIMEOUT_S = 30
+
+  def __init__(self, *args, **kwargs):
+    cros_test_lib.TempDirTestCase.__init__(self, *args, **kwargs)
+    self.mysqld_host = None
+    self.mysqld_port = None
+    self._mysqld_dir = None
+    self._mysqld_runner = None
+
+    # This class has assumptions about the mariadb installation that are only
+    # guaranteed to hold inside the chroot.
+    cros_build_lib.AssertInsideChroot()
+
+  def setUp(self):
+    """Launch mysqld in a clean temp directory."""
+
+    self._mysqld_dir = os.path.join(self.tempdir, 'mysqld_dir')
+    osutils.SafeMakedirs(self._mysqld_dir)
+    mysqld_tmp_dir = os.path.join(self._mysqld_dir, 'tmp')
+    osutils.SafeMakedirs(mysqld_tmp_dir)
+
+    # MYSQL_INSTALL_DB is stupid. It can't parse '--flag value'.
+    # Must give it options in '--flag=value' form.
+    cmd = [
+        self.MYSQL_INSTALL_DB,
+        '--no-defaults',
+        '--basedir=/usr',
+        '--ldata=%s' % self._mysqld_dir,
+    ]
+    cros_build_lib.run(cmd, quiet=True)
+
+    self.mysqld_host = '127.0.0.1'
+    self.mysqld_port = remote_access.GetUnusedPort()
+    cmd = [
+        self.MYSQLD,
+        '--no-defaults',
+        '--datadir', self._mysqld_dir,
+        '--socket', os.path.join(self._mysqld_dir, 'mysqld.socket'),
+        '--port', str(self.mysqld_port),
+        '--pid-file', os.path.join(self._mysqld_dir, 'mysqld.pid'),
+        '--tmpdir', mysqld_tmp_dir,
+    ]
+    self._mysqld_runner = parallel.BackgroundTaskRunner(
+        cros_build_lib.run,
+        processes=1,
+        halt_on_error=True)
+    queue = self._mysqld_runner.__enter__()
+    queue.put((cmd,))
+    self.addCleanup(self._ShutdownMysqld)
+
+    # Ensure that the Sql server is up before continuing.
+    cmd = [
+        'mysqladmin',
+        '-S', os.path.join(self._mysqld_dir, 'mysqld.socket'),
+        'ping',
+    ]
+    try:
+      # Retry at:
+      # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255 seconds total timeout in case
+      # of failure.
+      # Smaller timeouts make this check flaky on heavily loaded builders.
+      retry_util.RunCommandWithRetries(cmd=cmd, quiet=True, max_retry=8,
+                                       sleep=1, backoff_factor=2)
+    except Exception as e:
+      self.addCleanup(lambda: self._CleanupMysqld(
+          'mysqladmin failed to ping mysqld: %s' % e))
+      raise
+
+  def _ShutdownMysqld(self):
+    """Cleanup mysqld and our mysqld data directory."""
+    if self._mysqld_runner is None:
+      return
+
+    try:
+      cmd = [
+          'mysqladmin',
+          '-S', os.path.join(self._mysqld_dir, 'mysqld.socket'),
+          '-u', 'root',
+          'shutdown',
+      ]
+      cros_build_lib.run(cmd, quiet=True)
+    except cros_build_lib.RunCommandError as e:
+      self._CleanupMysqld(
+          failure='mysqladmin failed to shutdown mysqld: %s' % e)
+    else:
+      self._CleanupMysqld()
+
+  def _CleanupMysqld(self, failure=None):
+    if self._mysqld_runner is None:
+      return
+
+    try:
+      if failure is not None:
+        self._mysqld_runner.__exit__(
+            Exception,
+            '%s. We force killed the mysqld process.' % failure,
+            None,
+        )
+      else:
+        self._mysqld_runner.__exit__(None, None, None)
+    finally:
+      self._mysqld_runner = None
+
+
+class CIDBIntegrationTest(LocalSqlServerTestCase):
   """Base class for cidb tests that connect to a test MySQL instance."""
 
   CIDB_USER_ROOT = 'root'
