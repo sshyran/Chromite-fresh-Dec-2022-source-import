@@ -15,9 +15,9 @@ import glob
 import json
 import os
 from pathlib import Path
+import queue
 import re
 import sys
-import queue
 import textwrap
 import threading
 
@@ -35,8 +35,8 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import portage_util
+from chromite.third_party.gn_helpers import gn_helpers
 from chromite.utils import memoize
-from gn_helpers import gn_helpers
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

@@ -16,18 +16,18 @@ import threading
 
 import mock
 
-from chromite.lib import constants
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import cache
 from chromite.lib import chromite_config
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from gn_helpers import gn_helpers
+from chromite.third_party.gn_helpers import gn_helpers
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

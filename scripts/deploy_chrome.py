@@ -31,20 +31,20 @@ import shutil
 import sys
 import time
 
-from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access as remote
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from gn_helpers import gn_helpers
+from chromite.third_party.gn_helpers import gn_helpers
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
