@@ -12,10 +12,10 @@ import os
 import struct
 import sys
 
-from elftools.elf import elffile
 from elftools.common import utils
+from elftools.elf import elffile
 
-from chromite.scripts import lddtree
+from chromite.third_party import lddtree
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

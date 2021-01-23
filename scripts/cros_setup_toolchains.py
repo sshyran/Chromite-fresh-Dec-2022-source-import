@@ -16,17 +16,16 @@ import re
 import shutil
 import sys
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import toolchain
+from chromite.third_party import lddtree
 from chromite.utils import key_value_store
 
-# Needs to be after chromite imports.
-import lddtree  # pylint: disable=wrong-import-order
 
 if cros_build_lib.IsInsideChroot():
   # Only import portage after we've checked that we're inside the chroot.

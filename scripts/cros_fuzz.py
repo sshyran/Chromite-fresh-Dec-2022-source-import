@@ -48,7 +48,6 @@ import shutil
 import sys
 
 from elftools.elf.elffile import ELFFile
-import lddtree
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
@@ -58,6 +57,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.third_party import lddtree
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
