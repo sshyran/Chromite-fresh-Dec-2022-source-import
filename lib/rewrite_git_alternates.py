@@ -13,16 +13,20 @@ from __future__ import print_function
 
 __all__ = ('RebuildRepoCheckout',)
 
+import errno
 import math
 import os
 import shutil
-import errno
+import sys
 
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _CACHE_NAME = '.cros_projects.list'
