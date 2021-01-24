@@ -40,6 +40,9 @@ from chromite.lib import cros_build_lib
 from chromite.utils import memoize
 
 
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
+
 _GAE_VERSION = 'GAE_VERSION'
 
 

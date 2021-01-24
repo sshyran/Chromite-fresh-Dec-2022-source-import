@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import pprint
+import sys
 import tempfile
 
 import httplib2
@@ -26,6 +27,10 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import cros_build_lib
 from chromite.utils import memoize
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
 
 # pylint: disable=line-too-long
 # CIPD client to download.

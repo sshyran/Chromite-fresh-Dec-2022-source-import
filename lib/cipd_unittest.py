@@ -9,14 +9,18 @@ from __future__ import print_function
 
 import hashlib
 import json
-import mock
+import sys
 
+import mock
 import httplib2
 
 from chromite.lib import cipd
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CIPDTest(cros_test_lib.MockTestCase):

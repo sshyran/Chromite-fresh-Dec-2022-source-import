@@ -7,12 +7,16 @@
 
 from __future__ import print_function
 
+import sys
 import time
 
 import mock
 
 from chromite.lib import auth
 from chromite.lib import cros_test_lib
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class AuthTest(cros_test_lib.RunCommandTestCase):
