@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 
 import mock
 import six
@@ -31,6 +32,9 @@ from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import osutils
 from chromite.lib import retry_util
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GerritTestCase(cros_test_lib.MockTempDirTestCase):

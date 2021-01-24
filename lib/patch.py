@@ -13,6 +13,7 @@ import os
 import random
 import re
 import subprocess
+import sys
 import time
 
 import six
@@ -31,6 +32,9 @@ try:
   import mock
 except ImportError:
   mock = None
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _MAXIMUM_GERRIT_NUMBER_LENGTH = 7

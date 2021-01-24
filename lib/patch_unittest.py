@@ -12,6 +12,7 @@ import functools
 import itertools
 import os
 import shutil
+import sys
 import tempfile
 import time
 
@@ -25,6 +26,9 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import patch as cros_patch
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _GetNumber = functools.partial(next, itertools.count())

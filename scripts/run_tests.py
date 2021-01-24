@@ -80,8 +80,6 @@ SPECIAL_TESTS = {
 SLOW_TESTS = {
     # Tests that require network can be really slow.
     'lib/cros_build_lib_unittest': SKIP,
-    'lib/gerrit_unittest': SKIP,
-    'lib/patch_unittest': SKIP,
 }
 
 
