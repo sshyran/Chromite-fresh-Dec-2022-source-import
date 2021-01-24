@@ -25,10 +25,14 @@ import datetime
 import glob
 import os
 import re
+import sys
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib.xbuddy import cherrypy_log_util
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Module-local log function.
