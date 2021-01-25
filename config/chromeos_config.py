@@ -3188,6 +3188,8 @@ def BranchScheduleConfig():
   # does that as of 2020-09-15.  It needs to run because it *does* update the
   # CWP profiles.
 
+  # Do not remove BOT-TAG:* comments. They are used to help parse config.
+  # BOT-TAG:RELEASES_START
   RELEASES = [
       ('release-R89-13729.B',
        ['grunt-android-pi-pre-flight-branch',
@@ -3216,6 +3218,7 @@ def BranchScheduleConfig():
        config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
+      # BOT-TAG:NO_PRUNE
       ('release-R86-13421.B',
        ['grunt-android-pi-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
@@ -3227,6 +3230,7 @@ def BranchScheduleConfig():
         'chrome-broadwell-release-afdo-verify'],
        config_lib.LUCI_BUILDER_LTS_RELEASE ),
   ]
+  # BOT-TAG:RELEASES_END
 
   PFQ_SCHEDULE = [
       '0 3,7,11,15,19,23 * * *',
