@@ -1244,7 +1244,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
             'binpkg—run emerge on the package to rebuild. See more info at '
             'https://dev.chromium.org/chromium-os/licensing',
             sln, pkg.fullnamerev)
-        raise e
+        cros_build_lib.Die(e)
       license_pointers.append(
           "<li><a href='#%s'>%s License %s</a></li>" % (
               sln, license_type, sln))
