@@ -5,4 +5,4 @@
 set -eu
 readonly rootdir=$(cd "$(dirname "$(readlink -f "$0")")/.."; pwd)
 export PYTHONPATH=$rootdir/venv
-exec vpython -vpython-spec "$rootdir/.vpython" "$@"
+exec vpython3 -vpython-spec "$rootdir/.vpython" "$@"
