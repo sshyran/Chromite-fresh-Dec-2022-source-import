@@ -348,7 +348,15 @@ def SafeUnlink(path, sudo=False):
       raise
 
   # If we're still here, we're falling back to sudo.
-  cros_build_lib.sudo_run(['rm', '--', path], print_cmd=False, stderr=True)
+  try:
+    cros_build_lib.sudo_run(['rm', '--', path], print_cmd=False, stderr=True)
+  except cros_build_lib.RunCommandError as e:
+    # If the dir is inaccessible to non-root users, we'd end up here.
+    if b'No such file or directory' in e.stderr:
+      return False
+
+    raise
+
   return True
 
 

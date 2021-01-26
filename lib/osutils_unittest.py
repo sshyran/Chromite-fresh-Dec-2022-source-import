@@ -149,23 +149,34 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
   def testSafeUnlink(self):
     """Test unlinking files work (existing or not)."""
-    def f(dirname, sudo=False):
-      dirname = os.path.join(self.tempdir, dirname)
-      path = os.path.join(dirname, 'foon')
-      os.makedirs(dirname)
-      open(path, 'w').close()
-      self.assertExists(path)
-      if sudo:
-        cros_build_lib.sudo_run(
-            ['chown', 'root:root', '-R', '--', dirname], print_cmd=False)
-        self.assertRaises(EnvironmentError, os.unlink, path)
-      self.assertTrue(osutils.SafeUnlink(path, sudo=sudo))
-      self.assertNotExists(path)
-      self.assertFalse(osutils.SafeUnlink(path))
-      self.assertNotExists(path)
+    def f(sudo=False):
+      with osutils.TempDir(sudo_rm=sudo) as dirname:
+        path = os.path.join(dirname, 'foon')
+        osutils.Touch(path, makedirs=True)
+        self.assertExists(path)
+        if sudo:
+          osutils.Chown(dirname, user='root', group='root', recursive=False)
+          self.assertRaises(EnvironmentError, os.unlink, path)
+        self.assertTrue(osutils.SafeUnlink(path, sudo=sudo))
+        self.assertNotExists(path)
+        self.assertFalse(osutils.SafeUnlink(path))
+        self.assertNotExists(path)
 
-    f('nonsudo', False)
-    f('sudo', True)
+    f(False)
+    f(True)
+
+  def testSafeUnlinkSudoInaccessible(self):
+    """Test unlinking files work in a dir only root can read."""
+    with osutils.TempDir(sudo_rm=True) as dirname:
+      path = os.path.join(dirname, 'exists')
+      osutils.Touch(path, mode=0o000)
+      os.chmod(dirname, 0o000)
+      self.assertRaises(EnvironmentError, os.unlink, path)
+      self.assertTrue(osutils.SafeUnlink(path, sudo=True))
+      self.assertFalse(osutils.SafeUnlink(path, sudo=True))
+
+      os.chmod(dirname, 0o700)
+      self.assertNotExists(path)
 
   def testSafeMakedirs(self):
     """Test creating directory trees work (existing or not)."""
