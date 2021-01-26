@@ -20,6 +20,10 @@ import warnings
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
+
 warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 
 # Max amount of data we're hold in the buffer at a given time.
