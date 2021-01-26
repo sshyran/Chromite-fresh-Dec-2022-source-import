@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import errno
 import os
+import shutil
 
 import mock
 
@@ -18,7 +19,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from chromite.lib import patch_unittest
 
 
 class ManifestMock(partial_mock.PartialMock):
@@ -557,26 +557,35 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
       self.assertRaises(cros_build_lib.RunCommandError, self._RunGitPush)
 
 
-class GitIntegrationTest(patch_unittest.GitRepoPatchTestCase):
+class GitIntegrationTest(cros_test_lib.TempDirTestCase):
   """Tests that git library functions work with actual git repos."""
 
-  def testIsReachableTrue(self):
-    git1 = self._MakeRepo('git1', self.source)
-    patch1 = self.CommitFile(git1, 'foo', 'foo')
-    patch2 = self.CommitFile(git1, 'bar', 'bar')
-    self.assertTrue(git.IsReachable(git1, patch1.sha1, patch2.sha1))
+  def setUp(self):
+    self.source = os.path.join(self.tempdir, 'src')
+    git.Init(self.source)
+    # Nerf any hooks the OS might have installed on us as they aren't going to
+    # be useful to us, just slow things down.
+    shutil.rmtree(os.path.join(self.source, '.git', 'hooks'))
+    cros_build_lib.run(
+        ['git', 'commit', '--allow-empty', '-m', 'initial commit'],
+        cwd=self.source, print_cmd=False, capture_output=True)
 
-  def testIsReachableFalse(self):
-    git1 = self._MakeRepo('git1', self.source)
-    patch1 = self.CommitFile(git1, 'foo', 'foo')
-    patch2 = self.CommitFile(git1, 'bar', 'bar')
-    self.assertFalse(git.IsReachable(git1, patch2.sha1, patch1.sha1))
+  def _CommitFile(self, repo, filename, content):
+    osutils.WriteFile(os.path.join(repo, filename), content)
+    git.AddPath(os.path.join(repo, filename))
+    git.Commit(repo, 'commit %s' % (cros_build_lib.GetRandomString(),))
+    return git.GetGitRepoRevision(repo)
+
+  def testIsReachable(self):
+    sha1 = self._CommitFile(self.source, 'foo', 'foo')
+    sha2 = self._CommitFile(self.source, 'bar', 'bar')
+    self.assertTrue(git.IsReachable(self.source, sha1, sha2))
+    self.assertFalse(git.IsReachable(self.source, sha2, sha1))
 
   def testDoesCommitExistInRepoWithAmbiguousBranchName(self):
-    git1 = self._MakeRepo('git1', self.source)
-    git.CreateBranch(git1, 'peach', track=True)
-    self.CommitFile(git1, 'peach', 'Keep me.')
-    self.assertTrue(git.DoesCommitExistInRepo(git1, 'peach'))
+    git.CreateBranch(self.source, 'peach', track=True)
+    self._CommitFile(self.source, 'peach', 'Keep me.')
+    self.assertTrue(git.DoesCommitExistInRepo(self.source, 'peach'))
 
 
 class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
