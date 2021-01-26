@@ -3011,6 +3011,19 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       unittests=False,
   )
 
+  site_config.Add(
+      'hatch-arc-r-android-rvc-pre-flight-branch',
+      site_config.templates.pre_flight_branch,
+      display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
+      boards=['hatch-arc-r'],
+      sync_chrome=True,
+      android_rev=constants.ANDROID_REV_LATEST,
+      android_package='android-vm-rvc',
+      android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
+      prebuilts=False,
+      unittests=False,
+  )
+
   site_config.AddWithoutTemplate(
       'chromeos-infra-go',
       site_config.templates.no_hwtest_builder,
@@ -3175,7 +3188,8 @@ def BranchScheduleConfig():
 
   RELEASES = [
       ('release-R89-13729.B',
-       ['grunt-android-pi-pre-flight-branch'],
+       ['grunt-android-pi-pre-flight-branch',
+        'hatch-arc-r-android-rvc-pre-flight-branch'],
        '',
        [],
        [],
