@@ -438,7 +438,7 @@ def BundleTestUpdatePayloads(image_path, output_dir):
     list[str] - The list of generated payloads.
   """
   payloads = GenerateTestPayloads(image_path, output_dir, full=True,
-                                  stateful=True, delta=True)
+                                  stateful=True, delta=True, dlc=True)
   payloads.extend(GenerateQuickProvisionPayloads(image_path, output_dir))
 
   return payloads
