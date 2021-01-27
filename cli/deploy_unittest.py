@@ -12,6 +12,8 @@ import multiprocessing
 import os
 import sys
 
+import mock
+
 from chromite.cli import command
 from chromite.cli import deploy
 from chromite.lib import cros_build_lib
@@ -90,8 +92,8 @@ class ChromiumOSDeviceHandlerFake(object):
 
 class BrilloDeployOperationFake(deploy.BrilloDeployOperation):
   """Fake for deploy.BrilloDeployOperation."""
-  def __init__(self, pkg_count, emerge, queue):
-    super(BrilloDeployOperationFake, self).__init__(pkg_count, emerge)
+  def __init__(self, emerge, queue):
+    super(BrilloDeployOperationFake, self).__init__(emerge)
     self._queue = queue
 
   def ParseOutput(self, output=None):
@@ -344,7 +346,9 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
     self.get_packages_paths.assert_called_once_with(
         [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
     # Check that deploy._Emerge is called the right number of times.
-    self.assertEqual(self.emerge.call_count, len(packages))
+    self.emerge.assert_called_once_with(mock.ANY, [
+        '/path/to/foo-1.2.3.tbz2', '/path/to/bar-1.2.5.tbz2',
+        '/path/to/foobar-2.0.tbz2'], '/', extra_args=None)
     self.assertEqual(self.unmerge.call_count, 0)
 
   def testDeployEmergeDLC(self):
@@ -390,7 +394,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
     self.get_packages_paths.assert_called_once_with(
         [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
     # Check that deploy._Emerge is called the right number of times.
-    self.assertEqual(self.emerge.call_count, len(packages))
+    self.assertEqual(self.emerge.call_count, 1)
     self.assertEqual(self.unmerge.call_count, 0)
 
     self.assertEqual(self.device.device.cmds,
@@ -459,7 +463,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     queue = multiprocessing.Queue()
     # Emerge one package.
-    op = BrilloDeployOperationFake(1, True, queue)
+    op = BrilloDeployOperationFake(True, queue)
 
     with self.OutputCapturer():
       op.Run(func, queue)
@@ -477,7 +481,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     queue = multiprocessing.Queue()
     # Unmerge one package.
-    op = BrilloDeployOperationFake(1, False, queue)
+    op = BrilloDeployOperationFake(False, queue)
 
     with self.OutputCapturer():
       op.Run(func, queue)

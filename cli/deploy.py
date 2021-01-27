@@ -67,15 +67,19 @@ class BrilloDeployOperation(operation.ProgressBarOperation):
   """ProgressBarOperation specific for brillo deploy."""
   # These two variables are used to validate the output in the VM integration
   # tests. Changes to the output must be reflected here.
-  MERGE_EVENTS = ['NOTICE: Copying', 'NOTICE: Installing', 'WARNING: Ignoring',
-                  'emerge --usepkg', 'has been installed.']
+  MERGE_EVENTS = (
+      'Preparing local packages',
+      'NOTICE: Copying binpkgs',
+      'NOTICE: Installing',
+      'been installed.',
+      'Please restart any updated',
+  )
   UNMERGE_EVENTS = ['NOTICE: Unmerging', 'has been uninstalled.']
 
-  def __init__(self, pkg_count, emerge):
+  def __init__(self, emerge):
     """Construct BrilloDeployOperation object.
 
     Args:
-      pkg_count: number of packages being built.
       emerge: True if emerge, False is unmerge.
     """
     super(BrilloDeployOperation, self).__init__()
@@ -83,7 +87,7 @@ class BrilloDeployOperation(operation.ProgressBarOperation):
       self._events = self.MERGE_EVENTS
     else:
       self._events = self.UNMERGE_EVENTS
-    self._total = pkg_count * len(self._events)
+    self._total = len(self._events)
     self._completed = 0
 
   def ParseOutput(self, output=None):
@@ -758,40 +762,51 @@ print(json.dumps(pkg_info))
     return sorted_installs, listed_installs, num_updates, install_attrs
 
 
-def _Emerge(device, pkg_path, root, extra_args=None):
-  """Copies |pkg| to |device| and emerges it.
+def _Emerge(device, pkg_paths, root, extra_args=None):
+  """Copies |pkg_paths| to |device| and emerges them.
 
   Args:
     device: A ChromiumOSDevice object.
-    pkg_path: A path to a binary package.
+    pkg_paths: (Local) paths to binary packages.
     root: Package installation root path.
     extra_args: Extra arguments to pass to emerge.
 
   Raises:
     DeployError: Unrecoverable error during emerge.
   """
+  def path_to_name(pkg_path):
+    return os.path.basename(pkg_path)
+  def path_to_category(pkg_path):
+    return os.path.basename(os.path.dirname(pkg_path))
+
+  pkg_names = ', '.join(path_to_name(x) for x in pkg_paths)
+
   pkgroot = os.path.join(device.work_dir, 'packages')
-  pkg_name = os.path.basename(pkg_path)
-  pkg_dirname = os.path.basename(os.path.dirname(pkg_path))
-  pkg_dir = os.path.join(pkgroot, pkg_dirname)
   portage_tmpdir = os.path.join(device.work_dir, 'portage-tmp')
   # Clean out the dirs first if we had a previous emerge on the device so as to
   # free up space for this emerge.  The last emerge gets implicitly cleaned up
   # when the device connection deletes its work_dir.
   device.run(
-      ['rm', '-rf', pkg_dir, portage_tmpdir, '&&',
-       'mkdir', '-p', pkg_dir, portage_tmpdir], remote_sudo=True)
-
-  # This message is read by BrilloDeployOperation.
-  logging.notice('Copying %s to device.', pkg_name)
-  device.CopyToDevice(pkg_path, pkg_dir, mode='rsync', remote_sudo=True,
-                      compress=False)
+      f'cd {device.work_dir} && '
+      f'rm -rf packages portage-tmp && '
+      f'mkdir -p portage-tmp packages && '
+      f'cd packages && '
+      f'mkdir -p {" ".join(set(path_to_category(x) for x in pkg_paths))}',
+      shell=True, remote_sudo=True)
 
   logging.info('Use portage temp dir %s', portage_tmpdir)
 
   # This message is read by BrilloDeployOperation.
-  logging.notice('Installing %s.', pkg_name)
-  pkg_path = os.path.join(pkg_dir, pkg_name)
+  logging.notice('Copying binpkgs to device.')
+  for pkg_path in pkg_paths:
+    pkg_name = path_to_name(pkg_path)
+    logging.info('Copying %s', pkg_name)
+    pkg_dir = os.path.join(pkgroot, path_to_category(pkg_path))
+    device.CopyToDevice(pkg_path, pkg_dir, mode='rsync', remote_sudo=True,
+                        compress=False)
+
+  # This message is read by BrilloDeployOperation.
+  logging.notice('Installing: %s', pkg_names)
 
   # We set PORTAGE_CONFIGROOT to '/usr/local' because by default all
   # chromeos-base packages will be skipped due to the configuration
@@ -807,11 +822,12 @@ def _Emerge(device, pkg_path, root, extra_args=None):
       'PORTDIR': device.work_dir,
       'CONFIG_PROTECT': '-*',
   }
+
   # --ignore-built-slot-operator-deps because we don't rebuild everything.
   # It can cause errors, but that's expected with cros deploy since it's just a
   # best effort to prevent developers avoid rebuilding an image every time.
-  cmd = ['emerge', '--usepkg', '--ignore-built-slot-operator-deps=y', pkg_path,
-         '--root=%s' % root]
+  cmd = ['emerge', '--usepkg', '--ignore-built-slot-operator-deps=y', '--root',
+         root] + [os.path.join(pkgroot, *x.split('/')[-2:]) for x in pkg_paths]
   if extra_args:
     cmd.append(extra_args)
 
@@ -834,10 +850,11 @@ def _Emerge(device, pkg_path, root, extra_args=None):
                % (pattern, pkg_name))
       cros_build_lib.Die(error)
   except Exception:
-    logging.error('Failed to emerge package %s', pkg_name)
+    logging.error('Failed to emerge packages %s', pkg_names)
     raise
   else:
-    logging.notice('%s has been installed.', pkg_name)
+    # This message is read by BrilloDeployOperation.
+    logging.notice('Packages have been installed.')
 
 
 def _RestoreSELinuxContext(device, pkgpath, root):
@@ -961,8 +978,13 @@ def _ConfirmDeploy(num_updates):
 def _EmergePackages(pkgs, device, strip, sysroot, root, board, emerge_args):
   """Call _Emerge for each package in pkgs."""
   dlc_deployed = False
-  for pkg_path in _GetPackagesPaths(pkgs, strip, sysroot):
-    _Emerge(device, pkg_path, root, extra_args=emerge_args)
+  # This message is read by BrilloDeployOperation.
+  logging.info('Preparing local packages for transfer.')
+  pkg_paths = _GetPackagesPaths(pkgs, strip, sysroot)
+  # Install all the packages in one pass so inter-package blockers work.
+  _Emerge(device, pkg_paths, root, extra_args=emerge_args)
+  logging.info('Updating SELinux settings & DLC images.')
+  for pkg_path in pkg_paths:
     if device.IsSELinuxAvailable():
       _RestoreSELinuxContext(device, pkg_path, root)
 
@@ -1216,7 +1238,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
 
       # Call the function with the progress bar or with normal output.
       if command.UseProgressBar():
-        op = BrilloDeployOperation(len(pkgs), emerge)
+        op = BrilloDeployOperation(emerge)
         op.Run(func, log_level=logging.DEBUG)
       else:
         func()
@@ -1229,6 +1251,7 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
               'contexts (labels) of a file will require building a new image '
               'and flashing the image onto the device.')
 
+      # This message is read by BrilloDeployOperation.
       logging.warning('Please restart any updated services on the device, '
                       'or just reboot it.')
   except Exception:
