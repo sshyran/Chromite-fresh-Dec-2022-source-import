@@ -824,6 +824,7 @@ class RemoteDevice(object):
         ['PATH=%s:$PATH which' % DEV_BIN_PATHS, binary], check=False)
     return result.returncode == 0
 
+  @memoize.MemoizedSingleCall
   def HasRsync(self):
     """Checks if rsync exists on the device."""
     return self.HasProgramInPath('rsync')
@@ -838,6 +839,7 @@ class RemoteDevice(object):
                                       capture_output=True)
     return re.search(r'Speed: \d+000Mb/s', result.output)
 
+  @memoize.MemoizedSingleCall
   def IsSELinuxAvailable(self):
     """Check whether the device has SELinux compiled in."""
     # Note that SELinux can be enabled for some devices that lack SELinux

@@ -388,13 +388,13 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.rsh_mock.call_count, 2)
 
-  def testSELinux(self):
-    """Tests behavior of IsSELinuxAvailable() and IsSELinuxEnforced()."""
+  def testSELinuxAvailable(self):
+    """Test IsSELinuxAvailable() and IsSELinuxEnforced() when available."""
     self.rsh_mock.AddCmdResult(
         partial_mock.ListRegex('which restorecon'), returncode=0)
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('test -f'), returncode=0)
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
-      self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=0)
       self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
           returncode=0, output='1')
@@ -402,15 +402,18 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
       self.assertEqual(device.IsSELinuxEnforced(), True)
 
       self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=0)
-      self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
           returncode=0, output='0')
       self.assertEqual(device.IsSELinuxAvailable(), True)
       self.assertEqual(device.IsSELinuxEnforced(), False)
 
-      self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=1)
+  def testSELinuxUnavailable(self):
+    """Test IsSELinuxAvailable() and IsSELinuxEnforced() when unavailable."""
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('which restorecon'), returncode=0)
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('test -f'), returncode=1)
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.assertEqual(device.IsSELinuxAvailable(), False)
       self.assertEqual(device.IsSELinuxEnforced(), False)
 
