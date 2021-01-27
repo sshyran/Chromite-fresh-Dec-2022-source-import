@@ -1073,12 +1073,13 @@ def _GetDLCInfo(device, pkg_path, from_dut):
   if from_dut:
     # On DUT, |pkg_path| is the directory which contains environment file.
     environment_path = os.path.join(pkg_path, _ENVIRONMENT_FILENAME)
-    result = device.run(['test', '-f', environment_path],
-                        check=False, encoding=None)
-    if result.returncode == 1:
+    result = device.run(['bzip2', '-d', '-c', environment_path], check=False,
+                        encoding=None)
+    if result.returncode:
       # The package is not installed on DUT yet. Skip extracting info.
-      return None, None
-    result = device.run(['bzip2', '-d', '-c', environment_path], encoding=None)
+      if not result.stdout and b'No such file or directory' in result.stderr:
+        return None, None
+      result.check_returncode()
     environment_content = result.output
   else:
     # On host, pkg_path is tbz2 file which contains environment file.
