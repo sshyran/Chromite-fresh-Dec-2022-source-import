@@ -1039,13 +1039,14 @@ class RemoteDevice(object):
     result = self.BaseRunCommand(cmd, remote_sudo=True, capture_output=True)
     return int(result.output.split()[0])
 
-  def CatFile(self, path, max_size=1000000):
+  def CatFile(self, path, max_size=1000000, encoding='utf-8'):
     """Reads the file on device to string if its size is less than |max_size|.
 
     Args:
       path: The full path to the file on the device to read.
       max_size: Read the file only if its size is less than |max_size| in bytes.
         If None, do not check its size and always cat the path.
+      encoding: Encoding for return value.  Use None to get bytes.
 
     Returns:
       A string of the file content.
@@ -1063,8 +1064,8 @@ class RemoteDevice(object):
         raise CatFileError('File "%s" is larger than %d bytes' %
                            (path, max_size))
 
-    result = self.BaseRunCommand(['cat', path], remote_sudo=True,
-                                 check=False, capture_output=True)
+    result = self.base_run(['cat', path], remote_sudo=True, check=False,
+                           capture_output=True, encoding=encoding)
     if result.returncode:
       raise CatFileError('Failed to read file "%s" on the device' % path)
     return result.output
