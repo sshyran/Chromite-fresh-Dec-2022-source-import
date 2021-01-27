@@ -7,13 +7,9 @@
 from __future__ import print_function
 
 import os
-import sys
 
 from chromite.lib import cloud_trace
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class SpanTest(cros_test_lib.MockTestCase):

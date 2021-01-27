@@ -13,7 +13,6 @@ import json
 import os
 import random
 import re
-import sys
 
 import google.protobuf.internal.well_known_types as types
 from infra_libs import ts_mon
@@ -21,9 +20,6 @@ from infra_libs import ts_mon
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import structured
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 SPANS_LOG = '/var/log/trace/{pid}-{span_id}.json'
