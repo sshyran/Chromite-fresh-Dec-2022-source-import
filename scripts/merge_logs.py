@@ -153,20 +153,31 @@ AutoservPatterns = [
     Pattern(AUTOSERV_DATE_RE, ParseAutoservDate, lambda m: m.group(1))
 ]
 
+# 2021-07-31T07:28:33.409065Z VERBOSE1 chrome[1694:1694]: [main.cc(480)]
+CHROME_DATE_NEW_RE = re.compile(
+    r'^(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\d\d\d\dZ) ')
+
 # [8525:8525:0731/072833.409065:VERBOSE1:gaia_screen_handler.cc(480)] OnPortalDetectionCompleted Online
-CHROME_DATE_RE = re.compile(r'^\[\d+:\d+:(\d{4}/\d{6}.\d{6}):')
+CHROME_DATE_OLD_RE = re.compile(r'^\[\d+:\d+:(\d{4}/\d{6}.\d{6}):')
 ChromePatterns = [
-    Pattern(CHROME_DATE_RE, ParseChromeDate, lambda m: m.group(1))
+    Pattern(CHROME_DATE_NEW_RE, ParseDate, lambda m: m.group(1)),
+    Pattern(CHROME_DATE_OLD_RE, ParseChromeDate, lambda m: m.group(1)),
 ]
 
 # 2017/07/31 09:18:08.871 DEBUG|     remote_access:0659| The temporary working directory on the device is /mnt/stateful_partition/unencrypted/preserve/cros-update/tmp.S7y5vF3xQE
 CROS_DATE_RE = re.compile(r'^(\d\d\d\d/\d\d/\d\d \d\d:\d\d:\d\d.\d\d\d) ')
 CrOSPatterns = [Pattern(CROS_DATE_RE, ParseDate, lambda m: m.group(1))]
 
-# [0731/070232:INFO:main.cc(289)] System uptime: 5s
-POWERD_DATE_RE = re.compile(r'^\[(\d{4}/\d{6}):')
+# 2021-01-27T05:38:56.751227Z INFO powerd: [main.cc(289)] System uptime: 5s
+POWERD_DATE_NEW_RE = re.compile(
+    r'^(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\d\d\d\dZ) ')
+
+# [0127/053856:INFO:main.cc(289)] System uptime: 5s
+POWERD_DATE_OLD_RE = re.compile(r'^\[(\d{4}/\d{6}):')
+
 PowerdPatterns = [
-    Pattern(POWERD_DATE_RE, ParsePowerdDate, lambda m: m.group(1))
+    Pattern(POWERD_DATE_NEW_RE, ParseDate, lambda m: m.group(1)),
+    Pattern(POWERD_DATE_OLD_RE, ParsePowerdDate, lambda m: m.group(1)),
 ]
 
 # 2017-07-31 07:00:46,650 - DEBUG - Running hook: /usr/local/bin/hooks/check_ethernet.hook
