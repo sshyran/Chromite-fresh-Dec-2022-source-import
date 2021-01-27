@@ -873,9 +873,6 @@ def _RestoreSELinuxContext(device, pkgpath, root):
     pkgpath: path to tarball
     root: Package installation root path.
   """
-  enforced = device.IsSELinuxEnforced()
-  if enforced:
-    device.run(['setenforce', '0'])
   pkgroot = os.path.join(device.work_dir, 'packages')
   pkg_dirname = os.path.basename(os.path.dirname(pkgpath))
   pkgpath_device = os.path.join(pkgroot, pkg_dirname, os.path.basename(pkgpath))
@@ -885,8 +882,6 @@ def _RestoreSELinuxContext(device, pkgpath, root):
        'tar', 'tf', pkgpath_device, '|',
        'restorecon', '-i', '-f', '-'],
       remote_sudo=True)
-  if enforced:
-    device.run(['setenforce', '1'])
 
 
 def _GetPackagesByCPV(cpvs, strip, sysroot):
@@ -983,6 +978,13 @@ def _ConfirmDeploy(num_updates):
 
 def _EmergePackages(pkgs, device, strip, sysroot, root, board, emerge_args):
   """Call _Emerge for each package in pkgs."""
+  if device.IsSELinuxAvailable():
+    enforced = device.IsSELinuxEnforced()
+    if enforced:
+      device.run(['setenforce', '0'])
+  else:
+    enforced = False
+
   dlc_deployed = False
   # This message is read by BrilloDeployOperation.
   logging.info('Preparing local packages for transfer.')
@@ -1002,6 +1004,9 @@ def _EmergePackages(pkgs, device, strip, sysroot, root, board, emerge_args):
       device.run(['test', '-d', '/build/rootfs', '&&', 'rmdir',
                   '--ignore-fail-on-non-empty', '/build/rootfs', '/build'],
                  check=False)
+
+  if enforced:
+    device.run(['setenforce', '1'])
 
   # Restart dlcservice so it picks up the newly installed DLC modules (in case
   # we installed new DLC images).

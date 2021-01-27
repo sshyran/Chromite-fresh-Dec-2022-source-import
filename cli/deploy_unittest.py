@@ -373,11 +373,9 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     def GetRestoreconCommand(pkgfile):
       remote_path = os.path.join('/testdir/packages/to/', pkgfile)
-      return [['setenforce', '0'],
-              ['cd', '/', '&&',
+      return [['cd', '/', '&&',
                'tar', 'tf', remote_path, '|',
-               'restorecon', '-i', '-f', '-'],
-              ['setenforce', '1']]
+               'restorecon', '-i', '-f', '-']]
 
     self.device.device.selinux_available = True
     packages = ['some/foo-1.2.3', _BINPKG, 'some/foobar-2.0']
@@ -398,9 +396,11 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
     self.assertEqual(self.unmerge.call_count, 0)
 
     self.assertEqual(self.device.device.cmds,
+                     [['setenforce', '0']] +
                      GetRestoreconCommand('foo-1.2.3.tbz2') +
                      GetRestoreconCommand('bar-1.2.5.tbz2') +
-                     GetRestoreconCommand('foobar-2.0.tbz2'))
+                     GetRestoreconCommand('foobar-2.0.tbz2') +
+                     [['setenforce', '1']])
 
   def testDeployUnmerge(self):
     """Test that deploy._Unmerge is called for each package."""
