@@ -118,37 +118,39 @@ def _GetGclientURLs(internal, rev):
   """Get the URLs and deps_file values to use in gclient file.
 
   See WriteConfigFile below.
-  """
-  results = []
 
+  Returns:
+    Tuple of (name, url, deps_file).
+  """
   if rev is None or git.IsSHA1(rev) or rev == 'HEAD':
     # Regular chromium checkout; src may float to origin/master or be pinned.
     url = constants.CHROMIUM_GOB_URL
 
     if rev:
       url += ('@' + rev)
-    results.append(('src', url, '.DEPS.git'))
-    if internal:
-      results.append(
-          ('src-internal', constants.CHROME_INTERNAL_GOB_URL, '.DEPS.git'))
-  elif internal:
-    # Internal buildspec: check out the buildspec repo and set deps_file to
-    # the path to the desired release spec.
-    site_params = config_lib.GetSiteParams()
-    url = site_params.INTERNAL_GOB_URL + '/chrome/tools/buildspec.git'
-
-    # Chromium switched to DEPS at version 45.0.2432.3.
-    deps_file = '.DEPS.git' if BuildspecUsesDepsGit(rev) else 'DEPS'
-
-    results.append(('CHROME_DEPS', url, 'releases/%s/%s' % (rev, deps_file)))
+    return 'src', url, None
   else:
-    # External buildspec: use the main chromium src repository, pinned to the
-    # release tag, with deps_file set to .DEPS.git (which is created by
-    # publish_deps.py).
-    url = constants.CHROMIUM_GOB_URL + '@refs/tags/' + rev
-    results.append(('src', url, '.DEPS.git'))
+    try:
+      major = int(rev.split('.')[0])
+    except ValueError:
+      major = None
+    # Starting with m90, start using the normal gclient fetch process rather
+    # than buildspecs. But keep using buildspecs for older versions for safety.
+    if major and major < 90 and internal:
+      # Internal buildspec: check out the buildspec repo and set deps_file to
+      # the path to the desired release spec.
+      site_params = config_lib.GetSiteParams()
+      url = site_params.INTERNAL_GOB_URL + '/chrome/tools/buildspec.git'
 
-  return results
+      # Chromium switched to DEPS at version 45.0.2432.3.
+      deps_file = '.DEPS.git' if BuildspecUsesDepsGit(rev) else 'DEPS'
+
+      return 'CHROME_DEPS', url, 'releases/%s/%s' % (rev, deps_file)
+    else:
+      # Normal gclient fetch process: use the main chromium src repository,
+      # pinned to the release tag.
+      url = constants.CHROMIUM_GOB_URL + '@' + rev
+      return 'src', url, None
 
 
 def _GetGclientSolutions(internal, rev, template, managed):
@@ -156,27 +158,22 @@ def _GetGclientSolutions(internal, rev, template, managed):
 
   See WriteConfigFile below.
   """
-  urls = _GetGclientURLs(internal, rev)
+  name, url, deps_file = _GetGclientURLs(internal, rev)
   solutions = LoadGclientFile(template) if template is not None else []
-  for (name, url, deps_file) in urls:
-    solution = _FindOrAddSolution(solutions, name)
-    # Always override 'url' and 'deps_file' of a solution as we need to specify
-    # the revision information.
-    solution['url'] = url
-    if deps_file:
-      solution['deps_file'] = deps_file
-
-      # TODO(engeg@): Remove this ugly hack once we get an acceptable build.
-      #               See crbug.com/1044411 for more information. We landed
-      #               this custom dep here: crrev.com/i/3304125.
-      if deps_file == 'releases/51.0.2701.0/DEPS':
-        solution['deps_file'] = 'releases/51.0.2701.0/DEPS_crbug_1044411'
-
-    # Use 'custom_deps' and 'custom_vars' of a solution when specified by the
-    # template gclient file.
-    solution.setdefault('custom_deps', {})
-    solution.setdefault('custom_vars', {})
-    solution.setdefault('managed', managed)
+  solution = _FindOrAddSolution(solutions, name)
+  # Always override 'url' and 'deps_file' of a solution as we need to specify
+  # the revision information.
+  solution['url'] = url
+  if deps_file:
+    solution['deps_file'] = deps_file
+  # Use 'custom_deps' and 'custom_vars' of a solution when specified by the
+  # template gclient file.
+  solution.setdefault('custom_deps', {})
+  solution.setdefault('custom_vars', {})
+  if internal:
+    solution['custom_vars'].setdefault('checkout_src_internal', True)
+    solution['custom_vars'].setdefault('checkout_google_internal', True)
+  solution.setdefault('managed', managed)
 
   return solutions
 
