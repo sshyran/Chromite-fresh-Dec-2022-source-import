@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromiumos',
   syntax='proto3',
   serialized_options=_b('Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos'),
-  serialized_pb=_b('\n\x17\x63hromiumos/common.proto\x12\nchromiumos\"\x1b\n\x0b\x42uildTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xca\x01\n\x06\x43hroot\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x11\n\tcache_dir\x18\x02 \x01(\t\x12)\n\x03\x65nv\x18\x03 \x01(\x0b\x32\x1c.chromiumos.Chroot.ChrootEnv\x12\x12\n\nchrome_dir\x18\x04 \x01(\t\x1aZ\n\tChrootEnv\x12&\n\tuse_flags\x18\x01 \x03(\x0b\x32\x13.chromiumos.UseFlag\x12%\n\x08\x66\x65\x61tures\x18\x02 \x03(\x0b\x32\x13.chromiumos.FeatureJ\x04\x08\x05\x10\x06\"\x1a\n\x07\x46\x65\x61ture\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x01(\t\"\xcf\x02\n\nGomaConfig\x12\x10\n\x08goma_dir\x18\x01 \x01(\t\x12\x18\n\x10goma_client_json\x18\x02 \x01(\t\x12\x19\n\x11\x63hromeos_goma_dir\x18\x03 \x01(\t\x12:\n\rgoma_approach\x18\x04 \x01(\x0e\x32#.chromiumos.GomaConfig.GomaApproach\x12&\n\x07log_dir\x18\x05 \x01(\x0b\x32\x15.chromiumos.SyncedDir\x12\x12\n\nstats_file\x18\x06 \x01(\t\x12\x15\n\rcounterz_file\x18\x07 \x01(\t\"k\n\x0cGomaApproach\x12\x1d\n\x19GOMA_APPROACH_UNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x01\x12\x0c\n\x08RBE_PROD\x10\x02\x12\x0f\n\x0bRBE_STAGING\x10\x03\x12\x10\n\x0cRBE_CHROMEOS\x10\x04\"M\n\rGomaArtifacts\x12\x12\n\nstats_file\x18\x01 \x01(\t\x12\x15\n\rcounterz_file\x18\x02 \x01(\t\x12\x11\n\tlog_files\x18\x03 \x03(\t\"F\n\x0bPackageInfo\x12\x14\n\x0cpackage_name\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\"\x17\n\x07Profile\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xa8\x01\n\x10PackageIndexInfo\x12\x14\n\x0csnapshot_sha\x18\x01 \x01(\t\x12\x17\n\x0fsnapshot_number\x18\x02 \x01(\x05\x12-\n\x0c\x62uild_target\x18\x03 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x10\n\x08location\x18\x04 \x01(\t\x12$\n\x07profile\x18\x05 \x01(\x0b\x32\x13.chromiumos.Profile\"w\n\x04Path\x12\x0c\n\x04path\x18\x01 \x01(\t\x12+\n\x08location\x18\x02 \x01(\x0e\x32\x19.chromiumos.Path.Location\"4\n\x08Location\x12\x0f\n\x0bNO_LOCATION\x10\x00\x12\n\n\x06INSIDE\x10\x01\x12\x0b\n\x07OUTSIDE\x10\x02\",\n\nResultPath\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x18\n\tSyncedDir\x12\x0b\n\x03\x64ir\x18\x01 \x01(\t\"O\n\x0cGerritChange\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\x0e\n\x06\x63hange\x18\x03 \x01(\x03\x12\x10\n\x08patchset\x18\x04 \x01(\x03\"Y\n\rGitilesCommit\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x0b\n\x03ref\x18\x04 \x01(\t\x12\x10\n\x08position\x18\x05 \x01(\r\"\x17\n\x07UseFlag\x12\x0c\n\x04\x66lag\x18\x01 \x01(\t\"\x89\x02\n\x0eReleaseBuilder\x12\x39\n\tmilestone\x18\x01 \x01(\x0b\x32$.chromiumos.ReleaseBuilder.MilestoneH\x00\x12\x16\n\x0e\x62uild_schedule\x18\x02 \x01(\t\x1a\x8e\x01\n\tMilestone\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12\x45\n\x12target_branch_date\x18\x02 \x01(\x0b\x32).chromiumos.ReleaseBuilder.Milestone.Date\x12\x13\n\x0b\x62ranch_name\x18\x03 \x01(\t\x1a\x15\n\x04\x44\x61te\x12\r\n\x05value\x18\x01 \x01(\tB\x13\n\x11milestone_message\"?\n\x0fReleaseBuilders\x12,\n\x08\x62uilders\x18\x01 \x03(\x0b\x32\x1a.chromiumos.ReleaseBuilder\"&\n\nProtoBytes\x12\x18\n\x10serialized_proto\x18\x01 \x01(\x0c\"q\n\x1dPrepareForBuildAdditionalArgs\x12\x1c\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\tH\x00\x12\x18\n\x0ekernel_version\x18\x02 \x01(\tH\x00\x42\x18\n\x16prepare_for_build_args\"A\n\x0b\x41\x66\x64oRelease\x12\x1a\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\t\x12\x16\n\x0eimage_build_id\x18\x02 \x01(\x03\"\x97\x01\n\x13\x41rtifactProfileInfo\x12\x1c\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\tH\x00\x12\x18\n\x0ekernel_version\x18\x02 \x01(\tH\x00\x12/\n\x0c\x61\x66\x64o_release\x18\x03 \x01(\x0b\x32\x17.chromiumos.AfdoReleaseH\x00\x42\x17\n\x15\x61rtifact_profile_info\"\x88\"\n\x12\x41rtifactsByService\x12\x35\n\x06legacy\x18\x01 \x01(\x0b\x32%.chromiumos.ArtifactsByService.Legacy\x12;\n\ttoolchain\x18\x02 \x01(\x0b\x32(.chromiumos.ArtifactsByService.Toolchain\x12\x33\n\x05image\x18\x03 \x01(\x0b\x32$.chromiumos.ArtifactsByService.Image\x12\x37\n\x07package\x18\x04 \x01(\x0b\x32&.chromiumos.ArtifactsByService.Package\x12\x37\n\x07sysroot\x18\x05 \x01(\x0b\x32&.chromiumos.ArtifactsByService.Sysroot\x12\x31\n\x04test\x18\x06 \x01(\x0b\x32#.chromiumos.ArtifactsByService.Test\x12\x35\n\x0cprofile_info\x18\x07 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\x12\x39\n\x08\x66irmware\x18\x08 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\x1a\x8b\x05\n\x06Legacy\x12K\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactInfo\x12L\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactInfo\x1a\xd4\x01\n\x0c\x41rtifactInfo\x12J\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishConditionJ\x04\x08\x03\x10\x04\"\x8e\x02\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\r\n\tIMAGE_ZIP\x10\x01\x12\x17\n\x13TEST_UPDATE_PAYLOAD\x10\x02\x12\x12\n\x0e\x41UTOTEST_FILES\x10\x03\x12\x0e\n\nTAST_FILES\x10\x04\x12\x17\n\x13PINNED_GUEST_IMAGES\x10\x05\x12\x0c\n\x08\x46IRMWARE\x10\x06\x12\x0f\n\x0b\x45\x42UILD_LOGS\x10\x07\x12\x13\n\x0f\x43HROMEOS_CONFIG\x10\x08\x12\x0e\n\nCPE_REPORT\x10\t\x12\x12\n\x0eIMAGE_ARCHIVES\x10\n\x12\x13\n\x0f\x46PMCU_UNITTESTS\x10\x1b\x12\x0f\n\x0bGCE_TARBALL\x10\x1c\"\x04\x08\x0b\x10\x1a\"\x04\x08\x1d\x10\x1f\x1a\xff\x07\n\tToolchain\x12N\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactInfo\x12O\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactInfo\x1a\xd1\x01\n\x0c\x41rtifactInfo\x12M\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"\xfc\x04\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12$\n UNVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0b\x12\"\n\x1eVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0c\x12\x1e\n\x1a\x43HROME_CLANG_WARNINGS_FILE\x10\r\x12\x1c\n\x18UNVERIFIED_LLVM_PGO_FILE\x10\x0e\x12)\n%UNVERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x0f\x12\'\n#VERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x10\x12!\n\x1dVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x11\x12#\n\x1fUNVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x12\x12#\n\x1fUNVERIFIED_CHROME_CWP_AFDO_FILE\x10\x13\x12!\n\x1dVERIFIED_CHROME_CWP_AFDO_FILE\x10\x14\x12\x1e\n\x1aVERIFIED_RELEASE_AFDO_FILE\x10\x15\x12)\n%UNVERIFIED_CHROME_BENCHMARK_PERF_FILE\x10\x16\x12\x17\n\x13\x43HROME_DEBUG_BINARY\x10\x17\x12\x1a\n\x16TOOLCHAIN_WARNING_LOGS\x10\x18\x12)\n%CHROME_AFDO_PROFILE_FOR_ANDROID_LINUX\x10\x19\x12\x19\n\x15\x43LANG_CRASH_DIAGNOSES\x10\x1a\x12\x17\n\x13\x43OMPILER_RUSAGE_LOG\x10\x1d\"\x04\x08\x01\x10\n\"\x04\x08\x1b\x10\x1c\"\x04\x08\x1e\x10\x1f\x1a\x97\x03\n\x05Image\x12J\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactInfo\x12K\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactInfo\x1a\xcd\x01\n\x0c\x41rtifactInfo\x12I\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x9f\x03\n\x07Package\x12L\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactInfo\x12M\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactInfo\x1a\xcf\x01\n\x0c\x41rtifactInfo\x12K\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x9f\x03\n\x07Sysroot\x12L\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactInfo\x12M\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactInfo\x1a\xcf\x01\n\x0c\x41rtifactInfo\x12K\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x93\x03\n\x04Test\x12I\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactInfo\x12J\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactInfo\x1a\xcc\x01\n\x0c\x41rtifactInfo\x12H\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\xd4\x03\n\x08\x46irmware\x12M\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactInfo\x12N\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactInfo\x1a\xd0\x01\n\x0c\x41rtifactInfo\x12L\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"V\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x14\n\x10\x46IRMWARE_TARBALL\x10\x1e\x12\x19\n\x15\x46IRMWARE_TARBALL_INFO\x10\x1f\"\x04\x08\x01\x10\x1d\"W\n\x10PublishCondition\x12\x17\n\x13PUBLISH_UNSPECIFIED\x10\x00\x12\x16\n\x12PUBLISH_ON_SUCCESS\x10\x01\x12\x12\n\x0ePUBLISH_ALWAYS\x10\x02\"\xd1\x0f\n\x1aUploadedArtifactsByService\x12=\n\x06legacy\x18\x01 \x01(\x0b\x32-.chromiumos.UploadedArtifactsByService.Legacy\x12\x43\n\ttoolchain\x18\x02 \x01(\x0b\x32\x30.chromiumos.UploadedArtifactsByService.Toolchain\x12;\n\x05image\x18\x03 \x01(\x0b\x32,.chromiumos.UploadedArtifactsByService.Image\x12?\n\x07package\x18\x04 \x01(\x0b\x32..chromiumos.UploadedArtifactsByService.Package\x12?\n\x07sysroot\x18\x05 \x01(\x0b\x32..chromiumos.UploadedArtifactsByService.Sysroot\x12\x39\n\x04test\x18\x06 \x01(\x0b\x32+.chromiumos.UploadedArtifactsByService.Test\x12\x41\n\x08\x66irmware\x18\x07 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware\x1a\xd5\x01\n\x06Legacy\x12N\n\tartifacts\x18\x01 \x03(\x0b\x32;.chromiumos.UploadedArtifactsByService.Legacy.ArtifactPaths\x1a{\n\rArtifactPaths\x12I\n\rartifact_type\x18\x01 \x01(\x0e\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xde\x01\n\tToolchain\x12Q\n\tartifacts\x18\x01 \x03(\x0b\x32>.chromiumos.UploadedArtifactsByService.Toolchain.ArtifactPaths\x1a~\n\rArtifactPaths\x12L\n\rartifact_type\x18\x01 \x01(\x0e\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd2\x01\n\x05Image\x12M\n\tartifacts\x18\x01 \x03(\x0b\x32:.chromiumos.UploadedArtifactsByService.Image.ArtifactPaths\x1az\n\rArtifactPaths\x12H\n\rartifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd8\x01\n\x07Package\x12O\n\tartifacts\x18\x01 \x03(\x0b\x32<.chromiumos.UploadedArtifactsByService.Package.ArtifactPaths\x1a|\n\rArtifactPaths\x12J\n\rartifact_type\x18\x01 \x01(\x0e\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd8\x01\n\x07Sysroot\x12O\n\tartifacts\x18\x01 \x03(\x0b\x32<.chromiumos.UploadedArtifactsByService.Sysroot.ArtifactPaths\x1a|\n\rArtifactPaths\x12J\n\rartifact_type\x18\x01 \x01(\x0e\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xcf\x01\n\x04Test\x12L\n\tartifacts\x18\x01 \x03(\x0b\x32\x39.chromiumos.UploadedArtifactsByService.Test.ArtifactPaths\x1ay\n\rArtifactPaths\x12G\n\rartifact_type\x18\x01 \x01(\x0e\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xdb\x01\n\x08\x46irmware\x12P\n\tartifacts\x18\x01 \x03(\x0b\x32=.chromiumos.UploadedArtifactsByService.Firmware.ArtifactPaths\x1a}\n\rArtifactPaths\x12K\n\rartifact_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path*\xe0\x04\n\tImageType\x12\x18\n\x14IMAGE_TYPE_UNDEFINED\x10\x00\x12\x13\n\x0fIMAGE_TYPE_BASE\x10\x01\x12\x12\n\x0eIMAGE_TYPE_DEV\x10\x02\x12\x13\n\x0fIMAGE_TYPE_TEST\x10\x03\x12\x16\n\x12IMAGE_TYPE_BASE_VM\x10\x04\x12\x16\n\x12IMAGE_TYPE_TEST_VM\x10\x05\x12\x17\n\x13IMAGE_TYPE_RECOVERY\x10\x06\x12\x16\n\x12IMAGE_TYPE_FACTORY\x10\x07\x12\x17\n\x13IMAGE_TYPE_FIRMWARE\x10\x08\x12\x1c\n\x18IMAGE_TYPE_CR50_FIRMWARE\x10\t\x12\x1c\n\x18IMAGE_TYPE_BASE_GUEST_VM\x10\n\x12\x1c\n\x18IMAGE_TYPE_TEST_GUEST_VM\x10\x0b\x12\x12\n\x0eIMAGE_TYPE_DLC\x10\x0c\x12\x1b\n\x17IMAGE_TYPE_GSC_FIRMWARE\x10\r\x12\x1e\n\x1aIMAGE_TYPE_ACCESSORY_USBPD\x10\x0e\x12\x1e\n\x1aIMAGE_TYPE_ACCESSORY_RWSIG\x10\x0f\x12\x08\n\x04\x42\x41SE\x10\x01\x12\x07\n\x03\x44\x45V\x10\x02\x12\x08\n\x04TEST\x10\x03\x12\x0b\n\x07\x42\x41SE_VM\x10\x04\x12\x0b\n\x07TEST_VM\x10\x05\x12\x0c\n\x08RECOVERY\x10\x06\x12\x0b\n\x07\x46\x41\x43TORY\x10\x07\x12\x0c\n\x08\x46IRMWARE\x10\x08\x12\x11\n\rCR50_FIRMWARE\x10\t\x12\x11\n\rBASE_GUEST_VM\x10\n\x12\x11\n\rTEST_GUEST_VM\x10\x0b\x12\x07\n\x03\x44LC\x10\x0c\x12\x10\n\x0cGSC_FIRMWARE\x10\r\x1a\x02\x10\x01*m\n\x07\x43hannel\x12\x17\n\x13\x43HANNEL_UNSPECIFIED\x10\x00\x12\x12\n\x0e\x43HANNEL_STABLE\x10\x01\x12\x10\n\x0c\x43HANNEL_BETA\x10\x02\x12\x0f\n\x0b\x43HANNEL_DEV\x10\x03\x12\x12\n\x0e\x43HANNEL_CANARY\x10\x04*c\n\tDeltaType\x12\x11\n\rDELTA_UNKNOWN\x10\x00\x12\x0c\n\x08NO_DELTA\x10\x01\x12\x07\n\x03\x46SI\x10\x02\x12\r\n\tMILESTONE\x10\x03\x12\t\n\x05OMAHA\x10\x04\x12\x12\n\x0eSTEPPING_STONE\x10\x05*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03*f\n\x10\x41\x46\x44OArtifactType\x12\r\n\tNONE_TYPE\x10\x00\x12\r\n\tORDERFILE\x10\x01\x12\x12\n\x0e\x42\x45NCHMARK_AFDO\x10\x02\x12\x0f\n\x0bKERNEL_AFDO\x10\x03\x12\x0f\n\x0b\x43HROME_AFDO\x10\x04\x42\x36Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3')
+  serialized_pb=_b('\n\x17\x63hromiumos/common.proto\x12\nchromiumos\"\x1b\n\x0b\x42uildTarget\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xca\x01\n\x06\x43hroot\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x11\n\tcache_dir\x18\x02 \x01(\t\x12)\n\x03\x65nv\x18\x03 \x01(\x0b\x32\x1c.chromiumos.Chroot.ChrootEnv\x12\x12\n\nchrome_dir\x18\x04 \x01(\t\x1aZ\n\tChrootEnv\x12&\n\tuse_flags\x18\x01 \x03(\x0b\x32\x13.chromiumos.UseFlag\x12%\n\x08\x66\x65\x61tures\x18\x02 \x03(\x0b\x32\x13.chromiumos.FeatureJ\x04\x08\x05\x10\x06\"\x1a\n\x07\x46\x65\x61ture\x12\x0f\n\x07\x66\x65\x61ture\x18\x01 \x01(\t\"\xcf\x02\n\nGomaConfig\x12\x10\n\x08goma_dir\x18\x01 \x01(\t\x12\x18\n\x10goma_client_json\x18\x02 \x01(\t\x12\x19\n\x11\x63hromeos_goma_dir\x18\x03 \x01(\t\x12:\n\rgoma_approach\x18\x04 \x01(\x0e\x32#.chromiumos.GomaConfig.GomaApproach\x12&\n\x07log_dir\x18\x05 \x01(\x0b\x32\x15.chromiumos.SyncedDir\x12\x12\n\nstats_file\x18\x06 \x01(\t\x12\x15\n\rcounterz_file\x18\x07 \x01(\t\"k\n\x0cGomaApproach\x12\x1d\n\x19GOMA_APPROACH_UNSPECIFIED\x10\x00\x12\x0b\n\x07\x44\x45\x46\x41ULT\x10\x01\x12\x0c\n\x08RBE_PROD\x10\x02\x12\x0f\n\x0bRBE_STAGING\x10\x03\x12\x10\n\x0cRBE_CHROMEOS\x10\x04\"M\n\rGomaArtifacts\x12\x12\n\nstats_file\x18\x01 \x01(\t\x12\x15\n\rcounterz_file\x18\x02 \x01(\t\x12\x11\n\tlog_files\x18\x03 \x03(\t\"F\n\x0bPackageInfo\x12\x14\n\x0cpackage_name\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\"\x17\n\x07Profile\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xa8\x01\n\x10PackageIndexInfo\x12\x14\n\x0csnapshot_sha\x18\x01 \x01(\t\x12\x17\n\x0fsnapshot_number\x18\x02 \x01(\x05\x12-\n\x0c\x62uild_target\x18\x03 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x10\n\x08location\x18\x04 \x01(\t\x12$\n\x07profile\x18\x05 \x01(\x0b\x32\x13.chromiumos.Profile\"w\n\x04Path\x12\x0c\n\x04path\x18\x01 \x01(\t\x12+\n\x08location\x18\x02 \x01(\x0e\x32\x19.chromiumos.Path.Location\"4\n\x08Location\x12\x0f\n\x0bNO_LOCATION\x10\x00\x12\n\n\x06INSIDE\x10\x01\x12\x0b\n\x07OUTSIDE\x10\x02\",\n\nResultPath\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x18\n\tSyncedDir\x12\x0b\n\x03\x64ir\x18\x01 \x01(\t\"O\n\x0cGerritChange\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\x0e\n\x06\x63hange\x18\x03 \x01(\x03\x12\x10\n\x08patchset\x18\x04 \x01(\x03\"Y\n\rGitilesCommit\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x0b\n\x03ref\x18\x04 \x01(\t\x12\x10\n\x08position\x18\x05 \x01(\r\"\x17\n\x07UseFlag\x12\x0c\n\x04\x66lag\x18\x01 \x01(\t\"\xb8\x02\n\x0eReleaseBuilder\x12\x39\n\tmilestone\x18\x01 \x01(\x0b\x32$.chromiumos.ReleaseBuilder.MilestoneH\x00\x12\x16\n\x0e\x62uild_schedule\x18\x02 \x01(\t\x12\x38\n\x0f\x65xpiration_date\x18\x03 \x01(\x0b\x32\x1f.chromiumos.ReleaseBuilder.Date\x1a\x15\n\x04\x44\x61te\x12\r\n\x05value\x18\x01 \x01(\t\x1am\n\tMilestone\x12\x0e\n\x06number\x18\x01 \x01(\x05\x12;\n\x12target_branch_date\x18\x02 \x01(\x0b\x32\x1f.chromiumos.ReleaseBuilder.Date\x12\x13\n\x0b\x62ranch_name\x18\x03 \x01(\tB\x13\n\x11milestone_message\"?\n\x0fReleaseBuilders\x12,\n\x08\x62uilders\x18\x01 \x03(\x0b\x32\x1a.chromiumos.ReleaseBuilder\"&\n\nProtoBytes\x12\x18\n\x10serialized_proto\x18\x01 \x01(\x0c\"q\n\x1dPrepareForBuildAdditionalArgs\x12\x1c\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\tH\x00\x12\x18\n\x0ekernel_version\x18\x02 \x01(\tH\x00\x42\x18\n\x16prepare_for_build_args\"A\n\x0b\x41\x66\x64oRelease\x12\x1a\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\t\x12\x16\n\x0eimage_build_id\x18\x02 \x01(\x03\"\x97\x01\n\x13\x41rtifactProfileInfo\x12\x1c\n\x12\x63hrome_cwp_profile\x18\x01 \x01(\tH\x00\x12\x18\n\x0ekernel_version\x18\x02 \x01(\tH\x00\x12/\n\x0c\x61\x66\x64o_release\x18\x03 \x01(\x0b\x32\x17.chromiumos.AfdoReleaseH\x00\x42\x17\n\x15\x61rtifact_profile_info\"\xb2\"\n\x12\x41rtifactsByService\x12\x35\n\x06legacy\x18\x01 \x01(\x0b\x32%.chromiumos.ArtifactsByService.Legacy\x12;\n\ttoolchain\x18\x02 \x01(\x0b\x32(.chromiumos.ArtifactsByService.Toolchain\x12\x33\n\x05image\x18\x03 \x01(\x0b\x32$.chromiumos.ArtifactsByService.Image\x12\x37\n\x07package\x18\x04 \x01(\x0b\x32&.chromiumos.ArtifactsByService.Package\x12\x37\n\x07sysroot\x18\x05 \x01(\x0b\x32&.chromiumos.ArtifactsByService.Sysroot\x12\x31\n\x04test\x18\x06 \x01(\x0b\x32#.chromiumos.ArtifactsByService.Test\x12\x35\n\x0cprofile_info\x18\x07 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\x12\x39\n\x08\x66irmware\x18\x08 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\x1a\x8b\x05\n\x06Legacy\x12K\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactInfo\x12L\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactInfo\x1a\xd4\x01\n\x0c\x41rtifactInfo\x12J\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishConditionJ\x04\x08\x03\x10\x04\"\x8e\x02\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\r\n\tIMAGE_ZIP\x10\x01\x12\x17\n\x13TEST_UPDATE_PAYLOAD\x10\x02\x12\x12\n\x0e\x41UTOTEST_FILES\x10\x03\x12\x0e\n\nTAST_FILES\x10\x04\x12\x17\n\x13PINNED_GUEST_IMAGES\x10\x05\x12\x0c\n\x08\x46IRMWARE\x10\x06\x12\x0f\n\x0b\x45\x42UILD_LOGS\x10\x07\x12\x13\n\x0f\x43HROMEOS_CONFIG\x10\x08\x12\x0e\n\nCPE_REPORT\x10\t\x12\x12\n\x0eIMAGE_ARCHIVES\x10\n\x12\x13\n\x0f\x46PMCU_UNITTESTS\x10\x1b\x12\x0f\n\x0bGCE_TARBALL\x10\x1c\"\x04\x08\x0b\x10\x1a\"\x04\x08\x1d\x10\x1f\x1a\xff\x07\n\tToolchain\x12N\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactInfo\x12O\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactInfo\x1a\xd1\x01\n\x0c\x41rtifactInfo\x12M\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"\xfc\x04\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12$\n UNVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0b\x12\"\n\x1eVERIFIED_CHROME_LLVM_ORDERFILE\x10\x0c\x12\x1e\n\x1a\x43HROME_CLANG_WARNINGS_FILE\x10\r\x12\x1c\n\x18UNVERIFIED_LLVM_PGO_FILE\x10\x0e\x12)\n%UNVERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x0f\x12\'\n#VERIFIED_CHROME_BENCHMARK_AFDO_FILE\x10\x10\x12!\n\x1dVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x11\x12#\n\x1fUNVERIFIED_KERNEL_CWP_AFDO_FILE\x10\x12\x12#\n\x1fUNVERIFIED_CHROME_CWP_AFDO_FILE\x10\x13\x12!\n\x1dVERIFIED_CHROME_CWP_AFDO_FILE\x10\x14\x12\x1e\n\x1aVERIFIED_RELEASE_AFDO_FILE\x10\x15\x12)\n%UNVERIFIED_CHROME_BENCHMARK_PERF_FILE\x10\x16\x12\x17\n\x13\x43HROME_DEBUG_BINARY\x10\x17\x12\x1a\n\x16TOOLCHAIN_WARNING_LOGS\x10\x18\x12)\n%CHROME_AFDO_PROFILE_FOR_ANDROID_LINUX\x10\x19\x12\x19\n\x15\x43LANG_CRASH_DIAGNOSES\x10\x1a\x12\x17\n\x13\x43OMPILER_RUSAGE_LOG\x10\x1d\"\x04\x08\x01\x10\n\"\x04\x08\x1b\x10\x1c\"\x04\x08\x1e\x10\x1f\x1a\x97\x03\n\x05Image\x12J\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactInfo\x12K\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactInfo\x1a\xcd\x01\n\x0c\x41rtifactInfo\x12I\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x9f\x03\n\x07Package\x12L\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactInfo\x12M\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactInfo\x1a\xcf\x01\n\x0c\x41rtifactInfo\x12K\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x9f\x03\n\x07Sysroot\x12L\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactInfo\x12M\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactInfo\x1a\xcf\x01\n\x0c\x41rtifactInfo\x12K\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\x93\x03\n\x04Test\x12I\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactInfo\x12J\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactInfo\x1a\xcc\x01\n\x0c\x41rtifactInfo\x12H\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\"%\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\"\x04\x08\x01\x10\x1f\x1a\xfe\x03\n\x08\x46irmware\x12M\n\x0finput_artifacts\x18\x01 \x03(\x0b\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactInfo\x12N\n\x10output_artifacts\x18\x02 \x03(\x0b\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactInfo\x1a\xfa\x01\n\x0c\x41rtifactInfo\x12L\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactType\x12\x14\n\x0cgs_locations\x18\x02 \x03(\t\x12\x10\n\x08\x61\x63l_name\x18\x04 \x01(\t\x12J\n\x11publish_condition\x18\x05 \x01(\x0e\x32/.chromiumos.ArtifactsByService.PublishCondition\x12(\n\x08location\x18\x06 \x01(\x0e\x32\x16.chromiumos.FwLocation\"V\n\x0c\x41rtifactType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x14\n\x10\x46IRMWARE_TARBALL\x10\x1e\x12\x19\n\x15\x46IRMWARE_TARBALL_INFO\x10\x1f\"\x04\x08\x01\x10\x1d\"W\n\x10PublishCondition\x12\x17\n\x13PUBLISH_UNSPECIFIED\x10\x00\x12\x16\n\x12PUBLISH_ON_SUCCESS\x10\x01\x12\x12\n\x0ePUBLISH_ALWAYS\x10\x02\"\xfc\x0f\n\x1aUploadedArtifactsByService\x12=\n\x06legacy\x18\x01 \x01(\x0b\x32-.chromiumos.UploadedArtifactsByService.Legacy\x12\x43\n\ttoolchain\x18\x02 \x01(\x0b\x32\x30.chromiumos.UploadedArtifactsByService.Toolchain\x12;\n\x05image\x18\x03 \x01(\x0b\x32,.chromiumos.UploadedArtifactsByService.Image\x12?\n\x07package\x18\x04 \x01(\x0b\x32..chromiumos.UploadedArtifactsByService.Package\x12?\n\x07sysroot\x18\x05 \x01(\x0b\x32..chromiumos.UploadedArtifactsByService.Sysroot\x12\x39\n\x04test\x18\x06 \x01(\x0b\x32+.chromiumos.UploadedArtifactsByService.Test\x12\x41\n\x08\x66irmware\x18\x07 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware\x1a\xd5\x01\n\x06Legacy\x12N\n\tartifacts\x18\x01 \x03(\x0b\x32;.chromiumos.UploadedArtifactsByService.Legacy.ArtifactPaths\x1a{\n\rArtifactPaths\x12I\n\rartifact_type\x18\x01 \x01(\x0e\x32\x32.chromiumos.ArtifactsByService.Legacy.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xde\x01\n\tToolchain\x12Q\n\tartifacts\x18\x01 \x03(\x0b\x32>.chromiumos.UploadedArtifactsByService.Toolchain.ArtifactPaths\x1a~\n\rArtifactPaths\x12L\n\rartifact_type\x18\x01 \x01(\x0e\x32\x35.chromiumos.ArtifactsByService.Toolchain.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd2\x01\n\x05Image\x12M\n\tartifacts\x18\x01 \x03(\x0b\x32:.chromiumos.UploadedArtifactsByService.Image.ArtifactPaths\x1az\n\rArtifactPaths\x12H\n\rartifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.ArtifactsByService.Image.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd8\x01\n\x07Package\x12O\n\tartifacts\x18\x01 \x03(\x0b\x32<.chromiumos.UploadedArtifactsByService.Package.ArtifactPaths\x1a|\n\rArtifactPaths\x12J\n\rartifact_type\x18\x01 \x01(\x0e\x32\x33.chromiumos.ArtifactsByService.Package.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xd8\x01\n\x07Sysroot\x12O\n\tartifacts\x18\x01 \x03(\x0b\x32<.chromiumos.UploadedArtifactsByService.Sysroot.ArtifactPaths\x1a|\n\rArtifactPaths\x12J\n\rartifact_type\x18\x01 \x01(\x0e\x32\x33.chromiumos.ArtifactsByService.Sysroot.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\xcf\x01\n\x04Test\x12L\n\tartifacts\x18\x01 \x03(\x0b\x32\x39.chromiumos.UploadedArtifactsByService.Test.ArtifactPaths\x1ay\n\rArtifactPaths\x12G\n\rartifact_type\x18\x01 \x01(\x0e\x32\x30.chromiumos.ArtifactsByService.Test.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x1a\x86\x02\n\x08\x46irmware\x12P\n\tartifacts\x18\x01 \x03(\x0b\x32=.chromiumos.UploadedArtifactsByService.Firmware.ArtifactPaths\x1a\xa7\x01\n\rArtifactPaths\x12K\n\rartifact_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.ArtifactsByService.Firmware.ArtifactType\x12\x1f\n\x05paths\x18\x02 \x03(\x0b\x32\x10.chromiumos.Path\x12(\n\x08location\x18\x03 \x01(\x0e\x32\x16.chromiumos.FwLocation*\xe0\x04\n\tImageType\x12\x18\n\x14IMAGE_TYPE_UNDEFINED\x10\x00\x12\x13\n\x0fIMAGE_TYPE_BASE\x10\x01\x12\x12\n\x0eIMAGE_TYPE_DEV\x10\x02\x12\x13\n\x0fIMAGE_TYPE_TEST\x10\x03\x12\x16\n\x12IMAGE_TYPE_BASE_VM\x10\x04\x12\x16\n\x12IMAGE_TYPE_TEST_VM\x10\x05\x12\x17\n\x13IMAGE_TYPE_RECOVERY\x10\x06\x12\x16\n\x12IMAGE_TYPE_FACTORY\x10\x07\x12\x17\n\x13IMAGE_TYPE_FIRMWARE\x10\x08\x12\x1c\n\x18IMAGE_TYPE_CR50_FIRMWARE\x10\t\x12\x1c\n\x18IMAGE_TYPE_BASE_GUEST_VM\x10\n\x12\x1c\n\x18IMAGE_TYPE_TEST_GUEST_VM\x10\x0b\x12\x12\n\x0eIMAGE_TYPE_DLC\x10\x0c\x12\x1b\n\x17IMAGE_TYPE_GSC_FIRMWARE\x10\r\x12\x1e\n\x1aIMAGE_TYPE_ACCESSORY_USBPD\x10\x0e\x12\x1e\n\x1aIMAGE_TYPE_ACCESSORY_RWSIG\x10\x0f\x12\x08\n\x04\x42\x41SE\x10\x01\x12\x07\n\x03\x44\x45V\x10\x02\x12\x08\n\x04TEST\x10\x03\x12\x0b\n\x07\x42\x41SE_VM\x10\x04\x12\x0b\n\x07TEST_VM\x10\x05\x12\x0c\n\x08RECOVERY\x10\x06\x12\x0b\n\x07\x46\x41\x43TORY\x10\x07\x12\x0c\n\x08\x46IRMWARE\x10\x08\x12\x11\n\rCR50_FIRMWARE\x10\t\x12\x11\n\rBASE_GUEST_VM\x10\n\x12\x11\n\rTEST_GUEST_VM\x10\x0b\x12\x07\n\x03\x44LC\x10\x0c\x12\x10\n\x0cGSC_FIRMWARE\x10\r\x1a\x02\x10\x01*m\n\x07\x43hannel\x12\x17\n\x13\x43HANNEL_UNSPECIFIED\x10\x00\x12\x12\n\x0e\x43HANNEL_STABLE\x10\x01\x12\x10\n\x0c\x43HANNEL_BETA\x10\x02\x12\x0f\n\x0b\x43HANNEL_DEV\x10\x03\x12\x12\n\x0e\x43HANNEL_CANARY\x10\x04*c\n\tDeltaType\x12\x11\n\rDELTA_UNKNOWN\x10\x00\x12\x0c\n\x08NO_DELTA\x10\x01\x12\x07\n\x03\x46SI\x10\x02\x12\r\n\tMILESTONE\x10\x03\x12\t\n\x05OMAHA\x10\x04\x12\x12\n\x0eSTEPPING_STONE\x10\x05*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03*f\n\x10\x41\x46\x44OArtifactType\x12\r\n\tNONE_TYPE\x10\x00\x12\r\n\tORDERFILE\x10\x01\x12\x12\n\x0e\x42\x45NCHMARK_AFDO\x10\x02\x12\x0f\n\x0bKERNEL_AFDO\x10\x03\x12\x0f\n\x0b\x43HROME_AFDO\x10\x04\x42\x36Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3')
 )
 
 _IMAGETYPE = _descriptor.EnumDescriptor(
@@ -148,8 +148,8 @@ _IMAGETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=_b('\020\001'),
-  serialized_start=8453,
-  serialized_end=9061,
+  serialized_start=8585,
+  serialized_end=9193,
 )
 _sym_db.RegisterEnumDescriptor(_IMAGETYPE)
 
@@ -183,8 +183,8 @@ _CHANNEL = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9063,
-  serialized_end=9172,
+  serialized_start=9195,
+  serialized_end=9304,
 )
 _sym_db.RegisterEnumDescriptor(_CHANNEL)
 
@@ -222,8 +222,8 @@ _DELTATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9174,
-  serialized_end=9273,
+  serialized_start=9306,
+  serialized_end=9405,
 )
 _sym_db.RegisterEnumDescriptor(_DELTATYPE)
 
@@ -253,8 +253,8 @@ _FWLOCATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9275,
-  serialized_end=9369,
+  serialized_start=9407,
+  serialized_end=9501,
 )
 _sym_db.RegisterEnumDescriptor(_FWLOCATION)
 
@@ -288,8 +288,8 @@ _AFDOARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=9371,
-  serialized_end=9473,
+  serialized_start=9503,
+  serialized_end=9605,
 )
 _sym_db.RegisterEnumDescriptor(_AFDOARTIFACTTYPE)
 
@@ -466,8 +466,8 @@ _ARTIFACTSBYSERVICE_LEGACY_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2938,
-  serialized_end=3208,
+  serialized_start=2985,
+  serialized_end=3255,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_LEGACY_ARTIFACTTYPE)
 
@@ -552,8 +552,8 @@ _ARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=3598,
-  serialized_end=4234,
+  serialized_start=3645,
+  serialized_end=4281,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTTYPE)
 
@@ -570,8 +570,8 @@ _ARTIFACTSBYSERVICE_IMAGE_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4607,
-  serialized_end=4644,
+  serialized_start=4654,
+  serialized_end=4691,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_IMAGE_ARTIFACTTYPE)
 
@@ -588,8 +588,8 @@ _ARTIFACTSBYSERVICE_PACKAGE_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4607,
-  serialized_end=4644,
+  serialized_start=4654,
+  serialized_end=4691,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_PACKAGE_ARTIFACTTYPE)
 
@@ -606,8 +606,8 @@ _ARTIFACTSBYSERVICE_SYSROOT_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4607,
-  serialized_end=4644,
+  serialized_start=4654,
+  serialized_end=4691,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_SYSROOT_ARTIFACTTYPE)
 
@@ -624,8 +624,8 @@ _ARTIFACTSBYSERVICE_TEST_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=4607,
-  serialized_end=4644,
+  serialized_start=4654,
+  serialized_end=4691,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_TEST_ARTIFACTTYPE)
 
@@ -650,8 +650,8 @@ _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6271,
-  serialized_end=6357,
+  serialized_start=6360,
+  serialized_end=6446,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTTYPE)
 
@@ -676,8 +676,8 @@ _ARTIFACTSBYSERVICE_PUBLISHCONDITION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=6359,
-  serialized_end=6446,
+  serialized_start=6448,
+  serialized_end=6535,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACTSBYSERVICE_PUBLISHCONDITION)
 
@@ -1330,15 +1330,15 @@ _USEFLAG = _descriptor.Descriptor(
 )
 
 
-_RELEASEBUILDER_MILESTONE_DATE = _descriptor.Descriptor(
+_RELEASEBUILDER_DATE = _descriptor.Descriptor(
   name='Date',
-  full_name='chromiumos.ReleaseBuilder.Milestone.Date',
+  full_name='chromiumos.ReleaseBuilder.Date',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='chromiumos.ReleaseBuilder.Milestone.Date.value', index=0,
+      name='value', full_name='chromiumos.ReleaseBuilder.Date.value', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -1356,8 +1356,8 @@ _RELEASEBUILDER_MILESTONE_DATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1600,
-  serialized_end=1621,
+  serialized_start=1536,
+  serialized_end=1557,
 )
 
 _RELEASEBUILDER_MILESTONE = _descriptor.Descriptor(
@@ -1391,7 +1391,7 @@ _RELEASEBUILDER_MILESTONE = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_RELEASEBUILDER_MILESTONE_DATE, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -1400,8 +1400,8 @@ _RELEASEBUILDER_MILESTONE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1479,
-  serialized_end=1621,
+  serialized_start=1559,
+  serialized_end=1668,
 )
 
 _RELEASEBUILDER = _descriptor.Descriptor(
@@ -1425,10 +1425,17 @@ _RELEASEBUILDER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='expiration_date', full_name='chromiumos.ReleaseBuilder.expiration_date', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_RELEASEBUILDER_MILESTONE, ],
+  nested_types=[_RELEASEBUILDER_DATE, _RELEASEBUILDER_MILESTONE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -1441,7 +1448,7 @@ _RELEASEBUILDER = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=1377,
-  serialized_end=1642,
+  serialized_end=1689,
 )
 
 
@@ -1471,8 +1478,8 @@ _RELEASEBUILDERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1644,
-  serialized_end=1707,
+  serialized_start=1691,
+  serialized_end=1754,
 )
 
 
@@ -1502,8 +1509,8 @@ _PROTOBYTES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1709,
-  serialized_end=1747,
+  serialized_start=1756,
+  serialized_end=1794,
 )
 
 
@@ -1543,8 +1550,8 @@ _PREPAREFORBUILDADDITIONALARGS = _descriptor.Descriptor(
       name='prepare_for_build_args', full_name='chromiumos.PrepareForBuildAdditionalArgs.prepare_for_build_args',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1749,
-  serialized_end=1862,
+  serialized_start=1796,
+  serialized_end=1909,
 )
 
 
@@ -1581,8 +1588,8 @@ _AFDORELEASE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1864,
-  serialized_end=1929,
+  serialized_start=1911,
+  serialized_end=1976,
 )
 
 
@@ -1629,8 +1636,8 @@ _ARTIFACTPROFILEINFO = _descriptor.Descriptor(
       name='artifact_profile_info', full_name='chromiumos.ArtifactProfileInfo.artifact_profile_info',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1932,
-  serialized_end=2083,
+  serialized_start=1979,
+  serialized_end=2130,
 )
 
 
@@ -1681,8 +1688,8 @@ _ARTIFACTSBYSERVICE_LEGACY_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2723,
-  serialized_end=2935,
+  serialized_start=2770,
+  serialized_end=2982,
 )
 
 _ARTIFACTSBYSERVICE_LEGACY = _descriptor.Descriptor(
@@ -1719,8 +1726,8 @@ _ARTIFACTSBYSERVICE_LEGACY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2557,
-  serialized_end=3208,
+  serialized_start=2604,
+  serialized_end=3255,
 )
 
 _ARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTINFO = _descriptor.Descriptor(
@@ -1770,8 +1777,8 @@ _ARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3386,
-  serialized_end=3595,
+  serialized_start=3433,
+  serialized_end=3642,
 )
 
 _ARTIFACTSBYSERVICE_TOOLCHAIN = _descriptor.Descriptor(
@@ -1808,8 +1815,8 @@ _ARTIFACTSBYSERVICE_TOOLCHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3211,
-  serialized_end=4234,
+  serialized_start=3258,
+  serialized_end=4281,
 )
 
 _ARTIFACTSBYSERVICE_IMAGE_ARTIFACTINFO = _descriptor.Descriptor(
@@ -1859,8 +1866,8 @@ _ARTIFACTSBYSERVICE_IMAGE_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4400,
-  serialized_end=4605,
+  serialized_start=4447,
+  serialized_end=4652,
 )
 
 _ARTIFACTSBYSERVICE_IMAGE = _descriptor.Descriptor(
@@ -1897,8 +1904,8 @@ _ARTIFACTSBYSERVICE_IMAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4237,
-  serialized_end=4644,
+  serialized_start=4284,
+  serialized_end=4691,
 )
 
 _ARTIFACTSBYSERVICE_PACKAGE_ARTIFACTINFO = _descriptor.Descriptor(
@@ -1948,8 +1955,8 @@ _ARTIFACTSBYSERVICE_PACKAGE_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4816,
-  serialized_end=5023,
+  serialized_start=4863,
+  serialized_end=5070,
 )
 
 _ARTIFACTSBYSERVICE_PACKAGE = _descriptor.Descriptor(
@@ -1986,8 +1993,8 @@ _ARTIFACTSBYSERVICE_PACKAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4647,
-  serialized_end=5062,
+  serialized_start=4694,
+  serialized_end=5109,
 )
 
 _ARTIFACTSBYSERVICE_SYSROOT_ARTIFACTINFO = _descriptor.Descriptor(
@@ -2037,8 +2044,8 @@ _ARTIFACTSBYSERVICE_SYSROOT_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5234,
-  serialized_end=5441,
+  serialized_start=5281,
+  serialized_end=5488,
 )
 
 _ARTIFACTSBYSERVICE_SYSROOT = _descriptor.Descriptor(
@@ -2075,8 +2082,8 @@ _ARTIFACTSBYSERVICE_SYSROOT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5065,
-  serialized_end=5480,
+  serialized_start=5112,
+  serialized_end=5527,
 )
 
 _ARTIFACTSBYSERVICE_TEST_ARTIFACTINFO = _descriptor.Descriptor(
@@ -2126,8 +2133,8 @@ _ARTIFACTSBYSERVICE_TEST_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5643,
-  serialized_end=5847,
+  serialized_start=5690,
+  serialized_end=5894,
 )
 
 _ARTIFACTSBYSERVICE_TEST = _descriptor.Descriptor(
@@ -2164,8 +2171,8 @@ _ARTIFACTSBYSERVICE_TEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5483,
-  serialized_end=5886,
+  serialized_start=5530,
+  serialized_end=5933,
 )
 
 _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO = _descriptor.Descriptor(
@@ -2203,6 +2210,13 @@ _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='location', full_name='chromiumos.ArtifactsByService.Firmware.ArtifactInfo.location', index=4,
+      number=6, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -2215,8 +2229,8 @@ _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6061,
-  serialized_end=6269,
+  serialized_start=6108,
+  serialized_end=6358,
 )
 
 _ARTIFACTSBYSERVICE_FIRMWARE = _descriptor.Descriptor(
@@ -2253,8 +2267,8 @@ _ARTIFACTSBYSERVICE_FIRMWARE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5889,
-  serialized_end=6357,
+  serialized_start=5936,
+  serialized_end=6446,
 )
 
 _ARTIFACTSBYSERVICE = _descriptor.Descriptor(
@@ -2333,8 +2347,8 @@ _ARTIFACTSBYSERVICE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2086,
-  serialized_end=6446,
+  serialized_start=2133,
+  serialized_end=6535,
 )
 
 
@@ -2371,8 +2385,8 @@ _UPLOADEDARTIFACTSBYSERVICE_LEGACY_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7019,
-  serialized_end=7142,
+  serialized_start=7108,
+  serialized_end=7231,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_LEGACY = _descriptor.Descriptor(
@@ -2401,8 +2415,8 @@ _UPLOADEDARTIFACTSBYSERVICE_LEGACY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6929,
-  serialized_end=7142,
+  serialized_start=7018,
+  serialized_end=7231,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2438,8 +2452,8 @@ _UPLOADEDARTIFACTSBYSERVICE_TOOLCHAIN_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7241,
-  serialized_end=7367,
+  serialized_start=7330,
+  serialized_end=7456,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_TOOLCHAIN = _descriptor.Descriptor(
@@ -2468,8 +2482,8 @@ _UPLOADEDARTIFACTSBYSERVICE_TOOLCHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7145,
-  serialized_end=7367,
+  serialized_start=7234,
+  serialized_end=7456,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_IMAGE_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2505,8 +2519,8 @@ _UPLOADEDARTIFACTSBYSERVICE_IMAGE_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7458,
-  serialized_end=7580,
+  serialized_start=7547,
+  serialized_end=7669,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_IMAGE = _descriptor.Descriptor(
@@ -2535,8 +2549,8 @@ _UPLOADEDARTIFACTSBYSERVICE_IMAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7370,
-  serialized_end=7580,
+  serialized_start=7459,
+  serialized_end=7669,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_PACKAGE_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2572,8 +2586,8 @@ _UPLOADEDARTIFACTSBYSERVICE_PACKAGE_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7675,
-  serialized_end=7799,
+  serialized_start=7764,
+  serialized_end=7888,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_PACKAGE = _descriptor.Descriptor(
@@ -2602,8 +2616,8 @@ _UPLOADEDARTIFACTSBYSERVICE_PACKAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7583,
-  serialized_end=7799,
+  serialized_start=7672,
+  serialized_end=7888,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_SYSROOT_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2639,8 +2653,8 @@ _UPLOADEDARTIFACTSBYSERVICE_SYSROOT_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7894,
-  serialized_end=8018,
+  serialized_start=7983,
+  serialized_end=8107,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_SYSROOT = _descriptor.Descriptor(
@@ -2669,8 +2683,8 @@ _UPLOADEDARTIFACTSBYSERVICE_SYSROOT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7802,
-  serialized_end=8018,
+  serialized_start=7891,
+  serialized_end=8107,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_TEST_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2706,8 +2720,8 @@ _UPLOADEDARTIFACTSBYSERVICE_TEST_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8107,
-  serialized_end=8228,
+  serialized_start=8196,
+  serialized_end=8317,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_TEST = _descriptor.Descriptor(
@@ -2736,8 +2750,8 @@ _UPLOADEDARTIFACTSBYSERVICE_TEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8021,
-  serialized_end=8228,
+  serialized_start=8110,
+  serialized_end=8317,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS = _descriptor.Descriptor(
@@ -2761,6 +2775,13 @@ _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='location', full_name='chromiumos.UploadedArtifactsByService.Firmware.ArtifactPaths.location', index=2,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -2773,8 +2794,8 @@ _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8325,
-  serialized_end=8450,
+  serialized_start=8415,
+  serialized_end=8582,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE = _descriptor.Descriptor(
@@ -2803,8 +2824,8 @@ _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8231,
-  serialized_end=8450,
+  serialized_start=8320,
+  serialized_end=8582,
 )
 
 _UPLOADEDARTIFACTSBYSERVICE = _descriptor.Descriptor(
@@ -2875,8 +2896,8 @@ _UPLOADEDARTIFACTSBYSERVICE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6449,
-  serialized_end=8450,
+  serialized_start=6538,
+  serialized_end=8582,
 )
 
 _CHROOT_CHROOTENV.fields_by_name['use_flags'].message_type = _USEFLAG
@@ -2891,10 +2912,11 @@ _PACKAGEINDEXINFO.fields_by_name['profile'].message_type = _PROFILE
 _PATH.fields_by_name['location'].enum_type = _PATH_LOCATION
 _PATH_LOCATION.containing_type = _PATH
 _RESULTPATH.fields_by_name['path'].message_type = _PATH
-_RELEASEBUILDER_MILESTONE_DATE.containing_type = _RELEASEBUILDER_MILESTONE
-_RELEASEBUILDER_MILESTONE.fields_by_name['target_branch_date'].message_type = _RELEASEBUILDER_MILESTONE_DATE
+_RELEASEBUILDER_DATE.containing_type = _RELEASEBUILDER
+_RELEASEBUILDER_MILESTONE.fields_by_name['target_branch_date'].message_type = _RELEASEBUILDER_DATE
 _RELEASEBUILDER_MILESTONE.containing_type = _RELEASEBUILDER
 _RELEASEBUILDER.fields_by_name['milestone'].message_type = _RELEASEBUILDER_MILESTONE
+_RELEASEBUILDER.fields_by_name['expiration_date'].message_type = _RELEASEBUILDER_DATE
 _RELEASEBUILDER.oneofs_by_name['milestone_message'].fields.append(
   _RELEASEBUILDER.fields_by_name['milestone'])
 _RELEASEBUILDER.fields_by_name['milestone'].containing_oneof = _RELEASEBUILDER.oneofs_by_name['milestone_message']
@@ -2959,6 +2981,7 @@ _ARTIFACTSBYSERVICE_TEST.containing_type = _ARTIFACTSBYSERVICE
 _ARTIFACTSBYSERVICE_TEST_ARTIFACTTYPE.containing_type = _ARTIFACTSBYSERVICE_TEST
 _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO.fields_by_name['artifact_types'].enum_type = _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTTYPE
 _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO.fields_by_name['publish_condition'].enum_type = _ARTIFACTSBYSERVICE_PUBLISHCONDITION
+_ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO.fields_by_name['location'].enum_type = _FWLOCATION
 _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO.containing_type = _ARTIFACTSBYSERVICE_FIRMWARE
 _ARTIFACTSBYSERVICE_FIRMWARE.fields_by_name['input_artifacts'].message_type = _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO
 _ARTIFACTSBYSERVICE_FIRMWARE.fields_by_name['output_artifacts'].message_type = _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTINFO
@@ -3005,6 +3028,7 @@ _UPLOADEDARTIFACTSBYSERVICE_TEST.fields_by_name['artifacts'].message_type = _UPL
 _UPLOADEDARTIFACTSBYSERVICE_TEST.containing_type = _UPLOADEDARTIFACTSBYSERVICE
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS.fields_by_name['artifact_type'].enum_type = _ARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTTYPE
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS.fields_by_name['paths'].message_type = _PATH
+_UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS.fields_by_name['location'].enum_type = _FWLOCATION
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS.containing_type = _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE.fields_by_name['artifacts'].message_type = _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE_ARTIFACTPATHS
 _UPLOADEDARTIFACTSBYSERVICE_FIRMWARE.containing_type = _UPLOADEDARTIFACTSBYSERVICE
@@ -3152,14 +3176,14 @@ _sym_db.RegisterMessage(UseFlag)
 
 ReleaseBuilder = _reflection.GeneratedProtocolMessageType('ReleaseBuilder', (_message.Message,), dict(
 
-  Milestone = _reflection.GeneratedProtocolMessageType('Milestone', (_message.Message,), dict(
+  Date = _reflection.GeneratedProtocolMessageType('Date', (_message.Message,), dict(
+    DESCRIPTOR = _RELEASEBUILDER_DATE,
+    __module__ = 'chromiumos.common_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.ReleaseBuilder.Date)
+    ))
+  ,
 
-    Date = _reflection.GeneratedProtocolMessageType('Date', (_message.Message,), dict(
-      DESCRIPTOR = _RELEASEBUILDER_MILESTONE_DATE,
-      __module__ = 'chromiumos.common_pb2'
-      # @@protoc_insertion_point(class_scope:chromiumos.ReleaseBuilder.Milestone.Date)
-      ))
-    ,
+  Milestone = _reflection.GeneratedProtocolMessageType('Milestone', (_message.Message,), dict(
     DESCRIPTOR = _RELEASEBUILDER_MILESTONE,
     __module__ = 'chromiumos.common_pb2'
     # @@protoc_insertion_point(class_scope:chromiumos.ReleaseBuilder.Milestone)
@@ -3170,8 +3194,8 @@ ReleaseBuilder = _reflection.GeneratedProtocolMessageType('ReleaseBuilder', (_me
   # @@protoc_insertion_point(class_scope:chromiumos.ReleaseBuilder)
   ))
 _sym_db.RegisterMessage(ReleaseBuilder)
+_sym_db.RegisterMessage(ReleaseBuilder.Date)
 _sym_db.RegisterMessage(ReleaseBuilder.Milestone)
-_sym_db.RegisterMessage(ReleaseBuilder.Milestone.Date)
 
 ReleaseBuilders = _reflection.GeneratedProtocolMessageType('ReleaseBuilders', (_message.Message,), dict(
   DESCRIPTOR = _RELEASEBUILDERS,

@@ -22,6 +22,33 @@ from chromite.lib import sysroot_lib
 from chromite.service import artifacts
 
 
+def _GetResponse(_input_proto, _output_proto, _config):
+  """Currently bundles nothing."""
+  # TODO(crbug/1034529): As methods migrate, begin populating them based on what
+  # input_proto has defined.
+
+
+@faux.success(_GetResponse)
+@faux.empty_error
+@validate.exists('result_path.path.path')
+@validate.validation_complete
+def Get(_input_proto, _output_proto, _config):
+  """Get all artifacts.
+
+  Get all artifacts for the build.
+
+  Note: crbug/1034529 introduces this method as a noop.  As the individual
+  artifact_type bundlers are added here, they *must* stop uploading it via the
+  individual bundler function.
+
+  Args:
+    _input_proto (GetRequest): The input proto.
+    _output_proto (GetResponse): The output proto.
+    _config (api_config.ApiConfig): The API call config.
+  """
+  return controller.RETURN_CODE_SUCCESS
+
+
 def _GetImageDir(build_root, target):
   """Return path containing images for the given build target.
 
