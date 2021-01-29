@@ -415,7 +415,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     # Check that deploy._Unmerge is called the right number of times.
     self.assertEqual(self.emerge.call_count, 0)
-    self.assertEqual(self.unmerge.call_count, len(packages))
+    self.unmerge.assert_called_once_with(mock.ANY, packages, '/')
 
     self.assertEqual(
         self.device.device.cmds,

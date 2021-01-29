@@ -74,7 +74,11 @@ class BrilloDeployOperation(operation.ProgressBarOperation):
       'been installed.',
       'Please restart any updated',
   )
-  UNMERGE_EVENTS = ['NOTICE: Unmerging', 'has been uninstalled.']
+  UNMERGE_EVENTS = (
+      'NOTICE: Unmerging',
+      'been uninstalled.',
+      'Please restart any updated',
+  )
 
   def __init__(self, emerge):
     """Construct BrilloDeployOperation object.
@@ -938,32 +942,34 @@ def _GetPackagesPaths(pkgs, strip, sysroot):
   return _GetPackagesByCPV(cpvs, strip, sysroot)
 
 
-def _Unmerge(device, pkg, root):
-  """Unmerges |pkg| on |device|.
+def _Unmerge(device, pkgs, root):
+  """Unmerges |pkgs| on |device|.
 
   Args:
     device: A RemoteDevice object.
-    pkg: A package name.
+    pkgs: Package names.
     root: Package installation root path.
   """
-  pkg_name = os.path.basename(pkg)
+  pkg_names = ', '.join(os.path.basename(x) for x in pkgs)
   # This message is read by BrilloDeployOperation.
-  logging.notice('Unmerging %s.', pkg_name)
+  logging.notice('Unmerging %s.', pkg_names)
   cmd = ['qmerge', '--yes']
   # Check if qmerge is available on the device. If not, use emerge.
   if device.run(['qmerge', '--version'], check=False).returncode != 0:
     cmd = ['emerge']
 
-  cmd.extend(['--unmerge', f'={pkg}', '--root=%s' % root])
+  cmd += ['--unmerge', '--root', root]
+  cmd.extend('f={x}' for x in pkgs)
   try:
     # Always showing the emerge output for clarity.
     device.run(cmd, capture_output=False, remote_sudo=True,
                debug_level=logging.INFO)
   except Exception:
-    logging.error('Failed to unmerge package %s', pkg_name)
+    logging.error('Failed to unmerge packages %s', pkg_names)
     raise
   else:
-    logging.notice('%s has been uninstalled.', pkg_name)
+    # This message is read by BrilloDeployOperation.
+    logging.notice('Packages have been uninstalled.')
 
 
 def _ConfirmDeploy(num_updates):
@@ -1006,8 +1012,9 @@ def _EmergePackages(pkgs, device, strip, sysroot, root, board, emerge_args):
 def _UnmergePackages(pkgs, device, root, pkgs_attrs):
   """Call _Unmege for each package in pkgs."""
   dlc_uninstalled = False
+  _Unmerge(device, pkgs, root)
+  logging.info('Cleaning up DLC images.')
   for pkg in pkgs:
-    _Unmerge(device, pkg, root)
     if _UninstallDLCImage(device, pkgs_attrs[pkg]):
       dlc_uninstalled = True
 
