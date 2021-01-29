@@ -26,7 +26,7 @@ from chromite.lib import gs
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-GSC_PRODUCTION_JOB = 'chromeos/packaging/sign-image'
+GSC_PRODUCTION_JOB = 'chromeos/release/sign-image'
 GSC_STAGING_JOB = 'chromeos/staging/staging-sign-image'
 _IMAGE_TYPE = 'gsc_firmware'
 
