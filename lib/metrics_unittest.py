@@ -7,16 +7,19 @@
 
 from __future__ import print_function
 
+import sys
 import tempfile
+import unittest
 
 import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import parallel
-from chromite.lib import ts_mon_config
+if sys.version_info.major >= 3:
+  from chromite.lib import ts_mon_config
 
-from infra_libs import ts_mon
+from infra_libs import ts_mon  # pylint: disable=wrong-import-position
 
 
 class FakeException(Exception):
@@ -61,6 +64,7 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
                      'time',
                      mock.Mock(time=mock.Mock(side_effect=TimeIterator())))
 
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires py3')
   def testShortLived(self):
     """Tests that configuring ts-mon to use short-lived processes works."""
     self.patchTime()
@@ -71,7 +75,7 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
         # pylint: disable=protected-access
         self.assertTrue(ts_mon_config._WasSetup)
 
-
+  @unittest.skipIf(sys.version_info.major < 3, 'Requires py3')
   def testResetAfter(self):
     """Tests that the reset_after flag works to send metrics only once."""
     # By mocking out its "time" module, the forked flushing process will think

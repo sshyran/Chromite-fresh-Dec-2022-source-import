@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import itertools
 import multiprocessing
+import sys
 
 from six.moves import queue as Queue
 
@@ -17,6 +18,9 @@ from chromite.lib import metrics
 from chromite.lib import ts_mon_config
 
 from infra_libs import ts_mon
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
