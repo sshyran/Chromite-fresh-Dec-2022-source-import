@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import os
+import sys
 
 import __main__ as main
 
@@ -19,6 +20,9 @@ except ImportError:
   # Module not available -> can't do anything.
   getproctitle = lambda: None
   setproctitle = lambda _x: None
+
+
+assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Used with the settitle helper below.
