@@ -317,4 +317,5 @@ def PushImage(input_proto, _output_proto, config):
         **kwargs)
     return controller.RETURN_CODE_SUCCESS
   except Exception:
+    logging.error('PushImage failed: ', exc_info=True)
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
