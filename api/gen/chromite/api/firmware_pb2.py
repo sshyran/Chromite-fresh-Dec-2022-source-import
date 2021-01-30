@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=_b('Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api'),
-  serialized_pb=_b('\n\x1b\x63hromite/api/firmware.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"\x99\x04\n\rFwBuildMetric\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12\x15\n\rplatform_name\x18\x02 \x01(\t\x12\x39\n\nfw_section\x18\x03 \x03(\x0b\x32%.chromite.api.FwBuildMetric.FwSection\x12:\n\x06zephyr\x18\x04 \x01(\x0b\x32(.chromite.api.FwBuildMetric.ZephyrTargetH\x00\x1a\xd2\x01\n\tFwSection\x12>\n\x06region\x18\x01 \x01(\x0e\x32..chromite.api.FwBuildMetric.FwSection.FwRegion\x12\x0c\n\x04used\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\r\"h\n\x08\x46wRegion\x12\x15\n\x11\x46W_REGION_UNKNOWN\x10\x00\x12\t\n\x05\x45\x43_RO\x10\x01\x12\t\n\x05\x45\x43_RW\x10\x02\x12\r\n\tEC_RO_BSS\x10\x03\x12\r\n\tEC_RW_BSS\x10\x04\x12\x11\n\rEC_SHARED_MEM\x10\x05\x1a\x35\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\x0c\n\x04tiny\x18\x03 \x01(\r\x1aK\n\x0cZephyrTarget\x12;\n\x0ekernel_version\x18\x01 \x01(\x0b\x32#.chromite.api.FwBuildMetric.VersionB\x0c\n\nimage_type\"?\n\x11\x46wBuildMetricList\x12*\n\x05value\x18\x01 \x03(\x0b\x32\x1b.chromite.api.FwBuildMetric\"\x1c\n\x0c\x46wTestMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\"=\n\x10\x46wTestMetricList\x12)\n\x05value\x18\x01 \x03(\x0b\x32\x1a.chromite.api.FwTestMetric\"u\n\x1a\x42uildAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"O\n\x1b\x42uildAllTotFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"t\n\x19TestAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"M\n\x1aTestAllTotFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"p\n\x17\x42uildAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"L\n\x18\x42uildAllFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"o\n\x16TestAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"J\n\x17TestAllFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\xe0\x01\n\x1e\x42undleFirmwareArtifactsRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12+\n\x0bresult_path\x18\x03 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12:\n\tartifacts\x18\x04 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\"e\n\x1f\x42undleFirmwareArtifactsResponse\x12\x42\n\tartifacts\x18\x01 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03\x32\xb3\x04\n\x0f\x46irmwareService\x12j\n\x13\x42uildAllTotFirmware\x12(.chromite.api.BuildAllTotFirmwareRequest\x1a).chromite.api.BuildAllTotFirmwareResponse\x12g\n\x12TestAllTotFirmware\x12\'.chromite.api.TestAllTotFirmwareRequest\x1a(.chromite.api.TestAllTotFirmwareResponse\x12\x61\n\x10\x42uildAllFirmware\x12%.chromite.api.BuildAllFirmwareRequest\x1a&.chromite.api.BuildAllFirmwareResponse\x12^\n\x0fTestAllFirmware\x12$.chromite.api.TestAllFirmwareRequest\x1a%.chromite.api.TestAllFirmwareResponse\x12v\n\x17\x42undleFirmwareArtifacts\x12,.chromite.api.BundleFirmwareArtifactsRequest\x1a-.chromite.api.BundleFirmwareArtifactsResponse\x1a\x10\xc2\xed\x1a\x0c\n\x08\x66irmware\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
+  serialized_pb=_b('\n\x1b\x63hromite/api/firmware.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"\x99\x04\n\rFwBuildMetric\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12\x15\n\rplatform_name\x18\x02 \x01(\t\x12\x39\n\nfw_section\x18\x03 \x03(\x0b\x32%.chromite.api.FwBuildMetric.FwSection\x12:\n\x06zephyr\x18\x04 \x01(\x0b\x32(.chromite.api.FwBuildMetric.ZephyrTargetH\x00\x1a\xd2\x01\n\tFwSection\x12>\n\x06region\x18\x01 \x01(\x0e\x32..chromite.api.FwBuildMetric.FwSection.FwRegion\x12\x0c\n\x04used\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\r\"h\n\x08\x46wRegion\x12\x15\n\x11\x46W_REGION_UNKNOWN\x10\x00\x12\t\n\x05\x45\x43_RO\x10\x01\x12\t\n\x05\x45\x43_RW\x10\x02\x12\r\n\tEC_RO_BSS\x10\x03\x12\r\n\tEC_RW_BSS\x10\x04\x12\x11\n\rEC_SHARED_MEM\x10\x05\x1a\x35\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\x0c\n\x04tiny\x18\x03 \x01(\r\x1aK\n\x0cZephyrTarget\x12;\n\x0ekernel_version\x18\x01 \x01(\x0b\x32#.chromite.api.FwBuildMetric.VersionB\x0c\n\nimage_type\"?\n\x11\x46wBuildMetricList\x12*\n\x05value\x18\x01 \x03(\x0b\x32\x1b.chromite.api.FwBuildMetric\"\x1c\n\x0c\x46wTestMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\"=\n\x10\x46wTestMetricList\x12)\n\x05value\x18\x01 \x03(\x0b\x32\x1a.chromite.api.FwTestMetric\"u\n\x1a\x42uildAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"O\n\x1b\x42uildAllTotFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"t\n\x19TestAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"M\n\x1aTestAllTotFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"p\n\x17\x42uildAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"L\n\x18\x42uildAllFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"o\n\x16TestAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"J\n\x17TestAllFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\xad\x01\n\x1e\x42undleFirmwareArtifactsRequest\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12+\n\x0bresult_path\x18\x03 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12:\n\tartifacts\x18\x04 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\"e\n\x1f\x42undleFirmwareArtifactsResponse\x12\x42\n\tartifacts\x18\x01 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03\x32\xb3\x04\n\x0f\x46irmwareService\x12j\n\x13\x42uildAllTotFirmware\x12(.chromite.api.BuildAllTotFirmwareRequest\x1a).chromite.api.BuildAllTotFirmwareResponse\x12g\n\x12TestAllTotFirmware\x12\'.chromite.api.TestAllTotFirmwareRequest\x1a(.chromite.api.TestAllTotFirmwareResponse\x12\x61\n\x10\x42uildAllFirmware\x12%.chromite.api.BuildAllFirmwareRequest\x1a&.chromite.api.BuildAllFirmwareResponse\x12^\n\x0fTestAllFirmware\x12$.chromite.api.TestAllFirmwareRequest\x1a%.chromite.api.TestAllFirmwareResponse\x12v\n\x17\x42undleFirmwareArtifacts\x12,.chromite.api.BundleFirmwareArtifactsRequest\x1a-.chromite.api.BundleFirmwareArtifactsResponse\x1a\x10\xc2\xed\x1a\x0c\n\x08\x66irmware\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _FWLOCATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1906,
-  serialized_end=2000,
+  serialized_start=1855,
+  serialized_end=1949,
 )
 _sym_db.RegisterEnumDescriptor(_FWLOCATION)
 
@@ -653,28 +653,21 @@ _BUNDLEFIRMWAREARTIFACTSREQUEST = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='firmware_location', full_name='chromite.api.BundleFirmwareArtifactsRequest.firmware_location', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='chroot', full_name='chromite.api.BundleFirmwareArtifactsRequest.chroot', index=1,
+      name='chroot', full_name='chromite.api.BundleFirmwareArtifactsRequest.chroot', index=0,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='result_path', full_name='chromite.api.BundleFirmwareArtifactsRequest.result_path', index=2,
+      name='result_path', full_name='chromite.api.BundleFirmwareArtifactsRequest.result_path', index=1,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='artifacts', full_name='chromite.api.BundleFirmwareArtifactsRequest.artifacts', index=3,
+      name='artifacts', full_name='chromite.api.BundleFirmwareArtifactsRequest.artifacts', index=2,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -693,7 +686,7 @@ _BUNDLEFIRMWAREARTIFACTSREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1577,
-  serialized_end=1801,
+  serialized_end=1750,
 )
 
 
@@ -723,8 +716,8 @@ _BUNDLEFIRMWAREARTIFACTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1803,
-  serialized_end=1904,
+  serialized_start=1752,
+  serialized_end=1853,
 )
 
 _FWBUILDMETRIC_FWSECTION.fields_by_name['region'].enum_type = _FWBUILDMETRIC_FWSECTION_FWREGION
@@ -752,7 +745,6 @@ _BUILDALLFIRMWARERESPONSE.fields_by_name['metrics'].message_type = _FWBUILDMETRI
 _TESTALLFIRMWAREREQUEST.fields_by_name['firmware_location'].enum_type = chromiumos_dot_common__pb2._FWLOCATION
 _TESTALLFIRMWAREREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _TESTALLFIRMWARERESPONSE.fields_by_name['metrics'].message_type = _FWTESTMETRICLIST
-_BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['firmware_location'].enum_type = chromiumos_dot_common__pb2._FWLOCATION
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['result_path'].message_type = chromiumos_dot_common__pb2._RESULTPATH
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['artifacts'].message_type = chromiumos_dot_common__pb2._ARTIFACTSBYSERVICE_FIRMWARE
@@ -905,8 +897,8 @@ _FIRMWARESERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=_b('\302\355\032\014\n\010firmware\020\001'),
-  serialized_start=2003,
-  serialized_end=2566,
+  serialized_start=1952,
+  serialized_end=2515,
   methods=[
   _descriptor.MethodDescriptor(
     name='BuildAllTotFirmware',
