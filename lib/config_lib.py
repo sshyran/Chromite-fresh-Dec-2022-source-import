@@ -1864,16 +1864,27 @@ def GetNonUniBuildLabBoardName(board):
   # Those special string represent special configuration used in the image,
   # and should run on DUT without those string.
   # We strip those string from the board so that lab can handle it correctly.
-  SPECIAL_SUFFIX = [
-      '-arcnext$', '-arcvm$', '-arc-r$', '-arc-r-userdebug$', '-blueznext$',
-      '-kernelnext$', '-kvm$', '-ndktranslation$', '-cfm$', '-campfire$',
-      '-borealis$',
+  # NOTE: please try to keep this list in sync with the corresponding list in
+  # infra/suite_scheduler/build_lib.py
+  special_suffixes = [
+      '-arc-r', #
+      '-arc-r-userdebug', #
+      '-arcnext', #
+      '-arcvm', #
+      '-blueznext', #
+      '-borealis', #
+      '-campfire', #
+      '-cfm', #
+      '-kernelnext', #
+      '-kvm', #
+      '-ndktranslation', #
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
   ARM64_BOARDS = ['cheza64', 'kevin64', 'trogdor64']
-  for suffix in SPECIAL_SUFFIX:
-    board = re.sub(suffix, '', board)
+  for s in special_suffixes:
+    if board.endswith(s):
+      board = board[:-len(s)]
   if board in ARM64_BOARDS:
     # Remove '64' suffix from the board name.
     board = board[:-2]
