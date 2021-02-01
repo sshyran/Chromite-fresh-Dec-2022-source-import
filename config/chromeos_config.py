@@ -707,7 +707,9 @@ def GeneralTemplates(site_config):
           config_lib.TastVMTestConfig(
               'tast_vm_canary_informational',
               ['("group:mainline" && informational)'],
-              timeout=3 * 60 * 60),
+              # TODO(crbug/1173026): revert this to 3 hours once the
+              # informational tests are split out into their own builders.
+              timeout=4 * 60 * 60),
       ],
   )
 
