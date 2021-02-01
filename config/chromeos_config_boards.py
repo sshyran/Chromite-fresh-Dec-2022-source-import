@@ -34,7 +34,6 @@ arm_internal_release_boards = frozenset([
     'oak',
     'tael',
     'veyron_jaq',
-    'veyron_jerry',
     'veyron_mighty',
     'veyron_minnie',
     'veyron_rialto',

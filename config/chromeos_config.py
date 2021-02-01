@@ -1745,7 +1745,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-gandof-6301.155.B', ['gandof'], {}),
       (MONTHLY, 'firmware-buddy-6301.202.B', ['buddy'], {}),
       (MONTHLY, 'firmware-veyron-6588.B', [
-          'veyron_jerry', 'veyron_mighty',
+          'veyron_mighty',
           'veyron_speedy', 'veyron_jaq',
           'veyron_minnie',
           'veyron_mickey', 'veyron_rialto', 'veyron_tiger',
@@ -1834,7 +1834,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
           'gandof', 'buddy']),
       (MONTHLY, 'factory-whirlwind-6509.B', ['whirlwind']),
       (MONTHLY, 'factory-veyron-6591.B', [
-          'veyron_jerry', 'veyron_mighty',
+          'veyron_mighty',
           'veyron_speedy', 'veyron_jaq',
           'veyron_minnie', 'veyron_mickey']),
       (MONTHLY, 'factory-auron-6772.B', [
