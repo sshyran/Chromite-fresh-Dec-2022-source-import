@@ -42,7 +42,7 @@ class RunTestsTest(cros_test_lib.MockTestCase):
   """Tests for the RunTests() func"""
 
   def testDryrun(self):
-    """Verify dryrun doesn't do anything crazy."""
+    """Verify dryrun doesn't do anything unexpected."""
     self.PatchObject(run_tests, 'RunTest', side_effect=Exception('do not run'))
     ret = run_tests.RunTests(['/bin/false'], dryrun=True)
     self.assertTrue(ret)

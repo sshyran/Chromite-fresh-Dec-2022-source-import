@@ -221,7 +221,7 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
     result = base.derive(site_config.templates.stackedDeep)
     self.assertEqual(result.foo, 'fixed one one one deep')
 
-    # Just get crazy with it.
+    # We must go deeper.
     result = base.derive(site_config.templates.stackedDeeper)
     self.assertEqual(result.foo, 'fixed one one one deep deeper')
 
