@@ -1878,6 +1878,7 @@ def GetNonUniBuildLabBoardName(board):
       '-kernelnext', #
       '-kvm', #
       '-ndktranslation', #
+      '-userdebug', #
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
