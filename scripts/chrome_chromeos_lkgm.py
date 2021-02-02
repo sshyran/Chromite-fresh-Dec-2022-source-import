@@ -41,6 +41,7 @@ class ChromeLKGMCommitter(object):
       'chromeos-betty-pi-arc-chrome',
       'chromeos-eve-chrome',
       'chromeos-kevin-chrome',
+      'lacros-amd64-generic-chrome',
   ]
   # Files needed in a local checkout to successfully update the LKGM. The OWNERS
   # file allows the --tbr-owners mechanism to select an appropriate OWNER to
