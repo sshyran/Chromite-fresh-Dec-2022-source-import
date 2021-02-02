@@ -146,10 +146,15 @@ class VM(device.Device):
   """Class for managing a VM."""
 
   SSH_PORT = 9222
-  SSH_NON_KVM_CONNECT_TIMEOUT = 120
+  SSH_NON_KVM_CONNECT_TIMEOUT = 240
   IMAGE_FORMAT = 'raw'
   # kvm_* should match kvm_intel, kvm_amd, etc.
   NESTED_KVM_GLOB = '/sys/module/kvm_*/parameters/nested'
+  FLASH_SIZE = 64*1024*1024
+
+  # Target architecture
+  ARCH_X86_64 = 'x86_64'
+  ARCH_AARCH64 = 'aarch64'
 
   def __init__(self, opts):
     """Initialize VM.
@@ -162,18 +167,30 @@ class VM(device.Device):
     self.qemu_path = opts.qemu_path
     self.qemu_img_path = opts.qemu_img_path
     self.qemu_bios_path = opts.qemu_bios_path
+    self.qemu_arch = opts.qemu_arch
     self.qemu_m = opts.qemu_m
     self.qemu_cpu = opts.qemu_cpu
+    if self.qemu_cpu is None:
+      # TODO(pwang): replace SandyBridge to Haswell-noTSX once lab machine
+      # running VMTest all migrate to GCE.
+      if self.qemu_arch == VM.ARCH_X86_64:
+        self.qemu_cpu = 'SandyBridge,-invpcid,-tsc-deadline'
+      elif self.qemu_arch == VM.ARCH_AARCH64:
+        self.qemu_cpu = 'cortex-a57'
+    self.qemu_arch = opts.qemu_arch
     self.qemu_smp = opts.qemu_smp
     if self.qemu_smp == 0:
       self.qemu_smp = min(8, multiprocessing.cpu_count())
     self.qemu_hostfwd = opts.qemu_hostfwd
     self.qemu_args = opts.qemu_args
 
-    if opts.enable_kvm is None:
-      self.enable_kvm = os.path.exists('/dev/kvm')
+    if self.qemu_arch == VM.ARCH_X86_64:
+      if opts.enable_kvm is None:
+        self.enable_kvm = os.path.exists('/dev/kvm')
+      else:
+        self.enable_kvm = opts.enable_kvm
     else:
-      self.enable_kvm = opts.enable_kvm
+      self.enable_kvm = False
     self.copy_on_write = opts.copy_on_write
     # We don't need sudo access for software emulation or if /dev/kvm is
     # writeable.
@@ -204,6 +221,8 @@ class VM(device.Device):
     self.kvm_pipe_in = '%s.in' % self.kvm_monitor  # to KVM
     self.kvm_pipe_out = '%s.out' % self.kvm_monitor  # from KVM
     self.kvm_serial = '%s.serial' % self.kvm_monitor
+    self.flash0_file = os.path.join(self.vm_dir, 'flash0.img')
+    self.flash1_file = os.path.join(self.vm_dir, 'flash1.img')
 
     self.copy_image_on_shutdown = False
     self.image_copy_dir = None
@@ -222,6 +241,28 @@ class VM(device.Device):
       assert os.path.isdir(self.vm_dir), error_str
       assert not os.path.islink(self.vm_dir), error_str
       assert os.stat(self.vm_dir).st_uid == os.getuid(), error_str
+
+  def _CreatePflashFiles(self):
+    """Creates parallel flash images in the temporary VM dir.
+
+    One image is used for the UEFI firmware, the other as non-volatile
+    storage for UEFI variables.
+
+    These images will get removed on VM shutdown.
+
+    Returns:
+      Nothing
+    """
+    uefi_path = '/usr/share/qemu/edk2-aarch64-code.fd'
+    cros_build_lib.run(
+        ['dd', 'if=%s' % uefi_path, 'of=%s' % self.flash0_file,
+        'count=1', 'bs=%dM' % (VM.FLASH_SIZE / (1024*1024)), 'conv=sync',
+        ], dryrun=self.dryrun)
+    logging.info('flash0 image created at %s.', self.flash0_file)
+
+    with open(self.flash1_file, 'wb+') as f:
+      f.truncate(VM.FLASH_SIZE)
+    logging.info('flash1 image created at %s.', self.flash1_file)
 
   def _CreateQcow2Image(self):
     """Creates a qcow2-formatted image in the temporary VM dir.
@@ -282,7 +323,10 @@ class VM(device.Device):
 
   def _SetQemuPath(self):
     """Find a suitable Qemu executable."""
-    qemu_exe = 'qemu-system-x86_64'
+    if self.qemu_arch == VM.ARCH_X86_64:
+      qemu_exe = 'qemu-system-x86_64'
+    elif self.qemu_arch == VM.ARCH_AARCH64:
+      qemu_exe = 'qemu-system-aarch64'
     qemu_exe_path = os.path.join('usr/bin', qemu_exe)
 
     # Check SDK cache.
@@ -414,8 +458,10 @@ class VM(device.Device):
       image_format: Format of the image.
     """
     # Append 'check' to warn if the requested CPU is not fully supported.
-    if 'check' not in self.qemu_cpu.split(','):
-      self.qemu_cpu += ',check'
+    logging.info('CPU: %s', str(self.qemu_cpu))
+    if self.qemu_arch == VM.ARCH_X86_64:
+      if 'check' not in self.qemu_cpu.split(','):
+        self.qemu_cpu += ',check'
     # Append 'vmx=on' if the host supports nested virtualization. It can be
     # enabled via 'vmx+' or 'vmx=on' (or similarly disabled) so just test for
     # the presence of 'vmx'. For more details, see:
@@ -433,21 +479,32 @@ class VM(device.Device):
       qemu_args += ['-L', self.qemu_bios_path]
 
     qemu_args += [
-        '-m', self.qemu_m, '-smp', str(self.qemu_smp), '-vga', 'virtio',
+        '-m', self.qemu_m, '-smp', str(self.qemu_smp),
         '-daemonize',
         '-pidfile', self.pidfile,
         '-chardev', 'pipe,id=control_pipe,path=%s' % self.kvm_monitor,
         '-serial', 'file:%s' % self.kvm_serial,
         '-mon', 'chardev=control_pipe',
-        '-cpu', self.qemu_cpu,
-        '-usb', '-device', 'usb-tablet',
         '-device', 'virtio-net,netdev=eth0',
         '-device', 'virtio-scsi-pci,id=scsi',
         '-device', 'virtio-rng',
-        '-device', 'scsi-hd,drive=hd',
+        '-device', 'scsi-hd,drive=hd,bootindex=0',
         '-drive', 'if=none,id=hd,file=%s,cache=unsafe,format=%s'
         % (image_path, image_format),
     ]
+    if self.qemu_arch == VM.ARCH_X86_64:
+      qemu_args += [
+        '-vga', 'virtio',
+        '-usb', '-device', 'usb-tablet',
+      ]
+    if self.qemu_arch == VM.ARCH_AARCH64:
+      qemu_args += [
+          '-M', 'virt',
+          '-pflash', self.flash0_file,
+          '-pflash', self.flash1_file,
+      ]
+    if self.qemu_cpu:
+      qemu_args += [ '-cpu', self.qemu_cpu ]
     # netdev args, including hostfwds.
     netdev_args = ('user,id=eth0,net=10.0.2.0/27,hostfwd=tcp:%s:%d-:%d'
                    % (remote_access.LOCALHOST_IP, self.ssh_port,
@@ -486,6 +543,9 @@ class VM(device.Device):
       logging.debug('Start VM, attempt #%d', attempt)
 
       self._CreateVMDir()
+      if self.qemu_arch == VM.ARCH_AARCH64:
+        self._CreatePflashFiles()
+
       image_path = self.image_path
       image_format = self.image_format
       if self.copy_on_write:
@@ -653,9 +713,10 @@ class VM(device.Device):
 
     super(VM, self).WaitForBoot(sleep=sleep, max_retry=max_retry)
 
+    # XXX: this seems to be chromeos-secific, WaitForProcs waits for chrome
     # Chrome can take a while to start with software emulation.
-    if not self.enable_kvm:
-      self._WaitForProcs()
+    # if not self.enable_kvm:
+    #   self._WaitForProcs()
 
   @staticmethod
   def GetParser():
@@ -683,11 +744,11 @@ class VM(device.Device):
     parser.add_argument('--qemu-smp', type=int, default='0',
                         help='SMP argument that will be passed to qemu. (0 '
                              'means auto-detection.)')
-    # TODO(pwang): replace SandyBridge to Haswell-noTSX once lab machine
-    # running VMTest all migrate to GCE.
     parser.add_argument('--qemu-cpu', type=str,
-                        default='SandyBridge,-invpcid,-tsc-deadline',
                         help='CPU argument that will be passed to qemu.')
+    parser.add_argument('--qemu-arch', type=str, default=VM.ARCH_X86_64,
+                        choices=(VM.ARCH_AARCH64, VM.ARCH_X86_64),
+                        help='VM architecture: ')
     parser.add_argument('--qemu-bios-path', type='path',
                         help='Path of directory with qemu bios files.')
     parser.add_argument('--qemu-hostfwd', action='append',
