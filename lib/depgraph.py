@@ -377,17 +377,17 @@ class DepGraphGenerator(object):
       #
       # We just refer to CPVs as packages here because it's easier.
 
-      # Clear the entry for 'child' that persisted from the previous loop
-      # iteration. In Python 2 loop variables continue to hold their value
-      # in the enclosing function scope (outside the loop body), so if
-      # node_deps[0] is empty then 'child' would have whatever value was
-      # left in it from the previous loop.
-      child = None
+      if not isinstance(node, Package):
+        # Some nodes may be the AtomArgs (usually the virtuals) or sets.
+        # We only want to deal with the packages themselves.
+        continue
 
       deps = {}
       for child, priorities in node_deps[0].items():
-        if (isinstance(node, Package) and isinstance(child, Package) and
-            (self.include_bdepend or child.root == node.root)):
+        if not isinstance(child, Package):
+          continue
+
+        if self.include_bdepend or child.root == node.root:
           cpv = str(child.cpv)
           action = str(child.operation)
 
@@ -407,31 +407,27 @@ class DepGraphGenerator(object):
 
       # We've built our list of deps, so we can add our package to the tree.
 
-      # Some objects in digraph.nodes can be sets instead of packages, but we
-      # only want to return packages in our dependency graph.
-      if isinstance(node, Package) and isinstance(child, Package):
+      # If a package is destined for ROOT, then it is in DEPEND OR RDEPEND
+      # and we want to include it in the deps tree. If the package is not
+      # destined for ROOT, then (in the Chrome OS build) we must be building
+      # for a board and the package is a BDEPEND. We only want to add that
+      # package to the deps_tree if include_bdepend is set.
+      if node.root == root or self.include_bdepend:
+        deps_tree[str(node.cpv)] = dict(action=str(node.operation), deps=deps,
+                                        root=node.root)
 
-        # If a package is destined for ROOT, then it is in DEPEND OR RDEPEND
-        # and we want to include it in the deps tree. If the package is not
-        # destined for ROOT, then (in the Chrome OS build) we must be building
-        # for a board and the package is a BDEPEND. We only want to add that
-        # package to the deps_tree if include_bdepend is set.
-        if (node.root == root or self.include_bdepend):
-          deps_tree[str(node.cpv)] = dict(action=str(node.operation), deps=deps,
-                                          root=node.root)
-
-        # The only packages that will have a distinct root (in the Chrome OS
-        # build) are BDEPEND packages for a board target. If we are building
-        # for the host (the SDK) then BDEPEND packages 1. Will have the same
-        # root as every other package and 2. Are functionally the same as
-        # DEPEND packages and belong in the deps_tree.
-        #
-        # If include_bdepend is passed and we are building for a board target,
-        # BDEPEND packages will intentionally show up in both deps_tree and
-        # bdeps_tree.
-        if node.root != root:
-          bdeps_tree[str(node.cpv)] = dict(
-              action=str(node.operation), deps=deps, root=node.root)
+      # The only packages that will have a distinct root (in the Chrome OS
+      # build) are BDEPEND packages for a board target. If we are building
+      # for the host (the SDK) then BDEPEND packages 1. Will have the same
+      # root as every other package and 2. Are functionally the same as
+      # DEPEND packages and belong in the deps_tree.
+      #
+      # If include_bdepend is passed and we are building for a board target,
+      # BDEPEND packages will intentionally show up in both deps_tree and
+      # bdeps_tree.
+      if node.root != root:
+        bdeps_tree[str(node.cpv)] = dict(
+            action=str(node.operation), deps=deps, root=node.root)
 
     # Ask portage for its install plan, so that we can only throw out
     # dependencies that portage throws out.
