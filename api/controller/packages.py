@@ -351,7 +351,7 @@ def NeedsChromeSource(input_proto, output_proto, _config):
   compile_source = input_proto.install_request.flags.compile_source
   pkgs = [controller_util.deserialize_package_info(pi) for pi in
           input_proto.install_request.packages]
-  use_flags = input_proto.install_request.use_flags
+  use_flags = [f.flag for f in input_proto.install_request.use_flags]
 
   result = packages.needs_chrome_source(
       build_target,

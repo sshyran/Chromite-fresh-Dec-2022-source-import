@@ -1126,7 +1126,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_needs_all(self):
     """Verify we need source when we have no prebuilts."""
     graph = self._build_graph(with_chrome=True, with_followers=True)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
 
@@ -1145,7 +1145,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_needs_none(self):
     """Verify not building any of the chrome packages prevents needing it."""
     graph = self._build_graph(with_chrome=False, with_followers=False)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
 
@@ -1162,7 +1162,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_needs_chrome_only(self):
     """Verify only chrome triggers needs chrome source."""
     graph = self._build_graph(with_chrome=True, with_followers=False)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
 
@@ -1181,7 +1181,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_needs_followers_only(self):
     """Verify only chrome followers triggers needs chrome source."""
     graph = self._build_graph(with_chrome=False, with_followers=True)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
 
@@ -1200,7 +1200,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_has_prebuilts(self):
     """Test prebuilts prevent us from needing chrome source."""
     graph = self._build_graph(with_chrome=True, with_followers=True)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
 
@@ -1217,7 +1217,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   def test_compile_source(self):
     """Test compile source ignores prebuilts."""
     graph = self._build_graph(with_chrome=True, with_followers=True)
-    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
 

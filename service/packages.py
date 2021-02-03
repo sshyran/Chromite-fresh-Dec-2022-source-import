@@ -749,8 +749,7 @@ def needs_chrome_source(
   cros_build_lib.AssertInsideChroot()
 
   # Check if it builds chrome and/or a follower package.
-  graph = depgraph.get_build_target_dependency_graph(build_target.root,
-                                                     packages)
+  graph = depgraph.get_sysroot_dependency_graph(build_target.root, packages)
   builds_chrome = constants.CHROME_CP in graph
   builds_follower = {
       pkg: pkg in graph for pkg in constants.OTHER_CHROME_PACKAGES
