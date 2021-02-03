@@ -56,7 +56,7 @@ class PackageNode:
   def __init__(self, pkg_info: package_info.PackageInfo, root: str,
                src_paths: Optional[Iterable[Union[str, os.PathLike]]] = None):
     self.pkg_info = pkg_info
-    self.root = root
+    self.root = os.path.normpath(root)
     self._deps = set()
     self._rev_deps = set()
     self.source_paths = list(src_paths) if src_paths else []
@@ -225,7 +225,7 @@ class DependencyGraph:
     assert 0 <= len(self._roots) <= 2, 'Unexpected roots: {self._roots}'
 
     # Figure out which roots we have roots, and that they're the ones we expect.
-    given_sysroot = getattr(sysroot, 'path', sysroot)
+    given_sysroot = os.path.normpath(getattr(sysroot, 'path', sysroot))
     sdk_root = cros_build_lib.GetSysroot()
     is_sdk_graph = given_sysroot == sdk_root
     # Store the SDK (bdeps) root when present and it's not the SDK's depgraph.

@@ -12,7 +12,7 @@ from chromite.lib.parser import package_info
 
 def _build_depgraph():
   """Build a DependencyGraph to test against."""
-  sysroot = '/build/target'
+  sysroot = '/build/target/'
   sdk_root = '/'
 
   virtual = package_info.parse('virtual/target-foo-1.2.3')
