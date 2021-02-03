@@ -898,11 +898,13 @@ def _get_emerge_args(sysroot_path: str,
   # Pretend: Don't actually install anything.
   # Emptytree: Act as though nothing is installed (even if some packages are).
   # Sysroot: Which sysroot we're considering.
-  args = ['--quiet', '--pretend', '--emptytree', '--sysroot', sysroot_path]
-  # Also set the root for DepGraphGenerator specific semantics. This might not
-  # be necessary, pending more investigation.
-  # TODO: Document final reason or remove if unnecessary.
-  args.extend(['--root', sysroot_path])
+  args = [
+      '--quiet',
+      '--pretend',
+      '--emptytree',
+      # Sysroot needs to be set this way so parallel emerge parses it correctly.
+      f'--sysroot={sysroot_path}',
+  ]
   if include_bdeps:
     args.append('--include-bdepend')
 
