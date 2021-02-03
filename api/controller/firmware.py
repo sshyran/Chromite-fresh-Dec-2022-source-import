@@ -2,6 +2,7 @@
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Firmware builder controller.
 
 Handle all firmware builder related functionality.  Currently no service module
@@ -20,6 +21,8 @@ from chromite.api.gen.chromite.api import firmware_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
+
 
 def _call_entry(fw_loc, metric_proto, subcmd, **kwargs):
   """Calls into firmware_builder.py with the specified subcmd."""
@@ -33,20 +36,24 @@ def _call_entry(fw_loc, metric_proto, subcmd, **kwargs):
   else:
     cros_build_lib.Die(f'Unknown firmware location {fw_loc}.')
 
-  entry_point = os.path.join(constants.SOURCE_ROOT,
-                             fw_path, 'firmware_builder.py')
+  entry_point = os.path.join(constants.SOURCE_ROOT, fw_path,
+                             'firmware_builder.py')
 
   with tempfile.NamedTemporaryFile() as tmpfile:
-    cmd = [entry_point, '--metrics', tmpfile.name, subcmd]
+    cmd = [entry_point, '--metrics', tmpfile.name]
     for key, value in kwargs.items():
       cmd += [f'--{key.replace("_", "-")}', value]
+    cmd += [subcmd]
 
     result = cros_build_lib.run(cmd, check=False)
     with open(tmpfile.name, 'r') as f:
       response = f.read()
 
-  # Parse the entire metric file as our metric proto (as a passthru)
-  json_format.Parse(response, metric_proto)
+  if metric_proto:
+    # Parse the entire metric file as our metric proto (as a passthru).
+    # TODO(b/177907747): BundleFirmwareArtifacts doesn't use this (yet?), but
+    # firmware_builder.py requires it.
+    json_format.Parse(response, metric_proto)
 
   if result.returncode == 0:
     return controller.RETURN_CODE_SUCCESS
@@ -65,6 +72,7 @@ def _BuildAllTotFirmwareResponse(_input_proto, output_proto, _config):
   fw_section.used = 100
   fw_section.total = 150
 
+
 @faux.success(_BuildAllTotFirmwareResponse)
 @faux.empty_completed_unsuccessfully_error
 @validate.require('firmware_location')
@@ -81,6 +89,7 @@ def _TestAllTotFirmwareResponse(_input_proto, output_proto, _config):
 
   metric = output_proto.success.value.add()
   metric.name = 'foo-test'
+
 
 @faux.success(_TestAllTotFirmwareResponse)
 @faux.empty_completed_unsuccessfully_error
@@ -104,6 +113,7 @@ def _BuildAllFirmwareResponse(_input_proto, output_proto, _config):
   fw_section.used = 100
   fw_section.total = 150
 
+
 @faux.success(_BuildAllFirmwareResponse)
 @faux.empty_completed_unsuccessfully_error
 @validate.require('firmware_location')
@@ -120,6 +130,7 @@ def _TestAllFirmwareResponse(_input_proto, output_proto, _config):
 
   metric = output_proto.success.value.add()
   metric.name = 'foo-test'
+
 
 @faux.success(_TestAllFirmwareResponse)
 @faux.empty_completed_unsuccessfully_error
@@ -138,31 +149,37 @@ def _BundleFirmwareArtifactsResponse(_input_proto, output_proto, _config):
   metric = output_proto.success.value.add()
   metric.name = 'foo-test'
 
+
 @faux.success(_BundleFirmwareArtifactsResponse)
 @faux.empty_completed_unsuccessfully_error
-@validate.require('firmware_location')
 @validate.validation_complete
 def BundleFirmwareArtifacts(input_proto, output_proto, _config):
   """Runs all of the firmware tests at the specified location."""
 
-  if len(input_proto.output_artifacts) > 1:
+  if len(input_proto.artifacts.output_artifacts) > 1:
     raise ValueError('Must have exactly one output_artifact')
 
-  with tempfile.NamedTemporaryFile() as meta:
-    info = input_proto.output_artifacts[0]
-    metadata_path = os.path.join(input_proto.result_path.path, meta.name)
+  with osutils.TempDir(delete=False) as tmpdir:
+    info = input_proto.artifacts.output_artifacts[0]
+    metadata_path = os.path.join(tmpdir, 'firmware_metadata.jsonpb')
     resp = _call_entry(
-        info.location, output_proto.metrics, 'bundle',
-        output_dir=input_proto.result_path.path, metadata=metadata_path)
-    if common_pb2.FIRMWARE_TARBALL in info.artifact_types:
-      out = output_proto.artifacts.add()
-      out.artifact_types.append(common_pb2.FIRMWARE_TARBALL)
+        info.location,
+        None,
+        'bundle',
+        output_dir=tmpdir,
+        metadata=metadata_path)
+    if input_proto.artifacts.FIRMWARE_TARBALL in info.artifact_types:
       # TODO(b/177907747): gather the paths from the response and add them to
       # out.paths.
+      out = output_proto.artifacts.artifacts.add(
+          artifact_type=input_proto.artifacts.FIRMWARE_TARBALL, paths=[])
       out.location = info.location
-    if common_pb2.FIRMWARE_TARBALL_INFO in info.artifact_types:
-      out = output_proto.artifacts.add()
-      out.artifact_types.append(common_pb2.FIRMWARE_TARBALL_INFO)
-      out.paths.append(
-          common_pb2.Path(metadata_path, input_proto.result_path.path.location))
+    if (input_proto.artifacts.FIRMWARE_TARBALL_INFO in info.artifact_types and
+        os.path.exists(metadata_path)):
+      out = output_proto.artifacts.artifacts.add(
+          artifact_type=input_proto.artifacts.FIRMWARE_TARBALL_INFO,
+          paths=[
+              common_pb2.Path(
+                  path=metadata_path, location=common_pb2.Path.INSIDE)
+          ])
     return resp
