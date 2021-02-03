@@ -13466,7 +13466,7 @@
         "boards": [
             "hatch"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-hatch-12672.B"
     },
     "firmware-hatch-12672.B-firmwarebranch-tryjob": {

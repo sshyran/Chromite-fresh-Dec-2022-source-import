@@ -1784,7 +1784,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'firmware-sarien-12200.B', ['sarien'], {}),
       (WEEKLY, 'firmware-mistral-12422.B', ['mistral'], {}),
       (WEEKLY, 'firmware-kukui-12573.B', ['kukui', 'jacuzzi'], {}),
-      (DAILY, 'firmware-hatch-12672.B', ['hatch'], {}),
+      (WEEKLY, 'firmware-hatch-12672.B', ['hatch'], {}),
       (WEEKLY, 'firmware-servo-12768.B', ['nautilus'], {}),
       (DAILY, 'firmware-drallion-12930.B', ['drallion'], {}),
       (DAILY, 'firmware-endeavour-13259.B', ['endeavour'], {}),
