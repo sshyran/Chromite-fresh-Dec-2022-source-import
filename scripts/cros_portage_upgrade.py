@@ -1525,11 +1525,6 @@ class Upgrader(object):
 
   def PrepareToRun(self):
     """Checkout upstream gentoo if necessary, and any other prep steps."""
-
-    if not os.path.exists(os.path.join(
-        self._upstream, '.git', 'shallow')):
-      osutils.RmDir(self._upstream, ignore_missing=True)
-
     if os.path.exists(self._upstream):
       if self._local_only:
         oper.Notice('Using upstream cache as-is (no network) %s.' %
