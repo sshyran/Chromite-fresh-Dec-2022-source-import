@@ -27,6 +27,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import gob_util
 from chromite.lib import parallel
+from chromite.lib import pformat
 from chromite.lib import terminal
 from chromite.lib import uri_lib
 from chromite.utils import memoize
@@ -801,21 +802,38 @@ class ActionUnignore(_ActionSimpleParallelCLs):
     helper.UnignoreChange(cl, dryrun=opts.dryrun)
 
 
-class ActionAccount(UserAction):
-  """Get the current user account information"""
+class ActionAccount(_ActionSimpleParallelCLs):
+  """Get user account information"""
 
   COMMAND = 'account'
 
   @staticmethod
-  def __call__(opts):
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('accounts', nargs='*', default=['self'],
+                        help='The accounts to query')
+
+  @classmethod
+  def __call__(cls, opts):
     """Implement the action."""
     helper, _ = GetGerrit(opts)
-    acct = helper.GetAccount()
-    if opts.json:
-      json.dump(acct, sys.stdout)
-    else:
-      print('account_id:%i  %s <%s>' %
-            (acct['_account_id'], acct['name'], acct['email']))
+
+    def print_one(header, data):
+      print(f'### {header}')
+      print(pformat.json(data, compact=opts.json).rstrip())
+
+    def task(arg):
+      detail = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/detail')
+      if not detail:
+        print(f'{arg}: account not found')
+      else:
+        print_one('detail', detail)
+        for field in ('groups', 'capabilities', 'preferences', 'sshkeys',
+                      'gpgkeys'):
+          data = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/{field}')
+          print_one(field, data)
+
+    _run_parallel_tasks(task, *opts.accounts)
 
 
 class ActionHelpAll(UserAction):

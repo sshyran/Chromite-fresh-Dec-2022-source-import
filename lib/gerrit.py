@@ -521,9 +521,9 @@ class GerritHelper(object):
       return
     gob_util.DeleteDraft(self.host, self._to_changenum(change))
 
-  def GetAccount(self):
+  def GetAccount(self, account='self'):
     """Get information about the user account."""
-    return gob_util.GetAccount(self.host)
+    return gob_util.GetAccount(self.host, account=account)
 
 
 def GetGerritPatchInfo(patches):

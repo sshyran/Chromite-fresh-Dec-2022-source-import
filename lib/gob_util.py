@@ -880,6 +880,6 @@ def GetCommitDate(git_url, commit):
     raise GOBError(reason='Failed parsing commit time "%s"' % commit_timestr)
 
 
-def GetAccount(host):
+def GetAccount(host, account='self'):
   """Get information about the user account."""
-  return FetchUrlJson(host, 'accounts/self')
+  return FetchUrlJson(host, 'accounts/%s' % (account,))
