@@ -134,6 +134,18 @@
       ]
     },
     {
+      "name": "betty-arc-s",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "betty-arcvm-master",
       "configs": [
         {
