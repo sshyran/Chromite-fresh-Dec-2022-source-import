@@ -213,10 +213,10 @@
     arm-generic-full
     arm64-generic-full
     eve-full
+    hana-full
     kevin-full
     kevin64-full
     lakitu-full
-    oak-full
     tael-full
     tatl-full
 
@@ -1477,10 +1477,10 @@
     arm-generic-full-tryjob
     arm64-generic-full-tryjob
     eve-full-tryjob
+    hana-full-tryjob
     kevin-full-tryjob
     kevin64-full-tryjob
     lakitu-full-tryjob
-    oak-full-tryjob
     tael-full-tryjob
     tatl-full-tryjob
   master-incremental-tryjob
@@ -1763,12 +1763,6 @@
   nyan_blaze-release-tryjob
   nyan_blaze-unittest-stress
   nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob
-  oak-full-tryjob
-  oak-llvm-next-toolchain-tryjob
-  oak-llvm-toolchain-tryjob
-  oak-payloads-tryjob
-  oak-release-tryjob
-  oak-unittest-stress
   octavius-full-tryjob
   octavius-llvm-next-toolchain-tryjob
   octavius-llvm-toolchain-tryjob
