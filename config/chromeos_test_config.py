@@ -11,6 +11,7 @@ import copy
 
 from chromite.lib import config_lib
 from chromite.lib import constants
+from chromite.lib import cros_logging as logging
 
 from chromite.config import chromeos_config_boards as config_boards
 
@@ -374,7 +375,11 @@ def ApplyCustomOverrides(site_config):
     # for k, v in overrides.items():
     #   assert config[k] != v, ('Unnecessary override: %s: %s' %
     #                           (config_name, k))
-    site_config[config_name].apply(**overrides)
+    if config_name in site_config:
+      site_config[config_name].apply(**overrides)
+    else:
+      logging.warning('ignoring overrides for missing config %s', config_name)
+
 
 
 def IncrementalBuilders(site_config):

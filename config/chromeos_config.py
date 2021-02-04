@@ -24,6 +24,17 @@ from chromite.config.chromeos_test_config import TRADITIONAL_VM_TESTS_SUPPORTED
 from chromite.config.chromeos_test_config import getInfoVMTest
 
 
+def _frozen_ge_set(ge_build_config, values, extras=None):
+  """Return a frozenset of things in GE."""
+  separate_board_names = set(config_lib.GeBuildConfigAllBoards(ge_build_config))
+  unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
+  unified_board_names = set([b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
+                             for b in unified_builds])
+  board_names = separate_board_names | unified_board_names
+  return frozenset(
+      x for x in values if x in board_names).union(extras or frozenset())
+
+
 def remove_images(unsupported_images):
   """Remove unsupported images when applying changes to a BuildConfig.
 
@@ -1237,7 +1248,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.master_android_pfq_mixin,
       schedule='with 150m interval'
   )
-  _vmmst_no_hwtest_boards = frozenset([
+  _vmmst_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'betty-arcvm-master', # No HWTest, No VMTest.
       'hatch-arc-s',
   ])
@@ -1251,14 +1262,14 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       schedule='with 60m interval',
   )
 
-  _pi_no_hwtest_boards = frozenset([
+  _pi_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'caroline',
       'coral',
       'eve', # TODO(b/172889735): Temporary no_hwtest.
       'reef',
   ])
-  _pi_no_hwtest_experimental_boards = frozenset([])
-  _pi_hwtest_boards = frozenset([
+  _pi_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _pi_hwtest_boards = _frozen_ge_set(ge_build_config, [
       # TODO(b/172889735): Temporary disable eve because DUTs are reserved
       # due to crbug/1141713. Instead, adding rammus to cover x86_64.
       # 'eve',
@@ -1266,17 +1277,17 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'kevin',
       'rammus',
   ])
-  _pi_hwtest_experimental_boards = frozenset([])
-  _pi_hwtest_skylab_boards = frozenset([
+  _pi_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _pi_hwtest_skylab_boards = _frozen_ge_set(ge_build_config, [
       # 'eve', TODO(b/172889735): See above.
       'grunt',
       'kevin',
       'rammus',
   ])
-  _pi_vmtest_boards = frozenset([
+  _pi_vmtest_boards = _frozen_ge_set(ge_build_config, [
       'betty-pi-arc',
   ])
-  _pi_vmtest_experimental_boards = frozenset([
+  _pi_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [
   ])
 
   # Android VM RVC master.
@@ -1287,17 +1298,17 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       schedule='with 60m interval',
   )
 
-  _vmrvc_no_hwtest_boards = frozenset([])
-  _vmrvc_no_hwtest_experimental_boards = frozenset([])
-  _vmrvc_hwtest_boards = frozenset([
+  _vmrvc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmrvc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmrvc_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'grunt-arc-r',
       'hatch-arc-r',
       'kukui-arc-r',
       'rammus-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = frozenset([])
-  _vmrvc_vmtest_boards = frozenset([])
-  _vmrvc_vmtest_experimental_boards = frozenset([])
+  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
   # Android VMMST slaves.
   # No board to build for now (just roll). empty slave to pass test.
@@ -1419,21 +1430,18 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  active_builders = frozenset([
-      'amd64-generic',
-      'arm-generic',
-      'arm64-generic',
+  active_builders = _frozen_ge_set(ge_build_config, [
       'eve',
       'hana',
       'kevin',
       'kevin64',
       'tael',
       'tatl',
-  ])
+  ], ('amd64-generic', 'arm-generic', 'arm64-generic'))
 
   # Move the following builders to active_builders once they are consistently
   # green.
-  unstable_builders = frozenset([
+  unstable_builders = _frozen_ge_set(ge_build_config, [
       'lakitu',  # TODO: Re-enable after crbug.com/919630 resolved.
   ])
 
@@ -2036,7 +2044,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   ### Release configs.
 
   # Used for future bvt migration.
-  _release_experimental_boards = frozenset([
+  _release_experimental_boards = _frozen_ge_set(ge_build_config, [
       'betty-kernelnext',
       'elm-kernelnext',
       'eve-arcvm-mesa-virgl-next',
@@ -2048,7 +2056,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'zork-kernelnext',
   ])
 
-  _release_enable_skylab_hwtest = frozenset([
+  _release_enable_skylab_hwtest = _frozen_ge_set(ge_build_config, [
       'asuka',
       'coral',
       'nyan_blaze',
@@ -2059,7 +2067,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'coral': ['astronaut', 'nasher', 'lava'],
   }
 
-  _release_enable_skylab_cts_hwtest = frozenset([
+  _release_enable_skylab_cts_hwtest = _frozen_ge_set(ge_build_config, [
       'samus',
       'terra',
   ])
