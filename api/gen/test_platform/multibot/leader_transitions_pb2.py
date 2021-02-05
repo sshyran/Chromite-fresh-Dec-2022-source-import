@@ -19,8 +19,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='test_platform/multibot/leader_transitions.proto',
   package='test_platform.multibot',
   syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n/test_platform/multibot/leader_transitions.proto\x12\x16test_platform.multibot\x1a#test_platform/multibot/common.proto\"\xf1\x02\n\x17LeaderTransitionMessage\x12N\n\tnew_state\x18\x01 \x01(\x0e\x32;.test_platform.multibot.LeaderTransitionMessage.LeaderState\x12\x42\n\x12\x66ollower_gathering\x18\x02 \x01(\x0b\x32&.test_platform.multibot.FollowersState\"\xc1\x01\n\x0bLeaderState\x12\x13\n\x0fSTATE_UNDEFINED\x10\x00\x12\x14\n\x10STATE_SCHEDULING\x10\x10\x12\x18\n\x14STATE_RUNNING_PREJOB\x10 \x12\x1f\n\x1bSTATE_WAITING_FOR_FOLLOWERS\x10\x30\x12\x1d\n\x19STATE_NOTIFYING_FOLLOWERS\x10@\x12\x19\n\x15STATE_RUNNING_PAYLOAD\x10P\x12\x12\n\x0eSTATE_CLEANING\x10`\"o\n\x0e\x46ollowersState\x12\x1d\n\x15waiting_for_followers\x18\x01 \x01(\x05\x12>\n\x0f\x66ollowers_heard\x18\x02 \x01(\x0b\x32%.test_platform.multibot.HostInfoStoreb\x06proto3')
+  serialized_options=_b('Z@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibot'),
+  serialized_pb=_b('\n/test_platform/multibot/leader_transitions.proto\x12\x16test_platform.multibot\x1a#test_platform/multibot/common.proto\"\xf1\x02\n\x17LeaderTransitionMessage\x12N\n\tnew_state\x18\x01 \x01(\x0e\x32;.test_platform.multibot.LeaderTransitionMessage.LeaderState\x12\x42\n\x12\x66ollower_gathering\x18\x02 \x01(\x0b\x32&.test_platform.multibot.FollowersState\"\xc1\x01\n\x0bLeaderState\x12\x13\n\x0fSTATE_UNDEFINED\x10\x00\x12\x14\n\x10STATE_SCHEDULING\x10\x10\x12\x18\n\x14STATE_RUNNING_PREJOB\x10 \x12\x1f\n\x1bSTATE_WAITING_FOR_FOLLOWERS\x10\x30\x12\x1d\n\x19STATE_NOTIFYING_FOLLOWERS\x10@\x12\x19\n\x15STATE_RUNNING_PAYLOAD\x10P\x12\x12\n\x0eSTATE_CLEANING\x10`\"o\n\x0e\x46ollowersState\x12\x1d\n\x15waiting_for_followers\x18\x01 \x01(\x05\x12>\n\x0f\x66ollowers_heard\x18\x02 \x01(\x0b\x32%.test_platform.multibot.HostInfoStoreBBZ@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibotb\x06proto3')
   ,
   dependencies=[test__platform_dot_multibot_dot_common__pb2.DESCRIPTOR,])
 
@@ -168,4 +168,5 @@ FollowersState = _reflection.GeneratedProtocolMessageType('FollowersState', (_me
 _sym_db.RegisterMessage(FollowersState)
 
 
+DESCRIPTOR._options = None
 # @@protoc_insertion_point(module_scope)

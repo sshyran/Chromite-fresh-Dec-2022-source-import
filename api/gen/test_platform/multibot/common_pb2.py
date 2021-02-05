@@ -21,8 +21,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='test_platform/multibot/common.proto',
   package='test_platform.multibot',
   syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n#test_platform/multibot/common.proto\x12\x16test_platform.multibot\x1a\x1btest_platform/request.proto\x1a\x30test_platform/skylab_local_state/host_info.proto\x1a.test_platform/skylab_test_runner/request.proto\"\x1f\n\x0eMultiBotConfig\x12\r\n\x05topic\x18\x01 \x01(\t\"\xbf\x01\n\rHostInfoStore\x12H\n\nhost_infos\x18\x01 \x03(\x0b\x32\x34.test_platform.multibot.HostInfoStore.HostInfosEntry\x1a\x64\n\x0eHostInfosEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x41\n\x05value\x18\x02 \x01(\x0b\x32\x32.test_platform.skylab_local_state.AutotestHostInfo:\x02\x38\x01\"\xe4\x02\n\x0c\x46ollowerSpec\x12P\n\x11static_attributes\x18\x01 \x01(\x0b\x32\x35.test_platform.multibot.FollowerSpec.StaticAttributes\x12@\n\x06prejob\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Request.Prejob\x12\r\n\x05\x63ount\x18\x03 \x01(\x05\x1a\xb0\x01\n\x10StaticAttributes\x12M\n\x13hardware_attributes\x18\x01 \x01(\x0b\x32\x30.test_platform.Request.Params.HardwareAttributes\x12M\n\x13software_attributes\x18\x02 \x01(\x0b\x32\x30.test_platform.Request.Params.SoftwareAttributesb\x06proto3')
+  serialized_options=_b('Z@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibot'),
+  serialized_pb=_b('\n#test_platform/multibot/common.proto\x12\x16test_platform.multibot\x1a\x1btest_platform/request.proto\x1a\x30test_platform/skylab_local_state/host_info.proto\x1a.test_platform/skylab_test_runner/request.proto\"\x1f\n\x0eMultiBotConfig\x12\r\n\x05topic\x18\x01 \x01(\t\"\xbf\x01\n\rHostInfoStore\x12H\n\nhost_infos\x18\x01 \x03(\x0b\x32\x34.test_platform.multibot.HostInfoStore.HostInfosEntry\x1a\x64\n\x0eHostInfosEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x41\n\x05value\x18\x02 \x01(\x0b\x32\x32.test_platform.skylab_local_state.AutotestHostInfo:\x02\x38\x01\"\xe4\x02\n\x0c\x46ollowerSpec\x12P\n\x11static_attributes\x18\x01 \x01(\x0b\x32\x35.test_platform.multibot.FollowerSpec.StaticAttributes\x12@\n\x06prejob\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.Request.Prejob\x12\r\n\x05\x63ount\x18\x03 \x01(\x05\x1a\xb0\x01\n\x10StaticAttributes\x12M\n\x13hardware_attributes\x18\x01 \x01(\x0b\x32\x30.test_platform.Request.Params.HardwareAttributes\x12M\n\x13software_attributes\x18\x02 \x01(\x0b\x32\x30.test_platform.Request.Params.SoftwareAttributesBBZ@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibotb\x06proto3')
   ,
   dependencies=[test__platform_dot_request__pb2.DESCRIPTOR,test__platform_dot_skylab__local__state_dot_host__info__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_request__pb2.DESCRIPTOR,])
 
@@ -260,5 +260,6 @@ _sym_db.RegisterMessage(FollowerSpec)
 _sym_db.RegisterMessage(FollowerSpec.StaticAttributes)
 
 
+DESCRIPTOR._options = None
 _HOSTINFOSTORE_HOSTINFOSENTRY._options = None
 # @@protoc_insertion_point(module_scope)

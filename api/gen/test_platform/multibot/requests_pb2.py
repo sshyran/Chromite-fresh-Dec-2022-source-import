@@ -21,8 +21,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='test_platform/multibot/requests.proto',
   package='test_platform.multibot',
   syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n%test_platform/multibot/requests.proto\x12\x16test_platform.multibot\x1a%test_platform/phosphorus/prejob.proto\x1a#test_platform/multibot/common.proto\x1a\x1btest_platform/request.proto\"{\n\rLeaderRequest\x12,\n\x07payload\x18\x01 \x01(\x0b\x32\x1b.test_platform.Request.Test\x12<\n\x0e\x66ollower_specs\x18\x02 \x03(\x0b\x32$.test_platform.multibot.FollowerSpec\"\x8b\x03\n\x0f\x46ollowerRequest\x12\x19\n\x11subscription_name\x18\x01 \x01(\t\x12T\n\x0fincoming_filter\x18\x02 \x03(\x0b\x32;.test_platform.multibot.FollowerRequest.IncomingFilterEntry\x12\\\n\x13outgoing_attributes\x18\x03 \x03(\x0b\x32?.test_platform.multibot.FollowerRequest.OutgoingAttributesEntry\x12\x37\n\x06prejob\x18\x04 \x01(\x0b\x32\'.test_platform.phosphorus.PrejobRequest\x1a\x35\n\x13IncomingFilterEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17OutgoingAttributesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
+  serialized_options=_b('Z@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibot'),
+  serialized_pb=_b('\n%test_platform/multibot/requests.proto\x12\x16test_platform.multibot\x1a%test_platform/phosphorus/prejob.proto\x1a#test_platform/multibot/common.proto\x1a\x1btest_platform/request.proto\"{\n\rLeaderRequest\x12,\n\x07payload\x18\x01 \x01(\x0b\x32\x1b.test_platform.Request.Test\x12<\n\x0e\x66ollower_specs\x18\x02 \x03(\x0b\x32$.test_platform.multibot.FollowerSpec\"\x8b\x03\n\x0f\x46ollowerRequest\x12\x19\n\x11subscription_name\x18\x01 \x01(\t\x12T\n\x0fincoming_filter\x18\x02 \x03(\x0b\x32;.test_platform.multibot.FollowerRequest.IncomingFilterEntry\x12\\\n\x13outgoing_attributes\x18\x03 \x03(\x0b\x32?.test_platform.multibot.FollowerRequest.OutgoingAttributesEntry\x12\x37\n\x06prejob\x18\x04 \x01(\x0b\x32\'.test_platform.phosphorus.PrejobRequest\x1a\x35\n\x13IncomingFilterEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17OutgoingAttributesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x42Z@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibotb\x06proto3')
   ,
   dependencies=[test__platform_dot_phosphorus_dot_prejob__pb2.DESCRIPTOR,test__platform_dot_multibot_dot_common__pb2.DESCRIPTOR,test__platform_dot_request__pb2.DESCRIPTOR,])
 
@@ -234,6 +234,7 @@ _sym_db.RegisterMessage(FollowerRequest.IncomingFilterEntry)
 _sym_db.RegisterMessage(FollowerRequest.OutgoingAttributesEntry)
 
 
+DESCRIPTOR._options = None
 _FOLLOWERREQUEST_INCOMINGFILTERENTRY._options = None
 _FOLLOWERREQUEST_OUTGOINGATTRIBUTESENTRY._options = None
 # @@protoc_insertion_point(module_scope)

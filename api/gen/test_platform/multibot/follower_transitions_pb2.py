@@ -19,8 +19,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='test_platform/multibot/follower_transitions.proto',
   package='test_platform.multibot',
   syntax='proto3',
-  serialized_options=None,
-  serialized_pb=_b('\n1test_platform/multibot/follower_transitions.proto\x12\x16test_platform.multibot\x1a\x30test_platform/skylab_local_state/multihost.proto\"\xee\x01\n\x13\x46ollowerStateChange\x12L\n\tnew_state\x18\x01 \x01(\x0e\x32\x39.test_platform.multibot.FollowerStateChange.FollowerState\"\x88\x01\n\rFollowerState\x12\x13\n\x0fSTATE_UNDEFINED\x10\x00\x12\x11\n\rSTATE_STARTED\x10\x10\x12 \n\x1cSTATE_WAITING_TO_RUN_PAYLOAD\x10 \x12\x19\n\x15STATE_RUNNING_PAYLOAD\x10\x30\x12\x12\n\x0eSTATE_CLEANING\x10@\"\xd2\x01\n\rFollowerEvent\x12O\n\x0f\x66inished_prejob\x18\x01 \x01(\x0b\x32\x34.test_platform.multibot.FollowerEvent.FinishedPrejobH\x00\x12\x0e\n\x04\x64ied\x18\x02 \x01(\x08H\x00\x1aW\n\x0e\x46inishedPrejob\x12\x45\n\thost_info\x18\x01 \x01(\x0b\x32\x32.test_platform.skylab_local_state.MultiBotHostInfoB\x07\n\x05\x65ventb\x06proto3')
+  serialized_options=_b('Z@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibot'),
+  serialized_pb=_b('\n1test_platform/multibot/follower_transitions.proto\x12\x16test_platform.multibot\x1a\x30test_platform/skylab_local_state/multihost.proto\"\xee\x01\n\x13\x46ollowerStateChange\x12L\n\tnew_state\x18\x01 \x01(\x0e\x32\x39.test_platform.multibot.FollowerStateChange.FollowerState\"\x88\x01\n\rFollowerState\x12\x13\n\x0fSTATE_UNDEFINED\x10\x00\x12\x11\n\rSTATE_STARTED\x10\x10\x12 \n\x1cSTATE_WAITING_TO_RUN_PAYLOAD\x10 \x12\x19\n\x15STATE_RUNNING_PAYLOAD\x10\x30\x12\x12\n\x0eSTATE_CLEANING\x10@\"\xd2\x01\n\rFollowerEvent\x12O\n\x0f\x66inished_prejob\x18\x01 \x01(\x0b\x32\x34.test_platform.multibot.FollowerEvent.FinishedPrejobH\x00\x12\x0e\n\x04\x64ied\x18\x02 \x01(\x08H\x00\x1aW\n\x0e\x46inishedPrejob\x12\x45\n\thost_info\x18\x01 \x01(\x0b\x32\x32.test_platform.skylab_local_state.MultiBotHostInfoB\x07\n\x05\x65ventBBZ@go.chromium.org/chromiumos/infra/proto/go/test_platform/multibotb\x06proto3')
   ,
   dependencies=[test__platform_dot_skylab__local__state_dot_multihost__pb2.DESCRIPTOR,])
 
@@ -201,4 +201,5 @@ _sym_db.RegisterMessage(FollowerEvent)
 _sym_db.RegisterMessage(FollowerEvent.FinishedPrejob)
 
 
+DESCRIPTOR._options = None
 # @@protoc_insertion_point(module_scope)

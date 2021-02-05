@@ -13,6 +13,7 @@ from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -46,6 +47,37 @@ def Get(_input_proto, _output_proto, _config):
     _output_proto (GetResponse): The output proto.
     _config (api_config.ApiConfig): The API call config.
   """
+  return controller.RETURN_CODE_SUCCESS
+
+
+def _BuildSetupResponse(_input_proto, output_proto, _config):
+  """Just return POINTLESS for now."""
+  # All of the artifact types we support claim that the build is POINTLESS.
+  output_proto.build_relevance = artifacts_pb2.BuildSetupResponse.POINTLESS
+
+
+@faux.success(_BuildSetupResponse)
+@faux.empty_error
+@validate.validation_complete
+def BuildSetup(_input_proto, output_proto, _config):
+  """Setup anything needed for building artifacts
+
+  If any artifact types require steps prior to building the package, they go
+  here.  For example, see ToolchainService/PrepareForBuild.
+
+  Note: crbug/1034529 introduces this method as a noop.  As the individual
+  artifact_type bundlers are added here, they *must* stop uploading it via the
+  individual bundler function.
+
+  Args:
+    _input_proto (GetRequest): The input proto.
+    output_proto (GetResponse): The output proto.
+    _config (api_config.ApiConfig): The API call config.
+  """
+  # If any artifact_type says "NEEDED", the return is NEEDED.
+  # Otherwise, if any artifact_type says "UNKNOWN", the return is UNKNOWN.
+  # Otherwise, the return is POINTLESS.
+  output_proto.build_relevance = artifacts_pb2.BuildSetupResponse.POINTLESS
   return controller.RETURN_CODE_SUCCESS
 
 
