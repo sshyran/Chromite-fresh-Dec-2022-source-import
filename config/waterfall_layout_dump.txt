@@ -117,7 +117,6 @@
     strongbad-factory-trogdor-13443.B-factorybranch
     trogdor-factory-trogdor-13443.B-factorybranch
   factory-veyron-6591.B-buildspec
-    veyron_jaq-factory-veyron-6591.B-factorybranch
     veyron_mickey-factory-veyron-6591.B-factorybranch
     veyron_mighty-factory-veyron-6591.B-factorybranch
     veyron_minnie-factory-veyron-6591.B-factorybranch
@@ -999,7 +998,6 @@
     strongbad-factory-trogdor-13443.B-factorybranch-tryjob
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   factory-veyron-6591.B-buildspec-tryjob
-    veyron_jaq-factory-veyron-6591.B-factorybranch-tryjob
     veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob
     veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob
     veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob
@@ -2072,13 +2070,6 @@
   veyron_fievel-payloads-tryjob
   veyron_fievel-release-tryjob
   veyron_fievel-unittest-stress
-  veyron_jaq-factory-veyron-6591.B-factorybranch-tryjob
-  veyron_jaq-full-tryjob
-  veyron_jaq-llvm-next-toolchain-tryjob
-  veyron_jaq-llvm-toolchain-tryjob
-  veyron_jaq-payloads-tryjob
-  veyron_jaq-release-tryjob
-  veyron_jaq-unittest-stress
   veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob
   veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob
   veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob
