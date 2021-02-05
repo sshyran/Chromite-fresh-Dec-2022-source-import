@@ -455,6 +455,11 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         constants.ANDROID_VM_PACKAGE_KEYWORD,
         constants.ANDROID_VMRVC_BUILD_BRANCH).keys():
       self.assertIn(t, acls)
+    # Test that all VMSC targets have their ACLS set.
+    for t in cros_mark_android_as_stable.MakeBuildTargetDict(
+        constants.ANDROID_VM_PACKAGE_KEYWORD,
+        constants.ANDROID_VMSC_BUILD_BRANCH).keys():
+      self.assertIn(t, acls)
     # Test that all VMMST targets have their ACLS set.
     for t in cros_mark_android_as_stable.MakeBuildTargetDict(
         constants.ANDROID_VM_PACKAGE_KEYWORD,

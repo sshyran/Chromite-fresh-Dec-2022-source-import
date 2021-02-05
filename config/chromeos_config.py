@@ -1203,6 +1203,16 @@ def AndroidTemplates(site_config):
       android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
   )
 
+  # Template for Android VM Sc.
+  site_config.AddTemplate(
+      'vmsc_android_pfq',
+      site_config.templates.generic_android_pfq,
+      site_config.templates.internal,
+      display_label=config_lib.DISPLAY_LABEL_VMSC_ANDROID_PFQ,
+      android_package='android-vm-sc',
+      android_import_branch=constants.ANDROID_VMSC_BUILD_BRANCH,
+  )
+
   # Template for Android VM Master.
   site_config.AddTemplate(
       'vmmst_android_pfq',

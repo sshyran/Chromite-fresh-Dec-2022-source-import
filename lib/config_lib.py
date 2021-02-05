@@ -12,7 +12,6 @@ import itertools
 import json
 import numbers
 import os
-import re
 
 from chromite.lib import constants
 from chromite.lib import osutils
@@ -42,6 +41,7 @@ DISPLAY_LABEL_PI_ANDROID_PFQ = 'pi_android_pfq'
 DISPLAY_LABEL_QT_ANDROID_PFQ = 'qt_android_pfq'
 DISPLAY_LABEL_RVC_ANDROID_PFQ = 'rvc_android_pfq'
 DISPLAY_LABEL_VMRVC_ANDROID_PFQ = 'vmrvc_android_pfq'
+DISPLAY_LABEL_VMSC_ANDROID_PFQ = 'vmsc_android_pfq'
 DISPLAY_LABEL_FIRMWARE = 'firmware'
 DISPLAY_LABEL_FACTORY = 'factory'
 DISPLAY_LABEL_TOOLCHAIN = 'toolchain'

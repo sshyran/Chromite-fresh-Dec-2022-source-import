@@ -271,6 +271,7 @@ ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
+ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
 
 ANDROID_PI_BUILD_TARGETS = {
@@ -320,6 +321,17 @@ ANDROID_VMRVC_BUILD_TARGETS = {
                          (r'(\.zip|/XkbToKcmConverter'
                           r'|/org.chromium.arc.cts.helpers.apk)$')),
 }
+ANDROID_VMSC_BUILD_TARGETS = {
+    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
+    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+    # installed on the board, but not into the VM.
+    'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
+                        (r'(\.zip|/XkbToKcmConverter'
+                         r'|/org.chromium.arc.cts.helpers.apk)$')),
+    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
+                         (r'(\.zip|/XkbToKcmConverter'
+                          r'|/org.chromium.arc.cts.helpers.apk)$')),
+}
 
 # These refer to *_TARGET variables in Android ebuild files, used when
 # parsing ebuilds to determine the corresponding Android branch.
@@ -330,6 +342,7 @@ ANDROID_ALL_BUILD_TARGETS = frozenset(
         ANDROID_PI_BUILD_TARGETS,
         ANDROID_VMMST_BUILD_TARGETS,
         ANDROID_VMRVC_BUILD_TARGETS,
+        ANDROID_VMSC_BUILD_TARGETS,
     )
 )
 
@@ -877,6 +890,7 @@ PFQ_MASTER = 'master-chromium-pfq'
 VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
+VMSC_ANDROID_PFQ_MASTER = 'master-vmsc-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
 
 

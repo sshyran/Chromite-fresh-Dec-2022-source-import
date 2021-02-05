@@ -382,6 +382,8 @@ def MakeBuildTargetDict(package_name, build_branch):
         constants.ANDROID_VMMST_BUILD_TARGETS,
         constants.ANDROID_VMRVC_BUILD_BRANCH:
         constants.ANDROID_VMRVC_BUILD_TARGETS,
+        constants.ANDROID_VMSC_BUILD_BRANCH:
+        constants.ANDROID_VMSC_BUILD_TARGETS,
     }
   else:
     raise ValueError('Unknown package: %s' % package_name)
