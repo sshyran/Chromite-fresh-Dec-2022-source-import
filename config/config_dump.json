@@ -33649,7 +33649,6 @@
             "base",
             "test"
         ],
-        "important": false,
         "notification_configs": [
             "{\n    \"email\": \"clumptini+release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 1\n}"
         ],
@@ -33963,7 +33962,6 @@
             "base",
             "test"
         ],
-        "important": false,
         "notification_configs": [
             "{\n    \"email\": \"clumptini+release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 1\n}"
         ],
