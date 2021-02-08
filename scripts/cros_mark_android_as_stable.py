@@ -34,6 +34,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.scripts import cros_mark_as_stable
 
@@ -542,7 +543,10 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     build_targets: build targets for this particular Android branch.
 
   Returns:
-    Full portage version atom (including rc's, etc) that was revved.
+    Tuple[str, List[str], List[str]] if revved, or None
+    1. Full portage version atom (including rc's, etc) that was revved.
+    2. List of files to be `git add`ed.
+    3. List of files to be `git rm`ed.
   """
   def IsTheNewEBuildRedundant(new_ebuild, stable_ebuild):
     """Returns True if the new ebuild is redundant.
@@ -586,28 +590,52 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     logging.PrintBuildbotStepText('%s %s not revved'
                                   % (stable_candidate.pkgname,
                                      stable_candidate.version))
-    os.unlink(new_ebuild_path)
+    osutils.SafeUnlink(new_ebuild_path)
     return None
 
   # PFQ runs should always be able to find a stable candidate.
   if stable_candidate:
     PrintUprevMetadata(build_branch, stable_candidate, new_ebuild)
 
-  git.RunGit(package_dir, ['add', new_ebuild_path])
+  files_to_add = [new_ebuild_path]
+  files_to_remove = []
   if stable_candidate and not stable_candidate.IsSticky():
-    git.RunGit(package_dir, ['rm', stable_candidate.ebuild_path])
+    osutils.SafeUnlink(stable_candidate.ebuild_path)
+    files_to_remove.append(stable_candidate.ebuild_path)
 
   # Update ebuild manifest and git add it.
   gen_manifest_cmd = ['ebuild', new_ebuild_path, 'manifest', '--force']
   cros_build_lib.run(gen_manifest_cmd, extra_env=None, print_cmd=True)
-  git.RunGit(package_dir, ['add', 'Manifest'])
+  files_to_add.append('Manifest')
 
-  portage_util.EBuild.CommitChange(
-      _GIT_COMMIT_MESSAGE % {'android_package': android_package,
-                             'android_version': android_version},
-      package_dir)
+  return (
+      f'{new_ebuild.package}-{new_ebuild.version}',
+      files_to_add,
+      files_to_remove,
+  )
 
-  return '%s-%s' % (new_ebuild.package, new_ebuild.version)
+
+def _PrepareGitBranch(tracking_branch, overlay_dir):
+  """Prepares a git branch for the uprev commit."""
+  tracking_branch = f'remotes/m/{os.path.basename(tracking_branch)}'
+  existing_branch = git.GetCurrentBranchOrId(overlay_dir)
+  work_branch = cros_mark_as_stable.GitBranch(constants.STABLE_EBUILD_BRANCH,
+                                              tracking_branch,
+                                              overlay_dir)
+  work_branch.CreateBranch()
+
+  # In the case of uprevving overlays that have patches applied to them,
+  # include the patched changes in the stabilizing branch.
+  if existing_branch:
+    git.RunGit(overlay_dir, ['rebase', existing_branch])
+
+
+def _CommitChange(message, android_package_dir, files_to_add, files_to_remove):
+  """Commit changes to git with list of files to add/remove."""
+  git.RunGit(android_package_dir, ['add', '--'] + files_to_add)
+  git.RunGit(android_package_dir, ['rm', '--'] + files_to_remove)
+
+  portage_util.EBuild.CommitChange(message, android_package_dir)
 
 
 def GetParser():
@@ -636,6 +664,9 @@ def GetParser():
   parser.add_argument('--runtime_artifacts_bucket_url',
                       default=_RUNTIME_ARTIFACTS_BUCKET_URL,
                       type='gs_path')
+  parser.add_argument('--skip_commit',
+                      action='store_true',
+                      help='Skip commiting uprev changes to git')
   return parser
 
 
@@ -643,6 +674,11 @@ def main(argv):
   logging.EnableBuildbotMarkers()
   parser = GetParser()
   options = parser.parse_args(argv)
+  # HACK(b/179456416): Skip git operations if tracking_branch is empty, which
+  # happens when called from CQ builders.
+  # TODO(b/179456416): Make CQ builders specify the --skip_commit option.
+  if not options.tracking_branch:
+    options.skip_commit = True
   options.Freeze()
 
   overlay_dir = os.path.abspath(_OVERLAY_DIR % {'srcroot': options.srcroot})
@@ -669,24 +705,25 @@ def main(argv):
   else:
     logging.info('No stable candidate found.')
 
-  tracking_branch = 'remotes/m/%s' % os.path.basename(options.tracking_branch)
-  existing_branch = git.GetCurrentBranchOrId(android_package_dir)
-  work_branch = cros_mark_as_stable.GitBranch(constants.STABLE_EBUILD_BRANCH,
-                                              tracking_branch,
-                                              android_package_dir)
-  work_branch.CreateBranch()
+  if not options.skip_commit:
+    _PrepareGitBranch(options.tracking_branch, overlay_dir)
 
-  # In the case of uprevving overlays that have patches applied to them,
-  # include the patched changes in the stabilizing branch.
-  if existing_branch:
-    git.RunGit(overlay_dir, ['rebase', existing_branch])
-
-  android_version_atom = MarkAndroidEBuildAsStable(
+  revved = MarkAndroidEBuildAsStable(
       stable_candidate, unstable_ebuild, options.android_package,
       version_to_uprev, android_package_dir,
       options.android_build_branch, options.arc_bucket_url,
       options.runtime_artifacts_bucket_url, build_targets)
-  if android_version_atom:
+
+  if revved:
+    android_version_atom, files_to_add, files_to_remove = revved
+    if not options.skip_commit:
+      _CommitChange(
+          _GIT_COMMIT_MESSAGE % {'android_package': options.android_package,
+                                 'android_version': version_to_uprev},
+          android_package_dir,
+          files_to_add,
+          files_to_remove,
+      )
     if options.boards:
       cros_mark_as_stable.CleanStalePackages(options.srcroot,
                                              options.boards.split(':'),

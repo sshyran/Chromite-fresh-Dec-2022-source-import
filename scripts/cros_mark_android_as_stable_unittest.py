@@ -10,14 +10,12 @@ from __future__ import print_function
 import os
 import sys
 
-import mock
 from six.moves import zip as izip
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
-from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
@@ -530,28 +528,26 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(cros_build_lib, 'run')
     self.PatchObject(portage_util.EBuild, 'GetCrosWorkonVars',
                      return_value=None)
-    git_mock = self.PatchObject(git, 'RunGit')
-    commit_mock = self.PatchObject(portage_util.EBuild, 'CommitChange')
     stable_candidate = portage_util.EBuild(self.old2)
     unstable = portage_util.EBuild(self.unstable)
     android_version = self.new_version
     package_dir = self.mock_android_dir
     self.setupMockRuntimeDataBuild(android_version)
-    version_atom = cros_mark_android_as_stable.MarkAndroidEBuildAsStable(
+
+    revved = cros_mark_android_as_stable.MarkAndroidEBuildAsStable(
         stable_candidate, unstable, self.android_package, android_version,
         package_dir, self.build_branch, self.arc_bucket_url,
         self.runtime_artifacts_bucket_url, self.targets)
-    git_mock.assert_has_calls([
-        mock.call(package_dir, ['add', self.new]),
-        mock.call(package_dir, ['add', 'Manifest']),
-    ])
-    commit_mock.assert_called_with(partial_mock.HasString('latest'),
-                                   package_dir)
+
+    self.assertIsNotNone(revved)
+    version_atom, files_to_add, files_to_remove = revved
     self.assertEqual(
         version_atom,
         '%s-%s-r1' % (
             portage_util.GetFullAndroidPortagePackageName(self.android_package),
             self.new_version))
+    self.assertEqual(files_to_add, [self.new, 'Manifest'])
+    self.assertEqual(files_to_remove, [])
 
   def testUpdateDataCollectorArtifacts(self):
     android_version = 100
