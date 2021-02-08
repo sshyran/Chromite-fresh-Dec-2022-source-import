@@ -1000,10 +1000,12 @@ def _EmergePackages(pkgs, device, strip, sysroot, root, board, emerge_args):
     if dlc_id and dlc_package:
       _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package)
       dlc_deployed = True
-      # Clean up empty directories created by emerging DLCs.
-      device.run(['test', '-d', '/build/rootfs', '&&', 'rmdir',
-                  '--ignore-fail-on-non-empty', '/build/rootfs', '/build'],
-                 check=False)
+
+  if dlc_deployed:
+    # Clean up empty directories created by emerging DLCs.
+    device.run(['test', '-d', '/build/rootfs', '&&', 'rmdir',
+                '--ignore-fail-on-non-empty', '/build/rootfs', '/build'],
+               check=False)
 
   if enforced:
     device.run(['setenforce', '1'])
