@@ -28,11 +28,25 @@ the most part in Python with some Bash sprinkled in.
 
 ## Directory Overview
 
-You can use [Code Search](https://cs.corp.google.com/) to lookup things in
-Chromite or ChromeOS in general. You can add a ChromeOS filter to only show
-files from CrOS repositories by going to
-[CS Settings](https://cs.corp.google.com/settings/) and adding a new Saved
-query: “`package:^chromeos`” named “chromeos”.
+You can use
+[Code Search](https://source.chromium.org/chromiumos/chromiumos/codesearch/)
+to lookup things in
+[Chromite](https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:chromite/)
+or Chromium OS in general.
+
+Non-public code has a separate
+[internal Code Search site](https://source.corp.google.com/).
+It's organized into different ["repositories"](https://source.corp.google.com/repos),
+and we have two:
+["Chrome OS - Internal"](https://source.corp.google.com/chromeos_internal) (only
+internal repositories) &
+["Chrome OS - Public"](https://source.corp.google.com/chromeos_public) (only
+public repositories).
+You can add a search query for a single combined view (public & private) in the
+[Saved Queries settings page](https://source.corp.google.com/settings/savedqueries).
+Use the query `package:^chromeos_(internal|public)$`.
+NB: The "Chrome OS - Public" repository is exactly the same as the public
+source.chromium.org site.
 
 ### chromite/api
 
