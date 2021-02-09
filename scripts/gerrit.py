@@ -473,9 +473,6 @@ class _ActionLabeler(UserAction):
   @classmethod
   def init_subparser(cls, parser):
     """Add arguments to this action's subparser."""
-    parser.add_argument('--ne', '--no-emails', dest='notify',
-                        default='ALL', action='store_const', const='NONE',
-                        help='Do not send e-mail notifications')
     parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
                         help='Optional message to include')
     parser.add_argument('cls', nargs='+', metavar='CL',
@@ -551,7 +548,7 @@ class ActionSubmit(_ActionSimpleParallelCLs):
   @staticmethod
   def _process_one(helper, cl, opts):
     """Use |helper| to process the single |cl|."""
-    helper.SubmitChange(cl, dryrun=opts.dryrun)
+    helper.SubmitChange(cl, dryrun=opts.dryrun, notify=opts.notify)
 
 
 class ActionAbandon(_ActionSimpleParallelCLs):
@@ -562,7 +559,7 @@ class ActionAbandon(_ActionSimpleParallelCLs):
   @staticmethod
   def _process_one(helper, cl, opts):
     """Use |helper| to process the single |cl|."""
-    helper.AbandonChange(cl, dryrun=opts.dryrun)
+    helper.AbandonChange(cl, dryrun=opts.dryrun, notify=opts.notify)
 
 
 class ActionRestore(_ActionSimpleParallelCLs):
@@ -606,9 +603,6 @@ class ActionReviewers(UserAction):
   @staticmethod
   def init_subparser(parser):
     """Add arguments to this action's subparser."""
-    parser.add_argument('--ne', '--no-emails', dest='notify',
-                        default='ALL', action='store_const', const='NONE',
-                        help='Do not send e-mail notifications')
     parser.add_argument('cl', metavar='CL',
                         help='The CL to update')
     parser.add_argument('reviewers', nargs='+',
@@ -824,7 +818,7 @@ class ActionCherryPick(UserAction):
       for arg in opts.cls:
         helper, cl = GetGerrit(opts, arg)
         ret = helper.CherryPick(cl, branch, rev=opts.rev, msg=opts.msg,
-                                dryrun=opts.dryrun)
+                                dryrun=opts.dryrun, notify=opts.notify)
         logging.debug('Response: %s', ret)
         if opts.raw:
           print(ret['_number'])
@@ -971,21 +965,38 @@ Actions:
   site_params = config_lib.GetSiteParams()
   parser = commandline.ArgumentParser(
       description=description, default_log_level='notice')
-  parser.add_argument('-i', '--internal', dest='gob', action='store_const',
-                      default=site_params.EXTERNAL_GOB_INSTANCE,
-                      const=site_params.INTERNAL_GOB_INSTANCE,
-                      help='Query internal Chromium Gerrit instance')
-  parser.add_argument('-g', '--gob',
-                      default=site_params.EXTERNAL_GOB_INSTANCE,
-                      help=('Gerrit (on borg) instance to query (default: %s)' %
-                            (site_params.EXTERNAL_GOB_INSTANCE)))
+
+  group = parser.add_argument_group('Server options')
+  group.add_argument('-i', '--internal', dest='gob', action='store_const',
+                     default=site_params.EXTERNAL_GOB_INSTANCE,
+                     const=site_params.INTERNAL_GOB_INSTANCE,
+                     help='Query internal Chrome Gerrit instance')
+  group.add_argument('-g', '--gob',
+                     default=site_params.EXTERNAL_GOB_INSTANCE,
+                     help='Gerrit (on borg) instance to query (default: %s)' %
+                          (site_params.EXTERNAL_GOB_INSTANCE))
+
+  def _AddCommonOptions(p):
+    """Add options that should work before & after the subcommand.
+
+    Make it easy to do `gerrit --dry-run foo` and `gerrit foo --dry-run`.
+    """
+    parser.add_common_argument_to_group(
+        p, '--ne', '--no-emails', dest='notify',
+        default='ALL', action='store_const', const='NONE',
+        help='Do not send e-mail notifications')
+    parser.add_common_argument_to_group(
+        p, '-n', '--dry-run', dest='dryrun',
+        default=False, action='store_true',
+        help='Show what would be done, but do not make changes')
+
+  group = parser.add_argument_group('CL options')
+  _AddCommonOptions(group)
+
   parser.add_argument('--raw', default=False, action='store_true',
                       help='Return raw results (suitable for scripting)')
   parser.add_argument('--json', default=False, action='store_true',
                       help='Return results in JSON (suitable for scripting)')
-  parser.add_argument('-n', '--dry-run', default=False, action='store_true',
-                      dest='dryrun',
-                      help='Show what would be done, but do not make changes')
 
   # Subparsers are required by default under Python 2.  Python 3 changed to
   # not required, but didn't include a required option until 3.7.  Setting
@@ -996,9 +1007,7 @@ Actions:
     # Format the full docstring by removing the file level indentation.
     description = re.sub(r'^  ', '', cls.__doc__, flags=re.M)
     subparser = subparsers.add_parser(cmd, description=description)
-    subparser.add_argument('-n', '--dry-run', dest='dryrun',
-                           default=False, action='store_true',
-                           help='Show what would be done only')
+    _AddCommonOptions(subparser)
     cls.init_subparser(subparser)
 
   return parser

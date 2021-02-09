@@ -529,10 +529,12 @@ def UnignoreChange(host, change):
   return FetchUrlJson(host, path, reqtype='PUT', ignore_404=False)
 
 
-def AbandonChange(host, change, msg=''):
+def AbandonChange(host, change, msg='', notify=None):
   """Abandon a gerrit change."""
   path = '%s/abandon' % _GetChangePath(change)
   body = {'message': msg}
+  if notify is not None:
+    body['notify'] = notify
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
 
 
@@ -559,19 +561,23 @@ def DeleteDraft(host, change):
                ' %r' % change)
 
 
-def CherryPick(host, change, branch, rev='current', msg=''):
+def CherryPick(host, change, branch, rev='current', msg='', notify=None):
   """Cherry pick a change to a branch."""
   path = '%s/revisions/%s/cherrypick' % (_GetChangePath(change), rev)
   body = {'destination': branch, 'message': msg}
+  if notify is not None:
+    body['notify'] = notify
   return FetchUrlJson(host, path, reqtype='POST', body=body)
 
 
-def SubmitChange(host, change, revision=None, wait_for_merge=True):
+def SubmitChange(host, change, revision=None, wait_for_merge=True, notify=None):
   """Submits a gerrit change via Gerrit."""
   if revision is None:
     revision = 'current'
   path = '%s/revisions/%s/submit' % (_GetChangePath(change), revision)
   body = {'wait_for_merge': wait_for_merge}
+  if notify is not None:
+    body['notify'] = notify
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
 
 

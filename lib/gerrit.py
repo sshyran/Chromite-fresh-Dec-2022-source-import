@@ -461,7 +461,7 @@ class GerritHelper(object):
     gob_util.ResetReviewLabels(self.host, self._to_changenum(change),
                                label='Commit-Queue', notify='OWNER')
 
-  def SubmitChange(self, change, dryrun=False):
+  def SubmitChange(self, change, dryrun=False, notify=None):
     """Land (merge) a gerrit change using the JSON API."""
     if dryrun:
       logging.info('Would have submitted change %s', change)
@@ -470,7 +470,8 @@ class GerritHelper(object):
       rev = change.sha1
     else:
       rev = None
-    gob_util.SubmitChange(self.host, self._to_changenum(change), revision=rev)
+    gob_util.SubmitChange(self.host, self._to_changenum(change), revision=rev,
+                          notify=notify)
 
   def ReviewedChange(self, change, dryrun=False):
     """Mark a gerrit change as reviewed."""
@@ -500,12 +501,13 @@ class GerritHelper(object):
       return
     gob_util.UnignoreChange(self.host, self._to_changenum(change))
 
-  def AbandonChange(self, change, msg='', dryrun=False):
+  def AbandonChange(self, change, msg='', dryrun=False, notify=None):
     """Mark a gerrit change as 'Abandoned'."""
     if dryrun:
       logging.info('Would have abandoned change %s', change)
       return
-    gob_util.AbandonChange(self.host, self._to_changenum(change), msg=msg)
+    gob_util.AbandonChange(self.host, self._to_changenum(change), msg=msg,
+                           notify=notify)
 
   def RestoreChange(self, change, dryrun=False):
     """Re-activate a previously abandoned gerrit change."""
@@ -521,7 +523,8 @@ class GerritHelper(object):
       return
     gob_util.DeleteDraft(self.host, self._to_changenum(change))
 
-  def CherryPick(self, change, branch, rev='current', msg='', dryrun=False):
+  def CherryPick(self, change, branch, rev='current', msg='', dryrun=False,
+                 notify=None):
     """Cherry pick a CL to a branch.
 
     Args:
@@ -530,13 +533,14 @@ class GerritHelper(object):
       rev: The specific revision to cherry pick back.
       msg: An additional message to include.
       dryrun: If True, don't actually set the hashtag.
+      notify: Who to send notifications to.
     """
     if dryrun:
       logging.info('Would cherry-pick change %s (revision %s) to branch %s',
                    change, rev, branch)
       return
     return gob_util.CherryPick(self.host, self._to_changenum(change), branch,
-                               rev=rev, msg=msg)
+                               rev=rev, msg=msg, notify=notify)
 
   def GetAccount(self, account='self'):
     """Get information about the user account."""
