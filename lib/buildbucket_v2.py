@@ -245,24 +245,111 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
                         exception=httplib.ResponseNotReady)
-  def GetBuild(self, buildbucket_id, properties=None):
-    """GetBuild call of a specific build with buildbucket_id.
+  def CancelBuild(self, buildbucket_id, summary_markdown, properties=None):
+    """CancelBuild call of a specific build with buildbucket_id.
 
     Args:
       buildbucket_id: id of the build in buildbucket.
-      properties: specific build.output.properties to query.
+      summary_markdown: Human-readable summary of the build in Markdown format.
+      properties: fields to include in the response.
 
     Returns:
       The corresponding Build proto. See here:
       https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
     """
-    if properties:
-      field_mask = field_mask_pb2.FieldMask(paths=[properties])
-      get_build_request = rpc_pb2.GetBuildRequest(id=buildbucket_id,
-                                                  fields=field_mask)
-    else:
-      get_build_request = rpc_pb2.GetBuildRequest(id=buildbucket_id)
+    cancel_build_request = rpc_pb2.CancelBuildRequest(
+         id=buildbucket_id,
+         summary_markdown=summary_markdown,
+         fields=(field_mask_pb2.FieldMask(paths=[properties])
+                 if properties else None)
+    )
+    return self.client.CancelBuild(cancel_build_request)
+
+  # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=httplib.ResponseNotReady)
+  def GetBuild(self, buildbucket_id, properties=None):
+    """GetBuild call of a specific build with buildbucket_id.
+
+    Args:
+      buildbucket_id: id of the build in buildbucket.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+    """
+    get_build_request = rpc_pb2.GetBuildRequest(
+        id=buildbucket_id,
+        fields=(field_mask_pb2.FieldMask(paths=[properties])
+                if properties else None)
+    )
     return self.client.GetBuild(get_build_request)
+
+# TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=httplib.ResponseNotReady)
+  def ScheduleBuild(self, request_id, template_build_id=None,
+                    builder=None, experiments=None,
+                    properties=None, gerrit_changes=None,
+                    tags=None, fields=None, critical=True):
+    """GetBuild call of a specific build with buildbucket_id.
+
+    Args:
+      request_id: unique string used to prevent duplicates.
+      template_build_id: ID of a build to retry.
+      builder: Tuple (builder.project, builder.bucket) defines build ACL
+      experiments: map of string, bool of experiments to set.
+      properties: properties key in parameters_json
+      gerrit_changes: Repeated GerritChange message type.
+      tags: repeated StringPair of Build.tags to associate with build.
+      fields: fields to include in the response.
+      critical: bool for build.critical.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+    """
+    schedule_build_request = rpc_pb2.ScheduleBuildRequest(
+        request_id=request_id,
+        template_build_id=template_build_id if template_build_id else None,
+        builder=builder,
+        experiments=experiments if experiments else None,
+        properties=properties if properties else None,
+        gerrit_changes=gerrit_changes if gerrit_changes else None,
+        tags=tags if tags else None,
+        fields=field_mask_pb2.FieldMask(paths=[fields]) if fields else None,
+        critical=common_pb2.YES if critical else common_pb2.NO)
+    return self.client.ScheduleBuild(schedule_build_request)
+
+# TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=httplib.ResponseNotReady)
+  def UpdateBuild(self, build, update_properties, properties=None):
+    """GetBuild call of a specific build with buildbucket_id.
+
+    Args:
+      build: Buildbucket build to update.
+      update_properties: fields to update.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+    """
+    update_build_request = rpc_pb2.UpdateBuildRequest(
+        build=build,
+        update_mask=field_mask_pb2.FieldMask(paths=[update_properties]),
+        fields=(field_mask_pb2.FieldMask(paths=[properties])
+                if properties else None)
+    )
+    return self.client.UpdateBuild(update_build_request)
 
   def GetKilledChildBuilds(self, buildbucket_id):
     """Get IDs of all the builds killed by self-destructed master build.

@@ -36,6 +36,34 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
     ret = buildbucket_v2.BuildbucketV2(test_env=True)
     self.assertIsInstance(ret.client, Client)
 
+  def testCancelBuildWithProperties(self):
+    fake_field_mask = field_mask_pb2.FieldMask(paths=['properties'])
+    fake_cancel_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2()
+    client = bbv2.client
+    self.cancel_build_request_fn = self.PatchObject(
+        rpc_pb2, 'CancelBuildRequest', return_value=fake_cancel_build_request)
+    self.cancel_build_function = self.PatchObject(client, 'CancelBuild')
+    bbv2.CancelBuild('some-id', 'summary_markdown', 'properties')
+    self.cancel_build_request_fn.assert_called_with(id='some-id',
+        summary_markdown='summary_markdown',
+        fields=fake_field_mask)
+    self.cancel_build_function.assert_called_with(fake_cancel_build_request)
+
+  def testCancelBuildWithoutProperties(self):
+    fake_cancel_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2()
+    client = bbv2.client
+    self.cancel_build_request_fn = self.PatchObject(
+        rpc_pb2, 'CancelBuildRequest', return_value=fake_cancel_build_request)
+    self.cancel_build_function = self.PatchObject(client, 'CancelBuild')
+    bbv2.CancelBuild('some-id', 'summary_markdown')
+    self.cancel_build_request_fn.assert_called_with(
+        id='some-id',
+        summary_markdown='summary_markdown',
+        fields=None)
+    self.cancel_build_function.assert_called_with(fake_cancel_build_request)
+
   def testGetBuildWithProperties(self):
     fake_field_mask = field_mask_pb2.FieldMask(paths=['properties'])
     fake_get_build_request = object()
@@ -57,8 +85,71 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
         rpc_pb2, 'GetBuildRequest', return_value=fake_get_build_request)
     self.get_build_function = self.PatchObject(client, 'GetBuild')
     bbv2.GetBuild('some-id')
-    self.get_build_request_fn.assert_called_with(id='some-id')
+    self.get_build_request_fn.assert_called_with(id='some-id', fields=None)
     self.get_build_function.assert_called_with(fake_get_build_request)
+
+  def testScheduleBuild(self):
+    fake_builder = build_pb2.BuilderID(project='chromeos',
+                                      bucket='general',
+                                      builder='test-builder')
+    fake_field_mask = field_mask_pb2.FieldMask(paths=['properties'])
+    fake_tag = common_pb2.StringPair(key='foo',
+                                     value='bar')
+    fake_schedule_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2()
+    client = bbv2.client
+    self.schedule_build_request_fn = self.PatchObject(
+        rpc_pb2, 'ScheduleBuildRequest',
+        return_value=fake_schedule_build_request)
+    self.schedule_build_function = self.PatchObject(client, 'ScheduleBuild')
+    bbv2.ScheduleBuild(request_id='1234', builder=fake_builder,
+                       tags=fake_tag, fields='properties', critical=True)
+    self.schedule_build_request_fn.assert_called_with(
+        request_id='1234',
+        template_build_id=None,
+        builder=fake_builder,
+        experiments=None,
+        properties=None,
+        gerrit_changes=None,
+        tags=fake_tag,
+        fields=fake_field_mask,
+        critical=common_pb2.YES)
+    self.schedule_build_function.assert_called_with(fake_schedule_build_request)
+
+  def testUpdateBuildWithProperties(self):
+    fake_update_mask = field_mask_pb2.FieldMask(paths=['number'])
+    fake_prop_mask = field_mask_pb2.FieldMask(paths=['properties'])
+    fake_build = build_pb2.Build(id=2341,
+                                 number=1234)
+    fake_update_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2()
+    client = bbv2.client
+    self.update_build_request_fn = self.PatchObject(
+        rpc_pb2, 'UpdateBuildRequest', return_value=fake_update_build_request)
+    self.update_build_function = self.PatchObject(client, 'UpdateBuild')
+    bbv2.UpdateBuild(fake_build, 'number', 'properties')
+    self.update_build_request_fn.assert_called_with(
+        build=fake_build,
+        update_mask=fake_update_mask,
+        fields=fake_prop_mask)
+    self.update_build_function.assert_called_with(fake_update_build_request)
+
+  def testUpdateBuildWithoutProperties(self):
+    fake_update_mask = field_mask_pb2.FieldMask(paths=['number'])
+    fake_build = build_pb2.Build(id=2341,
+                                 number=1234)
+    fake_update_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2()
+    client = bbv2.client
+    self.update_build_request_fn = self.PatchObject(
+        rpc_pb2, 'UpdateBuildRequest', return_value=fake_update_build_request)
+    self.update_build_function = self.PatchObject(client, 'UpdateBuild')
+    bbv2.UpdateBuild(fake_build, 'number')
+    self.update_build_request_fn.assert_called_with(
+        build=fake_build,
+        update_mask=fake_update_mask,
+        fields=None)
+    self.update_build_function.assert_called_with(fake_update_build_request)
 
   def testGetBuildStages(self):
     """Test the GetBuildStages functionality."""
