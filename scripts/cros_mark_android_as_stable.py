@@ -36,6 +36,7 @@ from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import repo_util
 from chromite.scripts import cros_mark_as_stable
 
 
@@ -615,17 +616,18 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
   )
 
 
-def _PrepareGitBranch(tracking_branch, overlay_dir):
-  """Prepares a git branch for the uprev commit."""
-  tracking_branch = f'remotes/m/{os.path.basename(tracking_branch)}'
-  existing_branch = git.GetCurrentBranchOrId(overlay_dir)
-  work_branch = cros_mark_as_stable.GitBranch(constants.STABLE_EBUILD_BRANCH,
-                                              tracking_branch,
-                                              overlay_dir)
-  work_branch.CreateBranch()
+def _PrepareGitBranch(overlay_dir):
+  """Prepares a git branch for the uprev commit.
 
-  # In the case of uprevving overlays that have patches applied to them,
-  # include the patched changes in the stabilizing branch.
+  If the overlay project is currently on a branch (e.g. patches are being
+  applied), rebase the new branch on top of it.
+
+  Args:
+    overlay_dir: The overlay directory.
+  """
+  existing_branch = git.GetCurrentBranch(overlay_dir)
+  repo_util.Repository.MustFind(overlay_dir).StartBranch(
+      constants.STABLE_EBUILD_BRANCH, projects=['.'], cwd=overlay_dir)
   if existing_branch:
     git.RunGit(overlay_dir, ['rebase', existing_branch])
 
@@ -659,8 +661,9 @@ def GetParser():
   parser.add_argument('-s', '--srcroot',
                       default=os.path.join(os.environ['HOME'], 'trunk', 'src'),
                       help='Path to the src directory')
+  # TODO(crbug/1074145): Remove once CQ specifies --skip_commit.
   parser.add_argument('-t', '--tracking_branch', default='cros/master',
-                      help='Branch we are tracking changes against')
+                      help='DEPRECATED')
   parser.add_argument('--runtime_artifacts_bucket_url',
                       default=_RUNTIME_ARTIFACTS_BUCKET_URL,
                       type='gs_path')
@@ -706,7 +709,7 @@ def main(argv):
     logging.info('No stable candidate found.')
 
   if not options.skip_commit:
-    _PrepareGitBranch(options.tracking_branch, overlay_dir)
+    _PrepareGitBranch(overlay_dir)
 
   revved = MarkAndroidEBuildAsStable(
       stable_candidate, unstable_ebuild, options.android_package,
