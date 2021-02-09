@@ -138,8 +138,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
     sdk_results['package_deps'].update(board_bdeps)
 
   indep_packages = [
-      'virtual/target-sdk', 'chromeos-base/chromite',
-      'virtual/target-sdk-post-cross'
+      'virtual/target-sdk', 'virtual/target-sdk-post-cross',
   ]
 
   indep_deps, _ = cros_extract_deps.ExtractDeps(
