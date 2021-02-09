@@ -143,18 +143,21 @@ def uprev_android(tracking_branch,
                   android_build_branch,
                   chroot,
                   build_targets=None,
-                  android_version=None):
+                  android_version=None,
+                  skip_commit=False):
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   command = [
       'cros_mark_android_as_stable',
-      '--tracking_branch=%s' % tracking_branch,
-      '--android_package=%s' % android_package,
-      '--android_build_branch=%s' % android_build_branch,
+      f'--tracking_branch={tracking_branch}'
+      f'--android_package={android_package}',
+      f'--android_build_branch={android_build_branch}',
   ]
   if build_targets:
-    command.append('--boards=%s' % ':'.join(bt.name for bt in build_targets))
+    command.append(f'--boards={":".join(bt.name for bt in build_targets)}')
   if android_version:
-    command.append('--force_version=%s' % android_version)
+    command.append(f'--force_version={android_version}')
+  if skip_commit:
+    command.append('--skip_commit')
 
   result = cros_build_lib.run(
       command,
@@ -174,7 +177,7 @@ def uprev_android(tracking_branch,
   for target in build_targets or []:
     # Sanity check: We should always be able to merge the version of
     # Android we just unmasked.
-    command = ['emerge-%s' % target.name, '-p', '--quiet', '=%s' % android_atom]
+    command = [f'emerge-{target.name}', '-p', '--quiet', f'={android_atom}']
     try:
       cros_build_lib.run(
           command, enter_chroot=True, chroot_args=chroot.get_enter_args())

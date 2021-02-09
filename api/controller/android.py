@@ -56,6 +56,7 @@ def MarkStable(input_proto, output_proto, _config):
   package_name = input_proto.package_name
   android_build_branch = input_proto.android_build_branch
   android_version = input_proto.android_version
+  skip_commit = input_proto.skip_commit
 
   # Assume success.
   output_proto.status = android_pb2.MARK_STABLE_STATUS_SUCCESS
@@ -68,7 +69,9 @@ def MarkStable(input_proto, output_proto, _config):
         android_build_branch=android_build_branch,
         chroot=chroot,
         build_targets=build_targets,
-        android_version=android_version)
+        android_version=android_version,
+        skip_commit=skip_commit,
+    )
   except packages.AndroidIsPinnedUprevError as e:
     # If the uprev failed due to a pin, CI needs to unpin and retry.
     android_atom_to_build = e.new_android_atom

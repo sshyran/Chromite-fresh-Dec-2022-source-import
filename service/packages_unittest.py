@@ -57,6 +57,17 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     self.assertCommandContains(['emerge-foo'])
     self.assertCommandContains(['emerge-bar'])
 
+  def test_skip_commit(self):
+    """Test specifying skip_commit option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('refs/tracking-branch', 'android/package',
+                           'refs/android-build-branch', Chroot(),
+                           skip_commit=True)
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--skip_commit'])
+
   def test_no_uprev(self):
     """Test no uprev handling."""
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
