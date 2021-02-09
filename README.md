@@ -1,11 +1,9 @@
 # Chromite Development: Starter Guide
 
-[TOC]
-
-## Objective
-
 This doc tries to give an overview and head start to anyone just starting out on
 Chromite development.
+
+[TOC]
 
 ## Background
 
