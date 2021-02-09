@@ -168,18 +168,27 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
         'bundle',
         output_dir=tmpdir,
         metadata=metadata_path)
-    if input_proto.artifacts.FIRMWARE_TARBALL in info.artifact_types:
-      # TODO(b/177907747): gather the paths from the response and add them to
-      # out.paths.
-      out = output_proto.artifacts.artifacts.add(
-          artifact_type=input_proto.artifacts.FIRMWARE_TARBALL, paths=[])
-      out.location = info.location
+    tarball_paths = []
     if (input_proto.artifacts.FIRMWARE_TARBALL_INFO in info.artifact_types and
         os.path.exists(metadata_path)):
+      with open(metadata_path, 'r') as f:
+        metadata = json_format.Parse(f.read(),
+                                     firmware_pb2.FirmwareArtifactInfo())
       out = output_proto.artifacts.artifacts.add(
           artifact_type=input_proto.artifacts.FIRMWARE_TARBALL_INFO,
           paths=[
               common_pb2.Path(
                   path=metadata_path, location=common_pb2.Path.INSIDE)
           ])
+      tarball_paths = [
+          common_pb2.Path(
+              path=os.path.join(tmpdir, x.file_name),
+              location=common_pb2.Path.INSIDE) for x in metadata.objects
+      ]
+    if (tarball_paths and
+        input_proto.artifacts.FIRMWARE_TARBALL in info.artifact_types):
+      out = output_proto.artifacts.artifacts.add(
+          artifact_type=input_proto.artifacts.FIRMWARE_TARBALL,
+          paths=tarball_paths)
+      out.location = info.location
     return resp
