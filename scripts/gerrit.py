@@ -294,9 +294,7 @@ class ActionTodo(_ActionSearchQuery):
   @staticmethod
   def __call__(opts):
     """Implement the action."""
-    cls = FilteredQuery(opts, ('reviewer:self status:open NOT owner:self '
-                               'label:Code-Review=0,user=self '
-                               'NOT label:Verified<0'))
+    cls = FilteredQuery(opts, 'attention:self')
     PrintCls(opts, cls)
 
 
