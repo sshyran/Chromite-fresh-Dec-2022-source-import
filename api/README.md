@@ -147,6 +147,8 @@ chromite changes.
 
 When making changes to the proto, you must:
 
+*   **Note: this process is currently being reviewed and best practices
+    developed.**
 *   Change the proto.
     1.  Make your changes.
     1.  Run `chromite/infra/proto/generate.sh`.
@@ -163,22 +165,12 @@ When making changes to the proto, you must:
         *   Submit the proto changes along with the implementation.
         *   May be done as a single CL or as a stack of CLs with `Cq-Depend`.
 
-At time of writing, the PCQ does not support `Cq-Depend:` between the
-infra/proto and chromite repos, so it must be handled manually.
+Use `Cq-Depend:` to declare the CL dependencies between the infra/proto and
+chromite changes.
 
-This repo was and will be pinned to a specific revision in the manifest files
-when we get closer to completing work on the Build API. For the speed we're
-moving at now, though, having that revision pinned and updating the manifest has
-caused far more problems than its solving.
-
-When we do go back to the pinned revision:
-
-1.  Commit and land your proto changes.
-1.  Update manifest/full.xml with the new revision.
-1.  Update manifest-internal/external-full.xml with the new revision.
-1.  Run chromite/api/compile_build_api_proto.
-1.  Upload the changes from the previous three steps and add CQ-DEPEND between
-    the CLs.
+The chromite/infra/proto repo is branched and reflects the Build API for the
+branch in question. The infra/proto repo is unbranched, and is what is used by
+recipes.
 
 ### gen/
 
