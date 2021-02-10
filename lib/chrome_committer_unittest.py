@@ -85,7 +85,8 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
                                 'cl', 'upload', '-v', '-m',
                                 'Automated Commit: Modify OWNERS and BUILD.gn',
                                 '--bypass-hooks', '-f',
-                                '--tbrs', 'chrome-os-gardeners@google.com',
+                                '--cc', 'chrome-os-gardeners@google.com',
+                                '--set-bot-commit',
                                 '--send-mail', '--use-commit-queue'])
 
   def testUploadDryRun(self):

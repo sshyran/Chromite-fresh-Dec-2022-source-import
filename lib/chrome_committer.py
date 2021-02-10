@@ -100,7 +100,7 @@ class ChromeCommitter(object):
       # not part of the shallow checkout, -f to skip editing the CL message,
       upload_args = self._git_committer_args + [
           'cl', 'upload', '-v', '-m', self._commit_msg, '--bypass-hooks', '-f',
-          '--tbrs', constants.CHROME_GARDENER_REVIEW_EMAIL]
+          '--cc', constants.CHROME_GARDENER_REVIEW_EMAIL, '--set-bot-commit']
       # Marks CL as ready.
       upload_args += ['--send-mail']
       if self._dryrun:
