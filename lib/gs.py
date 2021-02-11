@@ -647,8 +647,13 @@ class GSContext(object):
     if self.dry_run:
       return (lambda: (yield ''))()
 
+    env = None
+    if self.boto_file and os.path.isfile(self.boto_file):
+      env = os.environ.copy()
+      env['BOTO_CONFIG'] = self.boto_file
+
     cmd = [self.gsutil_bin] + self.gsutil_flags + ['cat', path]
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
 
     def read_content():
       try:
