@@ -537,7 +537,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     payload_path = os.path.join(
         self.tempdir,
         'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
-    paygen_mock.assert_call_once_with(self.target_image, payload_path)
+    paygen_mock.assert_called_once_with(self.target_image, payload_path)
 
   def testGenerateDeltaTestPayloads(self):
     """Verifies correctly generating delta payloads."""
@@ -547,8 +547,8 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    paygen_mock.assert_call_once_with(self.target_image, payload_path,
-                                      src_image=self.target_image)
+    paygen_mock.assert_called_once_with(self.target_image, payload_path,
+                                        src_image=self.target_image)
 
   def testGenerateFullDummyDlcTestPayloads(self):
     """Verifies correctly generating full payloads for sample-dlc."""
@@ -595,7 +595,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
                                    'GenerateStatefulPayload')
     artifacts.GenerateTestPayloads(self.target_image, self.tempdir,
                                    stateful=True)
-    paygen_mock.assert_call_once_with(self.target_image, self.tempdir)
+    paygen_mock.assert_called_once_with(self.target_image, self.tempdir)
 
   def testGenerateQuickProvisionPayloads(self):
     """Verifies correct files are created for quick_provision script."""
