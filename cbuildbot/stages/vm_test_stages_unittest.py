@@ -117,8 +117,9 @@ class VMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     for cmd in ('GenerateStackTraces', 'ArchiveFile',
                 'UploadArchivedFile', 'BuildAndArchiveTestResultsTarball'):
       self.PatchObject(commands, cmd, autospec=True)
+    self.run_test_suite_mock = self.PatchObject(
+        vm_test_stages, 'RunTestSuite', autospec=True)
     for cmd in (
-        'RunTestSuite',
         'ArchiveTestResults',
         'ArchiveVMFiles',
         'RunDevModeTest',
@@ -212,11 +213,7 @@ class VMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
     # pylint: enable=unused-argument
 
-    self.PatchObject(
-        vm_test_stages,
-        'RunTestSuite',
-        autospec=True,
-        side_effect=_MockRunTestSuite)
+    self.run_test_suite_mock.side_effect = _MockRunTestSuite
     results_lib.Results.Clear()
     self.RunStage()
     result = results_lib.Results.Get()[0]
