@@ -13,8 +13,8 @@ _sym_db = _symbol_database.Default()
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
-from infra_libs.common.proto.gerrit import gerrit_pb2 as go_dot_chromium_dot_org_dot_luci_dot_common_dot_proto_dot_gerrit_dot_gerrit__pb2
-from infra_libs.cv.api.bigquery.v1 import attempt_pb2 as go_dot_chromium_dot_org_dot_luci_dot_cv_dot_api_dot_bigquery_dot_v1_dot_attempt__pb2
+from chromite.third_party.infra_libs.common.proto.gerrit import gerrit_pb2 as go_dot_chromium_dot_org_dot_luci_dot_common_dot_proto_dot_gerrit_dot_gerrit__pb2
+from chromite.third_party.infra_libs.cv.api.bigquery.v1 import attempt_pb2 as go_dot_chromium_dot_org_dot_luci_dot_cv_dot_api_dot_bigquery_dot_v1_dot_attempt__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(

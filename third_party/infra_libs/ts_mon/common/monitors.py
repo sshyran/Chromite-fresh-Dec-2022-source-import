@@ -11,8 +11,8 @@ import socket
 from chromite.third_party import httplib2
 
 from googleapiclient import errors
-from infra_libs import httplib2_utils
-from infra_libs.ts_mon.common import pb_to_popo
+from chromite.third_party.infra_libs import httplib2_utils
+from chromite.third_party.infra_libs.ts_mon.common import pb_to_popo
 try: # pragma: no cover
   from oauth2client import gce
 except ImportError: # pragma: no cover

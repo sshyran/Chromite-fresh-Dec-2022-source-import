@@ -9,20 +9,22 @@ import contextlib
 import multiprocessing
 import os
 import queue as Queue
-import socket
 import signal
+import socket
 import time
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 from chromite.lib import parallel
 
+
 try:
-  from infra_libs.ts_mon import config
-  from infra_libs.ts_mon import BooleanField
-  from infra_libs.ts_mon import IntegerField
-  from infra_libs.ts_mon import StringField
   import googleapiclient.discovery
+
+  from chromite.third_party.infra_libs.ts_mon import BooleanField
+  from chromite.third_party.infra_libs.ts_mon import config
+  from chromite.third_party.infra_libs.ts_mon import IntegerField
+  from chromite.third_party.infra_libs.ts_mon import StringField
 except (ImportError, RuntimeError) as e:
   config = None
   logging.warning('Failed to import ts_mon, monitoring is disabled: %s', e)

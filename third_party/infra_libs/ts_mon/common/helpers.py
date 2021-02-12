@@ -5,7 +5,7 @@
 """Helper classes that make it easier to instrument code for monitoring."""
 
 
-from infra_libs.ts_mon.common import metrics
+from chromite.third_party.infra_libs.ts_mon.common import metrics
 
 import time
 

@@ -4,7 +4,8 @@
 
 """Unit tests for buildbucket_v2."""
 
-from datetime import datetime, date
+from datetime import date
+from datetime import datetime
 
 from google.protobuf import field_mask_pb2
 from google.protobuf.struct_pb2 import Struct, Value
@@ -12,14 +13,13 @@ from google.protobuf.timestamp_pb2 import Timestamp
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import constants
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import cros_test_lib
 from chromite.lib import metadata_lib
-from chromite.lib.luci.prpc.client import Client, ProtocolError
-
-from infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
-from infra_libs.buildbucket.proto import common_pb2
-from infra_libs.buildbucket.proto import builder_pb2, step_pb2
+from chromite.lib.luci.prpc.client import Client
+from chromite.lib.luci.prpc.client import ProtocolError
+from chromite.third_party.infra_libs.buildbucket.proto import (build_pb2, builder_pb2, builds_service_pb2, common_pb2,
+                                                               step_pb2)
 
 
 SUCCESS_BUILD = {'infra': {

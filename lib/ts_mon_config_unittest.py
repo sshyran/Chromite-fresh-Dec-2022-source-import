@@ -11,8 +11,7 @@ import queue as Queue
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
-
-from infra_libs import ts_mon
+from chromite.third_party.infra_libs import ts_mon
 
 
 # pylint: disable=protected-access

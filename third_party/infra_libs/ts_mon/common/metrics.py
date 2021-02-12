@@ -8,11 +8,11 @@ import re
 
 import six
 
-from infra_libs.ts_mon.protos import metrics_pb2
+from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
 
-from infra_libs.ts_mon.common import distribution
-from infra_libs.ts_mon.common import errors
-from infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import distribution
+from chromite.third_party.infra_libs.ts_mon.common import errors
+from chromite.third_party.infra_libs.ts_mon.common import interface
 
 
 MICROSECONDS_PER_SECOND = 1000000

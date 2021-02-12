@@ -17,7 +17,7 @@ from chromite.lib import parallel
 if sys.version_info.major >= 3:
   from chromite.lib import ts_mon_config
 
-from infra_libs import ts_mon  # pylint: disable=wrong-import-position
+from chromite.third_party.infra_libs import ts_mon  # pylint: disable=wrong-import-position
 
 
 class FakeException(Exception):

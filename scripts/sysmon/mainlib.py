@@ -19,7 +19,7 @@ from chromite.scripts.sysmon import osinfo_metrics
 from chromite.scripts.sysmon import proc_metrics
 from chromite.scripts.sysmon import puppet_metrics
 from chromite.scripts.sysmon import system_metrics
-from infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import interface
 
 
 logger = logging.getLogger(__name__)

@@ -17,7 +17,7 @@ import six
 from six.moves import http_client as httplib
 
 from googleapiclient import errors
-from infra_libs.ts_mon.common import http_metrics
+from chromite.third_party.infra_libs.ts_mon.common import http_metrics
 
 # TODO(nxia): crbug.com/790760 upgrade oauth2client to 4.1.2.
 oauth2client_util_imported = False

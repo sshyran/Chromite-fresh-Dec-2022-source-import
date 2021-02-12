@@ -11,10 +11,10 @@ import time
 import unittest
 from unittest import mock
 
-import infra_libs
-from infra_libs.ts_mon.common import http_metrics
-from infra_libs import httplib2_utils
-from infra_libs import ts_mon
+from chromite.third_party import infra_libs
+from chromite.third_party.infra_libs.ts_mon.common import http_metrics
+from chromite.third_party.infra_libs import httplib2_utils
+from chromite.third_party.infra_libs import ts_mon
 
 from chromite.third_party import httplib2
 

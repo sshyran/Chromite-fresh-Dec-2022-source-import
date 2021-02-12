@@ -21,8 +21,9 @@ class TestGitMetricCollector(cros_test_lib.TestCase):
   """Tests for _GitMetricCollector."""
 
   def setUp(self):
-    patcher = mock.patch('infra_libs.ts_mon.common.interface.state.store',
-                         autospec=True)
+    patcher = mock.patch(
+        'chromite.third_party.infra_libs.ts_mon.common.interface.state.store',
+        autospec=True)
     self.store = patcher.start()
     self.addCleanup(patcher.stop)
 

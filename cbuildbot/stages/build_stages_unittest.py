@@ -13,8 +13,10 @@ from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
-from chromite.lib import buildbucket_v2
+from chromite.cbuildbot.stages.generic_stages_unittest import patch
+from chromite.cbuildbot.stages.generic_stages_unittest import patches
 from chromite.lib import build_summary
+from chromite.lib import buildbucket_v2
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -28,11 +30,9 @@ from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import path_util
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party.infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
 
-from chromite.cbuildbot.stages.generic_stages_unittest import patch
-from chromite.cbuildbot.stages.generic_stages_unittest import patches
 
-from infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
 

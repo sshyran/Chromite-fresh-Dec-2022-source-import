@@ -11,16 +11,16 @@ import os
 import pprint
 import time
 
-from googleapiclient import discovery
 from google.protobuf import timestamp_pb2
+from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
-
-from infra_libs import ts_mon
 
 from chromite.lib import commandline
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
+from chromite.third_party.infra_libs import ts_mon
+
 
 try:
   import pytest  # pylint: disable=import-error

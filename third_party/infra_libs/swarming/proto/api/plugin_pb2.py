@@ -12,7 +12,7 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
-from infra_libs.swarming.proto.api import swarming_pb2 as go_dot_chromium_dot_org_dot_luci_dot_swarming_dot_proto_dot_api_dot_swarming__pb2
+from chromite.third_party.infra_libs.swarming.proto.api import swarming_pb2 as go_dot_chromium_dot_org_dot_luci_dot_swarming_dot_proto_dot_api_dot_swarming__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(

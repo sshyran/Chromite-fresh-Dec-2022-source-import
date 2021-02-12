@@ -9,16 +9,14 @@ import glob
 import os
 
 from google.protobuf import field_mask_pb2
-from infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2
-from infra_libs.buildbucket.proto import common_pb2
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import test_stages
-from chromite.lib import buildbucket_v2
 from chromite.lib import build_summary
+from chromite.lib import buildbucket_v2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -32,6 +30,7 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
 from chromite.service import image as image_service
+from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
 
 
 class CleanUpStage(generic_stages.BuilderStage):

@@ -10,10 +10,11 @@ import collections
 import socket
 
 import psutil  # pylint: disable=import-error
-from infra_libs import ts_mon
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
+from chromite.third_party.infra_libs import ts_mon
+
 
 logger = logging.getLogger(__name__)
 

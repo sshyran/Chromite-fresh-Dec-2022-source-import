@@ -11,12 +11,12 @@ from unittest import mock
 from chromite.third_party import requests
 from testing_support import auto_stub
 
-from infra_libs.ts_mon import config
-from infra_libs.ts_mon.common import interface
-from infra_libs.ts_mon.common import standard_metrics
-from infra_libs.ts_mon.common import monitors
-from infra_libs.ts_mon.common import targets
-import infra_libs
+from chromite.third_party.infra_libs.ts_mon import config
+from chromite.third_party.infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import standard_metrics
+from chromite.third_party.infra_libs.ts_mon.common import monitors
+from chromite.third_party.infra_libs.ts_mon.common import targets
+from chromite.third_party import infra_libs
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

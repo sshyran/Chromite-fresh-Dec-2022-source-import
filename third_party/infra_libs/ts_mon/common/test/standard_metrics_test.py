@@ -4,10 +4,10 @@
 
 import unittest
 
-from infra_libs.ts_mon.common import interface
-from infra_libs.ts_mon.common import standard_metrics
-from infra_libs.ts_mon.common import targets
-from infra_libs import ts_mon
+from chromite.third_party.infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import standard_metrics
+from chromite.third_party.infra_libs.ts_mon.common import targets
+from chromite.third_party.infra_libs import ts_mon
 
 class StandardMetricsTest(unittest.TestCase):
 

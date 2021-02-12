@@ -13,15 +13,16 @@ from __future__ import division
 
 import collections
 import contextlib
+from functools import wraps
 import queue as Queue
 import ssl
 import time
-from functools import wraps
 
 from chromite.lib import cros_logging as logging
 
+
 try:
-  from infra_libs import ts_mon
+  from chromite.third_party.infra_libs import ts_mon
 except (ImportError, RuntimeError):
   ts_mon = None
 

@@ -4,8 +4,8 @@
 
 import unittest
 
-from infra_libs.ts_mon.common import pb_to_popo
-from infra_libs.ts_mon.protos import metrics_pb2
+from chromite.third_party.infra_libs.ts_mon.common import pb_to_popo
+from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
 
 class PbToPopoTest(unittest.TestCase):
 

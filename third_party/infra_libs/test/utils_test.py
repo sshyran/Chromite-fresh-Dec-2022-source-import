@@ -6,7 +6,7 @@
 import os
 import unittest
 
-import infra_libs
+from chromite.third_party import infra_libs
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')

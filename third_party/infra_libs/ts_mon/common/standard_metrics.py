@@ -4,7 +4,7 @@
 
 """Metrics common to all tasks and devices."""
 
-from infra_libs.ts_mon.common import metrics
+from chromite.third_party.infra_libs.ts_mon.common import metrics
 
 
 up = metrics.BooleanMetric(

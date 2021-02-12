@@ -7,13 +7,13 @@ import time
 import unittest
 from unittest import mock
 
-from infra_libs.ts_mon.common import distribution
-from infra_libs.ts_mon.common import errors
-from infra_libs.ts_mon.common import interface
-from infra_libs.ts_mon.common import metric_store
-from infra_libs.ts_mon.common import metrics
-from infra_libs.ts_mon.common import targets
-from infra_libs.ts_mon.protos import metrics_pb2
+from chromite.third_party.infra_libs.ts_mon.common import distribution
+from chromite.third_party.infra_libs.ts_mon.common import errors
+from chromite.third_party.infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import metric_store
+from chromite.third_party.infra_libs.ts_mon.common import metrics
+from chromite.third_party.infra_libs.ts_mon.common import targets
+from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
 
 
 class TestBase(unittest.TestCase):

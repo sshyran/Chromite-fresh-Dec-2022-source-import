@@ -13,11 +13,11 @@ import random
 import re
 
 from google.protobuf import timestamp_pb2
-from infra_libs import ts_mon
 
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import structured
+from chromite.third_party.infra_libs import ts_mon
 
 
 SPANS_LOG = '/var/log/trace/{pid}-{span_id}.json'

@@ -7,14 +7,13 @@
 import collections
 import uuid
 
-from google.protobuf.struct_pb2 import Struct
 from google.protobuf import duration_pb2
-from infra_libs.buildbucket.proto import build_pb2, builder_pb2
-from infra_libs.buildbucket.proto import common_pb2
+from google.protobuf.struct_pb2 import Struct
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
+from chromite.third_party.infra_libs.buildbucket.proto import build_pb2, builder_pb2, common_pb2
 
 
 class RemoteRequestFailure(Exception):

@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from infra_libs.ts_mon.common import distribution
-from infra_libs.ts_mon.common import metrics
+from chromite.third_party.infra_libs.ts_mon.common import distribution
+from chromite.third_party.infra_libs.ts_mon.common import metrics
 
 
 # Extending HTTP status codes to client-side errors and timeouts.

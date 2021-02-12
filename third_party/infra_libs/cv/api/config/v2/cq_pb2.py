@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
-from infra_libs.common.proto import options_pb2 as go_dot_chromium_dot_org_dot_luci_dot_common_dot_proto_dot_options__pb2
+from chromite.third_party.infra_libs.common.proto import options_pb2 as go_dot_chromium_dot_org_dot_luci_dot_common_dot_proto_dot_options__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
