@@ -190,6 +190,9 @@ class MockTestCaseTest(cros_test_lib.TestCase):
     patcher.stop()
     self.assertEqual(self.Mockable.TO_BE_MOCKED2, -200)
     self.assertEqual(self.Mockable.TO_BE_MOCKED3, -300)
+    def abort():
+      raise RuntimeError()
+    patcher.stop = abort
     self.assertRaises(RuntimeError, tc.tearDown)
     # Make sure that even though exception is raised for stopping 'patcher', we
     # continue to stop 'patcher2', and run patcher.stopall().
