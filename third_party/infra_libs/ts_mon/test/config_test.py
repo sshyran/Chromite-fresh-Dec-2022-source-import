@@ -5,10 +5,10 @@
 import argparse
 import json
 import os
-import requests
 import unittest
 from unittest import mock
 
+from chromite.third_party import requests
 from testing_support import auto_stub
 
 from infra_libs.ts_mon import config

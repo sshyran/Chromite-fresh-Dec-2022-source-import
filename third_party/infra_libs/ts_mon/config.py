@@ -9,7 +9,7 @@ import socket
 import sys
 import re
 
-import requests
+from chromite.third_party import requests
 
 from infra_libs.ts_mon.common import interface
 from infra_libs.ts_mon.common import monitors

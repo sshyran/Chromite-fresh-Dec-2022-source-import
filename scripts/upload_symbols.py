@@ -17,11 +17,10 @@ import json
 import os
 import socket
 import sys
-import textwrap
 import tempfile
+import textwrap
 import time
 
-import requests
 from six.moves import http_client as httplib
 from six.moves import urllib
 
@@ -35,6 +34,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats
 from chromite.scripts import cros_generate_breakpad_symbols
+from chromite.third_party import requests
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
