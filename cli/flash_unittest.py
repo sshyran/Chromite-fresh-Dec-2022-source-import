@@ -10,8 +10,6 @@ from __future__ import print_function
 import os
 import sys
 
-import mock
-
 from chromite.cli import flash
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -20,6 +18,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

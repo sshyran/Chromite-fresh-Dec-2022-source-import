@@ -17,13 +17,13 @@ import random
 import shutil
 import tempfile
 
-import mock
-
 from chromite.lib import cros_test_lib
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import downloader
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

@@ -8,16 +8,13 @@
 from __future__ import print_function
 
 import os
-import mock
 
 from chromite.api.gen.chromite.api import toolchain_pb2
-
 from chromite.cbuildbot import afdo
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import afdo_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
-
 from chromite.lib import alerts
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
@@ -25,6 +22,7 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.lib.parser import package_info
+from chromite.third_party import mock
 
 
 def _GenerateAFDOGenerateTest(chrome_version_str, expected_to_generate_profile,

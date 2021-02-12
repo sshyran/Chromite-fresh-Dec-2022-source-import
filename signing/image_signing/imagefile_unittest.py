@@ -11,7 +11,6 @@ import os
 import re
 import tempfile
 
-import mock
 import six
 
 from chromite.lib import constants
@@ -23,9 +22,10 @@ from chromite.lib import image_lib_unittest
 from chromite.lib import kernel_cmdline
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.signing.image_signing import imagefile
 from chromite.signing.lib import firmware
 from chromite.signing.lib import keys
-from chromite.signing.image_signing import imagefile
+from chromite.third_party import mock
 from chromite.utils import key_value_store
 
 

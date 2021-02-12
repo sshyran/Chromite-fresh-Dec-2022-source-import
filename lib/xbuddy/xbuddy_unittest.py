@@ -12,13 +12,14 @@ import shutil
 import tempfile
 import time
 
-import mock
 from six.moves import configparser
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import path_util
 from chromite.lib.xbuddy import xbuddy
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

@@ -9,12 +9,12 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.licensing import licenses_lib
+from chromite.third_party import mock
+
 
 # pylint: disable=protected-access
 

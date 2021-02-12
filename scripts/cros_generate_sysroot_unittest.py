@@ -9,15 +9,14 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.scripts import cros_generate_sysroot as cros_gen
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import sudo
+from chromite.scripts import cros_generate_sysroot as cros_gen
+from chromite.third_party import mock
 
 
 Dir = cros_test_lib.Directory

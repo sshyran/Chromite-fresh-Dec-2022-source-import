@@ -15,11 +15,13 @@ import socket
 import sys
 import time
 
-import mock
+import pytest  # pylint: disable=import-error
 from six.moves import BaseHTTPServer
 from six.moves import socketserver
 from six.moves import urllib
-import pytest  # pylint: disable=import-error
+
+from chromite.third_party import mock
+
 
 # We specifically set up a local server to connect to, so make sure we
 # delete any proxy settings that might screw that up.  We also need to
@@ -30,6 +32,7 @@ import pytest  # pylint: disable=import-error
 os.environ.pop('http_proxy', None)
 
 from chromite.lib import constants
+
 
 # The isolateserver includes a bunch of third_party python packages that clash
 # with chromite's bundled third_party python packages (like oauth2client).

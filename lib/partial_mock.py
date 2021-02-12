@@ -11,12 +11,12 @@ import collections
 import os
 import re
 
-import mock
 import six
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.third_party import mock
 
 
 def _PredicateSplit(func, iterable):

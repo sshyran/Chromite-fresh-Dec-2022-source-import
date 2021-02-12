@@ -11,14 +11,13 @@ import errno
 import os
 import shutil
 
-import mock
-
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.third_party import mock
 
 
 class ManifestMock(partial_mock.PartialMock):

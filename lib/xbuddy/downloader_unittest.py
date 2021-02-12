@@ -11,14 +11,14 @@ import os
 import shutil
 import tempfile
 
-import mock
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import downloader
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

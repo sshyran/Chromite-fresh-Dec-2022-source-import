@@ -10,14 +10,12 @@ import json
 import os
 import sys
 
-import mock
-
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-
-from chromite.lib import dlc_lib
 from chromite.scripts import cros_set_lsb_release
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

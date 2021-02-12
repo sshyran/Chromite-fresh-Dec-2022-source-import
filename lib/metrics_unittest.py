@@ -11,11 +11,12 @@ import sys
 import tempfile
 import unittest
 
-import mock
-
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import parallel
+from chromite.third_party import mock
+
+
 if sys.version_info.major >= 3:
   from chromite.lib import ts_mon_config
 

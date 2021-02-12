@@ -12,8 +12,6 @@ import os
 import sys
 import tarfile
 
-import mock
-
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -24,6 +22,7 @@ from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import test_params
+from chromite.third_party import mock
 
 
 # We access a lot of protected members during testing.

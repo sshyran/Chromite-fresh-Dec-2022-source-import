@@ -7,17 +7,16 @@
 
 from __future__ import print_function
 
-import mock
-
+from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import scheduler_stages
-from chromite.cbuildbot import cbuildbot_run
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import fake_cidb
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
 
 
 class ScheduleSlavesStageTest(generic_stages_unittest.AbstractStageTestCase):

@@ -10,9 +10,8 @@ from __future__ import print_function
 import os
 import sys
 
-import mock
-
 from chromite.lib import cros_test_lib
+from chromite.third_party import mock
 from chromite.utils import metrics
 
 

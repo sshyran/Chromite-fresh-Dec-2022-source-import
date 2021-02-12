@@ -9,8 +9,6 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import lkgm_manager
 from chromite.cbuildbot import manifest_version
@@ -23,6 +21,8 @@ from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import fake_cidb
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

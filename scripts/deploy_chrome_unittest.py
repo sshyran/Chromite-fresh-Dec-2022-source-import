@@ -12,8 +12,6 @@ import os
 import sys
 import time
 
-import mock
-
 from chromite.cli.cros import cros_chrome_sdk_unittest
 from chromite.lib import chrome_util
 from chromite.lib import cros_build_lib
@@ -24,6 +22,7 @@ from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
 from chromite.scripts import deploy_chrome
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

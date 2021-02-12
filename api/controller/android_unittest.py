@@ -7,19 +7,18 @@
 
 from __future__ import print_function
 
-import mock
-
 from chromite.api import api_config
 from chromite.api.controller import android
 from chromite.api.gen.chromite.api import android_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import build_target_lib
 from chromite.service import android as service_android
 from chromite.service import packages
+from chromite.third_party import mock
 
 
 class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

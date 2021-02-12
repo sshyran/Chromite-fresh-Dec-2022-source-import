@@ -11,10 +11,9 @@ import contextlib
 import sys
 import threading
 
-import mock
-
 from chromite.lib import cros_test_lib
 from chromite.scripts import export_to_cloud_trace
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

@@ -19,15 +19,15 @@ import subprocess
 import sys
 import unittest
 
-import mock
 from six.moves import builtins
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import signals as cros_signals
+from chromite.third_party import mock
 
 
 class RunCommandErrorStrTest(cros_test_lib.TestCase):

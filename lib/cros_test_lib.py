@@ -15,13 +15,12 @@ import sys
 import time
 import unittest
 
-import mock
 import six
 from six.moves import StringIO
 
 from chromite.lib import cache
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import operation
@@ -29,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import terminal
 from chromite.lib import timeout_util
+from chromite.third_party import mock
 from chromite.utils import outcap
 
 

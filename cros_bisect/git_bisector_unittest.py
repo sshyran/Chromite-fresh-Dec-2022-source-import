@@ -10,17 +10,17 @@ from __future__ import print_function
 import copy
 import os
 
-import mock
-
-from chromite.cros_bisect import common
 from chromite.cros_bisect import builder as builder_module
+from chromite.cros_bisect import common
 from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import git_bisector
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
-from chromite.lib import cros_logging as logging
+from chromite.third_party import mock
+
 
 class GitMock(partial_mock.PartialCmdMock):
   """Mocks git.RunGit.

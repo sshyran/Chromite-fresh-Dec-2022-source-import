@@ -11,8 +11,6 @@ import os
 import sys
 import tempfile
 
-import mock
-
 from chromite.cbuildbot import build_status
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import repository
@@ -23,6 +21,7 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

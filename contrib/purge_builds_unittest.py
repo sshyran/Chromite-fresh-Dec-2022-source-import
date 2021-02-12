@@ -9,12 +9,11 @@ from __future__ import print_function
 
 import datetime
 
-import mock
-
 from chromite.contrib import purge_builds
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
+from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

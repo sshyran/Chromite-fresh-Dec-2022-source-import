@@ -8,13 +8,12 @@
 from __future__ import print_function
 
 import contextlib
-import functools
 import datetime
+import functools
 import numbers
 import os
 import string
 
-import mock
 import six
 
 from chromite.lib import constants
@@ -24,6 +23,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import retry_stats
+from chromite.third_party import mock
 
 
 def PatchGS(*args, **kwargs):

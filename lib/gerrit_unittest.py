@@ -17,7 +17,6 @@ import shutil
 import stat
 import sys
 
-import mock
 import six
 from six.moves import http_client as httplib
 from six.moves import http_cookiejar as cookielib
@@ -31,6 +30,7 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import osutils
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

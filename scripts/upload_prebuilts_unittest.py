@@ -8,20 +8,19 @@
 from __future__ import print_function
 
 import copy
-import os
 import multiprocessing
+import os
 import sys
 import tempfile
 
-import mock
-
-from chromite.scripts import upload_prebuilts as prebuilt
+from chromite.lib import binpkg
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
-from chromite.lib import binpkg
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib import portage_util
+from chromite.scripts import upload_prebuilts as prebuilt
+from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

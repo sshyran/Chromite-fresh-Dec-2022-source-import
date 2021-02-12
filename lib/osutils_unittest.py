@@ -17,12 +17,12 @@ import stat
 import sys
 import unittest
 
-import mock
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.third_party import mock
+
 
 if sys.version_info.major >= 3:
   from pathlib import Path

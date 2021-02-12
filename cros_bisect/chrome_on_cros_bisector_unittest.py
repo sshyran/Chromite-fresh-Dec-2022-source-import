@@ -11,19 +11,18 @@ import copy
 import itertools
 import os
 
-import mock
-
 from chromite.cli import flash
-from chromite.cros_bisect import common
 from chromite.cros_bisect import builder as builder_module
-from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import chrome_on_cros_bisector
+from chromite.cros_bisect import common
+from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import git_bisector_unittest
 from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import partial_mock
+from chromite.third_party import mock
 
 
 class DummyEvaluator(evaluator_module.Evaluator):

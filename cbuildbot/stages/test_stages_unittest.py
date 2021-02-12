@@ -10,14 +10,13 @@ from __future__ import print_function
 import copy
 import os
 
-import mock
 import pytest  # pylint: disable=import-error
 
+from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import cbuildbot_run
-from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import generic_stages
+from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import test_stages
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
@@ -30,6 +29,8 @@ from chromite.lib import path_util
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

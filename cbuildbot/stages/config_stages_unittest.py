@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import os
 
-import mock
 from six.moves import builtins
 
 from chromite.cbuildbot import repository
@@ -20,6 +19,8 @@ from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
+
 
 # pylint: disable=protected-access
 

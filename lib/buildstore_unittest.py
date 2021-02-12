@@ -9,14 +9,13 @@ from __future__ import print_function
 
 import sys
 
-import mock
-
+from chromite.lib import buildbucket_v2
+from chromite.lib import buildstore
 from chromite.lib import cidb
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import buildstore
-from chromite.lib import buildbucket_v2
 from chromite.lib import failure_message_lib
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

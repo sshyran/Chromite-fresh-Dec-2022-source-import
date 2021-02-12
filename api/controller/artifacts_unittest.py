@@ -9,8 +9,6 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from chromite.api import api_config
 from chromite.api.controller import artifacts
 from chromite.api.gen.chromite.api import artifacts_pb2
@@ -24,6 +22,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.service import artifacts as artifacts_svc
+from chromite.third_party import mock
 
 
 class BundleRequestMixin(object):

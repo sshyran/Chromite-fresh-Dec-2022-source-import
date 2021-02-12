@@ -12,23 +12,23 @@ import signal
 import sys
 import time
 
-import mock
 from six.moves import StringIO
 
-from chromite.lib import constants
-from chromite.lib import config_lib_unittest
-from chromite.lib import failures_lib
-from chromite.lib import results_lib
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cidb
+from chromite.lib import config_lib_unittest
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
+from chromite.lib import failures_lib
 from chromite.lib import fake_cidb
 from chromite.lib import parallel
+from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

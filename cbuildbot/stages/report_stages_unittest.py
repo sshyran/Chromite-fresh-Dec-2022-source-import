@@ -10,7 +10,6 @@ from __future__ import print_function
 import datetime as dt
 import json
 
-import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.cbuildbot import cbuildbot_run
@@ -27,8 +26,8 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import fake_cidb
 from chromite.lib import failure_message_lib_unittest
+from chromite.lib import fake_cidb
 from chromite.lib import gs_unittest
 from chromite.lib import metrics
 from chromite.lib import osutils
@@ -36,6 +35,8 @@ from chromite.lib import results_lib
 from chromite.lib import retry_stats
 from chromite.lib import toolchain
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
+
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-ancestors

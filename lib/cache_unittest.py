@@ -10,8 +10,6 @@ from __future__ import print_function
 import datetime
 import os
 
-import mock
-
 from chromite.lib import cache
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -19,6 +17,7 @@ from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import retry_util
+from chromite.third_party import mock
 
 
 class CacheReferenceTest(cros_test_lib.TestCase):

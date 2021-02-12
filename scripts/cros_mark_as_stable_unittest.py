@@ -10,8 +10,6 @@ from __future__ import print_function
 import os
 import sys
 
-import mock
-
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -23,6 +21,8 @@ from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import repo_util
 from chromite.scripts import cros_mark_as_stable
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

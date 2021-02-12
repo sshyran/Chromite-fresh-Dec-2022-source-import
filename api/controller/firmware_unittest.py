@@ -8,8 +8,6 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from google.protobuf import json_format
 
 from chromite.api import api_config
@@ -18,6 +16,7 @@ from chromite.api.gen.chromite.api import firmware_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.third_party import mock
 
 
 class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,

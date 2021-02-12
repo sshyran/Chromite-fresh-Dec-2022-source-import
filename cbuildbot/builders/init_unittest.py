@@ -8,11 +8,11 @@
 from __future__ import print_function
 
 import importlib
-import mock
 
 from chromite.cbuildbot import builders
 from chromite.cbuildbot.builders import simple_builders
 from chromite.lib import cros_test_lib
+from chromite.third_party import mock
 
 
 class ModuleTest(cros_test_lib.MockTempDirTestCase):

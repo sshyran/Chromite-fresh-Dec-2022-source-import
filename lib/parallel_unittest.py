@@ -18,7 +18,6 @@ import threading
 import time
 import unittest
 
-import mock
 from six.moves import cPickle as pickle
 from six.moves import queue as Queue
 
@@ -28,6 +27,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import partial_mock
 from chromite.lib import timeout_util
+from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

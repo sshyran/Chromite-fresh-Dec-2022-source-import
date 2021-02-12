@@ -11,8 +11,6 @@ import contextlib
 import os
 import tempfile
 
-import mock
-
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import build_stages
@@ -32,6 +30,7 @@ from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import path_util
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
 
 from chromite.cbuildbot.stages.generic_stages_unittest import patch
 from chromite.cbuildbot.stages.generic_stages_unittest import patches

@@ -12,10 +12,9 @@ from __future__ import print_function
 
 import sys
 
-import mock
-
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import osinfo_metrics
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

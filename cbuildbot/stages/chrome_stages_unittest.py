@@ -9,20 +9,19 @@ from __future__ import print_function
 
 import os
 
-import mock
-
-from chromite.cbuildbot import commands
-from chromite.lib import constants
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
+from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import chrome_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party import mock
 
 
 # pylint: disable=too-many-ancestors

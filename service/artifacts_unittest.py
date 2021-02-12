@@ -13,8 +13,6 @@ import json
 import os
 import shutil
 
-import mock
-
 from chromite.lib import autotest_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -30,6 +28,7 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.service import artifacts
+from chromite.third_party import mock
 
 
 class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):

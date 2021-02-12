@@ -9,8 +9,6 @@ from __future__ import print_function
 
 import os
 
-import mock
-
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.builders import workspace_builders
@@ -23,6 +21,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import parallel
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
+from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

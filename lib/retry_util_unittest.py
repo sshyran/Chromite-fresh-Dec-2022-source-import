@@ -10,15 +10,14 @@ from __future__ import print_function
 import functools
 import itertools
 import os
-import time
 import sys
-
-import mock
+import time
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import retry_util
 from chromite.lib import osutils
+from chromite.lib import retry_util
+from chromite.third_party import mock
 
 
 class TestRetries(cros_test_lib.MockTempDirTestCase):

@@ -10,8 +10,6 @@ from __future__ import print_function
 import contextlib
 import os
 
-import mock
-
 from chromite.api import api_config
 from chromite.api import controller
 from chromite.api.controller import test as test_controller
@@ -25,6 +23,7 @@ from chromite.lib import osutils
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
+from chromite.third_party import mock
 from chromite.utils import key_value_store
 
 

@@ -9,8 +9,6 @@ import sys
 import tempfile
 import time
 
-import mock
-
 from chromite.cli import device_imager
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -24,6 +22,7 @@ from chromite.lib import remote_access_unittest
 from chromite.lib import stateful_updater
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import xbuddy
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

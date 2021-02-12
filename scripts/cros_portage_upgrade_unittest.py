@@ -14,7 +14,6 @@ import subprocess
 import sys
 import unittest
 
-import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.lib import cros_build_lib
@@ -26,6 +25,8 @@ from chromite.lib import terminal
 from chromite.lib import upgrade_table as utable
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_portage_upgrade as cpu
+from chromite.third_party import mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

@@ -13,11 +13,11 @@ from __future__ import print_function
 import socket
 import sys
 
-import mock
 import psutil  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import net_metrics
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

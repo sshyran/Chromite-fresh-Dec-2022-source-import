@@ -13,19 +13,17 @@ import os
 import sys
 import unittest
 
-import mock
-
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cidb
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import fake_cidb
-from chromite.lib import failures_lib
 from chromite.lib import failure_message_lib
+from chromite.lib import failures_lib
+from chromite.lib import fake_cidb
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import partial_mock
@@ -33,6 +31,7 @@ from chromite.lib import portage_util
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
 from chromite.scripts import cbuildbot
+from chromite.third_party import mock
 
 
 DEFAULT_BUILD_NUMBER = 1234321

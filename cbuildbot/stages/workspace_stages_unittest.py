@@ -9,11 +9,9 @@ from __future__ import print_function
 
 import os
 
-import mock
-
-from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
+from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import workspace_stages
@@ -22,6 +20,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
+from chromite.third_party import mock
+
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access

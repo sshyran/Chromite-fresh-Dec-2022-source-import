@@ -7,8 +7,6 @@
 
 from __future__ import print_function
 
-import mock
-
 from chromite.api.api_config import ApiConfigMixin
 from chromite.api.controller import controller_util
 from chromite.api.controller import packages as packages_controller
@@ -23,6 +21,7 @@ from chromite.lib import portage_util
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 from chromite.service import packages as packages_service
+from chromite.third_party import mock
 
 
 class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):

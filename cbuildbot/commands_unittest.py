@@ -10,24 +10,22 @@ from __future__ import print_function
 import base64
 import collections
 import datetime as dt
-import json
 import hashlib
+import json
 import os
 import struct
 import subprocess
 import sys
 
-import mock
-
 from chromite.cbuildbot import commands
-from chromite.lib import config_lib
-from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
 from chromite.lib import chroot_lib
+from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import failures_lib
 from chromite.lib import gob_util
 from chromite.lib import osutils
 from chromite.lib import partial_mock
@@ -36,8 +34,8 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import pushimage
-
 from chromite.service import artifacts as artifacts_service
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'

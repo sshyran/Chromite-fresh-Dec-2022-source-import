@@ -19,10 +19,14 @@ import os
 import sys
 import time
 
-import mock
 from chromite.cbuildbot import afdo
-from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils, path_util)
+from chromite.lib import cros_build_lib
+from chromite.lib import cros_test_lib
+from chromite.lib import gs
+from chromite.lib import osutils
+from chromite.lib import path_util
 from chromite.lib.parser import package_info
+from chromite.third_party import mock
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
