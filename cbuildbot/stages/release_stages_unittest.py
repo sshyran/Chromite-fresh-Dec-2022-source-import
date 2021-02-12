@@ -16,6 +16,7 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
 from chromite.lib import parallel
+from chromite.lib import parallel_unittest
 from chromite.lib import results_lib
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore
@@ -347,12 +348,12 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   def testPerformStageSuccess(self):
     """Test that PaygenStage works when signing works."""
-    with patch(release_stages.parallel, 'BackgroundTaskRunner') as background:
-      queue = background().__enter__()
+    with patch(release_stages.PaygenStage, '_RunPaygenInProcess') as runner:
       channels = ['stable', 'beta']
       stage = self.ConstructStage(channels=channels)
 
-      stage.PerformStage()
+      with parallel_unittest.ParallelMock():
+        stage.PerformStage()
 
       metadata_channels = self._run.attrs.metadata.GetValue('channels')
       self.assertEqual(','.join(channels), metadata_channels)
@@ -361,40 +362,38 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
       self.assertEqual(self.validateMock.call_args_list,
                        [mock.call('auron-yuna')])
 
-      # Verify that we queue up work
-      self.assertEqual(queue.put.call_args_list, [
+      # Verify that we queue up work.
+      runner.assert_has_calls([
           mock.call(
-              ('stable', 'auron-yuna', '0.0.1', False, False, False)),
-          mock.call(('beta', 'auron-yuna', '0.0.1', False, False, False))
+              stage, 'stable', 'auron-yuna', '0.0.1', False, False, False),
+          mock.call(stage, 'beta', 'auron-yuna', '0.0.1', False, False, False),
       ])
 
   def testPerformStageNoChannels(self):
     """Test that PaygenStage works when signing works."""
-    with patch(release_stages.parallel, 'BackgroundTaskRunner') as background:
-      queue = background().__enter__()
-
+    with patch(release_stages.PaygenStage, '_RunPaygenInProcess') as runner:
       stage = self.ConstructStage(channels=[])
 
-      stage.PerformStage()
+      with parallel_unittest.ParallelMock():
+        stage.PerformStage()
 
-      # Verify that we queue up work
-      self.assertEqual(queue.put.call_args_list, [])
+      # Verify that we did not queue up work.
+      runner.assert_not_called()
 
   def testPerformStageTrybot(self):
     """Test the PerformStage alternate behavior for trybot runs."""
-    with patch(release_stages.parallel, 'BackgroundTaskRunner') as background:
-      queue = background().__enter__()
-
+    with patch(release_stages.PaygenStage, '_RunPaygenInProcess') as runner:
       # The stage is constructed differently for trybots, so don't use
       # ConstructStage.
       stage = self.ConstructStage(channels=['foo', 'bar'])
-      stage.PerformStage()
+      with parallel_unittest.ParallelMock():
+        stage.PerformStage()
 
       # Notice that we didn't put anything in _wait_for_channel_signing, but
       # still got results right away.
-      self.assertEqual(queue.put.call_args_list, [
-          mock.call(('foo', 'auron-yuna', '0.0.1', False, False, False)),
-          mock.call(('bar', 'auron-yuna', '0.0.1', False, False, False)),
+      runner.assert_has_calls([
+          mock.call(stage, 'foo', 'auron-yuna', '0.0.1', False, False, False),
+          mock.call(stage, 'bar', 'auron-yuna', '0.0.1', False, False, False),
       ])
 
   def testPerformStageUnknownBoard(self):
