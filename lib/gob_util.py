@@ -247,7 +247,7 @@ def _InAppengine():
 
 
 def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
-             ignore_204=False, ignore_404=True):
+             expect: Union[int, Tuple[int]] = 200, ignore_404=True):
   """Fetches the http response from the specified URL.
 
   Args:
@@ -257,9 +257,8 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
     reqtype: The request type. Can be GET or POST.
     headers: A mapping of extra HTTP headers to pass in with the request.
     body: A string of data to send after the headers are finished.
-    ignore_204: for some requests gerrit-on-borg will return 204 to confirm
-                proper processing of the request. When processing responses to
-                these requests we should expect this status.
+    expect: The status code(s) to expect as "success".  For some requests,
+            Gerrit will return 204 to confirm proper processing of the request.
     ignore_404: For many requests, gerrit-on-borg will return 404 if the request
                 doesn't match the database contents.  In most such cases, we
                 want the API to return None rather than raise an Exception.
@@ -267,6 +266,9 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
   Returns:
     The connection's reply, as bytes.
   """
+  if isinstance(expect, int):
+    expect = (expect,)
+
   @timeout_util.TimeoutDecorator(REQUEST_TIMEOUT_SECONDS)
   def _FetchUrlHelper():
     err_prefix = f'A transient error occured while querying {host}/{path}\n'
@@ -299,12 +301,9 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
     """
     # Normal/good responses.
     response_body = response.read()
-    if response.status == 204 and ignore_204:
-      # This exception is used to confirm expected response status.
-      raise GOBError(http_status=response.status, reason=response.reason)
     if response.status == 404 and ignore_404:
       return b''
-    elif response.status in (200, 201):
+    elif response.status in expect:
       return response_body
 
     # Bad responses.
@@ -559,11 +558,7 @@ def ChangeEdit(host: str, change: str, filepath: str,
   body = {
       'binary_content': 'data:text/plain;base64,%s' % contents
   }
-  try:
-    return FetchUrlJson(host, path, body=body, reqtype='PUT', ignore_204=True)
-  except GOBError as e:
-    if e.http_status != 204:
-      raise
+  return FetchUrlJson(host, path, body=body, reqtype='PUT', expect=204)
 
 
 def PublishChangeEdit(host: str, change: str) -> Dict[str, Any]:
@@ -578,11 +573,7 @@ def PublishChangeEdit(host: str, change: str) -> Dict[str, Any]:
   """
   path = '%s/edit:publish' % _GetChangePath(change)
   body = {'notify': 'NONE'}
-  try:
-    return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_204=True)
-  except GOBError as e:
-    if e.http_status != 204:
-      raise
+  return FetchUrlJson(host, path, body=body, reqtype='POST', expect=204)
 
 
 def ReviewedChange(host, change):
@@ -628,17 +619,7 @@ def RestoreChange(host, change, msg=''):
 def DeleteDraft(host, change):
   """Delete a gerrit draft change."""
   path = _GetChangePath(change)
-  try:
-    FetchUrl(host, path, reqtype='DELETE', ignore_204=True, ignore_404=False)
-  except GOBError as e:
-    # On success, gerrit returns status 204; anything else is an error.
-    if e.http_status != 204:
-      raise
-  else:
-    raise GOBError(
-        http_status=200,
-        reason='Unexpectedly received a 200 http status while deleting draft '
-               ' %r' % change)
+  FetchUrl(host, path, reqtype='DELETE', expect=204, ignore_404=False)
 
 
 def CherryPick(host, change, branch, rev='current', msg='', notify=None):
@@ -715,23 +696,15 @@ def MarkNotPrivate(host, change):
   """
   path = '%s/private.delete' % _GetChangePath(change)
   try:
-    FetchUrlJson(host, path, reqtype='POST', ignore_404=False, ignore_204=True)
+    FetchUrlJson(host, path, reqtype='POST', expect=204, ignore_404=False)
   except GOBError as e:
-    if e.http_status == 204:
-      # 204: no content -- change was successfully marked not private.
-      pass
-    elif e.http_status == 409:
+    if e.http_status == 409:
       raise GOBError(
           http_status=e.http_status,
           reason='Change was already marked not private',
       )
     else:
       raise
-  else:
-    raise GOBError(
-        http_status=200,
-        reason='Got unexpected 200 when marking change not private.',
-    )
 
 
 def MarkWorkInProgress(host, change, msg=''):
@@ -803,12 +776,7 @@ def RemoveAttentionSet(host: str, change: str, remove: Tuple[str, ...],
     body['notify'] = notify
   for r in remove:
     path = '%s/attention/%s/delete' % (_GetChangePath(change), r)
-    try:
-      FetchUrl(host, path, reqtype='POST', body=body, ignore_204=True)
-    except GOBError as e:
-      # On success, gerrit returns status 204; anything else is an error.
-      if e.http_status != 204:
-        raise
+    FetchUrl(host, path, reqtype='POST', body=body, expect=204)
 
 
 def GetReviewers(host, change):
@@ -849,12 +817,7 @@ def RemoveReviewers(host, change, remove=None, notify=None):
     body['notify'] = notify
   for r in remove:
     path = '%s/reviewers/%s/delete' % (_GetChangePath(change), r)
-    try:
-      FetchUrl(host, path, reqtype='POST', body=body, ignore_204=True)
-    except GOBError as e:
-      # On success, gerrit returns status 204; anything else is an error.
-      if e.http_status != 204:
-        raise
+    FetchUrl(host, path, reqtype='POST', body=body, expect=204)
 
 
 def SetReview(host, change, revision=None, msg=None, labels=None, notify=None,
