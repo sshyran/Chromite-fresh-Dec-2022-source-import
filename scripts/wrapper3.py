@@ -173,6 +173,20 @@ def FindTarget(target):
     from chromite.lib import cros_test_lib
     return lambda _argv: cros_test_lib.main(module=module)
 
+  # Is this a package?  Import it like `python -m...` does.
+  if target != 'wrapper3.py':
+    mod_name = '.'.join(target + ['__main__'])
+    try:
+      module = importlib.import_module(mod_name)
+    except ImportError:
+      module = None
+    if module:
+      spec = importlib.util.find_spec(mod_name)
+      loader = spec.loader
+      code = loader.get_code(mod_name)
+      # pylint: disable=exec-used
+      return lambda _argv: exec(code, {**globals(), '__name__': '__main__'})
+
 
 def DoMain():
   commandline.ScriptWrapperMain(FindTarget)
