@@ -4,6 +4,8 @@
 
 """Module containing unit tests for generic_builders."""
 
+from unittest import mock
+
 from chromite.cbuildbot.builders import generic_builders
 from chromite.lib import cidb
 from chromite.lib import constants
@@ -11,7 +13,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import fake_cidb
 from chromite.lib import parallel
 from chromite.lib import results_lib
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

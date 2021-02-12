@@ -7,6 +7,7 @@
 import copy
 import itertools
 import os
+from unittest import mock
 
 from chromite.cli import flash
 from chromite.cros_bisect import builder as builder_module
@@ -19,7 +20,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import partial_mock
-from chromite.third_party import mock
 
 
 class DummyEvaluator(evaluator_module.Evaluator):

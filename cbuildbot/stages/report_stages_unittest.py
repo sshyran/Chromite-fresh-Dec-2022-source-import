@@ -6,6 +6,7 @@
 
 import datetime as dt
 import json
+from unittest import mock
 
 import pytest  # pylint: disable=import-error
 
@@ -32,7 +33,6 @@ from chromite.lib import results_lib
 from chromite.lib import retry_stats
 from chromite.lib import toolchain
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

@@ -9,12 +9,12 @@
 from __future__ import absolute_import
 
 import socket
+from unittest import mock
 
 import psutil  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import net_metrics
-from chromite.third_party import mock
 
 
 snetio = psutil._common.snetio

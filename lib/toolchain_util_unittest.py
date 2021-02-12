@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import time
+from unittest import mock
 
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -30,7 +31,6 @@ from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib import toolchain_util
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

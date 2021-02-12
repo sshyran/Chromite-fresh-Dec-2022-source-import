@@ -10,6 +10,7 @@ import os
 import socket
 import stat
 import sys
+from unittest import mock
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import constants
@@ -21,7 +22,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import vm
-from chromite.third_party import mock
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only

@@ -5,10 +5,10 @@
 """Module that contains unittests for auth module."""
 
 import time
+from unittest import mock
 
 from chromite.lib import auth
 from chromite.lib import cros_test_lib
-from chromite.third_party import mock
 
 
 class AuthTest(cros_test_lib.RunCommandTestCase):

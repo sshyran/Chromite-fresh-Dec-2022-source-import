@@ -5,6 +5,7 @@
 """Unittests for the binhost.py service."""
 
 import os
+from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
@@ -16,7 +17,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import binhost
-from chromite.third_party import mock
 
 
 class GetPrebuiltAclArgsTest(cros_test_lib.MockTempDirTestCase):

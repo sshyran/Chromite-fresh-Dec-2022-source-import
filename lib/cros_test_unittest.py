@@ -5,6 +5,7 @@
 """Unit tests for CrOSTest."""
 
 import os
+from unittest import mock
 
 import pytest  # pylint: disable=import-error
 
@@ -14,7 +15,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.scripts import cros_set_lsb_release
-from chromite.third_party import mock
 from chromite.utils import outcap
 
 

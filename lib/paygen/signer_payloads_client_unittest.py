@@ -8,6 +8,7 @@ import base64
 import os
 import shutil
 import tempfile
+from unittest import mock
 
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
@@ -19,7 +20,6 @@ from chromite.lib import remote_access
 from chromite.lib.paygen import gslock
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import signer_payloads_client
-from chromite.third_party import mock
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only

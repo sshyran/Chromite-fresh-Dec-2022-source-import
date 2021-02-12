@@ -6,13 +6,13 @@
 
 import os
 import unittest
+from unittest import mock
 
 from chromite.lib import cidb
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import factory
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 if cidb.sqlalchemy_imported:

@@ -5,6 +5,7 @@
 """Unittests for Binhost operations."""
 
 import os
+from unittest import mock
 
 from chromite.api import api_config
 from chromite.api.controller import binhost
@@ -13,7 +14,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.service import binhost as binhost_service
-from chromite.third_party import mock
 
 
 class GetBinhostsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

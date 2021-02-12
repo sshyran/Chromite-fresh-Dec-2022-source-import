@@ -7,6 +7,7 @@
 import os
 import tempfile
 import time
+from unittest import mock
 
 from chromite.cli import device_imager
 from chromite.lib import constants
@@ -21,7 +22,6 @@ from chromite.lib import remote_access_unittest
 from chromite.lib import stateful_updater
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import xbuddy
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

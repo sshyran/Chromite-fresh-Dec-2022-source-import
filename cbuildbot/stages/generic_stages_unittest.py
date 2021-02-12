@@ -9,6 +9,7 @@ import copy
 import os
 import sys
 import unittest
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
@@ -28,7 +29,6 @@ from chromite.lib import portage_util
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
 from chromite.scripts import cbuildbot
-from chromite.third_party import mock
 
 
 DEFAULT_BUILD_NUMBER = 1234321

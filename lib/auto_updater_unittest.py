@@ -14,6 +14,7 @@ The main parts of unittest include:
 
 import json
 import os
+from unittest import mock
 
 from chromite.lib import auto_updater
 from chromite.lib import auto_updater_transfer
@@ -24,7 +25,6 @@ from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
 from chromite.lib import stateful_updater
-from chromite.third_party import mock
 
 
 class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):

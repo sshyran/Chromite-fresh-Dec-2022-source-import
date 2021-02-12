@@ -5,12 +5,12 @@
 """Test the license_lib module."""
 
 import os
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.licensing import licenses_lib
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

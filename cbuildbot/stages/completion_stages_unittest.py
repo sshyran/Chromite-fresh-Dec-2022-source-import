@@ -4,6 +4,8 @@
 
 """Unittests for completion stages."""
 
+from unittest import mock
+
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import prebuilts
@@ -18,7 +20,6 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

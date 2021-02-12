@@ -6,6 +6,7 @@
 
 import collections
 import os
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -15,7 +16,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import signing
 from chromite.scripts import pushimage
-from chromite.third_party import mock
 
 
 # Use our local copy of insns for testing as the main one is not available in

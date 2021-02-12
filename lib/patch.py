@@ -11,6 +11,9 @@ import random
 import re
 import subprocess
 import time
+# We import mock so that we can identify mock.MagicMock instances in tests
+# that use mock.
+from unittest import mock
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -18,9 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
-# We import mock so that we can identify mock.MagicMock instances in tests
-# that use mock.
-from chromite.third_party import mock
 
 
 _MAXIMUM_GERRIT_NUMBER_LENGTH = 7

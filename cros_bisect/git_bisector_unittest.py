@@ -6,6 +6,7 @@
 
 import copy
 import os
+from unittest import mock
 
 from chromite.cros_bisect import builder as builder_module
 from chromite.cros_bisect import common
@@ -16,7 +17,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
-from chromite.third_party import mock
 
 
 class GitMock(partial_mock.PartialCmdMock):

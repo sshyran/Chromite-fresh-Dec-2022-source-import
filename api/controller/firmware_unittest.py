@@ -4,6 +4,7 @@
 """Unittests for Firmware operations."""
 
 import os
+from unittest import mock
 
 from google.protobuf import json_format
 
@@ -13,7 +14,6 @@ from chromite.api.gen.chromite.api import firmware_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.third_party import mock
 
 
 class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,

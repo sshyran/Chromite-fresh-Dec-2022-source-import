@@ -8,6 +8,7 @@ import json
 import multiprocessing
 import os
 import sys
+from unittest import mock
 
 from chromite.cli import command
 from chromite.cli import deploy
@@ -18,7 +19,6 @@ from chromite.lib import osutils
 from chromite.lib import remote_access
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 pytestmark = [cros_test_lib.pytestmark_inside_only]

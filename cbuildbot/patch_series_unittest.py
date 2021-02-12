@@ -6,6 +6,7 @@
 
 import contextlib
 import os
+from unittest import mock
 
 from chromite.cbuildbot import patch_series
 from chromite.lib import config_lib
@@ -15,7 +16,6 @@ from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import patch as cros_patch
 from chromite.lib import patch_unittest
-from chromite.third_party import mock
 
 
 class MockManifest(object):

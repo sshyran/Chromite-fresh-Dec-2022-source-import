@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest import mock
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
@@ -23,7 +24,6 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import partial_mock
 from chromite.lib import timeout_util
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access
@@ -84,10 +84,10 @@ class ParallelMock(partial_mock.PartialMock):
 
   def PreStart(self):
     self.PatchObject(parallel, 'Manager', side_effect=FakeMultiprocessManager)
-    partial_mock.PartialMock.PreStart(self)
 
+  @classmethod
   @contextlib.contextmanager
-  def ParallelTasks(self, steps, max_parallel=None, halt_on_error=False):
+  def ParallelTasks(cls, steps, max_parallel=None, halt_on_error=False):
     assert max_parallel is None or isinstance(max_parallel, numbers.Integral)
     assert isinstance(halt_on_error, bool)
     try:

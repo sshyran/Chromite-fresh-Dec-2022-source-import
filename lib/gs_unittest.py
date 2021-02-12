@@ -10,6 +10,7 @@ import functools
 import numbers
 import os
 import string
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -18,7 +19,6 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import retry_stats
-from chromite.third_party import mock
 
 
 def PatchGS(*args, **kwargs):

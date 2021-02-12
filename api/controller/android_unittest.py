@@ -4,6 +4,8 @@
 
 """Unittests for Android operations."""
 
+from unittest import mock
+
 from chromite.api import api_config
 from chromite.api.controller import android
 from chromite.api.gen.chromite.api import android_pb2
@@ -15,7 +17,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.service import android as service_android
 from chromite.service import packages
-from chromite.third_party import mock
 
 
 class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

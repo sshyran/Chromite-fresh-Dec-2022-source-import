@@ -7,6 +7,7 @@
 import contextlib
 import os
 import tempfile
+from unittest import mock
 from xml.dom import minidom
 
 from chromite.cbuildbot import lkgm_manager
@@ -20,7 +21,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 FAKE_VERSION_STRING = '1.2.4-rc3'

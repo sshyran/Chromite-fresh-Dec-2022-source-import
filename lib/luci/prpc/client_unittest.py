@@ -7,6 +7,7 @@
 import contextlib
 import sys
 import unittest
+from unittest import mock
 
 from google.protobuf import empty_pb2
 
@@ -15,7 +16,6 @@ from chromite.lib.luci.prpc import client as prpc_client
 from chromite.lib.luci.prpc import codes
 from chromite.lib.luci.prpc.test import test_pb2, test_prpc_pb2
 from chromite.lib.luci.test_support import test_case, test_env
-from chromite.third_party import mock
 
 
 test_env.setup_test_env()

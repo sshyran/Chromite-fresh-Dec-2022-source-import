@@ -5,6 +5,7 @@
 """Unittests for prebuilts."""
 
 import os
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import prebuilts
@@ -12,7 +13,6 @@ from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 DEFAULT_CHROME_BRANCH = '27'

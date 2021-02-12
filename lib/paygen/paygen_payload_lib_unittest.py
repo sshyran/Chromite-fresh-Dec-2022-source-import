@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -23,7 +24,6 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
-from chromite.third_party import mock
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only

@@ -6,6 +6,7 @@
 
 import contextlib
 import os
+from unittest import mock
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -20,7 +21,6 @@ from chromite.lib import osutils
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
-from chromite.third_party import mock
 from chromite.utils import key_value_store
 
 

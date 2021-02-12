@@ -4,12 +4,13 @@
 
 """Tests for the ap_firmware module."""
 
+from unittest import mock
+
 from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import workon_helper
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
-from chromite.third_party import mock
 
 
 class BuildTest(cros_test_lib.RunCommandTestCase):

@@ -5,13 +5,13 @@
 
 import json
 import os
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.scripts import cros_set_lsb_release
-from chromite.third_party import mock
 
 
 _PRE_ALLOCATED_BLOCKS = 100

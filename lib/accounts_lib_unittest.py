@@ -5,12 +5,12 @@
 """Tests for accounts_lib."""
 
 import json
+from unittest import mock
 
 from chromite.lib import accounts_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import user_db
-from chromite.third_party import mock
 
 
 EMPTY_ACCOUNTS_DB_WITH_COMMENTS = """

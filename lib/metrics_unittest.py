@@ -7,11 +7,11 @@
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import parallel
-from chromite.third_party import mock
 
 
 if sys.version_info.major >= 3:

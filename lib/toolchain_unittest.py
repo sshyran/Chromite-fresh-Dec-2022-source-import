@@ -5,6 +5,7 @@
 """Tests for toolchain."""
 
 import os
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -12,7 +13,6 @@ from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 BASE_TOOLCHAIN_CONF = """# The root of all evil is money, err, this config.

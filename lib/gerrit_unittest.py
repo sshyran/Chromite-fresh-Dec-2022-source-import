@@ -14,6 +14,7 @@ import os
 import re
 import shutil
 import stat
+from unittest import mock
 import urllib.parse
 
 from chromite.lib import config_lib
@@ -24,7 +25,6 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 class GerritTestCase(cros_test_lib.MockTempDirTestCase):

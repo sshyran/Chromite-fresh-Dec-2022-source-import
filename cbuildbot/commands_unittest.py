@@ -12,6 +12,7 @@ import json
 import os
 import struct
 import subprocess
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import swarming_lib
@@ -31,7 +32,6 @@ from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
-from chromite.third_party import mock
 
 
 class RunBuildScriptTest(cros_test_lib.RunCommandTempDirTestCase):

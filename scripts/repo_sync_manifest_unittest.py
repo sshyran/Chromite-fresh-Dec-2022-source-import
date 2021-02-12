@@ -5,12 +5,12 @@
 """Tests for scripts/repo_sync_manifest."""
 
 import os
+from unittest import mock
 
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import repository
 from chromite.lib import cros_test_lib
 from chromite.scripts import repo_sync_manifest
-from chromite.third_party import mock
 
 
 class RepoSyncManifestTest(cros_test_lib.RunCommandTempDirTestCase):

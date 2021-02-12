@@ -5,11 +5,11 @@
 """Unittests for main builder logic (__init__.py)."""
 
 import importlib
+from unittest import mock
 
 from chromite.cbuildbot import builders
 from chromite.cbuildbot.builders import simple_builders
 from chromite.lib import cros_test_lib
-from chromite.third_party import mock
 
 
 class ModuleTest(cros_test_lib.MockTempDirTestCase):

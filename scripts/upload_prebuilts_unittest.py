@@ -8,6 +8,7 @@ import copy
 import multiprocessing
 import os
 import tempfile
+from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import cros_test_lib
@@ -16,7 +17,6 @@ from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib import portage_util
 from chromite.scripts import upload_prebuilts as prebuilt
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

@@ -7,11 +7,11 @@
 import os
 import shutil
 import unittest
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 class MoblabVmTestCase(cros_test_lib.MockTempDirTestCase):

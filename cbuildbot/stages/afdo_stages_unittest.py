@@ -5,6 +5,7 @@
 """Unittests for updating Chrome ebuild stages."""
 
 import os
+from unittest import mock
 
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.cbuildbot import afdo
@@ -19,7 +20,6 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 def _GenerateAFDOGenerateTest(chrome_version_str, expected_to_generate_profile,

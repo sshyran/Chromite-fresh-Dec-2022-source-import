@@ -8,9 +8,10 @@
 
 from __future__ import absolute_import
 
+from unittest import mock
+
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import osinfo_metrics
-from chromite.third_party import mock
 
 
 class TestOSInfoMetrics(cros_test_lib.TestCase):

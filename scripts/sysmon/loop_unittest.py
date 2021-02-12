@@ -9,10 +9,10 @@
 from __future__ import absolute_import
 
 import contextlib
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import loop
-from chromite.third_party import mock
 
 
 class _MockTime(object):

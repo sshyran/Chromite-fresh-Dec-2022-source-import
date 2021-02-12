@@ -4,9 +4,10 @@
 
 """Unit tests for autotest_quickmerge."""
 
+from unittest import mock
+
 from chromite.lib import cros_test_lib
 from chromite.scripts import autotest_quickmerge
-from chromite.third_party import mock
 
 
 RSYNC_TEST_OUTPUT = """.d..t...... ./

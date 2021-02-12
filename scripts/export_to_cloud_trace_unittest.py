@@ -6,10 +6,10 @@
 
 import contextlib
 import threading
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import export_to_cloud_trace
-from chromite.third_party import mock
 
 
 _SPAN = """{

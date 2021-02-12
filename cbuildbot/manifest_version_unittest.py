@@ -6,6 +6,7 @@
 
 import os
 import tempfile
+from unittest import mock
 
 from chromite.cbuildbot import build_status
 from chromite.cbuildbot import manifest_version
@@ -17,7 +18,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
-from chromite.third_party import mock
 
 
 FAKE_VERSION = """

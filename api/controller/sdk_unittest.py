@@ -4,13 +4,14 @@
 
 """SDK tests."""
 
+from unittest import mock
+
 from chromite.api import api_config
 from chromite.api.controller import sdk as sdk_controller
 from chromite.api.gen.chromite.api import sdk_pb2
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.service import sdk as sdk_service
-from chromite.third_party import mock
 
 
 class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

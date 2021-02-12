@@ -7,6 +7,7 @@
 import os
 import re
 import tempfile
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -20,7 +21,6 @@ from chromite.lib import partial_mock
 from chromite.signing.image_signing import imagefile
 from chromite.signing.lib import firmware
 from chromite.signing.lib import keys
-from chromite.third_party import mock
 from chromite.utils import key_value_store
 
 

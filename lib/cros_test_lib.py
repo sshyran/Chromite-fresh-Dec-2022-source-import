@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import unittest
+from unittest import mock
 
 from chromite.lib import cache
 from chromite.lib import commandline
@@ -23,7 +24,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import terminal
 from chromite.lib import timeout_util
-from chromite.third_party import mock
 from chromite.utils import outcap
 
 

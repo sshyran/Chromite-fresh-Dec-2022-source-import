@@ -7,6 +7,7 @@
 import contextlib
 import os
 import shutil
+from unittest import mock
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
@@ -24,7 +25,6 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.service import test
-from chromite.third_party import mock
 
 
 class PartialDict:

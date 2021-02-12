@@ -5,12 +5,12 @@
 """Unit tests for the deploy_chrome script."""
 
 import datetime
+from unittest import mock
 
 from chromite.contrib import purge_builds
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

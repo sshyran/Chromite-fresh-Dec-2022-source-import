@@ -14,6 +14,7 @@ import datetime
 import json
 import os
 import time
+from unittest import mock
 
 from chromite.cbuildbot import afdo
 from chromite.lib import cros_build_lib
@@ -22,7 +23,6 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 MockGsFile = collections.namedtuple('MockGsFile', ['url', 'creation_time'])

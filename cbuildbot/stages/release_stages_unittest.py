@@ -4,6 +4,8 @@
 
 """Unittests for build stages."""
 
+from unittest import mock
+
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import release_stages
@@ -20,7 +22,6 @@ from chromite.cbuildbot.stages.generic_stages_unittest import patch
 
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

@@ -8,6 +8,7 @@ import copy
 import json
 import os
 import re
+from unittest import mock
 
 from chromite.cbuildbot import builders
 from chromite.cbuildbot.builders import generic_builders
@@ -19,7 +20,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

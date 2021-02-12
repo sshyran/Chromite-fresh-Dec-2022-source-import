@@ -5,9 +5,9 @@
 """Tests for the utils/metrics library."""
 
 import os
+from unittest import mock
 
 from chromite.lib import cros_test_lib
-from chromite.third_party import mock
 from chromite.utils import metrics
 
 

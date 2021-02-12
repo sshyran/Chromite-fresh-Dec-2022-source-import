@@ -5,6 +5,7 @@
 """Image service tests."""
 
 import os
+from unittest import mock
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -19,7 +20,6 @@ from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.scripts import pushimage
 from chromite.service import image as image_service
-from chromite.third_party import mock
 
 
 class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):

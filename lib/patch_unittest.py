@@ -11,6 +11,7 @@ import os
 import shutil
 import tempfile
 import time
+from unittest import mock
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -20,7 +21,6 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import patch as cros_patch
-from chromite.third_party import mock
 
 
 _GetNumber = functools.partial(next, itertools.count())

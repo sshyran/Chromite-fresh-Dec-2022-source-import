@@ -6,6 +6,7 @@
 
 import os
 import shutil
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
@@ -18,7 +19,6 @@ from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import portage_util
-from chromite.third_party import mock
 
 
 # pylint: disable=too-many-ancestors

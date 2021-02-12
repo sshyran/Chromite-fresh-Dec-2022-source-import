@@ -7,6 +7,7 @@
 import ctypes
 import io
 import os
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -14,7 +15,6 @@ from chromite.lib import parallel
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.scripts import cros_generate_breakpad_symbols
-from chromite.third_party import mock
 
 
 class FindDebugDirMock(partial_mock.PartialMock):

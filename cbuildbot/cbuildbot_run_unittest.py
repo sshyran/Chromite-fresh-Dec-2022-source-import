@@ -6,13 +6,13 @@
 
 import pickle
 import time
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_test_lib
 from chromite.lib import parallel
-from chromite.third_party import mock
 
 
 DEFAULT_ARCHIVE_GS_PATH = 'bogus_bucket/TheArchiveBase'

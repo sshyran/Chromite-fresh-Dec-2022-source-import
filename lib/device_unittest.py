@@ -5,13 +5,13 @@
 """Unittests for device.py"""
 
 import subprocess
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import device
 from chromite.lib import remote_access
 from chromite.lib import vm
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

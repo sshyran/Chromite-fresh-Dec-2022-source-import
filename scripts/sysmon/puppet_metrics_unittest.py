@@ -10,10 +10,10 @@ from __future__ import absolute_import
 
 import io
 import os
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import puppet_metrics
-from chromite.third_party import mock
 
 
 _SUMMARY = u"""\

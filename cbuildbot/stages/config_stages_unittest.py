@@ -6,6 +6,7 @@
 
 import builtins
 import os
+from unittest import mock
 
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import config_stages
@@ -15,7 +16,6 @@ from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

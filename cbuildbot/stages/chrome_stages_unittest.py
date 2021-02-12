@@ -5,6 +5,7 @@
 """Unittests for chrome stages."""
 
 import os
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
@@ -18,7 +19,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 # pylint: disable=too-many-ancestors

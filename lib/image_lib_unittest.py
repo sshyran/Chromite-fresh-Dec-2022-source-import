@@ -9,6 +9,7 @@ import gc
 import glob
 import os
 import stat
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -17,7 +18,6 @@ from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import retry_util
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

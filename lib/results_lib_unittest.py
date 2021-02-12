@@ -8,6 +8,7 @@ import io
 import os
 import signal
 import time
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import simple_builders
@@ -23,7 +24,6 @@ from chromite.lib import fake_cidb
 from chromite.lib import parallel
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 class PassStage(generic_stages.BuilderStage):

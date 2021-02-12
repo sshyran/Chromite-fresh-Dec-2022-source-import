@@ -13,11 +13,10 @@ import socket
 import socketserver
 import sys
 import time
+from unittest import mock
 import urllib.request
 
 import pytest  # pylint: disable=import-error
-
-from chromite.third_party import mock
 
 
 # We specifically set up a local server to connect to, so make sure we

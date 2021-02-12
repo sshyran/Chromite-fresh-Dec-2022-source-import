@@ -8,6 +8,7 @@ from __future__ import division
 
 import os
 import pathlib
+from unittest import mock
 
 import pytest
 
@@ -20,7 +21,6 @@ from chromite.lib import uprev_lib
 from chromite.lib.build_target_lib import BuildTarget
 from chromite.lib.chroot_lib import Chroot
 from chromite.lib.parser import package_info
-from chromite.third_party import mock
 
 
 class ChromeVersionTest(cros_test_lib.TestCase):

@@ -7,13 +7,13 @@
 import itertools
 import os
 import tempfile
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import partial_mock
 from chromite.lib import path_util
-from chromite.third_party import mock
 
 
 FAKE_SOURCE_PATH = '/path/to/source/tree'

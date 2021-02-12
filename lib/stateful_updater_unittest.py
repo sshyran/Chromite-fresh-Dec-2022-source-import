@@ -6,6 +6,7 @@
 
 import os
 import shutil
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -13,7 +14,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import stateful_updater
-from chromite.third_party import mock
 
 
 # pylint: disable=protected-access

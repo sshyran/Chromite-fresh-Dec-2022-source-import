@@ -6,6 +6,7 @@
 
 import os
 import re
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -23,7 +24,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party import mock
 
 
 # pylint: disable=too-many-ancestors

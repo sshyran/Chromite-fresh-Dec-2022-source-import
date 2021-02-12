@@ -9,13 +9,13 @@ import subprocess
 import sys
 import time
 import unittest
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import timeout_util
-from chromite.third_party import mock
 
 
 # Convenience alias

@@ -5,12 +5,12 @@
 """Tests for the autotest_util module."""
 
 import os
+from unittest import mock
 
 from chromite.lib import autotest_util
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.third_party import mock
 from chromite.utils import matching
 
 

@@ -9,12 +9,12 @@ import itertools
 import os
 import sys
 import time
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import retry_util
-from chromite.third_party import mock
 
 
 class TestRetries(cros_test_lib.MockTempDirTestCase):

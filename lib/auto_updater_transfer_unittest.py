@@ -14,13 +14,13 @@ from __future__ import division
 
 import copy
 import os
+from unittest import mock
 
 from chromite.lib import auto_updater_transfer
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
-from chromite.third_party import mock
 
 
 _DEFAULT_ARGS = {

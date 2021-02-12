@@ -5,6 +5,7 @@
 """Test simple_chrome_builder  module."""
 
 import os
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cros_bisect import simple_chrome_builder
@@ -14,7 +15,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gclient
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.third_party import mock
 
 
 class TestSimpleChromeBuilder(cros_test_lib.MockTempDirTestCase):

@@ -4,13 +4,14 @@
 
 """Test the archive_lib module."""
 
+from unittest import mock
+
 from chromite.cbuildbot import archive_lib
 from chromite.cbuildbot import cbuildbot_run
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_test_lib
 from chromite.lib import parallel_unittest
-from chromite.third_party import mock
 
 
 DEFAULT_ARCHIVE_PREFIX = 'bogus_bucket/TheArchiveBase'
