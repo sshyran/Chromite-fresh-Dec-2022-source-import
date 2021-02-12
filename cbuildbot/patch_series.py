@@ -433,9 +433,8 @@ class PatchSeries(object):
     """
     plan = []
     gerrit_deps_seen = cros_patch.PatchCache()
-    cq_deps_seen = cros_patch.PatchCache()
     self._AddChangeToPlanWithDeps(change, plan, gerrit_deps_seen,
-                                  cq_deps_seen, limit_to=limit_to)
+                                  limit_to=limit_to)
     return plan
 
   def CreateTransactions(self, changes, limit_to=None):
@@ -468,8 +467,7 @@ class PatchSeries(object):
 
   @_PatchWrapException
   def _AddChangeToPlanWithDeps(self, change, plan, gerrit_deps_seen,
-                               cq_deps_seen, limit_to=None,
-                               include_cq_deps=True,
+                               limit_to=None,
                                remaining_depth=MAX_PLAN_RECURSION):
     """Add a change and its dependencies into a |plan|.
 
@@ -479,12 +477,8 @@ class PatchSeries(object):
         |change| and any necessary dependencies to |plan|.
       gerrit_deps_seen: The changes whose Gerrit dependencies have already been
         processed.
-      cq_deps_seen: The changes whose CQ-DEPEND and Gerrit dependencies have
-        already been processed.
       limit_to: If non-None, limit the allowed uncommitted patches to
         what's in that container/mapping.
-      include_cq_deps: If True, include CQ dependencies in the list
-        of dependencies. Defaults to True.
       remaining_depth: Amount of permissible recursion depth from this call.
 
     Raises:
@@ -499,32 +493,19 @@ class PatchSeries(object):
 
     # Get a list of the changes that haven't been committed.
     # These are returned as cros_patch.PatchQuery objects.
-    gerrit_deps, cq_deps = self.GetDepsForChange(change)
+    gerrit_deps = self.GetDepsForChange(change)
 
     # Only process the Gerrit dependencies for each change once. We prioritize
     # Gerrit dependencies over CQ dependencies, since Gerrit dependencies might
     # be required in order for the change to apply.
-    old_plan_len = len(plan)
     if change not in gerrit_deps_seen:
       gerrit_deps = self._LookupUncommittedChanges(
           gerrit_deps, limit_to=limit_to)
       gerrit_deps_seen.Inject(change)
       for dep in gerrit_deps:
-        self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen, cq_deps_seen,
-                                      limit_to=limit_to, include_cq_deps=False,
+        self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen,
+                                      limit_to=limit_to,
                                       remaining_depth=remaining_depth - 1)
-
-    if include_cq_deps and change not in cq_deps_seen:
-      cq_deps = self._LookupUncommittedChanges(
-          cq_deps, limit_to=limit_to)
-      cq_deps_seen.Inject(change)
-      for dep in plan[old_plan_len:] + cq_deps:
-        # Add the requested change (plus deps) to our plan, if it we aren't
-        # already in the process of doing that.
-        if dep not in cq_deps_seen:
-          self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen,
-                                        cq_deps_seen, limit_to=limit_to,
-                                        remaining_depth=remaining_depth - 1)
 
     # If there are cyclic dependencies, we might have already applied this
     # patch as part of dependency resolution. If not, apply this patch.
@@ -545,11 +526,7 @@ class PatchSeries(object):
     """
     val = self._change_deps_cache.get(change)
     if val is None:
-      git_repo = self.GetGitRepoForChange(change)
-      val = self._change_deps_cache[change] = (
-          change.GerritDependencies(),
-          change.PaladinDependencies(git_repo))
-
+      val = self._change_deps_cache[change] = change.GerritDependencies()
     return val
 
   def InjectCommittedPatches(self, changes):

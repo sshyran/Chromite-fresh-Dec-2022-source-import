@@ -63,23 +63,6 @@ ATTR_PASS_COUNT = 'pass_count'
 ATTR_TOTAL_FAIL_COUNT = 'total_fail_count'
 ATTR_COMMIT_MESSAGE = 'commit_message'
 
-ALL_ATTRS = (
-    ATTR_REMOTE,
-    ATTR_GERRIT_NUMBER,
-    ATTR_PROJECT,
-    ATTR_BRANCH,
-    ATTR_PROJECT_URL,
-    ATTR_REF,
-    ATTR_CHANGE_ID,
-    ATTR_COMMIT,
-    ATTR_PATCH_NUMBER,
-    ATTR_OWNER_EMAIL,
-    ATTR_FAIL_COUNT,
-    ATTR_PASS_COUNT,
-    ATTR_TOTAL_FAIL_COUNT,
-    ATTR_COMMIT_MESSAGE,
-)
-
 def ParseSHA1(text, error_ok=True):
   """Checks if |text| conforms to the SHA1 format and parses it.
 
@@ -346,21 +329,6 @@ class DependencyError(PatchException):
         return None
 
     return key_error
-
-class BrokenCQDepends(PatchException):
-  """Raised if a patch has a CQ-DEPEND line that is ill formated."""
-
-  def __init__(self, patch, text, msg=None):
-    PatchException.__init__(self, patch)
-    self.text = text
-    self.msg = msg
-    self.args = (patch, text, msg)
-
-  def ShortExplanation(self):
-    s = 'has a malformed CQ-DEPEND target: %s' % (self.text,)
-    if self.msg is not None:
-      s += '; %s' % (self.msg,)
-    return s
 
 
 class BrokenChangeID(PatchException):
@@ -1367,37 +1335,6 @@ class GitRepoPatch(PatchQuery):
 
     return ParseChangeID(change_id_match)
 
-  def PaladinDependencies(self, git_repo):
-    """Returns an ordered list of dependencies based on the Commit Message.
-
-    Parses the Commit message for this change looking for lines that follow
-    the format:
-
-    CQ-DEPEND=change_num+ e.g.
-
-    A commit which depends on a couple others.
-
-    BUG=blah
-    TEST=blah
-    CQ-DEPEND=10001,10002
-    """
-    dependencies = []
-    logging.debug('Checking for CQ-DEPEND dependencies for change %s', self)
-
-    # Only fetch the commit message if needed.
-    if self.commit_message is None:
-      self.Fetch(git_repo)
-
-    try:
-      dependencies = GetPaladinDeps(self.commit_message)
-    except ValueError as e:
-      raise BrokenCQDepends(self, str(e))
-
-    if dependencies:
-      logging.debug('Found %s Paladin dependencies for change %s',
-                    dependencies, self)
-    return dependencies
-
   def _FindEbuildConflicts(self, git_repo, upstream, inflight=False):
     """Verify that there are no ebuild conflicts in the given |git_repo|.
 
@@ -2049,34 +1986,9 @@ class GerritPatch(GerritFetchOnlyPatch):
     else:
       return value in type_approvals
 
-  def HasApprovals(self, flags):
-    """Return whether the current patchset has the specified approval.
-
-    Args:
-      flags: A dictionary of flag -> value mappings in
-        GerritPatch.HasApproval format.
-        ex: { 'CRVW': '2', 'VRIF': '1', 'COMR': ('1', '2') }
-
-    returns boolean telling if all flag requirements are met.
-    """
-    return all(self.HasApproval(field, value)
-               for field, value in flags.items())
-
   def IsPrivate(self):
     """Return whether this CL is currently marked Private."""
     return self.private
-
-  def WasVetoed(self):
-    """Return whether this CL was vetoed with VRIF=-1 or CRVW=-2."""
-    return self.HasApproval('VRIF', '-1') or self.HasApproval('CRVW', '-2')
-
-  def IsMergeable(self):
-    """Return true if all Gerrit approvals required for submission are set."""
-    return not self.GetMergeException()
-
-  def HasReadyFlag(self):
-    """Return true if the commit-ready flag is set."""
-    return self.HasApproval('COMR', ('1', '2'))
 
   def GetMergeException(self):
     """Return the reason why this change is not mergeable.

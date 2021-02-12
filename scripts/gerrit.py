@@ -432,10 +432,7 @@ class ActionDeps(_ActionSearchQuery):
 
   @classmethod
   def _Children(cls, opts, querier, cl):
-    """Yields the Gerrit and CQ-Depends dependencies of a patch"""
-    for change in cls._ProcessDeps(
-        opts, querier, cl, cl.PaladinDependencies(None), True):
-      yield change
+    """Yields the Gerrit dependencies of a patch"""
     for change in cls._ProcessDeps(
         opts, querier, cl, cl.GerritDependencies(), False):
       yield change
