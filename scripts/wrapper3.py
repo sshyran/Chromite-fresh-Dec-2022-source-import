@@ -61,6 +61,7 @@ class ChromiteImporter(object):
     path = os.path.dirname(os.path.realpath(__file__))
     while not os.path.exists(os.path.join(path, 'PRESUBMIT.cfg')):
       path = os.path.dirname(path)
+      assert path != '/', 'Unable to locate chromite dir'
 
     # pylint: disable=global-statement
     global CHROMITE_PATH
