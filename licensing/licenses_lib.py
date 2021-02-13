@@ -983,6 +983,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'chromeos-base/intel-hdcp',
         'chromeos-base/monotype-fonts',
         'chromeos-base/qc7180-modem-firmware',
+        'chromeos-base/sc7280-modem-firmware',
         'chromeos-base/rialto-cellular-autoconnect',
         'chromeos-base/rialto-modem-watchdog',
         'chromeos-base/rialto-override-apn',
