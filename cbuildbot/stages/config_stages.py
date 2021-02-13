@@ -406,7 +406,6 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
 
   PROJECT_URL = os.path.join(constants.INTERNAL_GOB_URL,
                              'chromeos/infra/config')
-  PROJECT_BRANCH = 'master'
 
   def __init__(self, builder_run, buildstore, **kwargs):
     super(DeployLuciSchedulerStage, self).__init__(builder_run, buildstore,
@@ -444,10 +443,10 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
     """
     self.project_dir = self._MakeWorkDir('luci_config')
 
-    git.Clone(self.project_dir, self.PROJECT_URL, branch=self.PROJECT_BRANCH)
+    git.Clone(self.project_dir, self.PROJECT_URL)
 
-    logging.info('Checked out luci config %s:%s in %s',
-                 self.PROJECT_URL, self.PROJECT_BRANCH, self.project_dir)
+    logging.info('Checked out luci config %s:HEAD in %s',
+                 self.PROJECT_URL, self.project_dir)
 
   def _UpdateLuciProject(self):
     chromite_source_file = os.path.join(constants.CHROMITE_DIR, 'config',
@@ -481,20 +480,17 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
     git.RunGit(self.project_dir, ['add', '-A'])
     git.RunGit(self.project_dir, ['commit', '-m', message])
 
-    push_to = git.RemoteRef('origin', self.PROJECT_BRANCH)
-    logging.info('Pushing to branch (%s) with message: %s %s', push_to, message,
+    logging.info('Pushing to branch (HEAD) with message: %s %s', message,
                  ' (dryrun)' if self._run.options.debug else '')
     git.RunGit(
         self.project_dir, ['config', 'push.default', 'tracking'],
         print_cmd=True)
-    git.PushBranch(self.PROJECT_BRANCH, self.project_dir,
-                   dryrun=self._run.options.debug)
+    git.PushBranch('HEAD', self.project_dir, dryrun=self._run.options.debug)
     logging.PrintBuildbotStepText('luci-scheduler.cfg: Updated.')
 
   def PerformStage(self):
     """Perform the DeployLuciSchedulerStage."""
-    logging.info('Update luci_scheduler.cfg at %s:%s.',
-                 self.PROJECT_URL, self.PROJECT_BRANCH)
+    logging.info('Update luci_scheduler.cfg at %s:HEAD.', self.PROJECT_URL)
 
     self._RunUnitTest()
     self._CheckoutLuciProject()
