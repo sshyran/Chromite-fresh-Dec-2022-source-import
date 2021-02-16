@@ -2251,6 +2251,10 @@ def AddNotificationConfigs(site_config):
           config_lib.NotificationConfig(
               email='borealis-release-builder-alerts@google.com', threshold=2),
       ],
+      'puff-borealis-release': [
+          config_lib.NotificationConfig(
+              email='borealis-release-builder-alerts@google.com', threshold=2),
+      ],
       'swanky-release': [
           config_lib.NotificationConfig(email='navil+spam@chromium.org'),
       ],
