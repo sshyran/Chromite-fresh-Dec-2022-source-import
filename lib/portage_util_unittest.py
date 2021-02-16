@@ -1261,12 +1261,12 @@ class ProjectMappingTest(cros_test_lib.TestCase):
     """Test if we can find the list of workon projects."""
     frecon = 'sys-apps/frecon'
     frecon_project = 'chromiumos/platform/frecon'
-    this = 'chromeos-base/chromite'
-    this_project = 'chromiumos/chromite'
+    dev_install = 'chromeos-base/dev-install'
+    dev_install_project = 'chromiumos/platform2'
     matches = [
-        ([frecon], set([frecon_project])),
-        ([this], set([this_project])),
-        ([frecon, this], set([frecon_project, this_project]))
+        ([frecon], {frecon_project}),
+        ([dev_install], {dev_install_project}),
+        ([frecon, dev_install], {frecon_project, dev_install_project}),
     ]
     if portage_util.FindOverlays(constants.BOTH_OVERLAYS):
       for packages, projects in matches:
