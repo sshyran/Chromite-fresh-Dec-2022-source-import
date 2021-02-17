@@ -24,7 +24,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
 
-def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
+def _call_entry(fw_loc, metric_proto, subcmd, **kwargs):
   """Calls into firmware_builder.py with the specified subcmd."""
 
   if fw_loc == common_pb2.PLATFORM_EC:
@@ -40,7 +40,7 @@ def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
                              'firmware_builder.py')
 
   with tempfile.NamedTemporaryFile() as tmpfile:
-    cmd = [entry_point, '--metrics', tmpfile.name] + args
+    cmd = [entry_point, '--metrics', tmpfile.name]
     for key, value in kwargs.items():
       cmd += [f'--{key.replace("_", "-")}', value]
     cmd += [subcmd]
@@ -80,9 +80,8 @@ def _BuildAllTotFirmwareResponse(_input_proto, output_proto, _config):
 def BuildAllTotFirmware(input_proto, output_proto, _config):
   """Build all of the firmware targets at the specified location."""
 
-  args = ['--code-coverage'] if input_proto.code_coverage else []
   return _call_entry(input_proto.firmware_location, output_proto.metrics,
-                     'build', *args)
+                     'build')
 
 
 def _TestAllTotFirmwareResponse(_input_proto, output_proto, _config):
@@ -99,9 +98,8 @@ def _TestAllTotFirmwareResponse(_input_proto, output_proto, _config):
 def TestAllTotFirmware(input_proto, output_proto, _config):
   """Runs all of the firmware tests at the specified location."""
 
-  args = ['--code-coverage'] if input_proto.code_coverage else []
   return _call_entry(input_proto.firmware_location, output_proto.metrics,
-                     'test', *args)
+                     'test')
 
 
 def _BuildAllFirmwareResponse(_input_proto, output_proto, _config):
@@ -123,9 +121,8 @@ def _BuildAllFirmwareResponse(_input_proto, output_proto, _config):
 def BuildAllFirmware(input_proto, output_proto, _config):
   """Build all of the firmware targets at the specified location."""
 
-  args = ['--code-coverage'] if input_proto.code_coverage else []
   return _call_entry(input_proto.firmware_location, output_proto.metrics,
-                     'build', *args)
+                     'build')
 
 
 def _TestAllFirmwareResponse(_input_proto, output_proto, _config):
@@ -142,9 +139,8 @@ def _TestAllFirmwareResponse(_input_proto, output_proto, _config):
 def TestAllFirmware(input_proto, output_proto, _config):
   """Runs all of the firmware tests at the specified location."""
 
-  args = ['--code-coverage'] if input_proto.code_coverage else []
   return _call_entry(input_proto.firmware_location, output_proto.metrics,
-                     'test', *args)
+                     'test')
 
 
 def _BundleFirmwareArtifactsResponse(_input_proto, output_proto, _config):
@@ -166,14 +162,10 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
   with osutils.TempDir(delete=False) as tmpdir:
     info = input_proto.artifacts.output_artifacts[0]
     metadata_path = os.path.join(tmpdir, 'firmware_metadata.jsonpb')
-    args = []
-    if input_proto.artifacts.FIRMWARE_LCOV in info.artifact_types:
-      args += ['--code-coverage']
     resp = _call_entry(
         info.location,
         None,
         'bundle',
-        *args,
         output_dir=tmpdir,
         metadata=metadata_path)
     tarball_paths = []

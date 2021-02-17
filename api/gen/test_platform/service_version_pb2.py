@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform',
   syntax='proto3',
   serialized_options=_b('Z7go.chromium.org/chromiumos/infra/proto/go/test_platform'),
-  serialized_pb=_b('\n#test_platform/service_version.proto\x12\rtest_platform\"K\n\x0eServiceVersion\x12\x13\n\x0bskylab_tool\x18\x02 \x01(\x03\x12\x16\n\x0e\x63rosfleet_tool\x18\x03 \x01(\x03J\x04\x08\x01\x10\x02R\x06globalB9Z7go.chromium.org/chromiumos/infra/proto/go/test_platformb\x06proto3')
+  serialized_pb=_b('\n#test_platform/service_version.proto\x12\rtest_platform\"3\n\x0eServiceVersion\x12\x13\n\x0bskylab_tool\x18\x02 \x01(\x03J\x04\x08\x01\x10\x02R\x06globalB9Z7go.chromium.org/chromiumos/infra/proto/go/test_platformb\x06proto3')
 )
 
 
@@ -39,13 +39,6 @@ _SERVICEVERSION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='crosfleet_tool', full_name='test_platform.ServiceVersion.crosfleet_tool', index=1,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -59,7 +52,7 @@ _SERVICEVERSION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=54,
-  serialized_end=129,
+  serialized_end=105,
 )
 
 DESCRIPTOR.message_types_by_name['ServiceVersion'] = _SERVICEVERSION
