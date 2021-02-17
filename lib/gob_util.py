@@ -839,9 +839,9 @@ def ResetReviewLabels(host, change, label, value='0', revision=None,
 
 
 def GetTipOfTrunkRevision(git_url):
-  """Returns the current git revision on the master branch."""
+  """Returns the current git revision on the default branch."""
   parsed_url = urllib.parse.urlparse(git_url)
-  path = parsed_url[2].rstrip('/') + '/+log/master?n=1&format=JSON'
+  path = parsed_url[2].rstrip('/') + '/+log/HEAD?n=1&format=JSON'
   j = FetchUrlJson(parsed_url[1], path, ignore_404=False)
   if not j:
     raise GOBError(
