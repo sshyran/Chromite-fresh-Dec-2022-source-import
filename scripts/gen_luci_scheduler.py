@@ -36,7 +36,7 @@ assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 _CONFIG_HEADER = """# Defines buckets on luci-scheduler.appspot.com.
 #
 # For schema of this file and documentation see ProjectConfig message in
-# https://github.com/luci/luci-go/blob/master/scheduler/appengine/messages/config.proto
+# https://github.com/luci/luci-go/blob/HEAD/scheduler/appengine/messages/config.proto
 
 # Generated with chromite/scripts/gen_luci_scheduler
 

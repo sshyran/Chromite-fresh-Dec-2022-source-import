@@ -258,7 +258,7 @@ VM is staged inside moblab from Google Storage.
 
 This setup is especially useful for iterating on most pieces of the autotest
 infrastructure code, instead of using
-[local_dev_autotest](https://chromium.googlesource.com/chromiumos/third_party/autotest/+/master/site_utils/setup_dev_autotest.sh)
+[local_dev_autotest](https://chromium.googlesource.com/chromiumos/third_party/autotest/+/HEAD/site_utils/setup_dev_autotest.sh)
 to install the full autotest stack on your workstation, as we've done in the
 past.
 
@@ -330,4 +330,4 @@ sudo apt-get install qemu-kvm
 
 [moblab-generic-vm-paladin builder]: https://cros-goldeneye.corp.google.com/chromeos/legoland/builderHistory?buildConfig=moblab-generic-vm-paladin&buildBranch=master
 [betty paladin builder]: https://cros-goldeneye.corp.google.com/chromeos/legoland/builderHistory?buildConfig=betty-paladin&buildBranch=master
-[moblab_RunSuite]: https://chromium.googlesource.com/chromiumos/third_party/autotest/+/master/server/site_tests/moblab_RunSuite/
+[moblab_RunSuite]: https://chromium.googlesource.com/chromiumos/third_party/autotest/+/HEAD/server/site_tests/moblab_RunSuite/

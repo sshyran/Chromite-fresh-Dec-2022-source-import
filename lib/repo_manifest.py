@@ -41,7 +41,7 @@ class UnsupportedFeature(Error):
 class Manifest(object):
   """Manifest represents the contents of a repo manifest XML file."""
 
-  # https://chromium.googlesource.com/external/repo/+/master/docs/manifest-format.md
+  # https://chromium.googlesource.com/external/repo/+/HEAD/docs/manifest-format.md
 
   def __init__(self, etree, allow_unsupported_features=False):
     """Initialize Manifest.

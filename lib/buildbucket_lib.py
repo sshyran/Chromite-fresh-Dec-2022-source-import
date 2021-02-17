@@ -10,8 +10,7 @@ a build and wait for a result. A building system, such as Buildbot,
 can lease it, build it and report a result back.
 
 For more documents about buildbucket, please refer to:
-'https://chromium.googlesource.com/infra/infra/+/master/appengine/
-cr-buildbucket/README.md'
+https://chromium.googlesource.com/infra/infra/+/HEAD/appengine/cr-buildbucket/README.md'
 """
 
 from __future__ import print_function

@@ -25,5 +25,5 @@ Supported Python Versions
 
 We support Python 2.6, 2.7, 3.3+. More information [in the docs][2].
 
-[1]: https://github.com/google/oauth2client/blob/master/CONTRIBUTING.md
+[1]: https://github.com/google/oauth2client/blob/HEAD/CONTRIBUTING.md
 [2]: http://oauth2client.readthedocs.org/#supported-python-versions

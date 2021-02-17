@@ -42,7 +42,7 @@ BBV2_URL_ENDPOINT_TEST = (
 BB_STATUS_DICT = {
     # A mapping of Buildbucket V2 statuses to chromite's statuses. For
     # buildbucket reference, see here:
-    # https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/common.proto
+    # https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/common.proto
     0: 'unspecified',
     1: constants.BUILDER_STATUS_PLANNED,
     2: constants.BUILDER_STATUS_INFLIGHT,
@@ -180,7 +180,7 @@ def BuildStepToDict(step, build_values=None):
   """Extract information from a Buildbucket Step instance.
 
   Reference:
-  https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/step.proto
+  https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/step.proto
 
   Args:
     step: A step_pb2.Step instance from Buildbucket to be extracted.
@@ -254,7 +254,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding BatchResponse message. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/builds_service.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
     """
     batch_requests = []
     for buildbucket_id in buildbucket_ids:
@@ -279,7 +279,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding BatchResponse message. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/builds_service.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
     """
     batch_requests = []
     for buildbucket_id in buildbucket_ids:
@@ -304,7 +304,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding Build proto. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
     cancel_build_request = rpc_pb2.CancelBuildRequest(
          id=buildbucket_id,
@@ -327,7 +327,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding Build proto. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
     get_build_request = rpc_pb2.GetBuildRequest(
         id=buildbucket_id,
@@ -360,7 +360,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding Build proto. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
     schedule_build_request = rpc_pb2.ScheduleBuildRequest(
         request_id=request_id,
@@ -389,7 +389,7 @@ class BuildbucketV2(object):
 
     Returns:
       The corresponding Build proto. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
     update_build_request = rpc_pb2.UpdateBuildRequest(
         build=build,

@@ -669,7 +669,7 @@ def ValidateDlcIdentifier(name):
     - Maximum length of 40 (_MAX_ID_NAME) characters.
 
   For more info see:
-  https://chromium.googlesource.com/chromiumos/platform2/+/master/dlcservice/docs/developer.md#create-a-dlc-module
+  https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/dlcservice/docs/developer.md#create-a-dlc-module
 
   Args:
     name: The value of the string to be validated.

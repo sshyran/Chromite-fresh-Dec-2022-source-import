@@ -3075,6 +3075,7 @@ def BranchScheduleConfig():
   Returns:
     List of config_lib.BuildConfig instances.
   """
+  # https://github.com/luci/luci-go/blob/HEAD/scheduler/appengine/messages/config.proto
   #
   # Define each branched schedule with:
   #   branch_name: Name of the branch to build as a string.
@@ -3084,9 +3085,6 @@ def BranchScheduleConfig():
   #     'triggered' for manual builds.
   #     Cron style in UTC timezone: '0 15 * * *'
   #     'with 30d interval' to run X time after previous build.
-  #
-  #     https://github.com/luci/luci-go/blob/master/scheduler/
-  #                        appengine/messages/config.proto
   #
   # When updating this be sure to run `config/refresh_generated_files`
   # or the change will fail chromite unittests.

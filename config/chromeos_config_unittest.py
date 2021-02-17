@@ -27,11 +27,6 @@ from chromite.lib import osutils
 
 # pylint: disable=protected-access
 
-CHROMIUM_WATCHING_URL = (
-    'http://src.chromium.org/chrome/trunk/tools/build/masters/'
-    'master.chromium.chromiumos/master_chromiumos_cros_cfg.py'
-)
-
 
 class ChromeosConfigTestBase(cros_test_lib.TestCase):
   """Base class for tests of chromeos_config.."""
