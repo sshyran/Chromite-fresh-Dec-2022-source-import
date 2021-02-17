@@ -101,8 +101,8 @@ def GetBranchName(template_file):
   if match:
     if match.group(1) == 'ToT':
       # Given 'build_config.ToT.json',
-      # return branch name 'master'.
-      return 'master'
+      # return branch name 'main'.
+      return 'main'
     else:
       # Given 'build_config.release-R51-8172.B.json',
       # return branch name 'release-R51-8172.B'.
@@ -138,7 +138,7 @@ class CheckTemplateStage(generic_stages.BuilderStage):
     milestone_path_pairs = []
     for release_template in release_list:
       milestone_num = _GetMilestone(release_template)
-      # Enable config-updater builder for master branch
+      # Enable config-updater builder for main branch
       # and release branches with milestone_num > 53
       if milestone_num and milestone_num > 53:
         milestone_path_pairs.append((milestone_num, release_template))
@@ -303,7 +303,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
     TODO(crbug/1062657): remove the legacy fallback when ConfigUpdater
     no longer runs on a milestone <= 83.
     """
-    if self.branch == 'master':
+    if self.branch == 'main':
       self._RunNewUnitTest()
     else:
       match = re.search(r'release-R(.+)-.*', self.branch)

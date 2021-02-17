@@ -176,12 +176,12 @@ class UpdateConfigStageTest(generic_stages_unittest.AbstractStageTestCase):
       self.assertEqual(
           os.path.basename(config_change_patch), 'config_change.patch')
 
-  def testMasterBasic(self):
-    """Basic test on master branch."""
+  def testMainBasic(self):
+    """Basic test on main branch."""
     template = 'build_config.ToT.json'
     stage = self.ConstructStage(template)
     stage.PerformStage()
-    self.assertTrue(stage.branch == 'master')
+    self.assertTrue(stage.branch == 'main')
 
   def testReleaseBasic(self):
     """Basic test on release branch."""
