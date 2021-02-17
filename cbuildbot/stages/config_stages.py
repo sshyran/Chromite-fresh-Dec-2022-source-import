@@ -485,7 +485,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
     git.RunGit(
         self.project_dir, ['config', 'push.default', 'tracking'],
         print_cmd=True)
-    git.PushBranch('HEAD', self.project_dir, dryrun=self._run.options.debug)
+    git.PushBranch('main', self.project_dir, dryrun=self._run.options.debug)
     logging.PrintBuildbotStepText('luci-scheduler.cfg: Updated.')
 
   def PerformStage(self):
