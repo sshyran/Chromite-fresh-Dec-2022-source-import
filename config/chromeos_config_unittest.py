@@ -977,7 +977,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
                 self.assertIsInstance(path_regexp, str)
         except (TypeError, ValueError):
           self.fail(('%s has a triggered_gitiles that is malformed: %r\n'
-                     "Simple example: [['url', ['refs/heads/master']]]") %
+                     "Simple example: [['url', ['refs/heads/main']]]") %
                     (config.name, config.triggered_gitiles))
 
   def testNotificationConfigsType(self):
