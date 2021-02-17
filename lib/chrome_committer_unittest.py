@@ -44,8 +44,8 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
                         'https://chromium.googlesource.com/chromium/src.git')
     self._assertCommand('git config core.sparsecheckout true')
     self._assertCommand('git fetch --depth=1')
-    self._assertCommand('git pull origin master')
-    self._assertCommand('git checkout -B auto-commit-branch origin/master')
+    self._assertCommand('git pull origin HEAD')
+    self._assertCommand('git checkout -B auto-commit-branch HEAD')
     self.assertEqual(
         osutils.ReadFile(os.path.join(self.tempdir, '.git', 'info',
                                       'sparse-checkout')),

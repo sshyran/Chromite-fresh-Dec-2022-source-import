@@ -101,7 +101,7 @@ Change-Id: %s
     self.assertCommandContains(['config', 'core.sparsecheckout', 'true'])
     self.assertCommandContains(['remote', 'add', 'origin', url])
     self.assertCommandContains(['fetch', '--depth=1'])
-    self.assertCommandContains(['pull', 'origin', 'master'])
+    self.assertCommandContains(['pull', 'origin', 'HEAD'])
     self.assertEqual(osutils.ReadFile(sparse_checkout),
                      'dir1/file1\ndir2/file2')
 

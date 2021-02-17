@@ -63,8 +63,7 @@ class ChromeCommitter(object):
     sparse_checkout += ['codereview.settings', 'WATCHLISTS']
     git.ShallowFetch(self._checkout_dir, constants.CHROMIUM_GOB_URL,
                      sparse_checkout=sparse_checkout)
-    git.CreateBranch(self._checkout_dir, 'auto-commit-branch',
-                     branch_point='origin/master')
+    git.CreateBranch(self._checkout_dir, 'auto-commit-branch')
 
   def Commit(self, file_paths, commit_msg):
     """Commits files listed in |file_paths|.
