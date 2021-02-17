@@ -527,7 +527,7 @@ class RepoRepository(object):
     """Display debugging information for the repo binary."""
     logging.info('Repo path: %s', osutils.Which('repo'))
     cmd = [self.repo_cmd, 'version']
-    cros_build_lib.run(cmd, capture_output=True,
+    cros_build_lib.run(cmd, capture_output=True, encoding='utf-8',
                        log_output=True)
 
   def Sync(self, local_manifest=None, jobs=None, all_branches=True,
