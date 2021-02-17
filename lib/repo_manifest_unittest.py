@@ -39,7 +39,7 @@ REMOTES_XML = """
           fetch="http://example.com"
           pushurl="http://example.com/push"
           review="http://review.example.com"
-          revision="refs/heads/master"/>
+          revision="refs/heads/main"/>
 """
 
 DEFAULT_XML = '<default remote="simple_remote" upstream="default_upstream"/>'
@@ -48,7 +48,7 @@ SIMPLE_PROJECT_XML = '<project name="simple/project"/>'
 
 COMPLEX_PROJECT_XML = """
   <project name="complex/project" path="src/complex" revision="cafe"
-           remote="complex_remote" upstream="refs/heads/master">
+           remote="complex_remote" upstream="refs/heads/main">
     <annotation name="branch-mode" value="pin"/>
   </project>
 """
