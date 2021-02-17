@@ -1199,7 +1199,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
     chrome_lkgm = b'3322.0.0'
     url = '%s/+/%s/%s?format=text' % (
         constants.CHROMIUM_SRC_PROJECT,
-        chrome_revision or 'refs/heads/master',
+        chrome_revision or 'HEAD',
         constants.PATH_TO_CHROME_LKGM)
     site_params = config_lib.GetSiteParams()
     with mock.patch.object(

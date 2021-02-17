@@ -3507,7 +3507,7 @@ def GeneratePayloads(target_image_path,
 
 def GetChromeLKGM(revision):
   """Returns the ChromeOS LKGM from Chrome given the git revision."""
-  revision = revision or 'refs/heads/master'
+  revision = revision or 'HEAD'
   lkgm_url_path = '%s/+/%s/%s?format=text' % (
       constants.CHROMIUM_SRC_PROJECT, revision, constants.PATH_TO_CHROME_LKGM)
   contents_b64 = gob_util.FetchUrl(config_lib.GetSiteParams().EXTERNAL_GOB_HOST,
