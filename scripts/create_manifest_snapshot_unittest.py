@@ -32,7 +32,7 @@ MANIFEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   <default remote="origin"/>
   <project name="project/a" revision="f01dab1e"/>
   <project name="project/b" revision="cafe1234" upstream="short"/>
-  <project name="project/c" revision="deadbeef" upstream="refs/heads/master"/>
+  <project name="project/c" revision="deadbeef" upstream="refs/heads/main"/>
   <project name="dupe" revision="d1" upstream="dupe"/>
   <project name="dupe" revision="d2" upstream="dupe"/>
 </manifest>
@@ -78,7 +78,7 @@ class CreateManifestSnapshotTest(cros_test_lib.MockTempDirTestCase,
   def testGetUpstreamBranchFullUpstream(self):
     """Test _GetUpstreamBranch with full upstream ref."""
     branch = create_manifest_snapshot._GetUpstreamBranch(self.project_c)
-    self.assertEqual(branch, 'master')
+    self.assertEqual(branch, 'main')
 
   def testNeedsSnapshotReachable(self):
     """Test _NeedsSnapshot with revision reachable from upstream."""
@@ -86,7 +86,7 @@ class CreateManifestSnapshotTest(cros_test_lib.MockTempDirTestCase,
     result = create_manifest_snapshot._NeedsSnapshot('root', self.project_c)
     self.assertFalse(result)
     self.mock_is_reachable.assert_called_with(
-        'root/project/c', 'deadbeef', 'refs/remotes/origin/master')
+        'root/project/c', 'deadbeef', 'refs/remotes/origin/main')
 
   def testNeedsSnapshotUnreachable(self):
     """Test _NeedsSnapshot with revision reachable from upstream."""
@@ -100,7 +100,7 @@ class CreateManifestSnapshotTest(cros_test_lib.MockTempDirTestCase,
     """Test _NeedsSnapshot with no project upstream."""
     create_manifest_snapshot._NeedsSnapshot('root', self.project_a)
     self.mock_is_reachable.assert_called_with(
-        'root/project/a', 'f01dab1e', 'refs/remotes/origin/master')
+        'root/project/a', 'f01dab1e', 'refs/remotes/origin/main')
 
   def testNeedsSnapshotIsReachableFailure(self):
     """Test _NeedsSnapshot with no project upstream."""
@@ -108,8 +108,8 @@ class CreateManifestSnapshotTest(cros_test_lib.MockTempDirTestCase,
     result = create_manifest_snapshot._NeedsSnapshot('root', self.project_a)
     self.assertTrue(result)
 
-  def testMakeUniqueRefMaster(self):
-    """Test _MakeUniqueRef with upstream master."""
+  def testMakeUniqueRefMain(self):
+    """Test _MakeUniqueRef with upstream main."""
     used = set()
     ref1 = create_manifest_snapshot._MakeUniqueRef(self.project_c, 'base', used)
     ref2 = create_manifest_snapshot._MakeUniqueRef(self.project_c, 'base', used)
@@ -118,8 +118,8 @@ class CreateManifestSnapshotTest(cros_test_lib.MockTempDirTestCase,
     self.assertEqual(ref2, 'base/1')
     self.assertEqual(ref3, 'base/2')
 
-  def testMakeUniqueRefNonMaster(self):
-    """Test _MakeUniqueRef with non-master upstream."""
+  def testMakeUniqueRefNonMain(self):
+    """Test _MakeUniqueRef with non-main upstream."""
     used = set()
     ref1 = create_manifest_snapshot._MakeUniqueRef(self.project_b, 'base', used)
     ref2 = create_manifest_snapshot._MakeUniqueRef(self.project_b, 'base', used)

@@ -61,8 +61,8 @@ def _GetUpstreamBranch(project):
 
 def _NeedsSnapshot(repo_root, project):
   """Test if project's revision is reachable from its upstream ref."""
-  # Some projects don't have an upstream set. Try 'master' anyway.
-  branch = _GetUpstreamBranch(project) or 'master'
+  # Some projects don't have an upstream set. Try 'main' anyway.
+  branch = _GetUpstreamBranch(project) or 'main'
   upstream_ref = 'refs/remotes/%s/%s' % (project.Remote().GitName(), branch)
   project_path = os.path.join(repo_root, project.Path())
   try:
@@ -86,9 +86,9 @@ def _MakeUniqueRef(project, base_ref, used_refs):
   """
   ref = base_ref
 
-  # If the project upstream is a non-master branch, append it to the ref.
+  # If the project upstream is a non-main branch, append it to the ref.
   branch = _GetUpstreamBranch(project)
-  if branch and branch != 'master':
+  if branch and branch != 'main':
     ref = '%s/%s' % (ref, branch)
 
   if ref in used_refs:
