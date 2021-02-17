@@ -248,14 +248,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'lakitu',
-      sync_chrome=False,
-      chrome_sdk=False,
-      dev_installer_prebuilts=False,
-      paygen_skip_testing=True,
-  )
-
-  site_config.AddTemplate(
       'lassen',
       sync_chrome=False,
       chrome_sdk=False,
@@ -321,34 +313,6 @@ def GeneralTemplates(site_config):
       site_config.templates.loonix,
       # Disable rootfs_verification until Dustbuster is ready.
       rootfs_verification=False,
-  )
-
-  # An anchor of Laktiu' test customizations.
-  # TODO: renable SIMPLE_AU_TEST_TYPE once b/67510964 is fixed.
-  site_config.AddTemplate(
-      'lakitu_test_customizations',
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
-      vm_tests_override=None,
-      gce_tests=[config_lib.GCETestConfig(constants.GCE_SUITE_TEST_TYPE,
-                                          test_suite='gce-sanity'),
-                 config_lib.GCETestConfig(constants.GCE_SUITE_TEST_TYPE,
-                                          test_suite='gce-smoke')],
-  )
-
-  # Test customizations for lakitu boards' paladin builders.
-  site_config.AddTemplate(
-      'lakitu_paladin_test_customizations',
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
-      vm_tests_override=None,
-      gce_tests=[config_lib.GCETestConfig(constants.GCE_SUITE_TEST_TYPE,
-                                          test_suite='gce-sanity')],
-  )
-
-  # An anchor of Laktiu' notification email settings.
-  site_config.AddTemplate(
-      'lakitu_notification_emails',
   )
 
   site_config.AddTemplate(
@@ -765,8 +729,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
 
     if board in chromeos_boards.brillo_boards:
       board_config.apply(site_config.templates.brillo)
-    if board in chromeos_boards.lakitu_boards:
-      board_config.apply(site_config.templates.lakitu)
     if board in chromeos_boards.lassen_boards:
       board_config.apply(site_config.templates.lassen)
     if board in ['x30evb']:
@@ -1450,9 +1412,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
 
   # Move the following builders to active_builders once they are consistently
   # green.
-  unstable_builders = _frozen_ge_set(ge_build_config, [
-      'lakitu',  # TODO: Re-enable after crbug.com/919630 resolved.
-  ])
+  unstable_builders = _frozen_ge_set(ge_build_config, [])
 
   external_board_configs = CreateBoardConfigs(
       site_config, boards_dict, ge_build_config)
@@ -1559,18 +1519,6 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.internal_incremental,
           site_config.templates.incremental_affinity,
           boards=['chell'],
-          manifest_version=True,
-      )
-  )
-
-  master_config.AddSlave(
-      site_config.Add(
-          'lakitu-incremental',
-          site_config.templates.incremental,
-          site_config.templates.internal_incremental,
-          site_config.templates.incremental_affinity,
-          site_config.templates.lakitu_notification_emails,
-          board_configs['lakitu'],
           manifest_version=True,
       )
   )
@@ -1998,9 +1946,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   unified_board_names = set([b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
                              for b in unified_builds])
 
-  def _IsLakituConfig(config):
-    return 'lakitu' in config['name']
-
   def _CreateMasterConfig(name,
                           template=site_config.templates.release,
                           schedule='  0 2,10,18 * * *'):
@@ -2024,8 +1969,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'master-release-basic',
       template=site_config.templates.release_basic,
       schedule='30 */2 * * * *')
-  # pylint: disable=unused-variable
-  lakitu_master_config = _CreateMasterConfig('master-lakitu-release')
 
   def _AssignToMaster(config):
     """Add |config| as a slave config to the appropriate master config."""
@@ -2035,15 +1978,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     # Add this config to the master release basic builder.
     if config.name.endswith('-release-basic'):
       master = basic_master_config
-
-    # Add this config to 'master-lakitu-release' instead if this is an LTS
-    # branch for lakitu. This is typically only done on a branch after it is
-    # out of ChromeOS support window.
-    # To do this, set 'lakitu_lts_branch' to 'True' and re-run
-    # 'config/refresh_generated_files'.
-    lakitu_lts_branch = False
-    if lakitu_lts_branch and _IsLakituConfig(config):
-      master = lakitu_master_config
 
     master.AddSlave(config)
 
@@ -2057,7 +1991,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'grunt-kernelnext',
       'hana-kernelnext',
       'hatch-kernelnext',
-      'lakitu',
       'volteer-kernelnext',
       'zork-kernelnext',
   ])
@@ -2511,15 +2444,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'paygen_skip_testing': True,
       },
 
-      'lakitu-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-          sign_types=['base'],
-      ),
-
-      # This is the full build of open-source overlay.
-      'lakitu-full': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_notification_emails,
-      ),
 
       # TODO(yshaul): find out if hwqual needs to go as well
       # TODO(yshaul): fix apply method to merge base and test
@@ -2758,17 +2682,8 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   # Some boards in toolchain builder are not using the same configuration as
   # release builders. Configure it here since it's easier, for both
   # llvm-toolchain and llvm-next-toolchain builders.
-  for board in ['lakitu', 'fizz-moblab', 'gale', 'mistral', 'whirlwind']:
-    if board == 'lakitu':
-      overwritten_configs[board+'-llvm-toolchain'] = {
-          'vm_tests': [config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                               test_suite='smoke')],
-          'gce_tests': [config_lib.GCETestConfig(constants.GCE_SUITE_TEST_TYPE,
-                                                 test_suite='gce-sanity'),
-                        config_lib.GCETestConfig(constants.GCE_SUITE_TEST_TYPE,
-                                                 test_suite='gce-smoke')]
-      }
-    elif board == 'fizz-moblab':
+  for board in ['fizz-moblab', 'gale', 'mistral', 'whirlwind']:
+    if board == 'fizz-moblab':
       overwritten_configs[board+'-llvm-toolchain'] = {
           'enable_skylab_hw_tests': False,
           'hw_tests': [
@@ -3179,22 +3094,6 @@ def BranchScheduleConfig():
       # Add non release branch schedules here, if needed.
       # <branch>, <build_config>, <display_label>, <schedule>, <triggers>,
       # <builder>
-
-      # NOTE: R69, R73, R77 and R81 are Long Term Support (LTS) milestones for
-      # lakitu and they'd like to keep them a little longer. Please let
-      # lakitu-dev@google.com know before deleting this.
-      ('release-R69-10895.B', 'master-lakitu-release',
-       config_lib.DISPLAY_LABEL_RELEASE, '0 4 * * *', None,
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-      ('release-R73-11647.B', 'master-lakitu-release',
-       config_lib.DISPLAY_LABEL_RELEASE, '0 8 * * *', None,
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-      ('release-R77-12371.B', 'master-lakitu-release',
-       config_lib.DISPLAY_LABEL_RELEASE, '0 12 * * *', None,
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-      ('release-R81-12871.B', 'master-lakitu-release',
-       config_lib.DISPLAY_LABEL_RELEASE, '0 16 * * *', None,
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
   ]
 
   # The three active release branches.

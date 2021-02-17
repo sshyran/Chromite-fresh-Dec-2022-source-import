@@ -13,7 +13,6 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 
-from chromite.config import chromeos_config_boards as config_boards
 
 vmtest_boards = frozenset([
     # Full VMTest support on ChromeOS is currently limited to devices derived
@@ -24,7 +23,7 @@ vmtest_boards = frozenset([
     'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
-]) | config_boards.lakitu_boards  # All lakitu boards have VM support.
+])
 
 
 def getInfoVMTest():
@@ -331,17 +330,6 @@ def ApplyCustomOverrides(site_config):
   """
 
   overwritten_configs = {
-      'lakitu-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_test_customizations,
-      ),
-
-      # This is the full build of open-source overlay.
-      'lakitu-full': config_lib.BuildConfig().apply(
-          # logging_CrashSender is expected to fail for lakitu-full.
-          # See b/111567339 for more details.
-          useflags=config_lib.append_useflags(['-tests_logging_CrashSender']),
-      ),
-
       'guado_labstation-release': {
           'hw_tests': [],
           # 'hwqual':False,
@@ -398,10 +386,6 @@ def IncrementalBuilders(site_config):
   site_config['betty-incremental'].apply(
       vm_tests=getInfoVMTest(),
       vm_tests_override=getInfoVMTest(),
-  )
-
-  site_config['lakitu-incremental'].apply(
-      site_config.templates.lakitu_test_customizations,
   )
 
   site_config['x32-generic-incremental'].apply(
@@ -511,12 +495,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.no_vmtest_builder,
   )
   # END Firmware
-
-  # BEGIN Lakitu
-  site_config.templates.lakitu.apply(
-      site_config.templates.no_hwtest_builder,
-  )
-  # END Lakitu
 
   # BEGIN Loonix
   site_config.templates.loonix.apply(

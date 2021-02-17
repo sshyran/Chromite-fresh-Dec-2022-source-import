@@ -55,7 +55,6 @@ x86_internal_release_boards = frozenset([
     'guado_labstation',
     'guybrush',
     'jecht',
-    'lakitu',
     'majolica',
     'mancomb',
     'monroe',
@@ -91,10 +90,6 @@ beaglebone_boards = frozenset([
 
 dustbuster_boards = frozenset([
     'wristpin',
-])
-
-lakitu_boards = frozenset([
-    'lakitu',
 ])
 
 lassen_boards = frozenset([
@@ -140,7 +135,7 @@ termina_boards = frozenset([
 ])
 
 nofactory_boards = (
-    lakitu_boards | termina_boards | lassen_boards | reven_boards | frozenset([
+    termina_boards | lassen_boards | reven_boards | frozenset([
         'x30evb',
     ])
 )
@@ -149,14 +144,14 @@ toolchains_from_source = frozenset([
     'x32-generic',
 ])
 
-noimagetest_boards = (lakitu_boards | loonix_boards | termina_boards
+noimagetest_boards = (loonix_boards | termina_boards
                       | scribe_boards | wshwos_boards | dustbuster_boards)
 
-nohwqual_boards = (lakitu_boards | lassen_boards | loonix_boards
+nohwqual_boards = (lassen_boards | loonix_boards
                    | termina_boards | beaglebone_boards | wshwos_boards
                    | dustbuster_boards | reven_boards)
 
-base_layout_boards = lakitu_boards | termina_boards
+base_layout_boards = termina_boards
 
 builder_incompatible_binaries_boards = frozenset([
     'grunt',

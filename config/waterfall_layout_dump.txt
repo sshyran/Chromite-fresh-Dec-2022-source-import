@@ -215,7 +215,6 @@
     hana-full
     kevin-full
     kevin64-full
-    lakitu-full
     tael-full
     tatl-full
 
@@ -224,7 +223,6 @@
     amd64-generic-incremental
     betty-incremental
     chell-incremental
-    lakitu-incremental
 
 == informational ==
   amd64-generic-asan
@@ -246,7 +244,6 @@
     reef-pi-android-pfq
 
 == release ==
-  master-lakitu-release
   master-release
     ambassador-release
     amd64-generic-cheets-release
@@ -351,7 +348,6 @@
     kukui-arc-r-release
     kukui-arc64-release
     kukui-release
-    lakitu-release
     lars-release
     lasilla-ground-release
     lulu-release
@@ -1409,13 +1405,6 @@
   kukui-payloads-tryjob
   kukui-release-tryjob
   kukui-unittest-stress
-  lakitu-full-tryjob
-  lakitu-incremental-tryjob
-  lakitu-llvm-next-toolchain-tryjob
-  lakitu-llvm-toolchain-tryjob
-  lakitu-payloads-tryjob
-  lakitu-release-tryjob
-  lakitu-unittest-stress
   lars-factory-glados-7828.B-factorybranch-tryjob
   lars-full-tryjob
   lars-llvm-next-toolchain-tryjob
@@ -1478,15 +1467,12 @@
     hana-full-tryjob
     kevin-full-tryjob
     kevin64-full-tryjob
-    lakitu-full-tryjob
     tael-full-tryjob
     tatl-full-tryjob
   master-incremental-tryjob
     amd64-generic-incremental-tryjob
     betty-incremental-tryjob
     chell-incremental-tryjob
-    lakitu-incremental-tryjob
-  master-lakitu-release-tryjob
   master-pi-android-pfq-tryjob
     betty-pi-arc-pi-android-pfq-tryjob
     caroline-pi-android-pfq-tryjob
@@ -1604,7 +1590,6 @@
     kukui-arc-r-release-tryjob
     kukui-arc64-release-tryjob
     kukui-release-tryjob
-    lakitu-release-tryjob
     lars-release-tryjob
     lasilla-ground-release-tryjob
     lulu-release-tryjob

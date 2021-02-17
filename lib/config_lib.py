@@ -101,6 +101,8 @@ ALL_LUCI_BUILDER = {
     LUCI_BUILDER_TRY,
 }
 
+GOLDENEYE_IGNORED_BOARDS = ['lakitu']
+
 
 def isTryjobConfig(build_config):
   """Is a given build config a tryjob config, or a production config?
@@ -1817,6 +1819,10 @@ def GroupBoardsByBuilderAndBoardGroup(board_list):
 
   for b in board_list:
     name = b[CONFIG_TEMPLATE_NAME]
+    # Until Lakitu is removed from GE, skip the board
+    # http://b/180437658
+    if name in GOLDENEYE_IGNORED_BOARDS:
+      continue
     # Invalid build configs being written out with no config templates,
     # thus the default. See https://crbug.com/1012278.
     for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):
@@ -1848,6 +1854,10 @@ def GroupBoardsByBuilder(board_list):
   builder_to_boards_dict = {}
 
   for b in board_list:
+    # Until Lakitu is removed from GE, skip the board
+    # http://b/180437658
+    if b['name'] in GOLDENEYE_IGNORED_BOARDS:
+      continue
     # Invalid build configs being written out with no configs array, thus the
     # default. See https://crbug.com/1005803.
     for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):

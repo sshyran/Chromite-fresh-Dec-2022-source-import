@@ -66,10 +66,6 @@ USER_BASELINE_TERMINA = dict((e.user, e) for e in (
 ))
 
 USER_BOARD_BASELINES = {
-    'lakitu': USER_BASELINE_LAKITU,
-    'lakitu-gpu': USER_BASELINE_LAKITU,
-    'lakitu-st': USER_BASELINE_LAKITU,
-    'lakitu_next': USER_BASELINE_LAKITU,
     'arkham': USER_BASELINE_JETSTREAM,
     'cyclone': USER_BASELINE_JETSTREAM,
     'gale': USER_BASELINE_JETSTREAM,
@@ -258,10 +254,6 @@ GROUP_BASELINE_TERMINA = dict((e.group, e) for e in (
 ))
 
 GROUP_BOARD_BASELINES = {
-    'lakitu': GROUP_BASELINE_LAKITU,
-    'lakitu-gpu': GROUP_BASELINE_LAKITU,
-    'lakitu-st': GROUP_BASELINE_LAKITU,
-    'lakitu_next': GROUP_BASELINE_LAKITU,
     'arkham': GROUP_BASELINE_JETSTREAM,
     'cyclone': GROUP_BASELINE_JETSTREAM,
     'gale': GROUP_BASELINE_JETSTREAM,
