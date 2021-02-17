@@ -116,7 +116,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='chronos', gid=1000),
     GroupEntry(group='chronos-access', gid=1001,
                users={'root', 'ipsec', 'chronos',
-                      'cros-disks', 'imageloaderd', 'crash'}),
+                      'cros-disks', 'imageloaderd', 'crash', 'dlp'}),
     GroupEntry(group='tss', gid=207, users={'root', 'attestation',
                                             'bootlockboxd', 'chaps',
                                             'oobe_config_restore',
