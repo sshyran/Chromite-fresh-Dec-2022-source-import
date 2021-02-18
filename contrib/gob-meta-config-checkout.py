@@ -92,6 +92,7 @@ def get_hook_commit_msg(opts: argparse.Namespace) -> Path:
     """Get a cache of the commit-msg hook."""
     commit_msg = opts.output / '.commit-msg'
     if not commit_msg.exists():
+        opts.output.mkdir(0o755, exist_ok=True)
         response = urllib.request.urlopen(
             'https://gerrit-review.googlesource.com/tools/hooks/commit-msg')
         commit_msg.write_bytes(response.read())
@@ -162,7 +163,7 @@ def get_repos(gob: str) -> Iterable[Path]:
                  capture_output=True)
     # Pull out lines like:
     #  repo: "chromium/chromiumos/platform2"
-    REPO_RE = re.compile('^ *repo: "(.*)"')
+    REPO_RE = re.compile('^ *repo: *"(.*)"')
     for line in result.stdout.splitlines():
         m = REPO_RE.match(line)
         if m:
