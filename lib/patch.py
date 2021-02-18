@@ -1269,7 +1269,7 @@ class GitRepoPatch(PatchQuery):
     revision = checkout.get('revision')
     # revision might be a branch which is written as it would appear on the
     # remote. If so, rewrite it as a local reference to the remote branch.
-    # For example, refs/heads/master might become refs/remotes/cros/master.
+    # For example, refs/heads/main might become refs/remotes/cros/main.
     if revision and not git.IsSHA1(revision):
       revision = 'refs/remotes/%s/%s' % \
           (checkout['remote'], git.StripRefs(revision))

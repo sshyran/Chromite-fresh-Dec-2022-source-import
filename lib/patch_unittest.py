@@ -40,7 +40,7 @@ GERRIT_ABANDONED_CHANGEID = '2'
 
 FAKE_PATCH_JSON = {
     'project': 'tacos/chromite',
-    'branch': 'master',
+    'branch': 'main',
     'id': 'Iee5c89d929f1850d7d4e1a4ff5f21adda800025f',
     'currentPatchSet': {
         'number': '2',
@@ -50,7 +50,7 @@ FAKE_PATCH_JSON = {
     'number': '1112',
     'subject': 'chromite commit',
     'owner': {
-        'name': 'Chromite Master',
+        'name': 'Chromite main',
         'email': 'chromite@chromium.org',
     },
     'url': 'https://chromium-review.googlesource.com/1112',
@@ -115,13 +115,13 @@ FAKE_GERRIT_ACCT_JSON = {
 # A valid change json result as returned by gerrit.
 FAKE_CHANGE_JSON = {
     '_number': 8366,
-    'branch': 'master',
+    'branch': 'main',
     'change_id': 'I3a753d6bacfbe76e5675a6f2f7941fe520c095e5',
     'created': '2016-09-14 23:02:46.000000000',
     'current_revision': 'be54f9935bedb157b078eefa26fc1885b8264da6',
     'deletions': 1,
     'hashtags': [],
-    'id': 'example%2Frepo~master~I3a753d6bacfbe76e5675a6f2f7941fe520c095e5',
+    'id': 'example%2Frepo~main~I3a753d6bacfbe76e5675a6f2f7941fe520c095e5',
     'insertions': 0,
     'labels': FAKE_LABELS_JSON,
     'mergeable': True,
@@ -215,7 +215,7 @@ I am the first commit.
   has_native_change_id = False
 
   DEFAULT_TRACKING = (
-      'refs/remotes/%s/master' % config_lib.GetSiteParams().EXTERNAL_REMOTE)
+      'refs/remotes/%s/main' % config_lib.GetSiteParams().EXTERNAL_REMOTE)
 
   @staticmethod
   def _CreateSourceRepo(tmp_path):
@@ -224,7 +224,7 @@ I am the first commit.
     checkout_path = os.path.join(tmp_path, 'checkout')
     cros_build_lib.run(
         ['git', 'init', '--separate-git-dir', bare_path,
-         '--initial-branch', 'master', checkout_path],
+         '--initial-branch', 'main', checkout_path],
         cwd=tmp_path, print_cmd=False, capture_output=True)
 
     # Nerf any hooks the OS might have installed on us as they aren't going to
@@ -256,13 +256,13 @@ I am the first commit.
     os.mkdir(self.default_cwd, 0o500)
     os.chdir(self.default_cwd)
 
-  def _MkPatch(self, source, sha1, ref='refs/heads/master', **kwargs):
+  def _MkPatch(self, source, sha1, ref='refs/heads/main', **kwargs):
     # This arg is used by inherited versions of _MkPatch. Pop it to make this
     # _MkPatch compatible with them.
     site_params = config_lib.GetSiteParams()
     kwargs.pop('suppress_branch', None)
     return self.patch_kls(source, 'chromiumos/chromite', ref,
-                          '%s/master' % site_params.EXTERNAL_REMOTE,
+                          '%s/main' % site_params.EXTERNAL_REMOTE,
                           kwargs.pop('remote',
                                      site_params.EXTERNAL_REMOTE),
                           sha1=sha1, **kwargs)
@@ -521,7 +521,7 @@ class TestGitRepoPatch(GitRepoPatchTestCase):
   def testCleanlyApply(self):
     _, git2, patch = self._CommonGitSetup()
     # Clone git3 before we modify git2; else we'll just wind up
-    # cloning its master.
+    # cloning its default branch.
     git3 = self._MakeRepo('git3', git2)
     patch.Apply(git2, self.DEFAULT_TRACKING)
     # Verify reuse; specifically that Fetch doesn't actually run since
@@ -535,8 +535,8 @@ class TestGitRepoPatch(GitRepoPatchTestCase):
   def testFailsApply(self):
     _, git2, patch1 = self._CommonGitSetup()
     patch2 = self.CommitFile(git2, 'monkeys', 'not foon')
-    # Note that Apply creates it's own branch, resetting to master
-    # thus we have to re-apply (even if it looks stupid, it's right).
+    # Note that Apply creates its own branch, resetting to the default,
+    # thus we have to re-apply (even if it looks wrong, it's right).
     patch2.Apply(git2, self.DEFAULT_TRACKING)
     self.assertRaises2(cros_patch.ApplyPatchException,
                        patch1.Apply, git2, self.DEFAULT_TRACKING,
@@ -650,7 +650,7 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
         cros_patch.ATTR_PROJECT_URL: 'https://host/chromite/tacos',
         cros_patch.ATTR_PROJECT: 'chromite/tacos',
         cros_patch.ATTR_REF: 'refs/changes/11/12345/4',
-        cros_patch.ATTR_BRANCH: 'master',
+        cros_patch.ATTR_BRANCH: 'main',
         cros_patch.ATTR_REMOTE: 'cros-internal',
         cros_patch.ATTR_COMMIT: '7181e4b5e182b6f7d68461b04253de095bad74f9',
         cros_patch.ATTR_CHANGE_ID: 'I47ea30385af60ae4cc2acc5d1a283a46423bc6e1',
@@ -665,7 +665,7 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
         cros_patch.ATTR_PROJECT_URL: 'https://host/chromite/tacos',
         cros_patch.ATTR_PROJECT: 'chromite/tacos',
         cros_patch.ATTR_REF: 'refs/changes/11/12345/4',
-        cros_patch.ATTR_BRANCH: 'master',
+        cros_patch.ATTR_BRANCH: 'main',
         cros_patch.ATTR_REMOTE: 'cros-internal',
         cros_patch.ATTR_COMMIT: '7181e4b5e182b6f7d68461b04253de095bad74f9',
         cros_patch.ATTR_CHANGE_ID: 'I47ea30385af60ae4cc2acc5d1a283a46423bc6e1',
@@ -693,7 +693,7 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
         'https://host/chromite/tacos',
         'chromite/tacos',
         'refs/changes/11/12345/4',
-        'master',
+        'main',
         'cros-internal',
         '7181e4b5e182b6f7d68461b04253de095bad74f9',
         'I47ea30385af60ae4cc2acc5d1a283a46423bc6e1',
@@ -708,7 +708,7 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
         cros_patch.ATTR_PROJECT_URL: 'https://host/chromite/tacos',
         cros_patch.ATTR_PROJECT: 'chromite/tacos',
         cros_patch.ATTR_REF: 'refs/changes/11/12345/4',
-        cros_patch.ATTR_BRANCH: 'master',
+        cros_patch.ATTR_BRANCH: 'main',
         cros_patch.ATTR_REMOTE: 'cros-internal',
         cros_patch.ATTR_COMMIT: '7181e4b5e182b6f7d68461b04253de095bad74f9',
         cros_patch.ATTR_CHANGE_ID: 'I47ea30385af60ae4cc2acc5d1a283a46423bc6e1',
@@ -786,7 +786,7 @@ class TestApplyAgainstManifest(GitRepoPatchTestCase,
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <remote name="cros" />
-  <default revision="refs/heads/master" remote="cros" />
+  <default revision="refs/heads/main" remote="cros" />
   %(projects)s
 </manifest>
 """
@@ -824,7 +824,7 @@ class TestApplyAgainstManifest(GitRepoPatchTestCase,
         'path': git1,
         'name': 'chromiumos/chromite',
         'revision': str(readme1.sha1),
-        'upstream': 'refs/heads/master',
+        'upstream': 'refs/heads/main',
     }
     git2_proj = {
         'path': git2,
@@ -854,10 +854,10 @@ class TestLocalPatchGit(GitRepoPatchTestCase):
   def setUp(self):
     self.sourceroot = os.path.join(self.tempdir, 'sourceroot')
 
-  def _MkPatch(self, source, sha1, ref='refs/heads/master', **kwargs):
+  def _MkPatch(self, source, sha1, ref='refs/heads/main', **kwargs):
     remote = kwargs.pop('remote', config_lib.GetSiteParams().EXTERNAL_REMOTE)
     return self.patch_kls(source, 'chromiumos/chromite', ref,
-                          '%s/master' % remote, remote, sha1, **kwargs)
+                          '%s/main' % remote, remote, sha1, **kwargs)
 
   def testUpload(self):
     def ProjectDirMock(_sourceroot):
@@ -907,10 +907,10 @@ class UploadedLocalPatchTestCase(GitRepoPatchTestCase):
 
   patch_kls = cros_patch.UploadedLocalPatch
 
-  def _MkPatch(self, source, sha1, ref='refs/heads/master', **kwargs):
+  def _MkPatch(self, source, sha1, ref='refs/heads/main', **kwargs):
     site_params = config_lib.GetSiteParams()
     return self.patch_kls(source, self.PROJECT, ref,
-                          '%s/master' % site_params.EXTERNAL_REMOTE,
+                          '%s/main' % site_params.EXTERNAL_REMOTE,
                           self.ORIGINAL_BRANCH,
                           kwargs.pop('original_sha1', self.ORIGINAL_SHA1),
                           kwargs.pop('remote',
@@ -947,7 +947,7 @@ class TestGerritPatch(TestGitRepoPatch):
   def test_json(self):
     return copy.deepcopy(FAKE_PATCH_JSON)
 
-  def _MkPatch(self, source, sha1, ref='refs/heads/master', **kwargs):
+  def _MkPatch(self, source, sha1, ref='refs/heads/main', **kwargs):
     site_params = config_lib.GetSiteParams()
     json = self.test_json
     remote = kwargs.pop('remote', site_params.EXTERNAL_REMOTE)
@@ -1143,7 +1143,7 @@ class PrepareRemotePatchesTest(cros_test_lib.TestCase):
 
   def MkRemote(self,
                project='my/project', original_branch='my-local',
-               ref='refs/tryjobs/elmer/patches', tracking_branch='master',
+               ref='refs/tryjobs/elmer/patches', tracking_branch='main',
                internal=False):
 
     l = [project, original_branch, ref, tracking_branch,
@@ -1153,7 +1153,7 @@ class PrepareRemotePatchesTest(cros_test_lib.TestCase):
 
   def assertRemote(self, patch, project='my/project',
                    original_branch='my-local',
-                   ref='refs/tryjobs/elmer/patches', tracking_branch='master',
+                   ref='refs/tryjobs/elmer/patches', tracking_branch='main',
                    internal=False):
     self.assertEqual(patch.project, project)
     self.assertEqual(patch.original_branch, original_branch)
@@ -1322,7 +1322,7 @@ class MockPatchFactory(object):
   def MockPatch(self, change_id=None, patch_number=None, is_merged=False,
                 project='chromiumos/chromite',
                 remote=config_lib.GetSiteParams().EXTERNAL_REMOTE,
-                tracking_branch='refs/heads/master', is_draft=False,
+                tracking_branch='refs/heads/main', is_draft=False,
                 approvals=(), commit_message=None):
     """Helper function to create mock GerritPatch objects."""
     if change_id is None:
