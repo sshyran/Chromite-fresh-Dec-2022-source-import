@@ -7,11 +7,49 @@
 
 from __future__ import print_function
 
+import os
+
 from chromite.api import api_config
 from chromite.api import router
 from chromite.api.controller import api as api_controller
 from chromite.api.gen.chromite.api import api_pb2
+from chromite.lib import constants
 from chromite.lib import cros_test_lib
+
+
+class CompileProtoTest(cros_test_lib.RunCommandTestCase,
+                       api_config.ApiConfigMixin):
+  """CompileProto tests."""
+
+  def setUp(self):
+    self.request = api_pb2.CompileProtoRequest()
+    self.response = api_pb2.CompileProtoResponse()
+
+  def testCompileProto(self):
+    """Quick CompileProto functional check."""
+    self.rc.SetDefaultCmdResult(stdout=' M foo/bar.py')
+    expected = [os.path.join(constants.CHROMITE_DIR, 'foo/bar.py')]
+
+    api_controller.CompileProto(self.request, self.response, self.api_config)
+    returned = [f.path for f in self.response.modified_files]
+
+    self.assertCountEqual(expected, returned)
+    self.assertTrue(all(f in returned for f in expected))
+    self.assertTrue(all(f in expected for f in returned))
+
+  def testValidateOnly(self):
+    """Verify validate only calls do not execute logic."""
+    api_controller.CompileProto(self.request, self.response,
+                                self.validate_only_config)
+
+    self.assertFalse(self.rc.call_count)
+
+  def testMockSuccess(self):
+    """Verify mock success calls do not execute logic."""
+    api_controller.CompileProto(self.request, self.response,
+                                self.mock_call_config)
+    self.assertTrue(len(self.response.modified_files))
+    self.assertFalse(self.rc.call_count)
 
 
 class GetMethodsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
