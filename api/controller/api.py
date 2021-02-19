@@ -20,6 +20,19 @@ VERSION_MINOR = 0
 VERSION_BUG = 0
 
 
+def _CompileProtoSuccess(_input_proto, output_proto, _config):
+  """Mock success response for CompileProto."""
+  output_proto.modified_files.add().path = '/code/chromite/api/gen/foo_pb2.py'
+
+
+@faux.success(_CompileProtoSuccess)
+@faux.empty_error
+@validate.validation_complete
+def CompileProto(_input_proto, _output_proto, _config):
+  """Compile the Build API proto, returning the list of modified files."""
+  pass
+
+
 @faux.all_empty
 @validate.validation_complete
 def GetMethods(_input_proto, output_proto, _config):

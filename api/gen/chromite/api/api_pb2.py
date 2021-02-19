@@ -20,11 +20,96 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=_b('Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api'),
-  serialized_pb=_b('\n\x16\x63hromite/api/api.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\"\x12\n\x10MethodGetRequest\"f\n\x11MethodGetResponse\x12\x37\n\x07methods\x18\x01 \x03(\x0b\x32&.chromite.api.MethodGetResponse.Method\x1a\x18\n\x06Method\x12\x0e\n\x06method\x18\x01 \x01(\t\"\x13\n\x11VersionGetRequest\"\x85\x01\n\x12VersionGetResponse\x12\x39\n\x07version\x18\x01 \x01(\x0b\x32(.chromite.api.VersionGetResponse.Version\x1a\x34\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\x05\x12\r\n\x05minor\x18\x02 \x01(\x05\x12\x0b\n\x03\x62ug\x18\x03 \x01(\x05\x32v\n\rMethodService\x12X\n\x03Get\x12\x1e.chromite.api.MethodGetRequest\x1a\x1f.chromite.api.MethodGetResponse\"\x10\xc2\xed\x1a\x0c\n\nGetMethods\x1a\x0b\xc2\xed\x1a\x07\n\x03\x61pi\x10\x02\x32y\n\x0eVersionService\x12Z\n\x03Get\x12\x1f.chromite.api.VersionGetRequest\x1a .chromite.api.VersionGetResponse\"\x10\xc2\xed\x1a\x0c\n\nGetVersion\x1a\x0b\xc2\xed\x1a\x07\n\x03\x61pi\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
+  serialized_pb=_b('\n\x16\x63hromite/api/api.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\"\x15\n\x13\x43ompileProtoRequest\"w\n\x14\x43ompileProtoResponse\x12\x44\n\x0emodified_files\x18\x01 \x03(\x0b\x32,.chromite.api.CompileProtoResponse.ProtoFile\x1a\x19\n\tProtoFile\x12\x0c\n\x04path\x18\x01 \x01(\t\"\x12\n\x10MethodGetRequest\"f\n\x11MethodGetResponse\x12\x37\n\x07methods\x18\x01 \x03(\x0b\x32&.chromite.api.MethodGetResponse.Method\x1a\x18\n\x06Method\x12\x0e\n\x06method\x18\x01 \x01(\t\"\x13\n\x11VersionGetRequest\"\x85\x01\n\x12VersionGetResponse\x12\x39\n\x07version\x18\x01 \x01(\x0b\x32(.chromite.api.VersionGetResponse.Version\x1a\x34\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\x05\x12\r\n\x05minor\x18\x02 \x01(\x05\x12\x0b\n\x03\x62ug\x18\x03 \x01(\x05\x32p\n\nApiService\x12U\n\x0c\x43ompileProto\x12!.chromite.api.CompileProtoRequest\x1a\".chromite.api.CompileProtoResponse\x1a\x0b\xc2\xed\x1a\x07\n\x03\x61pi\x10\x02\x32v\n\rMethodService\x12X\n\x03Get\x12\x1e.chromite.api.MethodGetRequest\x1a\x1f.chromite.api.MethodGetResponse\"\x10\xc2\xed\x1a\x0c\n\nGetMethods\x1a\x0b\xc2\xed\x1a\x07\n\x03\x61pi\x10\x02\x32y\n\x0eVersionService\x12Z\n\x03Get\x12\x1f.chromite.api.VersionGetRequest\x1a .chromite.api.VersionGetResponse\"\x10\xc2\xed\x1a\x0c\n\nGetVersion\x1a\x0b\xc2\xed\x1a\x07\n\x03\x61pi\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,])
 
 
+
+
+_COMPILEPROTOREQUEST = _descriptor.Descriptor(
+  name='CompileProtoRequest',
+  full_name='chromite.api.CompileProtoRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=70,
+  serialized_end=91,
+)
+
+
+_COMPILEPROTORESPONSE_PROTOFILE = _descriptor.Descriptor(
+  name='ProtoFile',
+  full_name='chromite.api.CompileProtoResponse.ProtoFile',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='path', full_name='chromite.api.CompileProtoResponse.ProtoFile.path', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=187,
+  serialized_end=212,
+)
+
+_COMPILEPROTORESPONSE = _descriptor.Descriptor(
+  name='CompileProtoResponse',
+  full_name='chromite.api.CompileProtoResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='modified_files', full_name='chromite.api.CompileProtoResponse.modified_files', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[_COMPILEPROTORESPONSE_PROTOFILE, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=93,
+  serialized_end=212,
+)
 
 
 _METHODGETREQUEST = _descriptor.Descriptor(
@@ -46,8 +131,8 @@ _METHODGETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=70,
-  serialized_end=88,
+  serialized_start=214,
+  serialized_end=232,
 )
 
 
@@ -77,8 +162,8 @@ _METHODGETRESPONSE_METHOD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=168,
-  serialized_end=192,
+  serialized_start=312,
+  serialized_end=336,
 )
 
 _METHODGETRESPONSE = _descriptor.Descriptor(
@@ -107,8 +192,8 @@ _METHODGETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=90,
-  serialized_end=192,
+  serialized_start=234,
+  serialized_end=336,
 )
 
 
@@ -131,8 +216,8 @@ _VERSIONGETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=194,
-  serialized_end=213,
+  serialized_start=338,
+  serialized_end=357,
 )
 
 
@@ -176,8 +261,8 @@ _VERSIONGETRESPONSE_VERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=297,
-  serialized_end=349,
+  serialized_start=441,
+  serialized_end=493,
 )
 
 _VERSIONGETRESPONSE = _descriptor.Descriptor(
@@ -206,19 +291,45 @@ _VERSIONGETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=216,
-  serialized_end=349,
+  serialized_start=360,
+  serialized_end=493,
 )
 
+_COMPILEPROTORESPONSE_PROTOFILE.containing_type = _COMPILEPROTORESPONSE
+_COMPILEPROTORESPONSE.fields_by_name['modified_files'].message_type = _COMPILEPROTORESPONSE_PROTOFILE
 _METHODGETRESPONSE_METHOD.containing_type = _METHODGETRESPONSE
 _METHODGETRESPONSE.fields_by_name['methods'].message_type = _METHODGETRESPONSE_METHOD
 _VERSIONGETRESPONSE_VERSION.containing_type = _VERSIONGETRESPONSE
 _VERSIONGETRESPONSE.fields_by_name['version'].message_type = _VERSIONGETRESPONSE_VERSION
+DESCRIPTOR.message_types_by_name['CompileProtoRequest'] = _COMPILEPROTOREQUEST
+DESCRIPTOR.message_types_by_name['CompileProtoResponse'] = _COMPILEPROTORESPONSE
 DESCRIPTOR.message_types_by_name['MethodGetRequest'] = _METHODGETREQUEST
 DESCRIPTOR.message_types_by_name['MethodGetResponse'] = _METHODGETRESPONSE
 DESCRIPTOR.message_types_by_name['VersionGetRequest'] = _VERSIONGETREQUEST
 DESCRIPTOR.message_types_by_name['VersionGetResponse'] = _VERSIONGETRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+CompileProtoRequest = _reflection.GeneratedProtocolMessageType('CompileProtoRequest', (_message.Message,), dict(
+  DESCRIPTOR = _COMPILEPROTOREQUEST,
+  __module__ = 'chromite.api.api_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.CompileProtoRequest)
+  ))
+_sym_db.RegisterMessage(CompileProtoRequest)
+
+CompileProtoResponse = _reflection.GeneratedProtocolMessageType('CompileProtoResponse', (_message.Message,), dict(
+
+  ProtoFile = _reflection.GeneratedProtocolMessageType('ProtoFile', (_message.Message,), dict(
+    DESCRIPTOR = _COMPILEPROTORESPONSE_PROTOFILE,
+    __module__ = 'chromite.api.api_pb2'
+    # @@protoc_insertion_point(class_scope:chromite.api.CompileProtoResponse.ProtoFile)
+    ))
+  ,
+  DESCRIPTOR = _COMPILEPROTORESPONSE,
+  __module__ = 'chromite.api.api_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.CompileProtoResponse)
+  ))
+_sym_db.RegisterMessage(CompileProtoResponse)
+_sym_db.RegisterMessage(CompileProtoResponse.ProtoFile)
 
 MethodGetRequest = _reflection.GeneratedProtocolMessageType('MethodGetRequest', (_message.Message,), dict(
   DESCRIPTOR = _METHODGETREQUEST,
@@ -267,14 +378,38 @@ _sym_db.RegisterMessage(VersionGetResponse.Version)
 
 DESCRIPTOR._options = None
 
+_APISERVICE = _descriptor.ServiceDescriptor(
+  name='ApiService',
+  full_name='chromite.api.ApiService',
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=_b('\302\355\032\007\n\003api\020\002'),
+  serialized_start=495,
+  serialized_end=607,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='CompileProto',
+    full_name='chromite.api.ApiService.CompileProto',
+    index=0,
+    containing_service=None,
+    input_type=_COMPILEPROTOREQUEST,
+    output_type=_COMPILEPROTORESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_APISERVICE)
+
+DESCRIPTOR.services_by_name['ApiService'] = _APISERVICE
+
+
 _METHODSERVICE = _descriptor.ServiceDescriptor(
   name='MethodService',
   full_name='chromite.api.MethodService',
   file=DESCRIPTOR,
-  index=0,
+  index=1,
   serialized_options=_b('\302\355\032\007\n\003api\020\002'),
-  serialized_start=351,
-  serialized_end=469,
+  serialized_start=609,
+  serialized_end=727,
   methods=[
   _descriptor.MethodDescriptor(
     name='Get',
@@ -295,10 +430,10 @@ _VERSIONSERVICE = _descriptor.ServiceDescriptor(
   name='VersionService',
   full_name='chromite.api.VersionService',
   file=DESCRIPTOR,
-  index=1,
+  index=2,
   serialized_options=_b('\302\355\032\007\n\003api\020\002'),
-  serialized_start=471,
-  serialized_end=592,
+  serialized_start=729,
+  serialized_end=850,
   methods=[
   _descriptor.MethodDescriptor(
     name='Get',
