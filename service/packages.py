@@ -148,7 +148,7 @@ def uprev_android(tracking_branch,
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   command = [
       'cros_mark_android_as_stable',
-      f'--tracking_branch={tracking_branch}'
+      f'--tracking_branch={tracking_branch}',
       f'--android_package={android_package}',
       f'--android_build_branch={android_build_branch}',
   ]

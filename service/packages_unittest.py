@@ -52,8 +52,13 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     packages.uprev_android('refs/tracking-branch', 'android/package',
                            'refs/android-build-branch', Chroot(),
                            build_targets=build_targets)
-    self.assertCommandContains(['cros_mark_android_as_stable',
-                                '--boards=foo:bar'])
+    self.assertCommandContains([
+        'cros_mark_android_as_stable',
+        '--tracking_branch=refs/tracking-branch',
+        '--android_package=android/package',
+        '--android_build_branch=refs/android-build-branch',
+        '--boards=foo:bar'
+    ])
     self.assertCommandContains(['emerge-foo'])
     self.assertCommandContains(['emerge-bar'])
 
