@@ -1683,7 +1683,6 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   # Override these template variables via kwargs.
   GSC = {'sign_types': ['gsc_firmware']}
   firmware_branch_builders = [
-      (MONTHLY, 'firmware-monroe-4921.B', ['monroe'], {}),
       (MONTHLY, 'firmware-enguarde-5216.201.B', ['enguarde'], {}),
       (MONTHLY, 'firmware-expresso-5216.223.B', ['expresso'], {}),
       (MONTHLY, 'firmware-kip-5216.227.B', ['kip'], {}),
@@ -1699,8 +1698,6 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-sumo-5216.382.B', ['sumo'], {}),
       (MONTHLY, 'firmware-ninja-5216.383.B', ['ninja'], {}),
       (MONTHLY, 'firmware-heli-5216.392.B', ['heli'], {}),
-      (MONTHLY, 'firmware-nyan-5771.B', ['nyan_big', 'nyan_blaze'], {}),
-      (MONTHLY, 'firmware-kitty-5771.61.B', ['nyan_kitty'], {}),
       (MONTHLY, 'firmware-samus-6300.B', ['samus'], {}),
       (MONTHLY, 'firmware-paine-6301.58.B', ['auron_paine'], {}),
       (MONTHLY, 'firmware-yuna-6301.59.B', ['auron_yuna'], {}),
@@ -1711,7 +1708,6 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-gandof-6301.155.B', ['gandof'], {}),
       (MONTHLY, 'firmware-buddy-6301.202.B', ['buddy'], {}),
       (MONTHLY, 'firmware-veyron-6588.B', [
-          'veyron_mighty', 'veyron_speedy', 'veyron_minnie',
           'veyron_mickey', 'veyron_rialto', 'veyron_tiger',
           'veyron_fievel'], {}),
       (MONTHLY, 'firmware-glados-7820.B', [

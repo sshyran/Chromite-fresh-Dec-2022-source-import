@@ -13669,26 +13669,6 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-kip-5216.227.B"
     },
-    "firmware-kitty-5771.61.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "nyan_kitty"
-        ],
-        "schedule": "with 720h interval",
-        "workspace_branch": "firmware-kitty-5771.61.B"
-    },
-    "firmware-kitty-5771.61.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "nyan_kitty"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-kitty-5771.61.B"
-    },
     "firmware-kukui-12573.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
@@ -13750,26 +13730,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "workspace_branch": "firmware-mistral-12422.B"
-    },
-    "firmware-monroe-4921.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "monroe"
-        ],
-        "schedule": "with 720h interval",
-        "workspace_branch": "firmware-monroe-4921.B"
-    },
-    "firmware-monroe-4921.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "monroe"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-monroe-4921.B"
     },
     "firmware-nami-10775.108.B-firmwarebranch": {
         "_template": "firmwarebranch",
@@ -13850,28 +13810,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "workspace_branch": "firmware-nocturne-10984.B"
-    },
-    "firmware-nyan-5771.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "nyan_big",
-            "nyan_blaze"
-        ],
-        "schedule": "with 720h interval",
-        "workspace_branch": "firmware-nyan-5771.B"
-    },
-    "firmware-nyan-5771.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "nyan_big",
-            "nyan_blaze"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-nyan-5771.B"
     },
     "firmware-oak-8438.B-firmwarebranch": {
         "_template": "firmwarebranch",
@@ -14362,9 +14300,6 @@
     "firmware-veyron-6588.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
-            "veyron_mighty",
-            "veyron_speedy",
-            "veyron_minnie",
             "veyron_mickey",
             "veyron_rialto",
             "veyron_tiger",
@@ -14376,9 +14311,6 @@
     "firmware-veyron-6588.B-firmwarebranch-tryjob": {
         "_template": "firmwarebranch",
         "boards": [
-            "veyron_mighty",
-            "veyron_speedy",
-            "veyron_minnie",
             "veyron_mickey",
             "veyron_rialto",
             "veyron_tiger",
