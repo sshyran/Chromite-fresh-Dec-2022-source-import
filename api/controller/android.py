@@ -52,7 +52,6 @@ def MarkStable(input_proto, output_proto, _config):
   """
   chroot = controller_util.ParseChroot(input_proto.chroot)
   build_targets = controller_util.ParseBuildTargets(input_proto.build_targets)
-  tracking_branch = input_proto.tracking_branch
   package_name = input_proto.package_name
   android_build_branch = input_proto.android_build_branch
   android_version = input_proto.android_version
@@ -64,7 +63,6 @@ def MarkStable(input_proto, output_proto, _config):
   # should be finished.
   try:
     android_atom_to_build = packages.uprev_android(
-        tracking_branch=tracking_branch,
         android_package=package_name,
         android_build_branch=android_build_branch,
         chroot=chroot,

@@ -1938,14 +1938,12 @@ class ChromeIsPinnedUprevError(failures_lib.InfrastructureFailure):
 
 
 def MarkAndroidAsStable(buildroot,
-                        tracking_branch,
                         android_package,
                         android_build_branch,
                         boards=None,
                         android_version=None):
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   input_msg = android_pb2.MarkStableRequest()
-  input_msg.tracking_branch = tracking_branch
   input_msg.package_name = android_package
   input_msg.android_build_branch = android_build_branch
   if android_version:

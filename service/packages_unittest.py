@@ -49,12 +49,10 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
                          stdout='ANDROID_ATOM=android/android-1.0\n')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
 
-    packages.uprev_android('refs/tracking-branch', 'android/package',
-                           'refs/android-build-branch', Chroot(),
-                           build_targets=build_targets)
+    packages.uprev_android('android/package', 'refs/android-build-branch',
+                           Chroot(), build_targets=build_targets)
     self.assertCommandContains([
         'cros_mark_android_as_stable',
-        '--tracking_branch=refs/tracking-branch',
         '--android_package=android/package',
         '--android_build_branch=refs/android-build-branch',
         '--boards=foo:bar'
@@ -67,9 +65,8 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
                          stdout='ANDROID_ATOM=android/android-1.0\n')
 
-    packages.uprev_android('refs/tracking-branch', 'android/package',
-                           'refs/android-build-branch', Chroot(),
-                           skip_commit=True)
+    packages.uprev_android('android/package', 'refs/android-build-branch',
+                           Chroot(), skip_commit=True)
     self.assertCommandContains(['cros_mark_android_as_stable',
                                 '--skip_commit'])
 
@@ -78,9 +75,8 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
                          stdout='')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
-    packages.uprev_android('refs/tracking-branch', 'android/package',
-                           'refs/android-build-branch', Chroot(),
-                           build_targets=build_targets)
+    packages.uprev_android('android/package', 'refs/android-build-branch',
+                           Chroot(), build_targets=build_targets)
 
     self.assertCommandContains(['cros_mark_android_as_stable',
                                 '--boards=foo:bar'])

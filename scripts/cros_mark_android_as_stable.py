@@ -663,9 +663,6 @@ def GetParser():
   parser.add_argument('-s', '--srcroot',
                       default=os.path.join(os.environ['HOME'], 'trunk', 'src'),
                       help='Path to the src directory')
-  # TODO(crbug/1074145): Remove once CQ specifies --skip_commit.
-  parser.add_argument('-t', '--tracking_branch', default='cros/master',
-                      help='DEPRECATED')
   parser.add_argument('--runtime_artifacts_bucket_url',
                       default=_RUNTIME_ARTIFACTS_BUCKET_URL,
                       type='gs_path')
@@ -679,11 +676,6 @@ def main(argv):
   logging.EnableBuildbotMarkers()
   parser = GetParser()
   options = parser.parse_args(argv)
-  # HACK(b/179456416): Skip git operations if tracking_branch is empty, which
-  # happens when called from CQ builders.
-  # TODO(b/179456416): Make CQ builders specify the --skip_commit option.
-  if not options.tracking_branch:
-    options.skip_commit = True
   options.Freeze()
 
   overlay_dir = os.path.abspath(_OVERLAY_DIR % {'srcroot': options.srcroot})

@@ -1925,7 +1925,6 @@ class MarkAndroidAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test input and success handling."""
     # Raw arguments for the function.
     buildroot = '/buildroot'
-    tracking_branch = 'refs/tracking'
     android_package = 'android/android-1.0-r1'
     android_build_branch = 'refs/build'
     boards = ['foo', 'bar']
@@ -1940,14 +1939,13 @@ class MarkAndroidAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
         return_value={'status': 1, 'android_atom': response_package})
 
     new_atom = commands.MarkAndroidAsStable(
-        buildroot, tracking_branch, android_package, android_build_branch,
+        buildroot, android_package, android_build_branch,
         boards=boards, android_version=android_version)
 
     # Make sure the atom is rebuilt correctly from the package info.
     self.assertEqual('android/android-1.0-r2', new_atom)
 
     expected_input = {
-        'trackingBranch': tracking_branch,
         'packageName': android_package,
         'androidBuildBranch': android_build_branch,
         'androidVersion': android_version,

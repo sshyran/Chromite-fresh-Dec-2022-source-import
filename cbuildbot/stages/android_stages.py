@@ -67,7 +67,6 @@ class UprevAndroidStage(generic_stages.BuilderStage,
     try:
       android_atom_to_build = commands.MarkAndroidAsStable(
           buildroot=self._build_root,
-          tracking_branch=self._run.manifest_branch,
           android_package=android_package,
           android_build_branch=android_build_branch,
           boards=self._boards,

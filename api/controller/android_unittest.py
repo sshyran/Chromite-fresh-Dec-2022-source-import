@@ -28,7 +28,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.uprev = self.PatchObject(packages, 'uprev_android')
 
     self.input_proto = android_pb2.MarkStableRequest()
-    self.input_proto.tracking_branch = 'tracking-branch'
     self.input_proto.package_name = 'android-package-name'
     self.input_proto.android_build_branch = 'android_build_branch'
     self.input_proto.build_targets.add().name = 'foo'
@@ -82,7 +81,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     atom.version = '1.2.3'
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
-        tracking_branch=self.input_proto.tracking_branch,
         android_package=self.input_proto.package_name,
         android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
@@ -100,7 +98,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.uprev.return_value = ''
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
-        tracking_branch=self.input_proto.tracking_branch,
         android_package=self.input_proto.package_name,
         android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
@@ -121,7 +118,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     atom.version = '1.1'
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
-        tracking_branch=self.input_proto.tracking_branch,
         android_package=self.input_proto.package_name,
         android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
