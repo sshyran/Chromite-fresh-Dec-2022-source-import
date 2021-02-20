@@ -39,7 +39,9 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     """Common set up method for all tests."""
-    opts = vm.VM.GetParser().parse_args([])
+    # Pick a port that is valid, but we can't bind normally, and is unlikely to
+    # be used in general.
+    opts = vm.VM.GetParser().parse_args(['--ssh-port=1'])
     opts.enable_kvm = True
     with mock.patch.object(multiprocessing, 'cpu_count', return_value=8):
       self._vm = vm.VM(opts)
@@ -104,7 +106,9 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     ])
     self.assertCommandContains([
         '-device', 'virtio-net,netdev=eth0',
-        '-netdev', 'user,id=eth0,net=10.0.2.0/27,hostfwd=tcp:127.0.0.1:9222-:22'
+        '-netdev',
+        'user,id=eth0,net=10.0.2.0/27,hostfwd=tcp:127.0.0.1:'
+        f'{self.ssh_port}-:22'
     ])
     self.assertCommandContains([
         '-device', 'virtio-scsi-pci,id=scsi', '-device', 'scsi-hd,drive=hd',
@@ -343,7 +347,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self._vm.cmd = ['fake_command', '--test_cmd']
     self._vm.Run()
     self.assertCommandContains([
-        'ssh', '-p', '9222', 'root@localhost', '--',
+        'ssh', '-p', str(self.ssh_port), 'root@localhost', '--',
         'fake_command', '--test_cmd'])
     is_running_mock.assert_called()
 
