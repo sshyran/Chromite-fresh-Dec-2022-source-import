@@ -52,7 +52,7 @@ def FixBotoCerts(activate=True, strict=False):
 
   boto_cfg_path = None
   try:
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
 
     # Read existing boto config file(s); this mimics what boto itself does.
     if 'BOTO_CONFIG' in os.environ:

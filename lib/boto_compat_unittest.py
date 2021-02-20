@@ -29,7 +29,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
       boto_config = os.environ['BOTO_CONFIG']
       self.assertExists(boto_config)
 
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(boto_config)
 
       cafile = config.get('Boto', 'ca_certificates_file')
@@ -43,7 +43,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
     os.environ['BOTO_CONFIG'] = boto_config
 
     with boto_compat.FixBotoCerts(strict=True):
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(os.environ['BOTO_CONFIG'])
       self.assertEqual(config.get('S', 'k'), 'v')
       self.assertTrue(config.has_option('Boto', 'ca_certificates_file'))
@@ -58,7 +58,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
     os.environ['BOTO_PATH'] = boto_path = '%s:%s' % (cfgfile1, cfgfile2)
 
     with boto_compat.FixBotoCerts(strict=True):
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(os.environ['BOTO_CONFIG'])
       self.assertEqual(config.get('S', 'k'), 'v')
       self.assertEqual(config.get('S', 'k2'), 'v2')
