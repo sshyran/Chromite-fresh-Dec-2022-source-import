@@ -22,6 +22,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.lib import retry_util
+from chromite.lib.paygen import partition_lib
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
 
@@ -213,6 +214,11 @@ class DeviceImager(object):
 
     updaters = []
     if not self._no_rootfs_update:
+      current_root = prefix + str(active_state[Partition.ROOTFS])
+      target_root = prefix + str(self._inactive_state[Partition.ROOTFS])
+      updaters.append(RootfsUpdater(current_root, self._device, image,
+                                    image_type, target_root, self._compression))
+
       target_kernel = prefix + str(self._inactive_state[Partition.KERNEL])
       updaters.append(KernelUpdater(self._device, image, image_type,
                                     target_kernel, self._compression))
@@ -534,3 +540,83 @@ class KernelUpdater(RawPartitionUpdater):
   def Revert(self):
     """Reverts the kernel partition update."""
     # There is nothing to do for reverting kernel partition.
+
+
+class RootfsUpdater(RawPartitionUpdater):
+  """A class to update the root partition on a Chromium OS device."""
+
+  def __init__(self, current_root: str, *args):
+    """Initializes the class.
+
+    Args:
+      current_root: The current root device path.
+      *args: See PartitionUpdaterBase
+    """
+    super().__init__(*args)
+
+    self._current_root = current_root
+    self._ran_postinst = False
+
+  def _GetPartitionName(self):
+    """See RawPartitionUpdater._GetPartitionName()."""
+    return constants.PART_ROOT_A
+
+  def _Run(self):
+    """The function that does the job of rootfs partition update."""
+    super()._Run()
+
+    self._RunPostInst()
+
+  def _OptimizePartLocation(self, offset: int, length: int):
+    """Optimizes the size of the root partition of the image.
+
+    Normally the file system does not occupy the entire partition. Furthermore
+    we don't need the verity hash tree at the end of the root file system
+    because postinst will recreate it. This function reads the (approximate)
+    superblock of the ext4 partition and extracts the actual file system size in
+    the root partition.
+    """
+    superblock_size = 4096 * 2
+    with open(self._image, 'rb') as r:
+      r.seek(offset)
+      with tempfile.NamedTemporaryFile(delete=False) as fp:
+        fp.write(r.read(superblock_size))
+        fp.close()
+        return offset, partition_lib.Ext2FileSystemSize(fp.name)
+
+  def _RunPostInst(self, on_target: bool = True):
+    """Runs the postinst process in the root partition.
+
+    Args:
+      on_target: If true the postinst is run on the target (inactive)
+        partition. This is used when doing normal updates. If false, the
+        postinst is run on the current (active) partition. This is used when
+        reverting an update.
+    """
+    try:
+      postinst_dir = '/'
+      partition = self._current_root
+      if on_target:
+        postinst_dir = self._device.run(
+            ['mktemp', '-d', '-p', self._device.work_dir],
+            capture_output=True).stdout.strip()
+        self._device.run(['mount', '-o', 'ro', self._target, postinst_dir])
+        partition = self._target
+
+      self._ran_postinst = True
+      postinst = os.path.join(postinst_dir, 'postinst')
+      result = self._device.run([postinst, partition], capture_output=True)
+
+      logging.debug('Postinst result on %s: \n%s', postinst, result.stdout)
+      logging.info('Postinstall completed.')
+    finally:
+      if on_target:
+        self._device.run(['umount', postinst_dir])
+
+  def Revert(self):
+    """Reverts the root update install."""
+    logging.info('Reverting the rootfs partition update.')
+    if self._ran_postinst:
+      # We don't have to do anything for revert if we haven't changed the kernel
+      # priorities yet.
+      self._RunPostInst(on_target=False)

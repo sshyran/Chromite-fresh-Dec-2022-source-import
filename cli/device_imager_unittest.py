@@ -243,3 +243,76 @@ class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
     """Tests the name of the partitions."""
     ku = device_imager.KernelUpdater(None, None, None, None, None)
     self.assertEqual(constants.PART_KERN_B, ku._GetPartitionName())
+
+
+class RootfsUpdaterTest(cros_test_lib.MockTestCase):
+  """Tests RootfsUpdater class."""
+
+  def setUp(self):
+    """Sets up the class by creating proper mocks."""
+    self.rsh_mock = self.StartPatcher(remote_access_unittest.RemoteShMock())
+    self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), stdout='')
+    self.path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
+
+  def test_GetPartitionName(self):
+    """Tests the name of the partitions."""
+    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+    self.assertEqual(constants.PART_ROOT_A, ru._GetPartitionName())
+
+  @mock.patch.object(device_imager.RootfsUpdater, '_RunPostInst')
+  @mock.patch.object(device_imager.RootfsUpdater, '_CopyPartitionFromImage')
+  def test_Run(self, copy_mock, postinst_mock):
+    """Test main Run() function.
+
+    This function should parts of the source image and write it into the device
+    using proper compression programs.
+    """
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.RootfsUpdater(
+          '/dev/mmcblk0p5', device, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p3', cros_build_lib.COMP_GZIP).Run()
+
+      copy_mock.assert_called_with(constants.PART_ROOT_A)
+      postinst_mock.assert_called_with()
+
+  def test_RunPostInstOnTarget(self):
+    """Test _RunPostInst() function."""
+    target = '/dev/mmcblk0p3'
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device._work_dir = '/tmp/work_dir'
+      temp_dir = os.path.join(device.work_dir, 'dir')
+      self.rsh_mock.AddCmdResult(
+          [self.path_env, 'mktemp', '-d', '-p', device.work_dir],
+          stdout=temp_dir)
+      self.rsh_mock.AddCmdResult(
+          [self.path_env, 'mount', '-o', 'ro', target, temp_dir])
+      self.rsh_mock.AddCmdResult(
+          [self.path_env, os.path.join(temp_dir, 'postinst'), target])
+      self.rsh_mock.AddCmdResult([self.path_env, 'umount', temp_dir])
+
+      device_imager.RootfsUpdater(
+          '/dev/mmcblk0p5', device, 'foo-image', device_imager.ImageType.FULL,
+          target, cros_build_lib.COMP_GZIP)._RunPostInst()
+
+  def test_RunPostInstOnCurrentRoot(self):
+    """Test _RunPostInst() on current root (used for reverting an update)."""
+    root_dev = '/dev/mmcblk0p5'
+    self.rsh_mock.AddCmdResult([self.path_env, '/postinst', root_dev])
+
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.RootfsUpdater(
+          root_dev, device, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p3', cros_build_lib.COMP_GZIP)._RunPostInst(
+              on_target=False)
+
+  @mock.patch.object(device_imager.RootfsUpdater, '_RunPostInst')
+  def testRevert(self, postinst_mock):
+    """Tests Revert() function."""
+    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+
+    ru.Revert()
+    postinst_mock.assert_not_called()
+
+    ru._ran_postinst = True
+    ru.Revert()
+    postinst_mock.assert_called_with(on_target=False)
