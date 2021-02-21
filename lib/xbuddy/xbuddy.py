@@ -126,6 +126,8 @@ LATEST_OFFICIAL = 'latest-official'
 
 RELEASE = '-release'
 
+DEFAULT_STATIC_DIR = os.path.join(constants.SOURCE_ROOT, 'devserver', 'static')
+
 
 class XBuddyException(Exception):
   """Exception classes used by this module."""
@@ -186,7 +188,7 @@ class XBuddy(object):
   _staging_thread_count_lock = threading.Lock()
 
   def __init__(self, manage_builds=False, board=None, version=None,
-               images_dir=None, log_screen=True, static_dir=None):
+               images_dir=None, log_screen=True, static_dir=DEFAULT_STATIC_DIR):
     if not log_screen:
       cherrypy_log_util.UpdateConfig({'log.screen': False})
 
