@@ -109,6 +109,10 @@ class RebootError(RemoteAccessException):
   """Raised when a device fails to reboot."""
 
 
+class ProgramNotFoundError(RemoteAccessException):
+  """Raised when a program on device is not found."""
+
+
 def NormalizePort(port, str_ok=True):
   """Checks if |port| is a valid port number and returns the number.
 
@@ -1243,6 +1247,36 @@ class RemoteDevice(object):
       True if the device has successfully rebooted.
     """
     return self.GetAgent().AwaitReboot(old_boot_id)
+
+  def GetDecompressor(self, compression):
+    """Returns a decompressor command on a remote device.
+
+    Args:
+      compression: The type of compression desired. See cros_build_lib.COMP_*.
+
+    Returns:
+      command to a decompressor as a string list.
+
+    Raises:
+      ValueError: If compression is unknown.
+    """
+
+    if compression == cros_build_lib.COMP_XZ:
+      prog = 'xz'
+    elif compression == cros_build_lib.COMP_GZIP:
+      prog = 'gzip'
+    elif compression == cros_build_lib.COMP_BZIP2:
+      prog = 'bzip2'
+    elif compression == cros_build_lib.COMP_NONE:
+      return ['cat']
+    else:
+      raise ValueError(f'Unknown compression: {compression}')
+
+    if self.HasProgramInPath(prog):
+      return [prog, '--decompress', '--stdout']
+
+    raise ProgramNotFoundError(
+        f'No decompressor found for compression: {compression}')
 
 
 class ChromiumOSDevice(RemoteDevice):

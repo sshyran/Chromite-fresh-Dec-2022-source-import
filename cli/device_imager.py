@@ -4,15 +4,21 @@
 
 """Library containing functions to install an image on a Chromium OS device."""
 
+import abc
 import enum
 import os
 import re
 import sys
+import tempfile
+import threading
 from typing import Tuple, Dict
 
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
+from chromite.lib import image_lib
+from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.lib import retry_util
@@ -239,3 +245,273 @@ class DeviceImager(object):
       raise Error('The expected kernel state after update is invalid.')
 
     logging.info('Verified boot expectations.')
+
+
+class ReaderBase(threading.Thread):
+  """The base class for reading different inputs and writing into output.
+
+  This class extends threading.Thread, so it will be run on its own thread. Also
+  it can be used as a context manager. Internally, it opens necessary files for
+  writing to and reading from. This class cannot be instantiated, it needs to be
+  sub-classed first to provide necessary function implementations.
+  """
+
+  def __init__(self, use_named_pipes: bool = False):
+    """Initializes the class.
+
+    Args:
+      use_named_pipes: Whether to use a named pipe or anonymous file
+        descriptors.
+    """
+    super().__init__()
+    self._use_named_pipes = use_named_pipes
+    self._pipe_target = None
+    self._pipe_source = None
+
+  def __del__(self):
+    """Destructor.
+
+    Make sure to clean up any named pipes we might have created.
+    """
+    if self._use_named_pipes:
+      osutils.SafeUnlink(self._pipe_target)
+
+  def __enter__(self):
+    """Enters the context manager"""
+    if self._use_named_pipes:
+      # There is no need for the temp file, we only need its path. So the named
+      # pipe is created after this temp file is deleted.
+      with tempfile.NamedTemporaryFile(prefix='chromite-device-imager') as fp:
+        self._pipe_target = self._pipe_source = fp.name
+      os.mkfifo(self._pipe_target)
+    else:
+      self._pipe_target, self._pipe_source = os.pipe()
+
+    self.start()
+    return self
+
+  def __exit__(self, *args, **kwargs):
+    """Exits the context manager."""
+    self.join()
+
+  def _Source(self):
+    """Returns the source pipe to write data into.
+
+    Sub-classes can use this function to determine where to write their data
+    into.
+    """
+    return self._pipe_source
+
+  def _CloseSource(self):
+    """Closes the source pipe.
+
+    Sub-classes should use this function to close the pipe after they are done
+    writing into it. Failure to do so may result reader of the data to hang
+    indefinitely.
+    """
+    if not self._use_named_pipes:
+      os.close(self._pipe_source)
+
+  def Target(self):
+    """Returns the target pipe to read data from.
+
+    Users of this class can use this path to read data from.
+    """
+    return self._pipe_target
+
+  def CloseTarget(self):
+    """Closes the target pipe.
+
+    Users of this class should use this function to close the pipe after they
+    are done reading from it.
+    """
+    if self._use_named_pipes:
+      os.remove(self._pipe_target)
+    else:
+      os.close(self._pipe_target)
+
+
+class PartialFileReader(ReaderBase):
+  """A class to read specific offset and length from a file and compress it.
+
+  This class can be used to read from specific location and length in a file
+  (e.g. A partition in a GPT image). Then it compresses the input and writes it
+  out (to a pipe). Look at the base class for more information.
+  """
+
+  # The offset of different partitions in a Chromium OS image does not always
+  # align to larger values like 4096. It seems that 512 is the maximum value to
+  # be divisible by partition offsets. This size should not be increased just
+  # for 'performance reasons'. Since we are doing everything in parallel, in
+  # practice there is not much difference between this and larger block sizes as
+  # parallelism hides the possible extra latency provided by smaller block
+  # sizes.
+  _BLOCK_SIZE = 512
+
+  def __init__(self, image: str, offset: int, length: int, compression):
+    """Initializes the class.
+
+    Args:
+      image: The path to an image (local or remote directory).
+      offset: The offset (in bytes) to read from the image.
+      length: The length (in bytes) to read from the image.
+      compression: The compression type (see cros_build_lib.COMP_XXX).
+    """
+    super().__init__()
+
+    self._image = image
+    self._offset = offset
+    self._length = length
+    self._compression = compression
+
+  def run(self):
+    """Runs the reading and compression."""
+    cmd = [
+        'dd',
+        'status=none',
+        f'if={self._image}',
+        f'ibs={self._BLOCK_SIZE}',
+        f'skip={int(self._offset/self._BLOCK_SIZE)}',
+        f'count={int(self._length/self._BLOCK_SIZE)}',
+        '|',
+        cros_build_lib.FindCompressor(self._compression),
+    ]
+
+    try:
+      cros_build_lib.run(' '.join(cmd), stdout=self._Source(), shell=True)
+    finally:
+      self._CloseSource()
+
+
+class PartitionUpdaterBase(object):
+  """A base abstract class to use for installing an image into a partition.
+
+  Sub-classes should implement the abstract methods to provide the core
+  functionality.
+  """
+  def __init__(self, device, image: str, image_type, target: str, compression):
+    """Initializes this base class with values that most sub-classes will need.
+
+    Args:
+      device: The ChromiumOSDevice to be updated.
+      image: The target image path for the partition update.
+      image_type: The type of the image (ImageType).
+      target: The target path (e.g. block dev) to install the update.
+      compression: The compression used for compressing the update payload.
+    """
+    self._device = device
+    self._image = image
+    self._image_type = image_type
+    self._target = target
+    self._compression = compression
+    self._finished = False
+
+  def Run(self):
+    """The main function that does the partition update job."""
+    with cros_build_lib.TimedSection() as timer:
+      try:
+        self._Run()
+      finally:
+        self._finished = True
+
+    logging.debug('Completed %s in %s', self.__class__.__name__, timer.delta)
+
+  @abc.abstractmethod
+  def _Run(self):
+    """The method that need to be implemented by sub-classes."""
+    raise NotImplementedError('Sub-classes need to implement this.')
+
+  def IsFinished(self):
+    """Returns whether the partition update has been successful."""
+    return self._finished
+
+  @abc.abstractmethod
+  def Revert(self):
+    """Reverts the partition update.
+
+    Sub-classes need to implement this function to provide revert capability.
+    """
+    raise NotImplementedError('Sub-classes need to implement this.')
+
+
+class RawPartitionUpdater(PartitionUpdaterBase):
+  """A class to update a raw partition on a Chromium OS device."""
+
+  def _Run(self):
+    """The function that does the job of kernel partition update."""
+    if self._image_type == ImageType.FULL:
+      self._CopyPartitionFromImage(self._GetPartitionName())
+    elif self._image_type == ImageType.REMOTE_DIRECTORY:
+      raise NotImplementedError('Not yet implemented.')
+    else:
+      raise ValueError(f'Invalid image type {self._image_type}')
+
+  def _GetPartitionName(self):
+    """Returns the name of the partition in a Chromium OS GPT layout.
+
+    Subclasses should override this function to return correct name.
+    """
+    raise NotImplementedError('Subclasses need to implement this.')
+
+  def _CopyPartitionFromImage(self, part_name: str):
+    """Updates the device's partition from a local Chromium OS image.
+
+    Args:
+      part_name: The name of the partition in the source image that needs to be
+        extracted.
+    """
+    cmd = self._GetWriteToTargetCommand()
+
+    offset, length = self._GetPartLocation(part_name)
+    offset, length = self._OptimizePartLocation(offset, length)
+    with PartialFileReader(self._image, offset, length,
+                           self._compression) as generator:
+      try:
+        self._device.run(cmd, input=generator.Target(), shell=True)
+      finally:
+        generator.CloseTarget()
+
+  def _GetWriteToTargetCommand(self):
+    """Returns a write to target command to run on a Chromium OS device.
+
+    Returns:
+      A string command to run on a device to read data from stdin, uncompress it
+      and write it to the target partition.
+    """
+    cmd = self._device.GetDecompressor(self._compression)
+    # Using oflag=direct to tell the OS not to cache the writes (faster).
+    cmd += ['|', 'dd', 'bs=1M', 'oflag=direct', f'of={self._target}']
+    return ' '.join(cmd)
+
+  def _GetPartLocation(self, part_name: str):
+    """Extracts the location and size of the kernel partition from the image.
+
+    Args:
+      part_name: The name of the partition in the source image that needs to be
+        extracted.
+
+    Returns:
+      A tuple of offset and length (in bytes) from the image.
+    """
+    try:
+      parts = image_lib.GetImageDiskPartitionInfo(self._image)
+      part_info = [p for p in parts if p.name == part_name][0]
+    except IndexError:
+      raise Error(f'No partition named {part_name} found.')
+
+    return int(part_info.start), int(part_info.size)
+
+  def _OptimizePartLocation(self, offset: int, length: int):
+    """Optimizes the offset and length of the partition.
+
+    Subclasses can override this to provide better offset/length than what is
+    defined in the PGT partition layout.
+
+    Args:
+      offset: The offset (in bytes) of the partition in the image.
+      length: The length (in bytes) of the partition.
+
+    Returns:
+      A tuple of offset and length (in bytes) from the image.
+    """
+    return offset, length
