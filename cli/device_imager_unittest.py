@@ -20,6 +20,8 @@ from chromite.lib import image_lib_unittest
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
+from chromite.lib import stateful_updater
+from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import xbuddy
 
 
@@ -360,3 +362,50 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     ru._ran_postinst = True
     ru.Revert()
     postinst_mock.assert_called_with(on_target=False)
+
+
+class StatefulPayloadGeneratorTest(cros_test_lib.TestCase):
+  """Tests stateful payload generator."""
+  @mock.patch.object(paygen_stateful_payload_lib, 'GenerateStatefulPayload')
+  def testRun(self, paygen_mock):
+    """Tests run() function."""
+    image = '/foo/image'
+    with device_imager.StatefulPayloadGenerator(image) as spg:
+      pass
+
+    paygen_mock.assert_called_with(image, spg._Source())
+
+
+class StatefulUpdaterTest(cros_test_lib.TestCase):
+  """Tests StatefulUpdater."""
+  @mock.patch.object(paygen_stateful_payload_lib, 'GenerateStatefulPayload')
+  @mock.patch.object(stateful_updater.StatefulUpdater, 'Update')
+  def test_RunFullImage(self, update_mock, paygen_mock):
+    """Test main Run() function for full image."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.StatefulUpdater(False, device, 'foo-image',
+                                 device_imager.ImageType.FULL, None, None).Run()
+      update_mock.assert_called_with(mock.ANY,
+                                     is_payload_on_device=False,
+                                     update_type=None)
+      paygen_mock.assert_called()
+
+  @mock.patch.object(gs.GSContext, 'Copy')
+  @mock.patch.object(stateful_updater.StatefulUpdater, 'Update')
+  def test_RunRemoteImage(self, update_mock, copy_mock):
+    """Test main Run() function for remote images."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.StatefulUpdater(False, device, 'gs://foo-image',
+                                 device_imager.ImageType.REMOTE_DIRECTORY, None,
+                                 None).Run()
+      copy_mock.assert_called_with('gs://foo-image/stateful.tgz',mock.ANY)
+      update_mock.assert_called_with(mock.ANY, is_payload_on_device=False,
+                                     update_type=None)
+
+  @mock.patch.object(stateful_updater.StatefulUpdater, 'Reset')
+  def testRevert(self, reset_mock):
+    """Tests Revert() function."""
+    su = device_imager.StatefulUpdater(False, None, None, None, None, None)
+
+    su.Revert()
+    reset_mock.assert_called()

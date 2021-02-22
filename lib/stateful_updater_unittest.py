@@ -84,6 +84,21 @@ class StatefulUpdaterTest(cros_test_lib.MockTempDirTestCase):
       self.assertEqual(osutils.ReadFile(os.path.join(
           self._stateful_dir, updater._UPDATE_TYPE_FILE)), '')
 
+  def testUpdateFileDescriptor(self):
+    """Tests Update function with file descriptor input."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      updater = stateful_updater.StatefulUpdater(
+          device, stateful_dir=self._stateful_dir)
+
+      r, w = os.pipe()
+      with os.fdopen(w, 'wb') as fp:
+        fp.write(osutils.ReadFile(self._payload, 'rb'))
+
+      updater.Update(r, is_payload_on_device=False)
+      os.close(r)
+      self.assertEqual(osutils.ReadFile(os.path.join(
+          self._stateful_dir, updater._UPDATE_TYPE_FILE)), '')
+
   def testUpdateClobber(self):
     """Tests Update function with default arguments."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:

@@ -22,7 +22,9 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.lib import retry_util
+from chromite.lib import stateful_updater
 from chromite.lib.paygen import partition_lib
+from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
 
@@ -222,6 +224,10 @@ class DeviceImager(object):
       target_kernel = prefix + str(self._inactive_state[Partition.KERNEL])
       updaters.append(KernelUpdater(self._device, image, image_type,
                                     target_kernel, self._compression))
+
+    if not self._no_stateful_update:
+      updaters.append(StatefulUpdater(self._clobber_stateful, self._device,
+                                      image, image_type, None, None))
 
     # Retry the partitions updates that failed, in case a transient error (like
     # SSH drop, etc) caused the error.
@@ -671,3 +677,63 @@ class RootfsUpdater(RawPartitionUpdater):
       # We don't have to do anything for revert if we haven't changed the kernel
       # priorities yet.
       self._RunPostInst(on_target=False)
+
+
+class StatefulPayloadGenerator(ReaderBase):
+  """A class for generating a stateful update payload in a separate thread."""
+  def __init__(self, image: str):
+    """Initializes that class.
+
+    Args:
+      image: The path to a local Chromium OS image.
+    """
+    super().__init__()
+    self._image = image
+
+  def run(self):
+    """Generates the stateful update and writes it into the output pipe."""
+    try:
+      paygen_stateful_payload_lib.GenerateStatefulPayload(
+          self._image, self._Source())
+    finally:
+      self._CloseSource()
+
+
+class StatefulUpdater(PartitionUpdaterBase):
+  """A class to update the stateful partition on a device."""
+  def __init__(self, clobber_stateful: bool, *args):
+    """Initializes the class
+
+    Args:
+      clobber_stateful: Whether to clobber the stateful or not.
+      *args: Look at PartitionUpdaterBase.
+    """
+    super().__init__(*args)
+    self._clobber_stateful = clobber_stateful
+
+  def _Run(self):
+    """Reads/Downloads the stateful updates and writes it into the device."""
+    if self._image_type == ImageType.FULL:
+      generator_cls = StatefulPayloadGenerator
+    elif self._image_type == ImageType.REMOTE_DIRECTORY:
+      generator_cls = GsFileCopier
+      self._image = os.path.join(self._image,
+                                 paygen_stateful_payload_lib.STATEFUL_FILE)
+    else:
+      raise ValueError(f'Invalid image type {self._image_type}')
+
+    with generator_cls(self._image) as generator:
+      try:
+        updater = stateful_updater.StatefulUpdater(self._device)
+        updater.Update(
+            generator.Target(),
+            is_payload_on_device=False,
+            update_type=(stateful_updater.StatefulUpdater.UPDATE_TYPE_CLOBBER if
+                         self._clobber_stateful else None))
+      finally:
+        generator.CloseTarget()
+
+  def Revert(self):
+    """Reverts the stateful partition update."""
+    logging.info('Reverting the stateful update.')
+    stateful_updater.StatefulUpdater(self._device).Reset()

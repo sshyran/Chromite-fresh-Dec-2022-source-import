@@ -1193,7 +1193,7 @@ def CreateTarball(
   """Create a tarball.  Executes 'tar' on the commandline.
 
   Args:
-    tarball_path: The path of the tar file to generate.
+    tarball_path: The path of the tar file to generate. Can be file descriptor.
     cwd: The directory to run the tar command.
     sudo: Whether to run with "sudo".
     compression: The type of compression desired.  See the FindCompressor
@@ -1223,7 +1223,15 @@ def CreateTarball(
   comp = FindCompressor(compression, chroot=chroot)
   cmd = (['tar'] +
          extra_args +
-         ['--sparse', '--use-compress-program', comp, '-cf', tarball_path])
+         ['--sparse', '--use-compress-program', comp, '-c'])
+
+  rc_stdout = None
+  if isinstance(tarball_path, int):
+    cmd += ['--to-stdout']
+    rc_stdout = tarball_path
+  else:
+    cmd += ['-f', tarball_path]
+
   if len(inputs) > _THRESHOLD_TO_USE_T_FOR_TAR:
     cmd += ['--null', '-T', '/dev/stdin']
     rc_input = b'\0'.join(x.encode('utf-8') for x in inputs)
@@ -1238,7 +1246,7 @@ def CreateTarball(
   for try_count in range(3):
     try:
       result = rc_func(cmd, cwd=cwd, **dict(kwargs, check=False,
-                                            input=rc_input))
+                                            input=rc_input, stdout=rc_stdout))
     except RunCommandError as rce:
       # There are cases where run never executes the command (cannot find tar,
       # cannot execute tar, such as when cwd does not exist). Although the run

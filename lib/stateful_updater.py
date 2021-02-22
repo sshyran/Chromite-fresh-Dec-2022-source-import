@@ -59,7 +59,8 @@ class StatefulUpdater(object):
     """Updates the stateful partition given the update file.
 
     Args:
-      payload_path: The path to the stateful update (stateful.tgz).
+      payload_path: The path to the stateful update (stateful.tgz). It can also
+         be just a file descriptor.
       is_payload_on_device: True if the payload is on the device. False if it
         is on the workstation.
       update_type: The type of the stateful update to be marked. Accepted
@@ -74,6 +75,9 @@ class StatefulUpdater(object):
 
         cmd += [payload_path]
         self._device.run(cmd)
+      elif isinstance(payload_path, int):
+        cmd += ['-']
+        self._device.run(cmd, input=payload_path)
       else:
         with open(payload_path, 'rb') as f:
           cmd += ['-']
