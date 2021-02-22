@@ -59,10 +59,6 @@
     nami-factory-nami-10715.B-factorybranch
   factory-nocturne-11066.B-buildspec
     nocturne-factory-nocturne-11066.B-factorybranch
-  factory-nyan-5772.B-buildspec
-    nyan_big-factory-nyan-5772.B-factorybranch
-    nyan_blaze-factory-nyan-5772.B-factorybranch
-    nyan_kitty-factory-nyan-5772.B-factorybranch
   factory-oak-8182.B-buildspec
     elm-factory-oak-8182.B-factorybranch
     hana-factory-oak-8182.B-factorybranch
@@ -116,22 +112,12 @@
   factory-trogdor-13443.B-buildspec
     strongbad-factory-trogdor-13443.B-factorybranch
     trogdor-factory-trogdor-13443.B-factorybranch
-  factory-veyron-6591.B-buildspec
-    veyron_mickey-factory-veyron-6591.B-factorybranch
-    veyron_mighty-factory-veyron-6591.B-factorybranch
-    veyron_minnie-factory-veyron-6591.B-factorybranch
-    veyron_speedy-factory-veyron-6591.B-factorybranch
   factory-veyron-7505.B-buildspec
     veyron_fievel-factory-veyron-7505.B-factorybranch
-    veyron_mickey-factory-veyron-7505.B-factorybranch
     veyron_rialto-factory-veyron-7505.B-factorybranch
     veyron_tiger-factory-veyron-7505.B-factorybranch
   factory-volteer-13600.B-buildspec
     volteer-factory-volteer-13600.B-factorybranch
-  factory-whirlwind-6509.B-buildspec
-    whirlwind-factory-whirlwind-6509.B-factorybranch
-  factory-whirlwind-6812.41.B-buildspec
-    whirlwind-factory-whirlwind-6812.41.B-factorybranch
   factory-zork-13427.B-buildspec
     zork-factory-zork-13427.B-factorybranch
   factory-zork-13700.B-buildspec
@@ -932,10 +918,6 @@
     nami-factory-nami-10715.B-factorybranch-tryjob
   factory-nocturne-11066.B-buildspec-tryjob
     nocturne-factory-nocturne-11066.B-factorybranch-tryjob
-  factory-nyan-5772.B-buildspec-tryjob
-    nyan_big-factory-nyan-5772.B-factorybranch-tryjob
-    nyan_blaze-factory-nyan-5772.B-factorybranch-tryjob
-    nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob
   factory-oak-8182.B-buildspec-tryjob
     elm-factory-oak-8182.B-factorybranch-tryjob
     hana-factory-oak-8182.B-factorybranch-tryjob
@@ -989,22 +971,12 @@
   factory-trogdor-13443.B-buildspec-tryjob
     strongbad-factory-trogdor-13443.B-factorybranch-tryjob
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
-  factory-veyron-6591.B-buildspec-tryjob
-    veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob
-    veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob
-    veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob
-    veyron_speedy-factory-veyron-6591.B-factorybranch-tryjob
   factory-veyron-7505.B-buildspec-tryjob
     veyron_fievel-factory-veyron-7505.B-factorybranch-tryjob
-    veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob
     veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob
     veyron_tiger-factory-veyron-7505.B-factorybranch-tryjob
   factory-volteer-13600.B-buildspec-tryjob
     volteer-factory-volteer-13600.B-factorybranch-tryjob
-  factory-whirlwind-6509.B-buildspec-tryjob
-    whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob
-  factory-whirlwind-6812.41.B-buildspec-tryjob
-    whirlwind-factory-whirlwind-6812.41.B-factorybranch-tryjob
   factory-zork-13427.B-buildspec-tryjob
     zork-factory-zork-13427.B-factorybranch-tryjob
   factory-zork-13700.B-buildspec-tryjob
@@ -1717,21 +1689,18 @@
   novato-payloads-tryjob
   novato-release-tryjob
   novato-unittest-stress
-  nyan_big-factory-nyan-5772.B-factorybranch-tryjob
   nyan_big-full-tryjob
   nyan_big-llvm-next-toolchain-tryjob
   nyan_big-llvm-toolchain-tryjob
   nyan_big-payloads-tryjob
   nyan_big-release-tryjob
   nyan_big-unittest-stress
-  nyan_blaze-factory-nyan-5772.B-factorybranch-tryjob
   nyan_blaze-full-tryjob
   nyan_blaze-llvm-next-toolchain-tryjob
   nyan_blaze-llvm-toolchain-tryjob
   nyan_blaze-payloads-tryjob
   nyan_blaze-release-tryjob
   nyan_blaze-unittest-stress
-  nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob
   octavius-full-tryjob
   octavius-llvm-next-toolchain-tryjob
   octavius-llvm-toolchain-tryjob
@@ -2041,16 +2010,12 @@
   veyron_fievel-payloads-tryjob
   veyron_fievel-release-tryjob
   veyron_fievel-unittest-stress
-  veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob
-  veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob
-  veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob
   veyron_mighty-full-tryjob
   veyron_mighty-llvm-next-toolchain-tryjob
   veyron_mighty-llvm-toolchain-tryjob
   veyron_mighty-payloads-tryjob
   veyron_mighty-release-tryjob
   veyron_mighty-unittest-stress
-  veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob
   veyron_minnie-full-tryjob
   veyron_minnie-llvm-next-toolchain-tryjob
   veyron_minnie-llvm-toolchain-tryjob
@@ -2064,7 +2029,6 @@
   veyron_rialto-payloads-tryjob
   veyron_rialto-release-tryjob
   veyron_rialto-unittest-stress
-  veyron_speedy-factory-veyron-6591.B-factorybranch-tryjob
   veyron_speedy-full-tryjob
   veyron_speedy-llvm-next-toolchain-tryjob
   veyron_speedy-llvm-toolchain-tryjob
@@ -2103,8 +2067,6 @@
   volteer-payloads-tryjob
   volteer-release-tryjob
   volteer-unittest-stress
-  whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob
-  whirlwind-factory-whirlwind-6812.41.B-factorybranch-tryjob
   whirlwind-full-tryjob
   whirlwind-llvm-next-toolchain-tryjob
   whirlwind-llvm-toolchain-tryjob

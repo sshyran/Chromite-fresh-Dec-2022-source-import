@@ -1784,26 +1784,19 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
   branch_builders = [
       (MONTHLY, 'factory-rambi-5517.B', [
           'enguarde', 'expresso', 'kip', 'swanky', 'winky']),
-      (MONTHLY, 'factory-nyan-5772.B', [
-          'nyan_big', 'nyan_blaze', 'nyan_kitty']),
       (MONTHLY, 'factory-rambi-6420.B', [
           'enguarde', 'candy', 'banjo',
           'ninja', 'sumo', 'orco', 'heli', 'gnawty']),
       (MONTHLY, 'factory-auron-6459.B', [
           'auron_paine', 'auron_yuna', 'lulu',
           'gandof', 'buddy']),
-      (MONTHLY, 'factory-whirlwind-6509.B', ['whirlwind']),
-      (MONTHLY, 'factory-veyron-6591.B', [
-          'veyron_mighty', 'veyron_speedy',
-          'veyron_minnie', 'veyron_mickey']),
       (MONTHLY, 'factory-auron-6772.B', [
           'guado', 'tidus', 'rikku', 'buddy']),
-      (MONTHLY, 'factory-whirlwind-6812.41.B', ['whirlwind']),
       (MONTHLY, 'factory-strago-7458.B', [
           'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar',
           'wizpig', 'setzer', 'banon', 'kefka', 'relm', 'kip']),
       (MONTHLY, 'factory-veyron-7505.B', [
-          'veyron_mickey', 'veyron_tiger', 'veyron_fievel', 'veyron_rialto']),
+          'veyron_tiger', 'veyron_fievel', 'veyron_rialto']),
       (MONTHLY, 'factory-glados-7657.B', ['glados', 'chell']),
       (MONTHLY, 'factory-glados-7828.B', [
           'glados', 'chell', 'lars',
@@ -1879,17 +1872,11 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
 
   # These branches require a differnt list of packages to build.
   old_package_branches = {
-      'factory-beltino-5140.14.B',
       'factory-rambi-5517.B',
-      'factory-nyan-5772.B',
       'factory-rambi-6420.B',
       'factory-auron-6459.B',
-      'factory-whirlwind-6509.B',
-      'factory-veyron-6591.B',
       'factory-samus-6658.B',
       'factory-auron-6772.B',
-      'factory-whirlwind-6812.41.B',
-      'factory-arkham-7077.113.B',
       'factory-strago-7458.B',
       'factory-veyron-7505.B',
       'factory-glados-7657.B',

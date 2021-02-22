@@ -12361,32 +12361,6 @@
         ],
         "workspace_branch": "factory-nocturne-11066.B"
     },
-    "factory-nyan-5772.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "nyan_big-factory-nyan-5772.B-factorybranch",
-            "nyan_blaze-factory-nyan-5772.B-factorybranch",
-            "nyan_kitty-factory-nyan-5772.B-factorybranch"
-        ],
-        "workspace_branch": "factory-nyan-5772.B"
-    },
-    "factory-nyan-5772.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "nyan_big-factory-nyan-5772.B-factorybranch-tryjob",
-            "nyan_blaze-factory-nyan-5772.B-factorybranch-tryjob",
-            "nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-nyan-5772.B"
-    },
     "factory-oak-8182.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -12727,34 +12701,6 @@
         ],
         "workspace_branch": "factory-trogdor-13443.B"
     },
-    "factory-veyron-6591.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "veyron_mickey-factory-veyron-6591.B-factorybranch",
-            "veyron_mighty-factory-veyron-6591.B-factorybranch",
-            "veyron_minnie-factory-veyron-6591.B-factorybranch",
-            "veyron_speedy-factory-veyron-6591.B-factorybranch"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "factory-veyron-6591.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob",
-            "veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob",
-            "veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob",
-            "veyron_speedy-factory-veyron-6591.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
     "factory-veyron-7505.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -12762,7 +12708,6 @@
         "schedule": "with 720h interval",
         "slave_configs": [
             "veyron_fievel-factory-veyron-7505.B-factorybranch",
-            "veyron_mickey-factory-veyron-7505.B-factorybranch",
             "veyron_rialto-factory-veyron-7505.B-factorybranch",
             "veyron_tiger-factory-veyron-7505.B-factorybranch"
         ],
@@ -12777,7 +12722,6 @@
         "luci_builder": "Try",
         "slave_configs": [
             "veyron_fievel-factory-veyron-7505.B-factorybranch-tryjob",
-            "veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob",
             "veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob",
             "veyron_tiger-factory-veyron-7505.B-factorybranch-tryjob"
         ],
@@ -12804,50 +12748,6 @@
             "volteer-factory-volteer-13600.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-volteer-13600.B"
-    },
-    "factory-whirlwind-6509.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "whirlwind-factory-whirlwind-6509.B-factorybranch"
-        ],
-        "workspace_branch": "factory-whirlwind-6509.B"
-    },
-    "factory-whirlwind-6509.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-whirlwind-6509.B"
-    },
-    "factory-whirlwind-6812.41.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "whirlwind-factory-whirlwind-6812.41.B-factorybranch"
-        ],
-        "workspace_branch": "factory-whirlwind-6812.41.B"
-    },
-    "factory-whirlwind-6812.41.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "whirlwind-factory-whirlwind-6812.41.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-whirlwind-6812.41.B"
     },
     "factory-zork-13427.B-buildspec": {
         "_template": "buildspec",
@@ -25899,46 +25799,6 @@
             "chrome_internal"
         ]
     },
-    "nyan_big-factory-nyan-5772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_big"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-nyan-5772.B"
-    },
-    "nyan_big-factory-nyan-5772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_big"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-nyan-5772.B"
-    },
     "nyan_big-full": {
         "_template": "full",
         "boards": [
@@ -26072,46 +25932,6 @@
             "chrome_internal"
         ]
     },
-    "nyan_blaze-factory-nyan-5772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_blaze"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-nyan-5772.B"
-    },
-    "nyan_blaze-factory-nyan-5772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_blaze"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-nyan-5772.B"
-    },
     "nyan_blaze-full": {
         "_template": "full",
         "boards": [
@@ -26244,46 +26064,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "nyan_kitty-factory-nyan-5772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_kitty"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-nyan-5772.B"
-    },
-    "nyan_kitty-factory-nyan-5772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "nyan_kitty"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-nyan-5772.B"
     },
     "octavius-full": {
         "_template": "full",
@@ -34710,126 +34490,6 @@
             "chrome_internal"
         ]
     },
-    "veyron_mickey-factory-veyron-6591.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mickey"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "veyron_mickey-factory-veyron-6591.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mickey"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "veyron_mickey-factory-veyron-7505.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mickey"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-7505.B"
-    },
-    "veyron_mickey-factory-veyron-7505.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mickey"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-7505.B"
-    },
-    "veyron_mighty-factory-veyron-6591.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mighty"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "veyron_mighty-factory-veyron-6591.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_mighty"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-6591.B"
-    },
     "veyron_mighty-full": {
         "_template": "full",
         "boards": [
@@ -34962,46 +34622,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "veyron_minnie-factory-veyron-6591.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_minnie"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "veyron_minnie-factory-veyron-6591.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_minnie"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-6591.B"
     },
     "veyron_minnie-full": {
         "_template": "full",
@@ -35306,46 +34926,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "veyron_speedy-factory-veyron-6591.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_speedy"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-6591.B"
-    },
-    "veyron_speedy-factory-veyron-6591.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_speedy"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-6591.B"
     },
     "veyron_speedy-full": {
         "_template": "full",
@@ -36537,86 +36117,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "whirlwind-factory-whirlwind-6509.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "whirlwind"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-whirlwind-6509.B"
-    },
-    "whirlwind-factory-whirlwind-6509.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "whirlwind"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-whirlwind-6509.B"
-    },
-    "whirlwind-factory-whirlwind-6812.41.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "whirlwind"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-whirlwind-6812.41.B"
-    },
-    "whirlwind-factory-whirlwind-6812.41.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "whirlwind"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-whirlwind-6812.41.B"
     },
     "whirlwind-full": {
         "_template": "full",
