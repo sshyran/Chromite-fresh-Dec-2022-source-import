@@ -32,8 +32,8 @@ def GetParser():
   deprecated = 'Argument will be removed 2019-06-01. Use %s instead.'
   parser = commandline.ArgumentParser(description=__doc__)
 
-  parser.add_argument('--board', required=True,
-                      help='The name of the board to set up.')
+  parser.add_argument('-b', '--board', '--build-target', required=True,
+                      dest='board', help='The name of the board to set up.')
   parser.add_argument('--default', action='store_true', default=False,
                       help='Set the board to the default board in your chroot.')
   parser.add_argument('--force', action='store_true', default=False,
