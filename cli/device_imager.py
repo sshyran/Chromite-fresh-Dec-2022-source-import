@@ -396,6 +396,26 @@ class PartialFileReader(ReaderBase):
       self._CloseSource()
 
 
+class GsFileCopier(ReaderBase):
+  """A class for downloading gzip compressed file from GS bucket into a pipe."""
+
+  def __init__(self, image: str):
+    """Initializes the class.
+
+    Args:
+      image: The path to an image (local or remote directory).
+    """
+    super().__init__(use_named_pipes=True)
+    self._image = image
+
+  def run(self):
+    """Runs the download and write into the output pipe."""
+    try:
+      gs.GSContext().Copy(self._image, self._Source())
+    finally:
+      self._CloseSource()
+
+
 class PartitionUpdaterBase(object):
   """A base abstract class to use for installing an image into a partition.
 
@@ -455,7 +475,7 @@ class RawPartitionUpdater(PartitionUpdaterBase):
     if self._image_type == ImageType.FULL:
       self._CopyPartitionFromImage(self._GetPartitionName())
     elif self._image_type == ImageType.REMOTE_DIRECTORY:
-      raise NotImplementedError('Not yet implemented.')
+      self._RedirectPartition(self._GetRemotePartitionName())
     else:
       raise ValueError(f'Invalid image type {self._image_type}')
 
@@ -514,6 +534,13 @@ class RawPartitionUpdater(PartitionUpdaterBase):
 
     return int(part_info.start), int(part_info.size)
 
+  def _GetRemotePartitionName(self):
+    """Returns the name of the quick-provision partition file.
+
+    Subclasses should override this function to return correct name.
+    """
+    raise NotImplementedError('Subclasses need to implement this.')
+
   def _OptimizePartLocation(self, offset: int, length: int):
     """Optimizes the offset and length of the partition.
 
@@ -529,6 +556,22 @@ class RawPartitionUpdater(PartitionUpdaterBase):
     """
     return offset, length
 
+  def _RedirectPartition(self, file_name: str):
+    """Downloads the partition from a remote path and writes it into target.
+
+    Args:
+      file_name: The file name in the remote directory self._image.
+    """
+    cmd = self._GetWriteToTargetCommand()
+
+    image_path = os.path.join(self._image, file_name)
+    with GsFileCopier(image_path) as generator:
+      try:
+        with open(generator.Target(), 'rb') as fp:
+          self._device.run(cmd, input=fp, shell=True)
+      finally:
+        generator.CloseTarget()
+
 
 class KernelUpdater(RawPartitionUpdater):
   """A class to update the kernel partition on a Chromium OS device."""
@@ -536,6 +579,10 @@ class KernelUpdater(RawPartitionUpdater):
   def _GetPartitionName(self):
     """See RawPartitionUpdater._GetPartitionName()."""
     return constants.PART_KERN_B
+
+  def _GetRemotePartitionName(self):
+    """See RawPartitionUpdater._GetRemotePartitionName()."""
+    return constants.QUICK_PROVISION_PAYLOAD_KERNEL
 
   def Revert(self):
     """Reverts the kernel partition update."""
@@ -560,6 +607,10 @@ class RootfsUpdater(RawPartitionUpdater):
   def _GetPartitionName(self):
     """See RawPartitionUpdater._GetPartitionName()."""
     return constants.PART_ROOT_A
+
+  def _GetRemotePartitionName(self):
+    """See RawPartitionUpdater._GetRemotePartitionName()."""
+    return constants.QUICK_PROVISION_PAYLOAD_ROOTFS
 
   def _Run(self):
     """The function that does the job of rootfs partition update."""

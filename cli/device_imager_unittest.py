@@ -14,6 +14,7 @@ from chromite.cli import device_imager
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 from chromite.lib import image_lib
 from chromite.lib import image_lib_unittest
 from chromite.lib import partial_mock
@@ -175,6 +176,19 @@ class PartialFileReaderTest(cros_test_lib.RunCommandTestCase):
     self.assertNotExists(GetFdPath(pfr._Source()))
 
 
+class GsFileCopierTest(cros_test_lib.TestCase):
+  """Tests GsFileCopier class."""
+
+  @mock.patch.object(gs.GSContext, 'Copy')
+  def testRun(self, copy_mock):
+    """Tests the run() function."""
+    image = 'gs://path/to/image'
+    with device_imager.GsFileCopier(image) as gfc:
+      self.assertTrue(gfc._use_named_pipes)
+
+    copy_mock.assert_called_with(image, gfc._Source())
+
+
 class PartitionUpdaterBaseTest(cros_test_lib.TestCase):
   """Tests PartitionUpdaterBase class"""
 
@@ -200,7 +214,7 @@ class PartitionUpdaterBaseTest(cros_test_lib.TestCase):
     self.assertTrue(pub.IsFinished())
 
 
-class RawPartitionUpdaterTest(cros_test_lib.MockTestCase):
+class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
   """Tests RawPartitionUpdater class."""
 
   def setUp(self):
@@ -235,6 +249,24 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTestCase):
       close_mock.assert_called()
       name_mock.assert_called()
 
+  def test_RunRemoteImage(self):
+    """Test main Run() function for remote images."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult([partial_mock.In('which'), 'gzip'],
+                                 returncode=0)
+      self.rsh_mock.AddCmdResult(
+        self.path_env +
+        ' gzip --decompress --stdout | dd bs=1M oflag=direct of=/dev/mmcblk0p2')
+
+      path = os.path.join(self.tempdir,
+                          constants.QUICK_PROVISION_PAYLOAD_KERNEL)
+      with open(path, 'w') as image:
+        image.write('helloworld')
+
+      device_imager.KernelUpdater(
+          device, self.tempdir, device_imager.ImageType.REMOTE_DIRECTORY,
+          '/dev/mmcblk0p2', cros_build_lib.COMP_GZIP).Run()
+
 
 class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
   """Tests KernelUpdater class."""
@@ -243,6 +275,12 @@ class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
     """Tests the name of the partitions."""
     ku = device_imager.KernelUpdater(None, None, None, None, None)
     self.assertEqual(constants.PART_KERN_B, ku._GetPartitionName())
+
+  def test_GetRemotePartitionName(self):
+    """Tests the name of the partitions."""
+    ku = device_imager.KernelUpdater(None, None, None, None, None)
+    self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_KERNEL,
+                     ku._GetRemotePartitionName())
 
 
 class RootfsUpdaterTest(cros_test_lib.MockTestCase):
@@ -258,6 +296,12 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     """Tests the name of the partitions."""
     ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
     self.assertEqual(constants.PART_ROOT_A, ru._GetPartitionName())
+
+  def test_GetRemotePartitionName(self):
+    """Tests the name of the partitions."""
+    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+    self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_ROOTFS,
+                     ru._GetRemotePartitionName())
 
   @mock.patch.object(device_imager.RootfsUpdater, '_RunPostInst')
   @mock.patch.object(device_imager.RootfsUpdater, '_CopyPartitionFromImage')
