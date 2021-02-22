@@ -966,7 +966,8 @@ class BuildSpecsManager(object):
     # high traffic manifest_versions repository.
     push_to_git = git.GetTrackingBranch(
         self.manifest_dir, for_checkout=False, for_push=False)
-    push_to = git.RemoteRef(push_to_git.remote, 'refs/for/master%submit',
+    push_to = git.RemoteRef(push_to_git.remote,
+                            f'refs/for/{push_to_git.ref}%submit',
                             push_to_git.project_name)
     _PushGitChanges(
         self.manifest_dir,
