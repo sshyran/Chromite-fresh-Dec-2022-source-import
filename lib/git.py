@@ -826,7 +826,7 @@ def ShallowFetch(git_repo, git_url, sparse_checkout=None):
   RunGit(git_repo, ['fetch', '--depth=1'],
          print_cmd=True, stderr=True, capture_output=False)
   # Pull the files in sparse_checkout.
-  RunGit(git_repo, ['pull', 'origin', 'HEAD'],
+  RunGit(git_repo, ['pull', 'origin', 'master'],
          print_cmd=True, stderr=True, capture_output=False)
   logging.info('ShallowFetch completed in %s.', utcnow() - start)
 
