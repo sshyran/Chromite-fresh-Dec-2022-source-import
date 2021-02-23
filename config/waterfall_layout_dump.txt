@@ -412,7 +412,6 @@
 == vmmst_android_pfq ==
   master-vmmst-android-pfq
     betty-arcvm-master-vmmst-android-pfq
-    hatch-arc-s-vmmst-android-pfq
 
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
@@ -420,6 +419,11 @@
     hatch-arc-r-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
     rammus-arc-r-vmrvc-android-pfq
+
+== vmsc_android_pfq ==
+  master-vmsc-android-pfq
+    betty-arc-s-vmsc-android-pfq
+    hatch-arc-s-vmsc-android-pfq
 
 == tryjob ==
   ambassador-full-tryjob
@@ -543,6 +547,7 @@
   betty-arc-s-payloads-tryjob
   betty-arc-s-release-tryjob
   betty-arc-s-unittest-stress
+  betty-arc-s-vmsc-android-pfq-tryjob
   betty-arcvm-master-full-tryjob
   betty-arcvm-master-llvm-next-toolchain-tryjob
   betty-arcvm-master-llvm-toolchain-tryjob
@@ -1221,7 +1226,7 @@
   hatch-arc-s-payloads-tryjob
   hatch-arc-s-release-tryjob
   hatch-arc-s-unittest-stress
-  hatch-arc-s-vmmst-android-pfq-tryjob
+  hatch-arc-s-vmsc-android-pfq-tryjob
   hatch-blueznext-full-tryjob
   hatch-blueznext-llvm-next-toolchain-tryjob
   hatch-blueznext-llvm-toolchain-tryjob
@@ -1614,12 +1619,14 @@
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
-    hatch-arc-s-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
     hatch-arc-r-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
     rammus-arc-r-vmrvc-android-pfq-tryjob
+  master-vmsc-android-pfq-tryjob
+    betty-arc-s-vmsc-android-pfq-tryjob
+    hatch-arc-s-vmsc-android-pfq-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-full-tryjob
   mistral-llvm-next-toolchain-tryjob

@@ -1213,7 +1213,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   )
   _vmmst_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'betty-arcvm-master', # No HWTest, No VMTest.
-      'hatch-arc-s',
   ])
 
   # Android PI master.
@@ -1272,6 +1271,24 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+
+  # Android VM SC master.
+  vmsc_master_config = site_config.Add(
+      constants.VMSC_ANDROID_PFQ_MASTER,
+      site_config.templates.vmsc_android_pfq,
+      site_config.templates.master_android_pfq_mixin,
+      schedule='with 60m interval',
+  )
+
+  _vmsc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
+      'betty-arc-s',
+      'hatch-arc-s',
+  ])
+  _vmsc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmsc_hwtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmsc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmsc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmsc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
   # Android VMMST slaves.
   # No board to build for now (just roll). empty slave to pass test.
@@ -1383,6 +1400,47 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       )
   )
 
+  # Android VMSC slaves.
+  vmsc_master_config.AddSlaves(
+      site_config.AddForBoards(
+          'vmsc-android-pfq',
+          _vmsc_hwtest_boards,
+          board_configs,
+          site_config.templates.vmsc_android_pfq,
+          enable_skylab_hw_tests=True,
+          hw_tests=hw_test_list.SharedPoolPFQ(),
+      ) +
+      site_config.AddForBoards(
+          'vmsc-android-pfq',
+          _vmsc_hwtest_experimental_boards,
+          board_configs,
+          site_config.templates.vmsc_android_pfq,
+          enable_skylab_hw_tests=True,
+          hw_tests=hw_test_list.SharedPoolPFQ(),
+          important=False,
+      ) +
+      site_config.AddForBoards(
+          'vmsc-android-pfq',
+          _vmsc_no_hwtest_boards,
+          board_configs,
+          site_config.templates.vmsc_android_pfq,
+      ) +
+      site_config.AddForBoards(
+          'vmsc-android-pfq',
+          _vmsc_no_hwtest_experimental_boards,
+          board_configs,
+          site_config.templates.vmsc_android_pfq,
+          important=False,
+      ) +
+      site_config.AddForBoards(
+          'vmsc-android-pfq',
+          _vmsc_vmtest_boards,
+          board_configs,
+          site_config.templates.vmsc_android_pfq,
+          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
+                                            test_suite='smoke')],
+      )
+  )
 
 def FullBuilders(site_config, boards_dict, ge_build_config):
   """Create all full builders.

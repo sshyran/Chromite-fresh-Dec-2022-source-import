@@ -891,6 +891,24 @@
             "sync_chrome": true,
             "uprev": false,
             "vm_tests": []
+        },
+        "vmsc_android_pfq": {
+            "_template": "vmsc_android_pfq",
+            "android_import_branch": "git_sc-arc-dev",
+            "android_package": "android-vm-sc",
+            "android_rev": "latest_release",
+            "build_timeout": 28800,
+            "build_type": "android",
+            "description": "Preflight Android Uprev & Build (internal)",
+            "display_label": "vmsc_android_pfq",
+            "internal": true,
+            "luci_builder": "PFQ",
+            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+            "manifest_version": true,
+            "overlays": "both",
+            "sync_chrome": true,
+            "uprev": false,
+            "vm_tests": []
         }
     },
     "ambassador-full": {
@@ -3884,6 +3902,30 @@
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "betty-arc-s-vmsc-android-pfq": {
+        "_template": "vmsc_android_pfq",
+        "boards": [
+            "betty-arc-s"
+        ],
+        "manifest": "official.xml",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "betty-arc-s-vmsc-android-pfq-tryjob": {
+        "_template": "vmsc_android_pfq",
+        "boards": [
+            "betty-arc-s"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "uprev": true,
         "useflags": [
             "chrome_internal"
         ]
@@ -18372,8 +18414,8 @@
             "chrome_internal"
         ]
     },
-    "hatch-arc-s-vmmst-android-pfq": {
-        "_template": "vmmst_android_pfq",
+    "hatch-arc-s-vmsc-android-pfq": {
+        "_template": "vmsc_android_pfq",
         "boards": [
             "hatch-arc-s"
         ],
@@ -18382,8 +18424,8 @@
             "chrome_internal"
         ]
     },
-    "hatch-arc-s-vmmst-android-pfq-tryjob": {
-        "_template": "vmmst_android_pfq",
+    "hatch-arc-s-vmsc-android-pfq-tryjob": {
+        "_template": "vmsc_android_pfq",
         "boards": [
             "hatch-arc-s"
         ],
@@ -23761,8 +23803,7 @@
         "push_overlays": "both",
         "schedule": "with 150m interval",
         "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq",
-            "hatch-arc-s-vmmst-android-pfq"
+            "betty-arcvm-master-vmmst-android-pfq"
         ]
     },
     "master-vmmst-android-pfq-tryjob": {
@@ -23775,8 +23816,7 @@
         "master": true,
         "push_overlays": "both",
         "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq-tryjob",
-            "hatch-arc-s-vmmst-android-pfq-tryjob"
+            "betty-arcvm-master-vmmst-android-pfq-tryjob"
         ],
         "uprev": true
     },
@@ -23807,6 +23847,32 @@
             "hatch-arc-r-vmrvc-android-pfq-tryjob",
             "kukui-arc-r-vmrvc-android-pfq-tryjob",
             "rammus-arc-r-vmrvc-android-pfq-tryjob"
+        ],
+        "uprev": true
+    },
+    "master-vmsc-android-pfq": {
+        "_template": "vmsc_android_pfq",
+        "boards": [],
+        "master": true,
+        "push_overlays": "both",
+        "schedule": "with 60m interval",
+        "slave_configs": [
+            "betty-arc-s-vmsc-android-pfq",
+            "hatch-arc-s-vmsc-android-pfq"
+        ]
+    },
+    "master-vmsc-android-pfq-tryjob": {
+        "_template": "vmsc_android_pfq",
+        "boards": [],
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "master": true,
+        "push_overlays": "both",
+        "slave_configs": [
+            "betty-arc-s-vmsc-android-pfq-tryjob",
+            "hatch-arc-s-vmsc-android-pfq-tryjob"
         ],
         "uprev": true
     },
