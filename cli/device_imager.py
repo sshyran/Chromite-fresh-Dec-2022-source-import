@@ -11,13 +11,16 @@ import re
 import sys
 import tempfile
 import threading
+import time
 from typing import Tuple, Dict
 
+from chromite.cli import command
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import image_lib
+from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
@@ -101,10 +104,15 @@ class DeviceImager(object):
     """Update the device with image of specific version."""
 
     try:
-      self._Run()
+      if command.UseProgressBar():
+        op = DeviceImagerOperation()
+        op.Run(self._Run)
+      else:
+        self._Run()
     except Exception as e:
       raise Error(f'DeviceImager Failed with error: {e}')
 
+    # DeviceImagerOperation will look for this log.
     logging.info('DeviceImager completed.')
 
   def _Run(self):
@@ -620,7 +628,8 @@ class RootfsUpdater(RawPartitionUpdater):
 
   def _Run(self):
     """The function that does the job of rootfs partition update."""
-    super()._Run()
+    with ProgressWatcher(self._device, self._target):
+      super()._Run()
 
     self._RunPostInst()
 
@@ -665,6 +674,7 @@ class RootfsUpdater(RawPartitionUpdater):
       result = self._device.run([postinst, partition], capture_output=True)
 
       logging.debug('Postinst result on %s: \n%s', postinst, result.stdout)
+      # DeviceImagerOperation will look for this log.
       logging.info('Postinstall completed.')
     finally:
       if on_target:
@@ -737,3 +747,113 @@ class StatefulUpdater(PartitionUpdaterBase):
     """Reverts the stateful partition update."""
     logging.info('Reverting the stateful update.')
     stateful_updater.StatefulUpdater(self._device).Reset()
+
+
+class ProgressWatcher(threading.Thread):
+  """A class used for watching the progress of rootfs update."""
+
+  def __init__(self, device, target_root: str):
+    """Initializes the class.
+
+    Args:
+      device: The ChromiumOSDevice to be updated.
+      target_root: The target root partition to monitor the progress of.
+    """
+    super().__init__()
+
+    self._device = device
+    self._target_root = target_root
+    self._exit = False
+
+  def __enter__(self):
+    """Starts the thread."""
+    self.start()
+    return self
+
+  def __exit__(self, *args, **kwargs):
+    """Exists the thread."""
+    self._exit = True
+    self.join()
+
+  def _ShouldExit(self):
+    return self._exit
+
+  def run(self):
+    """Monitors the progress of the target root partitions' update.
+
+    This is done by periodically, reading the fd position of the process that is
+    writing into the target partition and reporting it back. Then the position
+    is divided by the size of the block device to report an approximate
+    progress.
+    """
+    cmd = ['blockdev', '--getsize64', self._target_root]
+    output = self._device.run(cmd, capture_output=True).stdout.strip()
+    if output is None:
+      raise Error(f'Cannot get the block device size from {output}.')
+    dev_size = int(output)
+
+    # Using lsof to find out which process is writing to the target rootfs.
+    cmd = f'lsof 2>/dev/null | grep {self._target_root}'
+    while not self._ShouldExit():
+      try:
+        output = self._device.run(cmd, capture_output=True,
+                                  shell=True).stdout.strip()
+        if output:
+          break
+      except cros_build_lib.RunCommandError:
+        continue
+      finally:
+        time.sleep(1)
+
+    # Now that we know which process is writing to it, we can look the fdinfo of
+    # stdout of that process to get its offset. We're assuming there will be no
+    # seek, which is correct.
+    pid = output.split()[1]
+    cmd = ['cat', f'/proc/{pid}/fdinfo/1']
+    while not self._ShouldExit():
+      try:
+        output = self._device.run(cmd, capture_output=True).stdout.strip()
+        m = re.search(r'^pos:\s*(\d+)$', output, flags=re.M)
+        if m:
+          offset = int(m.group(1))
+          # DeviceImagerOperation will look for this log.
+          logging.info('RootFS progress: %f', offset/dev_size)
+      except cros_build_lib.RunCommandError:
+        continue
+      finally:
+        time.sleep(1)
+
+
+class DeviceImagerOperation(operation.ProgressBarOperation):
+  """A class to provide a progress bar for DeviceImager operation."""
+
+  def __init__(self):
+    """Initializes the class."""
+    super().__init__()
+
+    self._progress = 0.0
+
+  def ParseOutput(self, output=None):
+    """Override function to parse the output and provide progress.
+
+    Args:
+      output: The stderr or stdout.
+    """
+    output = self._stdout.read()
+    match = re.findall(r'RootFS progress: (\d+(?:\.\d+)?)', output)
+    if match:
+      progress = float(match[0])
+      self._progress = max(self._progress, progress)
+
+    # If postinstall completes, move half of the remaining progress.
+    if re.findall(r'Postinstall completed', output):
+      self._progress += (1.0 - self._progress) / 2
+
+    # While waiting for reboot, each time, move half of the remaining progress.
+    if re.findall(r'Unable to get new boot_id', output):
+      self._progress += (1.0 - self._progress) / 2
+
+    if re.findall(r'DeviceImager completed.', output):
+      self._progress = 1.0
+
+    self.ProgressBar(self._progress)

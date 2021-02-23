@@ -7,6 +7,7 @@
 import os
 import sys
 import tempfile
+import time
 
 import mock
 
@@ -305,9 +306,10 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_ROOTFS,
                      ru._GetRemotePartitionName())
 
+  @mock.patch.object(device_imager.ProgressWatcher, 'run')
   @mock.patch.object(device_imager.RootfsUpdater, '_RunPostInst')
   @mock.patch.object(device_imager.RootfsUpdater, '_CopyPartitionFromImage')
-  def test_Run(self, copy_mock, postinst_mock):
+  def test_Run(self, copy_mock, postinst_mock, pw_mock):
     """Test main Run() function.
 
     This function should parts of the source image and write it into the device
@@ -320,6 +322,7 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
 
       copy_mock.assert_called_with(constants.PART_ROOT_A)
       postinst_mock.assert_called_with()
+      pw_mock.assert_called()
 
   def test_RunPostInstOnTarget(self):
     """Test _RunPostInst() function."""
@@ -409,3 +412,31 @@ class StatefulUpdaterTest(cros_test_lib.TestCase):
 
     su.Revert()
     reset_mock.assert_called()
+
+
+class ProgressWatcherTest(cros_test_lib.MockTestCase):
+  """Tests ProgressWatcher class"""
+
+  def setUp(self):
+    """Sets up the class by creating proper mocks."""
+    self.rsh_mock = self.StartPatcher(remote_access_unittest.RemoteShMock())
+    self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), stdout='')
+    self.path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
+
+  @mock.patch.object(time, 'sleep')
+  @mock.patch.object(device_imager.ProgressWatcher, '_ShouldExit',
+                     side_effect=[False, False, True])
+  # pylint: disable=unused-argument
+  def testRun(self, exit_mock, _):
+    """Tests the run() function."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      target_root = '/foo/root'
+      self.rsh_mock.AddCmdResult(
+          [self.path_env, 'blockdev', '--getsize64', target_root], stdout='100')
+      self.rsh_mock.AddCmdResult(
+          self.path_env + f' lsof 2>/dev/null | grep {target_root}',
+          stdout='xz 999')
+      self.rsh_mock.AddCmdResult([self.path_env, 'cat', '/proc/999/fdinfo/1'],
+                                 stdout='pos:   10\nflags:  foo')
+      pw = device_imager.ProgressWatcher(device, target_root)
+      pw.run()
