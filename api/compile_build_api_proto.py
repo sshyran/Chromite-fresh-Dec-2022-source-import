@@ -28,7 +28,7 @@ _CIPD_ROOT = os.path.join(constants.CHROMITE_DIR, '.cipd_bin')
 _PROTOC = os.path.join(_CIPD_ROOT, 'protoc')
 _PROTO_DIR = os.path.join(constants.CHROMITE_DIR, 'infra', 'proto')
 
-PROTOC_VERSION = '3.6.1'
+PROTOC_VERSION = '3.13.0'
 
 
 class Error(Exception):
