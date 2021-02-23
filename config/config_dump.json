@@ -23462,6 +23462,7 @@
         "boards": [
             "majolica"
         ],
+        "important": false,
         "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
