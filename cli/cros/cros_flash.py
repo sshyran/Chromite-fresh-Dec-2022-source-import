@@ -13,10 +13,11 @@ from chromite.cli import command
 from chromite.cli import flash
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
-
+from chromite.lib import pformat
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
@@ -159,6 +160,9 @@ Examples:
         action='store_false', default=True,
         help=('Do not copy the update payloads to the device. For now this '
               'only works for the stateful payload.'))
+    update.add_argument(
+        '--exp-new-flash', action='store_true', default=False,
+        help=('Use the faster version of cros flash (experimental).'))
 
   def _GetDefaultVersion(self):
     """Get default full SDK version.
@@ -183,28 +187,32 @@ Examples:
     self.options.Freeze()
 
     try:
-      flash.Flash(
-          self.options.device,
-          self.options.image,
-          board=self.options.board,
-          version=self._GetDefaultVersion(),
-          src_image_to_delta=self.options.src_image_to_delta,
-          rootfs_update=self.options.rootfs_update,
-          stateful_update=self.options.stateful_update,
-          clobber_stateful=self.options.clobber_stateful,
-          clear_tpm_owner=self.options.clear_tpm_owner,
-          reboot=self.options.reboot,
-          wipe=self.options.wipe,
-          ssh_private_key=self.options.private_key,
-          ping=self.options.ping,
-          disable_rootfs_verification=self.options.disable_rootfs_verification,
-          clear_cache=self.options.clear_cache,
-          yes=self.options.yes,
-          force=self.options.force,
-          debug=self.options.debug,
-          send_payload_in_parallel=self.options.send_payload_in_parallel,
-          copy_payloads_to_device=self.options.copy_payloads_to_device)
-      logging.notice('cros flash completed successfully.')
+      with cros_build_lib.TimedSection() as timer:
+        flash.Flash(
+            self.options.device,
+            self.options.image,
+            board=self.options.board,
+            version=self._GetDefaultVersion(),
+            src_image_to_delta=self.options.src_image_to_delta,
+            rootfs_update=self.options.rootfs_update,
+            stateful_update=self.options.stateful_update,
+            clobber_stateful=self.options.clobber_stateful,
+            clear_tpm_owner=self.options.clear_tpm_owner,
+            reboot=self.options.reboot,
+            wipe=self.options.wipe,
+            ssh_private_key=self.options.private_key,
+            ping=self.options.ping,
+            disable_rootfs_verification=
+              self.options.disable_rootfs_verification,
+            clear_cache=self.options.clear_cache,
+            yes=self.options.yes,
+            force=self.options.force,
+            debug=self.options.debug,
+            send_payload_in_parallel=self.options.send_payload_in_parallel,
+            copy_payloads_to_device=self.options.copy_payloads_to_device,
+            exp_new_flash=self.options.exp_new_flash)
+      logging.notice('cros flash completed successfully in %s',
+                     pformat.timedelta(timer.delta))
     except dev_server_wrapper.ImagePathError:
       logging.error('To get the latest remote image, please run:\n'
                     'cros flash --board=%s %s remote/latest',

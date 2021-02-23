@@ -14,6 +14,7 @@ import shutil
 import sys
 import tempfile
 
+from chromite.cli import device_imager
 from chromite.cli.cros import cros_chrome_sdk
 
 from chromite.lib import auto_updater
@@ -527,7 +528,8 @@ def Flash(device, image, board=None, src_image_to_delta=None,
           reboot=True, wipe=True, ssh_private_key=None, ping=True,
           disable_rootfs_verification=False, clear_cache=False, yes=False,
           force=False, debug=False, send_payload_in_parallel=False,
-          clear_tpm_owner=False, version=None, copy_payloads_to_device=True):
+          clear_tpm_owner=False, version=None, copy_payloads_to_device=True,
+          exp_new_flash=False):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -561,6 +563,7 @@ def Flash(device, image, board=None, src_image_to_delta=None,
     copy_payloads_to_device: If True, update payloads are copied to the
         Chromium OS device first. Otherwise, they are piped through SSH.
         Currently, this only applies to the stateful payloads.
+    exp_new_flash: Whether to use device_imager.
 
   Raises:
     FlashError: An unrecoverable error occured.
@@ -581,6 +584,22 @@ def Flash(device, image, board=None, src_image_to_delta=None,
     else:
       hostname, port = None, None
     logging.notice('Preparing to update the remote device %s', hostname)
+
+    if exp_new_flash:
+      with remote_access.ChromiumOSDeviceHandler(
+          hostname, port=port,
+          private_key=ssh_private_key, ping=ping) as device_p:
+        device_imager.DeviceImager(
+            device_p,
+            image,
+            no_rootfs_update=not rootfs_update,
+            no_stateful_update=not stateful_update,
+            no_reboot=not reboot,
+            disable_verification=disable_rootfs_verification,
+            clobber_stateful=clobber_stateful,
+            clear_tpm_owner=clear_tpm_owner).Run()
+      return
+
     updater = RemoteDeviceUpdater(
         hostname,
         port,
