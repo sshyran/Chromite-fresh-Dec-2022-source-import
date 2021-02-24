@@ -21,9 +21,7 @@
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
 ignore-patterns=
-    .*_pb2\.py$,
-    .*third_party\/.*.py$
-
+    .*_pb2\.py$
 
 # Pickle collected data for later comparisons.
 #persistent=yes
