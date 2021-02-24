@@ -97,7 +97,7 @@ def _get_proto_dir(_protoc_version):
   return os.path.join(constants.CHROMITE_DIR, 'infra', 'proto')
 
 
-def _InstallProtoc(protoc_version: ProtocVersion):
+def InstallProtoc(protoc_version: ProtocVersion):
   """Install protoc from CIPD."""
   if protoc_version is not ProtocVersion.CHROMITE:
     return
@@ -117,7 +117,7 @@ def _InstallProtoc(protoc_version: ProtocVersion):
 
     cmd.extend(['-ensure-file', ensure_file])
 
-    cros_build_lib.run(cmd, cwd=constants.CHROMITE_DIR, print_cmd=False)
+    cros_build_lib.dbg_run(cmd, cwd=constants.CHROMITE_DIR)
 
 
 def _CleanTargetDirectory(directory: str):
@@ -292,7 +292,7 @@ def CompileProto(output: str,
   source = os.path.join(_get_proto_dir(protoc_version), 'src')
   protoc_version = protoc_version or ProtocVersion.CHROMITE
 
-  _InstallProtoc(protoc_version)
+  InstallProtoc(protoc_version)
   _CleanTargetDirectory(output)
   _GenerateFiles(source, output, protoc_version, dir_subset)
   _InstallMissingInits(output)

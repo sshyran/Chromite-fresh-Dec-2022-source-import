@@ -26,6 +26,7 @@ import sys
 
 import pytest  # pylint: disable=import-error
 
+from chromite.api import compile_build_api_proto
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -54,9 +55,7 @@ def main(argv):
   if opts.network:
     pytest_args += ['-m', 'not network_test or network_test']
 
-  # This is a cheesy hack to make sure gsutil is populated in the cache before
-  # we run tests. This is a partial workaround for crbug.com/468838.
-  gs.GSContext.InitializeCache()
+  precache()
 
   if opts.quick:
     logging.info('Skipping test namespacing due to --quickstart.')
@@ -81,6 +80,16 @@ def main(argv):
         ' (should be 0:0)\nFix with: sudo chown 0:0 /')
 
   sys.exit(pytest.main(pytest_args))
+
+
+def precache():
+  """Do some network-dependent stuff before we disallow network access."""
+  # This is a cheesy hack to make sure gsutil is populated in the cache before
+  # we run tests. This is a partial workaround for crbug.com/468838.
+  gs.GSContext.InitializeCache()
+  # Ensure protoc is installed for api/compile_build_api_proto_unittest.
+  compile_build_api_proto.InstallProtoc(
+      compile_build_api_proto.ProtocVersion.CHROMITE)
 
 
 def re_execute_with_namespace(argv, network=False):
