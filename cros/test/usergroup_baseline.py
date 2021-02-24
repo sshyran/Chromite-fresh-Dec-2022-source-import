@@ -198,6 +198,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='traced-consumer', gid=20164, users={'traced',
                                                           'chronos'}),
     GroupEntry(group='hotline', gid=20157, users={'hotline', 'hotlog'}),
+    GroupEntry(group='vpn', gid=20174, users={'vpn', 'shill'}),
 ))
 
 GROUP_BASELINE_LAKITU = dict((e.group, e) for e in (
