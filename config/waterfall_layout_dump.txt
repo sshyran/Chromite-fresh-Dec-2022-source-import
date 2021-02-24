@@ -1026,7 +1026,6 @@
   firmware-ninja-5216.383.B-firmwarebranch-tryjob
   firmware-nocturne-10984.B-firmwarebranch-tryjob
   firmware-oak-8438.B-firmwarebranch-tryjob
-  firmware-octopus-11297.196.B-firmwarebranch-tryjob
   firmware-octopus-11297.B-firmwarebranch-tryjob
   firmware-orco-5216.362.B-firmwarebranch-tryjob
   firmware-paine-6301.58.B-firmwarebranch-tryjob
@@ -1049,6 +1048,8 @@
   firmware-trogdor-13577.B-firmwarebranch-tryjob
   firmware-ultima-7287.131.B-firmwarebranch-tryjob
   firmware-veyron-6588.B-firmwarebranch-tryjob
+  firmware-volteer-13672.39.B-firmwarebranch-tryjob
+  firmware-volteer-13672.47.B-firmwarebranch-tryjob
   firmware-volteer-13672.B-firmwarebranch-tryjob
   firmware-winky-5216.265.B-firmwarebranch-tryjob
   firmware-yuna-6301.59.B-firmwarebranch-tryjob
