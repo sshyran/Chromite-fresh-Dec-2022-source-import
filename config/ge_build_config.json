@@ -4468,6 +4468,14 @@
         },
         {
           "board_name": "kukui-arc-r",
+          "name": "katsu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 442,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-arc-r",
           "name": "kodama",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
