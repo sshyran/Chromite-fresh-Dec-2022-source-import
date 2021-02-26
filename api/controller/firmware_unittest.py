@@ -69,3 +69,18 @@ class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,
     response = firmware_pb2.BuildAllFirmwareResponse()
     firmware.BuildAllFirmware(request, response, self.validate_only_config)
     self.cros_build_run_patch.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    request = self._GetInput(chroot_path=self.chroot_path, code_coverage=True)
+    response = firmware_pb2.BuildAllFirmwareResponse()
+    firmware.BuildAllFirmware(request, response, self.mock_call_config)
+    self.cros_build_run_patch.assert_not_called()
+    self.assertEqual(len(response.metrics.value), 1)
+    self.assertEqual(response.metrics.value[0].target_name, 'foo')
+    self.assertEqual(response.metrics.value[0].platform_name, 'bar')
+    self.assertEqual(len(response.metrics.value[0].fw_section), 1)
+    self.assertEqual(response.metrics.value[0].fw_section[0].region,
+                     firmware_pb2.FwBuildMetric.FwSection.EC_RO)
+    self.assertEqual(response.metrics.value[0].fw_section[0].used, 100)
+    self.assertEqual(response.metrics.value[0].fw_section[0].total, 150)

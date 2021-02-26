@@ -107,7 +107,7 @@ def TestAllTotFirmware(input_proto, output_proto, _config):
 def _BuildAllFirmwareResponse(_input_proto, output_proto, _config):
   """Add a fw region metric to a successful response."""
 
-  metric = output_proto.success.value.add()
+  metric = output_proto.metrics.value.add()
   metric.target_name = 'foo'
   metric.platform_name = 'bar'
   fw_section = metric.fw_section.add()
