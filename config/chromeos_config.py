@@ -1747,8 +1747,8 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
-      (NONE, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
-      (NONE, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
+      (MONTHLY, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
+      (MONTHLY, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
