@@ -3080,6 +3080,13 @@ def BranchScheduleConfig():
   # Do not remove BOT-TAG:* comments. They are used to help parse config.
   # BOT-TAG:RELEASES_START
   RELEASES = [
+      ('release-R90-13816.B',
+       ['grunt-android-pi-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+
       ('release-R89-13729.B',
        ['grunt-android-pi-pre-flight-branch',
         'hatch-arc-r-android-rvc-pre-flight-branch'],
@@ -3093,17 +3100,6 @@ def BranchScheduleConfig():
        '',
        [],
        [],
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-
-      ('release-R87-13505.B',
-       ['grunt-android-pi-pre-flight-branch'],
-       '',
-       ['orderfile-generate-toolchain',
-        'orderfile-verify-toolchain'],
-       ['benchmark-afdo-generate',
-        'chrome-silvermont-release-afdo-verify',
-        'chrome-airmont-release-afdo-verify',
-        'chrome-broadwell-release-afdo-verify'],
        config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
