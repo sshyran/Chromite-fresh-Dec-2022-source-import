@@ -234,3 +234,12 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTestCase):
       run_mock.assert_called()
       close_mock.assert_called()
       name_mock.assert_called()
+
+
+class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
+  """Tests KernelUpdater class."""
+
+  def test_GetPartitionName(self):
+    """Tests the name of the partitions."""
+    ku = device_imager.KernelUpdater(None, None, None, None, None)
+    self.assertEqual(constants.PART_KERN_B, ku._GetPartitionName())

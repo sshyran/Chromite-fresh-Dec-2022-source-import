@@ -208,7 +208,14 @@ class DeviceImager(object):
       image: The image path (local file or remote directory).
       image_type: The type of the image (ImageType).
     """
+    prefix, root_num = self._SplitDevPath(self._device.root_dev)
+    active_state, self._inactive_state = self._GetKernelState(root_num)
+
     updaters = []
+    if not self._no_rootfs_update:
+      target_kernel = prefix + str(self._inactive_state[Partition.KERNEL])
+      updaters.append(KernelUpdater(self._device, image, image_type,
+                                    target_kernel, self._compression))
 
     # Retry the partitions updates that failed, in case a transient error (like
     # SSH drop, etc) caused the error.
@@ -515,3 +522,15 @@ class RawPartitionUpdater(PartitionUpdaterBase):
       A tuple of offset and length (in bytes) from the image.
     """
     return offset, length
+
+
+class KernelUpdater(RawPartitionUpdater):
+  """A class to update the kernel partition on a Chromium OS device."""
+
+  def _GetPartitionName(self):
+    """See RawPartitionUpdater._GetPartitionName()."""
+    return constants.PART_KERN_B
+
+  def Revert(self):
+    """Reverts the kernel partition update."""
+    # There is nothing to do for reverting kernel partition.
