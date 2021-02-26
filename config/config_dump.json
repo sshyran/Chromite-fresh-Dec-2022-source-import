@@ -14206,7 +14206,7 @@
         "boards": [
             "volteer"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-volteer-13672.39.B"
     },
     "firmware-volteer-13672.39.B-firmwarebranch-tryjob": {
@@ -14226,7 +14226,7 @@
         "boards": [
             "volteer"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-volteer-13672.47.B"
     },
     "firmware-volteer-13672.47.B-firmwarebranch-tryjob": {

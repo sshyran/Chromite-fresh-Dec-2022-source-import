@@ -1674,6 +1674,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   DAILY = 'with 24h interval'  # 1 day interval
   WEEKLY = 'with 168h interval'  # 1 week interval
   MONTHLY = 'with 720h interval'  # 30 day interval
+  TRIGGERED = 'triggered'  # Only when triggered
   # Override these template variables via kwargs.
   GSC = {'sign_types': ['gsc_firmware']}
   firmware_branch_builders = [
@@ -1747,8 +1748,8 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
-      (MONTHLY, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
-      (MONTHLY, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
+      (TRIGGERED, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
+      (TRIGGERED, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
