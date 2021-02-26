@@ -39,7 +39,7 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.ChromeSDKCommand'
   TARGET_CLASS = cros_chrome_sdk.ChromeSDKCommand
   COMMAND = 'chrome-sdk'
-  ATTRS = (('_GOMA_DOWNLOAD_URL', '_SetupEnvironment') +
+  ATTRS = (('_GOMA_DOWNLOAD_URL', '_SetupEnvironment', '_CreateLdSymlinks') +
            command_unittest.MockCommand.ATTRS)
 
   _GOMA_DOWNLOAD_URL = 'Invalid URL'
@@ -52,6 +52,9 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
     env = self.backup['_SetupEnvironment'](*args, **kwargs)
     self.env = copy.deepcopy(env)
     return env
+
+  def _CreateLdSymlinks(self, *args):
+    pass
 
 
 class ParserTest(cros_test_lib.MockTempDirTestCase):
