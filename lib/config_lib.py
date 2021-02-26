@@ -1887,6 +1887,7 @@ def GetNonUniBuildLabBoardName(board):
       '-cfm', #
       '-kernelnext', #
       '-kvm', #
+      '-libcamera', #
       '-ndktranslation', #
       '-userdebug', #
   ]
