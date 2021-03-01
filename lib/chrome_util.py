@@ -413,6 +413,8 @@ _COPY_PATHS_CHROME = (
     Path('Packages/content_browser/manifest.json', optional=True),
     Path('resources/chromeos/'),
     Path('resources.pak'),
+    # TODO(crbug.com/1182258): remove once swiftshader is handled as DLC.
+    Path('swiftshader/*.so', dest='swiftshader/', optional=True),
     Path('xdg-settings'),
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
