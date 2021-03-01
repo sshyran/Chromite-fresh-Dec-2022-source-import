@@ -3081,7 +3081,8 @@ def BranchScheduleConfig():
   # BOT-TAG:RELEASES_START
   RELEASES = [
       ('release-R90-13816.B',
-       ['grunt-android-pi-pre-flight-branch'],
+       ['grunt-android-pi-pre-flight-branch',
+        'hatch-arc-r-android-rvc-pre-flight-branch'],
        '',
        [],
        [],
