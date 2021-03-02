@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n!chromite/api/build_api_test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\x1a\x18\x63hromiumos/metrics.proto\",\n\nNestedPath\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"f\n\x11MultiFieldMessage\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x66lag\x18\x03 \x01(\x08\x12)\n\ttest_enum\x18\x04 \x01(\x0e\x32\x16.chromite.api.TestEnum\"\xc9\x04\n\x12TestRequestMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x1e\n\x04path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12&\n\x0c\x61nother_path\x18\x04 \x01(\x0b\x32\x10.chromiumos.Path\x12-\n\x0bnested_path\x18\x05 \x01(\x0b\x32\x18.chromite.api.NestedPath\x12+\n\x0bresult_path\x18\x06 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12-\n\x0c\x62uild_target\x18\x07 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12.\n\rbuild_targets\x18\x08 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12)\n\nsynced_dir\x18\t \x01(\x0b\x32\x15.chromiumos.SyncedDir\x12*\n\x0bsynced_dirs\x18\n \x03(\x0b\x32\x15.chromiumos.SyncedDir\x12\x31\n\x08messages\x18\x0b \x03(\x0b\x32\x1f.chromite.api.MultiFieldMessage\x12)\n\ttest_enum\x18\x0c \x01(\x0e\x32\x16.chromite.api.TestEnum\x12*\n\ntest_enums\x18\r \x03(\x0e\x32\x16.chromite.api.TestEnum\x12\x0e\n\x06number\x18\x0e \x01(\x05\x12\x0f\n\x07numbers\x18\x0f \x03(\x05\"\xc8\x01\n\x11TestResultMessage\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\"\n\x08\x61rtifact\x18\x02 \x01(\x0b\x32\x10.chromiumos.Path\x12\x31\n\x0fnested_artifact\x18\x03 \x01(\x0b\x32\x18.chromite.api.NestedPath\x12#\n\tartifacts\x18\x04 \x03(\x0b\x32\x10.chromiumos.Path\x12\'\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x17.chromiumos.MetricEvent*^\n\x08TestEnum\x12\x19\n\x15TEST_ENUM_UNSPECIFIED\x10\x00\x12\x11\n\rTEST_ENUM_FOO\x10\x01\x12\x11\n\rTEST_ENUM_BAR\x10\x02\x12\x11\n\rTEST_ENUM_BAZ\x10\x03\x32\xe5\x01\n\x0eTestApiService\x12V\n\x11InputOutputMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12\x65\n\rRenamedMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x11\xc2\xed\x1a\r\n\x0b\x43orrectName\x1a\x14\xc2\xed\x1a\x10\n\x0e\x62uild_api_test2\xf9\x01\n\x16InsideChrootApiService\x12^\n\x19InsideServiceInsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12g\n\x1aInsideServiceOutsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x16\xc2\xed\x1a\x12\n\x0e\x62uild_api_test\x10\x01\x32\xfc\x01\n\x17OutsideChrootApiService\x12`\n\x1bOutsideServiceOutsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12g\n\x1aOutsideServiceInsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x06\xc2\xed\x1a\x02\x10\x01\x1a\x16\xc2\xed\x1a\x12\n\x0e\x62uild_api_test\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n!chromite/api/build_api_test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\x1a\x18\x63hromiumos/metrics.proto\",\n\nNestedPath\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"f\n\x11MultiFieldMessage\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x66lag\x18\x03 \x01(\x08\x12)\n\ttest_enum\x18\x04 \x01(\x0e\x32\x16.chromite.api.TestEnum\"\xc9\x04\n\x12TestRequestMessage\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x1e\n\x04path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12&\n\x0c\x61nother_path\x18\x04 \x01(\x0b\x32\x10.chromiumos.Path\x12-\n\x0bnested_path\x18\x05 \x01(\x0b\x32\x18.chromite.api.NestedPath\x12+\n\x0bresult_path\x18\x06 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12-\n\x0c\x62uild_target\x18\x07 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12.\n\rbuild_targets\x18\x08 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12)\n\nsynced_dir\x18\t \x01(\x0b\x32\x15.chromiumos.SyncedDir\x12*\n\x0bsynced_dirs\x18\n \x03(\x0b\x32\x15.chromiumos.SyncedDir\x12\x31\n\x08messages\x18\x0b \x03(\x0b\x32\x1f.chromite.api.MultiFieldMessage\x12)\n\ttest_enum\x18\x0c \x01(\x0e\x32\x16.chromite.api.TestEnum\x12*\n\ntest_enums\x18\r \x03(\x0e\x32\x16.chromite.api.TestEnum\x12\x0e\n\x06number\x18\x0e \x01(\x05\x12\x0f\n\x07numbers\x18\x0f \x03(\x05\"\xc8\x01\n\x11TestResultMessage\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\"\n\x08\x61rtifact\x18\x02 \x01(\x0b\x32\x10.chromiumos.Path\x12\x31\n\x0fnested_artifact\x18\x03 \x01(\x0b\x32\x18.chromite.api.NestedPath\x12#\n\tartifacts\x18\x04 \x03(\x0b\x32\x10.chromiumos.Path\x12\'\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x17.chromiumos.MetricEvent*^\n\x08TestEnum\x12\x19\n\x15TEST_ENUM_UNSPECIFIED\x10\x00\x12\x11\n\rTEST_ENUM_FOO\x10\x01\x12\x11\n\rTEST_ENUM_BAR\x10\x02\x12\x11\n\rTEST_ENUM_BAZ\x10\x03\x32\xc0\x02\n\x0eTestApiService\x12V\n\x11InputOutputMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12\x65\n\rRenamedMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x11\xc2\xed\x1a\r\n\x0b\x43orrectName\x12Y\n\x0cHiddenMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x06\xc2\xed\x1a\x02\x18\x02\x1a\x14\xc2\xed\x1a\x10\n\x0e\x62uild_api_test2\xf9\x01\n\x16InsideChrootApiService\x12^\n\x19InsideServiceInsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12g\n\x1aInsideServiceOutsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x16\xc2\xed\x1a\x12\n\x0e\x62uild_api_test\x10\x01\x32\xfc\x01\n\x17OutsideChrootApiService\x12`\n\x1bOutsideServiceOutsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x12g\n\x1aOutsideServiceInsideMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\"\x06\xc2\xed\x1a\x02\x10\x01\x1a\x16\xc2\xed\x1a\x12\n\x0e\x62uild_api_test\x10\x02\x32|\n\rHiddenService\x12Q\n\x0cHiddenMethod\x12 .chromite.api.TestRequestMessage\x1a\x1f.chromite.api.TestResultMessage\x1a\x18\xc2\xed\x1a\x14\n\x0e\x62uild_api_test\x10\x02\x18\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_metrics__pb2.DESCRIPTOR,])
 
@@ -408,7 +408,7 @@ _TESTAPISERVICE = _descriptor.ServiceDescriptor(
   serialized_options=b'\302\355\032\020\n\016build_api_test',
   create_key=_descriptor._internal_create_key,
   serialized_start=1170,
-  serialized_end=1399,
+  serialized_end=1490,
   methods=[
   _descriptor.MethodDescriptor(
     name='InputOutputMethod',
@@ -430,6 +430,16 @@ _TESTAPISERVICE = _descriptor.ServiceDescriptor(
     serialized_options=b'\302\355\032\r\n\013CorrectName',
     create_key=_descriptor._internal_create_key,
   ),
+  _descriptor.MethodDescriptor(
+    name='HiddenMethod',
+    full_name='chromite.api.TestApiService.HiddenMethod',
+    index=2,
+    containing_service=None,
+    input_type=_TESTREQUESTMESSAGE,
+    output_type=_TESTRESULTMESSAGE,
+    serialized_options=b'\302\355\032\002\030\002',
+    create_key=_descriptor._internal_create_key,
+  ),
 ])
 _sym_db.RegisterServiceDescriptor(_TESTAPISERVICE)
 
@@ -443,8 +453,8 @@ _INSIDECHROOTAPISERVICE = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=b'\302\355\032\022\n\016build_api_test\020\001',
   create_key=_descriptor._internal_create_key,
-  serialized_start=1402,
-  serialized_end=1651,
+  serialized_start=1493,
+  serialized_end=1742,
   methods=[
   _descriptor.MethodDescriptor(
     name='InsideServiceInsideMethod',
@@ -479,8 +489,8 @@ _OUTSIDECHROOTAPISERVICE = _descriptor.ServiceDescriptor(
   index=2,
   serialized_options=b'\302\355\032\022\n\016build_api_test\020\002',
   create_key=_descriptor._internal_create_key,
-  serialized_start=1654,
-  serialized_end=1906,
+  serialized_start=1745,
+  serialized_end=1997,
   methods=[
   _descriptor.MethodDescriptor(
     name='OutsideServiceOutsideMethod',
@@ -506,5 +516,31 @@ _OUTSIDECHROOTAPISERVICE = _descriptor.ServiceDescriptor(
 _sym_db.RegisterServiceDescriptor(_OUTSIDECHROOTAPISERVICE)
 
 DESCRIPTOR.services_by_name['OutsideChrootApiService'] = _OUTSIDECHROOTAPISERVICE
+
+
+_HIDDENSERVICE = _descriptor.ServiceDescriptor(
+  name='HiddenService',
+  full_name='chromite.api.HiddenService',
+  file=DESCRIPTOR,
+  index=3,
+  serialized_options=b'\302\355\032\024\n\016build_api_test\020\002\030\002',
+  create_key=_descriptor._internal_create_key,
+  serialized_start=1999,
+  serialized_end=2123,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='HiddenMethod',
+    full_name='chromite.api.HiddenService.HiddenMethod',
+    index=0,
+    containing_service=None,
+    input_type=_TESTREQUESTMESSAGE,
+    output_type=_TESTRESULTMESSAGE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_HIDDENSERVICE)
+
+DESCRIPTOR.services_by_name['HiddenService'] = _HIDDENSERVICE
 
 # @@protoc_insertion_point(module_scope)

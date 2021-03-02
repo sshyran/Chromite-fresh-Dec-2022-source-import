@@ -170,7 +170,19 @@ class Router(object):
     """List all methods registered with the router."""
     services = []
     for service_name, (svc, _module) in self._services.items():
+      svc_visibility = getattr(
+          svc.GetOptions().Extensions[self._svc_options_ext],
+          'service_visibility', build_api_pb2.LV_VISIBLE)
+      if svc_visibility == build_api_pb2.LV_HIDDEN:
+        continue
+
       for method_name in svc.methods_by_name.keys():
+        method_options = self._get_method_options(service_name, method_name)
+        method_visibility = getattr(method_options, 'method_visibility',
+                                    build_api_pb2.LV_VISIBLE)
+        if method_visibility == build_api_pb2.LV_HIDDEN:
+          continue
+
         services.append('%s/%s' % (service_name, method_name))
 
     return sorted(services)

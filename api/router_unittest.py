@@ -380,3 +380,12 @@ class RouterTest(cros_test_lib.RunCommandTempDirTestCase,
       self.router.Route(service, method, self.api_config,
                         self.binary_input_handler, [self.binary_output_handler],
                         self.binary_config_handler)
+
+  def testListVisibility(self):
+    """Test visibility options."""
+    service = 'HiddenService'
+    method = 'HiddenMethod'
+
+    for current in self.router.ListMethods():
+      self.assertNotIn(service, current)
+      self.assertNotIn(method, current)
