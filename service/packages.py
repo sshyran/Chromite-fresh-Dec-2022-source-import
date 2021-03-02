@@ -344,6 +344,37 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   return result
 
+@uprevs_versioned_package('chromeos-base/perfetto')
+def uprev_perfetto(_build_targets, refs, chroot):
+  """Updates Perfetto ebuilds.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result of updating Perfetto ebuilds.
+  """
+  result = uprev_lib.UprevVersionedPackageResult()
+
+  perfetto_version = get_latest_perfetto_version_from_refs(refs)
+  if not perfetto_version:
+    # No valid Perfetto version is identified.
+    return result
+
+  logging.debug('Perfetto version determined from refs: %s', perfetto_version)
+
+  # Attempt to uprev perfetto package.
+  PERFETTO_PATH = 'src/third_party/chromiumos-overlay/chromeos-base/perfetto'
+
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(PERFETTO_PATH,
+                                                          perfetto_version,
+                                                          chroot)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(perfetto_version, uprev_result.changed_files)
+
+  return result
 
 @uprevs_versioned_package('afdo/kernel-profiles')
 def uprev_kernel_afdo(*_args, **_kwargs):
@@ -535,6 +566,36 @@ def get_latest_drivefs_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
                               key=LooseVersion,
                               reverse=True)[0]
   return target_version_ref.replace(DRIVEFS_REFS_PREFIX, '')
+
+
+def get_latest_perfetto_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
+  """Get the latest Perfetto version from refs
+
+  Perfetto versions follow the tag format of refs/tags/v1.2.
+  Versions are compared using |distutils.version.LooseVersion| and
+  the latest version is returned.
+
+  Args:
+    refs: The tags to parse for the latest Perfetto version.
+
+  Returns:
+    The latest Perfetto version to use.
+  """
+  PERFETTO_REFS_PREFIX = 'refs/tags/v'
+
+  valid_refs = []
+  for gitiles in refs:
+    if gitiles.ref.startswith(PERFETTO_REFS_PREFIX):
+      valid_refs.append(gitiles.ref)
+
+  if not valid_refs:
+    return None
+
+  # Sort by version and take the latest version.
+  target_version_ref = sorted(valid_refs,
+                              key=LooseVersion,
+                              reverse=True)[0]
+  return target_version_ref.replace(PERFETTO_REFS_PREFIX, '')
 
 
 def _generate_platform_c_files(replication_config, chroot):

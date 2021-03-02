@@ -1097,6 +1097,34 @@ class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
     self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)
 
 
+class GetLatestPerfettoVersionTest(cros_test_lib.TestCase):
+  """Tests for get_latest_perfetto_version_from_refs."""
+
+  def setUp(self):
+    # The tag ref template.
+    ref_tpl = 'refs/tags/v%s'
+
+    self.latest = '12.0'
+    self.versions = ['9.1', self.latest, '10.0', '10.2']
+    self.latest_ref = uprev_lib.GitRef('/path', ref_tpl % self.latest, 'abc123')
+    self.refs = [uprev_lib.GitRef('/path', ref_tpl % v, 'abc123')
+                 for v in self.versions]
+
+  def test_single_ref(self):
+    """Test a single ref is supplied."""
+    self.assertEqual(self.latest,
+        packages.get_latest_perfetto_version_from_refs([self.latest_ref]))
+
+  def test_multiple_ref_versions(self):
+    """Test multiple refs supplied."""
+    self.assertEqual(self.latest,
+        packages.get_latest_perfetto_version_from_refs(self.refs))
+
+  def test_no_refs_returns_none(self):
+    """Test no refs supplied."""
+    self.assertEqual(packages.get_latest_perfetto_version_from_refs([]), None)
+
+
 class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
   """Tests for needs_chrome_source."""
 
@@ -1317,4 +1345,69 @@ class UprevDrivefsTest(cros_test_lib.MockTestCase):
         'uprev_workon_ebuild_to_version',
         side_effect=[drivefs_outcome, drivefs_ipc_outcome])
     output = packages.uprev_drivefs(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+
+# TODO(chenghaoyang): Shouldn't use uprev_workon_ebuild_to_version.
+class UprevPerfettoTest(cros_test_lib.MockTestCase):
+  """Tests for uprev_perfetto."""
+
+  def setUp(self):
+    self.refs = [
+        GitRef(
+            path='/foo',
+            ref='refs/tags/v12.0',
+            revision='123')
+    ]
+    self.MOCK_PERFETTO_EBUILD_PATH = 'perfetto-12.0-r1.ebuild'
+
+  def revisionBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
+
+  def majorBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
+
+  def sameVersionOutcome(self):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.SAME_VERSION_EXISTS)
+
+  def test_latest_version_returns_none(self):
+    """Test no refs were supplied"""
+    output = packages.uprev_perfetto(None, [], None)
+    self.assertFalse(output.uprevved)
+
+  def test_perfetto_uprev_fails(self):
+    """Test a single ref is supplied."""
+    self.PatchObject(
+        uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_same_version_exists(self):
+    """Test the same version exists uprev should not happen."""
+    perfetto_outcome = self.sameVersionOutcome()
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_revision_bump_perfetto_package(self):
+    """Test perfetto package uprev."""
+    perfetto_outcome = self.revisionBumpOutcome(self.MOCK_PERFETTO_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_major_bump_perfetto_package(self):
+    """Test perfetto package uprev."""
+    perfetto_outcome = self.majorBumpOutcome(self.MOCK_PERFETTO_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
     self.assertTrue(output.uprevved)
