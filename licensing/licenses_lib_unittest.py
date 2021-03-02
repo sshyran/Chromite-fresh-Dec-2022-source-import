@@ -9,6 +9,9 @@ from __future__ import print_function
 
 import os
 
+import mock
+
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.licensing import licenses_lib
@@ -377,3 +380,17 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
           licenses_lib.HookPackageProcess(os.path.join(build_infos_path, pkg))
       else:
         licenses_lib.HookPackageProcess(os.path.join(build_infos_path, pkg))
+
+  @mock.patch('chromite.lib.cros_build_lib.run')
+  def testListInstalledPackages(self, run_mock):
+    result = '[ U ] test to /build/test_dir\n[ U ] test2 to /build/test_dir'
+    run_mock.return_value = cros_build_lib.CommandResult(
+        args=[], returncode=0, stdout=result)
+    self.assertRaisesRegex(
+        AssertionError, r'^.*\[ U \] test.*\[ U \] test2.*$',
+        licenses_lib.ListInstalledPackages, '')
+
+    result = '[ R ] test to /build/test_dir\n[ R ] test2 to /build/test_dir'
+    run_mock.return_value = cros_build_lib.CommandResult(
+        args=[], returncode=0, stdout=result)
+    self.assertEqual(licenses_lib.ListInstalledPackages(''), ['test', 'test2'])

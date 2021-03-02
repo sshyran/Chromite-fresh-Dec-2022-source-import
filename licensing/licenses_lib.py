@@ -1493,6 +1493,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     # flex. This is why we use bdep=y and not bdep=n.
 
     packages = []
+    bad_packages = []
     # [binary   R    ] x11-libs/libva-1.1.1 to /build/x86-alex/
     pkg_rgx = re.compile(r'\[[^]]+R[^]]+\] (.+) to /build/.*')
     # If we match something else without the 'R' like
@@ -1505,8 +1506,11 @@ def ListInstalledPackages(sysroot, all_packages=False):
       if match:
         packages.append(match.group(1))
       elif match2:
-        raise AssertionError('Package incorrectly installed, try reinstalling',
-                             '\n%s' % match2.group(1))
+        bad_packages.append(match2.group(1))
+
+    if bad_packages:
+      raise AssertionError('Package incorrectly installed, try reinstalling',
+                           '\n%s' % '\n'.join(bad_packages))
 
   return packages
 
