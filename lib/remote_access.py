@@ -1326,6 +1326,11 @@ class ChromiumOSDevice(RemoteDevice):
     """The App ID of the device."""
     return self.lsb_release.get(cros_set_lsb_release.LSB_KEY_APPID_RELEASE, '')
 
+  @property
+  def root_dev(self):
+    """The current root device path."""
+    return self.run(['rootdev', '-s'], capture_output=True).stdout.strip()
+
   def _RemountRootfsAsWritable(self):
     """Attempts to Remount the root partition."""
     logging.info("Remounting '/' with rw...")

@@ -349,18 +349,11 @@ class ChromiumOSUpdater(BaseUpdater):
 
     return values
 
-  @classmethod
-  def GetRootDev(cls, device):
-    """Get the current root device on |device|.
-
-    Args:
-      device: a ChromiumOSDevice object, defines whose root device we
-          want to fetch.
-    """
-    rootdev = device.run(
-        ['rootdev', '-s'], capture_output=True).output.strip()
-    logging.debug('Current root device is %s', rootdev)
-    return rootdev
+  def GetRootDev(self):
+    """Get the current root device on |device|."""
+    root_dev = self.device.root_dev
+    logging.debug('Current root device is %s', root_dev)
+    return root_dev
 
   def _StartUpdateEngineIfNotRunning(self, device):
     """Starts update-engine service if it is not running.
@@ -433,7 +426,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def RevertBootPartition(self):
     """Revert the boot partition."""
-    part = self.GetRootDev(self.device)
+    part = self.GetRootDev()
     logging.warning('Reverting update; Boot partition will be %s', part)
     try:
       self.device.run(['/postinst', part], **self._cmd_kwargs)
@@ -603,14 +596,14 @@ class ChromiumOSUpdater(BaseUpdater):
     # and before reboot, since SetupRootfsUpdate may reboot the device if there
     # is a pending update, which changes the root device, and reboot will
     # definitely change the root device if update successfully finishes.
-    old_root_dev = self.GetRootDev(self.device)
+    old_root_dev = self.GetRootDev()
     self.device.Reboot()
     if self._clobber_stateful:
       self.device.run(['mkdir', '-p', self.device.work_dir])
 
     if self._do_rootfs_update:
       logging.notice('Verifying that the device has been updated...')
-      new_root_dev = self.GetRootDev(self.device)
+      new_root_dev = self.GetRootDev()
       if old_root_dev is None:
         raise AutoUpdateVerifyError(
             'Failed to locate root device before update.')
@@ -729,7 +722,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def _GetKernelState(self):
     """Returns the (<active>, <inactive>) kernel state as a pair."""
-    active_root = int(re.findall(r'(\d+\Z)', self.GetRootDev(self.device))[0])
+    active_root = int(re.findall(r'(\d+\Z)', self.GetRootDev())[0])
     if active_root == self.KERNEL_A['root']:
       return self.KERNEL_A, self.KERNEL_B
     elif active_root == self.KERNEL_B['root']:
