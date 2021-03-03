@@ -1387,6 +1387,11 @@ class ChromiumOSDevice(RemoteDevice):
 
     return not self._RootfsIsReadOnly()
 
+  def ClearTpmOwner(self):
+    """Clears the TPM owner flag."""
+    logging.info('Clearing TPM owner.')
+    self.run(['crossystem', 'clear_tpm_owner_request=1'])
+
   def run(self, cmd, **kwargs):
     """Executes a shell command on the device with output captured by default.
 

@@ -667,7 +667,7 @@ class ChromiumOSUpdater(BaseUpdater):
       logging.info('Stateful update completed.')
 
     if self._clear_tpm_owner:
-      self.SetClearTpmOwnerRequest()
+      self.device.ClearTpmOwner()
 
     if self._reboot:
       self.RebootAndVerify()
@@ -908,19 +908,6 @@ class ChromiumOSUpdater(BaseUpdater):
     except nebraska_wrapper.NebraskaStartupError as e:
       raise ChromiumOSUpdateError(
           'Unable to restore stateful partition: %s' % e)
-
-  def SetClearTpmOwnerRequest(self):
-    """Set clear_tpm_owner_request flag."""
-    # The issue is that certain AU tests leave the TPM in a bad state which
-    # most commonly shows up in provisioning.  Executing this 'crossystem'
-    # command before rebooting clears the problem state during the reboot.
-    # It's also worth mentioning that this isn't a complete fix:  The bad
-    # TPM state in theory might happen some time other than during
-    # provisioning.  Also, the bad TPM state isn't supposed to happen at
-    # all; this change is just papering over the real bug.
-    logging.info('Setting clear_tpm_owner_request to 1.')
-    self._RetryCommand('crossystem clear_tpm_owner_request=1',
-                       **self._cmd_kwargs_omit_error)
 
   def PostCheckRootfsUpdate(self):
     """Post-check for rootfs update for CrOS host."""

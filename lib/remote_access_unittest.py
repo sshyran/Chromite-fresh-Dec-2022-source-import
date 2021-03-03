@@ -452,6 +452,13 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
                                  stdout='/dev/foop5')
       self.assertEqual(device.root_dev, '/dev/foop5')
 
+  def testClearTpmOwner(self):
+    """Test clearing the TPM owner."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult(
+        [self.path_env, 'crossystem', 'clear_tpm_owner_request=1'])
+      device.ClearTpmOwner()
+
 
 class ScpTest(cros_test_lib.MockTempDirTestCase):
   """Tests for RemoteAccess.Scp"""
