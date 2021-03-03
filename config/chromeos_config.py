@@ -727,8 +727,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
       board_config.apply(site_config.templates.lassen)
     if board in ['x30evb']:
       board_config.apply(site_config.templates.x30evb)
-    if board in chromeos_boards.loonix_boards:
-      board_config.apply(site_config.templates.loonix)
     if board in chromeos_boards.wshwos_boards:
       board_config.apply(site_config.templates.wshwos)
     if board in chromeos_boards.dustbuster_boards:
@@ -2887,8 +2885,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
 
   # Loonix release builders; no signed images nor testing
   # Associated with Rapid releases, triggered from Rapid.
-  for board in frozenset.union(chromeos_boards.loonix_boards,
-                               chromeos_boards.dustbuster_boards,
+  for board in frozenset.union(chromeos_boards.dustbuster_boards,
                                chromeos_boards.wshwos_boards):
     site_config.Add(
         '{}-rapid'.format(board),

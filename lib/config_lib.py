@@ -101,7 +101,19 @@ ALL_LUCI_BUILDER = {
     LUCI_BUILDER_TRY,
 }
 
-GOLDENEYE_IGNORED_BOARDS = ['lakitu']
+GOLDENEYE_IGNORED_BOARDS = [
+  'capri',
+  'capri-zfpga',
+  'cobblepot',
+  'gonzo',
+  'lakitu',
+  'lasilla-ground',
+  'lasilla-sky',
+  'macchiato-ground',
+  'octavius',
+  'romer',
+  'wooten',
+]
 
 
 def isTryjobConfig(build_config):

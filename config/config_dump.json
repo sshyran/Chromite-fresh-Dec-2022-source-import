@@ -5838,21 +5838,9 @@
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5863,24 +5851,22 @@
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -5890,139 +5876,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "capri"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "capri-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "capri-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "capri"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "capri-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "capri-rapid": {
-        "_template": "release",
+    "capri-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "capri"
+        ]
+    },
+    "capri-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "capri-release": {
         "_template": "release",
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -6031,28 +5932,22 @@
         "boards": [
             "capri"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -6061,259 +5956,12 @@
         "boards": [
             "capri"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "capri-zfpga-full": {
-        "_template": "full",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "manifest_branch": "main",
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "capri-zfpga-full-tryjob": {
-        "_template": "full",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "debug": true,
-        "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "manifest_branch": "main",
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "capri-zfpga-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
-    },
-    "capri-zfpga-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "debug": true,
-        "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
-    },
-    "capri-zfpga-llvm-toolchain": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
-    },
-    "capri-zfpga-llvm-toolchain-tryjob": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "debug": true,
-        "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
-    },
-    "capri-zfpga-rapid": {
-        "_template": "release",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
-    },
-    "capri-zfpga-release": {
-        "_template": "release",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
-    },
-    "capri-zfpga-release-tryjob": {
-        "_template": "release",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "chrome_sdk": false,
-        "debug": true,
-        "dev_installer_prebuilts": false,
-        "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "paygen": false,
-        "push_image": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
-    },
-    "capri-zfpga-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "capri-zfpga"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -8244,21 +7892,9 @@
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8269,24 +7905,22 @@
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -8296,139 +7930,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "cobblepot"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "cobblepot-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "cobblepot-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "cobblepot"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "cobblepot-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "cobblepot-rapid": {
-        "_template": "release",
+    "cobblepot-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "cobblepot"
+        ]
+    },
+    "cobblepot-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "cobblepot-release": {
         "_template": "release",
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -8437,28 +7986,22 @@
         "boards": [
             "cobblepot"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -8467,17 +8010,12 @@
         "boards": [
             "cobblepot"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -15939,21 +15477,9 @@
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15964,24 +15490,22 @@
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -15991,139 +15515,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "gonzo"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "gonzo-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "gonzo-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "gonzo"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "gonzo-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "gonzo-rapid": {
-        "_template": "release",
+    "gonzo-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "gonzo"
+        ]
+    },
+    "gonzo-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "gonzo-release": {
         "_template": "release",
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -16132,28 +15571,22 @@
         "boards": [
             "gonzo"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -16162,17 +15595,12 @@
         "boards": [
             "gonzo"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -22551,21 +21979,9 @@
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22576,24 +21992,22 @@
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -22603,139 +22017,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "lasilla-ground"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "lasilla-ground-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "lasilla-ground-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "lasilla-ground"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "lasilla-ground-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "lasilla-ground-rapid": {
-        "_template": "release",
+    "lasilla-ground-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "lasilla-ground"
+        ]
+    },
+    "lasilla-ground-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "lasilla-ground-release": {
         "_template": "release",
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -22744,28 +22073,22 @@
         "boards": [
             "lasilla-ground"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -22774,17 +22097,12 @@
         "boards": [
             "lasilla-ground"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -23344,7 +22662,6 @@
         "boards": [
             "macchiato-ground"
         ],
-        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -23897,7 +23214,6 @@
             "buddy-cfm-release",
             "buddy-release",
             "candy-release",
-            "capri-release",
             "caroline-arc64-release",
             "caroline-kernelnext-release",
             "caroline-ndktranslation-release",
@@ -23908,7 +23224,6 @@
             "chell-release",
             "cheza-release",
             "cheza64-release",
-            "cobblepot-release",
             "coral-release",
             "cyan-release",
             "dedede-release",
@@ -23936,7 +23251,6 @@
             "gale-release",
             "gandof-release",
             "gnawty-release",
-            "gonzo-release",
             "grunt-arc-r-release",
             "grunt-arc64-release",
             "grunt-kernelnext-release",
@@ -23973,9 +23287,7 @@
             "kukui-arc64-release",
             "kukui-release",
             "lars-release",
-            "lasilla-ground-release",
             "lulu-release",
-            "macchiato-ground-release",
             "majolica-release",
             "mancomb-release",
             "mistral-release",
@@ -23986,7 +23298,6 @@
             "nocturne-release",
             "novato-arc64-release",
             "novato-release",
-            "octavius-release",
             "octopus-release",
             "orco-release",
             "palkia-release",
@@ -24004,7 +23315,6 @@
             "reven-release",
             "rikku-cfm-release",
             "rikku-release",
-            "romer-release",
             "samus-release",
             "sand-release",
             "sarien-arc64-release",
@@ -24037,7 +23347,6 @@
             "whirlwind-release",
             "winky-release",
             "wizpig-release",
-            "wooten-release",
             "zork-arc-r-release",
             "zork-borealis-release",
             "zork-kernelnext-release",
@@ -24125,7 +23434,6 @@
             "buddy-cfm-release-tryjob",
             "buddy-release-tryjob",
             "candy-release-tryjob",
-            "capri-release-tryjob",
             "caroline-arc64-release-tryjob",
             "caroline-kernelnext-release-tryjob",
             "caroline-ndktranslation-release-tryjob",
@@ -24136,7 +23444,6 @@
             "chell-release-tryjob",
             "cheza-release-tryjob",
             "cheza64-release-tryjob",
-            "cobblepot-release-tryjob",
             "coral-release-tryjob",
             "cyan-release-tryjob",
             "dedede-release-tryjob",
@@ -24164,7 +23471,6 @@
             "gale-release-tryjob",
             "gandof-release-tryjob",
             "gnawty-release-tryjob",
-            "gonzo-release-tryjob",
             "grunt-arc-r-release-tryjob",
             "grunt-arc64-release-tryjob",
             "grunt-kernelnext-release-tryjob",
@@ -24201,9 +23507,7 @@
             "kukui-arc64-release-tryjob",
             "kukui-release-tryjob",
             "lars-release-tryjob",
-            "lasilla-ground-release-tryjob",
             "lulu-release-tryjob",
-            "macchiato-ground-release-tryjob",
             "majolica-release-tryjob",
             "mancomb-release-tryjob",
             "mistral-release-tryjob",
@@ -24214,7 +23518,6 @@
             "nocturne-release-tryjob",
             "novato-arc64-release-tryjob",
             "novato-release-tryjob",
-            "octavius-release-tryjob",
             "octopus-release-tryjob",
             "orco-release-tryjob",
             "palkia-release-tryjob",
@@ -24232,7 +23535,6 @@
             "reven-release-tryjob",
             "rikku-cfm-release-tryjob",
             "rikku-release-tryjob",
-            "romer-release-tryjob",
             "samus-release-tryjob",
             "sand-release-tryjob",
             "sarien-arc64-release-tryjob",
@@ -24265,7 +23567,6 @@
             "whirlwind-release-tryjob",
             "winky-release-tryjob",
             "wizpig-release-tryjob",
-            "wooten-release-tryjob",
             "zork-arc-r-release-tryjob",
             "zork-borealis-release-tryjob",
             "zork-kernelnext-release-tryjob",
@@ -26099,21 +25400,9 @@
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26124,24 +25413,22 @@
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -26151,139 +25438,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "octavius"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "octavius-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "octavius-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "octavius"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "octavius-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "octavius-rapid": {
-        "_template": "release",
+    "octavius-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "octavius"
+        ]
+    },
+    "octavius-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "octavius-release": {
         "_template": "release",
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -26292,28 +25494,22 @@
         "boards": [
             "octavius"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -26322,17 +25518,12 @@
         "boards": [
             "octavius"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -29553,21 +28744,9 @@
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29578,24 +28757,22 @@
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -29605,139 +28782,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "romer"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "romer-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "romer-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "romer"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "romer-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "romer-rapid": {
-        "_template": "release",
+    "romer-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "romer"
+        ]
+    },
+    "romer-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "romer-release": {
         "_template": "release",
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -29746,28 +28838,22 @@
         "boards": [
             "romer"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -29776,17 +28862,12 @@
         "boards": [
             "romer"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]
@@ -36869,21 +35950,9 @@
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -36894,24 +35963,22 @@
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "manifest_branch": "main",
         "prebuilts": "public",
         "run_cpeexport": true,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -36921,139 +35988,54 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "wooten"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "wooten-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
     "wooten-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "wooten"
-        ],
-        "chrome_sdk": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        ]
     },
     "wooten-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
         "debug": true,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Try",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false
+        "luci_builder": "Try"
     },
-    "wooten-rapid": {
-        "_template": "release",
+    "wooten-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "wooten"
+        ]
+    },
+    "wooten-payloads-tryjob": {
+        "_template": "payloads",
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "description": "Create unsigned release image for ingestion into build tool",
-        "dev_installer_prebuilts": false,
-        "display_label": "utility",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
         "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "luci_builder": "Rapid",
-        "paygen": false,
-        "push_image": false,
-        "rootfs_verification": false,
-        "signer_tests": false,
-        "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "vm_tests": [],
-        "vm_tests_override": null
+        "luci_builder": "Try"
     },
     "wooten-release": {
         "_template": "release",
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
-        "dev_installer_prebuilts": false,
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": [],
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
-        ],
-        "important": false,
-        "paygen": false,
-        "signer_tests": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -37062,28 +36044,22 @@
         "boards": [
             "wooten"
         ],
-        "chrome_sdk": false,
         "debug": true,
-        "dev_installer_prebuilts": false,
         "display_label": "tryjob",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests": [],
-        "hw_tests_override": null,
-        "hwqual": false,
-        "image_test": false,
-        "images": [
-            "base",
-            "test"
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
         ],
+        "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
-        "signer_tests": false,
         "suite_scheduling": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -37092,17 +36068,12 @@
         "boards": [
             "wooten"
         ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
         "hw_tests_override": null,
         "internal": true,
         "luci_builder": "Try",
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
         "useflags": [
             "chrome_internal"
         ]

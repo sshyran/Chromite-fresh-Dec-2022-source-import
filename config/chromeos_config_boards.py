@@ -25,7 +25,6 @@ arm_internal_release_boards = frozenset([
     'arkham',
     'beaglebone',
     'beaglebone_servo',
-    'capri-zfpga',
     'gale',
     'hana',
     'kevin-arc64',
@@ -96,16 +95,7 @@ lassen_boards = frozenset([
     'lassen',
 ])
 
-loonix_boards = frozenset([
-    'capri',
-    'capri-zfpga',
-    'cobblepot',
-    'gonzo',
-    'lasilla-ground',
-    'octavius',
-    'romer',
-    'wooten',
-])
+loonix_boards = frozenset([])
 
 reven_boards = frozenset([
     'reven',
@@ -144,11 +134,11 @@ toolchains_from_source = frozenset([
     'x32-generic',
 ])
 
-noimagetest_boards = (loonix_boards | termina_boards
-                      | scribe_boards | wshwos_boards | dustbuster_boards)
+noimagetest_boards = (termina_boards | scribe_boards
+                      | wshwos_boards | dustbuster_boards)
 
-nohwqual_boards = (lassen_boards | loonix_boards
-                   | termina_boards | beaglebone_boards | wshwos_boards
+nohwqual_boards = (lassen_boards | termina_boards
+                   | beaglebone_boards | wshwos_boards
                    | dustbuster_boards | reven_boards)
 
 base_layout_boards = termina_boards
