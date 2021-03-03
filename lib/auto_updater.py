@@ -684,7 +684,7 @@ class ChromiumOSUpdater(BaseUpdater):
       if timeout is None:
         timeout = self.REBOOT_TIMEOUT
       self.device.Reboot(timeout_sec=timeout)
-    except cros_build_lib.DieSystemExit:
+    except remote_access.RebootError:
       raise ChromiumOSUpdateError('Could not recover from reboot at %s' %
                                   error_stage)
     except remote_access.SSHConnectionError:

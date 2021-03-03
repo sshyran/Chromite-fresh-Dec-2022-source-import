@@ -104,6 +104,10 @@ class RunningPidsError(RemoteAccessException):
   """Raised when unable to get running pids on the device."""
 
 
+class RebootError(RemoteAccessException):
+  """Raised when a device fails to reboot."""
+
+
 def NormalizePort(port, str_ok=True):
   """Checks if |port| is a valid port number and returns the number.
 
@@ -537,8 +541,8 @@ class RemoteAccess(object):
     self.RemoteSh(['reboot'], ssh_error_ok=True, remote_sudo=True)
     time.sleep(CHECK_INTERVAL)
     if not self.AwaitReboot(old_boot_id, timeout_sec):
-      cros_build_lib.Die('Reboot has not completed after %s seconds; giving up.'
-                         % (timeout_sec,))
+      raise RebootError('Reboot has not completed after %s seconds; giving up.'
+                        % (timeout_sec,))
 
   def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
             recursive=True, inplace=False, verbose=False, sudo=False,
