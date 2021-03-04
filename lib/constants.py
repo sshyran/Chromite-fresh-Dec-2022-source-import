@@ -662,10 +662,6 @@ HWTEST_STATUES_NOT_PASSED = frozenset([HWTEST_STATUS_FAIL,
                                        HWTEST_STATUS_ABORT,
                                        HWTEST_STATUS_OTHER])
 
-# Define HWTEST subsystem logic constants.
-SUBSYSTEMS = 'subsystems'
-SUBSYSTEM_UNUSED = 'subsystem_unused'
-
 # Build messages
 MESSAGE_TYPE_IGNORED_REASON = 'ignored_reason'
 MESSAGE_TYPE_ANNOTATIONS_FINALIZED = 'annotations_finalized'
