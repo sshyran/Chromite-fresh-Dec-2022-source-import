@@ -1748,6 +1748,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
       (TRIGGERED, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
       (TRIGGERED, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
+      (TRIGGERED, 'firmware-volteer-13672.81.B', ['volteer'], {}), # b/181692098
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
