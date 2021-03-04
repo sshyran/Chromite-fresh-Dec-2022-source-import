@@ -21,6 +21,7 @@ from chromite.lib import metrics
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
+BUILD_START_TIMEOUT_MIN = 60
 
 # TODO(nxia): Rename this module to slave_status, since this module is for
 # a master build which has slave builds and there is builder_status_lib for
@@ -32,9 +33,6 @@ class SlaveStatus(object):
   interpret slave statuses by querying CIDB and Buildbucket; otherwise,
   it will only interpret slave statuses by querying CIDB.
   """
-
-  BUILD_START_TIMEOUT_MIN = 30
-
   ACCEPTED_STATUSES = (constants.BUILDER_STATUS_PASSED,
                        constants.BUILDER_STATUS_SKIPPED,)
 
@@ -389,7 +387,7 @@ class SlaveStatus(object):
     """
     # Check that we're at least past the start timeout.
     builder_start_deadline = datetime.timedelta(
-        minutes=self.BUILD_START_TIMEOUT_MIN)
+        minutes=BUILD_START_TIMEOUT_MIN)
     past_deadline = current_time - self.start_time > builder_start_deadline
 
     # Check that we have missing builders and logging who they are.
@@ -549,7 +547,7 @@ class SlaveStatus(object):
 
     if self._ShouldFailForBuilderStartTimeout(current_time):
       logging.error('Ending build since at least one builder has not started '
-                    'within 5 mins.')
+                    'within %d minutes.', BUILD_START_TIMEOUT_MIN)
       builder_status_lib.CancelBuilds(uncompleted_build_buildbucket_ids,
                                       self.buildbucket_client,
                                       self.dry_run,
