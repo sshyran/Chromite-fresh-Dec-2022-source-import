@@ -316,6 +316,7 @@
     hatch-kernelnext-release
     hatch-release
     heli-release
+    herobrine-release
     jacuzzi-arc64-release
     jacuzzi-release
     kalista-cfm-release
@@ -1256,6 +1257,12 @@
   heli-payloads-tryjob
   heli-release-tryjob
   heli-unittest-stress
+  herobrine-full-tryjob
+  herobrine-llvm-next-toolchain-tryjob
+  herobrine-llvm-toolchain-tryjob
+  herobrine-payloads-tryjob
+  herobrine-release-tryjob
+  herobrine-unittest-stress
   jacuzzi-arc64-full-tryjob
   jacuzzi-arc64-llvm-next-toolchain-tryjob
   jacuzzi-arc64-llvm-toolchain-tryjob
@@ -1522,6 +1529,7 @@
     hatch-kernelnext-release-tryjob
     hatch-release-tryjob
     heli-release-tryjob
+    herobrine-release-tryjob
     jacuzzi-arc64-release-tryjob
     jacuzzi-release-tryjob
     kalista-cfm-release-tryjob
