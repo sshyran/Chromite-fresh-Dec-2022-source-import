@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import functools
 import glob
 import os
 import re
@@ -822,8 +823,13 @@ class RemoteDevice(object):
 
     return self._work_dir
 
-  def HasProgramInPath(self, binary):
-    """Checks if the given binary exists on the device."""
+  @functools.lru_cache(maxsize=256)
+  def HasProgramInPath(self, binary: str) -> bool:
+    """Checks if the given |binary| exists on the device.
+
+    This will cache the result and assume that $PATH does not have entries
+    added ore removed for the life of the connection.
+    """
     result = self.GetAgent().RemoteSh(
         ['PATH=%s:$PATH which' % DEV_BIN_PATHS, binary], check=False)
     return result.returncode == 0
