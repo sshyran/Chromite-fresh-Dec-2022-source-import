@@ -423,18 +423,13 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     chrome_version_mock = self.PatchObject(packages_service,
                                            'determine_chrome_version',
                                            return_value=chrome_version)
-    android_version = 'android_test_version'
-    android_version_mock = self.PatchObject(packages_service,
-                                            'determine_android_version',
-                                            return_value=android_version)
+    android_package = 'chromeos-base/android-container-pi-10.3'
+    self.PatchObject(packages_service, 'determine_android_package',
+                     return_value=android_package)
     android_branch = 'android_test_branch'
     android_branch_mock = self.PatchObject(packages_service,
                                            'determine_android_branch',
                                            return_value=android_branch)
-    android_target = 'android_test_target'
-    android_target_mock = self.PatchObject(packages_service,
-                                           'determine_android_target',
-                                           return_value=android_target)
     platform_version = '12345.1.2'
     self.PatchObject(packages_service, 'determine_platform_version',
                      return_value=platform_version)
@@ -447,9 +442,9 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     request = self._GetRequest(board='betty')
     packages_controller.GetTargetVersions(request, self.response,
                                           self.api_config)
-    self.assertEqual(self.response.android_version, android_version)
+    self.assertEqual(self.response.android_version, '10.3')
     self.assertEqual(self.response.android_branch_version, android_branch)
-    self.assertEqual(self.response.android_target_version, android_target)
+    self.assertEqual(self.response.android_target_version, 'cheets')
     self.assertEqual(self.response.chrome_version, chrome_version)
     self.assertEqual(self.response.platform_version, platform_version)
     self.assertEqual(self.response.milestone_version, milestone_version)
@@ -457,12 +452,8 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     # Verify call to determine_chrome_version passes a build_target object.
     build_target = build_target_lib.BuildTarget('betty')
     chrome_version_mock.assert_called_with(build_target)
-    # Verify call to determine_android_version passes a list of the board name.
-    android_version_mock.assert_called_with('betty')
     # Verify call to determine_android_branch passes a board name.
-    android_branch_mock.assert_called_with('betty')
-    # Verify call to determine_android_target passes a board name.
-    android_target_mock.assert_called_with('betty')
+    android_branch_mock.assert_called_with('betty', package=android_package)
 
   def testGetTargetVersionsWithPackagesSet(self):
     """Verify packages pass through and basic return values."""
@@ -475,15 +466,12 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     chrome_version = '76.0.1.2'
     self.PatchObject(packages_service, 'determine_chrome_version',
                      return_value=chrome_version)
-    android_version = 'android_test_version'
-    self.PatchObject(packages_service, 'determine_android_version',
-                     return_value=android_version)
+    android_package = 'chromeos-base/android-container-pi-10.3'
+    self.PatchObject(packages_service, 'determine_android_package',
+                     return_value=android_package)
     android_branch = 'android_test_branch'
     self.PatchObject(packages_service, 'determine_android_branch',
                      return_value=android_branch)
-    android_target = 'android_test_target'
-    self.PatchObject(packages_service, 'determine_android_target',
-                     return_value=android_target)
     platform_version = '12345.1.2'
     self.PatchObject(packages_service, 'determine_platform_version',
                      return_value=platform_version)
@@ -508,9 +496,9 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
 
     packages_controller.GetTargetVersions(request, self.response,
                                           self.api_config)
-    self.assertEqual(self.response.android_version, android_version)
+    self.assertEqual(self.response.android_version, '10.3')
     self.assertEqual(self.response.android_branch_version, android_branch)
-    self.assertEqual(self.response.android_target_version, android_target)
+    self.assertEqual(self.response.android_target_version, 'cheets')
     self.assertEqual(self.response.chrome_version, chrome_version)
     self.assertEqual(self.response.platform_version, platform_version)
     self.assertEqual(self.response.milestone_version, milestone_version)
@@ -525,11 +513,7 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.PatchObject(packages_service, 'determine_platform_version',
                      return_value=platform_version)
     self.PatchObject(packages_service, 'builds', return_value=False)
-    self.PatchObject(packages_service, 'determine_android_version',
-                     return_value=None)
-    self.PatchObject(packages_service, 'determine_android_branch',
-                     return_value=None)
-    self.PatchObject(packages_service, 'determine_android_target',
+    self.PatchObject(packages_service, 'determine_android_package',
                      return_value=None)
     request = self._GetRequest(board='betty')
     packages_controller.GetTargetVersions(request, self.response,

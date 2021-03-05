@@ -843,7 +843,7 @@ def determine_android_package(board):
   return None
 
 
-def determine_android_version(board):
+def determine_android_version(board, package=None):
   """Determine the current Android version in buildroot now and return it.
 
   This uses the typical portage logic to determine which version of Android
@@ -851,6 +851,7 @@ def determine_android_version(board):
 
   Args:
     board: The board name this is specific to.
+    package: The Android package, if already computed.
 
   Returns:
     The Android build ID of the container for the board.
@@ -858,7 +859,8 @@ def determine_android_version(board):
   Raises:
     NoAndroidVersionError: if no unique Android version can be determined.
   """
-  package = determine_android_package(board)
+  if not package:
+    package = determine_android_package(board)
   if not package:
     return None
   cpv = package_info.SplitCPV(package)
@@ -868,12 +870,13 @@ def determine_android_version(board):
   return cpv.version_no_rev
 
 
-def determine_android_branch(board):
+def determine_android_branch(board, package=None):
   """Returns the Android branch in use by the active container ebuild."""
-  android_package = determine_android_package(board)
-  if not android_package:
+  if not package:
+    package = determine_android_package(board)
+  if not package:
     return None
-  ebuild_path = portage_util.FindEbuildForBoardPackage(android_package, board)
+  ebuild_path = portage_util.FindEbuildForBoardPackage(package, board)
   # We assume all targets pull from the same branch and that we always
   # have at least one of the following targets.
   targets = constants.ANDROID_ALL_BUILD_TARGETS
@@ -887,19 +890,20 @@ def determine_android_branch(board):
       'Android branch could not be determined for %s (ebuild empty?)' % board)
 
 
-def determine_android_target(board):
+def determine_android_target(board, package=None):
   """Returns the Android target in use by the active container ebuild."""
-  android_package = determine_android_package(board)
-  if not android_package:
+  if not package:
+    package = determine_android_package(board)
+  if not package:
     return None
-  if android_package.startswith('chromeos-base/android-vm-'):
+  if package.startswith('chromeos-base/android-vm-'):
     return 'bertha'
-  elif android_package.startswith('chromeos-base/android-container-'):
+  elif package.startswith('chromeos-base/android-container-'):
     return 'cheets'
 
   raise NoAndroidTargetError(
       'Android Target cannot be determined for the package: %s' %
-      android_package)
+      package)
 
 
 def determine_platform_version():
