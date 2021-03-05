@@ -870,11 +870,7 @@ def determine_android_version(board):
 
 def determine_android_branch(board):
   """Returns the Android branch in use by the active container ebuild."""
-  try:
-    android_package = determine_android_package(board)
-  except cros_build_lib.RunCommandError:
-    raise NoAndroidBranchError(
-        'Android branch could not be determined for %s' % board)
+  android_package = determine_android_package(board)
   if not android_package:
     return None
   ebuild_path = portage_util.FindEbuildForBoardPackage(android_package, board)
@@ -893,11 +889,7 @@ def determine_android_branch(board):
 
 def determine_android_target(board):
   """Returns the Android target in use by the active container ebuild."""
-  try:
-    android_package = determine_android_package(board)
-  except cros_build_lib.RunCommandError:
-    raise NoAndroidTargetError(
-        'Android Target could not be determined for %s' % board)
+  android_package = determine_android_package(board)
   if not android_package:
     return None
   if android_package.startswith('chromeos-base/android-vm-'):
