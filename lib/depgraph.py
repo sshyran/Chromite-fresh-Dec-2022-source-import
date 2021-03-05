@@ -365,7 +365,6 @@ class DepGraphGenerator(object):
     # pylint: disable=protected-access
     digraph = depgraph._dynamic_config.digraph
     root = emerge.settings['ROOT']
-    final_db = depgraph._dynamic_config._filtered_trees[root]['graph_db']
     for node, node_deps in digraph.nodes.items():
       # Calculate dependency packages that need to be installed first. Each
       # child on the digraph is a dependency. The "operation" field specifies
@@ -397,16 +396,6 @@ class DepGraphGenerator(object):
         if self.include_bdepend or child.root == node.root:
           cpv = str(child.cpv)
           action = str(child.operation)
-
-          # If we're uninstalling a package, check whether Portage is
-          # installing a replacement. If so, just depend on the installation
-          # of the new package, because the old package will automatically
-          # be uninstalled at that time.
-          if action == 'uninstall':
-            for pkg in final_db.match_pkgs(child.slot_atom):
-              cpv = str(pkg.cpv)
-              action = 'merge'
-              break
 
           dep = {
               'action': action,
