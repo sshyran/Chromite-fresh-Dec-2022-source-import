@@ -458,7 +458,7 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     build_target = build_target_lib.BuildTarget('betty')
     chrome_version_mock.assert_called_with(build_target)
     # Verify call to determine_android_version passes a list of the board name.
-    android_version_mock.assert_called_with(['betty'])
+    android_version_mock.assert_called_with('betty')
     # Verify call to determine_android_branch passes a board name.
     android_branch_mock.assert_called_with('betty')
     # Verify call to determine_android_target passes a board name.
@@ -689,7 +689,7 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         self.response.build_target_metadata[0].arc_use_set,
         True)
     # Verify call to determine_android_version passes list of the board name.
-    android_version_mock.assert_called_with(['betty'])
+    android_version_mock.assert_called_with('betty')
     # Verify call to determine_android_branch passes board name.
     android_branch_mock.assert_called_with('betty')
     # Verify call to determine_android_target passes board name.

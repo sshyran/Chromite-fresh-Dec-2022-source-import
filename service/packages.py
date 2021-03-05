@@ -843,39 +843,29 @@ def determine_android_package(board):
   return None
 
 
-def determine_android_version(boards=None):
+def determine_android_version(board):
   """Determine the current Android version in buildroot now and return it.
 
   This uses the typical portage logic to determine which version of Android
   is active right now in the buildroot.
 
   Args:
-    boards: List of boards to check version of.
+    board: The board name this is specific to.
 
   Returns:
-    The Android build ID of the container for the boards.
+    The Android build ID of the container for the board.
 
   Raises:
     NoAndroidVersionError: if no unique Android version can be determined.
   """
-  if not boards:
+  package = determine_android_package(board)
+  if not package:
     return None
-  # Verify that all boards have the same version.
-  version = None
-  for board in boards:
-    package = determine_android_package(board)
-    if not package:
-      return None
-    cpv = package_info.SplitCPV(package)
-    if not cpv:
-      raise NoAndroidVersionError(
-          'Android version could not be determined for %s' % board)
-    if not version:
-      version = cpv.version_no_rev
-    elif version != cpv.version_no_rev:
-      raise NoAndroidVersionError('Different Android versions (%s vs %s) for %s'
-                                  % (version, cpv.version_no_rev, boards))
-  return version
+  cpv = package_info.SplitCPV(package)
+  if not cpv:
+    raise NoAndroidVersionError(
+        'Android version could not be determined for %s' % board)
+  return cpv.version_no_rev
 
 
 def determine_android_branch(board):

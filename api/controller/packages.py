@@ -160,7 +160,7 @@ def GetTargetVersions(input_proto, output_proto, _config):
   """Returns the target versions."""
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   # Android version.
-  android_version = packages.determine_android_version([build_target.name])
+  android_version = packages.determine_android_version(build_target.name)
   logging.info('Found android version: %s', android_version)
   if android_version:
     output_proto.android_version = android_version
@@ -221,7 +221,7 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
   build_target_metadata = output_proto.build_target_metadata.add()
   build_target_metadata.build_target = build_target.name
   # Android version.
-  android_version = packages.determine_android_version([build_target.name])
+  android_version = packages.determine_android_version(build_target.name)
   logging.info('Found android version: %s', android_version)
   if android_version:
     build_target_metadata.android_container_version = android_version
