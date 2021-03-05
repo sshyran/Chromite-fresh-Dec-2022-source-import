@@ -348,7 +348,8 @@ def NeedsChromeSource(input_proto, output_proto, _config):
   # Input parsing.
   build_target = controller_util.ParseBuildTarget(
       input_proto.install_request.sysroot.build_target)
-  compile_source = input_proto.install_request.flags.compile_source
+  compile_source = (input_proto.install_request.flags.compile_source or
+                    input_proto.install_request.flags.toolchain_changed)
   pkgs = [controller_util.deserialize_package_info(pi) for pi in
           input_proto.install_request.packages]
   use_flags = [f.flag for f in input_proto.install_request.use_flags]
