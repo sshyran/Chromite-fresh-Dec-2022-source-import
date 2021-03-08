@@ -11,7 +11,7 @@ import glob
 import multiprocessing
 import os
 import sys
-from typing import Iterable
+from typing import Iterable, Union
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -439,7 +439,8 @@ class Sysroot(object):
     osutils.SafeSymlink(config_file, self._Path(_MAKE_CONF), sudo=True)
 
   def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False,
-                           package_indexes=None):
+                           package_indexes=None,
+                           expanded_binhost_inheritance: bool = False):
     """Make sure the make.conf.board file exists and is up to date.
 
     Args:
@@ -447,6 +448,9 @@ class Sysroot(object):
       local_only (bool): Whether prebuilts can be fetched from remote sources.
       package_indexes (list[PackageIndexInfo]): List of information about
         available prebuilts, youngest first, or None.
+      expanded_binhost_inheritance: Whether to enable expanded binhost
+        inheritance, which searches for additional binhosts to include to
+        attempt to improve binhost hit rates.
     """
     board_conf = self.GenerateBoardMakeConf(accepted_licenses=accepted_licenses)
     make_conf_path = self._Path(_MAKE_CONF_BOARD)
@@ -455,8 +459,10 @@ class Sysroot(object):
     # Once make.conf.board has been generated, generate the binhost config.
     # We need to do this in two steps as the binhost generation step needs
     # portageq to be available.
-    binhost_conf = self.GenerateBinhostConf(local_only=local_only,
-                                            package_indexes=package_indexes)
+    binhost_conf = self.GenerateBinhostConf(
+        local_only=local_only,
+        package_indexes=package_indexes,
+        expanded_binhost_inheritance=expanded_binhost_inheritance)
     osutils.WriteFile(make_conf_path, '%s\n%s\n' % (board_conf, binhost_conf),
                       sudo=True)
 
@@ -584,13 +590,15 @@ class Sysroot(object):
 
     return '\n'.join(config)
 
-  def GenerateBinhostConf(self, local_only=False, package_indexes=None):
+  def GenerateBinhostConf(self, local_only=False, package_indexes=None,
+                          expanded_binhost_inheritance: bool = False):
     """Returns the binhost configuration.
 
     Args:
       local_only (bool): If True, use binary packages from local boards only.
       package_indexes (list[PackageIndexInfo]): List of information about
         available prebuilts, youngest first, or None.
+      expanded_binhost_inheritance: Look for additional binhosts to inherit.
 
     Returns:
       str - The config contents.
@@ -621,7 +629,7 @@ class Sysroot(object):
       return '\n'.join(config)
 
     postsubmit_binhost, postsubmit_binhost_internal = self._PostsubmitBinhosts(
-        board)
+        board, expanded_binhost_inheritance)
 
     config.append("""
 # FULL_BINHOST is populated by the full builders. It is listed first because it
@@ -649,25 +657,25 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
 
     return '\n'.join(config)
 
-  def _PostsubmitBinhosts(self, board=None):
-    """Returns the postsubmit binhost to use.
-
-    Args:
-      board (str): Board name.
-    """
+  def _PostsubmitBinhosts(self, board: Union[str, None],
+                          expanded_binhost_inheritance: bool):
+    """Returns the postsubmit binhost to use."""
     prefixes = []
     # The preference of picking the binhost file for a board is in the same
     # order of prefixes, so it's critical to make sure
     # <board>-POSTSUBMIT_BINHOST.conf is at the top of |prefixes| list.
     if board:
       prefixes = [board]
-      # 'eve-kvm' is very close to 'eve' (see crbug.com/947238).
-      # TODO: remove this once 'eve-kvm' is merged back to 'eve'.
-      if board == 'eve-kvm':
-        prefixes.append('eve')
       # Add reference board if applicable.
       if '_' in board:
         prefixes.append(board.split('_')[0])
+      elif expanded_binhost_inheritance:
+        # Search the public parent overlays for the given board, and include
+        # the parents' binhosts; e.g. eve for eve-kvm.
+        overlays = portage_util.FindOverlays(constants.PUBLIC_OVERLAYS,
+                                             board=board)
+        names = [portage_util.GetOverlayName(x) for x in overlays]
+        prefixes.extend(x for x in names if x != board)
 
     # Add base architecture board.
     arch = self.GetStandardField(STANDARD_FIELD_ARCH)
