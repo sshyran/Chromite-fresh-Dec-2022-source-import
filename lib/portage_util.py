@@ -362,14 +362,14 @@ class EBuild(object):
       r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
 
   # These eclass files imply that src_test is defined for an ebuild.
-  _ECLASS_IMPLIES_TEST = set((
+  _ECLASS_IMPLIES_TEST = {
       'cros-common.mk',
       'cros-ec',      # defines src_test
       'cros-firmware',
       'cros-go',      # defines src_test
       'cros-rust',    # defines src_test
       'tast-bundle',  # inherits cros-go
-  ))
+  }
 
   @classmethod
   def _RunCommand(cls, command, **kwargs):
@@ -1876,7 +1876,6 @@ def _EqueryWhich(
       version, and slot.
     sysroot: The root directory being inspected.
     include_masked: True iff we should include masked ebuilds in our query.
-    equery_cmd_args: List containing equery command args.
     extra_env: optional dictionary of extra string/string pairs to use as the
       environment of equery command.
     check: If False, do not raise an exception when run returns
@@ -2548,7 +2547,7 @@ def GeneratePackageSizes(db, root, installed_packages):
         total_package_filesize += filesize
     logging.debug('%s installed_package size is %d', package_cpv,
                   total_package_filesize)
-    yield (package_cpv, total_package_filesize)
+    yield package_cpv, total_package_filesize
 
 
 def UpdateEbuildManifest(ebuild_path, chroot=None):
