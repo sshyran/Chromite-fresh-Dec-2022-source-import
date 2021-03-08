@@ -865,8 +865,6 @@ FIRMWARE_ARCHIVE_NAME = 'firmware_from_source.tar.bz2'
 FPMCU_UNITTESTS_ARCHIVE_NAME = 'fpmcu_unittests.tar.bz2'
 
 # Global configuration constants.
-CHROMITE_CONFIG_DIR = os.path.expanduser('~/.chromite')
-CHROME_SDK_BASHRC = os.path.join(CHROMITE_CONFIG_DIR, 'chrome_sdk.bashrc')
 SYNC_RETRIES = 4
 SLEEP_TIMEOUT = 30
 

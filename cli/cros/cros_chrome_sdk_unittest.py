@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import copy
 import os
+from pathlib import Path
 import shutil
 import sys
 import threading
@@ -19,6 +20,7 @@ from chromite.lib import constants
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import cache
+from chromite.lib import chromite_config
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
@@ -252,7 +254,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.cmd_mock.UnMockAttr('Run')
 
   def SourceEnvironmentMock(self, path, *_args, **_kwargs):
-    if path.endswith('environment'):
+    if str(path).endswith('environment'):
       return copy.deepcopy(self.FAKE_ENV)
     return {}
 
@@ -265,8 +267,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         external_mocks=[self.rc_mock]))
 
     # This needs to occur before initializing MockChromeSDKCommand.
-    self.bashrc = os.path.join(self.tempdir, 'bashrc')
-    self.PatchObject(constants, 'CHROME_SDK_BASHRC', new=self.bashrc)
+    self.bashrc = Path(self.tempdir) / 'bashrc'
+    self.PatchObject(chromite_config, 'CHROME_SDK_BASHRC', new=self.bashrc)
 
     self.PatchObject(osutils, 'SourceEnvironment',
                      autospec=True, side_effect=self.SourceEnvironmentMock)

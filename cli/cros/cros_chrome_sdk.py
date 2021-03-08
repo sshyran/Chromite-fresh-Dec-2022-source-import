@@ -14,6 +14,7 @@ import datetime
 import glob
 import json
 import os
+from pathlib import Path
 import re
 import sys
 import queue
@@ -23,6 +24,7 @@ import threading
 from chromite.cbuildbot import archive_lib
 from chromite.cli import command
 from chromite.lib import cache
+from chromite.lib import chromite_config
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -803,8 +805,7 @@ class ChromeSDKCommand(command.CliCommand):
   sets up the environment for building Chrome, and runs a command in the
   environment, starting a bash session if no command is specified.
 
-  The bash session environment is set up by a user-configurable rc file located
-  at ~/.chromite/chrome_sdk.bashrc.
+  The bash session environment is set up by a user-configurable rc file.
   """
 
   # Note, this URL is not accessible outside of corp.
@@ -877,9 +878,9 @@ class ChromeSDKCommand(command.CliCommand):
              'out_${BOARD}/')
     parser.add_argument(
         '--bashrc', type='path',
-        default=constants.CHROME_SDK_BASHRC,
+        default=chromite_config.CHROME_SDK_BASHRC,
         help='A bashrc file used to set up the SDK shell environment. '
-             'Defaults to %s.' % constants.CHROME_SDK_BASHRC)
+             '(default: %(default)s')
     parser.add_argument(
         '--chroot', type='path',
         help='Path to a ChromeOS chroot to use. If set, '
@@ -1502,6 +1503,16 @@ class ChromeSDKCommand(command.CliCommand):
 
     if os.environ.get(SDKFetcher.SDK_VERSION_ENV) is not None:
       cros_build_lib.Die('Already in an SDK shell.')
+
+    # Migrate config file from old to new path.
+    old_config = Path('~/.chromite/chrome_sdk.bashrc').expanduser()
+    if old_config.exists() and not chromite_config.CHROME_SDK_BASHRC.exists():
+      chromite_config.initialize()
+      old_config.rename(chromite_config.CHROME_SDK_BASHRC)
+      try:
+        old_config.parent.rmdir()
+      except OSError:
+        pass
 
     src_path = self.options.chrome_src or os.getcwd()
     checkout = path_util.DetermineCheckout(src_path)
