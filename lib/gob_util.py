@@ -605,25 +605,6 @@ def CheckChange(host, change, sha1=None):
                       headers=headers)
 
 
-def GetAssignee(host, change):
-  """Get assignee for a change."""
-  path = '%s/assignee' % _GetChangePath(change)
-  return FetchUrlJson(host, path)
-
-
-def AddAssignee(host, change, assignee):
-  """Add reviewers to a change.
-
-  Args:
-    host: The Gerrit host to interact with.
-    change: The Gerrit change ID.
-    assignee: Gerrit account email as a string
-  """
-  path = '%s/assignee' % _GetChangePath(change)
-  body = {'assignee': assignee}
-  return  FetchUrlJson(host, path, reqtype='PUT', body=body, ignore_404=False)
-
-
 def MarkPrivate(host, change):
   """Marks the given CL as private.
 

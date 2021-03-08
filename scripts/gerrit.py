@@ -634,24 +634,6 @@ class ActionReviewers(UserAction):
                           dryrun=opts.dryrun, notify=opts.notify)
 
 
-class ActionAssign(_ActionSimpleParallelCLs):
-  """Set the assignee for CLs"""
-
-  COMMAND = 'assign'
-
-  @staticmethod
-  def init_subparser(parser):
-    """Add arguments to this action's subparser."""
-    _ActionSimpleParallelCLs.init_subparser(parser)
-    parser.add_argument('assignee',
-                        help='The new assignee')
-
-  @staticmethod
-  def _process_one(helper, cl, opts):
-    """Use |helper| to process the single |cl|."""
-    helper.SetAssignee(cl, opts.assignee, dryrun=opts.dryrun)
-
-
 class ActionMessage(_ActionSimpleParallelCLs):
   """Add a message to a CL"""
 
@@ -1032,7 +1014,7 @@ Scripting:
 with Commit-Queue=1.
   $ gerrit label-cq `gerrit --raw -i mine` 1   # Mark *ALL* of your internal \
 CLs with Commit-Queue=1.
-  $ gerrit --json search 'assignee:self'       # Dump all pending CLs in JSON.
+  $ gerrit --json search 'attention:self'      # Dump all pending CLs in JSON.
 
 Actions:
 """
