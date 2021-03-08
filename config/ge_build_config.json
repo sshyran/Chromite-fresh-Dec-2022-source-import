@@ -7506,6 +7506,14 @@
         },
         {
           "board_name": "zork",
+          "name": "jelboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 381,
+          "is_active": true
+        },
+        {
+          "board_name": "zork",
           "name": "morphius",
           "test_suites": [
             "sanity",
@@ -7677,6 +7685,14 @@
         },
         {
           "board_name": "zork-arc-r",
+          "name": "jelboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7161,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-arc-r",
           "name": "morphius",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -7775,6 +7791,14 @@
         {
           "board_name": "zork-borealis",
           "name": "jelboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
+          "name": "jelboz360",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 456,
