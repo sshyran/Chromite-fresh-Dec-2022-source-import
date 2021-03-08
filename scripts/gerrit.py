@@ -923,6 +923,28 @@ class ActionAccount(_ActionSimpleParallelCLs):
     _run_parallel_tasks(task, *opts.accounts)
 
 
+class ActionHelp(UserAction):
+  """An alias to --help for CLI symmetry"""
+
+  COMMAND = 'help'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('command', nargs='?',
+                        help='The command to display.')
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # Show global help.
+    if not opts.command:
+      opts.parser.print_help()
+      return
+
+    opts.parser.parse_args([opts.command, '--help'])
+
+
 class ActionHelpAll(UserAction):
   """Show all actions help output at once."""
 
