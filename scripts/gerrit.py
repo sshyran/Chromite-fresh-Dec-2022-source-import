@@ -14,12 +14,16 @@ from __future__ import print_function
 
 import argparse
 import collections
+import configparser
 import functools
 import inspect
 import json
+from pathlib import Path
 import re
+import shlex
 import sys
 
+from chromite.lib import chromite_config
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -35,6 +39,26 @@ from chromite.utils import memoize
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+
+
+class Config:
+  """Manage the user's gerrit config settings.
+
+  This is entirely unique to this gerrit command.  Inspiration for naming and
+  layout is taken from ~/.gitconfig settings.
+  """
+
+  def __init__(self, path: Path = chromite_config.GERRIT_CONFIG):
+    self.cfg = configparser.ConfigParser(interpolation=None)
+    if path.exists():
+      self.cfg.read(chromite_config.GERRIT_CONFIG)
+
+  def expand_alias(self, action):
+    """Expand any aliases."""
+    alias = self.cfg.get('alias', action, fallback=None)
+    if alias is not None:
+      return shlex.split(alias)
+    return action
 
 
 class UserAction(object):
@@ -923,6 +947,27 @@ class ActionAccount(_ActionSimpleParallelCLs):
     _run_parallel_tasks(task, *opts.accounts)
 
 
+class ActionConfig(UserAction):
+  """Manage the gerrit tool's own config file
+
+  Gerrit may be customized via ~/.config/chromite/gerrit.cfg.
+  It is an ini file like ~/.gitconfig.  See `man git-config` for basic format.
+
+  # Set up subcommand aliases.
+  [alias]
+      common-search = search 'is:open project:something/i/care/about'
+  """
+
+  COMMAND = 'config'
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # For now, this is a place holder for raising visibility for the config file
+    # and its associated help text documentation.
+    opts.parser.parse_args(['config', '--help'])
+
+
 class ActionHelp(UserAction):
   """An alias to --help for CLI symmetry"""
 
@@ -1010,8 +1055,23 @@ def _GetActionUsages():
   )
 
 
-def GetParser():
-  """Returns the parser to use for this module."""
+def _AddCommonOptions(parser, subparser):
+  """Add options that should work before & after the subcommand.
+
+  Make it easy to do `gerrit --dry-run foo` and `gerrit foo --dry-run`.
+  """
+  parser.add_common_argument_to_group(
+      subparser, '--ne', '--no-emails', dest='notify',
+      default='ALL', action='store_const', const='NONE',
+      help='Do not send e-mail notifications')
+  parser.add_common_argument_to_group(
+      subparser, '-n', '--dry-run', dest='dryrun',
+      default=False, action='store_true',
+      help='Show what would be done, but do not make changes')
+
+
+def GetBaseParser() -> commandline.ArgumentParser:
+  """Returns the common parser (i.e. no subparsers added)."""
   description = """\
 There is no support for doing line-by-line code review via the command line.
 This helps you manage various bits and CL status.
@@ -1042,8 +1102,6 @@ Actions:
 """
   description += _GetActionUsages()
 
-  actions = _GetActions()
-
   site_params = config_lib.GetSiteParams()
   parser = commandline.ArgumentParser(
       description=description, default_log_level='notice')
@@ -1058,27 +1116,23 @@ Actions:
                      help='Gerrit (on borg) instance to query (default: %s)' %
                           (site_params.EXTERNAL_GOB_INSTANCE))
 
-  def _AddCommonOptions(p):
-    """Add options that should work before & after the subcommand.
-
-    Make it easy to do `gerrit --dry-run foo` and `gerrit foo --dry-run`.
-    """
-    parser.add_common_argument_to_group(
-        p, '--ne', '--no-emails', dest='notify',
-        default='ALL', action='store_const', const='NONE',
-        help='Do not send e-mail notifications')
-    parser.add_common_argument_to_group(
-        p, '-n', '--dry-run', dest='dryrun',
-        default=False, action='store_true',
-        help='Show what would be done, but do not make changes')
-
   group = parser.add_argument_group('CL options')
-  _AddCommonOptions(group)
+  _AddCommonOptions(parser, group)
 
   parser.add_argument('--raw', default=False, action='store_true',
                       help='Return raw results (suitable for scripting)')
   parser.add_argument('--json', default=False, action='store_true',
                       help='Return results in JSON (suitable for scripting)')
+  return parser
+
+
+def GetParser(parser: commandline.ArgumentParser = None) -> (
+    commandline.ArgumentParser):
+  """Returns the full parser to use for this module."""
+  if parser is None:
+    parser = GetBaseParser()
+
+  actions = _GetActions()
 
   # Subparsers are required by default under Python 2.  Python 3 changed to
   # not required, but didn't include a required option until 3.7.  Setting
@@ -1089,14 +1143,26 @@ Actions:
     # Format the full docstring by removing the file level indentation.
     description = re.sub(r'^  ', '', cls.__doc__, flags=re.M)
     subparser = subparsers.add_parser(cmd, description=description)
-    _AddCommonOptions(subparser)
+    _AddCommonOptions(parser, subparser)
     cls.init_subparser(subparser)
 
   return parser
 
 
 def main(argv):
-  parser = GetParser()
+  base_parser = GetBaseParser()
+  opts, subargs = base_parser.parse_known_args(argv)
+
+  config = Config()
+  if subargs:
+    # If the action is an alias to an expanded value, we need to mutate the argv
+    # and reparse things.
+    action = config.expand_alias(subargs[0])
+    if action != subargs[0]:
+      pos = argv.index(subargs[0])
+      argv = argv[:pos] + action + argv[pos + 1:]
+
+  parser = GetParser(parser=base_parser)
   opts = parser.parse_args(argv)
 
   # In case the action wants to throw a parser error.

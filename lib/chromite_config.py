@@ -20,6 +20,8 @@ DIR = Path('~/.config/chromite').expanduser()
 
 CHROME_SDK_BASHRC = DIR / 'chrome_sdk.bashrc'
 
+GERRIT_CONFIG = DIR / 'gerrit.cfg'
+
 
 def initialize():
   """Initialize the config dir for use.
