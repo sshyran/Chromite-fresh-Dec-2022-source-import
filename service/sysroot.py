@@ -254,7 +254,7 @@ def Create(target, run_configs, accept_licenses):
     try:
       cros_build_lib.run(update_chroot)
     except cros_build_lib.RunCommandError:
-      raise UpdateChrootError('Error occurred while updating the chroot.'
+      raise UpdateChrootError('Error occurred while updating the chroot. '
                               'See the logs for more information.')
 
   # Delete old sysroot to force a fresh start if requested.
@@ -309,6 +309,7 @@ def GenerateArchive(output_dir, build_target_name, pkg_list):
   cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT)
   return os.path.join(output_dir, constants.TARGET_SYSROOT_TAR)
 
+
 def CreateSimpleChromeSysroot(target, use_flags):
   """Create a sysroot for SimpleChrome to use.
 
@@ -330,6 +331,7 @@ def CreateSimpleChromeSysroot(target, use_flags):
                        extra_env=extra_env)
     sysroot_tar_path = os.path.join(tempdir, constants.CHROME_SYSROOT_TAR)
     return sysroot_tar_path
+
 
 def InstallToolchain(target, sysroot, run_configs):
   """Update the toolchain to a sysroot.
