@@ -244,7 +244,7 @@ def FindOverlaysForBoards(overlay_type, boards):
   return list(overlays)
 
 
-def FindOverlayFile(filename, overlay_type='both', board=None,
+def FindOverlayFile(filename, overlay_type=constants.BOTH_OVERLAYS, board=None,
                     buildroot=constants.SOURCE_ROOT):
   """Attempt to find a file in the overlay directories.
 
@@ -284,7 +284,7 @@ def FindSysrootOverlays(sysroot):
   return PortageqEnvvar('PORTDIR_OVERLAY', board=os.path.basename(sysroot))
 
 
-def ReadOverlayFile(filename, overlay_type='both', board=None,
+def ReadOverlayFile(filename, overlay_type=constants.BOTH_OVERLAYS, board=None,
                     buildroot=constants.SOURCE_ROOT):
   """Attempt to open a file in the overlay directories.
 
