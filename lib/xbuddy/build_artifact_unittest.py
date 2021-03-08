@@ -140,7 +140,7 @@ _TEST_GOLO_ARCHIVE_TEST_TARBALL_CONTENT = [
     'autotest/test_suites/control.faft_bios_au_2',
     'autotest/test_suites/control.faft_lv1',
     'autotest/test_suites/control.av_webcam',
-    'autotest/test_suites/control.power_sanity',
+    'autotest/test_suites/control.power_check',
     'autotest/test_suites/control.wificell-pre-cq',
     'autotest/test_suites/control.hotrod',
     'autotest/test_suites/control.skylab_staging_test',
