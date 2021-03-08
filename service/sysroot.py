@@ -41,7 +41,8 @@ class SetupBoardRunConfig(object):
   def __init__(self, set_default=False, force=False, usepkg=True, jobs=None,
                regen_configs=False, quiet=False, update_toolchain=True,
                upgrade_chroot=True, init_board_pkgs=True, local_build=False,
-               toolchain_changed=False, package_indexes=None):
+               toolchain_changed=False, package_indexes=None,
+               expanded_binhost_inheritance: bool = False):
     """Initialize method.
 
     Args:
@@ -59,8 +60,8 @@ class SetupBoardRunConfig(object):
         'force'.
       package_indexes (list[PackageIndexInfo]): List of information about
         available prebuilts, youngest first, or None.
+      expanded_binhost_inheritance: Allow expanded binhost inheritance.
     """
-
     self.set_default = set_default
     self.force = force or toolchain_changed
     self.usepkg = usepkg
@@ -72,6 +73,7 @@ class SetupBoardRunConfig(object):
     self.init_board_pkgs = init_board_pkgs
     self.local_build = local_build
     self.package_indexes = package_indexes or []
+    self.expanded_binhost_inheritance = expanded_binhost_inheritance
 
   def GetUpdateChrootArgs(self):
     """Create a list containing the relevant update_chroot arguments.
@@ -278,9 +280,13 @@ def Create(target, run_configs, accept_licenses):
   # Create the command wrappers, choose profile, and make.conf.board.
   # Refresh the workon symlinks to compensate for crbug.com/679831.
   logging.info('Setting up portage in the sysroot.')
-  _InstallPortageConfigs(sysroot, target, accept_licenses,
-                         run_configs.local_build,
-                         package_indexes=run_configs.package_indexes)
+  _InstallPortageConfigs(
+      sysroot,
+      target,
+      accept_licenses,
+      run_configs.local_build,
+      package_indexes=run_configs.package_indexes,
+      expanded_binhost_inheritance=run_configs.expanded_binhost_inheritance)
 
   # Developer Experience Step: Set default board (if requested) to allow
   # running later commands without needing to pass the --board argument.
@@ -420,8 +426,12 @@ def _InstallConfigs(sysroot, target):
   sysroot.InstallMakeConfUser()
 
 
-def _InstallPortageConfigs(sysroot, target, accept_licenses, local_build,
-                           package_indexes=None):
+def _InstallPortageConfigs(sysroot,
+                           target,
+                           accept_licenses,
+                           local_build,
+                           package_indexes=None,
+                           expanded_binhost_inheritance: bool = False):
   """Install portage wrappers and configurations.
 
   Dependencies: make.conf.board_setup (InstallConfigs).
@@ -436,14 +446,17 @@ def _InstallPortageConfigs(sysroot, target, accept_licenses, local_build,
     local_build (bool): If the build is a local only build.
     package_indexes (list[PackageIndexInfo]): List of information about
       available prebuilts, youngest first, or None.
+    expanded_binhost_inheritance: Whether to allow expanded binhost inheritance.
   """
   sysroot.CreateAllWrappers(friendly_name=target.name)
   _ChooseProfile(target, sysroot)
   _RefreshWorkonSymlinks(target.name, sysroot)
   # Must be done after the profile is chosen or binhosts may be incomplete.
-  sysroot.InstallMakeConfBoard(accepted_licenses=accept_licenses,
-                               local_only=local_build,
-                               package_indexes=package_indexes)
+  sysroot.InstallMakeConfBoard(
+      accepted_licenses=accept_licenses,
+      local_only=local_build,
+      package_indexes=package_indexes,
+      expanded_binhost_inheritance=expanded_binhost_inheritance)
 
 
 def _InstallToolchain(sysroot, target, local_init=True):

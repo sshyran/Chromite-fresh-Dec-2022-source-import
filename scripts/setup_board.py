@@ -107,6 +107,20 @@ def GetParser():
                      deprecated=deprecated % '--reuse-pkgs-from-local-boards',
                      help='Deprecated form of --reuse-pkgs-from-local-boards.')
 
+  experimental = parser.add_argument_group('Experimental Options')
+  experimental.add_argument(
+      '--more-binhosts',
+      dest='expanded_binhost_inheritance',
+      default=False,
+      action='store_true',
+      help='Try to include additional binhosts to improve binhost hit rate.')
+  experimental.add_argument(
+      '--fewer-binhosts',
+      dest='expanded_binhost_inheritance',
+      default=False,
+      action='store_false',
+      help='Do not try to include any additional binhosts.')
+
   return parser
 
 
@@ -122,12 +136,18 @@ def _ParseArgs(args):
                                                    profile=opts.profile)
 
   opts.run_config = sysroot.SetupBoardRunConfig(
-      set_default=opts.default, force=opts.force, usepkg=opts.usepkg,
-      jobs=opts.jobs, regen_configs=opts.regen_configs, quiet=opts.quiet,
+      set_default=opts.default,
+      force=opts.force,
+      usepkg=opts.usepkg,
+      jobs=opts.jobs,
+      regen_configs=opts.regen_configs,
+      quiet=opts.quiet,
       update_toolchain=not opts.skip_toolchain_update,
       upgrade_chroot=not opts.skip_chroot_upgrade,
       init_board_pkgs=not opts.skip_board_pkg_init,
-      local_build=opts.reuse_local)
+      local_build=opts.reuse_local,
+      expanded_binhost_inheritance=opts.expanded_binhost_inheritance,
+  )
 
   opts.Freeze()
   return opts
