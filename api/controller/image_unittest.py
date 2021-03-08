@@ -121,6 +121,21 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     build_patch.assert_called_with(
         images=expected_images, board='board', config=mock.ANY)
 
+  def testRecoveryImpliedTypes(self):
+    """Test implied type handling of recovery images."""
+    # The TEST_VM type should force it to build the test image.
+    types = [common_pb2.IMAGE_TYPE_RECOVERY]
+
+    request = self._GetRequest(board='board', types=types)
+
+    # Failed result to avoid the success handling logic.
+    result = image_service.BuildResult(1, [])
+    build_patch = self.PatchObject(image_service, 'Build', return_value=result)
+
+    image_controller.Create(request, self.response, self.api_config)
+    build_patch.assert_called_with(
+        images=[constants.IMAGE_TYPE_BASE], board='board', config=mock.ANY)
+
   def testFailedPackageHandling(self):
     """Test failed packages are populated correctly."""
     result = image_service.BuildResult(1, ['foo/bar', 'cat/pkg'])

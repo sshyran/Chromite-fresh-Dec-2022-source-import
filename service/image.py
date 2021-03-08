@@ -145,6 +145,35 @@ def Build(board=None, images=None, config=None, extra_env=None):
 
     return BuildResult(result.returncode, failed)
 
+def BuildRecoveryImage(board=None, image_path=None):
+  """Build a recovery image.
+
+  This must be done after a base image has been created.
+
+  Args:
+    board (str): The board name.
+    image_path (str): The chrooted path to the image, defaults
+      to chromiums_image.bin.
+
+  Returns:
+    BuildResult
+  """
+  board = board or cros_build_lib.GetDefaultBoard()
+  if not board:
+    raise InvalidArgumentError('board is required.')
+
+  if cros_build_lib.IsInsideChroot():
+    cmd = [os.path.join(constants.CROSUTILS_DIR, 'mod_image_for_recovery.sh')]
+  else:
+    cmd = ['./mod_image_for_recovery.sh']
+
+  cmd.extend(['--board', board])
+  if image_path:
+    cmd.extend(['--image', image_path])
+
+  result = cros_build_lib.run(cmd, enter_chroot=True,
+                              check=False)
+  return BuildResult(result.returncode, None)
 
 def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
   """Create a VM from an image.
