@@ -7,6 +7,7 @@
 
 from __future__ import print_function
 
+import collections
 import os
 import sys
 
@@ -103,8 +104,10 @@ class CreateTunnelPopenMock(partial_mock.PartialCmdMock):
   ATTRS = ('_mockable_popen',)
   DEFAULT_ATTR = '_mockable_popen'
 
-  def _mockable_popen(self, inst, *args, **kwargs):
-    return inst, args, kwargs
+  PopenFake = collections.namedtuple('PopenFake', ('args',))
+
+  def _mockable_popen(self, inst, *_args, **_kwargs):
+    return self.PopenFake(inst)
 
 
 class RemoteShMock(partial_mock.PartialCmdMock):
@@ -153,9 +156,9 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
 
   def testDefault(self):
     """Test default behavior."""
-    plain_result = self.host.CreateTunnel()[0]
-    self.assertRaises(ValueError, plain_result.index, '-R')
-    self.assertRaises(ValueError, plain_result.index, '-L')
+    plain_result = self.host.CreateTunnel().args
+    self.assertNotIn('-R', plain_result)
+    self.assertNotIn('-L', plain_result)
 
   def testLocal(self):
     """Test behavior of to_local parameter."""
@@ -166,7 +169,7 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
                                        remote_host='', remote_port=12345),
          '12345:foo:3240',),
         ):
-      result = self.host.CreateTunnel(to_local=[spec])[0]
+      result = self.host.CreateTunnel(to_local=[spec]).args
       self.assertEqual(result[result.index('-L') + 1], expected_output)
 
   def testRemote(self):
@@ -178,7 +181,7 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
                                        remote_host='', remote_port=12345),
          '12345:foo:3240',),
         ):
-      result = self.host.CreateTunnel(to_remote=[spec])[0]
+      result = self.host.CreateTunnel(to_remote=[spec]).args
       self.assertEqual(result[result.index('-R') + 1], expected_output)
 
   def testInvalid(self):
