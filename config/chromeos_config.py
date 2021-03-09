@@ -1746,6 +1746,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
+      (TRIGGERED, 'firmware-octopus-11297.250.B', ['octopus'], {}),
       (TRIGGERED, 'firmware-volteer-13672.39.B', ['volteer'], {}), # b/180965428
       (TRIGGERED, 'firmware-volteer-13672.47.B', ['volteer'], {}), # b/180965428
       (TRIGGERED, 'firmware-volteer-13672.81.B', ['volteer'], {}), # b/181692098

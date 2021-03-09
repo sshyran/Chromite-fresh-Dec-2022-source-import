@@ -13275,6 +13275,26 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-oak-8438.B"
     },
+    "firmware-octopus-11297.250.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "octopus"
+        ],
+        "schedule": "triggered",
+        "workspace_branch": "firmware-octopus-11297.250.B"
+    },
+    "firmware-octopus-11297.250.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "octopus"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-octopus-11297.250.B"
+    },
     "firmware-octopus-11297.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
