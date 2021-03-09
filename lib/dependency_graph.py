@@ -49,6 +49,7 @@ class PackageNode:
     root: The root where the package is to be installed.
     _deps: The set of packages this package depends on.
     _rev_deps: The set of packages that depend on this package.
+    source_paths: The list of source paths the package uses to build.
   """
   pkg_info: package_info.PackageInfo
   root: str
@@ -123,6 +124,7 @@ class PackageNode:
 
   @property
   def cpvr(self):
+    """Get the fully qualified package string."""
     return self.pkg_info.cpvr
 
   @property
@@ -187,6 +189,34 @@ class DependencyGraph:
   Data structure to enable more easily querying and traversing the depgraphs.
   Querying the depgraph currently supports the full CPVR package spec, and
   package atoms. The behavior of other package specs (e.g. CPV) is undefined.
+
+  Attributes:
+    _pkg_dict: A dictionary of packages indexed by their full CPVR/CPF, i.e.
+      category/package_name-version-revision, then by the package's target root,
+      e.g. /build/eve, or /. This allows differentiating between packages
+      installed to the sysroot, and those installed to the SDK (DEPEND/deps vs
+      BDEPEND/bdeps).
+    _atom_list: A dictionary of packages indexed by their package atom, i.e.
+      category/package_name. The dictionary contains a list of nodes that have
+      the given atom. This can include the same package installed to multiple
+      roots, and/or different versions of the same package.
+    _roots: The different roots to which packages in the graph would be
+      installed. This will always contain at most 2 entries, the SDK root (/),
+      and a build target's sysroot (e.g. /build/eve). Graphs containing just one
+      of the two are also common.
+    _len: The number of distinct nodes in the graph. The count is NOT the number
+      of distinct packages in the graph. If foo/bar-1.0 is installed to both the
+      sysroot and the SDK root, it will be counted as 2 distinct nodes.
+    sdk_root: The SDK root path if a build target graph has nodes installed to
+      it, otherwise None. Note: The SDK graph's sdk_root will be None because
+      its sysroot is the SDK's root path.
+    sysroot_path: The sysroot path if any nodes install to one, otherwise None.
+      The sysroot path will almost always be set, but it can be None if a
+      build target's depgraph only has bdeps that need to be installed.
+    _root_package_nodes: The nodes of the packages passed as the
+      |root_packages|. This is the list of packages used to create the graph,
+      and so is a superset of the root nodes of the directed graph that only
+      includes the dependency edges.
   """
 
   def __init__(self, nodes: Iterable[PackageNode],
