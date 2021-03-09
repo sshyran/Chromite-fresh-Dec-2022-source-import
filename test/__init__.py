@@ -5,5 +5,5 @@
 
 from __future__ import print_function
 
-# pylint: disable=wildcard-import
+# pylint: disable=wildcard-import, import-error
 from .portage_testables import *

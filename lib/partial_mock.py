@@ -378,6 +378,8 @@ class MockedCallResults(object):
       raise AssertionError('%s: %r not mocked!' % (self.name, params))
 
     if is_exception(side_effect):
+      # Pylint-2.2 can't handle this if guard.
+      # pylint: disable=raising-bad-type
       raise side_effect
     if side_effect:
       assert hook_args is not None
@@ -725,12 +727,12 @@ class PartialCmdMock(PartialMock):
 
   @property
   @CheckAttr
-  def call_count(self, mock_attr=None):
+  def call_count(self, mock_attr=None):  # pylint: disable=property-with-parameters
     """Return the number of times we've been called."""
     return self.patched[mock_attr].call_count
 
   @property
   @CheckAttr
-  def call_args_list(self, mock_attr=None):
+  def call_args_list(self, mock_attr=None):  # pylint: disable=property-with-parameters
     """Return the list of args we've been called with."""
     return self.patched[mock_attr].call_args_list

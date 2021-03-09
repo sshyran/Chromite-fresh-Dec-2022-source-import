@@ -236,8 +236,8 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
                  osutils.ReadFile(os.path.join(self.out_board_dir, 'args.gn')))
 
   def _ShouldEnableGoma(self):
-    # Enable goma if 1) Chrome actually needs to be built, 2) goma is available and
-    # 3) config says goma should be used to build Chrome.
+    # Enable goma if 1) Chrome actually needs to be built, 2) goma is available
+    # and 3) config says goma should be used to build Chrome.
     return (self._run.options.managed_chrome and
             self._run.options.goma_dir and
             self._run.config.chrome_sdk_goma)

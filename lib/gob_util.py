@@ -88,6 +88,12 @@ class ErrorParser(HTMLParser.HTMLParser):
   def ParsedDiv(self):
     return self.err_data.strip()
 
+  def error(self, message):
+    # Pylint correctly flags a missing abstract method, but the error is in
+    # Python itself.  We can delete this method once we move to Python 3.10+.
+    # https://bugs.python.org/issue31844
+    pass
+
 
 @memoize.Memoize
 def _GetAppCredentials():

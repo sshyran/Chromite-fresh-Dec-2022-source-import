@@ -949,7 +949,7 @@ class PaygenPayload(object):
     """Create, verify and upload the results.
 
     Returns:
-        A string uri to payload, if uploaded, otherwise None.
+      A string uri to payload, if uploaded, otherwise None.
     """
     ret_uri = None
     logging.info('* Starting payload generation')

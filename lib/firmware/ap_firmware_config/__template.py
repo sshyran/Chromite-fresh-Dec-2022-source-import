@@ -27,9 +27,10 @@ BUILD_PACKAGES = BUILD_WORKON_PACKAGES + (
 # FLASH CONFIGS.
 
 # TODO: Set any required force command constants with explanation.
-# TODO: Delete this comment block.
+# TODO: Delete this comment block (including pylint disable).
 # Force flash command constants: DEPLOY_{SSH,SERVO}_FORCE_{FLASHROM,FUTILITY}.
 # Any of the constants may be used, simply set to True to enable.
+# pylint: disable=unused-argument
 
 def is_fast_required(use_futility, servo):
   """Returns true if --fast is necessary to flash successfully.

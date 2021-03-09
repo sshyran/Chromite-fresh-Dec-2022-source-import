@@ -181,7 +181,8 @@ def InstallPackage(cipd_path, package, version, destination,
   Args:
     cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
     package: A package name.
-    version: The CIPD version of the package to install (can be instance ID or a ref).
+    version: The CIPD version of the package to install (can be instance ID or a
+        ref).
     destination: The folder to install the package under.
     service_account_json: The path of the service account credentials.
 

@@ -264,6 +264,8 @@ class SDKPackageToolchainOverlaysStage(generic_stages.BuilderStage):
             delete=False) as merged_dir:
           with osutils.MountOverlayContext(
               sdk_dir, overlay_dir, merged_dir, cleanup=True):
+            # Pylint-2.2 is unable to see self.tempdir is a string.
+            # pylint: disable=unsubscriptable-object
             sysroot = merged_dir[len(chroot_dir):]
             cmd = [
                 'cros_setup_toolchains', '--targets=boards',

@@ -1663,8 +1663,11 @@ class UploadedLocalPatch(GitRepoPatch):
 
   def __str__(self):
     """Returns custom string to identify this patch."""
-    s = '%s:%s:%s' % (self.project, self.original_branch,
-                      self.original_sha1[:8])
+    s = '%s:%s' % (self.project, self.original_branch)
+    if self._original_sha1_valid:
+      # Pylint-2.2 is unable to see the if guard above.
+      # pylint: disable=unsubscriptable-object
+      s += ':%s' % (self.original_sha1[:8],)
     # TODO(ferringb,build): This gets a bit long in output; should likely
     # do some form of truncation to it.
     if self._subject_line:

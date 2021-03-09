@@ -433,12 +433,6 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
     Instead of waiting for the signers to sign the hashes, we just sign then and
     copy them to the requested files. It doesn't really support keysets at this
     point.
-
-    Args:
-      Look at SignerPayloadsClientGoogleStorage.GetHashsignatures()
-
-    Returns:
-      Look at SignerPayloadsClientGoogleStorage.GetHashsignatures()
     """
     logging.info('Signing the hashes with unoffical keys.')
 

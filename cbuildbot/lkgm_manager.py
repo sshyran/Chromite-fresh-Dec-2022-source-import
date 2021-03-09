@@ -89,7 +89,7 @@ class _LKGMCandidateInfo(manifest_version.VersionInfo):
     self.revision_number += 1
     return self.VersionString()
 
-  # pylint: disable=arguments-differ
+  # pylint: disable=arguments-differ, signature-differs
   def UpdateVersionFile(self, *args, **kwargs):
     """Update the version file on disk.
 
