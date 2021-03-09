@@ -253,7 +253,7 @@ class DeviceImager(object):
   def _Reboot(self):
     """Reboots the device."""
     try:
-      self._device.Reboot(timeout_sec=60)
+      self._device.Reboot(timeout_sec=300)
     except remote_access.RebootError:
       raise Error('Could not recover from reboot. Once example reason'
                   ' could be the image provided was a non-test image'
