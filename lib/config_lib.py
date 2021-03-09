@@ -1889,19 +1889,20 @@ def GetNonUniBuildLabBoardName(board):
   # NOTE: please try to keep this list in sync with the corresponding list in
   # infra/suite_scheduler/build_lib.py
   special_suffixes = [
-      '-arc-r', #
-      '-arc-r-userdebug', #
-      '-arcnext', #
-      '-arcvm', #
-      '-blueznext', #
-      '-borealis', #
-      '-campfire', #
-      '-cfm', #
-      '-kernelnext', #
-      '-kvm', #
-      '-libcamera', #
-      '-ndktranslation', #
-      '-userdebug', #
+      '-arc64',  #
+      '-arc-r',  #
+      '-arc-r-userdebug',  #
+      '-arcnext',  #
+      '-arcvm',  #
+      '-blueznext',  #
+      '-borealis',  #
+      '-campfire',  #
+      '-cfm',  #
+      '-kernelnext',  #
+      '-kvm',  #
+      '-libcamera',  #
+      '-ndktranslation',  #
+      '-userdebug',  #
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
