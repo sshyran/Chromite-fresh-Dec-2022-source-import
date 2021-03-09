@@ -98,7 +98,6 @@ enable=
     next-method-defined,
     nonzero-method,
     oct-method,
-    old-division,
     old-ne-operator,
     old-octal-literal,
     old-raise-syntax,
