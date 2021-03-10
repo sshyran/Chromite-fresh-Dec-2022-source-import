@@ -182,6 +182,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='apex-access', gid=405, users={'rtanalytics'}),
     GroupEntry(group='modem', gid=241, users={'shill'}),
     GroupEntry(group='pluginvm', gid=20128, users={'crosvm', 'pluginvm'}),
+    GroupEntry(group='rmtfs', gid=306, users={'rmtfs', 'shill'}),
     GroupEntry(group='virtaccess', gid=418, users={'crosvm', 'wilco_dtc'}),
     GroupEntry(group='kerberosd', gid=20131, users={'kerberosd',
                                                     'kerberosd-exec'}),
