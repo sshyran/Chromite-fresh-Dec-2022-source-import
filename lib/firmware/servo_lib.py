@@ -96,21 +96,6 @@ class DutControl(object):
       self.run(cmd, verbose=verbose, dryrun=dryrun)
 
 
-def get(dut_ctl: DutControl):
-  """Get the Servo instance the given dut_control command is using.
-
-  Args:
-    dut_ctl: The dut_control command wrapper instance.
-  """
-  version = dut_ctl.get_value('servo_type')
-  if version not in VALID_SERVOS:
-    raise InvalidServoVersion('Unrecognized servo version: %s' % version)
-
-  option = _SERIAL_NUMBER_OPTION_OVERRIDE.get(version, _SERIAL_NUMBER_OPTION)
-  serial = dut_ctl.get_value(option)
-  return Servo(version, serial)
-
-
 class Servo(object):
   """Data class for servos."""
 
@@ -138,3 +123,18 @@ class Servo(object):
   @property
   def is_v4(self):
     return self.version in V4_SERVOS
+
+
+def get(dut_ctl: DutControl) -> Servo:
+  """Get the Servo instance the given dut_control command is using.
+
+  Args:
+    dut_ctl: The dut_control command wrapper instance.
+  """
+  version = dut_ctl.get_value('servo_type')
+  if version not in VALID_SERVOS:
+    raise InvalidServoVersion('Unrecognized servo version: %s' % version)
+
+  option = _SERIAL_NUMBER_OPTION_OVERRIDE.get(version, _SERIAL_NUMBER_OPTION)
+  serial = dut_ctl.get_value(option)
+  return Servo(version, serial)
