@@ -7,6 +7,9 @@
 
 from __future__ import print_function
 
+from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
+
 
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'
@@ -44,11 +47,60 @@ class InvalidServoVersion(Error):
   """Invalid servo version error."""
 
 
-def get(dut_ctl):
+class DutConnectionError(Error):
+  """Error when fetching data from a dut."""
+
+
+class DutControl(object):
+  """Wrapper for dut_control calls."""
+
+  def __init__(self, port):
+    self._base_cmd = ['dut-control']
+    if port:
+      self._base_cmd.append('--port=%s' % port)
+
+  def get_value(self, arg):
+    """Get the value of |arg| from dut_control."""
+    try:
+      result = cros_build_lib.run(
+          self._base_cmd + [arg], stdout=True, encoding='utf-8')
+    except cros_build_lib.CalledProcessError as e:
+      logging.debug('dut-control error: %s', str(e))
+      raise DutConnectionError(
+          'Could not establish servo connection. Verify servod is running in '
+          'the background, and the servo is properly connected.')
+
+    # Return value from the "key:value" output.
+    return result.stdout.partition(':')[2].strip()
+
+  def run(self, cmd_fragment, verbose=False, dryrun=False):
+    """Run a dut_control command.
+
+    Args:
+      cmd_fragment (list[str]): The dut_control command to run.
+      verbose (bool): Whether to print the command before it's run.
+      dryrun (bool): Whether to actually execute the command or just print it.
+    """
+    cros_build_lib.run(
+        self._base_cmd + cmd_fragment, print_cmd=verbose, dryrun=dryrun)
+
+  def run_all(self, cmd_fragments, verbose=False, dryrun=False):
+    """Run multiple dut_control commands in the order given.
+
+    Args:
+      cmd_fragments (list[list[str]]): The dut_control commands to run.
+      verbose (bool): Whether to print the commands as they are run.
+      dryrun (bool): Whether to actually execute the command or just print it.
+    """
+    for cmd in cmd_fragments:
+      self.run(cmd, verbose=verbose, dryrun=dryrun)
+
+
+def get(dut_ctl: DutControl):
   """Get the Servo instance the given dut_control command is using.
 
   Args:
-    dut_ctl (flash_ap.DutControl): The dut_control command wrapper instance.
+    dut_ctl: The dut_control command wrapper instance.
   """
   version = dut_ctl.get_value('servo_type')
   if version not in VALID_SERVOS:

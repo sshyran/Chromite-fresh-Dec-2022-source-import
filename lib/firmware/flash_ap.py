@@ -38,57 +38,8 @@ class DeployFailed(Error):
   """Error raised when deploy fails."""
 
 
-class DutConnectionError(Error):
-  """Error when fetching data from a dut."""
-
-
 class MissingBuildTargetCommandsError(Error):
   """Error thrown when board-specific functionality can't be imported."""
-
-
-class DutControl(object):
-  """Wrapper for dut_control calls."""
-
-  def __init__(self, port):
-    self._base_cmd = ['dut-control']
-    if port:
-      self._base_cmd.append('--port=%s' % port)
-
-  def get_value(self, arg):
-    """Get the value of |arg| from dut_control."""
-    try:
-      result = cros_build_lib.run(
-          self._base_cmd + [arg], stdout=True, encoding='utf-8')
-    except cros_build_lib.CalledProcessError as e:
-      logging.debug('dut-control error: %s', str(e))
-      raise DutConnectionError(
-          'Could not establish servo connection. Verify servod is running in '
-          'the background, and the servo is properly connected.')
-
-    # Return value from the "key:value" output.
-    return result.stdout.partition(':')[2].strip()
-
-  def run(self, cmd_fragment, verbose=False, dryrun=False):
-    """Run a dut_control command.
-
-    Args:
-      cmd_fragment (list[str]): The dut_control command to run.
-      verbose (bool): Whether to print the command before it's run.
-      dryrun (bool): Whether to actually execute the command or just print it.
-    """
-    cros_build_lib.run(
-        self._base_cmd + cmd_fragment, print_cmd=verbose, dryrun=dryrun)
-
-  def run_all(self, cmd_fragments, verbose=False, dryrun=False):
-    """Run multiple dut_control commands in the order given.
-
-    Args:
-      cmd_fragments (list[list[str]]): The dut_control commands to run.
-      verbose (bool): Whether to print the commands as they are run.
-      dryrun (bool): Whether to actually execute the command or just print it.
-    """
-    for cmd in cmd_fragments:
-      self.run(cmd, verbose=verbose, dryrun=dryrun)
 
 
 def _build_ssh_cmds(futility, ip, port, path, tmp_file_name, fast, verbose):
@@ -293,7 +244,7 @@ def _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun):
       operations that would have been performed.
   """
   logging.notice('Attempting to flash via servo.')
-  dut_ctl = DutControl(port)
+  dut_ctl = servo_lib.DutControl(port)
   servo = servo_lib.get(dut_ctl)
   # TODO(b/143240576): Fast mode is sometimes necessary to flash successfully.
   if (not fast and hasattr(module, 'is_fast_required') and
