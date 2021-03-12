@@ -602,7 +602,7 @@ class XBuddy(object):
     Raises:
       XBuddyException: if the path can't be resolved into valid components
     """
-    if path.startswith('xbuddy://'):
+    if path.lower().startswith('xbuddy://'):
       path = path[9:]
     path_list = [p for p in path.split('/') if p]
 
