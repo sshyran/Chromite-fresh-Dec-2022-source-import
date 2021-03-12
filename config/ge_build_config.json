@@ -7686,6 +7686,14 @@
         },
         {
           "board_name": "zork",
+          "name": "shuboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 381,
+          "is_active": true
+        },
+        {
+          "board_name": "zork",
           "name": "trembyle",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -7975,6 +7983,14 @@
         },
         {
           "board_name": "zork-borealis",
+          "name": "shuboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 456,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-borealis",
           "name": "trembyle",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -8092,6 +8108,14 @@
         {
           "board_name": "zork-kernelnext",
           "name": "morphius",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 452,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-kernelnext",
+          "name": "shuboz",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 452,
