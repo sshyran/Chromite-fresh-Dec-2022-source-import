@@ -101,19 +101,12 @@ def GetParser():
                      deprecated=deprecated % '--reuse-pkgs-from-local-boards',
                      help='Deprecated form of --reuse-pkgs-from-local-boards.')
 
-  experimental = parser.add_argument_group('Experimental Options')
-  experimental.add_argument(
-      '--more-binhosts',
-      dest='expanded_binhost_inheritance',
-      default=True,
-      action='store_true',
-      help=argparse.SUPPRESS)
-  experimental.add_argument(
+  parser.add_argument(
       '--fewer-binhosts',
       dest='expanded_binhost_inheritance',
       default=True,
       action='store_false',
-      help='Do not try to include any additional binhosts.')
+      help=argparse.SUPPRESS)
 
   return parser
 
