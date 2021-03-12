@@ -15,6 +15,7 @@ import time
 from typing import Tuple, Dict
 
 from chromite.cli import command
+from chromite.cli import flash
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -68,6 +69,8 @@ class DeviceImager(object):
   B = {Partition.KERNEL: 4, Partition.ROOTFS: 5}
 
   def __init__(self, device, image: str,
+               board: str = None,
+               version: str = None,
                no_rootfs_update: bool = False,
                no_stateful_update: bool = False,
                no_reboot: bool = False,
@@ -79,6 +82,8 @@ class DeviceImager(object):
     Args:
       device: The ChromiumOSDevice to be updated.
       image: The target image path (can be xBuddy path).
+      board: Board to use.
+      version: Image version to use.
       no_rootfs_update: Whether to do rootfs partition update.
       no_stateful_update: Whether to do stateful partition update.
       no_reboot: Whether to reboot device after update. The default is True.
@@ -90,6 +95,8 @@ class DeviceImager(object):
 
     self._device = device
     self._image = image
+    self._board = board
+    self._version = version
     self._no_rootfs_update = no_rootfs_update
     self._no_stateful_update = no_stateful_update
     self._no_reboot = no_reboot
@@ -168,7 +175,11 @@ class DeviceImager(object):
       return self._image, ImageType.REMOTE_DIRECTORY
 
     # Assuming it is an xBuddy path.
-    xb = xbuddy.XBuddy(log_screen=False)
+    board = cros_build_lib.GetBoard(
+        device_board=self._device.board or flash.GetDefaultBoard(),
+        override_board=self._board, force=True)
+
+    xb = xbuddy.XBuddy(log_screen=False, board=board, version=self._version)
     build_id, local_file = xb.Translate([self._image])
     if build_id is None:
       raise Error(f'{self._image}: unable to find matching xBuddy path.')

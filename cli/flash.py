@@ -592,6 +592,8 @@ def Flash(device, image, board=None, src_image_to_delta=None,
         device_imager.DeviceImager(
             device_p,
             image,
+            board=board,
+            version=version,
             no_rootfs_update=not rootfs_update,
             no_stateful_update=not stateful_update,
             no_reboot=not reboot,
