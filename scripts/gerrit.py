@@ -582,9 +582,17 @@ class ActionAbandon(_ActionSimpleParallelCLs):
   COMMAND = 'abandon'
 
   @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    _ActionSimpleParallelCLs.init_subparser(parser)
+
+  @staticmethod
   def _process_one(helper, cl, opts):
     """Use |helper| to process the single |cl|."""
-    helper.AbandonChange(cl, dryrun=opts.dryrun, notify=opts.notify)
+    helper.AbandonChange(cl, msg=opts.msg, dryrun=opts.dryrun,
+                         notify=opts.notify)
 
 
 class ActionRestore(_ActionSimpleParallelCLs):
