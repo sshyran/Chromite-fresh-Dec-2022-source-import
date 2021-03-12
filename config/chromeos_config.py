@@ -1264,7 +1264,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'grunt-arc-r',
-      'hatch-arc-r',
+      'hatch',
       'kukui-arc-r',
       'rammus-arc-r',
   ])
@@ -2977,6 +2977,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       unittests=False,
   )
 
+  # TODO(b/182520025): Switch M90 PFQ to use hatch.
   site_config.Add(
       'hatch-arc-r-android-rvc-pre-flight-branch',
       site_config.templates.pre_flight_branch,

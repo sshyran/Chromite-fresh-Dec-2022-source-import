@@ -416,7 +416,7 @@
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
     grunt-arc-r-vmrvc-android-pfq
-    hatch-arc-r-vmrvc-android-pfq
+    hatch-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
     rammus-arc-r-vmrvc-android-pfq
 
@@ -1219,7 +1219,6 @@
   hatch-arc-r-userdebug-payloads-tryjob
   hatch-arc-r-userdebug-release-tryjob
   hatch-arc-r-userdebug-unittest-stress
-  hatch-arc-r-vmrvc-android-pfq-tryjob
   hatch-arc-s-full-tryjob
   hatch-arc-s-llvm-next-toolchain-tryjob
   hatch-arc-s-llvm-toolchain-tryjob
@@ -1258,6 +1257,7 @@
   hatch-payloads-tryjob
   hatch-release-tryjob
   hatch-unittest-stress
+  hatch-vmrvc-android-pfq-tryjob
   heli-factory-rambi-6420.B-factorybranch-tryjob
   heli-full-tryjob
   heli-llvm-next-toolchain-tryjob
@@ -1621,7 +1621,7 @@
     betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
-    hatch-arc-r-vmrvc-android-pfq-tryjob
+    hatch-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
     rammus-arc-r-vmrvc-android-pfq-tryjob
   master-vmsc-android-pfq-tryjob
