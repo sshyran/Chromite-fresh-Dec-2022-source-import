@@ -13,6 +13,7 @@ headers, gcc-libs).
 
 from __future__ import print_function
 
+import argparse
 import sys
 
 from chromite.lib import build_target_lib
@@ -111,13 +112,13 @@ def GetParser():
   experimental.add_argument(
       '--more-binhosts',
       dest='expanded_binhost_inheritance',
-      default=False,
+      default=True,
       action='store_true',
-      help='Try to include additional binhosts to improve binhost hit rate.')
+      help=argparse.SUPPRESS)
   experimental.add_argument(
       '--fewer-binhosts',
       dest='expanded_binhost_inheritance',
-      default=False,
+      default=True,
       action='store_false',
       help='Do not try to include any additional binhosts.')
 
