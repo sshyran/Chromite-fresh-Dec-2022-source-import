@@ -101,7 +101,8 @@ class BuildPackagesRunConfig(object):
 
   def __init__(self, usepkg=True, install_debug_symbols=False,
                packages=None, use_flags=None, use_goma=False,
-               incremental_build=True, package_indexes=None):
+               incremental_build=True, package_indexes=None,
+               expanded_binhosts: bool = False):
     """Init method.
 
     Args:
@@ -119,6 +120,8 @@ class BuildPackagesRunConfig(object):
         a fresh build.
       package_indexes (list[PackageIndexInfo]): List of information about
         available prebuilts, youngest first, or None.
+      expanded_binhosts: Whether to enable/disable the expanded binhost
+        inheritance feature for the sysroot.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -127,6 +130,7 @@ class BuildPackagesRunConfig(object):
     self.use_goma = use_goma
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
+    self.expanded_binhosts = expanded_binhosts
 
   def GetBuildPackagesArgs(self):
     """Get the build_packages script arguments."""
@@ -151,6 +155,11 @@ class BuildPackagesRunConfig(object):
 
     if not self.is_incremental:
       args.append('--nowithrevdeps')
+
+    if self.expanded_binhosts:
+      args.append('--expandedbinhosts')
+    else:
+      args.append('--noexpandedbinhosts')
 
     if self.packages:
       args.extend(self.packages)
