@@ -253,7 +253,19 @@ class VM(device.Device):
     Returns:
       Nothing
     """
-    uefi_path = '/usr/share/qemu/edk2-aarch64-code.fd'
+    standard_uefi_paths = [
+        '/usr/share/qemu/edk2-aarch64-code.fd',
+        '/usr/share/qemu-efi-aarch64/QEMU_EFI.fd',
+    ]
+    uefi_path = None
+    for p in standard_uefi_paths:
+      if os.path.exists(p):
+        uefi_path = p
+        break
+
+    if not uefi_path:
+      raise VMError('EDK2 QEMU firmware not found.')
+
     cros_build_lib.run(
         ['dd', 'if=%s' % uefi_path, 'of=%s' % self.flash0_file,
         'count=1', 'bs=%dM' % (VM.FLASH_SIZE / (1024*1024)), 'conv=sync',
