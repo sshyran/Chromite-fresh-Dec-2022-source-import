@@ -721,7 +721,7 @@ class Upgrader(object):
     # the last item in the directory.
     if os.path.exists(pkgdir):
       items = os.listdir(pkgdir)
-      items = [os.path.join(catpkgsubdir, i) for i in items if i != 'Manifest']
+      items = [os.path.join(catpkgsubdir, i) for i in items]
       if items:
         args = ['rm', '-rf', '--ignore-unmatch'] + items
         self._RunGit(self._stable_repo, args, stdout=True)
@@ -741,9 +741,6 @@ class Upgrader(object):
           shutil.copytree(src, dst, symlinks=True)
         else:
           shutil.copy2(src, dst)
-
-    # Create a new Manifest file for this package.
-    self._CreateManifest(upstream_pkgdir, pkgdir, ebuild)
 
     # Now copy any eclasses that this package requires.
     eclass = self._IdentifyNeededEclass(upstream_cpv)
@@ -767,65 +764,6 @@ class Upgrader(object):
 
     # Write ebuild file back out.
     osutils.WriteFile(ebuild_path, content)
-
-  def _CreateManifest(self, upstream_pkgdir, pkgdir, ebuild):
-    """Create a trusted Manifest from available Manifests.
-
-    Combine the current Manifest in |pkgdir| (if it exists) with
-    the Manifest from |upstream_pkgdir| to create a new trusted
-    Manifest.  Supplement with 'ebuild manifest' command.
-
-    It is assumed that a Manifest exists in |upstream_pkgdir|, but
-    there may not be one in |pkgdir|.  The new |ebuild| in pkgdir
-    should be used for 'ebuild manifest' command.
-
-    The algorithm is this:
-    1) Remove all lines in upstream Manifest that duplicate
-    lines in current Manifest.
-    2) Concatenate the result of 1) onto the current Manifest.
-    3) Run 'ebuild manifest' to add to results.
-    """
-    upstream_manifest = os.path.join(upstream_pkgdir, 'Manifest')
-    current_manifest = os.path.join(pkgdir, 'Manifest')
-
-    # Don't bother to proceed if the package doesn't have external code.
-    if not os.path.exists(upstream_manifest):
-      return
-
-    if os.path.exists(current_manifest):
-      # Determine which files have DIST entries in current_manifest.
-      dists = set()
-      with open(current_manifest, 'r') as f:
-        for line in f:
-          tokens = line.split()
-          if len(tokens) > 1 and tokens[0] == 'DIST':
-            dists.add(tokens[1])
-
-      # Find DIST lines in upstream manifest not overlapping with current.
-      new_lines = []
-      with open(upstream_manifest, 'r') as f:
-        for line in f:
-          tokens = line.split()
-          if len(tokens) > 1 and tokens[0] == 'DIST' and tokens[1] not in dists:
-            new_lines.append(line)
-
-      # Write all new_lines to current_manifest.
-      if new_lines:
-        with open(current_manifest, 'a') as f:
-          f.writelines(new_lines)
-    else:
-      # Use upstream_manifest as a starting point.
-      shutil.copyfile(upstream_manifest, current_manifest)
-
-    manifest_cmd = ['ebuild', os.path.join(pkgdir, ebuild), 'manifest']
-    manifest_result = cros_build_lib.run(
-        manifest_cmd, check=False, print_cmd=False,
-        stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
-
-    if manifest_result.returncode != 0:
-      raise RuntimeError('Failed "ebuild manifest" for upgraded package.\n'
-                         'Output of %r:\n%s' %
-                         (' '.join(manifest_cmd), manifest_result.output))
 
   def _CopyUpstreamEclass(self, eclass):
     """Upgrades eclass in |eclass| to upstream copy.

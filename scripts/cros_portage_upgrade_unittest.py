@@ -12,7 +12,6 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 import unittest
 
 import mock
@@ -551,7 +550,7 @@ class CpuTestBase(cros_test_lib.MockTempDirTestCase):
 
 
 class CopyUpstreamTest(CpuTestBase):
-  """Test Upgrader._CopyUpstreamPackage, _CopyUpstreamEclass, _CreateManifest"""
+  """Test Upgrader._CopyUpstreamPackage, _CopyUpstreamEclass"""
 
   def _AddEclassToPlayground(self, eclass, content='',
                              ebuilds=None, missing=False):
@@ -764,9 +763,6 @@ class CopyUpstreamTest(CpuTestBase):
     if success:
       self.assertEqual(result, upstream_cpv)
 
-      pkgdir = os.path.join(mocked_upgrader._stable_repo, catpkg)
-      mocked_upgrader._CreateManifest.assert_called_once_with(
-          os.path.join(self.upstream_tmp_repo, catpkg), pkgdir, ebuild)
       mocked_upgrader._IdentifyNeededEclass.assert_called_once_with(
           upstream_cpv)
 
@@ -822,138 +818,6 @@ class CopyUpstreamTest(CpuTestBase):
     self._TestCopyUpstreamPackage('dev-libs/F', '2-r1', True,
                                   existing_files,
                                   extra_upstream_files)
-
-  def _SetupManifestTest(self, ebuild,
-                         upstream_mlines, current_mlines):
-    upstream_dir = tempfile.mkdtemp(dir=self.tempdir)
-    current_dir = tempfile.mkdtemp(dir=self.tempdir)
-
-    upstream_manifest = os.path.join(upstream_dir, 'Manifest')
-    current_manifest = os.path.join(current_dir, 'Manifest')
-
-    if upstream_mlines:
-      osutils.WriteFile(upstream_manifest,
-                        '\n'.join(str(x) for x in upstream_mlines) + '\n',
-                        makedirs=True)
-
-    if current_mlines:
-      osutils.WriteFile(current_manifest,
-                        '\n'.join(str(x) for x in current_mlines) + '\n',
-                        makedirs=True)
-
-    ebuild_path = os.path.join(current_dir, ebuild)
-
-    # Add test-specific mocks/stubs.
-    def CheckRunCommand(cmd, **kwargs):
-      self.assertEqual(cmd, ['ebuild', ebuild_path, 'manifest'])
-      self.assertTrue(kwargs.get('stdout'))
-      return cros_build_lib.CommandResult(returncode=0, output='')
-
-    self.PatchObject(cros_build_lib, 'run').side_effect = CheckRunCommand
-
-    return (upstream_dir, current_dir)
-
-  def _AssertManifestContents(self, manifest_path, expected_manifest_lines):
-    manifest_lines = []
-    with open(manifest_path, 'r') as f:
-      for line in f:
-        manifest_lines.append(ManifestLine(line))
-
-    msg = ('Manifest contents not as expected.  Expected:\n%s\n'
-           '\nBut got:\n%s\n' %
-           ('\n'.join([str(ml) for ml in expected_manifest_lines]),
-            '\n'.join([str(ml) for ml in manifest_lines])))
-    self.assertTrue(manifest_lines == expected_manifest_lines, msg=msg)
-    self.assertFalse(manifest_lines != expected_manifest_lines, msg=msg)
-
-  def testCreateManifestNew(self):
-    """Test case with upstream but no current Manifest."""
-
-    mocked_upgrader = self._MockUpgrader()
-
-    ebuild = 'some-pkg.ebuild'
-    upst_mlines = [ManifestLine(type='DIST',
-                                file='fileA',
-                                size='100',
-                                RMD160='abc',
-                                SHA1='123',
-                                SHA256='abc123'),
-                   ManifestLine(type='EBUILD',
-                                file=ebuild,
-                                size='254',
-                                RMD160='def',
-                                SHA1='456',
-                                SHA256='def456'),]
-    upstream_dir, current_dir = self._SetupManifestTest(ebuild,
-                                                        upst_mlines, None)
-
-    upstream_manifest = os.path.join(upstream_dir, 'Manifest')
-    current_manifest = os.path.join(current_dir, 'Manifest')
-
-    # Run test verification.
-    self.assertNotExists(current_manifest)
-    cpu.Upgrader._CreateManifest(mocked_upgrader,
-                                 upstream_dir, current_dir, ebuild)
-    self.assertTrue(filecmp.cmp(upstream_manifest, current_manifest))
-
-  def testCreateManifestMerge(self):
-    """Test case with upstream but no current Manifest."""
-
-    mocked_upgrader = self._MockUpgrader()
-
-    ebuild = 'some-pkg.ebuild'
-    curr_mlines = [ManifestLine(type='DIST',
-                                file='fileA',
-                                size='101',
-                                RMD160='abc',
-                                SHA1='123',
-                                SHA256='abc123'),
-                   ManifestLine(type='DIST',
-                                file='fileC',
-                                size='321',
-                                RMD160='cde',
-                                SHA1='345',
-                                SHA256='cde345'),
-                   ManifestLine(type='EBUILD',
-                                file=ebuild,
-                                size='254',
-                                RMD160='def',
-                                SHA1='789',
-                                SHA256='def789'),]
-    upst_mlines = [ManifestLine(type='DIST',
-                                file='fileA',
-                                size='100',
-                                RMD160='abc',
-                                SHA1='123',
-                                SHA256='abc123'),
-                   # This file is different from current manifest.
-                   # It should be picked up by _CreateManifest.
-                   ManifestLine(type='DIST',
-                                file='fileB',
-                                size='345',
-                                RMD160='bcd',
-                                SHA1='234',
-                                SHA256='bcd234'),
-                   ManifestLine(type='EBUILD',
-                                file=ebuild,
-                                size='254',
-                                RMD160='def',
-                                SHA1='789',
-                                SHA256='def789'),]
-
-    upstream_dir, current_dir = self._SetupManifestTest(ebuild,
-                                                        upst_mlines,
-                                                        curr_mlines)
-
-    current_manifest = os.path.join(current_dir, 'Manifest')
-
-    # Run test verification.
-    self.assertExists(current_manifest)
-    cpu.Upgrader._CreateManifest(mocked_upgrader,
-                                 upstream_dir, current_dir, ebuild)
-
-    expected_mlines = curr_mlines + upst_mlines[1:2]
-    self._AssertManifestContents(current_manifest, expected_mlines)
 
 
 class GetPackageUpgradeStateTest(CpuTestBase):
