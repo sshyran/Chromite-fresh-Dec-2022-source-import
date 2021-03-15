@@ -8,7 +8,6 @@
 from __future__ import print_function
 
 import filecmp
-import fnmatch
 import os
 import re
 import shutil
@@ -41,9 +40,6 @@ UPGRADED = 'Upgraded'
 
 # Arches we care about -- we actively develop/support/ship.
 STANDARD_BOARD_ARCHS = set(('amd64', 'arm'))
-
-# Files we do not include in our upgrades by convention.
-IGNORE_FILES = set(['Manifest', 'ChangeLog*'])
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -735,20 +731,16 @@ class Upgrader(object):
 
     osutils.SafeMakedirs(pkgdir)
 
-    # Grab all non-ignored, non-ebuilds from upstream plus the specific
-    # ebuild requested.
+    # Grab all non-ebuilds from upstream plus the specific ebuild requested.
     items = os.listdir(upstream_pkgdir)
     for item in items:
-      ignored = [x for x in IGNORE_FILES
-                 if fnmatch.fnmatch(os.path.basename(item), x)]
-      if not ignored:
-        if not item.endswith('.ebuild') or item == ebuild:
-          src = os.path.join(upstream_pkgdir, item)
-          dst = os.path.join(pkgdir, item)
-          if os.path.isdir(src):
-            shutil.copytree(src, dst, symlinks=True)
-          else:
-            shutil.copy2(src, dst)
+      if not item.endswith('.ebuild') or item == ebuild:
+        src = os.path.join(upstream_pkgdir, item)
+        dst = os.path.join(pkgdir, item)
+        if os.path.isdir(src):
+          shutil.copytree(src, dst, symlinks=True)
+        else:
+          shutil.copy2(src, dst)
 
     # Create a new Manifest file for this package.
     self._CreateManifest(upstream_pkgdir, pkgdir, ebuild)
