@@ -41,10 +41,8 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.ChromeSDKCommand'
   TARGET_CLASS = cros_chrome_sdk.ChromeSDKCommand
   COMMAND = 'chrome-sdk'
-  ATTRS = (('_GOMA_DOWNLOAD_URL', '_SetupEnvironment', '_CreateLdSymlinks') +
+  ATTRS = (('_SetupEnvironment', '_CreateLdSymlinks') +
            command_unittest.MockCommand.ATTRS)
-
-  _GOMA_DOWNLOAD_URL = 'Invalid URL'
 
   def __init__(self, *args, **kwargs):
     command_unittest.MockCommand.__init__(self, *args, **kwargs)
@@ -290,6 +288,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testIt(self):
     """Test a runthrough of the script."""
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.SetupCommandMock()
     with cros_test_lib.LoggingCapturer() as logs:
       self.cmd_mock.inst.Run()
@@ -342,7 +342,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     """We print an error message when GomaError is raised."""
     self.SetupCommandMock()
     with cros_test_lib.LoggingCapturer() as logs:
-      self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_FetchGoma',
+      self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_SetupGoma',
                        side_effect=cros_chrome_sdk.GomaError())
       self.cmd_mock.inst.Run()
       self.AssertLogsContain(logs, 'Goma:')
@@ -379,6 +379,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testGomaInPath(self):
     """Verify that we do indeed add Goma to the PATH."""
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.SetupCommandMock()
     self.cmd_mock.inst.Run()
 
@@ -627,7 +629,7 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
     self.StartPatcher(self.cmd_mock)
 
   def VerifyGomaError(self):
-    self.assertRaises(cros_chrome_sdk.GomaError, self.cmd_mock.inst._FetchGoma)
+    self.assertRaises(cros_chrome_sdk.GomaError, self.cmd_mock.inst._SetupGoma)
 
   def testNoGomaPort(self):
     """We print an error when gomacc is not returning a port."""
@@ -641,7 +643,7 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
         cros_chrome_sdk.ChromeSDKCommand.GOMACC_PORT_CMD, returncode=1)
     self.VerifyGomaError()
 
-  def testFetchError(self):
+  def testSetupError(self):
     """We print an error when we can't fetch Goma."""
     self.rc_mock.AddCmdResult(
         cros_chrome_sdk.ChromeSDKCommand.GOMACC_PORT_CMD, returncode=1)
@@ -650,13 +652,13 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
   def testGomaStart(self):
     """Test that we start Goma if it's not already started."""
     # Duplicate return values.
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaPort',
                      side_effect=['XXXX', 'XXXX'])
-    # Run it twice to exercise caching.
-    for _ in range(2):
-      goma_dir, goma_port = self.cmd_mock.inst._FetchGoma()
-      self.assertEqual(goma_port, 'XXXX')
-      self.assertTrue(bool(goma_dir))
+    goma_dir, goma_port = self.cmd_mock.inst._SetupGoma()
+    self.assertEqual(goma_port, 'XXXX')
+    self.assertTrue(bool(goma_dir))
 
 
 class VersionTest(cros_test_lib.MockTempDirTestCase,

@@ -35,7 +35,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import portage_util
-from chromite.lib import retry_util
 from chromite.utils import memoize
 from gn_helpers import gn_helpers
 
@@ -808,11 +807,6 @@ class ChromeSDKCommand(command.CliCommand):
   The bash session environment is set up by a user-configurable rc file.
   """
 
-  # Note, this URL is not accessible outside of corp.
-  _GOMA_DOWNLOAD_URL = ('https://clients5.google.com/cxx-compiler-service/'
-                        'download/downloadurl')
-  _GOMA_TGZ = 'goma-goobuntu.tgz'
-
   _CHROME_CLANG_DIR = 'third_party/llvm-build/Release+Asserts/bin'
   _BUILD_ARGS_DIR = 'build/args/chromeos/'
 
@@ -1424,59 +1418,28 @@ class ChromeSDKCommand(command.CliCommand):
         check=False, encoding='utf-8', capture_output=True).output.strip()
     return port
 
-  def _FetchGoma(self):
-    """Fetch, install, and start Goma, using cached version if it exists.
-
-    Returns:
-      A tuple (dir, port) containing the path to the cached goma/ dir and the
-      Goma port.
-    """
-    common_path = os.path.join(self.options.cache_dir, constants.COMMON_CACHE)
-    common_cache = cache.DiskCache(common_path)
-
-    goma_dir = self.options.gomadir
+  def _GomaDir(self, goma_dir):
+    """Returns current active Goma directory."""
     if not goma_dir:
       goma_dir_cmd = ['goma_ctl', 'goma_dir']
       goma_dir = cros_build_lib.run(
           goma_dir_cmd, check=False, capture_output=True,
           encoding='utf-8').stdout.strip()
+    if goma_dir and os.path.exists(os.path.join(goma_dir, 'gomacc')):
+      return goma_dir
 
-    # TODO(crbug.com/1072400): Remove use of Goma in legacy location.
-    if not goma_dir or not os.path.exists(os.path.join(goma_dir, 'gomacc')):
-      logging.warning('Falling back to legacy Goma location')
-      ref = common_cache.Lookup(('goma', '2'))
-      if not ref.Exists():
-        Log('Installing Goma.', silent=self.silent)
-        with osutils.TempDir() as tempdir:
-          goma_dir = os.path.join(tempdir, 'goma')
-          osutils.SafeMakedirs(goma_dir)
-          with osutils.ChdirContext(tempdir):
-            try:
-              result = retry_util.RunCurl(['--fail', self._GOMA_DOWNLOAD_URL],
-                                          stdout=True, encoding='utf-8')
-              if result.returncode:
-                raise GomaError('Failed to fetch Goma Download URL')
-              download_url = result.output.strip()
-              result = retry_util.RunCurl(
-                  ['--fail', '%s/%s' % (download_url, self._GOMA_TGZ),
-                   '--output', self._GOMA_TGZ])
-              if result.returncode:
-                raise GomaError('Failed to fetch Goma')
-            except retry_util.DownloadError:
-              raise GomaError('Failed to fetch Goma')
-            result = cros_build_lib.dbg_run(
-                ['tar', 'xf', self._GOMA_TGZ,
-                 '--strip=1', '-C', goma_dir])
-            if result.returncode:
-              raise GomaError('Failed to extract Goma')
-            # TODO(crbug.com/1007384): Stop forcing Python 2.
-            result = cros_build_lib.dbg_run(
-                ['python2', os.path.join(goma_dir, 'goma_ctl.py'), 'update'],
-                extra_env={'PLATFORM': 'goobuntu'})
-            if result.returncode:
-              raise GomaError('Failed to install Goma')
-          ref.SetDefault(goma_dir)
-      goma_dir = ref.path
+  def _SetupGoma(self):
+    """Find installed Goma and start Goma.
+
+    Returns:
+      A tuple (dir, port) containing the path to the cached goma/ dir and the
+      Goma port.
+    """
+    goma_dir = self._GomaDir(self.options.gomadir)
+    if not goma_dir:
+      raise GomaError('Failed to find the Goma client.'
+                      ' Please confirm depot_tools is in PATH,'
+                      ' and you do not set GOMA_DIR.')
 
     port = None
     if self.options.start_goma:
@@ -1592,7 +1555,7 @@ class ChromeSDKCommand(command.CliCommand):
     goma_port = None
     if self.options.goma:
       try:
-        goma_dir, goma_port = self._FetchGoma()
+        goma_dir, goma_port = self._SetupGoma()
       except GomaError as e:
         logging.error('Goma: %s.  Bypass by running with --nogoma.', e)
 
