@@ -535,7 +535,7 @@ class BuildbucketLibNetworkTest(cros_test_lib.MockTestCase):
         buckets=constants.ACTIVE_BUCKETS,
         limit=10,
         tags=['cbb_config:success-build',
-              'cbb_branch:master'],
+              'cbb_branch:main'],
         status=constants.BUILDBUCKET_BUILDER_STATUS_COMPLETED)
 
     self.assertEqual(len(previous_builds), 10)

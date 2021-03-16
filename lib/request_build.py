@@ -60,7 +60,7 @@ class RequestBuild(object):
                build_config,
                luci_builder=None,
                display_label=None,
-               branch='master',
+               branch='main',
                extra_args=(),
                extra_properties=None,
                user_email=None,

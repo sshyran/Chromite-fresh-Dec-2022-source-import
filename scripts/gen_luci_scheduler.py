@@ -84,7 +84,7 @@ def genSchedulerJob(build_config):
   if 'schedule_branch' in build_config:
     branch = build_config.schedule_branch
   else:
-    branch = 'master'
+    branch = 'main'
 
   tags = {
       'cbb_branch': branch,

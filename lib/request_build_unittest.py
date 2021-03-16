@@ -65,7 +65,7 @@ class RequestBuildHelperTestsBase(cros_test_lib.MockTestCase):
     return request_build.RequestBuild(
         build_config=self.UNKNOWN_CONFIG,
         display_label=self.DISPLAY_LABEL,
-        branch='master',
+        branch='main',
         extra_args=(),
         user_email='default_email',
         master_buildbucket_id=None)
@@ -97,7 +97,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
         'parameters_json': mock.ANY,
         'bucket': 'luci.chromeos.general',
         'tags': [
-            'cbb_branch:master',
+            'cbb_branch:main',
             'cbb_config:amd64-generic-paladin-tryjob',
             'cbb_display_label:tryjob',
         ]
@@ -108,13 +108,12 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
     self.assertEqual(parameters_parsed, {
         u'builder_name': u'Try',
         u'properties': {
-            u'cbb_branch': u'master',
+            u'cbb_branch': u'main',
             u'cbb_config': u'amd64-generic-paladin-tryjob',
             u'cbb_display_label': u'tryjob',
             u'cbb_extra_args': [],
         }
     })
-
 
   def testMaxRequestBody(self):
     """Verify our request body with max options."""
@@ -177,7 +176,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
         'parameters_json': mock.ANY,
         'bucket': 'luci.chromeos.general',
         'tags': [
-            'cbb_branch:master',
+            'cbb_branch:main',
             'cbb_config:unknown-config',
             'cbb_display_label:display',
             'cbb_email:default_email',
@@ -191,7 +190,7 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
         u'email_notify': [{u'email': u'default_email',
                            u'template': u'default'}],
         u'properties': {
-            u'cbb_branch': u'master',
+            u'cbb_branch': u'main',
             u'cbb_config': u'unknown-config',
             u'cbb_display_label': u'display',
             u'cbb_email': u'default_email',
@@ -267,14 +266,14 @@ class RequestBuildHelperTestsNetork(RequestBuildHelperTestsBase):
         'luci.chromeos.general',
         [
             'builder:Try',
-            'cbb_branch:master',
+            'cbb_branch:main',
             'cbb_config:amd64-generic-paladin-tryjob',
             'cbb_display_label:tryjob',
         ],
         {
             u'builder_name': u'Try',
             u'properties': {
-                u'cbb_branch': u'master',
+                u'cbb_branch': u'main',
                 u'cbb_config': u'amd64-generic-paladin-tryjob',
                 u'cbb_display_label': u'tryjob',
                 u'cbb_extra_args': [],
@@ -355,7 +354,7 @@ class RequestBuildHelperTestsNetork(RequestBuildHelperTestsBase):
     remote_try_job = request_build.RequestBuild(
         build_config=self.BUILD_CONFIG_MIN,
         display_label=self.DISPLAY_LABEL,
-        branch='master',
+        branch='main',
         extra_args=(),
         user_email='default_email',
         master_buildbucket_id=None)
