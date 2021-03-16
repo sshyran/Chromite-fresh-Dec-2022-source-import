@@ -367,6 +367,7 @@
     sarien-release
     scarlet-arc64-release
     scarlet-release
+    senor-release
     sentry-release
     setzer-release
     shadowkeep-release
@@ -1587,6 +1588,7 @@
     sarien-release-tryjob
     scarlet-arc64-release-tryjob
     scarlet-release-tryjob
+    senor-release-tryjob
     sentry-release-tryjob
     setzer-release-tryjob
     shadowkeep-release-tryjob
@@ -1886,6 +1888,12 @@
   scarlet-payloads-tryjob
   scarlet-release-tryjob
   scarlet-unittest-stress
+  senor-full-tryjob
+  senor-llvm-next-toolchain-tryjob
+  senor-llvm-toolchain-tryjob
+  senor-payloads-tryjob
+  senor-release-tryjob
+  senor-unittest-stress
   sentry-factory-glados-7828.B-factorybranch-tryjob
   sentry-full-tryjob
   sentry-llvm-next-toolchain-tryjob
