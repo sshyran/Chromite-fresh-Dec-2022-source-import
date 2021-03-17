@@ -126,12 +126,13 @@ class StatStub(object):
 class CheckerTestCase(cros_test_lib.TestCase):
   """Helpers for Checker modules"""
 
-  def add_message(self, msg_id, node=None, line=None, args=None):
+  def add_message(self, msg_id, node=None, line=None, col_offset=None,
+                  args=None):
     """Capture lint checks"""
     # We include node.doc here explicitly so the pretty assert message
     # inclues it in the output automatically.
     doc = node.doc if node else ''
-    self.results.append((msg_id, doc, line, args))
+    self.results.append((msg_id, doc, line, args, col_offset))
 
   def setUp(self):
     assert hasattr(self, 'CHECKER'), 'TestCase must set CHECKER'
@@ -664,7 +665,7 @@ class ChromiteLoggingCheckerTest(CheckerTestCase):
     """Test that import logging is flagged."""
     node = TestNode(names=[('logging', None)], lineno=15)
     self.checker.visit_import(node)
-    self.assertEqual(self.results, [('R9301', '', 15, None)])
+    self.assertEqual(self.results, [('R9301', '', 15, None, None)])
 
   def testLoggingNotImported(self):
     """Test that importing something else (not logging) is not flagged."""
@@ -804,6 +805,77 @@ class SourceCheckerTest(CheckerTestCase):
       self.results = []
       self.checker._check_module_name(node)
       self.assertLintFailed(expected=('R9203',))
+
+  def testAcceptableBackslashes(self):
+    """Verify _check_backslashes allows certain backslash usage"""
+    snippets = (
+        # With context manager.
+        b"""with foo() \\
+                as bar:""",
+        b"""with foo() as bar, \\
+                 foo() as barar:""",
+        # Leading docstrings.
+        b"""'''\\
+            long string is long'''""",
+        # Comments.
+        b"""# Blah blah: \\
+            # another point.""",
+        # Docstring with split content.
+        b"""foo = '''
+            blah bl-\\
+            ah'''"""
+    )
+    node = TestNode()
+    for snippet in snippets:
+      # Make sure there's actually a \ to test against.
+      self.assertIn(b'\\', snippet)
+      print('Checking snippet', snippet)
+      self.results = []
+      stream = io.BytesIO(snippet)
+      self.checker._check_backslashes(node, stream)
+      self.assertLintPassed()
+
+  def testBadBackslashes(self):
+    """Verify _check_backslashes rejects bad backslash usage"""
+    snippets = (
+        # kwarg in a function call.
+        b"""foo(bar=\\
+                True)""",
+        # Variable assignment.
+        b"""foo = \\
+                bar""",
+        # If statements.
+        b"""if True and \\
+               True:""",
+        b"""if True or \\
+               True:""",
+        # Assert statements.
+        b"""assert False, \\
+                "blah blah" """,
+        # Interpolation.
+        b"""foo = BLAH % \\
+                {}""",
+        # Binary operators.
+        b"""foo = 1 + \\
+                2""",
+        b"""foo = 1 - \\
+                2""",
+        b"""foo = 1 | \\
+                2""",
+        b"""foo = 1 * \\
+                2""",
+        b"""foo = 1 / \\
+                2""",
+    )
+    node = TestNode()
+    for snippet in snippets:
+      # Make sure there's actually a \ to test against.
+      self.assertIn(b'\\', snippet)
+      print('Checking snippet', snippet)
+      self.results = []
+      stream = io.BytesIO(snippet)
+      self.checker._check_backslashes(node, stream)
+      self.assertLintFailed(expected=('R9206',))
 
 
 class CommentCheckerTest(CheckerTestCase):

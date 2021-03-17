@@ -632,6 +632,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
   class _MessageR9203(object): pass
   class _MessageR9204(object): pass
   class _MessageR9205(object): pass
+  class _MessageR9206(object): pass
   # pylint: enable=class-missing-docstring,multiple-statements
 
   name = 'source_checker'
@@ -652,6 +653,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
                 ('missing-file-encoding'), _MessageR9204),
       'R9205': ('File encoding should be "utf-8"',
                 ('bad-file-encoding'), _MessageR9205),
+      'R9206': ('Use parens for long line wrapping, not backslashes',
+                ('parens-not-backslashes'), _MessageR9206),
   }
   options = ()
 
@@ -665,6 +668,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
       self._check_shebang(node, stream, st)
       self._check_encoding(node, stream, st)
       self._check_module_name(node)
+      self._check_backslashes(node, stream)
 
   def _check_shebang(self, _node, stream, st):
     """Verify the shebang is version specific"""
@@ -722,6 +726,17 @@ class SourceChecker(pylint.checkers.BaseChecker):
     name = node.name.rsplit('.', 2)[-1]
     if name.rsplit('_', 2)[-1] in ('unittests',):
       self.add_message('R9203')
+
+  def _check_backslashes(self, _node, stream):
+    """Make sure we use () for line continuations, not backslashes"""
+    stream.seek(0)
+    # This is a rough heuristic by nature: try and flag common uses, but not
+    # all \ usage as there are a few that are legitimate.
+    matcher = re.compile(br'^\s*([^#]*(and|or|=| [-%+|*/])|assert.*) *\\\n$')
+    for lineno, line in enumerate(stream, start=1):
+      if matcher.search(line):
+        s = line.decode('utf8')
+        self.add_message('R9206', line=lineno, col_offset=len(s) - 1)
 
 
 class CommentChecker(pylint.checkers.BaseTokenChecker):
