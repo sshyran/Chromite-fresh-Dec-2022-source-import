@@ -13247,6 +13247,26 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-heli-5216.392.B"
     },
+    "firmware-icarus-13854.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "jacuzzi"
+        ],
+        "schedule": "with 168h interval",
+        "workspace_branch": "firmware-icarus-13854.B"
+    },
+    "firmware-icarus-13854.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "jacuzzi"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-icarus-13854.B"
+    },
     "firmware-kalista-11343.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [

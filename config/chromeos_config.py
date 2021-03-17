@@ -1733,6 +1733,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   TRIGGERED = 'triggered'  # Only when triggered
   # Override these template variables via kwargs.
   GSC = {'sign_types': ['gsc_firmware']}
+  # Changes here should be reflected in infra/config/firmware.star as well
   firmware_branch_builders = [
       (MONTHLY, 'firmware-enguarde-5216.201.B', ['enguarde'], {}),
       (MONTHLY, 'firmware-expresso-5216.223.B', ['expresso'], {}),
@@ -1797,6 +1798,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'firmware-kukui-12573.B', ['kukui', 'jacuzzi'], {}),
       (WEEKLY, 'firmware-hatch-12672.B', ['hatch'], {}),
       (WEEKLY, 'firmware-servo-12768.B', ['nautilus'], {}),
+      (WEEKLY, 'firmware-icarus-13854.B', ['jacuzzi'], {}),
       (DAILY, 'firmware-drallion-12930.B', ['drallion'], {}),
       (DAILY, 'firmware-endeavour-13259.B', ['endeavour'], {}),
       (DAILY, 'firmware-puff-13324.B', ['puff', 'ambassador'], {}),
