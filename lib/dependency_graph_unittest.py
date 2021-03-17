@@ -342,3 +342,30 @@ def test_dependency_graph_any_relevant():
   assert graph.any_relevant(['/not/relevant', '/cat/bdep'])
   # Neither relevant.
   assert not graph.any_relevant(['/not/relevant', '/also/not/relevant'])
+
+
+def test_get_relevant_nodes():
+  """Test the get_relevant_nodes method."""
+  graph = _build_depgraph()
+  dep = package_info.parse('cat/dep-1.0.0-r1')
+
+  # No root type specified, defaults to all.
+  assert set(graph.get_relevant_nodes(['/cat/dep'
+                                      ])) == set(graph.get_nodes([dep]))
+
+  # Get dependencies for all root types.
+  assert set(
+      graph.get_relevant_nodes(['/cat/dep'],
+                               dependency_graph.RootType.ALL)) == set(
+                                   graph.get_nodes([dep]))
+  # Only sysroot dependencies.
+  assert set(
+      graph.get_relevant_nodes(
+          ['/cat/dep'], dependency_graph.RootType.SYSROOT)) == set(
+              graph.get_nodes([dep], dependency_graph.RootType.SYSROOT))
+
+  # Only SDK dependencies.
+  assert set(
+      graph.get_relevant_nodes(
+          ['/cat/dep'], dependency_graph.RootType.SDK)) == set(
+              graph.get_nodes([dep], dependency_graph.RootType.SDK))

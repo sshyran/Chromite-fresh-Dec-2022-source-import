@@ -438,3 +438,13 @@ class DependencyGraph:
   def any_relevant(self, src_paths: Iterable[Union[str, os.PathLike]]) -> bool:
     """Check if any of the paths in |src_paths| are relevant to any nodes."""
     return any(self.is_relevant(p) for p in src_paths)
+
+  def get_relevant_nodes(
+      self,
+      src_paths: Iterable[Union[str, os.PathLike]],
+      root_type: RootType = RootType.ALL) -> List[PackageNode]:
+    """Get nodes where any path in |src_paths| is relevant and root matches."""
+    return [
+        x for x in self.get_nodes(root_type=root_type)
+        if x.any_relevant(src_paths)
+    ]
