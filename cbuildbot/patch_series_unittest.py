@@ -128,8 +128,8 @@ class PatchSeriesTestCase(patch_unittest.UploadedLocalPatchTestCase,
 
     # Suppress transactions.
     series._Transaction = self._ValidateTransactionCall
-    series.GetGitRepoForChange = \
-        lambda change, **kwargs: os.path.join(self.build_root, change.project)
+    series.GetGitRepoForChange = (
+        lambda change, **kwargs: os.path.join(self.build_root, change.project))
 
     return series
 

@@ -2749,8 +2749,8 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       }
 
     # Use the same configuration for llvm-next
-    overwritten_configs[board+'-llvm-next-toolchain'] = \
-      overwritten_configs[board+'-llvm-toolchain']
+    overwritten_configs[board+'-llvm-next-toolchain'] = (
+        overwritten_configs[board+'-llvm-toolchain'])
 
   for config_name, overrides  in overwritten_configs.items():
     # TODO: Turn this assert into a unittest.

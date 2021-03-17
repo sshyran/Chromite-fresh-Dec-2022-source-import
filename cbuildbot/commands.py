@@ -151,8 +151,8 @@ def RunBuildScript(buildroot, cmd, chromite_cmd=False, **kwargs):
       kwargs['extra_env'] = (kwargs.get('extra_env') or {}).copy()
       status_file = stack.Add(tempfile.NamedTemporaryFile, dir=chroot_tmp,
                               mode='w+', encoding='utf-8')
-      kwargs['extra_env'][constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = \
-          path_util.ToChrootPath(status_file.name)
+      kwargs['extra_env'][constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = (
+          path_util.ToChrootPath(status_file.name))
     runcmd = cros_build_lib.run
     if sudo:
       runcmd = cros_build_lib.sudo_run

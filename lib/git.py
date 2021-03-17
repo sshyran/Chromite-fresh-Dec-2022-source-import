@@ -670,8 +670,8 @@ class ManifestCheckout(Manifest):
     for key, value in self.checkouts_by_path.items():
       self.checkouts_by_path[key] = ProjectCheckout(value)
     for key, value in self.checkouts_by_name.items():
-      self.checkouts_by_name[key] = \
-          [ProjectCheckout(x) for x in value]
+      self.checkouts_by_name[key] = [
+          ProjectCheckout(x) for x in value]
 
   def _FinalizeProjectData(self, attrs):
     Manifest._FinalizeProjectData(self, attrs)

@@ -151,8 +151,8 @@ class Cgroup(object):
     opts = ','.join(cls.NEEDED_SUBSYSTEMS)
     cgroup_root_args = ['-t', 'cgroup', '-o', opts, 'cros']
 
-    return _EnsureMounted(cls.MOUNT_ROOT, mount_root_args) and \
-        _EnsureMounted(cls.CGROUP_ROOT, cgroup_root_args)
+    return (_EnsureMounted(cls.MOUNT_ROOT, mount_root_args) and
+            _EnsureMounted(cls.CGROUP_ROOT, cgroup_root_args))
 
   @classmethod
   @memoize.MemoizedSingleCall

@@ -36,8 +36,8 @@ class TestGitMetricCollector(cros_test_lib.TestCase):
   def test_collect(self):
     with mock.patch.object(git_metrics, '_GitRepo', autospec=True) as _GitRepo:
       instance = _GitRepo('dummy')
-      instance.get_commit_hash.return_value = \
-          '2b1ce059425edc91e013c260e59019195f927a07'
+      instance.get_commit_hash.return_value = (
+          '2b1ce059425edc91e013c260e59019195f927a07')
       instance.get_commit_time.return_value = 1483257600
       instance.get_unstaged_changes.return_value = (0, 3)
 

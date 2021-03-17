@@ -287,8 +287,8 @@ class RunAttributes(object):
       AssertionError if the board/target combination does not exist.
     """
     board_target = RunAttributes.BOARD_ATTR_SEP.join((board, target))
-    assert board_target in self._board_targets, \
-        'Unknown board/target combination: %s/%s' % (board, target)
+    assert board_target in self._board_targets, (
+        'Unknown board/target combination: %s/%s' % (board, target))
 
     # Translate to the unique attribute name for attr/board/target.
     return RunAttributes.BOARD_ATTR_SEP.join((attr, board, target))
@@ -882,8 +882,8 @@ class _BuilderRunBase(object):
     packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
     # We assume there is only one Android package in the depgraph.
     for package in packages:
-      if package.startswith('chromeos-base/android-container-') or \
-         package.startswith('chromeos-base/android-vm-'):
+      if (package.startswith('chromeos-base/android-container-') or
+          package.startswith('chromeos-base/android-vm-')):
         return package
     return None
 

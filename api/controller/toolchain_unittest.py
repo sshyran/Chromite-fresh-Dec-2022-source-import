@@ -246,11 +246,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
             BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE],
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ],
@@ -270,11 +270,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
             BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE],
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ],
@@ -299,11 +299,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
             BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE],
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
-                input_artifact_type=\
+                input_artifact_type=
                     BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ])

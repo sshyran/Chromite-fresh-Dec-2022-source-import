@@ -34,8 +34,8 @@ PACKAGE_EXCLUDED_PATHS = ('usr/lib/debug', 'usr/lib64/debug',
 
 # Names of various packaged artifacts.
 SDK_TARBALL_NAME = 'built-sdk.tar.xz'
-TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE = \
-    'built-sdk-overlay-toolchains-%(toolchains)s.tar.xz'
+TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE = (
+    'built-sdk-overlay-toolchains-%(toolchains)s.tar.xz')
 
 
 def SdkPerfPath(buildroot):

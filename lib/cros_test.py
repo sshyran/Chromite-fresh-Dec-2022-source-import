@@ -547,8 +547,8 @@ class CrOSTest(object):
     test_binary = os.path.relpath(
         os.path.join(self.build_dir, self.chrome_test_target), chrome_src_dir)
     test_args = self.args[1:]
-    command = 'cd %s && su chronos -c -- "%s %s"' % \
-        (self.chrome_test_deploy_target_dir, test_binary, ' '.join(test_args))
+    command = 'cd %s && su chronos -c -- "%s %s"' % (
+        self.chrome_test_deploy_target_dir, test_binary, ' '.join(test_args))
     result = self._device.remote_run(command, stream_output=True)
     return result
 

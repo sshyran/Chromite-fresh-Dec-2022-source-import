@@ -91,8 +91,8 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     os.makedirs(self._test_root)
     self._mock_create_test_root = self.PatchObject(commands, 'CreateTestRoot',
                                                    autospec=True)
-    self._mock_create_test_root.return_value = \
-        TastVMTestStageTest.RESULTS_CHROOT_PATH
+    self._mock_create_test_root.return_value = (
+        TastVMTestStageTest.RESULTS_CHROOT_PATH)
 
     self._mock_run_command = self.PatchObject(cros_build_lib, 'run',
                                               autospec=True)
@@ -125,11 +125,11 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     # Mock out some of the methods that TastVMTestStage inherits from
     # generic_stages. This is gross, but slightly less gross than mocking out
     # everything called by generic_stages.
-    self._mock_upload_artifact = \
-        self.PatchObject(self._stage, 'UploadArtifact', autospec=True)
+    self._mock_upload_artifact = self.PatchObject(
+        self._stage, 'UploadArtifact', autospec=True)
     self._mock_upload_artifact.side_effect = self._artifact_exception
-    self._mock_print_download_link = \
-        self.PatchObject(self._stage, 'PrintDownloadLink', autospec=True)
+    self._mock_print_download_link = self.PatchObject(
+        self._stage, 'PrintDownloadLink', autospec=True)
 
     return self._stage
 
@@ -176,14 +176,16 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     """Configures the test framework to run a given suite."""
     self._exp_test_suite = suite_name
     self._exp_test_exprs = test_exprs
-    self._run.config['tast_vm_tests'] = \
-        [config_lib.TastVMTestConfig(suite_name, list(test_exprs))]
+    self._run.config['tast_vm_tests'] = [
+        config_lib.TastVMTestConfig(suite_name, list(test_exprs)),
+    ]
 
   def _VerifyArtifacts(self):
     """Verifies that results were archived and queued to be uploaded."""
     # pylint: disable=protected-access
-    archive_dir = constants.TAST_VM_TEST_RESULTS % \
-        {'attempt': self._stage._attempt}
+    archive_dir = constants.TAST_VM_TEST_RESULTS % {
+        'attempt': self._stage._attempt,
+    }
     self.assertEqual(os.listdir(self._stage.archive_path), [archive_dir])
     archived_results_path = os.path.join(self._stage.archive_path, archive_dir,
                                          self._exp_test_suite,
@@ -198,8 +200,9 @@ class TastVMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     num_failed_tests = 0
     with open(archived_results_path, 'r') as f:
       for test in json.load(f):
-        if test[tast_test_stages.RESULTS_ERRORS_KEY] or \
-           test[tast_test_stages.RESULTS_END_KEY] == tast_test_stages.ZERO_TIME:
+        if (test[tast_test_stages.RESULTS_ERRORS_KEY] or
+            test[tast_test_stages.RESULTS_END_KEY] ==
+                tast_test_stages.ZERO_TIME):
           num_failed_tests += 1
           informational = (tast_test_stages.RESULTS_INFORMATIONAL_ATTR in
                            test.get(tast_test_stages.RESULTS_ATTR_KEY, []))

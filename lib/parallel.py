@@ -322,8 +322,7 @@ class _BackgroundTask(multiprocessing.Process):
           running = self.is_alive()
 
           try:
-            errors, results = \
-                self._queue.get(True, self.PRINT_INTERVAL)
+            errors, results = self._queue.get(True, self.PRINT_INTERVAL)
             if errors:
               task_errors.extend(errors)
 

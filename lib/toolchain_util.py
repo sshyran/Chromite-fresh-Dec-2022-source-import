@@ -53,26 +53,18 @@ class PrepareForBuildReturn(object):
 # operations from chromite, including access to GS buckets.
 # Need to use build API and recipes to communicate to GS buckets in
 # the future.
-ORDERFILE_GS_URL_UNVETTED = \
-    'gs://chromeos-toolchain-artifacts/orderfile/unvetted'
-ORDERFILE_GS_URL_VETTED = \
-    'gs://chromeos-prebuilt/afdo-job/orderfiles/vetted'
-BENCHMARK_AFDO_GS_URL = \
-    'gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark'
-CWP_AFDO_GS_URL = \
-    'gs://chromeos-prebuilt/afdo-job/cwp/chrome/'
-KERNEL_PROFILE_URL = \
-    'gs://chromeos-prebuilt/afdo-job/cwp/kernel/'
-AFDO_GS_URL_VETTED = \
-    'gs://chromeos-prebuilt/afdo-job/vetted/'
-KERNEL_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'kernel')
-BENCHMARK_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'benchmarks')
-CWP_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'cwp')
-RELEASE_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'release')
+ORDERFILE_GS_URL_UNVETTED = (
+    'gs://chromeos-toolchain-artifacts/orderfile/unvetted')
+ORDERFILE_GS_URL_VETTED = 'gs://chromeos-prebuilt/afdo-job/orderfiles/vetted'
+BENCHMARK_AFDO_GS_URL = (
+    'gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark')
+CWP_AFDO_GS_URL = 'gs://chromeos-prebuilt/afdo-job/cwp/chrome/'
+KERNEL_PROFILE_URL = 'gs://chromeos-prebuilt/afdo-job/cwp/kernel/'
+AFDO_GS_URL_VETTED = 'gs://chromeos-prebuilt/afdo-job/vetted/'
+KERNEL_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'kernel')
+BENCHMARK_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'benchmarks')
+CWP_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'cwp')
+RELEASE_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'release')
 
 # Constants
 AFDO_SUFFIX = '.afdo'
@@ -289,7 +281,7 @@ def _ParseMergedProfileName(artifact_name):
   """Parse the name of an orderfile or a release profile for Chrome.
 
   Examples:
-    With input: profile_name='chromeos-chrome-orderfile\
+    With input: profile_name='chromeos-chrome-orderfile
     -field-77-3809.38-1562580965
     -benchmark-77.0.3849.0_rc-r1.orderfile.xz'
     the function returns:
@@ -2590,12 +2582,12 @@ class GetUpdatedFilesHandler(object):
     kernel_version = kernel_version.replace('.', '_')
     json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
                              f'kernel_afdo_{kernel_version}.json')
-    assert os.path.exists(json_file), \
-      f'Metadata for {kernel_version} does not exist'
+    assert os.path.exists(json_file), (
+      f'Metadata for {kernel_version} does not exist')
     afdo_versions = json.loads(osutils.ReadFile(json_file))
     kernel_name = f'chromeos-kernel-{kernel_version}'
-    assert kernel_name in afdo_versions, \
-      f'To update {kernel_name}, the entry should be in kernel_afdo.json'
+    assert kernel_name in afdo_versions, (
+      f'To update {kernel_name}, the entry should be in kernel_afdo.json')
     old_value = afdo_versions[kernel_name]['name']
     update_to_newer_profile = _RankValidCWPProfiles(
         old_value) < _RankValidCWPProfiles(profile_version)
@@ -2914,8 +2906,8 @@ class GenerateBenchmarkAFDOProfile(object):
         self.output_dir,
         os.path.basename(debug_bin) + BZ2_COMPRESSION_SUFFIX)
     chrome_version = CHROME_ARCH_VERSION % afdo_spec
-    debug_bin_name_with_version = \
-        chrome_version + '.debug' + BZ2_COMPRESSION_SUFFIX
+    debug_bin_name_with_version = (
+        chrome_version + '.debug' + BZ2_COMPRESSION_SUFFIX)
 
     # Upload Chrome debug binary and rename it
     _UploadAFDOArtifactToGSBucket(

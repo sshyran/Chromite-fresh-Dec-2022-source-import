@@ -549,7 +549,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
         for test in config.vm_tests:
           self.assertIn(
               test, config.vm_tests_override,
-              'Config %s: has %s VM test, not in override (%s, %s).' % \
+              'Config %s: has %s VM test, not in override (%s, %s).' %
               (build_name, test, config.vm_tests, config.vm_tests_override))
 
   def testVmTestsOnlyOnVmTestBoards(self):
@@ -582,12 +582,12 @@ class CBuildBotTest(ChromeosConfigTestBase):
 
       self.assertIsNone(
           config.vm_tests_override,
-          'Config %s: is tryjob safe, but defines vm_tests_override.' % \
+          'Config %s: is tryjob safe, but defines vm_tests_override.' %
           build_name)
 
       self.assertIsNone(
           config.hw_tests_override,
-          'Config %s: is tryjob safe, but defines hw_tests_override.' % \
+          'Config %s: is tryjob safe, but defines hw_tests_override.' %
           build_name)
 
   def testHWTestsReleaseBuilderRequirement(self):
@@ -812,8 +812,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
 
       # This requirement doesn't apply to payloads(-tryjob)
       # builds. Payloads(-tryjob) are using artifacts from a previous build.
-      if build_name.endswith('-payloads') or \
-         build_name.endswith('-payloads-tryjob'):
+      if (build_name.endswith('-payloads') or
+          build_name.endswith('-payloads-tryjob')):
         continue
 
       if config['paygen'] and not config['paygen_skip_testing']:

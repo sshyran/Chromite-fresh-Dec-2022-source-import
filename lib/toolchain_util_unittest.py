@@ -734,8 +734,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     mock_ebuild = self.PatchObject(
         self.obj, '_GetArtifactVersionInEbuild', return_value=self.kernel_name)
     ret = self.obj.Bundle()
-    profile_name = self.kernel_name + \
-      toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
+    profile_name = self.kernel_name + (
+        toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX)
     verified_profile = os.path.join(self.outdir, profile_name)
     self.assertEqual([verified_profile], ret)
     mock_ebuild.assert_called_once_with(
@@ -881,8 +881,8 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
     self.cwp_full = self.cwp_name + toolchain_util.XZ_COMPRESSION_SUFFIX
     self.arch = 'atom'
     self.benchmark_name = 'chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
-    self.benchmark_full = \
-        self.benchmark_name + toolchain_util.BZ2_COMPRESSION_SUFFIX
+    self.benchmark_full = (self.benchmark_name +
+                           toolchain_util.BZ2_COMPRESSION_SUFFIX)
     cwp_string = '%s-77-3809.38-1562580965' % self.arch
     benchmark_string = 'benchmark-77.0.3849.0-r1'
     self.merged_name = 'chromeos-chrome-amd64-%s-%s' % (cwp_string,
@@ -1269,10 +1269,9 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
     unmerged_name = self._benchmark_afdo_profile_name(
         major=10, build=13, patch=99, compression_suffix=False)
 
-    merged_name, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            recent_to_merge=2,
-            unmerged_name=unmerged_name)
+    merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=2,
+        unmerged_name=unmerged_name)
     self.assertIsNotNone(merged_name)
 
     def _afdo_name(major, build, patch=0, merged_suffix=False):
@@ -1314,8 +1313,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
     )
 
   def testCreateAndUploadMergedAFDOProfileWorksInTheHappyCase(self):
-    merged_name, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce()
+    merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce()
     self.assertIsNotNone(merged_name)
 
     # Note that we always return the *basename*
@@ -1372,17 +1370,16 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
         any_order=True, calls=[call_for(n) for n in input_afdo_names[:-1]])
 
   def testMergeIsOKIfWeFindFewerProfilesThanWeWant(self):
-    merged_name, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(recent_to_merge=1000,
-                                                     max_age_days=1000)
+    merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=1000, max_age_days=1000)
     self.assertIsNotNone(merged_name)
     self.assertEqual(mocks.gs_context.Copy.call_count, 9)
 
   def testNoFilesAfterUnmergedNameAreIncluded(self):
     max_name = self._benchmark_afdo_profile_name(
         major=10, build=11, patch=2, compression_suffix=False)
-    merged_name, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(unmerged_name=max_name)
+    merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        unmerged_name=max_name)
     self.assertIsNotNone(merged_name)
 
     self.assertEqual(
@@ -1467,7 +1464,7 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
       json.dump(self.afdo_versions, f)
     self.artifact_path = os.path.join(
         '/any/path/to/',
-        self.afdo_sorted_by_freshness[2] + \
+        self.afdo_sorted_by_freshness[2] +
         toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX
     )
     self.profile_info = {'kernel_version': self.kernel}
@@ -1520,8 +1517,8 @@ class FindEbuildPathTest(cros_test_lib.MockTempDirTestCase):
     self.board = 'lulu'
     self.chrome_package = 'chromeos-chrome'
     self.kernel_package = 'chromeos-kernel-3_14'
-    self.chrome_ebuild = \
-        '/mnt/host/source/src/path/to/chromeos-chrome-1.0.ebuild'
+    self.chrome_ebuild = (
+        '/mnt/host/source/src/path/to/chromeos-chrome-1.0.ebuild')
     mock_result = cros_build_lib.CommandResult(output=self.chrome_ebuild)
     self.mock_command = self.PatchObject(
         cros_build_lib, 'run', return_value=mock_result)
@@ -1544,8 +1541,8 @@ class FindEbuildPathTest(cros_test_lib.MockTempDirTestCase):
 
   def testKernelPackagePass(self):
     """Test finding kernel ebuild work."""
-    ebuild_path = \
-        '/mnt/host/source/src/path/to/chromeos-kernel-3_14-3.14-r1.ebuild'
+    ebuild_path = (
+        '/mnt/host/source/src/path/to/chromeos-kernel-3_14-3.14-r1.ebuild')
     mock_result = cros_build_lib.CommandResult(output=ebuild_path)
     mock_command = self.PatchObject(
         cros_build_lib, 'run', return_value=mock_result)
@@ -2304,8 +2301,8 @@ class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):
         'arch': self.arch,
         'version': self.version
     }
-    upload_name = chrome_version + '.debug' + \
-        toolchain_util.BZ2_COMPRESSION_SUFFIX
+    upload_name = (chrome_version + '.debug' +
+                   toolchain_util.BZ2_COMPRESSION_SUFFIX)
     calls = [
         mock.call(
             toolchain_util.BENCHMARK_AFDO_GS_URL,
@@ -2510,8 +2507,8 @@ class UploadReleaseChromeAFDOTest(cros_test_lib.MockTempDirTestCase):
     self.cwp_full = self.cwp_name + toolchain_util.XZ_COMPRESSION_SUFFIX
     self.arch = 'atom'
     self.benchmark_name = 'chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
-    self.benchmark_full = \
-        self.benchmark_name + toolchain_util.BZ2_COMPRESSION_SUFFIX
+    self.benchmark_full = (self.benchmark_name +
+                           toolchain_util.BZ2_COMPRESSION_SUFFIX)
     cwp_string = '%s-77-3809.38-1562580965' % self.arch
     benchmark_string = 'benchmark-77.0.3849.0-r1'
     self.merged_name = 'chromeos-chrome-amd64-%s-%s' % (cwp_string,

@@ -179,8 +179,8 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       # a different bucket for PFQ AFDO. Also for async AFDO builders, no need
       # to check here because there's an earlier check to avoid generating
       # AFDO for the same version.
-      if not self._run.config.afdo_generate_async and \
-         afdo.CheckAFDOPerfData(cpv, arch, gs.GSContext()):
+      if (not self._run.config.afdo_generate_async and
+          afdo.CheckAFDOPerfData(cpv, arch, gs.GSContext())):
         logging.info(
             'AFDO profile already generated for arch %s '
             'and Chrome %s. Not generating it again', arch,

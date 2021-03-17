@@ -898,8 +898,8 @@ def determine_android_package(board):
 
   # We assume there is only one Android package in the depgraph.
   for package in packages:
-    if package.startswith('chromeos-base/android-container-') or \
-        package.startswith('chromeos-base/android-vm-'):
+    if (package.startswith('chromeos-base/android-container-') or
+        package.startswith('chromeos-base/android-vm-')):
       return package
   return None
 

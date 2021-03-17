@@ -206,9 +206,9 @@ class MemoryConsumptionSemaphore(object):
   def _set_timer(self):
     """Set a time in the future to unblock after."""
     with self._lock:
-      self._timer_future.value = \
-          max(self._clock() + self.quiescence_time_seconds,
-              self._timer_future.value)
+      self._timer_future.value = max(
+          self._clock() + self.quiescence_time_seconds,
+          self._timer_future.value)
 
   def _allow_consumption(self):
     """Calculate max utilization to determine if another should be allowed.

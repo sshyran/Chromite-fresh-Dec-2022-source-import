@@ -41,8 +41,8 @@ cd+++++++++ new_empty_directory/
 # that would rarely or never be encountered in the wild, rsync quickmerge
 # will exclude all files which contain the substring " -> " in their name.
 
-RSYNC_TEST_OUTPUT_FOR_PACKAGE_UPDATE = \
-""">f..t...... client/ardvark.py
+RSYNC_TEST_OUTPUT_FOR_PACKAGE_UPDATE = """\
+>f..t...... client/ardvark.py
 .d..t...... client/site_tests/
 >f+++++++++ client/site_tests/nothing.py
 .d..t...... client/site_tests/factory_Leds/

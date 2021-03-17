@@ -769,8 +769,8 @@ def _TempDirSetup(self, prefix='tmp', set_global=False, base_dir=None):
   os.chmod(self.tempdir, 0o700)
 
   if set_global:
-    self._orig_tempdir_value, self._orig_tempdir_env = \
-        SetGlobalTempDir(self.tempdir)
+    self._orig_tempdir_value, self._orig_tempdir_env = SetGlobalTempDir(
+        self.tempdir)
 
 
 def _TempDirTearDown(self, force_sudo, delete=True):

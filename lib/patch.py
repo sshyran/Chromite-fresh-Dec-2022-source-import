@@ -1271,8 +1271,8 @@ class GitRepoPatch(PatchQuery):
     # remote. If so, rewrite it as a local reference to the remote branch.
     # For example, refs/heads/main might become refs/remotes/cros/main.
     if revision and not git.IsSHA1(revision):
-      revision = 'refs/remotes/%s/%s' % \
-          (checkout['remote'], git.StripRefs(revision))
+      revision = 'refs/remotes/%s/%s' % (
+          checkout['remote'], git.StripRefs(revision))
     upstream = checkout['tracking_branch']
     self.Apply(checkout.GetPath(absolute=True), upstream, revision=revision,
                trivial=trivial)

@@ -90,9 +90,8 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
           logging.info('AFDO profile already existed in GS. Quit')
           return
 
-        merged_file, uploaded_merged = \
-            afdo.CreateAndUploadMergedAFDOProfile(gs_context, buildroot,
-                                                  afdo_file)
+        merged_file, uploaded_merged = afdo.CreateAndUploadMergedAFDOProfile(
+            gs_context, buildroot, afdo_file)
 
         if merged_file is not None:
           logging.info('Generated %s merged AFDO profile %s', arch,

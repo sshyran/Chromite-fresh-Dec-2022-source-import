@@ -443,8 +443,8 @@ class ManifestVersionedSyncStage(SyncStage):
     self._InitializeRepo()
 
     # If chrome_rev is somehow set, fail.
-    assert not self._chrome_rev, \
-        'chrome_rev is unsupported on release builders.'
+    assert not self._chrome_rev, (
+        'chrome_rev is unsupported on release builders.')
 
     self.RegisterManifestManager(
         manifest_version.BuildSpecsManager(
@@ -507,8 +507,8 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def GetNextManifest(self):
     """Uses the initialized manifest manager to get the next manifest."""
-    assert self.manifest_manager, \
-        'Must run GetStageManager before checkout out build.'
+    assert self.manifest_manager, (
+        'Must run GetStageManager before checkout out build.')
 
     build_id = self._run.attrs.metadata.GetDict().get('build_id')
 
@@ -691,8 +691,8 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
     self.RegisterManifestManager(self._GetInitializedManager(self.internal))
     if self._run.config.master and self._GetSlaveConfigs():
       assert self.internal, 'Unified masters must use an internal checkout.'
-      MasterSlaveLKGMSyncStage.external_manager = \
-          self._GetInitializedManager(False)
+      MasterSlaveLKGMSyncStage.external_manager = self._GetInitializedManager(
+          False)
 
   def ForceVersion(self, version):
     manifest = super(MasterSlaveLKGMSyncStage, self).ForceVersion(version)
@@ -711,10 +711,10 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def GetNextManifest(self):
     """Gets the next manifest using LKGM logic."""
-    assert self.manifest_manager, \
-        'Must run Initialize before we can get a manifest.'
-    assert isinstance(self.manifest_manager, lkgm_manager.LKGMManager), \
-        'Manifest manager instantiated with wrong class.'
+    assert self.manifest_manager, (
+        'Must run Initialize before we can get a manifest.')
+    assert isinstance(self.manifest_manager, lkgm_manager.LKGMManager), (
+        'Manifest manager instantiated with wrong class.')
     assert self._run.config.master
 
     build_id = self._run.attrs.metadata.GetDict().get('build_id')

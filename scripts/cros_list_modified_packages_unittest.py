@@ -25,9 +25,8 @@ class ListModifiedWorkonPackagesTest(cros_test_lib.MockTestCase):
     """Test that no ebuild breaks cros_list_modified_packages"""
 
     # A hook to set the "all_opt" parameter when calling ListWorkonPackages
-    _ListWorkonPackagesPatch = \
-      functools.partial(cros_list_modified_packages.ListWorkonPackages,
-                        all_opt=True)
+    _ListWorkonPackagesPatch = functools.partial(
+        cros_list_modified_packages.ListWorkonPackages, all_opt=True)
 
     with self.PatchObject(cros_list_modified_packages, 'ListWorkonPackages',
                           side_effect=_ListWorkonPackagesPatch):

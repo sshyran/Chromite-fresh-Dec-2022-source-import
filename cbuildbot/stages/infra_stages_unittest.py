@@ -64,8 +64,8 @@ class PackageInfraGoBinariesTest(generic_stages_unittest.AbstractStageTestCase,
 
     # Mock out a method that PackageInfraGoBinariesStage inherits from
     # generic_stages.
-    self._mock_upload_artifact = \
-        self.PatchObject(self._stage, 'UploadArtifact', autospec=True)
+    self._mock_upload_artifact = self.PatchObject(
+        self._stage, 'UploadArtifact', autospec=True)
 
     return self._stage
 
@@ -128,8 +128,8 @@ class PackageInfraGoBinariesTest(generic_stages_unittest.AbstractStageTestCase,
       self._RegisterPortagePackageFile(pkg, bin_path)
       data_path = os.path.join('/usr/share', pkg, 'data.bin')
       self._RegisterPortagePackageFile(pkg, data_path)
-      cipd_packages[infra_stages._CIPD_PACKAGE_PREFIX + pkg] = \
-          [bin_path, data_path]
+      cipd_packages[infra_stages._CIPD_PACKAGE_PREFIX + pkg] = [
+          bin_path, data_path]
 
     self.RunStage()
     self.assertDictEqual(self._cipd_packages, cipd_packages)

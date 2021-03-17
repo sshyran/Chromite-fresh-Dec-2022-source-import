@@ -156,10 +156,8 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
     board_metadata['boards'] = [self._current_board]
     board_metadata['branch'] = self._run.config.workspace_branch
     board_metadata['version_full'] = self.dummy_version
-    board_metadata['version_milestone'] = \
-        workspace_version_info.chrome_branch
-    board_metadata['version_platform'] = \
-        workspace_version_info.VersionString()
+    board_metadata['version_milestone'] = workspace_version_info.chrome_branch
+    board_metadata['version_platform'] = workspace_version_info.VersionString()
     board_metadata['version'] = {
         'platform': workspace_version_info.VersionString(),
         'full': self.dummy_version,

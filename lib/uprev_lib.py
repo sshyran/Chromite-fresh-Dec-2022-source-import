@@ -800,9 +800,9 @@ def uprev_workon_ebuild_to_version(
 
   # If the newly generated stable ebuild is identical to the previous one,
   # early return without incrementing the revision number.
-  if stable_ebuild and target_version == stable_ebuild.version_no_rev and \
-    filecmp.cmp(
-        new_ebuild_src_path, stable_ebuild.ebuild_path, shallow=False):
+  if (stable_ebuild and target_version == stable_ebuild.version_no_rev and
+      filecmp.cmp(new_ebuild_src_path, stable_ebuild.ebuild_path,
+                  shallow=False)):
     return UprevResult(outcome=Outcome.SAME_VERSION_EXISTS)
 
   if stable_ebuild is not None:

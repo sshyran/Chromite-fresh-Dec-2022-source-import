@@ -168,9 +168,8 @@ class DeployTest(cros_test_lib.MockTempDirTestCase):
     self.deploy = self._GetDeployChrome(list(_REGULAR_TO) +
                                         ['--board', _TARGET_BOARD, '--gs-path',
                                          _GS_PATH, '--force', '--mount'])
-    self.remote_reboot_mock = \
-      self.PatchObject(remote_access.RemoteAccess, 'RemoteReboot',
-                       return_value=True)
+    self.remote_reboot_mock = self.PatchObject(
+        remote_access.RemoteAccess, 'RemoteReboot', return_value=True)
 
 
 class TestCheckIfBoardMatches(DeployTest):
