@@ -70,7 +70,7 @@ Examples:
   cros flash usb:// xbuddy://remote/eve/latest-stable/signed
 
   For more information and known problems/fixes, please see:
-  https://dev.chromium.org/chromium-os/build/cros-flash
+  https://chromium.googlesource.com/chromiumos/docs/+/HEAD/cros_flash.md
 """
 
   # Override base class property to use cache related commandline options.
