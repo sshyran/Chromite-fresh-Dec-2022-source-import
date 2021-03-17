@@ -12,13 +12,15 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
-from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dependency_lib
 from chromite.lib import git
 from chromite.lib import portage_util
 from chromite.scripts import cros_extract_deps
+
+if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
 
 
 class Error(Exception):
@@ -186,14 +188,12 @@ def determine_package_relevance(dep_src_paths: List[str],
 
 
 def GetDependencies(sysroot_path: str,
-                    build_target: build_target_lib.BuildTarget,
                     src_paths: Optional[List[str]] = None,
                     packages: Optional[List[str]] = None) -> List[str]:
   """Return the packages dependent on the given source paths for |board|.
 
   Args:
     sysroot_path: The path to the sysroot.
-    build_target: The build_target whose dependencies are being calculated.
     src_paths: List of paths for which to get a list of dependent packages. If
       empty / None returns all package dependencies.
     packages: The packages that need to be built, or empty / None to use the
@@ -203,16 +203,15 @@ def GetDependencies(sysroot_path: str,
     The relevant package dependencies based on the given list of packages and
       src_paths.
   """
+  cros_build_lib.AssertInsideChroot()
   pkgs = tuple(packages) if packages else None
-  json_deps, _sdk_json_deps = GetBuildDependency(
-      sysroot_path, build_target.name, packages=pkgs)
+  dep_graph = depgraph.get_sysroot_dependency_graph(
+      sysroot_path, pkgs, with_src_paths=True)
 
-  relevant_packages = set()
-  for cpv, dep_src_paths in json_deps['source_path_mapping'].items():
-    if determine_package_relevance(dep_src_paths, src_paths):
-      relevant_packages.add(cpv)
-
-  return relevant_packages
+  nodes = (
+      dep_graph.get_relevant_nodes(
+          src_paths=src_paths) if src_paths else dep_graph.get_nodes())
+  return [x.pkg_info for x in nodes]
 
 
 def DetermineToolchainSourcePaths():

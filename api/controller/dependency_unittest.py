@@ -17,6 +17,7 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib.parser import package_info
 from chromite.service import dependency as dependency_service
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -187,26 +188,28 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
 
   def testListResponse(self):
     """Test calls helper method with correct args."""
-    mock_get_deps = self.PatchObject(
-        dependency_service, 'GetDependencies', return_value=['foo/bar-1.2.3'])
     sysroot = sysroot_pb2.Sysroot(
         path=self.sysroot, build_target=self.build_target)
     path = '/path'
-    package = common_pb2.PackageInfo(category='foo', package_name='bar')
+    return_package_info = package_info.parse('foo/bar-1.2.3')
+    return_package_info_proto = common_pb2.PackageInfo(
+        category='foo', package_name='bar', version='1.2.3')
+    mock_get_deps = self.PatchObject(
+        dependency_service,
+        'GetDependencies',
+        return_value=[return_package_info])
+
+    input_package_info_proto = common_pb2.PackageInfo(
+        category='foo', package_name='bar')
+    input_package_info = package_info.parse('foo/bar')
     input_proto = depgraph_pb2.ListRequest(
         sysroot=sysroot,
         src_paths=[
-            depgraph_pb2.SourcePath(path='/path'),
+            depgraph_pb2.SourcePath(path=path),
         ],
-        packages=[package])
+        packages=[input_package_info_proto])
     dependency.List(input_proto, self.response, self.api_config)
     mock_get_deps.assert_called_once_with(
-        self.sysroot,
-        build_target=controller_util.ParseBuildTarget(self.build_target),
-        src_paths=[path],
-        packages=[controller_util.PackageInfoToCPV(package)])
-    expected_deps = [
-        common_pb2.PackageInfo(
-            category='foo', package_name='bar', version='1.2.3')
-    ]
-    self.assertCountEqual(expected_deps, self.response.package_deps)
+        self.sysroot, src_paths=[path], packages=[input_package_info])
+    self.assertCountEqual([return_package_info_proto],
+                          self.response.package_deps)

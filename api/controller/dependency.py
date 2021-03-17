@@ -111,21 +111,18 @@ def List(input_proto: depgraph_pb2.ListRequest,
     output_proto: The empty output message.
     _config: The API call config.
   """
-  build_target = controller_util.ParseBuildTarget(
-      input_proto.sysroot.build_target)
   sysroot_path = input_proto.sysroot.path
   src_paths = [src_path.path for src_path in input_proto.src_paths]
-  packages = [controller_util.PackageInfoToCPV(x) for x in input_proto.packages]
-
   package_deps = dependency.GetDependencies(
       sysroot_path,
-      build_target=build_target,
       src_paths=src_paths,
-      packages=packages)
+      packages=[
+          controller_util.deserialize_package_info(package)
+          for package in input_proto.packages
+      ])
   for package in package_deps:
     pkg_info_msg = output_proto.package_deps.add()
-    pkg_info = package_info.parse(package)
-    controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+    controller_util.serialize_package_info(package, pkg_info_msg)
 
 
 def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):
