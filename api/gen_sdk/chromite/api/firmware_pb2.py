@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x1b\x63hromite/api/firmware.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"\x99\x04\n\rFwBuildMetric\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12\x15\n\rplatform_name\x18\x02 \x01(\t\x12\x39\n\nfw_section\x18\x03 \x03(\x0b\x32%.chromite.api.FwBuildMetric.FwSection\x12:\n\x06zephyr\x18\x04 \x01(\x0b\x32(.chromite.api.FwBuildMetric.ZephyrTargetH\x00\x1a\xd2\x01\n\tFwSection\x12>\n\x06region\x18\x01 \x01(\x0e\x32..chromite.api.FwBuildMetric.FwSection.FwRegion\x12\x0c\n\x04used\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\r\"h\n\x08\x46wRegion\x12\x15\n\x11\x46W_REGION_UNKNOWN\x10\x00\x12\t\n\x05\x45\x43_RO\x10\x01\x12\t\n\x05\x45\x43_RW\x10\x02\x12\r\n\tEC_RO_BSS\x10\x03\x12\r\n\tEC_RW_BSS\x10\x04\x12\x11\n\rEC_SHARED_MEM\x10\x05\x1a\x35\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\x0c\n\x04tiny\x18\x03 \x01(\r\x1aK\n\x0cZephyrTarget\x12;\n\x0ekernel_version\x18\x01 \x01(\x0b\x32#.chromite.api.FwBuildMetric.VersionB\x0c\n\nimage_type\"?\n\x11\x46wBuildMetricList\x12*\n\x05value\x18\x01 \x03(\x0b\x32\x1b.chromite.api.FwBuildMetric\"\x1c\n\x0c\x46wTestMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\"=\n\x10\x46wTestMetricList\x12)\n\x05value\x18\x01 \x03(\x0b\x32\x1a.chromite.api.FwTestMetric\"\x8c\x01\n\x1a\x42uildAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"O\n\x1b\x42uildAllTotFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"\x8b\x01\n\x19TestAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"M\n\x1aTestAllTotFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\x87\x01\n\x17\x42uildAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"L\n\x18\x42uildAllFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"\x86\x01\n\x16TestAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"J\n\x17TestAllFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\xc2\x01\n\x1e\x42undleFirmwareArtifactsRequest\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12+\n\x0bresult_path\x18\x03 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12:\n\tartifacts\x18\x04 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\x12\x13\n\x0b\x62\x63s_version\x18\x05 \x01(\t\"e\n\x1f\x42undleFirmwareArtifactsResponse\x12\x42\n\tartifacts\x18\x01 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware\"\x9a\x04\n\x14\x46irmwareArtifactInfo\x12>\n\x07objects\x18\x01 \x03(\x0b\x32-.chromite.api.FirmwareArtifactInfo.ObjectInfo\x1a\xc0\x02\n\x0bTarballInfo\x12\x13\n\x0b\x62\x63s_version\x18\x01 \x01(\t\x12\x1b\n\x13\x66irmware_image_name\x18\x02 \x01(\t\x12N\n\x04type\x18\x03 \x01(\x0e\x32@.chromite.api.FirmwareArtifactInfo.TarballInfo.FirmwareType.Type\x12G\n\x07version\x18\x04 \x01(\x0b\x32\x36.chromite.api.FirmwareArtifactInfo.TarballInfo.Version\x1a=\n\x0c\x46irmwareType\"-\n\x04Type\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04MAIN\x10\x01\x12\x06\n\x02\x45\x43\x10\x02\x12\x06\n\x02PD\x10\x03\x1a\'\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\x05\x12\r\n\x05minor\x18\x02 \x01(\x05\x1a\x7f\n\nObjectInfo\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x46\n\x0ctarball_info\x18\x02 \x01(\x0b\x32..chromite.api.FirmwareArtifactInfo.TarballInfoH\x00\x42\x16\n\x14\x66irmware_object_info*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03\x32\xb3\x04\n\x0f\x46irmwareService\x12j\n\x13\x42uildAllTotFirmware\x12(.chromite.api.BuildAllTotFirmwareRequest\x1a).chromite.api.BuildAllTotFirmwareResponse\x12g\n\x12TestAllTotFirmware\x12\'.chromite.api.TestAllTotFirmwareRequest\x1a(.chromite.api.TestAllTotFirmwareResponse\x12\x61\n\x10\x42uildAllFirmware\x12%.chromite.api.BuildAllFirmwareRequest\x1a&.chromite.api.BuildAllFirmwareResponse\x12^\n\x0fTestAllFirmware\x12$.chromite.api.TestAllFirmwareRequest\x1a%.chromite.api.TestAllFirmwareResponse\x12v\n\x17\x42undleFirmwareArtifacts\x12,.chromite.api.BundleFirmwareArtifactsRequest\x1a-.chromite.api.BundleFirmwareArtifactsResponse\x1a\x10\xc2\xed\x1a\x0c\n\x08\x66irmware\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1b\x63hromite/api/firmware.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"(\n\x0e\x42\x63sVersionInfo\x12\x16\n\x0eversion_string\x18\x01 \x01(\t\"-\n\x13\x46irmwareVersionInfo\x12\x16\n\x0eversion_string\x18\x01 \x01(\t\"\x99\x04\n\rFwBuildMetric\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12\x15\n\rplatform_name\x18\x02 \x01(\t\x12\x39\n\nfw_section\x18\x03 \x03(\x0b\x32%.chromite.api.FwBuildMetric.FwSection\x12:\n\x06zephyr\x18\x04 \x01(\x0b\x32(.chromite.api.FwBuildMetric.ZephyrTargetH\x00\x1a\xd2\x01\n\tFwSection\x12>\n\x06region\x18\x01 \x01(\x0e\x32..chromite.api.FwBuildMetric.FwSection.FwRegion\x12\x0c\n\x04used\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\r\"h\n\x08\x46wRegion\x12\x15\n\x11\x46W_REGION_UNKNOWN\x10\x00\x12\t\n\x05\x45\x43_RO\x10\x01\x12\t\n\x05\x45\x43_RW\x10\x02\x12\r\n\tEC_RO_BSS\x10\x03\x12\r\n\tEC_RW_BSS\x10\x04\x12\x11\n\rEC_SHARED_MEM\x10\x05\x1a\x35\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\r\x12\r\n\x05minor\x18\x02 \x01(\r\x12\x0c\n\x04tiny\x18\x03 \x01(\r\x1aK\n\x0cZephyrTarget\x12;\n\x0ekernel_version\x18\x01 \x01(\x0b\x32#.chromite.api.FwBuildMetric.VersionB\x0c\n\nimage_type\"?\n\x11\x46wBuildMetricList\x12*\n\x05value\x18\x01 \x03(\x0b\x32\x1b.chromite.api.FwBuildMetric\"\x1c\n\x0c\x46wTestMetric\x12\x0c\n\x04name\x18\x01 \x01(\t\"=\n\x10\x46wTestMetricList\x12)\n\x05value\x18\x01 \x03(\x0b\x32\x1a.chromite.api.FwTestMetric\"\x8c\x01\n\x1a\x42uildAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"O\n\x1b\x42uildAllTotFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"\x8b\x01\n\x19TestAllTotFirmwareRequest\x12\x33\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x18.chromite.api.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"M\n\x1aTestAllTotFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\x87\x01\n\x17\x42uildAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"L\n\x18\x42uildAllFirmwareResponse\x12\x30\n\x07metrics\x18\x01 \x01(\x0b\x32\x1f.chromite.api.FwBuildMetricList\"\x86\x01\n\x16TestAllFirmwareRequest\x12\x31\n\x11\x66irmware_location\x18\x01 \x01(\x0e\x32\x16.chromiumos.FwLocation\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\"J\n\x17TestAllFirmwareResponse\x12/\n\x07metrics\x18\x01 \x01(\x0b\x32\x1e.chromite.api.FwTestMetricList\"\xfe\x01\n\x1e\x42undleFirmwareArtifactsRequest\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12+\n\x0bresult_path\x18\x03 \x01(\x0b\x32\x16.chromiumos.ResultPath\x12:\n\tartifacts\x18\x04 \x01(\x0b\x32\'.chromiumos.ArtifactsByService.Firmware\x12\x17\n\x0b\x62\x63s_version\x18\x05 \x01(\tB\x02\x18\x01\x12\x36\n\x10\x62\x63s_version_info\x18\x06 \x01(\x0b\x32\x1c.chromite.api.BcsVersionInfo\"e\n\x1f\x42undleFirmwareArtifactsResponse\x12\x42\n\tartifacts\x18\x01 \x01(\x0b\x32/.chromiumos.UploadedArtifactsByService.Firmware\"\xf9\x05\n\x14\x46irmwareArtifactInfo\x12>\n\x07objects\x18\x01 \x03(\x0b\x32-.chromite.api.FirmwareArtifactInfo.ObjectInfo\x12\x36\n\x10\x62\x63s_version_info\x18\x02 \x01(\x0b\x32\x1c.chromite.api.BcsVersionInfo\x1a\x8a\x03\n\x0bTarballInfo\x12\x17\n\x0b\x62\x63s_version\x18\x01 \x01(\tB\x02\x18\x01\x12\x1b\n\x13\x66irmware_image_name\x18\x02 \x01(\t\x12N\n\x04type\x18\x03 \x01(\x0e\x32@.chromite.api.FirmwareArtifactInfo.TarballInfo.FirmwareType.Type\x12K\n\x07version\x18\x04 \x01(\x0b\x32\x36.chromite.api.FirmwareArtifactInfo.TarballInfo.VersionB\x02\x18\x01\x12@\n\x15\x66irmware_version_info\x18\x05 \x01(\x0b\x32!.chromite.api.FirmwareVersionInfo\x1a=\n\x0c\x46irmwareType\"-\n\x04Type\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x08\n\x04MAIN\x10\x01\x12\x06\n\x02\x45\x43\x10\x02\x12\x06\n\x02PD\x10\x03\x1a\'\n\x07Version\x12\r\n\x05major\x18\x01 \x01(\x05\x12\r\n\x05minor\x18\x02 \x01(\x05\x1a\x11\n\x0fLcovTarballInfo\x1a\xc8\x01\n\nObjectInfo\x12\x11\n\tfile_name\x18\x01 \x01(\t\x12\x46\n\x0ctarball_info\x18\x02 \x01(\x0b\x32..chromite.api.FirmwareArtifactInfo.TarballInfoH\x00\x12G\n\tlcov_info\x18\x03 \x01(\x0b\x32\x32.chromite.api.FirmwareArtifactInfo.LcovTarballInfoH\x00\x42\x16\n\x14\x66irmware_object_info*^\n\nFwLocation\x12\x17\n\x13\x46W_LOCATION_UNKNOWN\x10\x00\x12\x0f\n\x0bPLATFORM_EC\x10\x01\x12\x13\n\x0fPLATFORM_ZEPHYR\x10\x02\x12\x11\n\rPLATFORM_TI50\x10\x03\x32\xb3\x04\n\x0f\x46irmwareService\x12j\n\x13\x42uildAllTotFirmware\x12(.chromite.api.BuildAllTotFirmwareRequest\x1a).chromite.api.BuildAllTotFirmwareResponse\x12g\n\x12TestAllTotFirmware\x12\'.chromite.api.TestAllTotFirmwareRequest\x1a(.chromite.api.TestAllTotFirmwareResponse\x12\x61\n\x10\x42uildAllFirmware\x12%.chromite.api.BuildAllFirmwareRequest\x1a&.chromite.api.BuildAllFirmwareResponse\x12^\n\x0fTestAllFirmware\x12$.chromite.api.TestAllFirmwareRequest\x1a%.chromite.api.TestAllFirmwareResponse\x12v\n\x17\x42undleFirmwareArtifacts\x12,.chromite.api.BundleFirmwareArtifactsRequest\x1a-.chromite.api.BundleFirmwareArtifactsResponse\x1a\x10\xc2\xed\x1a\x0c\n\x08\x66irmware\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -50,8 +50,8 @@ _FWLOCATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2513,
-  serialized_end=2607,
+  serialized_start=2885,
+  serialized_end=2979,
 )
 _sym_db.RegisterEnumDescriptor(_FWLOCATION)
 
@@ -95,8 +95,8 @@ _FWBUILDMETRIC_FWSECTION_FWREGION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=388,
-  serialized_end=492,
+  serialized_start=477,
+  serialized_end=581,
 )
 _sym_db.RegisterEnumDescriptor(_FWBUILDMETRIC_FWSECTION_FWREGION)
 
@@ -125,10 +125,72 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE_TYPE = _descriptor.EnumDescriptor
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2296,
-  serialized_end=2341,
+  serialized_start=2575,
+  serialized_end=2620,
 )
 _sym_db.RegisterEnumDescriptor(_FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE_TYPE)
+
+
+_BCSVERSIONINFO = _descriptor.Descriptor(
+  name='BcsVersionInfo',
+  full_name='chromite.api.BcsVersionInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='version_string', full_name='chromite.api.BcsVersionInfo.version_string', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=100,
+  serialized_end=140,
+)
+
+
+_FIRMWAREVERSIONINFO = _descriptor.Descriptor(
+  name='FirmwareVersionInfo',
+  full_name='chromite.api.FirmwareVersionInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='version_string', full_name='chromite.api.FirmwareVersionInfo.version_string', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=142,
+  serialized_end=187,
+)
 
 
 _FWBUILDMETRIC_FWSECTION = _descriptor.Descriptor(
@@ -172,8 +234,8 @@ _FWBUILDMETRIC_FWSECTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=282,
-  serialized_end=492,
+  serialized_start=371,
+  serialized_end=581,
 )
 
 _FWBUILDMETRIC_VERSION = _descriptor.Descriptor(
@@ -216,8 +278,8 @@ _FWBUILDMETRIC_VERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=494,
-  serialized_end=547,
+  serialized_start=583,
+  serialized_end=636,
 )
 
 _FWBUILDMETRIC_ZEPHYRTARGET = _descriptor.Descriptor(
@@ -246,8 +308,8 @@ _FWBUILDMETRIC_ZEPHYRTARGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=549,
-  serialized_end=624,
+  serialized_start=638,
+  serialized_end=713,
 )
 
 _FWBUILDMETRIC = _descriptor.Descriptor(
@@ -300,8 +362,8 @@ _FWBUILDMETRIC = _descriptor.Descriptor(
       name='image_type', full_name='chromite.api.FwBuildMetric.image_type',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=101,
-  serialized_end=638,
+  serialized_start=190,
+  serialized_end=727,
 )
 
 
@@ -331,8 +393,8 @@ _FWBUILDMETRICLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=640,
-  serialized_end=703,
+  serialized_start=729,
+  serialized_end=792,
 )
 
 
@@ -362,8 +424,8 @@ _FWTESTMETRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=705,
-  serialized_end=733,
+  serialized_start=794,
+  serialized_end=822,
 )
 
 
@@ -393,8 +455,8 @@ _FWTESTMETRICLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=735,
-  serialized_end=796,
+  serialized_start=824,
+  serialized_end=885,
 )
 
 
@@ -438,8 +500,8 @@ _BUILDALLTOTFIRMWAREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=799,
-  serialized_end=939,
+  serialized_start=888,
+  serialized_end=1028,
 )
 
 
@@ -469,8 +531,8 @@ _BUILDALLTOTFIRMWARERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=941,
-  serialized_end=1020,
+  serialized_start=1030,
+  serialized_end=1109,
 )
 
 
@@ -514,8 +576,8 @@ _TESTALLTOTFIRMWAREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1023,
-  serialized_end=1162,
+  serialized_start=1112,
+  serialized_end=1251,
 )
 
 
@@ -545,8 +607,8 @@ _TESTALLTOTFIRMWARERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1164,
-  serialized_end=1241,
+  serialized_start=1253,
+  serialized_end=1330,
 )
 
 
@@ -590,8 +652,8 @@ _BUILDALLFIRMWAREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1244,
-  serialized_end=1379,
+  serialized_start=1333,
+  serialized_end=1468,
 )
 
 
@@ -621,8 +683,8 @@ _BUILDALLFIRMWARERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1381,
-  serialized_end=1457,
+  serialized_start=1470,
+  serialized_end=1546,
 )
 
 
@@ -666,8 +728,8 @@ _TESTALLFIRMWAREREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1460,
-  serialized_end=1594,
+  serialized_start=1549,
+  serialized_end=1683,
 )
 
 
@@ -697,8 +759,8 @@ _TESTALLFIRMWARERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1596,
-  serialized_end=1670,
+  serialized_start=1685,
+  serialized_end=1759,
 )
 
 
@@ -736,6 +798,13 @@ _BUNDLEFIRMWAREARTIFACTSREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
+      serialized_options=b'\030\001', file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='bcs_version_info', full_name='chromite.api.BundleFirmwareArtifactsRequest.bcs_version_info', index=4,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
@@ -749,8 +818,8 @@ _BUNDLEFIRMWAREARTIFACTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1673,
-  serialized_end=1867,
+  serialized_start=1762,
+  serialized_end=2016,
 )
 
 
@@ -780,8 +849,8 @@ _BUNDLEFIRMWAREARTIFACTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1869,
-  serialized_end=1970,
+  serialized_start=2018,
+  serialized_end=2119,
 )
 
 
@@ -805,8 +874,8 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2280,
-  serialized_end=2341,
+  serialized_start=2559,
+  serialized_end=2620,
 )
 
 _FIRMWAREARTIFACTINFO_TARBALLINFO_VERSION = _descriptor.Descriptor(
@@ -842,8 +911,8 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO_VERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2343,
-  serialized_end=2382,
+  serialized_start=2622,
+  serialized_end=2661,
 )
 
 _FIRMWAREARTIFACTINFO_TARBALLINFO = _descriptor.Descriptor(
@@ -859,7 +928,7 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=b'\030\001', file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='firmware_image_name', full_name='chromite.api.FirmwareArtifactInfo.TarballInfo.firmware_image_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
@@ -880,6 +949,13 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
+      serialized_options=b'\030\001', file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='firmware_version_info', full_name='chromite.api.FirmwareArtifactInfo.TarballInfo.firmware_version_info', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
@@ -893,8 +969,31 @@ _FIRMWAREARTIFACTINFO_TARBALLINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2062,
-  serialized_end=2382,
+  serialized_start=2267,
+  serialized_end=2661,
+)
+
+_FIRMWAREARTIFACTINFO_LCOVTARBALLINFO = _descriptor.Descriptor(
+  name='LcovTarballInfo',
+  full_name='chromite.api.FirmwareArtifactInfo.LcovTarballInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2663,
+  serialized_end=2680,
 )
 
 _FIRMWAREARTIFACTINFO_OBJECTINFO = _descriptor.Descriptor(
@@ -918,6 +1017,13 @@ _FIRMWAREARTIFACTINFO_OBJECTINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lcov_info', full_name='chromite.api.FirmwareArtifactInfo.ObjectInfo.lcov_info', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -933,8 +1039,8 @@ _FIRMWAREARTIFACTINFO_OBJECTINFO = _descriptor.Descriptor(
       name='firmware_object_info', full_name='chromite.api.FirmwareArtifactInfo.ObjectInfo.firmware_object_info',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=2384,
-  serialized_end=2511,
+  serialized_start=2683,
+  serialized_end=2883,
 )
 
 _FIRMWAREARTIFACTINFO = _descriptor.Descriptor(
@@ -951,10 +1057,17 @@ _FIRMWAREARTIFACTINFO = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='bcs_version_info', full_name='chromite.api.FirmwareArtifactInfo.bcs_version_info', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_FIRMWAREARTIFACTINFO_TARBALLINFO, _FIRMWAREARTIFACTINFO_OBJECTINFO, ],
+  nested_types=[_FIRMWAREARTIFACTINFO_TARBALLINFO, _FIRMWAREARTIFACTINFO_LCOVTARBALLINFO, _FIRMWAREARTIFACTINFO_OBJECTINFO, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -963,8 +1076,8 @@ _FIRMWAREARTIFACTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1973,
-  serialized_end=2511,
+  serialized_start=2122,
+  serialized_end=2883,
 )
 
 _FWBUILDMETRIC_FWSECTION.fields_by_name['region'].enum_type = _FWBUILDMETRIC_FWSECTION_FWREGION
@@ -995,19 +1108,29 @@ _TESTALLFIRMWARERESPONSE.fields_by_name['metrics'].message_type = _FWTESTMETRICL
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['result_path'].message_type = chromiumos_dot_common__pb2._RESULTPATH
 _BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['artifacts'].message_type = chromiumos_dot_common__pb2._ARTIFACTSBYSERVICE_FIRMWARE
+_BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['bcs_version_info'].message_type = _BCSVERSIONINFO
 _BUNDLEFIRMWAREARTIFACTSRESPONSE.fields_by_name['artifacts'].message_type = chromiumos_dot_common__pb2._UPLOADEDARTIFACTSBYSERVICE_FIRMWARE
 _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE.containing_type = _FIRMWAREARTIFACTINFO_TARBALLINFO
 _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE_TYPE.containing_type = _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE
 _FIRMWAREARTIFACTINFO_TARBALLINFO_VERSION.containing_type = _FIRMWAREARTIFACTINFO_TARBALLINFO
 _FIRMWAREARTIFACTINFO_TARBALLINFO.fields_by_name['type'].enum_type = _FIRMWAREARTIFACTINFO_TARBALLINFO_FIRMWARETYPE_TYPE
 _FIRMWAREARTIFACTINFO_TARBALLINFO.fields_by_name['version'].message_type = _FIRMWAREARTIFACTINFO_TARBALLINFO_VERSION
+_FIRMWAREARTIFACTINFO_TARBALLINFO.fields_by_name['firmware_version_info'].message_type = _FIRMWAREVERSIONINFO
 _FIRMWAREARTIFACTINFO_TARBALLINFO.containing_type = _FIRMWAREARTIFACTINFO
+_FIRMWAREARTIFACTINFO_LCOVTARBALLINFO.containing_type = _FIRMWAREARTIFACTINFO
 _FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['tarball_info'].message_type = _FIRMWAREARTIFACTINFO_TARBALLINFO
+_FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['lcov_info'].message_type = _FIRMWAREARTIFACTINFO_LCOVTARBALLINFO
 _FIRMWAREARTIFACTINFO_OBJECTINFO.containing_type = _FIRMWAREARTIFACTINFO
 _FIRMWAREARTIFACTINFO_OBJECTINFO.oneofs_by_name['firmware_object_info'].fields.append(
   _FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['tarball_info'])
 _FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['tarball_info'].containing_oneof = _FIRMWAREARTIFACTINFO_OBJECTINFO.oneofs_by_name['firmware_object_info']
+_FIRMWAREARTIFACTINFO_OBJECTINFO.oneofs_by_name['firmware_object_info'].fields.append(
+  _FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['lcov_info'])
+_FIRMWAREARTIFACTINFO_OBJECTINFO.fields_by_name['lcov_info'].containing_oneof = _FIRMWAREARTIFACTINFO_OBJECTINFO.oneofs_by_name['firmware_object_info']
 _FIRMWAREARTIFACTINFO.fields_by_name['objects'].message_type = _FIRMWAREARTIFACTINFO_OBJECTINFO
+_FIRMWAREARTIFACTINFO.fields_by_name['bcs_version_info'].message_type = _BCSVERSIONINFO
+DESCRIPTOR.message_types_by_name['BcsVersionInfo'] = _BCSVERSIONINFO
+DESCRIPTOR.message_types_by_name['FirmwareVersionInfo'] = _FIRMWAREVERSIONINFO
 DESCRIPTOR.message_types_by_name['FwBuildMetric'] = _FWBUILDMETRIC
 DESCRIPTOR.message_types_by_name['FwBuildMetricList'] = _FWBUILDMETRICLIST
 DESCRIPTOR.message_types_by_name['FwTestMetric'] = _FWTESTMETRIC
@@ -1025,6 +1148,20 @@ DESCRIPTOR.message_types_by_name['BundleFirmwareArtifactsResponse'] = _BUNDLEFIR
 DESCRIPTOR.message_types_by_name['FirmwareArtifactInfo'] = _FIRMWAREARTIFACTINFO
 DESCRIPTOR.enum_types_by_name['FwLocation'] = _FWLOCATION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+BcsVersionInfo = _reflection.GeneratedProtocolMessageType('BcsVersionInfo', (_message.Message,), {
+  'DESCRIPTOR' : _BCSVERSIONINFO,
+  '__module__' : 'chromite.api.firmware_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.BcsVersionInfo)
+  })
+_sym_db.RegisterMessage(BcsVersionInfo)
+
+FirmwareVersionInfo = _reflection.GeneratedProtocolMessageType('FirmwareVersionInfo', (_message.Message,), {
+  'DESCRIPTOR' : _FIRMWAREVERSIONINFO,
+  '__module__' : 'chromite.api.firmware_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.FirmwareVersionInfo)
+  })
+_sym_db.RegisterMessage(FirmwareVersionInfo)
 
 FwBuildMetric = _reflection.GeneratedProtocolMessageType('FwBuildMetric', (_message.Message,), {
 
@@ -1171,6 +1308,13 @@ FirmwareArtifactInfo = _reflection.GeneratedProtocolMessageType('FirmwareArtifac
     })
   ,
 
+  'LcovTarballInfo' : _reflection.GeneratedProtocolMessageType('LcovTarballInfo', (_message.Message,), {
+    'DESCRIPTOR' : _FIRMWAREARTIFACTINFO_LCOVTARBALLINFO,
+    '__module__' : 'chromite.api.firmware_pb2'
+    # @@protoc_insertion_point(class_scope:chromite.api.FirmwareArtifactInfo.LcovTarballInfo)
+    })
+  ,
+
   'ObjectInfo' : _reflection.GeneratedProtocolMessageType('ObjectInfo', (_message.Message,), {
     'DESCRIPTOR' : _FIRMWAREARTIFACTINFO_OBJECTINFO,
     '__module__' : 'chromite.api.firmware_pb2'
@@ -1185,10 +1329,14 @@ _sym_db.RegisterMessage(FirmwareArtifactInfo)
 _sym_db.RegisterMessage(FirmwareArtifactInfo.TarballInfo)
 _sym_db.RegisterMessage(FirmwareArtifactInfo.TarballInfo.FirmwareType)
 _sym_db.RegisterMessage(FirmwareArtifactInfo.TarballInfo.Version)
+_sym_db.RegisterMessage(FirmwareArtifactInfo.LcovTarballInfo)
 _sym_db.RegisterMessage(FirmwareArtifactInfo.ObjectInfo)
 
 
 DESCRIPTOR._options = None
+_BUNDLEFIRMWAREARTIFACTSREQUEST.fields_by_name['bcs_version']._options = None
+_FIRMWAREARTIFACTINFO_TARBALLINFO.fields_by_name['bcs_version']._options = None
+_FIRMWAREARTIFACTINFO_TARBALLINFO.fields_by_name['version']._options = None
 
 _FIRMWARESERVICE = _descriptor.ServiceDescriptor(
   name='FirmwareService',
@@ -1196,8 +1344,8 @@ _FIRMWARESERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=b'\302\355\032\014\n\010firmware\020\001',
-  serialized_start=2610,
-  serialized_end=3173,
+  serialized_start=2982,
+  serialized_end=3545,
   methods=[
   _descriptor.MethodDescriptor(
     name='BuildAllTotFirmware',
