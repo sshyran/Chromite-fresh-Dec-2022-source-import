@@ -214,9 +214,9 @@ def test_get_sysroot_dependency_graph(monkeypatch):
   assert 'sdk/bdep-1' not in graph
   assert graph.sysroot_path == '/build/target'
   assert not graph.sdk_root
-  assert len(graph.get_nodes('sysroot/both-1')) == 1
-  assert graph.get_nodes('sysroot/both-1', dependency_graph.RootType.SYSROOT)
-  assert not graph.get_nodes('sysroot/both-1', dependency_graph.RootType.SDK)
+  assert len(graph.get_nodes(['sysroot/both-1'])) == 1
+  assert graph.get_nodes(['sysroot/both-1'], dependency_graph.RootType.SYSROOT)
+  assert not graph.get_nodes(['sysroot/both-1'], dependency_graph.RootType.SDK)
 
 
 def test_get_build_target_dependency_graph(monkeypatch):
@@ -234,6 +234,6 @@ def test_get_build_target_dependency_graph(monkeypatch):
   assert 'sdk/bdep-1' not in graph
   assert graph.sysroot_path == '/build/target'
   assert graph.sdk_root
-  assert len(graph.get_nodes('sysroot/both-1')) == 2
-  assert graph.get_nodes('sysroot/both-1', dependency_graph.RootType.SYSROOT)
-  assert graph.get_nodes('sysroot/both-1', dependency_graph.RootType.SDK)
+  assert len(graph.get_nodes(['sysroot/both-1'])) == 2
+  assert graph.get_nodes(['sysroot/both-1'], dependency_graph.RootType.SYSROOT)
+  assert graph.get_nodes(['sysroot/both-1'], dependency_graph.RootType.SDK)

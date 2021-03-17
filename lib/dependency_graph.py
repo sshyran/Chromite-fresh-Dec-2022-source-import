@@ -285,7 +285,7 @@ class DependencyGraph:
     # filtering functionality in _get_nodes().
     self._root_package_nodes = []
     for pkg in [package_info.parse(p) for p in root_packages]:
-      self._root_package_nodes.extend(self.get_nodes(pkg, RootType.SYSROOT))
+      self._root_package_nodes.extend(self.get_nodes([pkg], RootType.SYSROOT))
 
   def __contains__(
       self, item: Union[str, package_info.PackageInfo, PackageNode]) -> bool:
@@ -340,10 +340,8 @@ class DependencyGraph:
     else:
       return self._roots
 
-  def get_nodes(self, pkg: Union[package_info.PackageInfo, str],
-                root_type: RootType = RootType.ALL) -> List[PackageNode]:
-    """Get all nodes matching the given package and root type."""
-    pkg_info = package_info.parse(pkg)
+  def _get_nodes(self, pkg_info: package_info.PackageInfo, root_type: RootType):
+    """Helper to get all nodes matching the given package and root type."""
     roots = self._get_roots(root_type)
     if pkg_info.cpvr in self._pkg_dict:
       # Have exact match.
@@ -358,7 +356,26 @@ class DependencyGraph:
     else:
       return []
 
-  def is_dependency(self, dep_pkg: Union[package_info.PackageInfo, str],
+  def get_nodes(
+      self,
+      pkgs: Optional[Iterable[Union[package_info.PackageInfo, str]]] = None,
+      root_type: RootType = RootType.ALL) -> List[PackageNode]:
+    """Get all nodes matching the given packages and root type.
+
+    If no |pkgs| are specified will return all nodes for the given root_type.
+    """
+    roots = self._get_roots(root_type)
+    if not pkgs:
+      return [x for x in self if x.root in roots]
+
+    nodes = []
+    for pkg in pkgs:
+      pkg_info = package_info.parse(pkg)
+      nodes.extend(self._get_nodes(pkg_info, root_type))
+    return nodes
+
+  def is_dependency(self,
+                    dep_pkg: Union[package_info.PackageInfo, str],
                     src_pkg: Union[package_info.PackageInfo, str],
                     dep_root_type: RootType = RootType.ALL,
                     src_root_type: RootType = RootType.ALL,
@@ -372,8 +389,8 @@ class DependencyGraph:
       src_root_type: Filters the root when finding |src_pkg|.
       direct: Only search direct dependencies when set to True.
     """
-    dep_pkg_nodes = self.get_nodes(dep_pkg, dep_root_type)
-    src_pkg_nodes = self.get_nodes(src_pkg, src_root_type)
+    dep_pkg_nodes = self.get_nodes([dep_pkg], dep_root_type)
+    src_pkg_nodes = self.get_nodes([src_pkg], src_root_type)
 
     if not dep_pkg_nodes or not src_pkg_nodes:
       # One or both not in the graph at all.
@@ -399,7 +416,7 @@ class DependencyGraph:
     filtered to a root the package isn't installed to). Does not ensure a
     unique list when multiple nodes are found.
     """
-    for node in self.get_nodes(pkg, root_type):
+    for node in self.get_nodes([pkg], root_type):
       yield from node.dependencies
 
   def get_reverse_dependencies(
@@ -411,7 +428,7 @@ class DependencyGraph:
     Like get_dependencies(), but get the reverse dependencies for the package.
     See get_dependencies() for more information.
     """
-    for node in self.get_nodes(pkg, root_type):
+    for node in self.get_nodes([pkg], root_type):
       yield from node.reverse_dependencies
 
   def is_relevant(self,  src_path: Union[str, os.PathLike]) -> bool:

@@ -159,6 +159,11 @@ def test_dependency_graph_iter():
   for i, node in enumerate(graph):
     assert node.pkg_info in expected_order[i]
 
+def test_dependency_graph_get_nodes_default_values():
+  """Test get_nodes retrieves the expected results with default args."""
+  graph = _build_depgraph()
+  assert len(graph.get_nodes()) == 5
+
 
 def test_dependency_graph_get_nodes():
   """Test get_nodes retrieves the expected results."""
@@ -168,10 +173,10 @@ def test_dependency_graph_get_nodes():
   virtual_atom = package_info.parse('virtual/target-foo')
 
   # Test fetching by different values.
-  pi_nodes = graph.get_nodes(virtual)
-  cpvr_nodes = graph.get_nodes(virtual.cpvr)
-  atom_nodes = graph.get_nodes(virtual.atom)
-  pi_atom_nodes = graph.get_nodes(virtual_atom)
+  pi_nodes = graph.get_nodes([virtual])
+  cpvr_nodes = graph.get_nodes([virtual.cpvr])
+  atom_nodes = graph.get_nodes([virtual.atom])
+  pi_atom_nodes = graph.get_nodes([virtual_atom])
   assert pi_nodes == cpvr_nodes == atom_nodes == pi_atom_nodes
 
 
@@ -182,9 +187,9 @@ def test_dependency_graph_get_nodes_by_roots():
   dep = package_info.parse('cat/dep-1.0.0-r1')
 
   # Verify the correct counts.
-  dep_all = graph.get_nodes(dep)
-  dep_sysroot = graph.get_nodes(dep, dependency_graph.RootType.SYSROOT)
-  dep_sdk = graph.get_nodes(dep, dependency_graph.RootType.SDK)
+  dep_all = graph.get_nodes([dep])
+  dep_sysroot = graph.get_nodes([dep], dependency_graph.RootType.SYSROOT)
+  dep_sdk = graph.get_nodes([dep], dependency_graph.RootType.SDK)
   assert len(dep_all) == 2
   assert len(dep_sysroot) == 1
   assert len(dep_sdk) == 1
@@ -222,20 +227,20 @@ def test_dependency_graph_get_nodes_multi_version_package():
                                            sysroot, root_packages=[virtual])
 
   # Should get both instances of cat/pkg-1.0.
-  assert len(graph.get_nodes(pkg1)) == 2
-  assert len(graph.get_nodes(pkg1.cpvr)) == 2
-  assert all(p.pkg_info.cpvr == pkg1.cpvr for p in graph.get_nodes(pkg1))
+  assert len(graph.get_nodes([pkg1])) == 2
+  assert len(graph.get_nodes([pkg1.cpvr])) == 2
+  assert all(p.pkg_info.cpvr == pkg1.cpvr for p in graph.get_nodes([pkg1]))
 
   # Should get both instances of cat/pkg-2.0.
-  assert len(graph.get_nodes(pkg2)) == 2
-  assert len(graph.get_nodes(pkg2.cpvr)) == 2
-  assert all(p.pkg_info.cpvr == pkg2.cpvr for p in graph.get_nodes(pkg2))
+  assert len(graph.get_nodes([pkg2])) == 2
+  assert len(graph.get_nodes([pkg2.cpvr])) == 2
+  assert all(p.pkg_info.cpvr == pkg2.cpvr for p in graph.get_nodes([pkg2]))
 
   atom = package_info.parse(pkg1.atom)
   # Should get both instances of cat/pkg-1.0 and both instances of cat/pkg-2.0.
-  assert len(graph.get_nodes(atom)) == 4
-  assert len(graph.get_nodes(atom.atom)) == 4
-  assert all(p.pkg_info.atom == atom.atom for p in graph.get_nodes(atom))
+  assert len(graph.get_nodes([atom])) == 4
+  assert len(graph.get_nodes([atom.atom])) == 4
+  assert all(p.pkg_info.atom == atom.atom for p in graph.get_nodes([atom]))
 
 
 def test_dependency_graph_dependencies():
@@ -247,9 +252,9 @@ def test_dependency_graph_dependencies():
   depdep = package_info.parse('cat/depdep-2.0.1-r5')
   bdep = package_info.parse('cat/bdep-3.4')
 
-  dep_nodes = graph.get_nodes(dep)
+  dep_nodes = graph.get_nodes([dep])
   bdep_node = graph.get_nodes(
-      bdep, root_type=dependency_graph.RootType.SDK).pop()
+      [bdep], root_type=dependency_graph.RootType.SDK).pop()
   # The virtual has three dependencies; dep x2(sdk + sysroot), and bdep.
   assert set(graph.get_dependencies(virtual)) == {*dep_nodes, bdep_node}
   # Virtual has no revdeps.
@@ -317,7 +322,7 @@ def test_depedency_graph_is_relevant():
   graph = _build_depgraph()
   # Dependency.
   # Fetch node and call directly.
-  assert graph.get_nodes('cat/depdep')[0].is_relevant('/cat/depdep')
+  assert graph.get_nodes(['cat/depdep'])[0].is_relevant('/cat/depdep')
   # Search the depgraph.
   assert graph.is_relevant('/cat/depdep')
 
