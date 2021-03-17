@@ -161,7 +161,7 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
   """Runs all of the firmware tests at the specified location."""
 
   if len(input_proto.artifacts.output_artifacts) > 1:
-    raise ValueError('Must have exactly one output_artifact')
+    raise ValueError('Must have exactly one output_artifact entry')
 
   with osutils.TempDir(delete=False) as tmpdir:
     info = input_proto.artifacts.output_artifacts[0]
@@ -176,27 +176,34 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
         *args,
         output_dir=tmpdir,
         metadata=metadata_path)
-    tarball_paths = []
-    if (input_proto.artifacts.FIRMWARE_TARBALL_INFO in info.artifact_types and
-        os.path.exists(metadata_path)):
+    file_paths = []
+    if os.path.exists(metadata_path):
       with open(metadata_path, 'r') as f:
         metadata = json_format.Parse(f.read(),
                                      firmware_pb2.FirmwareArtifactInfo())
-      out = output_proto.artifacts.artifacts.add(
+    else:
+      metadata = firmware_pb2.FirmwareArtifactInfo()
+    if input_proto.artifacts.FIRMWARE_TARBALL_INFO in info.artifact_types:
+      output_proto.artifacts.artifacts.add(
           artifact_type=input_proto.artifacts.FIRMWARE_TARBALL_INFO,
-          paths=[
+          location=info.location, paths=[
               common_pb2.Path(
                   path=metadata_path, location=common_pb2.Path.INSIDE)
           ])
-      tarball_paths = [
-          common_pb2.Path(
-              path=os.path.join(tmpdir, x.file_name),
-              location=common_pb2.Path.INSIDE) for x in metadata.objects
+
+    full_path = lambda x: common_pb2.Path(
+        path=os.path.join(tmpdir, x.file_name),
+        location=common_pb2.Path.INSIDE)
+
+    for typ, name in (
+        (input_proto.artifacts.FIRMWARE_TARBALL, 'tarball_info'),
+        (input_proto.artifacts.FIRMWARE_LCOV, 'lcov_info')):
+      file_paths = [
+          full_path(x) for x in metadata.objects
+          if x.WhichOneof('firmware_object_info') == name
       ]
-    if (tarball_paths and
-        input_proto.artifacts.FIRMWARE_TARBALL in info.artifact_types):
-      out = output_proto.artifacts.artifacts.add(
-          artifact_type=input_proto.artifacts.FIRMWARE_TARBALL,
-          paths=tarball_paths)
-      out.location = info.location
+      if (file_paths and typ in info.artifact_types):
+        output_proto.artifacts.artifacts.add(
+            artifact_type=typ, paths=file_paths, location=info.location)
+
     return resp
