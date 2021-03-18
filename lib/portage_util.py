@@ -898,7 +898,7 @@ class EBuild(object):
         projects=projects, srcdirs=subdir_paths, subdirs=[],
         subtrees=subtree_paths)
 
-  def GetCommitId(self, srcdir):
+  def GetCommitId(self, srcdir, ref: str = 'HEAD'):
     """Get the commit id for this ebuild.
 
     Returns:
@@ -907,12 +907,12 @@ class EBuild(object):
     Raises:
       raise Error if git fails to return the HEAD commit id.
     """
-    output = self._RunGit(srcdir, ['rev-parse', 'HEAD'])
+    output = self._RunGit(srcdir, ['rev-parse', '%s^{commit}' % ref])
     if not output:
-      raise Error('Cannot determine HEAD commit for %s' % srcdir)
+      raise Error('Cannot determine %s commit for %s' % (ref, srcdir))
     return output.rstrip()
 
-  def GetTreeId(self, path):
+  def GetTreeId(self, path, ref: str = 'HEAD'):
     """Get the SHA1 of the source tree for this ebuild.
 
     Unlike the commit hash, the SHA1 of the source tree is unaffected by the
@@ -932,9 +932,9 @@ class EBuild(object):
     else:
       basedir = os.path.dirname(path)
       relpath = os.path.basename(path)
-    output = self._RunGit(basedir, ['rev-parse', 'HEAD:./%s' % relpath])
+    output = self._RunGit(basedir, ['rev-parse', ref + ':./%s' % relpath])
     if not output:
-      raise Error('Cannot determine HEAD tree hash for %s' % path)
+      raise Error('Cannot determine %s tree hash for %s' % (ref, path))
     return output.rstrip()
 
   def GetVersion(self, srcroot, manifest, default):

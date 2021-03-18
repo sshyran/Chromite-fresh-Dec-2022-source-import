@@ -300,6 +300,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
 def uprev_drivefs(_build_targets, refs, chroot):
   """Updates drivefs ebuilds.
 
+  DriveFS versions follow the tag format of refs/tags/drivefs_1.2.3.
   See: uprev_versioned_package.
 
   Returns:
@@ -310,7 +311,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   result = uprev_lib.UprevVersionedPackageResult()
   all_changed_files = []
 
-  drivefs_version = get_latest_drivefs_version_from_refs(refs)
+  DRIVEFS_REFS_PREFIX = 'refs/tags/drivefs_'
+  drivefs_version = _get_latest_version_from_refs(DRIVEFS_REFS_PREFIX, refs)
   if not drivefs_version:
     # No valid DriveFS version is identified.
     return result
@@ -321,7 +323,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
-                                                          chroot)
+                                                          chroot,
+                                                          allow_downrev=False)
 
   if not uprev_result:
     return result
@@ -331,7 +334,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
-                                                          chroot)
+                                                          chroot,
+                                                          allow_downrev=False)
 
   if not uprev_result:
     logging.warning(
@@ -348,6 +352,7 @@ def uprev_drivefs(_build_targets, refs, chroot):
 def uprev_perfetto(_build_targets, refs, chroot):
   """Updates Perfetto ebuilds.
 
+  Perfetto versions follow the tag format of refs/tags/v1.2.
   See: uprev_versioned_package.
 
   Returns:
@@ -355,7 +360,8 @@ def uprev_perfetto(_build_targets, refs, chroot):
   """
   result = uprev_lib.UprevVersionedPackageResult()
 
-  perfetto_version = get_latest_perfetto_version_from_refs(refs)
+  PERFETTO_REFS_PREFIX = 'refs/tags/v'
+  perfetto_version = _get_latest_version_from_refs(PERFETTO_REFS_PREFIX, refs)
   if not perfetto_version:
     # No valid Perfetto version is identified.
     return result
@@ -365,9 +371,12 @@ def uprev_perfetto(_build_targets, refs, chroot):
   # Attempt to uprev perfetto package.
   PERFETTO_PATH = 'src/third_party/chromiumos-overlay/chromeos-base/perfetto'
 
-  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(PERFETTO_PATH,
-                                                          perfetto_version,
-                                                          chroot)
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(
+      PERFETTO_PATH,
+      perfetto_version,
+      chroot,
+      allow_downrev=False,
+      ref=PERFETTO_REFS_PREFIX + perfetto_version)
 
   if not uprev_result:
     return result
@@ -538,54 +547,23 @@ def uprev_chrome(build_targets, refs, chroot):
   return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
 
 
-def get_latest_drivefs_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
-  """Get the latest DriveFS version from refs
+def _get_latest_version_from_refs(refs_prefix: str,
+                                  refs: List[uprev_lib.GitRef]) -> str:
+  """Get the latest version from refs
 
-  DriveFS versions follow the tag format of refs/tags/drivefs_1.2.3.
   Versions are compared using |distutils.version.LooseVersion| and
   the latest version is returned.
 
   Args:
-    refs: The tags to parse for the latest DriveFS version.
-
-  Returns:
-    The latest DriveFS version to use.
-  """
-  DRIVEFS_REFS_PREFIX = 'refs/tags/drivefs_'
-
-  valid_refs = []
-  for gitiles in refs:
-    if gitiles.ref.startswith(DRIVEFS_REFS_PREFIX):
-      valid_refs.append(gitiles.ref)
-
-  if not valid_refs:
-    return None
-
-  # Sort by version and take the latest version.
-  target_version_ref = sorted(valid_refs,
-                              key=LooseVersion,
-                              reverse=True)[0]
-  return target_version_ref.replace(DRIVEFS_REFS_PREFIX, '')
-
-
-def get_latest_perfetto_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
-  """Get the latest Perfetto version from refs
-
-  Perfetto versions follow the tag format of refs/tags/v1.2.
-  Versions are compared using |distutils.version.LooseVersion| and
-  the latest version is returned.
-
-  Args:
+    refs_prefix: The refs prefix of the tag format.
     refs: The tags to parse for the latest Perfetto version.
 
   Returns:
     The latest Perfetto version to use.
   """
-  PERFETTO_REFS_PREFIX = 'refs/tags/v'
-
   valid_refs = []
   for gitiles in refs:
-    if gitiles.ref.startswith(PERFETTO_REFS_PREFIX):
+    if gitiles.ref.startswith(refs_prefix):
       valid_refs.append(gitiles.ref)
 
   if not valid_refs:
@@ -595,7 +573,7 @@ def get_latest_perfetto_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
   target_version_ref = sorted(valid_refs,
                               key=LooseVersion,
                               reverse=True)[0]
-  return target_version_ref.replace(PERFETTO_REFS_PREFIX, '')
+  return target_version_ref.replace(refs_prefix, '')
 
 
 def _generate_platform_c_files(replication_config, chroot):

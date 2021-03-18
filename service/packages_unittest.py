@@ -1069,12 +1069,13 @@ class GetKeyIdTest(cros_test_lib.MockTestCase):
     self.assertEqual(result, None)
 
 
-class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
-  """Tests for get_latest_drivefs_version_from_refs."""
+class GetLatestVersionTest(cros_test_lib.TestCase):
+  """Tests for get_latest_version_from_refs."""
 
   def setUp(self):
+    self.prefix = 'refs/tags/drivefs_'
     # The tag ref template.
-    ref_tpl = 'refs/tags/drivefs_%s'
+    ref_tpl = self.prefix + '%s'
 
     self.latest = '44.0.20'
     self.versions = ['42.0.1', self.latest, '44.0.19', '39.0.15']
@@ -1084,45 +1085,21 @@ class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
 
   def test_single_ref(self):
     """Test a single ref is supplied."""
+    # pylint: disable=protected-access
     self.assertEqual(self.latest,
-        packages.get_latest_drivefs_version_from_refs([self.latest_ref]))
+        packages._get_latest_version_from_refs(self.prefix, [self.latest_ref]))
 
   def test_multiple_ref_versions(self):
     """Test multiple refs supplied."""
+    # pylint: disable=protected-access
     self.assertEqual(self.latest,
-        packages.get_latest_drivefs_version_from_refs(self.refs))
+        packages._get_latest_version_from_refs(self.prefix, self.refs))
 
   def test_no_refs_returns_none(self):
     """Test no refs supplied."""
-    self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)
-
-
-class GetLatestPerfettoVersionTest(cros_test_lib.TestCase):
-  """Tests for get_latest_perfetto_version_from_refs."""
-
-  def setUp(self):
-    # The tag ref template.
-    ref_tpl = 'refs/tags/v%s'
-
-    self.latest = '12.0'
-    self.versions = ['9.1', self.latest, '10.0', '10.2']
-    self.latest_ref = uprev_lib.GitRef('/path', ref_tpl % self.latest, 'abc123')
-    self.refs = [uprev_lib.GitRef('/path', ref_tpl % v, 'abc123')
-                 for v in self.versions]
-
-  def test_single_ref(self):
-    """Test a single ref is supplied."""
-    self.assertEqual(self.latest,
-        packages.get_latest_perfetto_version_from_refs([self.latest_ref]))
-
-  def test_multiple_ref_versions(self):
-    """Test multiple refs supplied."""
-    self.assertEqual(self.latest,
-        packages.get_latest_perfetto_version_from_refs(self.refs))
-
-  def test_no_refs_returns_none(self):
-    """Test no refs supplied."""
-    self.assertEqual(packages.get_latest_perfetto_version_from_refs([]), None)
+    # pylint: disable=protected-access
+    self.assertEqual(packages._get_latest_version_from_refs(self.prefix, []),
+                     None)
 
 
 class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
@@ -1367,6 +1344,9 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
   def majorBumpOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
 
+  def newerVersionOutcome(self):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.NEWER_VERSION_EXISTS)
+
   def sameVersionOutcome(self):
     return uprev_lib.UprevResult(uprev_lib.Outcome.SAME_VERSION_EXISTS)
 
@@ -1379,6 +1359,16 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
     """Test a single ref is supplied."""
     self.PatchObject(
         uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_newer_version_exists(self):
+    """Test the newer version exists uprev should not happen."""
+    perfetto_outcome = self.newerVersionOutcome()
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
     output = packages.uprev_perfetto(None, self.refs, None)
     self.assertFalse(output.uprevved)
 

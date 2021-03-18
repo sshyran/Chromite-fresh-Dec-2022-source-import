@@ -529,3 +529,29 @@ def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
   )
 
   assert stable_package in overlay
+
+
+def test_uprev_workon_ebuild_to_version_newer_exists(overlay_stack):
+  """Test no uprev occurs when downrev not allowed and newer version exists."""
+  overlay, = overlay_stack(1)
+  unstable_ebuild = cr.test.Package(
+      'chromeos-base',
+      'uprev-test',
+      version='9999',
+      keywords='~*',
+      inherit='cros-workon')
+  stable_ebuild = cr.test.Package(
+      'chromeos-base', 'uprev-test', version='5.0.3-r2', inherit='cros-workon')
+
+  overlay.add_package(unstable_ebuild)
+  overlay.add_package(stable_ebuild)
+
+  result = uprev_lib.uprev_workon_ebuild_to_version(
+      'chromeos-base/uprev-test',
+      '1.2.3',
+      allow_downrev=False,
+      src_root=overlay.path,
+      chroot_src_root=overlay.path)
+
+  assert not result
+  assert result.outcome is uprev_lib.Outcome.NEWER_VERSION_EXISTS

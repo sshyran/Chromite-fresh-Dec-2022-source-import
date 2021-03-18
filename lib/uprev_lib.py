@@ -25,6 +25,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib.chroot_lib import Chroot
+from chromite.utils import pms
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -720,6 +721,8 @@ def uprev_workon_ebuild_to_version(
     target_version: str,
     chroot: Optional['chromite.lib.chroot_lib.Chroot'] = None,
     *,
+    allow_downrev: bool = True,
+    ref: str = 'HEAD',
     src_root: str = constants.SOURCE_ROOT,
     chroot_src_root: str = constants.CHROOT_SOURCE_ROOT) -> UprevResult:
   """Uprev a cros-workon ebuild to a specified version.
@@ -730,11 +733,13 @@ def uprev_workon_ebuild_to_version(
     target_version: The version to use for the stable ebuild to be generated.
       Should not contain a revision number.
     chroot: The path to the chroot to enter, if not the default.
+    allow_downrev: Whether the downrev should be proceed. If not and the target
+      version is older than the existing version, abort this downrev.
+    ref: The target version's ref tag in the git repository to be used.
     src_root: Path to the root of the source checkout. Only for testing.
     chroot_src_root: Path to the root of the source checkout when inside the
       chroot. Only override for testing.
   """
-
   package_path = str(package_path)
   package = os.path.basename(package_path)
 
@@ -762,6 +767,13 @@ def uprev_workon_ebuild_to_version(
   if not unstable_ebuild.is_workon:
     raise EbuildUprevError('A workon ebuild was expected '
                            f'but {unstable_ebuild.ebuild_path} is not workon.')
+
+  # If downrev is not allowed, and the new version is older than the existing
+  # version, early return without uprevving.
+  if (not allow_downrev and stable_ebuild and
+      pms.version_lt(target_version, stable_ebuild.version_no_rev)):
+    return UprevResult(outcome=Outcome.NEWER_VERSION_EXISTS)
+
   # If the new version is the same as the old version, bump the revision number,
   # otherwise reset it to 1
   if stable_ebuild and target_version == stable_ebuild.version_no_rev:
@@ -782,11 +794,11 @@ def uprev_workon_ebuild_to_version(
   manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
   info = unstable_ebuild.GetSourceInfo(
       os.path.join(constants.SOURCE_ROOT, 'src'), manifest)
-  commit_ids = [unstable_ebuild.GetCommitId(x) for x in info.srcdirs]
+  commit_ids = [unstable_ebuild.GetCommitId(x, ref) for x in info.srcdirs]
   if not commit_ids:
     raise EbuildUprevError('No commit_ids found for %s' % info.srcdirs)
 
-  tree_ids = [unstable_ebuild.GetTreeId(x) for x in info.subtrees]
+  tree_ids = [unstable_ebuild.GetTreeId(x, ref) for x in info.subtrees]
   tree_ids = [tree_id for tree_id in tree_ids if tree_id]
   if not tree_ids:
     raise EbuildUprevError('No tree_ids found for %s' % info.subtrees)
