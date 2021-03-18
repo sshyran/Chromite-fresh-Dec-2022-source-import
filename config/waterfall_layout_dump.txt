@@ -267,6 +267,7 @@
     cave-release
     celes-release
     chell-release
+    cherry-release
     cheza-release
     cheza64-release
     coral-release
@@ -692,6 +693,12 @@
   chell-payloads-tryjob
   chell-release-tryjob
   chell-unittest-stress
+  cherry-full-tryjob
+  cherry-llvm-next-toolchain-tryjob
+  cherry-llvm-toolchain-tryjob
+  cherry-payloads-tryjob
+  cherry-release-tryjob
+  cherry-unittest-stress
   cheza-full-tryjob
   cheza-llvm-next-toolchain-tryjob
   cheza-llvm-toolchain-tryjob
@@ -1489,6 +1496,7 @@
     cave-release-tryjob
     celes-release-tryjob
     chell-release-tryjob
+    cherry-release-tryjob
     cheza-release-tryjob
     cheza64-release-tryjob
     coral-release-tryjob
