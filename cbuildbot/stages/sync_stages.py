@@ -29,8 +29,8 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import patch as cros_patch
 from chromite.lib import timeout_util
-from chromite.scripts import cros_mark_android_as_stable
 from chromite.scripts import cros_mark_chrome_as_stable
+from chromite.service import android
 
 
 class PatchChangesStage(generic_stages.BuilderStage):
@@ -736,11 +736,10 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def GetLatestAndroidVersion(self):
     """Returns the version of Android to uprev."""
-    return cros_mark_android_as_stable.GetLatestBuild(
+    return android.GetLatestBuild(
         constants.ANDROID_BUCKET_URL, self._run.config.android_import_branch,
-        cros_mark_android_as_stable.MakeBuildTargetDict(
-            self._run.config.android_package,
-            self._run.config.android_import_branch))[0]
+        android.MakeBuildTargetDict(self._run.config.android_package,
+                                    self._run.config.android_import_branch))[0]
 
   def GetLatestChromeVersion(self):
     """Returns the version of Chrome to uprev."""
