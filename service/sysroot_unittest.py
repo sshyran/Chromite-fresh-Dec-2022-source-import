@@ -287,9 +287,11 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   def testGetBuildPackagesArgs(self):
     """Test the build_packages args building for non-empty values."""
     packages = ['cat/pkg', 'cat2/pkg2']
-    instance = sysroot.BuildPackagesRunConfig(usepkg=True,
-                                              install_debug_symbols=True,
-                                              packages=packages)
+    instance = sysroot.BuildPackagesRunConfig(
+        usepkg=True,
+        install_debug_symbols=True,
+        packages=packages,
+        setup_board=False)
 
     args = instance.GetBuildPackagesArgs()
     self.AssertHasRequiredArgs(args)
@@ -298,6 +300,7 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     self.assertNotIn('--reuse_pkgs_from_local_boards', args)
     # Debug symbols included.
     self.assertIn('--withdebugsymbols', args)
+    self.assertIn('--skip_setup_board', args)
     # Packages included.
     for package in packages:
       self.assertIn(package, args)

@@ -102,7 +102,7 @@ class BuildPackagesRunConfig(object):
   def __init__(self, usepkg=True, install_debug_symbols=False,
                packages=None, use_flags=None, use_goma=False,
                incremental_build=True, package_indexes=None,
-               expanded_binhosts: bool = False):
+               expanded_binhosts: bool = False, setup_board: bool = True):
     """Init method.
 
     Args:
@@ -122,6 +122,7 @@ class BuildPackagesRunConfig(object):
         available prebuilts, youngest first, or None.
       expanded_binhosts: Whether to enable/disable the expanded binhost
         inheritance feature for the sysroot.
+      setup_board: Whether to run setup_board in build_packages.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -131,6 +132,7 @@ class BuildPackagesRunConfig(object):
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
     self.expanded_binhosts = expanded_binhosts
+    self.setup_board = setup_board
 
   def GetBuildPackagesArgs(self):
     """Get the build_packages script arguments."""
@@ -160,6 +162,9 @@ class BuildPackagesRunConfig(object):
       args.append('--expandedbinhosts')
     else:
       args.append('--noexpandedbinhosts')
+
+    if not self.setup_board:
+      args.append('--skip_setup_board')
 
     if self.packages:
       args.extend(self.packages)
