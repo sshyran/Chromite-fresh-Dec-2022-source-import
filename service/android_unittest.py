@@ -49,15 +49,20 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     self.arm_acl_data = '-g google.com:READ'
     self.x86_acl_data = '-g google.com:WRITE'
+    self.public_acl_data = '-u AllUsers:READ'
     self.arm_acl = os.path.join(self.mock_android_dir,
-                                'googlestorage_arm_acl.txt')
+                                'googlestorage_acl_arm.txt')
     self.x86_acl = os.path.join(self.mock_android_dir,
-                                'googlestorage_x86_acl.txt')
+                                'googlestorage_acl_x86.txt')
+    self.public_acl = os.path.join(self.mock_android_dir,
+                                   'googlestorage_acl_public.txt')
     self.acls = {
+        'APPS': self.public_acl,
         'ARM': self.arm_acl,
         'ARM64': self.arm_acl,
         'X86': self.x86_acl,
         'X86_64': self.x86_acl,
+        'ARM_USERDEBUG': self.arm_acl,
         'ARM64_USERDEBUG': self.arm_acl,
         'X86_USERDEBUG': self.x86_acl,
         'X86_64_USERDEBUG': self.x86_acl,
@@ -67,6 +72,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
     osutils.WriteFile(self.arm_acl, self.arm_acl_data, makedirs=True)
     osutils.WriteFile(self.x86_acl, self.x86_acl_data, makedirs=True)
+    osutils.WriteFile(self.public_acl, self.public_acl_data, makedirs=True)
 
     self.bucket_url = 'gs://u'
     self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
@@ -75,13 +81,10 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.targets = android.MakeBuildTargetDict(self.android_package,
                                                self.build_branch).copy()
 
-    # Remove targets which were historically not covered by tests.
-    # TODO(crbug.com/1074145): List of targets is generated dynamically here but
-    # hardcoded everywhere else. Figure out a better way to test this.
-    del self.targets['APPS']
-    del self.targets['ARM_USERDEBUG']
-
     builds = {
+        'APPS': [
+            self.old_version, self.old2_version, self.new_version,
+        ],
         'ARM': [
             self.old_version, self.old2_version, self.new_version,
             self.partial_new_version
@@ -91,6 +94,9 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         ],
         'X86': [self.old_version, self.old2_version, self.new_version],
         'X86_64': [self.old_version, self.old2_version, self.new_version],
+        'ARM_USERDEBUG': [
+            self.old_version, self.old2_version, self.new_version,
+        ],
         'ARM64_USERDEBUG': [
             self.old_version, self.old2_version, self.new_version,
         ],
@@ -116,10 +122,12 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       for key in self.targets.keys():
         self.setupMockBuild(key, version)
     self.new_subpaths = {
+        'APPS': 'linux-apps100',
         'ARM': 'linux-cheets_arm-user100',
         'ARM64': 'linux-cheets_arm64-user100',
         'X86': 'linux-cheets_x86-user100',
         'X86_64': 'linux-cheets_x86_64-user100',
+        'ARM_USERDEBUG': 'linux-cheets_arm-userdebug100',
         'ARM64_USERDEBUG': 'linux-cheets_arm64-userdebug100',
         'X86_USERDEBUG': 'linux-cheets_x86-userdebug100',
         'X86_64_USERDEBUG': 'linux-cheets_x86_64-userdebug100',
@@ -127,10 +135,12 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         'SDK_GOOGLE_X86_64_USERDEBUG': 'linux-sdk_cheets_x86_64-userdebug100',
     }
 
+    self.setupMockBuild('APPS', self.partial_new_version, valid=False)
     self.setupMockBuild('ARM', self.partial_new_version)
     self.setupMockBuild('ARM64', self.partial_new_version, valid=False)
     self.setupMockBuild('X86', self.partial_new_version, valid=False)
     self.setupMockBuild('X86_64', self.partial_new_version, valid=False)
+    self.setupMockBuild('ARM_USERDEBUG', self.partial_new_version, valid=False)
     self.setupMockBuild('ARM64_USERDEBUG', self.partial_new_version,
                         valid=False)
     self.setupMockBuild('X86_USERDEBUG', self.partial_new_version, valid=False)
@@ -158,10 +168,13 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
       # Show files.
       mock_file_template_list = {
+          'APPS': ['org.chromium.arc.cachebuilder.jar'],
           'ARM': ['file-%(version)s.zip', 'adb', 'sepolicy.zip'],
           'ARM64': ['cheets_arm64-file-%(version)s.zip', 'sepolicy.zip'],
           'X86': ['file-%(version)s.zip'],
           'X86_64': ['file-%(version)s.zip'],
+          'ARM_USERDEBUG': ['cheets_arm-file-%(version)s.zip', 'adb',
+                            'sepolicy.zip'],
           'ARM64_USERDEBUG': ['cheets_arm64-file-%(version)s.zip', 'adb',
                               'sepolicy.zip'],
           'X86_USERDEBUG': ['cheets_x86-file-%(version)s.zip', 'sepolicy.zip'],
@@ -185,10 +198,13 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       dst_url = self.makeDstUrl(target, version)
       # Show files.
       mock_file_template_list = {
+          'APPS': ['org.chromium.arc.cachebuilder.jar'],
           'ARM': ['file-%(version)s.zip', 'adb', 'sepolicy.zip'],
           'ARM64': ['cheets_arm64-file-%(version)s.zip', 'sepolicy.zip'],
           'X86': ['file-%(version)s.zip'],
           'X86_64': ['file-%(version)s.zip'],
+          'ARM_USERDEBUG': ['cheets_arm_userdebug-file-%(version)s.zip',
+                            'adb', 'sepolicy.zip'],
           'ARM64_USERDEBUG': ['cheets_arm64_userdebug-file-%(version)s.zip',
                               'adb', 'sepolicy.zip'],
           'X86_USERDEBUG':
@@ -242,11 +258,13 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
                                       self.old_version, self.targets)
     self.assertTrue(subpaths)
-    self.assertEqual(len(subpaths), 9)
+    self.assertEqual(len(subpaths), 11)
+    self.assertEqual(subpaths['APPS'], 'linux-apps25')
     self.assertEqual(subpaths['ARM'], 'linux-cheets_arm-user25')
     self.assertEqual(subpaths['ARM64'], 'linux-cheets_arm64-user25')
     self.assertEqual(subpaths['X86'], 'linux-cheets_x86-user25')
     self.assertEqual(subpaths['X86_64'], 'linux-cheets_x86_64-user25')
+    self.assertEqual(subpaths['ARM_USERDEBUG'], 'linux-cheets_arm-userdebug25')
     self.assertEqual(subpaths['ARM64_USERDEBUG'],
                      'linux-cheets_arm64-userdebug25')
     self.assertEqual(subpaths['X86_USERDEBUG'],
@@ -276,11 +294,13 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
                                                self.build_branch, self.targets)
     self.assertEqual(version, self.new_version)
     self.assertTrue(subpaths)
-    self.assertEqual(len(subpaths), 9)
+    self.assertEqual(len(subpaths), 11)
+    self.assertEqual(subpaths['APPS'], 'linux-apps100')
     self.assertEqual(subpaths['ARM'], 'linux-cheets_arm-user100')
     self.assertEqual(subpaths['ARM64'], 'linux-cheets_arm64-user100')
     self.assertEqual(subpaths['X86'], 'linux-cheets_x86-user100')
     self.assertEqual(subpaths['X86_64'], 'linux-cheets_x86_64-user100')
+    self.assertEqual(subpaths['ARM_USERDEBUG'], 'linux-cheets_arm-userdebug100')
     self.assertEqual(subpaths['ARM64_USERDEBUG'],
                      'linux-cheets_arm64-userdebug100')
     self.assertEqual(subpaths['X86_USERDEBUG'],
@@ -367,15 +387,11 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def testMakeAclDict(self):
     """Test generation of acls dictionary."""
     acls = android.MakeAclDict(self.mock_android_dir)
-    self.assertEqual(acls['ARM'], os.path.join(self.mock_android_dir,
-                                               'googlestorage_acl_arm.txt'))
-    self.assertEqual(acls['ARM64'], os.path.join(self.mock_android_dir,
-                                                 'googlestorage_acl_arm.txt'))
-    self.assertEqual(acls['ARM64_USERDEBUG'],
-                     os.path.join(self.mock_android_dir,
-                                  'googlestorage_acl_arm.txt'))
-    self.assertEqual(acls['X86'], os.path.join(self.mock_android_dir,
-                                               'googlestorage_acl_x86.txt'))
+    self.assertEqual(acls['APPS'], self.public_acl)
+    self.assertEqual(acls['ARM'], self.arm_acl)
+    self.assertEqual(acls['ARM64'], self.arm_acl)
+    self.assertEqual(acls['ARM64_USERDEBUG'], self.arm_acl)
+    self.assertEqual(acls['X86'], self.x86_acl)
     # Test that all PI targets have their ACLS set.
     for t in android.MakeBuildTargetDict(
         constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
