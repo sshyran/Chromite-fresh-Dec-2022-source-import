@@ -18,7 +18,6 @@ from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
-from chromite.service import android
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -71,8 +70,6 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.arc_bucket_url = 'gs://a'
     self.runtime_artifacts_bucket_url = 'gs://r'
-    self.targets = android.MakeBuildTargetDict(self.android_package,
-                                               self.build_branch).copy()
 
   def setupMockRuntimeDataBuild(self, android_version):
     """Helper to mock a build for runtime data."""
@@ -120,7 +117,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     revved = cros_mark_android_as_stable.MarkAndroidEBuildAsStable(
         stable_candidate, unstable, self.android_package, android_version,
         package_dir, self.build_branch, self.arc_bucket_url,
-        self.runtime_artifacts_bucket_url, self.targets)
+        self.runtime_artifacts_bucket_url)
 
     self.assertIsNotNone(revved)
     version_atom, files_to_add, files_to_remove = revved

@@ -13,7 +13,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
-def IsBuildIdValid(bucket_url, build_branch, build_id, targets):
+def IsBuildIdValid(bucket_url, build_branch, build_id):
   """Checks that a specific build_id is valid.
 
   Looks for that build_id for all builds. Confirms that the subpath can
@@ -23,13 +23,12 @@ def IsBuildIdValid(bucket_url, build_branch, build_id, targets):
     bucket_url: URL of Android build gs bucket
     build_branch: branch of Android builds
     build_id: A string. The Android build id number to check.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
 
   Returns:
     Returns subpaths dictionary if build_id is valid.
     None if the build_id is not valid.
   """
+  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
   subpaths_dict = {}
   for build, (target, _) in targets.items():
@@ -69,19 +68,18 @@ def IsBuildIdValid(bucket_url, build_branch, build_id, targets):
   return subpaths_dict
 
 
-def GetLatestBuild(bucket_url, build_branch, targets):
+def GetLatestBuild(bucket_url, build_branch):
   """Searches the gs bucket for the latest green build.
 
   Args:
     bucket_url: URL of Android build gs bucket
     build_branch: branch of Android builds
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
 
   Returns:
     Tuple of (latest version string, subpaths dictionary)
     If no latest build can be found, returns None, None
   """
+  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
   common_build_ids = None
   # Find builds for each target.
@@ -112,7 +110,7 @@ def GetLatestBuild(bucket_url, build_branch, targets):
 
   # Otherwise, find the most recent one that is valid.
   for build_id in sorted(common_build_ids, key=int, reverse=True):
-    subpaths = IsBuildIdValid(bucket_url, build_branch, build_id, targets)
+    subpaths = IsBuildIdValid(bucket_url, build_branch, build_id)
     if subpaths:
       return build_id, subpaths
 
@@ -158,7 +156,7 @@ def _GetArcBasename(build, basename):
 
 
 def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
-                    targets, arc_bucket_url, acls):
+                    arc_bucket_url, acls):
   """Copies from source Android bucket to ARC++ specific bucket.
 
   Copies each build to the ARC bucket eliminating the subpath.
@@ -169,11 +167,10 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
     build_branch: branch of Android builds
     build_id: A string. The Android build id number to check.
     subpaths: Subpath dictionary for each build to copy.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
     arc_bucket_url: URL of the target ARC build gs bucket
     acls: ACLs dictionary for each build to copy.
   """
+  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
   for build, subpath in subpaths.items():
     target, pattern = targets[build]
@@ -229,7 +226,7 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
 
 
 def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
-                    acls, targets, version=None):
+                    acls, version=None):
   """Mirrors artifacts from Android bucket to ARC bucket.
 
   First, this function identifies which build version should be copied,
@@ -243,8 +240,6 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
     android_build_branch: branch of Android builds
     arc_bucket_url: URL of the target ARC build gs bucket
     acls: ACLs dictionary for each build to copy.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
     version: (optional) A string. The Android build id number to check.
         If not passed, detect latest good build version.
 
@@ -252,16 +247,14 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
     Mirrored version.
   """
   if version:
-    subpaths = IsBuildIdValid(
-        android_bucket_url, android_build_branch, version, targets)
+    subpaths = IsBuildIdValid(android_bucket_url, android_build_branch, version)
     if not subpaths:
       logging.error('Requested build %s is not valid', version)
   else:
-    version, subpaths = GetLatestBuild(
-        android_bucket_url, android_build_branch, targets)
+    version, subpaths = GetLatestBuild(android_bucket_url, android_build_branch)
 
   CopyToArcBucket(android_bucket_url, android_build_branch, version, subpaths,
-                  targets, arc_bucket_url, acls)
+                  arc_bucket_url, acls)
 
   return version
 
@@ -279,43 +272,3 @@ def MakeAclDict(package_dir):
       (k, os.path.join(package_dir, v))
       for k, v in constants.ARC_BUCKET_ACLS.items()
   )
-
-
-def MakeBuildTargetDict(package_name, build_branch):
-  """Creates a dictionary of build targets.
-
-  Not all targets are common between branches, for example
-  sdk_google_cheets_x86 only exists on N.
-  This generates a dictionary listing the available build targets for a
-  specific branch.
-
-  Args:
-    package_name: package name of chromeos arc package.
-    build_branch: branch of Android builds.
-
-  Returns:
-    Returns build target dictionary.
-
-  Raises:
-    ValueError: if the Android build branch is invalid.
-  """
-  if constants.ANDROID_CONTAINER_PACKAGE_KEYWORD in package_name:
-    target_list = {
-        constants.ANDROID_PI_BUILD_BRANCH:
-        constants.ANDROID_PI_BUILD_TARGETS,
-    }
-  elif constants.ANDROID_VM_PACKAGE_KEYWORD in package_name:
-    target_list = {
-        constants.ANDROID_VMMST_BUILD_BRANCH:
-        constants.ANDROID_VMMST_BUILD_TARGETS,
-        constants.ANDROID_VMRVC_BUILD_BRANCH:
-        constants.ANDROID_VMRVC_BUILD_TARGETS,
-        constants.ANDROID_VMSC_BUILD_BRANCH:
-        constants.ANDROID_VMSC_BUILD_TARGETS,
-    }
-  else:
-    raise ValueError('Unknown package: %s' % package_name)
-  target = target_list.get(build_branch)
-  if not target:
-    raise ValueError('Unknown branch: %s' % build_branch)
-  return target

@@ -217,8 +217,7 @@ def UpdateDataCollectorArtifacts(android_version,
 def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
                               android_package, android_version, package_dir,
                               build_branch, arc_bucket_url,
-                              runtime_artifacts_bucket_url,
-                              build_targets):
+                              runtime_artifacts_bucket_url):
   r"""Uprevs the Android ebuild.
 
   This is the main function that uprevs from a stable candidate
@@ -235,7 +234,6 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     build_branch: branch of Android builds.
     arc_bucket_url: URL of the target ARC build gs bucket.
     runtime_artifacts_bucket_url: root of runtime artifacts
-    build_targets: build targets for this particular Android branch.
 
   Returns:
     Tuple[str, List[str], List[str]] if revved, or None
@@ -266,6 +264,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     pf = '%s-%s-r1' % (android_package, android_version)
     new_ebuild_path = os.path.join(package_dir, '%s.ebuild' % pf)
 
+  build_targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   variables = {'BASE_URL': arc_bucket_url}
   for build, (target, _) in build_targets.items():
     variables[build + '_TARGET'] = '%s-%s' % (build_branch, target)
@@ -343,8 +342,8 @@ def GetParser():
                       type='gs_path')
   parser.add_argument('--android_build_branch',
                       required=True,
-                      help='Android branch to import from. '
-                           'Ex: git_mnc-dr-arc-dev')
+                      choices=constants.ANDROID_BRANCH_TO_BUILD_TARGETS,
+                      help='Android branch to import from')
   parser.add_argument('--android_package',
                       default=constants.ANDROID_PACKAGE_NAME)
   parser.add_argument('--arc_bucket_url',
@@ -374,17 +373,13 @@ def main(argv):
   android_package_dir = os.path.join(
       overlay_dir,
       portage_util.GetFullAndroidPortagePackageName(options.android_package))
-  version_to_uprev = None
 
   (unstable_ebuild, stable_ebuilds) = FindAndroidCandidates(android_package_dir)
   acls = android.MakeAclDict(android_package_dir)
-  build_targets = android.MakeBuildTargetDict(options.android_package,
-                                              options.android_build_branch)
   # Mirror artifacts, i.e., images and some sdk tools (e.g., adb, aapt).
   version_to_uprev = android.MirrorArtifacts(options.android_bucket_url,
                                              options.android_build_branch,
                                              options.arc_bucket_url, acls,
-                                             build_targets,
                                              options.force_version)
 
   stable_candidate = portage_util.BestEBuild(stable_ebuilds)
@@ -401,7 +396,7 @@ def main(argv):
       stable_candidate, unstable_ebuild, options.android_package,
       version_to_uprev, android_package_dir,
       options.android_build_branch, options.arc_bucket_url,
-      options.runtime_artifacts_bucket_url, build_targets)
+      options.runtime_artifacts_bucket_url)
 
   if revved:
     android_version_atom, files_to_add, files_to_remove = revved

@@ -78,8 +78,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.arc_bucket_url = 'gs://a'
-    self.targets = android.MakeBuildTargetDict(self.android_package,
-                                               self.build_branch).copy()
+    self.targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[self.build_branch]
 
     builds = {
         'APPS': [
@@ -256,7 +255,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def testIsBuildIdValid(self):
     """Test if checking if build valid."""
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.old_version, self.targets)
+                                      self.old_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
     self.assertEqual(subpaths['APPS'], 'linux-apps25')
@@ -277,21 +276,21 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
                      'linux-sdk_cheets_x86_64-userdebug25')
 
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.new_version, self.targets)
+                                      self.new_version)
     self.assertEqual(subpaths, self.new_subpaths)
 
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.partial_new_version, self.targets)
+                                      self.partial_new_version)
     self.assertEqual(subpaths, None)
 
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.not_new_version, self.targets)
+                                      self.not_new_version)
     self.assertEqual(subpaths, None)
 
   def testGetLatestBuild(self):
     """Test determination of latest build from gs bucket."""
     version, subpaths = android.GetLatestBuild(self.bucket_url,
-                                               self.build_branch, self.targets)
+                                               self.build_branch)
     self.assertEqual(version, self.new_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
@@ -381,7 +380,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     # Allow setting of dest acls.
     self.gs_mock.AddCmdResult(partial_mock.In('acl'))
     android.CopyToArcBucket(self.bucket_url, self.build_branch,
-                            self.new_version, self.new_subpaths, self.targets,
+                            self.new_version, self.new_subpaths,
                             self.arc_bucket_url, self.acls)
 
   def testMakeAclDict(self):
@@ -393,81 +392,18 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(acls['ARM64_USERDEBUG'], self.arm_acl)
     self.assertEqual(acls['X86'], self.x86_acl)
     # Test that all PI targets have their ACLS set.
-    for t in android.MakeBuildTargetDict(
-        constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
-        constants.ANDROID_PI_BUILD_BRANCH).keys():
+    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
+        constants.ANDROID_PI_BUILD_BRANCH]:
       self.assertIn(t, acls)
     # Test that all VMRVC targets have their ACLS set.
-    for t in android.MakeBuildTargetDict(
-        constants.ANDROID_VM_PACKAGE_KEYWORD,
-        constants.ANDROID_VMRVC_BUILD_BRANCH).keys():
+    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
+        constants.ANDROID_VMRVC_BUILD_BRANCH]:
       self.assertIn(t, acls)
     # Test that all VMSC targets have their ACLS set.
-    for t in android.MakeBuildTargetDict(
-        constants.ANDROID_VM_PACKAGE_KEYWORD,
-        constants.ANDROID_VMSC_BUILD_BRANCH).keys():
+    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
+        constants.ANDROID_VMSC_BUILD_BRANCH]:
       self.assertIn(t, acls)
     # Test that all VMMST targets have their ACLS set.
-    for t in android.MakeBuildTargetDict(
-        constants.ANDROID_VM_PACKAGE_KEYWORD,
-        constants.ANDROID_VMMST_BUILD_BRANCH).keys():
+    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
+        constants.ANDROID_VMMST_BUILD_BRANCH]:
       self.assertIn(t, acls)
-
-  def testMakeBuildTargetDictPI(self):
-    """Test generation of PI build target dictionary.
-
-    If the number of targets is correct and PI-specific targets are
-    present, then the dictionary is correct.
-    """
-    targets = android.MakeBuildTargetDict('android-container-pi',
-                                          constants.ANDROID_PI_BUILD_BRANCH)
-    # Test the number of targets.
-    self.assertEqual(len(targets),
-                     len(constants.ANDROID_PI_BUILD_TARGETS))
-    # Test that all PI-specific targets are in the dictionary.
-    for target in constants.ANDROID_PI_BUILD_TARGETS:
-      self.assertEqual(targets[target],
-                       constants.ANDROID_PI_BUILD_TARGETS[target])
-
-  def testMakeBuildTargetDictVMRVC(self):
-    """Test generation of VMRVC build target dictionary.
-
-    If the number of targets is correct and VMRVC-specific targets are
-    present, then the dictionary is correct.
-    """
-    targets = android.MakeBuildTargetDict('android-vm-pi',
-                                          constants.ANDROID_VMRVC_BUILD_BRANCH)
-    # Test the number of targets.
-    self.assertEqual(len(targets),
-                     len(constants.ANDROID_VMRVC_BUILD_TARGETS))
-    # Test that all VMRVC-specific targets are in the dictionary.
-    for target in constants.ANDROID_VMRVC_BUILD_TARGETS:
-      self.assertEqual(targets[target],
-                       constants.ANDROID_VMRVC_BUILD_TARGETS[target])
-
-  def testMakeBuildTargetDictVMMst(self):
-    """Test generation of VMMst build target dictionary.
-
-    If the number of targets is correct and VMMst-specific targets are
-    present, then the dictionary is correct.
-    """
-    targets = android.MakeBuildTargetDict('android-vm-master',
-                                          constants.ANDROID_VMMST_BUILD_BRANCH)
-    # Test the number of targets.
-    self.assertEqual(len(targets),
-                     len(constants.ANDROID_VMMST_BUILD_TARGETS))
-    # Test that all VMMst-specific targets are in the dictionary.
-    for target in constants.ANDROID_VMMST_BUILD_TARGETS:
-      self.assertEqual(targets[target],
-                       constants.ANDROID_VMMST_BUILD_TARGETS[target])
-
-  def testMakeBuildTargetDictException(self):
-    """Test that passing invalid branch names throws ValueError exception."""
-    self.assertRaises(ValueError,
-                      android.MakeBuildTargetDict,
-                      constants.ANDROID_CONTAINER_PACKAGE_KEYWORD,
-                      'INVALID_BRANCH_NAME')
-    self.assertRaises(ValueError,
-                      android.MakeBuildTargetDict,
-                      'invalid-package',
-                      constants.ANDROID_VMRVC_BUILD_BRANCH)
