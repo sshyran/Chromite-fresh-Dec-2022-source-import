@@ -121,17 +121,17 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       for key in self.targets.keys():
         self.setupMockBuild(key, version)
     self.new_subpaths = {
-        'APPS': 'linux-apps100',
-        'ARM': 'linux-cheets_arm-user100',
-        'ARM64': 'linux-cheets_arm64-user100',
-        'X86': 'linux-cheets_x86-user100',
-        'X86_64': 'linux-cheets_x86_64-user100',
-        'ARM_USERDEBUG': 'linux-cheets_arm-userdebug100',
-        'ARM64_USERDEBUG': 'linux-cheets_arm64-userdebug100',
-        'X86_USERDEBUG': 'linux-cheets_x86-userdebug100',
-        'X86_64_USERDEBUG': 'linux-cheets_x86_64-userdebug100',
-        'SDK_GOOGLE_X86_USERDEBUG': 'linux-sdk_cheets_x86-userdebug100',
-        'SDK_GOOGLE_X86_64_USERDEBUG': 'linux-sdk_cheets_x86_64-userdebug100',
+        'APPS': 'apps100',
+        'ARM': 'cheets_arm-user100',
+        'ARM64': 'cheets_arm64-user100',
+        'X86': 'cheets_x86-user100',
+        'X86_64': 'cheets_x86_64-user100',
+        'ARM_USERDEBUG': 'cheets_arm-userdebug100',
+        'ARM64_USERDEBUG': 'cheets_arm64-userdebug100',
+        'X86_USERDEBUG': 'cheets_x86-userdebug100',
+        'X86_64_USERDEBUG': 'cheets_x86_64-userdebug100',
+        'SDK_GOOGLE_X86_USERDEBUG': 'sdk_cheets_x86-userdebug100',
+        'SDK_GOOGLE_X86_64_USERDEBUG': 'sdk_cheets_x86_64-userdebug100',
     }
 
     self.setupMockBuild('APPS', self.partial_new_version, valid=False)
@@ -233,7 +233,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def makeSrcTargetUrl(self, target):
     """Helper to return the url for a target."""
     return os.path.join(self.bucket_url,
-                        '%s-%s' % (self.build_branch, target))
+                        f'{self.build_branch}-linux-{target}')
 
   def makeSrcUrl(self, target, version):
     """Helper to return the url for a build."""
@@ -242,7 +242,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def makeDstTargetUrl(self, target):
     """Helper to return the url for a target."""
     return os.path.join(self.arc_bucket_url,
-                        '%s-%s' % (self.build_branch, target))
+                        f'{self.build_branch}-linux-{target}')
 
   def makeDstUrl(self, target, version):
     """Helper to return the url for a build."""
@@ -258,22 +258,19 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
                                       self.old_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
-    self.assertEqual(subpaths['APPS'], 'linux-apps25')
-    self.assertEqual(subpaths['ARM'], 'linux-cheets_arm-user25')
-    self.assertEqual(subpaths['ARM64'], 'linux-cheets_arm64-user25')
-    self.assertEqual(subpaths['X86'], 'linux-cheets_x86-user25')
-    self.assertEqual(subpaths['X86_64'], 'linux-cheets_x86_64-user25')
-    self.assertEqual(subpaths['ARM_USERDEBUG'], 'linux-cheets_arm-userdebug25')
-    self.assertEqual(subpaths['ARM64_USERDEBUG'],
-                     'linux-cheets_arm64-userdebug25')
-    self.assertEqual(subpaths['X86_USERDEBUG'],
-                     'linux-cheets_x86-userdebug25')
-    self.assertEqual(subpaths['X86_64_USERDEBUG'],
-                     'linux-cheets_x86_64-userdebug25')
+    self.assertEqual(subpaths['APPS'], 'apps25')
+    self.assertEqual(subpaths['ARM'], 'cheets_arm-user25')
+    self.assertEqual(subpaths['ARM64'], 'cheets_arm64-user25')
+    self.assertEqual(subpaths['X86'], 'cheets_x86-user25')
+    self.assertEqual(subpaths['X86_64'], 'cheets_x86_64-user25')
+    self.assertEqual(subpaths['ARM_USERDEBUG'], 'cheets_arm-userdebug25')
+    self.assertEqual(subpaths['ARM64_USERDEBUG'], 'cheets_arm64-userdebug25')
+    self.assertEqual(subpaths['X86_USERDEBUG'], 'cheets_x86-userdebug25')
+    self.assertEqual(subpaths['X86_64_USERDEBUG'], 'cheets_x86_64-userdebug25')
     self.assertEqual(subpaths['SDK_GOOGLE_X86_USERDEBUG'],
-                     'linux-sdk_cheets_x86-userdebug25')
+                     'sdk_cheets_x86-userdebug25')
     self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
-                     'linux-sdk_cheets_x86_64-userdebug25')
+                     'sdk_cheets_x86_64-userdebug25')
 
     subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
                                       self.new_version)
@@ -294,22 +291,19 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(version, self.new_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
-    self.assertEqual(subpaths['APPS'], 'linux-apps100')
-    self.assertEqual(subpaths['ARM'], 'linux-cheets_arm-user100')
-    self.assertEqual(subpaths['ARM64'], 'linux-cheets_arm64-user100')
-    self.assertEqual(subpaths['X86'], 'linux-cheets_x86-user100')
-    self.assertEqual(subpaths['X86_64'], 'linux-cheets_x86_64-user100')
-    self.assertEqual(subpaths['ARM_USERDEBUG'], 'linux-cheets_arm-userdebug100')
-    self.assertEqual(subpaths['ARM64_USERDEBUG'],
-                     'linux-cheets_arm64-userdebug100')
-    self.assertEqual(subpaths['X86_USERDEBUG'],
-                     'linux-cheets_x86-userdebug100')
-    self.assertEqual(subpaths['X86_64_USERDEBUG'],
-                     'linux-cheets_x86_64-userdebug100')
+    self.assertEqual(subpaths['APPS'], 'apps100')
+    self.assertEqual(subpaths['ARM'], 'cheets_arm-user100')
+    self.assertEqual(subpaths['ARM64'], 'cheets_arm64-user100')
+    self.assertEqual(subpaths['X86'], 'cheets_x86-user100')
+    self.assertEqual(subpaths['X86_64'], 'cheets_x86_64-user100')
+    self.assertEqual(subpaths['ARM_USERDEBUG'], 'cheets_arm-userdebug100')
+    self.assertEqual(subpaths['ARM64_USERDEBUG'], 'cheets_arm64-userdebug100')
+    self.assertEqual(subpaths['X86_USERDEBUG'], 'cheets_x86-userdebug100')
+    self.assertEqual(subpaths['X86_64_USERDEBUG'], 'cheets_x86_64-userdebug100')
     self.assertEqual(subpaths['SDK_GOOGLE_X86_USERDEBUG'],
-                     'linux-sdk_cheets_x86-userdebug100')
+                     'sdk_cheets_x86-userdebug100')
     self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
-                     'linux-sdk_cheets_x86_64-userdebug100')
+                     'sdk_cheets_x86_64-userdebug100')
 
   def _AuxGetArcBasename(self, build, basename):
     """Helper function for readability."""

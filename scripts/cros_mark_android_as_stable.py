@@ -267,7 +267,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
   build_targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   variables = {'BASE_URL': arc_bucket_url}
   for build, (target, _) in build_targets.items():
-    variables[build + '_TARGET'] = '%s-%s' % (build_branch, target)
+    variables[build + '_TARGET'] = f'{build_branch}-linux-{target}'
 
   variables.update(UpdateDataCollectorArtifacts(
       android_version, runtime_artifacts_bucket_url, build_branch))

@@ -282,24 +282,23 @@ ANDROID_PI_BUILD_TARGETS = {
     # X86 target as there's no other similar executables right now.
     # We put it in two buckets because we have separate ACLs for arm and x86.
     # http://b/128405786
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM': ('linux-cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64': ('linux-cheets_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86': ('linux-cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-cheets_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('linux-cheets_arm-userdebug', r'\.zip$'),
-    'ARM64_USERDEBUG': ('linux-cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('linux-cheets_x86-userdebug', r'\.zip$'),
-    'X86_64_USERDEBUG': ('linux-cheets_x86_64-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_USERDEBUG': ('linux-sdk_cheets_x86-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_64_USERDEBUG': ('linux-sdk_cheets_x86_64-userdebug',
-                                    r'\.zip$'),
+    'APPS': ('apps', 'org.chromium.arc.cachebuilder.jar'),
+    'ARM': ('cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
+    'ARM64': ('cheets_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
+    'X86': ('cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
+    'X86_64': ('cheets_x86_64-user', r'\.zip$'),
+    'ARM_USERDEBUG': ('cheets_arm-userdebug', r'\.zip$'),
+    'ARM64_USERDEBUG': ('cheets_arm64-userdebug', r'\.zip$'),
+    'X86_USERDEBUG': ('cheets_x86-userdebug', r'\.zip$'),
+    'X86_64_USERDEBUG': ('cheets_x86_64-userdebug', r'\.zip$'),
+    'SDK_GOOGLE_X86_USERDEBUG': ('sdk_cheets_x86-userdebug', r'\.zip$'),
+    'SDK_GOOGLE_X86_64_USERDEBUG': ('sdk_cheets_x86_64-userdebug', r'\.zip$'),
 }
 ANDROID_VMMST_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
     # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
     # installed on the board, but not into the VM.
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
+    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
                          (r'(\.zip|/XkbToKcmConverter'
                           r'|/org.chromium.arc.cts.helpers.apk)$')),
 }
@@ -307,17 +306,17 @@ ANDROID_VMRVC_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
     # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
     # installed on the board, but not into the VM.
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM64': ('linux-bertha_arm64-user',
+    'APPS': ('apps', 'org.chromium.arc.cachebuilder.jar'),
+    'ARM64': ('bertha_arm64-user',
               (r'(\.zip|/XkbToKcmConverter'
                r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64': ('linux-bertha_x86_64-user',
+    'X86_64': ('bertha_x86_64-user',
                (r'(\.zip|/XkbToKcmConverter'
                 r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
+    'ARM64_USERDEBUG': ('bertha_arm64-userdebug',
                         (r'(\.zip|/XkbToKcmConverter'
                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
+    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
                          (r'(\.zip|/XkbToKcmConverter'
                           r'|/org.chromium.arc.cts.helpers.apk)$')),
 }
@@ -325,10 +324,10 @@ ANDROID_VMSC_BUILD_TARGETS = {
     # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
     # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
     # installed on the board, but not into the VM.
-    'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
+    'ARM64_USERDEBUG': ('bertha_arm64-userdebug',
                         (r'(\.zip|/XkbToKcmConverter'
                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
+    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
                          (r'(\.zip|/XkbToKcmConverter'
                           r'|/org.chromium.arc.cts.helpers.apk)$')),
 }

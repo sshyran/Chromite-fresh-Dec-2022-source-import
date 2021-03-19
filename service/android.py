@@ -32,7 +32,7 @@ def IsBuildIdValid(bucket_url, build_branch, build_id):
   gs_context = gs.GSContext()
   subpaths_dict = {}
   for build, (target, _) in targets.items():
-    build_dir = '%s-%s' % (build_branch, target)
+    build_dir = f'{build_branch}-linux-{target}'
     build_id_path = os.path.join(bucket_url, build_dir, build_id)
 
     # Find name of subpath.
@@ -84,7 +84,7 @@ def GetLatestBuild(bucket_url, build_branch):
   common_build_ids = None
   # Find builds for each target.
   for target, _ in targets.values():
-    build_dir = '-'.join((build_branch, target))
+    build_dir = f'{build_branch}-linux-{target}'
     base_path = os.path.join(bucket_url, build_dir)
     build_ids = []
     for gs_result in gs_context.List(base_path):
@@ -174,7 +174,7 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
   gs_context = gs.GSContext()
   for build, subpath in subpaths.items():
     target, pattern = targets[build]
-    build_dir = '%s-%s' % (build_branch, target)
+    build_dir = f'{build_branch}-linux-{target}'
     android_dir = os.path.join(android_bucket_url, build_dir, build_id, subpath)
     arc_dir = os.path.join(arc_bucket_url, build_dir, build_id)
 
