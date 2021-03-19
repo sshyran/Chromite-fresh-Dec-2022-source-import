@@ -233,6 +233,7 @@
 
 == release ==
   master-release
+    adlrvp-release
     ambassador-release
     amd64-generic-cheets-release
     arkham-release
@@ -429,6 +430,12 @@
     hatch-arc-s-vmsc-android-pfq
 
 == tryjob ==
+  adlrvp-full-tryjob
+  adlrvp-llvm-next-toolchain-tryjob
+  adlrvp-llvm-toolchain-tryjob
+  adlrvp-payloads-tryjob
+  adlrvp-release-tryjob
+  adlrvp-unittest-stress
   ambassador-full-tryjob
   ambassador-llvm-next-toolchain-tryjob
   ambassador-llvm-toolchain-tryjob
@@ -1463,6 +1470,7 @@
     eve-release-basic-tryjob
     grunt-release-basic-tryjob
   master-release-tryjob
+    adlrvp-release-tryjob
     ambassador-release-tryjob
     amd64-generic-cheets-release-tryjob
     arkham-release-tryjob
