@@ -354,19 +354,7 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
 }
 
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
-ARC_BUCKET_ACLS = {
-    'APPS': 'googlestorage_acl_public.txt',
-    'ARM': 'googlestorage_acl_arm.txt',
-    'ARM64': 'googlestorage_acl_arm.txt',
-    'X86': 'googlestorage_acl_x86.txt',
-    'X86_64': 'googlestorage_acl_x86.txt',
-    'ARM_USERDEBUG': 'googlestorage_acl_arm.txt',
-    'ARM64_USERDEBUG': 'googlestorage_acl_arm.txt',
-    'X86_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'X86_64_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'SDK_GOOGLE_X86_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'SDK_GOOGLE_X86_64_USERDEBUG': 'googlestorage_acl_x86.txt',
-}
+
 ANDROID_SYMBOLS_URL_TEMPLATE = (
     ARC_BUCKET_URL +
     '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'

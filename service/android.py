@@ -13,6 +13,14 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
+# ACL definition files that live under the Portage package directory.
+# We set ACLs when copying Android artifacts to the ARC bucket, using
+# definitions for corresponding architecture (and public for the `apps` target).
+ARC_BUCKET_ACL_ARM = 'googlestorage_acl_arm.txt'
+ARC_BUCKET_ACL_X86 = 'googlestorage_acl_x86.txt'
+ARC_BUCKET_ACL_PUBLIC = 'googlestorage_acl_public.txt'
+
+
 def IsBuildIdValid(bucket_url, build_branch, build_id):
   """Checks that a specific build_id is valid.
 
@@ -155,8 +163,27 @@ def _GetArcBasename(build, basename):
   return basename
 
 
+def _GetAcl(target, package_dir):
+  """Returns the path to ACL file corresponding to target.
+
+  Args:
+    target: Android build target.
+    package_dir: Path to the Android portage package.
+
+  Returns:
+    Path to the ACL definition file.
+  """
+  if 'arm' in target:
+    return os.path.join(package_dir, ARC_BUCKET_ACL_ARM)
+  if 'x86' in target:
+    return os.path.join(package_dir, ARC_BUCKET_ACL_X86)
+  if target == 'apps':
+    return os.path.join(package_dir, ARC_BUCKET_ACL_PUBLIC)
+  raise ValueError(f'Unknown target {target}')
+
+
 def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
-                    arc_bucket_url, acls):
+                    arc_bucket_url, package_dir):
   """Copies from source Android bucket to ARC++ specific bucket.
 
   Copies each build to the ARC bucket eliminating the subpath.
@@ -168,7 +195,7 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
     build_id: A string. The Android build id number to check.
     subpaths: Subpath dictionary for each build to copy.
     arc_bucket_url: URL of the target ARC build gs bucket
-    acls: ACLs dictionary for each build to copy.
+    package_dir: Path to the Android portage package.
   """
   targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
@@ -177,13 +204,13 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
     build_dir = f'{build_branch}-linux-{target}'
     android_dir = os.path.join(android_bucket_url, build_dir, build_id, subpath)
     arc_dir = os.path.join(arc_bucket_url, build_dir, build_id)
+    acl = _GetAcl(target, package_dir)
 
     # Copy all target files from android_dir to arc_dir, setting ACLs.
     for targetfile in gs_context.List(android_dir):
       if re.search(pattern, targetfile.url):
         basename = os.path.basename(targetfile.url)
         arc_path = os.path.join(arc_dir, _GetArcBasename(build, basename))
-        acl = acls[build]
         needs_copy = True
         retry_count = 2
 
@@ -226,7 +253,7 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
 
 
 def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
-                    acls, version=None):
+                    package_dir, version=None):
   """Mirrors artifacts from Android bucket to ARC bucket.
 
   First, this function identifies which build version should be copied,
@@ -239,7 +266,7 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
     android_bucket_url: URL of Android build gs bucket
     android_build_branch: branch of Android builds
     arc_bucket_url: URL of the target ARC build gs bucket
-    acls: ACLs dictionary for each build to copy.
+    package_dir: Path to the Android portage package.
     version: (optional) A string. The Android build id number to check.
         If not passed, detect latest good build version.
 
@@ -254,21 +281,6 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
     version, subpaths = GetLatestBuild(android_bucket_url, android_build_branch)
 
   CopyToArcBucket(android_bucket_url, android_build_branch, version, subpaths,
-                  arc_bucket_url, acls)
+                  arc_bucket_url, package_dir)
 
   return version
-
-
-def MakeAclDict(package_dir):
-  """Creates a dictionary of acl files for each build type.
-
-  Args:
-    package_dir: The path to where the package acl files are stored.
-
-  Returns:
-    Returns acls dictionary.
-  """
-  return dict(
-      (k, os.path.join(package_dir, v))
-      for k, v in constants.ARC_BUCKET_ACLS.items()
-  )

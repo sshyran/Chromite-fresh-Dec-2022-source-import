@@ -50,24 +50,11 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.x86_acl_data = '-g google.com:WRITE'
     self.public_acl_data = '-u AllUsers:READ'
     self.arm_acl = os.path.join(self.mock_android_dir,
-                                'googlestorage_acl_arm.txt')
+                                android.ARC_BUCKET_ACL_ARM)
     self.x86_acl = os.path.join(self.mock_android_dir,
-                                'googlestorage_acl_x86.txt')
+                                android.ARC_BUCKET_ACL_X86)
     self.public_acl = os.path.join(self.mock_android_dir,
-                                   'googlestorage_acl_public.txt')
-    self.acls = {
-        'APPS': self.public_acl,
-        'ARM': self.arm_acl,
-        'ARM64': self.arm_acl,
-        'X86': self.x86_acl,
-        'X86_64': self.x86_acl,
-        'ARM_USERDEBUG': self.arm_acl,
-        'ARM64_USERDEBUG': self.arm_acl,
-        'X86_USERDEBUG': self.x86_acl,
-        'X86_64_USERDEBUG': self.x86_acl,
-        'SDK_GOOGLE_X86_USERDEBUG': self.x86_acl,
-        'SDK_GOOGLE_X86_64_USERDEBUG': self.x86_acl,
-    }
+                                   android.ARC_BUCKET_ACL_PUBLIC)
 
     osutils.WriteFile(self.arm_acl, self.arm_acl_data, makedirs=True)
     osutils.WriteFile(self.x86_acl, self.x86_acl_data, makedirs=True)
@@ -390,29 +377,4 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     """Test copying of images to ARC bucket."""
     android.CopyToArcBucket(self.bucket_url, self.build_branch,
                             self.new_version, self.new_subpaths,
-                            self.arc_bucket_url, self.acls)
-
-  def testMakeAclDict(self):
-    """Test generation of acls dictionary."""
-    acls = android.MakeAclDict(self.mock_android_dir)
-    self.assertEqual(acls['APPS'], self.public_acl)
-    self.assertEqual(acls['ARM'], self.arm_acl)
-    self.assertEqual(acls['ARM64'], self.arm_acl)
-    self.assertEqual(acls['ARM64_USERDEBUG'], self.arm_acl)
-    self.assertEqual(acls['X86'], self.x86_acl)
-    # Test that all PI targets have their ACLS set.
-    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
-        constants.ANDROID_PI_BUILD_BRANCH]:
-      self.assertIn(t, acls)
-    # Test that all VMRVC targets have their ACLS set.
-    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
-        constants.ANDROID_VMRVC_BUILD_BRANCH]:
-      self.assertIn(t, acls)
-    # Test that all VMSC targets have their ACLS set.
-    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
-        constants.ANDROID_VMSC_BUILD_BRANCH]:
-      self.assertIn(t, acls)
-    # Test that all VMMST targets have their ACLS set.
-    for t in constants.ANDROID_BRANCH_TO_BUILD_TARGETS[
-        constants.ANDROID_VMMST_BUILD_BRANCH]:
-      self.assertIn(t, acls)
+                            self.arc_bucket_url, self.mock_android_dir)

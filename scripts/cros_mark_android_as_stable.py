@@ -375,11 +375,11 @@ def main(argv):
       portage_util.GetFullAndroidPortagePackageName(options.android_package))
 
   (unstable_ebuild, stable_ebuilds) = FindAndroidCandidates(android_package_dir)
-  acls = android.MakeAclDict(android_package_dir)
   # Mirror artifacts, i.e., images and some sdk tools (e.g., adb, aapt).
   version_to_uprev = android.MirrorArtifacts(options.android_bucket_url,
                                              options.android_build_branch,
-                                             options.arc_bucket_url, acls,
+                                             options.arc_bucket_url,
+                                             android_package_dir,
                                              options.force_version)
 
   stable_candidate = portage_util.BestEBuild(stable_ebuilds)
