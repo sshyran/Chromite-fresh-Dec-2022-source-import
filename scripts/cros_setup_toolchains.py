@@ -73,7 +73,7 @@ HOST_PACKAGES = (
 # build), so we have to delay their installation.
 HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust',
-    'dev-lang/rust-bootstrap',
+    'dev-lang/rust-bootstrap:0',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
 )
