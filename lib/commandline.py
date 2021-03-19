@@ -958,7 +958,7 @@ def RunInsideChroot(command=None, chroot_args=None):
     return
 
   # Produce the command line to execute inside the chroot.
-  argv = sys.argv[:]
+  argv = command.TranslateToChrootArgv() if command else sys.argv[:]
   argv[0] = path_util.ToChrootPath(argv[0])
 
   # Set log-level of cros_sdk to be same as log-level of command entering the

@@ -8,15 +8,21 @@ import collections
 import glob
 import logging
 import os
+from pathlib import Path
 import re
+from typing import Iterable
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import dependency_graph
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 
+if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
 
 # A package is a canonical CP atom.
 # A package may have 0 or more repositories, given as strings.
@@ -211,6 +217,7 @@ class WorkonHelper(object):
     self._src_root = src_root
     self._cached_overlays = None
     self._cached_arch = None
+    self._depgraph = None
 
     profile = os.path.join(self._sysroot, 'etc', 'portage')
     self._unmasked_symlink = os.path.join(
@@ -361,8 +368,24 @@ class WorkonHelper(object):
             possible_ebuilds.add(ebuild)
 
       if not possible_ebuilds:
-        logging.warning('Could not find canonical package for "%s"', package)
-        return None
+        # Try finding the packages affected by a given path.
+        path_atoms = sorted(self._GetPathAtoms(package))
+        if not path_atoms:
+          logging.warning('Could not find canonical package for "%s"', package)
+          return None
+
+        if len(path_atoms) > 1:
+          logging.warning('Multiple affected packages found for %s:', package)
+          for p in path_atoms:
+            logging.warning('  %s', p)
+          logging.warning('Using %s', path_atoms[0])
+          logging.notice('start and stop commands for the rest of the '
+                          'packages are provided below:')
+          logging.notice(
+              f'cros workon -b {self._system} start {" ".join(path_atoms[1:])}')
+          logging.notice(
+              f'cros workon -b {self._system} stop {" ".join(path_atoms[1:])}')
+        return self._GetCanonicalAtom(path_atoms[0])
 
       # We want some consistent order for making our selection below.
       possible_ebuilds = sorted(possible_ebuilds)
@@ -407,9 +430,6 @@ class WorkonHelper(object):
     """
     if not packages:
       raise WorkonError('No packages specified')
-    if len(packages) == 1 and packages[0] == '.':
-      raise WorkonError('Working on the current package is no longer '
-                        'supported.')
 
     atoms = []
     for package_fragment in packages:
@@ -419,6 +439,55 @@ class WorkonHelper(object):
       atoms.append(atom)
 
     return atoms
+
+  def _GetDepGraph(self):
+    """Get the dependency graph."""
+    if self._depgraph:
+      return self._depgraph
+
+    try:
+      # Get the graph for our target.
+      if self._sysroot == build_target_lib.get_default_sysroot_path():
+        self._depgraph = depgraph.get_sdk_dependency_graph(with_src_paths=True)
+      else:
+        self._depgraph = depgraph.get_build_target_dependency_graph(
+            self._sysroot, with_src_paths=True)
+    except dependency_graph.Error as e:
+      logging.error(e)
+      raise WorkonError('Error generating dependency graph.')
+
+    return self._depgraph
+
+  def _GetPathAtoms(self, path) -> Iterable:
+    """Get workon atoms affected by the current path."""
+    # Make sure we're in a source path.
+    path = Path(path).resolve()
+    try:
+      path = path.relative_to(constants.SOURCE_ROOT)
+    except ValueError as e:
+      logging.error(e)
+      raise WorkonError(
+          f'Current path not in the source root: '
+          f'{path} not in {constants.SOURCE_ROOT}'
+      )
+
+    graph = self._GetDepGraph()
+    # Get the relevant packages from the dep graph.
+    logging.debug('Getting packages relevant to %s', path)
+    relevant_atoms = set(x.atom for x in graph.get_relevant_nodes([path]))
+
+    if not relevant_atoms:
+      return []
+
+    logging.debug('Found relevant packages: %s', relevant_atoms)
+
+    # Filter out any non-cros-workon packages.
+    canonical = [self._GetCanonicalAtom(x) for x in relevant_atoms]
+    workon_atoms = [x for x in canonical if x]
+
+    logging.debug('Found relevant workon packages: %s', workon_atoms)
+
+    return workon_atoms
 
   def _GetWorkedOnAtoms(self):
     """Returns a list of CP atoms that we're currently working on."""
@@ -543,8 +612,11 @@ class WorkonHelper(object):
 
     return sorted(packages)
 
-  def StartWorkingOnPackages(self, packages, use_all=False,
-                             use_workon_only=False):
+  def StartWorkingOnPackages(self,
+                             packages,
+                             use_all: bool = False,
+                             use_workon_only: bool = False,
+                             quiet: bool = False):
     """Mark a list of packages as being worked on locally.
 
     Args:
@@ -557,6 +629,8 @@ class WorkonHelper(object):
       use_workon_only: True iff we should ignore the package list, and instead
           consider all possible atoms for the system in question that define
           only the -9999 ebuild.
+      quiet: Does not log the started atoms when True. Used to avoid confusion
+          in cases where the list must be toggled to compute the new packages.
     """
     if not os.path.exists(self._sysroot):
       raise WorkonError('Sysroot %s is not setup.' % self._sysroot)
@@ -587,13 +661,17 @@ class WorkonHelper(object):
 
     self._AddProjectsToPartialManifests(new_atoms)
 
-    # Legacy scripts used single quotes in their output, and we carry on this
-    # honorable tradition.
-    logging.info("Started working on '%s' for '%s'",
-                 ' '.join(new_atoms), self._system)
+    if not quiet:
+      # Legacy scripts used single quotes in their output, and we carry on this
+      # honorable tradition.
+      logging.info("Started working on '%s' for '%s'",
+                   ' '.join(new_atoms), self._system)
 
-  def StopWorkingOnPackages(self, packages, use_all=False,
-                            use_workon_only=False):
+  def StopWorkingOnPackages(self,
+                            packages,
+                            use_all: bool = False,
+                            use_workon_only: bool = False,
+                            quiet: bool = False):
     """Stop working on a list of packages currently marked as locally worked on.
 
     Args:
@@ -606,6 +684,8 @@ class WorkonHelper(object):
       use_workon_only: True iff instead of the provided package list, we should
           stop working on all currently worked on atoms that define only a
           -9999 ebuild.
+      quiet: Does not log the started atoms when True. Used to avoid confusion
+          in cases where the list must be toggled to compute the new packages.
     """
     if use_all or use_workon_only:
       atoms = self._GetLiveAtoms(filter_workon=use_workon_only)
@@ -624,7 +704,7 @@ class WorkonHelper(object):
 
     self._SetWorkedOnAtoms(current_atoms)
 
-    if stopped_atoms:
+    if stopped_atoms and not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
       logging.info("Stopped working on '%s' for '%s'",

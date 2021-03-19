@@ -10,13 +10,16 @@ is intended to support development. The current source tip is fetched,
 source modified and built using the unstable 'live' (9999) ebuild.
 """
 
+from pathlib import Path
+
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
+from chromite.lib import path_util
 from chromite.lib import terminal
 from chromite.lib import workon_helper
-
 
 # These would preferably be class attributes, but it's difficult to make class
 # attributes refer to each other with nested generators in class declarations.
@@ -55,11 +58,19 @@ Examples:
   Stop working on a package (use last known good version):
     cros workon stop authpolicy -b eve
 
+  Start and stop also support resolving paths:
+    cd ~/chromiumos/src/platform2/authpolicy
+    cros workon start . -b eve
+    cros workon stop . -b eve
+
   Stop working on all packages for a build target:
     cros workon stop --all -b eve
 
   Due to argparse limitations, the positional arguments must be together.
-  Currently, the following will not parse correctly:
+  The following two commands are equivalent:
+    cros workon stop authpolicy -b eve
+    cros workon -b eve stop authpolicy
+  However, currently the following will not parse correctly:
     cros workon stop -b eve authpolicy
 """
 
@@ -131,8 +142,12 @@ Examples:
     if needs_target and not has_target:
       cros_build_lib.Die(f'{self.options.action} requires a build target or '
                          'specifying the host.')
-
-    commandline.RunInsideChroot(self)
+    chroot_args = []
+    try:
+      chroot_args += ['--working-dir', path_util.ToChrootPath(Path.cwd())]
+    except ValueError as e:
+      logging.warning('Unable to translate CWD to a chroot path.')
+    commandline.RunInsideChroot(self, chroot_args=chroot_args)
 
     if self.options.action == 'list-all':
       build_target_to_packages = workon_helper.ListAllWorkedOnAtoms()
@@ -186,3 +201,19 @@ Examples:
     except workon_helper.WorkonError as e:
       cros_build_lib.Die(e)
     return 0
+
+  def TranslateToChrootArgv(self):
+    """Get reexec args for cros workon."""
+    argv = super().TranslateToChrootArgv()
+    # Definitely don't need to translate paths for list and list-all.
+    if self.options.action in ('list', 'list-all'):
+      return argv
+
+    for pkg in self.options.packages:
+      if pkg.startswith('/'):
+        try:
+          argv[argv.index(pkg)] = path_util.ToChrootPath(pkg)
+        except ValueError as e:
+          logging.error('Unexpectedly unable to replace path (%s): %s', pkg, e)
+
+    return argv

@@ -660,6 +660,13 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
     self.cmd = command.CliCommand(argparse.Namespace())
     self.cmd.options.log_level = 'info'
 
+    def _inside_args_patch(*_args):
+      argv = sys.argv[:]
+      if argv[-1] == 'arg3':
+        argv[-1] = 'newarg3'
+      return argv
+    self.PatchObject(self.cmd, 'TranslateToChrootArgv', _inside_args_patch)
+
   def teardown(self):
     sys.argv = self.orig_argv
 
@@ -715,6 +722,12 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
 
     # Since we are in the chroot, it should return, doing nothing.
     commandline.RunInsideChroot(self.cmd)
+
+  def testTranslateToChrootArgv(self):
+    """Test we can restart inside the chroot."""
+    self.mock_inside_chroot.return_value = False
+    sys.argv.append('arg3')
+    self._VerifyRunInsideChroot(['/inside/cmd', 'arg1', 'arg2', 'newarg3'])
 
 
 class DeprecatedActionTest(cros_test_lib.MockTestCase):

@@ -8,7 +8,10 @@ import collections
 import os
 
 from chromite.lib import cros_test_lib
+from chromite.lib import depgraph
+from chromite.lib import dependency_graph
 from chromite.lib import git
+from chromite.lib.parser import package_info
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import osutils
@@ -123,6 +126,19 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
                                              project='workon-project'),
         )
     )
+    pkgs = [
+        package_info.parse(f'{WORKON_ONLY_ATOM}-9999'),
+        package_info.parse(f'{VERSIONED_WORKON_ATOM}-0.0.1-r1'),
+        package_info.parse(f'{NOT_WORKON_ATOM}-0.0.1-r1'),
+    ]
+    nodes = [
+        dependency_graph.PackageNode(
+            x, self._sysroot, src_paths=[self._valid_atoms[x.atom]])
+        for x in pkgs
+    ]
+    graph = dependency_graph.DependencyGraph(nodes, self._sysroot, pkgs)
+    self.PatchObject(depgraph, 'get_build_target_dependency_graph',
+                     return_value=graph)
     # We do a lot of work as root. Pretend to be root so that we never have to
     # call sudo.
     self.PatchObject(os, 'getuid', return_value=0)
