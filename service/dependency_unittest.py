@@ -145,6 +145,20 @@ class DependencyTests(cros_test_lib.MockTestCase):
     sysroot_path = '/build/target'
     src_paths = ['/cat/dep/one']
     actual_deps = dependency.GetDependencies(sysroot_path, src_paths)
-    dep1 = package_info.parse('cat/dep-1.0.0-r1')
-    expected_deps = [dep1]
-    self.assertCountEqual(expected_deps, actual_deps)
+    dep = package_info.parse('cat/dep-1.0.0-r1')
+    self.assertCountEqual([dep], actual_deps)
+
+  def testGetDependenciesWithSrcPathsAndReverseDeps(self):
+    """Test GetDependencies given a list of paths."""
+    self.PatchObject(
+        depgraph,
+        'get_sysroot_dependency_graph',
+        return_value=(self._build_sysroot_depgraph()))
+    sysroot_path = '/build/target'
+    src_paths = ['/cat/dep/one']
+    actual_deps = dependency.GetDependencies(
+        sysroot_path, src_paths, include_rev_dependencies=True)
+
+    revdep = package_info.parse('virtual/target-foo-1.2.3')
+    dep = package_info.parse('cat/dep-1.0.0-r1')
+    self.assertCountEqual([dep, revdep], actual_deps)

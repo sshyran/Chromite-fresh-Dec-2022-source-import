@@ -119,7 +119,8 @@ def List(input_proto: depgraph_pb2.ListRequest,
       packages=[
           controller_util.deserialize_package_info(package)
           for package in input_proto.packages
-      ])
+      ],
+      include_rev_dependencies=True)
   for package in package_deps:
     pkg_info_msg = output_proto.package_deps.add()
     controller_util.serialize_package_info(package, pkg_info_msg)

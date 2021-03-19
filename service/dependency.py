@@ -189,7 +189,8 @@ def determine_package_relevance(dep_src_paths: List[str],
 
 def GetDependencies(sysroot_path: str,
                     src_paths: Optional[List[str]] = None,
-                    packages: Optional[List[str]] = None) -> List[str]:
+                    packages: Optional[List[str]] = None,
+                    include_rev_dependencies: bool = False) -> List[str]:
   """Return the packages dependent on the given source paths for |board|.
 
   Args:
@@ -198,6 +199,8 @@ def GetDependencies(sysroot_path: str,
       empty / None returns all package dependencies.
     packages: The packages that need to be built, or empty / None to use the
       default list.
+    include_rev_dependencies: Whether to include the reverse dependencies of
+      relevant packages.
 
   Returns:
     The relevant package dependencies based on the given list of packages and
@@ -208,10 +211,15 @@ def GetDependencies(sysroot_path: str,
   dep_graph = depgraph.get_sysroot_dependency_graph(
       sysroot_path, pkgs, with_src_paths=True)
 
-  nodes = (
-      dep_graph.get_relevant_nodes(
-          src_paths=src_paths) if src_paths else dep_graph.get_nodes())
-  return [x.pkg_info for x in nodes]
+  if not src_paths:
+    return [x.pkg_info for x in dep_graph.get_nodes()]
+
+  dep_nodes = dep_graph.get_relevant_nodes(src_paths=src_paths)
+  rev_dep_nodes = []
+  if include_rev_dependencies:
+    for dep in dep_nodes:
+      rev_dep_nodes.extend(dep.reverse_dependencies)
+  return list({dep.pkg_info for dep in dep_nodes + rev_dep_nodes})
 
 
 def DetermineToolchainSourcePaths():

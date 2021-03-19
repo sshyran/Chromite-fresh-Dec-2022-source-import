@@ -210,6 +210,9 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         packages=[input_package_info_proto])
     dependency.List(input_proto, self.response, self.api_config)
     mock_get_deps.assert_called_once_with(
-        self.sysroot, src_paths=[path], packages=[input_package_info])
+        self.sysroot,
+        src_paths=[path],
+        packages=[input_package_info],
+        include_rev_dependencies=True)
     self.assertCountEqual([return_package_info_proto],
                           self.response.package_deps)
