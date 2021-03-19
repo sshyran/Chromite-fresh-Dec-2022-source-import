@@ -44,7 +44,6 @@ class Device(object):
     self.device = opts.device.hostname if opts.device else None
     self.ssh_port = opts.device.port if opts.device else None
     self.should_start_vm = not self.device
-    self.board = opts.board
 
     self.use_sudo = False
     self.cmd = opts.args[1:] if opts.cmd else None
@@ -53,6 +52,7 @@ class Device(object):
     # log_level is only set if --log-level or --debug is specified.
     self.log_level = getattr(opts, 'log_level', None)
     self.InitRemote()
+    self.board = opts.board or self.remote.board
 
   def InitRemote(self, connect_timeout=SSH_CONNECT_TIMEOUT):
     """Initialize remote access."""
