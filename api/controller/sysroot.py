@@ -186,7 +186,8 @@ def InstallPackages(input_proto, output_proto, _config):
       package_indexes=package_indexes,
       use_flags=use_flags,
       use_goma=use_goma,
-      incremental_build=False)
+      incremental_build=False,
+      setup_board=False)
 
   try:
     sysroot.BuildPackages(build_target, target_sysroot, build_packages_config)
