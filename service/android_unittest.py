@@ -12,7 +12,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
-from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.service import android
 
@@ -226,6 +225,24 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       # Allow copying of source to dest.
       for src_file, dst_file in zip(src_filelist, dst_filelist):
         self.gs_mock.AddCmdResult(['cp', '-v', '--', src_file, dst_file])
+
+      # Allow setting ACL on dest files.
+      acls = {
+          'APPS': self.public_acl_data,
+          'ARM': self.arm_acl_data,
+          'ARM64': self.arm_acl_data,
+          'X86': self.x86_acl_data,
+          'X86_64': self.x86_acl_data,
+          'ARM_USERDEBUG': self.arm_acl_data,
+          'ARM64_USERDEBUG': self.arm_acl_data,
+          'X86_USERDEBUG': self.x86_acl_data,
+          'X86_64_USERDEBUG': self.x86_acl_data,
+          'SDK_GOOGLE_X86_USERDEBUG': self.x86_acl_data,
+          'SDK_GOOGLE_X86_64_USERDEBUG': self.x86_acl_data,
+      }
+      for dst_file in dst_filelist:
+        self.gs_mock.AddCmdResult(
+            ['acl', 'ch'] + acls[key].split() + [dst_file])
     else:
       self.gs_mock.AddCmdResult(['ls', '--', src_url],
                                 side_effect=_RaiseGSNoSuchKey)
@@ -371,8 +388,6 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
   def testCopyToArcBucket(self):
     """Test copying of images to ARC bucket."""
-    # Allow setting of dest acls.
-    self.gs_mock.AddCmdResult(partial_mock.In('acl'))
     android.CopyToArcBucket(self.bucket_url, self.build_branch,
                             self.new_version, self.new_subpaths,
                             self.arc_bucket_url, self.acls)
