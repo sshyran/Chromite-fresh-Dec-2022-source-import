@@ -14381,7 +14381,6 @@
         "boards": [
             "fizz-cfm"
         ],
-        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"jax\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"kench\",\n    \"test_suites\": []\n}",
