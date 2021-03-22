@@ -265,89 +265,54 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = 'gs://chromeos-cts-results/'
 DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 
+# List of supported Android branches. When adding/removing branches make sure
+# the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
 
-ANDROID_PI_BUILD_TARGETS = {
-    # Roll XkbToKcmConverter with system image. It's a host executable and
-    # doesn't depend on the target as long as it's pi-arc branch. The converter
-    # is ARC specific and not a part of Android SDK. Having a custom target like
-    # SDK_TOOLS might be better in the long term, but let's use one from ARM or
-    # X86 target as there's no other similar executables right now.
-    # We put it in two buckets because we have separate ACLs for arm and x86.
-    # http://b/128405786
-    'APPS': ('apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM': ('cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64': ('cheets_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86': ('cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('cheets_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('cheets_arm-userdebug', r'\.zip$'),
-    'ARM64_USERDEBUG': ('cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('cheets_x86-userdebug', r'\.zip$'),
-    'X86_64_USERDEBUG': ('cheets_x86_64-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_USERDEBUG': ('sdk_cheets_x86-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_64_USERDEBUG': ('sdk_cheets_x86_64-userdebug', r'\.zip$'),
-}
-ANDROID_VMMST_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-    # installed on the board, but not into the VM.
-    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
-                         (r'(\.zip|/XkbToKcmConverter'
-                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-}
-ANDROID_VMRVC_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-    # installed on the board, but not into the VM.
-    'APPS': ('apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM64': ('bertha_arm64-user',
-              (r'(\.zip|/XkbToKcmConverter'
-               r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64': ('bertha_x86_64-user',
-               (r'(\.zip|/XkbToKcmConverter'
-                r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'ARM64_USERDEBUG': ('bertha_arm64-userdebug',
-                        (r'(\.zip|/XkbToKcmConverter'
-                         r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
-                         (r'(\.zip|/XkbToKcmConverter'
-                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-}
-ANDROID_VMSC_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-    # installed on the board, but not into the VM.
-    'ARM64_USERDEBUG': ('bertha_arm64-userdebug',
-                        (r'(\.zip|/XkbToKcmConverter'
-                         r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64_USERDEBUG': ('bertha_x86_64-userdebug',
-                         (r'(\.zip|/XkbToKcmConverter'
-                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-}
-
-# These refer to *_TARGET variables in Android ebuild files, used when
-# parsing ebuilds to determine the corresponding Android branch.
-# NOTE: We may use `|` operator to union dict keys after we completely go
-# Python 3.
-ANDROID_ALL_BUILD_TARGETS = frozenset(
-    x + '_TARGET' for x in itertools.chain(
-        ANDROID_PI_BUILD_TARGETS,
-        ANDROID_VMMST_BUILD_TARGETS,
-        ANDROID_VMRVC_BUILD_TARGETS,
-        ANDROID_VMSC_BUILD_TARGETS,
-    )
-)
-
-# Mapping from Android branch to build target dict.
+# Supported Android build targets for each branch. Maps from *_TARGET variables
+# in Android ebuilds to Android build targets. Used during Android uprev to fill
+# in corresponding variables.
+# TODO(crbug/1192431): Move this next to uprev code once
+# ANDROID_ALL_BUILD_TARGETS is removed.
 ANDROID_BRANCH_TO_BUILD_TARGETS = {
-    ANDROID_PI_BUILD_BRANCH: ANDROID_PI_BUILD_TARGETS,
-    ANDROID_VMMST_BUILD_BRANCH: ANDROID_VMMST_BUILD_TARGETS,
-    ANDROID_VMRVC_BUILD_BRANCH: ANDROID_VMRVC_BUILD_TARGETS,
-    ANDROID_VMSC_BUILD_BRANCH: ANDROID_VMSC_BUILD_TARGETS,
+    ANDROID_PI_BUILD_BRANCH: {
+        'APPS_TARGET': 'apps',
+        'ARM_TARGET': 'cheets_arm-user',
+        'ARM64_TARGET': 'cheets_arm64-user',
+        'X86_TARGET': 'cheets_x86-user',
+        'X86_64_TARGET': 'cheets_x86_64-user',
+        'ARM_USERDEBUG_TARGET': 'cheets_arm-userdebug',
+        'ARM64_USERDEBUG_TARGET': 'cheets_arm64-userdebug',
+        'X86_USERDEBUG_TARGET': 'cheets_x86-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'cheets_x86_64-userdebug',
+        'SDK_GOOGLE_X86_USERDEBUG_TARGET': 'sdk_cheets_x86-userdebug',
+        'SDK_GOOGLE_X86_64_USERDEBUG_TARGET': 'sdk_cheets_x86_64-userdebug',
+    },
+    ANDROID_VMMST_BUILD_BRANCH: {
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMRVC_BUILD_BRANCH: {
+        'APPS_TARGET': 'apps',
+        'ARM64_TARGET': 'bertha_arm64-user',
+        'X86_64_TARGET': 'bertha_x86_64-user',
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMSC_BUILD_BRANCH: {
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
 }
+
+# All possible *_TARGET variables in Android ebuild files, used when parsing
+# ebuilds to determine the corresponding Android branch.
+# TODO(crbug/1193413): Remove this.
+ANDROID_ALL_BUILD_TARGETS = frozenset(itertools.chain.from_iterable(
+    ANDROID_BRANCH_TO_BUILD_TARGETS.values()
+))
 
 # The bucket where we save Android artifacts indefinitely, to ensure any old
 # Android versions in the commit history can be built.

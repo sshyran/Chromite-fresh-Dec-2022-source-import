@@ -13,6 +13,60 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
+# Regex patterns of artifacts to copy for each branch and build target.
+ARTIFACTS_TO_COPY = {
+    constants.ANDROID_PI_BUILD_BRANCH: {
+        # Roll XkbToKcmConverter with system image. It's a host executable and
+        # doesn't depend on the target as long as it's pi-arc branch. The
+        # converter is ARC specific and not a part of Android SDK. Having a
+        # custom target like SDK_TOOLS might be better in the long term, but
+        # let's use one from ARM or X86 target as there's no other similar
+        # executables right now.  We put it in two buckets because we have
+        # separate ACLs for arm and x86.  http://b/128405786
+        'apps': 'org.chromium.arc.cachebuilder.jar',
+        'cheets_arm-user': r'(\.zip|/XkbToKcmConverter)$',
+        'cheets_arm64-user': r'(\.zip|/XkbToKcmConverter)$',
+        'cheets_x86-user': r'(\.zip|/XkbToKcmConverter)$',
+        'cheets_x86_64-user': r'\.zip$',
+        'cheets_arm-userdebug': r'\.zip$',
+        'cheets_arm64-userdebug': r'\.zip$',
+        'cheets_x86-userdebug': r'\.zip$',
+        'cheets_x86_64-userdebug': r'\.zip$',
+        'sdk_cheets_x86-userdebug': r'\.zip$',
+        'sdk_cheets_x86_64-userdebug': r'\.zip$',
+    },
+    constants.ANDROID_VMMST_BUILD_BRANCH: {
+        # For XkbToKcmConverter, see the comment in pi-arc targets.
+        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+        # installed on the board, but not into the VM.
+        'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
+    },
+    constants.ANDROID_VMRVC_BUILD_BRANCH: {
+        # For XkbToKcmConverter, see the comment in pi-arc targets.
+        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+        # installed on the board, but not into the VM.
+        'apps': 'org.chromium.arc.cachebuilder.jar',
+        'bertha_arm64-user': (r'(\.zip|/XkbToKcmConverter'
+                              r'|/org.chromium.arc.cts.helpers.apk)$'),
+        'bertha_x86_64-user': (r'(\.zip|/XkbToKcmConverter'
+                               r'|/org.chromium.arc.cts.helpers.apk)$'),
+        'bertha_arm64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                   r'|/org.chromium.arc.cts.helpers.apk)$'),
+        'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
+    },
+    constants.ANDROID_VMSC_BUILD_BRANCH: {
+        # For XkbToKcmConverter, see the comment in pi-arc targets.
+        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+        # installed on the board, but not into the VM.
+        'bertha_arm64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                   r'|/org.chromium.arc.cts.helpers.apk)$'),
+        'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
+    },
+}
+
 # The bucket where Android infra publishes build artifacts. Files are only kept
 # for 90 days.
 ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
@@ -40,10 +94,10 @@ def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
     Returns subpaths dictionary if build_id is valid.
     None if the build_id is not valid.
   """
-  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
+  targets = ARTIFACTS_TO_COPY[build_branch]
   gs_context = gs.GSContext()
   subpaths_dict = {}
-  for target, _ in targets.values():
+  for target in targets:
     build_dir = f'{build_branch}-linux-{target}'
     build_id_path = os.path.join(bucket_url, build_dir, build_id)
 
@@ -91,11 +145,11 @@ def GetLatestBuild(build_branch, bucket_url=ANDROID_BUCKET_URL):
     Tuple of (latest version string, subpaths dictionary)
     If no latest build can be found, returns None, None
   """
-  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
+  targets = ARTIFACTS_TO_COPY[build_branch]
   gs_context = gs.GSContext()
   common_build_ids = None
   # Find builds for each target.
-  for target, _ in targets.values():
+  for target in targets:
     build_dir = f'{build_branch}-linux-{target}'
     base_path = os.path.join(bucket_url, build_dir)
     build_ids = []
@@ -165,9 +219,9 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
     arc_bucket_url: URL of the target ARC build gs bucket
     package_dir: Path to the Android portage package.
   """
-  targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
+  targets = ARTIFACTS_TO_COPY[build_branch]
   gs_context = gs.GSContext()
-  for target, pattern in targets.values():
+  for target, pattern in targets.items():
     subpath = subpaths[target]
     build_dir = f'{build_branch}-linux-{target}'
     android_dir = os.path.join(android_bucket_url, build_dir, build_id, subpath)

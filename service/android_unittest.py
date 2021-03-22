@@ -16,6 +16,24 @@ from chromite.lib import portage_util
 from chromite.service import android
 
 
+class ArtifactsConfigTest(cros_test_lib.TestCase):
+  """Tests to ensure artifacts configs are properly written."""
+
+  def testAllTargetsAreConfigured(self):
+    """Ensure artifact patterns are configured for all branches and targets."""
+    self.assertSetEqual(set(android.ARTIFACTS_TO_COPY),
+                        set(constants.ANDROID_BRANCH_TO_BUILD_TARGETS),
+                        "Branches configured in ARTIFACTS_TO_COPY doesn't "
+                        'match list of all Android branches')
+    for branch, ebuild_target in (
+        constants.ANDROID_BRANCH_TO_BUILD_TARGETS.items()):
+      self.assertSetEqual(set(android.ARTIFACTS_TO_COPY[branch]),
+                          set(ebuild_target.values()),
+                          f'For branch {branch}, targets configured in '
+                          "ARTIFACTS_TO_COPY doesn't match list of all "
+                          'supported targets')
+
+
 class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   """Tests using a mocked GS bucket containing Android build artifacts."""
 
@@ -64,48 +82,52 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.build_branch = constants.ANDROID_PI_BUILD_BRANCH
     self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
     self.arc_bucket_url = 'gs://a'
-    self.targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[self.build_branch]
+    self.targets = android.ARTIFACTS_TO_COPY[self.build_branch]
 
-    builds = {
-        'APPS': [
+    targets = {
+        'apps': [
             self.old_version, self.old2_version, self.new_version,
         ],
-        'ARM': [
+        'cheets_arm-user': [
             self.old_version, self.old2_version, self.new_version,
             self.partial_new_version
         ],
-        'ARM64': [
+        'cheets_arm64-user': [
             self.old_version, self.old2_version, self.new_version,
         ],
-        'X86': [self.old_version, self.old2_version, self.new_version],
-        'X86_64': [self.old_version, self.old2_version, self.new_version],
-        'ARM_USERDEBUG': [
+        'cheets_x86-user': [
             self.old_version, self.old2_version, self.new_version,
         ],
-        'ARM64_USERDEBUG': [
+        'cheets_x86_64-user': [
             self.old_version, self.old2_version, self.new_version,
         ],
-        'X86_USERDEBUG': [
+        'cheets_arm-userdebug': [
+            self.old_version, self.old2_version, self.new_version,
+        ],
+        'cheets_arm64-userdebug': [
+            self.old_version, self.old2_version, self.new_version,
+        ],
+        'cheets_x86-userdebug': [
             self.old_version, self.old2_version, self.new_version
         ],
-        'X86_64_USERDEBUG': [
+        'cheets_x86_64-userdebug': [
             self.old_version, self.old2_version, self.new_version
         ],
-        'SDK_GOOGLE_X86_USERDEBUG': [
+        'sdk_cheets_x86-userdebug': [
             self.old_version, self.old2_version, self.new_version
         ],
-        'SDK_GOOGLE_X86_64_USERDEBUG': [
+        'sdk_cheets_x86_64-userdebug': [
             self.old_version, self.old2_version, self.new_version
         ],
     }
-    for build_type, builds in builds.items():
-      url = self.makeSrcTargetUrl(self.targets[build_type][0])
-      builds = '\n'.join(os.path.join(url, version) for version in builds)
-      self.gs_mock.AddCmdResult(['ls', '--', url], output=builds)
+    for target, versions in targets.items():
+      url = self.makeSrcTargetUrl(target)
+      versions = '\n'.join(os.path.join(url, version) for version in versions)
+      self.gs_mock.AddCmdResult(['ls', '--', url], output=versions)
 
     for version in [self.old_version, self.old2_version, self.new_version]:
-      for key in self.targets.keys():
-        self.setupMockBuild(key, version)
+      for target in self.targets:
+        self.setupMockBuild(target, version)
     self.new_subpaths = {
         'apps': 'apps100',
         'cheets_arm-user': 'cheets_arm-user100',
@@ -120,31 +142,35 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         'sdk_cheets_x86_64-userdebug': 'sdk_cheets_x86_64-userdebug100',
     }
 
-    self.setupMockBuild('APPS', self.partial_new_version, valid=False)
-    self.setupMockBuild('ARM', self.partial_new_version)
-    self.setupMockBuild('ARM64', self.partial_new_version, valid=False)
-    self.setupMockBuild('X86', self.partial_new_version, valid=False)
-    self.setupMockBuild('X86_64', self.partial_new_version, valid=False)
-    self.setupMockBuild('ARM_USERDEBUG', self.partial_new_version, valid=False)
-    self.setupMockBuild('ARM64_USERDEBUG', self.partial_new_version,
+    self.setupMockBuild('apps', self.partial_new_version, valid=False)
+    self.setupMockBuild('cheets_arm-user', self.partial_new_version)
+    self.setupMockBuild('cheets_arm64-user', self.partial_new_version,
                         valid=False)
-    self.setupMockBuild('X86_USERDEBUG', self.partial_new_version, valid=False)
-    self.setupMockBuild('X86_64_USERDEBUG', self.partial_new_version,
+    self.setupMockBuild('cheets_x86-user', self.partial_new_version,
                         valid=False)
-    self.setupMockBuild('SDK_GOOGLE_X86_USERDEBUG', self.partial_new_version,
+    self.setupMockBuild('cheets_x86_64-user', self.partial_new_version,
                         valid=False)
-    self.setupMockBuild('SDK_GOOGLE_X86_64_USERDEBUG', self.partial_new_version,
+    self.setupMockBuild('cheets_arm-userdebug', self.partial_new_version,
+                        valid=False)
+    self.setupMockBuild('cheets_arm64-userdebug', self.partial_new_version,
+                        valid=False)
+    self.setupMockBuild('cheets_x86-userdebug', self.partial_new_version,
+                        valid=False)
+    self.setupMockBuild('cheets_x86_64-userdebug', self.partial_new_version,
+                        valid=False)
+    self.setupMockBuild('sdk_cheets_x86-userdebug', self.partial_new_version,
+                        valid=False)
+    self.setupMockBuild('sdk_cheets_x86_64-userdebug', self.partial_new_version,
                         valid=False)
 
     for key in self.targets.keys():
       self.setupMockBuild(key, self.not_new_version, False)
 
-  def setupMockBuild(self, key, version, valid=True):
+  def setupMockBuild(self, target, version, valid=True):
     """Helper to mock a build."""
     def _RaiseGSNoSuchKey(*_args, **_kwargs):
       raise gs.GSNoSuchKey('file does not exist')
 
-    target = self.targets[key][0]
     src_url = self.makeSrcUrl(target, version)
     if valid:
       # Show source subpath directory.
@@ -153,24 +179,25 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
       # Show files.
       mock_file_template_list = {
-          'APPS': ['org.chromium.arc.cachebuilder.jar'],
-          'ARM': ['file-%(version)s.zip', 'adb', 'sepolicy.zip'],
-          'ARM64': ['cheets_arm64-file-%(version)s.zip', 'sepolicy.zip'],
-          'X86': ['file-%(version)s.zip'],
-          'X86_64': ['file-%(version)s.zip'],
-          'ARM_USERDEBUG': ['cheets_arm-file-%(version)s.zip', 'adb',
-                            'sepolicy.zip'],
-          'ARM64_USERDEBUG': ['cheets_arm64-file-%(version)s.zip', 'adb',
-                              'sepolicy.zip'],
-          'X86_USERDEBUG': ['cheets_x86-file-%(version)s.zip', 'sepolicy.zip'],
-          'X86_64_USERDEBUG': ['cheets_x86_64-file-%(version)s.zip'],
-          'SDK_GOOGLE_X86_USERDEBUG':
-              ['sdk_cheets_x86-file-%(version)s.zip'],
-          'SDK_GOOGLE_X86_64_USERDEBUG':
-              ['sdk_cheets_x86_64-file-%(version)s.zip'],
+          'apps': ['org.chromium.arc.cachebuilder.jar'],
+          'cheets_arm-user': ['file-%(version)s.zip', 'adb', 'sepolicy.zip'],
+          'cheets_arm64-user': ['cheets_arm64-file-%(version)s.zip',
+                                'sepolicy.zip'],
+          'cheets_x86-user': ['file-%(version)s.zip'],
+          'cheets_x86_64-user': ['file-%(version)s.zip'],
+          'cheets_arm-userdebug': ['cheets_arm-file-%(version)s.zip', 'adb',
+                                   'sepolicy.zip'],
+          'cheets_arm64-userdebug': ['cheets_arm64-file-%(version)s.zip', 'adb',
+                                     'sepolicy.zip'],
+          'cheets_x86-userdebug': ['cheets_x86-file-%(version)s.zip',
+                                   'sepolicy.zip'],
+          'cheets_x86_64-userdebug': ['cheets_x86_64-file-%(version)s.zip'],
+          'sdk_cheets_x86-userdebug': ['sdk_cheets_x86-file-%(version)s.zip'],
+          'sdk_cheets_x86_64-userdebug': [
+              'sdk_cheets_x86_64-file-%(version)s.zip'],
       }
       filelist = [template % {'version': version}
-                  for template in mock_file_template_list[key]]
+                  for template in mock_file_template_list[target]]
       src_filelist = [os.path.join(src_subdir, filename)
                       for filename in filelist]
       self.gs_mock.AddCmdResult(['ls', '--', src_subdir],
@@ -182,7 +209,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       # Show nothing in destination.
       dst_url = self.makeDstUrl(target, version)
       filelist = [template % {'version': version}
-                  for template in mock_file_template_list[key]]
+                  for template in mock_file_template_list[target]]
       dst_filelist = [os.path.join(dst_url, filename)
                       for filename in filelist]
       for dst_file in dst_filelist:
@@ -196,21 +223,21 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
       # Allow setting ACL on dest files.
       acls = {
-          'APPS': self.public_acl_data,
-          'ARM': self.arm_acl_data,
-          'ARM64': self.arm_acl_data,
-          'X86': self.x86_acl_data,
-          'X86_64': self.x86_acl_data,
-          'ARM_USERDEBUG': self.arm_acl_data,
-          'ARM64_USERDEBUG': self.arm_acl_data,
-          'X86_USERDEBUG': self.x86_acl_data,
-          'X86_64_USERDEBUG': self.x86_acl_data,
-          'SDK_GOOGLE_X86_USERDEBUG': self.x86_acl_data,
-          'SDK_GOOGLE_X86_64_USERDEBUG': self.x86_acl_data,
+          'apps': self.public_acl_data,
+          'cheets_arm-user': self.arm_acl_data,
+          'cheets_arm64-user': self.arm_acl_data,
+          'cheets_x86-user': self.x86_acl_data,
+          'cheets_x86_64-user': self.x86_acl_data,
+          'cheets_arm-userdebug': self.arm_acl_data,
+          'cheets_arm64-userdebug': self.arm_acl_data,
+          'cheets_x86-userdebug': self.x86_acl_data,
+          'cheets_x86_64-userdebug': self.x86_acl_data,
+          'sdk_cheets_x86-userdebug': self.x86_acl_data,
+          'sdk_cheets_x86_64-userdebug': self.x86_acl_data,
       }
       for dst_file in dst_filelist:
         self.gs_mock.AddCmdResult(
-            ['acl', 'ch'] + acls[key].split() + [dst_file])
+            ['acl', 'ch'] + acls[target].split() + [dst_file])
     else:
       self.gs_mock.AddCmdResult(['ls', '--', src_url],
                                 side_effect=_RaiseGSNoSuchKey)
