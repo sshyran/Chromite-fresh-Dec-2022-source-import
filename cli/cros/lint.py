@@ -21,6 +21,7 @@ as many/few checkers as we want in this one module.
 from __future__ import print_function
 
 import collections
+import itertools
 import tokenize
 import os
 import re
@@ -515,7 +516,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
 
   def _check_all_args_in_doc(self, node, _lines, sections):
     """All function arguments are mentioned in doc"""
-    if not hasattr(node, 'argnames'):
+    if not hasattr(node, 'args'):
       return
 
     # If they don't have an Args section, then give it a pass.
@@ -527,7 +528,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
     # TODO: Should we verify arg order matches doc order ?
     # TODO: Should we check indentation of wrapped docs ?
     missing_args = []
-    for arg in node.args.args:
+    for arg in itertools.chain(node.args.args, node.args.kwonlyargs):
       # Ignore class related args.
       if arg.name in ('cls', 'self'):
         continue

@@ -730,7 +730,7 @@ def uprev_workon_ebuild_to_version(
     target_version: The version to use for the stable ebuild to be generated.
       Should not contain a revision number.
     chroot: The path to the chroot to enter, if not the default.
-    srcroot: Path to the root of the source checkout. Only override for testing.
+    src_root: Path to the root of the source checkout. Only for testing.
     chroot_src_root: Path to the root of the source checkout when inside the
       chroot. Only override for testing.
   """
