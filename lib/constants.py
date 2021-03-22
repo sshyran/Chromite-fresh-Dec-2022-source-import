@@ -355,32 +355,18 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
 
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
 
+# URL template to Android symbols, used by release builders.
+# TODO(crbug/1074145): Remove the old template once all Android packages have
+# been uprevved.
 ANDROID_SYMBOLS_URL_TEMPLATE = (
+    ARC_BUCKET_URL +
+    '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'
+    '/%(target)s_%(arch)s-symbols-%(version)s.zip')
+ANDROID_SYMBOLS_URL_TEMPLATE_OLD = (
     ARC_BUCKET_URL +
     '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'
     '/%(target)s_%(arch)s%(suffix)s-symbols-%(version)s.zip')
 ANDROID_SYMBOLS_FILE = 'android-symbols.zip'
-# x86-user, x86-userdebug and x86-eng builders create build artifacts with the
-# same name, e.g. cheets_x86-target_files-${VERSION}.zip. Chrome OS builders
-# that need to select x86-user or x86-userdebug artifacts at emerge time need
-# the artifacts to have different filenames to avoid checksum failures. These
-# targets will have their artifacts renamed when the PFQ copies them from the
-# the Android bucket to the ARC++ bucket (b/33072485).
-ARC_BUILDS_NEED_ARTIFACTS_RENAMED = {
-    'ARM_USERDEBUG',
-    'ARM64_USERDEBUG',
-    'X86_USERDEBUG',
-    'X86_64_USERDEBUG',
-    'SDK_GOOGLE_X86_USERDEBUG',
-    'SDK_GOOGLE_X86_64_USERDEBUG',
-}
-# All builds will have the same name without target prefix.
-# Emerge checksum failures will be workarounded by ebuild rename symbol (->).
-ARC_ARTIFACTS_RENAME_NOT_NEEDED = [
-    'push_to_device.zip',
-    'sepolicy.zip',
-    'XkbToKcmConverter',
-]
 
 GOB_COOKIE_PATH = os.path.expanduser('~/.git-credential-cache/cookie')
 GITCOOKIES_PATH = os.path.expanduser('~/.gitcookies')

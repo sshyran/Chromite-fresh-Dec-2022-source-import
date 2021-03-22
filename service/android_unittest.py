@@ -181,25 +181,6 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
       # Show nothing in destination.
       dst_url = self.makeDstUrl(target, version)
-      # Show files.
-      mock_file_template_list = {
-          'APPS': ['org.chromium.arc.cachebuilder.jar'],
-          'ARM': ['file-%(version)s.zip', 'adb', 'sepolicy.zip'],
-          'ARM64': ['cheets_arm64-file-%(version)s.zip', 'sepolicy.zip'],
-          'X86': ['file-%(version)s.zip'],
-          'X86_64': ['file-%(version)s.zip'],
-          'ARM_USERDEBUG': ['cheets_arm_userdebug-file-%(version)s.zip',
-                            'adb', 'sepolicy.zip'],
-          'ARM64_USERDEBUG': ['cheets_arm64_userdebug-file-%(version)s.zip',
-                              'adb', 'sepolicy.zip'],
-          'X86_USERDEBUG':
-              ['cheets_x86_userdebug-file-%(version)s.zip', 'sepolicy.zip'],
-          'X86_64_USERDEBUG': ['cheets_x86_64_userdebug-file-%(version)s.zip'],
-          'SDK_GOOGLE_X86_USERDEBUG':
-              ['cheets_sdk_google_x86_userdebug-file-%(version)s.zip'],
-          'SDK_GOOGLE_X86_64_USERDEBUG':
-              ['cheets_sdk_google_x86_64_userdebug-file-%(version)s.zip'],
-      }
       filelist = [template % {'version': version}
                   for template in mock_file_template_list[key]]
       dst_filelist = [os.path.join(dst_url, filename)
@@ -308,70 +289,6 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
                      'sdk_cheets_x86-userdebug100')
     self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
                      'sdk_cheets_x86_64-userdebug100')
-
-  def _AuxGetArcBasename(self, build, basename):
-    """Helper function for readability."""
-    # pylint: disable=protected-access
-    return android._GetArcBasename(build, basename)
-
-  def testGetArcBasenameNoRename(self):
-    """Test build targets that don't require renaming."""
-    default_bn = 'do_not_rename_basename'
-    no_rename_build_targets = ['ARM', 'ARM64', 'X86']
-    for build in no_rename_build_targets:
-      self.assertEqual(self._AuxGetArcBasename(build, default_bn), default_bn)
-
-    self.assertEqual(self._AuxGetArcBasename('UNKNOWN', default_bn), default_bn)
-    self.assertEqual(self._AuxGetArcBasename('', default_bn), default_bn)
-    self.assertEqual(self._AuxGetArcBasename(None, default_bn), default_bn)
-
-  def testGetArcBasenameRenameValid(self):
-    """Test renaming when input basename is valid."""
-    # Actual name patterns.
-    build_targets = {
-        'X86_USERDEBUG':
-            ('cheets_x86-target_files-25.zip',
-             'cheets_x86_userdebug-target_files-25.zip'),
-        'SDK_GOOGLE_X86_USERDEBUG':
-            ('sdk_cheets_x86-target_files-25.zip',
-             'cheets_sdk_google_x86_userdebug-target_files-25.zip'),
-    }
-    for build, (src, dst) in build_targets.items():
-      self.assertEqual(self._AuxGetArcBasename(build, src), dst)
-
-    # More generic name patterns.
-    build_targets['X86_USERDEBUG'] = (
-        ('cheets_-XXX', 'cheets_x86_userdebug-XXX')
-    )
-    build_targets['SDK_GOOGLE_X86_USERDEBUG'] = (
-        ('cheets_-XXX', 'cheets_sdk_google_x86_userdebug-XXX')
-    )
-    for build, (src, dst) in build_targets.items():
-      self.assertEqual(self._AuxGetArcBasename(build, src), dst)
-
-    # Check bertha also.
-    build_targets['X86_USERDEBUG'] = (
-        ('bertha_-XXX', 'bertha_x86_userdebug-XXX')
-    )
-    build_targets['SDK_GOOGLE_X86_USERDEBUG'] = (
-        ('bertha_-XXX', 'bertha_sdk_google_x86_userdebug-XXX')
-    )
-    for build, (src, dst) in build_targets.items():
-      self.assertEqual(self._AuxGetArcBasename(build, src), dst)
-
-  def testGetArcBasenameRenameInvalid(self):
-    """Test that basename is unchanged if it's not as expected."""
-    # Missing hyphen.
-    self.assertEqual(self._AuxGetArcBasename('X86_USERDEBUG',
-                                             'cheets_x86.zip'),
-                     'cheets_x86.zip')
-    # Missing 'cheets_' before first hyphen.
-    self.assertEqual(self._AuxGetArcBasename('X86_USERDEBUG',
-                                             'marlin_x86-25.zip'),
-                     'marlin_x86-25.zip')
-    self.assertEqual(self._AuxGetArcBasename('X86_USERDEBUG',
-                                             'XX-cheets_x86-25.zip'),
-                     'XX-cheets_x86-25.zip')
 
   def testCopyToArcBucket(self):
     """Test copying of images to ARC bucket."""
