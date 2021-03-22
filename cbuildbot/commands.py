@@ -57,6 +57,9 @@ CHROME_UNMASK_FILE = ('%(buildroot)s/%(chroot)s'
                       '/build/%(board)s/etc/portage/package.unmask/chrome')
 _CROS_ARCHIVE_URL = 'CROS_ARCHIVE_URL'
 _FACTORY_SHIM = 'factory_shim'
+FACTORY_PACKAGE_PATH = '%(buildroot)s/chroot/build/%(board)s/usr/local/factory'
+# Filename for tarball containing factory project specific files.
+FACTORY_PROJECT_PACKAGE = 'factory_project_toolkits.tar.gz'
 _AUTOTEST_RPC_CLIENT = ('/b/build_internal/scripts/slave-internal/autotest_rpc/'
                         'autotest_rpc_client.py')
 _AUTOTEST_RPC_HOSTNAME = 'master2'
@@ -3404,8 +3407,8 @@ def BuildFactoryZip(buildroot,
 
   # Everything in /usr/local/factory/bundle gets overlaid into the
   # bundle.
-  bundle_src_dir = os.path.join(buildroot, 'chroot', 'build', board, 'usr',
-                                'local', 'factory', 'bundle')
+  bundle_src_dir = os.path.join(
+      FACTORY_PACKAGE_PATH % {'buildroot': buildroot, 'board': board}, 'bundle')
   if os.path.exists(bundle_src_dir):
     cros_build_lib.run(cmd + ['-y', '.'], cwd=bundle_src_dir,
                        capture_output=True)

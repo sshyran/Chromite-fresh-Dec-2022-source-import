@@ -284,6 +284,17 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
 
       self.UploadDummyArtifact(tarball_path)
 
+  def CreateFactoryProjectToolkitsZip(self):
+    """Create/publish the factory project toolkits for the current board."""
+    toolkits_src_path = os.path.join(
+        commands.FACTORY_PACKAGE_PATH % {
+            'buildroot': self._build_root,
+            'board': self._current_board},
+        'project_toolkits',
+        commands.FACTORY_PROJECT_PACKAGE)
+    if os.path.exists(toolkits_src_path):
+      self.UploadDummyArtifact(toolkits_src_path)
+
   def PerformStage(self):
     """Archive and publish the factory build artifacts."""
     logging.info('Factory version: %s', self.dummy_version)
@@ -298,6 +309,7 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
 
     # factory_image.zip
     self.CreateFactoryZip()
+    self.CreateFactoryProjectToolkitsZip()
     self.CreateTestImageTar()
     self.CreateDummyMetadataJson()
     self.PushBoardImage()

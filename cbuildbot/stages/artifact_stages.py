@@ -223,6 +223,17 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                                             self._run.attrs.release_tag)
         self._release_upload_queue.put([filename])
 
+      # Upload project toolkits tarball if needed.
+      toolkits_src_path = os.path.join(
+          commands.FACTORY_PACKAGE_PATH % {
+              'buildroot': buildroot,
+              'board': board},
+          'project_toolkits',
+          commands.FACTORY_PROJECT_PACKAGE)
+      if os.path.exists(toolkits_src_path):
+        shutil.copy(toolkits_src_path, archive_path)
+        self._release_upload_queue.put([commands.FACTORY_PROJECT_PACKAGE])
+
     def ArchiveStandaloneArtifact(artifact_info):
       """Build and upload a single archive."""
       if artifact_info['paths']:
