@@ -160,7 +160,8 @@ def IsCanaryMaster(builder_run):
   """Returns True if this build type is master-release"""
   return (builder_run.config.build_type == constants.CANARY_TYPE and
           builder_run.config.master and
-          builder_run.manifest_branch == 'master')
+          builder_run.manifest_branch in ('main', 'master'))
+
 
 def IsPFQType(b_type):
   """Returns True if this build type is a PFQ."""
