@@ -43,7 +43,7 @@ def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
   targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
   subpaths_dict = {}
-  for build, (target, _) in targets.items():
+  for target, _ in targets.values():
     build_dir = f'{build_branch}-linux-{target}'
     build_id_path = os.path.join(bucket_url, build_dir, build_id)
 
@@ -73,8 +73,8 @@ def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
           build_id, subpath_dir)
       return None
 
-    # Record subpath for the build.
-    subpaths_dict[build] = subpath_name
+    # Record subpath for the target.
+    subpaths_dict[target] = subpath_name
 
   # If we got here, it means we found an appropriate build for all platforms.
   return subpaths_dict
@@ -167,8 +167,8 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
   """
   targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   gs_context = gs.GSContext()
-  for build, subpath in subpaths.items():
-    target, pattern = targets[build]
+  for target, pattern in targets.values():
+    subpath = subpaths[target]
     build_dir = f'{build_branch}-linux-{target}'
     android_dir = os.path.join(android_bucket_url, build_dir, build_id, subpath)
     arc_dir = os.path.join(arc_bucket_url, build_dir, build_id)

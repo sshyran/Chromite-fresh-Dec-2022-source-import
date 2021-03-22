@@ -107,17 +107,17 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
       for key in self.targets.keys():
         self.setupMockBuild(key, version)
     self.new_subpaths = {
-        'APPS': 'apps100',
-        'ARM': 'cheets_arm-user100',
-        'ARM64': 'cheets_arm64-user100',
-        'X86': 'cheets_x86-user100',
-        'X86_64': 'cheets_x86_64-user100',
-        'ARM_USERDEBUG': 'cheets_arm-userdebug100',
-        'ARM64_USERDEBUG': 'cheets_arm64-userdebug100',
-        'X86_USERDEBUG': 'cheets_x86-userdebug100',
-        'X86_64_USERDEBUG': 'cheets_x86_64-userdebug100',
-        'SDK_GOOGLE_X86_USERDEBUG': 'sdk_cheets_x86-userdebug100',
-        'SDK_GOOGLE_X86_64_USERDEBUG': 'sdk_cheets_x86_64-userdebug100',
+        'apps': 'apps100',
+        'cheets_arm-user': 'cheets_arm-user100',
+        'cheets_arm64-user': 'cheets_arm64-user100',
+        'cheets_x86-user': 'cheets_x86-user100',
+        'cheets_x86_64-user': 'cheets_x86_64-user100',
+        'cheets_arm-userdebug': 'cheets_arm-userdebug100',
+        'cheets_arm64-userdebug': 'cheets_arm64-userdebug100',
+        'cheets_x86-userdebug': 'cheets_x86-userdebug100',
+        'cheets_x86_64-userdebug': 'cheets_x86_64-userdebug100',
+        'sdk_cheets_x86-userdebug': 'sdk_cheets_x86-userdebug100',
+        'sdk_cheets_x86_64-userdebug': 'sdk_cheets_x86_64-userdebug100',
     }
 
     self.setupMockBuild('APPS', self.partial_new_version, valid=False)
@@ -243,18 +243,20 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
                                       self.bucket_url)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
-    self.assertEqual(subpaths['APPS'], 'apps25')
-    self.assertEqual(subpaths['ARM'], 'cheets_arm-user25')
-    self.assertEqual(subpaths['ARM64'], 'cheets_arm64-user25')
-    self.assertEqual(subpaths['X86'], 'cheets_x86-user25')
-    self.assertEqual(subpaths['X86_64'], 'cheets_x86_64-user25')
-    self.assertEqual(subpaths['ARM_USERDEBUG'], 'cheets_arm-userdebug25')
-    self.assertEqual(subpaths['ARM64_USERDEBUG'], 'cheets_arm64-userdebug25')
-    self.assertEqual(subpaths['X86_USERDEBUG'], 'cheets_x86-userdebug25')
-    self.assertEqual(subpaths['X86_64_USERDEBUG'], 'cheets_x86_64-userdebug25')
-    self.assertEqual(subpaths['SDK_GOOGLE_X86_USERDEBUG'],
+    self.assertEqual(subpaths['apps'], 'apps25')
+    self.assertEqual(subpaths['cheets_arm-user'], 'cheets_arm-user25')
+    self.assertEqual(subpaths['cheets_arm64-user'], 'cheets_arm64-user25')
+    self.assertEqual(subpaths['cheets_x86-user'], 'cheets_x86-user25')
+    self.assertEqual(subpaths['cheets_x86_64-user'], 'cheets_x86_64-user25')
+    self.assertEqual(subpaths['cheets_arm-userdebug'], 'cheets_arm-userdebug25')
+    self.assertEqual(subpaths['cheets_arm64-userdebug'],
+                     'cheets_arm64-userdebug25')
+    self.assertEqual(subpaths['cheets_x86-userdebug'], 'cheets_x86-userdebug25')
+    self.assertEqual(subpaths['cheets_x86_64-userdebug'],
+                     'cheets_x86_64-userdebug25')
+    self.assertEqual(subpaths['sdk_cheets_x86-userdebug'],
                      'sdk_cheets_x86-userdebug25')
-    self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
+    self.assertEqual(subpaths['sdk_cheets_x86_64-userdebug'],
                      'sdk_cheets_x86_64-userdebug25')
 
     subpaths = android.IsBuildIdValid(self.build_branch, self.new_version,
@@ -276,18 +278,22 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(version, self.new_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
-    self.assertEqual(subpaths['APPS'], 'apps100')
-    self.assertEqual(subpaths['ARM'], 'cheets_arm-user100')
-    self.assertEqual(subpaths['ARM64'], 'cheets_arm64-user100')
-    self.assertEqual(subpaths['X86'], 'cheets_x86-user100')
-    self.assertEqual(subpaths['X86_64'], 'cheets_x86_64-user100')
-    self.assertEqual(subpaths['ARM_USERDEBUG'], 'cheets_arm-userdebug100')
-    self.assertEqual(subpaths['ARM64_USERDEBUG'], 'cheets_arm64-userdebug100')
-    self.assertEqual(subpaths['X86_USERDEBUG'], 'cheets_x86-userdebug100')
-    self.assertEqual(subpaths['X86_64_USERDEBUG'], 'cheets_x86_64-userdebug100')
-    self.assertEqual(subpaths['SDK_GOOGLE_X86_USERDEBUG'],
+    self.assertEqual(subpaths['apps'], 'apps100')
+    self.assertEqual(subpaths['cheets_arm-user'], 'cheets_arm-user100')
+    self.assertEqual(subpaths['cheets_arm64-user'], 'cheets_arm64-user100')
+    self.assertEqual(subpaths['cheets_x86-user'], 'cheets_x86-user100')
+    self.assertEqual(subpaths['cheets_x86_64-user'], 'cheets_x86_64-user100')
+    self.assertEqual(subpaths['cheets_arm-userdebug'],
+                    'cheets_arm-userdebug100')
+    self.assertEqual(subpaths['cheets_arm64-userdebug'],
+                     'cheets_arm64-userdebug100')
+    self.assertEqual(subpaths['cheets_x86-userdebug'],
+                     'cheets_x86-userdebug100')
+    self.assertEqual(subpaths['cheets_x86_64-userdebug'],
+                     'cheets_x86_64-userdebug100')
+    self.assertEqual(subpaths['sdk_cheets_x86-userdebug'],
                      'sdk_cheets_x86-userdebug100')
-    self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
+    self.assertEqual(subpaths['sdk_cheets_x86_64-userdebug'],
                      'sdk_cheets_x86_64-userdebug100')
 
   def testCopyToArcBucket(self):
