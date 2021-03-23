@@ -3,5 +3,3 @@
 # found in the LICENSE file.
 
 include /OWNERS.au
-
-# COMPONENT: Internals>Installer
