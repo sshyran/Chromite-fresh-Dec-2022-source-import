@@ -9,6 +9,7 @@ from __future__ import print_function
 
 from copy import deepcopy
 import os
+import re
 
 from chromite.lib import chroot_util
 from chromite.lib.paygen import gspaths
@@ -148,7 +149,8 @@ class GeneratePayloadResult(object):
 
 def _ImageTypeToStr(image_type_n):
   """The numeral image type enum in proto to lowercase string."""
-  return common_pb2.ImageType.Name(image_type_n).lower()
+  ret = common_pb2.ImageType.Name(image_type_n).lower()
+  return re.sub('^image_type_', '', ret)
 
 
 def _GenSignedGSPath(image, image_type):
