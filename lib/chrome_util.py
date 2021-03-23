@@ -201,6 +201,9 @@ class Copier(object):
                         src)
       else:
         msg = ('%s does not exist and is required.\n'
+               'You might build Chrome with the wrong configuration. Have you '
+               'configured your args.gn correctly? You may need to edit '
+               'your .gclient file and run `$ gclient runhooks`.\n'
                'You can bypass this error with --sloppy.\n'
                'Aborting copy...' % src)
         raise MissingPathError(msg)
