@@ -334,6 +334,7 @@
     kip-release
     kukui-arc-r-release
     kukui-arc64-release
+    kukui-kernelnext-release
     kukui-release
     lars-release
     lulu-release
@@ -1383,6 +1384,12 @@
   kukui-arc64-unittest-stress
   kukui-factory-kukui-12587.B-factorybranch-tryjob
   kukui-full-tryjob
+  kukui-kernelnext-full-tryjob
+  kukui-kernelnext-llvm-next-toolchain-tryjob
+  kukui-kernelnext-llvm-toolchain-tryjob
+  kukui-kernelnext-payloads-tryjob
+  kukui-kernelnext-release-tryjob
+  kukui-kernelnext-unittest-stress
   kukui-llvm-next-toolchain-tryjob
   kukui-llvm-toolchain-tryjob
   kukui-payloads-tryjob
@@ -1571,6 +1578,7 @@
     kip-release-tryjob
     kukui-arc-r-release-tryjob
     kukui-arc64-release-tryjob
+    kukui-kernelnext-release-tryjob
     kukui-release-tryjob
     lars-release-tryjob
     lulu-release-tryjob
