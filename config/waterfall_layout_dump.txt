@@ -424,6 +424,7 @@
     hatch-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
     rammus-arc-r-vmrvc-android-pfq
+    zork-arc-r-vmrvc-android-pfq
 
 == vmsc_android_pfq ==
   master-vmsc-android-pfq
@@ -1653,6 +1654,7 @@
     hatch-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
     rammus-arc-r-vmrvc-android-pfq-tryjob
+    zork-arc-r-vmrvc-android-pfq-tryjob
   master-vmsc-android-pfq-tryjob
     betty-arc-s-vmsc-android-pfq-tryjob
     hatch-arc-s-vmsc-android-pfq-tryjob
@@ -2154,6 +2156,7 @@
   zork-arc-r-payloads-tryjob
   zork-arc-r-release-tryjob
   zork-arc-r-unittest-stress
+  zork-arc-r-vmrvc-android-pfq-tryjob
   zork-borealis-full-tryjob
   zork-borealis-llvm-next-toolchain-tryjob
   zork-borealis-llvm-toolchain-tryjob

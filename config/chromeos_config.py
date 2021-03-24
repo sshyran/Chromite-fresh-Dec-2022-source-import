@@ -1267,6 +1267,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'hatch',
       'kukui-arc-r',
       'rammus-arc-r',
+      'zork-arc-r',
   ])
   _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
