@@ -686,18 +686,6 @@
       ]
     },
     {
-      "name": "kukui-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "lakitu",
       "configs": [
         {
@@ -4833,6 +4821,55 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 450,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "kukui-kernelnext",
+      "reference_board_name": "kukui-kernelnext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "kukui-kernelnext",
+          "name": "kakadu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7169,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-kernelnext",
+          "name": "katsu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7169,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-kernelnext",
+          "name": "kodama",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7169,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-kernelnext",
+          "name": "krane",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7169,
+          "is_active": true
+        },
+        {
+          "board_name": "kukui-kernelnext",
+          "name": "kukui",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7169,
           "is_active": true
         }
       ]
