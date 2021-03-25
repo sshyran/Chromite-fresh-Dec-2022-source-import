@@ -27563,7 +27563,6 @@
             "recovery",
             "test"
         ],
-        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"

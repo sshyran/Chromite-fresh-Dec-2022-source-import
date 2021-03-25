@@ -6329,7 +6329,7 @@
       "reference_board_name": "puff-moblab",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "puff-moblab",
