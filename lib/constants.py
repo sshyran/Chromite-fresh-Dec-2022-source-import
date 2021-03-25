@@ -265,10 +265,6 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = 'gs://chromeos-cts-results/'
 DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 
-ANDROID_CONTAINER_PACKAGE_KEYWORD = 'android-container'
-ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
-
-ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
@@ -353,6 +349,9 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
     ANDROID_VMSC_BUILD_BRANCH: ANDROID_VMSC_BUILD_TARGETS,
 }
 
+# The bucket where we save Android artifacts indefinitely, to ensure any old
+# Android versions in the commit history can be built.
+# TODO(crbug/1192431): Move to service.android.
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
 
 # URL template to Android symbols, used by release builders.

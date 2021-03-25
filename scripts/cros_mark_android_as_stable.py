@@ -338,7 +338,7 @@ def GetParser():
   parser = commandline.ArgumentParser()
   parser.add_argument('-b', '--boards')
   parser.add_argument('--android_bucket_url',
-                      default=constants.ANDROID_BUCKET_URL,
+                      default=android.ANDROID_BUCKET_URL,
                       type='gs_path')
   parser.add_argument('--android_build_branch',
                       required=True,

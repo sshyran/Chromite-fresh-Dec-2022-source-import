@@ -33,7 +33,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     """Setup vars and create mock dir."""
-    self.android_package = constants.ANDROID_CONTAINER_PACKAGE_KEYWORD
+    self.android_package = 'android-container-pi'
 
     self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
     self.mock_android_dir = os.path.join(
@@ -239,8 +239,8 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
   def testIsBuildIdValid(self):
     """Test if checking if build valid."""
-    subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.old_version)
+    subpaths = android.IsBuildIdValid(self.build_branch, self.old_version,
+                                      self.bucket_url)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)
     self.assertEqual(subpaths['APPS'], 'apps25')
@@ -257,22 +257,22 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(subpaths['SDK_GOOGLE_X86_64_USERDEBUG'],
                      'sdk_cheets_x86_64-userdebug25')
 
-    subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.new_version)
+    subpaths = android.IsBuildIdValid(self.build_branch, self.new_version,
+                                      self.bucket_url)
     self.assertEqual(subpaths, self.new_subpaths)
 
-    subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.partial_new_version)
+    subpaths = android.IsBuildIdValid(self.build_branch,
+                                      self.partial_new_version, self.bucket_url)
     self.assertEqual(subpaths, None)
 
-    subpaths = android.IsBuildIdValid(self.bucket_url, self.build_branch,
-                                      self.not_new_version)
+    subpaths = android.IsBuildIdValid(self.build_branch, self.not_new_version,
+                                      self.bucket_url)
     self.assertEqual(subpaths, None)
 
   def testGetLatestBuild(self):
     """Test determination of latest build from gs bucket."""
-    version, subpaths = android.GetLatestBuild(self.bucket_url,
-                                               self.build_branch)
+    version, subpaths = android.GetLatestBuild(self.build_branch,
+                                               self.bucket_url)
     self.assertEqual(version, self.new_version)
     self.assertTrue(subpaths)
     self.assertEqual(len(subpaths), 11)

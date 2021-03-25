@@ -13,6 +13,10 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
+# The bucket where Android infra publishes build artifacts. Files are only kept
+# for 90 days.
+ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
+
 # ACL definition files that live under the Portage package directory.
 # We set ACLs when copying Android artifacts to the ARC bucket, using
 # definitions for corresponding architecture (and public for the `apps` target).
@@ -21,16 +25,16 @@ ARC_BUCKET_ACL_X86 = 'googlestorage_acl_x86.txt'
 ARC_BUCKET_ACL_PUBLIC = 'googlestorage_acl_public.txt'
 
 
-def IsBuildIdValid(bucket_url, build_branch, build_id):
+def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
   """Checks that a specific build_id is valid.
 
   Looks for that build_id for all builds. Confirms that the subpath can
   be found and that the zip file is present in that subdirectory.
 
   Args:
-    bucket_url: URL of Android build gs bucket
     build_branch: branch of Android builds
     build_id: A string. The Android build id number to check.
+    bucket_url: URL of Android build gs bucket
 
   Returns:
     Returns subpaths dictionary if build_id is valid.
@@ -76,12 +80,12 @@ def IsBuildIdValid(bucket_url, build_branch, build_id):
   return subpaths_dict
 
 
-def GetLatestBuild(bucket_url, build_branch):
+def GetLatestBuild(build_branch, bucket_url=ANDROID_BUCKET_URL):
   """Searches the gs bucket for the latest green build.
 
   Args:
-    bucket_url: URL of Android build gs bucket
     build_branch: branch of Android builds
+    bucket_url: URL of Android build gs bucket
 
   Returns:
     Tuple of (latest version string, subpaths dictionary)
@@ -118,7 +122,7 @@ def GetLatestBuild(bucket_url, build_branch):
 
   # Otherwise, find the most recent one that is valid.
   for build_id in sorted(common_build_ids, key=int, reverse=True):
-    subpaths = IsBuildIdValid(bucket_url, build_branch, build_id)
+    subpaths = IsBuildIdValid(build_branch, build_id, bucket_url)
     if subpaths:
       return build_id, subpaths
 
@@ -230,18 +234,18 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
     android_build_branch: branch of Android builds
     arc_bucket_url: URL of the target ARC build gs bucket
     package_dir: Path to the Android portage package.
-    version: (optional) A string. The Android build id number to check.
+    version: A string. The Android build id number to check.
         If not passed, detect latest good build version.
 
   Returns:
     Mirrored version.
   """
   if version:
-    subpaths = IsBuildIdValid(android_bucket_url, android_build_branch, version)
+    subpaths = IsBuildIdValid(android_build_branch, version, android_bucket_url)
     if not subpaths:
       logging.error('Requested build %s is not valid', version)
   else:
-    version, subpaths = GetLatestBuild(android_bucket_url, android_build_branch)
+    version, subpaths = GetLatestBuild(android_build_branch, android_bucket_url)
 
   CopyToArcBucket(android_bucket_url, android_build_branch, version, subpaths,
                   arc_bucket_url, package_dir)
