@@ -23,6 +23,7 @@ vmtest_boards = frozenset([
     'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
+    'reven',         # CloudReady VM board.
 ])
 
 
