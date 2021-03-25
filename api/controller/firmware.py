@@ -30,7 +30,7 @@ def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
   if fw_loc == common_pb2.PLATFORM_EC:
     fw_path = 'src/platform/ec/'
   elif fw_loc == common_pb2.PLATFORM_ZEPHYR:
-    fw_path = 'src/platform/zephyr-chrome/'
+    fw_path = 'src/platform/ec/zephyr/'
   elif fw_loc == common_pb2.PLATFORM_TI50:
     fw_path = 'src/platform/ti50/common/'
   else:
