@@ -569,7 +569,7 @@ class ChromeosReleases(object):
     if random_str is None:
       random_str = cros_build_lib.GetRandomString()
 
-    if key is None:
+    if not key:
       signed_ext = ''
       key = unsigned_image_type
     else:
