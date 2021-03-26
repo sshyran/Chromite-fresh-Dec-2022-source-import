@@ -4457,6 +4457,14 @@
         },
         {
           "board_name": "jacuzzi",
+          "name": "makomo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 401,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi",
           "name": "stern",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -4566,6 +4574,14 @@
         {
           "board_name": "jacuzzi-arc64",
           "name": "kenzo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7154,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-arc64",
+          "name": "makomo",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7154,
