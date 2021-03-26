@@ -47,6 +47,7 @@ class CrOSTest(object):
     self.xbuddy = opts.xbuddy
     self.deploy = opts.deploy
     self.deploy_lacros = opts.deploy_lacros
+    self.lacros_launcher_script = opts.lacros_launcher_script
     self.nostrip = opts.nostrip
     self.build_dir = opts.build_dir
     self.mount = opts.mount
@@ -206,6 +207,9 @@ class CrOSTest(object):
     else:
       self._DeployChrome()
 
+    if self.deploy_lacros:
+      self._DeployLacrosLauncherScript()
+
   def _DeployChrome(self):
     """Deploy lacros-chrome or ash-chrome."""
     deploy_cmd = [
@@ -250,6 +254,12 @@ class CrOSTest(object):
     self._DeployCopyPaths(src_dir, self.chrome_test_deploy_target_dir,
                           chrome_util.GetChromeTestCopyPaths(
                               self.build_dir, self.chrome_test_target))
+
+  def _DeployLacrosLauncherScript(self):
+    """Deploy a script that is needed to launch Lacros in Tast tests."""
+    self._DeployCopyPaths(
+        os.path.dirname(self.lacros_launcher_script), '/usr/local/bin',
+        [chrome_util.Path(os.path.basename(self.lacros_launcher_script))])
 
   def _DeployCopyPaths(self, host_src_dir, remote_target_dir, copy_paths):
     """Deploy files in copy_paths to device.
@@ -603,6 +613,9 @@ def ParseCommandLine(argv):
   parser.add_argument('--deploy-lacros', action='store_true', default=False,
                       help='Before running tests, deploy lacros-chrome, '
                       '--build-dir must be specified.')
+  parser.add_argument('--lacros-launcher-script', type=str,
+                      help='Absolute path to a python script needed to launch '
+                           'Lacros in tast tests.')
   parser.add_argument('--deploy', action='store_true', default=False,
                       help='Before running tests, deploy ash-chrome, '
                       '--build-dir must be specified.')
@@ -667,6 +680,10 @@ def ParseCommandLine(argv):
 
   if opts.deploy and opts.deploy_lacros:
     parser.error('Cannot deploy lacros-chrome and ash-chrome at the same time.')
+
+  if bool(opts.deploy_lacros) != bool(opts.lacros_launcher_script):
+    parser.error(
+        '--lacros-launcher-script is required when running Lacros tests.')
 
   if opts.results_src:
     for src in opts.results_src:
