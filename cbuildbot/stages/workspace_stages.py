@@ -322,27 +322,34 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
             constants.SYNC_RETRIES, cmd, cwd=self._build_root)
 
 
-class WorkspaceUprevAndPublishStage(WorkspaceStageBase):
-  """Uprev ebuilds, and immediately publish them.
+class WorkspaceUprevStage(WorkspaceStageBase):
+  """Uprev ebuilds.
 
   This stage updates ebuilds to top of branch with no verification, or prebuilt
   generation. This is generally intended only for branch builds.
   """
-  config = 'push_overlays'
+  config_name = 'uprev'
 
   def __init__(self, builder_run, buildstore, boards=None, **kwargs):
-    super(WorkspaceUprevAndPublishStage, self).__init__(builder_run,
-                                                        buildstore,
-                                                        **kwargs)
+    super(WorkspaceUprevStage, self).__init__(builder_run,
+                                              buildstore,
+                                              **kwargs)
     if boards is not None:
       self._boards = boards
 
   def PerformStage(self):
-    """Perform the uprev and push."""
+    """Perform the uprev."""
     commands.UprevPackages(self._orig_root, self._boards,
                            overlay_type=self._run.config.overlays,
                            workspace=self._build_root)
 
+
+class WorkspacePublishStage(WorkspaceStageBase):
+  """Publish ebuilds."""
+  config_name = 'push_overlays'
+
+  def PerformStage(self):
+    """Perform the push."""
     logging.info('Pushing.')
     commands.UprevPush(self._orig_root,
                        overlay_type=self._run.config.push_overlays,

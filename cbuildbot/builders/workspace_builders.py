@@ -32,7 +32,10 @@ class BuildSpecBuilder(generic_builders.Builder):
 
     if not self._run.options.force_version:
       # If we were not given a specific buildspec to build, create one.
-      self._RunStage(workspace_stages.WorkspaceUprevAndPublishStage,
+      self._RunStage(workspace_stages.WorkspaceUprevStage,
+                     build_root=self._run.options.workspace)
+
+      self._RunStage(workspace_stages.WorkspacePublishStage,
                      build_root=self._run.options.workspace)
 
       self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
@@ -79,7 +82,7 @@ class FirmwareBranchBuilder(BuildSpecBuilder):
                      board=board)
 
 
-class FactoryBranchBuilder(BuildSpecBuilder):
+class FactoryBranchBuilder(generic_builders.Builder):
   """Builder that builds factory branches.
 
   This builder checks out a second copy of ChromeOS into the workspace
@@ -87,12 +90,27 @@ class FactoryBranchBuilder(BuildSpecBuilder):
   board.
   """
 
+  def GetSyncInstance(self):
+    """Returns an instance of a SyncStage that should be run."""
+    return self._GetStageInstance(workspace_stages.WorkspaceSyncStage,
+                                  build_root=self._run.options.workspace)
+
   def RunStages(self):
     """Run the stages."""
-    super(FactoryBranchBuilder, self).RunStages()
-
     assert len(self._run.config.boards) == 1
     board = self._run.config.boards[0]
+
+    if not self._run.options.force_version:
+      self._RunStage(workspace_stages.WorkspaceUprevStage,
+                     build_root=self._run.options.workspace)
+      # If we were not given a specific buildspec to build and this is not a
+      # tryjob, create one.
+      if not self._run.options.debug:
+        self._RunStage(workspace_stages.WorkspacePublishStage,
+                       build_root=self._run.options.workspace)
+
+        self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
+                       build_root=self._run.options.workspace)
 
     self._RunStage(workspace_stages.WorkspaceInitSDKStage,
                    build_root=self._run.options.workspace)

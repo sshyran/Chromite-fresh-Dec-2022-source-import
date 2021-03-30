@@ -16,6 +16,7 @@ from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.builders import workspace_builders
 from chromite.cbuildbot.stages import branch_archive_stages
 from chromite.cbuildbot.stages import workspace_stages
+from chromite.config import chromeos_config
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_test_lib
@@ -85,6 +86,8 @@ def CreateMockSiteConfig():
       ),
   ])
 
+  chromeos_config.TryjobMirrors(site_config)
+
   return site_config
 
 
@@ -123,6 +126,7 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
              '--workspace', self.workspace] +
             (extra_argv if extra_argv else []) + [bot_id])
     options = cbuildbot.ParseCommandLine(parser, argv)
+    cbuildbot._PostParseCheck(parser, options, self.site_config)
 
     return cbuildbot_run.BuilderRun(
         options, self.site_config, build_config, self._manager)
@@ -134,7 +138,9 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevAndPublishStage,
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspacePublishStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
@@ -156,7 +162,9 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevAndPublishStage,
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspacePublishStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
@@ -184,7 +192,9 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevAndPublishStage,
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspacePublishStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
@@ -234,7 +244,9 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevAndPublishStage,
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspacePublishStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
@@ -271,9 +283,46 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevAndPublishStage,
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspacePublishStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceInitSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceSyncChromeStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceSetupBoardStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceUnitTestStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceBuildImageStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceDebugSymbolsStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(branch_archive_stages.FactoryArchiveStage,
+                  build_root=self.workspace,
+                  board='board'),
+    ])
+
+  def testFactoryBranchTryjob(self):
+    """Verify RunStages for FactoryBranchBuilder Tryjob."""
+    builder_run = self._InitConfig('test-factorybranch-tryjob')
+    workspace_builders.FactoryBranchBuilder(
+        builder_run, self.buildstore).RunStages()
+
+    self.assertEqual(self.mock_run_stage.call_args_list, [
+        mock.call(workspace_stages.WorkspaceUprevStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspaceInitSDKStage,
                   build_root=self.workspace),
