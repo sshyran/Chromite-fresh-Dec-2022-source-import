@@ -1790,6 +1790,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-nocturne-10984.B', ['nocturne'], {}),
       (MONTHLY, 'firmware-grunt-11031.B', ['grunt'], {}),
       (MONTHLY, 'firmware-nami-10775.108.B', ['nami'], {}),
+      (WEEKLY, 'firmware-asurada-13885.B', ['asurada'], {}),
       (WEEKLY, 'firmware-rammus-11275.B', ['rammus'], {}),
       (WEEKLY, 'firmware-octopus-11297.B', ['octopus'], {}),
       (WEEKLY, 'firmware-kalista-11343.B', ['kalista'], {}),

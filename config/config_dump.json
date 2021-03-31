@@ -12797,6 +12797,26 @@
             "chrome_internal"
         ]
     },
+    "firmware-asurada-13885.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "asurada"
+        ],
+        "schedule": "with 168h interval",
+        "workspace_branch": "firmware-asurada-13885.B"
+    },
+    "firmware-asurada-13885.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "asurada"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-asurada-13885.B"
+    },
     "firmware-atlas-11827.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [

@@ -124,6 +124,7 @@
     zork-factory-zork-13700.B-factorybranch
 
 == firmware ==
+  firmware-asurada-13885.B-firmwarebranch
   firmware-atlas-11827.B-firmwarebranch
   firmware-banjo-5216.334.B-firmwarebranch
   firmware-buddy-6301.202.B-firmwarebranch
@@ -1003,6 +1004,7 @@
   falco_li-payloads-tryjob
   falco_li-release-tryjob
   falco_li-unittest-stress
+  firmware-asurada-13885.B-firmwarebranch-tryjob
   firmware-atlas-11827.B-firmwarebranch-tryjob
   firmware-banjo-5216.334.B-firmwarebranch-tryjob
   firmware-buddy-6301.202.B-firmwarebranch-tryjob
