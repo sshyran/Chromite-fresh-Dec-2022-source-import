@@ -19,11 +19,9 @@ from __future__ import print_function
 import importlib
 import os
 import shutil
-import sys
 import tempfile
 import time
 
-from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -300,87 +298,3 @@ def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun):
     logging.notice('ssh flash successful. Exiting flash_ap')
   else:
     raise DeployFailed('ssh failed, try using a servo connection instead.')
-
-
-def get_parser():
-  """Helper function to get parser with all arguments added
-
-  Returns:
-    commandline.ArgumentParser: object used to check command line arguments
-  """
-  parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('image', type='path', help='/path/to/BIOS_image.bin')
-  parser.add_argument(
-      '-b',
-      '--board',
-      '--build-target',
-      dest='board',
-      type=str,
-      help='The build target (board) name.')
-  parser.add_argument(
-      '-v',
-      '--verbose',
-      action='store_true',
-      help='Increase output verbosity for .')
-  parser.add_argument(
-      '--port',
-      type=int,
-      default=os.getenv('SERVO_PORT'),
-      help='Port number being listened to by servo device. '
-           'Defaults to $SERVO_PORT if set when not provided, otherwise allows '
-           'dut_control to use its default (9999).')
-  parser.add_argument(
-      '--flashrom',
-      action='store_true',
-      help='Use flashrom to flash instead of futility.')
-  parser.add_argument(
-      '--fast',
-      action='store_true',
-      help='Speed up flashing by not validating flash.')
-  parser.add_argument(
-      '-n',
-      '--dry-run',
-      action='store_true',
-      help='Perform a dry run, printing the relevant commands rather than '
-           'executing them.')
-  return parser
-
-
-def parse_args(argv):
-  """Parse the arguments."""
-  parser = get_parser()
-  opts = parser.parse_args(argv)
-  if not os.path.exists(opts.image):
-    parser.error('%s does not exist, verify the path of your build and try '
-                 'again.' % opts.image)
-
-  opts.Freeze()
-  return opts
-
-
-def main(argv):
-  """Main function for flashing ap firmware.
-
-  Detects flashing infrastructure then fetches commands from get_*_commands
-  and flashes accordingly.
-  """
-  logging.warning('This entry point is now deprecated in favor of '
-                  '`cros flash-ap`! Please use that command instead.')
-  cros_build_lib.AssertInsideChroot()
-
-  opts = parse_args(argv)
-  try:
-    deploy(
-        build_target_lib.BuildTarget(opts.board),
-        opts.image,
-        flashrom=opts.flashrom,
-        fast=opts.fast,
-        port=opts.port,
-        verbose=opts.verbose,
-        dryrun=opts.dry_run)
-  except Error as e:
-    cros_build_lib.Die(e)
-
-
-if __name__ == '__main__':
-  sys.exit(main(sys.argv[1:]))
