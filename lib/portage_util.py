@@ -345,7 +345,7 @@ class EbuildFormatIncorrectError(Error):
 
 # Container for Classify return values.
 EBuildClassifyAttributes = collections.namedtuple('EBuildClassifyAttributes', (
-    'is_workon', 'is_stable', 'is_blacklisted', 'has_test'))
+    'is_workon', 'is_stable', 'is_manually_uprevved', 'has_test'))
 
 
 class EBuild(object):
@@ -485,7 +485,7 @@ class EBuild(object):
 
     self.is_workon = False
     self.is_stable = False
-    self.is_blacklisted = False
+    self.is_manually_uprevved = False
     self.has_test = False
     self._ReadEBuild(path)
 
@@ -513,16 +513,16 @@ class EBuild(object):
 
   @staticmethod
   def Classify(ebuild_path):
-    """Return whether this ebuild is workon, stable, and/or blacklisted
+    """Return whether this ebuild is workon, stable, and/or manually uprevved
 
     workon is determined by whether the ebuild inherits from the
     'cros-workon' eclass. stable is determined by whether there's a '~'
-    in the KEYWORDS setting in the ebuild. An ebuild is considered blacklisted
+    in the KEYWORDS setting in the ebuild. An ebuild is only manually uprevved
     if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
     """
     is_workon = False
     is_stable = False
-    is_blacklisted = False
+    is_manually_uprevved = False
     has_test = False
     restrict_tests = False
     with open(ebuild_path, mode='rb') as fp:
@@ -550,7 +550,7 @@ class EBuild(object):
             if not keyword.startswith('~') and keyword != '-*':
               is_stable = True
         elif EBuild._RE_MANUAL_UPREV.match(line.strip()):
-          is_blacklisted = True
+          is_manually_uprevved = True
         elif (line.startswith('src_test()') or
               line.startswith('platform_pkg_test()') or
               line.startswith('multilib_src_test()')):
@@ -558,15 +558,16 @@ class EBuild(object):
         elif line.startswith('RESTRICT=') and 'test' in line:
           restrict_tests = True
     return EBuildClassifyAttributes(
-        is_workon, is_stable, is_blacklisted, has_test and not restrict_tests)
+        is_workon, is_stable, is_manually_uprevved,
+        has_test and not restrict_tests)
 
   def _ReadEBuild(self, path):
-    """Determine the settings of `is_workon`, `is_stable` and is_blacklisted
+    """Determine the settings of is_workon, is_stable and is_manually_uprevved
 
     These are determined using the static Classify function.
     """
     (self.is_workon, self.is_stable,
-     self.is_blacklisted, self.has_test) = EBuild.Classify(path)
+     self.is_manually_uprevved, self.has_test) = EBuild.Classify(path)
 
   @staticmethod
   def _GetAutotestTestsFromSettings(settings):
@@ -1444,7 +1445,7 @@ def BestEBuild(ebuilds):
   return winner
 
 
-def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
+def _FindUprevCandidates(files, allow_manual_uprev, subdir_support):
   """Return the uprev candidate ebuild from a specified list of files.
 
   Usually an uprev candidate is a the stable ebuild in a cros_workon
@@ -1455,7 +1456,7 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
 
   Args:
     files: List of files in a package directory.
-    allow_blacklisted: If False, discard blacklisted packages.
+    allow_manual_uprev: If False, discard manually uprevved packages.
     subdir_support: Support obsolete CROS_WORKON_SUBDIR.
                     Intended for branchs older than 10363.0.0.
 
@@ -1468,8 +1469,8 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
     if not path.endswith('.ebuild') or os.path.islink(path):
       continue
     ebuild = EBuild(path, subdir_support)
-    if not ebuild.is_workon or (ebuild.is_blacklisted and
-                                not allow_blacklisted):
+    if not ebuild.is_workon or (ebuild.is_manually_uprevved and
+                                not allow_manual_uprev):
       continue
     if ebuild.is_stable:
       if ebuild.version == WORKON_EBUILD_VERSION:
@@ -1514,7 +1515,7 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
   return uprev_ebuild
 
 
-def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
+def GetOverlayEBuilds(overlay, use_all, packages, allow_manual_uprev=False,
                       subdir_support=False):
   """Get ebuilds from the specified overlay.
 
@@ -1525,7 +1526,7 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
       of whether they are in our set of packages.
     packages: A set of the packages we want to gather.  If use_all is
       True, this argument is ignored, and should be None.
-    allow_blacklisted: Whether or not to consider blacklisted ebuilds.
+    allow_manual_uprev: Whether or not to consider manually uprevved ebuilds.
     subdir_support: Support obsolete CROS_WORKON_SUBDIR.
                     Intended for branchs older than 10363.0.0.
 
@@ -1536,8 +1537,8 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
   for package_dir, _dirs, files in os.walk(overlay):
     # If we were given a list of packages to uprev, only consider the files
     # whose potential CP match.
-    # This allows us to uprev specific blacklisted without throwing errors on
-    # every badly formatted blacklisted ebuild.
+    # This allows us to manually uprev a specific ebuild without throwing
+    # errors on every badly formatted manually uprevved ebuild.
     package_name = os.path.basename(package_dir)
     category = os.path.basename(os.path.dirname(package_dir))
 
@@ -1547,7 +1548,7 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
       continue
 
     paths = [os.path.join(package_dir, path) for path in files]
-    ebuild = _FindUprevCandidates(paths, allow_blacklisted, subdir_support)
+    ebuild = _FindUprevCandidates(paths, allow_manual_uprev, subdir_support)
 
     # Add stable ebuild.
     if ebuild:
@@ -1691,7 +1692,7 @@ def BuildFullWorkonPackageDictionary(buildroot, overlay_type, manifest):
 
   pkg_map = dict()
   for ebuild in WorkonEBuildGenerator(buildroot, overlay_type):
-    if ebuild.is_blacklisted:
+    if ebuild.is_manually_uprevved:
       continue
     package = ebuild.package
     paths = ebuild.GetSourceInfo(directory_src, manifest).srcdirs

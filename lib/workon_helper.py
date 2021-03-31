@@ -676,9 +676,9 @@ class WorkonHelper(object):
       projects = workon_vars.project if workon_vars else []
       ebuild_to_repos[ebuild] = projects
       ebuild_obj = portage_util.EBuild(ebuild)
-      if ebuild_obj.is_blacklisted:
-        # blacklisted ebuilds may have source infos incorrectly defined since
-        # they are not validated by bots
+      if ebuild_obj.is_manually_uprevved:
+        # Manually uprevved ebuild is pinned to a specific git sha1, so change
+        # in that repo matter to the ebuild.
         continue
       src_paths = ebuild_obj.GetSourceInfo(src_root, manifest).srcdirs
       src_paths = [os.path.relpath(path, build_root) for path in src_paths]

@@ -222,7 +222,8 @@ def GetParser():
   parser.add_argument('--dryrun', action='store_true',
                       help='Passes dry-run to git push if pushing a change.')
   parser.add_argument('--force', action='store_true',
-                      help='Force the stabilization of blacklisted packages. '
+                      help='Force the stabilization of packages marked for '
+                           'manual uprev. '
                       '(only compatible with -p)')
   parser.add_argument('--list_revisions', action='store_true',
                       help='List all revisions included in the commit message.')
