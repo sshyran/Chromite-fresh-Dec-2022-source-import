@@ -749,6 +749,8 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
     if self._android_rev and self._run.config.master:
       self._android_version = self.GetLatestAndroidVersion()
       logging.info('Latest Android version is: %s', self._android_version)
+      logging.PrintKitchenSetBuildProperty('android_version',
+                                           self._android_version)
 
     if (self._chrome_rev == constants.CHROME_REV_LATEST and
         self._run.config.master):
