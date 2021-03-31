@@ -58,6 +58,25 @@ def get_commands(servo):
     dut_control_off.append(['spi2_vref:off'])
     dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
+  elif servo.is_micro:
+    # Note servo micro is only supported for dauntless daughterboard for
+    # a limited time. Once Dauntless moves to MLB, there will be no 50-pin
+    # servo connector to attach servo micro to.
+    dut_control_on.append(['ec_uart_cmd:apshutdown'])
+    dut_control_on.append([
+        'spi2_vref:pp1800',
+        'spi2_buf_en:on',
+        'spi2_buf_on_flex_en:on',
+        'spi_hold:off',
+    ])
+    dut_control_off.append([
+        'spi2_vref:off',
+        'spi2_buf_en:off',
+        'spi2_buf_on_flex_en:off',
+        'spi_hold:off',
+    ])
+    dut_control_off.append(['ec_uart_cmd:powerb'])
+    programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
     dut_control_off.append(['power_state:reset'])
     programmer = ('raiden_debug_spi:target=AP,custom_rst=True,serial=%s' %
