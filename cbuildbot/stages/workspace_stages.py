@@ -870,11 +870,6 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
     arch = self.DetermineAndroidABI()
     variant = self.DetermineAndroidVariant(android_package)
     android_target = self.DetermineAndroidTarget(android_package)
-    # For user builds, there are no suffix.
-    # For userdebug builds, there is an explicit '_userdebug' suffix.
-    suffix = ''
-    if variant != 'user':
-      suffix = '_' + variant
 
     logging.info(
         'Downloading symbols of Android %s (%s)...',
@@ -894,20 +889,6 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
                                 'buildbot_archive',
                                 constants.ANDROID_SYMBOLS_FILE)
     gs_context = gs.GSContext()
-    # TODO(crbug/1074145): crrev.com/c/2781121 changed the location of Android
-    # symbols, but the old URL should be used before a successful uprev.
-    # Remove the old template once all Android packages have been uprevved.
-    try:
-      gs_context.Copy(symbols_file_url, symbols_file)
-    except gs.GSNoSuchKey:
-      logging.info('Using old URL template')
-      symbols_file_url = constants.ANDROID_SYMBOLS_URL_TEMPLATE_OLD % {
-          'branch': android_build_branch,
-          'target': android_target,
-          'arch': arch,
-          'version': android_version,
-          'variant': variant,
-          'suffix': suffix}
-      gs_context.Copy(symbols_file_url, symbols_file)
+    gs_context.Copy(symbols_file_url, symbols_file)
 
     return symbols_file

@@ -320,16 +320,10 @@ ANDROID_ALL_BUILD_TARGETS = frozenset(itertools.chain.from_iterable(
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
 
 # URL template to Android symbols, used by release builders.
-# TODO(crbug/1074145): Remove the old template once all Android packages have
-# been uprevved.
 ANDROID_SYMBOLS_URL_TEMPLATE = (
     ARC_BUCKET_URL +
     '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'
     '/%(target)s_%(arch)s-symbols-%(version)s.zip')
-ANDROID_SYMBOLS_URL_TEMPLATE_OLD = (
-    ARC_BUCKET_URL +
-    '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'
-    '/%(target)s_%(arch)s%(suffix)s-symbols-%(version)s.zip')
 ANDROID_SYMBOLS_FILE = 'android-symbols.zip'
 
 GOB_COOKIE_PATH = os.path.expanduser('~/.git-credential-cache/cookie')
