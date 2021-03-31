@@ -9,6 +9,7 @@ from __future__ import print_function
 
 import collections
 import importlib
+from typing import Optional
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -122,7 +123,8 @@ def deploy(build_target,
            flashrom=False,
            fast=False,
            verbose=False,
-           dryrun=False):
+           dryrun=False,
+           flash_contents: Optional[str] = None):
   """Deploy a firmware image to a device.
 
   Args:
@@ -134,6 +136,7 @@ def deploy(build_target,
     verbose (bool): Whether to enable verbose output of the flash commands.
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
+    flash_contents: Path to the file that contains the existing contents.
   """
   try:
     flash_ap.deploy(
@@ -143,7 +146,8 @@ def deploy(build_target,
         flashrom=flashrom,
         fast=fast,
         verbose=verbose,
-        dryrun=dryrun)
+        dryrun=dryrun,
+        flash_contents=flash_contents)
   except flash_ap.Error as e:
     # Reraise as a DeployError for future compatibility.
     raise DeployError(str(e))

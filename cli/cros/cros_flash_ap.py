@@ -63,6 +63,11 @@ To flash your volteer DUT via SERVO on port 1234:
         action='store_true',
         help='Use flashrom to flash instead of futility.')
     parser.add_argument(
+        '--flash-contents',
+        type=str,
+        help='Assume flash contents to be the specified file. '
+             'Only available when using --flashrom.')
+    parser.add_argument(
         '--fast',
         action='store_true',
         help='Speed up flashing by not validating flash.')
@@ -94,6 +99,7 @@ To flash your volteer DUT via SERVO on port 1234:
           flashrom=self.options.flashrom,
           fast=self.options.fast,
           verbose=self.options.verbose,
-          dryrun=self.options.dry_run)
+          dryrun=self.options.dry_run,
+          flash_contents=self.options.flash_contents)
     except ap_firmware.Error as e:
       cros_build_lib.Die(e)

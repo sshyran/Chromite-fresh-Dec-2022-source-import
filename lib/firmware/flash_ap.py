@@ -21,6 +21,7 @@ import os
 import shutil
 import tempfile
 import time
+from typing import Optional
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -190,7 +191,8 @@ def deploy(build_target,
            fast=False,
            port=None,
            verbose=False,
-           dryrun=False):
+           dryrun=False,
+           flash_contents: Optional[str] = None):
   """Deploy an AP FW image to a device.
 
   Args:
@@ -203,6 +205,7 @@ def deploy(build_target,
     verbose (bool): Whether to use verbose output for flash commands.
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
+    flash_contents: Path to the file that contains the existing contents.
   """
   ip = None
   if device:
@@ -225,10 +228,18 @@ def deploy(build_target,
   if ip:
     _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun)
   else:
-    _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun)
+    _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun,
+      flash_contents)
 
 
-def _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun):
+def _deploy_servo(image,
+                  module,
+                  flashrom,
+                  fast,
+                  verbose,
+                  port,
+                  dryrun,
+                  flash_contents: Optional[str] = None):
   """Deploy to a servo connection.
 
   Args:
@@ -240,6 +251,7 @@ def _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun):
     port (int|None): The servo port.
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
+    flash_contents: Path to the file that contains the existing contents.
   """
   logging.notice('Attempting to flash via servo.')
   dut_ctl = servo_lib.DutControl(port)
@@ -265,6 +277,8 @@ def _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun):
   if verbose:
     flashrom_cmd += ['-V']
     futility_cmd += ['-v']
+  if flash_contents is not None:
+    flashrom_cmd += ['--flash-contents', flash_contents]
   flash_cmd = flashrom_cmd if flashrom else futility_cmd
   if _flash(dut_ctl, dut_on, dut_off, flash_cmd, verbose, dryrun):
     logging.notice('SUCCESS. Exiting flash_ap.')
