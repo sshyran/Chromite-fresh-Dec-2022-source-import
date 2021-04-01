@@ -119,19 +119,19 @@ Examples:
     update.add_argument(
         '--no-wipe', action='store_false', dest='wipe', default=True,
         help='Do not wipe the temporary working directory. Default '
-        'is always wipe.')
+        'is always wipe.', deprecated='No temp directory anymore.')
     update.add_argument(
-        '--no-stateful-update', action='store_false', dest='stateful_update',
+        '--no-stateful-update', action='store_true',
         help='Do not update the stateful partition on the device. '
         'Default is always update.')
     update.add_argument(
-        '--no-rootfs-update', action='store_false', dest='rootfs_update',
+        '--no-rootfs-update', action='store_true',
         help='Do not update the rootfs partition on the device. '
         'Default is always update.')
     update.add_argument(
         '--src-image-to-delta', type='path',
         help='Local path to an image to be used as the base to generate '
-        'delta payloads.')
+        'delta payloads.', deprecated='Not used anymore.')
     update.add_argument(
         '--clobber-stateful', action='store_true', default=False,
         help='Clobber stateful partition when performing update. '
@@ -140,8 +140,9 @@ Examples:
         '--clear-tpm-owner', action='store_true', default=False,
         help='Clear the TPM owner on reboot.')
     update.add_argument(
-        '--restore-stateful', action='store_false', dest='rootfs_update',
-        help='Restore the stateful partition. Same as --no-rootfs-update.')
+        '--restore-stateful', action='store_false',
+        help='Restore the stateful partition. Same as --no-rootfs-update.',
+        deprecated='Not used anymore.')
     update.add_argument(
         '--private-key', type='path', default=None,
         help='SSH identify file (private key).')
@@ -154,12 +155,14 @@ Examples:
     update.add_argument(
         '--send-payload-in-parallel', default=False, action='store_true',
         help=('To speed up transfer payload files for long haul, chop '
-              'payload in chunks and transfer them in parallel.'))
+              'payload in chunks and transfer them in parallel.'),
+        deprecated='Not used anymore.')
     update.add_argument(
         '--no-copy-payloads-to-device', dest='copy_payloads_to_device',
         action='store_false', default=True,
         help=('Do not copy the update payloads to the device. For now this '
-              'only works for the stateful payload.'))
+              'only works for the stateful payload.'),
+        deprecated='This is default behavior now.')
     update.add_argument(
         '--exp-new-flash', action='store_true', default=True,
         help=('Use the faster version of cros flash (experimental).'),
@@ -194,13 +197,11 @@ Examples:
             self.options.image,
             board=self.options.board,
             version=self._GetDefaultVersion(),
-            src_image_to_delta=self.options.src_image_to_delta,
-            rootfs_update=self.options.rootfs_update,
-            stateful_update=self.options.stateful_update,
+            no_rootfs_update=self.options.no_rootfs_update,
+            no_stateful_update=self.options.no_stateful_update,
             clobber_stateful=self.options.clobber_stateful,
             clear_tpm_owner=self.options.clear_tpm_owner,
             reboot=self.options.reboot,
-            wipe=self.options.wipe,
             ssh_private_key=self.options.private_key,
             ping=self.options.ping,
             disable_rootfs_verification=
@@ -208,10 +209,7 @@ Examples:
             clear_cache=self.options.clear_cache,
             yes=self.options.yes,
             force=self.options.force,
-            debug=self.options.debug,
-            send_payload_in_parallel=self.options.send_payload_in_parallel,
-            copy_payloads_to_device=self.options.copy_payloads_to_device,
-            exp_new_flash=self.options.exp_new_flash)
+            debug=self.options.debug)
       logging.notice('cros flash completed successfully in %s',
                      pformat.timedelta(timer.delta))
     except dev_server_wrapper.ImagePathError:
