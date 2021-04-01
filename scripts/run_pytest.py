@@ -23,6 +23,7 @@ from chromite.lib import namespaces
 def main(argv):
   parser = get_parser()
   opts = parser.parse_args()
+  opts.Freeze()
 
   pytest_args = opts.pytest_args
 
