@@ -59,20 +59,28 @@ class DeviceImagerTest(cros_test_lib.MockTestCase):
       di._GetImage()
 
   @mock.patch.object(xbuddy.XBuddy, 'Translate', return_value=('eve/R90', None))
-  def test_GetImageXBuddyRemote(self, _):
+  @mock.patch.object(remote_access.ChromiumOSDevice, 'board',
+                     return_value='foo', new_callable=mock.PropertyMock)
+  # pylint: disable=unused-argument
+  def test_GetImageXBuddyRemote(self, _, board_mock):
     """Tests getting remote xBuddy image path."""
-    di = device_imager.DeviceImager(None, 'xbuddy://remote/eve/latest')
-    self.assertEqual(di._GetImage(),
-                     ('gs://chromeos-image-archive/eve/R90',
-                      device_imager.ImageType.REMOTE_DIRECTORY))
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      di = device_imager.DeviceImager(device, 'xbuddy://remote/eve/latest')
+      self.assertEqual(di._GetImage(),
+                       ('gs://chromeos-image-archive/eve/R90',
+                        device_imager.ImageType.REMOTE_DIRECTORY))
 
   @mock.patch.object(xbuddy.XBuddy, 'Translate',
                      return_value=('eve/R90', 'path/to/file'))
-  def test_GetImageXBuddyLocal(self, _):
+  @mock.patch.object(remote_access.ChromiumOSDevice, 'board',
+                     return_value='foo', new_callable=mock.PropertyMock)
+  # pylint: disable=unused-argument
+  def test_GetImageXBuddyLocal(self, _, board_mock):
     """Tests getting local xBuddy image path."""
-    di = device_imager.DeviceImager(None, 'xbuddy://local/eve/latest')
-    self.assertEqual(di._GetImage(),
-                     ('path/to/file', device_imager.ImageType.FULL))
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      di = device_imager.DeviceImager(device, 'xbuddy://local/eve/latest')
+      self.assertEqual(di._GetImage(),
+                       ('path/to/file', device_imager.ImageType.FULL))
 
   def test_SplitDevPath(self):
     """Tests splitting a device path into prefix and partition number."""
