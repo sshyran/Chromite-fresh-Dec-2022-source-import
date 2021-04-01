@@ -13,7 +13,6 @@ import sys
 import mock
 
 from chromite.cli import flash
-from chromite.lib import auto_updater_transfer
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -53,6 +52,18 @@ class RemoteDeviceUpdaterMock(partial_mock.PartialCmdMock):
     """Mock out RebootAndVerify."""
 
 
+class TransferMock(partial_mock.PartialCmdMock):
+  """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
+  TARGET = 'chromite.lib.auto_updater_transfer.LocalTransfer'
+  ATTRS = ('CheckPayloads',)
+
+  def __init__(self):
+    partial_mock.PartialCmdMock.__init__(self)
+
+  def CheckPayloads(self, _inst, *_args, **_kwargs):
+    """Mock auto_updater_transfer.Transfer.CheckPayloads."""
+
+
 class RemoteAccessMock(remote_access_unittest.RemoteShMock):
   """Mock out RemoteAccess."""
 
@@ -75,6 +86,7 @@ class RemoteDeviceUpdaterTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     """Patches objects."""
     self.updater_mock = self.StartPatcher(RemoteDeviceUpdaterMock())
+    self.transfer_mock = self.StartPatcher(TransferMock())
     self.PatchObject(dev_server_wrapper, 'GetImagePathWithXbuddy',
                      return_value=('taco-paladin/R36/chromiumos_test_image.bin',
                                    'remote/taco-paladin/R36/test'))
@@ -126,13 +138,6 @@ class RemoteDeviceUpdaterTest(cros_test_lib.MockTempDirTestCase):
       flash.Flash(self.DEVICE, self.IMAGE, stateful_update=False)
       self.assertFalse(self.updater_mock.patched['UpdateStateful'].called)
       self.assertTrue(self.updater_mock.patched['UpdateRootfs'].called)
-
-  def testMissingPayloads(self):
-    """Tests we raise FlashError when payloads are missing."""
-    with mock.patch('os.path.exists',
-                    side_effect=lambda p: self._ExistsMock(p, ret=False)):
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        flash.Flash, self.DEVICE, self.IMAGE)
 
   def testFullPayload(self):
     """Tests that we download full_payload and stateful using xBuddy."""
