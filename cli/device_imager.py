@@ -104,7 +104,7 @@ class DeviceImager(object):
     self._clobber_stateful = clobber_stateful
     self._clear_tpm_owner = clear_tpm_owner
 
-    self._compression = cros_build_lib.COMP_XZ
+    self._compression = cros_build_lib.COMP_GZIP
     self._inactive_state = None
 
   def Run(self):
