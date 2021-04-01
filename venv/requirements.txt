@@ -29,8 +29,8 @@ ply==3.8
 portage==2.3.75
 protobuf==3.13.0
 psutil==4.3.1
-pyasn1==0.1.9
-pyasn1-modules==0.0.8
+pyasn1==0.4.8
+pyasn1-modules==0.2.1
 pyparsing==2.1.8
 pytest==5.4.3
 pytest-cov==2.8.1
