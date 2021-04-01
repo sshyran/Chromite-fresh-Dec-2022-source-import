@@ -1150,7 +1150,7 @@
     {
       "name": "adlrvp",
       "reference_board_name": "adlrvp",
-      "arch": "X86_INTERNAL",
+      "arch": "ARM_INTERNAL",
       "builder": "RELEASE",
       "experimental": true,
       "models": [
