@@ -110,7 +110,7 @@ def main(argv):
   packages = set()
   # The list of packages to test can be passed as a file containing a
   # space-separated list of package names.
-  # This is used by the builder to test only the packages that were upreved.
+  # This is used by the builder to test only the packages that were uprevved.
   if opts.package_file and os.path.exists(opts.package_file):
     packages = set(osutils.ReadFile(opts.package_file).split())
 

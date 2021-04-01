@@ -173,5 +173,5 @@ def main(argv):
   average_delta_days = get_average_timestamp_delta_days(ebuild_uprev_timestamps)
 
   logging.info(
-      'Package %s for %s was upreved every %.2f days on average.',
+      'Package %s for %s was uprevved every %.2f days on average.',
       ebuild.package, board, average_delta_days)

@@ -1081,7 +1081,7 @@ class EBuild(object):
     test_dirs_changed = False
     if sorted(subdirs_to_rev) != sorted(old_subdirs_to_rev):
       logging.info(
-          'The list of subdirs in the ebuild %s has changed, upreving.',
+          'The list of subdirs in the ebuild %s has changed, uprevving.',
           self.pkgname)
       test_dirs_changed = True
 

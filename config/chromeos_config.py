@@ -2932,7 +2932,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
   )
 
   # *-pre-flight-branch builders are in chromeos_release waterfall.
-  # *-no-afdo-uprev builder skips upreving Chrome AFDO profiles in the PFQ
+  # *-no-afdo-uprev builder skips uprevving Chrome AFDO profiles in the PFQ
   # builder, as we have separate builders to do so.
   site_config.Add(
       'chell-chrome-no-afdo-uprev-pre-flight-branch',

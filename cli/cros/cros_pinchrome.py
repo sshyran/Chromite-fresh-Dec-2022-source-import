@@ -322,7 +322,7 @@ class PinchromeCommand(command.CliCommand):
   Pinning procedure:
 
   When pinning chrome, this script first looks through the history of the
-  public overlay repository looking for changes which upreved chrome. It shows
+  public overlay repository looking for changes which uprevved chrome. It shows
   the user what versions chrome has been at recently and when the uprevs
   happened, and lets the user pick a point in that history to go back to.
 

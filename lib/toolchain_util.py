@@ -1353,7 +1353,7 @@ class _CommonPrepareBundle(object):
     self._PatchEbuild(info_9999, update_rules, uprev=False)
 
   def _PatchEbuild(self, info, rules, uprev):
-    """Patch an ebuild file, possibly upreving it.
+    """Patch an ebuild file, possibly uprevving it.
 
     Args:
       info: _EbuildInfo describing the ebuild file.

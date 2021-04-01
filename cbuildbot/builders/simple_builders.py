@@ -336,7 +336,7 @@ class SimpleBuilder(generic_builders.Builder):
                 target='benchmark_afdo')):
           continue
 
-        # Only generate orderfile if Chrome is upreved since last generation
+        # Only generate orderfile if Chrome is uprevved since last generation.
         if (builder_run.config.orderfile_generate and
             toolchain_util.CheckAFDOArtifactExists(
                 buildroot=builder_run.buildroot,
