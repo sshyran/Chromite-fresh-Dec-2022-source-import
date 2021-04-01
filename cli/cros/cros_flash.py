@@ -161,8 +161,9 @@ Examples:
         help=('Do not copy the update payloads to the device. For now this '
               'only works for the stateful payload.'))
     update.add_argument(
-        '--exp-new-flash', action='store_true', default=False,
-        help=('Use the faster version of cros flash (experimental).'))
+        '--exp-new-flash', action='store_true', default=True,
+        help=('Use the faster version of cros flash (experimental).'),
+        deprecated='The new flash mechanism is ON by default.')
 
   def _GetDefaultVersion(self):
     """Get default full SDK version.
