@@ -95,7 +95,7 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
         'debug': False,
         'send_payload_in_parallel': False,
         'copy_payloads_to_device': True,
-        'exp_new_flash': False,
+        'exp_new_flash': True,
     }
     # Overwrite defaults with any variations in this test.
     expected_kwargs.update(kwargs)

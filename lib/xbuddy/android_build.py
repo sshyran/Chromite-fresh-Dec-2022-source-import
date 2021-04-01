@@ -14,14 +14,14 @@ import googleapiclient.http
 import httplib2  # pylint: disable=import-error
 
 
+from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib.xbuddy import retry
-from chromite.lib import cros_test_lib
 
 try:
   from oauth2client.client import SignedJwtAssertionCredentials
 except ImportError:
-  cros_test_lib.pytest_skip(allow_module_level=True)
+  SignedJwtAssertionCredentials = None
 
 
 CREDENTIAL_SCOPE = 'https://www.googleapis.com/auth/androidbuild.internal'
@@ -53,10 +53,14 @@ class BuildAccessor(object):
     if not cls.credential_info:
       raise AndroidBuildFetchError('Android Build credential is missing.')
 
-    credentials = SignedJwtAssertionCredentials(
-        cls.credential_info['client_email'],
-        cls.credential_info['private_key'], CREDENTIAL_SCOPE)
-    http_auth = credentials.authorize(httplib2.Http())
+    if SignedJwtAssertionCredentials is None:
+      http_auth = None
+      logging.warning('SignedJwtAssertionCredentials unavailable')
+    else:
+      credentials = SignedJwtAssertionCredentials(
+          cls.credential_info['client_email'],
+          cls.credential_info['private_key'], CREDENTIAL_SCOPE)
+      http_auth = credentials.authorize(httplib2.Http())
     return googleapiclient.discovery.build(
         DEFAULT_BUILDER, 'v1', http=http_auth)
 
