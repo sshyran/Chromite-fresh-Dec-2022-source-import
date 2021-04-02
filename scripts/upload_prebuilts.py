@@ -36,6 +36,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
+from chromite.lib import gerrit
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -160,27 +161,21 @@ def RevGitFile(filename, data, dryrun=False):
     dryrun: If True, do not actually commit the change.
   """
   prebuilt_branch = 'prebuilt_branch'
+  ref = 'refs/heads/%s' % prebuilt_branch
   cwd = os.path.abspath(os.path.dirname(filename))
-  commit = git.RunGit(cwd, ['rev-parse', 'HEAD']).output.rstrip()
+  remote = git.RunGit(cwd, ['--get', 'remote.origin.url'])
   description = '%s: updating %s' % (os.path.basename(filename),
                                      ', '.join(data.keys()))
   # UpdateLocalFile will print out the keys/values for us.
   print('Revving git file %s' % filename)
-
-  try:
-    git.CreatePushBranch(prebuilt_branch, cwd)
-    for key, value in data.items():
-      UpdateLocalFile(filename, value, key)
-    git.RunGit(cwd, ['add', filename])
-    git.RunGit(cwd, ['commit', '-m', description])
-    git.PushBranch(prebuilt_branch, cwd, dryrun=dryrun, auto_merge=True)
-  finally:
-    # We reset the index and the working tree state in case there are any
-    # uncommitted or pending changes, but we don't change any existing commits.
-    git.RunGit(cwd, ['reset', '--hard'])
-
-    # Check out the last good commit as a sanity fallback.
-    git.RunGit(cwd, ['checkout', commit])
+  git.CreatePushBranch(prebuilt_branch, cwd)
+  for key, value in data.items():
+    UpdateLocalFile(filename, value, key)
+  git.RunGit(cwd, ['add', filename])
+  git.RunGit(cwd, ['commit', '-m', description])
+  gpatch = gerrit.CreateGerritPatch(cwd, remote, ref=ref)
+  gerrit.SetReview(gpatch, label={'Bot-Commit': 1})
+  gerrit.SubmitChange(gpatch, dryrun)
 
 
 def GetVersion():
