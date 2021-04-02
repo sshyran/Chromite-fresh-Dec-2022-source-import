@@ -31,7 +31,6 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import osutils
-from chromite.lib import retry_util
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -341,36 +340,27 @@ class GerritHelperTest(GerritTestCase):
   def _GetHelper(self, remote=config_lib.GetSiteParams().EXTERNAL_REMOTE):
     return gerrit.GetGerritHelper(remote)
 
-  def createPatch(self, clone_path, project, **kwargs):
+  def createPatch(self, clone_path, project, remote='origin', **kwargs):
     """Create a patch in the given git checkout and upload it to gerrit.
 
     Args:
       clone_path: The directory on disk of the git clone.
       project: The associated project.
+      remote: The remote to upload changes to.
       **kwargs: Additional keyword arguments to pass to createCommit.
 
     Returns:
       A GerritPatch object.
     """
     (revision, changeid) = self.createCommit(clone_path, **kwargs)
-    self.uploadChange(clone_path)
-    def PatchQuery():
-      return self._GetHelper().QuerySingleRecord(
-          change=changeid, project=project, branch='master')
-    # 'RetryException' is needed because there is a race condition between
-    # uploading the change and querying for the change.
-    gpatch = retry_util.RetryException(
-        gerrit.QueryHasNoResults,
-        5,
-        PatchQuery,
-        sleep=1)
+    gpatch = self.CreateGerritPatch(clone_path, remote, project=project)
     self.assertEqual(gpatch.change_id, changeid)
     self.assertEqual(gpatch.revision, revision)
     return gpatch
 
-  def test001SimpleQuery(self):
+  def testSimpleQuery(self):
     """Create one independent and three dependent changes, then query them."""
-    project = self.createProject('test001')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     (head_sha1, head_changeid) = self.createCommit(clone_path)
     for idx in range(3):
@@ -381,12 +371,12 @@ class GerritHelperTest(GerritTestCase):
     helper = self._GetHelper()
     changes = helper.Query(owner='self', project=project)
     self.assertEqual(len(changes), 4)
-    changes = helper.Query(head_changeid, project=project, branch='master')
+    changes = helper.Query(head_changeid, project=project, branch='main')
     self.assertEqual(len(changes), 1)
     self.assertEqual(changes[0].change_id, head_changeid)
     self.assertEqual(changes[0].sha1, head_sha1)
     change = helper.QuerySingleRecord(
-        head_changeid, project=project, branch='master')
+        head_changeid, project=project, branch='main')
     self.assertTrue(change)
     self.assertEqual(change.change_id, head_changeid)
     self.assertEqual(change.sha1, head_sha1)
@@ -396,9 +386,9 @@ class GerritHelperTest(GerritTestCase):
     self.assertEqual(change.sha1, head_sha1)
 
   @mock.patch.object(gerrit.GerritHelper, '_GERRIT_MAX_QUERY_RETURN', 2)
-  def test002GerritQueryTruncation(self):
+  def testGerritQueryTruncation(self):
     """Verify that we detect gerrit truncating our query, and handle it."""
-    project = self.createProject('test002')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     # Using a shell loop is markedly faster than running a python loop.
     num_changes = 5
@@ -413,9 +403,9 @@ class GerritHelperTest(GerritTestCase):
     changes = helper.Query(project=project)
     self.assertEqual(len(changes), num_changes)
 
-  def test003IsChangeCommitted(self):
+  def testIsChangeCommitted(self):
     """Tests that we can parse a json to check if a change is committed."""
-    project = self.createProject('test003')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     gpatch = self.createPatch(clone_path, project)
     helper = self._GetHelper()
@@ -426,9 +416,9 @@ class GerritHelperTest(GerritTestCase):
     gpatch = self.createPatch(clone_path, project)
     self.assertFalse(helper.IsChangeCommitted(gpatch.gerrit_number))
 
-  def test004GetLatestSHA1ForBranch(self):
+  def testGetLatestSHA1ForBranch(self):
     """Verifies that we can query the tip-of-tree commit in a git repository."""
-    project = self.createProject('test004')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     for _ in range(5):
       (master_sha1, _) = self.createCommit(clone_path)
@@ -451,9 +441,9 @@ class GerritHelperTest(GerritTestCase):
     self.assertGreaterEqual(len(ret), 2)
     return ret
 
-  def test005SetReviewers(self):
+  def testSetReviewers(self):
     """Verify that we can set reviewers on a CL."""
-    project = self.createProject('test005')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     gpatch = self.createPatch(clone_path, project)
     emails = self._ChooseReviewers()
@@ -471,7 +461,7 @@ class GerritHelperTest(GerritTestCase):
     self.assertEqual(len(reviewers), 1)
     self.assertEqual(reviewers[0]['email'], emails[1])
 
-  def test006PatchNotFound(self):
+  def testPatchNotFound(self):
     """Test case where ChangeID isn't found on the server."""
     changeids = ['I' + ('deadbeef' * 5), 'I' + ('beadface' * 5)]
     self.assertRaises(gerrit.GerritException, gerrit.GetGerritPatchInfo,
@@ -485,9 +475,9 @@ class GerritHelperTest(GerritTestCase):
     self.assertRaises(gerrit.GerritException, gerrit.GetGerritPatchInfo,
                       ['*' + num for num in gerrit_numbers])
 
-  def test007VagueQuery(self):
+  def testVagueQuery(self):
     """Verify GerritHelper complains if an ID matches multiple changes."""
-    project = self.createProject('test007')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     (sha1, _) = self.createCommit(clone_path)
     (_, changeid) = self.createCommit(clone_path)
@@ -502,9 +492,9 @@ class GerritHelperTest(GerritTestCase):
     self.assertRaises(gerrit.GerritException, gerrit.GetGerritPatchInfo,
                       [changeid])
 
-  def test008Queries(self):
+  def testQueries(self):
     """Verify assorted query operations."""
-    project = self.createProject('test008')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     gpatch = self.createPatch(clone_path, project)
     helper = self._GetHelper()
@@ -553,9 +543,9 @@ class GerritHelperTest(GerritTestCase):
     self.assertEqual(patch_info[0].gerrit_number, gpatch.gerrit_number)
     self.assertEqual(patch_info[0].remote, site_params.INTERNAL_REMOTE)
 
-  def test009SubmitOutdatedCommit(self):
+  def testSubmitOutdatedCommit(self):
     """Tests that we can parse a json to check if a change is committed."""
-    project = self.createProject('test009')
+    project = self.createProject('testProject')
     clone_path = self.cloneProject(project, 'p1')
 
     # Create a change.
@@ -579,9 +569,9 @@ class GerritHelperTest(GerritTestCase):
     helper.SubmitChange(gpatch2)
     helper.IsChangeCommitted(gpatch2.gerrit_number)
 
-  def test011ResetReviewLabels(self):
+  def testResetReviewLabels(self):
     """Tests that we can remove a code review label."""
-    project = self.createProject('test011')
+    project = self.createProject('testProject')
     helper = self._GetHelper()
     clone_path = self.cloneProject(project, 'p1')
     gpatch = self.createPatch(clone_path, project, msg='Init')
@@ -589,10 +579,10 @@ class GerritHelperTest(GerritTestCase):
     gob_util.ResetReviewLabels(helper.host, gpatch.gerrit_number,
                                label='Code-Review', notify='OWNER')
 
-  def test012ApprovalTime(self):
+  def testApprovalTime(self):
     """Approval timestamp should be reset when a new patchset is created."""
     # Create a change.
-    project = self.createProject('test013')
+    project = self.createProject('testProject')
     helper = self._GetHelper()
     clone_path = self.cloneProject(project, 'p1')
     gpatch = self.createPatch(clone_path, project, msg='Init')
@@ -608,6 +598,55 @@ class GerritHelperTest(GerritTestCase):
     self.assertNotEqual(gpatch2.approval_timestamp, 0)
     self.assertNotEqual(gpatch2.commit_timestamp, 0)
     self.assertEqual(gpatch2.approval_timestamp, gpatch2.commit_timestamp)
+
+
+class GerritParserTest(cros_test_lib.TestCase):
+  """Unittests for GerritHelper."""
+
+  # pylint: disable=protected-access
+
+  def _GetHelper(self, remote=config_lib.GetSiteParams().EXTERNAL_REMOTE):
+    return gerrit.GetGerritHelper(remote)
+
+  def testGetChangeFromStdoutPass(self):
+    """Test that the proper change number is returned from the git stdout."""
+    stdout = ('remote:\nremote:\nremote:   '
+    'https://example.com/c/some/project/repo/+/123 gerrit: test')
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+    self.assertEqual(changenum, '123')
+
+    stdout = ('remote:\nremote:   '
+    'https://example.com/c/some/project3/repo/+/123 gerrit: test')
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+    self.assertEqual(changenum, '123')
+
+    stdout = ('remote:   '
+    'https://example.com/c/some/project/repo/+/123 gerrit: test 456')
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+    self.assertEqual(changenum, '123')
+
+    stdout = ('remote:   '
+    'https://example.com/c/some/project/repo/+/123 handle /+/124 in URI')
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+    self.assertEqual(changenum, '123')
+
+  def testGetChangeFromStdoutFail(self):
+    """Test that the function returns None when an improper stdout is given."""
+
+    # Fails because remote is not at the start of the text.
+    stdout = """
+    remote:
+    remote:   https://example./c/some/project/repo/+/123 gerrit: test
+    """
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+    self.assertIsNone(changenum)
+
+    stdout = """
+    remote:https://example./c/some/project/repo/+/123 gerrit: test
+    """
+    changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
+
+    self.assertIsNone(changenum)
 
 
 @cros_test_lib.pytestmark_network_test

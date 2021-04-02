@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import operator
+import re
 import sys
 
 from chromite.lib import config_lib
@@ -18,6 +19,7 @@ from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import parallel
 from chromite.lib import patch as cros_patch
+from chromite.lib import retry_util
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -543,6 +545,41 @@ class GerritHelper(object):
   def GetAccount(self, account='self'):
     """Get information about the user account."""
     return gob_util.GetAccount(self.host, account=account)
+
+  def _get_changenumber_from_stdout(self, stdout):
+    """Retrieve the change number written in the URL of the git stdout."""
+    match = re.search(r'^remote:\s+[^\s]+/\+/(?P<changenum>[0-9]+)',
+                      stdout,flags=re.MULTILINE)
+    if match:
+      return match['changenum']
+    return None
+
+  def CreateGerritPatch(self, cwd, remote, ref, **kwargs):
+    """Upload a change and retrieve a GerritPatch describing it.
+
+    Args:
+      cwd: The repository that we are working on.
+      remote: The remote to upload changes to.
+      ref: The ref where changes will be uploaded to.
+      **kwargs: Keyword arguments to be passed to QuerySingleRecord.
+
+    Returns:
+      A GerritPatch object describing the change for the HEAD commit.
+    """
+    # Upload the local changes to remote.
+    ret = git.RunGit(cwd, ['push', remote, f'HEAD:refs/for/{ref}'])
+    change_number = self._get_changenumber_from_stdout(ret.stdout)
+
+    # If we fail to grab a change number from the stdout then fall back to the
+    # ChangeID.
+    change_number = change_number or git.GetChangeId(cwd)
+
+    def PatchQuery():
+      """Retrieve the GerritPatch describing the change."""
+      return self.QuerySingleRecord(change=change_number, **kwargs)
+
+    return retry_util.RetryException(self.QueryHasNoResults, 5, PatchQuery,
+                                     sleep=1)
 
 
 def GetGerritPatchInfo(patches):
