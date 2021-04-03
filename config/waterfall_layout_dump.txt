@@ -641,12 +641,6 @@
   candy-payloads-tryjob
   candy-release-tryjob
   candy-unittest-stress
-  capri-full-tryjob
-  capri-llvm-next-toolchain-tryjob
-  capri-llvm-toolchain-tryjob
-  capri-payloads-tryjob
-  capri-release-tryjob
-  capri-unittest-stress
   caroline-arc64-full-tryjob
   caroline-arc64-llvm-next-toolchain-tryjob
   caroline-arc64-llvm-toolchain-tryjob
@@ -727,12 +721,6 @@
   chromeos-infra-go-tryjob
   chromiumos-sdk-llvm-next-tryjob
   chromiumos-sdk-tryjob
-  cobblepot-full-tryjob
-  cobblepot-llvm-next-toolchain-tryjob
-  cobblepot-llvm-toolchain-tryjob
-  cobblepot-payloads-tryjob
-  cobblepot-release-tryjob
-  cobblepot-unittest-stress
   config-updater-tryjob
   coral-factory-coral-10122.B-factorybranch-tryjob
   coral-full-tryjob
@@ -1129,12 +1117,6 @@
   gnawty-payloads-tryjob
   gnawty-release-tryjob
   gnawty-unittest-stress
-  gonzo-full-tryjob
-  gonzo-llvm-next-toolchain-tryjob
-  gonzo-llvm-toolchain-tryjob
-  gonzo-payloads-tryjob
-  gonzo-release-tryjob
-  gonzo-unittest-stress
   gru-factory-gru-9017.B-factorybranch-tryjob
   grunt-arc-r-full-tryjob
   grunt-arc-r-llvm-next-toolchain-tryjob
@@ -1398,12 +1380,6 @@
   lars-payloads-tryjob
   lars-release-tryjob
   lars-unittest-stress
-  lasilla-ground-full-tryjob
-  lasilla-ground-llvm-next-toolchain-tryjob
-  lasilla-ground-llvm-toolchain-tryjob
-  lasilla-ground-payloads-tryjob
-  lasilla-ground-release-tryjob
-  lasilla-ground-unittest-stress
   littlejoe-full-tryjob
   littlejoe-llvm-next-toolchain-tryjob
   littlejoe-llvm-toolchain-tryjob
@@ -1418,12 +1394,6 @@
   lulu-payloads-tryjob
   lulu-release-tryjob
   lulu-unittest-stress
-  macchiato-ground-full-tryjob
-  macchiato-ground-llvm-next-toolchain-tryjob
-  macchiato-ground-llvm-toolchain-tryjob
-  macchiato-ground-payloads-tryjob
-  macchiato-ground-release-tryjob
-  macchiato-ground-unittest-stress
   majolica-full-tryjob
   majolica-llvm-next-toolchain-tryjob
   majolica-llvm-toolchain-tryjob
@@ -1728,12 +1698,6 @@
   nyan_blaze-payloads-tryjob
   nyan_blaze-release-tryjob
   nyan_blaze-unittest-stress
-  octavius-full-tryjob
-  octavius-llvm-next-toolchain-tryjob
-  octavius-llvm-toolchain-tryjob
-  octavius-payloads-tryjob
-  octavius-release-tryjob
-  octavius-unittest-stress
   octopus-factory-octopus-11512.B-factorybranch-tryjob
   octopus-full-tryjob
   octopus-llvm-next-toolchain-tryjob
@@ -1859,12 +1823,6 @@
   rikku-payloads-tryjob
   rikku-release-tryjob
   rikku-unittest-stress
-  romer-full-tryjob
-  romer-llvm-next-toolchain-tryjob
-  romer-llvm-toolchain-tryjob
-  romer-payloads-tryjob
-  romer-release-tryjob
-  romer-unittest-stress
   samus-full-tryjob
   samus-kernelnext-full-tryjob
   samus-kernelnext-llvm-next-toolchain-tryjob
@@ -2127,12 +2085,6 @@
   wizpig-payloads-tryjob
   wizpig-release-tryjob
   wizpig-unittest-stress
-  wooten-full-tryjob
-  wooten-llvm-next-toolchain-tryjob
-  wooten-llvm-toolchain-tryjob
-  wooten-payloads-tryjob
-  wooten-release-tryjob
-  wooten-unittest-stress
   wristpin-full-tryjob
   wristpin-llvm-next-toolchain-tryjob
   wristpin-llvm-toolchain-tryjob
