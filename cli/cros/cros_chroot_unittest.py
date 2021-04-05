@@ -26,12 +26,6 @@ class MockChrootCommand(command_unittest.MockCommand):
   TARGET_CLASS = cros_chroot.ChrootCommand
   COMMAND = 'chroot'
 
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
-  def Run(self, inst):
-    return command_unittest.MockCommand.Run(self, inst)
-
 
 class ChrootTest(cros_test_lib.MockTestCase):
   """Test the ChrootCommand."""

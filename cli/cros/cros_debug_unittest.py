@@ -28,9 +28,6 @@ class MockDebugCommand(command_unittest.MockCommand):
   COMMAND = 'debug'
   ATTRS = ('_ListProcesses', '_DebugNewProcess', '_DebugRunningProcess')
 
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
   def _ListProcesses(self, _inst, *_args, **_kwargs):
     """Mock out _ListProcesses."""
 
@@ -39,9 +36,6 @@ class MockDebugCommand(command_unittest.MockCommand):
 
   def _DebugRunningProcess(self, _inst, *_args, **_kwargs):
     """Mock out _DebugRunningProcess."""
-
-  def Run(self, inst):
-    command_unittest.MockCommand.Run(self, inst)
 
 
 class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):

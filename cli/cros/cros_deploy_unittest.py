@@ -29,12 +29,6 @@ class MockDeployCommand(command_unittest.MockCommand):
   TARGET_CLASS = cros_deploy.DeployCommand
   COMMAND = 'deploy'
 
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
-  def Run(self, inst):
-    command_unittest.MockCommand.Run(self, inst)
-
 
 class CrosDeployTest(cros_test_lib.MockTempDirTestCase,
                      cros_test_lib.OutputTestCase):
