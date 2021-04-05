@@ -691,22 +691,6 @@ to assign.  Once you've found it, copy the entire license file to:
       logging.info('Read licenses for %s: %s', self.fullnamerev,
                    ','.join(ebuild_license_names))
 
-    # Lots of packages in chromeos-base have their license set to BSD instead
-    # of BSD-Google:
-    new_license_names = []
-    for license_name in ebuild_license_names:
-      # TODO: temp workaround for http;//crbug.com/348750 , remove when the bug
-      # is fixed.
-      if (license_name == 'BSD' and
-          self.fullnamerev.startswith('chromeos-base/') and
-          'BSD-Google' not in ebuild_license_names):
-        license_name = 'BSD-Google'
-        logging.warning(
-            "Fixed BSD->BSD-Google for %s because it's in chromeos-base. "
-            'Please fix the LICENSE field in the ebuild', self.fullnamerev)
-      new_license_names.append(license_name)
-    ebuild_license_names = new_license_names
-
     # The ebuild license field can look like:
     # LICENSE="GPL-3 LGPL-3 Apache-2.0" (this means AND, as in all 3)
     # for third_party/portage-stable/app-admin/rsyslog/rsyslog-5.8.11.ebuild
