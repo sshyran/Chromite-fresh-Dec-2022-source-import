@@ -131,7 +131,8 @@ def StrSignal(sig_num):
   # Probe the module looking for matching signal constant.
   sig_names = []
   for name, num in signal.__dict__.items():
-    if name.startswith('SIG') and num == sig_num:
+    # Filter out SIG_DFL and related constants.
+    if name.startswith('SIG') and name[3] != '_' and num == sig_num:
       sig_names.append(name)
   if sig_names:
     return '|'.join(sig_names)
