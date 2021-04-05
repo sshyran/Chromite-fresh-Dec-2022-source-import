@@ -74,7 +74,6 @@ HOST_PACKAGES = (
 HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust',
     'dev-lang/rust-bootstrap:0',
-    'dev-lang/rust-bootstrap:1.49.0',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
 )
@@ -83,9 +82,7 @@ HOST_POST_CROSS_PACKAGES = (
 # bot hasn't had a chance to run yet, there are no binary packages available,
 # so we have to list them here and wait.  Once it completes, entries here can
 # be removed so they'll end up on bots & dev's systems.
-NEW_PACKAGES = (
-    'dev-lang/rust-bootstrap:1.49.0',
-)
+NEW_PACKAGES = ()
 
 # Enable the Go compiler for these targets.
 TARGET_GO_ENABLED = (
