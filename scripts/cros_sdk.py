@@ -852,12 +852,17 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       default=False,
       help='Simulate a restrictive network requiring an outbound'
       ' proxy.')
-  group.add_argument(
-      '--no-ns-pid',
-      dest='ns_pid',
-      default=True,
-      action='store_false',
-      help='Do not create a new PID namespace.')
+  for ns, default in (('pid', True), ('net', None)):
+    group.add_argument(
+        f'--ns-{ns}',
+        default=default,
+        action='store_true',
+        help=f'Create a new {ns} namespace.')
+    group.add_argument(
+        f'--no-ns-{ns}',
+        dest=f'ns_{ns}',
+        action='store_false',
+        help=f'Do not create a new {ns} namespace.')
 
   # Internal options.
   group = parser.add_argument_group(
@@ -1150,7 +1155,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
 
   # Enter a new set of namespaces.  Everything after here cannot directly affect
   # the hosts's mounts or alter LVM volumes.
-  namespaces.SimpleUnshare(pid=options.ns_pid)
+  namespaces.SimpleUnshare(net=options.ns_net, pid=options.ns_pid)
 
   if options.snapshot_list:
     for snap in ListChrootSnapshots(chroot_vg, chroot_lv):
