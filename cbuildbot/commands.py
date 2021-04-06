@@ -29,6 +29,7 @@ from chromite.api.gen.chromite.api import android_pb2
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
 
+from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cipd
 from chromite.lib import config_lib
@@ -644,9 +645,10 @@ def GetFirmwareVersionCmdResult(buildroot, board):
   Returns:
     Command execution result.
   """
-  updater = os.path.join(buildroot, constants.DEFAULT_CHROOT_DIR,
-                         cros_build_lib.GetSysroot(board).lstrip(os.path.sep),
-                         'usr', 'sbin', 'chromeos-firmwareupdate')
+  updater = os.path.join(
+      buildroot, constants.DEFAULT_CHROOT_DIR,
+      build_target_lib.get_default_sysroot_path(board).lstrip(os.path.sep),
+      'usr', 'sbin', 'chromeos-firmwareupdate')
   if not os.path.isfile(updater):
     return ''
   updater = path_util.ToChrootPath(updater)
@@ -765,8 +767,8 @@ def RunCrosConfigHost(buildroot, board, args, log_output=True):
   tool = path_util.ToChrootPath(tool)
 
   config_fname = os.path.join(
-      cros_build_lib.GetSysroot(board), 'usr', 'share', 'chromeos-config',
-      'yaml', 'config.yaml')
+      build_target_lib.get_default_sysroot_path(board), 'usr', 'share',
+      'chromeos-config', 'yaml', 'config.yaml')
   result = cros_build_lib.run(
       [tool, '-c', config_fname] + args,
       enter_chroot=True,
@@ -1818,7 +1820,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
   stack_trace_filenames = []
   asan_log_signaled = False
 
-  board_path = cros_build_lib.GetSysroot(board=board)
+  board_path = build_target_lib.get_default_sysroot_path(board)
   symbol_dir = os.path.join(board_path, 'usr', 'lib', 'debug', 'breakpad')
   for curr_dir, _subdirs, files in os.walk(test_results_dir):
     for curr_file in files:
@@ -2209,8 +2211,8 @@ def GenerateBuildConfigs(board, config_useflags):
     and use flags.
   """
   config_chroot_path = os.path.join(
-      cros_build_lib.GetSysroot(board), 'usr', 'share', 'chromeos-config',
-      'yaml', 'config.yaml')
+      build_target_lib.get_default_sysroot_path(board), 'usr', 'share',
+      'chromeos-config', 'yaml', 'config.yaml')
 
   config_fname = path_util.FromChrootPath(config_chroot_path)
 
@@ -2300,7 +2302,7 @@ def GenerateAndroidBreakpadSymbols(buildroot,
     extra_env: A dictionary of environmental variables to set during generation.
     chroot_args: The args to the chroot.
   """
-  board_path = cros_build_lib.GetSysroot(board=board)
+  board_path = build_target_lib.get_default_sysroot_path(board)
   breakpad_dir = os.path.join(board_path, 'usr', 'lib', 'debug', 'breakpad')
   cmd = [
       'cros_generate_android_breakpad_symbols',
