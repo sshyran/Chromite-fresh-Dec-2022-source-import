@@ -6,7 +6,9 @@
 """Wilco configs."""
 
 from __future__ import print_function
+
 from chromite.lib import cros_logging as logging
+from chromite.lib.firmware import servo_lib
 
 # TODO(b/143241417): Use futility anytime flashing over ssh to avoid failures.
 DEPLOY_SSH_FORCE_FUTILITY = True
@@ -85,9 +87,11 @@ def get_commands(servo):
     # NO support for CCD on wilco so this will not work.
     logging.error('wilco devices do not support ccd, cannot flash')
     logging.info('Please use a different servo with wilco devices')
-    raise Exception('%s not accepted' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError(
+        '%s not accepted' % servo.version)
   else:
-    raise Exception('%s not supported' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError(
+        '%s not supported' % servo.version)
 
   flashrom_cmd = ['flashrom', '-p', programmer, '-w']
   futility_cmd = ['futility', 'update', '-p', programmer, '-i']

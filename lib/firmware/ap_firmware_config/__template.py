@@ -8,6 +8,8 @@
 
 from __future__ import print_function
 
+from chromite.lib.firmware import servo_lib
+
 # BUILD CONFIGS.
 
 # TODO: Fill out BUILD_WORKON_PACKAGES.
@@ -73,7 +75,8 @@ def get_commands(servo):
   if servo:
     programmer = ''
   else:
-    raise Exception('%s not supported' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError(
+        '%s not supported' % servo.version)
 
   flashrom_cmd = ['flashrom', '-p', programmer, '-w']
   futility_cmd = ['futility', 'update', '-p', programmer, '-i']

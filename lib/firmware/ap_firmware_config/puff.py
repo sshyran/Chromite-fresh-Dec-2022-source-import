@@ -7,6 +7,8 @@
 
 from __future__ import print_function
 
+from chromite.lib.firmware import servo_lib
+
 BUILD_WORKON_PACKAGES = (
     'chromeos-ec',
     'coreboot',
@@ -72,7 +74,8 @@ def get_commands(servo):
   elif servo.is_ccd:
     programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
   else:
-    raise Exception('%s not supported' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError(
+        '%s not supported' % servo.version)
 
   flashrom_cmd = ['flashrom', '-p', programmer, '-w']
   futility_cmd = ['futility', 'update', '-p', programmer, '-i']

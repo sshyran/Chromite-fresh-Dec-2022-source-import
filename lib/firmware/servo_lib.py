@@ -43,8 +43,12 @@ class Error(Exception):
   """Base error class for the module."""
 
 
-class InvalidServoVersion(Error):
+class InvalidServoVersionError(Error):
   """Invalid servo version error."""
+
+
+class UnsupportedServoVersionError(Error):
+  """Unsupported servo version error (e.g. some servos do not support CCD)."""
 
 
 class DutConnectionError(Error):
@@ -133,7 +137,7 @@ def get(dut_ctl: DutControl) -> Servo:
   """
   version = dut_ctl.get_value('servo_type')
   if version not in VALID_SERVOS:
-    raise InvalidServoVersion('Unrecognized servo version: %s' % version)
+    raise InvalidServoVersionError('Unrecognized servo version: %s' % version)
 
   option = _SERIAL_NUMBER_OPTION_OVERRIDE.get(version, _SERIAL_NUMBER_OPTION)
   serial = dut_ctl.get_value(option)
