@@ -19,7 +19,9 @@ from chromite.cli import deploy
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib import remote_access
+from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 
 pytestmark = [cros_test_lib.pytestmark_inside_only]
@@ -306,7 +308,8 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
     self.assertEqual(num_updates, 1)
 
 
-class TestDeploy(cros_test_lib.ProgressBarTestCase):
+class TestDeploy(cros_test_lib.ProgressBarTestCase,
+                 cros_test_lib.MockTempDirTestCase):
   """Test deploy.Deploy."""
 
   @staticmethod
@@ -314,18 +317,27 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
     return ['/path/to/%s.tbz2' % cpv.pv for cpv in cpvs]
 
   def setUp(self):
+    # Fake being root to avoid running filesystem commands with sudo_run.
+    self.PatchObject(os, 'getuid', return_value=0)
+    self.PatchObject(os, 'geteuid', return_value=0)
+    self._sysroot = os.path.join(self.tempdir, 'sysroot')
+    osutils.SafeMakedirs(self._sysroot)
     self.device = ChromiumOSDeviceHandlerFake()
     self.PatchObject(
         remote_access, 'ChromiumOSDeviceHandler', return_value=self.device)
     self.PatchObject(cros_build_lib, 'GetBoard', return_value=None)
     self.PatchObject(build_target_lib, 'get_default_sysroot_path',
-                     return_value='sysroot')
+                     return_value=self._sysroot)
     self.package_scanner = self.PatchObject(deploy, '_InstallPackageScanner')
     self.get_packages_paths = self.PatchObject(
         deploy, '_GetPackagesByCPV', side_effect=self.FakeGetPackagesByCPV)
     self.emerge = self.PatchObject(deploy, '_Emerge', return_value=None)
     self.unmerge = self.PatchObject(deploy, '_Unmerge', return_value=None)
     self.PatchObject(deploy, '_GetDLCInfo', return_value=(None, None))
+    # Avoid running the portageq command.
+    sysroot_lib.Sysroot(self._sysroot).WriteConfig(
+        'ARCH="amd64"\nPORTDIR_OVERLAY="%s"' % '/nothing/here')
+
 
   def testDeployEmerge(self):
     """Test that deploy._Emerge is called for each package."""
@@ -346,7 +358,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     # Check that package names were correctly resolved into binary packages.
     self.get_packages_paths.assert_called_once_with(
-        [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
+        [package_info.SplitCPV(p) for p in cpvs], True, self._sysroot)
     # Check that deploy._Emerge is called the right number of times.
     self.emerge.assert_called_once_with(mock.ANY, [
         '/path/to/foo-1.2.3.tbz2', '/path/to/bar-1.2.5.tbz2',
@@ -392,7 +404,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase):
 
     # Check that package names were correctly resolved into binary packages.
     self.get_packages_paths.assert_called_once_with(
-        [package_info.SplitCPV(p) for p in cpvs], True, 'sysroot')
+        [package_info.SplitCPV(p) for p in cpvs], True, self._sysroot)
     # Check that deploy._Emerge is called the right number of times.
     self.assertEqual(self.emerge.call_count, 1)
     self.assertEqual(self.unmerge.call_count, 0)

@@ -644,12 +644,11 @@ class WorkonHelper(object):
       packages: list of package name fragments.  These will be mapped to
           canonical portage atoms via the same process as
           StartWorkingOnPackages().
-      use_all: True iff instead of the provided package list, we should just
-          stop working on all currently worked on atoms for the system in
-          question.
-      use_workon_only: True iff instead of the provided package list, we should
-          stop working on all currently worked on atoms that define only a
-          -9999 ebuild.
+      use_all: True iff we should ignore the package list, and instead consider
+          all possible workon-able atoms.
+      use_workon_only: True iff we should ignore the package list, and instead
+          consider all possible atoms for the system in question that define
+          only the -9999 ebuild.
 
     Returns:
       Returns a list of PackageInfo tuples.

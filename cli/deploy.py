@@ -1228,10 +1228,11 @@ def Deploy(device, packages, board=None, emerge=True, update=False, deep=False,
 
       # Warn when the user installs & didn't `cros workon start`.
       if emerge:
+        all_workon = workon_helper.WorkonHelper(sysroot).ListAtoms(use_all=True)
         worked_on_cps = workon_helper.WorkonHelper(sysroot).ListAtoms()
         for package in listed:
           cp = package_info.SplitCPV(package).cp
-          if cp not in worked_on_cps:
+          if cp in all_workon and cp not in worked_on_cps:
             logging.warning(
                 'Are you intentionally deploying unmodified packages, or did '
                 'you forget to run `cros workon --board=$BOARD start %s`?', cp)
