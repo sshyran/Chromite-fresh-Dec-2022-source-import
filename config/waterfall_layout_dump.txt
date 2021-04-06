@@ -319,6 +319,7 @@
     hatch-borealis-release
     hatch-diskswap-release
     hatch-kernelnext-release
+    hatch-manatee-release
     hatch-release
     heli-release
     herobrine-release
@@ -394,6 +395,7 @@
     veyron_tiger-release
     volteer-borealis-release
     volteer-kernelnext-release
+    volteer-manatee-release
     volteer-release
     whirlwind-release
     winky-release
@@ -1251,6 +1253,12 @@
   hatch-kernelnext-unittest-stress
   hatch-llvm-next-toolchain-tryjob
   hatch-llvm-toolchain-tryjob
+  hatch-manatee-full-tryjob
+  hatch-manatee-llvm-next-toolchain-tryjob
+  hatch-manatee-llvm-toolchain-tryjob
+  hatch-manatee-payloads-tryjob
+  hatch-manatee-release-tryjob
+  hatch-manatee-unittest-stress
   hatch-payloads-tryjob
   hatch-release-tryjob
   hatch-unittest-stress
@@ -1528,6 +1536,7 @@
     hatch-borealis-release-tryjob
     hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
+    hatch-manatee-release-tryjob
     hatch-release-tryjob
     heli-release-tryjob
     herobrine-release-tryjob
@@ -1603,6 +1612,7 @@
     veyron_tiger-release-tryjob
     volteer-borealis-release-tryjob
     volteer-kernelnext-release-tryjob
+    volteer-manatee-release-tryjob
     volteer-release-tryjob
     whirlwind-release-tryjob
     winky-release-tryjob
@@ -2061,6 +2071,12 @@
   volteer-kernelnext-unittest-stress
   volteer-llvm-next-toolchain-tryjob
   volteer-llvm-toolchain-tryjob
+  volteer-manatee-full-tryjob
+  volteer-manatee-llvm-next-toolchain-tryjob
+  volteer-manatee-llvm-toolchain-tryjob
+  volteer-manatee-payloads-tryjob
+  volteer-manatee-release-tryjob
+  volteer-manatee-unittest-stress
   volteer-payloads-tryjob
   volteer-release-tryjob
   volteer-unittest-stress
