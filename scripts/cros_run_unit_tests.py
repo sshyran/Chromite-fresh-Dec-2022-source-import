@@ -12,6 +12,7 @@ import multiprocessing
 import os
 import sys
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import chroot_util
@@ -102,7 +103,8 @@ def main(argv):
 
   cros_build_lib.AssertInsideChroot()
 
-  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
+  sysroot = (opts.sysroot or
+             build_target_lib.get_default_sysroot_path(opts.board))
   skipped_packages = set()
   if opts.skip_packages:
     skipped_packages |= set(opts.skip_packages.split())

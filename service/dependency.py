@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dependency_lib
@@ -96,7 +97,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       depends on
   """
   if not sysroot_path:
-    sysroot_path = cros_build_lib.GetSysroot(board)
+    sysroot_path = build_target_lib.get_default_sysroot_path(board)
 
   results = {
       'sysroot_path': sysroot_path,
@@ -105,7 +106,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       'source_path_mapping': {},
   }
 
-  sdk_sysroot = cros_build_lib.GetSysroot(None)
+  sdk_sysroot = build_target_lib.get_default_sysroot_path(None)
   sdk_results = {
       'sysroot_path': sdk_sysroot,
       'target_board': 'sdk',
