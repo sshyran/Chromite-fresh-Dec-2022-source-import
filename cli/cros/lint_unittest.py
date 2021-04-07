@@ -15,8 +15,6 @@ from chromite.cli.cros import lint
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
-pytestmark = cros_test_lib.pytestmark_inside_only
-
 
 # pylint: disable=protected-access
 
@@ -89,11 +87,12 @@ class PylintrcConfigTest(cros_test_lib.TempDirTestCase):
 class TestNode(object):
   """Object good enough to stand in for lint funcs"""
 
-  Args = collections.namedtuple('Args', ('args', 'vararg', 'kwarg'))
+  Args = collections.namedtuple(
+      'Args', ('args', 'vararg', 'kwarg', 'kwonlyargs'))
   Arg = collections.namedtuple('Arg', ('name',))
 
   def __init__(self, doc='', fromlineno=0, path='foo.py', args=(), vararg='',
-               kwarg='', names=None, lineno=0, name='module',
+               kwarg='', kwonlyargs=(), names=None, lineno=0, name='module',
                display_type='Module', col_offset=None):
     if names is None:
       names = [('name', None)]
@@ -103,7 +102,7 @@ class TestNode(object):
     self.lineno = lineno
     self.file = path
     self.args = self.Args(args=[self.Arg(name=x) for x in args],
-                          vararg=vararg, kwarg=kwarg)
+                          vararg=vararg, kwarg=kwarg, kwonlyargs=kwonlyargs)
     self.names = names
     self.name = name
     self._display_type = display_type
@@ -753,7 +752,8 @@ class SourceCheckerTest(CheckerTestCase):
       self.results = []
       stream = io.BytesIO(header)
       self.checker._check_encoding(node, stream, StatStub(size=len(header)))
-      self.assertLintFailed(expected=('R9204',))
+      # NB: We no longer require file encodings w/Python 3.
+      self.assertLintPassed()
 
   def testBadEncoding(self):
     """_check_encoding should reject non-"utf-8" encodings"""
