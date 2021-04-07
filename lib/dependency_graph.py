@@ -18,7 +18,7 @@ from pathlib import Path
 import sys
 from typing import Iterable, Iterator, List, Optional, Set, Union
 
-from chromite.lib import build_target_lib
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.parser import package_info
 
@@ -256,7 +256,7 @@ class DependencyGraph:
 
     # Figure out which roots we have roots, and that they're the ones we expect.
     given_sysroot = os.path.normpath(getattr(sysroot, 'path', sysroot))
-    sdk_root = build_target_lib.get_default_sysroot_path()
+    sdk_root = cros_build_lib.GetSysroot()
     is_sdk_graph = given_sysroot == sdk_root
     # Store the SDK (bdeps) root when present and it's not the SDK's depgraph.
     self.sdk_root = (

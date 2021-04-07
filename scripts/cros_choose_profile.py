@@ -13,7 +13,6 @@ import sys
 
 import six
 
-from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -229,7 +228,7 @@ class Board(object):
     if self._board_root:
       return self._board_root
 
-    return build_target_lib.get_default_sysroot_path(self.board_variant)
+    return os.path.join(cros_build_lib.GetSysroot(self.board_variant))
 
   @property
   @PathPrefixDecorator

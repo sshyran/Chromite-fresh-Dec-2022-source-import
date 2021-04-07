@@ -15,7 +15,6 @@ from __future__ import print_function
 
 import sys
 
-from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import terminal
@@ -81,7 +80,7 @@ def main(argv):
     sysroot = '/'
   elif options.board:
     friendly_name = options.board
-    sysroot = build_target_lib.get_default_sysroot_path(options.board)
+    sysroot = cros_build_lib.GetSysroot(board=options.board)
   else:
     cros_build_lib.Die('You must specify either --host, --board')
 

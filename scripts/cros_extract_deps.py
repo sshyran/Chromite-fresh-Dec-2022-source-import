@@ -15,7 +15,6 @@ import sys
 
 from chromite.lib.depgraph import DepGraphGenerator
 
-from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -311,8 +310,7 @@ def ExtractDeps(sysroot,
 def main(argv):
   opts = ParseArgs(argv)
 
-  sysroot = (opts.sysroot or
-             build_target_lib.get_default_sysroot_path(opts.board))
+  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
   deps_list, _ = ExtractDeps(sysroot, opts.pkgs, opts.format)
 
   pformat.json(deps_list,

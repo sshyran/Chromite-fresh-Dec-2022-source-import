@@ -14,7 +14,6 @@ import sys
 import time
 from typing import List, Optional, Union
 
-from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
@@ -160,8 +159,8 @@ class DepGraphGenerator(object):
     # point our tools at /build/BOARD and to setup cross compiles to the
     # appropriate board as configured in toolchain.conf.
     if self.board:
-      self.sysroot = os.environ.get(
-          'SYSROOT', build_target_lib.get_default_sysroot_path(self.board))
+      self.sysroot = os.environ.get('SYSROOT',
+                                    cros_build_lib.GetSysroot(self.board))
 
     if self.sysroot:
       os.environ['PORTAGE_CONFIGROOT'] = self.sysroot
@@ -928,7 +927,7 @@ def _get_sysroot_path(
     try:
       return build_target.root
     except AttributeError:
-      return build_target_lib.get_default_sysroot_path(build_target)
+      return cros_build_lib.GetSysroot(build_target)
 
 
 def _get_raw_sdk_depgraph(
@@ -939,7 +938,7 @@ def _get_raw_sdk_depgraph(
   The SDK deps will contain the packages installed to a fresh SDK.
   The bdeps will always be empty since everything is installed to the SDK.
   """
-  sysroot_path = build_target_lib.get_default_sysroot_path(None)
+  sysroot_path = cros_build_lib.GetSysroot(board=None)
   packages = packages or [constants.TARGET_SDK]
   lib_argv = _get_emerge_args(sysroot_path, packages, include_bdeps=True)
 
@@ -1004,9 +1003,9 @@ def get_sdk_dependency_graph(
 ) -> dependency_graph.DependencyGraph:
   """Get the DependencyGraph for the SDK itself."""
   result = _get_raw_sdk_depgraph(packages=pkgs)
-  return _create_graph_from_deps(
-      result.deps, build_target_lib.get_default_sysroot_path(None),
-      result.packages, with_src_paths)
+  return _create_graph_from_deps(result.deps,
+                                 cros_build_lib.GetSysroot(board=None),
+                                 result.packages, with_src_paths)
 
 
 def get_sysroot_dependency_graph(

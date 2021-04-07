@@ -41,8 +41,6 @@ from typing import (Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple,
                     Union)
 
 import yaml  # pylint: disable=import-error
-
-from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -446,8 +444,7 @@ def setup_tidy(board: str, ebuild_list: List[portage_util.EBuild]):
   packages = [x.package for x in ebuild_list]
   logging.info('Setting up to lint %r', packages)
 
-  workon = workon_helper.WorkonHelper(
-      build_target_lib.get_default_sysroot_path(board))
+  workon = workon_helper.WorkonHelper(cros_build_lib.GetSysroot(board))
   workon.StopWorkingOnPackages(packages=[], use_all=True)
   workon.StartWorkingOnPackages(packages)
 
@@ -478,8 +475,7 @@ def run_tidy(board: str, ebuild_list: List[portage_util.EBuild],
   # Since we rely on build actions _actually_ running, we can't live with a
   # cache.
   osutils.RmDir(
-      Path(build_target_lib.get_default_sysroot_path(
-          board)) / 'var' / 'cache' / 'portage',
+      Path(cros_build_lib.GetSysroot(board)) / 'var' / 'cache' / 'portage',
       ignore_missing=True,
       sudo=True,
   )
