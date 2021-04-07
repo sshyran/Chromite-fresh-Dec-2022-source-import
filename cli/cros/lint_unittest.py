@@ -709,6 +709,8 @@ class SourceCheckerTest(CheckerTestCase):
         b'#!/usr/bin/env python\n',
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
+        b'#!/usr/bin/env vpython\n',
+        b'#!/usr/bin/env vpython3\n',
     )
     self._testShebang(shebangs, ('R9202',), 0o644)
 
@@ -719,6 +721,8 @@ class SourceCheckerTest(CheckerTestCase):
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
         b'#!/usr/bin/env python2\t\n',
+        b'#!/usr/bin/env vpython\n',
+        b'#!/usr/bin/env vpython3\n',
     )
     self._testShebang(shebangs, (), 0o755)
 

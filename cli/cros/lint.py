@@ -682,8 +682,11 @@ class SourceChecker(pylint.checkers.BaseChecker):
       self.add_message('R9202')
 
     if shebang.strip() not in (
-        b'#!/usr/bin/env python2', b'#!/usr/bin/env python3',
-        b'#!/usr/bin/env python'):
+        b'#!/usr/bin/env python2',
+        b'#!/usr/bin/env python3',
+        b'#!/usr/bin/env python',
+        b'#!/usr/bin/env vpython',
+        b'#!/usr/bin/env vpython3'):
       self.add_message('R9200')
 
   def _check_encoding(self, _node, stream, st):
