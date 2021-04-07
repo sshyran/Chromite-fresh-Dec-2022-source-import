@@ -153,12 +153,28 @@ class TestReaderBase(cros_test_lib.MockTestCase):
       self.assertExists(GetFdPath(r.Target()))
       self.assertExists(GetFdPath(r._Source()))
 
+      # Per crbug.com/1196702 it seems like some other process gets the file
+      # descriptor right after we close it and by the time we check its
+      # existence, it is still there and this can flake. So it might be better
+      # to make sure this is checked properly through real paths and not
+      # symlinks.
+      path = GetFdPath(r._Source())
+      old_path = os.path.realpath(path)
       r._CloseSource()
-      self.assertNotExists(GetFdPath(r._Source()))
+      with self.assertRaises(OSError):
+        new_path = os.path.realpath(path)
+        self.assertNotEqual(old_path, new_path)
+        raise OSError('Fake the context manager.')
+
       self.assertExists(GetFdPath(r.Target()))
 
+    path = GetFdPath(r.Target())
+    old_path = os.path.realpath(path)
     r.CloseTarget()
-    self.assertNotExists(GetFdPath(r.Target()))
+    with self.assertRaises(OSError):
+      new_path = os.path.realpath(path)
+      self.assertNotEqual(old_path, new_path)
+      raise OSError('Fake the context manager.')
 
   def testFdPipeCommunicate(self):
     """Tests that file descriptors pipe can actually communicate."""
