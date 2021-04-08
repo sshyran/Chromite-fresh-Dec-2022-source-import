@@ -324,6 +324,7 @@
     heli-release
     herobrine-release
     jacuzzi-arc64-release
+    jacuzzi-kernelnext-release
     jacuzzi-release
     kalista-cfm-release
     kalista-release
@@ -1284,6 +1285,12 @@
   jacuzzi-arc64-unittest-stress
   jacuzzi-factory-kukui-12587.B-factorybranch-tryjob
   jacuzzi-full-tryjob
+  jacuzzi-kernelnext-full-tryjob
+  jacuzzi-kernelnext-llvm-next-toolchain-tryjob
+  jacuzzi-kernelnext-llvm-toolchain-tryjob
+  jacuzzi-kernelnext-payloads-tryjob
+  jacuzzi-kernelnext-release-tryjob
+  jacuzzi-kernelnext-unittest-stress
   jacuzzi-llvm-next-toolchain-tryjob
   jacuzzi-llvm-toolchain-tryjob
   jacuzzi-payloads-tryjob
@@ -1541,6 +1548,7 @@
     heli-release-tryjob
     herobrine-release-tryjob
     jacuzzi-arc64-release-tryjob
+    jacuzzi-kernelnext-release-tryjob
     jacuzzi-release-tryjob
     kalista-cfm-release-tryjob
     kalista-release-tryjob
