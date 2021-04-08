@@ -13713,7 +13713,6 @@
     "firmware-veyron-6588.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
-            "veyron_mickey",
             "veyron_rialto",
             "veyron_tiger",
             "veyron_fievel"
@@ -13724,7 +13723,6 @@
     "firmware-veyron-6588.B-firmwarebranch-tryjob": {
         "_template": "firmwarebranch",
         "boards": [
-            "veyron_mickey",
             "veyron_rialto",
             "veyron_tiger",
             "veyron_fievel"

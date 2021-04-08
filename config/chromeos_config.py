@@ -1759,8 +1759,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-gandof-6301.155.B', ['gandof'], {}),
       (MONTHLY, 'firmware-buddy-6301.202.B', ['buddy'], {}),
       (MONTHLY, 'firmware-veyron-6588.B', [
-          'veyron_mickey', 'veyron_rialto', 'veyron_tiger',
-          'veyron_fievel'], {}),
+          'veyron_rialto', 'veyron_tiger', 'veyron_fievel'], {}),
       (MONTHLY, 'firmware-glados-7820.B', [
           'glados', 'chell', 'lars',
           'sentry', 'cave', 'asuka', 'caroline'], {}),
