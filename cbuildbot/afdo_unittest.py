@@ -686,7 +686,8 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
     ebuilds = [(os.path.basename(ebuild[0]), ebuild[1])
                for ebuild in afdo.FindKernelEbuilds()]
     self.assertIn(('chromeos-kernel-4_4-9999.ebuild', '4.4'), ebuilds)
-    self.assertIn(('chromeos-kernel-3_8-9999.ebuild', '3.8'), ebuilds)
+    self.assertIn(('chromeos-kernel-4_19-9999.ebuild', '4.19'), ebuilds)
+    self.assertIn(('chromeos-kernel-5_4-9999.ebuild', '5.4'), ebuilds)
 
   def testProfileAge(self):
     self.assertEqual(0, afdo.ProfileAge([0, 0, 0, int(time.time())]))
