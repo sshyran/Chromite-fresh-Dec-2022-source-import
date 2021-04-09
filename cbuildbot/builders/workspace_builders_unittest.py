@@ -213,6 +213,30 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
                   board='board'),
     ])
 
+  def testFirmwareBranchTryjob(self):
+    """Verify RunStages for FirmwareBranchBuilder Tryjob."""
+    builder_run = self._InitConfig('test-firmwarebranch-tryjob')
+    workspace_builders.FirmwareBranchBuilder(
+        builder_run, self.buildstore).RunStages()
+
+    self.assertEqual(self.mock_run_stage.call_args_list, [
+        mock.call(workspace_stages.WorkspaceUprevStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceInitSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceSetupBoardStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(branch_archive_stages.FirmwareArchiveStage,
+                  build_root=self.workspace,
+                  board='board'),
+    ])
+
   def testFirmwareBranchWithVersion(self):
     """Verify RunStages for FirmwareBranchBuilder with --version."""
     builder_run = self._InitConfig('test-firmwarebranch',

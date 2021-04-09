@@ -35,11 +35,13 @@ class BuildSpecBuilder(generic_builders.Builder):
       self._RunStage(workspace_stages.WorkspaceUprevStage,
                      build_root=self._run.options.workspace)
 
-      self._RunStage(workspace_stages.WorkspacePublishStage,
-                     build_root=self._run.options.workspace)
+      if not self._run.options.debug:
+        # If this is not a tryjob, push uprevs and the buildspec.
+        self._RunStage(workspace_stages.WorkspacePublishStage,
+                       build_root=self._run.options.workspace)
 
-      self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
-                     build_root=self._run.options.workspace)
+        self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
+                       build_root=self._run.options.workspace)
 
     if self._run.config.slave_configs:
       # If there are child builds to schedule, schedule them.
