@@ -578,18 +578,6 @@
       ]
     },
     {
-      "name": "jacuzzi-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "kefka",
       "configs": [
         {
@@ -4596,6 +4584,119 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7154,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "jacuzzi-kernelnext",
+      "reference_board_name": "jacuzzi-kernelnext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "burnet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "cerise",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "damu",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "esche",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "fennel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "fennel14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "jacuzzi",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "juniper",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "kappa",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "kenzo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "makomo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "stern",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
+          "is_active": true
+        },
+        {
+          "board_name": "jacuzzi-kernelnext",
+          "name": "willow",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7172,
           "is_active": true
         }
       ]
