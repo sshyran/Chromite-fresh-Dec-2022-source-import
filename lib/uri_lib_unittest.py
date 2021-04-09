@@ -139,7 +139,7 @@ class ConstructUrlTests(cros_test_lib.TestCase):
   """Tests functions that create URLs."""
 
   def testConstructMiloBuildURL(self):
-    """Tests generating Legoland build URIs."""
+    """Tests generating Milo build URIs."""
     actual = uri_lib.ConstructMiloBuildUri('bbid')
     expected = 'https://ci.chromium.org/b/bbid'
 

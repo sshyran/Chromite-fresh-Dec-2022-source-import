@@ -672,7 +672,7 @@ class _BuilderRunBase(object):
     """Return the dashboard URL
 
     This is the direct link to logdog logs if given a stage, or the link to the
-    legoland build page for the build.
+    build page for the build.
 
     Args:
       stage: Link to a specific |stage|, otherwise the general buildbot log

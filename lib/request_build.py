@@ -142,7 +142,7 @@ class RequestBuild(object):
     }
 
     if self.master_cidb_id or self.master_buildbucket_id:
-      # Used by Legoland as part of grouping slave builds. Set to False for
+      # Used by dashboards as part of grouping slave builds. Set to False for
       # slave builds, not set otherwise.
       tags['master'] = 'False'
 

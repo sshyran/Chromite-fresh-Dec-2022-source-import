@@ -10,7 +10,7 @@ This generates the LUCI Scheduler configuration file for ChromeOS builds based
 on the chromeos_config contents.
 
 Changes to chromite/config/luci-scheduler.cfg will be autodeployed:
-  http://cros-goldeneye/chromeos/legoland/builderHistory?buildConfig=luci-scheduler-updater
+  https://data.corp.google.com/sites/chromeos_ci_cros_ci_builds/utility/?f=board_name:in:luci-scheduler-updater
 
 Notes:
   Normal builds are scheduled based on the builder values for
@@ -41,7 +41,7 @@ _CONFIG_HEADER = """# Defines buckets on luci-scheduler.appspot.com.
 # Generated with chromite/scripts/gen_luci_scheduler
 
 # Autodeployed with:
-# http://cros-goldeneye/chromeos/legoland/builderHistory?buildConfig=luci-scheduler-updater
+# https://data.corp.google.com/sites/chromeos_ci_cros_ci_builds/utility/?f=board_name:in:luci-scheduler-updater
 
 acl_sets {
   name: "default"
