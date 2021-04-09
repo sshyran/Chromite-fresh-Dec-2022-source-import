@@ -16,6 +16,7 @@ from chromite.api.gen.chromite.api import android_pb2
 from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
+from chromite.service import android
 from chromite.service import packages
 
 
@@ -23,6 +24,20 @@ ANDROIDPIN_MASK_PATH = os.path.join(constants.SOURCE_ROOT,
                                     constants.CHROMIUMOS_OVERLAY_DIR,
                                     'profiles', 'default', 'linux',
                                     'package.mask', 'androidpin')
+
+
+def _GetLatestBuildResponse(_input_proto, output_proto, _config):
+  """Fake GetLatestBuild response."""
+  output_proto.android_version = '7123456'
+
+
+@faux.success(_GetLatestBuildResponse)
+@faux.empty_error
+@validate.require('android_build_branch')
+@validate.validation_complete
+def GetLatestBuild(input_proto, output_proto, _config):
+  build_id, _ = android.GetLatestBuild(input_proto.android_build_branch)
+  output_proto.android_version = build_id
 
 
 def _MarkStableResponse(_input_proto, output_proto, _config):

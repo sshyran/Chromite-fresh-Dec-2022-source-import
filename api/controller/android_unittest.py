@@ -18,7 +18,47 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import build_target_lib
+from chromite.service import android as service_android
 from chromite.service import packages
+
+
+class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+  """Unittests for GetLatestBuild."""
+
+  def setUp(self):
+    self._mock = self.PatchObject(service_android, 'GetLatestBuild')
+    self._mock.return_value = ('7123456', {})
+    self._input_proto = android_pb2.GetLatestBuildRequest()
+    self._input_proto.android_build_branch = 'git_rvc-arc'
+    self._output_proto = android_pb2.GetLatestBuildResponse()
+
+  def testValidateOnly(self):
+    """Test that a validate only call does not execute any logic."""
+    android.GetLatestBuild(self._input_proto, self._output_proto,
+                           self.validate_only_config)
+    self._mock.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    android.GetLatestBuild(self._input_proto, self._output_proto,
+                           self.mock_call_config)
+    self._mock.assert_not_called()
+    self.assertEqual(self._output_proto.android_version, '7123456')
+
+  def testFailsIfAndroidBuildBranchMissing(self):
+    """Fails if package_name is missing."""
+    self._input_proto.android_build_branch = ''
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      android.GetLatestBuild(self._input_proto, self._output_proto,
+                             self.api_config)
+    self._mock.assert_not_called()
+
+  def testActualCall(self):
+    """Test that the underlying method is being called in the usual case."""
+    android.GetLatestBuild(self._input_proto, self._output_proto,
+                           self.api_config)
+    self._mock.assert_called_once_with('git_rvc-arc')
+    self.assertEqual(self._output_proto.android_version, '7123456')
 
 
 class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
