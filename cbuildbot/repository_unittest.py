@@ -182,26 +182,23 @@ gpg: Can't check signature: public key not found
 
 warning: Skipped upgrade to unverified version
 """
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     cmd_result = cros_build_lib.CommandResult(error=warnning_stderr)
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     mock_rm.assert_called_once_with(mock.ANY, ignore_missing=True)
 
   def test_RepoSelfupdateRaisesException(self):
     """Test _RepoSelfupdate when exception is raised."""
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     ex = cros_build_lib.RunCommandError('msg')
     self.PatchObject(cros_build_lib, 'run', side_effect=ex)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     mock_rm.assert_called_once_with(mock.ANY, ignore_missing=True)
 
   def test_RepoSelfupdateSucceeds(self):
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     cmd_result = cros_build_lib.CommandResult()
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     self.assertFalse(mock_rm.called)
