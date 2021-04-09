@@ -242,8 +242,6 @@
     asurada-release
     atlas-blueznext-release
     atlas-release
-    auron_paine-release
-    auron_yuna-release
     banjo-release
     banon-release
     beaglebone-release
@@ -260,7 +258,6 @@
     brya-release
     bubs-release
     buddy-cfm-release
-    buddy-release
     candy-release
     caroline-arc64-release
     caroline-kernelnext-release
@@ -297,7 +294,6 @@
     fizz-moblab-release
     fizz-release
     gale-release
-    gandof-release
     gnawty-release
     grunt-arc-r-release
     grunt-arc64-release
@@ -305,7 +301,6 @@
     grunt-release
     guado-cfm-release
     guado-macrophage-release
-    guado-release
     guado_labstation-release
     guybrush-release
     hana-arc64-release
@@ -339,7 +334,6 @@
     kukui-kernelnext-release
     kukui-release
     lars-release
-    lulu-release
     majolica-release
     mancomb-release
     mistral-release
@@ -366,8 +360,6 @@
     relm-release
     reven-release
     rikku-cfm-release
-    rikku-release
-    samus-release
     sand-release
     sarien-arc64-release
     sarien-release
@@ -386,7 +378,6 @@
     tael-release
     tatl-release
     terra-release
-    tidus-release
     trogdor-kernelnext-release
     trogdor-release
     trogdor64-release
@@ -511,19 +502,7 @@
   atlas-release-tryjob
   atlas-unittest-stress
   auron_paine-factory-auron-6459.B-factorybranch-tryjob
-  auron_paine-full-tryjob
-  auron_paine-llvm-next-toolchain-tryjob
-  auron_paine-llvm-toolchain-tryjob
-  auron_paine-payloads-tryjob
-  auron_paine-release-tryjob
-  auron_paine-unittest-stress
   auron_yuna-factory-auron-6459.B-factorybranch-tryjob
-  auron_yuna-full-tryjob
-  auron_yuna-llvm-next-toolchain-tryjob
-  auron_yuna-llvm-toolchain-tryjob
-  auron_yuna-payloads-tryjob
-  auron_yuna-release-tryjob
-  auron_yuna-unittest-stress
   banjo-factory-rambi-6420.B-factorybranch-tryjob
   banjo-full-tryjob
   banjo-llvm-next-toolchain-tryjob
@@ -631,12 +610,6 @@
   buddy-cfm-unittest-stress
   buddy-factory-auron-6459.B-factorybranch-tryjob
   buddy-factory-auron-6772.B-factorybranch-tryjob
-  buddy-full-tryjob
-  buddy-llvm-next-toolchain-tryjob
-  buddy-llvm-toolchain-tryjob
-  buddy-payloads-tryjob
-  buddy-release-tryjob
-  buddy-unittest-stress
   candy-factory-rambi-6420.B-factorybranch-tryjob
   candy-full-tryjob
   candy-llvm-next-toolchain-tryjob
@@ -1099,12 +1072,6 @@
   gale-test-ap-tryjob
   gale-unittest-stress
   gandof-factory-auron-6459.B-factorybranch-tryjob
-  gandof-full-tryjob
-  gandof-llvm-next-toolchain-tryjob
-  gandof-llvm-toolchain-tryjob
-  gandof-payloads-tryjob
-  gandof-release-tryjob
-  gandof-unittest-stress
   glados-factory-glados-7657.B-factorybranch-tryjob
   glados-factory-glados-7828.B-factorybranch-tryjob
   glados-full-tryjob
@@ -1156,18 +1123,12 @@
   guado-cfm-release-tryjob
   guado-cfm-unittest-stress
   guado-factory-auron-6772.B-factorybranch-tryjob
-  guado-full-tryjob
-  guado-llvm-next-toolchain-tryjob
-  guado-llvm-toolchain-tryjob
   guado-macrophage-full-tryjob
   guado-macrophage-llvm-next-toolchain-tryjob
   guado-macrophage-llvm-toolchain-tryjob
   guado-macrophage-payloads-tryjob
   guado-macrophage-release-tryjob
   guado-macrophage-unittest-stress
-  guado-payloads-tryjob
-  guado-release-tryjob
-  guado-unittest-stress
   guado_labstation-full-tryjob
   guado_labstation-llvm-next-toolchain-tryjob
   guado_labstation-llvm-toolchain-tryjob
@@ -1403,12 +1364,6 @@
   littlejoe-unittest-stress
   luci-scheduler-updater-tryjob
   lulu-factory-auron-6459.B-factorybranch-tryjob
-  lulu-full-tryjob
-  lulu-llvm-next-toolchain-tryjob
-  lulu-llvm-toolchain-tryjob
-  lulu-payloads-tryjob
-  lulu-release-tryjob
-  lulu-unittest-stress
   majolica-full-tryjob
   majolica-llvm-next-toolchain-tryjob
   majolica-llvm-toolchain-tryjob
@@ -1466,8 +1421,6 @@
     asurada-release-tryjob
     atlas-blueznext-release-tryjob
     atlas-release-tryjob
-    auron_paine-release-tryjob
-    auron_yuna-release-tryjob
     banjo-release-tryjob
     banon-release-tryjob
     beaglebone-release-tryjob
@@ -1484,7 +1437,6 @@
     brya-release-tryjob
     bubs-release-tryjob
     buddy-cfm-release-tryjob
-    buddy-release-tryjob
     candy-release-tryjob
     caroline-arc64-release-tryjob
     caroline-kernelnext-release-tryjob
@@ -1521,7 +1473,6 @@
     fizz-moblab-release-tryjob
     fizz-release-tryjob
     gale-release-tryjob
-    gandof-release-tryjob
     gnawty-release-tryjob
     grunt-arc-r-release-tryjob
     grunt-arc64-release-tryjob
@@ -1529,7 +1480,6 @@
     grunt-release-tryjob
     guado-cfm-release-tryjob
     guado-macrophage-release-tryjob
-    guado-release-tryjob
     guado_labstation-release-tryjob
     guybrush-release-tryjob
     hana-arc64-release-tryjob
@@ -1563,7 +1513,6 @@
     kukui-kernelnext-release-tryjob
     kukui-release-tryjob
     lars-release-tryjob
-    lulu-release-tryjob
     majolica-release-tryjob
     mancomb-release-tryjob
     mistral-release-tryjob
@@ -1590,8 +1539,6 @@
     relm-release-tryjob
     reven-release-tryjob
     rikku-cfm-release-tryjob
-    rikku-release-tryjob
-    samus-release-tryjob
     sand-release-tryjob
     sarien-arc64-release-tryjob
     sarien-release-tryjob
@@ -1610,7 +1557,6 @@
     tael-release-tryjob
     tatl-release-tryjob
     terra-release-tryjob
-    tidus-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor64-release-tryjob
@@ -1835,24 +1781,12 @@
   rikku-cfm-release-tryjob
   rikku-cfm-unittest-stress
   rikku-factory-auron-6772.B-factorybranch-tryjob
-  rikku-full-tryjob
-  rikku-llvm-next-toolchain-tryjob
-  rikku-llvm-toolchain-tryjob
-  rikku-payloads-tryjob
-  rikku-release-tryjob
-  rikku-unittest-stress
-  samus-full-tryjob
   samus-kernelnext-full-tryjob
   samus-kernelnext-llvm-next-toolchain-tryjob
   samus-kernelnext-llvm-toolchain-tryjob
   samus-kernelnext-payloads-tryjob
   samus-kernelnext-release-tryjob
   samus-kernelnext-unittest-stress
-  samus-llvm-next-toolchain-tryjob
-  samus-llvm-toolchain-tryjob
-  samus-payloads-tryjob
-  samus-release-tryjob
-  samus-unittest-stress
   sand-factory-reef-8811.B-factorybranch-tryjob
   sand-full-tryjob
   sand-llvm-next-toolchain-tryjob
@@ -1980,12 +1914,6 @@
   terra-unittest-stress
   test-ap-group-tryjob
   tidus-factory-auron-6772.B-factorybranch-tryjob
-  tidus-full-tryjob
-  tidus-llvm-next-toolchain-tryjob
-  tidus-llvm-toolchain-tryjob
-  tidus-payloads-tryjob
-  tidus-release-tryjob
-  tidus-unittest-stress
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-kernelnext-full-tryjob

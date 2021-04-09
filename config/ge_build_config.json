@@ -38,30 +38,6 @@
       ]
     },
     {
-      "name": "auron_paine",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "auron",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "auron_yuna",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "auron",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "banjo",
       "configs": [
         {
@@ -226,18 +202,6 @@
           "leader_board": true,
           "board_group": "",
           "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "buddy",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "auron",
-          "arch": "X86_INTERNAL"
         }
       ]
     },
@@ -434,18 +398,6 @@
       ]
     },
     {
-      "name": "gandof",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "auron",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "gnawty",
       "configs": [
         {
@@ -453,18 +405,6 @@
           "experimental": false,
           "leader_board": false,
           "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "guado",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "jecht",
           "arch": "X86_INTERNAL"
         }
       ]
@@ -662,18 +602,6 @@
       ]
     },
     {
-      "name": "lulu",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "auron",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "majolica",
       "configs": [
         {
@@ -794,18 +722,6 @@
       ]
     },
     {
-      "name": "rikku",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "jecht",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "rikku-cfm",
       "configs": [
         {
@@ -813,18 +729,6 @@
           "experimental": true,
           "leader_board": false,
           "board_group": "cfm",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "samus",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
           "arch": "X86_INTERNAL"
         }
       ]
@@ -933,18 +837,6 @@
           "experimental": false,
           "leader_board": false,
           "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "tidus",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "jecht",
           "arch": "X86_INTERNAL"
         }
       ]
