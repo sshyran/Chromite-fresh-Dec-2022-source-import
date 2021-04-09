@@ -587,9 +587,9 @@ class BoardRunAttributesTest(_BuilderRunTestCase):
     """Stage-like class to wait for then check attr on BoardRunAttributes."""
     def Run(self):
       value = self.GetParallel()
-      assert value == self.expected_value, \
-          ('For run attribute %s expected value %r but got %r.' %
-           (self.attr, self.expected_value, value))
+      assert value == self.expected_value, (
+          'For run attribute %s expected value %r but got %r.' %
+          (self.attr, self.expected_value, value))
 
   class _TimeoutWaitForAttr(_WaitForAttr):
     """Stage-like class to time-out waiting for attr on BoardRunAttributes."""

@@ -110,8 +110,8 @@ def request(url,
     headers['Authorization'] = 'Bearer %s' % tok
 
   if payload is not None:
-    assert isinstance(payload, (six.string_types, six.binary_type)), \
-        type(payload)
+    assert isinstance(payload, (six.string_types, six.binary_type)), (
+        type(payload))
     assert method in ('CREATE', 'POST', 'PUT'), method
 
   attempt = 0

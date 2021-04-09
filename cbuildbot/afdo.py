@@ -163,8 +163,8 @@ def CompressAFDOFile(to_compress, buildroot):
     Name of the compressed data file.
   """
   local_dir = AFDO_BUILDROOT_LOCAL % {'build_root': buildroot}
-  dest = os.path.join(local_dir, os.path.basename(to_compress)) + \
-      COMPRESSION_SUFFIX
+  dest = (os.path.join(local_dir, os.path.basename(to_compress)) +
+          COMPRESSION_SUFFIX)
   cros_build_lib.CompressFile(to_compress, dest)
   return dest
 

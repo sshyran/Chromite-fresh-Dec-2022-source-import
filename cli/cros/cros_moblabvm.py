@@ -38,7 +38,7 @@ class MoblabvmCommand(command.CliCommand):
 
   EPILOG = u"""
 A typical moblabvm session looks so:
-  $ cros moblabvm --workspace /moblabvm/workspace create /moblab/image/ \
+  $ cros moblabvm --workspace /moblabvm/workspace create /moblab/image/ \\
         --dut-image-dir /link/image/
   $ cros moblabvm --workspace /moblabvm/workspace start
   ...

@@ -1503,8 +1503,8 @@ class SiteConfig(dict):
 
     # Select the template name based on template argument, or nothing.
     resolved_template = template.get('_template') if template else None
-    assert not resolved_template or resolved_template in self.templates, \
-        '%s inherits from non-template %s' % (name, resolved_template)
+    assert not resolved_template or resolved_template in self.templates, (
+        '%s inherits from non-template %s' % (name, resolved_template))
 
     # Our name is passed as an explicit argument. We use the first build
     # config as our template, or nothing.

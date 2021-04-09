@@ -183,8 +183,8 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
     """Tests that the list of ExceptInfo objects are copied over."""
     tb1 = 'Dummy traceback1'
     tb2 = 'Dummy traceback2'
-    org_infos = failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) + \
-                failures_lib.CreateExceptInfo(OSError('No salsa'), tb2)
+    org_infos = (failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) +
+                 failures_lib.CreateExceptInfo(OSError('No salsa'), tb2))
     try:
       self._GetFunction(self.SubparLunch, self.TacoNotTasty,
                         exc_infos=org_infos)()
