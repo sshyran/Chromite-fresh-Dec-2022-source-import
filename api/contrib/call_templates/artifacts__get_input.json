@@ -1,0 +1,13 @@
+{
+  "sysroot": {
+    "path": "/build/eve"
+  },
+  "chroot": {
+    "path": "/usr/local/google/home/jaquesc/workplace/chromiumos/chroot"
+  },
+  "result_path": {
+    "path": {
+      "path": "/tmp/dlc_out"
+    }
+  }
+}
