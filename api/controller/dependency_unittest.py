@@ -136,7 +136,7 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
     get_dep.assert_called_once_with('/build/target', 'target', (pkg_mock,))
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Test that a validate only call does not execute any logic."""
     patch = self.PatchObject(dependency_service, 'GetBuildDependency')
     input_proto = depgraph_pb2.GetBuildDependencyGraphRequest()
     input_proto.build_target.name = 'target'
@@ -165,7 +165,7 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     osutils.SafeMakedirs(self.sysroot)
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Test that a validate only call does not execute any logic."""
     sysroot = sysroot_pb2.Sysroot(
         path=self.sysroot, build_target=self.build_target)
     input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
@@ -185,6 +185,16 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
     with self.assertRaises(cros_build_lib.DieSystemExit):
       dependency.List(input_proto, self.response, self.api_config)
+
+  def testDefaultArguments(self):
+    """Test with default arguments."""
+    sysroot = sysroot_pb2.Sysroot(
+        path=self.sysroot, build_target=self.build_target)
+    input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
+    mock_get_deps = self.PatchObject(dependency_service, 'GetDependencies')
+    dependency.List(input_proto, self.response, self.api_config)
+    mock_get_deps.assert_called_once_with(
+        self.sysroot, src_paths=[], packages=[], include_rev_dependencies=False)
 
   def testListResponse(self):
     """Test calls helper method with correct args."""
@@ -207,7 +217,8 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         src_paths=[
             depgraph_pb2.SourcePath(path=path),
         ],
-        packages=[input_package_info_proto])
+        packages=[input_package_info_proto],
+        include_rev_deps=True)
     dependency.List(input_proto, self.response, self.api_config)
     mock_get_deps.assert_called_once_with(
         self.sysroot,
