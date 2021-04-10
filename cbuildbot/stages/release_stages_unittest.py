@@ -290,7 +290,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
   """Test the PaygenStage Stage."""
 
   # We use a variant board to make sure the '_' is translated to '-'.
-  BOT_ID = 'auron_yuna-release'
+  BOT_ID = 'beaglebone_servo-release'
   RELEASE_TAG = '0.0.1'
 
   def setUp(self):
@@ -360,13 +360,14 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
 
       # Verify that we validate with the board name in release name space.
       self.assertEqual(self.validateMock.call_args_list,
-                       [mock.call('auron-yuna')])
+                       [mock.call('beaglebone-servo')])
 
       # Verify that we queue up work.
       runner.assert_has_calls([
-          mock.call(
-              stage, 'stable', 'auron-yuna', '0.0.1', False, False, False),
-          mock.call(stage, 'beta', 'auron-yuna', '0.0.1', False, False, False),
+          mock.call(stage, 'stable', 'beaglebone-servo', '0.0.1', False, False,
+                    False),
+          mock.call(stage, 'beta', 'beaglebone-servo', '0.0.1', False, False,
+                    False),
       ])
 
   def testPerformStageNoChannels(self):
@@ -392,8 +393,10 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
       # Notice that we didn't put anything in _wait_for_channel_signing, but
       # still got results right away.
       runner.assert_has_calls([
-          mock.call(stage, 'foo', 'auron-yuna', '0.0.1', False, False, False),
-          mock.call(stage, 'bar', 'auron-yuna', '0.0.1', False, False, False),
+          mock.call(stage, 'foo', 'beaglebone-servo', '0.0.1', False, False,
+                    False),
+          mock.call(stage, 'bar', 'beaglebone-servo', '0.0.1', False, False,
+                    False),
       ])
 
   def testPerformStageUnknownBoard(self):
@@ -625,7 +628,7 @@ class PaygenBuildStageTest(generic_stages_unittest.AbstractStageTestCase,
   """Test the PaygenBuild stage."""
 
   # We use a variant board to make sure the '_' is translated to '-'.
-  BOT_ID = 'auron_yuna-release'
+  BOT_ID = 'beaglebone_servo-release'
   RELEASE_TAG = '0.0.1'
 
   def setUp(self):
@@ -655,7 +658,7 @@ class PaygenTestStageTest(generic_stages_unittest.AbstractStageTestCase,
   """Test the PaygenTestStage stage."""
 
   # We use a variant board to make sure the '_' is translated to '-'.
-  BOT_ID = 'auron_yuna-release'
+  BOT_ID = 'beaglebone_servo-release'
   RELEASE_TAG = '0.0.1'
 
   def setUp(self):
@@ -682,7 +685,7 @@ class PaygenTestStageTest(generic_stages_unittest.AbstractStageTestCase,
   def testStageName(self):
     """See if the stage name is correctly formed."""
     stage = self.ConstructStage()
-    self.assertEqual(stage.name, 'PaygenTestFoochan [auron_yuna]')
+    self.assertEqual(stage.name, 'PaygenTestFoochan [beaglebone_servo]')
 
   def testPerformStageTestLabFail(self):
     """Test that exception from RunHWTestSuite are properly handled."""
