@@ -149,6 +149,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
   class _MessageCP016(object): pass
   class _MessageCP017(object): pass
   class _MessageCP018(object): pass
+  class _MessageCP019(object): pass
   # pylint: enable=class-missing-docstring,multiple-statements
 
   # All the sections we recognize (and in this order).
@@ -204,6 +205,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                 ('docstring-duplicate-section'), _MessageCP017),
       'C9018': ('Docstrings must start with exactly three quotes',
                 ('docstring-extra-quotes'), _MessageCP018),
+      'C9019': ('Use typing module instead of docstring annotations',
+                ('docstring-deprecated-annotations'), _MessageCP019),
   }
 
   def __init__(self, *args, **kwargs):
@@ -545,6 +548,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
         aline = l.lstrip()
         m = arg_re.match(aline)
         if m:
+          if m.group(1) is not None:
+            margs = {'arg': l}
+            self.add_message('C9019', node=node, line=node.fromlineno,
+                             args=margs)
+
           amsg = aline[m.end():]
           if amsg and len(amsg) - len(amsg.lstrip()) != 1:
             margs = {'arg': l}
