@@ -11,34 +11,38 @@ import difflib
 import fnmatch
 import os
 import sys
+from typing import Any, Callable, List
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-def GetMostLikelyMatchedObject(haystack, needle, name_func=lambda x: x,
-                               matched_score_threshold=0.4):
+def GetMostLikelyMatchedObject(
+    haystack: List[Any],
+    needle: str,
+    name_func: Callable[[Any], str] = lambda x: x,
+    matched_score_threshold: float = 0.4) -> List[Any]:
   """Matches objects whose names are most likely matched with target.
 
   Args:
-    haystack (list): Objects to search against.
-    needle (str): The name to match.
-    name_func (callable): Function to get object name to match. Default is the
-      identity function.
-    matched_score_threshold (float): The threshold of likelihood to match.
-      Must be in the range [0,1]. Default is 0.4.
+    haystack: Objects to search against.
+    needle: The name to match.
+    name_func: Function to get object name to match. Default is the identity
+        function.
+    matched_score_threshold: The threshold of likelihood to match.  Must be in
+        the range [0,1].
 
   Returns:
-    A list of entities from |haystack| whose names are likely needle.
+    A list of entities from |haystack| whose names are likely |needle|.
   """
-
   def _Score(obj):
     return difflib.SequenceMatcher(a=name_func(obj), b=needle).ratio()
 
-  return sorted([o for o in haystack if _Score(o) > matched_score_threshold])
+  return sorted(o for o in haystack if _Score(o) > matched_score_threshold)
 
 
-def FindFilesMatching(pattern, target='./', cwd=os.curdir, exclude_dirs=()):
+def FindFilesMatching(pattern: str, target: str = './', cwd: str = os.curdir,
+                      exclude_dirs: List[str] = ()) -> List[str]:
   """Search the root directory recursively for matching filenames.
 
   The |target| and |cwd| args allow manipulating how the found paths are

@@ -8,6 +8,7 @@
 from __future__ import print_function
 
 import sys
+from typing import Dict, List
 
 from chromite.lib import cros_logging as logging
 
@@ -15,14 +16,15 @@ from chromite.lib import cros_logging as logging
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
-def _MergeDictWithPathParts(path_parts, source, destination):
+def _MergeDictWithPathParts(path_parts: List[str], source: Dict,
+                            destination: Dict):
   """Merges source into destination based on path_parts.
 
   Args:
-    path_parts (list[str]): A list with each part of a single FieldMask path as
-        an element. E.g. path 'a.b.c' would be list ['a', 'b', 'c']
-    source (dict): The source dict.
-    destination (dict): The destination message to be merged into.
+    path_parts: Parts of a single FieldMask path as an element.
+        E.g. path 'a.b.c' would be ['a', 'b', 'c'].
+    source: The source dict.
+    destination: The destination message to be merged into.
   """
   assert path_parts
   cur_part = path_parts[0]
@@ -69,15 +71,15 @@ def _MergeDictWithPathParts(path_parts, source, destination):
                             destination[cur_part])
 
 
-def CreateFilteredDict(field_mask, source):
-  """Returns a copy of source filtered by field_mask.
+def CreateFilteredDict(field_mask: 'FieldMask', source: Dict):
+  """Returns a copy of source filtered by |field_mask|.
 
   Similar to the FieldMask.MergeMessage method, but for general Python dicts,
   e.g. parsed from JSON.
 
   Args:
-    field_mask (FieldMask): The FieldMask to apply.
-    source (dict): The source dict.
+    field_mask: The FieldMask to apply.
+    source: The source dict.
   """
   destination = {}
   for path in field_mask.paths:
