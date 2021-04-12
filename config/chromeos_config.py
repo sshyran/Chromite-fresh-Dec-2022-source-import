@@ -1842,6 +1842,11 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'factory-rambi-6420.B', [
           'enguarde', 'candy', 'banjo',
           'ninja', 'sumo', 'orco', 'heli', 'gnawty']),
+      (MONTHLY, 'factory-auron-6459.B', [
+          'auron_paine', 'auron_yuna', 'lulu',
+          'gandof', 'buddy']),
+      (MONTHLY, 'factory-auron-6772.B', [
+          'guado', 'tidus', 'rikku', 'buddy']),
       (MONTHLY, 'factory-strago-7458.B', [
           'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar',
           'wizpig', 'setzer', 'banon', 'kefka', 'relm', 'kip']),
@@ -1926,6 +1931,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       'factory-rambi-6420.B',
       'factory-auron-6459.B',
       'factory-auron-6772.B',
+      'factory-samus-6658.B',
       'factory-strago-7458.B',
       'factory-veyron-7505.B',
       'factory-glados-7657.B',
