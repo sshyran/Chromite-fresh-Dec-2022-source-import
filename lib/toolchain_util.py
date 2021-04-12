@@ -99,13 +99,12 @@ _CHROME_DEBUG_BIN = os.path.join('%(root)s', '%(sysroot)s/usr/lib/debug',
 # at least 4GB of memory.
 #
 # This must be consistent with the definitions in autotest.
-AFDO_DATA_GENERATORS_LLVM = ('chell', 'samus')
-CHROME_AFDO_VERIFIER_BOARDS = {'samus': 'atom', 'eve': 'bigcore'}
+AFDO_DATA_GENERATORS_LLVM = ('chell')
+CHROME_AFDO_VERIFIER_BOARDS = {'chell': 'atom', 'eve': 'bigcore'}
 KERNEL_AFDO_VERIFIER_BOARDS = {
-    'lulu': '3.14',
     'chell': '3.18',
     'eve': '4.4',
-    'auron_yuna': '4.14',
+    'octopus': '4.14',
     'banon': '4.19'
 }
 

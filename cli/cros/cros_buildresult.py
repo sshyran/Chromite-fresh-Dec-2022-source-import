@@ -148,9 +148,9 @@ Look up a single build result:
   cros buildresult --buildbucket-id 1234567890123
 
 Look up results by build config name:
-  cros buildresult --build-config samus-pre-cq
-  cros buildresult --build-config samus-pre-cq --date 2018-1-2
-  cros buildresult --build-config samus-pre-cq \
+  cros buildresult --build-config hatch-pre-cq
+  cros buildresult --build-config hatch-pre-cq --date 2018-1-2
+  cros buildresult --build-config hatch-pre-cq \
       --start-date 2018-1-2 --end-date 2018-1-7
 
 Output can be json formatted with:

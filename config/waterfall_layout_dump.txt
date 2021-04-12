@@ -1,17 +1,6 @@
 == factory ==
   factory-atlas-11907.B-buildspec
     atlas-factory-atlas-11907.B-factorybranch
-  factory-auron-6459.B-buildspec
-    auron_paine-factory-auron-6459.B-factorybranch
-    auron_yuna-factory-auron-6459.B-factorybranch
-    buddy-factory-auron-6459.B-factorybranch
-    gandof-factory-auron-6459.B-factorybranch
-    lulu-factory-auron-6459.B-factorybranch
-  factory-auron-6772.B-buildspec
-    buddy-factory-auron-6772.B-factorybranch
-    guado-factory-auron-6772.B-factorybranch
-    rikku-factory-auron-6772.B-factorybranch
-    tidus-factory-auron-6772.B-factorybranch
   factory-coral-10122.B-buildspec
     coral-factory-coral-10122.B-factorybranch
   factory-dedede-13683.B-buildspec
@@ -501,8 +490,6 @@
   atlas-release-basic-tryjob
   atlas-release-tryjob
   atlas-unittest-stress
-  auron_paine-factory-auron-6459.B-factorybranch-tryjob
-  auron_yuna-factory-auron-6459.B-factorybranch-tryjob
   banjo-factory-rambi-6420.B-factorybranch-tryjob
   banjo-full-tryjob
   banjo-llvm-next-toolchain-tryjob
@@ -608,8 +595,6 @@
   buddy-cfm-payloads-tryjob
   buddy-cfm-release-tryjob
   buddy-cfm-unittest-stress
-  buddy-factory-auron-6459.B-factorybranch-tryjob
-  buddy-factory-auron-6772.B-factorybranch-tryjob
   candy-factory-rambi-6420.B-factorybranch-tryjob
   candy-full-tryjob
   candy-llvm-next-toolchain-tryjob
@@ -839,17 +824,6 @@
   expresso-unittest-stress
   factory-atlas-11907.B-buildspec-tryjob
     atlas-factory-atlas-11907.B-factorybranch-tryjob
-  factory-auron-6459.B-buildspec-tryjob
-    auron_paine-factory-auron-6459.B-factorybranch-tryjob
-    auron_yuna-factory-auron-6459.B-factorybranch-tryjob
-    buddy-factory-auron-6459.B-factorybranch-tryjob
-    gandof-factory-auron-6459.B-factorybranch-tryjob
-    lulu-factory-auron-6459.B-factorybranch-tryjob
-  factory-auron-6772.B-buildspec-tryjob
-    buddy-factory-auron-6772.B-factorybranch-tryjob
-    guado-factory-auron-6772.B-factorybranch-tryjob
-    rikku-factory-auron-6772.B-factorybranch-tryjob
-    tidus-factory-auron-6772.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
     coral-factory-coral-10122.B-factorybranch-tryjob
   factory-dedede-13683.B-buildspec-tryjob
@@ -1071,7 +1045,6 @@
   gale-release-tryjob
   gale-test-ap-tryjob
   gale-unittest-stress
-  gandof-factory-auron-6459.B-factorybranch-tryjob
   glados-factory-glados-7657.B-factorybranch-tryjob
   glados-factory-glados-7828.B-factorybranch-tryjob
   glados-full-tryjob
@@ -1122,7 +1095,6 @@
   guado-cfm-payloads-tryjob
   guado-cfm-release-tryjob
   guado-cfm-unittest-stress
-  guado-factory-auron-6772.B-factorybranch-tryjob
   guado-macrophage-full-tryjob
   guado-macrophage-llvm-next-toolchain-tryjob
   guado-macrophage-llvm-toolchain-tryjob
@@ -1363,7 +1335,6 @@
   littlejoe-release-tryjob
   littlejoe-unittest-stress
   luci-scheduler-updater-tryjob
-  lulu-factory-auron-6459.B-factorybranch-tryjob
   majolica-full-tryjob
   majolica-llvm-next-toolchain-tryjob
   majolica-llvm-toolchain-tryjob
@@ -1780,13 +1751,6 @@
   rikku-cfm-payloads-tryjob
   rikku-cfm-release-tryjob
   rikku-cfm-unittest-stress
-  rikku-factory-auron-6772.B-factorybranch-tryjob
-  samus-kernelnext-full-tryjob
-  samus-kernelnext-llvm-next-toolchain-tryjob
-  samus-kernelnext-llvm-toolchain-tryjob
-  samus-kernelnext-payloads-tryjob
-  samus-kernelnext-release-tryjob
-  samus-kernelnext-unittest-stress
   sand-factory-reef-8811.B-factorybranch-tryjob
   sand-full-tryjob
   sand-llvm-next-toolchain-tryjob
@@ -1913,7 +1877,6 @@
   terra-release-tryjob
   terra-unittest-stress
   test-ap-group-tryjob
-  tidus-factory-auron-6772.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-kernelnext-full-tryjob

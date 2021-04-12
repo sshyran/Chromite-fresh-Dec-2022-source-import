@@ -1726,7 +1726,7 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
     tarred_files = [os.path.join('logs', x) for x in log_files]
-    board = 'samus'
+    board = 'hatch'
     log_files_root = os.path.join(self.tempdir,
                                   'chroot/build/%s/tmp/portage/logs' % board)
     # Generate a representative set of log files produced by a typical build.
@@ -1755,7 +1755,7 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
 
-    board = 'samus'
+    board = 'hatch'
     # Create a malformed directory name.
     log_files_root = os.path.join(self.tempdir,
                                   '%s/tmp/portage/wrong_dir_name' % board)

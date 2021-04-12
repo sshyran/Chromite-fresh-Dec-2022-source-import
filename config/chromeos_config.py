@@ -1045,7 +1045,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
   # Since these builders upload different profiles, we can start
   # them at the same time, as soon as we might get a new benchmark
   # profile.
-  ChromeAFDOPublishBuilders('silvermont', 'samus')
+  ChromeAFDOPublishBuilders('silvermont', 'chell')
   ChromeAFDOPublishBuilders('airmont', 'snappy')
   ChromeAFDOPublishBuilders('broadwell', 'eve')
 
@@ -1067,7 +1067,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
   # Schedule these tryjobs 6 hours apart from each other.
   KernelAFDOPublishBuilders('kernel-3_18', 'chell', '0 17 * * *')
   KernelAFDOPublishBuilders('kernel-4_4', 'eve', '0 23 * * *')
-  KernelAFDOPublishBuilders('kernel-4_14', 'auron_yuna', '0 5 * * *')
+  KernelAFDOPublishBuilders('kernel-4_14', 'octopus', '0 5 * * *')
   KernelAFDOPublishBuilders('kernel-4_19', 'banon', '0 11 * * *')
 
   site_config.Add(
@@ -1842,11 +1842,6 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'factory-rambi-6420.B', [
           'enguarde', 'candy', 'banjo',
           'ninja', 'sumo', 'orco', 'heli', 'gnawty']),
-      (MONTHLY, 'factory-auron-6459.B', [
-          'auron_paine', 'auron_yuna', 'lulu',
-          'gandof', 'buddy']),
-      (MONTHLY, 'factory-auron-6772.B', [
-          'guado', 'tidus', 'rikku', 'buddy']),
       (MONTHLY, 'factory-strago-7458.B', [
           'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar',
           'wizpig', 'setzer', 'banon', 'kefka', 'relm', 'kip']),
@@ -1930,7 +1925,6 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       'factory-rambi-5517.B',
       'factory-rambi-6420.B',
       'factory-auron-6459.B',
-      'factory-samus-6658.B',
       'factory-auron-6772.B',
       'factory-strago-7458.B',
       'factory-veyron-7505.B',
@@ -2045,7 +2039,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   }
 
   _release_enable_skylab_cts_hwtest = _frozen_ge_set(ge_build_config, [
-      'samus',
       'terra',
   ])
 

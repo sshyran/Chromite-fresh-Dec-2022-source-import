@@ -2651,86 +2651,6 @@
             "chrome_internal"
         ]
     },
-    "auron_paine-factory-auron-6459.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "auron_paine"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "auron_paine-factory-auron-6459.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "auron_paine"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "auron_yuna-factory-auron-6459.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "auron_yuna"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "auron_yuna-factory-auron-6459.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "auron_yuna"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6459.B"
-    },
     "banjo-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -5303,86 +5223,6 @@
             "chrome_internal"
         ]
     },
-    "buddy-factory-auron-6459.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "buddy"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "buddy-factory-auron-6459.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "buddy"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "buddy-factory-auron-6772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "buddy"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "buddy-factory-auron-6772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "buddy"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6772.B"
-    },
     "candy-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -7399,7 +7239,7 @@
         "_template": "release_afdo_verify",
         "afdo_use": false,
         "boards": [
-            "samus"
+            "chell"
         ],
         "chrome_afdo_verify": true,
         "useflags": [
@@ -7412,7 +7252,7 @@
         "_template": "release_afdo_verify",
         "afdo_use": false,
         "boards": [
-            "samus"
+            "chell"
         ],
         "chrome_afdo_verify": true,
         "debug": true,
@@ -10964,64 +10804,6 @@
         ],
         "workspace_branch": "factory-atlas-11907.B"
     },
-    "factory-auron-6459.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "auron_paine-factory-auron-6459.B-factorybranch",
-            "auron_yuna-factory-auron-6459.B-factorybranch",
-            "buddy-factory-auron-6459.B-factorybranch",
-            "gandof-factory-auron-6459.B-factorybranch",
-            "lulu-factory-auron-6459.B-factorybranch"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "factory-auron-6459.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "auron_paine-factory-auron-6459.B-factorybranch-tryjob",
-            "auron_yuna-factory-auron-6459.B-factorybranch-tryjob",
-            "buddy-factory-auron-6459.B-factorybranch-tryjob",
-            "gandof-factory-auron-6459.B-factorybranch-tryjob",
-            "lulu-factory-auron-6459.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "factory-auron-6772.B-buildspec": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "display_label": "factory",
-        "schedule": "with 720h interval",
-        "slave_configs": [
-            "buddy-factory-auron-6772.B-factorybranch",
-            "guado-factory-auron-6772.B-factorybranch",
-            "rikku-factory-auron-6772.B-factorybranch",
-            "tidus-factory-auron-6772.B-factorybranch"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "factory-auron-6772.B-buildspec-tryjob": {
-        "_template": "buildspec",
-        "build_timeout": 43200,
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "slave_configs": [
-            "buddy-factory-auron-6772.B-factorybranch-tryjob",
-            "guado-factory-auron-6772.B-factorybranch-tryjob",
-            "rikku-factory-auron-6772.B-factorybranch-tryjob",
-            "tidus-factory-auron-6772.B-factorybranch-tryjob"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
     "factory-coral-10122.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -14347,46 +14129,6 @@
             "chrome_internal"
         ]
     },
-    "gandof-factory-auron-6459.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "gandof"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "gandof-factory-auron-6459.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "gandof"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6459.B"
-    },
     "glados-factory-glados-7657.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -15729,46 +15471,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "guado-factory-auron-6772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "guado"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "guado-factory-auron-6772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "guado"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6772.B"
     },
     "guado-macrophage-full": {
         "_template": "full",
@@ -19841,14 +19543,14 @@
     "kernel-4_14-release-afdo-verify": {
         "_template": "release_afdo_verify",
         "boards": [
-            "auron_yuna"
+            "octopus"
         ],
         "kernel_afdo_verify": true
     },
     "kernel-4_14-release-afdo-verify-tryjob": {
         "_template": "release_afdo_verify",
         "boards": [
-            "auron_yuna"
+            "octopus"
         ],
         "debug": true,
         "display_label": "tryjob",
@@ -21853,46 +21555,6 @@
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
         "vm_tests": []
-    },
-    "lulu-factory-auron-6459.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "lulu"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6459.B"
-    },
-    "lulu-factory-auron-6459.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "lulu"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6459.B"
     },
     "majolica-full": {
         "_template": "full",
@@ -27575,177 +27237,6 @@
             "chrome_internal"
         ]
     },
-    "rikku-factory-auron-6772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "rikku"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "rikku-factory-auron-6772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "rikku"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "samus-kernelnext-full": {
-        "_template": "full",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "samus-kernelnext-full-tryjob": {
-        "_template": "full",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests": [
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "samus-kernelnext-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "samus-kernelnext"
-        ]
-    },
-    "samus-kernelnext-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "samus-kernelnext-llvm-toolchain": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "samus-kernelnext"
-        ]
-    },
-    "samus-kernelnext-llvm-toolchain-tryjob": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "samus-kernelnext-payloads": {
-        "_template": "payloads",
-        "boards": [
-            "samus-kernelnext"
-        ]
-    },
-    "samus-kernelnext-payloads-tryjob": {
-        "_template": "payloads",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "debug": true,
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "samus-kernelnext-release": {
-        "_template": "release",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "vm_tests": [],
-        "vm_tests_override": null
-    },
-    "samus-kernelnext-release-tryjob": {
-        "_template": "release",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests": [
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "paygen": false,
-        "push_image": false,
-        "suite_scheduling": false,
-        "vm_tests": [],
-        "vm_tests_override": null
-    },
-    "samus-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "samus-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "sand-factory-reef-8811.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -31306,46 +30797,6 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try"
-    },
-    "tidus-factory-auron-6772.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "tidus"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-auron-6772.B"
-    },
-    "tidus-factory-auron-6772.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "tidus"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-auron-6772.B"
     },
     "trogdor-factory-trogdor-13443.B-factorybranch": {
         "_template": "factorybranch",

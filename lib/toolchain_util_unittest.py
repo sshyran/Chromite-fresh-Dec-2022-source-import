@@ -189,11 +189,11 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
   """Setup code common to Prepare/Bundle class methods."""
 
   def setUp(self):
-    self.board = 'lulu'
+    self.board = 'chell'
     self.chroot = chroot_lib.Chroot(path=self.tempdir, chrome_root=self.tempdir)
     self.sysroot = '/build/%s' % self.board
     self.chrome_package = 'chromeos-chrome'
-    self.kernel_package = 'chromeos-kernel-3_14'
+    self.kernel_package = 'chromeos-kernel-3_18'
     self.chrome_PV = 'chromeos-base/chromeos-chrome-78.0.3893.0_rc-r1'
     self.chrome_ebuild = os.path.realpath(
         os.path.join(
@@ -1514,9 +1514,9 @@ class FindEbuildPathTest(cros_test_lib.MockTempDirTestCase):
   """Test top-level function _FindEbuildPath()."""
 
   def setUp(self):
-    self.board = 'lulu'
+    self.board = 'chell'
     self.chrome_package = 'chromeos-chrome'
-    self.kernel_package = 'chromeos-kernel-3_14'
+    self.kernel_package = 'chromeos-kernel-3_18'
     self.chrome_ebuild = (
         '/mnt/host/source/src/path/to/chromeos-chrome-1.0.ebuild')
     mock_result = cros_build_lib.CommandResult(output=self.chrome_ebuild)
@@ -2005,8 +2005,8 @@ class CheckAFDOArtifactExistsTest(cros_test_lib.RunCommandTempDirTestCase):
         toolchain_util, '_FindLatestAFDOArtifact', return_value=self.afdo_name)
     self._CheckExistCall(
         'kernel_afdo',
-        os.path.join(toolchain_util.KERNEL_AFDO_GS_URL_VETTED, '3.14',
-                     self.afdo_name), 'lulu')
+        os.path.join(toolchain_util.KERNEL_AFDO_GS_URL_VETTED, '3.18',
+                     self.afdo_name), 'chell')
 
 
 class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):

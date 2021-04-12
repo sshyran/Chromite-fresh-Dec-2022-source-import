@@ -295,7 +295,7 @@ class AllConfigsTestCase(generic_stages_unittest.AbstractStageTestCase,
     if site_config is None:
       site_config = config_lib.GetConfig()
 
-    boards = ('samus', 'arm-generic')
+    boards = ('hatch', 'arm-generic')
 
     for board in boards:
       self.CreateMockOverlay(board)
