@@ -65,34 +65,34 @@ class TryjobTestPrintKnownConfigs(TryjobTest):
     tryjob_configs = cros_tryjob.ConfigsToPrint(
         self.site_config, production=False, build_config_fragments=[])
 
-    samus_tryjob_configs = cros_tryjob.ConfigsToPrint(
-        self.site_config, production=False, build_config_fragments=['samus'])
+    board_tryjob_configs = cros_tryjob.ConfigsToPrint(
+        self.site_config, production=False, build_config_fragments=['hatch'])
 
-    samus_release_tryjob_configs = cros_tryjob.ConfigsToPrint(
+    board_release_tryjob_configs = cros_tryjob.ConfigsToPrint(
         self.site_config, production=False,
-        build_config_fragments=['samus', 'release'])
+        build_config_fragments=['hatch', 'release'])
 
     # Prove expecting things are there.
-    self.assertIn(self.site_config['samus-release-tryjob'],
+    self.assertIn(self.site_config['hatch-release-tryjob'],
                   tryjob_configs)
-    self.assertIn(self.site_config['samus-release-tryjob'],
-                  samus_tryjob_configs)
-    self.assertIn(self.site_config['samus-release-tryjob'],
-                  samus_release_tryjob_configs)
+    self.assertIn(self.site_config['hatch-release-tryjob'],
+                  board_tryjob_configs)
+    self.assertIn(self.site_config['hatch-release-tryjob'],
+                  board_release_tryjob_configs)
 
     # Unexpecting things aren't.
-    self.assertNotIn(self.site_config['samus-release'],
+    self.assertNotIn(self.site_config['hatch-release'],
                      tryjob_configs)
     self.assertNotIn(self.site_config['glados-release'],
-                     samus_tryjob_configs)
-    self.assertNotIn(self.site_config['samus-full'],
-                     samus_release_tryjob_configs)
+                     board_tryjob_configs)
+    self.assertNotIn(self.site_config['hatch-full'],
+                     board_release_tryjob_configs)
 
     # And that we really filtered something out in every case.
-    self.assertLess(len(samus_release_tryjob_configs),
-                    len(samus_tryjob_configs))
+    self.assertLess(len(board_release_tryjob_configs),
+                    len(board_tryjob_configs))
 
-    self.assertLess(len(samus_tryjob_configs), len(tryjob_configs))
+    self.assertLess(len(board_tryjob_configs), len(tryjob_configs))
 
   def testListTryjobs(self):
     """Test we can generate results for --list."""
