@@ -442,6 +442,8 @@ class RepoRepository(object):
       init_cmd.extend(['--repo-branch', self.repo_branch])
     if self.groups:
       init_cmd.extend(['--groups', self.groups])
+    else:
+      init_cmd.extend(['--groups', 'all'])
 
     def _StatusCallback(attempt, _):
       if attempt:
