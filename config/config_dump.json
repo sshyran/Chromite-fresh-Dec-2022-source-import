@@ -33491,6 +33491,9 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"volteer2\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"voxel\",\n    \"test_suites\": []\n}"
         ],
+        "notification_configs": [
+            "{\n    \"email\": \"borealis-release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 2\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },

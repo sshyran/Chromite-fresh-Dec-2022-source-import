@@ -2295,6 +2295,10 @@ def AddNotificationConfigs(site_config):
       'swanky-release': [
           config_lib.NotificationConfig(email='navil+spam@chromium.org'),
       ],
+      'volteer-borealis-release': [
+          config_lib.NotificationConfig(
+              email='borealis-release-builder-alerts@google.com', threshold=2),
+      ],
       'zork-borealis-release': [
           config_lib.NotificationConfig(
               email='borealis-release-builder-alerts@google.com', threshold=2),
