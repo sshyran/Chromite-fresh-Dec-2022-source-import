@@ -143,17 +143,15 @@ Python 2.
 
 ### Running Chromite's unit tests
 
-Chromite has two unit test runners: `scripts/run_pytest` and
-`scripts/run_tests`, and two top-level entry points to the unit test suite:
-`run_pytest` and `run_tests`.
+Chromite provides a single `run_tests` wrapper in the top dir that runs all the
+unittests for you.
+It's the same as `scripts/run_tests`, but in an easier-to-find location.
 
 Every Python file in Chromite is accompanied by a corresponding `*_unittest.py`
 file. Running a particular file's unit tests is best done via
 ```shell
-~/trunk/chromite $ ./run_pytest example_file_unittest.py
+~/trunk/chromite $ ./run_tests example_file_unittest.py
 ```
-
-#### scripts/run_pytest
 
 This script initializes a Python 3 virtualenv with necessary test dependencies
 and runs `pytest` inside that virtualenv over all tests in Chromite, with the
@@ -161,35 +159,10 @@ configuration specified in [pytest.ini](./pytest.ini). The default configuration
 runs tests in parallel and skips some tests known to be flaky or take a very
 long time.
 
-#### scripts/run_tests
-
-This script was the unit test runner prior to Chromite transitioning to using
-pytest. It is responsible for running unit tests under Python 2 while Chromite
-is in the process of migrating to Python 3. Once Chromite runs under Python 3
-only, this script will be deprecated and removed.
-
 Tests will not run in a standalone git checkout of chromite. Use the repo-based
 flow described above to obtain a functional-testing environment.
 
-#### run_pytest
-
-This top-level script is a convenience wrapper for `scripts/run_pytest` and has
-identical behavior.
-
-#### run_tests
-
-This top-level script runs both `scripts/run_tests` and `scripts/run_pytest` as
-a convenience wrapper for the full testing run done in the CQ. This script
-accepts no arguments, so if you want to customize test run behavior you should
-run one of `scripts/run_pytest` or `scripts/run_tests` directly.
-
 ### Writing unit tests
-
-As of writing this document (April 2020), Chromite is still in the process of
-migrating to run entirely under Python 3. New `*_unittest.py` files can assume
-that they are run on Python 3 only, but existing files must maintain
-backwards compatibility unless marked with a `sys.version` assertion at the
-top of the file.
 
 Chromite's unit tests make use of pytest
 [fixtures](https://doc.pytest.org/en/latest/fixture.html). Fixtures that are

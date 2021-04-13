@@ -341,8 +341,8 @@ class UpdateConfigStage(generic_stages.BuilderStage):
     # Run the unit tests over the newly generated files.
 
     logging.debug('Running chromeos_config_unittest, to confirm sane state.')
-    test_runner = os.path.join(constants.CHROMITE_DIR, 'run_pytest')
-    # run_pytest re-executes itself inside the chroot and sets its own working
+    test_runner = os.path.join(constants.CHROMITE_DIR, 'run_tests')
+    # run_tests re-executes itself inside the chroot and sets its own working
     # directory to chromite, so using a relative path to the unittest works fine
     # here.
     test_path = os.path.join('config', 'chromeos_config_unittest.py')
@@ -416,8 +416,8 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
   def _RunUnitTest(self):
     """Run chromeos_config_unittest to confirm a clean scheduler config."""
     logging.debug('Running chromeos_config_unittest, to confirm sane state.')
-    test_runner = os.path.join(constants.CHROMITE_DIR, 'run_pytest')
-    # run_pytest re-executes itself inside the chroot and sets its own working
+    test_runner = os.path.join(constants.CHROMITE_DIR, 'run_tests')
+    # run_tests re-executes itself inside the chroot and sets its own working
     # directory to chromite, so using a relative path to the unittest works fine
     # here.
     test_path = os.path.join('config', 'chromeos_config_unittest.py')

@@ -147,14 +147,14 @@ def DebugInfoTest(sysroot_path):
   return result.returncode == 0
 
 
-def ChromitePytest():
-  """Run Pytest tests in Chromite.
+def ChromiteUnitTest():
+  """Run chromite unittests.
 
   Returns:
     bool: True iff all tests passed, False otherwise.
   """
   cmd = [
-      os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'run_pytest'),
+      os.path.join(constants.CHROMITE_DIR, 'run_tests'),
       constants.CHROMITE_DIR,
   ]
   result = cros_build_lib.run(cmd, check=False)

@@ -3,7 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Wrapper to execute pytest inside the chromite virtualenv."""
+"""Chromite main test runner.
+
+Run the specified tests.  If none are specified, we'll scan the
+tree looking for tests to run and then only run the semi-fast ones.
+"""
 
 from __future__ import print_function
 
@@ -93,7 +97,7 @@ def re_execute_inside_chroot(argv):
   if cros_build_lib.IsInsideChroot():
     return
 
-  target = os.path.join(constants.CHROMITE_DIR, 'scripts', 'run_pytest')
+  target = os.path.join(constants.CHROMITE_DIR, 'scripts', 'run_tests')
   relpath = os.path.relpath(target, '.')
   # If we're in the scripts dir, make sure we always have a relative path,
   # otherwise cros_sdk will search $PATH and fail.
