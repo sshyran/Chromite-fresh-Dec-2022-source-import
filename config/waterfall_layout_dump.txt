@@ -268,8 +268,6 @@
     celes-release
     chell-release
     cherry-release
-    cheza-release
-    cheza64-release
     coral-release
     cyan-release
     dedede-release
@@ -680,18 +678,6 @@
   cherry-payloads-tryjob
   cherry-release-tryjob
   cherry-unittest-stress
-  cheza-full-tryjob
-  cheza-llvm-next-toolchain-tryjob
-  cheza-llvm-toolchain-tryjob
-  cheza-payloads-tryjob
-  cheza-release-tryjob
-  cheza-unittest-stress
-  cheza64-full-tryjob
-  cheza64-llvm-next-toolchain-tryjob
-  cheza64-llvm-toolchain-tryjob
-  cheza64-payloads-tryjob
-  cheza64-release-tryjob
-  cheza64-unittest-stress
   chrome-airmont-release-afdo-verify-tryjob
   chrome-broadwell-release-afdo-verify-tryjob
   chrome-silvermont-release-afdo-verify-tryjob
@@ -1454,8 +1440,6 @@
     celes-release-tryjob
     chell-release-tryjob
     cherry-release-tryjob
-    cheza-release-tryjob
-    cheza64-release-tryjob
     coral-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
