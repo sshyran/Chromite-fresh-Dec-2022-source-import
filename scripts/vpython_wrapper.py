@@ -5,6 +5,9 @@
 
 # NB: Do not add a ton of wheels here as it's shared among many programs.
 # Only list significant ones widely used by chromite.lib modules.
+#
+# For info on this syntax, see:
+# https://chromium.googlesource.com/infra/infra/+/HEAD/doc/users/vpython.md#available-wheels
 
 # [VPYTHON:BEGIN]
 # python_version: "3.8"
