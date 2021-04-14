@@ -4,7 +4,16 @@
 
 """PMS tests."""
 
+import pytest
+
 from chromite.utils import pms
+
+
+def test_reject_invalid_versions():
+  """Check we reject invalid versions."""
+  assert not pms.version_valid('\n1.2')
+  assert not pms.version_valid('1.2\n')
+  assert not pms.version_valid('1.2\n1.3')
 
 
 def test_versions_eq():
@@ -16,6 +25,17 @@ def test_versions_eq():
   assert pms.version_eq('1.2.3.200702020000', '1.2.3.200702020000')
   assert pms.version_eq('1.2.3_alpha', '1.2.3_alpha0-r0')
   assert pms.version_eq('1.2.3_alpha4-r5', '1.2.3_alpha4-r5')
+
+
+def test_versions_eq_invalid():
+  """Check invalid versions throw correctly."""
+  with pytest.raises(ValueError) as e:
+    pms.version_eq('1\n', '1')
+  assert 'Invalid version' in str(e)
+
+  with pytest.raises(ValueError) as e:
+    pms.version_eq('1', '1\n')
+  assert 'Invalid version' in str(e)
 
 
 def test_version_lt():
