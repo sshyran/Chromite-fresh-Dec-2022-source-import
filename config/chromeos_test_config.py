@@ -145,7 +145,7 @@ class HWTestList(object):
     default_dict = dict(file_bugs=True,
                         pool=constants.HWTEST_QUOTA_POOL,
                         quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ,
-                        timeout=config_lib.HWTestConfig.ASYNC_HW_TEST_TIMEOUT,
+                        timeout=config_lib.HWTestConfig.PFQ_HW_TEST_TIMEOUT,
                         priority=constants.HWTEST_PFQ_PRIORITY, minimum_duts=3)
     # Allows kwargs overrides to default_dict for pfq.
     default_dict.update(kwargs)
@@ -166,6 +166,7 @@ class HWTestList(object):
     """
     sanity_dict = dict(pool=constants.HWTEST_QUOTA_POOL,
                        file_bugs=True,
+                       timeout=config_lib.HWTestConfig.PFQ_HW_TEST_TIMEOUT,
                        quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ)
     sanity_dict.update(kwargs)
     sanity_dict.update(dict(minimum_duts=1, suite_min_duts=1,
@@ -305,7 +306,7 @@ def EnsureVmTestsOnVmTestBoards(site_config, boards_dict, _gs_build_config):
   """Make sure VMTests are only enabled on boards that support them.
 
   Args:
-    site_config: config_lib.SiteConfig containing builds to have their
+    sIte_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.

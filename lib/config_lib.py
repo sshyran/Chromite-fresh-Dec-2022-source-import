@@ -524,6 +524,7 @@ class HWTestConfig(object):
   # timeouts equal.
   GTS_QUAL_HW_TEST_TIMEOUT = CTS_QUAL_HW_TEST_TIMEOUT
   SHARED_HW_TEST_TIMEOUT = int(3.0 * _HOUR)
+  PFQ_HW_TEST_TIMEOUT = int(6.0 * _HOUR)
   PALADIN_HW_TEST_TIMEOUT = int(2.0 * _HOUR)
   BRANCHED_HW_TEST_TIMEOUT = int(10.0 * _HOUR)
 
