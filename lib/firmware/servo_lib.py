@@ -7,9 +7,10 @@
 
 from __future__ import print_function
 
+from typing import List, NamedTuple
+
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-
 
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'
@@ -43,6 +44,25 @@ _SERIAL_NUMBER_OPTION_OVERRIDE = {
     SERVO_V4_CCD_TI50: 'ccd_serialname',
     SERVO_V4_MICRO: 'servo_micro_serialname',
 }
+
+
+class FirmwareConfig(NamedTuple):
+  """Stores dut controls for specific servos.
+
+  Attributes:
+    dut_control_on:  2d array formatted like [["cmd1", "arg1", "arg2"],
+                                              ["cmd2", "arg3", "arg4"]]
+                       with commands that need to be ran before flashing,
+                       where cmd1 will be run before cmd2.
+    dut_control_off: 2d array formatted like [["cmd1", "arg1", "arg2"],
+                                              ["cmd2", "arg3", "arg4"]]
+                       with commands that need to be ran after flashing,
+                       where cmd1 will be run before cmd2.
+    programmer:      programmer argument (-p) for flashrom and futility.
+  """
+  dut_control_on: List[List[str]]
+  dut_control_off: List[List[str]]
+  programmer: str
 
 
 class Error(Exception):

@@ -110,23 +110,26 @@ class DeployConfigTest(cros_test_lib.TestCase):
     # Expected dut commands and base flash commands.
     self.expected_dut_on = [['dut_on']]
     self.expected_dut_off = [['dut_off']]
-    base_flashrom = ['flashrom']
-    base_futility = ['futility']
+    programmer = ['programmer_arg']
     # The get commands function returning the base commands.
-    commands = (
+    config = servo_lib.FirmwareConfig(
         self.expected_dut_on[:],
         self.expected_dut_off[:],
-        base_flashrom[:],
-        base_futility[:],
+        programmer[:],
     )
-    self.get_commands = (
-        lambda *args: commands
-    )
+    self.get_config = (lambda *args: config)
 
     # The expected commands.
     self.image = 'image'
-    self.expected_flashrom = base_flashrom + [self.image]
-    self.expected_futility = base_futility + [self.image]
+    self.expected_flashrom = ['flashrom', '-p', programmer, '-w', self.image]
+    self.expected_futility = [
+        'futility',
+        'update',
+        '-p',
+        programmer,
+        '-i',
+        self.image,
+    ]
     # The optional fast and verbose arguments.
     self.flashrom_fast_verbose = ['-n', '-V']
     self.futility_fast_verbose = ['--fast', '-v']
@@ -157,24 +160,21 @@ class DeployConfigTest(cros_test_lib.TestCase):
 
   def test_force_fast(self):
     """Test the force fast call-through."""
-    get_commands = lambda *args: ([], [], [], [])
     force_fast = lambda futility, servo: futility and servo == self.servo
 
-    config = ap_firmware.DeployConfig(get_commands, force_fast=force_fast)
+    config = ap_firmware.DeployConfig(self.get_config, force_fast=force_fast)
     self.assertTrue(config.force_fast(flashrom=False, servo=self.servo))
     self.assertFalse(config.force_fast(flashrom=True, servo=self.servo))
 
   def test_no_force_fast(self):
     """Sanity check no force fast function gets handled properly."""
-    get_commands = lambda *args: ([], [], [], [])
-
-    config = ap_firmware.DeployConfig(get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     self.assertFalse(config.force_fast(flashrom=False, servo=self.servo))
     self.assertFalse(config.force_fast(flashrom=True, servo=self.servo))
 
   def test_dut_commands(self):
     """Sanity check for the dut commands pass through."""
-    config = ap_firmware.DeployConfig(self.get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     commands = config.get_servo_commands(self.servo, self.image)
 
     self.assertListEqual(self.expected_dut_on, commands.dut_on)
@@ -182,14 +182,14 @@ class DeployConfigTest(cros_test_lib.TestCase):
 
   def test_flashrom_command(self):
     """Test the base flashrom command is built correctly."""
-    config = ap_firmware.DeployConfig(self.get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     commands = config.get_servo_commands(self.servo, self.image, flashrom=True)
 
     self._assert_command(commands.flash, flashrom=True, fast_verbose=False)
 
   def test_fast_verbose_flashrom(self):
     """Sanity check the fast/verbose flashrom arguments get added."""
-    config = ap_firmware.DeployConfig(self.get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     commands = config.get_servo_commands(
         self.servo, self.image, flashrom=True, fast=True, verbose=True)
 
@@ -197,14 +197,14 @@ class DeployConfigTest(cros_test_lib.TestCase):
 
   def test_futility_command(self):
     """Test the futility command is built correctly."""
-    config = ap_firmware.DeployConfig(self.get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     commands = config.get_servo_commands(self.servo, self.image)
 
     self._assert_command(commands.flash, flashrom=False, fast_verbose=False)
 
   def test_fast_verbose_futility(self):
     """Sanity check the fast/verbose futility arguments get added."""
-    config = ap_firmware.DeployConfig(self.get_commands)
+    config = ap_firmware.DeployConfig(self.get_config)
     commands = config.get_servo_commands(
         self.servo, self.image, fast=True, verbose=True)
 
@@ -214,7 +214,7 @@ class DeployConfigTest(cros_test_lib.TestCase):
     """Test the flashrom and fast command alterations."""
     force_fast = lambda *args: True
     config = ap_firmware.DeployConfig(
-        self.get_commands,
+        self.get_config,
         force_fast=force_fast,
         servo_force_command=ap_firmware.DeployConfig.FORCE_FLASHROM)
 
@@ -225,7 +225,7 @@ class DeployConfigTest(cros_test_lib.TestCase):
     """Test the futility and fast command alterations."""
     force_fast = lambda *args: True
     config = ap_firmware.DeployConfig(
-        self.get_commands,
+        self.get_config,
         force_fast=force_fast,
         servo_force_command=ap_firmware.DeployConfig.FORCE_FUTILITY)
 

@@ -216,8 +216,8 @@ def deploy(build_target,
   else:
     ip = os.getenv('IP')
 
-  module_name = (
-      'chromite.lib.firmware.ap_firmware_config.%s' % build_target.name)
+  module_name = ('chromite.lib.firmware.ap_firmware_config.%s' %
+                 build_target.name)
   try:
     module = importlib.import_module(module_name)
   except ImportError:
@@ -229,7 +229,7 @@ def deploy(build_target,
     _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun)
   else:
     _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun,
-      flash_contents)
+                  flash_contents)
 
 
 def _deploy_servo(image,
@@ -267,9 +267,16 @@ def _deploy_servo(image,
     # Futility needs VBoot to flash so boards without functioning VBoot
     # can set this attribute to True to force the use of flashrom.
     flashrom = True
-  dut_on, dut_off, flashrom_cmd, futility_cmd = module.get_commands(servo)
-  flashrom_cmd += [image]
-  futility_cmd += [image]
+  ap_config = module.get_config(servo)
+  flashrom_cmd = ['flashrom', '-p', ap_config.programmer, '-w', image]
+  futility_cmd = [
+      'futility',
+      'update',
+      '-p',
+      ap_config.programmer,
+      '-i',
+      image,
+  ]
   futility_cmd += ['--force', '--wp=0']
   if fast:
     futility_cmd += ['--fast']
@@ -280,7 +287,8 @@ def _deploy_servo(image,
   if flash_contents is not None:
     flashrom_cmd += ['--flash-contents', flash_contents]
   flash_cmd = flashrom_cmd if flashrom else futility_cmd
-  if _flash(dut_ctl, dut_on, dut_off, flash_cmd, verbose, dryrun):
+  if _flash(dut_ctl, ap_config.dut_control_on, ap_config.dut_control_off,
+            flash_cmd, verbose, dryrun):
     logging.notice('SUCCESS. Exiting flash_ap.')
   else:
     logging.error('Unable to complete flash, verify servo connection '

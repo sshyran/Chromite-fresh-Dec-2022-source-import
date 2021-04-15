@@ -44,23 +44,27 @@ The __template.py file can be copied into place, it contains a skeleton config.
       Returns:
         bool: True if fast is necessary, False otherwise.
 
-    get_commands:
-      Get specific flash commands for this board
+    get_config:
+      Get specific flash config for this board.
       Each board needs specific commands including the voltage for Vref, to turn
       on and turn off the SPI flash. These commands can be found in the care and
       feeding doc for your board, any command that needs to be run before
-      flashing should be included in dut_control_on and anything run after flashing
-      should be in dut_control_off.
+      flashing should be included in dut_control_on and anything run after
+      flashing should be in dut_control_off.
 
       Args:
         servo (servo_lib.Servo): The servo connected to the target DUT.
 
       Returns:
-        list: [dut_control_on, dut_control_off, flashrom_cmd, futility_cmd]
-          dut_control*=2d arrays formmated like [["cmd1", "arg1", "arg2"],
-                                                 ["cmd2", "arg3", "arg4"]]
-          where cmd1 will be run before cmd2
-          flashrom_cmd=command to flash via flashrom
-          futility_cmd=command to flash via futility
+        servo_lib.FirmwareConfig:
+          dut_control_on: 2d array formatted like [["cmd1", "arg1", "arg2"],
+                                                   ["cmd2", "arg3", "arg4"]]
+                          with commands that need to be ran before flashing,
+                          where cmd1 will be run before cmd2.
+          dut_control_off: 2d array formatted like [["cmd1", "arg1", "arg2"],
+                                                    ["cmd2", "arg3", "arg4"]]
+                          with commands that need to be ran after flashing,
+                          where cmd1 will be run before cmd2.
+          programmer: programmer argument (-p) for flashrom and futility.
 
 See dedede.py for examples of each function/variable.
