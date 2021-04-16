@@ -51,6 +51,24 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
                          list(_REGULAR_TO) + ['--board', _TARGET_BOARD],
                          check_attrs={'code': 2})
 
+  def testBuildDirSpecified(self):
+    """Test case of build dir specified."""
+    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--build-dir',
+                                '/path/to/chrome']
+    _ParseCommandLine(argv)
+
+  def testBuildDirSpecifiedWithoutBoard(self):
+    """Test case of build dir specified without --board."""
+    argv = list(_REGULAR_TO) + [
+        '--build-dir', '/path/to/chrome/out_' + _TARGET_BOARD + '/Release']
+    options = _ParseCommandLine(argv)
+    self.assertEqual(options.board, _TARGET_BOARD)
+
+  def testBuildDirSpecifiedWithoutBoardError(self):
+    """Test case of irregular build dir specified without --board."""
+    argv = list(_REGULAR_TO) + ['--build-dir', '/path/to/chrome/foo/bar']
+    self.assertParseError(argv)
+
   def testGsPathSpecified(self):
     """Test case of GS path specified."""
     argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
@@ -61,6 +79,11 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
     argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--local-pkg-path',
                                 '/path/to/chrome']
     _ParseCommandLine(argv)
+
+  def testNoBoard(self):
+    """Test no board specified."""
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH]
+    self.assertParseError(argv)
 
   def testNoTarget(self):
     """Test no target specified."""

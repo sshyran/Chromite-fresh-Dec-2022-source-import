@@ -25,6 +25,7 @@ import functools
 import glob
 import multiprocessing
 import os
+import re
 import shlex
 import shutil
 import sys
@@ -710,6 +711,11 @@ def _ParseCommandLine(argv):
     if options.local_pkg_path:
       parser.error('--lacros does not support --local-pkg-path')
   else:
+    if not options.board and options.build_dir:
+      match = re.search(r'out_([^/]+)/Release$', options.build_dir)
+      if match:
+        options.board = match.group(1)
+        logging.info('--board is set to %s', options.board)
     if not options.board:
       parser.error('--board is required')
   if options.gs_path and options.local_pkg_path:
