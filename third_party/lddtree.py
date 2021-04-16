@@ -16,6 +16,8 @@ from __future__ import print_function
 
 import glob
 import errno
+import functools
+import mmap
 import optparse
 import os
 import shutil
@@ -101,6 +103,17 @@ def dedupe(items):
   return [seen.setdefault(x, x) for x in items if x not in seen]
 
 
+@functools.lru_cache(maxsize=None)
+def interp_supports_argv0(interp) -> bool:
+  """See whether |interp| supports the --argv0 option.
+
+  Starting with glibc-2.33, the ldso supports --argv0 to override argv[0].
+  """
+  with open(interp, 'rb') as fp:
+    with mmap.mmap(fp.fileno(), 0, prot=mmap.PROT_READ) as mm:
+      return mm.find(b'--argv0') >= 0
+
+
 def GenerateLdsoWrapper(root, path, interp, libpaths=(), elfsubdir=None):
   """Generate a shell script wrapper which uses local ldso to run the ELF
 
@@ -127,6 +140,7 @@ def GenerateLdsoWrapper(root, path, interp, libpaths=(), elfsubdir=None):
     'interp_rel': os.path.relpath(path, interp_dir),
     'libpaths': ':'.join(['${basedir}/' + os.path.relpath(p, basedir)
                           for p in libpaths]),
+    'argv0_arg': '--argv0 "$0"' if interp_supports_argv0(interp) else '',
   }
 
   wrappath = root + path
@@ -160,6 +174,7 @@ basedir=${base%%/*}
 # ld.so supports forwarding the binary name.
 LD_ARGV0="$0" LD_ARGV0_REL="%(interp_rel)s" exec \
   "${basedir}/%(interp)s" \
+  %(argv0_arg)s \
   --library-path "%(libpaths)s" \
   --inhibit-rpath '' \
   "%(elf_path)s" \
