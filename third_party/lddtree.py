@@ -156,9 +156,7 @@ else
   esac
 fi
 basedir=${base%%/*}
-# TODO(crbug/1003841): Remove LD_ARGV0 once
-# ld.so supports forwarding the binary name.
-LD_ARGV0="$0" LD_ARGV0_REL="%(interp_rel)s" exec \
+LD_ARGV0_REL="%(interp_rel)s" exec \
   "${basedir}/%(interp)s" \
   %(argv0_arg)s \
   --library-path "%(libpaths)s" \
