@@ -54,6 +54,7 @@ BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
 BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
+USE_TOOLCHAINS_BOARDS = '6480.0.0'
 
 
 class InvalidWorkspace(failures_lib.StepFailure):
@@ -450,7 +451,7 @@ class WorkspaceInitSDKStage(WorkspaceStageBase):
     logging.PrintBuildbotStepText(post_ver)
 
 
-class WorkspaceUpdateSDKStage(generic_stages.BuilderStage):
+class WorkspaceUpdateSDKStage(WorkspaceStageBase):
   """Stage that is responsible for updating the chroot."""
 
   option_name = 'build'
@@ -460,11 +461,15 @@ class WorkspaceUpdateSDKStage(generic_stages.BuilderStage):
     """Do the work of updating the chroot."""
     usepkg_toolchain = (
         self._run.config.usepkg_toolchain and not self._latest_toolchain)
+    toolchain_boards = None
+    if self.AfterLimit(USE_TOOLCHAINS_BOARDS):
+      toolchain_boards = self._run.config.boards
 
     commands.UpdateChroot(
         self._build_root,
         usepkg=usepkg_toolchain,
         extra_env=self._portage_extra_env,
+        toolchain_boards=toolchain_boards,
         chroot_args=['--cache-dir', self._run.options.cache_dir])
 
 
@@ -481,7 +486,7 @@ class WorkspaceSetupBoardStage(generic_stages.BoardSpecificBuilderStage,
         self._build_root, board=self._current_board, usepkg=usepkg,
         force=self._run.config.board_replace,
         profile=self._run.options.profile or self._run.config.profile,
-        chroot_upgrade=True,
+        chroot_upgrade=False,
         chroot_args=ChrootArgs(self._run.options),
         extra_env=self._portage_extra_env)
 
