@@ -417,7 +417,7 @@
           "experimental": true,
           "leader_board": false,
           "board_group": "",
-          "arch": "UNKNOWN"
+          "arch": "ARM_INTERNAL"
         }
       ]
     },

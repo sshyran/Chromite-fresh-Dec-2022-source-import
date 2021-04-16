@@ -1075,9 +1075,12 @@
   gnawty-payloads-tryjob
   gnawty-release-tryjob
   gnawty-unittest-stress
+  goroh-full-tryjob
   goroh-llvm-next-toolchain-tryjob
   goroh-llvm-toolchain-tryjob
+  goroh-payloads-tryjob
   goroh-release-tryjob
+  goroh-unittest-stress
   gru-factory-gru-9017.B-factorybranch-tryjob
   grunt-arc-r-full-tryjob
   grunt-arc-r-llvm-next-toolchain-tryjob
