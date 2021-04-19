@@ -383,7 +383,24 @@ class GSContext(object):
         # lock on the cached gsutil.
         ref = tar_cache.Lookup(key)
         ref.SetDefault(cls.GSUTIL_URL)
-        cls.DEFAULT_GSUTIL_BIN = os.path.join(ref.path, 'gsutil', 'gsutil')
+        gsutil_bin = os.path.join(ref.path, 'gsutil', 'gsutil')
+        # Make sure the shebang uses python3 since some distros (like Debian)
+        # delete `python`.  And do it with a write lock.
+        with ref:
+          with open(gsutil_bin, 'rb') as fp:
+            line = fp.readline()
+            if line.strip().endswith(b'python'):
+              data = b'#!/usr/bin/env python3\n' + fp.read()
+              # Make sure to update the file atomically in case someone executes
+              # it directly.  It shouldn't happen, but who knows.
+              try:
+                osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True)
+              except OSError:
+                # If the cache already existed, as root, but hadn't had its
+                # shebang updated, do it as root now.
+                osutils.WriteFile(
+                    gsutil_bin, data, 'wb', atomic=True, sudo=True)
+        cls.DEFAULT_GSUTIL_BIN = gsutil_bin
         cls._CompileCrcmod(ref.path)
       else:
         # Check if the default gsutil path for builders exists. If
