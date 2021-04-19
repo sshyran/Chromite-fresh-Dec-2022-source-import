@@ -73,7 +73,8 @@ def ParseELFSymbols(elf):
       # nchain is the second 32-bit integer at the address pointed by DT_HASH,
       # both for ELF and ELF64 formats.
       fmt = '<I' if elf.little_endian else '>I'
-      elf.stream.seek(dthash_ptr + 4)
+      nchain_offset = next(elf.address_offsets(dthash_ptr + 4))
+      elf.stream.seek(nchain_offset)
       nsymbols = struct.unpack(fmt, elf.stream.read(4))[0]
     else:
       # Get the size of DYNSYM section from section header.
