@@ -8,7 +8,7 @@
 This script is intended to checkout chromite on the branch specified by -b or
 --branch (as normally accepted by cbuildbot), and then invoke cbuildbot. Most
 arguments are not parsed, only passed along. If a branch is not specified, this
-script will use 'master'.
+script will use 'main'.
 
 Among other things, this allows us to invoke build configs that exist on a given
 branch, but not on TOT.
@@ -121,7 +121,7 @@ def PreParseArguments(argv):
     argv: The command line arguments to parse.
 
   Returns:
-    Branch as a string ('master' if nothing is specified).
+    Branch as a string ('main' if nothing is specified).
   """
   parser = cbuildbot.CreateParser()
   options = cbuildbot.ParseCommandLine(parser, argv)
@@ -508,7 +508,7 @@ def _main(options, argv):
   Returns:
     Return code of cbuildbot as an integer.
   """
-  branchname = options.branch or 'master'
+  branchname = options.branch or 'main'
   root = options.buildroot
   buildroot = os.path.join(root, 'repository')
   workspace = os.path.join(root, 'workspace')
@@ -571,7 +571,7 @@ def _main(options, argv):
 def main(argv):
   options = PreParseArguments(argv)
   metric_fields = {
-      'branch_name': options.branch or 'master',
+      'branch_name': options.branch or 'main',
       'build_config': options.build_config_name,
       'tryjob': options.remote_trybot,
   }
