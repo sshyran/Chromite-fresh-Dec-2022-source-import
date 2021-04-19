@@ -423,8 +423,8 @@ class CrOSTesterTast(CrOSTesterBase):
     self._tester.Run()
     self.assertCommandContains([
         'tast', 'run', '-build=false', '-waituntilready',
-        '-extrauseflags=tast_vm', '-var=key=value', 'localhost:9222',
-        'ui.ChromeLogin'
+        r'-maybemissingvars=.+\..+', '-extrauseflags=tast_vm',
+        '-var=key=value', 'localhost:9222', 'ui.ChromeLogin'
     ])
 
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot')

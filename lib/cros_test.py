@@ -351,7 +351,13 @@ class CrOSTest(object):
 
     if self._device.log_level == 'debug':
       cmd += ['-verbose']
-    cmd += ['run', '-build=false', '-waituntilready',]
+    cmd += ['run', '-build=false', '-waituntilready',
+      # Skip tests depending on private runtime variables.
+      # 'gs://chromeos-prebuilt/board/amd64-host/.../chromeos-base/tast-vars*'
+      # doesn't contain runtime variable files in the tast-tests-private
+      # repository.
+      r'-maybemissingvars=.+\..+',
+    ]
     # If the tests are not informational, then fail on test failure.
     # TODO(dhanyaganesh@): Make this less hack-y crbug.com/1034403.
     if '!informational' in self.tast[0]:
