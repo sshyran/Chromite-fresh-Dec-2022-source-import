@@ -68,6 +68,8 @@
     nautilus-factory-poppy-10504.B-factorybranch
   factory-puff-13329.B-buildspec
     puff-factory-puff-13329.B-factorybranch
+  factory-puff-13813.B-buildspec
+    puff-factory-puff-13813.B-factorybranch
   factory-rambi-5517.B-buildspec
     enguarde-factory-rambi-5517.B-factorybranch
     expresso-factory-rambi-5517.B-factorybranch
@@ -894,6 +896,8 @@
     nautilus-factory-poppy-10504.B-factorybranch-tryjob
   factory-puff-13329.B-buildspec-tryjob
     puff-factory-puff-13329.B-factorybranch-tryjob
+  factory-puff-13813.B-buildspec-tryjob
+    puff-factory-puff-13813.B-factorybranch-tryjob
   factory-rambi-5517.B-buildspec-tryjob
     enguarde-factory-rambi-5517.B-factorybranch-tryjob
     expresso-factory-rambi-5517.B-factorybranch-tryjob
@@ -1698,6 +1702,7 @@
   puff-borealis-release-tryjob
   puff-borealis-unittest-stress
   puff-factory-puff-13329.B-factorybranch-tryjob
+  puff-factory-puff-13813.B-factorybranch-tryjob
   puff-full-tryjob
   puff-llvm-next-toolchain-tryjob
   puff-llvm-toolchain-tryjob

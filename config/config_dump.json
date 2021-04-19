@@ -11247,6 +11247,28 @@
         ],
         "workspace_branch": "factory-puff-13329.B"
     },
+    "factory-puff-13813.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 168h interval",
+        "slave_configs": [
+            "puff-factory-puff-13813.B-factorybranch"
+        ],
+        "workspace_branch": "factory-puff-13813.B"
+    },
+    "factory-puff-13813.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "puff-factory-puff-13813.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-puff-13813.B"
+    },
     "factory-rambi-5517.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -25519,6 +25541,26 @@
         "push_image": false,
         "suite_scheduling": false,
         "workspace_branch": "factory-puff-13329.B"
+    },
+    "puff-factory-puff-13813.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "puff"
+        ],
+        "workspace_branch": "factory-puff-13813.B"
+    },
+    "puff-factory-puff-13813.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "puff"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-puff-13813.B"
     },
     "puff-full": {
         "_template": "full",
