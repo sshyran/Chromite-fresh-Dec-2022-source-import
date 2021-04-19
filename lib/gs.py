@@ -445,44 +445,42 @@ class GSContext(object):
         raise
 
     # See if the system includes one in which case we're done.
-    # We probe `python` as that's what gsutil uses for its shebang.
+    # We probe `python3` as that's what gsutil uses for its shebang (see below).
     result = cros_build_lib.run(
-        ['python', '-c', 'from crcmod.crcmod import _usingExtension; '
+        ['python3', '-c', 'from crcmod.crcmod import _usingExtension; '
          'exit(0 if _usingExtension else 1)'], check=False, capture_output=True)
     if result.returncode == 0:
       return
 
     # See if the local copy has one.
-    for pyver in ('python2', 'python3'):
-      logging.debug('Attempting to compile local crcmod for %s gsutil', pyver)
-      with osutils.TempDir(prefix='chromite.gsutil.crcmod') as tempdir:
-        result = cros_build_lib.run(
-            [pyver, 'setup.py', 'build', '--build-base', tempdir,
-             '--build-platlib', tempdir],
-            cwd=src_root, capture_output=True, check=False,
-            debug_level=logging.DEBUG)
-        if result.returncode:
-          continue
+    logging.debug('Attempting to compile local crcmod for gsutil')
+    with osutils.TempDir(prefix='chromite.gsutil.crcmod') as tempdir:
+      result = cros_build_lib.run(
+          ['python3', 'setup.py', 'build', '--build-base', tempdir,
+           '--build-platlib', tempdir],
+          cwd=src_root, capture_output=True, check=False,
+          debug_level=logging.DEBUG)
+      if result.returncode:
+        return
 
-        # Locate the module in the build dir.
-        copied = False
-        for mod_path in glob.glob(
-            os.path.join(tempdir, 'crcmod', '_crcfunext*.so')):
-          dst_mod_path = os.path.join(src_root, pyver, 'crcmod',
-                                      os.path.basename(mod_path))
-          try:
-            shutil.copy2(mod_path, dst_mod_path)
-            copied = True
-          except shutil.Error:
-            pass
+      # Locate the module in the build dir.
+      copied = False
+      for mod_path in glob.glob(
+          os.path.join(tempdir, 'crcmod', '_crcfunext*.so')):
+        dst_mod_path = os.path.join(src_root, 'python3', 'crcmod',
+                                    os.path.basename(mod_path))
+        try:
+          shutil.copy2(mod_path, dst_mod_path)
+          copied = True
+        except shutil.Error:
+          pass
 
-        if not copied:
-          # If the module compile failed (missing compiler/headers/whatever),
-          # then the setup.py build command above would have passed, but there
-          # won't actually be a _crcfunext.so module.  Check for it here to
-          # disambiguate other errors from shutil.copy2.
-          logging.debug('No crcmod module produced (missing host compiler?)')
-          continue
+      if not copied:
+        # If the module compile failed (missing compiler/headers/whatever),
+        # then the setup.py build command above would have passed, but there
+        # won't actually be a _crcfunext.so module.  Check for it here to
+        # disambiguate other errors from shutil.copy2.
+        logging.debug('No crcmod module produced (missing host compiler?)')
 
   def __init__(self, boto_file=None, cache_dir=None, acl=None,
                dry_run=False, gsutil_bin=None, init_boto=False, retries=None,
