@@ -133,7 +133,7 @@ class TryjobTestParsing(TryjobTest):
     self.expected = {
         'where': cros_tryjob.REMOTE,
         'buildroot': None,
-        'branch': 'master',
+        'branch': 'main',
         'production': False,
         'yes': False,
         'list': False,
@@ -173,7 +173,7 @@ class TryjobTestParsing(TryjobTest):
     self.expected.update({
         'where': cros_tryjob.REMOTE,
         'buildroot': '/buildroot',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -215,7 +215,7 @@ class TryjobTestParsing(TryjobTest):
         'where': cros_tryjob.LOCAL,
         'buildroot': '/buildroot',
         'git_cache_dir': '/git-cache',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -256,7 +256,7 @@ class TryjobTestParsing(TryjobTest):
         'where': cros_tryjob.CBUILDBOT,
         'buildroot': '/buildroot',
         'git_cache_dir': '/git-cache',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -614,7 +614,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master',
+        '--remote-trybot', '-b', 'main',
     ])
 
   def testCbuildbotArgsSimpleRemote(self):
@@ -623,7 +623,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master', '-g', '123',
+        '--remote-trybot', '-b', 'main', '-g', '123',
     ])
 
   def testCbuildbotArgsSimpleInfraTesting(self):
@@ -632,7 +632,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master', '-g', '123',
+        '--remote-trybot', '-b', 'main', '-g', '123',
     ])
 
   def testCbuildbotArgsSimpleLocal(self):
@@ -647,7 +647,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
         '--buildroot', mock.ANY,
         '--git-cache-dir', mock.ANY,
         '--no-buildbot-tags', '--debug',
-        '-b', 'master',
+        '-b', 'main',
         '-g', '123',
     ])
 
@@ -751,7 +751,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--buildbot', '-b', 'master',
+        '--buildbot', '-b', 'main',
     ])
 
   def testCbuildbotArgsProductionLocal(self):
@@ -766,7 +766,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
         '--buildroot', mock.ANY,
         '--git-cache-dir', mock.ANY,
         '--no-buildbot-tags', '--buildbot',
-        '-b', 'master',
+        '-b', 'main',
     ])
 
 class TryjobTestDisplayLabel(TryjobTest):
@@ -778,18 +778,18 @@ class TryjobTestDisplayLabel(TryjobTest):
     config_name = options.build_configs[-1]
     return cros_tryjob.DisplayLabel(site_config, options, config_name)
 
-  def testMasterTryjob(self):
+  def testMainTryjob(self):
     label = self.FindLabel(['eve-full-tryjob'])
     self.assertEqual(label, 'tryjob')
 
-  def testMasterUnknown(self):
+  def testMainUnknown(self):
     label = self.FindLabel(['bogus-config'])
     self.assertEqual(label, 'tryjob')
 
-  def testMasterKnownProduction(self):
+  def testMainKnownProduction(self):
     label = self.FindLabel(['--production', 'eve-full'])
     self.assertEqual(label, 'production_tryjob')
 
-  def testMasterUnknownProduction(self):
+  def testMainUnknownProduction(self):
     label = self.FindLabel(['--production', 'bogus-config'])
     self.assertEqual(label, 'production_tryjob')

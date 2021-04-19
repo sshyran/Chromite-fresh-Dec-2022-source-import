@@ -241,8 +241,8 @@ def DisplayLabel(site_config, options, build_config_name):
 
   # Our site_config is only valid for the current branch. If the build
   # config is known and has an explicit display_label, use it.
-  # to be 'master'.
-  if (options.branch == 'master' and
+  # to be 'main'.
+  if (options.branch == 'main' and
       build_config_name in site_config and
       site_config[build_config_name].display_label):
     return site_config[build_config_name].display_label
@@ -396,7 +396,7 @@ def VerifyOptions(options, site_config):
   if not options.build_configs:
     cros_build_lib.Die('At least one build_config is required.')
 
-  on_branch = options.branch != 'master'
+  on_branch = options.branch != 'main'
 
   if not (options.yes or on_branch):
     unknown_build_configs = [b for b in options.build_configs
@@ -426,8 +426,8 @@ def VerifyOptions(options, site_config):
              'See go/cros-explicit-tryjob-build-configs-psa.' %
              (', '.join(prod_configs), ', '.join(alternative_configs)))
 
-      if options.branch == 'master':
-        # On master branch, we know the status of configs for sure.
+      if options.branch == 'main':
+        # On main branch, we know the status of configs for sure.
         cros_build_lib.Die(msg)
       elif not options.yes:
         # On branches, we are just guessing. Let people override.
@@ -495,7 +495,7 @@ List Examples:
         'build_configs', nargs='*',
         help='One or more configs to build.')
     parser.add_argument(
-        '-b', '--branch', default='master',
+        '-b', '--branch', default='main',
         help='The manifest branch to test.  The branch to '
              'check the buildroot out to.')
     parser.add_argument(
