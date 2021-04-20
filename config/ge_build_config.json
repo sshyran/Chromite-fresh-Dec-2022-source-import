@@ -38,18 +38,6 @@
       ]
     },
     {
-      "name": "atlas-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "banjo",
       "configs": [
         {
@@ -698,18 +686,6 @@
       ]
     },
     {
-      "name": "nocturne-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "novato",
       "configs": [
         {
@@ -836,18 +812,6 @@
           "builder": "RELEASE",
           "experimental": true,
           "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "snappy-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
           "board_group": "",
           "arch": "X86_INTERNAL"
         }
@@ -1130,6 +1094,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 439,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "atlas-kernelnext",
+      "reference_board_name": "atlas-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "atlas-kernelnext",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7177,
           "is_active": true
         }
       ]
@@ -5197,6 +5178,23 @@
       ]
     },
     {
+      "name": "nocturne-kernelnext",
+      "reference_board_name": "nocturne-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "nocturne-kernelnext",
+          "name": "nocturne",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7178,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "octopus",
       "reference_board_name": "octopus",
       "arch": "X86_INTERNAL",
@@ -6851,6 +6849,39 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 290,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "snappy-kernelnext",
+      "reference_board_name": "snappy-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "snappy-kernelnext",
+          "name": "alan",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7179,
+          "is_active": true
+        },
+        {
+          "board_name": "snappy-kernelnext",
+          "name": "bigdaddy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7179,
+          "is_active": true
+        },
+        {
+          "board_name": "snappy-kernelnext",
+          "name": "snappy",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7179,
           "is_active": true
         }
       ]
