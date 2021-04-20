@@ -243,6 +243,7 @@
     asuka-release
     asurada-release
     atlas-blueznext-release
+    atlas-kernelnext-release
     atlas-release
     banjo-release
     banon-release
@@ -270,6 +271,7 @@
     celes-release
     chell-release
     cherry-release
+    coral-kernelnext-release
     coral-release
     cyan-release
     dedede-release
@@ -343,6 +345,7 @@
     nami-release
     nautilus-release
     ninja-release
+    nocturne-kernelnext-release
     nocturne-release
     novato-arc64-release
     novato-release
@@ -371,6 +374,7 @@
     sentry-release
     setzer-release
     shadowkeep-release
+    snappy-kernelnext-release
     snappy-release
     soraka-libcamera-release
     soraka-release
@@ -496,6 +500,12 @@
   atlas-blueznext-unittest-stress
   atlas-factory-atlas-11907.B-factorybranch-tryjob
   atlas-full-tryjob
+  atlas-kernelnext-full-tryjob
+  atlas-kernelnext-llvm-next-toolchain-tryjob
+  atlas-kernelnext-llvm-toolchain-tryjob
+  atlas-kernelnext-payloads-tryjob
+  atlas-kernelnext-release-tryjob
+  atlas-kernelnext-unittest-stress
   atlas-llvm-next-toolchain-tryjob
   atlas-llvm-toolchain-tryjob
   atlas-master-factorybranch-tryjob
@@ -690,6 +700,12 @@
   config-updater-tryjob
   coral-factory-coral-10122.B-factorybranch-tryjob
   coral-full-tryjob
+  coral-kernelnext-full-tryjob
+  coral-kernelnext-llvm-next-toolchain-tryjob
+  coral-kernelnext-llvm-toolchain-tryjob
+  coral-kernelnext-payloads-tryjob
+  coral-kernelnext-release-tryjob
+  coral-kernelnext-unittest-stress
   coral-llvm-next-toolchain-tryjob
   coral-llvm-toolchain-tryjob
   coral-master-factorybranch-tryjob
@@ -1424,6 +1440,7 @@
     asuka-release-tryjob
     asurada-release-tryjob
     atlas-blueznext-release-tryjob
+    atlas-kernelnext-release-tryjob
     atlas-release-tryjob
     banjo-release-tryjob
     banon-release-tryjob
@@ -1451,6 +1468,7 @@
     celes-release-tryjob
     chell-release-tryjob
     cherry-release-tryjob
+    coral-kernelnext-release-tryjob
     coral-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
@@ -1524,6 +1542,7 @@
     nami-release-tryjob
     nautilus-release-tryjob
     ninja-release-tryjob
+    nocturne-kernelnext-release-tryjob
     nocturne-release-tryjob
     novato-arc64-release-tryjob
     novato-release-tryjob
@@ -1552,6 +1571,7 @@
     sentry-release-tryjob
     setzer-release-tryjob
     shadowkeep-release-tryjob
+    snappy-kernelnext-release-tryjob
     snappy-release-tryjob
     soraka-libcamera-release-tryjob
     soraka-release-tryjob
@@ -1637,6 +1657,12 @@
   ninja-unittest-stress
   nocturne-factory-nocturne-11066.B-factorybranch-tryjob
   nocturne-full-tryjob
+  nocturne-kernelnext-full-tryjob
+  nocturne-kernelnext-llvm-next-toolchain-tryjob
+  nocturne-kernelnext-llvm-toolchain-tryjob
+  nocturne-kernelnext-payloads-tryjob
+  nocturne-kernelnext-release-tryjob
+  nocturne-kernelnext-unittest-stress
   nocturne-llvm-next-toolchain-tryjob
   nocturne-llvm-toolchain-tryjob
   nocturne-payloads-tryjob
@@ -1853,6 +1879,12 @@
   sludge-unittest-stress
   snappy-factory-reef-8811.B-factorybranch-tryjob
   snappy-full-tryjob
+  snappy-kernelnext-full-tryjob
+  snappy-kernelnext-llvm-next-toolchain-tryjob
+  snappy-kernelnext-llvm-toolchain-tryjob
+  snappy-kernelnext-payloads-tryjob
+  snappy-kernelnext-release-tryjob
+  snappy-kernelnext-unittest-stress
   snappy-llvm-next-toolchain-tryjob
   snappy-llvm-toolchain-tryjob
   snappy-payloads-tryjob
