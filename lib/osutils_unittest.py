@@ -296,6 +296,26 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertExists(path)
     self.assertEqual(os.path.getsize(path), 0)
 
+  def testChmod(self):
+    """Test Chmod."""
+    def getmode(path):
+      return os.stat(path).st_mode & 0o7777
+
+    path = os.path.join(self.tempdir, 'chmodtests')
+    osutils.Touch(path)
+
+    osutils.Chmod(path, 0o700)
+    self.assertEqual(getmode(path), 0o700)
+
+    osutils.Chmod(path, 0o644)
+    self.assertEqual(getmode(path), 0o644)
+
+    osutils.Chown(path, user='root', group='root')
+    osutils.Chmod(path, 0o660, sudo=True)
+    self.assertEqual(getmode(path), 0o660)
+
+    self.assertRaises(OSError, osutils.Chmod, path, 0o600)
+
   def testChown(self):
     """Test chown."""
     # Helpers to get the user and group name of the given path's owner.

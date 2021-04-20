@@ -234,6 +234,30 @@ def Touch(path, makedirs=False, mode=None):
   os.utime(path, None)
 
 
+def Chmod(path: str, mode: int, sudo: bool = False):
+  """Helper for changing file modes even if we have to elevate to root.
+
+  Args:
+    path: File/directory to chmod.
+    mode: The permissions (e.g. 0o644) to change the file mode to.  String
+        permissions (e.g. a+r) are *not* supported.
+    sudo: If True, chmod the permissions as root.
+  """
+  # Try to chmod the file directly ourselves.  If we have access, no need to
+  # elevate via sudo.  Faster this way in general.
+  try:
+    os.chmod(path, mode)
+    return
+  except OSError as e:
+    # EPERM: We have access to dir, but not the file.
+    # EACCES: We don't have access to the dir.
+    if not sudo or e.errno not in (errno.EPERM, errno.EACCES):
+      raise
+
+  # If we're still here, we got permission denied and sudo=True was requested.
+  cros_build_lib.sudo_run(['chmod', f'{mode:o}', '--', path])
+
+
 def Chown(path, user=None, group=None, recursive=False):
   """Simple sudo chown path to the user.
 
