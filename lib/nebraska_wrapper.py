@@ -181,7 +181,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           'Update metadata directory location is not passed.')
 
     cmd = [
-        'python', self._nebraska_bin,
+        self._nebraska_bin,
         '--update-metadata', self._update_metadata_dir,
     ]
 

@@ -151,7 +151,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     self._nebraska._update_metadata_dir = '/path/to/dir'
     self._nebraska.run()
     run_command_mock.assert_called_once_with(
-        ['python', nebraska_wrapper.RemoteNebraskaWrapper.NEBRASKA_PATH,
+        [nebraska_wrapper.RemoteNebraskaWrapper.NEBRASKA_PATH,
          '--update-metadata', '/path/to/dir'],
         stdout=True, stderr=subprocess.STDOUT)
 
