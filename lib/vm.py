@@ -283,6 +283,8 @@ class VM(device.Device):
   def _SetQemuPath(self):
     """Find a suitable Qemu executable."""
     qemu_exe = 'qemu-system-x86_64'
+    # Newer CrOS qemu builds provide a standalone version under libexec.
+    qemu_wrapper_path = os.path.join('usr/libexec/qemu/bin', qemu_exe)
     qemu_exe_path = os.path.join('usr/bin', qemu_exe)
 
     # Check SDK cache.
@@ -290,15 +292,20 @@ class VM(device.Device):
       qemu_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
           cros_chrome_sdk.SDKFetcher.QEMU_BIN_PATH, self.cache_dir, self.board)
       if qemu_dir:
-        qemu_path = os.path.join(qemu_dir, qemu_exe_path)
-        if os.path.isfile(qemu_path):
-          self.qemu_path = qemu_path
+        for qemu_path in (qemu_wrapper_path, qemu_exe_path):
+          qemu_path = os.path.join(qemu_dir, qemu_path)
+          if os.path.isfile(qemu_path):
+            self.qemu_path = qemu_path
+            break
 
     # Check chroot.
     if not self.qemu_path:
-      qemu_path = os.path.join(self.chroot_path, qemu_exe_path)
-      if os.path.isfile(qemu_path):
-        self.qemu_path = qemu_path
+      for qemu_path in (qemu_wrapper_path, qemu_exe_path):
+        qemu_path = os.path.join(self.chroot_path, qemu_path)
+        print('checking', qemu_path)
+        if os.path.isfile(qemu_path):
+          self.qemu_path = qemu_path
+          break
 
     # Check system.
     if not self.qemu_path:
