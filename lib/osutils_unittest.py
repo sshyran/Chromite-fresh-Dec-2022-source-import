@@ -116,6 +116,29 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     with self.assertRaises(IOError):
       osutils.ReadFile(filename)
 
+  def testWriteChmod(self):
+    """Verify writing files with perms works."""
+    def getmode(path):
+      return os.stat(path).st_mode & 0o7777
+    def assertMode(path, mode):
+      self.assertEqual(getmode(path), mode)
+
+    path = os.path.join(self.tempdir, 'file')
+    osutils.WriteFile(path, 'asdf')
+    assertMode(path, 0o644)
+
+    osutils.WriteFile(path, 'asdf', chmod=0o666)
+    assertMode(path, 0o666)
+
+    osutils.WriteFile(path, 'asdf', atomic=True, chmod=0o664)
+    assertMode(path, 0o664)
+
+    osutils.WriteFile(path, 'asdf', sudo=True, chmod=0o755)
+    assertMode(path, 0o755)
+
+    osutils.WriteFile(path, 'asdf', sudo=True, atomic=True, chmod=0o775)
+    assertMode(path, 0o775)
+
   def testSafeSymlink(self):
     """Test that we can create symlinks."""
     with osutils.TempDir(sudo_rm=True) as tempdir:

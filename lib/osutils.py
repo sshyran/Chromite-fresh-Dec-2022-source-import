@@ -22,6 +22,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
+from typing import Optional
 
 import six
 
@@ -120,7 +121,7 @@ _VALID_WRITE_MODES = {
 
 
 def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
-              makedirs=False, sudo=False):
+              makedirs=False, sudo=False, chmod: Optional[int] = None):
   """Write the given content to disk.
 
   Args:
@@ -135,6 +136,8 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
             option is incompatible w/ append mode.
     makedirs: If True, create missing leading directories in the path.
     sudo: If True, write the file as root.
+    chmod: Permissions to make sure the file uses.  By default, permissions will
+        be maintained if |path| exists, or default to 0644.
   """
   if mode not in _VALID_WRITE_MODES:
     raise ValueError('mode must be one of {"%s"}, not %r' %
@@ -165,6 +168,25 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       for item in iterable:
         yield item.encode(encoding, errors)
 
+  def get_existing_perms(path):
+    """Return permissions for |path| if available."""
+    try:
+      return os.stat(path).st_mode & 0o7777
+    except OSError as e:
+      # EPERM: We have access to dir, but not the file.
+      # EACCES: We don't have access to the dir.
+      if e.errno in (errno.EPERM, errno.EACCES):
+        if sudo:
+          result = cros_build_lib.sudo_run(
+              ['stat', '-c%a', '--', path], stdout=True)
+          return int(result.stdout, 8)
+        else:
+          raise
+      elif e.errno != errno.ENOENT:
+        raise
+      else:
+        return 0o644
+
   # If the file needs to be written as root and we are not root, write to a temp
   # file, move it and change the permission.
   if sudo and os.getuid() != 0:
@@ -174,13 +196,15 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       cros_build_lib.sudo_run(
           ['dd', 'conv=notrunc', 'oflag=append', 'status=none',
            'of=%s' % (path,)], print_cmd=False, input=content)
+      if chmod is not None:
+        Chmod(path, chmod, sudo=True)
 
     else:
       with tempfile.NamedTemporaryFile(mode=mode, delete=False) as temp:
         write_path = temp.name
         temp.writelines(write_wrapper(
             cros_build_lib.iflatten_instance(content)))
-      os.chmod(write_path, 0o644)
+      os.chmod(write_path, get_existing_perms(path) if chmod is None else chmod)
 
       try:
         mv_target = path if not atomic else path + '.tmp'
@@ -203,6 +227,8 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       write_path = path + '.tmp'
     with open(write_path, mode) as f:
       f.writelines(write_wrapper(cros_build_lib.iflatten_instance(content)))
+    if atomic or chmod is not None:
+      os.chmod(write_path, get_existing_perms(path) if chmod is None else chmod)
 
     if not atomic:
       return
