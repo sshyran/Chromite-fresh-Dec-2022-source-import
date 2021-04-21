@@ -155,7 +155,7 @@
   firmware-guado-6301.108.B-firmwarebranch
   firmware-hatch-12672.B-firmwarebranch
   firmware-heli-5216.392.B-firmwarebranch
-  firmware-icarus-13854.B-firmwarebranch
+  firmware-icarus-12574.B-firmwarebranch
   firmware-kalista-11343.B-firmwarebranch
   firmware-kip-5216.227.B-firmwarebranch
   firmware-kukui-12573.B-firmwarebranch
@@ -1003,7 +1003,7 @@
   firmware-guado-6301.108.B-firmwarebranch-tryjob
   firmware-hatch-12672.B-firmwarebranch-tryjob
   firmware-heli-5216.392.B-firmwarebranch-tryjob
-  firmware-icarus-13854.B-firmwarebranch-tryjob
+  firmware-icarus-12574.B-firmwarebranch-tryjob
   firmware-kalista-11343.B-firmwarebranch-tryjob
   firmware-kip-5216.227.B-firmwarebranch-tryjob
   firmware-kukui-12573.B-firmwarebranch-tryjob
