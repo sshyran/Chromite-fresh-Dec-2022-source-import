@@ -711,7 +711,7 @@ class IteratePathsTest(cros_test_lib.TestCase):
 
   def testType(self):
     """Check that return value is an iterator."""
-    self.assertTrue(isinstance(osutils.IteratePaths('/'), collections.Iterator))
+    self.assertIsInstance(osutils.IteratePaths('/'), collections.abc.Iterator)
 
   def testRoot(self):
     """Test iterating from root directory."""

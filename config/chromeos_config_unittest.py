@@ -390,15 +390,16 @@ class CBuildBotTest(ChromeosConfigTestBase):
     for build_name, config in self.site_config.items():
       useflags = config.get('useflags')
       if not useflags is None:
-        self.assertTrue(
-            isinstance(useflags, list),
+        self.assertIsInstance(
+            useflags, list,
             'Config %s: useflags should be a list.' % build_name)
 
   def testBoards(self):
     """Verify 'boards' is explicitly set for every config."""
     for build_name, config in self.site_config.items():
-      self.assertTrue(isinstance(config['boards'], (tuple, list)),
-                      "Config %s doesn't have a list of boards." % build_name)
+      self.assertIsInstance(
+          config['boards'], (tuple, list),
+          "Config %s doesn't have a list of boards." % build_name)
       self.assertEqual(len(set(config['boards'])), len(config['boards']),
                        'Config %s has duplicate boards.' % build_name)
       if config['builder_class_name'] in (
@@ -981,8 +982,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
       if config['notification_configs'] is None:
         continue
       for notification_config in config['notification_configs']:
-        self.assertTrue(
-            isinstance(notification_config, config_lib.NotificationConfig))
+        self.assertIsInstance(
+            notification_config, config_lib.NotificationConfig)
 
 
 class TemplateTest(ChromeosConfigTestBase):

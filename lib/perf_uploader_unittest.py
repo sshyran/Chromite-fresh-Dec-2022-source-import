@@ -60,7 +60,7 @@ class OutputPerfValueTest(PerfUploadTestCase):
     perf_uploader.OutputPerfValue(self.file_name, 'desc', 42, 'units')
     data = osutils.ReadFile(self.file_name)
     entry = json.loads(data)
-    self.assertTrue(isinstance(entry, dict))
+    self.assertIsInstance(entry, dict)
 
 
 class LoadPerfValuesTest(PerfUploadTestCase):

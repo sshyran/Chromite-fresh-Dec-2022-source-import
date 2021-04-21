@@ -318,8 +318,8 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
     failure_message = failure_message_lib.FailureMessageManager.CreateMessage(
         stage_failure)
 
-    self.assertTrue(isinstance(failure_message,
-                               failure_message_lib.BuildScriptFailureMessage))
+    self.assertIsInstance(failure_message,
+                          failure_message_lib.BuildScriptFailureMessage)
 
   def testCreateMessageForPackageBuildFailureMessage(self):
     """Test CreateMessage for PackageBuildFailureMessage."""
@@ -329,8 +329,8 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
     failure_message = failure_message_lib.FailureMessageManager.CreateMessage(
         stage_failure)
 
-    self.assertTrue(isinstance(failure_message,
-                               failure_message_lib.PackageBuildFailureMessage))
+    self.assertIsInstance(failure_message,
+                          failure_message_lib.PackageBuildFailureMessage)
 
   def testCreateMessageForStageFailureMessage(self):
     """Test CreateMessage for StageFailureMessage."""
@@ -339,8 +339,8 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
     failure_message = failure_message_lib.FailureMessageManager.CreateMessage(
         stage_failure)
 
-    self.assertTrue(isinstance(failure_message,
-                               failure_message_lib.StageFailureMessage))
+    self.assertIsInstance(failure_message,
+                          failure_message_lib.StageFailureMessage)
 
   def testReconstructMessagesOnMixedMsgs(self):
     """Test ReconstructMessages on mixed messages."""
@@ -352,8 +352,7 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
 
     for f in failures:
       if f.failure_id == 4:
-        self.assertTrue(isinstance(
-            f, failure_message_lib.CompoundFailureMessage))
+        self.assertIsInstance(f, failure_message_lib.CompoundFailureMessage)
         inner_failures = f.inner_failures
         inner_failure_ids = [n_f.failure_id for n_f in inner_failures]
         self.assertCountEqual([1, 2, 3], inner_failure_ids)
@@ -395,6 +394,6 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
     self.assertEqual(len(failures), 1)
     f = failures[0]
     self.assertEqual(f.failure_id, 1)
-    self.assertTrue(isinstance(f, failure_message_lib.CompoundFailureMessage))
+    self.assertIsInstance(f, failure_message_lib.CompoundFailureMessage)
     inner_failure_ids = [n_f.failure_id for n_f in f.inner_failures]
     self.assertCountEqual([2, 3], inner_failure_ids)

@@ -62,10 +62,10 @@ class SDKBuildToolchainsStageTest(generic_stages_unittest.AbstractStageTestCase,
     # Sanity check args passed to RunBuildScript.
     for call in self.run_mock.call_args_list:
       buildroot, cmd = call[0]
-      self.assertTrue(isinstance(buildroot, six.string_types))
-      self.assertTrue(isinstance(cmd, (tuple, list)))
+      self.assertIsInstance(buildroot, six.string_types)
+      self.assertIsInstance(cmd, (tuple, list))
       for ele in cmd:
-        self.assertTrue(isinstance(ele, six.string_types))
+        self.assertIsInstance(ele, six.string_types)
 
 
 class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,

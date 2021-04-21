@@ -419,7 +419,7 @@ class BuilderStageTest(AbstractStageTestCase):
     self.assertRaises(failures_lib.StepFailure, self._RunCapture, stage)
 
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'fail!')
     self.buildstore.StartBuildStage.assert_called_once_with(
         DEFAULT_BUILD_STAGE_ID)
@@ -440,7 +440,7 @@ class BuilderStageTest(AbstractStageTestCase):
     self.assertRaises(failures_lib.StepFailure, self._RunCapture, stage)
 
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'fail!')
     self.buildstore.StartBuildStage.assert_called_once_with(
         DEFAULT_BUILD_STAGE_ID)
@@ -507,7 +507,7 @@ class BuilderStageTest(AbstractStageTestCase):
 
     # Verify the results tracked the original exception.
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'first fail')
 
     self.assertEqual(stage.handled_exceptions, ['first fail'])
@@ -542,8 +542,8 @@ class BuilderStageGetBuildFailureMessage(AbstractStageTestCase):
     stage = self.ConstructStage()
     build_failure_msg = stage.GetBuildFailureMessageFromResults()
     self.assertEqual(build_failure_msg.builder, self.BOT_ID)
-    self.assertTrue(isinstance(build_failure_msg.failure_messages[0],
-                               failure_message_lib.StageFailureMessage))
+    self.assertIsInstance(build_failure_msg.failure_messages[0],
+                          failure_message_lib.StageFailureMessage)
 
   def testGetBuildFailureMessageWithoutBuildStore(self):
     """Test GetBuildFailureMessage without working BuildStore instance."""

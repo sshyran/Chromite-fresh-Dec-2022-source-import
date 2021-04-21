@@ -182,7 +182,7 @@ class TestWaitFors(cros_test_lib.TestCase):
     """Verify side_effect_func works."""
     side_effect_called = [False]
     def _SideEffect(remaining):
-      self.assertTrue(isinstance(remaining, datetime.timedelta))
+      self.assertIsInstance(remaining, datetime.timedelta)
       side_effect_called[0] = True
     self.assertEqual(1, self._TestWaitForSuccess(
         1, 10, period=0.1, side_effect_func=_SideEffect))

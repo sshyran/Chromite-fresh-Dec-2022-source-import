@@ -212,9 +212,8 @@ class BuilderRunTest(_BuilderRunTestCase):
       self.assertEqual(DEFAULT_BRANCH, run.manifest_branch)
       self.assertEqual(DEFAULT_OPTIONS, run.options)
       self.assertEqual(DEFAULT_CONFIG, run.config)
-      self.assertTrue(isinstance(run.attrs, cbuildbot_run.RunAttributes))
-      self.assertTrue(isinstance(run.GetArchive(),
-                                 cbuildbot_run.archive_lib.Archive))
+      self.assertIsInstance(run.attrs, cbuildbot_run.RunAttributes)
+      self.assertIsInstance(run.GetArchive(), cbuildbot_run.archive_lib.Archive)
 
       # Make sure methods behave normally, since BuilderRun messes with them.
       meth1 = run.GetVersionInfo
@@ -429,9 +428,9 @@ class ChildBuilderRunTest(_BuilderRunTestCase):
       self.assertEqual(DEFAULT_OPTIONS, crun.options)
       self.assertEqual(DEFAULT_CONFIG.child_configs[0], crun.config)
       self.assertEqual('foo', crun.config.name)
-      self.assertTrue(isinstance(crun.attrs, cbuildbot_run.RunAttributes))
-      self.assertTrue(isinstance(crun.GetArchive(),
-                                 cbuildbot_run.archive_lib.Archive))
+      self.assertIsInstance(crun.attrs, cbuildbot_run.RunAttributes)
+      self.assertIsInstance(crun.GetArchive(),
+                            cbuildbot_run.archive_lib.Archive)
 
       # Make sure methods behave normally, since BuilderRun messes with them.
       meth1 = crun.GetVersionInfo

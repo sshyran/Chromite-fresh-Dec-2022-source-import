@@ -544,7 +544,7 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
       # Verify the generation is sane.  All we can assume is that it's a valid
       # whole number greater than 0.
       self.assertNotEqual(gen, None)
-      self.assertTrue(isinstance(gen, numbers.Integral))
+      self.assertIsInstance(gen, numbers.Integral)
       self.assertGreater(gen, 0)
 
       # Verify the size is what we expect.

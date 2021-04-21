@@ -137,7 +137,7 @@ class PatchSeriesTestCase(patch_unittest.UploadedLocalPatchTestCase,
     for apply_mock in apply_mocks:
       apply_mock.assert_called_once_with(mock.ANY, trivial=False)
       value = apply_mock.call_args[0][0]
-      self.assertTrue(isinstance(value, MockManifest))
+      self.assertIsInstance(value, MockManifest)
       self.assertEqual(value.root, self.build_root)
 
   def SetPatchApply(self, patch):

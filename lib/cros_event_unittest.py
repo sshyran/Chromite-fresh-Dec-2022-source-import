@@ -32,7 +32,7 @@ class FailTest(cros_test_lib.TestCase):
   """Test Failure class"""
   def testInit(self):
     f1 = cros_event.Failure()
-    self.assertTrue(isinstance(f1, Exception))
+    self.assertIsInstance(f1, Exception)
     self.assertEqual(f1.status, cros_event.EVENT_STATUS_FAIL)
 
     f2_msg = 'This is the message for the failure'
@@ -65,7 +65,7 @@ class EventTest(cros_test_lib.TestCase):
     self.assertEqual(self.event1[cros_event.EVENT_ID], self.id1)
     self.assertDictContainsSubset(self.data1, self.event1)
 
-    self.assertTrue(isinstance(self.event1, dict))
+    self.assertIsInstance(self.event1, dict)
 
   def testWithSuccess(self):
     """test success case"""
@@ -176,7 +176,7 @@ class EventFileLoggerTest(cros_test_lib.TestCase):
                                           encoder_func=self.encode_func)
 
   def testInit(self):
-    self.assertTrue(isinstance(self.log, cros_event.EventLogger))
+    self.assertIsInstance(self.log, cros_event.EventLogger)
 
   def testEvents(self):
     with self.log.Event():
@@ -201,7 +201,7 @@ class EventDummyLogger(cros_test_lib.TestCase):
     self.log = cros_event.EventDummyLogger()
 
   def testInit(self):
-    self.assertTrue(isinstance(self.log, cros_event.EventLogger))
+    self.assertIsInstance(self.log, cros_event.EventLogger)
 
 
 class FunctionTest(cros_test_lib.TestCase):
@@ -221,10 +221,10 @@ class FunctionTest(cros_test_lib.TestCase):
 
   def newEventTest(self):
     e1 = cros_event.newEvent()
-    self.assertTrue(isinstance(e1, cros_event.Event))
+    self.assertIsInstance(e1, cros_event.Event)
 
     e2 = cros_event.newEvent(foo='bar')
-    self.assertTrue(isinstance(e2, cros_event.Event))
+    self.assertIsInstance(e2, cros_event.Event)
     self.assertEqual('bar', e2['foo'])
 
     test_kind = 'testKind'

@@ -197,7 +197,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
       entry = actualResults[i]
 
       if entry.result not in results_lib.Results.NON_FAILURE_TYPES:
-        self.assertTrue(isinstance(entry.result, BaseException))
+        self.assertIsInstance(entry.result, BaseException)
         if isinstance(entry.result, failures_lib.StepFailure):
           self.assertEqual(str(entry.result), entry.description)
 

@@ -256,7 +256,7 @@ class TriciumClangTidyTests(cros_test_lib.MockTestCase):
   def test_parse_tidy_invocation_functions_on_success(self):
     result = tricium_clang_tidy.parse_tidy_invocation('/file/path.json')
     # If we got an |Exception|, print it out.
-    self.assertFalse(isinstance(result, tricium_clang_tidy.Error), result)
+    self.assertNotIsInstance(result, tricium_clang_tidy.Error)
     meta, info = result
     self.assertEqual(
         meta,

@@ -172,12 +172,12 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
       self._GetFunction(self.TacoNotTasty, self.FooException,
                         self.ERROR_MESSAGE)()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.TacoNotTasty))
+      self.assertIsInstance(e, self.TacoNotTasty)
       self.assertTrue(e.msg, self.ERROR_MESSAGE)
       self.assertEqual(len(e.exc_infos), 1)
       self.assertEqual(e.exc_infos[0].str, self.ERROR_MESSAGE)
       self.assertEqual(e.exc_infos[0].type, self.FooException)
-      self.assertTrue(isinstance(e.exc_infos[0].traceback, str))
+      self.assertIsInstance(e.exc_infos[0].traceback, str)
 
   def testReraiseACompoundFailure(self):
     """Tests that the list of ExceptInfo objects are copied over."""
@@ -189,7 +189,7 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
       self._GetFunction(self.SubparLunch, self.TacoNotTasty,
                         exc_infos=org_infos)()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.SubparLunch))
+      self.assertIsInstance(e, self.SubparLunch)
       # The orignal exceptions stored in exc_infos are preserved.
       self.assertEqual(e.exc_infos, org_infos)
       # All essential inforamtion should be included in the message of
@@ -211,7 +211,7 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
       self._GetFunction(self.SubparLunch, self.TacoNotTasty,
                         message='empty list')()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.SubparLunch))
+      self.assertIsInstance(e, self.SubparLunch)
       self.assertEqual(e.exc_infos[0].type, self.TacoNotTasty)
 
   def testReraiseOriginalException(self):

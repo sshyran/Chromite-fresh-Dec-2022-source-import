@@ -261,7 +261,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         quota_account=quota_account, max_retries=max_retries,
         timeout_mins=timeout_mins)
 
-    self.assertTrue(isinstance(result, commands.HWTestSuiteResult))
+    self.assertIsInstance(result, commands.HWTestSuiteResult)
     self.assertEqual(result.to_raise, None)
     self.assertEqual(result.json_dump_result, None)
 
@@ -337,7 +337,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         build, suite, board, pool=pool, timeout_mins=None,
         wait_for_results=True)
     error = result.to_raise
-    self.assertTrue(isinstance(error, failures_lib.TestFailure))
+    self.assertIsInstance(error, failures_lib.TestFailure)
     self.assertIn('Suite failed', str(error))
     self.assertIn(board, str(error))
 
@@ -378,7 +378,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         test_plan=test_plan, build=build, pool=pool,
         quota_account=quota_account, board=board, model=model,
         timeout_mins=timeout_mins, keyvals=keyvals, legacy_suite=suite)
-    self.assertTrue(isinstance(result, commands.HWTestSuiteResult))
+    self.assertIsInstance(result, commands.HWTestSuiteResult)
     self.assertEqual(result.to_raise, None)
     self.assertEqual(result.json_dump_result, None)
 

@@ -116,7 +116,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     self.PatchObject(bs, '_IsCIDBClientMissing',
                      return_value=False)
     result = bs.InitializeClients()
-    self.assertTrue(isinstance(bs.bb_client, buildbucket_v2.BuildbucketV2))
+    self.assertIsInstance(bs.bb_client, buildbucket_v2.BuildbucketV2)
     self.assertEqual(result, True)
 
   def testInitializeClientsWhenBuildbucketIsNotNeeded(self):
@@ -461,7 +461,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     self.PatchObject(bs.bb_client, 'GetStageFailures', return_value=fake_return)
     fail = bs.GetBuildsFailures(buildbucket_ids=[1234])
     bs.bb_client.GetStageFailures.assert_called_with(1234)
-    self.assertTrue(isinstance(fail[0], failure_message_lib.StageFailure))
+    self.assertIsInstance(fail[0], failure_message_lib.StageFailure)
     init.return_value = False
     with self.assertRaises(buildstore.BuildStoreException):
       bs.GetBuildsFailures(buildbucket_ids=buildbucket_ids)
