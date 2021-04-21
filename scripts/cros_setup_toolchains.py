@@ -76,13 +76,16 @@ HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust-bootstrap:0',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
+    'dev-embedded/ti50-sdk',
 )
 
 # New packages that we're in the process of adding to the SDK.  Since the SDK
 # bot hasn't had a chance to run yet, there are no binary packages available,
 # so we have to list them here and wait.  Once it completes, entries here can
 # be removed so they'll end up on bots & dev's systems.
-NEW_PACKAGES = ()
+NEW_PACKAGES = (
+    'dev-embedded/ti50-sdk',
+)
 
 # Enable the Go compiler for these targets.
 TARGET_GO_ENABLED = (
