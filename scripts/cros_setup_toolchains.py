@@ -1033,23 +1033,12 @@ def _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,
     e = lddtree.ParseELF(elf, root=root, ldpaths=ldpaths)
     logging.debug('Parsed elf %s data: %s', elf, e)
     interp = e['interp']
-    # Do not create wrapper for libc. crbug.com/766827
-    if interp and not glibc_re.search(elf):
-      # Generate a wrapper if it is executable.
-      interp = os.path.join('/lib', os.path.basename(interp))
-      lddtree.GenerateLdsoWrapper(output_dir, path_rewrite_func(elf), interp,
-                                  libpaths=e['rpath'] + e['runpath'])
-      FixClangXXWrapper(output_dir, path_rewrite_func(elf))
-
-      # Wrap any symlinks to the wrapper.
-      if elf in sym_paths:
-        link = sym_paths[elf]
-        GeneratePathWrapper(output_dir, link, elf)
 
     # TODO(crbug.com/917193): Drop this hack once libopcodes linkage is fixed.
     if os.path.basename(elf).startswith('libopcodes-'):
       continue
 
+    # Copy all the dependencies before we copy the program & generate wrappers.
     for lib, lib_data in e['libs'].items():
       src = path = lib_data['path']
       if path is None:
@@ -1082,6 +1071,19 @@ def _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,
 
       logging.debug('Linking lib %s -> %s', root + src, dst)
       os.link(root + src, dst)
+
+    # Do not create wrapper for libc. crbug.com/766827
+    if interp and not glibc_re.search(elf):
+      # Generate a wrapper if it is executable.
+      interp = os.path.join('/lib', os.path.basename(interp))
+      lddtree.GenerateLdsoWrapper(output_dir, path_rewrite_func(elf), interp,
+                                  libpaths=e['rpath'] + e['runpath'])
+      FixClangXXWrapper(output_dir, path_rewrite_func(elf))
+
+      # Wrap any symlinks to the wrapper.
+      if elf in sym_paths:
+        link = sym_paths[elf]
+        GeneratePathWrapper(output_dir, link, elf)
 
 
 def _EnvdGetVar(envd, var):
