@@ -66,9 +66,6 @@ class GlobalTestConfig(object):
   UPDATE_GENERATED_FILES = False
 
 
-NetworkTest = pytestmark_network_test
-
-
 def _FlattenStructure(base_path, dir_struct):
   """Converts a directory structure to a list of paths."""
   flattened = []

@@ -334,7 +334,7 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(email, jmsg['email'])
 
 
-@cros_test_lib.NetworkTest()
+@cros_test_lib.pytestmark_network_test
 class GerritHelperTest(GerritTestCase):
   """Unittests for GerritHelper."""
 
@@ -610,7 +610,7 @@ class GerritHelperTest(GerritTestCase):
     self.assertEqual(gpatch2.approval_timestamp, gpatch2.commit_timestamp)
 
 
-@cros_test_lib.NetworkTest()
+@cros_test_lib.pytestmark_network_test
 class DirectGerritHelperTest(cros_test_lib.TestCase):
   """Unittests for GerritHelper that use the real Chromium instance."""
 

@@ -262,7 +262,7 @@ class RequestBuildHelperTestsNetork(RequestBuildHelperTestsBase):
     self.assertCountEqual(request.tags, expected_tags)
     self.assertCountEqual(request.properties, expected_properties)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testMinTestBucket(self):
     """Talk to a test buildbucket instance with min job settings."""
     job = self._CreateJobMin()
@@ -302,7 +302,7 @@ class RequestBuildHelperTestsNetork(RequestBuildHelperTestsBase):
         ],
         expected_properties)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testMaxTestBucket(self):
     """Talk to a test buildbucket instance with max job settings."""
     job = self._CreateJobMax()

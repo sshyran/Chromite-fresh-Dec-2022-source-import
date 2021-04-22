@@ -148,7 +148,7 @@ class GetCookieTests(cros_test_lib.TestCase):
     self.assertEqual(cookies, {})
 
 
-@cros_test_lib.NetworkTest()
+@cros_test_lib.pytestmark_network_test
 class NetworkGobTest(cros_test_lib.TestCase):
   """Unittests that talk to real Gerrit."""
 

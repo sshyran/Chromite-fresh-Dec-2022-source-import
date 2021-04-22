@@ -282,7 +282,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
         self.assertTrue(any(d.ARTIFACT_NAME.endswith(name)
                             for name in known_names))
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testProcessBuildArtifact(self):
     """Processes a real tarball from GSUtil and stages it."""
     artifact = build_artifact.Artifact(
@@ -296,7 +296,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
                                    build_artifact.TEST_SUITES_FILE))
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testProcessTarball(self):
     """Downloads a real tarball and untars it."""
     artifact = build_artifact.BundledArtifact(
@@ -311,7 +311,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
         self.work_dir, 'autotest', 'test_suites')))
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testProcessTarballWithFile(self):
     """Downloads a real tarball and only untars one file from it."""
     file_to_download = 'autotest/test_suites/control.provision'
@@ -360,7 +360,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
          os.path.join(install_dir, 'autotest/packages'), '--all'],
         cwd=install_dir)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testStatefulPayloadArtifact(self):
     """Tests downloading the stateful payload."""
     factory = build_artifact.ChromeOSArtifactFactory(
@@ -377,7 +377,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
       self.assertExists(f)
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testAUFullPayloadArtifact(self):
     """Tests downloading the full update payload payload."""
     factory = build_artifact.ChromeOSArtifactFactory(
@@ -396,7 +396,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
       self.assertExists(f)
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testAUDeltaPayloadArtifact(self):
     """Tests downloading the delta update payload payload."""
     factory = build_artifact.ChromeOSArtifactFactory(
@@ -415,7 +415,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
       self.assertExists(f)
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testImageUnzip(self):
     """Downloads and stages a zip file and extracts a test image."""
     files_to_extract = ['chromiumos_test_image.bin']
@@ -431,7 +431,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
       self.assertExists(f)
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testImageUnzipWithExcludes(self):
     """Downloads and stages a zip file while excluding all large files."""
     artifact = build_artifact.BundledArtifact(
@@ -446,7 +446,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
                                       'chromiumos_test_image.bin'))
     self._CheckMarker(artifact.marker_name, artifact.installed_files)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testArtifactFactory(self):
     """Tests that BuildArtifact works for both named and file artifacts."""
     name_artifact = 'test_suites' # This file is in every real GS dir.
@@ -487,7 +487,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
     self.assertEqual(str(expected_exception),
                      str(saved_exception).split('\n')[0])
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testArtifactStaged(self):
     """Tests the artifact staging verification logic."""
     artifact = build_artifact.BundledArtifact(

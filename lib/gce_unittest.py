@@ -36,7 +36,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(gce.GceContext, 'GetZoneRegion', autospec=True,
                      return_value=self._ZONE)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetImage(self):
     """Tests that GetImage returns the correct image."""
     good_http = HttpMockSequence([
@@ -51,7 +51,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     self.assertDictEqual(gce_context.GetImage('foo-image'),
                          dict(name='foo-image'))
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetImageRaisesIfImageNotFound(self):
     """Tests that GetImage raies exception when image is not found."""
     bad_http = HttpMockSequence([
@@ -66,7 +66,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     with self.assertRaises(gce.ResourceNotFoundError):
       gce_context.GetImage('not-exising-image')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testRetryOnServerErrorHttpRequest(self):
     """Tests that 500 errors are retried."""
 

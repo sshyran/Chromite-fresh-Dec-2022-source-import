@@ -56,7 +56,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
                                           self.tempdir, branch=branch)
     self.repo.Initialize()
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testReInitialization(self):
     """Test ability to switch between branches."""
     self._Initialize('release-R19-2046.B')
@@ -68,7 +68,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     self.assertRaises(Exception, self._Initialize, 'monkey')
     self._Initialize('release-R20-2268.B')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testBuildRootGitCleanup(self):
     """Test successful repo cleanup."""
     self._Initialize()
@@ -79,7 +79,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     # run should be called twice.
     self.assertEqual(run_cmd_mock.call_count, 2)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testCleanStaleLocks(self):
     """Test successful repo lock cleanup."""
     self._Initialize('release-R19-2046.B')

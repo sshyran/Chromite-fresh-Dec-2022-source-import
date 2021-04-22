@@ -196,7 +196,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         'chromium.googlesource.com',
         'chromiumos/platform/dev-util/+/HEAD/nebraska/nebraska.py?format=text')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   @mock.patch.object(path_util, 'DetermineCheckout',
                      return_value=path_util.CheckoutInfo(
                          path_util.CHECKOUT_TYPE_GCLIENT, None, None))

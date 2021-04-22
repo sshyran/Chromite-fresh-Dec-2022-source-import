@@ -48,7 +48,7 @@ PATH boo/baz.tbz2
 
     binpkg.FetchTarballs([uri], self.tempdir)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testFetchRealPackages(self):
     """Actually fetch a real binhost from the network."""
     uri = 'gs://chromeos-prebuilt/board/lumpy/paladin-R37-5905.0.0-rc2/packages'

@@ -869,12 +869,12 @@ class PaygenPayloadLibEndToEndTest(PaygenPayloadLibTest):
     self.assertEqual(os.path.exists(output_metadata_uri), sign)
     self.assertExists(output_metadata_json)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testEndToEndIntegrationFull(self):
     """Integration test to generate a full payload for old_image."""
     self._EndToEndIntegrationTest(self.old_image, None, sign=True)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testEndToEndIntegrationDelta(self):
     """Integration test to generate a delta payload for N -> N."""
     self._EndToEndIntegrationTest(self.new_image, self.new_image, sign=False)

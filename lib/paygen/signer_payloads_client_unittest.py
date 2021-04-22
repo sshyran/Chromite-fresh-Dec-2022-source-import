@@ -378,7 +378,7 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     downloads = self.client._DownloadSignatures(uris)
     self.assertEqual(downloads, uris)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetHashSignatures(self):
     """Integration test that talks to the real signer with test hashes."""
     ctx = gs.GSContext()
