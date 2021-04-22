@@ -292,7 +292,7 @@ class VMTestStage(generic_stages.BoardSpecificBuilderStage,
           per_test_results_dir = os.path.join(test_results_root,
                                               vm_test.test_type)
         try:
-          with cgroups.SimpleContainNodes('VMTest'):
+          with cgroups.SimpleContainChildren('VMTest'):
             r = ' Reached VMTestStage test run timeout.'
             with timeout_util.Timeout(vm_test.timeout, reason_message=r):
               self._RunTest(vm_test, per_test_results_dir)
@@ -398,7 +398,7 @@ class GCETestStage(VMTestStage):
         else:
           per_test_results_dir = os.path.join(test_results_root,
                                               gce_test.test_type)
-        with cgroups.SimpleContainNodes('GCETest'):
+        with cgroups.SimpleContainChildren('GCETest'):
           r = ' Reached GCETestStage test run timeout.'
           with timeout_util.Timeout(self.TEST_TIMEOUT, reason_message=r):
             self._RunTest(gce_test, per_test_results_dir)
@@ -666,10 +666,10 @@ def ListTests(results_path, show_failed=True, show_passed=True):
     logging.info('Parsing test report %s', report)
     # Format used in the report:
     #   /path/to/base/dir/test_harness/all/SimpleTestUpdateAndVerify/ \
-    #     2_autotest_tests/results-01-security_OpenSSLAllowList [  FAILED  ]
+    #     2_autotest_tests/results-01-security_OpenSSLBlacklist [  FAILED  ]
     #   /path/to/base/dir/test_harness/all/SimpleTestUpdateAndVerify/ \
-    #     2_autotest_tests/results-01-security_OpenSSLAllowlist/ \
-    #     security_OpenAllowlist [  FAILED  ]
+    #     2_autotest_tests/results-01-security_OpenSSLBlacklist/ \
+    #     security_OpenBlacklist [  FAILED  ]
     with open(report) as f:
       folder_re = re.compile(r'([\./\w-]*)\s*\[\s*(\S+?)\s*\]')
       test_name_re = re.compile(r'results-[\d]+?-([\.\w_]*)')

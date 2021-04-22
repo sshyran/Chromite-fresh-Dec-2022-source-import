@@ -34,14 +34,14 @@ ScheduledBuild = collections.namedtuple(
     ('bucket', 'buildbucket_id', 'build_config', 'url', 'created_ts'))
 
 
-def NodeBuildSet(parent_buildbucket_id):
-  """Compute the buildset id for all nodes of an orchestrator builder.
+def ChildBuildSet(parent_buildbucket_id):
+  """Compute the buildset id for all slaves of a master builder.
 
   Args:
-    parent_buildbucket_id: The buildbucket id of the orchestrator build.
+    parent_buildbucket_id: The buildbucket id of the master build.
 
   Returns:
-    A string to use as a buildset for the node builders, or None.
+    A string to use as a buildset for the slave builders, or None.
   """
   if not parent_buildbucket_id:
     return None
@@ -130,7 +130,7 @@ class RequestBuild(object):
     """
     tags = {
         # buildset identifies a group of related builders.
-        'buildset': NodeBuildSet(self.master_buildbucket_id),
+        'buildset': ChildBuildSet(self.master_buildbucket_id),
         'cbb_display_label': self.display_label,
         'cbb_branch': self.branch,
         'cbb_config': self.build_config,
@@ -142,8 +142,8 @@ class RequestBuild(object):
     }
 
     if self.master_cidb_id or self.master_buildbucket_id:
-      # Used by GoldenEye as part of grouping node builds. Set to False for
-      # node builds, not set otherwise.
+      # Used by dashboards as part of grouping slave builds. Set to False for
+      # slave builds, not set otherwise.
       tags['master'] = 'False'
 
     # Include the extra_properties we might have passed into the tags.

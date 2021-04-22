@@ -175,41 +175,41 @@ class BuildStore(object):
 
     return build_id
 
-  def GetNodeStatuses(self, master_build_identifier):
-    """Gets the statuses of node builders to given build.
+  def GetSlaveStatuses(self, master_build_identifier):
+    """Gets the statuses of slave builders to given build.
 
     Args:
-      master_build_identifier: BuildIdentifier of the orchestrator build to
-                               fetch the node statuses for.
+      master_build_identifier: BuildIdentifier of the master build to fetch the
+          slave statuses for.
 
     Returns:
       A list containing a dictionary with keys BUILD_STATUS_KEYS.
-      The list contains all node builds of the given orchestrator.
+      The list contains all child builds of the given master.
     """
     if not self.InitializeClients():
       raise BuildStoreException('BuildStore clients could not be initialized.')
     if (self._read_from_bb and
         master_build_identifier.buildbucket_id is not None):
-      return self.bb_client.GetNodeStatuses(
+      return self.bb_client.GetChildStatuses(
           int(master_build_identifier.buildbucket_id))
     elif not self._read_from_bb and master_build_identifier.cidb_id is not None:
-      return self.cidb_conn.GetNodeStatuses(master_build_identifier.cidb_id,
+      return self.cidb_conn.GetSlaveStatuses(master_build_identifier.cidb_id,
                                              None)
 
-  def GetKilledNodeBuilds(self, build_identifier):
-    """Get the node builds that were killed by the given orchestrator.
+  def GetKilledChildBuilds(self, build_identifier):
+    """Get the child builds that were killed by the given master.
 
     Args:
-      build_identifier: The orchestrator build to get nodes for.
+      build_identifier: The master build to get children for.
 
     Returns:
-      A list of node buildbucket_ids of the build that were killed.
+      A list of child buildbucket_ids of the build that were killed.
     """
     if not self.InitializeClients():
       raise BuildStoreException('BuildStore clients could not be initialized.')
     if self._read_from_bb:
       if build_identifier.buildbucket_id is not None:
-        return self.bb_client.GetKilledNodeBuilds(
+        return self.bb_client.GetKilledChildBuilds(
             int(build_identifier.buildbucket_id))
     else:
       if build_identifier.cidb_id is not None:
@@ -353,10 +353,10 @@ class BuildStore(object):
     if self._write_to_bb:
       buildbucket_v2.UpdateSelfCommonBuildProperties(metadata_url=metadata_url)
 
-  def FinishNodeConfig(self, build_id, child_config, status=None):
-    """Marks the given node config as finished with |status|.
+  def FinishChildConfig(self, build_id, child_config, status=None):
+    """Marks the given child config as finished with |status|.
 
-    This should be called before FinishBuild, on all node configs that
+    This should be called before FinishBuild, on all child configs that
     were used in a build.
 
     Args:
@@ -369,7 +369,7 @@ class BuildStore(object):
     if not self.InitializeClients():
       raise BuildStoreException('BuildStore clients could not be initialized.')
     if self._write_to_cidb:
-      self.cidb_conn.FinishNodeConfig(build_id, child_config, status=status)
+      self.cidb_conn.FinishChildConfig(build_id, child_config, status=status)
 
   def StartBuildStage(self, build_stage_id):
     """Marks a build stage as inflight, in the database.
@@ -599,10 +599,10 @@ class FakeBuildStore(object):
                                                      status)
     return build_stage_id
 
-  def GetNodeStatuses(self, master_build_id, buildbucket_ids=None):
-    return self.fake_cidb.GetNodeStatuses(master_build_id, buildbucket_ids)
+  def GetSlaveStatuses(self, master_build_id, buildbucket_ids=None):
+    return self.fake_cidb.GetSlaveStatuses(master_build_id, buildbucket_ids)
 
-  def GetKilledNodeBuilds(self, build_identifier):
+  def GetKilledChildBuilds(self, build_identifier):
     return [m['message_value'] for m in self.fake_cidb.GetBuildMessages(
         build_identifier.cidb_id,
         message_type=constants.MESSAGE_TYPE_IGNORED_REASON,

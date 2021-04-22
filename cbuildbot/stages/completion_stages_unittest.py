@@ -85,9 +85,9 @@ class ManifestVersionedSyncCompletionStageTest(
     self.assertEqual(expected_map, builder_success_map)
 
 
-class OrchestratorNodeSyncCompletionStageMockConfigTest(
+class MasterSlaveSyncCompletionStageMockConfigTest(
     generic_stages_unittest.AbstractStageTestCase):
-  """Tests OrchestratorNodeSyncCompletionStage."""
+  """Tests MasterSlaveSyncCompletionStage with ManifestVersionedSyncStage."""
   BOT_ID = 'master'
 
   def setUp(self):
@@ -104,7 +104,7 @@ class OrchestratorNodeSyncCompletionStageMockConfigTest(
   def ConstructStage(self):
     sync_stage = sync_stages.ManifestVersionedSyncStage(self._run,
                                                         self.buildstore)
-    return completion_stages.OrchestratorNodeSyncCompletionStage(
+    return completion_stages.MasterSlaveSyncCompletionStage(
         self._run, self.buildstore, sync_stage, success=True)
 
   def _GetTestConfig(self):
@@ -185,15 +185,15 @@ class OrchestratorNodeSyncCompletionStageMockConfigTest(
     )
     return test_config
 
-  def testGetNodesForOrchestrator(self):
-    """Tests get nodes for a fake unified orchestrator configuration."""
+  def testGetSlavesForMaster(self):
+    """Tests that we get the slaves for a fake unified master configuration."""
     stage = self.ConstructStage()
-    p = stage._GetNodeConfigs()
+    p = stage._GetSlaveConfigs()
     self.assertEqual([self.test_config['test3'], self.test_config['test5']], p)
 
 
 class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
-  """Tests how canary orchestrator handles failures in CanaryCompletionStage."""
+  """Tests how canary master handles failures in CanaryCompletionStage."""
   BOT_ID = 'master-release'
 
   # We duplicate __init__ to specify a default for bot_id.
@@ -219,8 +219,8 @@ class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
     self.PatchObject(
         builder_status_lib, 'BuilderStatusesFetcher', return_value=mock_fetcher)
     mock_wait = self.PatchObject(
-        completion_stages.OrchestratorNodeSyncCompletionStage,
-        '_WaitForNodesToComplete')
+        completion_stages.MasterSlaveSyncCompletionStage,
+        '_WaitForSlavesToComplete')
     stage = self.ConstructStage()
     stage._run.attrs.manifest_manager = mock.Mock()
 
@@ -260,8 +260,8 @@ class PublishUprevChangesStageTest(
     return completion_stages.PublishUprevChangesStage(
         self._run, self.buildstore, sync_stage, success=True)
 
-  def testCheckNodeUploadPrebuiltsTest(self):
-    """Tests for CheckNodeUploadPrebuiltsTest."""
+  def testCheckSlaveUploadPrebuiltsTest(self):
+    """Tests for CheckSlaveUploadPrebuiltsTest."""
     stage = self.ConstructStage()
     stage._build_stage_id = 'test_build_stage_id'
 
@@ -284,14 +284,14 @@ class PublishUprevChangesStageTest(
 
     self.PatchObject(
         completion_stages.PublishUprevChangesStage,
-        '_GetNodeConfigs',
+        '_GetSlaveConfigs',
         return_value=slave_configs_a)
     self.PatchObject(FakeBuildStore, 'GetBuildStatuses', return_value=[])
     self.PatchObject(FakeBuildStore, 'GetBuildsStages',
                      return_value=slave_stages_a)
 
-    # All important nodes are covered
-    self.assertTrue(stage.CheckNodeUploadPrebuiltsTest())
+    # All important slaves are covered
+    self.assertTrue(stage.CheckSlaveUploadPrebuiltsTest())
 
     slave_stages_b = [{'name': stage_name,
                        'build_config': slave_a,
@@ -301,24 +301,24 @@ class PublishUprevChangesStageTest(
                        'status': constants.BUILDER_STATUS_PASSED}]
     self.PatchObject(
         completion_stages.PublishUprevChangesStage,
-        '_GetNodeConfigs',
+        '_GetSlaveConfigs',
         return_value=slave_configs_a)
     self.PatchObject(FakeBuildStore, 'GetBuildsStages',
                      return_value=slave_stages_b)
 
     # Slave_a didn't pass the stage
-    self.assertFalse(stage.CheckNodeUploadPrebuiltsTest())
+    self.assertFalse(stage.CheckSlaveUploadPrebuiltsTest())
 
     slave_configs_b = [{'name': slave_a}, {'name': slave_b}, {'name': slave_c}]
     self.PatchObject(
         completion_stages.PublishUprevChangesStage,
-        '_GetNodeConfigs',
+        '_GetSlaveConfigs',
         return_value=slave_configs_b)
     self.PatchObject(FakeBuildStore, 'GetBuildsStages',
                      return_value=slave_stages_a)
 
     # No stage information for slave_c
-    self.assertFalse(stage.CheckNodeUploadPrebuiltsTest())
+    self.assertFalse(stage.CheckSlaveUploadPrebuiltsTest())
 
   def testAndroidPush(self):
     """Test values for PublishUprevChanges with Android PFQ."""

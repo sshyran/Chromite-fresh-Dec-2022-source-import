@@ -86,7 +86,7 @@ class FileTypeDecoder(object):
   shared between several calls to that method.
   """
 
-  # Allowlist of mime types and their mapping to file type.
+  # Whitelist of mime types and their mapping to file type.
   MIME_TYPE_MAPPING = {
       'application/x-gzip': 'binary/compressed/gzip',
       'application/x-bzip2': 'binary/compressed/bzip2',

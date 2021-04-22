@@ -65,7 +65,7 @@ def CreateMockSiteConfig():
       workspace_branch='test-branch',
   )
 
-  buildspec_parent.AddNodes([
+  buildspec_parent.AddSlaves([
       site_config.Add(
           'test-firmwarebranch',
           site_config.templates.firmwarebranch,
@@ -155,8 +155,8 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
 
     self.assertEqual(self.mock_run_stage.call_args_list, [])
 
-  def testBuildspecNode(self):
-    """Verify RunStages for buildspec with node configs."""
+  def testBuildspecChild(self):
+    """Verify RunStages for buildspec with child configs."""
     builder_run = self._InitConfig('buildspec-child')
     workspace_builders.BuildSpecBuilder(
         builder_run, self.buildstore).RunStages()
@@ -168,11 +168,11 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceScheduleNodesStage,
+        mock.call(workspace_stages.WorkspaceScheduleChildrenStage,
                   build_root=self.workspace),
     ])
 
-  def testBuildspecNodeWithVersion(self):
+  def testBuildspecChildWithVersion(self):
     """Verify RunStages for buildspec with --version and child configs."""
     builder_run = self._InitConfig('buildspec-child',
                                    extra_argv=['--version', '1.2.3'])
@@ -180,7 +180,7 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
         builder_run, self.buildstore).RunStages()
 
     self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceScheduleNodesStage,
+        mock.call(workspace_stages.WorkspaceScheduleChildrenStage,
                   build_root=self.workspace),
     ])
 

@@ -40,7 +40,7 @@ def GetBuilderSuccessMap(builder_run, overall_success):
     A dict, mapping the builder names to whether they succeeded.
   """
   success_map = {}
-  for run in [builder_run] + builder_run.GetNodes():
+  for run in [builder_run] + builder_run.GetChildren():
     if run.config.boards and not run.config.child_configs:
       success_map[run.config.name] = True
       for board in run.config.boards:
@@ -87,52 +87,52 @@ class ImportantBuilderFailedException(failures_lib.StepFailure):
   """Exception thrown when an important build fails to build."""
 
 
-class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
+class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
   """Stage that records whether we passed or failed to build/test manifest."""
 
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(OrchestratorNodeSyncCompletionStage, self).__init__(*args, **kwargs)
+    super(MasterSlaveSyncCompletionStage, self).__init__(*args, **kwargs)
     # TODO(nxia): rename to _build_statuses as it contains local status and
-    # node statuses for orchestrator builds
+    # slave statuses for master builds
     self._slave_statuses = {}
     self._experimental_build_statuses = {}
     self._fatal = False
     self.buildbucket_client = buildbucket_v2.BuildbucketV2()
 
-  def _WaitForNodesToComplete(self, manager, build_identifier, builders_array,
+  def _WaitForSlavesToComplete(self, manager, build_identifier, builders_array,
                                timeout):
-    """Wait for node builds to complete.
+    """Wait for slave builds to complete.
 
     Args:
       manager: An instance of BuildSpecsManager.
       build_identifier: The BuildIdentifier instance of the master build.
-      builders_array: A list of builder names (strings) of node builds.
+      builders_array: A list of builder names (strings) of slave builds.
       timeout: Number of seconds to wait for the results.
     """
-    return manager.WaitForNodesToComplete(
+    return manager.WaitForSlavesToComplete(
         build_identifier, builders_array, timeout=timeout)
 
   def _GetBuilderStatusesFetcher(self):
     """Construct and return the BuilderStatusesFetcher instance.
 
-    If this build is a orchestrator, wait for nodes to complete or timeout
-    before constructing and returning the BuilderStatusesFetcher instance.
+    If this build is a master, wait for slaves to complete or timeout before
+    constructing and returning the BuilderStatusesFetcher instance.
 
     Returns:
       A instance of builder_status_lib.BuilderStatusesFetcher.
     """
-    # Wait for nodes if we're an orchestrator, in production or
-    # mock-production.  Otherwise just look at our own status.
+    # Wait for slaves if we're a master, in production or mock-production.
+    # Otherwise just look at our own status.
     build_identifier, _ = self._run.GetCIDBHandle()
     builders_array = None
     if not self._run.config.master:
-      # The node build returns its own status.
+      # The slave build returns its own status.
       logging.warning('The build is not a master.')
     elif self._run.options.mock_slave_status or not self._run.options.debug:
       # The master build.
-      builders = self._GetNodeConfigs()
+      builders = self._GetSlaveConfigs()
       builders_array = [b.name for b in builders]
       timeout = self._run.config.build_timeout
 
@@ -145,10 +145,10 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
         timeout = 3 * 60
 
       manager = self._run.attrs.manifest_manager
-      if sync_stages.OrchestratorNodeLKGMSyncStage.external_manager:
-        manager = sync_stages.OrchestratorNodeLKGMSyncStage.external_manager
+      if sync_stages.MasterSlaveLKGMSyncStage.external_manager:
+        manager = sync_stages.MasterSlaveLKGMSyncStage.external_manager
 
-      self._WaitForNodesToComplete(manager, build_identifier, builders_array,
+      self._WaitForSlavesToComplete(manager, build_identifier, builders_array,
                                     timeout)
 
     # Set exclude_experimental to False to fetch the BuilderStatus for
@@ -170,11 +170,11 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
 
   def _HandleStageException(self, exc_info):
     """Decide whether an exception should be treated as fatal."""
-    # Besides the orchestrator, the completion stages also run on nodes, to
-    # report their status back to the orchestrator. If the build failed, they
-    # throw an exception here. For node builders, marking this stage 'red'
-    # would be redundant, since the build itself would already be red. In this
-    # case, report a warning instead.
+    # Besides the master, the completion stages also run on slaves, to report
+    # their status back to the master. If the build failed, they throw an
+    # exception here. For slave builders, marking this stage 'red' would be
+    # redundant, since the build itself would already be red. In this case,
+    # report a warning instead.
     # pylint: disable=protected-access
     exc_type = exc_info[0]
     if (issubclass(exc_type, ImportantBuilderFailedException) and
@@ -190,7 +190,7 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
     """Handle a successful build.
 
     This function is called whenever the cbuildbot run is successful.
-    For the orchestrator, this will only be called when all node builders
+    For the master, this will only be called when all slave builders
     are also successful. This function may be overridden by subclasses.
     """
     # We only promote for the pfq, not chrome pfq.
@@ -200,24 +200,22 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
         self._run.config.master and
         self._run.manifest_branch in ('main', 'master')):
       self._run.attrs.manifest_manager.PromoteCandidate()
-      if sync_stages.OrchestratorNodeLKGMSyncStage.external_manager:
-        (sync_stages.OrchestratorNodeLKGMSyncStage.external_manager
-          .PromoteCandidate())
+      if sync_stages.MasterSlaveLKGMSyncStage.external_manager:
+        sync_stages.MasterSlaveLKGMSyncStage.external_manager.PromoteCandidate()
 
   def HandleFailure(self, failing, inflight, no_stat, self_destructed):
     """Handle a build failure.
 
     This function is called whenever the cbuildbot run fails.
-    For the orchestrator, this will be called when any node fails or times
+    For the master, this will be called when any slave fails or times
     out. This function may be overridden by subclasses.
 
     Args:
       failing: The names of the failing builders.
       inflight: The names of the builders that are still running.
-      no_stat: Set of builder names of node builders that had status None.
-      self_destructed: Boolean indicating whether the orchestrator build
-                       destructed itself and stopped waiting completion of
-                       its nodes.
+      no_stat: Set of builder names of slave builders that had status None.
+      self_destructed: Boolean indicating whether the master build destructed
+                       itself and stopped waiting completion of its slaves.
     """
     if failing or inflight or no_stat:
       logging.PrintBuildbotStepWarnings()
@@ -244,7 +242,7 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       ]))
 
   def PerformStage(self):
-    super(OrchestratorNodeSyncCompletionStage, self).PerformStage()
+    super(MasterSlaveSyncCompletionStage, self).PerformStage()
 
     builder_statusess_fetcher = self._GetBuilderStatusesFetcher()
     self._slave_statuses, self._experimental_build_statuses = (
@@ -281,8 +279,8 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       failing: Set of build config names of builders that failed.
       inflight: Set of build config names of builders that are inflight
       no_stat: Set of build config names of builders that had status None.
-      self_destructed: Boolean indicating whether it's an orchestrator build
-        which destructed itself and stopped waiting its nodes to complete.
+      self_destructed: Boolean indicating whether it's a master build which
+        destructed itself and stopped waiting its slaves to complete.
 
     Returns:
       True if any of the failing, inflight or no_stat builders are not sanity
@@ -302,9 +300,9 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       build_identifier, _ = self._run.GetCIDBHandle()
       if self.buildstore.AreClientsReady():
         aborted_slaves = (
-            builder_status_lib.GetNodesAbortedBySelfDestructedOrchestrator(
+            builder_status_lib.GetSlavesAbortedBySelfDestructedMaster(
                 build_identifier, self.buildstore))
-        # Ignore the nodes aborted by self-destruction.
+        # Ignore the slaves aborted by self-destruction.
         not_passed_builders -= aborted_slaves
 
     # Fatal if any not_passed_builders remain.
@@ -329,7 +327,7 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
     scheduled by Buildbucket, get the build statuses and annotate the results.
 
     Args:
-      no_stat: Config names of the node builds with None status.
+      no_stat: Config names of the slave builds with None status.
     """
     buildbucket_info_dict = buildbucket_v2.GetBuildInfoDict(
         self._run.attrs.metadata)
@@ -381,16 +379,16 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
     step text for the no_stat builds.
 
     Args:
-      failing: Set of builder names of node builders that failed.
-      inflight: Set of builder names of node builders that are inflight.
-      no_stat: Set of builder names of node builders that had status None.
+      failing: Set of builder names of slave builders that failed.
+      inflight: Set of builder names of slave builders that are inflight.
+      no_stat: Set of builder names of slave builders that had status None.
       statuses: A builder-name->status dictionary, which will provide
                 the dashboard_url values for any links.
-      experimental_statuses: A builder-name->status dictionary for all nodes
+      experimental_statuses: A builder-name->status dictionary for all slaves
                              that were set as experimental through the tree
                              status.
       self_destructed: Boolean indicating whether the master build destructed
-                       itself and stopped waiting completion of its nodes.
+                       itself and stopped waiting completion of its slaves.
     """
     for build in failing:
       if statuses[build].message:
@@ -409,7 +407,7 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       self._AnnotateNoStatBuilders(no_stat)
     else:
       logging.PrintBuildbotStepText('The master destructed itself and stopped '
-                                    'waiting for the following nodes:')
+                                    'waiting for the following slaves:')
       for build in inflight:
         self._PrintBuildMessage('%s: still running' % build,
                                 statuses[build].dashboard_url)
@@ -422,8 +420,8 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
             '%s: set as experimental through tree status' % build,
             status.dashboard_url)
 
-  def GetNodeStatuses(self):
-    """Returns cached node status results.
+  def GetSlaveStatuses(self):
+    """Returns cached slave status results.
 
     Cached results are populated during PerformStage, so this function
     should only be called after PerformStage has returned.
@@ -435,32 +433,32 @@ class OrchestratorNodeSyncCompletionStage(ManifestVersionedSyncCompletionStage):
     return self._slave_statuses
 
   def GetExperimentalBuildStatuses(self):
-    """Returns cached BuilderStatus of the experimental node builds.
+    """Returns cached BuilderStatus of the experimental slave builds.
 
     Cached results are populated during PerformStage, so this function
     should only be called after PerformStage has returned.
 
     Returns:
-      A dictionary from names of experimental node builds to their
+      A dictionary from names of experimental slave builds to their
         builder_status_lib.BuilderStatus objects.
     """
     return self._experimental_build_statuses
 
   def GetFatal(self):
-    """Returns whether the build (and its important nodes) failed with fatal.
+    """Returns whether the build (and its important slaves) failed with fatal.
 
     Cached results are populated during PerformStage, so this function
     should only be called after PerformStage has returned.
 
     Returns:
-      A boolean indicating whether the build  (and its important nodes) failed
+      A boolean indicating whether the build  (and its important slaves) failed
       with fatal.
     """
     return self._fatal
 
 
-class CanaryCompletionStage(OrchestratorNodeSyncCompletionStage):
-  """Collect build node statuses and handle the failures."""
+class CanaryCompletionStage(MasterSlaveSyncCompletionStage):
+  """Collect build slave statuses and handle the failures."""
 
   category = constants.CI_INFRA_STAGE
 
@@ -470,17 +468,16 @@ class CanaryCompletionStage(OrchestratorNodeSyncCompletionStage):
     Args:
       failing: Names of the builders that failed.
       inflight: Names of the builders that timed out.
-      no_stat: Set of builder names of node builders that had status None.
-      self_destructed: Boolean indicating whether the orchestrator build
-                       destructed itself and stopped waiting completion of
-                       its nodes.
+      no_stat: Set of builder names of slave builders that had status None.
+      self_destructed: Boolean indicating whether the master build destructed
+                       itself and stopped waiting completion of its slaves.
     """
     # Print out the status about what builds failed or not.
-    OrchestratorNodeSyncCompletionStage.HandleFailure(self, failing, inflight,
+    MasterSlaveSyncCompletionStage.HandleFailure(self, failing, inflight,
                                                  no_stat, self_destructed)
 
     if self._run.config.master:
-      self.CanaryOrchestratorHandleFailure(failing, inflight, no_stat)
+      self.CanaryMasterHandleFailure(failing, inflight, no_stat)
 
   def SendCanaryFailureAlert(self, failing, inflight, no_stat):
     """Send an alert email to summarize canary failures.
@@ -490,7 +487,7 @@ class CanaryCompletionStage(OrchestratorNodeSyncCompletionStage):
       inflight: The names of the builders that are still running.
       no_stat: The names of the builders that had status None.
     """
-    builder_name = 'Canary Orchestrator'
+    builder_name = 'Canary Master'
     title = '%s has detected build failures:' % builder_name
     msgs = [
         str(x) for x in builder_status_lib.GetFailedMessages(
@@ -512,13 +509,13 @@ class CanaryCompletionStage(OrchestratorNodeSyncCompletionStage):
     alerts.SendHealthAlert(
         self._run, 'Canary builder failures', msg, extra_fields=extra_fields)
 
-  def CanaryOrchestratorHandleFailure(self, failing, inflight, no_stat):
+  def CanaryMasterHandleFailure(self, failing, inflight, no_stat):
     """Handles the failure by sending out an alert email.
 
     Args:
       failing: Names of the builders that failed.
       inflight: Names of the builders that timed out.
-      no_stat: Set of builder names of node builders that had status None.
+      no_stat: Set of builder names of slave builders that had status None.
     """
     if self._run.manifest_branch in ('main', 'master'):
       self.SendCanaryFailureAlert(failing, inflight, no_stat)
@@ -527,8 +524,8 @@ class CanaryCompletionStage(OrchestratorNodeSyncCompletionStage):
 
   def _HandleStageException(self, exc_info):
     """Decide whether an exception should be treated as fatal."""
-    # Canary master already updates the tree status for node
-    # failures. There is no need to mark this stage red. For node
+    # Canary master already updates the tree status for slave
+    # failures. There is no need to mark this stage red. For slave
     # builders, the build itself would already be red. In this case,
     # report a warning instead.
     # pylint: disable=protected-access
@@ -561,7 +558,7 @@ class UpdateChromeosLKGMStage(generic_stages.BuilderStage):
 
   def _build_threshold_successful(self):
     """Whether the percentage of successful child builders exceeds threshold"""
-    ids = self.GetScheduledNodeBuildbucketIds()
+    ids = self.GetScheduledSlaveBuildbucketIds()
     num_builds = 0
     num_failures = 0
     for status in self.buildstore.GetBuildStatuses(buildbucket_ids=ids):
@@ -607,14 +604,14 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
     self.sync_stage = sync_stage
     self.success = success
 
-  def CheckOrchestratorBinhostTest(self, buildbucket_id):
-    """Check whether the orchestrator builder has passed BinhostTest stage.
+  def CheckMasterBinhostTest(self, buildbucket_id):
+    """Check whether the master builder has passed BinhostTest stage.
 
     Args:
-      buildbucket_id: buildbucket_id of the orchestrator build to check for.
+      buildbucket_id: buildbucket_id of the master build to check for.
 
     Returns:
-      True if the status of the orchestrator build BinhostTest stage is 'pass';
+      True if the status of the master build BinhostTest stage is 'pass';
       else, False.
     """
     stage_name = 'BinhostTest'
@@ -646,14 +643,14 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
                     self._build_stage_id, stage_name)
     return False
 
-  def CheckNodeUploadPrebuiltsTest(self):
-    """Check if the nodes have passed UploadPrebuilts stage.
+  def CheckSlaveUploadPrebuiltsTest(self):
+    """Check if the slaves have passed UploadPrebuilts stage.
 
-    Given the orchestrator build id, check if all the important nodes have
-    passed the UploadPrebuilts stage.
+    Given the master build id, check if all the important slaves have passed
+    the UploadPrebuilts stage.
 
     Returns:
-      True if all the important nodes have passed the stage;
+      True if all the important slaves have passed the stage;
       True if it's in debug environment;
       else, False.
     """
@@ -663,18 +660,18 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
       logging.warning('The build is not a master')
       return False
     elif self._run.options.buildbot and self._run.options.debug:
-      # If it's in debug environment, no node builds would be triggered,
+      # If it's in debug environment, no slave builds would be triggered,
       # in order to cover the testing on pushing commits to a remote
       # temp branch, return True.
-      logging.info('In debug environment, return CheckNodeUploadPrebuiltsTest'
+      logging.info('In debug environment, return CheckSlaveUploadPrebuiltsTest'
                    'as True')
       return True
     elif self._build_stage_id is not None and self.buildstore.AreClientsReady():
-      slave_configs = self._GetNodeConfigs()
+      slave_configs = self._GetSlaveConfigs()
       important_set = set([slave['name'] for slave in slave_configs])
 
       stages = self.buildstore.GetBuildsStages(
-          buildbucket_ids=self.GetScheduledNodeBuildbucketIds())
+          buildbucket_ids=self.GetScheduledSlaveBuildbucketIds())
 
       passed_set = set([
           s['build_config']
@@ -684,11 +681,11 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
       ])
 
       if passed_set.issuperset(important_set):
-        logging.info('All the important nodes passed %s', stage_name)
+        logging.info('All the important slaves passed %s', stage_name)
         return True
       else:
         remaining_set = important_set.difference(passed_set)
-        logging.warning("node %s didn't pass %s", remaining_set, stage_name)
+        logging.warning("slave %s didn't pass %s", remaining_set, stage_name)
         return False
     else:
       logging.warning('Not valid build_stage_id %s', self._build_stage_id)
@@ -747,5 +744,5 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
         self._build_root,
         overlay_type=self._run.config.push_overlays,
         dryrun=self._run.options.debug)
-    if config_lib.IsMainAndroidPFQ(self._run.config) and self.success:
+    if config_lib.IsMasterAndroidPFQ(self._run.config) and self.success:
       self._run.attrs.metadata.UpdateWithDict({'UprevvedAndroid': True})

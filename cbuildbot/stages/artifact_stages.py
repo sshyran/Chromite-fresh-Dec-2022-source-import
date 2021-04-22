@@ -655,11 +655,11 @@ class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
     return generated_args
 
   @classmethod
-  def _AddOptionsForNode(cls, slave_config, board):
-    """Private helper method to add upload_prebuilts args for a node builder.
+  def _AddOptionsForSlave(cls, slave_config, board):
+    """Private helper method to add upload_prebuilts args for a slave builder.
 
     Args:
-      slave_config: The build config of a node builder.
+      slave_config: The build config of a slave builder.
       board: The name of the "master" board on the master builder.
 
     Returns:

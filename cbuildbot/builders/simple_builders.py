@@ -275,24 +275,23 @@ class SimpleBuilder(generic_builders.Builder):
         self._RunStage(build_stages.SetupBoardStage, board,
                        builder_run=builder_run)
 
-  def _RunMainAndroidPFQBuild(self):
-    """Runs through the stages of the chrome PFQ main build."""
-    # If there are node builders, schedule them.
+  def _RunMasterAndroidPFQBuild(self):
+    """Runs through the stages of the paladin or chrome PFQ master build."""
+    # If there are slave builders, schedule them.
     if self._run.config.slave_configs:
-      self._RunStage(scheduler_stages.ScheduleNodesStage, self.sync_stage)
+      self._RunStage(scheduler_stages.ScheduleSlavesStage, self.sync_stage)
     self._RunStage(build_stages.UprevStage)
     self._RunStage(build_stages.InitSDKStage)
     self._RunStage(build_stages.UpdateSDKStage)
-    # The CQ/Chrome PFQ orchestrator will not actually run the SyncChrome
-    # stage, but we want the logic that gets triggered when SyncChrome stage
-    # is skipped.
+    # The CQ/Chrome PFQ master will not actually run the SyncChrome stage, but
+    # we want the logic that gets triggered when SyncChrome stage is skipped.
     self._RunStage(chrome_stages.SyncChromeStage)
 
   def RunEarlySyncAndSetupStages(self):
     """Runs through the early sync and board setup stages."""
-    # If there are node builders, schedule them.
+    # If there are slave builders, schedule them.
     if self._run.config.slave_configs:
-      self._RunStage(scheduler_stages.ScheduleNodesStage, self.sync_stage)
+      self._RunStage(scheduler_stages.ScheduleSlavesStage, self.sync_stage)
     self._RunStage(build_stages.UprevStage)
     self._RunStage(build_stages.InitSDKStage)
     self._RunStage(build_stages.UpdateSDKStage)
@@ -425,8 +424,8 @@ class SimpleBuilder(generic_builders.Builder):
   def RunStages(self):
     """Runs through build process."""
     # TODO(sosa): Split these out into classes.
-    if config_lib.IsMainAndroidPFQ(self._run.config):
-      self._RunMainAndroidPFQBuild()
+    if config_lib.IsMasterAndroidPFQ(self._run.config):
+      self._RunMasterAndroidPFQBuild()
     else:
       self._RunDefaultTypeBuild()
 
@@ -467,10 +466,9 @@ class DistributedBuilder(SimpleBuilder):
           self._run.config.build_type in (constants.TOOLCHAIN_TYPE,
                                           constants.FULL_TYPE,
                                           constants.INCREMENTAL_TYPE)):
-      sync_stage = self._GetStageInstance(
-        sync_stages.OrchestratorNodeLKGMSyncStage)
+      sync_stage = self._GetStageInstance(sync_stages.MasterSlaveLKGMSyncStage)
       self.completion_stage_class = (
-          completion_stages.OrchestratorNodeSyncCompletionStage)
+          completion_stages.MasterSlaveSyncCompletionStage)
     else:
       sync_stage = self._GetStageInstance(
           sync_stages.ManifestVersionedSyncStage)
@@ -521,8 +519,8 @@ class DistributedBuilder(SimpleBuilder):
     try:
       # When (afdo_update_ebuild and not afdo_generate_min) is True,
       # if completion_stage passed, need to run
-      # AFDOUpdateChromeEbuildStage to prepare for pushing commits to mains;
-      # if it's a orchestartor_chrome_pfq build and compeletion_stage failed,
+      # AFDOUpdateChromeEbuildStage to prepare for pushing commits to masters;
+      # if it's a master_chrome_pfq build and compeletion_stage failed,
       # need to run AFDOUpdateChromeEbuildStage to prepare for pushing commits
       # to a staging branch.
       if completion_successful and not self._run.config.afdo_generate_min:
@@ -532,9 +530,9 @@ class DistributedBuilder(SimpleBuilder):
           self._RunStage(afdo_stages.AFDOUpdateKernelEbuildStage)
     finally:
       if self._run.config.master:
-        self._RunStage(report_stages.NodeFailureSummaryStage)
+        self._RunStage(report_stages.SlaveFailureSummaryStage)
 
-      if config_lib.IsCanaryMain(self._run):
+      if config_lib.IsCanaryMaster(self._run):
         if build_finished and not self._run.config.basic_builder:
           self._RunStage(completion_stages.UpdateChromeosLKGMStage)
         else:
@@ -547,14 +545,13 @@ class DistributedBuilder(SimpleBuilder):
       if self._run.config.push_overlays:
         publish = (was_build_successful and completion_successful and
                    build_finished)
-        # CQ and Orchestrator Chrome PFQ no longer publish uprevs. For
-        # Orchestrator Chrome PFQ this is because this duty is being
-        # transitioned to the Chrome PUpr in the PCQ world. See
-        # http://go/pupr.
+        # CQ and Master Chrome PFQ no longer publish uprevs. For Master Chrome
+        # PFQ this is because this duty is being transitioned to the Chrome
+        # PUpr in the PCQ world. See http://go/pupr.
         # There is no easy way to disable this in ChromeOS config,
         # so hack the check here.
 
-        if publish and config_lib.IsMainAndroidPFQ(self._run.config):
+        if publish and config_lib.IsMasterAndroidPFQ(self._run.config):
           self._RunStage(android_stages.UprevAndroidStage)
           self._RunStage(android_stages.AndroidMetadataStage)
         self._RunStage(completion_stages.PublishUprevChangesStage,

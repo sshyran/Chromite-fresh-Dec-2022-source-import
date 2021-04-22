@@ -91,9 +91,9 @@ class ConfigDumpStageTest(generic_stages_unittest.AbstractStageTestCase):
     self.RunStage()
 
 
-class NodeFailureSummaryStageTest(
+class SlaveFailureSummaryStageTest(
     generic_stages_unittest.AbstractStageTestCase):
-  """Tests that NodeFailureSummaryStage behaves as expected."""
+  """Tests that SlaveFailureSummaryStage behaves as expected."""
 
   def setUp(self):
     self.db = mock.MagicMock()
@@ -104,11 +104,11 @@ class NodeFailureSummaryStageTest(
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, **kwargs):  # pylint: disable=arguments-differ
     """Prepare stage with config['master']=True."""
-    super(NodeFailureSummaryStageTest, self)._Prepare(**kwargs)
+    super(SlaveFailureSummaryStageTest, self)._Prepare(**kwargs)
     self._run.config['master'] = True
 
   def ConstructStage(self):
-    return report_stages.NodeFailureSummaryStage(self._run, self.buildstore)
+    return report_stages.SlaveFailureSummaryStage(self._run, self.buildstore)
 
   def testPerformStage(self):
     """Tests that stage runs without syntax errors."""
@@ -248,7 +248,7 @@ class ReportStageTest(AbstractReportStageTestCase):
   RELEASE_TAG = ''
 
   def setUp(self):
-    self.mock_cidb.GetNodeStatuses = mock.Mock(return_value=None)
+    self.mock_cidb.GetSlaveStatuses = mock.Mock(return_value=None)
 
   def testCheckResults(self):
     """Basic sanity check for results stage functionality"""
@@ -301,7 +301,7 @@ class ReportStageTest(AbstractReportStageTestCase):
         },
     ]
     self.buildstore.GetBuildsStages = mock.Mock(return_value=stages)
-    self.mock_cidb.GetNodeStatuses = mock.Mock(return_value=statuses)
+    self.mock_cidb.GetSlaveStatuses = mock.Mock(return_value=statuses)
     self._SetupUpdateStreakCounter()
     self.PatchObject(report_stages.ReportStage, '_LinkArtifacts')
     self.RunStage()
@@ -346,7 +346,7 @@ class ReportStageTest(AbstractReportStageTestCase):
                         debug=False, update_list=True, acl=mock.ANY)]
     self.assertEqual(calls, commands.UploadArchivedFile.call_args_list)
 
-  def testEmailNotifyMainBranch(self):
+  def testEmailNotifyMasterBranch(self):
     """Send out alerts when streak counter reaches the threshold."""
     self.PatchObject(cbuildbot_run._BuilderRunBase,
                      'InEmailReportingEnvironment', return_value=True)
@@ -375,7 +375,7 @@ class ReportStageTest(AbstractReportStageTestCase):
             notification_config_2.email_notify,
         ])
 
-  def testEmailNotifyNonMainBranch(self):
+  def testEmailNotifyNonMasterBranch(self):
     """Do not send out email alerts for non-master branches."""
     self.PatchObject(
         cbuildbot_run._BuilderRunBase,
@@ -419,8 +419,8 @@ class ReportStageTest(AbstractReportStageTestCase):
     self.assertEqual(tags_content_dict['build_number'],
                      generic_stages_unittest.DEFAULT_BUILD_NUMBER)
 
-  def testGetNodeConfigsMetadataList(self):
-    """Test that GetNodeConfigListMetadata generates node config metadata."""
+  def testGetChildConfigsMetadataList(self):
+    """Test that GetChildConfigListMetadata generates child config metadata."""
     child_configs = [{'name': 'config1', 'boards': ['board1']},
                      {'name': 'config2', 'boards': ['board2']}]
     config_status_map = {'config1': True,
@@ -429,7 +429,7 @@ class ReportStageTest(AbstractReportStageTestCase):
                  'status': constants.BUILDER_STATUS_PASSED},
                 {'name': 'config2', 'boards': ['board2'],
                  'status': constants.BUILDER_STATUS_FAILED}]
-    child_config_list = report_stages.GetNodeConfigListMetadata(
+    child_config_list = report_stages.GetChildConfigListMetadata(
         child_configs, config_status_map)
     self.assertEqual(expected, child_config_list)
 

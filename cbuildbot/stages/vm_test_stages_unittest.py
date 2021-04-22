@@ -60,7 +60,7 @@ class GCETestStageTest(generic_stages_unittest.AbstractStageTestCase,
         autospec=True,
         return_value=False)
     self.PatchObject(osutils, 'RmDir', autospec=True)
-    self.PatchObject(cgroups, 'SimpleContainNodes', autospec=True)
+    self.PatchObject(cgroups, 'SimpleContainChildren', autospec=True)
     self._Prepare()
     self.buildstore = FakeBuildStore()
 
@@ -134,7 +134,7 @@ class VMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
         autospec=True,
         return_value=False)
     self.PatchObject(osutils, 'RmDir', autospec=True)
-    self.PatchObject(cgroups, 'SimpleContainNodes', autospec=True)
+    self.PatchObject(cgroups, 'SimpleContainChildren', autospec=True)
     self._Prepare()
     self.buildstore = FakeBuildStore()
 
@@ -484,7 +484,7 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains(['---test_that-args=-allow_chrome_crashes'],
                                expected=False)
 
-  def testAllowlistChromeCrashes(self):
+  def testWhitelistChromeCrashes(self):
     """Test SMOKE config with allowing chrome crashes."""
     config = config_lib.VMTestConfig(
         constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)

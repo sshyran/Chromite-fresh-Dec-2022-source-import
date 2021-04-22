@@ -156,8 +156,8 @@ class TestBuildStore(cros_test_lib.MockTestCase):
         cidb_id=build_id, critical=True)
     self.assertEqual(build_id, 0)
 
-  def testGetKilledNodeBuilds(self):
-    """Tests the redirect for GetKilledNodeBuilds function."""
+  def testGetKilledChildBuilds(self):
+    """Tests the redirect for GetKilledChildBuilds function."""
     init = self.PatchObject(BuildStore, 'InitializeClients',
                             return_value=True)
     bs = BuildStore(_read_from_bb=False)
@@ -170,18 +170,18 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     build_identifier = buildstore.BuildIdentifier(cidb_id=1,
                                                   buildbucket_id=1234)
     # Test for buildbucket_ids.
-    result = bs.GetKilledNodeBuilds(build_identifier)
+    result = bs.GetKilledChildBuilds(build_identifier)
     bs.cidb_conn.GetBuildMessages.assert_called_once_with(
         1, message_type=constants.MESSAGE_TYPE_IGNORED_REASON,
         message_subtype=constants.MESSAGE_SUBTYPE_SELF_DESTRUCTION)
     self.assertEqual(result, [1234, 2341, 3412])
     bs = BuildStore(_read_from_bb=True)
     bs.bb_client = mock.MagicMock()
-    bs.GetKilledNodeBuilds(build_identifier)
-    bs.bb_client.GetKilledNodeBuilds.assert_called_once_with(1234)
+    bs.GetKilledChildBuilds(build_identifier)
+    bs.bb_client.GetKilledChildBuilds.assert_called_once_with(1234)
     init.return_value = False
     with self.assertRaises(buildstore.BuildStoreException):
-      bs.GetKilledNodeBuilds(build_identifier)
+      bs.GetKilledChildBuilds(build_identifier)
 
   def testInsertBuildMessage(self):
     """Tests the redirect for InsertBuildMessage function."""
@@ -248,31 +248,31 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     with self.assertRaises(buildstore.BuildStoreException):
       bs.InsertBuildStage(constants.MOCK_BUILD_ID, 'stage_name')
 
-  def testGetNodeStatuses(self):
-    """Tests the redirect for GetNodeStatuses function."""
+  def testGetSlaveStatuses(self):
+    """Tests the redirect for GetSlaveStatuses function."""
     init = self.PatchObject(BuildStore, 'InitializeClients',
                             return_value=True)
     bs = BuildStore(_read_from_bb=False)
     fake_statuses = object()
     bs.cidb_conn = mock.MagicMock()
-    self.PatchObject(bs.cidb_conn, 'GetNodeStatuses',
+    self.PatchObject(bs.cidb_conn, 'GetSlaveStatuses',
                      return_value=fake_statuses)
-    result = bs.GetNodeStatuses(buildstore.BuildIdentifier(cidb_id=1234))
-    bs.cidb_conn.GetNodeStatuses.assert_called_once_with(
+    result = bs.GetSlaveStatuses(buildstore.BuildIdentifier(cidb_id=1234))
+    bs.cidb_conn.GetSlaveStatuses.assert_called_once_with(
         1234, None)
     self.assertEqual(result, fake_statuses)
     bs = BuildStore(_read_from_bb=True)
     fake_statuses = object()
     bs.bb_client = mock.MagicMock()
-    self.PatchObject(bs.bb_client, 'GetNodeStatuses',
+    self.PatchObject(bs.bb_client, 'GetChildStatuses',
                      return_value=fake_statuses)
-    result = bs.GetNodeStatuses(buildstore.BuildIdentifier(
+    result = bs.GetSlaveStatuses(buildstore.BuildIdentifier(
         cidb_id=1234, buildbucket_id=1234))
     self.assertEqual(result, fake_statuses)
-    bs.bb_client.GetNodeStatuses.assert_called_once_with(1234)
+    bs.bb_client.GetChildStatuses.assert_called_once_with(1234)
     init.return_value = False
     with self.assertRaises(buildstore.BuildStoreException):
-      bs.GetNodeStatuses(1234)
+      bs.GetSlaveStatuses(1234)
 
   def testStartBuildStage(self):
     """Tests the redirect for StartBuildStage function."""
@@ -357,21 +357,21 @@ class TestBuildStore(cros_test_lib.MockTestCase):
       bs.FinishBuild(constants.MOCK_BUILD_ID, status=status, summary=summary,
                      metadata_url=metadata_url, strict=strict)
 
-  def testFinishNodeConfig(self):
-    """Tests the redirect for FinishNodeConfig function."""
+  def testFinishChildConfig(self):
+    """Tests the redirect for FinishChildConfig function."""
     init = self.PatchObject(BuildStore, 'InitializeClients',
                             return_value=True)
     bs = BuildStore()
     bs.cidb_conn = mock.MagicMock()
     child_config = mock.Mock()
     status = mock.Mock()
-    self.PatchObject(bs.cidb_conn, 'FinishNodeConfig')
-    bs.FinishNodeConfig(constants.MOCK_BUILD_ID, child_config, status=status)
-    bs.cidb_conn.FinishNodeConfig.assert_called_once_with(
+    self.PatchObject(bs.cidb_conn, 'FinishChildConfig')
+    bs.FinishChildConfig(constants.MOCK_BUILD_ID, child_config, status=status)
+    bs.cidb_conn.FinishChildConfig.assert_called_once_with(
         constants.MOCK_BUILD_ID, child_config, status=status)
     init.return_value = False
     with self.assertRaises(buildstore.BuildStoreException):
-      bs.FinishNodeConfig(constants.MOCK_BUILD_ID, child_config, status=status)
+      bs.FinishChildConfig(constants.MOCK_BUILD_ID, child_config, status=status)
 
   def testInsertBoardPerBuildWithoutMetadata(self):
     """Tests the InsertBoardPerBuild function when metadata isn't available."""

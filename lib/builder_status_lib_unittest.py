@@ -44,8 +44,8 @@ def ConstructFailureMessages(build_config):
 class BuilderStatusLibTests(cros_test_lib.MockTestCase):
   """Tests for builder_status_lib."""
 
-  def testGetNodesAbortedBySelfDestructedOrchestrator(self):
-    """Test GetNodesAbortedBySelfDestructedOrchestrator with aborted nodes."""
+  def testGetSlavesAbortedBySelfDestructedMaster(self):
+    """Test GetSlavesAbortedBySelfDestructedMaster with aborted slaves."""
     db = fake_cidb.FakeCIDBConnection()
     buildstore = FakeBuildStore(db)
     cidb.CIDBConnectionFactory.SetupMockCidb(db)
@@ -57,7 +57,7 @@ class BuilderStatusLibTests(cros_test_lib.MockTestCase):
 
     self.assertEqual(
         set(),
-        builder_status_lib.GetNodesAbortedBySelfDestructedOrchestrator(
+        builder_status_lib.GetSlavesAbortedBySelfDestructedMaster(
             master_build_identifier, buildstore))
 
     db.InsertBuild(
@@ -77,7 +77,7 @@ class BuilderStatusLibTests(cros_test_lib.MockTestCase):
           message_value=str(slave_build_id))
     self.assertEqual(
         {'slave_1', 'slave_2'},
-        builder_status_lib.GetNodesAbortedBySelfDestructedOrchestrator(
+        builder_status_lib.GetSlavesAbortedBySelfDestructedMaster(
             BuildIdentifier(cidb_id=master_build_id,
                             buildbucket_id=1234), buildstore))
 

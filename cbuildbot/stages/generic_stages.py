@@ -334,11 +334,11 @@ class BuilderStage(object):
 
     return repository.RepoRepository(**kwargs)
 
-  def GetScheduledNodeBuildbucketIds(self):
-    """Get buildbucket_ids list of the scheduled node builds.
+  def GetScheduledSlaveBuildbucketIds(self):
+    """Get buildbucket_ids list of the scheduled slave builds.
 
     Returns:
-      A list of buildbucket_ids (strings) of the node builds. The list doesn't
+      A list of buildbucket_ids (strings) of the slave builds. The list doesn't
       contain the old builds which were retried in Buildbucket.
     """
     buildbucket_ids = None
@@ -462,21 +462,21 @@ class BuilderStage(object):
     return portage_util.PortageqEnvvar(
         envvar, board=board, allow_undefined=True)
 
-  def _GetNodeConfigs(self):
-    """Get the node configs for the current build config.
+  def _GetSlaveConfigs(self):
+    """Get the slave configs for the current build config.
 
-    This assumes self._run.config is an orchestrator config.
+    This assumes self._run.config is a master config.
 
     Returns:
-      A list of build configs corresponding to the nodes for the orchestrator
+      A list of build configs corresponding to the slaves for the master
         build config at self._run.config.
 
     Raises:
-      See config_lib.Config.GetNodesForOrchestrator for details.
+      See config_lib.Config.GetSlavesForMaster for details.
     """
     experimental_builders = self._run.attrs.metadata.GetValueWithDefault(
         constants.METADATA_EXPERIMENTAL_BUILDERS, [])
-    slave_configs = self._run.site_config.GetNodesForOrchestrator(
+    slave_configs = self._run.site_config.GetSlavesForMaster(
         self._run.config, self._run.options)
     slave_configs = [
         config for config in slave_configs
@@ -484,22 +484,22 @@ class BuilderStage(object):
     ]
     return slave_configs
 
-  def _GetNodeConfigMap(self, important_only=True):
-    """Get node config map for the current build config.
+  def _GetSlaveConfigMap(self, important_only=True):
+    """Get slave config map for the current build config.
 
-    This assumes self._run.config is an orchestrator config.
+    This assumes self._run.config is a master config.
 
     Args:
-      important_only: If True, only get important nodes.
+      important_only: If True, only get important slaves.
 
     Returns:
-      A map of node_name to node_config for the current orchestrator.
+      A map of slave_name to slave_config for the current master.
 
     Raises:
-      See config_lib.Config.GetNodeConfigMapForOrchestrator for details.
+      See config_lib.Config.GetSlaveConfigMapForMaster for details.
     """
 
-    slave_config_map = self._run.site_config.GetNodeConfigMapForOrchestrator(
+    slave_config_map = self._run.site_config.GetSlaveConfigMapForMaster(
         self._run.config, self._run.options, important_only=important_only)
     if important_only:
       experimental_builders = self._run.attrs.metadata.GetValueWithDefault(
@@ -1095,14 +1095,14 @@ class ArchivingStageMixin(object):
     logging.PrintBuildbotLink(text_to_display, url)
     return url
 
-  def _IsInUploadDenylist(self, filename):
-    """Check if this file is allowed to go into a board's extra buckets.
+  def _IsInUploadBlacklist(self, filename):
+    """Check if this file is blacklisted to go into a board's extra buckets.
 
     Args:
-      filename: The filename of the file we want to check is in the allowlist.
+      filename: The filename of the file we want to check is in the blacklist.
 
     Returns:
-      True if the file is denied, False otherwise.
+      True if the file is blacklisted, False otherwise.
     """
     for blacklisted_file in constants.EXTRA_BUCKETS_FILES_BLACKLIST:
       if fnmatch.fnmatch(filename, blacklisted_file):
@@ -1155,7 +1155,7 @@ class ArchivingStageMixin(object):
       if (builder_run.config['boards'] and
           len(builder_run.config['boards']) == 1):
         board = builder_run.config['boards'][0]
-    if (not self._IsInUploadDenylist(filename) and
+    if (not self._IsInUploadBlacklist(filename) and
         (hasattr(self, '_current_board') or board)):
       board = board or self._current_board
       custom_artifacts_file = portage_util.ReadOverlayFile(

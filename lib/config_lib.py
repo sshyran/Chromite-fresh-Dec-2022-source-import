@@ -156,7 +156,7 @@ CONFIG_ARM_INTERNAL = 'ARM_INTERNAL'
 CONFIG_ARM_EXTERNAL = 'ARM_EXTERNAL'
 
 
-def IsCanaryMain(builder_run):
+def IsCanaryMaster(builder_run):
   """Returns True if this build type is master-release"""
   return (builder_run.config.build_type == constants.CANARY_TYPE and
           builder_run.config.master and
@@ -173,8 +173,8 @@ def IsCanaryType(b_type):
   return b_type == constants.CANARY_TYPE
 
 
-def IsMainAndroidPFQ(config):
-  """Returns True if this build is main Android PFQ type."""
+def IsMasterAndroidPFQ(config):
+  """Returns True if this build is master Android PFQ type."""
   return config.build_type == constants.ANDROID_PFQ_TYPE and config.master
 
 
@@ -317,10 +317,10 @@ class BuildConfig(AttrDict):
     """
     return self.deepcopy().apply(*args, **kwargs)
 
-  def AddNode(self, slave):
-    """Assign node config(s) to a build master.
+  def AddSlave(self, slave):
+    """Assign slave config(s) to a build master.
 
-    A helper for adding node configs to a master config.
+    A helper for adding slave configs to a master config.
     """
     assert self.master
     if self['slave_configs'] is None:
@@ -328,10 +328,10 @@ class BuildConfig(AttrDict):
     self.slave_configs.append(slave.name)
     self.slave_configs.sort()
 
-  def AddNodes(self, slaves):
-    """Assign node config(s) to a build master.
+  def AddSlaves(self, slaves):
+    """Assign slave config(s) to a build master.
 
-    A helper for adding node configs to a master config.
+    A helper for adding slave configs to a master config.
     """
     assert self.master
     if self['slave_configs'] is None:
@@ -1388,20 +1388,20 @@ class SiteConfig(dict):
       raise ValueError('Invalid board specified: %s.' % board)
     return both[0]
 
-  def GetNodeConfigMapForOrchestrator(self,
-                                      master_config,
-                                      options=None,
-                                      important_only=True):
-    """Gets the node builds triggered by a orchestrator config.
+  def GetSlaveConfigMapForMaster(self,
+                                 master_config,
+                                 options=None,
+                                 important_only=True):
+    """Gets the slave builds triggered by a master config.
 
-    If a orchestrator builder also performs a build, it can (incorrectly)
-    return itself.
+    If a master builder also performs a build, it can (incorrectly) return
+    itself.
 
     Args:
-      master_config: A build config for an orchestrator builder.
+      master_config: A build config for a master builder.
       options: The options passed on the commandline. This argument is required
       for normal operation, but we accept None to assist with testing.
-      important_only: If True, only get the important nodes.
+      important_only: If True, only get the important slaves.
 
     Returns:
       A slave_name to slave_config map, corresponding to the slaves for the
@@ -1431,8 +1431,8 @@ class SiteConfig(dict):
 
     return slave_name_config_map
 
-  def GetNodesForOrchestrator(self, master_config, options=None,
-                              important_only=True):
+  def GetSlavesForMaster(self, master_config, options=None,
+                         important_only=True):
     """Get a list of qualified build slave configs given the master_config.
 
     Args:
@@ -1441,7 +1441,7 @@ class SiteConfig(dict):
                and only makes sense when called from cbuildbot.
       important_only: If True, only get the important slaves.
     """
-    slave_map = self.GetNodeConfigMapForOrchestrator(
+    slave_map = self.GetSlaveConfigMapForMaster(
         master_config, options=options, important_only=important_only)
     return list(slave_map.values())
 

@@ -761,8 +761,8 @@ class SiteConfigFindTests(cros_test_lib.TestCase):
         site_config.GetBoards(),
         set(['amd64-generic', 'foo_board', 'bar_board', 'car_board']))
 
-  def testGetNodeConfigMapForOrchestratorAll(self):
-    """Test GetNodeConfigMapForOrchestrator, GetNodesForOrchestrator."""
+  def testGetSlaveConfigMapForMasterAll(self):
+    """Test GetSlaveConfigMapForMaster, GetSlavesForMaster all slaves."""
 
     site_config = MockSiteConfig()
     master = site_config.Add('master', master=True, manifest_version=True,
@@ -771,16 +771,16 @@ class SiteConfigFindTests(cros_test_lib.TestCase):
     slave_b = site_config.Add('slave_b', important=False)
     site_config.Add('other')
 
-    results_map = site_config.GetNodeConfigMapForOrchestrator(master,
+    results_map = site_config.GetSlaveConfigMapForMaster(master,
                                                          important_only=False)
-    results_slaves = site_config.GetNodesForOrchestrator(master,
-                                                         important_only=False)
+    results_slaves = site_config.GetSlavesForMaster(master,
+                                                    important_only=False)
 
     self.assertEqual(results_map, {'slave_a': slave_a, 'slave_b': slave_b})
     self.assertCountEqual(results_slaves, [slave_a, slave_b])
 
-  def testGetNodeConfigMapForOrchestratorImportant(self):
-    """Test GetNodeConfigMapForOrchestrator, GetNodesForOrchestrator."""
+  def testGetSlaveConfigMapForMasterImportant(self):
+    """Test GetSlaveConfigMapForMaster, GetSlavesForMaster important only."""
 
     site_config = MockSiteConfig()
     master = site_config.Add('master', master=True, manifest_version=True,
@@ -789,8 +789,8 @@ class SiteConfigFindTests(cros_test_lib.TestCase):
     site_config.Add('slave_b', important=False)
     site_config.Add('other')
 
-    results_map = site_config.GetNodeConfigMapForOrchestrator(master)
-    results_slaves = site_config.GetNodesForOrchestrator(master)
+    results_map = site_config.GetSlaveConfigMapForMaster(master)
+    results_slaves = site_config.GetSlavesForMaster(master)
 
     self.assertEqual(results_map, {'slave_a': slave_a})
     self.assertCountEqual(results_slaves, [slave_a])

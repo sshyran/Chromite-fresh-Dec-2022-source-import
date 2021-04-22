@@ -477,15 +477,15 @@ class TestEmptyDir(cros_test_lib.TempDirTestCase):
 
 
 class TestProcess(cros_test_lib.RunCommandTestCase):
-  """Tests for osutils.IsNodeProcess."""
+  """Tests for osutils.IsChildProcess."""
 
-  def testIsNodeProcess(self):
-    """Test IsNodeProcess with no name."""
+  def testIsChildProcess(self):
+    """Test IsChildProcess with no name."""
     mock_pstree_output = 'a(1)-+-b(2)\n\t|-c(3)\n\t|-foo(4)-bar(5)'
     self.rc.AddCmdResult(partial_mock.Ignore(), output=mock_pstree_output)
-    self.assertTrue(osutils.IsNodeProcess(4))
-    self.assertTrue(osutils.IsNodeProcess(4, name='foo'))
-    self.assertFalse(osutils.IsNodeProcess(5, name='foo'))
+    self.assertTrue(osutils.IsChildProcess(4))
+    self.assertTrue(osutils.IsChildProcess(4, name='foo'))
+    self.assertFalse(osutils.IsChildProcess(5, name='foo'))
 
 
 class TempDirTests(cros_test_lib.TestCase):
@@ -795,7 +795,7 @@ mechant"
     osutils.WriteFile(self.env_file, self.ENV)
     osutils.WriteFile(self.env_file_multiline, self.ENV_MULTILINE)
 
-  def testAllowList(self):
+  def testWhiteList(self):
     env_dict = osutils.SourceEnvironment(
         self.env_file, ('ENV1', 'ENV3', 'ENV5', 'ENV6'))
     self.assertEqual(env_dict, self.ENV_WHITELIST)

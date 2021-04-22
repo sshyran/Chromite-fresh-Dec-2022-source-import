@@ -720,7 +720,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
                                         'board': board})
 
   @minimum_schema(7)
-  def InsertNodeConfigPerBuild(self, build_id, child_config):
+  def InsertChildConfigPerBuild(self, build_id, child_config):
     """Insert a child-config-per-build entry into database.
 
     Args:
@@ -912,8 +912,8 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     return self._UpdateWhere('buildTable', clause, values)
 
   @minimum_schema(16)
-  def FinishNodeConfig(self, build_id, child_config, status=None):
-    """Marks the given node config as finished with |status|.
+  def FinishChildConfig(self, build_id, child_config, status=None):
+    """Marks the given child config as finished with |status|.
 
     This should be called before FinishBuild, on all child configs that
     were used in a build.
@@ -1044,11 +1044,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     return [dict(zip(columns, values)) for values in results]
 
   @minimum_schema(65)
-  def GetNodeStatuses(self, master_build_id, buildbucket_ids=None):
-    """Gets the statuses of node builders to given build.
+  def GetSlaveStatuses(self, master_build_id, buildbucket_ids=None):
+    """Gets the statuses of slave builders to given build.
 
     Args:
-      master_build_id: build id of the orchestrator build to fetch the node
+      master_build_id: build id of the master build to fetch the slave
                        statuses for.
       buildbucket_ids: A list of buildbucket_ids (string). If it's given,
         only fetch the builds with buildbucket_id in the buildbucket_ids.
@@ -1056,8 +1056,8 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
 
     Returns:
       A list containing a dictionary with keys BUILD_STATUS_KEYS.
-      If buildbucket_ids is None, the list contains all node builds found
-      in the buildTable; else, the list only contains the node builds
+      If buildbucket_ids is None, the list contains all slave builds found
+      in the buildTable; else, the list only contains the slave builds
       with |buildbucket_id| in the buildbucket_ids list.
     """
     if buildbucket_ids is None:

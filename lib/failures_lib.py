@@ -390,8 +390,8 @@ class BuilderFailure(InfrastructureFailure):
   """Raised if a stage fails due to builder issues."""
 
 
-class OrchestratorNodeVersionMismatchFailure(BuilderFailure):
-  """Raised if a node build has a different full_version than orchestrator."""
+class MasterSlaveVersionMismatchFailure(BuilderFailure):
+  """Raised if a slave build has a different full_version than its master."""
 
 # Crash collection service failures.
 class CrashCollectionFailure(InfrastructureFailure):

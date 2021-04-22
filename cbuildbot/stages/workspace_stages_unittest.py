@@ -395,7 +395,7 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
 
 # TODO(dgarret): Test WorkspaceUprevAndPublishStage
 # TODO(dgarret): Test WorkspacePublishBuildspecStage
-# TODO(dgarret): Test WorkspaceScheduleNodesStage
+# TODO(dgarret): Test WorkspaceScheduleChildrenStage
 
 class WorkspaceInitSDKStageTest(WorkspaceStageBase):
   """Test the WorkspaceInitSDKStage."""

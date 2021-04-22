@@ -151,7 +151,7 @@ class TastVMTestStage(generic_stages.BoardSpecificBuilderStage,
     Raises:
       failures_lib.TestFailure if an internal error is encountered.
     """
-    with cgroups.SimpleContainNodes('TastVMTest'):
+    with cgroups.SimpleContainChildren('TastVMTest'):
       for suite in suites:
         logging.info('Running Tast VM test suite %s (%s)',
                      suite.suite_name, (' '.join(suite.test_exprs)))
