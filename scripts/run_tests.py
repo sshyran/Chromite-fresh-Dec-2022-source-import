@@ -41,6 +41,9 @@ def main(argv):
   else:
     pytest_args += ['--no-chroot']
 
+  if opts.network:
+    pytest_args += ['-m', 'not network_test or network_test']
+
   # This is a cheesy hack to make sure gsutil is populated in the cache before
   # we run tests. This is a partial workaround for crbug.com/468838.
   gs.GSContext.GetDefaultGSUtilBin()
@@ -54,7 +57,7 @@ def main(argv):
     # Namespacing is enabled by default because tests may break each other or
     # interfere with parts of the running system if not isolated in a namespace.
     # Disabling namespaces is not recommended for general use.
-    re_execute_with_namespace([sys.argv[0]] + argv)
+    re_execute_with_namespace([sys.argv[0]] + argv, network=opts.network)
 
   # Check the environment.  https://crbug.com/1015450
   st = os.stat('/')
@@ -131,6 +134,11 @@ def get_parser():
       action='store_true',
       help='Skip normal test sandboxing and namespacing for faster start up '
       'time.',
+  )
+  parser.add_argument(
+      '--network',
+      action='store_true',
+      help='Include network tests.',
   )
   parser.add_argument(
       '--no-chroot',

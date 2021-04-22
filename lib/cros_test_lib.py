@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import collections
 import contextlib
-import functools
 import os
 import re
 import sys
@@ -64,33 +63,10 @@ Directory = collections.namedtuple('Directory', ['name', 'contents'])
 class GlobalTestConfig(object):
   """Global configuration for tests."""
 
-  # By default, disable all network tests.
-  RUN_NETWORK_TESTS = False
   UPDATE_GENERATED_FILES = False
-  NETWORK_TESTS_SKIPPED = 0
 
 
-def NetworkTest(reason='Skipping network test (re-run w/--network)'):
-  """Decorator for unit tests. Skip the test if --network is not specified."""
-  def Decorator(test_item):
-    @functools.wraps(test_item)
-    @pytestmark_network_test
-    def NetworkWrapper(*args, **kwargs):
-      if not GlobalTestConfig.RUN_NETWORK_TESTS:
-        GlobalTestConfig.NETWORK_TESTS_SKIPPED += 1
-        raise unittest.SkipTest(reason)
-      test_item(*args, **kwargs)
-
-    # We can't check GlobalTestConfig.RUN_NETWORK_TESTS here because
-    # __main__ hasn't run yet. Wrap each test so that we check the flag before
-    # running it.
-    if isinstance(test_item, type) and issubclass(test_item, TestCase):
-      test_item.setUp = Decorator(test_item.setUp)
-      return test_item
-    else:
-      return NetworkWrapper
-
-  return Decorator
+NetworkTest = pytestmark_network_test
 
 
 def _FlattenStructure(base_path, dir_struct):
@@ -1316,12 +1292,7 @@ class TestProgram(unittest.TestProgram):
     self.default_log_level = kwargs.pop('level', 'critical')
     self._leaked_tempdir = None
 
-    try:
-      super(TestProgram, self).__init__(**kwargs)
-    finally:
-      if GlobalTestConfig.NETWORK_TESTS_SKIPPED:
-        print('Note: %i network test(s) skipped; use --network to run them.' %
-              GlobalTestConfig.NETWORK_TESTS_SKIPPED)
+    super(TestProgram, self).__init__(**kwargs)
 
   def parseArgs(self, argv):
     """Parse the command line for the test"""
@@ -1349,9 +1320,6 @@ class TestProgram(unittest.TestProgram):
     # These are custom options we added.
     parser.add_argument('-l', '--list', default=False, action='store_true',
                         help='List all the available tests')
-    parser.add_argument('--network', default=False, action='store_true',
-                        help='Run tests that depend on good network '
-                             'connectivity')
     parser.add_argument('--no-wipe', default=True, action='store_false',
                         dest='wipe',
                         help='Do not wipe the temporary working directory '
@@ -1401,9 +1369,6 @@ class TestProgram(unittest.TestProgram):
       self.buffer = True
 
     # Then handle the chromite extensions.
-    if opts.network:
-      GlobalTestConfig.RUN_NETWORK_TESTS = True
-
     if opts.update:
       GlobalTestConfig.UPDATE_GENERATED_FILES = True
 
