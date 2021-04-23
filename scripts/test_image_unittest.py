@@ -13,6 +13,7 @@ import tempfile
 import unittest
 
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import image_test_lib
@@ -32,10 +33,15 @@ class TestImageTest(cros_test_lib.MockTempDirTestCase):
   """
 
   def setUp(self):
-    # create dummy image file
+    # Create empty image file.
     self.image_file = os.path.join(self.tempdir,
                                    constants.BASE_IMAGE_NAME + '.bin')
-    osutils.WriteFile(self.image_file, '')
+    osutils.AllocateFile(self.image_file, 1024 * 1024)
+    # In case sfdisk is in /sbin, search that too.
+    cros_build_lib.run(
+        ['sfdisk', self.image_file],
+        extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']},
+        input='label: dos')
     fake_partitions = (
         image_lib.PartitionInfo(1, 0, 0, 0, 'fs', 'STATE', 'flag'),
         image_lib.PartitionInfo(2, 0, 0, 0, 'fs', 'KERN-A', 'flag'),
