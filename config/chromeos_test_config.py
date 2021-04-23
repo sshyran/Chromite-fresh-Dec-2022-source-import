@@ -357,6 +357,7 @@ def ApplyCustomOverrides(site_config):
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
+      'reven-release': site_config.templates.tast_vm_canary_tests,
   }
 
   for config_name, overrides in overwritten_configs.items():
