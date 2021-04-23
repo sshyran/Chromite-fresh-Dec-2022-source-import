@@ -13154,26 +13154,6 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-servo-12768.B"
     },
-    "firmware-smaug-7900.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "smaug"
-        ],
-        "schedule": "with 720h interval",
-        "workspace_branch": "firmware-smaug-7900.B"
-    },
-    "firmware-smaug-7900.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "smaug"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-smaug-7900.B"
-    },
     "firmware-strago-7287.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [

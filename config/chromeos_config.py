@@ -1771,7 +1771,6 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-reks-7287.133.B', ['reks'], {}),
       (MONTHLY, 'firmware-terra-7287.154.B', ['terra'], {}),
       (MONTHLY, 'firmware-edgar-7287.167.B', ['edgar'], {}),
-      (MONTHLY, 'firmware-smaug-7900.B', ['smaug'], {}),
       (MONTHLY, 'firmware-gale-8281.B', ['gale'], {}),
       (MONTHLY, 'firmware-oak-8438.B', ['oak', 'elm', 'hana'], {}),
       (MONTHLY, 'firmware-gru-8785.B', ['gru', 'kevin', 'bob'], {}),
