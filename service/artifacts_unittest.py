@@ -974,7 +974,6 @@ class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
                                            '--board=board',
                                            '--jobs', mock.ANY,
                                            '--exclude-dir=firmware'],
-                                          capture_output=True,
                                           enter_chroot=True,
                                           chroot_args=['--chroot', mock.ANY])
 
@@ -992,6 +991,5 @@ class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
                                            '--board=board',
                                            '--jobs', mock.ANY,
                                            '--exclude-dir=firmware'],
-                                          capture_output=True,
                                           enter_chroot=True,
                                           chroot_args=['--chroot', mock.ANY])

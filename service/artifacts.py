@@ -847,7 +847,6 @@ def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
   logging.info('Generating breakpad symbols: %s.', cmd)
   result = cros_build_lib.run(
       cmd,
-      capture_output=True,
       enter_chroot=True,
       chroot_args=chroot.get_enter_args())
   return result
