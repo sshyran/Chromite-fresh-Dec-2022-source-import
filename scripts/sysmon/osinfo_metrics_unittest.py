@@ -31,17 +31,31 @@ class TestOSInfoMetrics(cros_test_lib.TestCase):
     self.addCleanup(patcher.stop)
 
   def test_collect(self):
+    distro = ('Ubuntu', '14.04', 'trusty')
+    # This is removed in Python 3.8+.
+    try:
+      dist = mock.patch('platform.dist', autospec=True, return_value=distro)
+      dist.start()
+    except AttributeError:
+      distro = ('', '', '')
+      dist = None
+
     with mock.patch('platform.system', autospec=True) as system, \
-         mock.patch('platform.dist', autospec=True) as dist, \
          mock.patch('sys.maxsize', 2**64):
       system.return_value = 'Linux'
-      dist.return_value = ('Ubuntu', '14.04', 'trusty')
+      if dist is not None:
+        dist.return_value = distro
       osinfo_metrics.collect_os_info()
 
+    if dist is not None:
+      dist.stop()
+
     setter = self.store.set
+    print(setter.mock_calls)
     calls = [
-        mock.call('proc/os/name', (), None, 'ubuntu', enforce_ge=mock.ANY),
-        mock.call('proc/os/version', (), None, '14.04', enforce_ge=mock.ANY),
+        mock.call('proc/os/name', (), None, distro[0].lower(),
+                  enforce_ge=mock.ANY),
+        mock.call('proc/os/version', (), None, distro[1], enforce_ge=mock.ANY),
         mock.call('proc/os/arch', (), None, 'x86_64', enforce_ge=mock.ANY),
         mock.call('proc/python/arch', (), None, '64', enforce_ge=mock.ANY),
     ]
