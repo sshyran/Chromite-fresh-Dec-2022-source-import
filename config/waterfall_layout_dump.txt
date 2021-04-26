@@ -1,4 +1,6 @@
 == factory ==
+  factory-asurada-13929.B-buildspec
+    asurada-factory-asurada-13929.B-factorybranch
   factory-atlas-11907.B-buildspec
     atlas-factory-atlas-11907.B-factorybranch
   factory-auron-6459.B-buildspec
@@ -487,6 +489,7 @@
   asuka-payloads-tryjob
   asuka-release-tryjob
   asuka-unittest-stress
+  asurada-factory-asurada-13929.B-factorybranch-tryjob
   asurada-full-tryjob
   asurada-llvm-next-toolchain-tryjob
   asurada-llvm-toolchain-tryjob
@@ -844,6 +847,8 @@
   expresso-payloads-tryjob
   expresso-release-tryjob
   expresso-unittest-stress
+  factory-asurada-13929.B-buildspec-tryjob
+    asurada-factory-asurada-13929.B-factorybranch-tryjob
   factory-atlas-11907.B-buildspec-tryjob
     atlas-factory-atlas-11907.B-factorybranch-tryjob
   factory-auron-6459.B-buildspec-tryjob

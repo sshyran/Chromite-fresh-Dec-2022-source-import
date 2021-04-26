@@ -1886,6 +1886,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'factory-dedede-13683.B', ['dedede']),
       (WEEKLY, 'factory-zork-13700.B', ['zork']),
       (WEEKLY, 'factory-puff-13813.B', ['puff']),
+      (WEEKLY, 'factory-asurada-13929.B', ['asurada']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', ['atlas', 'octopus', 'rammus', 'coral', 'eve',
