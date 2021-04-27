@@ -139,26 +139,25 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
   return True
 
 
-def _flash(dut_ctl, dut_cmd_on, dut_cmd_off, flash_cmd, verbose, dryrun):
-  """Runs subprocesses for setting dut controls and flashing the AP fw.
+def servo_run(dut_ctl, dut_cmd_on, dut_cmd_off, flash_cmd, verbose, dryrun):
+  """Runs subprocesses for setting dut controls and executing flash_cmd.
 
   Args:
     dut_ctl (DutControl): The dut_control command runner instance.
     dut_cmd_on ([[str]]): 2d array of dut-control commands
       in the form [['dut-control', 'cmd1', 'cmd2'...],
       ['dut-control', 'cmd3'...]]
-      that get executed before the flashing.
+      that get executed before the dut_cmd.
     dut_cmd_off ([[str]]): 2d array of dut-control commands
-      in the same form that get executed after flashing.
+      in the same form that get executed after the dut_cmd.
     flash_cmd ([str]): array containing all arguments for
-      the flash command. Run as root user.
+      the actual command. Run as root user on host.
     verbose (bool): if True then print out the various
       commands before running them.
-    dryrun (bool): Whether to actually execute the flash or just print the
-      commands that would have been run.
+    dryrun (bool): Whether to actually execute the commands or just print them.
 
   Returns:
-    bool: True if flash was successful, otherwise False.
+    bool: True if commands were run successfully, otherwise False.
   """
   success = True
   try:
@@ -171,14 +170,14 @@ def _flash(dut_ctl, dut_cmd_on, dut_cmd_off, flash_cmd, verbose, dryrun):
     # Run the flash command.
     cros_build_lib.sudo_run(flash_cmd, print_cmd=verbose, dryrun=dryrun)
   except cros_build_lib.CalledProcessError:
-    logging.error('Flashing failed, see output above for more info.')
+    logging.error('DUT command failed, see output above for more info.')
     success = False
   finally:
     # Run the dut off commands to clean up state if possible.
     try:
       dut_ctl.run_all(dut_cmd_off, verbose=verbose, dryrun=dryrun)
     except cros_build_lib.CalledProcessError:
-      logging.error('Dut cmd off failed, see output above for more info.')
+      logging.error('DUT cmd off failed, see output above for more info.')
       success = False
 
   return success
@@ -287,8 +286,8 @@ def _deploy_servo(image,
   if flash_contents is not None:
     flashrom_cmd += ['--flash-contents', flash_contents]
   flash_cmd = flashrom_cmd if flashrom else futility_cmd
-  if _flash(dut_ctl, ap_config.dut_control_on, ap_config.dut_control_off,
-            flash_cmd, verbose, dryrun):
+  if servo_run(dut_ctl, ap_config.dut_control_on, ap_config.dut_control_off,
+               flash_cmd, verbose, dryrun):
     logging.notice('SUCCESS. Exiting flash_ap.')
   else:
     logging.error('Unable to complete flash, verify servo connection '
