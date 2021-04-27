@@ -576,6 +576,9 @@ class Sysroot(object):
     # will have access to the most stuff.
     if os.path.isfile(_CHROMEOS_INTERNAL_BOTO_PATH):
       boto_config = _CHROMEOS_INTERNAL_BOTO_PATH
+    else:
+      # NB: Do not touch this w/out build consult.  Pretend this doesn't exist.
+      config.append('USE="$USE -ondevice_speech"')
 
     gs_fetch_binpkg = os.path.join(constants.SOURCE_ROOT, 'chromite', 'bin',
                                    'gs_fetch_binpkg')
