@@ -385,6 +385,7 @@
     terra-release
     trogdor-kernelnext-release
     trogdor-release
+    trogdor-zephyr-release
     trogdor64-release
     ultima-release
     veyron_fievel-release
@@ -394,6 +395,7 @@
     volteer-kernelnext-release
     volteer-manatee-release
     volteer-release
+    volteer-zephyr-release
     whirlwind-release
     winky-release
     wizpig-release
@@ -1581,6 +1583,7 @@
     terra-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
+    trogdor-zephyr-release-tryjob
     trogdor64-release-tryjob
     ultima-release-tryjob
     veyron_fievel-release-tryjob
@@ -1590,6 +1593,7 @@
     volteer-kernelnext-release-tryjob
     volteer-manatee-release-tryjob
     volteer-release-tryjob
+    volteer-zephyr-release-tryjob
     whirlwind-release-tryjob
     winky-release-tryjob
     wizpig-release-tryjob
@@ -1956,6 +1960,12 @@
   trogdor-payloads-tryjob
   trogdor-release-tryjob
   trogdor-unittest-stress
+  trogdor-zephyr-full-tryjob
+  trogdor-zephyr-llvm-next-toolchain-tryjob
+  trogdor-zephyr-llvm-toolchain-tryjob
+  trogdor-zephyr-payloads-tryjob
+  trogdor-zephyr-release-tryjob
+  trogdor-zephyr-unittest-stress
   trogdor64-full-tryjob
   trogdor64-llvm-next-toolchain-tryjob
   trogdor64-llvm-toolchain-tryjob
@@ -2045,6 +2055,12 @@
   volteer-payloads-tryjob
   volteer-release-tryjob
   volteer-unittest-stress
+  volteer-zephyr-full-tryjob
+  volteer-zephyr-llvm-next-toolchain-tryjob
+  volteer-zephyr-llvm-toolchain-tryjob
+  volteer-zephyr-payloads-tryjob
+  volteer-zephyr-release-tryjob
+  volteer-zephyr-unittest-stress
   whirlwind-full-tryjob
   whirlwind-llvm-next-toolchain-tryjob
   whirlwind-llvm-toolchain-tryjob

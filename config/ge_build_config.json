@@ -878,6 +878,18 @@
       ]
     },
     {
+      "name": "trogdor-zephyr",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "zephyr-poc",
+          "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "ultima",
       "configs": [
         {
@@ -925,6 +937,18 @@
           "leader_board": false,
           "board_group": "veyron",
           "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "volteer-zephyr",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "zephyr-poc",
+          "arch": "X86_INTERNAL"
         }
       ]
     },
