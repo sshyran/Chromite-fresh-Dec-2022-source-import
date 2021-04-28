@@ -16,10 +16,10 @@ import traceback
 import six
 
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants
-from chromite.lib.xbuddy import cherrypy_log_util
 
 
 # We do a number of things with args/kwargs arguments that confuse pylint.
@@ -96,7 +96,7 @@ class ArtifactMeta(type):
 
 
 @six.add_metaclass(ArtifactMeta)
-class Artifact(cherrypy_log_util.Loggable):
+class Artifact(object):
   """Wrapper around an artifact to download using a fetcher.
 
   The purpose of this class is to download objects from Google Storage
@@ -212,7 +212,7 @@ class Artifact(cherrypy_log_util.Loggable):
 
     # If the marker is missing, it's definitely not staged.
     if not os.path.exists(marker_file):
-      self._Log('No marker file, %s is not staged.', self)
+      logging.error('No marker file, %s is not staged.', self)
       return False
 
     # We want to ensure that every file listed in the marker is actually there.
@@ -224,14 +224,14 @@ class Artifact(cherrypy_log_util.Loggable):
       # which case the marker is outdated and should be removed.
       missing_files = [fname for fname in files if not os.path.exists(fname)]
       if missing_files:
-        self._Log('***ATTENTION*** %s files listed in %s are missing:\n%s',
-                  'All' if len(files) == len(missing_files) else 'Some',
-                  marker_file, '\n'.join(missing_files))
+        logging.error('***ATTENTION*** %s files listed in %s are missing:\n%s',
+                      'All' if len(files) == len(missing_files) else 'Some',
+                      marker_file, '\n'.join(missing_files))
         os.remove(marker_file)
-        self._Log('Missing files, %s is not staged.', self)
+        logging.error('Missing files, %s is not staged.', self)
         return False
 
-    self._Log('ArtifactStaged() -> yes, %s is staged.', self)
+    logging.debug('ArtifactStaged() -> yes, %s is staged.', self)
     return True
 
   def StagedFiles(self):
@@ -330,8 +330,8 @@ class Artifact(cherrypy_log_util.Loggable):
             self._UpdateName(new_names)
 
           except ArtifactDownloadError:
-            self._Log('Unable to download %s; fall back to download %s',
-                      self.optional_name, self.name)
+            logging.warning('Unable to download %s; fall back to download %s',
+                            self.optional_name, self.name)
           else:
             found_artifact = True
 
@@ -346,7 +346,7 @@ class Artifact(cherrypy_log_util.Loggable):
 
           files = self.name if isinstance(self.name, list) else [self.name]
           for filename in files:
-            self._Log('Downloading file %s', filename)
+            logging.debug('Downloading file %s', filename)
             self.install_path = downloader.Fetch(filename, real_install_dir)
           self._Setup()
           self._MarkArtifactStaged()
@@ -513,7 +513,7 @@ class AutotestTarball(BundledArtifact):
         raise ArtifactDownloadError(
             'Failed to create autotest packages!:\n%s' % e)
     else:
-      self._Log('Using pre-generated packages from autotest')
+      logging.debug('Using pre-generated packages from autotest.')
 
 
 class SignedArtifact(Artifact):

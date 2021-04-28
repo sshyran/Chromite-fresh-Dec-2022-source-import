@@ -15,11 +15,11 @@ import shutil
 import threading
 from datetime import datetime
 
+from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib.xbuddy import android_build
 from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import common_util
-from chromite.lib.xbuddy import cherrypy_log_util
 
 
 class DownloaderException(Exception):
@@ -48,7 +48,7 @@ class DownloaderException(Exception):
     return '--------\n'.join([str(exception) for exception in self.exceptions])
 
 
-class Downloader(cherrypy_log_util.Loggable):
+class Downloader(object):
   """Downloader of images to the devsever.
 
   This is the base class for different types of downloaders, including
@@ -172,7 +172,7 @@ class Downloader(cherrypy_log_util.Loggable):
 
     required_artifacts = factory.RequiredArtifacts()
     str_repr = [str(a) for a in required_artifacts]
-    self._Log('Downloading artifacts %s.', ' '.join(str_repr))
+    logging.debug('Downloading artifacts %s.', ' '.join(str_repr))
 
     self._DownloadArtifactsSerially(required_artifacts, no_wait=True)
 
@@ -227,7 +227,7 @@ class Downloader(cherrypy_log_util.Loggable):
     Args:
       artifacts: List of build_artifact.BuildArtifact instances to download.
     """
-    self._Log('Invoking background download of artifacts for %r', artifacts)
+    logging.debug('Invoking background download of artifacts for %r', artifacts)
     thread = threading.Thread(target=self._DownloadArtifactsSerially,
                               args=(artifacts, False))
     thread.start()

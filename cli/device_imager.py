@@ -179,7 +179,7 @@ class DeviceImager(object):
         device_board=self._device.board or flash.GetDefaultBoard(),
         override_board=self._board, force=True)
 
-    xb = xbuddy.XBuddy(log_screen=False, board=board, version=self._version)
+    xb = xbuddy.XBuddy(board=board, version=self._version)
     build_id, local_file = xb.Translate([self._image])
     if build_id is None:
       raise Error(f'{self._image}: unable to find matching xBuddy path.')

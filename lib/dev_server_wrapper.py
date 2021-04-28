@@ -19,14 +19,7 @@ import tempfile
 from six.moves import http_client as httplib
 from six.moves import urllib
 
-# cherrypy may not be available outside the chroot.
-try:
-  import cherrypy  # pylint: disable=import-error
-except ImportError:
-  cherrypy = None
-
 from chromite.lib import constants
-from chromite.cli import command
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
@@ -115,17 +108,7 @@ def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
   upath.insert(0, os.path.dirname(gs.GSContext.GetDefaultGSUtilBin()))
   os.environ['PATH'] = os.pathsep.join(upath)
 
-  # If we are using the progress bar, quiet the logging output of cherrypy.
-  if cherrypy and command.UseProgressBar():
-    if (hasattr(cherrypy.log, 'access_log') and
-        hasattr(cherrypy.log, 'error_log')):
-      cherrypy.log.access_log.setLevel(logging.NOTICE)
-      cherrypy.log.error_log.setLevel(logging.NOTICE)
-    else:
-      cherrypy.config.update({'server.log_to_screen': False})
-
-  xb = xbuddy.XBuddy(board=board, version=version, log_screen=False,
-                     static_dir=static_dir)
+  xb = xbuddy.XBuddy(board=board, version=version, static_dir=static_dir)
   path_list = GetXbuddyPath(path).rsplit(os.path.sep)
   try:
     return xb.Get(path_list)
