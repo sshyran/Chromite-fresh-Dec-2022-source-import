@@ -158,7 +158,7 @@ class PackageNode:
       # By definition every package has at least 1 relevant path, the ebuild
       # itself, so no paths must mean the info wasn't provided.
       raise NoSourcePathsError(
-          '{self.pkg_info} does not have source paths. '
+          f'{self.pkg_info} does not have source paths. '
           'Must add source paths to nodes to perform this operation.')
     path = Path(src_path)
     for p in self.source_paths:
