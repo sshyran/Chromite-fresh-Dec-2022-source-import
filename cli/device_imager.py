@@ -104,11 +104,15 @@ class DeviceImager(object):
     self._clobber_stateful = clobber_stateful
     self._clear_tpm_owner = clear_tpm_owner
 
+    self._image_type = None
     self._compression = cros_build_lib.COMP_GZIP
     self._inactive_state = None
 
   def Run(self):
     """Update the device with image of specific version."""
+    self._LocateImage()
+    logging.notice('Preparing to update the remote device %s with image %s',
+                   self._device.hostname, self._image)
 
     try:
       if command.UseProgressBar():
@@ -124,13 +128,12 @@ class DeviceImager(object):
 
   def _Run(self):
     """Runs the various operations to install the image on device."""
-    image, image_type = self._GetImage()
-    logging.info('Using image %s of type %s', image, image_type )
-
-    if image_type == ImageType.REMOTE_DIRECTORY:
+    # Override the compression as remote quick provision images are gzip
+    # compressed only.
+    if self._image_type == ImageType.REMOTE_DIRECTORY:
       self._compression = cros_build_lib.COMP_GZIP
 
-    self._InstallPartitions(image, image_type)
+    self._InstallPartitions()
 
     if self._clear_tpm_owner:
       self._device.ClearTpmOwner()
@@ -142,8 +145,8 @@ class DeviceImager(object):
     if self._disable_verification:
       self._device.DisableRootfsVerification()
 
-  def _GetImage(self) -> Tuple[str, ImageType]:
-    """Returns the path to the final image(s) that need to be installed.
+  def _LocateImage(self):
+    """Locates the path to the final image(s) that need to be installed.
 
     If the paths is local, the image should be the Chromium OS GPT image
     (e.g. chromiumos_test_image.bin). If the path is remote, it should be the
@@ -152,12 +155,10 @@ class DeviceImager(object):
 
     NOTE: At this point there is no caching involved. Hence we always download
     the partition payloads or extract them from the Chromium OS image.
-
-    Returns:
-      A tuple of image path and image type.
     """
     if os.path.isfile(self._image):
-      return self._image, ImageType.FULL
+      self._image_type = ImageType.FULL
+      return
 
     # TODO(b/172212406): We could potentially also allow this by searching
     # through the directory to see whether we have quick-provision and stateful
@@ -172,7 +173,8 @@ class DeviceImager(object):
     if gs.PathIsGs(self._image):
       # TODO(b/172212406): Check whether it is a directory. If it wasn't a
       # directory download the image into some temp location and use it instead.
-      return self._image, ImageType.REMOTE_DIRECTORY
+      self._image_type = ImageType.REMOTE_DIRECTORY
+      return
 
     # Assuming it is an xBuddy path.
     board = cros_build_lib.GetBoard(
@@ -186,10 +188,12 @@ class DeviceImager(object):
     logging.info('XBuddy path translated to build ID %s', build_id)
 
     if local_file:
-      return local_file, ImageType.FULL
+      self._image = local_file
+      self._image_type = ImageType.FULL
+      return
 
-    return (f'{devserver_constants.GS_IMAGE_DIR}/{build_id}',
-            ImageType.REMOTE_DIRECTORY)
+    self._image = f'{devserver_constants.GS_IMAGE_DIR}/{build_id}'
+    self._image_type = ImageType.REMOTE_DIRECTORY
 
   def _SplitDevPath(self, path: str) -> Tuple[str, int]:
     """Splits the given /dev/x path into prefix and the dev number.
@@ -221,14 +225,10 @@ class DeviceImager(object):
     else:
       raise Error(f'Invalid root partition number {root_num}')
 
-  def _InstallPartitions(self, image: str, image_type):
+  def _InstallPartitions(self):
     """The main method that installs the partitions of a Chrome OS device.
 
     It uses parallelism to install the partitions as fast as possible.
-
-    Args:
-      image: The image path (local file or remote directory).
-      image_type: The type of the image (ImageType).
     """
     prefix, root_num = self._SplitDevPath(self._device.root_dev)
     active_state, self._inactive_state = self._GetKernelState(root_num)
@@ -237,16 +237,18 @@ class DeviceImager(object):
     if not self._no_rootfs_update:
       current_root = prefix + str(active_state[Partition.ROOTFS])
       target_root = prefix + str(self._inactive_state[Partition.ROOTFS])
-      updaters.append(RootfsUpdater(current_root, self._device, image,
-                                    image_type, target_root, self._compression))
+      updaters.append(RootfsUpdater(current_root, self._device, self._image,
+                                    self._image_type, target_root,
+                                    self._compression))
 
       target_kernel = prefix + str(self._inactive_state[Partition.KERNEL])
-      updaters.append(KernelUpdater(self._device, image, image_type,
+      updaters.append(KernelUpdater(self._device, self._image, self._image_type,
                                     target_kernel, self._compression))
 
     if not self._no_stateful_update:
       updaters.append(StatefulUpdater(self._clobber_stateful, self._device,
-                                      image, image_type, None, None))
+                                      self._image, self._image_type, None,
+                                      None))
 
     # Retry the partitions updates that failed, in case a transient error (like
     # SSH drop, etc) caused the error.

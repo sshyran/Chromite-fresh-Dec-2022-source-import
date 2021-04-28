@@ -46,41 +46,44 @@ class DeviceImagerTest(cros_test_lib.MockTestCase):
     self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), stdout='')
     self.path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
 
-  def test_GetImageLocalFile(self):
+  def test_LocateImageLocalFile(self):
     """Tests getting the path to local image."""
     with tempfile.NamedTemporaryFile() as fp:
       di = device_imager.DeviceImager(None, fp.name)
-      self.assertEqual(di._GetImage(), (fp.name, device_imager.ImageType.FULL))
+      di._LocateImage()
+      self.assertEqual(di._image, fp.name)
+      self.assertEqual(di._image_type, device_imager.ImageType.FULL)
 
-  def test_GetImageDir(self):
+  def test_LocateImageDir(self):
     """Tests failing on a given directory as a path."""
     di = device_imager.DeviceImager(None, '/tmp')
     with self.assertRaises(ValueError):
-      di._GetImage()
+      di._LocateImage()
 
   @mock.patch.object(xbuddy.XBuddy, 'Translate', return_value=('eve/R90', None))
   @mock.patch.object(remote_access.ChromiumOSDevice, 'board',
                      return_value='foo', new_callable=mock.PropertyMock)
   # pylint: disable=unused-argument
-  def test_GetImageXBuddyRemote(self, _, board_mock):
+  def test_LocateImageXBuddyRemote(self, _, board_mock):
     """Tests getting remote xBuddy image path."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       di = device_imager.DeviceImager(device, 'xbuddy://remote/eve/latest')
-      self.assertEqual(di._GetImage(),
-                       ('gs://chromeos-image-archive/eve/R90',
-                        device_imager.ImageType.REMOTE_DIRECTORY))
+      di._LocateImage()
+      self.assertEqual(di._image, 'gs://chromeos-image-archive/eve/R90')
+      self.assertEqual(di._image_type, device_imager.ImageType.REMOTE_DIRECTORY)
 
   @mock.patch.object(xbuddy.XBuddy, 'Translate',
                      return_value=('eve/R90', 'path/to/file'))
   @mock.patch.object(remote_access.ChromiumOSDevice, 'board',
                      return_value='foo', new_callable=mock.PropertyMock)
   # pylint: disable=unused-argument
-  def test_GetImageXBuddyLocal(self, _, board_mock):
+  def test_LocateImageXBuddyLocal(self, _, board_mock):
     """Tests getting local xBuddy image path."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       di = device_imager.DeviceImager(device, 'xbuddy://local/eve/latest')
-      self.assertEqual(di._GetImage(),
-                       ('path/to/file', device_imager.ImageType.FULL))
+      di._LocateImage()
+      self.assertEqual(di._image, 'path/to/file')
+      self.assertEqual(di._image_type, device_imager.ImageType.FULL)
 
   def test_SplitDevPath(self):
     """Tests splitting a device path into prefix and partition number."""

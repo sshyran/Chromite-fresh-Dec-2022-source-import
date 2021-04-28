@@ -363,7 +363,6 @@ def Flash(device, image, board=None, version=None,
       hostname, port = device.hostname, device.port
     else:
       hostname, port = None, None
-    logging.notice('Preparing to update the remote device %s', hostname)
 
     with remote_access.ChromiumOSDeviceHandler(
         hostname, port=port,
