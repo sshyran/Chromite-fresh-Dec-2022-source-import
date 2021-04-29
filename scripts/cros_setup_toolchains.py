@@ -557,12 +557,12 @@ def UpdateTargets(targets, usepkg, root='/'):
     cmd.extend(packages)
     cros_build_lib.run(cmd)
   else:
-    post_cross_cmd = cmd[:]
-    cmd.extend([pkg for pkg in packages if pkg not in post_cross_pkgs])
-    cros_build_lib.run(cmd)
+    pre_cross_items = [pkg for pkg in packages if pkg not in post_cross_pkgs]
+    if pre_cross_items:
+      cros_build_lib.run(cmd + pre_cross_items)
     post_cross_items = [pkg for pkg in packages if pkg in post_cross_pkgs]
-    if len(post_cross_items) > 0:
-      cros_build_lib.run(post_cross_cmd + post_cross_items)
+    if post_cross_items:
+      cros_build_lib.run(cmd + post_cross_items)
   return True
 
 
