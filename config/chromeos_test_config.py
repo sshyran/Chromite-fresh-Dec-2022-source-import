@@ -19,6 +19,7 @@ vmtest_boards = frozenset([
     # from betty & co.
     'amd64-generic', # Has kernel 4.4, used with public Chromium.
     'betty',         # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
+    'betty-kernelnext', # Like betty but on the next kernel version.
     'betty-pi-arc',  # Like betty but P version of ARC++.
     'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
@@ -355,6 +356,7 @@ def ApplyCustomOverrides(site_config):
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
+      'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
       'reven-release': site_config.templates.tast_vm_canary_tests,
