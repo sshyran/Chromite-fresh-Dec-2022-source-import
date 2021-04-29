@@ -190,12 +190,13 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
   # If the file needs to be written as root and we are not root, write to a temp
   # file, move it and change the permission.
   if sudo and os.getuid() != 0:
-    if 'a' in mode or '+' in mode:
+    if 'a' in mode or mode.startswith('r+'):
       # Use dd to run through sudo & append the output, and write the new data
       # to it through stdin.
-      cros_build_lib.sudo_run(
-          ['dd', 'conv=notrunc', 'oflag=append', 'status=none',
-           'of=%s' % (path,)], print_cmd=False, input=content)
+      cmd = ['dd', 'conv=notrunc', 'status=none', f'of={path}']
+      if 'a' in mode:
+        cmd += ['oflag=append']
+      cros_build_lib.sudo_run(cmd, print_cmd=False, input=content)
       if chmod is not None:
         Chmod(path, chmod, sudo=True)
 

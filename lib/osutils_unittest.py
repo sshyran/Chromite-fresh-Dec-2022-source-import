@@ -110,6 +110,23 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
       osutils.WriteFile(path, 'two', mode='a', sudo=True)
       self.assertEqual('onetwo', osutils.ReadFile(path))
 
+  def testSudoReadNoTrunc(self):
+    """Verify that we can write a new file as sudo when r+."""
+    def testit(path, sudo):
+      osutils.WriteFile(path, 'two')
+      self.assertEqual('two', osutils.ReadFile(path))
+      osutils.WriteFile(path, 'X', mode='r+', sudo=sudo)
+      self.assertEqual('Xwo', osutils.ReadFile(path))
+
+    # Make sure that r+ works as we think it does.
+    path = os.path.join(self.tempdir, 'foo')
+    testit(path, False)
+
+    # Now run it again with sudo.
+    with osutils.TempDir(sudo_rm=True) as tempdir:
+      path = os.path.join(tempdir, 'foo')
+      testit(path, True)
+
   def testReadFileNonExistent(self):
     """Verify what happens if you ReadFile a file that isn't there."""
     filename = os.path.join(self.tempdir, 'bogus')
