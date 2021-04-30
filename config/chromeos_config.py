@@ -2606,6 +2606,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'b/185377942',
       },
 
+      'aurora-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Aurora has no DUTs in the lab. (b/186859558)
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/186859558',
+      },
 
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
