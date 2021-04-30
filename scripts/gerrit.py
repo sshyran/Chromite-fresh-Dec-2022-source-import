@@ -33,6 +33,7 @@ from chromite.lib import gerrit
 from chromite.lib import gob_util
 from chromite.lib import parallel
 from chromite.lib import pformat
+from chromite.lib import retry_util
 from chromite.lib import terminal
 from chromite.lib import uri_lib
 from chromite.utils import memoize
@@ -121,7 +122,23 @@ def blue(s):
 
 def _run_parallel_tasks(task, *args):
   """Small wrapper around BackgroundTaskRunner to enforce job count."""
-  with parallel.BackgroundTaskRunner(task, processes=CONNECTION_LIMIT) as q:
+  # When we run in parallel, we can hit the max requests limit.
+  def check_exc(e):
+    if not isinstance(e, gob_util.GOBError):
+      raise e
+    return e.http_status == 429
+
+  @retry_util.WithRetry(5, handler=check_exc, sleep=1, backoff_factor=2)
+  def retry(*args):
+    try:
+      task(*args)
+    except gob_util.GOBError as e:
+      if e.http_status != 429:
+        logging.warning('%s: skipping due: %s', args, e)
+      else:
+        raise
+
+  with parallel.BackgroundTaskRunner(retry, processes=CONNECTION_LIMIT) as q:
     for arg in args:
       q.put([arg])
 
