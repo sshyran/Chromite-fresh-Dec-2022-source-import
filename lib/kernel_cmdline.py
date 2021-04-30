@@ -82,7 +82,8 @@ _KEYVALUE_RE = r'(?:(--|[^\s=]+)(?:(=)("[^"]*"|[^\s"]*))?)'
 _VALID_CMDLINE_RE = (
     r'\s*'  r'%s?'  r'(\s+%s)*'  r'\s*$') % (_KEYVALUE_RE, _KEYVALUE_RE)
 
-class KernelArgList(collections.MutableMapping, collections.MutableSequence):
+class KernelArgList(collections.abc.MutableMapping,
+                    collections.abc.MutableSequence):
   """A tokenized collection of key(=value) pairs.
 
   Behaves as a list, with some extra features.
