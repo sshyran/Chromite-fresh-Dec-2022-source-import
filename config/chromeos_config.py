@@ -2889,6 +2889,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       description=('Build Config Updater reads updated GE config files from'
                    ' GS, and commits them to chromite after running tests.'),
       build_type=constants.GENERIC_TYPE,
+      build_timeout=2 * 60 * 60,
       boards=[],
       builder_class_name='config_builders.UpdateConfigBuilder',
       schedule='@hourly',
