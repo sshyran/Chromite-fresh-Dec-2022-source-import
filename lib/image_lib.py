@@ -9,6 +9,8 @@ import glob
 import os
 import re
 
+from typing import Union
+
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -104,7 +106,7 @@ class LoopbackPartitions(object):
       self.close()
       raise
 
-  def GetPartitionDevName(self, part_id):
+  def GetPartitionDevName(self, part_id: Union[str, int]):
     """Return the loopback device for a partition.
 
     Args:
@@ -115,9 +117,23 @@ class LoopbackPartitions(object):
       multiple partitions that match part_id, then the first one from the
       partition table is returned.
     """
+    part_info = self.GetPartitionInfo(part_id)
+    return '%sp%d' % (self.dev, part_info.number)
+
+  def GetPartitionInfo(self, part_id: Union[str, int]):
+    """Return the partition info for the given partition ID.
+
+    Args:
+      part_id: partition name (str) or number (int)
+
+    Returns:
+      A PartitionInfo object representing the given partition ID. If there are
+      multiple partitions that match part_id, then the first one from the
+      partition table is returned.
+    """
     for part in self._gpt_table:
       if part_id == part.name or part_id == part.number:
-        return '%sp%d' % (self.dev, part.number)
+        return part
     raise KeyError(repr(part_id))
 
   def _GetMountPointAndSymlink(self, part):
