@@ -7,8 +7,6 @@
 
 """{Build Target} configs."""
 
-from __future__ import print_function
-
 from chromite.lib.firmware import servo_lib
 
 # BUILD CONFIGS.
