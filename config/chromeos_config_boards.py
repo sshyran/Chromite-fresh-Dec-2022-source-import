@@ -56,7 +56,6 @@ x86_internal_release_boards = frozenset([
     'jecht',
     'majolica',
     'mancomb',
-    'monroe',
     'poppy',
     'sludge',
     'tatl',

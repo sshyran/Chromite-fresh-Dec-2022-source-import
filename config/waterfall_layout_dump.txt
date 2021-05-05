@@ -1655,12 +1655,6 @@
   moblab-generic-vm-llvm-next-toolchain-tryjob
   moblab-generic-vm-llvm-toolchain-tryjob
   moblab-generic-vm-unittest-stress
-  monroe-full-tryjob
-  monroe-llvm-next-toolchain-tryjob
-  monroe-llvm-toolchain-tryjob
-  monroe-payloads-tryjob
-  monroe-release-tryjob
-  monroe-unittest-stress
   mushu-full-tryjob
   mushu-llvm-next-toolchain-tryjob
   mushu-llvm-toolchain-tryjob
