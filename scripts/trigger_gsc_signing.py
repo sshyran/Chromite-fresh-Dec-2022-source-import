@@ -28,7 +28,7 @@ assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 GSC_PRODUCTION_JOB = 'chromeos/release/sign-image'
 GSC_STAGING_JOB = 'chromeos/staging/staging-sign-image'
-_IMAGE_TYPE = 'gsc_firmware'
+_IMAGE_TYPE = 'image_type_gsc_firmware'
 
 # See ../infra/proto/src/chromiumos/common.proto.
 _channels = {k.lower().replace('channel_', ''): v

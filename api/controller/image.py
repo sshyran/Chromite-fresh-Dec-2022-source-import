@@ -27,16 +27,16 @@ from chromite.service import image
 from chromite.utils import metrics
 
 # The image.proto ImageType enum ids.
-_BASE_ID = common_pb2.BASE
-_DEV_ID = common_pb2.DEV
-_TEST_ID = common_pb2.TEST
-_BASE_VM_ID = common_pb2.BASE_VM
-_TEST_VM_ID = common_pb2.TEST_VM
-_RECOVERY_ID = common_pb2.RECOVERY
-_FACTORY_ID = common_pb2.FACTORY
-_FIRMWARE_ID = common_pb2.FIRMWARE
-_BASE_GUEST_VM_ID = common_pb2.BASE_GUEST_VM
-_TEST_GUEST_VM_ID = common_pb2.TEST_GUEST_VM
+_BASE_ID = common_pb2.IMAGE_TYPE_BASE
+_DEV_ID = common_pb2.IMAGE_TYPE_DEV
+_TEST_ID = common_pb2.IMAGE_TYPE_TEST
+_BASE_VM_ID = common_pb2.IMAGE_TYPE_BASE_VM
+_TEST_VM_ID = common_pb2.IMAGE_TYPE_TEST_VM
+_RECOVERY_ID = common_pb2.IMAGE_TYPE_RECOVERY
+_FACTORY_ID = common_pb2.IMAGE_TYPE_FACTORY
+_FIRMWARE_ID = common_pb2.IMAGE_TYPE_FIRMWARE
+_BASE_GUEST_VM_ID = common_pb2.IMAGE_TYPE_BASE_GUEST_VM
+_TEST_GUEST_VM_ID = common_pb2.IMAGE_TYPE_TEST_GUEST_VM
 
 # Dict to allow easily translating names to enum ids and vice versa.
 _IMAGE_MAPPING = {

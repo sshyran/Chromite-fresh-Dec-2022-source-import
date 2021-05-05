@@ -95,7 +95,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
 
   def testSingleTypeSpecified(self):
     """Test it's properly using a specified type."""
-    request = self._GetRequest(board='board', types=[common_pb2.DEV])
+    request = self._GetRequest(board='board', types=[common_pb2.IMAGE_TYPE_DEV])
 
     # Failed result to avoid the success handling logic.
     result = image_service.BuildResult(1, [])
@@ -108,7 +108,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
   def testMultipleAndImpliedTypes(self):
     """Test multiple types and implied type handling."""
     # The TEST_VM type should force it to build the test image.
-    types = [common_pb2.BASE, common_pb2.TEST_VM]
+    types = [common_pb2.IMAGE_TYPE_BASE, common_pb2.IMAGE_TYPE_TEST_VM]
     expected_images = [constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_TEST]
 
     request = self._GetRequest(board='board', types=types)

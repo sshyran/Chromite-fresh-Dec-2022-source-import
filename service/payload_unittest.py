@@ -35,9 +35,9 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image defs.
     src_image = payload_pb2.UnsignedImage(
-        build=self.src_build, image_type='BASE', milestone='R79')
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', milestone='R79')
     tgt_image = payload_pb2.UnsignedImage(
-        build=self.tgt_build, image_type='BASE', milestone='R80')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,
@@ -54,9 +54,9 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image defs.
     src_image = payload_pb2.SignedImage(
-        build=self.src_build, image_type='BASE', key='cave-mp-v4')
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
     tgt_image = payload_pb2.SignedImage(
-        build=self.tgt_build, image_type='BASE', key='cave-mp-v4')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,
@@ -73,7 +73,7 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image def.
     tgt_image = payload_pb2.UnsignedImage(
-        build=self.tgt_build, image_type='BASE', milestone='R80')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,
