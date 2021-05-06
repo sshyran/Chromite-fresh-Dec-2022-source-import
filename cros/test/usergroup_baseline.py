@@ -95,7 +95,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='adm', gid=4, users={'root', 'adm', 'daemon'}),
     GroupEntry(group='tty', gid=5, users={'power', 'brltty'}),
     GroupEntry(group='disk', gid=6, users={'root', 'adm', 'cros-disks',
-                                           'cros_healthd'}),
+                                           'cros_healthd', 'image-burner'}),
     GroupEntry(group='lp', gid=7, users={'lp', 'lpadmin', 'cups', 'chronos'}),
     GroupEntry(group='mem', gid=8),
     GroupEntry(group='kmem', gid=9),
@@ -194,7 +194,8 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='chronos', gid=1000),
     GroupEntry(group='chronos-access', gid=1001,
                users={'root', 'ipsec', 'chronos',
-                      'cros-disks', 'imageloaderd', 'crash', 'dlp'}),
+                      'cros-disks', 'imageloaderd', 'crash', 'dlp',
+                      'image-burner'}),
 
     GroupEntry(group='user-containers', gid=10000, users={'user-containers'}),
 
