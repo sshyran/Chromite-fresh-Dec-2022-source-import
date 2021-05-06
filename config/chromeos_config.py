@@ -1746,9 +1746,14 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'firmware-gnawty-5216.239.B', ['gnawty'], {}),
       (MONTHLY, 'firmware-winky-5216.265.B', ['winky'], {}),
       (MONTHLY, 'firmware-candy-5216.310.B', ['candy'], {}),
+      # PrePVT images
       (MONTHLY, 'firmware-cr50-9308.B', ['reef'], GSC),
+      # preflashed images for manufacturing
       (MONTHLY, 'firmware-cr50-guc-factory-9308.26.B', ['reef'], GSC),
-      (MONTHLY, 'firmware-cr50-mp-release-9308.87.B', ['reef'], GSC),
+      # MP images
+      (MONTHLY, 'firmware-cr50-mp-9311.B', ['reef'], GSC),
+      # R86 MP images
+      (TRIGGERED, 'firmware-cr50-mp-r86-9311.70.B', ['reef'], GSC),
       (MONTHLY, 'firmware-banjo-5216.334.B', ['banjo'], {}),
       (MONTHLY, 'firmware-orco-5216.362.B', ['orco'], {}),
       (MONTHLY, 'firmware-sumo-5216.382.B', ['sumo'], {}),

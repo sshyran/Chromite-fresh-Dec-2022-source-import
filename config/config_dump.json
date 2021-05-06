@@ -12726,7 +12726,7 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-cr50-guc-factory-9308.26.B"
     },
-    "firmware-cr50-mp-release-9308.87.B-firmwarebranch": {
+    "firmware-cr50-mp-9311.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
             "reef"
@@ -12735,9 +12735,9 @@
         "sign_types": [
             "gsc_firmware"
         ],
-        "workspace_branch": "firmware-cr50-mp-release-9308.87.B"
+        "workspace_branch": "firmware-cr50-mp-9311.B"
     },
-    "firmware-cr50-mp-release-9308.87.B-firmwarebranch-tryjob": {
+    "firmware-cr50-mp-9311.B-firmwarebranch-tryjob": {
         "_template": "firmwarebranch",
         "boards": [
             "reef"
@@ -12750,7 +12750,33 @@
             "gsc_firmware"
         ],
         "suite_scheduling": false,
-        "workspace_branch": "firmware-cr50-mp-release-9308.87.B"
+        "workspace_branch": "firmware-cr50-mp-9311.B"
+    },
+    "firmware-cr50-mp-r86-9311.70.B-firmwarebranch": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "reef"
+        ],
+        "schedule": "triggered",
+        "sign_types": [
+            "gsc_firmware"
+        ],
+        "workspace_branch": "firmware-cr50-mp-r86-9311.70.B"
+    },
+    "firmware-cr50-mp-r86-9311.70.B-firmwarebranch-tryjob": {
+        "_template": "firmwarebranch",
+        "boards": [
+            "reef"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "push_image": false,
+        "sign_types": [
+            "gsc_firmware"
+        ],
+        "suite_scheduling": false,
+        "workspace_branch": "firmware-cr50-mp-r86-9311.70.B"
     },
     "firmware-cyan-7287.57.B-firmwarebranch": {
         "_template": "firmwarebranch",
