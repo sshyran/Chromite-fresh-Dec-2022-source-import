@@ -343,6 +343,7 @@
     kukui-arc64-release
     kukui-kernelnext-release
     kukui-release
+    lars-kernelnext-release
     lars-release
     majolica-release
     mancomb-release
@@ -1401,6 +1402,12 @@
   kukui-unittest-stress
   lars-factory-glados-7828.B-factorybranch-tryjob
   lars-full-tryjob
+  lars-kernelnext-full-tryjob
+  lars-kernelnext-llvm-next-toolchain-tryjob
+  lars-kernelnext-llvm-toolchain-tryjob
+  lars-kernelnext-payloads-tryjob
+  lars-kernelnext-release-tryjob
+  lars-kernelnext-unittest-stress
   lars-llvm-next-toolchain-tryjob
   lars-llvm-toolchain-tryjob
   lars-payloads-tryjob
@@ -1567,6 +1574,7 @@
     kukui-arc64-release-tryjob
     kukui-kernelnext-release-tryjob
     kukui-release-tryjob
+    lars-kernelnext-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
     mancomb-release-tryjob
