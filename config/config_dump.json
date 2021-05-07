@@ -13754,66 +13754,6 @@
         "suite_scheduling": false,
         "workspace_branch": "firmware-veyron-6588.B"
     },
-    "firmware-volteer-13672.39.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "schedule": "triggered",
-        "workspace_branch": "firmware-volteer-13672.39.B"
-    },
-    "firmware-volteer-13672.39.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-volteer-13672.39.B"
-    },
-    "firmware-volteer-13672.47.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "schedule": "triggered",
-        "workspace_branch": "firmware-volteer-13672.47.B"
-    },
-    "firmware-volteer-13672.47.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-volteer-13672.47.B"
-    },
-    "firmware-volteer-13672.81.B-firmwarebranch": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "schedule": "triggered",
-        "workspace_branch": "firmware-volteer-13672.81.B"
-    },
-    "firmware-volteer-13672.81.B-firmwarebranch-tryjob": {
-        "_template": "firmwarebranch",
-        "boards": [
-            "volteer"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "firmware-volteer-13672.81.B"
-    },
     "firmware-volteer-13672.B-firmwarebranch": {
         "_template": "firmwarebranch",
         "boards": [
