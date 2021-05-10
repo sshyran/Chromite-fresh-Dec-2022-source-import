@@ -578,7 +578,7 @@ class GerritHelper(object):
       """Retrieve the GerritPatch describing the change."""
       return self.QuerySingleRecord(change=change_number, **kwargs)
 
-    return retry_util.RetryException(self.QueryHasNoResults, 5, PatchQuery,
+    return retry_util.RetryException(QueryHasNoResults, 5, PatchQuery,
                                      sleep=1)
 
 
