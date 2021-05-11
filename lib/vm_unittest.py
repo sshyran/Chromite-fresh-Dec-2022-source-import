@@ -200,7 +200,9 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     """Verify that QEMU in the chroot is picked up by vm.VM."""
     if cros_build_lib.IsInsideChroot():
       self._vm._SetQemuPath()
-      self.assertTrue('usr/bin/qemu-system-x86_64' in self._vm.qemu_path)
+      self.assertTrue(
+          'usr/bin/qemu-system-x86_64' in self._vm.qemu_path or
+          'usr/libexec/qemu/bin/qemu-system-x86_64' in self._vm.qemu_path)
 
   def testSDKQemuPath(self):
     """Verify vm.VM picks up the downloaded QEMU in the SDK."""
