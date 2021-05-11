@@ -1267,17 +1267,13 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_hwtest_boards = _frozen_ge_set(ge_build_config, [
+      'grunt-arc-r',
       'hatch',
       'kukui-arc-r',
       'rammus-arc-r',
       'zork-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [
-      # TODO(b/187659256): grunt is temporarily marked experimental due to
-      # libvirt-video issues. Move it back to the main group once the issue
-      # is resolved.
-      'grunt-arc-r',
-  ])
+  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
