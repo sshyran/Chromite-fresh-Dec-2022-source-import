@@ -554,18 +554,25 @@ class GerritHelper(object):
       return match['changenum']
     return None
 
-  def CreateGerritPatch(self, cwd, remote, ref, **kwargs):
+  def CreateGerritPatch(self, cwd, remote, ref, dryrun=False, **kwargs):
     """Upload a change and retrieve a GerritPatch describing it.
 
     Args:
       cwd: The repository that we are working on.
       remote: The remote to upload changes to.
       ref: The ref where changes will be uploaded to.
+      dryrun: If True, then return None.
       **kwargs: Keyword arguments to be passed to QuerySingleRecord.
 
     Returns:
       A GerritPatch object describing the change for the HEAD commit.
     """
+    # If dryrun is true then skip all network calls and return None.
+    if dryrun:
+      logging.info('Would have returned a GerritPatch object describing the'
+                   'local changes.')
+      return None
+
     # Upload the local changes to remote.
     ret = git.RunGit(cwd, ['push', remote, f'HEAD:refs/for/{ref}'])
     change_number = self._get_changenumber_from_stdout(ret.stdout)
