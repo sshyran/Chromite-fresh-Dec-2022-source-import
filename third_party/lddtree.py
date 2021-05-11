@@ -114,7 +114,7 @@ def interp_supports_argv0(interp) -> bool:
       return mm.find(b'--argv0') >= 0
 
 
-def GenerateLdsoWrapper(root, path, interp, libpaths=(), elfsubdir=None):
+def GenerateLdsoWrapper(root, path, interp, libpaths=()):
   """Generate a shell script wrapper which uses local ldso to run the ELF
 
   Since we cannot rely on the host glibc (or other libraries), we need to
@@ -126,9 +126,6 @@ def GenerateLdsoWrapper(root, path, interp, libpaths=(), elfsubdir=None):
     path: The full path (inside |root|) to the program to wrap
     interp: The ldso interpreter that we need to execute
     libpaths: Extra lib paths to search for libraries
-    elfsubdir: The sub-directory where the original ELF file lives. If not
-               provided, a '.elf' suffix will be added to the original file
-               instead.
   """
   basedir = os.path.dirname(path)
   interp_dir, interp_name = os.path.split(interp)
@@ -142,17 +139,6 @@ def GenerateLdsoWrapper(root, path, interp, libpaths=(), elfsubdir=None):
                           for p in libpaths]),
     'argv0_arg': '--argv0 "$0"' if interp_supports_argv0(root + interp) else '',
   }
-
-  wrappath = root + path
-  if elfsubdir:
-    elf_wrap_dir = os.path.join(os.path.dirname(wrappath), elfsubdir)
-    makedirs(elf_wrap_dir)
-    elf_wrappath = os.path.join(elf_wrap_dir, os.path.basename(wrappath))
-    replacements['elf_path'] = '${basedir}/%s/%s' % (elfsubdir,
-                                                     os.path.basename(wrappath))
-  else:
-    elf_wrappath = wrappath + '.elf'
-    replacements['elf_path'] = '${base}.elf'
 
   # Keep path relativeness of argv0. This allows to remove absolute path from
   # build output and leads directory independent cache sharing in distributed
@@ -177,10 +163,11 @@ LD_ARGV0="$0" LD_ARGV0_REL="%(interp_rel)s" exec \
   %(argv0_arg)s \
   --library-path "%(libpaths)s" \
   --inhibit-rpath '' \
-  "%(elf_path)s" \
+  "${base}.elf" \
   "$@"
 """
-  os.rename(wrappath, elf_wrappath)
+  wrappath = root + path
+  os.rename(wrappath, wrappath + '.elf')
   with open(wrappath, 'w') as f:
     f.write(wrapper % replacements)
   os.chmod(wrappath, 0o0755)
@@ -581,8 +568,7 @@ def _ActionCopy(options, elf):
         interp = os.path.join(options.libdir, os.path.basename(elf['interp']))
       else:
         interp = _StripRoot(elf['interp'])
-      GenerateLdsoWrapper(options.dest, subdst, interp, libpaths,
-                          options.elf_subdir)
+      GenerateLdsoWrapper(options.dest, subdst, interp, libpaths)
 
   # XXX: We should automatically import libgcc_s.so whenever libpthread.so
   # is copied over (since we know it can be dlopen-ed by NPTL at runtime).
@@ -693,10 +679,6 @@ they need will be placed into /foo/lib/ only.""")
   group.add_option('--generate-wrappers',
     action='store_true', default=False,
     help='Wrap executable ELFs with scripts for local ldso')
-  group.add_option('--elf-subdir',
-    default=None, type='string',
-    help='When wrapping executable ELFs, place the original file in this '
-         'sub-directory. By default, it appends a .elf suffix instead.')
   group.add_option('--copy-non-elfs',
     action='store_true', default=False,
     help='Copy over plain (non-ELF) files instead of warn+ignore')
