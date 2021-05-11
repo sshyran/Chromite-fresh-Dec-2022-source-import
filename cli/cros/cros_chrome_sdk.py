@@ -1024,6 +1024,35 @@ class ChromeSDKCommand(command.CliCommand):
     ps1_prefix = ChromeSDKCommand._PS1Prefix(board, version, chroot)
     return '%s %s' % (ps1_prefix, current_ps1)
 
+  def _SaveSharedGnArgs(self, gn_args, board):
+    """Saves the new gn args data to the shared location."""
+    shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
+
+    file_path = os.path.join(shared_dir, board + '.gni')
+    osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+
+    # If the board is a generic family, generate -crostoolchain.gni files,
+    # too, which is used by Lacros build.
+    if board in ('amd64-generic', 'arm-generic'):
+      toolchain_key_pattern = re.compile(r'^(%s)$' % '|'.join([
+          'cros_board',
+          'cros_sdk_version',
+          'host_pkg_config',
+          'is_clang',
+          'target_cpu',
+          'cros_host_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
+          'cros_target_(ar|cc|cxx|ld|nm|readelf|extra_(c|cpp|cxx|ld)flags)',
+          'cros_v8_snapshot_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
+          '(custom|host|v8_snapshot)_toolchain',
+          'system_libdir',
+          'target_sysroot',
+          'arm_(arch|float_abi|use_neon)',
+      ]))
+      toolchain_gn_args = {k: v for k, v in gn_args.items()
+                           if toolchain_key_pattern.match(k)}
+      file_path = os.path.join(shared_dir, board + '-crostoolchain.gni')
+      osutils.WriteFile(file_path, gn_helpers.ToGNString(toolchain_gn_args))
+
   def _UpdateGnArgsIfStale(self, out_dir, build_label, gn_args, board):
     """Runs 'gn gen' if gn args are stale or logs a warning."""
     build_dir = os.path.join(out_dir, build_label)
@@ -1031,9 +1060,6 @@ class ChromeSDKCommand(command.CliCommand):
         self.options.chrome_src, build_dir, 'args.gn')
 
     if not self.options.use_shell:
-      shared_args_file_path = os.path.join(
-          self.options.chrome_src, self._BUILD_ARGS_DIR, board + '.gni')
-      osutils.WriteFile(shared_args_file_path, gn_helpers.ToGNString(gn_args))
       import_line = 'import("//%s%s.gni")' % (self._BUILD_ARGS_DIR, board)
       if (os.path.exists(gn_args_file_path) and
           not import_line in osutils.ReadFile(gn_args_file_path)):
@@ -1315,6 +1341,8 @@ class ChromeSDKCommand(command.CliCommand):
     # For context, see crbug.com/407417
     env['CHROMIUM_OUT_DIR'] = os.path.join(options.chrome_src, out_dir)
 
+    if not self.options.use_shell:
+      self._SaveSharedGnArgs(gn_args, board)
     self._UpdateGnArgsIfStale(
         out_dir, options.build_label, gn_args, board)
 
