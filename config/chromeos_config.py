@@ -1843,6 +1843,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
   DAILY = 'with 24h interval'  # 1 day interval
   WEEKLY = 'with 168h interval'  # 1 week interval
   MONTHLY = 'with 720h interval'  # 30 day interval
+  TRIGGERED = 'triggered'  # Only when triggered
   branch_builders = [
       (MONTHLY, 'factory-rambi-5517.B', [
           'enguarde', 'expresso', 'kip', 'swanky', 'winky']),
@@ -1890,6 +1891,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-puff-13329.B', ['puff']),
       (WEEKLY, 'factory-zork-13427.B', ['zork']),
       (DAILY, 'factory-trogdor-13443.B', ['trogdor', 'strongbad']),
+      (TRIGGERED, 'factory-strongbad-13963.B', ['strongbad']),
       (DAILY, 'factory-volteer-13600.B', ['volteer']),
       (DAILY, 'factory-dedede-13683.B', ['dedede']),
       (WEEKLY, 'factory-zork-13700.B', ['zork']),
