@@ -14,18 +14,6 @@
       ]
     },
     {
-      "name": "arkham",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "arkham",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
       "name": "asuka",
       "configs": [
         {
@@ -925,18 +913,6 @@
           "leader_board": false,
           "board_group": "zephyr-poc",
           "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "whirlwind",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "whirlwind",
-          "arch": "UNKNOWN"
         }
       ]
     },

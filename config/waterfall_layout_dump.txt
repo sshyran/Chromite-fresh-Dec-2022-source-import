@@ -242,7 +242,6 @@
     adlrvp-release
     ambassador-release
     amd64-generic-cheets-release
-    arkham-release
     asuka-release
     asurada-release
     atlas-blueznext-release
@@ -397,7 +396,6 @@
     volteer-manatee-release
     volteer-release
     volteer-zephyr-release
-    whirlwind-release
     winky-release
     wizpig-release
     zork-arc-r-release
@@ -1442,7 +1440,6 @@
     adlrvp-release-tryjob
     ambassador-release-tryjob
     amd64-generic-cheets-release-tryjob
-    arkham-release-tryjob
     asuka-release-tryjob
     asurada-release-tryjob
     atlas-blueznext-release-tryjob
@@ -1597,7 +1594,6 @@
     volteer-manatee-release-tryjob
     volteer-release-tryjob
     volteer-zephyr-release-tryjob
-    whirlwind-release-tryjob
     winky-release-tryjob
     wizpig-release-tryjob
     zork-arc-r-release-tryjob
