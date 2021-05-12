@@ -840,3 +840,118 @@ class BuildsChromeTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     patch.assert_called_once_with(constants.CHROME_CP,
                                   build_target_lib.BuildTarget('foo'),
                                   [controller_util.PackageInfoToCPV(package)])
+
+
+class GetAndroidMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
+  """GetAndroidMetadata tests."""
+
+  def setUp(self):
+    self.response = packages_pb2.GetAndroidMetadataResponse()
+
+  def _GetRequest(self, board=None):
+    """Helper to build out a request."""
+    request = packages_pb2.GetAndroidMetadataRequest()
+
+    if board:
+      request.build_target.name = board
+
+    return request
+
+  def testValidateOnly(self):
+    """Check that a validate only call does not execute any logic."""
+    package_mock = self.PatchObject(packages_service,
+                                    'determine_android_package')
+    branch_mock = self.PatchObject(packages_service,
+                                   'determine_android_branch')
+    version_mock = self.PatchObject(packages_service,
+                                    'determine_android_version')
+
+    request = self._GetRequest(board='betty')
+    packages_controller.GetAndroidMetadata(request, self.response,
+                                           self.validate_only_config)
+
+    package_mock.assert_not_called()
+    branch_mock.assert_not_called()
+    version_mock.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    package_mock = self.PatchObject(packages_service,
+                                    'determine_android_package')
+    branch_mock = self.PatchObject(packages_service,
+                                   'determine_android_branch')
+    version_mock = self.PatchObject(packages_service,
+                                    'determine_android_version')
+
+    request = self._GetRequest(board='betty')
+    packages_controller.GetAndroidMetadata(request, self.response,
+                                           self.mock_call_config)
+
+    package_mock.assert_not_called()
+    branch_mock.assert_not_called()
+    version_mock.assert_not_called()
+
+    self.assertTrue(self.response.android_package)
+    self.assertTrue(self.response.android_branch)
+    self.assertTrue(self.response.android_version)
+
+  def testNoBuildTargetFails(self):
+    """No build target argument should fail."""
+    request = self._GetRequest()
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      packages_controller.GetAndroidMetadata(request, self.response,
+                                             self.api_config)
+
+  def testSuccess(self):
+    """Test a successful call."""
+    board = 'betty'
+    package = 'android-package'
+    branch = 'android-branch'
+    version = '7123456'
+    full_package = f'chromeos-base/{package}-{version}-r1'
+
+    package_mock = self.PatchObject(packages_service,
+                                    'determine_android_package',
+                                    return_value=full_package)
+    branch_mock = self.PatchObject(packages_service,
+                                   'determine_android_branch',
+                                   return_value=branch)
+    version_mock = self.PatchObject(packages_service,
+                                    'determine_android_version',
+                                    return_value=version)
+
+    request = self._GetRequest(board=board)
+    packages_controller.GetAndroidMetadata(request, self.response,
+                                           self.api_config)
+
+    package_mock.assert_called_once_with(board)
+    branch_mock.assert_called_once_with(board, package=full_package)
+    version_mock.assert_called_once_with(board, package=full_package)
+
+    self.assertEqual(self.response.android_package, package)
+    self.assertEqual(self.response.android_branch, branch)
+    self.assertEqual(self.response.android_version, version)
+
+  def testNoAndroid(self):
+    """Test returns an empty response if given board has no Android."""
+    board = 'betty'
+
+    package_mock = self.PatchObject(packages_service,
+                                    'determine_android_package',
+                                    return_value=None)
+    branch_mock = self.PatchObject(packages_service,
+                                   'determine_android_branch')
+    version_mock = self.PatchObject(packages_service,
+                                    'determine_android_version')
+
+    request = self._GetRequest(board=board)
+    packages_controller.GetAndroidMetadata(request, self.response,
+                                           self.api_config)
+
+    package_mock.assert_called_once_with(board)
+    branch_mock.assert_not_called()
+    version_mock.assert_not_called()
+
+    self.assertFalse(self.response.android_package)
+    self.assertFalse(self.response.android_branch)
+    self.assertFalse(self.response.android_version)

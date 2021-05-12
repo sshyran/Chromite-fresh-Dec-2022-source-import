@@ -388,3 +388,36 @@ def NeedsChromeSource(input_proto, output_proto, _config):
   for pkg in result.packages:
     pkg_info = output_proto.packages.add()
     controller_util.serialize_package_info(pkg, pkg_info)
+
+
+def _GetAndroidMetadataResponse(_input_proto, output_proto, _config):
+  """Mock Android metadata on successful run."""
+  output_proto.android_package = 'android-vm-rvc'
+  output_proto.android_branch = 'git_rvc-arc'
+  output_proto.android_version = '7123456'
+
+
+@faux.success(_GetAndroidMetadataResponse)
+@faux.empty_error
+@validate.require('build_target.name')
+@validate.validation_complete
+def GetAndroidMetadata(input_proto, output_proto, _config):
+  """Returns Android-related metadata."""
+  build_target = controller_util.ParseBuildTarget(input_proto.build_target)
+  # This returns a full CPVR string, e.g.
+  # 'chromeos-base/android-vm-rvc-7336577-r1'
+  android_full_package = packages.determine_android_package(build_target.name)
+  if android_full_package:
+    logging.info('Found Android package: %s', android_full_package)
+    info = package_info.parse(android_full_package)
+    output_proto.android_package = info.package
+
+    android_branch = packages.determine_android_branch(
+        build_target.name, package=android_full_package)
+    logging.info('Found Android branch: %s', android_branch)
+    output_proto.android_branch = android_branch
+
+    android_version = packages.determine_android_version(
+        build_target.name, package=android_full_package)
+    logging.info('Found Android version: %s', android_version)
+    output_proto.android_version = android_version
