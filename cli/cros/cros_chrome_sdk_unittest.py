@@ -387,6 +387,14 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
     self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
 
+  def testUseRBE(self):
+    """Verify that we do not add Goma to the PATH."""
+    self.SetupCommandMock(extra_args=['--use-rbe'])
+    self.cmd_mock.inst.Run()
+
+    self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
+    self.assertIn('use_rbe = true', self.cmd_mock.env['GN_ARGS'])
+
   def testGnArgsStalenessCheckNoMatch(self):
     """Verifies the GN args are checked for staleness with a mismatch."""
     with cros_test_lib.LoggingCapturer() as logs:

@@ -934,6 +934,10 @@ class ChromeSDKCommand(command.CliCommand):
         '--gomadir', type='path',
         help='Use the goma installation at the specified PATH.')
     parser.add_argument(
+        '--use-rbe', action='store_true', default=False,
+        help='Enable RBE client for the build. '
+             'This automatically disables Goma.')
+    parser.add_argument(
         '--version', default=None, type=cls.ValidateVersion,
         help='Specify the SDK version to use. This can be a platform version '
              'ending in .0.0, e.g. 1234.0.0, in which case the full version '
@@ -1259,8 +1263,11 @@ class ChromeSDKCommand(command.CliCommand):
     # adjustment made in _SetupTCEnvironment is for split debug which
     # is done with 'use_debug_fission'.
 
+    if options.use_rbe:
+      gn_args['use_rbe'] = True
+
     # Enable goma if requested.
-    if not options.goma:
+    if not options.goma or options.use_rbe:
       # If --nogoma option is explicitly set, disable goma, even if it is
       # used in the original GN_ARGS.
       gn_args['use_goma'] = False
@@ -1552,7 +1559,7 @@ class ChromeSDKCommand(command.CliCommand):
 
     goma_dir = None
     goma_port = None
-    if self.options.goma:
+    if self.options.goma and not self.options.use_rbe:
       try:
         goma_dir, goma_port = self._SetupGoma()
       except GomaError as e:
