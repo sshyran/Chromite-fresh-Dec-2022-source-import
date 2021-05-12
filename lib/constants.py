@@ -266,6 +266,17 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = 'gs://chromeos-cts-results/'
 DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 
+# List of Android Portage packages.
+ANDROID_PI_PACKAGE = 'android-container-pi'
+ANDROID_VMRVC_PACKAGE = 'android-vm-rvc'
+ANDROID_VMSC_PACKAGE = 'android-vm-sc'
+ANDROID_VMMST_PACKAGE = 'android-vm-master'
+
+ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
+                                  ANDROID_VMRVC_PACKAGE,
+                                  ANDROID_VMSC_PACKAGE,
+                                  ANDROID_VMMST_PACKAGE])
+
 # List of supported Android branches. When adding/removing branches make sure
 # the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
@@ -427,10 +438,8 @@ VALID_CHROME_REVISIONS = [CHROME_REV_TOT, CHROME_REV_LATEST,
 
 # Constants for uprevving Android.
 
-# Portage package name for Android container.
-ANDROID_PACKAGE_NAME = 'android-container'
-
 # Builds and validates the latest Android release.
+# TODO(b/187788131): cleanup this
 ANDROID_REV_LATEST = 'latest_release'
 VALID_ANDROID_REVISIONS = [ANDROID_REV_LATEST]
 

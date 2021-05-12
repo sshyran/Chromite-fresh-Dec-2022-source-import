@@ -50,7 +50,7 @@ def _MarkStableResponse(_input_proto, output_proto, _config):
 
 @faux.success(_MarkStableResponse)
 @faux.empty_error
-@validate.require('package_name', 'android_build_branch')
+@validate.require('package_name')
 @validate.validation_complete
 def MarkStable(input_proto, output_proto, _config):
   """Uprev Android, if able.
@@ -79,9 +79,9 @@ def MarkStable(input_proto, output_proto, _config):
   try:
     android_atom_to_build = packages.uprev_android(
         android_package=package_name,
-        android_build_branch=android_build_branch,
         chroot=chroot,
         build_targets=build_targets,
+        android_build_branch=android_build_branch,
         android_version=android_version,
         skip_commit=skip_commit,
     )

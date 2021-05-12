@@ -69,6 +69,7 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.input_proto = android_pb2.MarkStableRequest()
     self.input_proto.package_name = 'android-package-name'
     self.input_proto.android_build_branch = 'android_build_branch'
+    self.input_proto.android_version = 'android-version'
     self.input_proto.build_targets.add().name = 'foo'
     self.input_proto.build_targets.add().name = 'bar'
     self.input_proto.skip_commit = True
@@ -103,16 +104,8 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
       android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_not_called()
 
-  def testFailsIfAndroidBuildBranchMissing(self):
-    """Fails if android_build_branch is missing."""
-    self.input_proto.android_build_branch = ''
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      android.MarkStable(self.input_proto, self.response, self.api_config)
-    self.uprev.assert_not_called()
-
   def testCallsCommandCorrectly(self):
     """Test that commands.MarkAndroidAsStable is called correctly."""
-    self.input_proto.android_version = 'android-version'
     self.uprev.return_value = 'cat/android-1.2.3'
     atom = common_pb2.PackageInfo()
     atom.category = 'cat'
@@ -121,9 +114,9 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
         android_package=self.input_proto.package_name,
-        android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
         build_targets=self.build_targets,
+        android_build_branch=self.input_proto.android_build_branch,
         android_version=self.input_proto.android_version,
         skip_commit=self.input_proto.skip_commit,
     )
@@ -133,14 +126,13 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
   def testHandlesEarlyExit(self):
     """Test that early exit is handled correctly."""
-    self.input_proto.android_version = 'android-version'
     self.uprev.return_value = ''
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
         android_package=self.input_proto.package_name,
-        android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
         build_targets=self.build_targets,
+        android_build_branch=self.input_proto.android_build_branch,
         android_version=self.input_proto.android_version,
         skip_commit=self.input_proto.skip_commit,
     )
@@ -149,7 +141,6 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
   def testHandlesPinnedUprevError(self):
     """Test that pinned error is handled correctly."""
-    self.input_proto.android_version = 'android-version'
     self.uprev.side_effect = packages.AndroidIsPinnedUprevError('pin/xx-1.1')
     atom = common_pb2.PackageInfo()
     atom.category = 'pin'
@@ -158,9 +149,9 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
         android_package=self.input_proto.package_name,
-        android_build_branch=self.input_proto.android_build_branch,
         chroot=mock.ANY,
         build_targets=self.build_targets,
+        android_build_branch=self.input_proto.android_build_branch,
         android_version=self.input_proto.android_version,
         skip_commit=self.input_proto.skip_commit,
     )

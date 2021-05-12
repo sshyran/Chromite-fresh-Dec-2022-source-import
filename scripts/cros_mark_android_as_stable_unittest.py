@@ -45,7 +45,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     """Setup vars and create mock dir."""
-    self.android_package = 'android-container-pi'
+    self.android_package = constants.ANDROID_PI_PACKAGE
 
     self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
     self.mock_android_dir = os.path.join(

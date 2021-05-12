@@ -139,19 +139,20 @@ def uprevs_versioned_package(package):
 
 
 def uprev_android(android_package,
-                  android_build_branch,
                   chroot,
                   build_targets=None,
+                  android_build_branch=None,
                   android_version=None,
                   skip_commit=False):
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   command = [
       'cros_mark_android_as_stable',
       f'--android_package={android_package}',
-      f'--android_build_branch={android_build_branch}',
   ]
   if build_targets:
     command.append(f'--boards={":".join(bt.name for bt in build_targets)}')
+  if android_build_branch:
+    command.append(f'--android_build_branch={android_build_branch}')
   if android_version:
     command.append(f'--force_version={android_version}')
   if skip_commit:

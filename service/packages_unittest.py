@@ -49,25 +49,44 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
                          stdout='ANDROID_ATOM=android/android-1.0\n')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
 
-    packages.uprev_android('android/package', 'refs/android-build-branch',
-                           Chroot(), build_targets=build_targets)
-    self.assertCommandContains([
-        'cros_mark_android_as_stable',
-        '--android_package=android/package',
-        '--android_build_branch=refs/android-build-branch',
-        '--boards=foo:bar'
-    ])
+    packages.uprev_android('android/package', Chroot(),
+                           build_targets=build_targets)
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--boards=foo:bar'])
     self.assertCommandContains(['emerge-foo'])
     self.assertCommandContains(['emerge-bar'])
+
+  def test_android_build_branch(self):
+    """Test specifying android_build_branch option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('android/package', Chroot(),
+                           android_build_branch='android-build-branch')
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--android_build_branch=android-build-branch'])
+
+  def test_android_version(self):
+    """Test specifying android_version option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('android/package', Chroot(),
+                           android_version='7123456')
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--force_version=7123456'])
 
   def test_skip_commit(self):
     """Test specifying skip_commit option."""
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
                          stdout='ANDROID_ATOM=android/android-1.0\n')
 
-    packages.uprev_android('android/package', 'refs/android-build-branch',
-                           Chroot(), skip_commit=True)
+    packages.uprev_android('android/package', Chroot(), skip_commit=True)
     self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
                                 '--skip_commit'])
 
   def test_no_uprev(self):
@@ -75,8 +94,8 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
                          stdout='')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
-    packages.uprev_android('android/package', 'refs/android-build-branch',
-                           Chroot(), build_targets=build_targets)
+    packages.uprev_android('android/package', Chroot(),
+                           build_targets=build_targets)
 
     self.assertCommandContains(['cros_mark_android_as_stable',
                                 '--boards=foo:bar'])

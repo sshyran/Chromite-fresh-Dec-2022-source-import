@@ -79,6 +79,27 @@ ARC_BUCKET_ACL_X86 = 'googlestorage_acl_x86.txt'
 ARC_BUCKET_ACL_PUBLIC = 'googlestorage_acl_public.txt'
 
 
+def GetAndroidBranchForPackage(android_package):
+  """Returns the corresponding Android branch of given Android package.
+
+  Args:
+    android_package (str): the Android package name e.g. 'android-vm-rvc'
+
+  Returns:
+    str: the corresponding Android branch e.g. 'git_rvc-arc'
+  """
+  mapping = {
+      constants.ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
+      constants.ANDROID_VMRVC_PACKAGE: constants.ANDROID_VMRVC_BUILD_BRANCH,
+      constants.ANDROID_VMSC_PACKAGE: constants.ANDROID_VMSC_BUILD_BRANCH,
+      constants.ANDROID_VMMST_PACKAGE: constants.ANDROID_VMMST_BUILD_BRANCH,
+  }
+  try:
+    return mapping[android_package]
+  except KeyError:
+    raise ValueError(f'Unknown Android package "{android_package}"')
+
+
 def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
   """Checks that a specific build_id is valid.
 

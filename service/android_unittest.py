@@ -34,6 +34,21 @@ class ArtifactsConfigTest(cros_test_lib.TestCase):
                           'supported targets')
 
 
+class GetAndroidBranchForPackageTest(cros_test_lib.TestCase):
+  """Tests for GetAndroidBranchForPackage."""
+
+  def testAllPackagesAreMapped(self):
+    """Ensure all possible Android packages are mapped to valid branches."""
+    for package in constants.ANDROID_ALL_PACKAGES:
+      branch = android.GetAndroidBranchForPackage(package)
+      self.assertIn(branch, android.ARTIFACTS_TO_COPY)
+
+  def testRaisesOnUnknownPackage(self):
+    """Ensure passing an unknown package raises an exception."""
+    with self.assertRaises(ValueError):
+      android.GetAndroidBranchForPackage('not-an-android-package')
+
+
 class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
   """Tests using a mocked GS bucket containing Android build artifacts."""
 
@@ -51,7 +66,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     """Setup vars and create mock dir."""
-    self.android_package = 'android-container-pi'
+    self.android_package = constants.ANDROID_PI_PACKAGE
 
     self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
     self.mock_android_dir = os.path.join(

@@ -341,11 +341,12 @@ def GetParser():
                       default=android.ANDROID_BUCKET_URL,
                       type='gs_path')
   parser.add_argument('--android_build_branch',
-                      required=True,
                       choices=constants.ANDROID_BRANCH_TO_BUILD_TARGETS,
-                      help='Android branch to import from')
+                      help='Android branch to import from, overriding default')
   parser.add_argument('--android_package',
-                      default=constants.ANDROID_PACKAGE_NAME)
+                      required=True,
+                      choices=constants.ANDROID_ALL_PACKAGES,
+                      help='Android package to uprev')
   parser.add_argument('--arc_bucket_url',
                       default=constants.ARC_BUCKET_URL,
                       type='gs_path')
@@ -374,10 +375,15 @@ def main(argv):
       overlay_dir,
       portage_util.GetFullAndroidPortagePackageName(options.android_package))
 
+  # Use default Android branch if not overridden.
+  android_build_branch = (
+      options.android_build_branch or
+      android.GetAndroidBranchForPackage(options.android_package))
+
   (unstable_ebuild, stable_ebuilds) = FindAndroidCandidates(android_package_dir)
   # Mirror artifacts, i.e., images and some sdk tools (e.g., adb, aapt).
   version_to_uprev = android.MirrorArtifacts(options.android_bucket_url,
-                                             options.android_build_branch,
+                                             android_build_branch,
                                              options.arc_bucket_url,
                                              android_package_dir,
                                              options.force_version)
@@ -394,9 +400,8 @@ def main(argv):
 
   revved = MarkAndroidEBuildAsStable(
       stable_candidate, unstable_ebuild, options.android_package,
-      version_to_uprev, android_package_dir,
-      options.android_build_branch, options.arc_bucket_url,
-      options.runtime_artifacts_bucket_url)
+      version_to_uprev, android_package_dir, android_build_branch,
+      options.arc_bucket_url, options.runtime_artifacts_bucket_url)
 
   if revved:
     android_version_atom, files_to_add, files_to_remove = revved

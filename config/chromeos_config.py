@@ -1146,7 +1146,7 @@ def AndroidTemplates(site_config):
       site_config.templates.generic_android_pfq,
       site_config.templates.internal,
       display_label=config_lib.DISPLAY_LABEL_PI_ANDROID_PFQ,
-      android_package='android-container-pi',
+      android_package=constants.ANDROID_PI_PACKAGE,
       android_import_branch=constants.ANDROID_PI_BUILD_BRANCH,
   )
 
@@ -1156,7 +1156,7 @@ def AndroidTemplates(site_config):
       site_config.templates.generic_android_pfq,
       site_config.templates.internal,
       display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
-      android_package='android-vm-rvc',
+      android_package=constants.ANDROID_VMRVC_PACKAGE,
       android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
   )
 
@@ -1166,7 +1166,7 @@ def AndroidTemplates(site_config):
       site_config.templates.generic_android_pfq,
       site_config.templates.internal,
       display_label=config_lib.DISPLAY_LABEL_VMSC_ANDROID_PFQ,
-      android_package='android-vm-sc',
+      android_package=constants.ANDROID_VMSC_PACKAGE,
       android_import_branch=constants.ANDROID_VMSC_BUILD_BRANCH,
   )
 
@@ -1176,7 +1176,7 @@ def AndroidTemplates(site_config):
       site_config.templates.generic_android_pfq,
       site_config.templates.internal,
       display_label=config_lib.DISPLAY_LABEL_VMMST_ANDROID_PFQ,
-      android_package='android-vm-master',
+      android_package=constants.ANDROID_VMMST_PACKAGE,
       android_import_branch=constants.ANDROID_VMMST_BUILD_BRANCH,
   )
 
@@ -3005,7 +3005,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       boards=['kevin'],
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
-      android_package='android-container-pi',
+      android_package=constants.ANDROID_PI_PACKAGE,
       android_import_branch=constants.ANDROID_PI_BUILD_BRANCH,
       prebuilts=False,
       unittests=False,
@@ -3018,7 +3018,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       boards=['hatch'],
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
-      android_package='android-vm-rvc',
+      android_package=constants.ANDROID_VMRVC_PACKAGE,
       android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
       prebuilts=False,
       unittests=False,
@@ -3032,7 +3032,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       boards=['hatch-arc-r'],
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
-      android_package='android-vm-rvc',
+      android_package=constants.ANDROID_VMRVC_PACKAGE,
       android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
       prebuilts=False,
       unittests=False,
