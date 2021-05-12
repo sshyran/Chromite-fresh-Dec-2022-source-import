@@ -194,6 +194,7 @@
   firmware-trogdor-13577.B-firmwarebranch
   firmware-ultima-7287.131.B-firmwarebranch
   firmware-veyron-6588.B-firmwarebranch
+  firmware-volteer-13672.156.B-firmwarebranch
   firmware-volteer-13672.B-firmwarebranch
   firmware-winky-5216.265.B-firmwarebranch
   firmware-yuna-6301.59.B-firmwarebranch
@@ -1057,6 +1058,7 @@
   firmware-trogdor-13577.B-firmwarebranch-tryjob
   firmware-ultima-7287.131.B-firmwarebranch-tryjob
   firmware-veyron-6588.B-firmwarebranch-tryjob
+  firmware-volteer-13672.156.B-firmwarebranch-tryjob
   firmware-volteer-13672.B-firmwarebranch-tryjob
   firmware-winky-5216.265.B-firmwarebranch-tryjob
   firmware-yuna-6301.59.B-firmwarebranch-tryjob

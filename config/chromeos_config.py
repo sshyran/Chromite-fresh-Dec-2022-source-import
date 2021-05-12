@@ -1816,6 +1816,8 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
       (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
       (TRIGGERED, 'firmware-octopus-11297.250.B', ['octopus'], {}),
+      # TODO(b/187942470): temporary firmware-volteer-13672.156.B builder
+      (TRIGGERED, 'firmware-volteer-13672.156.B', ['volteer'], {}),
   ]
 
   for interval, branch, boards, kwargs in firmware_branch_builders:
