@@ -29,10 +29,6 @@ def GenerateOsRelease(root, default_params=None):
   os_release_path = os.path.join(root, 'etc', 'os-release')
   os_released_path = os.path.join(root, 'etc', 'os-release.d')
 
-  if not os.path.isdir(os_released_path):
-    # /etc/os-release.d does not exist, no need to regenerate /etc/os-release.
-    return
-
   mapping = {}
   if os.path.exists(os_release_path):
     content = osutils.ReadFile(os_release_path)
@@ -47,13 +43,14 @@ def GenerateOsRelease(root, default_params=None):
 
       mapping[key_value[0]] = key_value[1].strip()
 
-  for filepath in os.listdir(os_released_path):
-    key = os.path.basename(filepath)
-    if key in mapping:
-      cros_build_lib.Die('key %s defined in /etc/os-release.d but already '
-                         'defined in /etc/os-release.' % key)
-    mapping[key] = osutils.ReadFile(os.path.join(os_released_path,
-                                                 filepath)).strip('\n')
+  if os.path.isdir(os_released_path):
+    for filepath in os.listdir(os_released_path):
+      key = os.path.basename(filepath)
+      if key in mapping:
+        cros_build_lib.Die('key %s defined in /etc/os-release.d but already '
+                           'defined in /etc/os-release.' % key)
+      mapping[key] = osutils.ReadFile(os.path.join(os_released_path,
+                                                   filepath)).strip('\n')
 
   if default_params:
     for key, value in default_params.items():
