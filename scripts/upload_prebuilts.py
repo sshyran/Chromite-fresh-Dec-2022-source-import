@@ -179,10 +179,9 @@ def RevGitFile(filename, data, dryrun=False):
   tracking_info = git.GetTrackingBranch(
       cwd, prebuilt_branch, for_push=True, for_checkout=False)
   gpatch = gerrit_helper.CreateGerritPatch(
-      cwd, remote_url, ref=tracking_info.ref, dryrun=dryrun)
-  gerrit_helper.SetReview(
-      gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun, notify='NONE')
-  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun, notify='NONE')
+      cwd, remote_url, ref=tracking_info.ref)
+  gerrit_helper.SetReview(gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun)
+  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun)
 
 
 def GetVersion():
