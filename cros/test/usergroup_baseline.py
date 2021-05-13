@@ -148,6 +148,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     # FUSE-based filesystem daemons.
     GroupEntry(group='policy-readers', gid=303, users={'attestation',
                                                        'authpolicyd', 'chronos',
+                                                       'hardware_verifier',
                                                        'u2f', 'shill'}),
     GroupEntry(group='fuse-drivefs', gid=304, users={'chronos'}),
     GroupEntry(group='rmtfs', gid=306, users={'rmtfs', 'shill'}),
