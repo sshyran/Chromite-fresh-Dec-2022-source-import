@@ -14,6 +14,7 @@ lots of places.
 from __future__ import print_function
 
 import importlib
+import importlib.abc
 import os
 import sys
 
@@ -27,10 +28,17 @@ if sys.version_info < (3, 6):
   sys.exit(1)
 
 
-CHROMITE_PATH = None
+CHROMITE_PATH = os.path.dirname(os.path.realpath(__file__))
+while not os.path.exists(os.path.join(CHROMITE_PATH, 'PRESUBMIT.cfg')):
+  CHROMITE_PATH = os.path.dirname(CHROMITE_PATH)
+  assert str(CHROMITE_PATH) != '/', 'Unable to locate chromite dir'
+CHROMITE_PATH += '/'
 
 
-class ChromiteImporter(object):
+# module_repr triggers an abstract warning, but it's deprecated in Python 3.+,
+# so we don't want to bother implementing it.
+# pylint: disable=abstract-method
+class ChromiteLoader(importlib.abc.Loader):
   """Virtual chromite module
 
   If the checkout is not named 'chromite', trying to do 'from chromite.xxx'
@@ -44,42 +52,49 @@ class ChromiteImporter(object):
   import would also search those for .py modules.
   """
 
-  # When trying to load the chromite dir from disk, we'll get called again,
-  # so make sure to disable our logic to avoid an infinite loop.
-  _loading = False
+  def __init__(self):
+    # When trying to load the chromite dir from disk, we'll get called again,
+    # so make sure to disable our logic to avoid an infinite loop.
+    self.loading = False
 
-  def find_module(self, fullname, _path=None):
-    """Handle the 'chromite' module"""
-    if fullname == 'chromite' and not self._loading:
-      return self
-    return None
-
-  def load_module(self, _fullname):
-    """Return our cache of the 'chromite' module"""
-    # Locate the top of the chromite dir by searching for the PRESUBMIT.cfg
-    # file.  This assumes that file isn't found elsewhere in the tree.
-    path = os.path.dirname(os.path.realpath(__file__))
-    while not os.path.exists(os.path.join(path, 'PRESUBMIT.cfg')):
-      path = os.path.dirname(path)
-      assert path != '/', 'Unable to locate chromite dir'
-
-    # pylint: disable=global-statement
-    global CHROMITE_PATH
-    CHROMITE_PATH = path + '/'
-
-    # Finally load the chromite dir.
-    path, mod = os.path.split(path)
+  # pylint: disable=unused-argument
+  def create_module(self, spec):
+    """Load the current dir."""
+    if self.loading:
+      return None
+    path, mod = os.path.split(CHROMITE_PATH[:-1])
     sys.path.insert(0, path)
-    self._loading = True
+    self.loading = True
     try:
       return importlib.import_module(mod)
     finally:
       # We can't pop by index as the import might have changed sys.path.
       sys.path.remove(path)
-      self._loading = False
+      self.loading = False
+
+  # pylint: disable=unused-argument
+  def exec_module(self, module):
+    """Required stub as a loader."""
 
 
-sys.meta_path.insert(0, ChromiteImporter())
+class ChromiteFinder(importlib.abc.MetaPathFinder):
+  """Virtual chromite finder.
+
+  We'll route any requests for the 'chromite' module.
+  """
+
+  def __init__(self, loader):
+    self._loader = loader
+
+  # pylint: disable=unused-argument
+  def find_spec(self, fullname, path=None, target=None):
+    if fullname != 'chromite' or self._loader.loading:
+      return None
+    return importlib.machinery.ModuleSpec(fullname, self._loader)
+
+
+sys.meta_path.insert(0, ChromiteFinder(ChromiteLoader()))
+
 
 # We have to put these imports after our meta-importer above.
 # pylint: disable=wrong-import-position

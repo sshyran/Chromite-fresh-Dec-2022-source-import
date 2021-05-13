@@ -13,7 +13,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import timeout_util
-from chromite.scripts import wrapper3
 
 
 assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
@@ -26,10 +25,6 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
   """Tests for FindTarget()."""
 
   def setUp(self):
-    # It is important that the code we test is not peturbed because the funky
-    # path logic relies heavily upon it to make decisions.
-    self.assertIsNone(wrapper3.CHROMITE_PATH)
-
     # TODO)vapier): Switch tempdir to pathlib.
     self.tempdir = Path(self.tempdir)
 
