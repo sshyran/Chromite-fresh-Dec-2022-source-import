@@ -2227,12 +2227,13 @@ def CleanOutdatedBinaryPackages(sysroot):
       [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean'), '-d', 'packages'])
 
 
-def _CheckHasTest(cp, sysroot):
+def _CheckHasTest(cp, sysroot, require_workon: bool = False):
   """Checks if the ebuild for |cp| has tests.
 
   Args:
     cp: A portage package in the form category/package_name.
     sysroot: Path to the sysroot.
+    require_workon: Whether to only test workon packages.
 
   Returns:
     |cp| if the ebuild for |cp| defines a test stanza, None otherwise.
@@ -2247,20 +2248,25 @@ def _CheckHasTest(cp, sysroot):
     logging.error('FindEbuildForPackage error %s', e)
     raise failures_lib.PackageBuildFailure(e, 'equery', cp)
   ebuild = EBuild(path, False)
-  return cp if ebuild.has_test else None
+  if require_workon and not ebuild.is_workon:
+    return None
+  elif ebuild.has_test:
+    return cp
+  return None
 
 
-def PackagesWithTest(sysroot, packages):
+def PackagesWithTest(sysroot, packages, require_workon: bool = False):
   """Returns the subset of |packages| that have unit tests.
 
   Args:
     sysroot: Path to the sysroot.
     packages: List of packages to filter.
+    require_workon: Whether to only test workon packages.
 
   Returns:
     The subset of |packages| that defines unit tests.
   """
-  inputs = [(cp, sysroot) for cp in packages]
+  inputs = [(cp, sysroot, require_workon) for cp in packages]
   pkg_with_test = set(parallel.RunTasksInProcessPool(_CheckHasTest, inputs))
 
   # CheckHasTest will return None for packages that do not have tests. We can

@@ -83,7 +83,13 @@ def ParseArgs(argv):
       default=False,
       action='store_true',
       dest='testable_packages_optional',
-      help="If specified, don't fail if no testable packages are found.")
+      help='If specified, do not fail if no testable packages are found.')
+  parser.add_argument(
+      '--filter-only-cros-workon',
+      default=False,
+      action='store_true',
+      help='If specified and packages are given, filters out non-cros_workon '
+      'packages.')
 
   options = parser.parse_args(argv)
   options.Freeze()
@@ -135,7 +141,8 @@ def main(argv):
     logging.info('Skipping package %s.', cp)
 
   packages = packages - skipped_packages
-  pkg_with_test = portage_util.PackagesWithTest(sysroot, packages)
+  pkg_with_test = portage_util.PackagesWithTest(sysroot, packages,
+                                                opts.filter_only_cros_workon)
 
   if packages - pkg_with_test:
     logging.warning('The following packages do not have tests:\n  %s',
