@@ -107,6 +107,9 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   for package_info_msg in blocklisted_package_info:
     blocklist.append(controller_util.PackageInfoToString(package_info_msg))
 
+  # Allow call to filter out non-cros_workon packages from the input packages.
+  filter_only_cros_workon = input_proto.flags.filter_only_cros_workon
+
   # Allow call to succeed if no tests were found.
   testable_packages_optional = input_proto.flags.testable_packages_optional
 
@@ -122,7 +125,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       blocklist=blocklist,
       was_built=was_built,
       code_coverage=code_coverage,
-      testable_packages_optional=testable_packages_optional)
+      testable_packages_optional=testable_packages_optional,
+      filter_only_cros_workon=filter_only_cros_workon)
 
   if not result.success:
     # Failed to run tests or some tests failed.

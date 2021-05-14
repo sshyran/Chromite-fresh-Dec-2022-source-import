@@ -104,6 +104,12 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
         self.build_target, self.chroot, testable_packages_optional=True)
     self.assertCommandContains(['--no-testable-packages-ok'])
 
+  def testFilterOnlyCrosWorkon(self):
+    """Test the filter packages argument."""
+    test.BuildTargetUnitTest(
+        self.build_target, self.chroot, filter_only_cros_workon=True)
+    self.assertCommandContains(['--filter-only-cros-workon'])
+
   def testFailure(self):
     """Test non-zero return code and failed package handling."""
     packages = ['foo/bar', 'cat/pkg']
