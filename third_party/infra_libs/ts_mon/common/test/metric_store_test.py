@@ -6,8 +6,7 @@ import random
 import threading
 import time
 import unittest
-
-import mock
+from unittest import mock
 
 from infra_libs.ts_mon.common import distribution
 from infra_libs.ts_mon.common import interface

@@ -7,8 +7,7 @@ import json
 import os
 import requests
 import unittest
-
-import mock
+from unittest import mock
 
 from testing_support import auto_stub
 

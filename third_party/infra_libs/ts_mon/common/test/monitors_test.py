@@ -5,9 +5,9 @@
 import json
 import os
 import unittest
+from unittest import mock
 
 import httplib2
-import mock
 
 from infra_libs import httplib2_utils
 from infra_libs.ts_mon.common import interface

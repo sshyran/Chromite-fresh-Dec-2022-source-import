@@ -9,6 +9,7 @@ import os
 import socket
 import time
 import unittest
+from unittest import mock
 
 import infra_libs
 from infra_libs.ts_mon.common import http_metrics
@@ -16,7 +17,6 @@ from infra_libs import httplib2_utils
 from infra_libs import ts_mon
 
 import httplib2
-import mock
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

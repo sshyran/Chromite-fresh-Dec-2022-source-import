@@ -3,8 +3,7 @@
 # found in the LICENSE file.
 
 import unittest
-
-import mock
+from unittest import mock
 
 from infra_libs.ts_mon.common import http_metrics
 from infra_libs.ts_mon.common import interface

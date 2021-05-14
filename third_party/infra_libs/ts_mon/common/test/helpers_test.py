@@ -4,8 +4,7 @@
 
 import time
 import unittest
-
-import mock
+from unittest import mock
 
 from infra_libs.ts_mon.common import metrics
 from infra_libs.ts_mon.common import helpers
