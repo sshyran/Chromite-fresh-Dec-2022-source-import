@@ -72,8 +72,6 @@ from six import wraps
 __version__ = '3.0.5'
 version_info = tuple(int(p) for p in __version__.split('.'))
 
-import mock
-
 try:
     inspectsignature = inspect.signature
 except AttributeError:
@@ -775,7 +773,7 @@ class NonCallableMock(Base):
 
     def __dir__(self):
         """Filter the output of `dir(mock)` to only useful members."""
-        if not mock.FILTER_DIR and getattr(object, '__dir__', None):
+        if not FILTER_DIR and getattr(object, '__dir__', None):
             # object.__dir__ is not in 2.7
             return object.__dir__(self)
 
@@ -786,7 +784,7 @@ class NonCallableMock(Base):
             m_name for m_name, m_value in self._mock_children.items()
             if m_value is not _deleted]
 
-        if mock.FILTER_DIR:
+        if FILTER_DIR:
             # object.__dir__ is not in 2.7
             from_type = [e for e in from_type if not e.startswith('_')]
             from_dict = [e for e in from_dict if not e.startswith('_') or
