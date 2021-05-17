@@ -25,7 +25,7 @@ class CrOSGenerateUpdatePayloadTest(cros_test_lib.MockTestCase):
         '--tgt-image', 'foo-tgt-image',
         '--src-image', 'foo-src-image',
         '--output', 'foo-output',
-        '--check',
+        '--check', '--minios',
         '--private-key', 'foo-private-key',
         '--work-dir', 'foo-work-dir',
     ])
@@ -36,4 +36,4 @@ class CrOSGenerateUpdatePayloadTest(cros_test_lib.MockTestCase):
         src_image=partial_mock.HasString('foo-src-image'),
         work_dir=partial_mock.HasString('foo-work-dir'),
         private_key=partial_mock.HasString('foo-private-key'),
-        check=True)
+        check=True, minios=True)

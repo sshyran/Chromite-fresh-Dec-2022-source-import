@@ -914,6 +914,7 @@ PART_ROOT_A = 'ROOT-A'
 PART_ROOT_B = 'ROOT-B'
 PART_KERN_A = 'KERN-A'
 PART_KERN_B = 'KERN-B'
+PART_MINIOS_A = 'MINIOS-A'
 
 # Quick provision payloads. These file names should never be changed, otherwise
 # very bad things can happen :). The reason is we have already uploaded these

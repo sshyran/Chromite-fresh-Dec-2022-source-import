@@ -67,6 +67,14 @@ class TestUtils(cros_test_lib.TempDirTestCase):
     self.assertEqual(utils.ReadLsbRelease(self.tempdir),
                      {'key': 'value', 'foo': 'bar'})
 
+  def testReadMinorVersion(self):
+    """Tests that we correctly read the update_engine.conf file."""
+    path = os.path.join(self.tempdir, 'etc', 'update_engine.conf')
+    osutils.WriteFile(path,'PAYLOAD_VERSION=2\nPAYLOAD_MINOR_VERSION=6\n',
+                      makedirs=True)
+
+    self.assertEqual(utils.ReadMinorVersion(self.tempdir), '6')
+
   def testMassiveMemoryConsumptionSemaphore(self):
     """Tests that we block on not having enough memory."""
     # You should never get 2**64 bytes.

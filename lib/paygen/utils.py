@@ -9,9 +9,12 @@ import time
 import multiprocessing
 
 from collections import namedtuple
+from chromite.utils import key_value_store
 
 
 AcquireResult = namedtuple('AcquireResult', ['result', 'reason'])
+
+MINOR_VERSION = 'PAYLOAD_MINOR_VERSION'
 
 def ListdirFullpath(directory):
   """Return all files in a directory with full pathnames.
@@ -116,6 +119,21 @@ def ReadLsbRelease(sysroot):
 
   return lsb_release
 
+def ReadMinorVersion(sysroot: str):
+  """Reads the /etc/update_engine.conf file out of the given sysroot.
+
+  Args:
+    sysroot: The path to sysroot of an image to read
+      sysroot/etc/update_engine.conf
+
+  Returns:
+    The the minor version.
+  """
+  update_engine_conf = os.path.join(sysroot, 'etc', 'update_engine.conf')
+  versions = key_value_store.LoadFile(update_engine_conf)
+  if MINOR_VERSION in versions:
+    return versions.get(MINOR_VERSION)
+  return None
 
 class MemoryConsumptionSemaphore(object):
   """A semaphore that tries to acquire only if there is enough memory available.

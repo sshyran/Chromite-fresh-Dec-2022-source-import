@@ -30,6 +30,9 @@ def ParseArguments(argv):
   parser.add_argument('--extract', action='store_true',
                       help='If set, extract old/new kernel/rootfs to '
                            '[old|new]_[kern|root].dat. Useful for debugging.')
+  parser.add_argument('--minios', action='store_true',
+                      help='If set, extract the miniOS partition, otherwise '
+                           'extract the kernel and rootfs partitions.')
   parser.add_argument('--work-dir', type='path',
                       help='Path to a temporary directory in the chroot.')
   parser.add_argument('--payload', type='path',
@@ -57,4 +60,5 @@ def main(argv):
 
   return paygen_payload_lib.GenerateUpdatePayload(
       opts.tgt_image, opts.output, src_image=opts.src_image,
-      work_dir=opts.work_dir, private_key=opts.private_key, check=opts.check)
+      work_dir=opts.work_dir, private_key=opts.private_key, check=opts.check,
+      minios=opts.minios)

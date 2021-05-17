@@ -81,6 +81,7 @@ class PaygenPayload(object):
 
   _KERNEL = 'kernel'
   _ROOTFS = 'root'
+  _MINIOS = 'minios'
 
   def __init__(self,
                payload,
@@ -89,7 +90,8 @@ class PaygenPayload(object):
                verify=False,
                private_key=None,
                upload=True,
-               cache_dir=None):
+               cache_dir=None,
+               minios=None):
     """Init for PaygenPayload.
 
     Args:
@@ -109,13 +111,16 @@ class PaygenPayload(object):
                    private key and is used for verification.
       upload: Boolean saying if payload generation results should be uploaded.
       cache_dir: If passed, override the default cache dir (useful on bots).
+      minios: If passed, extract minios partition instead of root and kernel.
     """
     self.payload = payload
     self.work_dir = work_dir
     self._verify = verify
     self._private_key = private_key
     self._public_key = None
+    self._minor_version = None
     self._upload = upload
+    self._minios = minios
 
     self.src_image_file = os.path.join(work_dir, 'src_image.bin')
     self.tgt_image_file = os.path.join(work_dir, 'tgt_image.bin')
@@ -268,7 +273,7 @@ class PaygenPayload(object):
       image: The input image.
 
     Returns:
-      The release APPID of the image.
+      The release APPID of the image and the minor version.
     """
     # Mount the ROOT-A partition of the image. The reason we don't mount the
     # extracted partition directly is that if by mistake/bug the mount changes
@@ -290,7 +295,20 @@ class PaygenPayload(object):
           logging.error('APPID is missing in board %s. In some boards that do '
                         'not do auto updates, like amd64-generic, this is '
                         'expected, otherwise this is an error.', board)
-        return app_id
+        minor_version = None
+        if self._minios:
+          # Update APPID for miniOS partition.
+          if app_id:
+            app_id += '_minios'
+            logging.debug('APPID for miniOS partition is %s', app_id)
+          if self.payload.src_image:
+            # Get minor version for delta miniOS payloads.
+            minor_version = utils.ReadMinorVersion(sysroot_dir)
+            if not minor_version:
+              raise Error('Unable to extract minor version from source image')
+            logging.info('Minor version extracted from source: %s',
+                         minor_version)
+        return app_id, minor_version
 
   def _PreparePartitions(self):
     """Prepares parameters related to partitions of the given image.
@@ -319,32 +337,52 @@ class PaygenPayload(object):
 
     elif tgt_image_type == partition_lib.CROS_IMAGE:
       logging.info('Detected a Chromium OS image.')
-
-      self.partition_names = (self._ROOTFS, self._KERNEL)
-      self.tgt_partitions = tuple(os.path.join(self.work_dir,
-                                               'tgt_%s.bin' % name)
-                                  for name in self.partition_names)
-      self.src_partitions = tuple(os.path.join(self.work_dir,
-                                               'src_%s.bin' % name)
-                                  for name in self.partition_names)
-
-      partition_lib.ExtractRoot(self.tgt_image_file, self.tgt_partitions[0])
-      partition_lib.ExtractKernel(self.tgt_image_file, self.tgt_partitions[1])
-      if self.payload.src_image:
-        partition_lib.ExtractRoot(self.src_image_file, self.src_partitions[0])
-        partition_lib.ExtractKernel(self.src_image_file, self.src_partitions[1])
+      if self._minios:
+        logging.info('Extracting the MINIOS partition.')
+        self.partition_names = (self._MINIOS,)
+        self._GetPartitionFiles()
+        partition_lib.ExtractMiniOS(self.tgt_image_file, self.tgt_partitions[0])
+        if self.payload.src_image:
+          partition_lib.ExtractMiniOS(self.src_image_file,
+                                      self.src_partitions[0])
+      else:
+        self.partition_names = (self._ROOTFS, self._KERNEL)
+        self._GetPartitionFiles()
+        partition_lib.ExtractRoot(self.tgt_image_file, self.tgt_partitions[0])
+        partition_lib.ExtractKernel(self.tgt_image_file, self.tgt_partitions[1])
+        if self.payload.src_image:
+          partition_lib.ExtractRoot(self.src_image_file,
+                                    self.src_partitions[0])
+          partition_lib.ExtractKernel(self.src_image_file,
+                                      self.src_partitions[1])
+        # Makes sure we have generated postinstall config for major version 2
+        # and platform image.
+        self._GeneratePostinstConfig(True)
 
       # This step should be done after extracting partitions, look at the
       # _GetPlatformImageParams() documentation for more info.
-      self._appid = self._GetPlatformImageParams(self.tgt_image_file)
+      if self.payload.src_image:
+        self._appid, self._minor_version = (
+          self._GetPlatformImageParams(self.src_image_file))
+      else :
+        # Full payloads do not need the minor version and should use the target
+        # image.
+        self._appid, _ = self._GetPlatformImageParams(self.tgt_image_file)
+
       # Reset the target image file path so no one uses it later.
       self.tgt_image_file = None
 
-      # Makes sure we have generated postinstall config for major version 2 and
-      # platform image.
-      self._GeneratePostinstConfig(True)
     else:
       raise Error('Invalid image type %s' % tgt_image_type)
+
+  def _GetPartitionFiles(self):
+    """Creates the target and source file paths for each partition."""
+    self.tgt_partitions = tuple(os.path.join(self.work_dir,
+                                             'tgt_%s.bin' % name)
+                                for name in self.partition_names)
+    self.src_partitions = tuple(os.path.join(self.work_dir,
+                                             'src_%s.bin' % name)
+                                for name in self.partition_names)
 
   def _RunGeneratorCmd(self, cmd, squawk_wrap=False):
     """Wrapper for run in chroot.
@@ -531,6 +569,10 @@ class PaygenPayload(object):
     if self.payload.src_image:
       cmd += ['--old_partitions=' +
               ':'.join(path_util.ToChrootPath(x) for x in self.src_partitions)]
+
+    if self._minios and self._minor_version:
+      cmd += ['--minor_version=' + self._minor_version]
+
 
     # This can take a very long time with no output, so wrap the call.
     self._RunGeneratorCmd(cmd, squawk_wrap=True)
@@ -982,7 +1024,7 @@ def CreateAndUploadPayload(payload, sign=True, verify=True):
 
 
 def GenerateUpdatePayload(tgt_image, payload, src_image=None, work_dir=None,
-                          private_key=None, check=None):
+                          private_key=None, check=None, minios=None):
   """Generates output payload and verifies its integrity if needed.
 
   Args:
@@ -994,6 +1036,8 @@ def GenerateUpdatePayload(tgt_image, payload, src_image=None, work_dir=None,
         responsibility to cleanup this directory after this function returns.
     private_key: The private key to sign the payload.
     check: If True, it will check the integrity of the generated payload.
+    minios: If True, extract the minios partition instead of root and
+        kernel.
   """
   if path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_REPO:
     raise Error('Need a chromeos checkout to generate payloads.')
@@ -1005,7 +1049,8 @@ def GenerateUpdatePayload(tgt_image, payload, src_image=None, work_dir=None,
   with chroot_util.TempDirInChroot() as temp_dir:
     work_dir = work_dir if work_dir is not None else temp_dir
     paygen = PaygenPayload(payload, work_dir, sign=private_key is not None,
-                           verify=check, private_key=private_key)
+                           verify=check, private_key=private_key,
+                           minios=minios)
     paygen.Run()
 
 

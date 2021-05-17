@@ -118,6 +118,16 @@ def ExtractRoot(image, root_out, truncate=True):
     raise IOError('Error truncating the rootfs to filesystem size.')
 
 
+def ExtractMiniOS(image, minios_out):
+  """Extract the minios partition from a gpt image.
+
+  Args:
+    image: The input image file.
+    minios_out: The output minios partition file.
+  """
+  ExtractPartition(image, constants.PART_MINIOS_A, minios_out)
+
+
 def IsSquashfsImage(image):
   """Returns true if the image is detected to be Squashfs."""
   try:
