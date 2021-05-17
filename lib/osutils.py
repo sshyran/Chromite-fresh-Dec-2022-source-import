@@ -225,11 +225,12 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
     # We have the right permissions, simply write the file in python.
     write_path = path
     if atomic:
-      write_path = path + '.tmp'
+      write_path = tempfile.NamedTemporaryFile(prefix=path, delete=False).name
     with open(write_path, mode) as f:
       f.writelines(write_wrapper(cros_build_lib.iflatten_instance(content)))
-    if atomic or chmod is not None:
-      os.chmod(write_path, get_existing_perms(path) if chmod is None else chmod)
+      if atomic or chmod is not None:
+        os.fchmod(
+            f.fileno(), get_existing_perms(path) if chmod is None else chmod)
 
     if not atomic:
       return
