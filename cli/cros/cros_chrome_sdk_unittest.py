@@ -40,8 +40,7 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.ChromeSDKCommand'
   TARGET_CLASS = cros_chrome_sdk.ChromeSDKCommand
   COMMAND = 'chrome-sdk'
-  ATTRS = (('_SetupEnvironment', '_CreateLdSymlinks') +
-           command_unittest.MockCommand.ATTRS)
+  ATTRS = ('_SetupEnvironment',) + command_unittest.MockCommand.ATTRS
 
   def __init__(self, *args, **kwargs):
     command_unittest.MockCommand.__init__(self, *args, **kwargs)
@@ -51,9 +50,6 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
     env = self.backup['_SetupEnvironment'](*args, **kwargs)
     self.env = copy.deepcopy(env)
     return env
-
-  def _CreateLdSymlinks(self, *args):
-    pass
 
 
 class ParserTest(cros_test_lib.MockTempDirTestCase):

@@ -1106,22 +1106,6 @@ class ChromeSDKCommand(command.CliCommand):
     env['CXX_host'] = os.path.join(chrome_clang_path, 'clang++')
     env['LD_host'] = env['CXX_host']
 
-  def _CreateLdSymlinks(self, toolchain_dir):
-    """Create ld and ld.bfd symlinks in the toolchain dir.
-
-    A NaCl build script attempts to find the ld.bfd linker at build-time. To
-    appease it, try creating links at the expected locations so the build can
-    continue. See crbug.com/1182224 for details.
-    """
-    if not os.path.exists(os.path.join(toolchain_dir, 'ld.bfd')):
-      # Try to look for a suitable ld.bfd bin.
-      for tool in os.listdir(toolchain_dir):
-        if tool.endswith('-ld.bfd'):
-          osutils.SafeSymlink(tool, os.path.join(toolchain_dir, 'ld.bfd'))
-    if not os.path.exists(os.path.join(toolchain_dir, 'ld')):
-      # Just point ld to ld.lld. Should work?
-      osutils.SafeSymlink('ld.lld', os.path.join(toolchain_dir, 'ld'))
-
   def _AbsolutizeBinaryPath(self, binary, tc_path):
     """Modify toolchain path for goma build.
 
@@ -1256,10 +1240,6 @@ class ChromeSDKCommand(command.CliCommand):
     # No need to adjust CFLAGS and CXXFLAGS for GN since the only
     # adjustment made in _SetupTCEnvironment is for split debug which
     # is done with 'use_debug_fission'.
-
-    # TODO(crbug.com/1182224): Remove this call when the toolchain's handling
-    # paths correctly itself.
-    self._CreateLdSymlinks(os.path.dirname(env['CC']))
 
     # Enable goma if requested.
     if not options.goma:
