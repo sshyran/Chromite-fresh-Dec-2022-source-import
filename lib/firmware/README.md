@@ -2,22 +2,30 @@
 
 ## Building
 To build the AP Firmware for foo:
-  cros build-ap -b foo
+  setup_board -b foo # if not set up yet
+  cros ap build -b foo
 
 To build the AP Firmware only for foo-variant:
-  cros build-ap -b foo --fw-name foo-variant
+  cros ap build -b foo --fw-name foo-variant
 
 ## Flashing
 Requires servod process to be running if flashing via servo
 
 To flash your zork DUT with an IP of 1.1.1.1 via SSH:
-  cros flash-ap -b zork -i /path/to/image.bin -d ssh://1.1.1.1
+  cros ap flash -b zork -i /path/to/image.bin -d ssh://1.1.1.1
 
 To flash your volteer DUT via SERVO on the default port (9999):
-  cros flash-ap -d servo:port -b volteer -i /path/to/image.bin
+  cros ap flash -d servo:port -b volteer -i /path/to/image.bin
 
 To flash your volteer DUT via SERVO on port 1234:
-  cros flash-ap -d servo:port:1234 -b volteer -i /path/to/image.bin
+  cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
+
+## Dumping config
+To dump AP config of all boards into /tmp/cros-read-ap-config.json
+  cros ap dump-config -o /tmp/cros-read-ap-config.json
+
+To dump AP config of drallion and dedede boards:
+  cros ap dump-config -o /tmp/cros-read-ap-config.json -b drallion,dedede
 
 ## Add support for new board
 Create ${BOARD}.py in chromite/lib/firmware/ap_firmware_config.

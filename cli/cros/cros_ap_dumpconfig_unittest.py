@@ -15,8 +15,8 @@ from chromite.lib.firmware import servo_lib
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-class CrosDumpApConfigTest(cros_test_lib.TempDirTestCase):
-  """Test calling `cros dump-ap-config` and doing some simple validity checking.
+class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
+  """Test calling `cros ap dump-config` and doing some simple validity checking.
 
   Confirm that json output file is readable, contains expected structure and
   non-empty fields.
@@ -25,7 +25,7 @@ class CrosDumpApConfigTest(cros_test_lib.TempDirTestCase):
   def testCrosConfigDump(self):
     """Run cros dump-ap-config, read the output, and check validity."""
     output_file = Path(self.tempdir) / 'tmp.json'
-    cmd = ['cros', 'dump-ap-config', '-o', str(output_file)]
+    cmd = ['cros', 'ap', 'dump-config', '-o', str(output_file)]
     cros_build_lib.run(cmd)
     with output_file.open(encoding='utf-8') as fp:
       result = json.load(fp)
