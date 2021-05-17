@@ -1,0 +1,11 @@
+{
+  "packages": [
+    {"package_name": "trace_events"}
+  ],
+  "sysroot": {
+    "buildTarget": {
+      "name": "atlas"
+    },
+    "path": "/build/atlas"
+  }
+}

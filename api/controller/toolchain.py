@@ -14,7 +14,9 @@ from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import cros_logging as logging
 from chromite.lib import toolchain_util
+from chromite.lib import chroot_util
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
+from chromite.scripts import tricium_cargo_clippy
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
 _TOOLCHAIN_ARTIFACT_HANDLERS = {
@@ -345,3 +347,43 @@ def UploadVettedAFDOArtifacts(input_proto, output_proto, _config):
   artifact_type = _NAMES_FOR_AFDO_ARTIFACTS[input_proto.artifact_type]
   output_proto.status = toolchain_util.UploadAndPublishVettedAFDOArtifacts(
       artifact_type, board)
+
+
+def _fetch_clippy_lints():
+  """Get lints created by Cargo Clippy during emerge."""
+  lints_dir = '/tmp/cargo_clippy'
+  # TODO(b/188578936): determine relevant files for file filter
+  file_filter = '/**/*'
+  findings = tricium_cargo_clippy.parse_files(lints_dir)
+  findings = tricium_cargo_clippy.filter_diagnostics(findings, file_filter)
+  findings_protos = []
+  for finding in findings:
+    location_protos = []
+    for location in finding.locations:
+      location_protos.append(
+          toolchain_pb2.LinterFindingLocation(
+              filepath=location.file_path,
+              line_start=location.line_start,
+              line_end=location.line_end
+          )
+      )
+    findings_protos.append(
+        toolchain_pb2.LinterFinding(
+            message=finding.message,
+            locations=location_protos
+        )
+    )
+  return findings_protos
+
+
+# TODO(b/188589668): add input validation
+def GetClippyLints(input_proto, output_proto, _config):
+  """Emerges the given packages and retrieves any findings from Cargo Clippy."""
+  chroot_util.Emerge(
+      [package.package_name for package in input_proto.packages],
+      sysroot=input_proto.sysroot.path,
+      with_deps=False,
+      rebuild_deps=True,
+      # TODO(b/188590586): consider setting jobs to emerge in parallel
+  )
+  output_proto.findings.extend(_fetch_clippy_lints())
