@@ -295,12 +295,12 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
 
   def test_parse_locations(self):
     """Tests that parse_locations is as expected."""
-    for i, (test_case, exp_results) in enumerate(valid_test_cases.items()):
+    for test_case, exp_results in valid_test_cases.items():
       if 'locations' not in exp_results:
         continue
       test_json = json.loads(test_case)
       locations = list(tricium_cargo_clippy.parse_locations(
-          'valid', i, test_json, exp_results['file_path']))
+          test_json, exp_results['file_path']))
       self.assertEqual(locations, exp_results['locations'])
 
   def test_parse_level(self):
@@ -397,3 +397,48 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
             f'Pattern {pattern} should not match case {case} but did. '
             f'Hint: generated regex was {re_pattern}'
         )
+
+  def test_filter_diagnostics(self):
+    file_filter = 'acceptable_filepath.json'
+    example_code_location = tricium_cargo_clippy.CodeLocation(
+        file_path=file_filter,
+        file_name=file_filter,
+        line_start=1,
+        line_end=4,
+        column_start=0,
+        column_end=12
+    )
+    accepted_diags = [
+        tricium_cargo_clippy.ClippyDiagnostic(
+            file_path=file_filter,
+            locations=[example_code_location],
+            level='warning',
+            message='warning: be warned.'
+        )
+    ]
+    ignored_diags = [
+        # File filter not matched
+        tricium_cargo_clippy.ClippyDiagnostic(
+            file_path='not_a_match.json',
+            locations=[example_code_location],
+            level='warning',
+            message='warning: be warned.'
+        ),
+        # "aborting due to previous error" messages
+        tricium_cargo_clippy.ClippyDiagnostic(
+            file_path=file_filter,
+            locations=[example_code_location],
+            level='warning',
+            message='warning: aborting due to previous error...'
+        ),
+        # No locations provided
+        tricium_cargo_clippy.ClippyDiagnostic(
+            file_path=file_filter,
+            locations=[],
+            level='warning',
+            message='warning: 6 warnings emitted.'
+        )
+    ]
+    filtered_diags = list(tricium_cargo_clippy.filter_diagnostics(
+        accepted_diags + ignored_diags, file_filter))
+    self.assertEqual(filtered_diags, accepted_diags)

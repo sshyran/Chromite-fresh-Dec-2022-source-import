@@ -108,8 +108,6 @@ def parse_file_path(
 
 
 def parse_locations(
-    src: Text,
-    src_line: int,
     orig_json: Dict[Text, Any],
     file_path: Text) -> Iterable['CodeLocation']:
   """The code locations associated with this diagnostic as an iter.
@@ -119,8 +117,6 @@ def parse_locations(
   locations specified.
 
   Args:
-    src: Name of the file orig_json was found in.
-    src_line: Line number where orig_json was found.
     orig_json: An iterable of clippy entries in original json.
     file_path: A resolved path to the original source location.
 
@@ -134,9 +130,6 @@ def parse_locations(
   children = orig_json.get('message', {}).get('children', [])
   for child in children:
     spans = spans + child.get('spans', [])
-  if not spans:
-    raise CargoClippyFieldError(src, src_line, 'locations')
-
   locations = set()
   for span in spans:
     location = CodeLocation(
@@ -228,7 +221,7 @@ def parse_diagnostics(
       continue
 
     file_path = parse_file_path(src, src_line, line_json)
-    locations = parse_locations(src, src_line, line_json, file_path)
+    locations = parse_locations(line_json, file_path)
     level = parse_level(src, src_line, line_json)
     message = parse_message(src, src_line, line_json)
 
@@ -256,13 +249,18 @@ def filter_diagnostics(
     diags: Iterable[ClippyDiagnostic],
     file_filter: Text) -> Iterable[ClippyDiagnostic]:
   """Filters diagnostics by file_path and message and validates schemas."""
-  # ignore redundant message: "aborting due to previous error..."
-  abort_prev = 'aborting due to previous error'
-  # only include diagnostics if their file path matches the file_filter
-  include_file = include_file_pattern(file_filter).fullmatch
-  yield from (
-      diag for diag in diags
-      if include_file(diag.file_path) and abort_prev not in diag.message)
+  for diag in diags:
+    # only include diagnostics if their file path matches the file_filter
+    if not include_file_pattern(file_filter).fullmatch(diag.file_path):
+      continue
+    # ignore redundant messages: "aborting due to previous error..."
+    if 'aborting due to previous error' in diag.message:
+      continue
+    # findings with no location are never useful
+    if not diag.locations:
+      continue
+    yield diag
+
 
 
 def include_file_pattern(file_filter: Text) -> 're.Pattern':
