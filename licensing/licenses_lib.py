@@ -28,6 +28,21 @@ from chromite.lib.parser import package_info
 try:
   # pylint: disable=wrong-import-order
   import yaml
+
+  class SaferLoader(yaml.SafeLoader):
+    """Augment the yaml.SafeLoader with unicode and tuple types."""
+    def construct_tuple(self, node):
+      return tuple(self.construct_sequence(node))
+    def construct_unicode(self, node):
+      return node.value
+
+  SaferLoader.add_constructor(
+      'tag:yaml.org,2002:python/tuple',
+      SaferLoader.construct_tuple)
+  SaferLoader.add_constructor(
+      'tag:yaml.org,2002:python/unicode',
+      SaferLoader.construct_unicode)
+
 except ImportError:
   yaml = None
 
@@ -1126,7 +1141,7 @@ class Licensing(object):
   def _LoadLicenseDump(self, pkg):
     save_file = pkg.license_dump_path
     logging.debug('Getting license from %s for %s', save_file, pkg.name)
-    yaml_dump = yaml.load(osutils.ReadFile(save_file))
+    yaml_dump = yaml.load(osutils.ReadFile(save_file), Loader=SaferLoader)
     for key, value in yaml_dump:
       pkg.__dict__[key] = value
 
