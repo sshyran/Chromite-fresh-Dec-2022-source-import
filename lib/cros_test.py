@@ -482,8 +482,12 @@ class CrOSTest(object):
     osutils.SafeMakedirs(self.results_dest_dir)
     for src in self.results_src:
       logging.info('Fetching %s to %s', src, self.results_dest_dir)
+      # Don't raise an error if the filepath doesn't exist on the device since
+      # some log/crash directories are only created under certain conditions.
+      # e.g. When a user logs in.
       self._device.remote.CopyFromDevice(src=src, dest=self.results_dest_dir,
-                                         mode='scp', debug_level=logging.INFO)
+                                         mode='scp', debug_level=logging.INFO,
+                                         ignore_failures=True)
 
   def _RunDeviceCmd(self):
     """Run a command on the device.
