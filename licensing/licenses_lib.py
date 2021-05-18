@@ -1129,7 +1129,7 @@ class Licensing(object):
   def _LoadLicenseDump(self, pkg):
     save_file = pkg.license_dump_path
     logging.debug('Getting license from %s for %s', save_file, pkg.name)
-    yaml_dump = yaml.load(osutils.ReadFile(save_file))
+    yaml_dump = yaml.safe_load(osutils.ReadFile(save_file))
     for key, value in yaml_dump:
       pkg.__dict__[key] = value
 

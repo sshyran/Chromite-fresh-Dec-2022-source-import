@@ -361,7 +361,7 @@ Clang-tidy apparently crashed; dumping lots of invocation info:
                          f'{json_file}. Output:\n{meta.stdstreams}')
 
     with yaml_file.open('rb') as f:
-      yaml_data = yaml.load(f)
+      yaml_data = yaml.safe_load(f)
     return meta, list(parse_tidy_fixes_file(Path(meta.wd), yaml_data))
   except Exception:
     return ExceptionData()
@@ -486,8 +486,8 @@ def run_tidy(board: str, ebuild_list: List[portage_util.EBuild],
 
   results = set()
   # If clang-tidy dumps a lot of diags, it can take 1-10secs of CPU while
-  # holding the GIL to |yaml.load| on my otherwise-idle dev box. |yaml_pool|
-  # lets us do this in parallel.
+  # holding the GIL to |yaml.safe_load| on my otherwise-idle dev box.
+  # |yaml_pool| lets us do this in parallel.
   with multiprocessing.pool.Pool() as yaml_pool:
     for ebuild in ebuild_list:
       lint_tmpdir = generate_lints(board, ebuild.ebuild_path)

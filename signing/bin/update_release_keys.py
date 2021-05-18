@@ -51,7 +51,7 @@ class KeyringData(object):
     default = {'metadata-version': METADATA_VERSION}
     if os.path.exists(self.contents_yaml):
       with open(self.contents_yaml) as fp:
-        ret = yaml.load(fp)
+        ret = yaml.safe_load(fp)
       if not ret or 'metadata-version' not in ret:
         logging.error('%s: no metadata-version.', self.contents_yaml)
         raise KeyimportError('metadata-version missing.')
