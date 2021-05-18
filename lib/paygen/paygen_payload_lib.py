@@ -388,7 +388,7 @@ class PaygenPayload(object):
       inner_run_thread.start()
       # Wait for the inner run thread to finish, waking up each second.
       i = 1
-      while inner_run_thread.isAlive():
+      while inner_run_thread.is_alive():
         i += 1
         time.sleep(1)
         # Only report once an hour, otherwise we'd be too noisy.

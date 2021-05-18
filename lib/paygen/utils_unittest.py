@@ -226,7 +226,7 @@ class TestUtils(cros_test_lib.TempDirTestCase):
       mock_clock.add_time(0.1)
 
       # Maybe we can break early? (and waste some time for other threads).
-      threads_dead = [not x.isAlive() for x in threads]
+      threads_dead = [not x.is_alive() for x in threads]
       if all(threads_dead):
         break
 
