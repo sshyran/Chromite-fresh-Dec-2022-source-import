@@ -66,3 +66,10 @@ class CrosGenerateOsReleaseTest(cros_test_lib.TempDirTestCase):
                       'TEST2=bonjour',
                       'TEST3=hola'],
                      output)
+
+  def testDefaultsOnly(self):
+    """Make sure we always emit defaults even without any os-release.d frags."""
+    osutils.RmDir(self.osreleased)
+    cros_generate_os_release.GenerateOsRelease(self.tempdir, {'FOO': 'bar'})
+    self.assertExists(self.osrelease)
+    self.assertEqual('FOO=bar\n', osutils.ReadFile(self.osrelease))
