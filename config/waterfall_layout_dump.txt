@@ -383,6 +383,7 @@
     tael-release
     tatl-release
     terra-release
+    trogdor-arc-r-release
     trogdor-kernelnext-release
     trogdor-release
     trogdor-zephyr-release
@@ -1581,6 +1582,7 @@
     tael-release-tryjob
     tatl-release-tryjob
     terra-release-tryjob
+    trogdor-arc-r-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor-zephyr-release-tryjob
@@ -1929,6 +1931,12 @@
   terra-unittest-stress
   test-ap-group-tryjob
   tidus-factory-auron-6772.B-factorybranch-tryjob
+  trogdor-arc-r-full-tryjob
+  trogdor-arc-r-llvm-next-toolchain-tryjob
+  trogdor-arc-r-llvm-toolchain-tryjob
+  trogdor-arc-r-payloads-tryjob
+  trogdor-arc-r-release-tryjob
+  trogdor-arc-r-unittest-stress
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-kernelnext-full-tryjob
