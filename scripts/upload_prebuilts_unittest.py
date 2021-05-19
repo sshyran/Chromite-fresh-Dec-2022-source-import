@@ -119,7 +119,7 @@ class TestPrebuilt(cros_test_lib.MockTestCase):
   """Tests for Prebuilt logic."""
 
   def setUp(self):
-    self._base_local_path = '/b/cbuild/build/chroot/build/x86-dogfood/'
+    self._base_local_path = '/b/chromiumos/build/chroot/build/x86-dogfood/'
     self._gs_bucket_path = 'gs://chromeos-prebuilt/host/version'
     self._local_path = os.path.join(self._base_local_path, 'public1.tbz2')
 
