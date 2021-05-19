@@ -49,8 +49,8 @@ def _GetPylintrc(path):
   If not found - use the default.
   """
   path = os.path.realpath(path)
-  project_path = _GetProjectPath(path)
   parent = os.path.dirname(path)
+  project_path = _GetProjectPath(parent)
   while project_path and parent.startswith(project_path):
     pylintrc = os.path.join(parent, 'pylintrc')
     dotpylintrc = os.path.join(parent, '.pylintrc')
