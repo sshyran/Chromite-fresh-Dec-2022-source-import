@@ -330,8 +330,8 @@ class TryjobTestAdjustOptions(TryjobTest):
 
     cros_tryjob.AdjustOptions(options)
 
-    self.assertTrue(options.buildroot.endswith('/chromiumos'))
-    self.assertTrue(options.git_cache_dir.endswith('/chromiumos/.git_cache'))
+    self.assertTrue(options.buildroot.endswith('/cbuild'))
+    self.assertTrue(options.git_cache_dir.endswith('/cbuild/.git_cache'))
 
   def testCbuildbotExplicit(self):
     """Test explicit cbuildbot buildroot."""
