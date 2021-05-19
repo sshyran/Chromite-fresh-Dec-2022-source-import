@@ -2528,10 +2528,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       # After factory and firmware branches are created, the configuation of
       # this project should be removed.
       # --- start from here ---
-      'cheza-release': {
-          'sign_types': ['recovery', 'factory'],
-      },
-
       'dedede-release': {
           'sign_types': ['recovery', 'factory'],
       },
