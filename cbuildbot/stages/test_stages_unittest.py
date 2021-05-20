@@ -110,7 +110,7 @@ class HWTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     super(HWTestStageTest, self)._Prepare(bot_id, **kwargs)
 
     self.version = version or self.VERSION
-    self._run.options.log_dir = '/b/cbuild/mylogdir'
+    self._run.options.log_dir = '/b/chromiumos/mylogdir'
     self.suite_config = self.GetHWTestSuite()
     self.suite_config.warn_only = warn_only
     self.suite = self.suite_config.suite
