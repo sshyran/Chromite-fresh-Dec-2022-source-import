@@ -367,7 +367,7 @@ def AdjustOptions(options):
   """
   if options.where == CBUILDBOT:
     options.buildroot = options.buildroot or os.path.join(
-        os.path.dirname(constants.SOURCE_ROOT), 'chromiumos')
+        os.path.dirname(constants.SOURCE_ROOT), 'cbuild')
 
   if options.where == LOCAL:
     options.buildroot = options.buildroot or os.path.join(
