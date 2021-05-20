@@ -401,6 +401,7 @@
     wizpig-release
     zork-arc-r-release
     zork-borealis-release
+    zork-floss-release
     zork-kernelnext-release
     zork-release
   master-release-basic
@@ -1600,6 +1601,7 @@
     wizpig-release-tryjob
     zork-arc-r-release-tryjob
     zork-borealis-release-tryjob
+    zork-floss-release-tryjob
     zork-kernelnext-release-tryjob
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
@@ -2098,6 +2100,12 @@
   zork-borealis-unittest-stress
   zork-factory-zork-13427.B-factorybranch-tryjob
   zork-factory-zork-13700.B-factorybranch-tryjob
+  zork-floss-full-tryjob
+  zork-floss-llvm-next-toolchain-tryjob
+  zork-floss-llvm-toolchain-tryjob
+  zork-floss-payloads-tryjob
+  zork-floss-release-tryjob
+  zork-floss-unittest-stress
   zork-full-tryjob
   zork-kernelnext-full-tryjob
   zork-kernelnext-llvm-next-toolchain-tryjob
