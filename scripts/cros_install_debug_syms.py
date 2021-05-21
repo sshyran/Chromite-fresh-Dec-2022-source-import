@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +11,6 @@ The debug symbols are packaged outside of the prebuilt package in a
 builders). On local machines, separatedebug is not set and the debug symbols
 are part of the prebuilt package.
 """
-
-from __future__ import print_function
 
 import argparse
 import functools

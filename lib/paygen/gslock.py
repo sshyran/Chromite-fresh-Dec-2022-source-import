@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -27,8 +26,6 @@ them, which can be useful for debugging purposes.
 Note that lock files will be left behind forever if not explicitly cleaned up by
 the creating server.
 """
-
-from __future__ import print_function
 
 import datetime
 

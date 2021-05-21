@@ -203,8 +203,6 @@ file and return the file path rather than the message itself.
 
 `chromite/lib/hello_lib.py`
 ```python
-from __future__ import print_function
-
 import os
 
 from chromite.lib import osutils
@@ -221,8 +219,6 @@ Finally, let's update the controller to use the new fields in the request,
 and fix the hello_lib call now that it has a new signature.
 
 ```python
-from __future__ import print_function
-
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.gen.chromiumos import common_pb2

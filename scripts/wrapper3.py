@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ This takes care of creating a consistent environment for chromite scripts
 (like setting up import paths) so we don't have to duplicate the logic in
 lots of places.
 """
-
-from __future__ import print_function
 
 import importlib
 import importlib.abc

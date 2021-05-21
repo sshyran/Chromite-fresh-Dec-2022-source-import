@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ See the following doc link for an explanation of conftest.py and how it is used
 by pytest:
 https://docs.pytest.org/en/latest/fixture.html#conftest-py-sharing-fixture-functions
 """
-
-from __future__ import print_function
 
 import pytest
 

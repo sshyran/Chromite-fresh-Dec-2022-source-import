@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,8 +19,6 @@ Note: The --image argument can be a path or a basename. When a basename is
       Consequently, `./image_name.bin` and `image_name.bin` are treated
       very differently.
 """
-
-from __future__ import print_function
 
 import re
 import sys

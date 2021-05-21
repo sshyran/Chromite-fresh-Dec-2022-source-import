@@ -4,8 +4,6 @@
 
 """Hook to stop people from running `git cl`."""
 
-from __future__ import print_function
-
 import sys
 
 

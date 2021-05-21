@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ The tests themselves may vary, as may the harness used to manage the VM.
 But they all share some common operations around creating the VM image,
 archiving results and VM images in case of failure.
 """
-
-from __future__ import print_function
 
 import datetime
 import os

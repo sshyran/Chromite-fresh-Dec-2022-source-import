@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,8 +12,6 @@ This is needed for two reasons:
      transfer needs to be restarted from scratch. Ensuring that the
      file is deleted between each retry helps handle that eventuality.
 """
-
-from __future__ import print_function
 
 import shutil
 import sys

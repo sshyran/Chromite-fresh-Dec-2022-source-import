@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ In particular, this in combination w/ enter_chroot's mount binding, allows
 us to access the same repo from inside and outside a chroot at the same time
 """
 
-from __future__ import print_function
-
 __all__ = ('RebuildRepoCheckout',)
 
 import errno
@@ -18,7 +15,6 @@ import math
 import os
 import shutil
 import sys
-
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib

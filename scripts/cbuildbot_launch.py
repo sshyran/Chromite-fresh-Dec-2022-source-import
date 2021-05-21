@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,8 +12,6 @@ script will use 'main'.
 Among other things, this allows us to invoke build configs that exist on a given
 branch, but not on TOT.
 """
-
-from __future__ import print_function
 
 import base64
 import functools

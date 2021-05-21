@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ This script need only be used to upload release builds symbols or to debug
 crashes on non-release builds (in which case try to only upload the symbols
 for those executables involved).
 """
-
-from __future__ import print_function
 
 import itertools
 import json

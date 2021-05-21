@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ located where. At the moment, this module provides a default key-value api via
 the |topology| member, and a cidb-backed store to provide environment-specific
 overrides of the default values.
 """
-
-from __future__ import print_function
 
 import collections
 import sys

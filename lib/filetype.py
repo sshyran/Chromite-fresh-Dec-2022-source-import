@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,8 +19,6 @@ The purpose of this module is to provide a file type that splits the contents
 of a Chromium OS build in small buckets, partitioning cases where other standard
 classifications keep in the same set.
 """
-
-from __future__ import print_function
 
 import itertools
 import mmap

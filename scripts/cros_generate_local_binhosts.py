@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 Generates a file that sets the specified board's binhosts to include all of the
 other compatible boards in this buildroot.
 """
-
-from __future__ import print_function
 
 import collections
 import glob

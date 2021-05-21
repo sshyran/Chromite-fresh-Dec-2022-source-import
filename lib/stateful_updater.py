@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,8 +10,6 @@ on the device into var_new and dev_image_new directories. Optinonally, you can
 ask this module to reset a stateful partition by preparing it to be clobbered on
 reboot.
 """
-
-from __future__ import print_function
 
 import os
 import sys

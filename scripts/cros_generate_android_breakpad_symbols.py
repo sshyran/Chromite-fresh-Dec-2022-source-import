@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 This script takes expanded crash symbols published by the Android build, and
 converts them to breakpad format.
 """
-
-from __future__ import print_function
 
 import multiprocessing
 import os

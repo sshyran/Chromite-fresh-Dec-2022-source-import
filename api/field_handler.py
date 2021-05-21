@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 The field handlers are meant to parse information from or do some other generic
 action for a specific field type for the build_api script.
 """
-
-from __future__ import print_function
 
 import contextlib
 import functools

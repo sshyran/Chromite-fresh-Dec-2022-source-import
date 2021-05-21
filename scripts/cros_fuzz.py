@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -40,8 +39,6 @@ Note that cros_fuzz will print every shell command it runs if you set the
 log-level to debug ("--log-level debug"). Otherwise it will print commands that
 fail.
 """
-
-from __future__ import print_function
 
 import os
 import shutil

@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test cros_generate_os_release."""
-
-from __future__ import print_function
 
 import os
 import sys

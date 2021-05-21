@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ account for local changes that may not already be available remotely; for any
 commits that aren't already reachable from the upstream tracking branch, push
 refs to the remotes so that this snapshot can be reproduced remotely.
 """
-
-from __future__ import print_function
 
 import os
 import sys

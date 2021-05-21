@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 Test script runs a long time stressing the ability to start and stop the
 dev_server_wrapper. Even very rare hangs will cause significant build flake.
 """
-
-from __future__ import print_function
 
 import sys
 

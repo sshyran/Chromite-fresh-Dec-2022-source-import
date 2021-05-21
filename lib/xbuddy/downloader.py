@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Downloaders used to download artifacts and files from a given source."""
-
-from __future__ import print_function
 
 import collections
 import glob

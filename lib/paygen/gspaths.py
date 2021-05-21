@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -14,8 +13,6 @@ This includes definitions for various build flags:
   Example file paths:
     gs://chromeos-releases/blah-channel/board-name/1.2.3/payloads/LOCK_flag
 """
-
-from __future__ import print_function
 
 import os
 import re

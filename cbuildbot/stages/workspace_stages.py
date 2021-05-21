@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,8 +17,6 @@ A secondary workspace may not be inside an existing ChromeOS repo checkout.
 Also, the initial sync will usually take about 40 minutes, so performance should
 be considered carefully.
 """
-
-from __future__ import print_function
 
 import os
 import re

@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the retry_util module."""
-
-from __future__ import print_function
 
 import functools
 import itertools
@@ -196,7 +193,6 @@ class TestRetries(cros_test_lib.MockTempDirTestCase):
     }
     osutils.WriteFile(
         path,
-        'from __future__ import print_function\n'
         'import sys\n'
         'val = int(open(%(store)r).read())\n'
         'stop_val = int(open(%(stop)r).read())\n'

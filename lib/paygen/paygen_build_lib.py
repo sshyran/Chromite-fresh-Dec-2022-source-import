@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,8 +10,6 @@ need to be generated. It then calls paygen_payload to generate each payload.
 This library is reponsible for locking builds during processing, and checking
 and setting flags to show that a build has been processed.
 """
-
-from __future__ import print_function
 
 import functools
 import json

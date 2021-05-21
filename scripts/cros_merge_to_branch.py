@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -34,8 +33,6 @@ For more information on how to do this yourself you can go here:
 https://dev.chromium.org/chromium-os/how-tos-and-troubleshooting/working-on-a-br\
 anch
 """
-
-from __future__ import print_function
 
 import errno
 import os

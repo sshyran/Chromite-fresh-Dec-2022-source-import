@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ last known good commit. Moving an ebuild to 'live' (via cros_workon start)
 is intended to support development. The current source tip is fetched,
 source modified and built using the unstable 'live' (9999) ebuild.
 """
-
-from __future__ import print_function
 
 import sys
 

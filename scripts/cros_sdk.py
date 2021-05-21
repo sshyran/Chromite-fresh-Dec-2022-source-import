@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,8 +10,6 @@ to an interactive bash shell within the chroot.
 
 If given args those are passed to the chroot environment, and executed.
 """
-
-from __future__ import print_function
 
 import argparse
 import glob

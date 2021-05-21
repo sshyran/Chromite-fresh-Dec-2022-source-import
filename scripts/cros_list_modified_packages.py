@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,8 +19,6 @@ Some caveats:
   - Portage only stores the time that a package finished building, so we
     aren't able to detect when users modify source code during builds.
 """
-
-from __future__ import print_function
 
 import errno
 import multiprocessing

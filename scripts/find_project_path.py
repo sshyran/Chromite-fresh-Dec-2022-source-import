@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ Uses both a project name and a branch name to search the manifest file for a
 matching path entry, printing the path to stdout if found and raising an
 exception if no match can be found.
 """
-
-from __future__ import print_function
 
 import sys
 

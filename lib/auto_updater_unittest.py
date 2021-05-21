@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +11,6 @@ The main parts of unittest include:
   4. test reboot and verify method in ChromiumOSUpdater.
   5. test error raising in ChromiumOSUpdater.
 """
-
-from __future__ import print_function
 
 import json
 import os

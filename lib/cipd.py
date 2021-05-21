@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 CIPD is the Chrome Infra Package Deployer, a simple method of resolving a
 package/version into a GStorage link and installing them.
 """
-
-from __future__ import print_function
 
 import hashlib
 import json

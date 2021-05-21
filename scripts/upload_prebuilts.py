@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
  # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -17,8 +16,6 @@ upload_prebuilts -p /b/cbuild/build -s -u gs://chromeos-prebuilt
 Example of uploading x86-dogfood binhosts to Google Storage:
 upload_prebuilts -b x86-dogfood -p /b/cbuild/build/ -u gs://chromeos-prebuilt -g
 """
-
-from __future__ import print_function
 
 import argparse
 import datetime

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -27,8 +26,6 @@ ChromiumOSUpdater includes:
   * Disable rootfs verification in device if it's required.
   * Post-check stateful/rootfs update/whole update.
 """
-
-from __future__ import print_function
 
 import json
 import os

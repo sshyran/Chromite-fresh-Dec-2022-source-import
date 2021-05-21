@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,8 +19,6 @@ Notes:
   chromeos_config.BranchScheduleConfig()
 """
 # pylint: enable=line-too-long
-
-from __future__ import print_function
 
 import sys
 

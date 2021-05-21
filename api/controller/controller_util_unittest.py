@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """controller_util unittests."""
-
-from __future__ import print_function
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -14,8 +13,6 @@ Returns chrome-base/chromeos-chrome-8.0.552.0_alpha_r1
 
 emerge-x86-generic =chrome-base/chromeos-chrome-8.0.552.0_alpha_r1
 """
-
-from __future__ import print_function
 
 import base64
 import distutils.version  # pylint: disable=import-error,no-name-in-module

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 This pushes files from the archive bucket to the signer bucket and marks
 artifacts for signing (which a signing process will look for).
 """
-
-from __future__ import print_function
 
 import getpass
 import os

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,8 +12,6 @@ servo version is connected and uses that to flash the AP firmware. Right now
 this script only works with octopus, grunt, wilco, and hatch devices but will
 be extended to support more in the future.
 """
-
-from __future__ import print_function
 
 import importlib
 import os

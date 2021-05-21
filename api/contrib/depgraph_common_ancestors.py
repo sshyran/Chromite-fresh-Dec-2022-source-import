@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -23,8 +22,6 @@ $> ./gen_call_scripts --board=betty
 $> ./call_scripts/dependency__get_build_dependency_graph
 $> ./depgraph_common_inheritance dev-libs/libxml2 app-text/docbook-xml-dtd
 """
-
-from __future__ import print_function
 
 import copy
 import json

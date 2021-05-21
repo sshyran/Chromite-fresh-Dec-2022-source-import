@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +11,6 @@ The base MessageHandler class encapsulates the functionality of reading
 a file containing serialized data into a protobuf message instance, and
 writing serialized data from a message instance out to a file.
 """
-
-from __future__ import print_function
 
 import os
 import sys

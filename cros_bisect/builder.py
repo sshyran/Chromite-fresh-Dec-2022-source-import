@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ It defines methods which builder should support: SetUp(), Build(), Deploy(),
 SyncToHead(). Also, it sets up basic data members based on given options:
 base_dir, board, and reuse_repo. And repo_dir is derived from base_dir.
 """
-
-from __future__ import print_function
 
 import os
 

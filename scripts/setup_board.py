@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ several configuration files, sets up portage command wrappers and configs,
 and installs the toolchain and some core dependency packages (e.g. kernel
 headers, gcc-libs).
 """
-
-from __future__ import print_function
 
 import argparse
 import sys

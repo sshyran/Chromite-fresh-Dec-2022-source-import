@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for cros_install_debug_syms.py"""
-
-from __future__ import print_function
 
 from collections import namedtuple
 import os

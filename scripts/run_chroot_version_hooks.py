@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,8 +10,6 @@ the toolchain and some other packages on the chroot. The `update_chroot` script
 also calls this script. The chroot version and installed package versions are
 not strongly correlated.
 """
-
-from __future__ import print_function
 
 import sys
 

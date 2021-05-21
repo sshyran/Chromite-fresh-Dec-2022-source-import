@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 Documentation on this script is also available here:
   https://dev.chromium.org/chromium-os/licensing
 """
-
-from __future__ import print_function
 
 import codecs
 import html

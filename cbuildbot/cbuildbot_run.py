@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,8 +19,6 @@ will all share the same _BuilderRunBase *object*.  This means, for example,
 that run attributes (e.g. self.attrs.release_tag) are shared between them
 all, as intended.
 """
-
-from __future__ import print_function
 
 import functools
 import os

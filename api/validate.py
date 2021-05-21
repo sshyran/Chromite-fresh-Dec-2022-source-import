@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ set config option that allows the mock call decorators to be placed before or
 after the validation decorators, rather than forcing an ordering that could then
 produce incorrect outputs if missed.
 """
-
-from __future__ import print_function
 
 import functools
 import os

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2010 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,7 +7,6 @@
 This produces JSON output for other tools to process.
 """
 
-from __future__ import print_function
 from __future__ import absolute_import
 
 import sys

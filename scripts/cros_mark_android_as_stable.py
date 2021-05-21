@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -17,8 +16,6 @@ Returns chromeos-base/android-container-pi-6417892-r1
 
 emerge-eve =chromeos-base/android-container-pi-6417892-r1
 """
-
-from __future__ import print_function
 
 import filecmp
 import glob

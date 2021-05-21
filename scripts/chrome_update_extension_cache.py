@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -19,8 +18,6 @@ Also you need to regenerate the Manifest with the new tarball digest.
 Run inside the chroot:
 $ ebuild chromeos-default-apps-1.0.0.ebuild manifest --force
 """
-
-from __future__ import print_function
 
 import json
 import os

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,8 +11,6 @@ Usage:
 This script is a simple wrapper around emerge that handles legacy command line
 arguments as well as setting reasonable defaults for parallelism.
 """
-
-from __future__ import print_function
 
 import argparse
 import multiprocessing

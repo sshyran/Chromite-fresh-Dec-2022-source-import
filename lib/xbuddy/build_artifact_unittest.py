@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 These unit tests take tarball from google storage locations to fully test
 the artifact download process. Please make sure to set up your boto file.
 """
-
-from __future__ import print_function
 
 import itertools
 import os

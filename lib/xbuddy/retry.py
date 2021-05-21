@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,8 +9,6 @@ This implementation removes the timeout feature as that requires the retry to
 be done in main thread. For devserver, the call is handled in a thread kicked
 off by cherrypy, so timeotu can't be supported.
 """
-
-from __future__ import print_function
 
 import random
 import sys

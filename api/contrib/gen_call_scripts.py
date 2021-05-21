@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -19,8 +18,6 @@ script and the Build API itself, respectively.
 https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/contrib/README.md
 https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/README.md
 """
-
-from __future__ import print_function
 
 import os
 import re
