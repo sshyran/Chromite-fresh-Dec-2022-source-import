@@ -8,12 +8,11 @@ import io
 
 import googleapiclient.discovery
 import googleapiclient.http
-import httplib2  # pylint: disable=import-error
-
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib.xbuddy import retry
+from chromite.third_party import httplib2
 
 try:
   from oauth2client.client import SignedJwtAssertionCredentials

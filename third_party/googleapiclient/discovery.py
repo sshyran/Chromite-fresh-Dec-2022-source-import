@@ -49,7 +49,7 @@ import os
 import re
 
 # Third-party imports
-import httplib2
+from chromite.third_party import httplib2
 from chromite.third_party import uritemplate
 
 # Local imports

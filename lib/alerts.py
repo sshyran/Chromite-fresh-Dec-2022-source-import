@@ -23,11 +23,11 @@ from email.mime.text import MIMEText
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
+from chromite.third_party import httplib2
 
 # TODO(fdeng): Cleanup the try-catch once crbug.com/482063 is fixed.
 try:
   # pylint: disable=wrong-import-order
-  import httplib2
   from googleapiclient.discovery import build as apiclient_build
   from googleapiclient import errors as apiclient_errors
   from oauth2client import file as oauth_client_fileio

@@ -19,7 +19,6 @@ import sys
 import urllib.parse
 import warnings
 
-import httplib2
 try:
   from oauth2client import gce
 except ImportError:  # Newer oauth2client versions put it in .contrib
@@ -28,11 +27,12 @@ except ImportError:  # Newer oauth2client versions put it in .contrib
 
 from chromite.lib import auth
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from chromite.lib import cros_build_lib
+from chromite.third_party import httplib2
 from chromite.utils import memoize
 
 

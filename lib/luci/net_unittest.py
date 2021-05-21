@@ -7,12 +7,12 @@
 import sys
 import unittest
 
-import httplib2
-
 from chromite.lib import auth
 from chromite.lib import cros_logging as logging
 from chromite.lib.luci import net
 from chromite.lib.luci.test_support import test_case, test_env
+from chromite.third_party import httplib2
+
 
 test_env.setup_test_env()
 

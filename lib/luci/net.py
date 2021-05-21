@@ -9,11 +9,10 @@
 
 import urllib.parse
 
-import httplib2
-
 from chromite.lib import auth
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
+from chromite.third_party import httplib2
 
 
 def httprequest(http, **kwargs):

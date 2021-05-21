@@ -31,7 +31,7 @@ from six.moves.urllib.parse import urlparse, urlunparse, quote, unquote
 import base64
 import copy
 import gzip
-import httplib2
+from chromite.third_party import httplib2
 import json
 import logging
 import mimetypes

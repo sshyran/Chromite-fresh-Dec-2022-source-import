@@ -161,7 +161,7 @@ HOP_BY_HOP = [
     "upgrade",
 ]
 
-from httplib2 import certs
+from . import certs
 CA_CERTS = certs.where()
 
 # PROTOCOL_TLS is python 3.5.3+. PROTOCOL_SSLv23 is deprecated.

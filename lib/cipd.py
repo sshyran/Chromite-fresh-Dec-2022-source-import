@@ -15,13 +15,12 @@ import pprint
 import tempfile
 import urllib.parse
 
-import httplib2
-
-import chromite.lib.cros_logging as log
 from chromite.lib import cache
+from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import cros_build_lib
+import chromite.lib.cros_logging as log
+from chromite.third_party import httplib2
 from chromite.utils import memoize
 
 

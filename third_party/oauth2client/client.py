@@ -32,7 +32,7 @@ import shutil
 import six
 from six.moves import urllib
 
-import httplib2
+from chromite.third_party import httplib2
 from oauth2client import GOOGLE_AUTH_URI
 from oauth2client import GOOGLE_DEVICE_URI
 from oauth2client import GOOGLE_REVOKE_URI

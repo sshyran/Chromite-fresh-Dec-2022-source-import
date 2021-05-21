@@ -5,13 +5,12 @@
 
 import os
 
-import httplib2
-
 from chromite.lib import cipd
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import retry_util
 from chromite.lib import path_util
+from chromite.lib import retry_util
+from chromite.third_party import httplib2
 
 
 REFRESH_STATUS_CODES = [401]

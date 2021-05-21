@@ -8,7 +8,7 @@ import json
 import logging
 import socket
 
-import httplib2
+from chromite.third_party import httplib2
 
 from googleapiclient import errors
 from infra_libs import httplib2_utils

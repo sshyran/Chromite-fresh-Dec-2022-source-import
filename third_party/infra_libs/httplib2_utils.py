@@ -11,7 +11,7 @@ import re
 import socket
 import time
 
-import httplib2
+from chromite.third_party import httplib2
 import oauth2client.client
 import six
 from six.moves import http_client as httplib

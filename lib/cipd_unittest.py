@@ -7,12 +7,11 @@
 import hashlib
 import json
 
-import httplib2
-
 from chromite.lib import cipd
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.third_party import httplib2
 from chromite.third_party import mock
 
 

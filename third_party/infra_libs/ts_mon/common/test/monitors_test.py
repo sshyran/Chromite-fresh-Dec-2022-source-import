@@ -7,7 +7,7 @@ import os
 import unittest
 from unittest import mock
 
-import httplib2
+from chromite.third_party import httplib2
 
 from infra_libs import httplib2_utils
 from infra_libs.ts_mon.common import interface

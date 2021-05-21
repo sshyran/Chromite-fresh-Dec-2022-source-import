@@ -16,7 +16,7 @@ from infra_libs.ts_mon.common import http_metrics
 from infra_libs import httplib2_utils
 from infra_libs import ts_mon
 
-import httplib2
+from chromite.third_party import httplib2
 
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
