@@ -50,7 +50,7 @@ import re
 
 # Third-party imports
 import httplib2
-import uritemplate
+from chromite.third_party import uritemplate
 
 # Local imports
 from googleapiclient import mimeparse
