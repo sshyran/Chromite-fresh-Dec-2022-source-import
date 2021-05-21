@@ -8,8 +8,6 @@ import contextlib
 import functools
 import sys
 
-import six
-
 from chromite.lib import config_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
@@ -88,12 +86,12 @@ def _PatchWrapException(functor):
         e = ('%s\nSuggest you use gerrit numbers instead (prefixed with a '
              "'chrome-internal:' if it's an internal change)." % e)
       new_exc = cros_patch.PatchException(parent, e)
-      six.reraise(new_exc.__class__, new_exc, sys.exc_info()[2])
+      raise new_exc.with_traceback(sys.exc_info()[2])
     except cros_patch.PatchException as e:
       if e.patch.id == parent.id:
         raise
       new_exc = cros_patch.DependencyError(parent, e)
-      six.reraise(new_exc.__class__, new_exc, sys.exc_info()[2])
+      raise new_exc.with_traceback(sys.exc_info()[2])
 
   f.__name__ = functor.__name__
   return f

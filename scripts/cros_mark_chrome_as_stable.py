@@ -19,8 +19,7 @@ import distutils.version  # pylint: disable=import-error,no-name-in-module
 import filecmp
 import os
 import re
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import commandline

@@ -4,11 +4,10 @@
 
 """Unittests for the stage results."""
 
+import io
 import os
 import signal
 import time
-
-from six.moves import StringIO
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import simple_builders
@@ -380,7 +379,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
             'Command "/bin/false /nosuchdir" failed.\n', result),
         time=4)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results)
 
@@ -422,7 +421,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
         'FailRunCommand msg',
         time=4)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results)
 
@@ -463,7 +462,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     # Store off a known set of results and generate a report
     results_lib.Results.Record('Pass', results_lib.Results.SUCCESS, time=1)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results, current_version)
 
@@ -492,15 +491,14 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     results_lib.Results.Record('Fail', FailStage.FAIL_EXCEPTION)
     results_lib.Results.Record('Pass2', results_lib.Results.SUCCESS)
 
-    saveFile = StringIO()
+    saveFile = io.StringIO()
     results_lib.Results.SaveCompletedStages(saveFile)
     self.assertEqual(saveFile.getvalue(), self._PassString())
 
   def testRestoreCompletedStages(self):
     """Tests that we can read in completed stages."""
 
-    results_lib.Results.RestoreCompletedStages(
-        StringIO(self._PassString()))
+    results_lib.Results.RestoreCompletedStages(io.StringIO(self._PassString()))
 
     previous = results_lib.Results.GetPrevious()
     self.assertEqual(list(previous), ['Pass'])
@@ -509,8 +507,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     """Tests that we skip previously completed stages."""
 
     # Fake results_lib.Results.RestoreCompletedStages
-    results_lib.Results.RestoreCompletedStages(
-        StringIO(self._PassString()))
+    results_lib.Results.RestoreCompletedStages(io.StringIO(self._PassString()))
 
     self._runStages()
 
@@ -525,6 +522,6 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
   def testFailedButForgiven(self):
     """Tests that warnings are flagged as such."""
     results_lib.Results.Record('Warn', results_lib.Results.FORGIVEN, time=1)
-    results = StringIO()
+    results = io.StringIO()
     results_lib.Results.Report(results)
     self.assertTrue('@@@STEP_WARNINGS@@@' in results.getvalue())

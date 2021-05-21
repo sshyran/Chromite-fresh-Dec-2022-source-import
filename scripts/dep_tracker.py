@@ -22,8 +22,6 @@ import multiprocessing
 import os
 import stat
 
-from six.moves import map as imap
-
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import filetype
@@ -83,7 +81,7 @@ class DepTracker(object):
       self._pool = multiprocessing.Pool(jobs)
       self._imap = self._pool.map
     else:
-      self._imap = imap
+      self._imap = map
 
     self._files = {}
     self._ebuilds = {}

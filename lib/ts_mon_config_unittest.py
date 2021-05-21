@@ -6,8 +6,7 @@
 
 import itertools
 import multiprocessing
-
-from six.moves import queue as Queue
+import queue as Queue
 
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics

@@ -7,9 +7,9 @@
 
 """Wrapper around httplib2 to call REST API with service account credentials."""
 
+import urllib.parse
+
 import httplib2
-import six
-from six.moves import urllib
 
 from chromite.lib import auth
 from chromite.lib import constants
@@ -107,7 +107,7 @@ def request(url,
     headers['Authorization'] = 'Bearer %s' % tok
 
   if payload is not None:
-    assert isinstance(payload, (six.string_types, six.binary_type)), (
+    assert isinstance(payload, (str, bytes)), (
         type(payload))
     assert method in ('CREATE', 'POST', 'PUT'), method
 

@@ -10,8 +10,6 @@ import pickle
 import shutil
 import traceback
 
-import six
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.xbuddy import artifact_info
@@ -92,8 +90,7 @@ class ArtifactMeta(type):
     return str(cls)
 
 
-@six.add_metaclass(ArtifactMeta)
-class Artifact(object):
+class Artifact(object, metaclass=ArtifactMeta):
   """Wrapper around an artifact to download using a fetcher.
 
   The purpose of this class is to download objects from Google Storage

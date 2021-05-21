@@ -20,8 +20,7 @@ import re
 import resource
 import subprocess
 import sys
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import commandline

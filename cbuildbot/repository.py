@@ -10,8 +10,7 @@ import os
 import re
 import shutil
 import time
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib

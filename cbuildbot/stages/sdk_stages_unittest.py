@@ -8,8 +8,6 @@ import json
 import os
 import unittest
 
-import six
-
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
@@ -59,10 +57,10 @@ class SDKBuildToolchainsStageTest(generic_stages_unittest.AbstractStageTestCase,
     # Sanity check args passed to RunBuildScript.
     for call in self.run_mock.call_args_list:
       buildroot, cmd = call[0]
-      self.assertIsInstance(buildroot, six.string_types)
+      self.assertIsInstance(buildroot, str)
       self.assertIsInstance(cmd, (tuple, list))
       for ele in cmd:
-        self.assertIsInstance(ele, six.string_types)
+        self.assertIsInstance(ele, str)
 
 
 class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,

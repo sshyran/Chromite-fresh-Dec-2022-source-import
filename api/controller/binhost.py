@@ -6,8 +6,7 @@
 
 import os
 import shutil
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.api import controller
 from chromite.api import faux

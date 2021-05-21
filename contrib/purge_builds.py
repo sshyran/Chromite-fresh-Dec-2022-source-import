@@ -18,8 +18,7 @@ See go/cros-gs-cleanup-design for an overview.
 import datetime
 import multiprocessing
 import re
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import commandline
 from chromite.lib import constants

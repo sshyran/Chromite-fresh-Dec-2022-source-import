@@ -5,6 +5,7 @@
 """Unit tests for toolchain_util."""
 
 import base64
+import builtins
 import collections
 import datetime
 import glob
@@ -14,8 +15,6 @@ import os
 import re
 import shutil
 import time
-
-from six.moves import builtins
 
 from chromite.lib import chroot_lib
 from chromite.lib import constants

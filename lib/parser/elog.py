@@ -21,8 +21,6 @@ from __future__ import absolute_import
 import re
 from collections import defaultdict
 
-import six
-
 from chromite.lib.parser import package_info
 
 SECTION_HEADER = re.compile(
@@ -51,7 +49,7 @@ class SummaryLog(object):
 
   def __init__(self, log_contents):
     self.package_logs = sorted(
-        (PackageLog(cpv, logs) for cpv, logs in six.iteritems(log_contents)),
+        (PackageLog(cpv, logs) for cpv, logs in log_contents.items()),
         key=lambda x: x.cpv)
 
   def has_failed_packages(self):
@@ -81,7 +79,7 @@ class PackageLog(object):
 
   def __init__(self, cpv, log_mapping):
     self.cpv = cpv
-    self.log_levels = dict((k, dict(v)) for k, v in six.iteritems(log_mapping))
+    self.log_levels = dict((k, dict(v)) for k, v in log_mapping.items())
 
   @property
   def cp(self):

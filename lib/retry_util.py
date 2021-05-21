@@ -10,8 +10,6 @@ import re
 import sys
 import time
 
-import six
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 
@@ -219,7 +217,7 @@ class WithRetry(object):
       # Did not return, meaning all attempts failed. Raise the exception.
       if self._exception_to_raise:
         raise self._exception_to_raise('%s: %s' % (exc_info[0], exc_info[1]))
-      six.reraise(exc_info[0], exc_info[1], exc_info[2])
+      raise exc_info[1].with_traceback(exc_info[2])
     return _Wrapper
 
 

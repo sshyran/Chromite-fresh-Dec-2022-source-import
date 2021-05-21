@@ -22,8 +22,6 @@ import sys
 import tempfile
 import time
 
-import six
-
 from chromite.lib import constants
 from chromite.lib import cros_collections
 from chromite.lib import cros_logging as logging
@@ -82,7 +80,7 @@ def ShellQuote(s):
     # This is a bit of a hack.  Python 2 will display strings with u prefixes
     # when logging which makes things harder to work with.  Writing bytes to
     # stdout will be interpreted as UTF-8 content implicitly.
-    if isinstance(s, six.string_types):
+    if isinstance(s, str):
       try:
         s = s.encode('utf-8')
       except UnicodeDecodeError:
@@ -92,9 +90,9 @@ def ShellQuote(s):
       return repr(s)
   else:
     # If callers pass down bad types, don't blow up.
-    if isinstance(s, six.binary_type):
+    if isinstance(s, bytes):
       s = s.decode('utf-8', 'backslashreplace')
-    elif not isinstance(s, six.string_types):
+    elif not isinstance(s, str):
       return repr(s)
 
   # See if no quoting is needed so we can return the string as-is.
@@ -334,17 +332,17 @@ class CalledProcessError(subprocess.CalledProcessError):
     ]
     if stderr and self.stderr:
       stderr = self.stderr
-      if isinstance(stderr, six.binary_type):
+      if isinstance(stderr, bytes):
         stderr = stderr.decode('utf-8', 'replace')
       items.append(stderr)
     if stdout and self.stdout:
       stdout = self.stdout
-      if isinstance(stdout, six.binary_type):
+      if isinstance(stdout, bytes):
         stdout = stdout.decode('utf-8', 'replace')
       items.append(stdout)
     if self.msg:
       msg = self.msg
-      if isinstance(msg, six.binary_type):
+      if isinstance(msg, bytes):
         msg = msg.decode('utf-8', 'replace')
       items.append(msg)
     return u'\n'.join(items)
@@ -463,7 +461,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs):
   # Finally, block people from passing options to sudo.
   sudo_cmd.append('--')
 
-  if isinstance(cmd, six.string_types):
+  if isinstance(cmd, str):
     # We need to handle shell ourselves so the order is correct:
     #  $ sudo [sudo args] -- bash -c '[shell command]'
     # If we let run take care of it, we'd end up with:
@@ -733,7 +731,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   # what a separate process did to that file can result in a bad
   # view of the file.
   log_stdout_to_file = False
-  if isinstance(stdout, six.string_types):
+  if isinstance(stdout, str):
     popen_stdout = open(stdout, stdout_file_mode)
     log_stdout_to_file = True
   elif hasattr(stdout, 'fileno'):
@@ -769,16 +767,16 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
 
   # If input is a string, we'll create a pipe and send it through that.
   # Otherwise we assume it's a file object that can be read from directly.
-  if isinstance(input, (six.string_types, six.binary_type)):
+  if isinstance(input, (str, bytes)):
     stdin = subprocess.PIPE
     # Allow people to always pass in bytes or strings regardless of encoding.
     # Our Popen usage takes care of converting everything to bytes first.
     #
     # Linter can't see that we're using |input| as a var, not a builtin.
     # pylint: disable=input-builtin
-    if encoding and isinstance(input, six.text_type):
+    if encoding and isinstance(input, str):
       input = input.encode(encoding, errors)
-    elif not encoding and isinstance(input, six.text_type):
+    elif not encoding and isinstance(input, str):
       input = input.encode('utf-8')
   elif input is not None:
     stdin = input
@@ -786,7 +784,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
 
   # Sanity check the command.  This helps when RunCommand is deep in the call
   # chain, but the command itself was constructed along the way.
-  if isinstance(cmd, (six.string_types, six.binary_type)):
+  if isinstance(cmd, (str, bytes)):
     if not shell:
       raise ValueError('Cannot run a string command without a shell')
     cmd = ['/bin/bash', '-c', cmd]
@@ -798,7 +796,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   elif not isinstance(cmd, (list, tuple)):
     raise TypeError('cmd must be list or tuple, not %s: %r' %
                     (type(cmd), repr(cmd)))
-  elif not all(isinstance(x, (six.binary_type, six.string_types)) for x in cmd):
+  elif not all(isinstance(x, (bytes, str)) for x in cmd):
     raise TypeError('All command elements must be bytes/strings: %r' % (cmd,))
 
   # If we are using enter_chroot we need to use enterchroot pass env through
@@ -1468,7 +1466,7 @@ def BooleanShellValue(sval, default, msg=None):
   if sval is None:
     return default
 
-  if isinstance(sval, six.string_types):
+  if isinstance(sval, str):
     s = sval.lower()
     if s in ('yes', 'y', '1', 'true'):
       return True
@@ -1590,11 +1588,11 @@ class ContextManagerStack(object):
     # Normally a single context manager would return False to allow caller to
     # re-raise the exception itself, but here the exception might have been
     # raised during the exiting of one of the individual context managers.
-    six.reraise(exc_type, exc, exc_tb)
+    raise exc.with_traceback(exc_tb)
 
 
 def iflatten_instance(iterable,
-                      terminate_on_kls=(six.string_types, six.binary_type)):
+                      terminate_on_kls=(str, bytes)):
   """Derivative of snakeoil.lists.iflatten_instance; flatten an object.
 
   Given an object, flatten it into a single depth iterable-
@@ -1614,7 +1612,7 @@ def iflatten_instance(iterable,
       return False
     # Note strings can be infinitely descended through- thus this
     # recursion limiter.
-    return not isinstance(item, six.string_types) or len(item) > 1
+    return not isinstance(item, str) or len(item) > 1
 
   if not descend_into(iterable):
     yield iterable
@@ -1630,7 +1628,7 @@ def iflatten_instance(iterable,
 @contextlib.contextmanager
 def Open(obj, mode='r', **kwargs):
   """Convenience ctx that accepts a file path or an already open file object."""
-  if isinstance(obj, six.string_types):
+  if isinstance(obj, str):
     with open(obj, mode=mode, **kwargs) as f:
       yield f
   else:
@@ -1667,7 +1665,7 @@ def SafeRun(functors, combine_exceptions=False):
     if len(errors) == 1 or not combine_exceptions:
       # To preserve the traceback.
       inst, tb = errors[0]
-      six.reraise(type(inst), inst, tb)
+      raise inst.with_traceback(tb)
     else:
       raise RuntimeError([e[0] for e in errors])
 

@@ -6,17 +6,15 @@
 
 import collections
 import getpass
+import http.client
+import http.cookiejar
 import io
 import json
 import os
 import re
 import shutil
 import stat
-
-import six
-from six.moves import http_client as httplib
-from six.moves import http_cookiejar as cookielib
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -105,7 +103,7 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
         ['git', 'config', '--global', 'http.cookiefile', gi.cookies_path],
         quiet=True)
 
-    jar = cookielib.MozillaCookieJar(gi.cookies_path)
+    jar = http.cookiejar.MozillaCookieJar(gi.cookies_path)
     jar.load(ignore_expires=True)
 
     def GetCookies(host, _path):
@@ -313,7 +311,7 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     if password:
       body['http_password'] = password
     if groups:
-      if isinstance(groups, six.string_types):
+      if isinstance(groups, str):
         groups = [groups]
       body['groups'] = groups
     conn = gob_util.CreateHttpConn(
@@ -555,7 +553,7 @@ class GerritHelperTest(GerritTestCase):
     helper.SetReview(gpatch1.gerrit_number, labels={'Code-Review':'+2'})
     with self.assertRaises(gob_util.GOBError) as ex:
       helper.SubmitChange(gpatch1)
-    self.assertEqual(ex.exception.http_status, httplib.CONFLICT)
+    self.assertEqual(ex.exception.http_status, http.client.CONFLICT)
     self.assertFalse(helper.IsChangeCommitted(gpatch1.gerrit_number))
 
     # Try submitting the up-to-date change.

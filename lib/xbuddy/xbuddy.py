@@ -4,6 +4,7 @@
 
 """Main module for parsing and interpreting XBuddy paths for the devserver."""
 
+import configparser
 import datetime
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import operator
@@ -13,8 +14,6 @@ import shutil
 import sys
 import time
 import threading
-
-from six.moves import configparser
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging

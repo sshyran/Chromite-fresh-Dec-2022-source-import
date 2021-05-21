@@ -14,9 +14,8 @@ import multiprocessing
 import os
 import shutil
 import tempfile
-
 from typing import List
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import autotest_util
 from chromite.lib import build_target_lib

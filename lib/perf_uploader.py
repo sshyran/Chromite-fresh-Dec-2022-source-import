@@ -18,14 +18,15 @@ been extended significantly since.
 from __future__ import division
 
 import collections
+import http.client
 import json
 import math
 import os
 import re
 import string
-
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
@@ -343,7 +344,7 @@ def _SendToDashboard(data_obj, dashboard=DASHBOARD_URL):
   except urllib.error.URLError as e:
     raise PerfUploadingError('URLError: %s for JSON %s\n' %
                              (str(e.reason), data_obj['data']), e)
-  except httplib.HTTPException as e:
+  except http.client.HTTPException as e:
     raise PerfUploadingError(
         'HTTPException for JSON %s\n' % data_obj['data'], e)
 

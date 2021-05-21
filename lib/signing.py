@@ -4,9 +4,8 @@
 
 """All things Chrome OS signing related"""
 
+import configparser
 import os
-
-from six.moves import configparser
 
 from chromite.lib import constants
 

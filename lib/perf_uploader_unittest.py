@@ -7,8 +7,8 @@
 import json
 import os
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
+import urllib.request
 
 from chromite.lib import cros_test_lib
 from chromite.lib import perf_uploader

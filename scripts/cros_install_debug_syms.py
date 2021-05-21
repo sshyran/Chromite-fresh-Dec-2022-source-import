@@ -18,8 +18,7 @@ import multiprocessing
 import os
 import pickle
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib

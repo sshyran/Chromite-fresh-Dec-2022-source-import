@@ -8,11 +8,15 @@ https://gerrit-review.googlesource.com/Documentation/rest-api.html
 """
 
 import datetime
+import html.parser
+import http.client
+import http.cookiejar
 import json
 import os
 import re
 import socket
 import sys
+import urllib.parse
 import warnings
 
 import httplib2
@@ -21,11 +25,6 @@ try:
 except ImportError:  # Newer oauth2client versions put it in .contrib
   # pylint: disable=import-error,no-name-in-module
   from oauth2client.contrib import gce
-import six
-from six.moves import html_parser as HTMLParser
-from six.moves import http_client as httplib
-from six.moves import http_cookiejar as cookielib
-from six.moves import urllib
 
 from chromite.lib import auth
 from chromite.lib import constants
@@ -40,7 +39,7 @@ from chromite.utils import memoize
 _GAE_VERSION = 'GAE_VERSION'
 
 
-class ErrorParser(HTMLParser.HTMLParser):
+class ErrorParser(html.parser.HTMLParser):
   """Class to parse GOB error message reported as HTML.
 
   Only data inside <div id='af-error-container'> section is retrieved from the
@@ -52,7 +51,7 @@ class ErrorParser(HTMLParser.HTMLParser):
   """
 
   def __init__(self):
-    HTMLParser.HTMLParser.__init__(self)
+    html.parser.HTMLParser.__init__(self)
     self.in_div = False
     self.err_data = ''
 
@@ -173,7 +172,8 @@ def GetCookies(host, path, cookie_paths=None):
           if line.strip().startswith('#') or len(fields) != 7:
             continue
           domain, xpath, key, value = fields[0], fields[2], fields[5], fields[6]
-          if cookielib.domain_match(host, domain) and path.startswith(xpath):
+          if (http.cookiejar.domain_match(host, domain) and
+              path.startswith(xpath)):
             cookies[key] = value
   return cookies
 
@@ -233,7 +233,7 @@ def CreateHttpConn(host, path, reqtype='GET', headers=None, body=None):
       logging.debug('%s: %s', key, val)
     if body:
       logging.debug(body)
-  conn = httplib.HTTPSConnection(host)
+  conn = http.client.HTTPSConnection(host)
   conn.req_host = host
   conn.req_params = {
       'url': path,
@@ -346,7 +346,7 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
     except AttributeError:
       logging.warning('peer name unavailable')
 
-    if response.status == httplib.CONFLICT:
+    if response.status == http.client.CONFLICT:
       # 409 conflict
       if GOB_CONFLICT_ERRORS_RE.search(response_body):
         raise GOBError(
@@ -695,7 +695,7 @@ def AddReviewers(host, change, add=None, notify=None):
   """Add reviewers to a change."""
   if not add:
     return
-  if isinstance(add, six.string_types):
+  if isinstance(add, str):
     add = (add,)
   body = {}
   if notify:
@@ -711,7 +711,7 @@ def RemoveReviewers(host, change, remove=None, notify=None):
   """Remove reveiewers from a change."""
   if not remove:
     return
-  if isinstance(remove, six.string_types):
+  if isinstance(remove, str):
     remove = (remove,)
   body = {}
   if notify:

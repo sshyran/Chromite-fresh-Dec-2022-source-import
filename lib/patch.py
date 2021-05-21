@@ -12,8 +12,6 @@ import re
 import subprocess
 import time
 
-import six
-
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -402,7 +400,7 @@ class PatchCache(object):
   def _GetAliases(self, value):
     if hasattr(value, 'LookupAliases'):
       return value.LookupAliases()
-    elif not isinstance(value, six.string_types):
+    elif not isinstance(value, str):
       # This isn't needed in production code; it however is
       # rather useful to flush out bugs in test code.
       raise ValueError("Value %r isn't a string" % (value,))
@@ -728,7 +726,7 @@ class PatchQuery(object):
   def __eq__(self, other):
     """Defines when two PatchQuery objects are considered equal."""
     # We allow comparing against a string to make testing easier.
-    if isinstance(other, six.string_types):
+    if isinstance(other, str):
       return self.id == other
 
     if self.id is not None:

@@ -5,15 +5,16 @@
 """Module containing methods and classes to interact with a devserver instance.
 """
 
+import http.client
 import multiprocessing
 import os
 import re
 import socket
 import subprocess
 import tempfile
-
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -243,7 +244,7 @@ class DevServerWrapper(multiprocessing.Process):
     logging.debug('Retrieving %s', url)
     try:
       res = urllib.request.urlopen(url, timeout=timeout)
-    except (urllib.error.HTTPError, httplib.HTTPException) as e:
+    except (urllib.error.HTTPError, http.client.HTTPException) as e:
       logging.error('Devserver responded with HTTP error (%s)', e)
       raise DevServerResponseError(e)
     except (urllib.error.URLError, socket.timeout) as e:

@@ -15,8 +15,8 @@ import operator
 import os
 import tempfile
 import time
-
-from six.moves import urllib
+import urllib.error
+import urllib.request
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib

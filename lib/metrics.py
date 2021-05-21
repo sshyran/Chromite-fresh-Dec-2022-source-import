@@ -13,12 +13,10 @@ from __future__ import division
 
 import collections
 import contextlib
+import queue as Queue
 import ssl
 import time
 from functools import wraps
-
-import six
-from six.moves import queue as Queue
 
 from chromite.lib import cros_logging as logging
 
@@ -145,7 +143,7 @@ class FieldSpecAdapter(object):
       bool: ts_mon.BooleanField,
       int: ts_mon.IntegerField,
       str: ts_mon.StringField,
-      six.text_type: ts_mon.StringField,
+      str: ts_mon.StringField,
   }
 
   def __init__(self, metric_cls, *args, **kwargs):

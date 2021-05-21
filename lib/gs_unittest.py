@@ -11,8 +11,6 @@ import numbers
 import os
 import string
 
-import six
-
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -1464,7 +1462,7 @@ class UnmockedStatTest(cros_test_lib.TempDirTestCase):
     self.assertEqual(result.content_type, 'application/octet-stream')
     self.assertEqual(result.hash_crc32c, 'wUc4sQ==')
     self.assertEqual(result.hash_md5, 'iRvNNwBhmvUVG/lbg2/5sQ==')
-    self.assertIsInstance(result.etag, six.string_types)
+    self.assertIsInstance(result.etag, str)
     self.assertIsInstance(result.generation, int)
     self.assertEqual(result.metageneration, 1)
 

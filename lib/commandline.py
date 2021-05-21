@@ -16,9 +16,7 @@ import os
 import optparse  # pylint: disable=deprecated-module
 import signal
 import sys
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -234,7 +232,7 @@ class DeviceParser(object):
     Args:
       schemes: A scheme or list of schemes to accept.
     """
-    self.schemes = ([schemes] if isinstance(schemes, six.string_types)
+    self.schemes = ([schemes] if isinstance(schemes, str)
                     else schemes)
     # Provide __name__ for argparse to print on failure, or else it will use
     # repr() which creates a confusing error message.
@@ -737,8 +735,7 @@ class BaseParser(object):
     return path_util.FindCacheDir()
 
 
-@six.add_metaclass(attrs_freezer.Class)
-class ArgumentNamespace(argparse.Namespace):
+class ArgumentNamespace(argparse.Namespace, metaclass=attrs_freezer.Class):
   """Class to mimic argparse.Namespace with value freezing support."""
   _FROZEN_ERR_MSG = 'Option values are frozen, cannot alter %s.'
 

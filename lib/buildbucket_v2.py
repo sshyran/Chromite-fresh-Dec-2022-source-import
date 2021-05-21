@@ -11,11 +11,11 @@ client out of lib/luci/prpc and third_party/infra_libs/buildbucket.
 
 import ast
 import collections
+import http.client
 import socket
 from ssl import SSLError
 
 from google.protobuf import field_mask_pb2
-from six.moves import http_client as httplib
 
 from infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2
 from infra_libs.buildbucket.proto import builds_service_prpc_pb2, common_pb2
@@ -422,7 +422,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def BatchCancelBuilds(self, buildbucket_ids, summary_markdown,
                         properties=None):
     """BatchGetBuild repeated GetBuild request with provided ids.
@@ -460,7 +460,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def BatchGetBuilds(self, buildbucket_ids, properties=None):
     """BatchGetBuild repeated GetBuild request with provided ids.
 
@@ -510,7 +510,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def CancelBuild(self, buildbucket_id, summary_markdown, properties=None):
     """CancelBuild call of a specific build with buildbucket_id.
 
@@ -535,7 +535,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def GetBuild(self, buildbucket_id, properties=None):
     """GetBuild call of a specific build with buildbucket_id.
 
@@ -563,7 +563,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def ScheduleBuild(self, request_id, template_build_id=None,
                     builder=None, properties=None,
                     gerrit_changes=None, tags=None,
@@ -601,7 +601,7 @@ class BuildbucketV2(object):
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
   def UpdateBuild(self, build, update_properties, properties=None):
     """GetBuild call of a specific build with buildbucket_id.
 

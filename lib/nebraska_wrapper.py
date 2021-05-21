@@ -10,8 +10,7 @@ import os
 import shutil
 import multiprocessing
 import subprocess
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib

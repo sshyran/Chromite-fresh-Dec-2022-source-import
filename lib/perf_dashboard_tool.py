@@ -35,8 +35,7 @@ Examples:
 import getpass
 import os
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib

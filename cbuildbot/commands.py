@@ -19,7 +19,6 @@ import sys
 import tempfile
 
 from google.protobuf import json_format
-import six
 
 from chromite.api.gen.chromite.api import android_pb2
 
@@ -469,8 +468,7 @@ def SetupToolchains(buildroot,
   if sysroot:
     cmd += ['--sysroot', sysroot]
   if boards:
-    boards_str = (boards if isinstance(boards, six.string_types)
-                  else ','.join(boards))
+    boards_str = boards if isinstance(boards, str) else ','.join(boards)
     cmd += ['--include-boards', boards_str]
   if output_dir:
     cmd += ['--output-dir', output_dir]
@@ -2416,7 +2414,7 @@ def GenerateHtmlIndex(index, files, title='Index', url_base=None):
     return ('<li><a href="%s%s">%s</a></li>' % (url_base, target,
                                                 name if name else target))
 
-  if isinstance(files, six.string_types):
+  if isinstance(files, str):
     if os.path.isdir(files):
       files = os.listdir(files)
     else:

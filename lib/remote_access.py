@@ -15,8 +15,6 @@ import subprocess
 import tempfile
 import time
 
-import six
-
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -401,7 +399,7 @@ class RemoteAccess(object):
         # Prepend sudo to cmd.
         ssh_cmd.append('sudo')
 
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         if kwargs.get('shell'):
           ssh_cmd = '%s %s' % (' '.join(ssh_cmd),
                                cros_build_lib.ShellQuote(cmd))
@@ -1186,7 +1184,7 @@ class RemoteDevice(object):
       ARG_MAX = 32 * 1024
 
       # What the command line would generally look like on the remote.
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         if not kwargs.get('shell', False):
           raise ValueError("'shell' must be True when 'cmd' is a string.")
         cmdline = ' '.join(flat_vars) + ' ' + cmd
@@ -1210,7 +1208,7 @@ class RemoteDevice(object):
           new_cmd += ['sudo']
         new_cmd += flat_vars
 
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         cmd = ' '.join(new_cmd) + ' ' + cmd
       else:
         cmd = new_cmd + cmd

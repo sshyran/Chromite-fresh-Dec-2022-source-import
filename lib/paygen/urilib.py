@@ -6,8 +6,7 @@
 
 import re
 import sys
-
-from six.moves import urllib
+import urllib.request
 
 from chromite.lib import gs
 from chromite.lib.paygen import filelib

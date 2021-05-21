@@ -6,8 +6,7 @@
 
 import os
 import re
-
-from six.moves import urllib
+import urllib.parse
 
 
 def _ExtractGobClAndSubpath(o):

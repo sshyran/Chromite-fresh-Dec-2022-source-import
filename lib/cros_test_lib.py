@@ -6,14 +6,12 @@
 
 import collections
 import contextlib
+import io
 import os
 import re
 import sys
 import time
 import unittest
-
-import six
-from six.moves import StringIO
 
 from chromite.lib import cache
 from chromite.lib import commandline
@@ -72,7 +70,7 @@ def _FlattenStructure(base_path, dir_struct):
       flattened.append(new_base + os.sep)
       flattened.extend(_FlattenStructure(new_base, obj.contents))
     else:
-      assert isinstance(obj, six.string_types)
+      assert isinstance(obj, str)
       flattened.append(os.path.join(base_path, obj))
   return flattened
 
@@ -184,8 +182,8 @@ class StackedSetup(type):
        for any test classes that were partially or completely set up.
     3) All test cases time out after TEST_CASE_TIMEOUT seconds.
 
-  Use by adding this line before a class:
-    @six.add_metaclass(StackedSetup)
+  Use by including this line in the class signature:
+    class ...(..., metaclass=StackedSetup)
 
   Since cros_test_lib.TestCase uses this metaclass, all derivatives of TestCase
   also inherit the above behavior (unless they override the metaclass attribute
@@ -264,7 +262,7 @@ class StackedSetup(type):
     if exc_info:
       # Chuck the saved exception, w/ the same TB from
       # when it occurred.
-      six.reraise(exc_info[0], exc_info[1], exc_info[2])
+      raise exc_info[1].with_traceback(exc_info[2])
 
 
 class TruthTable(object):
@@ -432,7 +430,7 @@ class LogFilter(logging.Filter):
 
   def __init__(self):
     logging.Filter.__init__(self)
-    self.messages = StringIO()
+    self.messages = io.StringIO()
 
   def filter(self, record):
     self.messages.write(record.getMessage() + '\n')
@@ -483,8 +481,7 @@ class LoggingCapturer(object):
     return self.LogsMatch(re.escape(msg))
 
 
-@six.add_metaclass(StackedSetup)
-class TestCase(unittest.TestCase):
+class TestCase(unittest.TestCase, metaclass=StackedSetup):
   """Basic chromite test case.
 
   Provides sane setUp/tearDown logic so that tearDown is correctly cleaned up.
@@ -1466,7 +1463,7 @@ class PopenMock(partial_mock.PartialCmdMock):
     # specified in strings or in bytes, but there's no value in forcing all code
     # to use the same encoding with the mocks.
     def _MaybeEncode(src):
-      return src.encode('utf-8') if isinstance(src, six.text_type) else src
+      return src.encode('utf-8') if isinstance(src, str) else src
     osutils.WriteFile(stdout, _MaybeEncode(result.output), mode='wb')
     osutils.WriteFile(stderr, _MaybeEncode(result.error), mode='wb')
     osutils.WriteFile(

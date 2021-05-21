@@ -4,9 +4,8 @@
 
 """Unit tests for config stages"""
 
+import builtins
 import os
-
-from six.moves import builtins
 
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import config_stages

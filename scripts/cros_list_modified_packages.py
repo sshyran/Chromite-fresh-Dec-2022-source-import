@@ -23,8 +23,7 @@ Some caveats:
 import errno
 import multiprocessing
 import os
-
-from six.moves import queue as Queue
+import queue as Queue
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants

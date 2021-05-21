@@ -15,8 +15,6 @@ import re
 import shutil
 from typing import Dict, List, Optional
 
-import six
-
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
@@ -2406,7 +2404,7 @@ def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
     TypeError when variable is not a valid type.
     ValueError when variable is empty.
   """
-  if not isinstance(variable, six.string_types):
+  if not isinstance(variable, str):
     raise TypeError('Variable must be a string.')
   elif not variable:
     raise ValueError('Variable must not be empty.')
@@ -2434,7 +2432,7 @@ def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
     PortageqError when a variable is undefined and not allowed to be.
     cros_build_lib.RunCommandError when the command does not run successfully.
   """
-  if isinstance(variables, six.string_types):
+  if isinstance(variables, str):
     raise TypeError('Variables must not be a string. '
                     'See PortageqEnvvar for single variable support.')
 

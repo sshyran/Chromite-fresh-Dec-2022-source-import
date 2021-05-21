@@ -4,9 +4,8 @@
 
 """Unittests for the boto_compat module."""
 
+import configparser
 import os
-
-from six.moves import configparser
 
 from chromite.lib import boto_compat
 from chromite.lib import cros_test_lib

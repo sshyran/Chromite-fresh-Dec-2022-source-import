@@ -4,12 +4,11 @@
 
 """Unit tests for xbuddy.py."""
 
+import configparser
 import os
 import shutil
 import tempfile
 import time
-
-from six.moves import configparser
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs

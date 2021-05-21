@@ -27,8 +27,6 @@ import re
 import stat
 import sys
 
-import six
-
 from chromite.lib import parseelf
 
 try:
@@ -61,7 +59,7 @@ def SplitShebang(header):
   # worry about being given non-UTF-8 binary data.  If we're unable to decode
   # back into UTF-8, we'll just ignore the shebang.  There's no situation that
   # we care to support that would matter here.
-  if isinstance(header, six.string_types):
+  if isinstance(header, str):
     header = header.encode('utf-8')
   m = re.match(br'#!\s*(/[^\s]+)\s*(.*)$', header)
   if m:

@@ -5,10 +5,9 @@
 """ChromeOS encryption/decryption key management"""
 
 import collections
+import configparser
 import os
 import re
-
-from six.moves import configparser
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging

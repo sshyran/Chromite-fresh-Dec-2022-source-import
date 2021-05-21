@@ -4,9 +4,9 @@
 
 """Import keys from legacy signer config."""
 
+import configparser
 import os
 
-from six.moves import configparser
 import yaml # pylint: disable=import-error
 
 from chromite.lib import commandline

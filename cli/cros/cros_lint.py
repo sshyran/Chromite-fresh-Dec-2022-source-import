@@ -10,8 +10,7 @@ import multiprocessing
 import os
 import re
 import sys
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.cli import command

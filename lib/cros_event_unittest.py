@@ -4,9 +4,8 @@
 
 """Unit tests for chros_event"""
 
+import io
 import json
-
-from six.moves import StringIO
 
 from chromite.lib import cros_event
 from chromite.lib import cros_test_lib
@@ -164,7 +163,7 @@ class EventFileLoggerTest(cros_test_lib.TestCase):
   def setUp(self):
     self.data1 = {'one':2, 'two':4}
     self.emitEvent = None
-    self.file_out = StringIO()
+    self.file_out = io.StringIO()
     self.log = cros_event.EventFileLogger(self.file_out, data=self.data1,
                                           encoder_func=self.encode_func)
 

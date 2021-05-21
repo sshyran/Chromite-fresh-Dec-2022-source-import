@@ -23,10 +23,9 @@ all, as intended.
 import functools
 import os
 import pickle
+import queue as Queue
 import re
 import types
-
-from six.moves import queue as Queue
 
 from chromite.cbuildbot import archive_lib
 from chromite.lib import buildstore

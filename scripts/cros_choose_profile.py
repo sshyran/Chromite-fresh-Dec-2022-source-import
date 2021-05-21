@@ -7,8 +7,6 @@
 import functools
 import os
 
-import six
-
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -37,7 +35,7 @@ def PathPrefixDecorator(f):
     if not prefix or not result:
       # Nothing to do.
       return result
-    elif not isinstance(result, six.string_types):
+    elif not isinstance(result, str):
       # Transform each path in the collection.
       new_result = []
       for path in result:

@@ -16,12 +16,11 @@ import fcntl
 import multiprocessing
 import os
 import pty
+import queue as Queue
 import re
 import struct
 import sys
 import termios
-
-from six.moves import queue as Queue
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils

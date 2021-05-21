@@ -13,9 +13,9 @@ import json
 import os
 import pprint
 import tempfile
+import urllib.parse
 
 import httplib2
-from six.moves import urllib
 
 import chromite.lib.cros_logging as log
 from chromite.lib import cache

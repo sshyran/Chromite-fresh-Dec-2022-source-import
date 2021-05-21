@@ -9,6 +9,7 @@ crashes on non-release builds (in which case try to only upload the symbols
 for those executables involved).
 """
 
+import http.client
 import itertools
 import json
 import os
@@ -17,9 +18,7 @@ import sys
 import tempfile
 import textwrap
 import time
-
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cache
 from chromite.lib import commandline
@@ -435,7 +434,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
         def ShouldRetryUpload(exception):
           if isinstance(exception, (requests.exceptions.RequestException,
                                     IOError,
-                                    httplib.HTTPException, socket.error)):
+                                    http.client.HTTPException, socket.error)):
             logging.info('Request failed, retrying: %s', exception)
             return True
           return False
@@ -456,7 +455,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
                         s.display_name, e)
         s.status = SymbolFile.ERROR
         failures += 1
-      except (httplib.HTTPException, OSError) as e:
+      except (http.client.HTTPException, OSError) as e:
         logging.warning('could not upload: %s: %s %s', s.display_name,
                         type(e).__name__, e)
         s.status = SymbolFile.ERROR

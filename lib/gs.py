@@ -17,9 +17,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cache
@@ -783,7 +781,7 @@ class GSContext(object):
     if error:
       # Since the captured error will use the encoding the user requested,
       # normalize to bytes for testing below.
-      if isinstance(error, six.text_type):
+      if isinstance(error, str):
         error = error.encode('utf-8')
 
       # gsutil usually prints PreconditionException when a precondition fails.
@@ -954,7 +952,7 @@ class GSContext(object):
       if src_path == '-' and kwargs.get('input') is not None:
         f = stack.Add(tempfile.NamedTemporaryFile, mode='wb')
         data = kwargs['input']
-        if isinstance(data, six.text_type):
+        if isinstance(data, str):
           data = data.encode('utf-8')
         f.write(data)
         f.flush()
@@ -1053,7 +1051,7 @@ class GSContext(object):
     if details:
       cmd += ['-l']
     cmd += ['--']
-    if isinstance(path, six.string_types):
+    if isinstance(path, str):
       cmd.append(path)
     else:
       cmd.extend(path)
@@ -1126,7 +1124,7 @@ class GSContext(object):
       acl = self.acl
 
     cmd = ['acl', 'set', '--', acl]
-    if isinstance(path, six.string_types):
+    if isinstance(path, str):
       cmd.append(path)
     else:
       cmd.extend(path)
@@ -1204,7 +1202,7 @@ class GSContext(object):
     if recursive:
       cmd.append('-R')
     cmd.append('--')
-    if isinstance(path, six.string_types):
+    if isinstance(path, str):
       cmd.append(path)
     else:
       cmd.extend(path)

@@ -8,8 +8,6 @@ import collections
 import os
 import re
 
-import six
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
@@ -147,7 +145,7 @@ class ListRegex(Regex):
 
   @staticmethod
   def _ProcessArg(arg):
-    if not isinstance(arg, six.string_types):
+    if not isinstance(arg, str):
       return ' '.join(arg)
     return arg
 

@@ -6,8 +6,6 @@
 
 import types
 
-import six
-
 
 class Error(Exception):
   """Raised when frozen attribute value is modified."""
@@ -19,8 +17,8 @@ class Class(type):
   This metaclass can be used by any class to add the ability to
   freeze attribute values with the Freeze method.
 
-  Use by adding this line before a class:
-    @six.add_metaclass(attrs_freezer.Class)
+  Use by including this line in the class signature:
+    class ...(..., metaclass=attrs_freezer.Class)
   """
   _FROZEN_ERR_MSG = 'Attribute values are frozen, cannot alter %s.'
 
@@ -60,8 +58,7 @@ class Class(type):
     return newcls
 
 
-@six.add_metaclass(Class)
-class Mixin(object):
+class Mixin(object, metaclass=Class):
   """Alternate mechanism for freezing attributes in a class.
 
   If an existing class is not a new-style class then it will be unable to

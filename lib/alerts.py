@@ -7,6 +7,7 @@
 import base64
 import collections
 import gzip
+import http.client
 import io
 import json
 import os
@@ -18,9 +19,6 @@ import traceback
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-import six
-from six.moves import http_client as httplib
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
@@ -170,8 +168,8 @@ class GmailServer(MailServer):
       logging.warning('Could not get gmail credentials: %s', e)
       return False
 
-    http = credentials.authorize(httplib2.Http())
-    service = apiclient_build('gmail', 'v1', http=http)
+    httpcreds = credentials.authorize(httplib2.Http())
+    service = apiclient_build('gmail', 'v1', http=httpcreds)
     try:
       # 'me' represents the default authorized user.
       payload = {
@@ -180,7 +178,7 @@ class GmailServer(MailServer):
       }
       service.users().messages().send(userId='me', body=payload).execute()
       return True
-    except (apiclient_errors.HttpError, httplib.HTTPException,
+    except (apiclient_errors.HttpError, http.client.HTTPException,
             client.Error) as error:
       logging.warning('Could not send email: %s', error)
       return False
@@ -265,7 +263,7 @@ def CreateEmail(subject, recipients, message='', attachment=None,
 
   msg.attach(MIMEText(message))
   if attachment:
-    if isinstance(attachment, six.string_types):
+    if isinstance(attachment, str):
       attachment = attachment.encode()
     s = io.BytesIO()
     with gzip.GzipFile(fileobj=s, mode='wb') as f:

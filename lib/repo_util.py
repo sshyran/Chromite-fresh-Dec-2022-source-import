@@ -9,8 +9,6 @@ import contextlib
 import os
 import re
 
-import six
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
@@ -333,7 +331,7 @@ def _ListArg(arg):
   Raises:
     TypeError: if arg is a string or non-iterable (except None).
   """
-  if isinstance(arg, six.string_types):
+  if isinstance(arg, str):
     raise TypeError('string not allowed')
   if arg is None:
     return []

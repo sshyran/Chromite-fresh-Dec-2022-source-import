@@ -8,15 +8,14 @@ import contextlib
 import multiprocessing
 import numbers
 import os
+import pickle
+import queue as Queue
 import signal
 import sys
 import tempfile
 import threading
 import time
 import unittest
-
-from six.moves import cPickle as pickle
-from six.moves import queue as Queue
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib

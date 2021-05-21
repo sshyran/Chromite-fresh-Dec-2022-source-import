@@ -4,8 +4,6 @@
 
 """Test the attrs_freezer module."""
 
-import six
-
 from chromite.lib import cros_test_lib
 from chromite.utils import attrs_freezer
 
@@ -43,14 +41,12 @@ class FrozenAttributesTest(cros_test_lib.TestCase):
 
   def testFrozenByMetaclass(self):
     """Test attribute freezing with FrozenAttributesClass."""
-    @six.add_metaclass(attrs_freezer.Class)
-    class DummyByMeta(self.DummyClass):
+    class DummyByMeta(self.DummyClass, metaclass=attrs_freezer.Class):
       """Class that freezes DummyClass using metaclass construct."""
 
     self._TestBasics(DummyByMeta)
 
-    @six.add_metaclass(attrs_freezer.Class)
-    class SetattrByMeta(self.SetattrClass):
+    class SetattrByMeta(self.SetattrClass, metaclass=attrs_freezer.Class):
       """Class that freezes SetattrClass using metaclass construct."""
 
     self._TestBasics(SetattrByMeta)

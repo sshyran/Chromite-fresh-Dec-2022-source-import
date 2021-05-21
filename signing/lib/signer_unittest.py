@@ -4,11 +4,10 @@
 
 """Unittest ChromeOS image signer logic"""
 
+import configparser
 import io
 import os
 import sys
-
-from six.moves import configparser
 
 from chromite.lib import cros_test_lib
 from chromite.signing.lib import keys

@@ -21,8 +21,6 @@ import subprocess
 import tempfile
 from typing import Optional
 
-import six
-
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
@@ -981,7 +979,7 @@ def Mount(source, target, fstype, flags, data=''):
   libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
   # These fields might be a string or 0 (for NULL).  Convert to bytes.
   def _MaybeEncode(s):
-    return s.encode('utf-8') if isinstance(s, six.string_types) else s
+    return s.encode('utf-8') if isinstance(s, str) else s
   if libc.mount(_MaybeEncode(source), _MaybeEncode(target),
                 _MaybeEncode(fstype), ctypes.c_int(flags),
                 _MaybeEncode(data)) != 0:

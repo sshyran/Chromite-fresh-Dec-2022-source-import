@@ -5,17 +5,17 @@
 """Unittests for upload_symbols.py"""
 
 import errno
+import http.server
 import itertools
 import os
 import signal
 import socket
+import socketserver
 import sys
 import time
+import urllib.request
 
 import pytest  # pylint: disable=import-error
-from six.moves import BaseHTTPServer
-from six.moves import socketserver
-from six.moves import urllib
 
 from chromite.third_party import mock
 
@@ -117,7 +117,7 @@ STACK CFI 1234
     return result
 
 
-class SymbolServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class SymbolServerRequestHandler(http.server.BaseHTTPRequestHandler):
   """HTTP handler for symbol POSTs"""
 
   RESP_CODE = None
@@ -138,7 +138,7 @@ class SymbolServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Stub the logger as it writes to stderr"""
 
 
-class SymbolServer(socketserver.ThreadingTCPServer, BaseHTTPServer.HTTPServer):
+class SymbolServer(socketserver.ThreadingTCPServer, http.server.HTTPServer):
   """Simple HTTP server that forks each request"""
 
 

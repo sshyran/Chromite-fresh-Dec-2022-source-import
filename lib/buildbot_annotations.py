@@ -8,8 +8,6 @@ import abc
 import itertools
 import json
 
-import six
-
 
 class Annotation(object):
   """Formatted annotation for buildbot."""
@@ -40,8 +38,7 @@ class Annotation(object):
       return self.name
 
 
-@six.add_metaclass(abc.ABCMeta)
-class _NamedAnnotation(Annotation):
+class _NamedAnnotation(Annotation, metaclass=abc.ABCMeta):
   """Abstract subclass for creating named annotations.
 
   Concrete subclasses should define the ANNOTATION_NAME class attribute.

@@ -7,8 +7,6 @@
 import collections
 import re
 
-import six
-
 
 class KernelArg(object):
   """Stores a arg(=value).
@@ -27,7 +25,7 @@ class KernelArg(object):
     Raises:
       ValueError: Invalid quotes in |value|.
     """
-    if value and (not isinstance(value, six.string_types) or
+    if value and (not isinstance(value, str) or
                   '"' in value[1:-1] or
                   value.startswith('"') != value.endswith('"')):
       raise ValueError(value)
@@ -98,7 +96,7 @@ class KernelArgList(collections.abc.MutableMapping,
     """
     # If we got a string, split it into KernelArg pairs.  If not, just pass
     # it through list().
-    if isinstance(data, six.string_types):
+    if isinstance(data, str):
       valid = re.match(_VALID_CMDLINE_RE, data)
       if not valid:
         raise ValueError(data)
@@ -149,7 +147,7 @@ class KernelArgList(collections.abc.MutableMapping,
            argument (which is compared against only |entry.arg|, ignoring
            |entry.value|).
     """
-    if isinstance(item, six.string_types):
+    if isinstance(item, str):
       for kern_arg in self._data:
         if kern_arg.arg == item:
           return True
@@ -167,7 +165,7 @@ class KernelArgList(collections.abc.MutableMapping,
       key: Either a slice, an integer index, or a string argument to delete.
           A string is converted to a numeric index via index().
     """
-    if isinstance(key, six.string_types):
+    if isinstance(key, str):
       idx = self.index(key)
       if idx is None:
         raise KeyError(key)
@@ -212,7 +210,7 @@ class KernelArgList(collections.abc.MutableMapping,
     if not isinstance(value, KernelArg):
       raise ValueError(value)
     # Convert string keys into integer indexes.
-    if isinstance(key, six.string_types):
+    if isinstance(key, str):
       idx = self.index(key)
       # Setting a non-existent string index does an append.
       if idx is None:
@@ -269,7 +267,7 @@ class KernelArgList(collections.abc.MutableMapping,
     if not isinstance(obj, KernelArg):
       raise ValueError(obj)
     # Convert string index to an integer index.
-    if isinstance(index, six.string_types):
+    if isinstance(index, str):
       key = index
       index = self.index(index)
       if index is None:

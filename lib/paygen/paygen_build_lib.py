@@ -15,9 +15,9 @@ import functools
 import json
 import operator
 import os
+import urllib.parse
 
 from google.protobuf import json_format
-from six.moves import urllib
 
 from chromite.api.gen.chromite.api import test_metadata_pb2
 from chromite.api.gen.test_platform import request_pb2

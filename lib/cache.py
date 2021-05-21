@@ -9,8 +9,7 @@ import errno
 import os
 import shutil
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging

@@ -8,13 +8,10 @@ import argparse
 import contextlib
 import multiprocessing
 import os
+import queue as Queue
 import socket
 import signal
 import time
-
-from six.moves import queue as Queue
-
-import six
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
@@ -59,7 +56,7 @@ def GetMetricFieldSpec(fields=None):
         field_spec.append(BooleanField(key))
       elif isinstance(val, int):
         field_spec.append(IntegerField(key))
-      elif isinstance(val, six.string_types):
+      elif isinstance(val, str):
         field_spec.append(StringField(key))
       else:
         logging.error("Couldn't classify the metric field %s:%s",

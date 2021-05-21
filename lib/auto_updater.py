@@ -34,8 +34,6 @@ import subprocess
 import tempfile
 import time
 
-import six
-
 from chromite.cli import command
 from chromite.lib import auto_update_util
 from chromite.lib import auto_updater_transfer
@@ -837,7 +835,7 @@ class ChromiumOSUpdater(BaseUpdater):
         MAX_RETRY,
         self.device.run,
         cmd, delay_sec=DELAY_SEC_FOR_RETRY,
-        shell=isinstance(cmd, six.string_types),
+        shell=isinstance(cmd, str),
         **kwargs)
 
   def PreSetupStatefulUpdate(self):

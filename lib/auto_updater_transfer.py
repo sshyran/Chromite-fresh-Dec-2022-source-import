@@ -38,9 +38,7 @@ from __future__ import division
 
 import abc
 import os
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -87,7 +85,7 @@ def GetPayloadPropertiesFileName(payload):
   return payload + '.json'
 
 
-class Transfer(six.with_metaclass(abc.ABCMeta, object)):
+class Transfer(object, metaclass=abc.ABCMeta):
   """Abstract Base Class that handles payload precheck and transfer."""
 
   PAYLOAD_DIR_NAME = 'payloads'

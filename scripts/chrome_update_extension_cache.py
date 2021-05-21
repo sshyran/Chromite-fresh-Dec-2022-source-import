@@ -21,9 +21,8 @@ $ ebuild chromeos-default-apps-1.0.0.ebuild manifest --force
 
 import json
 import os
+import urllib.request
 import xml.dom.minidom
-
-from six.moves import urllib
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib

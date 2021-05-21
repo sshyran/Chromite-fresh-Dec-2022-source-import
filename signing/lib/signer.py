@@ -23,11 +23,9 @@ Signing Flow:
  Keyblock+-+  Image In+-+
 """
 
+import configparser
 import os
 import re
-
-import six
-from six.moves import configparser
 
 from chromite.lib import cros_build_lib
 
@@ -65,11 +63,11 @@ class SignerInstructionConfig(object):
 
     # Wrap files in tuple if given as a string
     self.input_files = (
-        (input_files,) if isinstance(input_files, six.string_types)
+        (input_files,) if isinstance(input_files, str)
         else input_files)
 
     self.output_files = (
-        (output_files,) if isinstance(output_files, six.string_types)
+        (output_files,) if isinstance(output_files, str)
         else output_files)
 
   def __eq__(self, other):

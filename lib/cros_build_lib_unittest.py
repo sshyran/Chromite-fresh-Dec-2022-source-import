@@ -4,6 +4,7 @@
 
 """Test the cros_build_lib module."""
 
+import builtins
 import contextlib
 import datetime
 import difflib
@@ -15,8 +16,6 @@ import socket
 import subprocess
 import sys
 import unittest
-
-from six.moves import builtins
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
