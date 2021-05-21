@@ -5,7 +5,6 @@
 """This script installs users and groups into sysroots."""
 
 import os
-import sys
 
 from chromite.lib import accounts_lib
 from chromite.lib import commandline
@@ -13,9 +12,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib import user_db
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 ACCOUNT_DB_FILENAME = 'accounts.json'

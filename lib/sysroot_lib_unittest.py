@@ -5,7 +5,6 @@
 """Tests for the sysroot library."""
 
 import os
-import sys
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
@@ -16,9 +15,6 @@ from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class SysrootLibTest(cros_test_lib.MockTempDirTestCase):

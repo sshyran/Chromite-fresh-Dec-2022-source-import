@@ -9,16 +9,12 @@
 from __future__ import absolute_import
 
 import socket
-import sys
 
 import psutil  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import net_metrics
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 snetio = psutil._common.snetio

@@ -5,7 +5,6 @@
 """Tests for scripts/repo_sync_manifest."""
 
 import os
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -17,9 +16,6 @@ from chromite.lib import repo_manifest_unittest
 from chromite.lib import repo_util
 from chromite.scripts import create_manifest_snapshot
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MANIFEST_XML = """<?xml version="1.0" encoding="UTF-8"?>

@@ -15,14 +15,11 @@ import collections
 import enum
 import os
 from pathlib import Path
-import sys
 from typing import Iterable, Iterator, List, Optional, Set, Union
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.parser import package_info
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

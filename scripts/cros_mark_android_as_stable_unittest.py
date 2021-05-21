@@ -5,7 +5,6 @@
 """Unit tests for cros_mark_android_as_stable.py."""
 
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -17,9 +16,6 @@ from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):

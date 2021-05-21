@@ -4,13 +4,8 @@
 
 """Unit tests for topology module."""
 
-import sys
-
 from chromite.cbuildbot import topology
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TopologyTest(cros_test_lib.TestCase):

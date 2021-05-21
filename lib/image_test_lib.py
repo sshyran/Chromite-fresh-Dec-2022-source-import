@@ -5,14 +5,10 @@
 """Functions related to image tests."""
 
 import os
-import sys
 import unittest
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import perf_uploader
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # File extension for file containing performance values.

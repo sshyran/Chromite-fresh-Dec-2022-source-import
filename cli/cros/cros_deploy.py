@@ -4,15 +4,10 @@
 
 """cros deploy: Deploy the packages onto the target device."""
 
-import sys
-
 from chromite.cli import command
 from chromite.cli import deploy
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('deploy')

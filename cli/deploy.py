@@ -15,7 +15,6 @@ import fnmatch
 import functools
 import json
 import os
-import sys
 import tempfile
 
 from chromite.cli import command
@@ -35,9 +34,6 @@ try:
 except ImportError:
   if cros_build_lib.IsInsideChroot():
     raise
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _DEVICE_BASE_DIR = '/usr/local/tmp/cros-deploy'

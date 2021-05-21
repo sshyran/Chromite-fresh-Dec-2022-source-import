@@ -10,7 +10,6 @@ import glob
 import os
 import re
 import shutil
-import sys
 import tempfile
 from xml.dom import minidom
 
@@ -25,9 +24,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 PUSH_BRANCH = 'temp_auto_checkin_branch'

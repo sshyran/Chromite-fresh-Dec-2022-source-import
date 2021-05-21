@@ -6,13 +6,9 @@
 
 from __future__ import division
 
-import sys
-
 from chromite.api import router as router_lib
 from chromite.lib import osutils
 from chromite.scripts import build_api
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def testSmoke(tmp_path, monkeypatch):

@@ -5,7 +5,6 @@
 """Code related to Remote tryjobs."""
 
 import collections
-import sys
 import uuid
 
 from google.protobuf.struct_pb2 import Struct
@@ -16,9 +15,6 @@ from infra_libs.buildbucket.proto import common_pb2
 from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RemoteRequestFailure(Exception):

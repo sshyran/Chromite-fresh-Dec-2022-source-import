@@ -5,14 +5,10 @@
 """Test that our interface to the user and group database works."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import user_db
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MOCK_PASSWD_CONTENTS = 'root:x:0:0:root:/root:/bin/bash'

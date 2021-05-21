@@ -5,12 +5,8 @@
 """Compares the packages between 2 images by parsing the license file output."""
 
 import re
-import sys
 
 from chromite.lib import commandline
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetPackagesLicensesFromHtml(html_file):

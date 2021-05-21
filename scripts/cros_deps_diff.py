@@ -12,16 +12,12 @@ in the dependency trees until common packages are found.
 
 import json
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import dot_helper
 
 NORMAL_COLOR = 'black'
 BASE_COLORS = ['red', 'green', 'blue']
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def UnversionedName(dep):

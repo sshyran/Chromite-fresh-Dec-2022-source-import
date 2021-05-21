@@ -4,13 +4,8 @@
 
 """Test the uri_lib module."""
 
-import sys
-
 from chromite.lib import cros_test_lib
 from chromite.lib import uri_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ShortenUriTests(cros_test_lib.TestCase):

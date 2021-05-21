@@ -5,14 +5,10 @@
 """All things Chrome OS signing related"""
 
 import os
-import sys
 
 from six.moves import configparser
 
 from chromite.lib import constants
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 SIGNING_DIR = os.path.join(constants.CHROMITE_DIR, 'signing')

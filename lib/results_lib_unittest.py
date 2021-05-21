@@ -6,7 +6,6 @@
 
 import os
 import signal
-import sys
 import time
 
 from six.moves import StringIO
@@ -26,9 +25,6 @@ from chromite.lib import parallel
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class PassStage(generic_stages.BuilderStage):

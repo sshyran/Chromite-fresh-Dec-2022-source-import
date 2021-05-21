@@ -4,14 +4,9 @@
 
 """Unit tests for the cbuildbot program"""
 
-import sys
-
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.scripts import cbuildbot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

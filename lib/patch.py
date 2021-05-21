@@ -10,7 +10,6 @@ import os
 import random
 import re
 import subprocess
-import sys
 import time
 
 import six
@@ -24,9 +23,6 @@ from chromite.lib import gob_util
 # We import mock so that we can identify mock.MagicMock instances in tests
 # that use mock.
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _MAXIMUM_GERRIT_NUMBER_LENGTH = 7

@@ -36,9 +36,6 @@ from chromite.lib import uri_lib
 from chromite.utils import memoize
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class Config:
   """Manage the user's gerrit config settings.
 

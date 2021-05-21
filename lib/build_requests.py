@@ -5,10 +5,6 @@
 """Classes to manage build requests."""
 
 import collections
-import sys
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 REASON_IMPORTANT_CQ_SLAVE = 'important_cq_slave'

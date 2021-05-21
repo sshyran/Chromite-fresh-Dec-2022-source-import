@@ -34,9 +34,6 @@ from chromite.scripts import cros_generate_breakpad_symbols
 from chromite.third_party import requests
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 # Needs to be after chromite imports.
 # We don't want to import the general keyring module as that will implicitly
 # try to import & connect to a dbus server.  That's a waste of time.

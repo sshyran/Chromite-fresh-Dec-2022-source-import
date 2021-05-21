@@ -7,7 +7,6 @@
 import glob
 import multiprocessing
 import os
-import sys
 from typing import Iterable, Union
 
 from chromite.api.gen.chromiumos import common_pb2
@@ -19,9 +18,6 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ConfigurationError(Exception):

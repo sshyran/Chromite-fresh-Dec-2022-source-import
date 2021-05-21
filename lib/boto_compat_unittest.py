@@ -5,16 +5,12 @@
 """Unittests for the boto_compat module."""
 
 import os
-import sys
 
 from six.moves import configparser
 
 from chromite.lib import boto_compat
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class FixBotoCertsTest(cros_test_lib.TempDirTestCase):

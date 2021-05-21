@@ -4,12 +4,7 @@
 
 """CLI entry point into lib/vm.py; used for VM management."""
 
-import sys
-
 from chromite.lib import vm
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def main(argv):

@@ -5,7 +5,6 @@
 """Unit tests for the device_imager module."""
 
 import os
-import sys
 import tempfile
 import time
 
@@ -23,9 +22,6 @@ from chromite.lib import stateful_updater
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import xbuddy
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

@@ -5,15 +5,11 @@
 """Unittests for the parseelf.py module."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parseelf
 from chromite.lib import unittest_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ELFParsingTest(cros_test_lib.TempDirTestCase):

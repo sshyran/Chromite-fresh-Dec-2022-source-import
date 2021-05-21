@@ -6,7 +6,6 @@
 
 import os
 import shutil
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -18,9 +17,6 @@ from chromite.third_party import mock
 
 
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ChromiumOSDeviceMock(partial_mock.PartialMock):

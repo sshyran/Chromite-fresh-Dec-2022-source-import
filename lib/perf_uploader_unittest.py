@@ -6,7 +6,6 @@
 
 import json
 import os
-import sys
 import tempfile
 
 from six.moves import urllib
@@ -14,9 +13,6 @@ from six.moves import urllib
 from chromite.lib import cros_test_lib
 from chromite.lib import perf_uploader
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class PerfUploadTestCase(cros_test_lib.MockTestCase):

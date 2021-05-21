@@ -7,7 +7,6 @@
 import multiprocessing
 import os
 import subprocess
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -18,9 +17,6 @@ from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import timeout_util
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

@@ -4,12 +4,7 @@
 
 """UpgradeTable class is used in Portage package upgrade process."""
 
-import sys
-
 from chromite.lib import table
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class UpgradeTable(table.Table):

@@ -7,16 +7,12 @@
 import datetime
 import json
 import os
-import sys
 
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.buildstore import BuildStore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _FINISHED_STATUSES = (

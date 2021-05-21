@@ -6,7 +6,6 @@
 
 import base64
 import os
-import sys
 from textwrap import dedent
 
 from chromite.lib import constants
@@ -22,9 +21,6 @@ from chromite.third_party import mock
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 unstable_data = 'KEYWORDS=~x86 ~arm'

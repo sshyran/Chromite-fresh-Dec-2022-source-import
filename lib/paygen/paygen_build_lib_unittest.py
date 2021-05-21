@@ -6,7 +6,6 @@
 
 import json
 import os
-import sys
 import tarfile
 
 from chromite.lib import config_lib_unittest
@@ -24,9 +23,6 @@ from chromite.third_party import mock
 
 # We access a lot of protected members during testing.
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class BasePaygenBuildLibTest(cros_test_lib.MockTestCase):

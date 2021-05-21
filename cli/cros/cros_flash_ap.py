@@ -5,7 +5,6 @@
 """flash-ap command."""
 
 import os
-import sys
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
@@ -13,9 +12,6 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.firmware import ap_firmware
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('flash-ap')

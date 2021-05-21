@@ -8,13 +8,8 @@ Test script runs a long time stressing the ability to start and stop the
 dev_server_wrapper. Even very rare hangs will cause significant build flake.
 """
 
-import sys
-
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _ITERATIONS = 10000

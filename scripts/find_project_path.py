@@ -9,14 +9,9 @@ matching path entry, printing the path to stdout if found and raising an
 exception if no match can be found.
 """
 
-import sys
-
 from chromite.lib import commandline
 from chromite.lib import repo_manifest
 from chromite.lib import repo_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def get_parser():

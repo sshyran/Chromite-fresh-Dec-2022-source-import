@@ -5,7 +5,6 @@
 """Tests for toolchain."""
 
 import os
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -14,9 +13,6 @@ from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BASE_TOOLCHAIN_CONF = """# The root of all evil is money, err, this config.

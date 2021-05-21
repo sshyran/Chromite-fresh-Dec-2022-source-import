@@ -4,12 +4,7 @@
 
 """CLI for running Chrome OS tests from lib/cros_test.py."""
 
-import sys
-
 from chromite.lib import cros_test
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def main(argv):

@@ -4,8 +4,6 @@
 
 """Install/copy the image to the device."""
 
-import sys
-
 from chromite.cli import command
 from chromite.cli import flash
 from chromite.cli.cros import cros_chrome_sdk
@@ -15,8 +13,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
 from chromite.lib import pformat
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('flash')

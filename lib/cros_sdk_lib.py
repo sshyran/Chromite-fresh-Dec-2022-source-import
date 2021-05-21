@@ -7,7 +7,6 @@
 import collections
 import os
 import re
-import sys
 import time
 
 from chromite.lib import constants
@@ -16,9 +15,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Version file location inside chroot.

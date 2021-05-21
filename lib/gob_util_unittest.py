@@ -4,7 +4,6 @@
 
 """Unittests for gob_util.py"""
 
-import sys
 import tempfile
 import time
 
@@ -14,9 +13,6 @@ from chromite.lib import config_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gob_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 gob_util.TRY_LIMIT = 1

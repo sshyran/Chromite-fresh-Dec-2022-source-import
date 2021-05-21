@@ -5,14 +5,10 @@
 """Tests for message_util."""
 
 import os
-import sys
 
 from chromite.api import message_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class JsonSerializerTest(cros_test_lib.TestCase):

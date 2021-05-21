@@ -6,7 +6,6 @@
 
 import json
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -17,9 +16,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MANIFEST = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)

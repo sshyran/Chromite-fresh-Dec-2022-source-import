@@ -16,9 +16,6 @@ import sys
 from chromite.lib import cros_logging as logging
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class loggingConfig(object):
   """Configuration for auto-update logging."""
 

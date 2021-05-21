@@ -5,14 +5,10 @@
 """Signing tests."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import signing
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GetDefaultVbootStableHashTest(cros_test_lib.TempDirTestCase):

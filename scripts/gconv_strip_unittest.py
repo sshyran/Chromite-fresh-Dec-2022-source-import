@@ -5,16 +5,12 @@
 """Test gconv_strip."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import gconv_strip
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GconvStriptTest(cros_test_lib.MockTempDirTestCase):

@@ -4,17 +4,12 @@
 
 """Tests for the api/metrics library."""
 
-import sys
-
 from chromite.api import metrics
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.lib import cros_test_lib
 from chromite.utils.metrics import (MetricEvent, OP_GAUGE, OP_NAMED_EVENT,
                                     OP_START_TIMER, OP_STOP_TIMER)
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class MetricsTest(cros_test_lib.TestCase):

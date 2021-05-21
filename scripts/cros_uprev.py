@@ -5,7 +5,6 @@
 """Simplified cros_mark_as_stable script."""
 
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -17,9 +16,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 
 from chromite.cbuildbot import manifest_version
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Commit message subject for uprevving Portage packages.

@@ -6,7 +6,6 @@
 
 import contextlib
 import os
-import sys
 
 from chromite.cbuildbot import patch_series
 from chromite.lib import config_lib
@@ -17,9 +16,6 @@ from chromite.lib import partial_mock
 from chromite.lib import patch as cros_patch
 from chromite.lib import patch_unittest
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class MockManifest(object):

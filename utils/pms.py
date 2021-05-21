@@ -14,9 +14,6 @@ perhaps where a new one could be added, before using this directly.
 
 import functools
 import re
-import sys
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # One value, so make sure we skip all eviction logic with maxsize=None.

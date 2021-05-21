@@ -6,7 +6,6 @@
 
 import operator
 import re
-import sys
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -17,9 +16,6 @@ from chromite.lib import gob_util
 from chromite.lib import parallel
 from chromite.lib import patch as cros_patch
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GerritException(Exception):

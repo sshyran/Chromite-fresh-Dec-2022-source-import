@@ -4,8 +4,6 @@
 
 """Unittests for request_build.py."""
 
-import sys
-
 from google.protobuf.struct_pb2 import Struct
 
 from infra_libs.buildbucket.proto import build_pb2, builder_pb2, common_pb2
@@ -18,9 +16,6 @@ from chromite.lib import request_build
 
 # Tests need internal access.
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RequestBuildHelperTestsBase(cros_test_lib.MockTestCase):

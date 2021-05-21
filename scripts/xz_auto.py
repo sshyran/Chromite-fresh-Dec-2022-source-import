@@ -8,13 +8,10 @@ from __future__ import division
 
 import multiprocessing
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import osutils
 from chromite.utils import memoize
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @memoize.Memoize

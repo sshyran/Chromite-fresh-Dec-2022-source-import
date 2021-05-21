@@ -14,7 +14,6 @@ The main parts of unittest include:
 
 import json
 import os
-import sys
 
 from chromite.lib import auto_updater
 from chromite.lib import auto_updater_transfer
@@ -26,9 +25,6 @@ from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
 from chromite.lib import stateful_updater
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):

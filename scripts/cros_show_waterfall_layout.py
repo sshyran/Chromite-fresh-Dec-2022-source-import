@@ -4,13 +4,8 @@
 
 """Show the builder layout for CrOS waterfalls."""
 
-import sys
-
 from chromite.lib import config_lib
 from chromite.lib import commandline
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _ParseArguments(argv):

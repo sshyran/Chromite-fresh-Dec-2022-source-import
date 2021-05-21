@@ -5,14 +5,10 @@
 """Tests the `cros buildresult` command."""
 
 import json
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_buildresult
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_BUILD_STATUS = {

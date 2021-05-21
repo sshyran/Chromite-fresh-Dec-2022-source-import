@@ -5,7 +5,6 @@
 """Tests for the autotest_util module."""
 
 import os
-import sys
 
 from chromite.lib import autotest_util
 from chromite.lib import constants
@@ -13,9 +12,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.third_party import mock
 from chromite.utils import matching
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):

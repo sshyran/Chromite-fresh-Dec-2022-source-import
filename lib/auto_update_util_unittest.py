@@ -4,13 +4,8 @@
 
 """Unit tests for the auto_update_util module."""
 
-import sys
-
 from chromite.lib import auto_update_util
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class VersionMatchUnittest(cros_test_lib.TestCase):

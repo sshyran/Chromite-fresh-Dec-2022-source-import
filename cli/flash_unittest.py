@@ -5,7 +5,6 @@
 """Unit tests for the flash module."""
 
 import os
-import sys
 
 from chromite.cli import flash
 from chromite.lib import commandline
@@ -16,9 +15,6 @@ from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class USBImagerMock(partial_mock.PartialCmdMock):

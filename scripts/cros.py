@@ -13,14 +13,9 @@ example, `cros lint` will use the cli/cros/cros_lint.py subcommand.
 See cli/ for actual command implementations.
 """
 
-import sys
-
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetOptions(cmd_name=None):

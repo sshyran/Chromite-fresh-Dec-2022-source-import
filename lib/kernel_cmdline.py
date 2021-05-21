@@ -6,12 +6,8 @@
 
 import collections
 import re
-import sys
 
 import six
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class KernelArg(object):

@@ -9,7 +9,6 @@ from __future__ import division
 import os
 import re
 import shutil
-import sys
 
 from chromite.cli import device_imager
 from chromite.cli.cros import cros_chrome_sdk
@@ -22,9 +21,6 @@ from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetDefaultBoard():

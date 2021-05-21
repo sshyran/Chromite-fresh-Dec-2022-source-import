@@ -15,14 +15,10 @@ arguments as well as setting reasonable defaults for parallelism.
 import argparse
 import multiprocessing
 import os
-import sys
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class LookupBoardSysroot(argparse.Action):

@@ -14,7 +14,6 @@ If unsure, just use the --safe flag to clean out various objects.
 import errno
 import glob
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.cli import command
@@ -22,9 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('clean')

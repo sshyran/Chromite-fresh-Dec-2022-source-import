@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 import queue
 import re
-import sys
 import textwrap
 import threading
 
@@ -34,9 +33,6 @@ from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.third_party.gn_helpers import gn_helpers
 from chromite.utils import memoize
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 COMMAND_NAME = 'chrome-sdk'

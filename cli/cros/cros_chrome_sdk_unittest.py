@@ -8,7 +8,6 @@ import copy
 import os
 from pathlib import Path
 import shutil
-import sys
 import threading
 
 from chromite.cli import command_unittest
@@ -24,9 +23,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.third_party import mock
 from chromite.third_party.gn_helpers import gn_helpers
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

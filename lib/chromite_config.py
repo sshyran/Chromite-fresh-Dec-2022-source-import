@@ -5,10 +5,6 @@
 """Manage various ~/.config/chromite/ configuration files."""
 
 from pathlib import Path
-import sys
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 DIR = Path('~/.config/chromite').expanduser()

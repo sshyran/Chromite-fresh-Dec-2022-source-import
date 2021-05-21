@@ -5,14 +5,10 @@
 """Tests for the utils/metrics library."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.third_party import mock
 from chromite.utils import metrics
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class MetricsTest(cros_test_lib.TestCase):

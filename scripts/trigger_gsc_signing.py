@@ -10,7 +10,6 @@ Causes signing to occur for a given artifact.
 import argparse
 import json
 import re
-import sys
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
@@ -18,9 +17,6 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 GSC_PRODUCTION_JOB = 'chromeos/release/sign-image'

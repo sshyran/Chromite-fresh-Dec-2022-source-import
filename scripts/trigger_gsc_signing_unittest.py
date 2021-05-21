@@ -5,7 +5,6 @@
 """Unittests for trigger_gsc_signing.py."""
 
 import json
-import sys
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
@@ -14,9 +13,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.scripts import trigger_gsc_signing as trigger
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

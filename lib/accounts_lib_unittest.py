@@ -5,16 +5,12 @@
 """Tests for accounts_lib."""
 
 import json
-import sys
 
 from chromite.lib import accounts_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import user_db
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 EMPTY_ACCOUNTS_DB_WITH_COMMENTS = """

@@ -11,16 +11,12 @@ headers, gcc-libs).
 """
 
 import argparse
-import sys
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
 from chromite.service import sysroot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():

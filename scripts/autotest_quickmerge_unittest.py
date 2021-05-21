@@ -4,14 +4,9 @@
 
 """Unit tests for autotest_quickmerge."""
 
-import sys
-
 from chromite.lib import cros_test_lib
 from chromite.scripts import autotest_quickmerge
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 RSYNC_TEST_OUTPUT = """.d..t...... ./

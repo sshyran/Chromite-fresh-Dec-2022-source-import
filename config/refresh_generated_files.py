@@ -5,7 +5,6 @@
 """Utility script to update the generated config files."""
 
 import os
-import sys
 
 from chromite.config import chromeos_config
 from chromite.lib import commandline
@@ -13,8 +12,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def main(argv):

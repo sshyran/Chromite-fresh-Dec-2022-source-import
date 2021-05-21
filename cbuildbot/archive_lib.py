@@ -5,7 +5,6 @@
 """Module with utilities for archiving functionality."""
 
 import os
-import sys
 
 from chromite.cbuildbot import commands
 from chromite.lib import config_lib
@@ -13,9 +12,6 @@ from chromite.lib import config_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetBaseUploadURI(config, archive_base=None, bot_id=None):

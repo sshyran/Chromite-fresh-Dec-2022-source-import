@@ -9,14 +9,10 @@
 from __future__ import absolute_import
 
 import contextlib
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import loop
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class _MockTime(object):

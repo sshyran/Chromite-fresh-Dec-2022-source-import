@@ -5,7 +5,6 @@
 """Unit tests for chromite.scripts.cbuildbot_launch."""
 
 import os
-import sys
 import time
 
 from chromite.cbuildbot import commands
@@ -18,9 +17,6 @@ from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.scripts import cbuildbot_launch
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 EXPECTED_MANIFEST_URL = 'https://chrome-internal-review.googlesource.com/chromeos/manifest-internal'  # pylint: disable=line-too-long

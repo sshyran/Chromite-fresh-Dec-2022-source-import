@@ -5,12 +5,8 @@
 """Decorators to help handle mock calls and errors in the Build API."""
 
 import functools
-import sys
 
 from chromite.api import controller
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def all_responses(faux_result_factory):

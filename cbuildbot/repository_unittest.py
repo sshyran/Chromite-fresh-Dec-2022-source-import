@@ -5,7 +5,6 @@
 """Unittests for repository.py."""
 
 import os
-import sys
 import time
 
 from chromite.cbuildbot import repository
@@ -19,9 +18,6 @@ from chromite.third_party import mock
 
 
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RepositoryTests(cros_test_lib.RunCommandTestCase):

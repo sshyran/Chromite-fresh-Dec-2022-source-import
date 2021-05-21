@@ -5,7 +5,6 @@
 """Unit tests for CrOSTest."""
 
 import os
-import sys
 
 import pytest  # pylint: disable=import-error
 
@@ -20,9 +19,6 @@ from chromite.utils import outcap
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

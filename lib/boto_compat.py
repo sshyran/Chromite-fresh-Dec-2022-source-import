@@ -12,7 +12,6 @@ NOTE: This should eventually be removed as part of crbug.com/845304.
 
 import contextlib
 import os
-import sys
 import tempfile
 
 from six.moves import configparser
@@ -20,9 +19,6 @@ from six.moves import configparser
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Path to an updated cacerts.txt file, which will override the cacerts.txt file

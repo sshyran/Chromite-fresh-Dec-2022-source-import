@@ -6,7 +6,6 @@
 
 import datetime
 import os
-import sys
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
@@ -18,9 +17,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import vm
 from chromite.lib.xbuddy import xbuddy
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CrOSTest(object):

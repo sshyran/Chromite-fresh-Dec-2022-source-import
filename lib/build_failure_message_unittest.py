@@ -4,17 +4,12 @@
 
 """Module containing unit tests for build_failure_message."""
 
-import sys
-
 from chromite.lib import build_failure_message
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import failure_message_lib
 from chromite.lib import failure_message_lib_unittest
 from chromite.lib import patch_unittest
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 failure_message_helper = failure_message_lib_unittest.FailureMessageHelper()

@@ -13,15 +13,11 @@ writing serialized data from a message instance out to a file.
 """
 
 import os
-import sys
 
 from google.protobuf import json_format
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FORMAT_BINARY = 1

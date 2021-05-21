@@ -11,14 +11,11 @@ import json
 import os
 from pathlib import Path
 import re
-import sys
 from typing import List, Dict, Iterable, Any, Text, NamedTuple
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

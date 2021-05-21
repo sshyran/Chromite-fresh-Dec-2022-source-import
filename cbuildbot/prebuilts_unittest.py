@@ -5,7 +5,6 @@
 """Unittests for prebuilts."""
 
 import os
-import sys
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import prebuilts
@@ -15,8 +14,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.third_party import mock
 
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 DEFAULT_CHROME_BRANCH = '27'
 

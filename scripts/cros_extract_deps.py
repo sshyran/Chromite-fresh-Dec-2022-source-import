@@ -22,9 +22,6 @@ from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 def FlattenDepTree(deptree, pkgtable=None, parentcpv=None, get_cpe=False):
   """Simplify dependency json.
 

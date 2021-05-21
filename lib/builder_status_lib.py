@@ -6,7 +6,6 @@
 
 import collections
 import pickle
-import sys
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import build_failure_message
@@ -17,9 +16,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import failure_message_lib
 
 from infra_libs.buildbucket.proto import common_pb2
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BUILD_STATUS_URL = (

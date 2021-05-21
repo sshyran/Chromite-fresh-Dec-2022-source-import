@@ -5,14 +5,10 @@
 """Unit tests for cros_fuzz."""
 
 import os
-import sys
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_fuzz
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 DEFAULT_MAX_TOTAL_TIME_OPTION = cros_fuzz.GetLibFuzzerOption(

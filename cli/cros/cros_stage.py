@@ -6,12 +6,9 @@
 
 import os
 import re
-import sys
 
 from chromite.cbuildbot import commands
-
 from chromite.cli import command
-
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -19,12 +16,8 @@ from chromite.lib import dev_server_wrapper
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import remote_access
-
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MOBLAB_STATIC_DIR = '/mnt/moblab/static'

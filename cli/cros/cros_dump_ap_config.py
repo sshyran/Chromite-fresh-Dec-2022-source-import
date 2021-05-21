@@ -6,7 +6,6 @@
 
 import importlib
 from pathlib import Path
-import sys
 
 from chromite.cli import command
 from chromite.lib import constants
@@ -14,8 +13,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import pformat
 from chromite.lib.firmware import servo_lib
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('dump-ap-config')

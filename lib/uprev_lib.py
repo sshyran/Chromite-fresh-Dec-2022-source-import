@@ -10,7 +10,6 @@ import filecmp
 import functools
 import os
 import re
-import sys
 from typing import Iterable, List, Optional, Tuple, Union
 
 from chromite.cbuildbot import manifest_version
@@ -23,9 +22,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib.chroot_lib import Chroot
 from chromite.utils import pms
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'

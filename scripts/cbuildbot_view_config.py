@@ -12,9 +12,6 @@ from chromite.lib import commandline
 from chromite.lib import pformat
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 def GetParser():
   """Creates the argparse parser."""
   parser = commandline.ArgumentParser(description=__doc__)

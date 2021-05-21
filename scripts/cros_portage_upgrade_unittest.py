@@ -8,7 +8,6 @@ import filecmp
 import os
 import re
 import subprocess
-import sys
 import unittest
 
 import pytest  # pylint: disable=import-error
@@ -26,9 +25,6 @@ from chromite.third_party import mock
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # This left in, but disabled, until we can get GetCurrentVersionsTest

@@ -9,7 +9,6 @@ import multiprocessing
 import os
 import re
 import shutil
-import sys
 import time
 
 from six.moves import urllib
@@ -26,9 +25,6 @@ from chromite.lib import path_util
 from chromite.lib import repo_util
 from chromite.lib import retry_util
 from chromite.lib import rewrite_git_alternates
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Default sleep time(second) between retries

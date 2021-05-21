@@ -8,7 +8,6 @@ import abc
 import enum
 import os
 import re
-import sys
 import tempfile
 import threading
 import time
@@ -31,9 +30,6 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

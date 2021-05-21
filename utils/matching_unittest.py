@@ -5,13 +5,9 @@
 """The matching utils unit tests."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.utils import matching
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GetMostLikelyMatchedObjectTest(cros_test_lib.TestCase):

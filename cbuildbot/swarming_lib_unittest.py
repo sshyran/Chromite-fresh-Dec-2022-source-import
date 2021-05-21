@@ -4,13 +4,8 @@
 
 """Unit tests for swarming_lib module."""
 
-import sys
-
 from chromite.cbuildbot import swarming_lib
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class SwarmingLibTest(cros_test_lib.RunCommandTestCase):

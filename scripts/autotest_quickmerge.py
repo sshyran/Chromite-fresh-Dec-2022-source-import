@@ -28,9 +28,6 @@ if cros_build_lib.IsInsideChroot():
   import portage
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 INCLUDE_PATTERNS_FILENAME = 'autotest-quickmerge-includepatterns'
 AUTOTEST_SYMLINK = 'autotest_lib'
 AUTOTEST_PROJECT_NAME = 'chromiumos/third_party/autotest'

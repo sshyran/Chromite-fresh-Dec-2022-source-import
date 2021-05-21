@@ -23,7 +23,6 @@ import functools
 import glob
 import multiprocessing
 import os
-import sys
 import tempfile
 
 from chromite.lib import constants
@@ -39,9 +38,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # How many times to retry uploads.

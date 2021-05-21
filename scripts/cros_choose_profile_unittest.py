@@ -5,15 +5,11 @@
 """Test cros_choose_profile."""
 
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import cros_choose_profile
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ParseArgsTest(cros_test_lib.TestCase):

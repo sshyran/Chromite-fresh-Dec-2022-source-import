@@ -5,7 +5,6 @@
 """Unittests for cidb."""
 
 import os
-import sys
 import unittest
 
 from chromite.lib import cidb
@@ -18,9 +17,6 @@ from chromite.third_party import mock
 
 if cidb.sqlalchemy_imported:
   import sqlalchemy  # pylint: disable=import-error
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RetryableOperationalError(EnvironmentError):

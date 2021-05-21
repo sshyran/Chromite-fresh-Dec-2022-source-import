@@ -6,7 +6,6 @@
 
 import contextlib
 import os
-import sys
 import tempfile
 from xml.dom import minidom
 
@@ -22,9 +21,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_VERSION_STRING = '1.2.4-rc3'

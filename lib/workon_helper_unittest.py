@@ -6,7 +6,6 @@
 
 import collections
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import git
@@ -14,9 +13,6 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import osutils
 from chromite.lib import workon_helper
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BOARD = 'this_is_a_board_name'

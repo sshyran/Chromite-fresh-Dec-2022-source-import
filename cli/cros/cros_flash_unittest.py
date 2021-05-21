@@ -4,8 +4,6 @@
 
 """This module tests the cros flash command."""
 
-import sys
-
 from chromite.cli import command_unittest
 from chromite.cli import flash
 from chromite.cli.cros import cros_flash
@@ -14,9 +12,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class MockFlashCommand(command_unittest.MockCommand):

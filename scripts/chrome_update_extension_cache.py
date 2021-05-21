@@ -21,7 +21,6 @@ $ ebuild chromeos-default-apps-1.0.0.ebuild manifest --force
 
 import json
 import os
-import sys
 import xml.dom.minidom
 
 from six.moves import urllib
@@ -32,9 +31,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import pformat
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 UPLOAD_URL_BASE = 'gs://chromeos-localmirror-private/distfiles'

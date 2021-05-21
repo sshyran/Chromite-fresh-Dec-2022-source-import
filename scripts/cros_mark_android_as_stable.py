@@ -21,7 +21,6 @@ import filecmp
 import glob
 import json
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -34,9 +33,6 @@ from chromite.lib import portage_util
 from chromite.lib import repo_util
 from chromite.scripts import cros_mark_as_stable
 from chromite.service import android
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Dir where all the action happens.

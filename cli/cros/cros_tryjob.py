@@ -5,7 +5,6 @@
 """cros tryjob: Schedule a tryjob."""
 
 import os
-import sys
 import time
 
 from google.protobuf import json_format
@@ -20,9 +19,6 @@ from chromite.lib import pformat
 from chromite.lib import request_build
 
 from chromite.cbuildbot import trybot_patch_pool
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 REMOTE = 'remote'

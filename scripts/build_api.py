@@ -5,7 +5,6 @@
 """The Build API entry point."""
 
 import os
-import sys
 
 from chromite.api import api_config as api_config_lib
 from chromite.api import controller
@@ -17,8 +16,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import tee
 from chromite.utils import matching
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():

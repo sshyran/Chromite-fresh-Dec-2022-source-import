@@ -7,14 +7,9 @@
 If a source .bin is specified, the update is assumed to be a delta update.
 """
 
-import sys
-
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib.paygen import paygen_payload_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def ParseArguments(argv):

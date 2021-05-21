@@ -7,14 +7,10 @@
 import datetime
 import io
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import pformat
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestPPrintTimedelta(cros_test_lib.TestCase):

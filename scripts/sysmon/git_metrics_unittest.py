@@ -10,15 +10,11 @@ from __future__ import absolute_import
 
 import os
 import subprocess
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts.sysmon import git_metrics
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestGitMetricCollector(cros_test_lib.TestCase):

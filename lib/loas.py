@@ -12,14 +12,10 @@ If you don't know what any of this means, then you don't need this module :).
 
 import datetime
 import socket
-import sys
 
 from chromite.lib import alerts
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class LoasError(Exception):

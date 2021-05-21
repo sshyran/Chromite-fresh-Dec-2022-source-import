@@ -15,7 +15,6 @@ import functools
 import json
 import operator
 import os
-import sys
 
 from google.protobuf import json_format
 from six.moves import urllib
@@ -37,9 +36,6 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import test_control
 from chromite.lib.paygen import test_params
 from chromite.lib.paygen import utils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # The oldest release milestone for which run_suite should be attempted.

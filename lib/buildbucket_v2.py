@@ -13,7 +13,6 @@ import ast
 import collections
 import socket
 from ssl import SSLError
-import sys
 
 from google.protobuf import field_mask_pb2
 from six.moves import http_client as httplib
@@ -26,9 +25,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.lib.luci import utils
 from chromite.lib.luci.prpc.client import Client, ProtocolError
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BBV2_URL_ENDPOINT_PROD = (

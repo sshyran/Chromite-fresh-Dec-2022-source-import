@@ -42,7 +42,6 @@ fail.
 
 import os
 import shutil
-import sys
 
 from elftools.elf.elffile import ELFFile
 
@@ -55,9 +54,6 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.third_party import lddtree
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Directory in sysroot's /tmp directory that this script will use for files it

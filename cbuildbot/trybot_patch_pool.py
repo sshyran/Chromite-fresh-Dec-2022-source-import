@@ -5,7 +5,6 @@
 """Module that contains trybot patch pool code."""
 
 import functools
-import sys
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -13,9 +12,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import patch as cros_patch
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def ChromiteFilter(patch):

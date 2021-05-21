@@ -12,7 +12,6 @@ import json
 import os
 import struct
 import subprocess
-import sys
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import swarming_lib
@@ -33,9 +32,6 @@ from chromite.lib.parser import package_info
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RunBuildScriptTest(cros_test_lib.RunCommandTempDirTestCase):

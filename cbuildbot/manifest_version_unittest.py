@@ -5,7 +5,6 @@
 """Unittests for manifest_version. Needs to be run inside of chroot."""
 
 import os
-import sys
 import tempfile
 
 from chromite.cbuildbot import build_status
@@ -19,9 +18,6 @@ from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_VERSION = """

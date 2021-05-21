@@ -5,7 +5,6 @@
 """Unit tests for buildbucket_v2."""
 
 from datetime import datetime, date
-import sys
 
 from google.protobuf import field_mask_pb2
 from google.protobuf.struct_pb2 import Struct, Value
@@ -22,8 +21,6 @@ from infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
 from infra_libs.buildbucket.proto import common_pb2
 from infra_libs.buildbucket.proto import builder_pb2, step_pb2
 
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 SUCCESS_BUILD = {'infra': {
                     'swarming': {

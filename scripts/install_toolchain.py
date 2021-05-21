@@ -8,15 +8,10 @@ This script is not meant to be used by developers directly.
 Run at your own risk.
 """
 
-import sys
-
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():

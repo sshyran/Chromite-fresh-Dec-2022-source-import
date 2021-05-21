@@ -4,7 +4,6 @@
 """Functions for authenticating httplib2 requests with OAuth2 tokens."""
 
 import os
-import sys
 
 import httplib2
 
@@ -13,9 +12,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.lib import path_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 REFRESH_STATUS_CODES = [401]

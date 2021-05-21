@@ -4,14 +4,9 @@
 
 """This module tests helpers in devserver_wrapper."""
 
-import sys
-
 from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import partial_mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 pytestmark = cros_test_lib.pytestmark_inside_only

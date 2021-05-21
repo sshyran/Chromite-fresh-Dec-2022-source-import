@@ -5,7 +5,6 @@
 """Unit tests for the functions in test_image."""
 
 import os
-import sys
 import tempfile
 import unittest
 
@@ -16,9 +15,6 @@ from chromite.lib import image_lib
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.scripts import test_image
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestImageTest(cros_test_lib.MockTempDirTestCase):

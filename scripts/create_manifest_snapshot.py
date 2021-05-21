@@ -21,9 +21,6 @@ from chromite.lib import parallel
 from chromite.lib import repo_util
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 BRANCH_REF_PREFIX = 'refs/heads/'
 
 

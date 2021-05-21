@@ -16,7 +16,6 @@ branch, but not on TOT.
 import base64
 import functools
 import os
-import sys
 import time
 
 from chromite.cbuildbot import repository
@@ -33,9 +32,6 @@ from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib import ts_mon_config
 from chromite.scripts import cbuildbot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # This number should be incremented when we change the layout of the buildroot

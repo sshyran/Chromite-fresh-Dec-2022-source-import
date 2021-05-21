@@ -23,7 +23,6 @@ Some caveats:
 import errno
 import multiprocessing
 import os
-import sys
 
 from six.moves import queue as Queue
 
@@ -38,9 +37,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ModificationTimeMonitor(object):

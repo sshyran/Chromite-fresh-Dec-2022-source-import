@@ -6,7 +6,6 @@
 
 import hashlib
 import json
-import sys
 
 import httplib2
 
@@ -15,9 +14,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CIPDTest(cros_test_lib.MockTestCase):

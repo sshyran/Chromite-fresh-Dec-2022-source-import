@@ -5,14 +5,10 @@
 """Tests for dependency_lib."""
 
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import dependency_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def test_normalize_source_paths_collapsing_sub_paths():

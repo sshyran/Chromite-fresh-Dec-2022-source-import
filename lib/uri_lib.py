@@ -6,12 +6,8 @@
 
 import os
 import re
-import sys
 
 from six.moves import urllib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _ExtractGobClAndSubpath(o):

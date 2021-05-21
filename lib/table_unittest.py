@@ -4,15 +4,11 @@
 
 """Unit tests for the table module."""
 
-import sys
 import tempfile
 
 from chromite.lib import cros_test_lib
 from chromite.lib import table
 from chromite.utils import outcap
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access

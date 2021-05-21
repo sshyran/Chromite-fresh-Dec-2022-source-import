@@ -4,13 +4,8 @@
 
 """API Config unit tests."""
 
-import sys
-
 from chromite.api.api_config import ApiConfig
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ApiConfigTest(cros_test_lib.TestCase):

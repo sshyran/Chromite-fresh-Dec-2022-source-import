@@ -10,8 +10,6 @@ is intended to support development. The current source tip is fetched,
 source modified and built using the unstable 'live' (9999) ebuild.
 """
 
-import sys
-
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
@@ -19,7 +17,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import terminal
 from chromite.lib import workon_helper
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 # These would preferably be class attributes, but it's difficult to make class
 # attributes refer to each other with nested generators in class declarations.

@@ -11,7 +11,6 @@ import glob
 import json
 import os
 import shlex
-import sys
 import tempfile
 
 from chromite.lib import cros_build_lib
@@ -19,9 +18,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _GOMA_COMPILER_PROXY_LOG_URL_TEMPLATE = (

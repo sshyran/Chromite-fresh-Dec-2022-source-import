@@ -12,7 +12,6 @@ import os
 import re
 import shutil
 import stat
-import sys
 
 import six
 from six.moves import http_client as httplib
@@ -28,9 +27,6 @@ from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import osutils
 from chromite.third_party import mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GerritTestCase(cros_test_lib.MockTempDirTestCase):

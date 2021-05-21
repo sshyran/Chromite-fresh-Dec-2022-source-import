@@ -9,7 +9,6 @@ import glob
 import os
 import random
 import shutil
-import sys
 
 from chromite.lib import constants
 from chromite.lib import metadata_lib
@@ -20,9 +19,6 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Hopefully cidb will be deleted soon (before Python 3 finalizes), so we don't

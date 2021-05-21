@@ -5,7 +5,6 @@
 """Unittests for the binpkg.py module."""
 
 import os
-import sys
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import binpkg
@@ -14,9 +13,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 PACKAGES_CONTENT = """USE: test

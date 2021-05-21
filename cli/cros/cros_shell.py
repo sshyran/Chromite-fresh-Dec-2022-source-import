@@ -5,15 +5,11 @@
 """cros shell: Open a remote shell on the target device."""
 
 import argparse
-import sys
 
 from chromite.cli import command
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('shell')

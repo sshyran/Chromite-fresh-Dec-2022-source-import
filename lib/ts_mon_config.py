@@ -10,7 +10,6 @@ import multiprocessing
 import os
 import socket
 import signal
-import sys
 import time
 
 from six.moves import queue as Queue
@@ -30,9 +29,6 @@ try:
 except (ImportError, RuntimeError) as e:
   config = None
   logging.warning('Failed to import ts_mon, monitoring is disabled: %s', e)
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _WasSetup = False

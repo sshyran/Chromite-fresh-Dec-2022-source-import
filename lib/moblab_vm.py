@@ -10,7 +10,6 @@ import json
 import os
 import random
 import shutil
-import sys
 
 from chromite.lib import chroot_util
 from chromite.lib import constants
@@ -20,9 +19,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _CONFIG_FILE_NAME = 'moblabvm.json'

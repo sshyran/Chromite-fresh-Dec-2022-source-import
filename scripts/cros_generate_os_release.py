@@ -5,14 +5,10 @@
 """Combine os-release.d fragments into /etc/os-release."""
 
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GenerateOsRelease(root, default_params=None):

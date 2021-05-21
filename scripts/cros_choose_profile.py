@@ -6,7 +6,6 @@
 
 import functools
 import os
-import sys
 
 import six
 
@@ -16,9 +15,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Default value constants.

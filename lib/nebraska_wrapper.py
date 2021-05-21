@@ -10,7 +10,6 @@ import os
 import shutil
 import multiprocessing
 import subprocess
-import sys
 
 from six.moves import urllib
 
@@ -22,9 +21,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 NEBRASKA_FILENAME = 'nebraska.py'

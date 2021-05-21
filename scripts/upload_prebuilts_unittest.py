@@ -7,7 +7,6 @@
 import copy
 import multiprocessing
 import os
-import sys
 import tempfile
 
 from chromite.lib import binpkg
@@ -21,9 +20,6 @@ from chromite.third_party import mock
 
 
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 PUBLIC_PACKAGES = [{'CPV': 'gtk+/public1', 'SHA1': '1', 'MTIME': '1'},

@@ -6,7 +6,6 @@
 
 import os
 import subprocess
-import sys
 import unittest
 
 from chromite.lib import cros_build_lib
@@ -17,9 +16,6 @@ from chromite.lib import osutils
 from chromite.lib import retry_util
 from chromite.lib import sudo
 from chromite.scripts import cros_sdk
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # This long decorator triggers a false positive in the docstring test.

@@ -11,7 +11,6 @@ registration.
 import collections
 import importlib
 import os
-import sys
 
 from google.protobuf import symbol_database
 
@@ -36,10 +35,9 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.utils import memoize
 
+
 MethodData = collections.namedtuple(
     'MethodData', ('service_descriptor', 'module_name', 'method_descriptor'))
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

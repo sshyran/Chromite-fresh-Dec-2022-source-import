@@ -5,14 +5,10 @@
 """Test crows_setup_toolchains."""
 
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import cros_setup_toolchains
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class UtilsTest(cros_test_lib.MockTempDirTestCase):

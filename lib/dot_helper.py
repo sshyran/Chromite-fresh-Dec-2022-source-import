@@ -4,13 +4,8 @@
 
 """Helper functions for building graphs with dot."""
 
-import sys
-
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Subgraph(object):

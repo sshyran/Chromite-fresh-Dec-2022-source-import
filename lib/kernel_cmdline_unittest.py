@@ -5,15 +5,11 @@
 """Test the kernel_cmdline module."""
 
 import collections
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import kernel_cmdline
 
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # A partial, but sufficiently complicated command line.  DmConfigTest uses

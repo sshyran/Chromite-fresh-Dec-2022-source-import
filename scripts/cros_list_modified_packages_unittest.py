@@ -5,14 +5,10 @@
 """Unit tests for the cros_list_modified_packages program"""
 
 import functools
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import sysroot_lib
 from chromite.scripts import cros_list_modified_packages
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ListModifiedWorkonPackagesTest(cros_test_lib.MockTestCase):

@@ -9,7 +9,6 @@ import glob
 import os
 import re
 import shutil
-import sys
 import tempfile
 
 from chromite.lib import config_lib
@@ -22,9 +21,6 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_mark_as_stable
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class UprevNotFound(Exception):

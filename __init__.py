@@ -7,6 +7,10 @@ import sys
 
 import pkg_resources
 
+
+assert sys.version_info >= (3, 6), 'Chromite requires Python 3.6+'
+
+
 # Add the third_party/ dir to our search path so that we can find the
 # modules in there automatically.  This isn't normal, so don't replicate
 # this pattern elsewhere.

@@ -4,13 +4,9 @@
 
 """Utilities for working with FieldMask protobufs."""
 
-import sys
 from typing import Dict, List
 
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _MergeDictWithPathParts(path_parts: List[str], source: Dict,

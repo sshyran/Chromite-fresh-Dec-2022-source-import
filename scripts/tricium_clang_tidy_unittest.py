@@ -10,7 +10,6 @@ import multiprocessing
 import os
 from pathlib import Path
 import subprocess
-import sys
 import tempfile
 from typing import NamedTuple
 from unittest import mock
@@ -18,8 +17,6 @@ from unittest import mock
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import tricium_clang_tidy
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Replacement(NamedTuple):
