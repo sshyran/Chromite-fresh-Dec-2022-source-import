@@ -11,7 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.api import field_behavior_pb2 as google_dot_api_dot_field__behavior__pb2
+from chromite.third_party.google.api import field_behavior_pb2 as google_dot_api_dot_field__behavior__pb2
 from infra_libs.buildbucket.proto import builder_pb2 as go_dot_chromium_dot_org_dot_luci_dot_buildbucket_dot_proto_dot_builder__pb2
 
 
