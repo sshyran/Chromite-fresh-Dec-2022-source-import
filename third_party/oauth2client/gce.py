@@ -21,10 +21,10 @@ import json
 import logging
 from six.moves import urllib
 
-from oauth2client._helpers import _from_bytes
-from oauth2client import util
-from oauth2client.client import HttpAccessTokenRefreshError
-from oauth2client.client import AssertionCredentials
+from ._helpers import _from_bytes
+from . import util
+from .client import HttpAccessTokenRefreshError
+from .client import AssertionCredentials
 
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'

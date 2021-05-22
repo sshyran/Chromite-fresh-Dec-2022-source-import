@@ -50,10 +50,10 @@ import logging
 import os
 import threading
 
-from oauth2client.client import Credentials
-from oauth2client.client import Storage as BaseStorage
-from oauth2client import util
-from oauth2client.locked_file import LockedFile
+from .client import Credentials
+from .client import Storage as BaseStorage
+from . import util
+from .locked_file import LockedFile
 
 
 __author__ = 'jbeda@google.com (Joe Beda)'

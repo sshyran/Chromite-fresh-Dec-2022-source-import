@@ -18,9 +18,9 @@ from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Util.asn1 import DerSequence
 
-from oauth2client._helpers import _parse_pem_key
-from oauth2client._helpers import _to_bytes
-from oauth2client._helpers import _urlsafe_b64decode
+from ._helpers import _parse_pem_key
+from ._helpers import _to_bytes
+from ._helpers import _urlsafe_b64decode
 
 
 class PyCryptoVerifier(object):

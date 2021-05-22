@@ -17,8 +17,8 @@ import base64
 
 from OpenSSL import crypto
 
-from oauth2client._helpers import _parse_pem_key
-from oauth2client._helpers import _to_bytes
+from ._helpers import _parse_pem_key
+from ._helpers import _to_bytes
 
 
 class OpenSSLVerifier(object):
