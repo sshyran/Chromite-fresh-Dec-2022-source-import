@@ -53,21 +53,21 @@ from chromite.third_party import httplib2
 from chromite.third_party import uritemplate
 
 # Local imports
-from googleapiclient import mimeparse
-from googleapiclient.errors import HttpError
-from googleapiclient.errors import InvalidJsonError
-from googleapiclient.errors import MediaUploadSizeError
-from googleapiclient.errors import UnacceptableMimeTypeError
-from googleapiclient.errors import UnknownApiNameOrVersion
-from googleapiclient.errors import UnknownFileType
-from googleapiclient.http import BatchHttpRequest
-from googleapiclient.http import HttpRequest
-from googleapiclient.http import MediaFileUpload
-from googleapiclient.http import MediaUpload
-from googleapiclient.model import JsonModel
-from googleapiclient.model import MediaModel
-from googleapiclient.model import RawModel
-from googleapiclient.schema import Schemas
+from . import mimeparse
+from .errors import HttpError
+from .errors import InvalidJsonError
+from .errors import MediaUploadSizeError
+from .errors import UnacceptableMimeTypeError
+from .errors import UnknownApiNameOrVersion
+from .errors import UnknownFileType
+from .http import BatchHttpRequest
+from .http import HttpRequest
+from .http import MediaFileUpload
+from .http import MediaUpload
+from .model import JsonModel
+from .model import MediaModel
+from .model import RawModel
+from .schema import Schemas
 from oauth2client.client import GoogleCredentials
 
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it

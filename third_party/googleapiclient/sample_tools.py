@@ -26,7 +26,7 @@ import argparse
 from chromite.third_party import httplib2
 import os
 
-from googleapiclient import discovery
+from . import discovery
 from oauth2client import client
 from oauth2client import file
 from oauth2client import tools
