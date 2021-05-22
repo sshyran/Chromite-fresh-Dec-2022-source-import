@@ -16,11 +16,10 @@ import time
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 from chromite.lib import parallel
+from chromite.third_party.googleapiclient import discovery
 
 
 try:
-  import googleapiclient.discovery
-
   from chromite.third_party.infra_libs.ts_mon import BooleanField
   from chromite.third_party.infra_libs.ts_mon import config
   from chromite.third_party.infra_libs.ts_mon import IntegerField
@@ -143,7 +142,7 @@ def _SetupTsMonFromOptions(options, suppress_exception):
     suppress_exception: True to silence any exception during the setup. Default
                         is set to True.
   """
-  googleapiclient.discovery.logger.setLevel(logging.WARNING)
+  discovery.logger.setLevel(logging.WARNING)
   try:
     config.process_argparse_options(options)
     logging.notice('ts_mon was set up.')

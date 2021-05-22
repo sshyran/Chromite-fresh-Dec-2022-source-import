@@ -68,16 +68,16 @@ from .model import JsonModel
 from .model import MediaModel
 from .model import RawModel
 from .schema import Schemas
-from oauth2client.client import GoogleCredentials
+from chromite.third_party.oauth2client.client import GoogleCredentials
 
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it
 # in '_helpers'.
 try:
-  from oauth2client.util import _add_query_parameter
-  from oauth2client.util import positional
+  from chromite.third_party.oauth2client.util import _add_query_parameter
+  from chromite.third_party.oauth2client.util import positional
 except ImportError:
-  from oauth2client._helpers import _add_query_parameter
-  from oauth2client._helpers import positional
+  from chromite.third_party.oauth2client._helpers import _add_query_parameter
+  from chromite.third_party.oauth2client._helpers import positional
 
 
 # The client library requires a version of httplib2 that supports RETRIES.

@@ -24,17 +24,10 @@ from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.third_party import httplib2
-
-# TODO(fdeng): Cleanup the try-catch once crbug.com/482063 is fixed.
-try:
-  # pylint: disable=wrong-import-order
-  from googleapiclient.discovery import build as apiclient_build
-  from googleapiclient import errors as apiclient_errors
-  from oauth2client import file as oauth_client_fileio
-  from oauth2client import client
-except (RuntimeError, ImportError) as e:
-  apiclient_build = None
-  oauth_client_fileio = None
+from chromite.third_party.googleapiclient import errors as apiclient_errors
+from chromite.third_party.googleapiclient.discovery import build as apiclient_build
+from chromite.third_party.oauth2client import client
+from chromite.third_party.oauth2client import file as oauth_client_fileio
 
 
 class MailServer(object):
@@ -158,10 +151,6 @@ class GmailServer(MailServer):
     Returns:
       True if the email was sent, else False.
     """
-    if not apiclient_build:
-      logging.warning('Could not send email: Google API client not installed.')
-      return False
-
     try:
       credentials = self._GetCachedCredentials()
     except AuthenticationError as e:

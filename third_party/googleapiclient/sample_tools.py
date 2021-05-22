@@ -27,9 +27,9 @@ from chromite.third_party import httplib2
 import os
 
 from . import discovery
-from oauth2client import client
-from oauth2client import file
-from oauth2client import tools
+from chromite.third_party.oauth2client import client
+from chromite.third_party.oauth2client import file
+from chromite.third_party.oauth2client import tools
 
 
 def init(argv, name, version, doc, filename, scope=None, parents=[], discovery_filename=None):

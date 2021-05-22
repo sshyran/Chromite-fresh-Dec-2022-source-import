@@ -66,9 +66,9 @@ import six
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it
 # in '_helpers'.
 try:
-  from oauth2client import util
+  from chromite.third_party.oauth2client import util
 except ImportError:
-  from oauth2client import _helpers as util
+  from chromite.third_party.oauth2client import _helpers as util
 
 
 # The unix time epoch starts at midnight 1970.

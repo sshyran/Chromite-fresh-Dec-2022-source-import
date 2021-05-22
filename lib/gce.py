@@ -8,14 +8,13 @@ Public methods in class GceContext raise HttpError when the underlining call to
 Google API fails, or gce.Error on other failures.
 """
 
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from googleapiclient.http import HttpRequest
-from oauth2client.client import GoogleCredentials
-
 from chromite.lib import cros_logging as logging
 from chromite.lib import timeout_util
 from chromite.third_party import httplib2
+from chromite.third_party.googleapiclient.discovery import build
+from chromite.third_party.googleapiclient.errors import HttpError
+from chromite.third_party.googleapiclient.http import HttpRequest
+from chromite.third_party.oauth2client.client import GoogleCredentials
 
 
 class Error(Exception):

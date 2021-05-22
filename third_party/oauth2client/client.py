@@ -305,6 +305,7 @@ class Credentials(object):
             # In case there's an object from the old package structure,
             # update it
             module_name = module_name.replace('.googleapiclient', '')
+            module_name = module_name.replace('oauth2client', 'chromite.third_party.oauth2client')
             module_obj = __import__(module_name)
 
         module_obj = __import__(module_name,
