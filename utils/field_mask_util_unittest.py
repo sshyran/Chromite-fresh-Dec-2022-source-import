@@ -4,7 +4,7 @@
 
 """Unittests for the field_mask_util.py module."""
 
-from google.protobuf import field_mask_pb2
+from chromite.third_party.google.protobuf import field_mask_pb2
 
 from chromite.lib import cros_test_lib
 from chromite.utils import field_mask_util

@@ -40,9 +40,9 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import unittest_pb2
-from google.protobuf import service_reflection
-from google.protobuf import service
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import service_reflection
+from chromite.third_party.google.protobuf import service
 
 
 class FooUnitTest(unittest.TestCase):

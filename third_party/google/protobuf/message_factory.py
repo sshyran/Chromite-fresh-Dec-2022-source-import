@@ -39,14 +39,14 @@ my_proto_instance = message_classes['some.proto.package.MessageName']()
 
 __author__ = 'matthewtoia@google.com (Matt Toia)'
 
-from google.protobuf.internal import api_implementation
-from google.protobuf import descriptor_pool
-from google.protobuf import message
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import message
 
 if api_implementation.Type() == 'cpp':
-  from google.protobuf.pyext import cpp_message as message_impl
+  from chromite.third_party.google.protobuf.pyext import cpp_message as message_impl
 else:
-  from google.protobuf.internal import python_message as message_impl
+  from chromite.third_party.google.protobuf.internal import python_message as message_impl
 
 
 # The type of all Message classes.

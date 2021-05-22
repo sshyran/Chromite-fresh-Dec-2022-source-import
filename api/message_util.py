@@ -14,7 +14,7 @@ writing serialized data from a message instance out to a file.
 
 import os
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils

@@ -43,24 +43,24 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import unittest_import_pb2
-from google.protobuf import unittest_import_public_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import descriptor_pb2
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import descriptor_pool_test1_pb2
-from google.protobuf.internal import descriptor_pool_test2_pb2
-from google.protobuf.internal import factory_test1_pb2
-from google.protobuf.internal import factory_test2_pb2
-from google.protobuf.internal import file_options_test_pb2
-from google.protobuf.internal import more_messages_pb2
-from google.protobuf.internal import no_package_pb2
-from google.protobuf.internal import testing_refleaks
-from google.protobuf import descriptor
-from google.protobuf import descriptor_database
-from google.protobuf import descriptor_pool
-from google.protobuf import message_factory
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import unittest_import_pb2
+from chromite.third_party.google.protobuf import unittest_import_public_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import descriptor_pool_test1_pb2
+from chromite.third_party.google.protobuf.internal import descriptor_pool_test2_pb2
+from chromite.third_party.google.protobuf.internal import factory_test1_pb2
+from chromite.third_party.google.protobuf.internal import factory_test2_pb2
+from chromite.third_party.google.protobuf.internal import file_options_test_pb2
+from chromite.third_party.google.protobuf.internal import more_messages_pb2
+from chromite.third_party.google.protobuf.internal import no_package_pb2
+from chromite.third_party.google.protobuf.internal import testing_refleaks
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import descriptor_database
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import message_factory
+from chromite.third_party.google.protobuf import symbol_database
 
 
 

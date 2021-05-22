@@ -6,7 +6,7 @@
 
 from datetime import datetime, date
 
-from google.protobuf.timestamp_pb2 import Timestamp
+from chromite.third_party.google.protobuf.timestamp_pb2 import Timestamp
 
 from chromite.lib import cros_test_lib
 from chromite.lib.luci import utils

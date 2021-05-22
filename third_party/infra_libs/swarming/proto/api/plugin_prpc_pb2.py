@@ -4,7 +4,7 @@
 import base64
 import zlib
 
-from google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
 
 # Includes description of the go.chromium.org/luci/swarming/proto/api/plugin.proto and all of its transitive
 # dependencies. Includes source code info.

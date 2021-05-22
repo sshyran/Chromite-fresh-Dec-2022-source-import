@@ -14,7 +14,7 @@ import re
 import sys
 from typing import List, Optional
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
 from chromite.cbuildbot import manifest_version

@@ -12,7 +12,7 @@ import collections
 import importlib
 import os
 
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import symbol_database
 
 from chromite.api import controller
 from chromite.api import field_handler

@@ -14,7 +14,7 @@ import functools
 import os
 from typing import Callable, Iterable, List, Optional, Union
 
-from google.protobuf import message as protobuf_message
+from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging

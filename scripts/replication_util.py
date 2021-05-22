@@ -4,7 +4,7 @@
 
 """A CLI to do the replication described by a ReplicationConfig proto."""
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
 from chromite.lib import commandline

@@ -60,9 +60,9 @@ __author__ = 'matthewtoia@google.com (Matt Toia)'
 import collections
 import warnings
 
-from google.protobuf import descriptor
-from google.protobuf import descriptor_database
-from google.protobuf import text_encoding
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import descriptor_database
+from chromite.third_party.google.protobuf import text_encoding
 
 
 _USE_C_DESCRIPTORS = descriptor._USE_C_DESCRIPTORS  # pylint: disable=protected-access
@@ -210,7 +210,7 @@ class DescriptorPool(object):
     """
 
     # pylint: disable=g-import-not-at-top
-    from google.protobuf import descriptor_pb2
+    from chromite.third_party.google.protobuf import descriptor_pb2
     file_desc_proto = descriptor_pb2.FileDescriptorProto.FromString(
         serialized_file_desc_proto)
     self.Add(file_desc_proto)

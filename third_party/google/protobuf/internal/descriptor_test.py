@@ -42,16 +42,16 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import unittest_custom_options_pb2
-from google.protobuf import unittest_import_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import descriptor_pb2
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import test_util
-from google.protobuf import descriptor
-from google.protobuf import descriptor_pool
-from google.protobuf import symbol_database
-from google.protobuf import text_format
+from chromite.third_party.google.protobuf import unittest_custom_options_pb2
+from chromite.third_party.google.protobuf import unittest_import_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import test_util
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import text_format
 
 
 TEST_EMPTY_MESSAGE_DESCRIPTOR_ASCII = """

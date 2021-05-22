@@ -13,7 +13,7 @@ import functools
 import os
 import shutil
 
-from google.protobuf import message as protobuf_message
+from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2

@@ -37,10 +37,10 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import unittest_pb2
-from google.protobuf import descriptor
-from google.protobuf import descriptor_pool
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import symbol_database
 
 
 class SymbolDatabaseTest(unittest.TestCase):

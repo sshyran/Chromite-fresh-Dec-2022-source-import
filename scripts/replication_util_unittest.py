@@ -7,7 +7,7 @@
 import json
 import os
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config.replication_config_pb2 import (
     ReplicationConfig, FileReplicationRule, FILE_TYPE_OTHER,

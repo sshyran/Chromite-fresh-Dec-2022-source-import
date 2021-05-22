@@ -7,9 +7,9 @@
 from datetime import date
 from datetime import datetime
 
-from google.protobuf import field_mask_pb2
-from google.protobuf.struct_pb2 import Struct, Value
-from google.protobuf.timestamp_pb2 import Timestamp
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.google.protobuf.struct_pb2 import Struct, Value
+from chromite.third_party.google.protobuf.timestamp_pb2 import Timestamp
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import constants

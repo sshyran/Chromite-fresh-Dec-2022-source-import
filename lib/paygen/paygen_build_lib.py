@@ -17,8 +17,6 @@ import operator
 import os
 import urllib.parse
 
-from google.protobuf import json_format
-
 from chromite.api.gen.chromite.api import test_metadata_pb2
 from chromite.api.gen.test_platform import request_pb2
 from chromite.cbuildbot import commands
@@ -36,6 +34,7 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import test_control
 from chromite.lib.paygen import test_params
 from chromite.lib.paygen import utils
+from chromite.third_party.google.protobuf import json_format
 
 
 # The oldest release milestone for which run_suite should be attempted.

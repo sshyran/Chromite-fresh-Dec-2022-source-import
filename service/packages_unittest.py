@@ -8,8 +8,8 @@ import json
 import os
 import re
 
-from google.protobuf import json_format
-from google.protobuf.field_mask_pb2 import FieldMask
+from chromite.third_party.google.protobuf import json_format
+from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
 import pytest
 
 import chromite as cr

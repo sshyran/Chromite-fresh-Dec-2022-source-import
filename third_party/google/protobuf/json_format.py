@@ -60,9 +60,9 @@ import sys
 
 from chromite.third_party import six
 
-from google.protobuf.internal import type_checkers
-from google.protobuf import descriptor
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf.internal import type_checkers
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import symbol_database
 
 
 _TIMESTAMPFOMAT = '%Y-%m-%dT%H:%M:%S'

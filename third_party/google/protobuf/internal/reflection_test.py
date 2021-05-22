@@ -47,24 +47,24 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import unittest_import_pb2
-from google.protobuf import unittest_mset_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import unittest_proto3_arena_pb2
-from google.protobuf import descriptor_pb2
-from google.protobuf import descriptor
-from google.protobuf import message
-from google.protobuf import reflection
-from google.protobuf import text_format
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import more_extensions_pb2
-from google.protobuf.internal import more_messages_pb2
-from google.protobuf.internal import message_set_extensions_pb2
-from google.protobuf.internal import wire_format
-from google.protobuf.internal import test_util
-from google.protobuf.internal import testing_refleaks
-from google.protobuf.internal import decoder
-from google.protobuf.internal import _parameterized
+from chromite.third_party.google.protobuf import unittest_import_pb2
+from chromite.third_party.google.protobuf import unittest_mset_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import unittest_proto3_arena_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import message
+from chromite.third_party.google.protobuf import reflection
+from chromite.third_party.google.protobuf import text_format
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import more_extensions_pb2
+from chromite.third_party.google.protobuf.internal import more_messages_pb2
+from chromite.third_party.google.protobuf.internal import message_set_extensions_pb2
+from chromite.third_party.google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf.internal import test_util
+from chromite.third_party.google.protobuf.internal import testing_refleaks
+from chromite.third_party.google.protobuf.internal import decoder
+from chromite.third_party.google.protobuf.internal import _parameterized
 
 
 if six.PY3:
@@ -2072,7 +2072,7 @@ class Proto2ReflectionTest(unittest.TestCase):
     # We import here since it's the import that used to fail, and we want
     # the failure to have the right context.
     # pylint: disable=g-import-not-at-top
-    from google.protobuf.internal import import_test_package
+    from chromite.third_party.google.protobuf.internal import import_test_package
     # pylint: enable=g-import-not-at-top
     msg = import_test_package.myproto.Outer()
     # Just check the default value.

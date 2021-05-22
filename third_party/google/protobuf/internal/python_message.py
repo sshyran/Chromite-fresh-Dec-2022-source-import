@@ -59,19 +59,19 @@ from chromite.third_party import six
 from six.moves import range
 
 # We use "as" to avoid name collisions with variables.
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import containers
-from google.protobuf.internal import decoder
-from google.protobuf.internal import encoder
-from google.protobuf.internal import enum_type_wrapper
-from google.protobuf.internal import extension_dict
-from google.protobuf.internal import message_listener as message_listener_mod
-from google.protobuf.internal import type_checkers
-from google.protobuf.internal import well_known_types
-from google.protobuf.internal import wire_format
-from google.protobuf import descriptor as descriptor_mod
-from google.protobuf import message as message_mod
-from google.protobuf import text_format
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import containers
+from chromite.third_party.google.protobuf.internal import decoder
+from chromite.third_party.google.protobuf.internal import encoder
+from chromite.third_party.google.protobuf.internal import enum_type_wrapper
+from chromite.third_party.google.protobuf.internal import extension_dict
+from chromite.third_party.google.protobuf.internal import message_listener as message_listener_mod
+from chromite.third_party.google.protobuf.internal import type_checkers
+from chromite.third_party.google.protobuf.internal import well_known_types
+from chromite.third_party.google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf import descriptor as descriptor_mod
+from chromite.third_party.google.protobuf import message as message_mod
+from chromite.third_party.google.protobuf import text_format
 
 _FieldDescriptor = descriptor_mod.FieldDescriptor
 _AnyFullTypeName = 'google.protobuf.Any'
@@ -963,7 +963,7 @@ def _InternalUnpackAny(msg):
   # To make Any work with custom factories, use the message factory of the
   # parent message.
   # pylint: disable=g-import-not-at-top
-  from google.protobuf import symbol_database
+  from chromite.third_party.google.protobuf import symbol_database
   factory = symbol_database.Default()
 
   type_url = msg.type_url

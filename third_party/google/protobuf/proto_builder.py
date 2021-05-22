@@ -37,8 +37,8 @@ except ImportError:
 import hashlib
 import os
 
-from google.protobuf import descriptor_pb2
-from google.protobuf import message_factory
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf import message_factory
 
 
 def _GetMessageFromFactory(factory, full_name):

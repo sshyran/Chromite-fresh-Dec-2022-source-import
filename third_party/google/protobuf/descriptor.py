@@ -38,14 +38,14 @@ import threading
 import warnings
 from chromite.third_party import six
 
-from google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import api_implementation
 
 _USE_C_DESCRIPTORS = False
 if api_implementation.Type() == 'cpp':
   # Used by MakeDescriptor in cpp mode
   import binascii
   import os
-  from google.protobuf.pyext import _message
+  from chromite.third_party.google.protobuf.pyext import _message
   _USE_C_DESCRIPTORS = True
 
 
@@ -164,7 +164,7 @@ class DescriptorBase(six.with_metaclass(DescriptorMetaclass)):
     if self._options:
       return self._options
 
-    from google.protobuf import descriptor_pb2
+    from chromite.third_party.google.protobuf import descriptor_pb2
     try:
       options_class = getattr(descriptor_pb2,
                               self._options_class_name)
@@ -954,7 +954,7 @@ class FileDescriptor(DescriptorBase):
         options, serialized_options, 'FileOptions')
 
     if pool is None:
-      from google.protobuf import descriptor_pool
+      from chromite.third_party.google.protobuf import descriptor_pool
       pool = descriptor_pool.Default()
     self.pool = pool
     self.message_types_by_name = {}
@@ -1057,7 +1057,7 @@ def MakeDescriptor(desc_proto, package='', build_file_if_cpp=True,
     # definition in the C++ descriptor pool. To do this, we build a
     # FileDescriptorProto with the same definition as this descriptor and build
     # it into the pool.
-    from google.protobuf import descriptor_pb2
+    from chromite.third_party.google.protobuf import descriptor_pb2
     file_descriptor_proto = descriptor_pb2.FileDescriptorProto()
     file_descriptor_proto.message_type.add().MergeFrom(desc_proto)
 

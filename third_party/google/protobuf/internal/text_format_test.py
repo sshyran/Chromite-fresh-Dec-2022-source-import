@@ -47,21 +47,21 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import any_pb2
-from google.protobuf import any_test_pb2
-from google.protobuf import map_unittest_pb2
-from google.protobuf import unittest_custom_options_pb2
-from google.protobuf import unittest_mset_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import unittest_proto3_arena_pb2
-from google.protobuf import descriptor_pb2
-from google.protobuf.internal import any_test_pb2 as test_extend_any
-from google.protobuf.internal import message_set_extensions_pb2
-from google.protobuf.internal import test_proto3_optional_pb2
-from google.protobuf.internal import test_util
-from google.protobuf import descriptor_pool
-from google.protobuf import text_format
-from google.protobuf.internal import _parameterized
+from chromite.third_party.google.protobuf import any_pb2
+from chromite.third_party.google.protobuf import any_test_pb2
+from chromite.third_party.google.protobuf import map_unittest_pb2
+from chromite.third_party.google.protobuf import unittest_custom_options_pb2
+from chromite.third_party.google.protobuf import unittest_mset_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import unittest_proto3_arena_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf.internal import any_test_pb2 as test_extend_any
+from chromite.third_party.google.protobuf.internal import message_set_extensions_pb2
+from chromite.third_party.google.protobuf.internal import test_proto3_optional_pb2
+from chromite.third_party.google.protobuf.internal import test_util
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import text_format
+from chromite.third_party.google.protobuf.internal import _parameterized
 # pylint: enable=g-import-not-at-top
 
 

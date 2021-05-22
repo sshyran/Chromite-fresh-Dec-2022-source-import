@@ -37,7 +37,7 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import text_encoding
+from chromite.third_party.google.protobuf import text_encoding
 
 TEST_VALUES = [
     ("foo\\rbar\\nbaz\\t",

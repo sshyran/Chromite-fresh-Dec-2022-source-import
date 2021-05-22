@@ -70,23 +70,23 @@ try:
 except NameError:
   cmp = lambda x, y: (x > y) - (x < y)  # Python 3
 
-from google.protobuf import map_proto2_unittest_pb2
-from google.protobuf import map_unittest_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import unittest_proto3_arena_pb2
-from google.protobuf import descriptor_pb2
-from google.protobuf import descriptor_pool
-from google.protobuf import message_factory
-from google.protobuf import text_format
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import encoder
-from google.protobuf.internal import more_extensions_pb2
-from google.protobuf.internal import packed_field_test_pb2
-from google.protobuf.internal import test_util
-from google.protobuf.internal import test_proto3_optional_pb2
-from google.protobuf.internal import testing_refleaks
-from google.protobuf import message
-from google.protobuf.internal import _parameterized
+from chromite.third_party.google.protobuf import map_proto2_unittest_pb2
+from chromite.third_party.google.protobuf import map_unittest_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import unittest_proto3_arena_pb2
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import message_factory
+from chromite.third_party.google.protobuf import text_format
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import encoder
+from chromite.third_party.google.protobuf.internal import more_extensions_pb2
+from chromite.third_party.google.protobuf.internal import packed_field_test_pb2
+from chromite.third_party.google.protobuf.internal import test_util
+from chromite.third_party.google.protobuf.internal import test_proto3_optional_pb2
+from chromite.third_party.google.protobuf.internal import testing_refleaks
+from chromite.third_party.google.protobuf import message
+from chromite.third_party.google.protobuf.internal import _parameterized
 
 UCS2_MAXUNICODE = 65535
 if six.PY3:
@@ -2685,7 +2685,7 @@ class OversizeProtosTest(unittest.TestCase):
     self.p_serialized = self.p.SerializeToString()
 
   def testAssertOversizeProto(self):
-    from google.protobuf.pyext._message import SetAllowOversizeProtos
+    from chromite.third_party.google.protobuf.pyext._message import SetAllowOversizeProtos
     SetAllowOversizeProtos(False)
     q = self.proto_cls()
     try:
@@ -2694,7 +2694,7 @@ class OversizeProtosTest(unittest.TestCase):
       self.assertEqual(str(e), 'Error parsing message')
 
   def testSucceedOversizeProto(self):
-    from google.protobuf.pyext._message import SetAllowOversizeProtos
+    from chromite.third_party.google.protobuf.pyext._message import SetAllowOversizeProtos
     SetAllowOversizeProtos(True)
     q = self.proto_cls()
     q.ParseFromString(self.p_serialized)

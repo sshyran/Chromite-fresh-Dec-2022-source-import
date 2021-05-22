@@ -4,7 +4,7 @@
 
 """Unittests for request_build.py."""
 
-from google.protobuf.struct_pb2 import Struct
+from chromite.third_party.google.protobuf.struct_pb2 import Struct
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib

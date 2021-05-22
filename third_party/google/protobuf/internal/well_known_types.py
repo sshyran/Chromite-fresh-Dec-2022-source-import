@@ -52,7 +52,7 @@ except ImportError:
   # Won't work after python 3.8
   import collections as collections_abc
 
-from google.protobuf.descriptor import FieldDescriptor
+from chromite.third_party.google.protobuf.descriptor import FieldDescriptor
 
 _TIMESTAMPFOMAT = '%Y-%m-%dT%H:%M:%S'
 _NANOS_PER_SECOND = 1000000000

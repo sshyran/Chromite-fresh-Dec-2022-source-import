@@ -11,12 +11,11 @@ import os
 import pprint
 import time
 
-from google.protobuf import timestamp_pb2
-
 from chromite.lib import commandline
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
+from chromite.third_party.google.protobuf import timestamp_pb2
 from chromite.third_party.googleapiclient import discovery
 from chromite.third_party.infra_libs import ts_mon
 from chromite.third_party.oauth2client.client import GoogleCredentials

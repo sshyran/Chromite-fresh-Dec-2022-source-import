@@ -7,7 +7,7 @@
 import os
 import time
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.lib import constants
 from chromite.cli import command

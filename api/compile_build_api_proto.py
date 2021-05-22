@@ -199,7 +199,7 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
   logging.info('Postprocessing: Fix imports in %s.', directory)
   # We are using a negative address here (the /address/! portion of the sed
   # command) to make sure we don't change any imports from protobuf itself.
-  address = '^from google.protobuf'
+  address = '^from chromite.third_party.google.protobuf'
   # Find: 'from x import y_pb2 as x_dot_y_pb2'.
   # "\(^google.protobuf[^ ]*\)" matches the module we're importing from.
   #   - \( and \) are for groups in sed.

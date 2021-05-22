@@ -12,7 +12,7 @@ Retries requests on transient errors.
 
 import collections
 
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import symbol_database
 
 from chromite.lib.luci import net
 from chromite.lib.luci.prpc import codes, encoding

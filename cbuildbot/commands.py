@@ -18,7 +18,7 @@ import subprocess
 import sys
 import tempfile
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.chromite.api import android_pb2
 

@@ -21,7 +21,7 @@ import sys
 import threading
 import urllib.parse
 
-from google.protobuf import timestamp_pb2
+from chromite.third_party.google.protobuf import timestamp_pb2
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -328,35 +328,3 @@ def get_token_fingerprint(blob):
   if isinstance(blob, str):
     blob = blob.encode('ascii', 'ignore')
   return binascii.hexlify(hashlib.sha256(blob).digest()[:16])
-
-
-## Hacks
-
-
-def fix_protobuf_package():
-  """Modifies 'google' package to include path to 'google.protobuf' package.
-
-  Prefer our own proto package on the server. Note that this functions is not
-  used on the Swarming bot nor any other client.
-  """
-  # google.__path__[0] will be google_appengine/google.
-  import google
-  if len(google.__path__) > 1:
-    return
-
-  # We do not mind what 'google' get used, inject protobuf in there.
-  path = os.path.join(THIS_DIR, 'third_party', 'protobuf', 'google')
-  google.__path__.append(path)
-
-  # six is needed for oauth2client and webtest (local testing).
-  six_path = os.path.join(THIS_DIR, 'third_party', 'six')
-  if six_path not in sys.path:
-    sys.path.insert(0, six_path)
-
-
-def import_jinja2():
-  """Remove any existing jinja2 package and add ours."""
-  for i in sys.path[:]:
-    if os.path.basename(i) == 'jinja2':
-      sys.path.remove(i)
-  sys.path.append(os.path.join(THIS_DIR, 'third_party'))

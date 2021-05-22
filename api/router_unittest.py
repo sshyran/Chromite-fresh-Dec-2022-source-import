@@ -6,7 +6,7 @@
 
 import os
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api import api_config
 from chromite.api import message_util

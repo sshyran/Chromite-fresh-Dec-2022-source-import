@@ -58,9 +58,9 @@ Example usage::
 """
 
 
-from google.protobuf.internal import api_implementation
-from google.protobuf import descriptor_pool
-from google.protobuf import message_factory
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import message_factory
 
 
 class SymbolDatabase(message_factory.MessageFactory):

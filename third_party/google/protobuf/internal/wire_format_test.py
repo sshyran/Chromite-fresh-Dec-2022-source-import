@@ -39,8 +39,8 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import message
-from google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf import message
+from chromite.third_party.google.protobuf.internal import wire_format
 
 
 class WireFormatTest(unittest.TestCase):

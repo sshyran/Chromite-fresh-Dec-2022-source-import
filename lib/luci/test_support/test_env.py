@@ -23,8 +23,3 @@ def setup_test_env():
 
   # For 'from components import ...' and 'from test_support import ...'.
   sys.path.insert(0, ROOT_DIR)
-  sys.path.insert(0, os.path.join(ROOT_DIR, '..', 'third_party_local'))
-
-  # pylint: disable=import-error
-  import utils
-  utils.fix_protobuf_package()

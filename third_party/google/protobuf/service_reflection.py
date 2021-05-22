@@ -38,11 +38,11 @@ compiler at compile-time.
 
 __author__ = 'petar@google.com (Petar Petrov)'
 
-from google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import api_implementation
 
 if api_implementation.Type() == 'cpp':
   # pylint: disable=g-import-not-at-top
-  from google.protobuf.pyext import _message
+  from chromite.third_party.google.protobuf.pyext import _message
 
 
 class GeneratedServiceType(type):

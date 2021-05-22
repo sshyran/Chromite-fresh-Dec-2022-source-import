@@ -54,10 +54,10 @@ if six.PY3:
   long = int  # pylint: disable=redefined-builtin,invalid-name
 
 # pylint: disable=g-import-not-at-top
-from google.protobuf.internal import decoder
-from google.protobuf.internal import type_checkers
-from google.protobuf import descriptor
-from google.protobuf import text_encoding
+from chromite.third_party.google.protobuf.internal import decoder
+from chromite.third_party.google.protobuf.internal import type_checkers
+from chromite.third_party.google.protobuf import descriptor
+from chromite.third_party.google.protobuf import text_encoding
 
 __all__ = ['MessageToString', 'Parse', 'PrintMessage', 'PrintField',
            'PrintFieldValue', 'Merge', 'MessageToBytes']
@@ -310,9 +310,9 @@ def _BuildMessageFromTypeName(type_name, descriptor_pool):
   """
   # pylint: disable=g-import-not-at-top
   if descriptor_pool is None:
-    from google.protobuf import descriptor_pool as pool_mod
+    from chromite.third_party.google.protobuf import descriptor_pool as pool_mod
     descriptor_pool = pool_mod.Default()
-  from google.protobuf import symbol_database
+  from chromite.third_party.google.protobuf import symbol_database
   database = symbol_database.Default()
   try:
     message_descriptor = descriptor_pool.FindMessageTypeByName(type_name)

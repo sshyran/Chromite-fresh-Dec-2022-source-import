@@ -39,19 +39,19 @@ try:
   import unittest2 as unittest  #PY26
 except ImportError:
   import unittest
-from google.protobuf import map_unittest_pb2
-from google.protobuf import unittest_mset_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import unittest_proto3_arena_pb2
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import encoder
-from google.protobuf.internal import message_set_extensions_pb2
-from google.protobuf.internal import missing_enum_values_pb2
-from google.protobuf.internal import test_util
-from google.protobuf.internal import testing_refleaks
-from google.protobuf.internal import type_checkers
-from google.protobuf.internal import wire_format
-from google.protobuf import descriptor
+from chromite.third_party.google.protobuf import map_unittest_pb2
+from chromite.third_party.google.protobuf import unittest_mset_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import unittest_proto3_arena_pb2
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import encoder
+from chromite.third_party.google.protobuf.internal import message_set_extensions_pb2
+from chromite.third_party.google.protobuf.internal import missing_enum_values_pb2
+from chromite.third_party.google.protobuf.internal import test_util
+from chromite.third_party.google.protobuf.internal import testing_refleaks
+from chromite.third_party.google.protobuf.internal import type_checkers
+from chromite.third_party.google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf import descriptor
 
 
 @testing_refleaks.TestCase

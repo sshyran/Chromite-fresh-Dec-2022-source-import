@@ -91,10 +91,10 @@ else:
   import re    # pylint: disable=g-import-not-at-top
   _SURROGATE_PATTERN = re.compile(six.u(r'[\ud800-\udfff]'))
 
-from google.protobuf.internal import containers
-from google.protobuf.internal import encoder
-from google.protobuf.internal import wire_format
-from google.protobuf import message
+from chromite.third_party.google.protobuf.internal import containers
+from chromite.third_party.google.protobuf.internal import encoder
+from chromite.third_party.google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf import message
 
 
 # This will overflow and thus become IEEE-754 "infinity".  We would use

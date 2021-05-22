@@ -4,7 +4,7 @@
 
 # This file is heavily based off of LUCI encoding.py.
 
-from google.protobuf import json_format, text_format
+from chromite.third_party.google.protobuf import json_format, text_format
 
 
 class Encoding(object):

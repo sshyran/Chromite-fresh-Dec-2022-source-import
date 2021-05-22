@@ -56,11 +56,11 @@ from chromite.third_party import six
 if six.PY3:
   long = int
 
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import decoder
-from google.protobuf.internal import encoder
-from google.protobuf.internal import wire_format
-from google.protobuf import descriptor
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import decoder
+from chromite.third_party.google.protobuf.internal import encoder
+from chromite.third_party.google.protobuf.internal import wire_format
+from chromite.third_party.google.protobuf import descriptor
 
 _FieldDescriptor = descriptor.FieldDescriptor
 

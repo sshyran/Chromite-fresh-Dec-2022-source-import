@@ -35,8 +35,8 @@
 import unittest
 
 
-from google.protobuf.internal import more_messages_pb2
-from google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf.internal import more_messages_pb2
+from chromite.third_party.google.protobuf import descriptor_pool
 
 
 class KeywordsConflictTest(unittest.TestCase):

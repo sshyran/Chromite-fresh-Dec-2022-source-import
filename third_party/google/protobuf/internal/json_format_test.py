@@ -44,20 +44,20 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import any_pb2
-from google.protobuf import duration_pb2
-from google.protobuf import field_mask_pb2
-from google.protobuf import struct_pb2
-from google.protobuf import timestamp_pb2
-from google.protobuf import wrappers_pb2
-from google.protobuf import any_test_pb2
-from google.protobuf import unittest_mset_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf.internal import test_proto3_optional_pb2
-from google.protobuf import descriptor_pool
-from google.protobuf import json_format
-from google.protobuf.util import json_format_pb2
-from google.protobuf.util import json_format_proto3_pb2
+from chromite.third_party.google.protobuf import any_pb2
+from chromite.third_party.google.protobuf import duration_pb2
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.google.protobuf import struct_pb2
+from chromite.third_party.google.protobuf import timestamp_pb2
+from chromite.third_party.google.protobuf import wrappers_pb2
+from chromite.third_party.google.protobuf import any_test_pb2
+from chromite.third_party.google.protobuf import unittest_mset_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf.internal import test_proto3_optional_pb2
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import json_format
+from chromite.third_party.google.protobuf.util import json_format_pb2
+from chromite.third_party.google.protobuf.util import json_format_proto3_pb2
 
 
 class JsonFormatBase(unittest.TestCase):

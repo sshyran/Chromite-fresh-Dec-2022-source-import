@@ -9,7 +9,7 @@ import sys
 import unittest
 from unittest import mock
 
-from google.protobuf import empty_pb2
+from chromite.third_party.google.protobuf import empty_pb2
 
 from chromite.lib.luci import net
 from chromite.lib.luci.prpc import client as prpc_client

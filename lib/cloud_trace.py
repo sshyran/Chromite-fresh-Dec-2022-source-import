@@ -12,11 +12,10 @@ import os
 import random
 import re
 
-from google.protobuf import timestamp_pb2
-
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import structured
+from chromite.third_party.google.protobuf import timestamp_pb2
 from chromite.third_party.infra_libs import ts_mon
 
 

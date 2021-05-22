@@ -11,7 +11,7 @@ exists: all of the work is done here.
 import os
 import tempfile
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api import controller
 from chromite.api import faux

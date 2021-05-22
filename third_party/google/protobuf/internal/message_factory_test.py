@@ -39,14 +39,14 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import descriptor_pb2
-from google.protobuf.internal import api_implementation
-from google.protobuf.internal import factory_test1_pb2
-from google.protobuf.internal import factory_test2_pb2
-from google.protobuf.internal import testing_refleaks
-from google.protobuf import descriptor_database
-from google.protobuf import descriptor_pool
-from google.protobuf import message_factory
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf.internal import api_implementation
+from chromite.third_party.google.protobuf.internal import factory_test1_pb2
+from chromite.third_party.google.protobuf.internal import factory_test2_pb2
+from chromite.third_party.google.protobuf.internal import testing_refleaks
+from chromite.third_party.google.protobuf import descriptor_database
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import message_factory
 
 
 @testing_refleaks.TestCase
