@@ -55,7 +55,8 @@ class EventTest(cros_test_lib.TestCase):
 
   def testInit(self):
     self.assertEqual(self.event1[cros_event.EVENT_ID], self.id1)
-    self.assertDictContainsSubset(self.data1, self.event1)
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(self.event1.items(), self.data1.items())
 
     self.assertIsInstance(self.event1, dict)
 
@@ -138,8 +139,9 @@ class EventLoggerTest(cros_test_lib.TestCase):
 
     e = self.log1.Event(data=e_data)
 
-    self.assertDictContainsSubset(e_data, e)
-    self.assertDictContainsSubset(self.data1, e)
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(e.items(), e_data.items())
+    self.assertGreaterEqual(e.items(), self.data1.items())
 
   def testEventWithKind(self):
     kind = 'testStep'

@@ -140,7 +140,8 @@ class TryjobTestParsing(TryjobTest):
     self.SetupCommandMock(['eve-full-tryjob'])
     options = self.cmd_mock.inst.options
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingRemote(self):
     """Tests flow for an interactive session."""
@@ -180,7 +181,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full-tryjob', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingLocal(self):
     """Tests flow for an interactive session."""
@@ -222,7 +224,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingCbuildbot(self):
     """Tests flow for an interactive session."""
@@ -262,7 +265,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full-tryjob', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testPayloadsParsing(self):
     """Tests flow for an interactive session."""
@@ -276,7 +280,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-payloads'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
 
 class TryjobTestAdjustOptions(TryjobTest):

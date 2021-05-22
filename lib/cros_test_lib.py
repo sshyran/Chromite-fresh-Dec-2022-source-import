@@ -684,6 +684,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
                          (deprecated, replacement))
     return disable_func
 
+  assertDictContainsSubset = _disable('assertDictContainsSubset',
+                                      'assertGreaterEqual')
   assertEquals = _disable('assertEquals', 'assertEqual')
   assertNotEquals = _disable('assertNotEquals', 'assertNotEqual')
   assertAlmostEquals = _disable('assertAlmostEquals', 'assertAlmostEqual')

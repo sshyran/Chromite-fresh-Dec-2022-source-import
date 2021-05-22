@@ -502,31 +502,35 @@ class SiteConfigTest(cros_test_lib.TestCase):
     # Make sure each one contains
     self.longMessage = True
     for name in expected:
-      self.assertDictContainsSubset(expected[name],
-                                    self.site_config[name],
-                                    name)
+      # pylint: disable=dict-items-not-iterating
+      self.assertGreaterEqual(self.site_config[name].items(),
+                              expected[name].items(),
+                              name)
 
     # Special handling for child configs.
 
     children = self.site_config['parent'].child_configs
     self.assertEqual(len(children), 2)
-    self.assertDictContainsSubset(
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(
+        children[0].items(),
         {
             '_template': None,
             'name': 'default',
             'value': 'default',
             'grouped': True,
-        },
-        children[0])
+        }.items(),
+    )
 
-    self.assertDictContainsSubset(
+    self.assertGreaterEqual(
+        children[1].items(),
         {
             '_template': None,
             'name': 'default_with_override',
             'value': 'override',
             'grouped': True,
-        },
-        children[1])
+        }.items(),
+    )
 
   def testAddErrors(self):
     """Test the SiteConfig.Add behavior."""

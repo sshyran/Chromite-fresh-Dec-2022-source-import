@@ -313,9 +313,10 @@ class AppendOptionTest(cros_test_lib.TestCase):
   def testNone(self):
     """Test results when no arguments are passed in."""
     result = self.parser.parse_args([])
-    self.assertDictContainsSubset(
-        {'flag': None, 'value': None, 'shared': None},
-        vars(result),
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(
+        vars(result).items(),
+        {'flag': None, 'value': None, 'shared': None}.items(),
     )
 
   def testSingles(self):
@@ -324,13 +325,14 @@ class AppendOptionTest(cros_test_lib.TestCase):
         ['--flag', '--value', 'foo', '--shared_flag', '--shared_value', 'bar']
     )
 
-    self.assertDictContainsSubset(
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(
+        vars(result).items(),
         {
             'flag': ['--flag'],
             'value': ['--value', 'foo'],
             'shared': ['--shared_flag', '--shared_value', 'bar'],
-        },
-        vars(result),
+        }.items(),
     )
 
   def testMultiples(self):
@@ -342,14 +344,15 @@ class AppendOptionTest(cros_test_lib.TestCase):
         '--flag', '--value', 'v2',
     ])
 
-    self.assertDictContainsSubset(
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(
+        vars(result).items(),
         {
             'flag': ['--flag', '--flag'],
             'value': ['--value', 'v1', '--value', 'v2'],
             'shared': ['-x', '-y', 's1', '--shared_flag',
                        '--shared_value', 's2'],
-        },
-        vars(result),
+        }.items(),
     )
 
 
