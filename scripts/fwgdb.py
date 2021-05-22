@@ -11,13 +11,12 @@ import re
 import socket
 import time
 
-from elftools.elf.elffile import ELFFile
-
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import timeout_util
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 # Need to do this before Servo import
 cros_build_lib.AssertInsideChroot()

@@ -21,8 +21,6 @@ import re
 import stat
 import unittest
 
-from elftools.common import exceptions
-from elftools.elf import elffile
 import magic  # pylint: disable=import-error
 
 from chromite.cros.test import usergroup_baseline
@@ -34,6 +32,8 @@ from chromite.lib import osutils
 from chromite.lib import parseelf
 from chromite.lib import portage_util
 from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.common import exceptions
+from chromite.third_party.pyelftools.elftools.elf import elffile
 
 
 class LocaltimeTest(image_test_lib.ImageTestCase):

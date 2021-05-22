@@ -23,8 +23,8 @@ import os
 import shutil
 import sys
 
-from elftools.elf.elffile import ELFFile
-from elftools.common import exceptions
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
+from chromite.third_party.pyelftools.elftools.common import exceptions
 
 
 def warn(msg, prefix='warning'):

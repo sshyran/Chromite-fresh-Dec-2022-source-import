@@ -43,8 +43,6 @@ fail.
 import os
 import shutil
 
-from elftools.elf.elffile import ELFFile
-
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -54,6 +52,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 
 # Directory in sysroot's /tmp directory that this script will use for files it
