@@ -324,16 +324,26 @@ class XBuddy(object):
     """Check LATEST-master for the version number of interest."""
     logging.debug('Checking gs for latest %s-%s image', board, suffix)
     image_dir = XBuddy._ResolveImageDir(image_dir)
-    latest_addr = (devserver_constants.GS_LATEST_MASTER %
-                   {'image_dir': image_dir,
-                    'board': board,
-                    'suffix': suffix})
-    # Full release + version is in the LATEST file.
-    version = self._ctx.Cat(latest_addr, encoding='utf-8')
 
-    return devserver_constants.IMAGE_DIR % {'board':board,
-                                            'suffix':suffix,
-                                            'version':version}
+    version = None
+    for f in (devserver_constants.GS_LATEST_MAIN,
+              devserver_constants.GS_LATEST_MASTER):
+      latest_addr = f % {'image_dir': image_dir,
+                         'board': board,
+                         'suffix': suffix}
+
+      try:
+        # Full release + version is in the LATEST file.
+        version = self._ctx.Cat(latest_addr, encoding='utf-8')
+        return devserver_constants.IMAGE_DIR % {'board':board,
+                                                'suffix':suffix,
+                                                'version':version}
+      except Exception as e:
+        logging.warning(
+            'Failed to look up file %s with error %s. ignoring', f, e)
+
+    raise build_artifact.ArtifactDownloadError(
+        'Cannot look up the official image version.')
 
   def _LS(self, path, list_subdirectory=False):
     """Does a directory listing of the given gs path.
