@@ -202,11 +202,11 @@ class Crossdev(object):
         cmd = ['crossdev', '--show-target-cfg', '--ex-gdb']
         if target in TARGET_COMPILER_RT_ENABLED:
           cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
-        if target in TARGET_GO_ENABLED:
-          cmd.extend(CROSSDEV_GO_ARGS)
         if target in TARGET_LLVM_PKGS_ENABLED:
           for pkg in LLVM_PKGS_TABLE:
             cmd.extend(LLVM_PKGS_TABLE[pkg])
+        if target in TARGET_GO_ENABLED:
+          cmd.extend(CROSSDEV_GO_ARGS)
         cmd.extend(['-t', target])
         # Catch output of crossdev.
         out = cros_build_lib.run(
