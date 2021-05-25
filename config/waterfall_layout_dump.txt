@@ -221,6 +221,7 @@
 == informational ==
   amd64-generic-asan
   amd64-generic-fuzzer
+  amd64-generic-fwupd-upstream
   amd64-generic-msan-fuzzer
   amd64-generic-ubsan
   amd64-generic-ubsan-fuzzer
@@ -456,6 +457,7 @@
   amd64-generic-coverage-fuzzer-tryjob
   amd64-generic-full-tryjob
   amd64-generic-fuzzer-tryjob
+  amd64-generic-fwupd-upstream-tryjob
   amd64-generic-incremental-tryjob
   amd64-generic-llvm-next-toolchain-tryjob
   amd64-generic-llvm-toolchain-tryjob

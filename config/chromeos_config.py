@@ -1714,6 +1714,20 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       board_replace=True,
   )
 
+  site_config.Add(
+      'amd64-generic-fwupd-upstream',
+      site_config.templates.full,
+      site_config.templates.informational,
+      boards=['amd64-generic'],
+      profile='fwupd-upstream',
+      description='Build with Upstream fwupd',
+      disk_layout='4gb-rootfs',
+      # Every 3 hours.
+      schedule='0 */3 * * *',
+      board_replace=True,
+      vm_tests=[],
+  )
+
 
 def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   """Create all firmware build configs.
