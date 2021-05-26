@@ -96,10 +96,17 @@ class SetupBoardRunConfig(object):
 class BuildPackagesRunConfig(object):
   """Value object to hold build packages run configs."""
 
-  def __init__(self, usepkg=True, install_debug_symbols=False,
-               packages=None, use_flags=None, use_goma=False,
-               incremental_build=True, package_indexes=None,
-               expanded_binhosts: bool = False, setup_board: bool = True):
+  def __init__(self,
+               usepkg=True,
+               install_debug_symbols=False,
+               packages=None,
+               use_flags=None,
+               use_goma=False,
+               incremental_build=True,
+               package_indexes=None,
+               expanded_binhosts: bool = False,
+               setup_board: bool = True,
+               dryrun: bool = False):
     """Init method.
 
     Args:
@@ -120,6 +127,7 @@ class BuildPackagesRunConfig(object):
       expanded_binhosts: Whether to enable/disable the expanded binhost
         inheritance feature for the sysroot.
       setup_board: Whether to run setup_board in build_packages.
+      dryrun: Whether to do a dryrun and not actually build any packages.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -130,6 +138,7 @@ class BuildPackagesRunConfig(object):
     self.package_indexes = package_indexes or []
     self.expanded_binhosts = expanded_binhosts
     self.setup_board = setup_board
+    self.dryrun = dryrun
 
   def GetBuildPackagesArgs(self):
     """Get the build_packages script arguments."""
@@ -165,6 +174,9 @@ class BuildPackagesRunConfig(object):
 
     if self.packages:
       args.extend(self.packages)
+
+    if self.dryrun:
+      args.append('--pretend')
 
     return args
 

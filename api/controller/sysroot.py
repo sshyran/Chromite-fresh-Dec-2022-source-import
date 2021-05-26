@@ -170,6 +170,9 @@ def InstallPackages(input_proto, output_proto, _config):
       for x in input_proto.package_indexes
   ]
 
+  # Calculate which packages would have been merged, but don't install anything.
+  dryrun = input_proto.flags.dryrun
+
   if not target_sysroot.IsToolchainInstalled():
     cros_build_lib.Die('Toolchain must first be installed.')
 
@@ -184,7 +187,8 @@ def InstallPackages(input_proto, output_proto, _config):
       use_flags=use_flags,
       use_goma=use_goma,
       incremental_build=False,
-      setup_board=False)
+      setup_board=False,
+      dryrun=dryrun)
 
   try:
     sysroot.BuildPackages(build_target, target_sysroot, build_packages_config)
@@ -199,6 +203,10 @@ def InstallPackages(input_proto, output_proto, _config):
       controller_util.CPVToPackageInfo(package, package_info)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
+
+  # Return without populating the response if it is a dryrun.
+  if dryrun:
+    return controller.RETURN_CODE_SUCCESS
 
   # Copy goma logs to specified directory if there is a goma_config and
   # it contains a log_dir to store artifacts.

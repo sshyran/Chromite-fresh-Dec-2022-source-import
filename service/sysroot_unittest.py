@@ -287,7 +287,8 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         usepkg=True,
         install_debug_symbols=True,
         packages=packages,
-        setup_board=False)
+        setup_board=False,
+        dryrun=True)
 
     args = instance.GetBuildPackagesArgs()
     self.AssertHasRequiredArgs(args)
@@ -300,6 +301,8 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     # Packages included.
     for package in packages:
       self.assertIn(package, args)
+    # Pretend flag included.
+    self.assertIn('--pretend', args)
 
   def testGetBuildPackagesEnv(self):
     """Test the build_packages env."""

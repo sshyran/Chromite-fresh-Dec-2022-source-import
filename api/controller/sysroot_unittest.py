@@ -612,7 +612,8 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         use_flags=[],
         use_goma=False,
         incremental_build=False,
-        setup_board=False)
+        setup_board=False,
+        dryrun=False)
 
   def testSuccessWithGomaLogs(self):
     """Test successful call with goma."""
