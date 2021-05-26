@@ -9,11 +9,13 @@ Install proto using CIPD to ensure a consistent protoc version.
 
 import enum
 import os
+import tempfile
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import git
 from chromite.lib import osutils
 
 
@@ -142,25 +144,40 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
           # We have a match, add the file.
           targets.append(os.path.join(dirpath, filename))
 
-  cmd = [
-      _get_protoc_command(protoc_version),
-      '--python_out',
-      output,
-      '--proto_path',
-      source,
-  ]
-  cmd.extend(targets)
+  chromeos_config_path = os.path.realpath(
+      os.path.join(constants.SOURCE_ROOT, 'src/config'))
 
-  result = cros_build_lib.run(
-      cmd,
-      cwd=source,
-      print_cmd=False,
-      check=False,
-      enter_chroot=protoc_version is ProtocVersion.SDK)
+  with tempfile.TemporaryDirectory() as tempdir:
+    if not os.path.exists(chromeos_config_path):
+      chromeos_config_path = os.path.join(tempdir, 'config')
 
-  if result.returncode:
-    raise GenerationError('Error compiling the proto. See the output for a '
-                          'message.')
+      logging.info('Creating shallow clone of chromiumos/config')
+      git.Clone(chromeos_config_path,
+                '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
+                depth=1
+      )
+
+    cmd = [
+        _get_protoc_command(protoc_version),
+        '-I',
+        os.path.join(chromeos_config_path, 'proto'),
+        '--python_out',
+        output,
+        '--proto_path',
+        source,
+    ]
+    cmd.extend(targets)
+
+    result = cros_build_lib.run(
+        cmd,
+        cwd=source,
+        print_cmd=False,
+        check=False,
+        enter_chroot=protoc_version is ProtocVersion.SDK)
+
+    if result.returncode:
+      raise GenerationError('Error compiling the proto. See the output for a '
+                            'message.')
 
 
 def _InstallMissingInits(directory):
