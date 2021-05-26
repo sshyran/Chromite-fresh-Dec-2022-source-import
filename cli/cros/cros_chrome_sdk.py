@@ -17,7 +17,6 @@ import re
 import textwrap
 import threading
 
-from chromite.cbuildbot import archive_lib
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
@@ -143,7 +142,7 @@ class SDKFetcher(object):
     self.board = board
     self.config = site_config.FindCanonicalConfigForBoard(
         board, allow_internal=not use_external_config)
-    self.gs_base = archive_lib.GetBaseUploadURI(self.config)
+    self.gs_base = f'gs://chromeos-image-archive/{self.config.name}'
     self.clear_cache = clear_cache
     self.chrome_src = chrome_src
     self.sdk_path = sdk_path
