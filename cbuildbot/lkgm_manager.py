@@ -143,7 +143,11 @@ class LKGMManager(manifest_version.BuildSpecsManager):
     # Chrome PFQ and PFQ's exist at the same time and version separately so they
     # must have separate subdirs in the manifest-versions repository.
     if self.build_type == constants.ANDROID_PFQ_TYPE:
-      self.rel_working_dir = self.ANDROID_PFQ_SUBDIR
+      # Separate manifests from different Android PFQs.
+      assert '/' not in config.android_package, (
+          f'"{config.android_package}" must not have / in it')
+      self.rel_working_dir = os.path.join(self.ANDROID_PFQ_SUBDIR,
+                                          config.android_package)
     elif self.build_type == constants.TOOLCHAIN_TYPE:
       self.rel_working_dir = self.TOOLCHAIN_SUBDIR
     elif self.build_type == constants.FULL_TYPE:

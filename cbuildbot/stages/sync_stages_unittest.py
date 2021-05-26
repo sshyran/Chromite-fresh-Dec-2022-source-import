@@ -15,6 +15,7 @@ from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import cidb
+from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import fake_cidb
@@ -235,6 +236,9 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
     self.incr_type = 'branch'
     self.next_version = 'next_version'
     self.sync_stage = None
+    self.android_package = 'android-package'
+    self.config = config_lib.BuildConfig(android_package=self.android_package,
+                                         master=True)
 
     self.repo = repository.RepoRepository(self.source_repo, self.tempdir,
                                           self.branch)
@@ -252,6 +256,7 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
         incr_type=self.incr_type,
         force=False,
         branch=self.branch,
+        config=self.config,
         buildstore=self.buildstore,
         dry_run=True)
 

@@ -115,6 +115,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
   """Tests for the BuildSpecs manager."""
 
   def setUp(self):
+    self.manager = None
     self.push_mock = self.PatchObject(git, 'CreatePushBranch')
 
     self.source_repo = 'ssh://source/repo'
@@ -131,22 +132,24 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
     self.tmpmandir = os.path.join(self.tempdir, 'man')
     osutils.SafeMakedirs(self.tmpmandir)
 
+  def _LKGMManager(self, build_type=constants.PFQ_TYPE, config=None):
     repo = repository.RepoRepository(
         self.source_repo, self.tmpdir, self.branch, depth=1)
-    self.manager = lkgm_manager.LKGMManager(
-        repo, self.manifest_repo, self.build_name, constants.PFQ_TYPE, 'branch',
-        force=False, branch=self.branch, buildstore=self.buildstore,
-        dry_run=True)
-    self.manager.manifest_dir = self.tmpmandir
-    self.manager.lkgm_path = os.path.join(
+    manager = lkgm_manager.LKGMManager(
+        repo, self.manifest_repo, self.build_name, build_type, 'branch',
+        force=False, branch=self.branch, config=config,
+        buildstore=self.buildstore, dry_run=True)
+    manager.manifest_dir = self.tmpmandir
+    manager.lkgm_path = os.path.join(
         self.tmpmandir, constants.LKGM_MANIFEST)
 
-    self.manager.all_specs_dir = '/LKGM/path'
-    manifest_dir = self.manager.manifest_dir
-    self.manager.specs_for_builder = os.path.join(manifest_dir,
-                                                  self.manager.rel_working_dir,
-                                                  'build-name', '%(builder)s')
-    self.manager.SLEEP_TIMEOUT = 0
+    manager.all_specs_dir = '/LKGM/path'
+    manifest_dir = manager.manifest_dir
+    manager.specs_for_builder = os.path.join(manifest_dir,
+                                             manager.rel_working_dir,
+                                             'build-name', '%(builder)s')
+    manager.SLEEP_TIMEOUT = 0
+    return manager
 
   def _GetPathToManifest(self, info):
     return os.path.join(self.manager.all_specs_dir, '%s.xml' %
@@ -154,6 +157,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
 
   def testCreateFromManifest(self):
     """Tests that we can create a new candidate from another manifest."""
+    self.manager = self._LKGMManager()
     # Let's stub out other LKGMManager calls cause they're already
     # unit tested.
 
@@ -196,6 +200,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
 
   def testCreateNewCandidateReturnNoneIfNoWorkToDo(self):
     """Tests that we return nothing if there is nothing to create."""
+    self.manager = self._LKGMManager()
     new_manifest = 'some_manifest'
     my_info = lkgm_manager._LKGMCandidateInfo('1.2.3')
 
@@ -243,6 +248,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
 
   def testAddChromeVersionToManifest(self):
     """Tests whether we can write the chrome version to the manifest file."""
+    self.manager = self._LKGMManager()
     with TemporaryManifest() as f:
       chrome_version = '35.0.1863.0'
       # Write the chrome element to manifest.
@@ -255,3 +261,25 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
       self.assertEqual(
           elements[0].getAttribute(lkgm_manager.CHROME_VERSION_ATTR),
           chrome_version)
+
+  def testAndroidPFQManifestPath(self):
+    """Tests if LKGMManager for Android PFQ yields correct manifest path."""
+    config = config_lib.BuildConfig(android_package='android-package',
+                                    master=True)
+    manager = self._LKGMManager(constants.ANDROID_PFQ_TYPE, config)
+    info = lkgm_manager._LKGMCandidateInfo(FAKE_VERSION_STRING, CHROME_BRANCH)
+
+    self.PatchObject(lkgm_manager.LKGMManager, 'CheckoutSourceCode')
+    self.PatchObject(lkgm_manager.LKGMManager, 'GetCurrentVersionInfo',
+                     return_value=info)
+    self.PatchObject(lkgm_manager.LKGMManager, 'RefreshManifestCheckout')
+    self.PatchObject(lkgm_manager.LKGMManager, 'CreateManifest',
+                     return_value='some_manifest')
+    self.PatchObject(lkgm_manager.LKGMManager, 'PublishManifest')
+
+    manifest = manager.GetNextBuildSpec()
+    self.assertEqual(manifest,
+                     os.path.join(self.tmpmandir,
+                                  lkgm_manager.LKGMManager.ANDROID_PFQ_SUBDIR,
+                                  'android-package', 'buildspecs',
+                                  '13', '1.2.4-rc3.xml'))
