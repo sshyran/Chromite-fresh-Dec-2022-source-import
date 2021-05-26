@@ -3379,11 +3379,8 @@ def BuildFactoryZip(buildroot,
   """
   filename = 'factory_image.zip'
 
-  # Creates a staging temporary folder.
-  temp_dir = tempfile.mkdtemp(prefix='cbuildbot_factory')
-
   zipfile = os.path.join(archive_dir, filename)
-  cmd = ['zip', '-r', zipfile, '.']
+  cmd = ['zip', '-r', zipfile]
 
   # Rules for archive: { folder: pattern }
   rules = {
@@ -3396,32 +3393,33 @@ def BuildFactoryZip(buildroot,
   for folder, patterns in rules.items():
     if not folder or not os.path.exists(folder):
       continue
+    dirname = os.path.dirname(folder)
     basename = os.path.basename(folder)
-    target = os.path.join(temp_dir, basename)
-    os.symlink(folder, target)
+    pattern_options = []
     for pattern in patterns:
-      cmd.extend(['--include', os.path.join(basename, pattern)])
+      pattern_options.extend(['--include', os.path.join(basename, pattern)])
+    # factory_shim_dir may be a symlink. We can not use '-y' here.
+    cros_build_lib.run(cmd + [basename] + pattern_options, cwd=dirname,
+                       capture_output=True)
 
   # Everything in /usr/local/factory/bundle gets overlaid into the
   # bundle.
   bundle_src_dir = os.path.join(buildroot, 'chroot', 'build', board, 'usr',
                                 'local', 'factory', 'bundle')
   if os.path.exists(bundle_src_dir):
-    for f in os.listdir(bundle_src_dir):
-      src_path = os.path.join(bundle_src_dir, f)
-      os.symlink(src_path, os.path.join(temp_dir, f))
-      cmd.extend([
-          '--include', f if os.path.isfile(src_path) else os.path.join(f, '*')
-      ])
+    cros_build_lib.run(cmd + ['-y', '.'], cwd=bundle_src_dir,
+                       capture_output=True)
 
   # Add a version file in the zip file.
   if version is not None:
-    version_file = os.path.join(temp_dir, 'BUILD_VERSION')
-    osutils.WriteFile(version_file, version)
-    cmd.extend(['--include', version_file])
+    version_filename = 'BUILD_VERSION'
+    # Creates a staging temporary folder.
+    with osutils.TempDir(prefix='cbuildbot_factory') as temp_dir:
+      version_file = os.path.join(temp_dir, version_filename)
+      osutils.WriteFile(version_file, version)
+      cros_build_lib.run(cmd + [version_filename], cwd=temp_dir,
+                         capture_output=True)
 
-  cros_build_lib.run(cmd, cwd=temp_dir, capture_output=True)
-  osutils.RmDir(temp_dir)
   return filename
 
 
