@@ -7342,6 +7342,22 @@
       "models": [
         {
           "board_name": "volteer",
+          "name": "chronicler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
+          "name": "collis",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
           "name": "copano",
           "test_suites": [
             "sanity",
@@ -7620,6 +7636,14 @@
         },
         {
           "board_name": "volteer",
+          "name": "volet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 405,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer",
           "name": "volta",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -7689,6 +7713,22 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "volteer-borealis",
+          "name": "chronicler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7165,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-borealis",
+          "name": "collis",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7165,
+          "is_active": true
+        },
         {
           "board_name": "volteer-borealis",
           "name": "copano",
@@ -7819,6 +7859,14 @@
         },
         {
           "board_name": "volteer-borealis",
+          "name": "volet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7165,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-borealis",
           "name": "volta",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -7858,6 +7906,22 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "chronicler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
+          "name": "collis",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
         {
           "board_name": "volteer-kernelnext",
           "name": "copano",
@@ -8012,6 +8076,14 @@
         },
         {
           "board_name": "volteer-kernelnext",
+          "name": "volet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 451,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-kernelnext",
           "name": "volta",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -8070,6 +8142,22 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "volteer-manatee",
+          "name": "chronicler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7170,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-manatee",
+          "name": "collis",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7170,
+          "is_active": true
+        },
         {
           "board_name": "volteer-manatee",
           "name": "copano",
@@ -8193,6 +8281,14 @@
         {
           "board_name": "volteer-manatee",
           "name": "voema_npcx796fc",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7170,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-manatee",
+          "name": "volet",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7170,
