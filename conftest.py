@@ -6,7 +6,7 @@
 
 See the following doc link for an explanation of conftest.py and how it is used
 by pytest:
-https://docs.pytest.org/en/latest/fixture.html#conftest-py-sharing-fixture-functions
+https://docs.pytest.org/en/latest/explanation/fixtures.html
 """
 
 from __future__ import division
@@ -101,11 +101,11 @@ def legacy_capture_output(request, capfd):
   fixture to the requesting class. Tests written as standalone functions should
   use pytest's built-in `capfd` fixture instead of this. See the documentation
   for more information on how to use the `capfd` fixture that this provides:
-  https://docs.pytest.org/en/latest/reference.html#capfd
+  https://docs.pytest.org/en/latest/reference/reference.html#std-fixture-capfd
 
   See the following documentation for an explanation of why fixtures have to be
   provided to TestCase classes in this manner:
-  https://docs.pytest.org/en/latest/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
+  https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
   """
   request.cls.capfd = capfd
 
@@ -119,11 +119,11 @@ def testcase_caplog(request, caplog):
   fixture to the requesting class. Tests written as standalone functions should
   use pytest's built-in `caplog` fixture instead of this. See the documentation
   for more information on how to use the `caplog` fixture that this provides:
-  https://docs.pytest.org/en/latest/reference.html#caplog
+  https://docs.pytest.org/en/latest/reference/reference.html#caplog
 
   See the following documentation for an explanation of why fixtures have to be
   provided to TestCase classes in this manner:
-  https://docs.pytest.org/en/latest/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
+  https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
   """
   request.cls.caplog = caplog
 
@@ -138,11 +138,11 @@ def testcase_monkeypatch(request, monkeypatch):
   use pytest's built-in `monkeypatch` fixture instead of this. See the
   documentation for more information on how to use the `monkeypatch` fixture
   that this provides:
-  https://docs.pytest.org/en/latest/reference.html#monkeypatch
+  https://docs.pytest.org/en/latest/reference/reference.html#monkeypatch
 
   See the following documentation for an explanation of why fixtures have to be
   provided to TestCase classes in this manner:
-  https://docs.pytest.org/en/latest/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
+  https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
   """
   request.cls.monkeypatch = monkeypatch
 
@@ -150,7 +150,7 @@ def testcase_monkeypatch(request, monkeypatch):
 def pytest_assertrepr_compare(op, left, right):
   """Global hook for defining detailed explanations for failed assertions.
 
-  https://docs.pytest.org/en/latest/assert.html#defining-your-own-explanation-for-failed-assertions
+  https://docs.pytest.org/en/latest/how-to/assert.html
   """
   if isinstance(left, package_info.CPV) and isinstance(
       right, cr.test.Overlay) and op == 'in':
@@ -177,7 +177,7 @@ def pytest_collection_modifyitems(config, items):
   """Modifies the list of test items pytest has collected.
 
   See the following link for full documentation on pytest collection hooks:
-  https://docs.pytest.org/en/latest/reference.html?highlight=pytest_collection_modifyitems#collection-hooks
+  https://docs.pytest.org/en/latest/reference/reference.html#collection-hooks
   """
   if config.option.chroot:
     return
