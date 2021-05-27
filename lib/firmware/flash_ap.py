@@ -38,7 +38,8 @@ class MissingBuildTargetCommandsError(Error):
   """Error thrown when board-specific functionality can't be imported."""
 
 
-def _build_ssh_cmds(futility, ip, port, path, tmp_file_name, fast, verbose):
+def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
+                          verbose):
   """Helper function to build commands for flashing over ssh
 
   Args:
@@ -118,8 +119,8 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
   tmpfile = tempfile.NamedTemporaryFile()
   shutil.copyfile(id_filename, tmpfile.name)
 
-  scp_cmd, flash_cmd = _build_ssh_cmds(futility, ip, port, path, tmpfile.name,
-                                       fast, verbose)
+  scp_cmd, flash_cmd = _build_flash_ssh_cmds(futility, ip, port, path,
+                                             tmpfile.name, fast, verbose)
   try:
     cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
   except cros_build_lib.CalledProcessError:
@@ -131,6 +132,84 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
     cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
   except cros_build_lib.CalledProcessError:
     logging.error('Flashing failed.')
+    return False
+
+  return True
+
+
+def _build_read_ssh_cmds(ip, port, path, tmp_file_name, verbose, region):
+  """Helper function to build commands for reading images over ssh
+
+  Args:
+    ip (string): ip address of DUT.
+    port (int): The port to ssh to.
+    path (string): path to store the read BIOS image.
+    tmp_file_name (string): name of tempfile with copy of testing_rsa
+      keys.
+    verbose (bool): if True set -v flag in flash command.
+    region (str): Region to read.
+
+  Returns:
+    scp_cmd ([string]):
+    flash_cmd ([string]):
+  """
+  ssh_parameters = [
+      '-o', 'UserKnownHostsFile=/dev/null', '-o', 'StrictHostKeyChecking=no',
+      '-o', 'CheckHostIP=no'
+  ]
+  ssh_port = ['-p', str(port)] if port else []
+  scp_port = ['-P', str(port)] if port else []
+  remote_path = os.path.join('/tmp', os.path.basename(path))
+  hostname = 'root@%s' % ip
+  scp_cmd = (['scp', '-i', tmp_file_name] + scp_port + ssh_parameters +
+             ['%s:%s' % (hostname, remote_path), path])
+  flash_cmd = (['ssh', hostname, '-i', tmp_file_name] + ssh_port +
+               ssh_parameters + ['flashrom', '-p', 'host', '-r', remote_path])
+  if region:
+    flash_cmd += ['-i', region]
+  if verbose:
+    flash_cmd += ['-V']
+  return scp_cmd, flash_cmd
+
+
+def ssh_read(path, verbose, ip, port, dryrun, region):
+  """This function reads AP firmware over ssh.
+
+  Tries to ssh to ip address once. If the ssh connection is successful the
+  image is read from the DUT using flashrom, and then is copied back via scp.
+
+  Args:
+    path (str): path to the BIOS image to be flashed or read.
+    verbose (bool): if True to set -v flag in flash command and
+      print other debug info, if False do nothing.
+    ip (str): ip address of DUT.
+    port (int): The port to ssh to.
+    dryrun (bool): Whether to actually execute the commands or just print
+      the commands that would have been run.
+    region (str): Region to read.
+
+  Returns:
+    bool: True on success, False on failure.
+  """
+  logging.info('Connecting to: %s\n', ip)
+  id_filename = '/mnt/host/source/chromite/ssh_keys/testing_rsa'
+  tmpfile = tempfile.NamedTemporaryFile()
+  shutil.copyfile(id_filename, tmpfile.name)
+
+  scp_cmd, flash_cmd = _build_read_ssh_cmds(ip, port, path, tmpfile.name,
+                                            verbose, region)
+
+  logging.info('Reading now, may take several minutes.')
+  try:
+    cros_build_lib.run(flash_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
+  except cros_build_lib.CalledProcessError:
+    logging.error('Read failed.')
+    return False
+
+  try:
+    cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
+  except cros_build_lib.CalledProcessError:
+    logging.error('Could not copy image from dut.')
     return False
 
   return True

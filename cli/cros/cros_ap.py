@@ -16,12 +16,12 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import pformat
-from chromite.lib.firmware import ap_firmware
-from chromite.lib.firmware import servo_lib
+from chromite.lib.firmware import ap_firmware, flash_ap, servo_lib
 
 COMMAND_DUMP_CONFIG = 'dump-config'
 COMMAND_BUILD = 'build'
 COMMAND_FLASH = 'flash'
+COMMAND_READ = 'read'
 
 
 @command.CommandDecorator('ap')
@@ -51,6 +51,10 @@ class APCommand(command.CliCommand):
                                  'Update the AP Firmware on a device.')
     FlashSubcommand.AddCLIArguments(cls, flash_parser)
 
+    read_parser = _AddSubparser(parser, subparsers, COMMAND_READ,
+                                'Read the AP Firmware from a device.')
+    ReadSubcommand.AddCLIArguments(cls, read_parser)
+
   def Run(self):
     """The main handler of this CLI."""
     if self.options.ap_command == COMMAND_DUMP_CONFIG:
@@ -59,6 +63,8 @@ class APCommand(command.CliCommand):
       subcmd = BuildSubcommand(self.options)
     elif self.options.ap_command == COMMAND_FLASH:
       subcmd = FlashSubcommand(self.options)
+    elif self.options.ap_command == COMMAND_READ:
+      subcmd = ReadSubcommand(self.options)
     subcmd.run()
 
 
@@ -86,7 +92,7 @@ def _AddSubparser(parser, subparsers, name, description):
   )
 
 
-class APSubommandInterface(metaclass=ABCMeta):
+class APSubcommandInterface(metaclass=ABCMeta):
   """Virtual class declaring methods of AP subcommand."""
 
   def __init__(self, options) -> None:
@@ -102,7 +108,7 @@ class APSubommandInterface(metaclass=ABCMeta):
     """Adds subcommand-specific CLI arguments to subparser."""
 
 
-class DumpConfigSubcommand(APSubommandInterface):
+class DumpConfigSubcommand(APSubcommandInterface):
   """Dump the AP Config to a file."""
 
   def __init__(self, options):
@@ -197,7 +203,7 @@ To dump AP config of drallion and dedede boards:
       pformat.json(output, f)
 
 
-class BuildSubcommand(APSubommandInterface):
+class BuildSubcommand(APSubcommandInterface):
   """Build the AP Firmware for the requested build target."""
 
   def __init__(self, options):
@@ -248,7 +254,103 @@ To build the AP Firmware only for foo-variant:
       cros_build_lib.Die(e)
 
 
-class FlashSubcommand(APSubommandInterface):
+class ReadSubcommand(APSubcommandInterface):
+  """Read the AP Firmware from a device."""
+
+  def __init__(self, options):
+    super().__init__(options)
+    if self.options.device is None:
+      cros_build_lib.Die('Specify device using --device argument.')
+    self.options.output_path = Path(self.options.output)
+    self.options.Freeze()
+
+  @staticmethod
+  def AddCLIArguments(cmd, subparser):
+    """Adds AP Read specific CLI arguments to subparser."""
+    cmd.AddDeviceArgument(
+        subparser,
+        schemes=[
+            commandline.DEVICE_SCHEME_SSH, commandline.DEVICE_SCHEME_SERVO
+        ])
+    subparser.add_argument(
+        '-b',
+        '--build-target',
+        default=cros_build_lib.GetDefaultBoard(),
+        dest='build_target',
+        help='The name of the build target.')
+    subparser.add_argument('-r'
+                           '--region',
+                           dest='region',
+                           type=str,
+                           help='Region to read.')
+    subparser.add_argument(
+        '-o', '--output', type='path', required=True, help='Output file.')
+    subparser.add_argument(
+        '-n',
+        '--dry-run',
+        action='store_true',
+        help='Execute a dry-run. Print the commands that would be run instead '
+        'of running them.')
+    subparser.epilog = """Command to read the AP firmware from a DUT.
+To read image of device.cros via SSH:
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://device.cros
+
+If you don't have ssh access from within the chroot, you may set up ssh tunnel:
+  ssh -L 2222:localhost:22 device.cros
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://localhost:2222
+
+To read image from DUT via SERVO on port 1234:
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d servo:port:1234
+
+To read a specific region from DUT via SERVO on default port(9999):
+  cros ap read -b volteer -r region -o /tmp/volteer-image.bin -d servo:port
+"""
+
+  def run(self):
+    if not cros_build_lib.IsInsideChroot():
+      logging.notice('Command will run in chroot, '
+                     'and the output file path will be inside.')
+    commandline.RunInsideChroot(self)
+    build_target = build_target_lib.BuildTarget(self.options.build_target)
+
+    ip = None
+    if self.options.device:
+      port = self.options.device.port
+      if self.options.device.scheme == commandline.DEVICE_SCHEME_SSH:
+        ip = self.options.device.hostname
+        port = port or self.options.device.port
+    else:
+      ip = os.getenv('IP')
+
+    region = None
+    if hasattr(self.options, 'region'):
+      region = self.options.region
+
+    if ip:
+      flash_ap.ssh_read(self.options.output, self.options.verbose, ip, port,
+                        self.options.dry_run, region)
+    else:
+      dut_ctl = servo_lib.DutControl(port)
+      servo = servo_lib.get(dut_ctl)
+
+      config_module = ap_firmware.get_config_module(build_target.name)
+      ap_config = config_module.get_config(servo)
+
+      flashrom_cmd = [
+          'flashrom', '-p', ap_config.programmer, '-r', self.options.output
+      ]
+      if self.options.verbose:
+        flashrom_cmd += ['-V']
+      if region:
+        flashrom_cmd += ['-i', self.options.region]
+      if not flash_ap.servo_run(dut_ctl, ap_config.dut_control_on,
+                                ap_config.dut_control_off, flashrom_cmd,
+                                self.options.verbose, self.options.dry_run):
+        logging.error('Unable to read, verify servo connection '
+                      'is correct and servod is running in the background.')
+
+
+class FlashSubcommand(APSubcommandInterface):
   """Update the AP Firmware on a device."""
 
   def __init__(self, options):

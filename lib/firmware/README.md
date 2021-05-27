@@ -20,6 +20,20 @@ To flash your volteer DUT via SERVO on the default port (9999):
 To flash your volteer DUT via SERVO on port 1234:
   cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
 
+## Reading
+To read image of device.cros via SSH:
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://device.cros
+
+If you don't have ssh access from within the chroot, you may set up ssh tunnel:
+  ssh -L 2222:localhost:22 device.cros
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://localhost:2222
+
+To read image from DUT via SERVO on port 1234:
+  cros ap read -b volteer -o /tmp/volteer-image.bin -d servo:port:1234
+
+To read a specific region from DUT via SERVO on default port(9999):
+  cros ap read -b volteer -r region -o /tmp/volteer-image.bin -d servo:port
+
 ## Dumping config
 To dump AP config of all boards into /tmp/cros-read-ap-config.json
   cros ap dump-config -o /tmp/cros-read-ap-config.json
