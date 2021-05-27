@@ -612,6 +612,7 @@ class RemoteAccess(object):
       verbose: If set, print more verbose output during scp file transfer.
       sudo: If set, invoke the command via sudo.
       remote_sudo: If set, run the command in remote shell with sudo.
+      compress: If set, passes the -C flag to scp to enable compression.
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
@@ -622,6 +623,8 @@ class RemoteAccess(object):
     if remote_sudo and self.username != ROOT_ACCOUNT:
       # TODO: Implement scp with remote sudo.
       raise NotImplementedError('Cannot run scp with sudo!')
+
+    compress = kwargs.pop('compress', False)
 
     kwargs.setdefault('debug_level', self.debug_level)
     # scp relies on 'scp' being in the $PATH of the non-interactive,
@@ -639,6 +642,9 @@ class RemoteAccess(object):
       scp_cmd.append('-r')
     if verbose:
       scp_cmd.append('-v')
+
+    if compress:
+      scp_cmd.append('-C')
 
     # Check for an IPv6 address
     if ':' in self.remote_host:
