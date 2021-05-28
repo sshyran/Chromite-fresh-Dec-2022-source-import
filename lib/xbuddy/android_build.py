@@ -6,17 +6,12 @@
 
 import io
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib.xbuddy import retry
 from chromite.third_party import httplib2
 from chromite.third_party.googleapiclient import discovery
 from chromite.third_party.googleapiclient import http
-
-try:
-  from chromite.third_party.oauth2client.client import SignedJwtAssertionCredentials
-except ImportError:
-  SignedJwtAssertionCredentials = None
+from chromite.third_party.oauth2client.client import SignedJwtAssertionCredentials  # pylint: disable=line-too-long
 
 
 CREDENTIAL_SCOPE = 'https://www.googleapis.com/auth/androidbuild.internal'
@@ -48,14 +43,10 @@ class BuildAccessor(object):
     if not cls.credential_info:
       raise AndroidBuildFetchError('Android Build credential is missing.')
 
-    if SignedJwtAssertionCredentials is None:
-      http_auth = None
-      logging.warning('SignedJwtAssertionCredentials unavailable')
-    else:
-      credentials = SignedJwtAssertionCredentials(
-          cls.credential_info['client_email'],
-          cls.credential_info['private_key'], CREDENTIAL_SCOPE)
-      http_auth = credentials.authorize(httplib2.Http())
+    credentials = SignedJwtAssertionCredentials(
+        cls.credential_info['client_email'],
+        cls.credential_info['private_key'], CREDENTIAL_SCOPE)
+    http_auth = credentials.authorize(httplib2.Http())
     return discovery.build(DEFAULT_BUILDER, 'v1', http=http_auth)
 
   @staticmethod
