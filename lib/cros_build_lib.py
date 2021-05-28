@@ -1214,10 +1214,14 @@ def CreateTarball(
 
   # Use a separate compression program - this enables parallel compression
   # in some cases.
+  # Using 'raw' hole detection instead of 'seek' isn't that much slower, but
+  # will provide much better results when archiving large disk images that are
+  # not fully sparse.
   comp = FindCompressor(compression, chroot=chroot)
   cmd = (['tar'] +
          extra_args +
-         ['--sparse', '--use-compress-program', comp, '-c'])
+         ['--sparse', '--hole-detection=raw',
+          '--use-compress-program', comp, '-c'])
 
   rc_stdout = None
   if isinstance(tarball_path, int):
