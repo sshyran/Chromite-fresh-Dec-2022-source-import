@@ -302,18 +302,6 @@
       ]
     },
     {
-      "name": "cherry",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "coral-kernelnext",
       "configs": [
         {
@@ -1374,6 +1362,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "cherry",
+      "reference_board_name": "cherry",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": false,
+      "models": [
+        {
+          "board_name": "cherry",
+          "name": "cherry",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7163,
           "is_active": true
         }
       ]
