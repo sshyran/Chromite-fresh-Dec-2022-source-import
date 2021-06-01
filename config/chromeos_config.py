@@ -1832,13 +1832,17 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (TRIGGERED, 'firmware-volteer-13672.156.B', ['volteer'], {}),
   ]
 
+  # TODO(b/180525904): All of the legacy "firmwarebranch" builders are being
+  # retired in favor of the recipes implementation.  For now, run the DAILY
+  # builders weekly, and all of the others only when triggered.
+  # See chromeos/infra/config/+/HEAD/firmware.star (http://shortn/_be6b7ORzyh)
   for interval, branch, boards, kwargs in firmware_branch_builders:
     site_config.Add(
         '%s-firmwarebranch' % branch,
         site_config.templates.firmwarebranch,
         boards=boards,
         workspace_branch=branch,
-        schedule=interval,
+        schedule=WEEKLY if interval==DAILY else TRIGGERED,
         **kwargs)
 
 

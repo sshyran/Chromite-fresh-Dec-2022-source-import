@@ -12481,7 +12481,7 @@
         "boards": [
             "asurada"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-asurada-13885.B"
     },
     "firmware-asurada-13885.B-firmwarebranch-tryjob": {
@@ -12501,7 +12501,7 @@
         "boards": [
             "atlas"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-atlas-11827.B"
     },
     "firmware-atlas-11827.B-firmwarebranch-tryjob": {
@@ -12521,7 +12521,7 @@
         "boards": [
             "banjo"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-banjo-5216.334.B"
     },
     "firmware-banjo-5216.334.B-firmwarebranch-tryjob": {
@@ -12541,7 +12541,7 @@
         "boards": [
             "buddy"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-buddy-6301.202.B"
     },
     "firmware-buddy-6301.202.B-firmwarebranch-tryjob": {
@@ -12561,7 +12561,7 @@
         "boards": [
             "candy"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-candy-5216.310.B"
     },
     "firmware-candy-5216.310.B-firmwarebranch-tryjob": {
@@ -12581,7 +12581,7 @@
         "boards": [
             "celes"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-celes-7287.92.B"
     },
     "firmware-celes-7287.92.B-firmwarebranch-tryjob": {
@@ -12601,7 +12601,7 @@
         "boards": [
             "coral"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-coral-10068.B"
     },
     "firmware-coral-10068.B-firmwarebranch-tryjob": {
@@ -12725,7 +12725,7 @@
         "boards": [
             "cyan"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-cyan-7287.57.B"
     },
     "firmware-cyan-7287.57.B-firmwarebranch-tryjob": {
@@ -12745,7 +12745,7 @@
         "boards": [
             "dedede"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-dedede-13606.B"
     },
     "firmware-dedede-13606.B-firmwarebranch-tryjob": {
@@ -12765,7 +12765,7 @@
         "boards": [
             "drallion"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-drallion-12930.B"
     },
     "firmware-drallion-12930.B-firmwarebranch-tryjob": {
@@ -12785,7 +12785,7 @@
         "boards": [
             "edgar"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-edgar-7287.167.B"
     },
     "firmware-edgar-7287.167.B-firmwarebranch-tryjob": {
@@ -12805,7 +12805,7 @@
         "boards": [
             "endeavour"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-endeavour-13259.B"
     },
     "firmware-endeavour-13259.B-firmwarebranch-tryjob": {
@@ -12825,7 +12825,7 @@
         "boards": [
             "enguarde"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-enguarde-5216.201.B"
     },
     "firmware-enguarde-5216.201.B-firmwarebranch-tryjob": {
@@ -12845,7 +12845,7 @@
         "boards": [
             "eve"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-eve-9584.B"
     },
     "firmware-eve-9584.B-firmwarebranch-tryjob": {
@@ -12865,7 +12865,7 @@
         "boards": [
             "expresso"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-expresso-5216.223.B"
     },
     "firmware-expresso-5216.223.B-firmwarebranch-tryjob": {
@@ -12885,7 +12885,7 @@
         "boards": [
             "fizz"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-fizz-10139.94.B"
     },
     "firmware-fizz-10139.94.B-firmwarebranch-tryjob": {
@@ -12905,7 +12905,7 @@
         "boards": [
             "fizz"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-fizz-10139.B"
     },
     "firmware-fizz-10139.B-firmwarebranch-tryjob": {
@@ -12925,7 +12925,7 @@
         "boards": [
             "gale"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-gale-8281.B"
     },
     "firmware-gale-8281.B-firmwarebranch-tryjob": {
@@ -12945,7 +12945,7 @@
         "boards": [
             "gandof"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-gandof-6301.155.B"
     },
     "firmware-gandof-6301.155.B-firmwarebranch-tryjob": {
@@ -12971,7 +12971,7 @@
             "asuka",
             "caroline"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-glados-7820.B"
     },
     "firmware-glados-7820.B-firmwarebranch-tryjob": {
@@ -12997,7 +12997,7 @@
         "boards": [
             "gnawty"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-gnawty-5216.239.B"
     },
     "firmware-gnawty-5216.239.B-firmwarebranch-tryjob": {
@@ -13019,7 +13019,7 @@
             "kevin",
             "bob"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-gru-8785.B"
     },
     "firmware-gru-8785.B-firmwarebranch-tryjob": {
@@ -13041,7 +13041,7 @@
         "boards": [
             "grunt"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-grunt-11031.B"
     },
     "firmware-grunt-11031.B-firmwarebranch-tryjob": {
@@ -13061,7 +13061,7 @@
         "boards": [
             "guado"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-guado-6301.108.B"
     },
     "firmware-guado-6301.108.B-firmwarebranch-tryjob": {
@@ -13081,7 +13081,7 @@
         "boards": [
             "hatch"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-hatch-12672.B"
     },
     "firmware-hatch-12672.B-firmwarebranch-tryjob": {
@@ -13101,7 +13101,7 @@
         "boards": [
             "heli"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-heli-5216.392.B"
     },
     "firmware-heli-5216.392.B-firmwarebranch-tryjob": {
@@ -13121,7 +13121,7 @@
         "boards": [
             "jacuzzi"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-icarus-12574.B"
     },
     "firmware-icarus-12574.B-firmwarebranch-tryjob": {
@@ -13141,7 +13141,7 @@
         "boards": [
             "kalista"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-kalista-11343.B"
     },
     "firmware-kalista-11343.B-firmwarebranch-tryjob": {
@@ -13161,7 +13161,7 @@
         "boards": [
             "kip"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-kip-5216.227.B"
     },
     "firmware-kip-5216.227.B-firmwarebranch-tryjob": {
@@ -13182,7 +13182,7 @@
             "kukui",
             "jacuzzi"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-kukui-12573.B"
     },
     "firmware-kukui-12573.B-firmwarebranch-tryjob": {
@@ -13203,7 +13203,7 @@
         "boards": [
             "lulu"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-lulu-6301.136.B"
     },
     "firmware-lulu-6301.136.B-firmwarebranch-tryjob": {
@@ -13223,7 +13223,7 @@
         "boards": [
             "mistral"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-mistral-12422.B"
     },
     "firmware-mistral-12422.B-firmwarebranch-tryjob": {
@@ -13243,7 +13243,7 @@
         "boards": [
             "nami"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-nami-10775.108.B"
     },
     "firmware-nami-10775.108.B-firmwarebranch-tryjob": {
@@ -13263,7 +13263,7 @@
         "boards": [
             "nami"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-nami-10775.B"
     },
     "firmware-nami-10775.B-firmwarebranch-tryjob": {
@@ -13283,7 +13283,7 @@
         "boards": [
             "ninja"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-ninja-5216.383.B"
     },
     "firmware-ninja-5216.383.B-firmwarebranch-tryjob": {
@@ -13303,7 +13303,7 @@
         "boards": [
             "nocturne"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-nocturne-10984.B"
     },
     "firmware-nocturne-10984.B-firmwarebranch-tryjob": {
@@ -13325,7 +13325,7 @@
             "elm",
             "hana"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-oak-8438.B"
     },
     "firmware-oak-8438.B-firmwarebranch-tryjob": {
@@ -13367,7 +13367,7 @@
         "boards": [
             "octopus"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-octopus-11297.B"
     },
     "firmware-octopus-11297.B-firmwarebranch-tryjob": {
@@ -13387,7 +13387,7 @@
         "boards": [
             "orco"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-orco-5216.362.B"
     },
     "firmware-orco-5216.362.B-firmwarebranch-tryjob": {
@@ -13407,7 +13407,7 @@
         "boards": [
             "auron_paine"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-paine-6301.58.B"
     },
     "firmware-paine-6301.58.B-firmwarebranch-tryjob": {
@@ -13429,7 +13429,7 @@
             "soraka",
             "nautilus"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-poppy-10431.B"
     },
     "firmware-poppy-10431.B-firmwarebranch-tryjob": {
@@ -13452,7 +13452,7 @@
             "puff",
             "ambassador"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-puff-13324.B"
     },
     "firmware-puff-13324.B-firmwarebranch-tryjob": {
@@ -13473,7 +13473,7 @@
         "boards": [
             "kukui"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-quiche-13883.B"
     },
     "firmware-quiche-13883.B-firmwarebranch-tryjob": {
@@ -13493,7 +13493,7 @@
         "boards": [
             "rammus"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-rammus-11275.B"
     },
     "firmware-rammus-11275.B-firmwarebranch-tryjob": {
@@ -13516,7 +13516,7 @@
             "sand",
             "snappy"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-reef-9042.B"
     },
     "firmware-reef-9042.B-firmwarebranch-tryjob": {
@@ -13539,7 +13539,7 @@
         "boards": [
             "reks"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-reks-7287.133.B"
     },
     "firmware-reks-7287.133.B-firmwarebranch-tryjob": {
@@ -13559,7 +13559,7 @@
         "boards": [
             "rikku"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-rikku-6301.110.B"
     },
     "firmware-rikku-6301.110.B-firmwarebranch-tryjob": {
@@ -13579,7 +13579,7 @@
         "boards": [
             "samus"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-samus-6300.B"
     },
     "firmware-samus-6300.B-firmwarebranch-tryjob": {
@@ -13599,7 +13599,7 @@
         "boards": [
             "sarien"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-sarien-12200.B"
     },
     "firmware-sarien-12200.B-firmwarebranch-tryjob": {
@@ -13619,7 +13619,7 @@
         "boards": [
             "scarlet"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-scarlet-10388.B"
     },
     "firmware-scarlet-10388.B-firmwarebranch-tryjob": {
@@ -13639,7 +13639,7 @@
         "boards": [
             "nautilus"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-servo-12768.B"
     },
     "firmware-servo-12768.B-firmwarebranch-tryjob": {
@@ -13663,7 +13663,7 @@
             "kefka",
             "relm"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-strago-7287.B"
     },
     "firmware-strago-7287.B-firmwarebranch-tryjob": {
@@ -13687,7 +13687,7 @@
         "boards": [
             "sumo"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-sumo-5216.382.B"
     },
     "firmware-sumo-5216.382.B-firmwarebranch-tryjob": {
@@ -13707,7 +13707,7 @@
         "boards": [
             "swanky"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-swanky-5216.238.B"
     },
     "firmware-swanky-5216.238.B-firmwarebranch-tryjob": {
@@ -13727,7 +13727,7 @@
         "boards": [
             "terra"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-terra-7287.154.B"
     },
     "firmware-terra-7287.154.B-firmwarebranch-tryjob": {
@@ -13747,7 +13747,7 @@
         "boards": [
             "tidus"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-tidus-6301.109.B"
     },
     "firmware-tidus-6301.109.B-firmwarebranch-tryjob": {
@@ -13768,7 +13768,7 @@
             "strongbad",
             "trogdor"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-trogdor-13577.B"
     },
     "firmware-trogdor-13577.B-firmwarebranch-tryjob": {
@@ -13789,7 +13789,7 @@
         "boards": [
             "ultima"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-ultima-7287.131.B"
     },
     "firmware-ultima-7287.131.B-firmwarebranch-tryjob": {
@@ -13811,7 +13811,7 @@
             "veyron_tiger",
             "veyron_fievel"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-veyron-6588.B"
     },
     "firmware-veyron-6588.B-firmwarebranch-tryjob": {
@@ -13853,7 +13853,7 @@
         "boards": [
             "volteer"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-volteer-13672.B"
     },
     "firmware-volteer-13672.B-firmwarebranch-tryjob": {
@@ -13873,7 +13873,7 @@
         "boards": [
             "winky"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-winky-5216.265.B"
     },
     "firmware-winky-5216.265.B-firmwarebranch-tryjob": {
@@ -13893,7 +13893,7 @@
         "boards": [
             "auron_yuna"
         ],
-        "schedule": "with 720h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-yuna-6301.59.B"
     },
     "firmware-yuna-6301.59.B-firmwarebranch-tryjob": {
@@ -13913,7 +13913,7 @@
         "boards": [
             "zork"
         ],
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "workspace_branch": "firmware-zork-13434.B"
     },
     "firmware-zork-13434.B-firmwarebranch-tryjob": {
