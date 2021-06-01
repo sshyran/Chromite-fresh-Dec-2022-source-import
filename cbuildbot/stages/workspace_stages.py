@@ -39,7 +39,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import request_build
-from chromite.lib import retry_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
 
@@ -296,28 +295,15 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
 
     logging.PrintBuildbotStepText('tag %s' % chrome_version)
 
-    sync_chrome = os.path.join(
-        self._orig_root, 'chromite', 'bin', 'sync_chrome')
-
-    # Branched gclient can use git-cache incompatibly, so use a temp one.
-    with osutils.TempDir(prefix='dummy') as git_cache:
-      # --reset tells sync_chrome to blow away local changes and to feel
-      # free to delete any directories that get in the way of syncing. This
-      # is needed for unattended operation.
-      # --gclient is not specified here, sync_chrome will locate the one
-      # on the $PATH.
-      cmd = [sync_chrome,
-             '--reset',
-             '--tag', chrome_version,
-             '--git_cache_dir', git_cache]
-
-      if constants.USE_CHROME_INTERNAL in self._run.config.useflags:
-        cmd += ['--internal']
-
-      cmd += [self._run.options.chrome_root]
-      with timeout_util.Timeout(self.SYNC_CHROME_TIMEOUT):
-        retry_util.RunCommandWithRetries(
-            constants.SYNC_RETRIES, cmd, cwd=self._build_root)
+    git_cache_dir = (
+        self._run.options.chrome_preload_dir or self._run.options.git_cache_dir)
+    with timeout_util.Timeout(self.SYNC_CHROME_TIMEOUT):
+      commands.SyncChrome(self._orig_root,
+                          self._run.options.chrome_root,
+                          self._run.config.useflags,
+                          tag=chrome_version,
+                          git_cache_dir=git_cache_dir,
+                          workspace=self._build_root)
 
 
 class WorkspaceUprevStage(WorkspaceStageBase):

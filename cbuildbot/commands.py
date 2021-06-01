@@ -3512,7 +3512,8 @@ def SyncChrome(build_root,
                useflags,
                tag=None,
                revision=None,
-               git_cache_dir=None):
+               git_cache_dir=None,
+               workspace=None):
   """Sync chrome.
 
   Args:
@@ -3522,6 +3523,7 @@ def SyncChrome(build_root,
     tag: If supplied, the Chrome tag to sync.
     revision: If supplied, the Chrome revision to sync.
     git_cache_dir: Directory to use for git-cache.
+    workspace: Alternative buildroot directory to sync.
   """
   sync_chrome = os.path.join(build_root, 'chromite', 'bin', 'sync_chrome')
   internal = constants.USE_CHROME_INTERNAL in useflags
@@ -3538,7 +3540,8 @@ def SyncChrome(build_root,
   if git_cache_dir:
     cmd += ['--git_cache_dir', git_cache_dir]
   cmd += [chrome_root]
-  retry_util.RunCommandWithRetries(constants.SYNC_RETRIES, cmd, cwd=build_root)
+  retry_util.RunCommandWithRetries(constants.SYNC_RETRIES, cmd,
+                                   cwd=workspace or build_root)
 
 
 class ChromeSDK(object):

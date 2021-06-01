@@ -358,6 +358,7 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
         return_value=fake_cpv)
 
   def ConstructStage(self):
+    self._run.options.chrome_preload_dir = '/preload/chrome_cache'
     return workspace_stages.WorkspaceSyncChromeStage(
         self._run, self.buildstore, build_root=self.workspace)
 
@@ -382,9 +383,9 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
             mock.call([os.path.join(self.build_root,
                                     'chromite/bin/sync_chrome'),
                        '--reset',
+                       '--internal',
                        '--tag', '0.0.1',
                        '--git_cache_dir', mock.ANY,
-                       '--internal',
                        '/chrome'],
                       cwd=self.workspace),
         ])
