@@ -81,21 +81,20 @@ def _ReapChildren(pid):
   Returns:
     The wait status of the |pid| child.
   """
-  pid_status = 0
 
   while True:
     try:
       (wpid, status) = os.wait()
       if pid == wpid:
-        # Save the status of our main child so we can exit with it below.
-        pid_status = status
+        return status
     except OSError as e:
       if e.errno == errno.ECHILD:
-        break
+        raise ValueError(
+          'All children of the current processes have been reaped, but %u '
+          'was not one of them. This means that %u is not a child of the '
+          'current processes.' % (pid))
       elif e.errno != errno.EINTR:
         raise
-
-  return pid_status
 
 
 def _SafeTcSetPgrp(fd, pgrp):
