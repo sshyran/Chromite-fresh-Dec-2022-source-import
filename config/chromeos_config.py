@@ -1720,12 +1720,19 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.informational,
       boards=['amd64-generic'],
       profile='fwupd-upstream',
+      sync_chrome=False,
+      chrome_sdk=False,
       description='Build with Upstream fwupd',
       disk_layout='4gb-rootfs',
       # Every 3 hours.
       schedule='0 */3 * * *',
       board_replace=True,
+      images=['base', 'test'],
       vm_tests=[],
+      tast_vm_tests=[
+          config_lib.TastVMTestConfig(
+              'tast_vm_fwupd',
+              ['("group:mainline" && !informational && "dep:fwupd")'])],
   )
 
 
