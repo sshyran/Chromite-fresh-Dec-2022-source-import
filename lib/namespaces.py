@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 
+from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import process_util
@@ -116,7 +117,14 @@ def _SafeTcSetPgrp(fd, pgrp):
 def _ForwardToChildPid(pid, signal_to_forward):
   """Setup a signal handler that forwards the given signal to the given pid."""
   def _ForwardingHandler(signum, _frame):
-    os.kill(pid, signum)
+    try:
+      os.kill(pid, signum)
+    except ProcessLookupError:
+      # The target PID might have already exited, and thus we get a
+      # ProcessLookupError when trying to send it a signal.
+      logging.debug(
+        "Can't forward signal %u to pid %u as it doesn't exist", signum, pid)
+
   signal.signal(signal_to_forward, _ForwardingHandler)
 
 
