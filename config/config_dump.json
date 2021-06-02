@@ -1467,7 +1467,6 @@
         "luci_builder": "Informational",
         "profile": "fwupd-upstream",
         "schedule": "0 */3 * * *",
-        "sync_chrome": false,
         "tast_vm_tests": [
             "{\n    \"suite_name\": \"tast_vm_fwupd\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational && \\\"dep:fwupd\\\")\"\n    ],\n    \"timeout\": 3600\n}"
         ],
@@ -1500,7 +1499,6 @@
         ],
         "luci_builder": "Try",
         "profile": "fwupd-upstream",
-        "sync_chrome": false,
         "tast_vm_tests": [
             "{\n    \"suite_name\": \"tast_vm_fwupd\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational && \\\"dep:fwupd\\\")\"\n    ],\n    \"timeout\": 3600\n}"
         ],

@@ -1720,7 +1720,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.informational,
       boards=['amd64-generic'],
       profile='fwupd-upstream',
-      sync_chrome=False,
       chrome_sdk=False,
       description='Build with Upstream fwupd',
       disk_layout='4gb-rootfs',
