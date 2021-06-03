@@ -1465,6 +1465,9 @@
             "test"
         ],
         "luci_builder": "Informational",
+        "notification_configs": [
+            "{\n    \"email\": \"chromeos-fwupd@google.com\",\n    \"template\": \"legacy_informational\",\n    \"threshold\": 1\n}"
+        ],
         "profile": "fwupd-upstream",
         "schedule": "0 */3 * * *",
         "tast_vm_tests": [

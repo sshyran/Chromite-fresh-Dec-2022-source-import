@@ -2315,6 +2315,11 @@ def AddNotificationConfigs(site_config):
   #     ],
   # }
   notifiers = {
+      'amd64-generic-fwupd-upstream': [
+          config_lib.NotificationConfig(
+              email='chromeos-fwupd@google.com',
+              template='legacy_informational'),
+      ],
       'dedede-release': [
           config_lib.NotificationConfig(
               email='dedede-release-builder-alerts@google.com', threshold=2),
