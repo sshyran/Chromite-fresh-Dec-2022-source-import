@@ -16,7 +16,6 @@ import signal
 import socket
 import subprocess
 import sys
-import unittest
 from unittest import mock
 
 from chromite.lib import constants

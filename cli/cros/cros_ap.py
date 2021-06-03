@@ -7,6 +7,7 @@
 import importlib
 import os
 from pathlib import Path
+import sys
 
 from abc import ABCMeta, abstractmethod
 from chromite.lib import build_target_lib
@@ -110,7 +111,8 @@ class DumpConfigSubcommand(APSubommandInterface):
 
   def __init__(self, options):
     super().__init__(options)
-    self.options.output_path = Path(self.options.output)
+    if self.options.output:
+      self.options.output = Path(self.options.output)
     self.options.Freeze()
 
   @staticmethod
@@ -129,7 +131,7 @@ class DumpConfigSubcommand(APSubommandInterface):
         default='%s',
         help='Serial of the servos. (default: %(default)s)')
     subparser.add_argument(
-        '-o', '--output', type='path', required=True, help='Output file.')
+        '-o', '--output', type='path', help='Output file.')
     subparser.epilog = """
 Dump DUT controls and programmer arguments into a provided file.
 
@@ -160,9 +162,13 @@ To dump AP config of drallion and dedede boards:
         boards.append(p.with_suffix('').name)
     boards.sort()
 
-    logging.info('Dumping AP config to %s', self.options.output_path)
-    logging.info('List of boards: %s', ', '.join(boards))
-    logging.info('List of servos: %s', ', '.join(servo_lib.VALID_SERVOS))
+    if self.options.output:
+      output_path = self.options.output
+      logging.info('Dumping AP config to %s', output_path)
+      logging.info('List of boards: %s', ', '.join(boards))
+      logging.info('List of servos: %s', ', '.join(servo_lib.VALID_SERVOS))
+    else:
+      output_path = sys.stdout
 
     output = {}
     failed_board_servos = {}
@@ -197,7 +203,7 @@ To dump AP config of drallion and dedede boards:
     for board, servos in failed_board_servos.items():
       logging.notice(f'[{board}] skipping servos ' f'{", ".join(servos)}')
 
-    with self.options.output_path.open('w', encoding='utf-8') as f:
+    with cros_build_lib.Open(output_path, 'w', encoding='utf-8') as f:
       pformat.json(output, f)
 
 
