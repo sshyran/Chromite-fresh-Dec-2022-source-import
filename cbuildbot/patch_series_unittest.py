@@ -122,6 +122,9 @@ class PatchSeriesTestCase(patch_unittest.UploadedLocalPatchTestCase,
     series._Transaction = self._ValidateTransactionCall
     series.GetGitRepoForChange = (
         lambda change, **kwargs: os.path.join(self.build_root, change.project))
+    series.GetGitReposForChange = (
+        lambda change, **kwargs: [os.path.join(self.build_root,
+                                               change.project)])
 
     return series
 
@@ -171,6 +174,7 @@ class TestUploadedLocalPatch(PatchSeriesTestCase):
     self.assertNotEqual(patch3.id, patch4.id)
     series = self.GetPatchSeries()
     series.GetGitRepoForChange = lambda change, **kwargs: git2
+    series.GetGitReposForChange = lambda change, **kwargs: [git2]
     patches, _ = series.FetchChanges([patch3, patch4])
     self.assertEqual(len(patches), 2)
     self.assertEqual(patches[0].id, patch3.id)
@@ -186,6 +190,7 @@ class TestUploadedLocalPatch(PatchSeriesTestCase):
 
     series = self.GetPatchSeries()
     series.GetGitRepoForChange = raiseException
+    series.GetGitReposForChange = raiseException
 
     changes, not_in_manifest = series.FetchChanges(patches)
 

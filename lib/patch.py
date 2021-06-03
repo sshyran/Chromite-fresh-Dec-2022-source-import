@@ -1251,17 +1251,17 @@ class GitRepoPatch(PatchQuery):
     Raises:
       ApplyPatchException: If the patch failed to apply.
     """
-    checkout = self.GetCheckout(manifest)
-    revision = checkout.get('revision')
-    # revision might be a branch which is written as it would appear on the
-    # remote. If so, rewrite it as a local reference to the remote branch.
-    # For example, refs/heads/main might become refs/remotes/cros/main.
-    if revision and not git.IsSHA1(revision):
-      revision = 'refs/remotes/%s/%s' % (
-          checkout['remote'], git.StripRefs(revision))
-    upstream = checkout['tracking_branch']
-    self.Apply(checkout.GetPath(absolute=True), upstream, revision=revision,
-               trivial=trivial)
+    for checkout in self.GetCheckouts(manifest):
+      revision = checkout.get('revision')
+      # revision might be a branch which is written as it would appear on the
+      # remote. If so, rewrite it as a local reference to the remote branch.
+      # For example, refs/heads/main might become refs/remotes/cros/main.
+      if revision and not git.IsSHA1(revision):
+        revision = 'refs/remotes/%s/%s' % (
+            checkout['remote'], git.StripRefs(revision))
+      upstream = checkout['tracking_branch']
+      self.Apply(checkout.GetPath(absolute=True), upstream, revision=revision,
+                 trivial=trivial)
 
   def GerritDependencies(self):
     """Returns a list of Gerrit change numbers that this patch depends on.
@@ -1371,6 +1371,22 @@ class GitRepoPatch(PatchQuery):
     existing_filenames = output.split('\0')[:-1]
     return [x for x in files if x not in existing_filenames]
 
+  def GetCheckouts(self, manifest, strict=True):
+    """Get the ProjectCheckout(s) associated with this patch.
+
+    Args:
+      manifest: A ManifestCheckout object.
+      strict: If the change refers to a project/branch that is not in the
+        manifest, raise a ChangeNotInManifest error.
+
+    Returns:
+      A list of the ProjectCheckout(s) for the patch, which may be empty.
+    """
+    checkouts = manifest.FindCheckouts(self.project, self.tracking_branch)
+    if strict and not checkouts:
+      raise ChangeNotInManifest(self)
+    return checkouts
+
   def GetCheckout(self, manifest, strict=True):
     """Get the ProjectCheckout associated with this patch.
 
@@ -1383,12 +1399,10 @@ class GitRepoPatch(PatchQuery):
       ChangeMatchesMultipleCheckouts if there are multiple checkouts that
       match this change.
     """
-    checkouts = manifest.FindCheckouts(self.project, self.tracking_branch)
+    checkouts = self.GetCheckouts(manifest, strict=strict)
     if len(checkouts) != 1:
       if len(checkouts) > 1:
         raise ChangeMatchesMultipleCheckouts(self)
-      elif strict:
-        raise ChangeNotInManifest(self)
       return None
 
     return checkouts[0]
