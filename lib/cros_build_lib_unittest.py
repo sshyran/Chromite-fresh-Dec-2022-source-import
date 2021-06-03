@@ -11,6 +11,7 @@ import difflib
 import functools
 import itertools
 import os
+from pathlib import Path
 import signal
 import socket
 import subprocess
@@ -1307,7 +1308,15 @@ class OpenTests(cros_test_lib.TempDirTestCase):
       with cros_build_lib.Open(fp) as fp2:
         self.assertEqual('foo', fp2.read())
 
-  @unittest.skipIf(sys.version_info.major < 3, 'Requires py3')
+  def testPath(self):
+    """Read/write a file by Path."""
+    path = Path(self.tempdir) / 'test.txt'
+    with cros_build_lib.Open(path, mode='w') as fp:
+      fp.write('foo')
+    with cros_build_lib.Open(path, mode='r') as fp:
+      self.assertEqual('foo', fp.read())
+    self.assertEqual('foo', path.read_text())
+
   def testEncoding(self):
     """Verify we pass kwargs down."""
     path = os.path.join(self.tempdir, 'test.txt')

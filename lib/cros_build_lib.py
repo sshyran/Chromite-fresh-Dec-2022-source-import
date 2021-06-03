@@ -14,6 +14,7 @@ import getpass
 import inspect
 import operator
 import os
+from pathlib import Path
 import re
 import signal
 import socket
@@ -21,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from typing import TextIO, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_collections
@@ -1630,11 +1632,13 @@ def iflatten_instance(iterable,
 
 
 @contextlib.contextmanager
-def Open(obj, mode='r', **kwargs):
+def Open(obj: Union[str, os.PathLike, TextIO], mode: str = 'r', **kwargs):
   """Convenience ctx that accepts a file path or an already open file object."""
   if isinstance(obj, str):
     with open(obj, mode=mode, **kwargs) as f:
       yield f
+  elif isinstance(obj, Path):
+    yield obj.open(mode=mode, **kwargs)
   else:
     yield obj
 
