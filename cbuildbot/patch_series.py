@@ -288,6 +288,29 @@ class PatchSeries(object):
     return f
 
   @_ManifestDecorator
+  def GetGitReposForChange(self, change, strict=False, manifest=None):
+    """Get the project path(s) associated with the specified change.
+
+    Args:
+      change: The change to operate on.
+      strict: If True, throw ChangeNotInManifest rather than returning
+        None. Default: False.
+      manifest: A ManifestCheckout instance representing what we're working on.
+
+    Returns:
+      List of the project paths, if found in the manifest. Otherwise returns
+      None (if strict=False).
+    """
+    if manifest is None:
+      manifest = self.manifest
+    if manifest:
+      checkouts = change.GetCheckouts(manifest, strict=strict)
+      if checkouts:
+        return [c.GetPath(absolute=True) for c in checkouts]
+
+    return None
+
+  @_ManifestDecorator
   def GetGitRepoForChange(self, change, strict=False, manifest=None):
     """Get the project path associated with the specified change.
 
@@ -563,13 +586,15 @@ class PatchSeries(object):
 
       repo = None
       try:
-        repo = self.GetGitRepoForChange(change, strict=True, manifest=manifest)
+        repos = self.GetGitReposForChange(change, strict=True,
+                                          manifest=manifest)
       except cros_patch.ChangeNotInManifest as e:
         logging.info("Skipping patch %s as it's not in manifest.", change)
         not_in_manifest.append(e)
         continue
 
-      by_repo.setdefault(repo, []).append(change)
+      for repo in repos:
+        by_repo.setdefault(repo, []).append(change)
       changes_to_fetch.append(change)
 
     # Fetch changes in parallel. The change.Fetch() method modifies the
@@ -713,7 +738,7 @@ class PatchSeries(object):
     # the sha1 of the branch; that information is enough to rewind us back
     # to the original repo state.
     project_state = set(
-        self.GetGitRepoForChange(x, strict=True) for x in commits)
+        r for x in commits for r in self.GetGitReposForChange(x, strict=True))
     resets = []
     for project_dir in project_state:
       current_sha1 = git.RunGit(
