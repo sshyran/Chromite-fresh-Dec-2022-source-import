@@ -423,6 +423,7 @@
 
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
+    eve-arc-r-vmrvc-android-pfq
     grunt-arc-r-vmrvc-android-pfq
     hatch-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
@@ -805,6 +806,7 @@
   eve-arc-r-payloads-tryjob
   eve-arc-r-release-tryjob
   eve-arc-r-unittest-stress
+  eve-arc-r-vmrvc-android-pfq-tryjob
   eve-arcvm-mesa-virgl-next-full-tryjob
   eve-arcvm-mesa-virgl-next-llvm-next-toolchain-tryjob
   eve-arcvm-mesa-virgl-next-llvm-toolchain-tryjob
@@ -1609,6 +1611,7 @@
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
+    eve-arc-r-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
     hatch-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
