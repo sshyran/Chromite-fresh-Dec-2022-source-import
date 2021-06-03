@@ -80,11 +80,6 @@ class ExecRequiredError(Exception):
     self.cmd = cmd
 
 
-def AbsolutePath(_option, _opt, value):
-  """Expand paths and make them absolute."""
-  return osutils.ExpandPath(value)
-
-
 def NormalizeGSPath(value):
   """Normalize GS paths."""
   url = gs.CanonicalizeURL(value, strict=True)
