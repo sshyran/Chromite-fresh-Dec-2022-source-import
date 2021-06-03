@@ -25,6 +25,7 @@ _FULLNAME_REV = None
 _BLOCK_SIZE = 4096
 _IMAGE_SIZE_NEARING_RATIO = 1.05
 _IMAGE_SIZE_GROWTH_RATIO = 1.2
+_DAYS_TO_PURGE = 3
 
 # pylint: disable=protected-access
 
@@ -70,6 +71,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         'version': f'{_VERSION}_new',
         'preload': True,
         'used_by': dlc_lib.USED_BY_USER,
+        'days_to_purge': _DAYS_TO_PURGE,
         'mount_file_required': True,
     }
 
@@ -93,6 +95,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   version=_VERSION,
                   preload=False,
                   used_by=dlc_lib.USED_BY_SYSTEM,
+                  days_to_purge=_DAYS_TO_PURGE,
                   mount_file_required=False,
                   fullnamerev=_FULLNAME_REV):
     """Tests EbuildParams JSON values"""
@@ -106,6 +109,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                           'description': description,
                           'preload': preload,
                           'used_by': used_by,
+                          'days_to_purge': days_to_purge,
                           'mount_file_required': mount_file_required,
                           'fullnamerev': fullnamerev})
 
@@ -120,6 +124,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      version=_VERSION,
                      preload=False,
                      used_by=dlc_lib.USED_BY_SYSTEM,
+                     days_to_purge=_DAYS_TO_PURGE,
                      mount_file_required=False,
                      fullnamerev=_FULLNAME_REV):
     """Creates and Stores DLC params at install_root_dir"""
@@ -133,6 +138,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         version=version,
         preload=preload,
         used_by=used_by,
+        days_to_purge=days_to_purge,
         mount_file_required=mount_file_required,
         fullnamerev=fullnamerev)
     return params.StoreDlcParameters(
@@ -210,6 +216,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
         version=_VERSION,
         preload=False,
         used_by=dlc_lib.USED_BY_SYSTEM,
+        days_to_purge=_DAYS_TO_PURGE,
         mount_file_required=False,
         fullnamerev=_FULLNAME_REV)
     return dlc_lib.DlcGenerator(
@@ -310,6 +317,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
             'mount-file-required': False,
             'preload-allowed': False,
             'used-by': dlc_lib.USED_BY_SYSTEM,
+            'days-to-purge': _DAYS_TO_PURGE,
         })
 
   def testVerifyImageSize(self):

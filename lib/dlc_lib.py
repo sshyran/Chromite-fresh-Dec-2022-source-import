@@ -99,12 +99,21 @@ class EbuildParams(object):
     preload: (bool) allow for preloading DLC.
     mount_file_required: (bool) allow for mount file generation for DLC.
     used_by: (str) The user of this DLC, e.g. "system" or "user"
+    days_to_purge: (int) The number of days to keep a DLC after uninstall and
+        before it is purged.
     fullnamerev: (str) The full package & version name.
   """
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
                version, name, description, preload, used_by,
-               mount_file_required, fullnamerev):
+               mount_file_required, fullnamerev, days_to_purge=0):
+    """Initializes the object.
+
+    When adding a new variable in here, always set a default value. The reason
+    is that this class is sometimes used to load a pre-existing ebuild params
+    JSON file (through bin packages) and that file may not contain the new
+    arguemnt. So the build will fail.
+    """
     self.dlc_id = dlc_id
     self.dlc_package = dlc_package
     self.fs_type = fs_type
@@ -116,6 +125,7 @@ class EbuildParams(object):
     self.used_by = used_by
     self.mount_file_required = mount_file_required
     self.fullnamerev = fullnamerev
+    self.days_to_purge = days_to_purge
 
   def StoreDlcParameters(self, install_root_dir, sudo):
     """Store DLC parameters defined in the ebuild.
@@ -456,6 +466,7 @@ class DlcGenerator(object):
         'version': self.ebuild_params.version,
         'preload-allowed': self.ebuild_params.preload,
         'used-by': self.ebuild_params.used_by,
+        'days-to-purge': self.ebuild_params.days_to_purge,
         'mount-file-required': self.ebuild_params.mount_file_required,
     }
 
