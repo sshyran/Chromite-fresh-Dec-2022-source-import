@@ -822,7 +822,7 @@ GOLO_SMTP_SERVER = 'mail.golo.chromium.org'
 CHROME_GARDENER = 'chrome'
 # Email alias to add as reviewer in Gerrit, which GWSQ will then automatically
 # assign to the current gardener.
-CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners+review@google.com'
+CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 
 # Useful config targets.
 CANARY_MASTER = 'master-release'

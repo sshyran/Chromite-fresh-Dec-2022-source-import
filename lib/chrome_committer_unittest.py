@@ -79,7 +79,7 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
                                 'Automated Commit: Modify OWNERS and BUILD.gn',
                                 '--bypass-hooks', '-f',
                                 '--reviewers',
-                                'chrome-os-gardeners+review@google.com',
+                                'chrome-os-gardeners-reviews@google.com',
                                 '--set-bot-commit',
                                 '--send-mail', '--use-commit-queue'])
 
