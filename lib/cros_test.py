@@ -15,6 +15,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import device
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import retry_util
 from chromite.lib import vm
 from chromite.lib.xbuddy import xbuddy
 
@@ -263,12 +264,10 @@ class CrOSTest(object):
                          |copy_paths| are copied to.
       copy_paths: A list of chrome_utils.Path of files to be copied.
     """
-    with osutils.TempDir(set_global=True) as tempdir:
-      self.staging_dir = tempdir
-      strip_bin = None
-      chrome_util.StageChromeFromBuildDir(
-          self.staging_dir, host_src_dir, strip_bin, copy_paths=copy_paths)
-
+    # The rsync connection can occasionally crash during the transfer, so
+    # retry in the hope that it's transient.
+    @retry_util.WithRetry(max_retry=3, sleep=1, backoff_factor=2)
+    def copy_with_retries():
       if self._device.remote.HasRsync():
         self._device.remote.CopyToDevice(
             '%s/' % os.path.abspath(self.staging_dir), remote_target_dir,
@@ -277,6 +276,14 @@ class CrOSTest(object):
         self._device.remote.CopyToDevice(
             '%s/' % os.path.abspath(self.staging_dir), remote_target_dir,
             mode='scp', debug_level=logging.INFO)
+
+    with osutils.TempDir(set_global=True) as tempdir:
+      self.staging_dir = tempdir
+      strip_bin = None
+      chrome_util.StageChromeFromBuildDir(
+          self.staging_dir, host_src_dir, strip_bin, copy_paths=copy_paths)
+      copy_with_retries()
+
 
   def _RunCatapultTests(self):
     """Run catapult tests matching a pattern using run_tests.
