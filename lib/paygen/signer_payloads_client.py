@@ -4,7 +4,6 @@
 
 """This library manages the interfaces to the signer for update payloads."""
 
-import binascii
 import os
 import re
 import shutil
@@ -438,7 +437,7 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
 
     signatures = []
     for h in hashes:
-      hash_hex = binascii.hexlify(h).decode()
+      hash_hex = h.hex()
       hash_file = os.path.join(self._work_dir, 'hash-%s.bin' % hash_hex)
       signature_file = os.path.join(self._work_dir,
                                     'signature-%s.bin' % hash_hex)
