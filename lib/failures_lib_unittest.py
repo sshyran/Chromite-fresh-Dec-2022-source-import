@@ -106,24 +106,6 @@ class CompoundFailureTest(cros_test_lib.TestCase):
     self.assertEqual(stage_failure_msg.exception_type, 'CompoundFailure')
     self.assertEqual(stage_failure_msg.exception_category, 'unknown')
 
-class ReportStageFailureTest(cros_test_lib.MockTestCase):
-  """Tests for ReportStageFailure."""
-
-  def testReportStageFailure(self):
-    """Test ReportStageFailure."""
-
-    class FakeStepFailure(failures_lib.StepFailure):
-      """A fake StepFailure subclass for unittest."""
-      EXCEPTION_CATEGORY = 'unittest'
-
-    fake_failure = FakeStepFailure('Toot! Toot!')
-    insert_failure_fn = self.PatchObject(failures_lib,
-                                         '_InsertFailureToMonarch')
-    failures_lib.ReportStageFailure(
-        fake_failure, {})
-    insert_failure_fn.assert_called_once_with(exception_category='unittest',
-                                              metrics_fields={})
-
 
 class SetFailureTypeTest(cros_test_lib.TestCase):
   """Test that the SetFailureType decorator works."""

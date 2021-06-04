@@ -12,7 +12,6 @@ import traceback
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failure_message_lib
-from chromite.lib import metrics
 
 
 class StepFailure(Exception):
@@ -169,7 +168,7 @@ class CompoundFailure(StepFailure):
     for exc_class, exc_str, _ in self.exc_infos:
       inner_failure = failure_message_lib.StageFailure(
           None, build_stage_id, None, exc_class.__name__, exc_str,
-          _GetExceptionCategory(exc_class), None, None, stage_name,
+          GetExceptionCategory(exc_class), None, None, stage_name,
           None, None, None, None, None, None, None, None, None, None)
       innner_failure_message = failure_message_lib.StageFailureMessage(
           inner_failure, stage_prefix_name=stage_prefix_name)
@@ -405,43 +404,6 @@ class TestWarning(StepFailure):
   """Raised if a test stage (e.g. VMTest) returns a warning code."""
 
 
-def ReportStageFailure(exception, metrics_fields=None):
-  """Reports stage failure to Mornach along with inner exceptions.
-
-  Args:
-    exception: The failure exception to report.
-    metrics_fields: (Optional) Fields for ts_mon metric.
-  """
-  _InsertFailureToMonarch(
-      exception_category=_GetExceptionCategory(type(exception)),
-      metrics_fields=metrics_fields)
-
-  # This assumes that CompoundFailure can't be nested.
-  if isinstance(exception, CompoundFailure):
-    for exc_class, _, _ in exception.exc_infos:
-      _InsertFailureToMonarch(
-          exception_category=_GetExceptionCategory(exc_class),
-          metrics_fields=metrics_fields)
-
-
-def _InsertFailureToMonarch(
-    exception_category=constants.EXCEPTION_CATEGORY_UNKNOWN,
-    metrics_fields=None):
-  """Report a single stage failure to Mornach if needed.
-
-  Args:
-    exception_category: (Optional) one of
-                        constants.EXCEPTION_CATEGORY_ALL_CATEGORIES,
-                        Default: 'unknown'.
-    metrics_fields: (Optional) Fields for ts_mon metric.
-  """
-  if (metrics_fields is not None and
-      exception_category != constants.EXCEPTION_CATEGORY_UNKNOWN):
-    counter = metrics.Counter(constants.MON_STAGE_FAILURE_COUNT)
-    metrics_fields['exception_category'] = exception_category
-    counter.increment(fields=metrics_fields)
-
-
 def GetStageFailureMessageFromException(stage_name, build_stage_id,
                                         exception, stage_prefix_name=None):
   """Get StageFailureMessage from an exception.
@@ -462,14 +424,14 @@ def GetStageFailureMessageFromException(stage_name, build_stage_id,
   else:
     stage_failure = failure_message_lib.StageFailure(
         None, build_stage_id, None, type(exception).__name__, str(exception),
-        _GetExceptionCategory(type(exception)), None, None, stage_name,
+        GetExceptionCategory(type(exception)), None, None, stage_name,
         None, None, None, None, None, None, None, None, None, None)
 
     return failure_message_lib.StageFailureMessage(
         stage_failure, stage_prefix_name=stage_prefix_name)
 
 
-def _GetExceptionCategory(exception_class):
+def GetExceptionCategory(exception_class):
   # Do not use try/catch. If a subclass of StepFailure does not have a valid
   # EXCEPTION_CATEGORY, it is a programming error, not a runtime error.
   if issubclass(exception_class, StepFailure):

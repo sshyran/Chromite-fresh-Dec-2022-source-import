@@ -684,3 +684,21 @@ class ArchivingStageMixinMock(partial_mock.PartialMock):
     with patch(commands, 'ArchiveFile', return_value='foo.txt'):
       with patch(commands, 'UploadArchivedFile'):
         self.backup['UploadArtifact'](*args, **kwargs)
+
+
+class ReportStageFailureTest(cros_test_lib.MockTestCase):
+  """Tests for ReportStageFailure."""
+
+  def testReportStageFailure(self):
+    """Test ReportStageFailure."""
+
+    class FakeStepFailure(failures_lib.StepFailure):
+      """A fake StepFailure subclass for unittest."""
+      EXCEPTION_CATEGORY = 'unittest'
+
+    fake_failure = FakeStepFailure('Toot! Toot!')
+    insert_failure_fn = self.PatchObject(generic_stages,
+                                         '_InsertFailureToMonarch')
+    generic_stages.ReportStageFailure(fake_failure, {})
+    insert_failure_fn.assert_called_once_with(exception_category='unittest',
+                                              metrics_fields={})

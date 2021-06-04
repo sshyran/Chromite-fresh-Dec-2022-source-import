@@ -37,6 +37,43 @@ from chromite.lib import timeout_util
 from chromite.lib.buildstore import BuildIdentifier
 
 
+def ReportStageFailure(exception, metrics_fields=None):
+  """Reports stage failure to Mornach along with inner exceptions.
+
+  Args:
+    exception: The failure exception to report.
+    metrics_fields: (Optional) Fields for ts_mon metric.
+  """
+  _InsertFailureToMonarch(
+      exception_category=failures_lib.GetExceptionCategory(type(exception)),
+      metrics_fields=metrics_fields)
+
+  # This assumes that CompoundFailure can't be nested.
+  if isinstance(exception, failures_lib.CompoundFailure):
+    for exc_class, _, _ in exception.exc_infos:
+      _InsertFailureToMonarch(
+          exception_category=failures_lib.GetExceptionCategory(exc_class),
+          metrics_fields=metrics_fields)
+
+
+def _InsertFailureToMonarch(
+    exception_category=constants.EXCEPTION_CATEGORY_UNKNOWN,
+    metrics_fields=None):
+  """Report a single stage failure to Mornach if needed.
+
+  Args:
+    exception_category: (Optional) one of
+                        constants.EXCEPTION_CATEGORY_ALL_CATEGORIES,
+                        Default: 'unknown'.
+    metrics_fields: (Optional) Fields for ts_mon metric.
+  """
+  if (metrics_fields is not None and
+      exception_category != constants.EXCEPTION_CATEGORY_UNKNOWN):
+    counter = metrics.Counter(constants.MON_STAGE_FAILURE_COUNT)
+    metrics_fields['exception_category'] = exception_category
+    counter.increment(fields=metrics_fields)
+
+
 class BuilderStage(object):
   """Parent class for stages to be performed by a builder."""
   # Used to remove 'Stage' suffix of stage class when generating stage name.
@@ -271,7 +308,7 @@ class BuilderStage(object):
           'category': self.category
       })
       if self.buildstore.AreClientsReady():
-        failures_lib.ReportStageFailure(
+        ReportStageFailure(
             stage_result,
             metrics_fields=failed_metrics_fields)
 
