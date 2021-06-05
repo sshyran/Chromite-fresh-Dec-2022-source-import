@@ -281,8 +281,8 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
   """Stage that syncs Chrome sources if needed."""
   category = constants.PRODUCT_CHROME_STAGE
 
-  # 6 hours in seconds should be long enough to fetch Chrome. I hope.
-  SYNC_CHROME_TIMEOUT = 6 * 60 * 60
+  # 12 hours in seconds should be long enough to fetch Chrome. I hope.
+  SYNC_CHROME_TIMEOUT = 12 * 60 * 60
 
   def DetermineChromeVersion(self):
     cpv = portage_util.PortageqBestVisible(constants.CHROME_CP,
