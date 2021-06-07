@@ -263,7 +263,7 @@ class DeployConfig(object):
 
 def _get_build_config(build_target):
   """Get the relevant build config for |build_target|."""
-  module = _get_config_module(build_target)
+  module = get_config_module(build_target.name)
   workon_pkgs = getattr(module, _CONFIG_BUILD_WORKON_PACKAGES, None)
   build_pkgs = getattr(module, _CONFIG_BUILD_PACKAGES, None)
 
@@ -278,7 +278,7 @@ def _get_build_config(build_target):
 
 def _get_deploy_config(build_target):
   """Get the relevant deploy config for |build_target|."""
-  module = _get_config_module(build_target)
+  module = get_config_module(build_target.name)
 
   # Get the force fast function if available.
   force_fast = getattr(module, 'is_fast_required', None)
@@ -304,11 +304,18 @@ def _get_deploy_config(build_target):
       ssh_force_command=ssh_force)
 
 
-def _get_config_module(build_target):
-  """Get the |build_target|'s config module."""
-  name = _BUILD_TARGET_CONFIG_MODULE % build_target.name
+def get_config_module(build_target_name):
+  """Return configuration module for a given build target.
+
+  Args:
+    build_target_name: Name of the build target, e.g. 'dedede'.
+
+  Returns:
+    module: Python configuration module for a given build target.
+  """
+  name = _BUILD_TARGET_CONFIG_MODULE % build_target_name
   try:
     return importlib.import_module(name)
   except ImportError:
     raise BuildTargetNotConfiguredError(
-        'Could not find a config module for %s.' % build_target.name)
+        'Could not find a config module for %s.' % build_target_name)

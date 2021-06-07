@@ -21,7 +21,7 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     module = mock.MagicMock(
         BUILD_WORKON_PACKAGES=('pkg1', 'pkg2'), BUILD_PACKAGES=('pkg3', 'pkg4'))
 
-    self.PatchObject(ap_firmware, '_get_config_module', return_value=module)
+    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
 
     # pylint: disable=protected-access
     build_config = ap_firmware._get_build_config(
@@ -35,7 +35,7 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     module = mock.MagicMock(
         BUILD_WORKON_PACKAGES=None, BUILD_PACKAGES=('pkg3', 'pkg4'))
 
-    self.PatchObject(ap_firmware, '_get_config_module', return_value=module)
+    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
 
     # pylint: disable=protected-access
     build_config = ap_firmware._get_build_config(
@@ -49,7 +49,7 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     module = mock.MagicMock(
         BUILD_WORKON_PACKAGES=('pkg1', 'pkg2'), BUILD_PACKAGES=tuple())
 
-    self.PatchObject(ap_firmware, '_get_config_module', return_value=module)
+    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
 
     with self.assertRaises(ap_firmware.InvalidConfigError):
       # pylint: disable=protected-access

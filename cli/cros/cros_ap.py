@@ -4,7 +4,6 @@
 
 """cros ap: firmware AP related commands."""
 
-import importlib
 import os
 from pathlib import Path
 import sys
@@ -127,8 +126,7 @@ class DumpConfigSubcommand(APSubommandInterface):
         '--serial',
         default='%s',
         help='Serial of the servos. (default: %(default)s)')
-    subparser.add_argument(
-        '-o', '--output', type='path', help='Output file.')
+    subparser.add_argument('-o', '--output', type='path', help='Output file.')
     subparser.epilog = """
 Dump DUT controls and programmer arguments into a provided file.
 
@@ -170,12 +168,7 @@ To dump AP config of drallion and dedede boards:
     output = {}
     failed_board_servos = {}
     for board in boards:
-      module_name = f'chromite.lib.firmware.ap_firmware_config.{board}'
-      try:
-        module = importlib.import_module(module_name)
-      except ImportError as e:
-        cros_build_lib.Die(f'Failed to import config module {module_name}: {e}')
-
+      module = ap_firmware.get_config_module(board)
       output[board] = {}
       for servo_version in servo_lib.VALID_SERVOS:
         servo = servo_lib.Servo(servo_version, self.options.serial)
