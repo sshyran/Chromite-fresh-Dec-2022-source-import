@@ -1837,6 +1837,10 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
       (TRIGGERED, 'firmware-octopus-11297.250.B', ['octopus'], {}),
       # TODO(b/187942470): temporary firmware-volteer-13672.156.B builder
       (TRIGGERED, 'firmware-volteer-13672.156.B', ['volteer'], {}),
+      # TODO(b/189250648): temporary firmware-volteer-13672.130.B builder
+      (TRIGGERED, 'firmware-volteer-13672.130.B', ['volteer'], {}),
+      # TODO(b/189250648): temporary firmware-volteer-13672.148.B builder
+      (TRIGGERED, 'firmware-volteer-13672.148.B', ['volteer'], {}),
   ]
 
   # TODO(b/180525904): All of the legacy "firmwarebranch" builders are being
