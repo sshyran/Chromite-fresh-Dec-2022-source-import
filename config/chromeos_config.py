@@ -2658,6 +2658,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'sign_types': ['recovery', 'factory', 'accessory_rwsig'],
       },
 
+      'guybrush-release': {
+          'sign_types': ['recovery', 'factory'],
+      },
+
       'drallion-release': {
           'sign_types': ['recovery', 'factory'],
       },

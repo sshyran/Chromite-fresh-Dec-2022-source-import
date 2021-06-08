@@ -16668,6 +16668,10 @@
             "guybrush"
         ],
         "important": false,
+        "sign_types": [
+            "recovery",
+            "factory"
+        ],
         "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
@@ -16692,6 +16696,10 @@
         "luci_builder": "Try",
         "paygen": false,
         "push_image": false,
+        "sign_types": [
+            "recovery",
+            "factory"
+        ],
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests": [],
