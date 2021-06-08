@@ -37,6 +37,7 @@ class APCommand(command.CliCommand):
     super(APCommand, cls).AddParser(parser)
     subparsers = parser.add_subparsers(
         title='AP subcommands', dest='ap_command')
+    subparsers.required = True
 
     dump_config_parser = _AddSubparser(parser, subparsers, COMMAND_DUMP_CONFIG,
                                        'Dump the AP Config to a file.')
@@ -59,10 +60,6 @@ class APCommand(command.CliCommand):
       subcmd = BuildSubcommand(self.options)
     elif self.options.ap_command == COMMAND_FLASH:
       subcmd = FlashSubcommand(self.options)
-    else:
-      cros_build_lib.Die('Please specify one of ap subcommands: %s. '
-                         'Refer to `cros ap --help` for full help.' %
-                         [COMMAND_DUMP_CONFIG, COMMAND_BUILD, COMMAND_FLASH])
     subcmd.run()
 
 
