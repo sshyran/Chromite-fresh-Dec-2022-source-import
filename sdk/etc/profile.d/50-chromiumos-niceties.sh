@@ -15,8 +15,8 @@ source /usr/share/git/git-prompt.sh
 # Repo maintains a phony 'm/' remote using the current manifest branch name.
 # This will retrieve it.
 __git_m_branch() {
-  git for-each-ref --count=1 --format '%(refname:lstrip=3)' \
-    'refs/remotes/m/' 2>/dev/null
+  git --git-dir="/mnt/host/source/.repo/manifests.git" config \
+    branch.default.merge | cut -d/ -f3-
 }
 
 # A "subclass" of __git_ps1 that adds the manifest branch name into the prompt.
