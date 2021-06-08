@@ -55,7 +55,7 @@ import struct
 import sys
 import weakref
 
-import six
+from chromite.third_party import six
 from six.moves import range
 
 # We use "as" to avoid name collisions with variables.

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import email.utils
 import mimetypes
 
-from .packages import six
+from chromite.third_party import six
 
 
 def guess_content_type(filename, default='application/octet-stream'):

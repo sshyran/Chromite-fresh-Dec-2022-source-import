@@ -61,7 +61,7 @@ import datetime
 import uuid
 
 from . import errors
-import six
+from chromite.third_party import six
 
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it
 # in '_helpers'.

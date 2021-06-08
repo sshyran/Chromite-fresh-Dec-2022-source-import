@@ -68,7 +68,7 @@ __author__ = 'kenton@google.com (Kenton Varda)'
 
 import struct
 
-import six
+from chromite.third_party import six
 
 from google.protobuf.internal import wire_format
 

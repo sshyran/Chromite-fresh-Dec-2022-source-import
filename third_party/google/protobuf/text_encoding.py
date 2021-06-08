@@ -31,7 +31,7 @@
 """Encoding related utilities."""
 import re
 
-import six
+from chromite.third_party import six
 
 _cescape_chr_to_symbol_map = {}
 _cescape_chr_to_symbol_map[9] = r'\t'  # optional escape

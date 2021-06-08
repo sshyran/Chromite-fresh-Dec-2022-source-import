@@ -29,7 +29,7 @@ import sys
 import tempfile
 import time
 import shutil
-import six
+from chromite.third_party import six
 from six.moves import urllib
 
 from chromite.third_party import httplib2

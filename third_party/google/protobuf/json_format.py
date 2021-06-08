@@ -58,7 +58,7 @@ from operator import methodcaller
 import re
 import sys
 
-import six
+from chromite.third_party import six
 
 from google.protobuf.internal import type_checkers
 from google.protobuf import descriptor

@@ -39,7 +39,7 @@ import re
 import string
 import textwrap
 
-import six
+from chromite.third_party import six
 
 # pylint: disable=g-import-not-at-top
 try:

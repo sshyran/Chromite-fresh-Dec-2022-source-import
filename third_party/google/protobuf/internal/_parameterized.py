@@ -154,7 +154,7 @@ except ImportError:
   import unittest
 import uuid
 
-import six
+from chromite.third_party import six
 
 try:
   # Since python 3

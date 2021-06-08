@@ -48,7 +48,7 @@ import encodings.unicode_escape  # pylint: disable=unused-import
 import io
 import re
 
-import six
+from chromite.third_party import six
 
 if six.PY3:
   long = int  # pylint: disable=redefined-builtin,invalid-name

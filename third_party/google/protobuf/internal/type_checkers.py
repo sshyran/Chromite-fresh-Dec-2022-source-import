@@ -51,7 +51,7 @@ except Exception:  # pylint: disable=broad-except
   ctypes = None
   import struct
 import numbers
-import six
+from chromite.third_party import six
 
 if six.PY3:
   long = int

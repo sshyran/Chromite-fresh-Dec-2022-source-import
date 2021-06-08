@@ -43,7 +43,7 @@ __author__ = 'jieluo@google.com (Jie Luo)'
 import calendar
 from datetime import datetime
 from datetime import timedelta
-import six
+from chromite.third_party import six
 
 try:
   # Since python 3

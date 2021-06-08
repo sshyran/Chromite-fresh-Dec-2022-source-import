@@ -82,7 +82,7 @@ __author__ = 'kenton@google.com (Kenton Varda)'
 
 import struct
 import sys
-import six
+from chromite.third_party import six
 
 _UCS2_MAXUNICODE = 65535
 if six.PY3:

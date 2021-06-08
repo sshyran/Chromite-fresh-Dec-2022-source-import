@@ -23,7 +23,7 @@ Contents:
 """
 from __future__ import absolute_import
 from functools import reduce
-import six
+from chromite.third_party import six
 
 __version__ = '0.1.3'
 __author__ = 'Joe Gregorio'

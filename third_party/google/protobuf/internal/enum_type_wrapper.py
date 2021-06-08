@@ -37,7 +37,7 @@ on proto classes.  For usage, see:
 
 __author__ = 'rabsatt@google.com (Kevin Rabsatt)'
 
-import six
+from chromite.third_party import six
 
 
 class EnumTypeWrapper(object):

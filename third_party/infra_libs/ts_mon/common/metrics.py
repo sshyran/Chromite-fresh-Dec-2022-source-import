@@ -6,7 +6,7 @@
 
 import re
 
-import six
+from chromite.third_party import six
 
 from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
 

@@ -21,7 +21,7 @@ import functools
 import inspect
 import logging
 
-import six
+from chromite.third_party import six
 from six.moves import urllib
 
 

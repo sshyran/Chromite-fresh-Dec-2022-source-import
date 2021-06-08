@@ -5,7 +5,7 @@ import sys
 import socket
 from socket import error as SocketError, timeout as SocketTimeout
 import warnings
-from .packages import six
+from chromite.third_party import six
 
 try:  # Python 3
     from http.client import HTTPConnection as _HTTPConnection

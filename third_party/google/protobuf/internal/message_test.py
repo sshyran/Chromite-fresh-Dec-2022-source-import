@@ -50,7 +50,7 @@ import math
 import operator
 import pickle
 import pydoc
-import six
+from chromite.third_party import six
 import sys
 import warnings
 

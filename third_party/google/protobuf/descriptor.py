@@ -36,7 +36,7 @@ __author__ = 'robinson@google.com (Will Robinson)'
 
 import threading
 import warnings
-import six
+from chromite.third_party import six
 
 from google.protobuf.internal import api_implementation
 

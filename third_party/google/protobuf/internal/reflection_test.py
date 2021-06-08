@@ -38,7 +38,7 @@ pure-Python protocol compiler.
 import copy
 import gc
 import operator
-import six
+from chromite.third_party import six
 import struct
 import warnings
 
