@@ -91,9 +91,9 @@ def _ReapChildren(pid):
     except OSError as e:
       if e.errno == errno.ECHILD:
         raise ValueError(
-          'All children of the current processes have been reaped, but %u '
-          'was not one of them. This means that %u is not a child of the '
-          'current processes.' % (pid))
+            'All children of the current processes have been reaped, but %u '
+            'was not one of them. This means that %u is not a child of the '
+            'current processes.' % (pid))
       elif e.errno != errno.EINTR:
         raise
 
