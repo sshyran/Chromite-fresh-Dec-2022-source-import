@@ -1081,9 +1081,11 @@ def FindCompressor(compression, chroot=None):
   if compression == COMP_XZ:
     return os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'xz_auto')
   elif compression == COMP_GZIP:
-    possible_progs = ['pigz', 'gzip']
+    std = 'gzip'
+    para = 'pigz'
   elif compression == COMP_BZIP2:
-    possible_progs = ['lbzip2', 'pbzip2', 'bzip2']
+    std = 'bzip2'
+    para = 'pbzip2'
   elif compression == COMP_NONE:
     return 'cat'
   else:
@@ -1094,14 +1096,14 @@ def FindCompressor(compression, chroot=None):
     roots.append(chroot)
   roots.append('/')
 
-  for prog in possible_progs:
+  for prog in [para, std]:
     for root in roots:
       for subdir in ['', 'usr']:
         path = os.path.join(root, subdir, 'bin', prog)
         if os.path.exists(path):
           return path
 
-  return possible_progs[-1]
+  return std
 
 
 def CompressionStrToType(s):
