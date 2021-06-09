@@ -74,7 +74,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
     dump_syms_cmd: Command to use for dumping symbols.
 
   Returns:
-    The name of symbol file written out.
+    The name of symbol file written out on success, or the failure count.
   """
   assert breakpad_dir
   if num_errors is None:

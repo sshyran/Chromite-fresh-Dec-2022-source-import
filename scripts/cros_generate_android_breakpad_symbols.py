@@ -148,7 +148,9 @@ def _UnpackGenerateBreakpad(elf_file, *args, **kwargs):
   breakpad_file = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
       elf_file, *args, **kwargs)
 
-  if offset:
+  if isinstance(breakpad_file, int):
+    logging.error('Unable to generate symbols for %s', elf_file)
+  elif offset:
     _AdjustSymbolOffset(breakpad_file, offset)
 
 
