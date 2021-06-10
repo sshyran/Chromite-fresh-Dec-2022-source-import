@@ -226,13 +226,18 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     cmd_args = ['--chrome-src', self.chrome_src_dir, 'true']
     if many_boards:
       cmd_args += ['--boards', ':'.join(SDKFetcherMock.BOARDS), '--no-shell']
-      # --no-shell drops gni files in //build/args/chromeos/.
-      osutils.SafeMakedirs(
-          os.path.join(self.chrome_root, 'src', 'build', 'args', 'chromeos'))
     else:
       cmd_args += ['--board', SDKFetcherMock.BOARD]
     if extra_args:
       cmd_args.extend(extra_args)
+    # rewrapper_linux.cfg is used as a reference. The file must exist.
+    osutils.Touch(os.path.join(self.chrome_root, 'src', 'buildtools',
+                               'reclient_cfgs', 'rewrapper_linux.cfg'),
+                  makedirs=True)
+    # --no-shell drops gni files in //build/args/chromeos/.
+    # reclient configs are also dropped here regardless of --no-shell or not.
+    osutils.SafeMakedirs(
+        os.path.join(self.chrome_root, 'src', 'build', 'args', 'chromeos'))
 
     base_args = None if default_cache_dir else ['--cache-dir', self.tempdir]
     self.cmd_mock = MockChromeSDKCommand(cmd_args, base_args=base_args)
@@ -394,6 +399,11 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
     self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
     self.assertIn('use_rbe = true', self.cmd_mock.env['GN_ARGS'])
+    wrapper_path = os.path.join(
+        self.chrome_root, 'src', 'build', 'args', 'chromeos',
+        'rewrapper_%s' % SDKFetcherMock.BOARD)
+    self.assertIn('rbe_cros_cc_wrapper = "%s"' % wrapper_path,
+                  self.cmd_mock.env['GN_ARGS'])
 
   def testGnArgsStalenessCheckNoMatch(self):
     """Verifies the GN args are checked for staleness with a mismatch."""

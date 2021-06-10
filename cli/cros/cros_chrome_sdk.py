@@ -1148,6 +1148,88 @@ class ChromeSDKCommand(command.CliCommand):
       return os.path.join(tc_path, 'bin', binary)
     return binary
 
+  def _GenerateReclientConfig(self, sdk_ctx, board):
+    """Generate a config and a wrapper for reclient.
+
+    This function generates a configuration to be used by rewrapper
+    (rewrapper_<board>.cfg) and a wrapper script for the rewrapper to make it
+    passed with --gomacc-path (rewrapper_<board>).
+    The configuration is based on the linux configuration, which has already
+    been installed in Chromium repository, and this function adds a flag to
+    preserve symlink and updates inputs so that the configuration can be used
+    for compiling with ChromeOS clang.
+
+    Args:
+      sdk_ctx: An SDKFetcher.SDKContext namedtuple object for getting toolchain
+               location.
+      board: Target board name to be used as a config name and a wrapper name.
+
+    Returns:
+      Absolute path to the wrapper script to be used as --gomacc-path.
+    """
+    shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
+    tc_tarball_path = None
+    # Since we want a path to tarball extraction not a path to clang in
+    # symlink directory, we cannot find the path with
+    # sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].
+    # That is why we search like this.
+    for key, value in sdk_ctx.key_map.items():
+      if isinstance(key, tuple) and key[0].startswith('target_toolchain/'):
+        assert tc_tarball_path is None
+        tc_tarball_path = value.path
+
+    linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
+                                  'reclient_cfgs', 'rewrapper_linux.cfg')
+    linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
+
+    # TODO(b:190794287): remove code for inputs.  It will eventually be
+    #                    provided by the file in the toolchain tarball.
+    inputs = [
+        'usr/bin/clang',
+        'usr/bin/clang++',
+        'usr/bin/clang++-13',
+        'usr/bin/clang-13',
+        'usr/bin/clang-13.elf',
+        'usr/bin/clang++-13.elf',
+        'lib/ld-linux-x86-64.so.2',
+        'lib/libc++abi.so.1',
+        'lib/libc++.so.1',
+        'lib/libc.so.6',
+        'lib/libdl.so.2',
+        'lib/libgcc_s.so.1',
+        'lib/libm.so.6',
+        'lib/libpthread.so.0',
+        'lib/libtinfo.so.5',
+        'lib/libz.so.1',
+    ]
+    rel_tc_tarball_path = os.path.relpath(tc_tarball_path,
+                                          self.options.chrome_src)
+    inputs = [os.path.join(rel_tc_tarball_path, i) for i in inputs]
+    cros_cfg = ['preserve_symlink=true']
+    for line in linux_cfg:
+      if line.startswith('inputs='):
+        line = 'inputs=%s' % ','.join(inputs)
+      cros_cfg.append(line)
+    cros_cfg_path = os.path.join(shared_dir, f'rewrapper_{board}.cfg')
+    osutils.WriteFile(cros_cfg_path, '\n'.join(cros_cfg))
+    Log('generated rewrapper_cfg %s', cros_cfg_path, silent=self.silent)
+
+    # TODO(b:190741226): remove the wrapper if the compiler wrapper supports
+    #                    flags for reclient.
+    wrapper_path = os.path.join(shared_dir, 'rewrapper_%s' % board)
+    wrapper_content = [
+        '#!/bin/sh\n',
+        '{rewrapper_dir}/rewrapper -cfg="{cros_cfg_path}" '
+        '-exec_root="{chrome_src}" $@\n'.format(
+            rewrapper_dir=os.path.join(
+                self.options.chrome_src, 'buildtools', 'reclient'),
+            cros_cfg_path=cros_cfg_path,
+            chrome_src=self.options.chrome_src),
+    ]
+    osutils.WriteFile(wrapper_path, wrapper_content, chmod=0o755)
+    Log('generated rewrapper wrapper %s', wrapper_path, silent=self.silent)
+    return wrapper_path
+
   def _SetupEnvironment(self, board, sdk_ctx, options, goma_dir=None,
                         goma_port=None):
     """Sets environment variables to export to the SDK shell."""
@@ -1314,6 +1396,9 @@ class ChromeSDKCommand(command.CliCommand):
       logging.info('Removing symbol_level = %d from gn args, use '
                    '--gn-extra-args to specify a non default value.',
                    symbol_level)
+
+    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientConfig(
+        sdk_ctx, board)
 
     if options.gn_extra_args:
       gn_args.update(gn_helpers.FromGNArgs(options.gn_extra_args))
