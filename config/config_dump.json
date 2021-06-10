@@ -27918,7 +27918,7 @@
         ],
         "important": false,
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
+            "{\n    \"suite_name\": \"tast_vm_reven\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !\\\"group:camera-libcamera\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
         ]
     },
     "reven-release-tryjob": {
@@ -27945,7 +27945,7 @@
         "push_image": false,
         "suite_scheduling": false,
         "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
+            "{\n    \"suite_name\": \"tast_vm_reven\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !\\\"group:camera-libcamera\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
         ],
         "vm_tests_override": null
     },
