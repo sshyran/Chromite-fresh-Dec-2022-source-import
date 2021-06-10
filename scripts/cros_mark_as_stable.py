@@ -132,20 +132,22 @@ def PushChange(stable_branch, tracking_branch, dryrun, cwd,
     logging.info('All changes already pushed for %s. Exiting', cwd)
     return
 
-  # Add a failsafe check here.  Only CLs from the 'chrome-bot' or
-  # 'chromeos-ci-prod' user should be involved here.  If any other CLs are
-  # found then complain. In dryruns extra CLs are normal, though, and can
-  # be ignored.
+  # Add a failsafe check here.  Only CLs from these users should be here.
+  #  - 'chrome-bot',
+  #  - 'chromeos-ci-prod'
+  #  - 'chromeos-ci-release'
+  # If any other CLs are found then complain. In dryruns extra CLs are normal,
+  # though, and can be ignored.
   bad_cl_cmd = [
       'log', '--format=short', '--perl-regexp', '--author',
-      '^(?!chrome-bot|chromeos-ci-prod)',
+      '^(?!chrome-bot|chromeos-ci-prod|chromeos-ci-release)',
       '%s..%s' % (remote_ref.ref, stable_branch)
   ]
   bad_cls = git.RunGit(cwd, bad_cl_cmd).output
   if bad_cls.strip() and not dryrun:
     logging.error(
         'The Uprev stage found changes from users other than '
-        'chrome-bot or chromeos-ci-prod:\n\n%s', bad_cls)
+        'chrome-bot or chromeos-ci-prod or chromeos-ci-release:\n\n%s', bad_cls)
     raise AssertionError('Unexpected CLs found during uprev stage.')
 
   if staging_branch is not None:

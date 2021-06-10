@@ -66,7 +66,7 @@ class NonClassTests(cros_test_lib.MockTestCase):
 
     cmd = [
         'log', '--format=short', '--perl-regexp', '--author',
-        '^(?!chrome-bot|chromeos-ci-prod)',
+        '^(?!chrome-bot|chromeos-ci-prod|chromeos-ci-release)',
         'refs/remotes/gerrit/master..%s' % self._branch
     ]
 
