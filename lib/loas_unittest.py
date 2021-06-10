@@ -59,11 +59,12 @@ class TestLoas(cros_test_lib.MockTestCase):
     """Verify that expiring certs generate e-mails once a day."""
     self.rc_mock.AddCmdResult(
         partial_mock.In('gcertstatus'), returncode=1,
-        error='  WARNING LOAS2 expires in 76h')
+        stderr='  WARNING LOAS2 expires in 76h')
 
     # This should invoke gcertstatus & send an e-mail.
     self.loas.Status()
     self.assertEqual(self.email_mock.call_count, 1)
+    self.assertIn('WARNING LOAS2', self.email_mock.call_args.kwargs['message'])
 
     # While this should do nothing but return (only one e-mail a day).
     self.loas.Status()

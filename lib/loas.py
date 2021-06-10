@@ -12,6 +12,7 @@ If you don't know what any of this means, then you don't need this module :).
 
 import datetime
 import socket
+import subprocess
 
 from chromite.lib import alerts
 from chromite.lib import cros_build_lib
@@ -69,6 +70,7 @@ class Loas(object):
                                      user=self.user,
                                      check=False,
                                      stdout=True,
+                                     stderr=subprocess.STDOUT,
                                      encoding='utf-8')
 
     # Send out one notification a day if there's a week or less left
