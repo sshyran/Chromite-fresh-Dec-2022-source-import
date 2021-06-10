@@ -45,7 +45,7 @@ from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import sysroot_lib
 from chromite.lib import timeout_util
-
+from chromite.lib.parser import package_info
 from chromite.lib.paygen import filelib
 
 from chromite.scripts import pushimage
@@ -1981,12 +1981,11 @@ def MarkChromeAsStable(buildroot,
                        boards,
                        chrome_version=None):
   """Returns the portage atom for the revved chrome ebuild - see man emerge."""
-  cwd = os.path.join(buildroot, 'src', 'scripts')
   extra_env = None
   chroot_args = None
 
   command = [
-      '../../chromite/bin/cros_mark_chrome_as_stable',
+      'cros_mark_chrome_as_stable',
       '--tracking_branch=%s' % tracking_branch
   ]
   if boards:
@@ -1994,9 +1993,10 @@ def MarkChromeAsStable(buildroot,
   if chrome_version:
     command.append('--force_version=%s' % chrome_version)
 
-  portage_atom_string = cros_build_lib.run(
+  portage_atom_string = RunBuildScript(
+      buildroot,
       command + [chrome_rev],
-      cwd=cwd,
+      chromite_cmd=True,
       stdout=True,
       enter_chroot=True,
       chroot_args=chroot_args,
@@ -2013,19 +2013,14 @@ def MarkChromeAsStable(buildroot,
     # If we're using a version of Chrome other than the latest one, we need
     # to unmask it manually.
     if chrome_rev != constants.CHROME_REV_LATEST:
-      keywords_file = CHROME_KEYWORDS_FILE % {'board': board}
-      for keywords_file in (CHROME_KEYWORDS_FILE % {
-          'board': board
-      }, CHROME_UNMASK_FILE % {
-          'board': board
-      }):
-        cros_build_lib.sudo_run(
-            ['mkdir', '-p', os.path.dirname(keywords_file)],
-            enter_chroot=True,
-            cwd=cwd)
-        cros_build_lib.sudo_run(['tee', keywords_file],
-                                input='=%s\n' % chrome_atom,
-                                enter_chroot=True, cwd=cwd)
+      data = f'={chrome_atom}\n'
+      atom = package_info.parse(chrome_atom)
+      for package in constants.OTHER_CHROME_PACKAGES:
+        data += f'={package}-{atom.vr}\n'
+
+      for cfg_file in (CHROME_KEYWORDS_FILE, CHROME_UNMASK_FILE):
+        cfg_file %= {'board': board}
+        osutils.WriteFile(cfg_file, data, makedirs=True, sudo=True)
 
     # Sanity check: We should always be able to merge the version of
     # Chrome we just unmasked.
