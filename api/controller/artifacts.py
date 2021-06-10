@@ -708,7 +708,7 @@ def BundleDebugSymbols(input_proto, output_proto, _config):
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
   with chroot.tempdir() as symbol_tmpdir, chroot.tempdir() as dest_tmpdir:
-    breakpad_dir = os.path.join('/build', build_target.name,
+    breakpad_dir = os.path.join(chroot.path, 'build', build_target.name,
                                 'usr/lib/debug/breakpad')
     # Call list on the atifacts.GatherSymbolFiles generator function to
     # materialize and consume all entries so that all are copied to

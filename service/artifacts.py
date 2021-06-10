@@ -755,8 +755,9 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
   for p in paths:
     o = urllib.parse.urlparse(p)
     if o.scheme:
-      raise NotImplementedError('URL paths are not expected/handled: ',p)
-
+      raise NotImplementedError('URL paths are not expected/handled: ', p)
+    elif not os.path.exists(p):
+      raise NoFilesError('The path did not exist: ', p)
     elif os.path.isdir(p):
       for root, _, files in os.walk(p):
         for f in files:
@@ -793,8 +794,7 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
         yield SymbolFileTuple(
             relative_path=sym.relative_path,
             source_file_name=new_source_file_name)
-
-    else:
+    elif os.path.isfile(p):
       # Path p is a file. This code path is only executed when a full file path
       # is one of the elements in the 'paths' argument. When a directory is an
       # element of the 'paths' argument, we walk the tree (above) and process
@@ -806,6 +806,8 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
         shutil.copy(p, destdir)
         yield SymbolFileTuple(relative_path=os.path.basename(p),
                               source_file_name=p)
+    else:
+      raise ValueError('Unexpected input to GatherSymbolFiles: ', p)
 
 
 def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
