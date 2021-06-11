@@ -423,9 +423,21 @@ _COPY_PATHS_LACROS = (
         exe=True,
         optional=True),
     Path(
+        'nacl_helper_bootstrap',
+        exe=True,
+        optional=True),
+    Path(
+        'nacl_helper_nonsfi',
+        exe=True,
+        optional=True),
+    Path(
         'nacl_irt_x86_64.nexe',
         exe=True,
-        optional=False),
+        optional=True),
+    Path(
+        'nacl_irt_arm.nexe',
+        exe=True,
+        optional=True),
     Path('locales/', optional=True),
     Path('*.pak', optional=True),
     Path('icudtl.dat', optional=True),
