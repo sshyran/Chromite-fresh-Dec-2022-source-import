@@ -12260,7 +12260,7 @@
         "_template": "buildspec",
         "build_timeout": 43200,
         "display_label": "factory",
-        "schedule": "triggered",
+        "schedule": "with 24h interval",
         "slave_configs": [
             "strongbad-factory-strongbad-13963.B-factorybranch"
         ],
