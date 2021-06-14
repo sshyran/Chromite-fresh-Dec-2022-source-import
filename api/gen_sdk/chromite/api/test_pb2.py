@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x17\x63hromite/api/test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\x1a\x18\x63hromiumos/metrics.proto\"\xee\x03\n\x1a\x42uildTargetUnitTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bresult_path\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12=\n\x05\x66lags\x18\x04 \x01(\x0b\x32..chromite.api.BuildTargetUnitTestRequest.Flags\x12\x32\n\x11package_blacklist\x18\x05 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12)\n\x08packages\x18\x06 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x32\n\x11package_blocklist\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x1a\x95\x01\n\x05\x46lags\x12\x15\n\rempty_sysroot\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\x12\"\n\x1atestable_packages_optional\x18\x04 \x01(\x08\x12\x1f\n\x17\x66ilter_only_cros_workon\x18\x05 \x01(\x08\"\x8e\x01\n\x1b\x42uildTargetUnitTestResponse\x12\x14\n\x0ctarball_path\x18\x01 \x01(\t\x12\x30\n\x0f\x66\x61iled_packages\x18\x02 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\'\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x17.chromiumos.MetricEvent\"=\n\x17\x43hromiteUnitTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x1a\n\x18\x43hromiteUnitTestResponse\";\n\x15\x43hromitePytestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x18\n\x16\x43hromitePytestResponse\"<\n\x16\x43rosSigningTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x19\n\x17\x43rosSigningTestResponse\"b\n\x14\x44\x65\x62ugInfoTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x17\n\x15\x44\x65\x62ugInfoTestResponse\"\xd2\x03\n\rVmTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12!\n\x07vm_path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12;\n\x0bssh_options\x18\x04 \x01(\x0b\x32&.chromite.api.VmTestRequest.SshOptions\x12=\n\x0ctest_harness\x18\x05 \x01(\x0e\x32\'.chromite.api.VmTestRequest.TestHarness\x12\x34\n\x08vm_tests\x18\x06 \x03(\x0b\x32\".chromite.api.VmTestRequest.VmTest\x1a\x46\n\nSshOptions\x12*\n\x10private_key_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\x12\x0c\n\x04port\x18\x02 \x01(\x05\x1a\x19\n\x06VmTest\x12\x0f\n\x07pattern\x18\x01 \x01(\t\"6\n\x0bTestHarness\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x08\n\x04TAST\x10\x01\x12\x0c\n\x08\x41UTOTEST\x10\x02\"\x10\n\x0eVmTestResponse\"\xe9\x01\n\x13MoblabVmTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12@\n\rimage_payload\x18\x02 \x01(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x12\x41\n\x0e\x63\x61\x63he_payloads\x18\x03 \x03(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x1a)\n\x07Payload\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x16\n\x14MoblabVmTestResponse\"\x8b\x01\n\x1fSimpleChromeWorkflowTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x13\n\x0b\x63hrome_root\x18\x02 \x01(\t\x12+\n\x0bgoma_config\x18\x03 \x01(\x0b\x32\x16.chromiumos.GomaConfig\"\"\n SimpleChromeWorkflowTestResponse2\xb1\x06\n\x0bTestService\x12r\n\x13\x42uildTargetUnitTest\x12(.chromite.api.BuildTargetUnitTestRequest\x1a).chromite.api.BuildTargetUnitTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10\x43hromiteUnitTest\x12%.chromite.api.ChromiteUnitTestRequest\x1a&.chromite.api.ChromiteUnitTestResponse\x12[\n\x0e\x43hromitePytest\x12#.chromite.api.ChromitePytestRequest\x1a$.chromite.api.ChromitePytestResponse\x12^\n\x0f\x43rosSigningTest\x12$.chromite.api.CrosSigningTestRequest\x1a%.chromite.api.CrosSigningTestResponse\x12X\n\rDebugInfoTest\x12\".chromite.api.DebugInfoTestRequest\x1a#.chromite.api.DebugInfoTestResponse\x12\x43\n\x06VmTest\x12\x1b.chromite.api.VmTestRequest\x1a\x1c.chromite.api.VmTestResponse\x12]\n\x0cMoblabVmTest\x12!.chromite.api.MoblabVmTestRequest\x1a\".chromite.api.MoblabVmTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x81\x01\n\x18SimpleChromeWorkflowTest\x12-.chromite.api.SimpleChromeWorkflowTestRequest\x1a..chromite.api.SimpleChromeWorkflowTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x0c\xc2\xed\x1a\x08\n\x04test\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x17\x63hromite/api/test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\x1a\x18\x63hromiumos/metrics.proto\"\x91\x02\n\x1fTestServiceContainerBuildResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12H\n\x07success\x18\x02 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.SuccessH\x00\x12H\n\x07\x66\x61ilure\x18\x03 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.FailureH\x00\x1a \n\x07Success\x12\x15\n\rregistry_path\x18\x01 \x01(\t\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x87\x01\n!BuildTestServiceContainersRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x0f\n\x07version\x18\x03 \x01(\t\"d\n\"BuildTestServiceContainersResponse\x12>\n\x07results\x18\x01 \x03(\x0b\x32-.chromite.api.TestServiceContainerBuildResult\"\xee\x03\n\x1a\x42uildTargetUnitTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bresult_path\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12=\n\x05\x66lags\x18\x04 \x01(\x0b\x32..chromite.api.BuildTargetUnitTestRequest.Flags\x12\x32\n\x11package_blacklist\x18\x05 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12)\n\x08packages\x18\x06 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x32\n\x11package_blocklist\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x1a\x95\x01\n\x05\x46lags\x12\x15\n\rempty_sysroot\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\x12\"\n\x1atestable_packages_optional\x18\x04 \x01(\x08\x12\x1f\n\x17\x66ilter_only_cros_workon\x18\x05 \x01(\x08\"\x8e\x01\n\x1b\x42uildTargetUnitTestResponse\x12\x14\n\x0ctarball_path\x18\x01 \x01(\t\x12\x30\n\x0f\x66\x61iled_packages\x18\x02 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\'\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x17.chromiumos.MetricEvent\"=\n\x17\x43hromiteUnitTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x1a\n\x18\x43hromiteUnitTestResponse\";\n\x15\x43hromitePytestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x18\n\x16\x43hromitePytestResponse\"<\n\x16\x43rosSigningTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x19\n\x17\x43rosSigningTestResponse\"b\n\x14\x44\x65\x62ugInfoTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x17\n\x15\x44\x65\x62ugInfoTestResponse\"\xd2\x03\n\rVmTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12!\n\x07vm_path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12;\n\x0bssh_options\x18\x04 \x01(\x0b\x32&.chromite.api.VmTestRequest.SshOptions\x12=\n\x0ctest_harness\x18\x05 \x01(\x0e\x32\'.chromite.api.VmTestRequest.TestHarness\x12\x34\n\x08vm_tests\x18\x06 \x03(\x0b\x32\".chromite.api.VmTestRequest.VmTest\x1a\x46\n\nSshOptions\x12*\n\x10private_key_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\x12\x0c\n\x04port\x18\x02 \x01(\x05\x1a\x19\n\x06VmTest\x12\x0f\n\x07pattern\x18\x01 \x01(\t\"6\n\x0bTestHarness\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x08\n\x04TAST\x10\x01\x12\x0c\n\x08\x41UTOTEST\x10\x02\"\x10\n\x0eVmTestResponse\"\xe9\x01\n\x13MoblabVmTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12@\n\rimage_payload\x18\x02 \x01(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x12\x41\n\x0e\x63\x61\x63he_payloads\x18\x03 \x03(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x1a)\n\x07Payload\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x16\n\x14MoblabVmTestResponse\"\x8b\x01\n\x1fSimpleChromeWorkflowTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x13\n\x0b\x63hrome_root\x18\x02 \x01(\t\x12+\n\x0bgoma_config\x18\x03 \x01(\x0b\x32\x16.chromiumos.GomaConfig\"\"\n SimpleChromeWorkflowTestResponse2\xbb\x07\n\x0bTestService\x12\x87\x01\n\x1a\x42uildTestServiceContainers\x12/.chromite.api.BuildTestServiceContainersRequest\x1a\x30.chromite.api.BuildTestServiceContainersResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12r\n\x13\x42uildTargetUnitTest\x12(.chromite.api.BuildTargetUnitTestRequest\x1a).chromite.api.BuildTargetUnitTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10\x43hromiteUnitTest\x12%.chromite.api.ChromiteUnitTestRequest\x1a&.chromite.api.ChromiteUnitTestResponse\x12[\n\x0e\x43hromitePytest\x12#.chromite.api.ChromitePytestRequest\x1a$.chromite.api.ChromitePytestResponse\x12^\n\x0f\x43rosSigningTest\x12$.chromite.api.CrosSigningTestRequest\x1a%.chromite.api.CrosSigningTestResponse\x12X\n\rDebugInfoTest\x12\".chromite.api.DebugInfoTestRequest\x1a#.chromite.api.DebugInfoTestResponse\x12\x43\n\x06VmTest\x12\x1b.chromite.api.VmTestRequest\x1a\x1c.chromite.api.VmTestResponse\x12]\n\x0cMoblabVmTest\x12!.chromite.api.MoblabVmTestRequest\x1a\".chromite.api.MoblabVmTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x81\x01\n\x18SimpleChromeWorkflowTest\x12-.chromite.api.SimpleChromeWorkflowTestRequest\x1a..chromite.api.SimpleChromeWorkflowTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x1a\x0c\xc2\xed\x1a\x08\n\x04test\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_metrics__pb2.DESCRIPTOR,])
 
@@ -49,10 +49,194 @@ _VMTESTREQUEST_TESTHARNESS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1597,
-  serialized_end=1651,
+  serialized_start=2113,
+  serialized_end=2167,
 )
 _sym_db.RegisterEnumDescriptor(_VMTESTREQUEST_TESTHARNESS)
+
+
+_TESTSERVICECONTAINERBUILDRESULT_SUCCESS = _descriptor.Descriptor(
+  name='Success',
+  full_name='chromite.api.TestServiceContainerBuildResult.Success',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='registry_path', full_name='chromite.api.TestServiceContainerBuildResult.Success.registry_path', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=348,
+  serialized_end=380,
+)
+
+_TESTSERVICECONTAINERBUILDRESULT_FAILURE = _descriptor.Descriptor(
+  name='Failure',
+  full_name='chromite.api.TestServiceContainerBuildResult.Failure',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='error_message', full_name='chromite.api.TestServiceContainerBuildResult.Failure.error_message', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=382,
+  serialized_end=414,
+)
+
+_TESTSERVICECONTAINERBUILDRESULT = _descriptor.Descriptor(
+  name='TestServiceContainerBuildResult',
+  full_name='chromite.api.TestServiceContainerBuildResult',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='chromite.api.TestServiceContainerBuildResult.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='success', full_name='chromite.api.TestServiceContainerBuildResult.success', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='failure', full_name='chromite.api.TestServiceContainerBuildResult.failure', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[_TESTSERVICECONTAINERBUILDRESULT_SUCCESS, _TESTSERVICECONTAINERBUILDRESULT_FAILURE, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='result', full_name='chromite.api.TestServiceContainerBuildResult.result',
+      index=0, containing_type=None, fields=[]),
+  ],
+  serialized_start=151,
+  serialized_end=424,
+)
+
+
+_BUILDTESTSERVICECONTAINERSREQUEST = _descriptor.Descriptor(
+  name='BuildTestServiceContainersRequest',
+  full_name='chromite.api.BuildTestServiceContainersRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='build_target', full_name='chromite.api.BuildTestServiceContainersRequest.build_target', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='chroot', full_name='chromite.api.BuildTestServiceContainersRequest.chroot', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='version', full_name='chromite.api.BuildTestServiceContainersRequest.version', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=427,
+  serialized_end=562,
+)
+
+
+_BUILDTESTSERVICECONTAINERSRESPONSE = _descriptor.Descriptor(
+  name='BuildTestServiceContainersResponse',
+  full_name='chromite.api.BuildTestServiceContainersResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='results', full_name='chromite.api.BuildTestServiceContainersResponse.results', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=564,
+  serialized_end=664,
+)
 
 
 _BUILDTARGETUNITTESTREQUEST_FLAGS = _descriptor.Descriptor(
@@ -109,8 +293,8 @@ _BUILDTARGETUNITTESTREQUEST_FLAGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=496,
-  serialized_end=645,
+  serialized_start=1012,
+  serialized_end=1161,
 )
 
 _BUILDTARGETUNITTESTREQUEST = _descriptor.Descriptor(
@@ -181,8 +365,8 @@ _BUILDTARGETUNITTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=151,
-  serialized_end=645,
+  serialized_start=667,
+  serialized_end=1161,
 )
 
 
@@ -226,8 +410,8 @@ _BUILDTARGETUNITTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=648,
-  serialized_end=790,
+  serialized_start=1164,
+  serialized_end=1306,
 )
 
 
@@ -257,8 +441,8 @@ _CHROMITEUNITTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=792,
-  serialized_end=853,
+  serialized_start=1308,
+  serialized_end=1369,
 )
 
 
@@ -281,8 +465,8 @@ _CHROMITEUNITTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=855,
-  serialized_end=881,
+  serialized_start=1371,
+  serialized_end=1397,
 )
 
 
@@ -312,8 +496,8 @@ _CHROMITEPYTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=883,
-  serialized_end=942,
+  serialized_start=1399,
+  serialized_end=1458,
 )
 
 
@@ -336,8 +520,8 @@ _CHROMITEPYTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=944,
-  serialized_end=968,
+  serialized_start=1460,
+  serialized_end=1484,
 )
 
 
@@ -367,8 +551,8 @@ _CROSSIGNINGTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=970,
-  serialized_end=1030,
+  serialized_start=1486,
+  serialized_end=1546,
 )
 
 
@@ -391,8 +575,8 @@ _CROSSIGNINGTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1032,
-  serialized_end=1057,
+  serialized_start=1548,
+  serialized_end=1573,
 )
 
 
@@ -429,8 +613,8 @@ _DEBUGINFOTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1059,
-  serialized_end=1157,
+  serialized_start=1575,
+  serialized_end=1673,
 )
 
 
@@ -453,8 +637,8 @@ _DEBUGINFOTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1159,
-  serialized_end=1182,
+  serialized_start=1675,
+  serialized_end=1698,
 )
 
 
@@ -491,8 +675,8 @@ _VMTESTREQUEST_SSHOPTIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1498,
-  serialized_end=1568,
+  serialized_start=2014,
+  serialized_end=2084,
 )
 
 _VMTESTREQUEST_VMTEST = _descriptor.Descriptor(
@@ -521,8 +705,8 @@ _VMTESTREQUEST_VMTEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1570,
-  serialized_end=1595,
+  serialized_start=2086,
+  serialized_end=2111,
 )
 
 _VMTESTREQUEST = _descriptor.Descriptor(
@@ -587,8 +771,8 @@ _VMTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1185,
-  serialized_end=1651,
+  serialized_start=1701,
+  serialized_end=2167,
 )
 
 
@@ -611,8 +795,8 @@ _VMTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1653,
-  serialized_end=1669,
+  serialized_start=2169,
+  serialized_end=2185,
 )
 
 
@@ -642,8 +826,8 @@ _MOBLABVMTESTREQUEST_PAYLOAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1864,
-  serialized_end=1905,
+  serialized_start=2380,
+  serialized_end=2421,
 )
 
 _MOBLABVMTESTREQUEST = _descriptor.Descriptor(
@@ -686,8 +870,8 @@ _MOBLABVMTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1672,
-  serialized_end=1905,
+  serialized_start=2188,
+  serialized_end=2421,
 )
 
 
@@ -710,8 +894,8 @@ _MOBLABVMTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1907,
-  serialized_end=1929,
+  serialized_start=2423,
+  serialized_end=2445,
 )
 
 
@@ -755,8 +939,8 @@ _SIMPLECHROMEWORKFLOWTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1932,
-  serialized_end=2071,
+  serialized_start=2448,
+  serialized_end=2587,
 )
 
 
@@ -779,10 +963,23 @@ _SIMPLECHROMEWORKFLOWTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2073,
-  serialized_end=2107,
+  serialized_start=2589,
+  serialized_end=2623,
 )
 
+_TESTSERVICECONTAINERBUILDRESULT_SUCCESS.containing_type = _TESTSERVICECONTAINERBUILDRESULT
+_TESTSERVICECONTAINERBUILDRESULT_FAILURE.containing_type = _TESTSERVICECONTAINERBUILDRESULT
+_TESTSERVICECONTAINERBUILDRESULT.fields_by_name['success'].message_type = _TESTSERVICECONTAINERBUILDRESULT_SUCCESS
+_TESTSERVICECONTAINERBUILDRESULT.fields_by_name['failure'].message_type = _TESTSERVICECONTAINERBUILDRESULT_FAILURE
+_TESTSERVICECONTAINERBUILDRESULT.oneofs_by_name['result'].fields.append(
+  _TESTSERVICECONTAINERBUILDRESULT.fields_by_name['success'])
+_TESTSERVICECONTAINERBUILDRESULT.fields_by_name['success'].containing_oneof = _TESTSERVICECONTAINERBUILDRESULT.oneofs_by_name['result']
+_TESTSERVICECONTAINERBUILDRESULT.oneofs_by_name['result'].fields.append(
+  _TESTSERVICECONTAINERBUILDRESULT.fields_by_name['failure'])
+_TESTSERVICECONTAINERBUILDRESULT.fields_by_name['failure'].containing_oneof = _TESTSERVICECONTAINERBUILDRESULT.oneofs_by_name['result']
+_BUILDTESTSERVICECONTAINERSREQUEST.fields_by_name['build_target'].message_type = chromiumos_dot_common__pb2._BUILDTARGET
+_BUILDTESTSERVICECONTAINERSREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
+_BUILDTESTSERVICECONTAINERSRESPONSE.fields_by_name['results'].message_type = _TESTSERVICECONTAINERBUILDRESULT
 _BUILDTARGETUNITTESTREQUEST_FLAGS.containing_type = _BUILDTARGETUNITTESTREQUEST
 _BUILDTARGETUNITTESTREQUEST.fields_by_name['build_target'].message_type = chromiumos_dot_common__pb2._BUILDTARGET
 _BUILDTARGETUNITTESTREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
@@ -814,6 +1011,9 @@ _MOBLABVMTESTREQUEST.fields_by_name['image_payload'].message_type = _MOBLABVMTES
 _MOBLABVMTESTREQUEST.fields_by_name['cache_payloads'].message_type = _MOBLABVMTESTREQUEST_PAYLOAD
 _SIMPLECHROMEWORKFLOWTESTREQUEST.fields_by_name['sysroot'].message_type = chromite_dot_api_dot_sysroot__pb2._SYSROOT
 _SIMPLECHROMEWORKFLOWTESTREQUEST.fields_by_name['goma_config'].message_type = chromiumos_dot_common__pb2._GOMACONFIG
+DESCRIPTOR.message_types_by_name['TestServiceContainerBuildResult'] = _TESTSERVICECONTAINERBUILDRESULT
+DESCRIPTOR.message_types_by_name['BuildTestServiceContainersRequest'] = _BUILDTESTSERVICECONTAINERSREQUEST
+DESCRIPTOR.message_types_by_name['BuildTestServiceContainersResponse'] = _BUILDTESTSERVICECONTAINERSRESPONSE
 DESCRIPTOR.message_types_by_name['BuildTargetUnitTestRequest'] = _BUILDTARGETUNITTESTREQUEST
 DESCRIPTOR.message_types_by_name['BuildTargetUnitTestResponse'] = _BUILDTARGETUNITTESTRESPONSE
 DESCRIPTOR.message_types_by_name['ChromiteUnitTestRequest'] = _CHROMITEUNITTESTREQUEST
@@ -831,6 +1031,43 @@ DESCRIPTOR.message_types_by_name['MoblabVmTestResponse'] = _MOBLABVMTESTRESPONSE
 DESCRIPTOR.message_types_by_name['SimpleChromeWorkflowTestRequest'] = _SIMPLECHROMEWORKFLOWTESTREQUEST
 DESCRIPTOR.message_types_by_name['SimpleChromeWorkflowTestResponse'] = _SIMPLECHROMEWORKFLOWTESTRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+TestServiceContainerBuildResult = _reflection.GeneratedProtocolMessageType('TestServiceContainerBuildResult', (_message.Message,), {
+
+  'Success' : _reflection.GeneratedProtocolMessageType('Success', (_message.Message,), {
+    'DESCRIPTOR' : _TESTSERVICECONTAINERBUILDRESULT_SUCCESS,
+    '__module__' : 'chromite.api.test_pb2'
+    # @@protoc_insertion_point(class_scope:chromite.api.TestServiceContainerBuildResult.Success)
+    })
+  ,
+
+  'Failure' : _reflection.GeneratedProtocolMessageType('Failure', (_message.Message,), {
+    'DESCRIPTOR' : _TESTSERVICECONTAINERBUILDRESULT_FAILURE,
+    '__module__' : 'chromite.api.test_pb2'
+    # @@protoc_insertion_point(class_scope:chromite.api.TestServiceContainerBuildResult.Failure)
+    })
+  ,
+  'DESCRIPTOR' : _TESTSERVICECONTAINERBUILDRESULT,
+  '__module__' : 'chromite.api.test_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.TestServiceContainerBuildResult)
+  })
+_sym_db.RegisterMessage(TestServiceContainerBuildResult)
+_sym_db.RegisterMessage(TestServiceContainerBuildResult.Success)
+_sym_db.RegisterMessage(TestServiceContainerBuildResult.Failure)
+
+BuildTestServiceContainersRequest = _reflection.GeneratedProtocolMessageType('BuildTestServiceContainersRequest', (_message.Message,), {
+  'DESCRIPTOR' : _BUILDTESTSERVICECONTAINERSREQUEST,
+  '__module__' : 'chromite.api.test_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.BuildTestServiceContainersRequest)
+  })
+_sym_db.RegisterMessage(BuildTestServiceContainersRequest)
+
+BuildTestServiceContainersResponse = _reflection.GeneratedProtocolMessageType('BuildTestServiceContainersResponse', (_message.Message,), {
+  'DESCRIPTOR' : _BUILDTESTSERVICECONTAINERSRESPONSE,
+  '__module__' : 'chromite.api.test_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.BuildTestServiceContainersResponse)
+  })
+_sym_db.RegisterMessage(BuildTestServiceContainersResponse)
 
 BuildTargetUnitTestRequest = _reflection.GeneratedProtocolMessageType('BuildTargetUnitTestRequest', (_message.Message,), {
 
@@ -985,13 +1222,22 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=b'\302\355\032\010\n\004test\020\001',
-  serialized_start=2110,
-  serialized_end=2927,
+  serialized_start=2626,
+  serialized_end=3581,
   methods=[
+  _descriptor.MethodDescriptor(
+    name='BuildTestServiceContainers',
+    full_name='chromite.api.TestService.BuildTestServiceContainers',
+    index=0,
+    containing_service=None,
+    input_type=_BUILDTESTSERVICECONTAINERSREQUEST,
+    output_type=_BUILDTESTSERVICECONTAINERSRESPONSE,
+    serialized_options=b'\302\355\032\002\020\002',
+  ),
   _descriptor.MethodDescriptor(
     name='BuildTargetUnitTest',
     full_name='chromite.api.TestService.BuildTargetUnitTest',
-    index=0,
+    index=1,
     containing_service=None,
     input_type=_BUILDTARGETUNITTESTREQUEST,
     output_type=_BUILDTARGETUNITTESTRESPONSE,
@@ -1000,7 +1246,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='ChromiteUnitTest',
     full_name='chromite.api.TestService.ChromiteUnitTest',
-    index=1,
+    index=2,
     containing_service=None,
     input_type=_CHROMITEUNITTESTREQUEST,
     output_type=_CHROMITEUNITTESTRESPONSE,
@@ -1009,7 +1255,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='ChromitePytest',
     full_name='chromite.api.TestService.ChromitePytest',
-    index=2,
+    index=3,
     containing_service=None,
     input_type=_CHROMITEPYTESTREQUEST,
     output_type=_CHROMITEPYTESTRESPONSE,
@@ -1018,7 +1264,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='CrosSigningTest',
     full_name='chromite.api.TestService.CrosSigningTest',
-    index=3,
+    index=4,
     containing_service=None,
     input_type=_CROSSIGNINGTESTREQUEST,
     output_type=_CROSSIGNINGTESTRESPONSE,
@@ -1027,7 +1273,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='DebugInfoTest',
     full_name='chromite.api.TestService.DebugInfoTest',
-    index=4,
+    index=5,
     containing_service=None,
     input_type=_DEBUGINFOTESTREQUEST,
     output_type=_DEBUGINFOTESTRESPONSE,
@@ -1036,7 +1282,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='VmTest',
     full_name='chromite.api.TestService.VmTest',
-    index=5,
+    index=6,
     containing_service=None,
     input_type=_VMTESTREQUEST,
     output_type=_VMTESTRESPONSE,
@@ -1045,7 +1291,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='MoblabVmTest',
     full_name='chromite.api.TestService.MoblabVmTest',
-    index=6,
+    index=7,
     containing_service=None,
     input_type=_MOBLABVMTESTREQUEST,
     output_type=_MOBLABVMTESTRESPONSE,
@@ -1054,7 +1300,7 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SimpleChromeWorkflowTest',
     full_name='chromite.api.TestService.SimpleChromeWorkflowTest',
-    index=7,
+    index=8,
     containing_service=None,
     input_type=_SIMPLECHROMEWORKFLOWTESTREQUEST,
     output_type=_SIMPLECHROMEWORKFLOWTESTRESPONSE,
