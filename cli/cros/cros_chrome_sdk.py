@@ -180,7 +180,7 @@ class SDKFetcher(object):
           self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
           ref.SetDefault(local_path, lock=True)
         except gs.GSNoSuchKey:
-          if key == constants.VM_IMAGE_TAR:
+          if key == constants.TEST_IMAGE_TAR:
             logging.warning(
                 'No VM available for board %s. Please try a different '
                 'board, e.g. amd64-generic.',
@@ -714,8 +714,8 @@ class SDKFetcher(object):
     else:
       logging.warning('Failed to find Tast binaries to download.')
 
-    # Also fetch QEMU binary if VM_IMAGE_TAR is specified.
-    if constants.VM_IMAGE_TAR in components:
+    # Also fetch QEMU binary if VM download is requested.
+    if constants.TEST_IMAGE_TAR in components:
       qemu_bin_path = self._GetBinPackageGSPath(version, self.QEMU_BIN_PATH)
       seabios_bin_path = self._GetBinPackageGSPath(version,
                                                    self.SEABIOS_BIN_PATH)
@@ -739,7 +739,7 @@ class SDKFetcher(object):
         # the remaining threads sit idle.
         if not tarball_ref.Exists(lock=True):
           pri = 3
-          if key == constants.VM_IMAGE_TAR:
+          if key == constants.TEST_IMAGE_TAR:
             pri = 1
           elif key == constants.CHROME_SYSROOT_TAR:
             pri = 2
@@ -1555,7 +1555,7 @@ class ChromeSDKCommand(command.CliCommand):
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
     if self.options.download_vm:
-      components.append(constants.VM_IMAGE_TAR)
+      components.append(constants.TEST_IMAGE_TAR)
 
     goma_dir = None
     goma_port = None
