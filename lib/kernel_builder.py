@@ -16,9 +16,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import kernel_cmdline
 
 
-VBOOT_DEVKEYS_DIR = '/usr/share/vboot/devkeys'
-
-
 class Error(Exception):
   """Base error class for the module."""
 
@@ -142,7 +139,10 @@ class Builder:
   def CreateKernelImage(self, output: str,
                         boot_args: Optional[str] = None,
                         serial: Optional[str] = None,
-                        keys_dir: str = VBOOT_DEVKEYS_DIR,
+                        keys_dir: str = constants.VBOOT_DEVKEYS_DIR,
+                        public_key: str = constants.KERNEL_PUBLIC_SUBKEY,
+                        private_key: str = constants.KERNEL_DATA_PRIVATE_KEY,
+                        keyblock: str = constants.KERNEL_KEYBLOCK,
                         disable_rootfs_verification: bool = False):
     """Builds the final initramfs kernel image.
 
@@ -151,6 +151,11 @@ class Builder:
       boot_args: A string of kernel boot arguments.
       serial: Serial ports for printks.
       keys_dir: The path to kernel keys directories. Default is dev keys.
+      public_key: Filename to the public key whose private part signed the
+                  keyblock.
+      private_key: Filename to the private key whose public part is baked into
+                   the keyblock.
+      keyblock: Filename to the kernel keyblock.
       disable_rootfs_verification: If True, the rootfs verification is disabled.
     """
     logging.info('Building kernel image into %s.', output)
@@ -176,9 +181,9 @@ class Builder:
         # Clean up is left to the caller of this class.
         '--keep_work',
         f'--keys_dir={keys_dir}',
-        '--public=recovery_key.vbpubk',
-        '--private=recovery_kernel_data_key.vbprivk',
-        '--keyblock=recovery_kernel.keyblock',
+        f'--public={public_key}',
+        f'--private={private_key}',
+        f'--keyblock={keyblock}',
     ]
     if disable_rootfs_verification:
       cmd += ['--noenable_rootfs_verification']

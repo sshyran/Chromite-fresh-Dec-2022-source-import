@@ -29,7 +29,9 @@ class MiniOsError(Error):
   """Raised when failing to build Mini OS image."""
 
 
-def CreateMiniOsKernelImage(board: str, work_dir: str) -> str:
+def CreateMiniOsKernelImage(board: str, work_dir: str,
+                            keys_dir: str, public_key: str,
+                            private_key: str, keyblock: str) -> str:
   """Creates the MiniOS kernel image.
 
   And puts it in the work directory.
@@ -37,6 +39,12 @@ def CreateMiniOsKernelImage(board: str, work_dir: str) -> str:
   Args:
     board: The board to build the kernel for.
     work_dir: The directory for keeping intermediary files.
+    keys_dir: The path to kernel keys directories.
+    public_key: Filename to the public key whose private part signed the
+                keyblock.
+    private_key: Filename to the private key whose public part is baked into
+                 the keyblock.
+    keyblock: Filename to the kernel keyblock.
 
   Returns:
     The path to the generated kernel image.
@@ -47,7 +55,8 @@ def CreateMiniOsKernelImage(board: str, work_dir: str) -> str:
   kb.CreateCustomKernel(KERNEL_FLAGS)
   kernel = os.path.join(work_dir, MINIOS_KERNEL_IMAGE)
   kb.CreateKernelImage(kernel, boot_args='noinitrd panic=60',
-                       serial='ttyS2')
+                       serial='ttyS2', keys_dir=keys_dir, public_key=public_key,
+                       private_key=private_key, keyblock=keyblock)
   return kernel
 
 

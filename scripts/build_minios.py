@@ -10,6 +10,7 @@ And inserting them into the Chromium OS images.
 import tempfile
 
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import minios
 
 
@@ -20,6 +21,20 @@ def GetParser():
                       help='The board name.')
   parser.add_argument('--image', type='path',
                       help='The path to the chromium os image.')
+  parser.add_argument('--keys-dir', type='path',
+                      help='The path to keyset.',
+                      default=constants.VBOOT_DEVKEYS_DIR)
+  parser.add_argument('--public-key', type='path',
+                      help='Filename to the public key whose private part '\
+                      'signed the keyblock.',
+                      default=constants.RECOVERY_PUBLIC_KEY )
+  parser.add_argument('--private-key', type='path',
+                      help='Filename to the private key whose public part is '\
+                      'baked into the keyblock.',
+                      default=constants.RECOVERY_DATA_PRIVATE_KEY )
+  parser.add_argument('--keyblock', type='path',
+                      help='Filename to the kernel keyblock.',
+                      default=constants.RECOVERY_KEYBLOCK)
   return parser
 
 
@@ -29,5 +44,7 @@ def main(argv):
   opts.Freeze()
 
   with tempfile.TemporaryDirectory() as work_dir:
-    kernel = minios.CreateMiniOsKernelImage(opts.board, work_dir)
+    kernel = minios.CreateMiniOsKernelImage(opts.board, work_dir,
+                                            opts.keys_dir, opts.public_key,
+                                            opts.private_key, opts.keyblock)
     minios.InsertMiniOsKernelImage(opts.image, kernel)

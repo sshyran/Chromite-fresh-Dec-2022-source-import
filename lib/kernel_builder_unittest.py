@@ -60,10 +60,10 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
         '--vmlinuz=foo-root/boot/vmlinuz',
         '--working_dir=foo-tmp',
         '--keep_work',
-        f'--keys_dir={kernel_builder.VBOOT_DEVKEYS_DIR}',
-        '--public=recovery_key.vbpubk',
-        '--private=recovery_kernel_data_key.vbprivk',
-        '--keyblock=recovery_kernel.keyblock',
+        f'--keys_dir={constants.VBOOT_DEVKEYS_DIR}',
+        f'--public={constants.KERNEL_PUBLIC_SUBKEY}',
+        f'--private={constants.KERNEL_DATA_PRIVATE_KEY}',
+        f'--keyblock={constants.KERNEL_KEYBLOCK}',
     ], enter_chroot=True)
 
   def testCreateKernelImageWithArgs(self):
@@ -71,10 +71,15 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
     self.rc.AddCmdResult(['portageq-foo-board', 'envvar', 'ARCH'],
                          stdout='foo-arch')
 
-    self._kb.CreateKernelImage('output', keys_dir='foo-keys-dir',
-                               boot_args='x y=foo',
-                               serial='ttyfoo',
-                               disable_rootfs_verification=True)
+    self._kb.CreateKernelImage(
+        'output',
+        keys_dir=constants.VBOOT_DEVKEYS_DIR,
+        public_key=constants.RECOVERY_PUBLIC_KEY,
+        private_key=constants.RECOVERY_DATA_PRIVATE_KEY,
+        keyblock=constants.RECOVERY_KEYBLOCK,
+        boot_args='x y=foo',
+        serial='ttyfoo',
+        disable_rootfs_verification=True)
 
     self.assertCommandCalled([
         os.path.join(constants.CROSUTILS_DIR, 'build_kernel_image.sh'),
@@ -84,10 +89,10 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
         '--vmlinuz=foo-root/boot/vmlinuz',
         '--working_dir=foo-tmp',
         '--keep_work',
-        '--keys_dir=foo-keys-dir',
-        '--public=recovery_key.vbpubk',
-        '--private=recovery_kernel_data_key.vbprivk',
-        '--keyblock=recovery_kernel.keyblock',
+        f'--keys_dir={constants.VBOOT_DEVKEYS_DIR}',
+        f'--public={constants.RECOVERY_PUBLIC_KEY}',
+        f'--private={constants.RECOVERY_DATA_PRIVATE_KEY}',
+        f'--keyblock={constants.RECOVERY_KEYBLOCK}',
         '--noenable_rootfs_verification',
         '--boot_args="x y=foo"',
         '--enable_serial=ttyfoo',

@@ -949,3 +949,12 @@ TOPOLOGY_DICT = {
 
 # Percentage of child builders that need to complete to update LKGM
 LKGM_THRESHOLD = 80
+
+# Dev key related names.
+VBOOT_DEVKEYS_DIR = os.path.join('/usr/share/vboot/devkeys')
+KERNEL_PUBLIC_SUBKEY = 'kernel_subkey.vbpubk'
+KERNEL_DATA_PRIVATE_KEY = 'kernel_data_key.vbprivk'
+KERNEL_KEYBLOCK = 'kernel.keyblock'
+RECOVERY_PUBLIC_KEY = 'recovery_key.vbpubk'
+RECOVERY_DATA_PRIVATE_KEY = 'recovery_kernel_data_key.vbprivk'
+RECOVERY_KEYBLOCK = 'recovery_kernel.keyblock'
