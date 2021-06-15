@@ -848,15 +848,6 @@ def BuildImage(buildroot,
       chroot_args=chroot_args)
 
 
-def BuildVMImageForTesting(buildroot, board, extra_env=None, disk_layout=None):
-  cmd = ['./image_to_vm.sh', '--board=%s' % board, '--test_image']
-
-  if disk_layout:
-    cmd += ['--disk_layout=%s' % disk_layout]
-
-  RunBuildScript(buildroot, cmd, extra_env=extra_env, enter_chroot=True)
-
-
 def RunTestImage(buildroot, board, image_dir, results_dir):
   """Executes test_image on the produced image in |image_dir|.
 

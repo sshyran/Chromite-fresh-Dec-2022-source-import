@@ -8,10 +8,9 @@ To run this command, first build a test image. e.g.
 (host)$ cros_sdk
 (sdk)$ ./build_packages --board=betty
 (sdk)$ ./build_image --board=betty test
-(sdk)$ ./image_to_vm.sh --board=betty --test_image
 (sdk)$ cd ../../chromite/cli/cros/tests/
 (sdk)$ ./cros_vm_test --board=betty --image_path \
-~/trunk/src/build/images/betty/latest/chromiumos_qemu_image.bin
+~/trunk/src/build/images/betty/latest/chromiumos_test_image.bin
 """
 
 from chromite.cli import command_vm_test

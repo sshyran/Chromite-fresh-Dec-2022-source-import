@@ -805,13 +805,13 @@ def _RunTestSuiteUsingChromite(board,
                                ssh_port=9228):
   """Runs the test harness suite using the chromite code path."""
   image_dir = os.path.dirname(image_path)
-  vm_image_path = os.path.join(image_dir, constants.VM_IMAGE_BIN)
+  image_path = os.path.join(image_dir, constants.TEST_IMAGE_BIN)
 
   cmd = [
       'cros_run_test',
       '--debug',
       '--board=%s' % board,
-      '--image-path=%s' % path_util.ToChrootPath(vm_image_path),
+      '--image-path=%s' % path_util.ToChrootPath(image_path),
       '--ssh-port=%s' % ssh_port,
       '--autotest=suite:%s' % test_config.test_suite,
       '--results-dir=%s' % results_dir,

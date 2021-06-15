@@ -179,7 +179,7 @@ class TastVMTestStage(generic_stages.BoardSpecificBuilderStage,
     Raises:
       failures_lib.TestFailure if an internal error is encountered.
     """
-    vm_path = os.path.join(self.GetImageDirSymlink(), constants.VM_IMAGE_BIN)
+    vm_path = os.path.join(self.GetImageDirSymlink(), constants.TEST_IMAGE_BIN)
     results_dir = self._MakeChrootPathAbsolute(suite_chroot_results_dir)
     cmd = ['./cros_run_test', '--no-display', '--copy-on-write', '--debug',
            '--board=%s' % self._current_board, '--image-path=%s' % vm_path,

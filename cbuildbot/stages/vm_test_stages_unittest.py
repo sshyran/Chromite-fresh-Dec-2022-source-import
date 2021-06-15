@@ -388,8 +388,8 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
   BUILD_ROOT = '/fake/root'
   RESULTS_DIR = '/tmp/taco'
   TEST_IMAGE_OUTSIDE_CHROOT = os.path.join(BUILD_ROOT, 'test.img')
-  VM_IMAGE_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT,
-                                        constants.VM_IMAGE_BIN)
+  TEST_IMAGE_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                          constants.TEST_IMAGE_BIN)
   PRIVATE_KEY_OUTSIDE_CHROOT = os.path.join(BUILD_ROOT, 'rsa')
   PRIVATE_KEY_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT, 'rsa')
   SSH_PORT = 9226
@@ -434,7 +434,7 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
     else:
       self.assertCommandContains([
           'cros_run_test', '--debug',
-          '--image-path=%s' % self.VM_IMAGE_INSIDE_CHROOT,
+          '--image-path=%s' % self.TEST_IMAGE_INSIDE_CHROOT,
           '--results-dir=%s' % self.RESULTS_DIR,
           '--private-key=%s' % self.PRIVATE_KEY_INSIDE_CHROOT
       ])

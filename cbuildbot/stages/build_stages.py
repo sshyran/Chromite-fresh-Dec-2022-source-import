@@ -833,22 +833,8 @@ class BuildImageStage(BuildPackagesStage):
 
     self.board_runattrs.SetParallel('images_generated', True)
 
-    parallel.RunParallelSteps([self._BuildVMImage,
-                               self._BuildGuestVMImage,
+    parallel.RunParallelSteps([self._BuildGuestVMImage,
                                self._BuildGceTarballs])
-
-  def _BuildVMImage(self):
-    # Adding startswith('betty') hack to create VM image for betty-arc-r.
-    # VM testing doesn't work on ARCVM but we still need the image.
-    # https://crbug.com/1092972.
-    if ((self._run.config.vm_tests or self._run.config.tast_vm_tests
-         or self._current_board.startswith('betty'))
-        and not self._afdo_generate_min):
-      commands.BuildVMImageForTesting(
-          self._build_root,
-          self._current_board,
-          extra_env=self._portage_extra_env,
-          disk_layout=self._run.config.disk_layout)
 
   def _BuildGuestVMImage(self):
     if self._run.config.guest_vm_image:
