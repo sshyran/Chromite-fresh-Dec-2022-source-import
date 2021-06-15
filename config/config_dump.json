@@ -12802,7 +12802,7 @@
         "boards": [
             "dedede"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-dedede-13606.B"
     },
     "firmware-dedede-13606.B-firmwarebranch-tryjob": {
@@ -12822,7 +12822,7 @@
         "boards": [
             "drallion"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-drallion-12930.B"
     },
     "firmware-drallion-12930.B-firmwarebranch-tryjob": {
@@ -12862,7 +12862,7 @@
         "boards": [
             "endeavour"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-endeavour-13259.B"
     },
     "firmware-endeavour-13259.B-firmwarebranch-tryjob": {
@@ -13509,7 +13509,7 @@
             "puff",
             "ambassador"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-puff-13324.B"
     },
     "firmware-puff-13324.B-firmwarebranch-tryjob": {
@@ -13825,7 +13825,7 @@
             "strongbad",
             "trogdor"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-trogdor-13577.B"
     },
     "firmware-trogdor-13577.B-firmwarebranch-tryjob": {
@@ -13950,7 +13950,7 @@
         "boards": [
             "volteer"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-volteer-13672.B"
     },
     "firmware-volteer-13672.B-firmwarebranch-tryjob": {
@@ -14010,7 +14010,7 @@
         "boards": [
             "zork"
         ],
-        "schedule": "with 168h interval",
+        "schedule": "triggered",
         "workspace_branch": "firmware-zork-13434.B"
     },
     "firmware-zork-13434.B-firmwarebranch-tryjob": {

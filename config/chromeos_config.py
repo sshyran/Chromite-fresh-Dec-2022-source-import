@@ -1844,8 +1844,8 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
   ]
 
   # TODO(b/180525904): All of the legacy "firmwarebranch" builders are being
-  # retired in favor of the recipes implementation.  For now, run the DAILY
-  # builders weekly, and all of the others only when triggered.
+  # retired in favor of the recipes implementation.  For now, leave them
+  # present, but only running when triggered.
   # See chromeos/infra/config/+/HEAD/firmware.star (http://shortn/_be6b7ORzyh)
   for interval, branch, boards, kwargs in firmware_branch_builders:
     site_config.Add(
@@ -1853,7 +1853,7 @@ def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
         site_config.templates.firmwarebranch,
         boards=boards,
         workspace_branch=branch,
-        schedule=WEEKLY if interval==DAILY else TRIGGERED,
+        schedule=TRIGGERED,
         **kwargs)
 
 
