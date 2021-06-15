@@ -87,7 +87,6 @@ enable=
     idiv-method,
     import-star-module-level,
     indexing-exception,
-    input-builtin,
     intern-builtin,
     invalid-str-codec,
     long-builtin,
@@ -274,10 +273,8 @@ bad-functions=
     apply,
     exit,
     filter,
-    input,
     map,
     quit,
-    raw_input,
     reduce,
 
 # Regular expression which should only match correct module names
