@@ -4,6 +4,7 @@
 
 """Test git_bisector module."""
 
+import builtins
 import copy
 import os
 from unittest import mock
@@ -400,8 +401,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
     """Tests GetThresholdFromUser()."""
     logging.notice('testGetThresholdFromUser')
     self.setDefaultCommitInfo()
-    input_mock = self.PatchObject(cros_build_lib, 'GetInput',
-                                  return_value=self.THRESHOLD_SPLITTER)
+    input_mock = self.PatchObject(
+        builtins, 'input', return_value=self.THRESHOLD_SPLITTER)
     self.assertTrue(self.bisector.GetThresholdFromUser())
     self.assertEqual(self.THRESHOLD, self.bisector.threshold)
     input_mock.assert_called()
@@ -417,8 +418,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
   def testGetThresholdFromUserOutOfBoundFail(self):
     """Tests GetThresholdFromUser() with out-of-bound input."""
     self.setDefaultCommitInfo()
-    input_mock = self.PatchObject(cros_build_lib, 'GetInput',
-                                  side_effect=['0', '1000', '-10'])
+    input_mock = self.PatchObject(
+        builtins, 'input', side_effect=['0', '1000', '-10'])
     self.assertFalse(self.bisector.GetThresholdFromUser())
     self.assertIsNone(self.bisector.threshold)
     self.assertEqual(3, input_mock.call_count)
@@ -427,7 +428,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
     """Tests GetThresholdFromUser() with retry."""
     self.setDefaultCommitInfo()
     input_mock = self.PatchObject(
-        cros_build_lib, 'GetInput',
+        builtins,
+        'input',
         side_effect=['not_a_number', '1000', self.THRESHOLD_SPLITTER])
     self.assertTrue(self.bisector.GetThresholdFromUser())
     self.assertEqual(self.THRESHOLD, self.bisector.threshold)

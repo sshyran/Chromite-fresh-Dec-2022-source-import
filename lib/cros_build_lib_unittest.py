@@ -909,17 +909,9 @@ class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
 class TestInput(cros_test_lib.MockOutputTestCase):
   """Tests of input gathering functionality."""
 
-  def testGetInput(self):
-    """Verify GetInput() basic behavior."""
-    response = 'Some response'
-    if sys.version_info.major < 3:
-      self.PatchObject(builtins, 'raw_input', return_value=response)
-    self.PatchObject(builtins, 'input', return_value=response)
-    self.assertEqual(response, cros_build_lib.GetInput('prompt'))
-
   def testBooleanPrompt(self):
     """Verify BooleanPrompt() full behavior."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = ''
     self.assertTrue(cros_build_lib.BooleanPrompt())
@@ -958,7 +950,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceLists(self):
     """Verify GetChoice behavior w/lists."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = '1'
     ret = cros_build_lib.GetChoice('title', ['a', 'b', 'c'])
@@ -966,7 +958,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceGenerator(self):
     """Verify GetChoice behavior w/generators."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = '2'
     ret = cros_build_lib.GetChoice('title', list(range(3)))
@@ -974,7 +966,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceWindow(self):
     """Verify GetChoice behavior w/group_size set."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     cnt = [0]
     def _Gen():

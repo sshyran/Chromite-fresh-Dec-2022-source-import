@@ -77,7 +77,7 @@ def main(argv):
     cros_build_lib.Die('No command or unsupported command. Exiting.')
 
   print(warn)
-  conf_string = cros_build_lib.GetInput('(%s)?: ' % positive_confirmation)
+  conf_string = input('(%s)?: ' % positive_confirmation)
   if conf_string != positive_confirmation:
     cros_build_lib.Die('You changed your mind. Aborting.')
 

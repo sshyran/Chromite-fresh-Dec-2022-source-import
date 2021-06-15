@@ -1357,17 +1357,6 @@ def IsTarball(path: str) -> bool:
   return parts[-1] in ('tbz2', 'tbz', 'tgz', 'txz')
 
 
-def GetInput(prompt):
-  """Helper function to grab input from a user.   Makes testing easier."""
-  # We have people use GetInput() so they don't have to use these bad builtins
-  # themselves or deal with version skews.
-  # pylint: disable=bad-builtin,input-builtin,raw_input-builtin,undefined-variable
-  if sys.version_info.major < 3:
-    return raw_input(prompt)
-  else:
-    return input(prompt)
-
-
 def GetChoice(title, options, group_size=0):
   """Ask user to choose an option from the list.
 
@@ -1392,7 +1381,7 @@ def GetChoice(title, options, group_size=0):
     prompt += ': '
 
     while True:
-      choice = GetInput(prompt)
+      choice = input(prompt)
       if more and not choice.strip():
         return None
       try:
@@ -1450,7 +1439,7 @@ def BooleanPrompt(prompt='Do you want to continue?', default=True,
 
   while True:
     try:
-      response = GetInput(prompt).lower()
+      response = input(prompt).lower()
     except EOFError:
       # If the user hits CTRL+D, or stdin is disabled, use the default.
       print()

@@ -281,9 +281,10 @@ class GitBisector(common.OptionsChecker):
     retry = 3
     for _ in range(retry):
       try:
-        splitter = float(cros_build_lib.GetInput(
-            'Please give a threshold that tell apart good and bad commit '
-            '(within range [%.3f, %.3f]: ' % (ref_score_min, ref_score_max)))
+        splitter = float(
+            input('Please give a threshold that tell apart good and bad commit '
+                  '(within range [%.3f, %.3f]: ' %
+                  (ref_score_min, ref_score_max)))
       except ValueError:
         logging.error('Threshold should be a floating number.')
         continue

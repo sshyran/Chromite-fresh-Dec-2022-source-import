@@ -4,11 +4,11 @@
 
 """Test manual_evaluator module."""
 
+import builtins
 import os
 
 from chromite.cros_bisect import common
 from chromite.cros_bisect import manual_evaluator
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
@@ -36,7 +36,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     """Tests Evaluate()."""
     report_path = self.evaluator.GetReportPath(self.BUILD_LABEL)
 
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.assertEqual(common.Score([1.0]),
                      self.evaluator.Evaluate(None, self.BUILD_LABEL))
@@ -53,7 +53,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     self.assertFalse(self.evaluator.CheckLastEvaluate(self.BUILD_LABEL))
 
     # Generate a report for BUILD_LABEL
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.evaluator.Evaluate(None, self.BUILD_LABEL)
 
@@ -84,7 +84,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     self.assertFalse(self.evaluator.CheckLastEvaluate(self.BUILD_LABEL))
 
     # Generate a report for BUILD_LABEL
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.evaluator.Evaluate(None, self.BUILD_LABEL)
 
