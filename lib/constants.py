@@ -129,9 +129,6 @@ BUILDER_NON_FAILURE_STATUSES = (BUILDER_STATUS_PLANNED,
                                 BUILDER_STATUS_INFLIGHT,
                                 BUILDER_STATUS_FORGIVEN)
 
-# Partition labels
-CROS_PART_STATEFUL = 'STATE'
-
 # Signer status strings
 SIGNER_STATUS_PASSED = 'passed'
 SIGNER_STATUS_FAILED = 'failed'
