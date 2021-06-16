@@ -585,10 +585,10 @@ class GSContext(object):
   def _TestGSLs(self):
     """Quick test of gsutil functionality."""
     # The bucket in question is readable by any authenticated account.
-    # If we can list it's contents, we have valid authentication.
+    # If we can list its contents, we have valid authentication.
     cmd = ['ls', AUTHENTICATION_BUCKET]
     result = self.DoCommand(cmd, retries=0, debug_level=logging.DEBUG,
-                            stderr=True, check=False)
+                            capture_output=True, check=False)
 
     # Did we fail with an authentication error?
     if (result.returncode == 1 and
