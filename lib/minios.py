@@ -58,7 +58,7 @@ def CreateMiniOsKernelImage(board: str, version: str, work_dir: str,
   kb.CreateCustomKernel(KERNEL_FLAGS)
   kernel = os.path.join(work_dir, MINIOS_KERNEL_IMAGE)
   assert ' ' not in version, f'bad version: {version}'
-  boot_args = f'noinitrd panic=60 cros_minios_version={version}'
+  boot_args = f'noinitrd panic=60 cros_minios_version={version} cros_minios'
   kb.CreateKernelImage(kernel, boot_args=boot_args,
                        serial=serial, keys_dir=keys_dir, public_key=public_key,
                        private_key=private_key, keyblock=keyblock)
