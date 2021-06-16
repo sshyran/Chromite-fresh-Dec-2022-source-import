@@ -19,6 +19,8 @@ def GetParser():
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('--board', '-b', '--build-target', required=True,
                       help='The board name.')
+  parser.add_argument('--version', required=True,
+                      help='The chromeos version string.')
   parser.add_argument('--image', type='path', required=True,
                       help='The path to the chromium os image.')
   parser.add_argument('--keys-dir', type='path',
@@ -46,7 +48,7 @@ def main(argv):
   opts.Freeze()
 
   with tempfile.TemporaryDirectory() as work_dir:
-    kernel = minios.CreateMiniOsKernelImage(opts.board, work_dir,
+    kernel = minios.CreateMiniOsKernelImage(opts.board, opts.version, work_dir,
                                             opts.keys_dir, opts.public_key,
                                             opts.private_key, opts.keyblock,
                                             opts.serial)

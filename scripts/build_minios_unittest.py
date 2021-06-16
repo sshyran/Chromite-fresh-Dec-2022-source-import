@@ -34,16 +34,20 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
   def testDefaultArguments(self):
     """Test that default arguments of build_minios are formatted correct."""
     test_board = 'test-board'
+    test_version = '0.0.0.0'
     test_image = '/some/image/path'
     build_minios.main([
         # --board is a required argument.
         '--board', test_board,
+        # --version is a required argument.
+        '--version', test_version,
         # --image is a required argument.
         '--image', test_image,
     ])
 
     self.assertEqual(self.create_minios_mock.mock_calls, [mock.call(
         test_board,
+        test_version,
         self._tempdir,
         constants.VBOOT_DEVKEYS_DIR,
         constants.RECOVERY_PUBLIC_KEY,
@@ -59,6 +63,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
   def testOverridenArguments(self):
     """Test that overridden arguments of build_minios are formatted correct."""
     test_board = 'test-board'
+    test_version = '1.0.0.0'
     test_image = '/some/image/path'
     test_keys_dir = '/some/path/test-keys-dir'
     test_public_key = 'test-public-key'
@@ -68,6 +73,8 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
     build_minios.main([
         # --board is a required argument.
         '--board', test_board,
+        # --version is a required argument.
+        '--version', test_version,
         # --image is a required argument.
         '--image', test_image,
         '--keys-dir', test_keys_dir,
@@ -79,6 +86,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
 
     self.assertEqual(self.create_minios_mock.mock_calls, [mock.call(
         test_board,
+        test_version,
         self._tempdir,
         test_keys_dir,
         test_public_key,

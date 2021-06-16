@@ -37,7 +37,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
     bki_mock = self.PatchObject(kernel_builder.Builder,
                                 'CreateKernelImage')
 
-    minios.CreateMiniOsKernelImage('foo-board', self.tempdir,
+    minios.CreateMiniOsKernelImage('foo-board', '0.0.0.0', self.tempdir,
                                    'foo-keys-dir', 'foo-public-key',
                                    'foo-private-key', 'foo-keyblock',
                                    'foo-tty')
@@ -47,7 +47,8 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
     bki_mock.assert_called_once_with(
         os.path.join(self.tempdir,
                      minios.MINIOS_KERNEL_IMAGE),
-        boot_args='noinitrd panic=60', serial='foo-tty',
+        boot_args='noinitrd panic=60 cros_minios_version=0.0.0.0',
+        serial='foo-tty',
         keys_dir='foo-keys-dir', public_key='foo-public-key',
         private_key='foo-private-key', keyblock='foo-keyblock')
 

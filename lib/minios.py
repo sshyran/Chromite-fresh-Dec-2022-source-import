@@ -29,7 +29,7 @@ class MiniOsError(Error):
   """Raised when failing to build Mini OS image."""
 
 
-def CreateMiniOsKernelImage(board: str, work_dir: str,
+def CreateMiniOsKernelImage(board: str, version: str, work_dir: str,
                             keys_dir: str, public_key: str,
                             private_key: str, keyblock: str,
                             serial: str) -> str:
@@ -39,6 +39,7 @@ def CreateMiniOsKernelImage(board: str, work_dir: str,
 
   Args:
     board: The board to build the kernel for.
+    version: The chromeos version string.
     work_dir: The directory for keeping intermediary files.
     keys_dir: The path to kernel keys directories.
     public_key: Filename to the public key whose private part signed the
@@ -56,7 +57,9 @@ def CreateMiniOsKernelImage(board: str, work_dir: str,
   kb = kernel_builder.Builder(board, work_dir, install_root)
   kb.CreateCustomKernel(KERNEL_FLAGS)
   kernel = os.path.join(work_dir, MINIOS_KERNEL_IMAGE)
-  kb.CreateKernelImage(kernel, boot_args='noinitrd panic=60',
+  assert ' ' not in version, f'bad version: {version}'
+  boot_args = f'noinitrd panic=60 cros_minios_version={version}'
+  kb.CreateKernelImage(kernel, boot_args=boot_args,
                        serial=serial, keys_dir=keys_dir, public_key=public_key,
                        private_key=private_key, keyblock=keyblock)
   return kernel
