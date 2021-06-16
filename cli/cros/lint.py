@@ -775,36 +775,6 @@ class CommentChecker(pylint.checkers.BaseTokenChecker):
         self._visit_comment(start_row, token)
 
 
-class ChromiteLoggingChecker(pylint.checkers.BaseChecker):
-  """Make sure we enforce rules on importing logging."""
-
-  __implements__ = pylint.interfaces.IAstroidChecker
-
-  # pylint: disable=class-missing-docstring,multiple-statements
-  class _MessageR9301(object): pass
-  # pylint: enable=class-missing-docstring,multiple-statements
-
-  name = 'chromite_logging_checker'
-  priority = -1
-  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
-  msgs = {
-      'R9301': ('logging is deprecated. Use "from chromite.lib import '
-                'cros_logging as logging" to import chromite/lib/cros_logging',
-                ('cros-logging-import'), _MessageR9301),
-  }
-  options = ()
-  # This checker is disabled by default because we only want to disallow "import
-  # logging" in chromite and not in other places cros lint is used. To enable
-  # this checker, modify the pylintrc file.
-  enabled = False
-
-  def visit_import(self, node):
-    """Called when node is an import statement."""
-    for name, _ in node.names:
-      if name == 'logging':
-        self.add_message('R9301', line=node.lineno)
-
-
 def register(linter):
   """pylint will call this func to register all our checkers"""
   # Walk all the classes in this module and register ours.
