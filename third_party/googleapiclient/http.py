@@ -20,13 +20,13 @@ actuall HTTP request.
 """
 from __future__ import absolute_import
 from chromite.third_party import six
-from six.moves import http_client
-from six.moves import range
+from chromite.third_party.six.moves import http_client
+from chromite.third_party.six.moves import range
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 
-from six import BytesIO, StringIO
-from six.moves.urllib.parse import urlparse, urlunparse, quote, unquote
+from chromite.third_party.six import BytesIO, StringIO
+from chromite.third_party.six.moves.urllib.parse import urlparse, urlunparse, quote, unquote
 
 import base64
 import copy

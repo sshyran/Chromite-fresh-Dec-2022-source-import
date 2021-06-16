@@ -30,7 +30,7 @@ import tempfile
 import time
 import shutil
 from chromite.third_party import six
-from six.moves import urllib
+from chromite.third_party.six.moves import urllib
 
 from chromite.third_party import httplib2
 from . import GOOGLE_AUTH_URI

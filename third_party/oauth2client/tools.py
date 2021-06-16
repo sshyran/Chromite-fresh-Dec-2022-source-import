@@ -25,9 +25,9 @@ import logging
 import socket
 import sys
 
-from six.moves import BaseHTTPServer
-from six.moves import urllib
-from six.moves import input
+from chromite.third_party.six.moves import BaseHTTPServer
+from chromite.third_party.six.moves import urllib
+from chromite.third_party.six.moves import input
 
 from . import client
 from . import util

@@ -14,7 +14,7 @@ import time
 from chromite.third_party import httplib2
 from chromite.third_party.oauth2client import client
 from chromite.third_party import six
-from six.moves import http_client as httplib
+from chromite.third_party.six.moves import http_client as httplib
 
 from chromite.third_party.googleapiclient import errors
 from chromite.third_party.infra_libs.ts_mon.common import http_metrics

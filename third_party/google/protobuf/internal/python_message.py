@@ -56,7 +56,7 @@ import sys
 import weakref
 
 from chromite.third_party import six
-from six.moves import range
+from chromite.third_party.six.moves import range
 
 # We use "as" to avoid name collisions with variables.
 from chromite.third_party.google.protobuf.internal import api_implementation

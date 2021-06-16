@@ -27,7 +27,7 @@ __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 import json
 import logging
 
-from six.moves.urllib.parse import urlencode
+from chromite.third_party.six.moves.urllib.parse import urlencode
 
 from . import __version__
 from .errors import HttpError

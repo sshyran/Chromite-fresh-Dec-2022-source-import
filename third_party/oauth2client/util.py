@@ -22,7 +22,7 @@ import inspect
 import logging
 
 from chromite.third_party import six
-from six.moves import urllib
+from chromite.third_party.six.moves import urllib
 
 
 __author__ = [

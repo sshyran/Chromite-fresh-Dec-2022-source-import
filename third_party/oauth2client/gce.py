@@ -19,7 +19,7 @@ Utilities for making it easier to use OAuth 2.0 on Google Compute Engine.
 
 import json
 import logging
-from six.moves import urllib
+from chromite.third_party.six.moves import urllib
 
 from ._helpers import _from_bytes
 from . import util

@@ -18,7 +18,7 @@ A client library for Google's discovery based APIs.
 """
 from __future__ import absolute_import
 from chromite.third_party import six
-from six.moves import zip
+from chromite.third_party.six.moves import zip
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 __all__ = [
@@ -28,9 +28,9 @@ __all__ = [
     'key2param',
     ]
 
-from six import BytesIO
-from six.moves import http_client
-from six.moves.urllib.parse import urlencode, urlparse, urljoin, \
+from chromite.third_party.six import BytesIO
+from chromite.third_party.six.moves import http_client
+from chromite.third_party.six.moves.urllib.parse import urlencode, urlparse, urljoin, \
   urlunparse, parse_qsl
 
 # Standard library imports
