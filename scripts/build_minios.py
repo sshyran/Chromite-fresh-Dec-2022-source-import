@@ -33,10 +33,10 @@ def GetParser():
   parser.add_argument('--private-key',
                       help='Filename to the private key whose public part is '\
                       'baked into the keyblock.',
-                      default=constants.RECOVERY_DATA_PRIVATE_KEY )
+                      default=constants.MINIOS_DATA_PRIVATE_KEY )
   parser.add_argument('--keyblock',
                       help='Filename to the kernel keyblock.',
-                      default=constants.RECOVERY_KEYBLOCK)
+                      default=constants.MINIOS_KEYBLOCK)
   parser.add_argument('--serial', type=str,
                       help='Serial port for the kernel console (e.g. printks)')
   return parser

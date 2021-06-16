@@ -51,8 +51,8 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         self._tempdir,
         constants.VBOOT_DEVKEYS_DIR,
         constants.RECOVERY_PUBLIC_KEY,
-        constants.RECOVERY_DATA_PRIVATE_KEY,
-        constants.RECOVERY_KEYBLOCK,
+        constants.MINIOS_DATA_PRIVATE_KEY,
+        constants.MINIOS_KEYBLOCK,
         None,
     )])
 
