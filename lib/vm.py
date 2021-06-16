@@ -69,10 +69,10 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
     raise VMError('Cannot create VM when both image and board are None.')
 
   image_dir = os.path.dirname(image)
-  src_path = dest_path = os.path.join(image_dir, constants.VM_IMAGE_BIN)
+  src_path = dest_path = os.path.join(image_dir, constants.TEST_IMAGE_BIN)
 
   if dest_dir:
-    dest_path = os.path.join(dest_dir, constants.VM_IMAGE_BIN)
+    dest_path = os.path.join(dest_dir, constants.TEST_IMAGE_BIN)
 
   exists = False
   # Do not create a new VM image if a matching image already exists.
@@ -126,7 +126,7 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
       # Move VM from tempdir to dest_dir.
       shutil.move(
           path_util.FromChrootPath(
-              os.path.join(tempdir, constants.VM_IMAGE_BIN)), dest_path)
+              os.path.join(tempdir, constants.TEST_IMAGE_BIN)), dest_path)
       osutils.RmDir(path_util.FromChrootPath(tempdir), ignore_missing=True)
 
   if not os.path.exists(dest_path):
@@ -323,15 +323,15 @@ class VM(device.Device):
     """Get path of a locally built VM image."""
     vm_image_path = os.path.join(
         constants.SOURCE_ROOT, 'src/build/images', self.board,
-        'latest', constants.VM_IMAGE_BIN)
+        'latest', constants.TEST_IMAGE_BIN)
     return vm_image_path if os.path.isfile(vm_image_path) else None
 
   def _GetCacheVMImagePath(self):
     """Get path of a cached VM image."""
     cache_path = cros_chrome_sdk.SDKFetcher.GetCachePath(
-        constants.VM_IMAGE_TAR, self.cache_dir, self.board)
+        constants.TEST_IMAGE_TAR, self.cache_dir, self.board)
     if cache_path:
-      vm_image = os.path.join(cache_path, constants.VM_IMAGE_BIN)
+      vm_image = os.path.join(cache_path, constants.TEST_IMAGE_BIN)
       if os.path.isfile(vm_image):
         return vm_image
     return None
@@ -345,7 +345,7 @@ class VM(device.Device):
       raise VMError('No VM image found. Use cros chrome-sdk --download-vm.')
     if not os.path.isfile(self.image_path):
       # Checks if the image path points to a directory containing the bin file.
-      image_path = os.path.join(self.image_path, constants.VM_IMAGE_BIN)
+      image_path = os.path.join(self.image_path, constants.TEST_IMAGE_BIN)
       if os.path.isfile(image_path):
         self.image_path = image_path
       else:

@@ -42,7 +42,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self._vm.use_sudo = False
     self._vm.board = 'amd64-generic'
     self._vm.cache_dir = self.tempdir
-    self._vm.image_path = self.TempFilePath('chromiumos_qemu_image.bin')
+    self._vm.image_path = self.TempFilePath(constants.TEST_IMAGE_BIN)
     osutils.Touch(self._vm.image_path)
 
     self.nested_kvm_file = self.TempFilePath('kvm_intel_nested')
@@ -107,7 +107,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains([
         '-device', 'virtio-scsi-pci,id=scsi', '-device', 'scsi-hd,drive=hd',
         '-drive', 'if=none,id=hd,file=%s,cache=unsafe,format=raw'
-        % self.TempFilePath('chromiumos_qemu_image.bin'),
+        % self.TempFilePath(constants.TEST_IMAGE_BIN),
     ])
     self.assertCommandContains(['-enable-kvm'])
 
@@ -147,10 +147,9 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
   def testBuiltVMImagePath(self):
     """Verify locally built VM image path is picked up by vm.VM."""
     self._vm.image_path = None
-    expected_vm_image_path = os.path.join(constants.SOURCE_ROOT,
-                                          'src/build/images/%s/latest/'
-                                          'chromiumos_qemu_image.bin'
-                                          % self._vm.board)
+    expected_vm_image_path = os.path.join(
+        constants.SOURCE_ROOT, 'src', 'build', 'images', self._vm.board,
+        'latest', constants.TEST_IMAGE_BIN)
     osutils.Touch(expected_vm_image_path, makedirs=True)
     self._vm.Start()
     self.assertTrue(self.FindPathInArgs(self.rc.call_args_list,
@@ -161,14 +160,14 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self._vm.image_path = None
     vm_image_dir = cros_test_lib.FakeSDKCache(
         self._vm.cache_dir).CreateCacheReference(self._vm.board,
-                                                 constants.VM_IMAGE_TAR)
-    vm_image_path = os.path.join(vm_image_dir, constants.VM_IMAGE_BIN)
+                                                 constants.TEST_IMAGE_TAR)
+    vm_image_path = os.path.join(vm_image_dir, constants.TEST_IMAGE_BIN)
     osutils.Touch(vm_image_path, makedirs=True)
     self._vm.Start()
     expected_vm_image_path = os.path.join(
         self._vm.cache_dir,
-        'chrome-sdk/symlinks/%s+12225.0.0+chromiumos_qemu_image.tar.xz/'
-        'chromiumos_qemu_image.bin' % self._vm.board)
+        'chrome-sdk/symlinks/%s+12225.0.0+%s/%s' % (
+            self._vm.board, constants.TEST_IMAGE_TAR, constants.TEST_IMAGE_BIN))
     self.assertTrue(self.FindPathInArgs(self.rc.call_args_list,
                                         expected_vm_image_path))
 
@@ -188,7 +187,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     self._vm.image_path = self.tempdir
     self._vm.Start()
     self.assertEqual(self._vm.image_path,
-                     self.TempFilePath('chromiumos_qemu_image.bin'))
+                     self.TempFilePath(constants.TEST_IMAGE_BIN))
 
   def testChrootQemuPath(self):
     """Verify that QEMU in the chroot is picked up by vm.VM."""
