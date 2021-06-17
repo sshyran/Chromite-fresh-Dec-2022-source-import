@@ -200,21 +200,6 @@ def CreateChroot(chroot_path, sdk_tarball, cache_dir, nousepkg=False):
     cros_build_lib.Die('Creating chroot failed!\n%s', e)
 
 
-def DeleteChroot(chroot_path):
-  """Deletes an existing chroot"""
-  cmd = MAKE_CHROOT + ['--chroot', chroot_path, '--delete']
-  try:
-    logging.notice('Deleting chroot.')
-    cros_build_lib.dbg_run(cmd)
-  except cros_build_lib.RunCommandError as e:
-    cros_build_lib.Die('Deleting chroot failed!\n%s', e)
-
-
-def CleanupChroot(chroot_path):
-  """Unmounts a chroot and cleans up any associated devices."""
-  cros_sdk_lib.CleanupChrootMount(chroot_path, delete=False)
-
-
 def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
                 goma_dir, goma_client_json, working_dir, additional_args):
   """Enters an existing SDK chroot"""
@@ -1010,9 +995,6 @@ def main(argv):
 
   # If deleting, do it regardless of the use_image flag so that a
   # previously-created loopback chroot can also be cleaned up.
-  # TODO(bmgordon): See if the DeleteChroot call below can be removed in
-  # favor of this block.
-  chroot_deleted = False
   if options.delete:
     # Set a timeout of 300 seconds when getting the lock.
     with locking.FileLock(lock_path, 'chroot lock',
@@ -1026,13 +1008,8 @@ def main(argv):
         else:
           logging.warning(
               'cros_sdk was invoked with force option, continuing.')
-      if missing_image_tools:
-        logging.notice('Unmounting chroot.')
-        osutils.UmountTree(options.chroot)
-      else:
-        logging.notice('Deleting chroot.')
-        cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
-        chroot_deleted = True
+      logging.notice('Deleting chroot.')
+      cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
 
   # If cleanup was requested, we have to do it while we're still in the original
   # namespace.  Since cleaning up the mount will interfere with any other
@@ -1053,7 +1030,7 @@ def main(argv):
       # even if we don't get the lock because it will attempt to unmount the
       # tree and will print diagnostic information from 'fuser', 'lsof', and
       # 'ps'.
-      CleanupChroot(options.chroot)
+      cros_sdk_lib.CleanupChrootMount(options.chroot, delete=False)
       sys.exit(0)
 
   # Make sure the main chroot mount is visible.  Contents will be filled in
@@ -1173,12 +1150,6 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
   with locking.FileLock(lock_path, 'chroot lock') as lock:
     if options.proxy_sim:
       _ProxySimSetup(options)
-
-    if (options.delete and not chroot_deleted and
-        (os.path.exists(options.chroot) or
-         os.path.exists(_ImageFileForChroot(options.chroot)))):
-      lock.write_lock()
-      DeleteChroot(options.chroot)
 
     sdk_cache = os.path.join(options.cache_dir, 'sdks')
     distfiles_cache = os.path.join(options.cache_dir, 'distfiles')
