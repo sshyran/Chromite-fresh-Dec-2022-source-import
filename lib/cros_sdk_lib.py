@@ -774,6 +774,9 @@ class ChrootCreator:
     logging.notice('Creating chroot. This may take a few minutes...')
     self._make_chroot()
 
+    # TODO(build): Delete this once all users migrate to cros_chroot_version.
+    osutils.Touch(self.chroot_path / 'etc' / 'debian_chroot')
+
 
 def CreateChroot(*args, **kwargs):
   """Convenience method."""
