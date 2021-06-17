@@ -1219,12 +1219,12 @@ class ChromeSDKCommand(command.CliCommand):
     wrapper_path = os.path.join(shared_dir, 'rewrapper_%s' % board)
     wrapper_content = [
         '#!/bin/sh\n',
-        '{rewrapper_dir}/rewrapper -cfg="{cros_cfg_path}" '
-        '-exec_root="{chrome_src}" $@\n'.format(
-            rewrapper_dir=os.path.join(
+        '%(rewrapper_dir)s/rewrapper -cfg="%(cros_cfg_path)s" '
+        '-exec_root="%(chrome_src)s" $@\n' % {
+            'rewrapper_dir': os.path.join(
                 self.options.chrome_src, 'buildtools', 'reclient'),
-            cros_cfg_path=cros_cfg_path,
-            chrome_src=self.options.chrome_src),
+            'cros_cfg_path': cros_cfg_path,
+            'chrome_src': self.options.chrome_src},
     ]
     osutils.WriteFile(wrapper_path, wrapper_content, chmod=0o755)
     Log('generated rewrapper wrapper %s', wrapper_path, silent=self.silent)
