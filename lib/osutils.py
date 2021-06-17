@@ -388,7 +388,8 @@ def SafeSymlink(source: Union[Path, str],
     os.symlink(source, dest)
 
 
-def SafeUnlink(path, sudo=False):
+def SafeUnlink(path: Union[Path, str],
+              sudo: bool = False):
   """Unlink a file from disk, ignoring if it doesn't exist.
 
   Returns:
@@ -406,7 +407,8 @@ def SafeUnlink(path, sudo=False):
 
   # If we're still here, we're falling back to sudo.
   try:
-    cros_build_lib.sudo_run(['rm', '--', path], print_cmd=False, stderr=True)
+    cros_build_lib.sudo_run(['rm', '--', str(path)], print_cmd=False,
+                            stderr=True)
   except cros_build_lib.RunCommandError as e:
     # If the dir is inaccessible to non-root users, we'd end up here.
     if b'No such file or directory' in e.stderr:

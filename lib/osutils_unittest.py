@@ -208,9 +208,11 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
   def testSafeUnlink(self):
     """Test unlinking files work (existing or not)."""
-    def f(sudo=False):
+    def f(sudo=False, as_path=False):
       with osutils.TempDir(sudo_rm=sudo) as dirname:
         path = os.path.join(dirname, 'foon')
+        if as_path:
+          path = Path(path)
         osutils.Touch(path, makedirs=True)
         self.assertExists(path)
         if sudo:
@@ -223,6 +225,8 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
     f(False)
     f(True)
+    f(False, True)
+    f(True, True)
 
   def testSafeUnlinkSudoInaccessible(self):
     """Test unlinking files work in a dir only root can read."""
