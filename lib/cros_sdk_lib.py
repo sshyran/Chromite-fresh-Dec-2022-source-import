@@ -841,10 +841,8 @@ class ChrootCreator:
     lines.insert(0, line)
     path.write_text('\n'.join(lines) + '\n')
 
-    # Setup the home dir.
-    chroot_home = self.chroot_path / home[1:]
-    shutil.copytree(self.chroot_path / 'etc/skel', chroot_home)
-    osutils.Chown(chroot_home, user=uid, group=gid, recursive=True)
+    home = self.chroot_path / home[1:]
+    self.init_user_home(home, uid, gid)
 
   def init_group(self,
                  user: Optional[str] = None,
@@ -896,6 +894,51 @@ class ChrootCreator:
     lines.insert(0, line)
     path.write_text('\n'.join(lines) + '\n')
 
+  def init_user_home(self, home: Path, uid: int, gid: int):
+    """Initialize the user's /home dir."""
+    shutil.copytree(self.chroot_path / 'etc/skel', home)
+
+    # TODO(build): Delete this leftover from SVN someday.
+    (home / 'trunk').symlink_to(constants.CHROOT_SOURCE_ROOT)
+    (home / 'chromiumos').symlink_to(constants.CHROOT_SOURCE_ROOT)
+    (home / 'depot_tools').symlink_to('/mnt/host/depot_tools')
+
+    # Automatically change to scripts directory.
+    bash_profile = home / '.bash_profile'
+    osutils.Touch(bash_profile)
+    data = bash_profile.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    data += (
+        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n'
+    )
+    bash_profile.write_text(data)
+
+    # Enable bash completion.
+    bashrc = home / '.bashrc'
+    osutils.Touch(bashrc)
+    data = bashrc.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    data += (
+        '# Set up bash autocompletion.\n'
+        '. ~/chromiumos/src/scripts/bash_completion\n'
+    )
+    bashrc.write_text(data)
+
+    osutils.Chown(home, user=uid, group=gid, recursive=True)
+
+  def init_filesystem_basic(self):
+    """Create various dirs & simple config files."""
+    # Create random empty dirs.
+    for path in (
+        constants.CHROOT_SOURCE_ROOT,
+        '/mnt/host/depot_tools',
+        '/run',
+    ):
+      (self.chroot_path / path[1:]).mkdir(
+          mode=0o755, parents=True, exist_ok=True)
+
   def print_success_summary(self):
     """Show a summary of the chroot to the user."""
     default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
@@ -933,6 +976,7 @@ $ cros_sdk --delete%s
     self.init_timezone()
     self.init_user(user=user, uid=uid, gid=gid)
     self.init_group(user=user, group=group, gid=gid)
+    self.init_filesystem_basic()
 
     self._make_chroot()
 
