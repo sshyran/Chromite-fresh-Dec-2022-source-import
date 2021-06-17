@@ -13,13 +13,14 @@ import errno
 import glob
 import hashlib
 import os
+from pathlib import Path
 import pwd
 import re
 import shutil
 import stat
 import subprocess
 import tempfile
-from typing import Optional
+from typing import Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -257,7 +258,7 @@ def Touch(path, makedirs=False, mode=None):
   os.utime(path, None)
 
 
-def Chmod(path: str, mode: int, sudo: bool = False):
+def Chmod(path: Union[Path, str], mode: int, sudo: bool = False):
   """Helper for changing file modes even if we have to elevate to root.
 
   Args:
@@ -278,19 +279,22 @@ def Chmod(path: str, mode: int, sudo: bool = False):
       raise
 
   # If we're still here, we got permission denied and sudo=True was requested.
-  cros_build_lib.sudo_run(['chmod', f'{mode:o}', '--', path])
+  cros_build_lib.sudo_run(['chmod', f'{mode:o}', '--', str(path)])
 
 
-def Chown(path, user=None, group=None, recursive=False):
+def Chown(path: Union[Path, str],
+          user: Optional[Union[str, int]] = None,
+          group: Optional[Union[str, int]] = None,
+          recursive: bool = False):
   """Simple sudo chown path to the user.
 
   Defaults to user running command. Does nothing if run as root user unless
   a new owner is provided.
 
   Args:
-    path: str - File/directory to chown.
-    user: str|int|None - User to chown the file to. Defaults to current user.
-    group: str|int|None - Group to assign the file to.
+    path: File/directory to chown.
+    user: User to chown the file to. Defaults to current user.
+    group: Group to assign the file to.
     recursive: Also chown child files/directories recursively.
   """
   if user is None:
@@ -304,7 +308,7 @@ def Chown(path, user=None, group=None, recursive=False):
     cmd = ['chown']
     if recursive:
       cmd += ['-R']
-    cmd += ['%s:%s' % (user, group), path]
+    cmd += ['%s:%s' % (user, group), str(path)]
     cros_build_lib.sudo_run(cmd, print_cmd=False,
                             stderr=True, stdout=True)
 

@@ -344,12 +344,14 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     osutils.Chmod(path, 0o700)
     self.assertEqual(getmode(path), 0o700)
 
-    osutils.Chmod(path, 0o644)
+    osutils.Chmod(Path(path), 0o644)
     self.assertEqual(getmode(path), 0o644)
 
     osutils.Chown(path, user='root', group='root')
     osutils.Chmod(path, 0o660, sudo=True)
     self.assertEqual(getmode(path), 0o660)
+    osutils.Chmod(Path(path), 0o661, sudo=True)
+    self.assertEqual(getmode(path), 0o661)
 
     self.assertRaises(OSError, osutils.Chmod, path, 0o600)
 
@@ -389,6 +391,14 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertEqual(new_user, User(filename))
     self.assertEqual(new_group, Group(filename))
     osutils.Chown(filename)
+    self.assertEqual(user, User(filename))
+    self.assertEqual(group, Group(filename))
+
+    # With Path object.
+    osutils.Chown(Path(filename), user=new_user, group=new_group)
+    self.assertEqual(new_user, User(filename))
+    self.assertEqual(new_group, Group(filename))
+    osutils.Chown(Path(filename))
     self.assertEqual(user, User(filename))
     self.assertEqual(group, Group(filename))
 
