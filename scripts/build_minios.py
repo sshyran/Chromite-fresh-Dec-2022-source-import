@@ -35,6 +35,8 @@ def GetParser():
   parser.add_argument('--keyblock', type='path',
                       help='Filename to the kernel keyblock.',
                       default=constants.RECOVERY_KEYBLOCK)
+  parser.add_argument('--serial', type=str,
+                      help='Serial port for the kernel console (e.g. printks)')
   return parser
 
 
@@ -46,5 +48,6 @@ def main(argv):
   with tempfile.TemporaryDirectory() as work_dir:
     kernel = minios.CreateMiniOsKernelImage(opts.board, work_dir,
                                             opts.keys_dir, opts.public_key,
-                                            opts.private_key, opts.keyblock)
+                                            opts.private_key, opts.keyblock,
+                                            opts.serial)
     minios.InsertMiniOsKernelImage(opts.image, kernel)

@@ -39,16 +39,17 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
 
     minios.CreateMiniOsKernelImage('foo-board', self.tempdir,
                                    'foo-keys-dir', 'foo-public-key',
-                                   'foo-private-key', 'foo-keyblock')
+                                   'foo-private-key', 'foo-keyblock',
+                                   'foo-tty')
     bck_mock.assert_called_once_with(
       ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
        'kernel_compress_xz', 'pcserial', '-kernel_afdo'])
     bki_mock.assert_called_once_with(
         os.path.join(self.tempdir,
                      minios.MINIOS_KERNEL_IMAGE),
-        boot_args='noinitrd panic=60', serial='ttyS2', keys_dir='foo-keys-dir',
-        public_key='foo-public-key', private_key='foo-private-key',
-        keyblock='foo-keyblock')
+        boot_args='noinitrd panic=60', serial='foo-tty',
+        keys_dir='foo-keys-dir', public_key='foo-public-key',
+        private_key='foo-private-key', keyblock='foo-keyblock')
 
   def testInsertMiniOsKernelImage(self):
     """Tests InsertMiniOsKernelImage()."""

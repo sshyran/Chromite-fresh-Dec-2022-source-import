@@ -31,7 +31,8 @@ class MiniOsError(Error):
 
 def CreateMiniOsKernelImage(board: str, work_dir: str,
                             keys_dir: str, public_key: str,
-                            private_key: str, keyblock: str) -> str:
+                            private_key: str, keyblock: str,
+                            serial: str) -> str:
   """Creates the MiniOS kernel image.
 
   And puts it in the work directory.
@@ -45,6 +46,7 @@ def CreateMiniOsKernelImage(board: str, work_dir: str,
     private_key: Filename to the private key whose public part is baked into
                  the keyblock.
     keyblock: Filename to the kernel keyblock.
+    serial: Serial port for the kernel console (e.g. printks).
 
   Returns:
     The path to the generated kernel image.
@@ -55,7 +57,7 @@ def CreateMiniOsKernelImage(board: str, work_dir: str,
   kb.CreateCustomKernel(KERNEL_FLAGS)
   kernel = os.path.join(work_dir, MINIOS_KERNEL_IMAGE)
   kb.CreateKernelImage(kernel, boot_args='noinitrd panic=60',
-                       serial='ttyS2', keys_dir=keys_dir, public_key=public_key,
+                       serial=serial, keys_dir=keys_dir, public_key=public_key,
                        private_key=private_key, keyblock=keyblock)
   return kernel
 
