@@ -756,7 +756,6 @@ class ChrootCreator:
     """Create the chroot."""
     cmd = [
         self.MAKE_CHROOT,
-        '--stage3_path', str(self.sdk_tarball),
         '--chroot', str(self.chroot_path),
         '--cache_dir', str(self.cache_dir),
     ]
@@ -787,6 +786,13 @@ $ cros_sdk --delete%s
   def run(self):
     """Create the chroot."""
     logging.notice('Creating chroot. This may take a few minutes...')
+
+    # Unpack the chroot & reset the version.
+    self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+    cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
+    updater = ChrootUpdater(self.chroot_path / CHROOT_VERSION_FILE[1:])
+    updater.SetVersion(0)
+
     self._make_chroot()
 
     # TODO(build): Delete this once all users migrate to cros_chroot_version.

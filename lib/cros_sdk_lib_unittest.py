@@ -789,15 +789,21 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.creater = cros_sdk_lib.ChrootCreator(
         self.chroot_path, self.sdk_tarball, self.cache_dir)
 
+    # Create an empty, but real, tarball to extract during testing.
+    tar_dir = tempdir / 'tar_dir'
+    D = cros_test_lib.Directory
+    cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
+        D('etc', ()),
+    ))
+    cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
+
   def testMakeChroot(self):
     """Verify make_chroot invocation."""
-    (self.chroot_path / 'etc').mkdir(parents=True)
     with cros_test_lib.RunCommandMock() as rc_mock:
       rc_mock.SetDefaultCmdResult()
       # pylint: disable=protected-access
       self.creater._make_chroot()
       rc_mock.assertCommandContains([
-          '--stage3_path', str(self.sdk_tarball),
           '--chroot', str(self.chroot_path),
           '--cache_dir', str(self.cache_dir),
       ])
@@ -805,6 +811,5 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
   def testRun(self):
     """Verify run works."""
     self.PatchObject(cros_sdk_lib.ChrootCreator, '_make_chroot')
-    (self.chroot_path / 'etc').mkdir(parents=True)
     self.creater.run()
     self.assertExists(self.chroot_path / 'etc' / 'debian_chroot')
