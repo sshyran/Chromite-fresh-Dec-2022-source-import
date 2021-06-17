@@ -736,6 +736,9 @@ class ChrootCreator:
   MAKE_CHROOT = os.path.join(
       constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
 
+  # If the host timezone isn't set, we'll use this inside the SDK.
+  DEFAULT_TZ = 'usr/share/zoneinfo/PST8PDT'
+
   def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
                usepkg: bool = True):
     """Initialize.
@@ -768,6 +771,20 @@ class ChrootCreator:
     except cros_build_lib.RunCommandError as e:
       cros_build_lib.Die('Creating chroot failed!\n%s', e)
 
+  def init_timezone(self):
+    """Setup the timezone info inside the chroot."""
+    tz_path = Path('etc/localtime')
+    host_tz = '/' / tz_path
+    chroot_tz = self.chroot_path / tz_path
+    # Nuke it in case it's a broken symlink.
+    chroot_tz.unlink(missing_ok=True)
+    if host_tz.exists():
+      logging.debug('%s: copying from %s', chroot_tz, host_tz)
+      chroot_tz.write_bytes(host_tz.read_bytes())
+    else:
+      logging.debug('%s: symlinking to %s', chroot_tz, self.DEFAULT_TZ)
+      chroot_tz.symlink_to(self.DEFAULT_TZ)
+
   def print_success_summary(self):
     """Show a summary of the chroot to the user."""
     default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
@@ -792,6 +809,8 @@ $ cros_sdk --delete%s
     cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
     updater = ChrootUpdater(self.chroot_path / CHROOT_VERSION_FILE[1:])
     updater.SetVersion(0)
+
+    self.init_timezone()
 
     self._make_chroot()
 

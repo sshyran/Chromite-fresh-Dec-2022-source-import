@@ -795,6 +795,7 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
         D('etc', ()),
     ))
+    osutils.Touch(tar_dir / self.creater.DEFAULT_TZ, makedirs=True)
     cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
 
   def testMakeChroot(self):
@@ -813,3 +814,4 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(cros_sdk_lib.ChrootCreator, '_make_chroot')
     self.creater.run()
     self.assertExists(self.chroot_path / 'etc' / 'debian_chroot')
+    self.assertExists(self.chroot_path / 'etc' / 'localtime')
