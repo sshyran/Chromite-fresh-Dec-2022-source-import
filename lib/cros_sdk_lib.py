@@ -939,6 +939,56 @@ class ChrootCreator:
       (self.chroot_path / path[1:]).mkdir(
           mode=0o755, parents=True, exist_ok=True)
 
+  def init_etc(self, user: str = None):
+    """Setup the /etc paths."""
+    if user is None:
+      user = os.getenv('SUDO_USER')
+
+    etc_dir = self.chroot_path / 'etc'
+
+    # Setup some symlinks.
+    mtab = etc_dir / 'mtab'
+    if not mtab.is_symlink():
+      osutils.SafeUnlink(mtab)
+      mtab.symlink_to('/proc/mounts')
+
+    # Copy config from outside chroot into chroot.
+    for path in ('hosts', 'resolve.conf'):
+      host_path = Path('/etc') / path
+      chroot_path = etc_dir / path
+      if host_path.exists():
+        chroot_path.write_bytes(host_path.read_bytes())
+        chroot_path.chmod(0o644)
+
+    # Add chromite/bin and depot_tools into the path globally; note that the
+    # chromite wrapper itself might also be found in depot_tools.
+    # We rely on 'env-update' getting called below.
+    env_d = etc_dir / 'env.d' / '99chromiumos'
+    env_d.write_text(f"""\
+PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/bin:/mnt/host/depot_tools"
+CROS_WORKON_SRCROOT="{constants.CHROOT_SOURCE_ROOT}"
+PORTAGE_USERNAME="{user}"
+""")
+
+    profile_d = etc_dir / 'profile.d'
+    profile_d.mkdir(mode=0o755, parents=True, exist_ok=True)
+    (profile_d / '50-chromiumos-niceties.sh').symlink_to(
+        f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/profile.d/'
+        '50-chromiumos-niceties.sh')
+
+    # Select a small set of locales for the user if they haven't done so
+    # already.  This makes glibc upgrades cheap by only generating a small
+    # set of locales.  The ones listed here are basically for the buildbots
+    # which always assume these are available.  This works in conjunction
+    # with `cros_sdk --enter`.
+    # http://crosbug.com/20378
+    localegen = etc_dir / 'locale.gen'
+    osutils.Touch(localegen)
+    data = localegen.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    localegen.write_text(data + 'en_US.UTF-8 UTF-8\n')
+
   def print_success_summary(self):
     """Show a summary of the chroot to the user."""
     default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
@@ -977,6 +1027,7 @@ $ cros_sdk --delete%s
     self.init_user(user=user, uid=uid, gid=gid)
     self.init_group(user=user, group=group, gid=gid)
     self.init_filesystem_basic()
+    self.init_etc(user=user)
 
     self._make_chroot()
 

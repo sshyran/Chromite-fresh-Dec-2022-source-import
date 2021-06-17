@@ -794,6 +794,7 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     D = cros_test_lib.Directory
     cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
         D('etc', (
+            D('env.d', ()),
             'passwd',
             'group',
             D('skel', (
@@ -850,3 +851,10 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.assertStartsWith(db, f'{TEST_GROUP}:x:{TEST_GID}:{TEST_USER}')
     # Make sure Python None didn't leak in.
     self.assertNotIn('None', db)
+
+    # Check various /etc paths.
+    etc = self.chroot_path / 'etc'
+    self.assertExists(etc / 'mtab')
+    self.assertIn(f'PORTAGE_USERNAME="{TEST_USER}"',
+                  (etc / 'env.d' / '99chromiumos').read_text())
+    self.assertIn('en_US.UTF-8 UTF-8', (etc / 'locale.gen').read_text())
