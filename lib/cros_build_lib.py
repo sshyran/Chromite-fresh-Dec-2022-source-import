@@ -22,7 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import TextIO, Union
+from typing import List, Optional, TextIO, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_collections
@@ -1060,7 +1060,9 @@ COMP_BZIP2 = 2
 COMP_XZ = 3
 
 
-def FindCompressor(compression, chroot=None):
+def FindCompressor(
+    compression,
+    chroot: Optional[Union[Path, str]] = None) -> str:
   """Locate a compressor utility program (possibly in a chroot).
 
   Since we compress/decompress a lot, make it easy to locate a
@@ -1124,7 +1126,7 @@ def CompressionStrToType(s):
     return COMP_NONE
 
 
-def CompressionExtToType(file_name):
+def CompressionExtToType(file_name: Union[Path, str]):
   """Retrieve a compression type constant from a compression file's name.
 
   Args:
@@ -1182,8 +1184,15 @@ class TarballError(RunCommandError):
 
 
 def CreateTarball(
-    tarball_path, cwd, sudo=False, compression=COMP_XZ, chroot=None,
-    inputs=None, timeout=300, extra_args=None, **kwargs):
+    tarball_path: Union[Path, int, str],
+    cwd: Union[Path, str],
+    sudo: Optional[bool] = False,
+    compression=COMP_XZ,
+    chroot: Optional[Union[Path, str]] = None,
+    inputs: Optional[List[str]] = None,
+    timeout: int = 300,
+    extra_args: Optional[List[str]] = None,
+    **kwargs):
   """Create a tarball.  Executes 'tar' on the commandline.
 
   Args:
@@ -1228,7 +1237,7 @@ def CreateTarball(
     cmd += ['--to-stdout']
     rc_stdout = tarball_path
   else:
-    cmd += ['-f', tarball_path]
+    cmd += ['-f', str(tarball_path)]
 
   if len(inputs) > _THRESHOLD_TO_USE_T_FOR_TAR:
     cmd += ['--null', '-T', '/dev/stdin']
@@ -1271,8 +1280,11 @@ def CreateTarball(
     logging.PrintBuildbotStepWarnings()
 
 
-def ExtractTarball(tarball_path, install_path, files_to_extract=None,
-                   excluded_files=None, return_extracted_files=False):
+def ExtractTarball(tarball_path: Union[Path, str],
+                   install_path: Union[Path, str],
+                   files_to_extract: Optional[List[str]] = None,
+                   excluded_files: Optional[List[str]] = None,
+                   return_extracted_files: bool = False) -> List[str]:
   """Extracts a tarball using tar.
 
   Detects whether the tarball is compressed or not based on the file
@@ -1294,7 +1306,8 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   """
   # Use a separate decompression program - this enables parallel decompression
   # in some cases.
-  cmd = ['tar', '--sparse', '-xf', tarball_path, '--directory', install_path]
+  cmd = ['tar', '--sparse', '-xf', str(tarball_path),
+         '--directory', str(install_path)]
 
   comp_type = CompressionExtToType(tarball_path)
   if comp_type != COMP_NONE:

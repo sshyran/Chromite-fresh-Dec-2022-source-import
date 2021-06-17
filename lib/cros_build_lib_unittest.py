@@ -1174,10 +1174,16 @@ class TarballTests(cros_test_lib.TempDirTestCase):
 
   def testCreateExtractSuccessWithNoCompressionProgram(self):
     """Create a tarfile without any compression, then extract it."""
-    TARBALL_PATH = os.path.join(self.tempdir, 'test.tar')
+    path = os.path.join(self.tempdir, 'test.tar')
     cros_build_lib.CreateTarball(
-        TARBALL_PATH, self.inputDir, inputs=self.inputs)
-    cros_build_lib.ExtractTarball(TARBALL_PATH, self.tempdir)
+        path, self.inputDir, inputs=self.inputs)
+    cros_build_lib.ExtractTarball(path, self.tempdir)
+
+    # Again, but using Path instead of str paths.
+    path = Path(path)
+    cros_build_lib.CreateTarball(
+        path, Path(self.inputDir), inputs=self.inputs)
+    cros_build_lib.ExtractTarball(path, Path(self.tempdir))
 
   def testExtractFailureWithMissingFile(self):
     """Verify that stderr from tar is printed if in encounters an error."""
