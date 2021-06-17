@@ -6,6 +6,7 @@
 
 import collections
 import os
+from pathlib import Path
 import re
 import time
 
@@ -727,3 +728,53 @@ class ChrootUpdater(object):
 
     self._hook_files = hook_files
     return self._hook_files
+
+
+class ChrootCreator:
+  """Creates a new chroot from a given SDK."""
+
+  MAKE_CHROOT = os.path.join(
+      constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
+
+  def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
+               usepkg: bool = True):
+    """Initialize.
+
+    Args:
+      chroot_path: Path where the new chroot will be created.
+      sdk_tarball: Path to a downloaded Chromium OS SDK tarball.
+      cache_dir: Path to a directory that will be used for caching files.
+      usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
+          chroot.
+    """
+    self.chroot_path = chroot_path
+    self.sdk_tarball = sdk_tarball
+    self.cache_dir = cache_dir
+    self.usepkg = usepkg
+
+  def _make_chroot(self):
+    """Create the chroot."""
+    cmd = [
+        self.MAKE_CHROOT,
+        '--stage3_path', str(self.sdk_tarball),
+        '--chroot', str(self.chroot_path),
+        '--cache_dir', str(self.cache_dir),
+    ]
+
+    if not self.usepkg:
+      cmd.append('--nousepkg')
+
+    try:
+      cros_build_lib.dbg_run(cmd)
+    except cros_build_lib.RunCommandError as e:
+      cros_build_lib.Die('Creating chroot failed!\n%s', e)
+
+  def run(self):
+    """Create the chroot."""
+    logging.notice('Creating chroot. This may take a few minutes...')
+    self._make_chroot()
+
+
+def CreateChroot(*args, **kwargs):
+  """Convenience method."""
+  ChrootCreator(*args, **kwargs).run()

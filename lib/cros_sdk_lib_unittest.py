@@ -5,6 +5,7 @@
 """Test the cros_sdk_lib module."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -774,3 +775,28 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
     self.PatchObject(self.chroot, 'GetVersion',
                      side_effect=cros_sdk_lib.UninitializedChrootError())
     self.assertFalse(self.chroot.IsInitialized())
+
+
+class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
+  """ChrootCreator tests."""
+
+  def setUp(self):
+    tempdir = Path(self.tempdir)
+    self.chroot_path = tempdir / 'chroot'
+    self.sdk_tarball = tempdir / 'chroot.tar'
+    self.cache_dir = tempdir / 'cache_dir'
+
+    self.creater = cros_sdk_lib.ChrootCreator(
+        self.chroot_path, self.sdk_tarball, self.cache_dir)
+
+  def testMakeChroot(self):
+    """Verify make_chroot invocation."""
+    with cros_test_lib.RunCommandMock() as rc_mock:
+      rc_mock.SetDefaultCmdResult()
+      # pylint: disable=protected-access
+      self.creater._make_chroot()
+      rc_mock.assertCommandContains([
+          '--stage3_path', str(self.sdk_tarball),
+          '--chroot', str(self.chroot_path),
+          '--cache_dir', str(self.cache_dir),
+      ])

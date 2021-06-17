@@ -14,6 +14,7 @@ If given args those are passed to the chroot environment, and executed.
 import argparse
 import glob
 import os
+from pathlib import Path
 import pwd
 import random
 import re
@@ -41,9 +42,6 @@ from chromite.utils import key_value_store
 COMPRESSION_PREFERENCE = ('xz', 'bz2')
 
 # TODO(zbehan): Remove the dependency on these, reimplement them in python
-MAKE_CHROOT = [
-    os.path.join(constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
-]
 ENTER_CHROOT = [
     os.path.join(constants.SOURCE_ROOT, 'src/scripts/sdk_lib/enter_chroot.sh')
 ]
@@ -171,33 +169,6 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
     osutils.SafeUnlink(os.path.join(storage_dir, filename))
 
   return tarball_dest
-
-
-def CreateChroot(chroot_path, sdk_tarball, cache_dir, nousepkg=False):
-  """Creates a new chroot from a given SDK.
-
-  Args:
-    chroot_path: Path where the new chroot will be created.
-    sdk_tarball: Path to a downloaded Gentoo Stage3 or Chromium OS SDK tarball.
-    cache_dir: Path to a directory that will be used for caching portage files,
-        etc.
-    nousepkg: If True, pass --nousepkg to cros_setup_toolchains inside the
-        chroot.
-  """
-
-  cmd = MAKE_CHROOT + [
-      '--stage3_path', sdk_tarball, '--chroot', chroot_path, '--cache_dir',
-      cache_dir
-  ]
-
-  if nousepkg:
-    cmd.append('--nousepkg')
-
-  logging.notice('Creating chroot. This may take a few minutes...')
-  try:
-    cros_build_lib.dbg_run(cmd)
-  except cros_build_lib.RunCommandError as e:
-    cros_build_lib.Die('Creating chroot failed!\n%s', e)
 
 
 def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
@@ -1193,11 +1164,11 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       if cros_sdk_lib.IsChrootReady(options.chroot):
         logging.debug('Chroot already exists.  Skipping creation.')
       else:
-        CreateChroot(
-            options.chroot,
-            sdk_tarball,
-            options.cache_dir,
-            nousepkg=(options.bootstrap or options.nousepkg))
+        cros_sdk_lib.CreateChroot(
+            Path(options.chroot),
+            Path(sdk_tarball),
+            Path(options.cache_dir),
+            usepkg=not options.bootstrap and not options.nousepkg)
 
     if options.enter:
       lock.read_lock()
