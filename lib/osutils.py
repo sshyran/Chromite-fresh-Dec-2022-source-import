@@ -116,7 +116,8 @@ _VALID_WRITE_MODES = {
 }
 
 
-def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
+def WriteFile(path: Union[Path, str],
+              content, mode='w', encoding=None, errors=None, atomic=False,
               makedirs=False, sudo=False, chmod: Optional[int] = None):
   """Write the given content to disk.
 
@@ -174,7 +175,7 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       if e.errno in (errno.EPERM, errno.EACCES):
         if sudo:
           result = cros_build_lib.sudo_run(
-              ['stat', '-c%a', '--', path], stdout=True)
+              ['stat', '-c%a', '--', str(path)], stdout=True)
           return int(result.stdout, 8)
         else:
           raise
@@ -204,12 +205,12 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       os.chmod(write_path, get_existing_perms(path) if chmod is None else chmod)
 
       try:
-        mv_target = path if not atomic else path + '.tmp'
+        mv_target = str(path) if not atomic else str(path) + '.tmp'
         cros_build_lib.sudo_run(['mv', write_path, mv_target],
                                 print_cmd=False, stderr=True)
         Chown(mv_target, user='root', group='root')
         if atomic:
-          cros_build_lib.sudo_run(['mv', mv_target, path],
+          cros_build_lib.sudo_run(['mv', mv_target, str(path)],
                                   print_cmd=False, stderr=True)
 
       except cros_build_lib.RunCommandError:
@@ -313,7 +314,10 @@ def Chown(path: Union[Path, str],
                             stderr=True, stdout=True)
 
 
-def ReadFile(path, mode='r', encoding=None, errors=None):
+def ReadFile(path: Union[Path, str],
+             mode: str = 'r',
+             encoding: Optional[str] = None,
+             errors: Optional[str] = None):
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.

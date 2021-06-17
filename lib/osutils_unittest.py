@@ -57,6 +57,13 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertEqual(osutils.WriteFile(filename, data), None)
     self.assertEqual(osutils.ReadFile(filename), data)
 
+  def testReadWritePath(self):
+    """Verify we can write data to a Path, and then read it back."""
+    filename = Path(self.tempdir) / 'foo'
+    data = 'alsdkfjasldkfjaskdlfjasdf'
+    self.assertEqual(osutils.WriteFile(filename, data), None)
+    self.assertEqual(osutils.ReadFile(filename), data)
+
   def testReadBinary(self):
     """Verify we can read data as binary."""
     filename = os.path.join(self.tempdir, 'foo')
