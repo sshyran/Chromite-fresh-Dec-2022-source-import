@@ -1471,3 +1471,21 @@ def IsInsideVm():
         return True
 
   return False
+
+
+@contextlib.contextmanager
+def UmaskContext(mask: int) -> int:
+  """Context manager for changing umask.
+
+  Args:
+    mask: The new umask setting to apply.  Should be an octal number.
+
+  Yields:
+    The old umask setting in case it's useful.  It will still be restored
+    automatically by this context manager.
+  """
+  try:
+    old = os.umask(mask)
+    yield old
+  finally:
+    os.umask(old)

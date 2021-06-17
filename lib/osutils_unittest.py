@@ -10,6 +10,7 @@ import glob
 import grp
 import os
 import pwd
+import re
 import stat
 import sys
 import unittest
@@ -1307,3 +1308,25 @@ class WhichTests(cros_test_lib.TempDirTestCase):
     self.assertEqual(None, osutils.Which('prog', root='/.........'))
     self.assertEqual(self.prog_path, osutils.Which('prog', path='/',
                                                    root=self.tempdir))
+
+
+class UmaskTests(cros_test_lib.TestCase):
+  """Test Umask."""
+
+  @staticmethod
+  def getUmask():
+    """Return the current umask setting."""
+    # Testing this is messy because there is no syscall to look this up without
+    # side-effects.  os.umask sets & queries at once.
+    m = re.search(r'^Umask:\s+([0-7]+)', osutils.ReadFile('/proc/self/status'),
+                  flags=re.M)
+    assert m is not None
+    return int(m.group(1), 8)
+
+  def testBasic(self):
+    """Verify umask is saved & restored."""
+    os.umask(0o222)
+    with osutils.UmaskContext(0o123) as old:
+      assert self.getUmask() == 0o123
+    assert self.getUmask() == old
+    assert old == 0o222

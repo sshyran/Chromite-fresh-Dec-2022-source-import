@@ -272,12 +272,8 @@ class FileLock(_Lock):
     # There exist race conditions where the lock may be created by
     # root, thus denying subsequent accesses from others. To prevent
     # this, we create the lock with mode 0o666.
-    try:
-      value = os.umask(000)
-      fd = os.open(self.path, os.W_OK|os.O_CREAT|cloexec, 0o666)
-    finally:
-      os.umask(value)
-    return fd
+    with osutils.UmaskContext(000):
+      return os.open(self.path, os.W_OK|os.O_CREAT|cloexec, 0o666)
 
 
 class ProcessLock(_Lock):
