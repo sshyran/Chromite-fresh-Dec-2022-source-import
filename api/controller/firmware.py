@@ -67,7 +67,7 @@ def _BuildAllTotFirmwareResponse(_input_proto, output_proto, _config):
   metric.target_name = 'foo'
   metric.platform_name = 'bar'
   fw_section = metric.fw_section.add()
-  fw_section.region = firmware_pb2.FwBuildMetric.FwSection.EC_RO
+  fw_section.region = 'EC_RO'
   fw_section.used = 100
   fw_section.total = 150
 
@@ -110,7 +110,7 @@ def _BuildAllFirmwareResponse(_input_proto, output_proto, _config):
   metric.target_name = 'foo'
   metric.platform_name = 'bar'
   fw_section = metric.fw_section.add()
-  fw_section.region = firmware_pb2.FwBuildMetric.FwSection.EC_RO
+  fw_section.region = 'EC_RO'
   fw_section.used = 100
   fw_section.total = 150
 

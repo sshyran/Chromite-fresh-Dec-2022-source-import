@@ -11,6 +11,7 @@ from chromite.third_party.google.protobuf import json_format
 from chromite.api import api_config
 from chromite.api.controller import firmware
 from chromite.api.gen.chromite.api import firmware_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -29,7 +30,7 @@ class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,
 
   def _GetInput(self,
                 chroot_path=None,
-                fw_location=firmware_pb2.PLATFORM_EC,
+                fw_location=common_pb2.PLATFORM_EC,
                 code_coverage=False):
     """Helper for creating input message."""
     proto = firmware_pb2.BuildAllFirmwareRequest(
@@ -76,7 +77,6 @@ class BuildAllFirmwareTestCase(cros_test_lib.MockTempDirTestCase,
     self.assertEqual(response.metrics.value[0].target_name, 'foo')
     self.assertEqual(response.metrics.value[0].platform_name, 'bar')
     self.assertEqual(len(response.metrics.value[0].fw_section), 1)
-    self.assertEqual(response.metrics.value[0].fw_section[0].region,
-                     firmware_pb2.FwBuildMetric.FwSection.EC_RO)
+    self.assertEqual(response.metrics.value[0].fw_section[0].region, 'EC_RO')
     self.assertEqual(response.metrics.value[0].fw_section[0].used, 100)
     self.assertEqual(response.metrics.value[0].fw_section[0].total, 150)
