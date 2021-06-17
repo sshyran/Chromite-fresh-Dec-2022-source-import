@@ -10,6 +10,7 @@ from unittest import mock
 
 import pytest  # pylint: disable=import-error
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -18,7 +19,6 @@ from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import test_stages
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
 from chromite.lib import osutils
@@ -91,8 +91,10 @@ class HWTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   def setUp(self):
     self.run_suite_mock = self.PatchObject(commands, 'RunHWTestSuite')
-    self.warning_mock = self.PatchObject(logging, 'PrintBuildbotStepWarnings')
-    self.failure_mock = self.PatchObject(logging, 'PrintBuildbotStepFailure')
+    self.warning_mock = self.PatchObject(cbuildbot_alerts,
+                                         'PrintBuildbotStepWarnings')
+    self.failure_mock = self.PatchObject(cbuildbot_alerts,
+                                         'PrintBuildbotStepFailure')
 
     self.suite_config = None
     self.suite = None

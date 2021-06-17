@@ -5,15 +5,16 @@
 """Module containing the various stages that a builder runs."""
 
 import json
+import logging
 import os
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
-from chromite.lib import failures_lib
-from chromite.lib import config_lib
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -248,7 +249,7 @@ class SigningStage(generic_stages.BoardSpecificBuilderStage):
     except timeout_util.TimeoutError:
       msg = 'Image signing timed out.'
       logging.error(msg)
-      logging.PrintBuildbotStepText(msg)
+      cbuildbot_alerts.PrintBuildbotStepText(msg)
       raise SignerResultsTimeout(msg)
 
     # Log all signer results, then handle any signing failures.
@@ -256,7 +257,7 @@ class SigningStage(generic_stages.BoardSpecificBuilderStage):
     for url_results in self.signing_results.values():
       for url, signer_result in url_results.items():
         result_description = os.path.basename(url)
-        logging.PrintBuildbotStepText(result_description)
+        cbuildbot_alerts.PrintBuildbotStepText(result_description)
         logging.info('Received results for: %s', result_description)
         logging.info(pformat.json(signer_result))
 

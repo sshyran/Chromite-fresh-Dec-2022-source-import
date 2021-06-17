@@ -5,9 +5,11 @@
 """Module containing the test stages."""
 
 import collections
+import logging
 import os
 
 from chromite.cbuildbot import afdo
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
@@ -15,7 +17,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import image_test_lib
@@ -167,7 +168,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
     # Wait for UploadHWTestArtifacts to generate and upload the artifacts.
     if not self.GetParallel(
         'test_artifacts_uploaded', pretty_name='payloads and test artifacts'):
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('missing test artifacts')
       logging.warning(
           'Cannot run %s because UploadTestArtifacts failed. '

@@ -5,20 +5,22 @@
 """Module containing the config stages."""
 
 import errno
+import logging
 import os
 import re
 import textwrap
 import traceback
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
+
 
 GS_GE_TEMPLATE_BUCKET = 'gs://chromeos-build-release-console/'
 GS_GE_TEMPLATE_TOT = GS_GE_TEMPLATE_BUCKET + 'build_config.ToT.json'
@@ -466,7 +468,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
                             + osutils.ReadFile(generated_source_file))
 
     if concatenated_content == osutils.ReadFile(target_file):
-      logging.PrintBuildbotStepText(
+      cbuildbot_alerts.PrintBuildbotStepText(
           'luci-scheduler.cfg current: No Update.')
       return
 
@@ -492,7 +494,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
         self.project_dir, ['config', 'push.default', 'tracking'],
         print_cmd=True)
     git.PushBranch('main', self.project_dir, dryrun=self._run.options.debug)
-    logging.PrintBuildbotStepText('luci-scheduler.cfg: Updated.')
+    cbuildbot_alerts.PrintBuildbotStepText('luci-scheduler.cfg: Updated.')
 
   def PerformStage(self):
     """Perform the DeployLuciSchedulerStage."""

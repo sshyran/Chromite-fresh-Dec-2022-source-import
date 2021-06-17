@@ -10,6 +10,7 @@ import datetime
 import difflib
 import functools
 import itertools
+import logging
 import os
 from pathlib import Path
 import signal
@@ -20,7 +21,6 @@ from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import signals as cros_signals

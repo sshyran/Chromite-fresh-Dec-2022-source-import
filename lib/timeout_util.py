@@ -7,11 +7,12 @@
 import contextlib
 import datetime
 import functools
+import logging
 import signal
 import threading
 import time
 
-from chromite.lib import cros_logging as logging
+from chromite.cbuildbot import cbuildbot_alerts
 
 
 class TimeoutError(Exception):  # pylint: disable=redefined-builtin
@@ -145,7 +146,7 @@ def FatalTimeout(max_run_time, display_message=None):
                      max_run_time)
     if display_message:
       error_message += ' Timeout reason: %s' % display_message
-    logging.PrintBuildbotStepFailure()
+    cbuildbot_alerts.PrintBuildbotStepFailure()
     logging.error(error_message)
     raise SystemExit(error_message)
 

@@ -8,29 +8,30 @@ Used by Chromium OS buildbot configuration for all Chromium OS builds including
 full and pre-flight-queue builds.
 """
 
-import distutils.version # pylint: disable=import-error,no-name-in-module
+import distutils.version  # pylint: disable=import-error,no-name-in-module
 import glob
 import json
+import logging
 import optparse  # pylint: disable=deprecated-module
 import os
 import pickle
 import sys
 
 from chromite.cbuildbot import builders
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import repository
 from chromite.cbuildbot import topology
 from chromite.cbuildbot.stages import completion_stages
 from chromite.cbuildbot.stages import test_stages
 from chromite.lib import builder_status_lib
-from chromite.lib import cidb
 from chromite.lib import cgroups
+from chromite.lib import cidb
 from chromite.lib import cleanup
 from chromite.lib import commandline
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import gob_util
@@ -858,7 +859,7 @@ def main(argv):
   cros_build_lib.AssertOutsideChroot()
 
   if options.enable_buildbot_tags:
-    logging.EnableBuildbotMarkers()
+    cbuildbot_alerts.EnableBuildbotMarkers()
 
   if (options.buildbot and
       not options.debug and

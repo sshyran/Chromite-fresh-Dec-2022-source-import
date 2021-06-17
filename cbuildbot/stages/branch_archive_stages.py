@@ -10,16 +10,17 @@ related to how build artifacts are generated and published.
 
 import datetime
 import json
+import logging
 import os
 import shutil
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import workspace_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import pformat
@@ -218,7 +219,7 @@ class FirmwareArchiveStage(WorkspaceArchiveBase):
                                     public=False, directory=True)
 
     label = '%s firmware [%s]' % (self._current_board, self.dummy_version)
-    logging.PrintBuildbotLink(label, dummy_http_url)
+    cbuildbot_alerts.PrintBuildbotLink(label, dummy_http_url)
 
     # Upload all artifacts.
     self.CreateFirmwareArchive()
@@ -293,7 +294,7 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
                                     public=False, directory=True)
 
     label = '%s factory [%s]' % (self._current_board, self.dummy_version)
-    logging.PrintBuildbotLink(label, dummy_http_url)
+    cbuildbot_alerts.PrintBuildbotLink(label, dummy_http_url)
 
     # factory_image.zip
     self.CreateFactoryZip()

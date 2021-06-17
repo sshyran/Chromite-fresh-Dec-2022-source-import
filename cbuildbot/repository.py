@@ -5,6 +5,7 @@
 """Repository module to handle different types of repositories."""
 
 import glob
+import logging
 import multiprocessing
 import os
 import re
@@ -12,9 +13,9 @@ import shutil
 import time
 import urllib.parse
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import locking
 from chromite.lib import metrics
@@ -286,7 +287,7 @@ class RepoRepository(object):
             git.GarbageCollection(repo_git_store, prune_all=prune_all)
         except cros_build_lib.RunCommandError as e:
           result = e.result
-          logging.PrintBuildbotStepWarnings()
+          cbuildbot_alerts.PrintBuildbotStepWarnings()
           logging.warning('\n%s', result.error)
 
           # If there's no repository corruption, just delete the index.

@@ -12,6 +12,7 @@ for those executables involved).
 import http.client
 import itertools
 import json
+import logging
 import os
 import socket
 import sys
@@ -20,17 +21,18 @@ import textwrap
 import time
 import urllib.parse
 
+from chromite.third_party import requests
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cache
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats
 from chromite.scripts import cros_generate_breakpad_symbols
-from chromite.third_party import requests
 
 
 # Needs to be after chromite imports.
@@ -273,7 +275,7 @@ def AdjustSymbolFileSize(symbol, tempdir, file_limit):
   # Hopefully the crash server will let it through.  But it probably won't.
   # Not sure what the best answer is in this case.
   if file_size >= CRASH_SERVER_FILE_LIMIT:
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
     logging.warning('upload file %s is awfully large, risking rejection by '
                     'the symbol server (%s > %s)', symbol.display_path,
                     file_size, CRASH_SERVER_FILE_LIMIT)
@@ -499,12 +501,12 @@ def ReportResults(symbols, failed_list):
                result_counts)
 
   if result_counts[SymbolFile.ERROR]:
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
     logging.warning('%d non-recoverable upload errors',
                     result_counts[SymbolFile.ERROR])
 
   if result_counts[SymbolFile.INITIAL]:
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
     logging.warning('%d upload(s) were skipped because of excessive errors',
                     result_counts[SymbolFile.INITIAL])
 

@@ -4,8 +4,9 @@
 
 """Module containing the completion stages."""
 
-from __future__ import division
+import logging
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages
@@ -15,7 +16,6 @@ from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import portage_util
 
@@ -216,7 +216,7 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
                        itself and stopped waiting completion of its slaves.
     """
     if failing or inflight or no_stat:
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
 
     if failing:
       logging.warning('\n'.join([
@@ -314,9 +314,9 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       url: URL (string) to link to the text, default to None.
     """
     if url is not None:
-      logging.PrintBuildbotLink(text, url)
+      cbuildbot_alerts.PrintBuildbotLink(text, url)
     else:
-      logging.PrintBuildbotStepText(text)
+      cbuildbot_alerts.PrintBuildbotStepText(text)
 
   def _AnnotateNoStatBuilders(self, no_stat):
     """Annotate the build statuses fetched from the Buildbucket.
@@ -355,16 +355,16 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
           dashboard_url = '{}{}'.format(constants.CHROMEOS_MILO_HOST,
                                         build.id)
           if dashboard_url:
-            logging.PrintBuildbotLink(text, dashboard_url)
+            cbuildbot_alerts.PrintBuildbotLink(text, dashboard_url)
           else:
-            logging.PrintBuildbotStepText(text)
+            cbuildbot_alerts.PrintBuildbotStepText(text)
         except buildbucket_v2.BuildbucketResponseException as e:
           logging.error('Cannot get status for %s: %s', config_name, e)
-          logging.PrintBuildbotStepText(
+          cbuildbot_alerts.PrintBuildbotStepText(
               'No status found for build %s buildbucket_id %s' %
               (config_name, buildbucket_id))
       else:
-        logging.PrintBuildbotStepText(
+        cbuildbot_alerts.PrintBuildbotStepText(
             "%s wasn't scheduled by master." % config_name)
 
   def _AnnotateFailingBuilders(self, failing, inflight, no_stat, statuses,
@@ -404,8 +404,9 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
 
       self._AnnotateNoStatBuilders(no_stat)
     else:
-      logging.PrintBuildbotStepText('The master destructed itself and stopped '
-                                    'waiting for the following slaves:')
+      cbuildbot_alerts.PrintBuildbotStepText(
+          'The master destructed itself and stopped waiting for the '
+          'following slaves:')
       for build in inflight:
         self._PrintBuildMessage('%s: still running' % build,
                                 statuses[build].dashboard_url)

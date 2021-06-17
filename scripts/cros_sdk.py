@@ -13,6 +13,7 @@ If given args those are passed to the chroot environment, and executed.
 
 import argparse
 import glob
+import logging
 import os
 from pathlib import Path
 import pwd
@@ -23,10 +24,10 @@ import subprocess
 import sys
 import urllib.parse
 
-from chromite.lib import constants
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import locking
 from chromite.lib import namespaces
@@ -1109,7 +1110,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
   else:
     sdk_version = options.sdk_version
   if options.buildbot_log_version:
-    logging.PrintBuildbotStepText(sdk_version)
+    cbuildbot_alerts.PrintBuildbotStepText(sdk_version)
 
   # Based on selections, determine the tarball to fetch.
   if options.download:

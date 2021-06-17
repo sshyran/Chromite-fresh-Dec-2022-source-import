@@ -4,21 +4,22 @@
 
 """Module containing the AFDO stages."""
 
+import logging
 import multiprocessing
 import os
 import time
 
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.cbuildbot import afdo
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
-from chromite.lib import constants
+from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import alerts
-from chromite.lib import cros_logging as logging
+from chromite.lib import constants
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import path_util
 from chromite.lib import portage_util
-from chromite.cbuildbot.stages import generic_stages
 
 
 class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
@@ -112,7 +113,7 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
                                    'AFDO profile.')
     # Will let system-exiting exceptions through.
     except Exception:
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('AFDO profile generation failed with exception ',
                       exc_info=True)
 

@@ -17,20 +17,20 @@ emerge-x86-generic =chrome-base/chromeos-chrome-8.0.552.0_alpha_r1
 import base64
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import filecmp
+import logging
 import os
 import re
 import urllib.parse
 
-from chromite.lib import constants
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.scripts import cros_mark_as_stable
-
 
 # Helper regex's for finding ebuilds.
 _CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'
@@ -396,7 +396,7 @@ def MarkChromeEBuildAsStable(stable_candidate, unstable_ebuild, chrome_pn,
     return None
 
   if stable_candidate and chrome_rev in _REV_TYPES_FOR_LINKS:
-    logging.PrintBuildbotLink('Chromium revisions',
+    cbuildbot_alerts.PrintBuildbotLink('Chromium revisions',
                               GetChromeRevisionListLink(stable_candidate,
                                                         new_ebuild, chrome_rev))
 

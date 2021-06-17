@@ -8,6 +8,7 @@ import os
 import re
 from unittest import mock
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages_unittest
@@ -15,7 +16,6 @@ from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import cgroups
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging
 from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
 from chromite.lib import gs
@@ -287,7 +287,7 @@ class MoblabVMTestStageTestCase(
     mock_gs_context = mock.create_autospec(gs.GSContext)
     self.PatchObject(
         gs, 'GSContext', autospec=True, return_value=mock_gs_context)
-    mock_buildbot_link = self.PatchObject(cros_logging, 'PrintBuildbotLink')
+    mock_buildbot_link = self.PatchObject(cbuildbot_alerts, 'PrintBuildbotLink')
     mock_generate_payloads = self.PatchObject(commands, 'GeneratePayloads')
     mock_qp_payloads = self.PatchObject(commands,
                                         'GenerateQuickProvisionPayloads')

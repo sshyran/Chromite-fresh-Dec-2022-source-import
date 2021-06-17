@@ -24,6 +24,7 @@ import tempfile
 import time
 from typing import List, Optional, TextIO, Union
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
 from chromite.lib import cros_collections
 from chromite.lib import cros_logging as logging
@@ -1277,7 +1278,7 @@ def CreateTarball(
     time.sleep(timeout * (try_count + 1))
     logging.warning('CreateTarball: tar: source modification time changed '
                     '(see crbug.com/547055), retrying')
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
 
 
 def ExtractTarball(tarball_path: Union[Path, str],

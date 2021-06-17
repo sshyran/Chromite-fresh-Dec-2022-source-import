@@ -10,6 +10,7 @@ import datetime
 import fnmatch
 import glob
 import json
+import logging
 import multiprocessing
 import os
 import re
@@ -21,17 +22,15 @@ import tempfile
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.chromite.api import android_pb2
-
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
-
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cipd
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gob_util
 from chromite.lib import gs
@@ -47,7 +46,6 @@ from chromite.lib import sysroot_lib
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
 from chromite.lib.paygen import filelib
-
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
 
@@ -1292,7 +1290,7 @@ def RunSkylabHWTestSuite(
     task_url = report['task_url']
 
     logging.info('Launched suite task %s', task_url)
-    logging.PrintBuildbotLink('Suite task: %s' % suite, task_url)
+    cbuildbot_alerts.PrintBuildbotLink('Suite task: %s' % suite, task_url)
     if not wait_for_results:
       return HWTestSuiteResult(None, None)
 
@@ -1405,7 +1403,7 @@ def RunSkylabHWTestPlan(test_plan=None,
       task_url = report.get('task_url')
 
       logging.info('Launched test plan task %s', task_url)
-      logging.PrintBuildbotLink('Test plan task', task_url)
+      cbuildbot_alerts.PrintBuildbotLink('Test plan task', task_url)
 
     except ValueError:
       logging.warning('Unable to parse output:\n%s', result.output)
@@ -1870,7 +1868,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
         if not asan_log_signaled:
           asan_log_signaled = True
           logging.error('Asan crash occurred. See asan_logs in Artifacts.')
-          logging.PrintBuildbotStepFailure()
+          cbuildbot_alerts.PrintBuildbotStepFailure()
 
       # Append the processed file to archive.
       filename = ArchiveFile(processed_file_path, archive_dir)
@@ -2715,7 +2713,7 @@ def PushImages(board,
         dry_run=dryrun,
         buildroot=buildroot)
   except pushimage.PushError as e:
-    logging.PrintBuildbotStepFailure()
+    cbuildbot_alerts.PrintBuildbotStepFailure()
     return e.args[1]
 
 
@@ -3212,7 +3210,7 @@ def BuildStrippedPackagesTarball(buildroot, board, package_globs, archive_dir):
                              'Failed to find stripped files at %s.' %
                              (cpv.cpf, os.path.join(stripped_pkg_dir, cpv.cpf)))
       if len(files) > 1:
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         logging.warning('Expected one stripped package for %s, found %d',
                         cpv.cpf, len(files))
 

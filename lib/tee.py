@@ -6,17 +6,16 @@
 
 import errno
 import fcntl
-import os
 import multiprocessing
+import os
 import select
 import signal
 import sys
 import traceback
 import warnings
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
-
 
 warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 
@@ -159,7 +158,7 @@ class _TeeProcess(multiprocessing.Process):
       failed = False
     except Exception as e:
       tb = traceback.format_exc()
-      logging.PrintBuildbotStepFailure(self._error_handle)
+      cbuildbot_alerts.PrintBuildbotStepFailure(self._error_handle)
       self._error_handle.write(
           'Unhandled exception occured in tee:\n%s\n' % (tb,))
       # Try to signal the parent telling them of our

@@ -20,12 +20,13 @@ emerge-eve =chromeos-base/android-container-pi-6417892-r1
 import filecmp
 import glob
 import json
+import logging
 import os
 
-from chromite.lib import constants
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
@@ -102,10 +103,10 @@ def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
     ab_link = ('https://android-build.googleplex.com'
                '/builds/%s/branches/%s/cls?end=%s'
                % (new_android, build_branch, old_android))
-    logging.PrintBuildbotLink('Android changelog', ab_link)
+    cbuildbot_alerts.PrintBuildbotLink('Android changelog', ab_link)
 
-  logging.PrintBuildbotStepText(msg)
-  logging.PrintKitchenSetBuildProperty('android_uprev', json.dumps({
+  cbuildbot_alerts.PrintBuildbotStepText(msg)
+  cbuildbot_alerts.PrintKitchenSetBuildProperty('android_uprev', json.dumps({
       'branch': build_branch,
       'new': new_ebuild.version,
       'old': stable_candidate.version,
@@ -274,7 +275,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
   if IsTheNewEBuildRedundant(new_ebuild, stable_candidate):
     msg = 'Previous ebuild with same version found and ebuild is redundant.'
     logging.info(msg)
-    logging.PrintBuildbotStepText('%s %s not revved'
+    cbuildbot_alerts.PrintBuildbotStepText('%s %s not revved'
                                   % (stable_candidate.pkgname,
                                      stable_candidate.version))
     osutils.SafeUnlink(new_ebuild_path)
@@ -358,7 +359,7 @@ def GetParser():
 
 
 def main(argv):
-  logging.EnableBuildbotMarkers()
+  cbuildbot_alerts.EnableBuildbotMarkers()
   parser = GetParser()
   options = parser.parse_args(argv)
   options.Freeze()

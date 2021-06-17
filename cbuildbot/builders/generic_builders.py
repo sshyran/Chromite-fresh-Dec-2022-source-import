@@ -4,25 +4,26 @@
 
 """Module containing the generic builders."""
 
+import logging
 import multiprocessing
 import os
 import sys
 import tempfile
 import traceback
 
-from chromite.lib import constants
-from chromite.lib import failures_lib
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import manifest_version
-from chromite.lib import results_lib
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import report_stages
 from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import parallel
+from chromite.lib import results_lib
 from chromite.lib.buildstore import BuildStore
 
 
@@ -348,7 +349,7 @@ class Builder(object):
                                                           buildbucket_id)
         if exception_thrown and success:
           success = False
-          logging.PrintBuildbotStepWarnings()
+          cbuildbot_alerts.PrintBuildbotStepWarnings()
           print("""\
 Exception thrown, but all stages marked successful. This is an internal error,
 because the stage that threw the exception should be marked as failing.""")

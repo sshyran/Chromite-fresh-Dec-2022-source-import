@@ -18,13 +18,14 @@ If you want to actually upload things, see upload_symbols.py.
 
 import collections
 import ctypes
+import logging
 import multiprocessing
 import os
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import signals
@@ -97,7 +98,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
 
   def _CrashCheck(ret, msg):
     if ret < 0:
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('dump_syms crashed with %s; %s',
                       signals.StrSignal(-ret), msg)
 
@@ -129,7 +130,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
       if result.returncode:
         # A lot of files (like kernel files) contain no debug information,
         # do not consider such occurrences as errors.
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         _CrashCheck(result.returncode, 'giving up entirely')
         if b'file contains no debugging information' in result.stderr:
           logging.warning('no symbols found for %s', elf_file)

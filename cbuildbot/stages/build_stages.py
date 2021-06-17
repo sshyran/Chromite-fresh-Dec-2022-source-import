@@ -6,8 +6,13 @@
 
 import base64
 import glob
+import logging
 import os
 
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
@@ -18,7 +23,6 @@ from chromite.lib import buildbucket_v2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import failures_lib
 from chromite.lib import git
@@ -28,8 +32,6 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
 from chromite.service import image as image_service
-from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
 
 
 class CleanUpStage(generic_stages.BuilderStage):
@@ -458,8 +460,8 @@ class InitSDKStage(generic_stages.BuilderStage):
       # Make sure the chroot has a valid version before we update it.
       pre_ver = cros_sdk_lib.GetChrootVersion(chroot_path)
       if pre_ver is None:
-        logging.PrintBuildbotStepText('Replacing broken chroot')
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepText('Replacing broken chroot')
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         replace = True
 
     if not chroot_exists or replace:
@@ -476,9 +478,9 @@ class InitSDKStage(generic_stages.BuilderStage):
 
     post_ver = cros_sdk_lib.GetChrootVersion(chroot_path)
     if pre_ver is not None and pre_ver != post_ver:
-      logging.PrintBuildbotStepText('%s->%s' % (pre_ver, post_ver))
+      cbuildbot_alerts.PrintBuildbotStepText('%s->%s' % (pre_ver, post_ver))
     else:
-      logging.PrintBuildbotStepText(post_ver)
+      cbuildbot_alerts.PrintBuildbotStepText(post_ver)
 
 
 class UpdateSDKStage(generic_stages.BuilderStage):
@@ -700,7 +702,7 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
         self._run.config.build_type == constants.TOOLCHAIN_TYPE)
 
     # Set property to specify bisection builder job to run for Findit.
-    logging.PrintKitchenSetBuildProperty(
+    cbuildbot_alerts.PrintKitchenSetBuildProperty(
         'BISECT_BUILDER', self._current_board + '-postsubmit-tryjob')
     try:
       commands.Build(
@@ -728,7 +730,8 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
           os.path.basename(failures_filename),
           text_to_display='BuildCompileFailureOutput')
       gs_url = os.path.join(self.upload_url, 'BuildCompileFailureOutput.json')
-      logging.PrintKitchenSetBuildProperty('BuildCompileFailureOutput', gs_url)
+      cbuildbot_alerts.PrintKitchenSetBuildProperty('BuildCompileFailureOutput',
+                                                    gs_url)
       raise
 
     if self._update_metadata:

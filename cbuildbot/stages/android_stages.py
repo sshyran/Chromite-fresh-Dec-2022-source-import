@@ -4,14 +4,15 @@
 
 """Module containing the Android stages."""
 
+import logging
 import os
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
@@ -75,7 +76,7 @@ class UprevAndroidStage(generic_stages.BuilderStage,
       # slave to test the newer version anyway).
       android_atom_to_build = e.new_android_atom
       results_lib.Results.Record(self.name, e)
-      logging.PrintBuildbotStepFailure()
+      cbuildbot_alerts.PrintBuildbotStepFailure()
       logging.error('Android is pinned. Unpinning Android and continuing '
                     'build for Android atom %s. This stage will be marked '
                     'as failed to prevent an uprev.',
@@ -208,9 +209,9 @@ class AndroidMetadataStage(generic_stages.BuilderStage,
     self.UploadMetadata(filename=constants.PARTIAL_METADATA_JSON)
 
     # Leave build info in buildbot steps page for convenience.
-    logging.PrintBuildbotStepText('tag %s' % debug_version)
-    logging.PrintBuildbotStepText('branch %s' % debug_branch)
-    logging.PrintBuildbotStepText('target %s' % debug_target)
+    cbuildbot_alerts.PrintBuildbotStepText('tag %s' % debug_version)
+    cbuildbot_alerts.PrintBuildbotStepText('branch %s' % debug_branch)
+    cbuildbot_alerts.PrintBuildbotStepText('target %s' % debug_target)
 
 
 class DownloadAndroidDebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,

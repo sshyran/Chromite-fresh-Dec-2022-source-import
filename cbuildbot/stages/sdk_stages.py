@@ -6,19 +6,21 @@
 
 import glob
 import json
+import logging
 import os
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import perf_uploader
 from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.scripts import upload_prebuilts
+
 
 # Version of the Manifest file being generated for SDK artifacts. Should be
 # incremented for major format changes.
@@ -340,7 +342,7 @@ class SDKTestStage(generic_stages.BuilderStage):
 
     # Build all the boards with the new sdk.
     for board in self._boards:
-      logging.PrintBuildbotStepText(board)
+      cbuildbot_alerts.PrintBuildbotStepText(board)
       commands.SetupBoard(
           self._build_root,
           board,
@@ -368,7 +370,7 @@ class SDKUprevStage(generic_stages.BuilderStage):
     self._version = version
 
   def PerformStage(self):
-    logging.PrintBuildbotStepText(self._version)
+    cbuildbot_alerts.PrintBuildbotStepText(self._version)
 
     if self._run.config.prebuilts == constants.PUBLIC:
       binhost_conf_dir = constants.PUBLIC_BINHOST_CONF_DIR

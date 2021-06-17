@@ -9,6 +9,7 @@ import collections
 import datetime
 import glob
 import json
+import logging
 import os
 import re
 import shutil
@@ -17,7 +18,6 @@ from chromite.cbuildbot import afdo
 from chromite.lib import alerts
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import gs
@@ -27,6 +27,7 @@ from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
+
 
 class PrepareForBuildReturn(object):
   """Return values for PrepareForBuild call."""

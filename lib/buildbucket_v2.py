@@ -12,19 +12,20 @@ client out of lib/luci/prpc and third_party/infra_libs/buildbucket.
 import ast
 import collections
 import http.client
+import logging
 import socket
 from ssl import SSLError
 
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    builder_pb2, builds_service_pb2, builds_service_prpc_pb2, common_pb2)
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.lib.luci import utils
 from chromite.lib.luci.prpc.client import Client
 from chromite.lib.luci.prpc.client import ProtocolError
-from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import (builder_pb2, builds_service_pb2, builds_service_prpc_pb2,
-                                                               common_pb2)
-
 
 BBV2_URL_ENDPOINT_PROD = (
     'cr-buildbucket.appspot.com'
@@ -219,9 +220,9 @@ def UpdateSelfBuildPropertiesNonBlocking(key, value):
     value: value of the property.
   """
   if key == 'email_notify':
-    logging.PrintKitchenSetEmailNotifyProperty(key, value)
+    cbuildbot_alerts.PrintKitchenSetEmailNotifyProperty(key, value)
   else:
-    logging.PrintKitchenSetBuildProperty(key, value)
+    cbuildbot_alerts.PrintKitchenSetBuildProperty(key, value)
 
 
 def UpdateSelfCommonBuildProperties(critical=None,

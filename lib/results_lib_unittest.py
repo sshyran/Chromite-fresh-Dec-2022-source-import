@@ -10,6 +10,7 @@ import signal
 import time
 from unittest import mock
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import generic_stages
@@ -17,7 +18,6 @@ from chromite.lib import cidb
 from chromite.lib import config_lib_unittest
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
 from chromite.lib import fake_cidb
@@ -131,7 +131,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     self.build_root = '/fake_root'
     # This test compares log output from the stages, so turn on buildbot
     # logging.
-    logging.EnableBuildbotMarkers()
+    cbuildbot_alerts.EnableBuildbotMarkers()
 
     self.db = fake_cidb.FakeCIDBConnection()
     cidb.CIDBConnectionFactory.SetupMockCidb(self.db)

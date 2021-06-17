@@ -10,13 +10,13 @@ import tempfile
 from unittest import mock
 from xml.dom import minidom
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import lkgm_manager
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import repository
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
@@ -231,7 +231,7 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
 
   def _MockParseGitLog(self, fake_git_log, project):
     exists_mock = self.PatchObject(os.path, 'exists', return_value=True)
-    link_mock = self.PatchObject(logging, 'PrintBuildbotLink')
+    link_mock = self.PatchObject(cbuildbot_alerts, 'PrintBuildbotLink')
     fake_project_handler = mock.Mock(spec=git.Manifest)
     fake_project_handler.checkouts_by_path = {project['path']: project}
     self.PatchObject(git, 'Manifest', return_value=fake_project_handler)
