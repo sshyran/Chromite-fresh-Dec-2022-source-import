@@ -15,10 +15,13 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
+from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import constants
 from chromite.lib import image_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import sysroot_lib
 from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
@@ -82,6 +85,56 @@ def _add_image_to_proto(output_proto, path, image_type, board):
   new_image.path = path
   new_image.type = image_type
   new_image.build_target.name = board
+
+
+def ExampleGetResponse():
+  """Give an example response to assemble upstream in caller artifacts."""
+  uabs = common_pb2.UploadedArtifactsByService
+  cabs = common_pb2.ArtifactsByService
+  return uabs.Sysroot(artifacts=[
+      uabs.Image.ArtifactPaths(
+          artifact_type=cabs.Image.ArtifactType.DLC_IMAGE,
+          paths=[
+              common_pb2.Path(
+                  path='/tmp/dlc/dlc.img', location=common_pb2.Path.OUTSIDE)
+          ])
+  ])
+
+
+def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
+        chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+        _build_target: build_target_lib.BuildTarget, output_dir) -> list:
+  """Builds and copies images to specified output_dir.
+
+  Copies (after optionally bundling) all required images into the output_dir,
+  returning a mapping of image type to a list of (output_dir) paths to
+  the desired files. Note that currently it is only processing one image (DLC),
+  but the future direction is to process all required images. Required images
+  are located within output_artifact.artifact_type.
+
+  Args:
+    in_proto: Proto request defining reqs.
+    chroot: The chroot proto used for these artifacts.
+    sysroot_class: The sysroot proto used for these artifacts.
+    build_target: The build target used for these artifacts.
+    output_dir: The path to write artifacts to.
+
+  Returns:
+    A list of dictionary mappings of ArtifactType to list of paths.
+  """
+  generated = []
+  base_path = chroot.full_path(sysroot_class.path)
+
+  for output_artifact in in_proto.output_artifacts:
+    if in_proto.ArtifactType.DLC_IMAGE in output_artifact.artifact_types:
+      # Handling DLC copying.
+      result_paths = image.copy_dlc_image(base_path, output_dir)
+      if result_paths:
+        generated.append({
+            'paths': result_paths,
+            'type': in_proto.ArtifactType.DLC_IMAGE,
+        })
+  return generated
 
 
 def _CreateResponse(_input_proto, output_proto, _config):

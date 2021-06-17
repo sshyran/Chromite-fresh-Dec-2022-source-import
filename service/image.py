@@ -8,7 +8,6 @@ import os
 import shutil
 from typing import List
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
@@ -273,7 +272,7 @@ def _get_dlc_images_path(base_path: str) -> str:
   return os.path.join(base_path, 'build', 'rootfs', 'dlc')
 
 
-def _copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
+def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
   """Copies DLC image folder from base_path to output_dir.
 
   Args:
@@ -290,40 +289,6 @@ def _copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
   dlc_dest_path = os.path.join(output_dir, 'dlc')
   shutil.copytree(dlc_source_path, dlc_dest_path)
   return [dlc_dest_path]
-
-
-def Get(image_proto: common_pb2.ArtifactsByService.Image,
-        base_path: str,
-        output_dir: str) -> list:
-  """Builds and copies images to specified output_dir.
-
-  Copies (after optionally bundling) all required images into the output_dir,
-  returning a mapping of image type to a list of (output_dir) paths to
-  the desired files. Note that currently it is only processing one image (DLC),
-  but the future direction is to process all required images. Required images
-  are located within output_artifact.artifact_type.
-
-  Args:
-    image_proto: Proto request defining reqs.
-    base_path: Base path wherein images are expected to be.
-    output_dir: Folder destination for images.
-
-  Returns:
-    A list of dictionary mapping of ArtifactType to list of paths.
-  """
-  generated = []
-
-  for output_artifact in image_proto.output_artifacts:
-    if image_proto.ArtifactType.DLC_IMAGE in  output_artifact.artifact_types:
-      # Handling DLC copying.
-      result_path = _copy_dlc_image(base_path, output_dir)
-      if result_path:
-        generated.append({
-            'paths': result_path,
-            'type': image_proto.ArtifactType.DLC_IMAGE,
-        })
-
-  return generated
 
 
 def Test(board, result_directory, image_dir=None):

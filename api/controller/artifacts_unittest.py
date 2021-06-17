@@ -12,7 +12,6 @@ from chromite.api.controller import artifacts
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.cbuildbot import commands
-from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -1127,73 +1126,3 @@ class BundleGceTarballTest(BundleTestCase):
     with self.assertRaises(cros_build_lib.DieSystemExit):
       artifacts.BundleGceTarball(self.target_request, self.response,
                                  self.api_config)
-
-
-class BundleDebugSymbolsTest(BundleTestCase):
-  """Unittests for BundleDebugSymbols."""
-
-  def setUp(self):
-    # Create a chroot_path that also includes a chroot tmp dir.
-    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
-    osutils.SafeMakedirs(self.chroot_path)
-    osutils.SafeMakedirs(os.path.join(self.chroot_path, 'tmp'))
-    # Create output dir.
-    output_dir = os.path.join(self.tempdir, 'output_dir')
-    osutils.SafeMakedirs(output_dir)
-    # Build target request.
-    self.target_request = self.BuildTargetRequest(
-        build_target='target',
-        output_dir=self.output_dir,
-        chroot=self.chroot_path)
-
-  def testValidateOnly(self):
-    """Check that a validate only call does not execute any logic."""
-    patch = self.PatchObject(artifacts_svc, 'GenerateBreakpadSymbols')
-    artifacts.BundleDebugSymbols(self.target_request, self.response,
-                                 self.validate_only_config)
-    patch.assert_not_called()
-
-  def testMockCall(self):
-    """Test that a mock call does not execute logic, returns mocked value."""
-    patch = self.PatchObject(artifacts_svc, 'GenerateBreakpadSymbols')
-    artifacts.BundleDebugSymbols(self.target_request, self.response,
-                                 self.mock_call_config)
-    patch.assert_not_called()
-    self.assertEqual(len(self.response.artifacts), 1)
-    self.assertEqual(self.response.artifacts[0].path,
-                     os.path.join(self.output_dir,
-                                  constants.DEBUG_SYMBOLS_TAR))
-
-  def testBundleDebugSymbols(self):
-    """BundleDebugSymbols calls cbuildbot/commands with correct args."""
-    # Patch service layer functions.
-    generate_breakpad_symbols_patch = self.PatchObject(
-        artifacts_svc, 'GenerateBreakpadSymbols',
-        return_value=cros_build_lib.CommandResult(returncode=0, output=''))
-    gather_symbol_files_patch = self.PatchObject(
-        artifacts_svc, 'GatherSymbolFiles',
-        return_value=[artifacts_svc.SymbolFileTuple(
-            source_file_name='path/to/source/file1.sym',
-            relative_path='file1.sym')])
-
-    artifacts.BundleDebugSymbols(self.target_request, self.response,
-                                 self.api_config)
-    # Verify mock objects were called.
-    build_target = build_target_lib.BuildTarget('target')
-    generate_breakpad_symbols_patch.assert_called_with(
-        mock.ANY, build_target, debug=True)
-    gather_symbol_files_patch.assert_called()
-
-    # Verify response proto contents and output directory contents.
-    self.assertEqual(
-        [artifact.path for artifact in self.response.artifacts],
-        [os.path.join(self.output_dir, constants.DEBUG_SYMBOLS_TAR)])
-    files = os.listdir(self.output_dir)
-    self.assertEqual(files, [constants.DEBUG_SYMBOLS_TAR])
-
-  def testBundleGceTarballNoImageDir(self):
-    """BundleDebugSymbols dies when image dir does not exist."""
-    self.PatchObject(os.path, 'exists', return_value=False)
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleDebugSymbols(self.target_request, self.response,
-                                   self.api_config)

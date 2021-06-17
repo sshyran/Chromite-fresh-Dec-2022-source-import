@@ -5,11 +5,14 @@
 """Implements ArtifactService."""
 
 import os
+from typing import Any, NamedTuple
 
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.controller import image as image_controller
+from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -19,17 +22,26 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import sysroot_lib
 from chromite.service import artifacts
-from chromite.service import image as image_service
 
 
-def _GetResponse(_input_proto, _output_proto, _config):
-  """Currently bundles nothing."""
-  # TODO(crbug/1034529): As methods migrate, begin populating them based on what
-  # input_proto has defined.
+class RegisteredGet(NamedTuple):
+  """An registered function for calling Get on an artifact type."""
+  output_proto: artifacts_pb2.GetResponse
+  artifact_dict: Any
 
 
-@faux.success(_GetResponse)
+def ExampleGetResponse(_input_proto, _output_proto, _config):
+  """Give an example GetResponse with a minimal coverage set."""
+  _output_proto = artifacts_pb2.GetResponse(
+      artifacts=common_pb2.UploadedArtifactsByService(
+          image=image_controller.ExampleGetResponse(),
+          sysroot=sysroot_controller.ExampleGetResponse(),
+      ))
+  return controller.RETURN_CODE_SUCCESS
+
+
 @faux.empty_error
+@faux.success(ExampleGetResponse)
 @validate.exists('result_path.path.path')
 @validate.validation_complete
 def Get(input_proto, output_proto, _config):
@@ -37,33 +49,44 @@ def Get(input_proto, output_proto, _config):
 
   Get all artifacts for the build.
 
-  Note: crbug/1034529 introduces this method as a noop.  As the individual
-  artifact_type bundlers are added here, they *must* stop uploading it via the
-  individual bundler function.
+  Note: As the individual artifact_type bundlers are added here, they *must*
+  stop uploading it via the individual bundler function.
 
   Args:
     input_proto (GetRequest): The input proto.
     output_proto (GetResponse): The output proto.
     _config (api_config.ApiConfig): The API call config.
   """
-
-  image_proto = input_proto.artifact_info.image
-  base_path = os.path.join(input_proto.chroot.path,
-                           input_proto.sysroot.path[1:])
   output_dir = input_proto.result_path.path.path
 
-  images_list = image_service.Get(image_proto, base_path, output_dir)
+  sysroot = controller_util.ParseSysroot(input_proto.sysroot)
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  build_target = controller_util.ParseBuildTarget(
+      input_proto.sysroot.build_target)
 
-  for artifact_dict in images_list:
-    output_proto.artifacts.image.artifacts.add(
-        artifact_type=artifact_dict['type'],
-        paths=[
-            common_pb2.Path(
-                path=x,
-                location=common_pb2.Path.Location.OUTSIDE)
-            for x in artifact_dict['paths']
-        ])
+  # A list of RegisteredGet tuples (input proto, output proto, get results).
+  get_res_list = [
+      RegisteredGet(
+          output_proto.artifacts.image,
+          image_controller.GetArtifacts(
+              input_proto.artifact_info.image, chroot, sysroot, build_target,
+              output_dir)),
+      RegisteredGet(
+          output_proto.artifacts.sysroot,
+          sysroot_controller.GetArtifacts(
+              input_proto.artifact_info.sysroot, chroot, sysroot, build_target,
+              output_dir))
+  ]
 
+  for get_res in get_res_list:
+    for artifact_dict in get_res.artifact_dict:
+      get_res.output_proto.artifacts.add(
+          artifact_type=artifact_dict['type'],
+          paths=[
+              common_pb2.Path(
+                  path=x, location=common_pb2.Path.Location.OUTSIDE)
+              for x in artifact_dict['paths']
+          ])
   return controller.RETURN_CODE_SUCCESS
 
 
@@ -674,59 +697,3 @@ def BundleGceTarball(input_proto, output_proto, _config):
 
   tarball = artifacts.BundleGceTarball(output_dir, image_dir)
   output_proto.artifacts.add().path = tarball
-
-
-def _BundleDebugSymbolsResponse(input_proto, output_proto, _config):
-  """Add artifact tarball to a successful response."""
-  output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
-                                                   constants.DEBUG_SYMBOLS_TAR)
-
-
-@faux.success(_BundleDebugSymbolsResponse)
-@faux.empty_error
-@validate.require('build_target.name', 'output_dir')
-@validate.exists('output_dir')
-@validate.validation_complete
-def BundleDebugSymbols(input_proto, output_proto, _config):
-  """Bundle the debug symbols into a tarball suitable for importing into GCE.
-
-  Args:
-    input_proto (BundleRequest): The input proto.
-    output_proto (BundleResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
-  """
-  output_dir = input_proto.output_dir
-
-  chroot = controller_util.ParseChroot(input_proto.chroot)
-  build_target = controller_util.ParseBuildTarget(input_proto.build_target)
-  result = artifacts.GenerateBreakpadSymbols(chroot,
-                                             build_target,
-                                             debug=True)
-
-  # Verify breakpad symbol generation before gathering the sym files.
-  if result.returncode != 0:
-    return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
-
-  with chroot.tempdir() as symbol_tmpdir, chroot.tempdir() as dest_tmpdir:
-    breakpad_dir = os.path.join(chroot.path, 'build', build_target.name,
-                                'usr/lib/debug/breakpad')
-    # Call list on the atifacts.GatherSymbolFiles generator function to
-    # materialize and consume all entries so that all are copied to
-    # dest dir and complete list of all symbol files is returned.
-    sym_file_list = list(artifacts.GatherSymbolFiles(tempdir=symbol_tmpdir,
-                                                     destdir=dest_tmpdir,
-                                                     paths=[breakpad_dir]))
-    if not sym_file_list:
-      logging.warning('No sym files found in %s.', breakpad_dir)
-    # Create tarball from destination_tmp, then copy it...
-    tarball_path = os.path.join(output_dir, constants.DEBUG_SYMBOLS_TAR)
-    result = cros_build_lib.CreateTarball(tarball_path, dest_tmpdir)
-    if result.returncode != 0:
-      logging.error('Error (%d) when creating tarball %s from %s',
-                    result.returncode,
-                    tarball_path,
-                    dest_tmpdir)
-      return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
-    output_proto.artifacts.add().path = tarball_path
-
-  return controller.RETURN_CODE_SUCCESS

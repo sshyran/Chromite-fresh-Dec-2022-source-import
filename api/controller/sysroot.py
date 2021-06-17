@@ -13,6 +13,8 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import binpkg
+from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import goma_lib
@@ -22,8 +24,70 @@ from chromite.lib import sysroot_lib
 from chromite.service import sysroot
 from chromite.utils import metrics
 
-
 _ACCEPTED_LICENSES = '@CHROMEOS'
+
+
+def ExampleGetResponse():
+  """Give an example response to assemble upstream in caller artifacts."""
+  uabs = common_pb2.UploadedArtifactsByService
+  cabs = common_pb2.ArtifactsByService
+  return uabs.Sysroot(artifacts=[
+      uabs.Sysroot.ArtifactPaths(
+          artifact_type=cabs.Sysroot.ArtifactType.DEBUG_SYMBOLS,
+          paths=[
+              common_pb2.Path(
+                  path='/tmp/debug.tgz', location=common_pb2.Path.OUTSIDE)
+          ],
+      ),
+      uabs.Sysroot.ArtifactPaths(
+          artifact_type=cabs.Sysroot.ArtifactType.BREAKPAD_DEBUG_SYMBOLS,
+          paths=[
+              common_pb2.Path(
+                  path='/tmp/debug_breakpad.tar.xz',
+                  location=common_pb2.Path.OUTSIDE)
+          ])
+  ])
+
+
+def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
+        chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+        build_target: build_target_lib.BuildTarget, output_dir: str) -> list:
+  """Builds and copies sysroot artifacts to specified output_dir.
+
+  Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
+  paths to the desired files.
+
+  Args:
+    in_proto: Proto request defining reqs.
+    chroot: The chroot class used for these artifacts.
+    sysroot_class: The sysroot class used for these artifacts.
+    build_target: The build target used for these artifacts.
+    output_dir: The path to write artifacts to.
+
+  Returns:
+    A list of dictionary mappings of ArtifactType to list of paths.
+  """
+  generated = []
+  for output_artifact in in_proto.output_artifacts:
+    if (in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS
+        in output_artifact.artifact_types):
+      result_path = sysroot.BundleBreakpadSymbols(chroot, sysroot_class,
+                                                  build_target, output_dir)
+      if result_path:
+        generated.append({
+            'paths': [result_path],
+            'type': in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS,
+        })
+    if in_proto.ArtifactType.DEBUG_SYMBOLS in output_artifact.artifact_types:
+      result_path = sysroot.BundleDebugSymbols(chroot, sysroot_class,
+                                               build_target, output_dir)
+      if result_path:
+        generated.append({
+            'paths': [result_path],
+            'type': in_proto.ArtifactType.DEBUG_SYMBOLS,
+        })
+  return generated
+
 
 
 @faux.all_empty

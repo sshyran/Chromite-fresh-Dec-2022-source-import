@@ -12,6 +12,7 @@ from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
+from chromite.lib.sysroot_lib import Sysroot
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):
@@ -44,6 +45,20 @@ class ParseChrootTest(cros_test_lib.MockTestCase):
     with self.assertRaises(AssertionError):
       controller_util.ParseChroot(common_pb2.BuildTarget())
 
+class ParseSysrootTest(cros_test_lib.MockTestCase):
+  """ParseSysroot tests."""
+
+  def testSuccess(self):
+    """test successful handling case."""
+    path = '/build/rare_pokemon'
+    sysroot_message = sysroot_pb2.Sysroot(path=path)
+    expected = Sysroot(path=path)
+    result = controller_util.ParseSysroot(sysroot_message)
+    self.assertEqual(expected, result)
+
+  def testWrongMessage(self):
+    with self.assertRaises(AssertionError):
+      controller_util.ParseSysroot(common_pb2.BuildTarget())
 
 class ParseBuildTargetTest(cros_test_lib.TestCase):
   """ParseBuildTarget tests."""

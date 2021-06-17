@@ -1331,6 +1331,21 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   return []
 
 
+def IsTarball(path: str) -> bool:
+  """Guess if this is a tarball based on the filename."""
+  parts = path.split('.')
+  if len(parts) <= 1:
+    return False
+
+  if parts[-1] == 'tar':
+    return True
+
+  if parts[-2] == 'tar':
+    return parts[-1] in ('bz2', 'gz', 'xz')
+
+  return parts[-1] in ('tbz2', 'tbz', 'tgz', 'txz')
+
+
 def GetInput(prompt):
   """Helper function to grab input from a user.   Makes testing easier."""
   # We have people use GetInput() so they don't have to use these bad builtins
