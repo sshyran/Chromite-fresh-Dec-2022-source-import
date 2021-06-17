@@ -1315,19 +1315,73 @@ def StatFilesInDirectory(path, recursive=False, to_string=False):
 
 
 @contextlib.contextmanager
-def ChdirContext(target_dir):
+def OpenContext(path: Union[Path, str],
+                flags: int = os.O_RDONLY,
+                mode: int = 0o777) -> int:
+  """Context manager to open & close |path| and return the OS file descriptor.
+
+  Args:
+    path: The path to open.
+    flags: The O_* flags to use.
+    mode: The permission bits to use (when creating a file).
+
+  Yields:
+    The open OS file descriptor.
+  """
+  fd = None
+  try:
+    fd = os.open(path, flags, mode)
+    yield fd
+  finally:
+    if fd is not None:
+      os.close(fd)
+
+
+@contextlib.contextmanager
+def ChdirContext(target_dir: Union[Path, str]) -> int:
   """A context manager to chdir() into |target_dir| and back out on exit.
 
   Args:
     target_dir: A target directory to chdir into.
-  """
 
-  cwd = os.getcwd()
-  os.chdir(target_dir)
-  try:
-    yield
-  finally:
-    os.chdir(cwd)
+  Yields:
+    File descriptor to old working directory.
+  """
+  with OpenContext('.', flags=os.O_RDONLY | os.O_PATH | os.O_CLOEXEC) as fd:
+    try:
+      os.chdir(target_dir)
+      yield fd
+    finally:
+      os.fchdir(fd)
+
+
+@contextlib.contextmanager
+def ChrootContext(target_dir: Union[Path, str]) -> int:
+  """A context manager to chroot() into |target_dir| and back out on exit.
+
+  The current process must already be running with sufficient privileges
+  (e.g. root).
+
+  Args:
+    target_dir: A target directory to chdir into.
+  """
+  # Order here is important, and use of handles & . avoids races.
+  # First chdir to the new path and save a handle to the old one.  The open
+  # handle stays viable across chroot calls.
+  with ChdirContext(target_dir):
+    # Get a handle to the current / so we can restore to it later.
+    with OpenContext('/', flags=os.O_RDONLY | os.O_PATH | os.O_CLOEXEC) as fd:
+      try:
+        # Chroot to the target_dir (via the cwd . symlink).
+        os.chroot('.')
+        # Pause here for the caller as we're now inside the chroot.
+        yield
+      finally:
+        # chdir to the saved / handle (breaking out of the chroot).
+        os.fchdir(fd)
+        # chroot to the saved / (via the cwd . symlink).
+        os.chroot('.')
+    # Context manager will chdir back to the original cwd via its saved handle.
 
 
 def _SameFileSystem(path1, path2):
