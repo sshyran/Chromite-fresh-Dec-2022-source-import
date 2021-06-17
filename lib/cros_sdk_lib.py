@@ -769,6 +769,21 @@ class ChrootCreator:
     except cros_build_lib.RunCommandError as e:
       cros_build_lib.Die('Creating chroot failed!\n%s', e)
 
+  def print_success_summary(self):
+    """Show a summary of the chroot to the user."""
+    default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
+    chroot_opt = ''
+    if default_chroot != self.chroot_path:
+      chroot_opt = f' --chroot={self.chroot_path}'
+    logging.info("""
+All set up.  To enter the chroot, run:
+$ cros_sdk --enter%s
+
+CAUTION: Do *NOT* rm -rf the chroot directory; if there are stale bind mounts
+you may end up deleting your source tree too.  To unmount & delete cleanly, use:
+$ cros_sdk --delete%s
+""", chroot_opt, chroot_opt)
+
   def run(self):
     """Create the chroot."""
     logging.notice('Creating chroot. This may take a few minutes...')
@@ -776,6 +791,8 @@ class ChrootCreator:
 
     # TODO(build): Delete this once all users migrate to cros_chroot_version.
     osutils.Touch(self.chroot_path / 'etc' / 'debian_chroot')
+
+    self.print_success_summary()
 
 
 def CreateChroot(*args, **kwargs):
