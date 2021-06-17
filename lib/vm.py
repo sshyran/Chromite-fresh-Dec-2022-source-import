@@ -695,7 +695,11 @@ class VM(device.Device):
                         'QEMU hostfwd format, eg tcp:127.0.0.1:12345-:54321 to '
                         'forward port 54321 on the VM to 12345 on the host.')
     parser.add_argument('--qemu-args', action='append',
-                        help='Additional args to pass to qemu.')
+                        help='Additional args to pass to qemu. Note that if '
+                             'you want to pass an argument that starts with a '
+                             'dash, e.g. -display you will need to enclose it '
+                             'in quotes and add a space at the beginning: '
+                             '" -display ..."')
     parser.add_argument('--copy-on-write', action='store_true', default=False,
                         help='Generates a temporary copy-on-write image backed '
                              'by the normal boot image. All filesystem changes '
