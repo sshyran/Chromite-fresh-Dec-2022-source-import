@@ -143,6 +143,41 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   deserialize_metrics_log(output_proto.events, prefix=build_target.name)
 
 
+SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
+TEST_SERVICE_DIR = os.path.join(SRC_DIR, 'platform/dev/src/chromiumos/test')
+TEST_CONTAINER_BUILD_SCRIPTS = [
+    os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
+    os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
+]
+
+
+@faux.all_empty
+@validate.require('build_target.name')
+@validate.require('chroot.path')
+@validate.require('version')
+@validate.validation_complete
+def BuildTestServiceContainers(input_proto, output_proto, _config):
+  """Builds docker containers for all test services and pushes them to gcr.io"""
+  build_target = controller_util.ParseBuildTarget(input_proto.build_target)
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  version = input_proto.version
+  sysroot = sysroot_lib.Sysroot(build_target.root)
+
+  for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
+    cmd = [build_script, chroot.path, version, sysroot.path]
+    cmd_result = cros_build_lib.run(cmd, check=False)
+    if cmd_result.returncode == 0:
+      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+          success = test_pb2.TestServiceContainerBuildResult.Success()
+      ))
+    else:
+      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+          failure = test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message = cmd_result.stderr
+          )
+      ))
+
+
 @faux.empty_success
 @faux.empty_completed_unsuccessfully_error
 @validate.validation_complete
