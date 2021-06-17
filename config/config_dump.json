@@ -19195,7 +19195,6 @@
         "boards": [
             "herobrine"
         ],
-        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
