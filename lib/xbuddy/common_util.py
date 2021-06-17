@@ -309,10 +309,6 @@ class LockDict(object):
         self._dict[key] = lock
       return lock
 
-def IsInsideChroot():
-  """Returns True if we are inside chroot."""
-  return os.path.exists('/etc/debian_chroot')
-
 
 def IsRunningOnMoblab():
   """Returns True if this code is running on a chromiumOS DUT."""
