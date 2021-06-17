@@ -434,18 +434,6 @@
       ]
     },
     {
-      "name": "guybrush",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "hana",
       "configs": [
         {
@@ -3035,6 +3023,31 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 417,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "guybrush",
+      "reference_board_name": "guybrush",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "guybrush",
+          "name": "guybrush",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7148,
+          "is_active": true
+        },
+        {
+          "board_name": "guybrush",
+          "name": "guybrush360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7148,
           "is_active": true
         }
       ]

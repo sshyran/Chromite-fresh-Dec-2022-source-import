@@ -16668,6 +16668,10 @@
             "guybrush"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush360\",\n    \"test_suites\": []\n}"
+        ],
         "sign_types": [
             "recovery",
             "factory"
@@ -16694,6 +16698,10 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush360\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "sign_types": [
