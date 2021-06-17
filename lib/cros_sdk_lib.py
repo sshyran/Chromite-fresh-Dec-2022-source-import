@@ -5,10 +5,14 @@
 """Utilities for setting up and cleaning up the chroot environment."""
 
 import collections
+import grp
 import os
 from pathlib import Path
+import pwd
 import re
+import shutil
 import time
+from typing import List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -739,6 +743,17 @@ class ChrootCreator:
   # If the host timezone isn't set, we'll use this inside the SDK.
   DEFAULT_TZ = 'usr/share/zoneinfo/PST8PDT'
 
+  # Groups to add the user to inside the chroot.
+  # This group list is a bit dated and probably contains a number of items that
+  # no longer make sense.
+  # TODO(crbug.com/762445): Remove "adm".
+  # TODO(build): Remove cdrom & floppy.
+  # TODO(build): See if audio is still needed.  Host distros might use diff
+  # "audio" group, so we wouldn't get access to /dev/snd/ nodes directly.
+  # TODO(build): See if video is still needed.  Host distros might use diff
+  # "video" group, so we wouldn't get access to /dev/dri/ nodes directly.
+  DEFGROUPS = {'adm', 'cdrom', 'floppy', 'audio', 'video', 'portage'}
+
   def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
                usepkg: bool = True):
     """Initialize.
@@ -785,6 +800,102 @@ class ChrootCreator:
       logging.debug('%s: symlinking to %s', chroot_tz, self.DEFAULT_TZ)
       chroot_tz.symlink_to(self.DEFAULT_TZ)
 
+  def init_user(self,
+                user: Optional[str] = None,
+                uid: Optional[int] = None,
+                gid: Optional[int] = None):
+    """Setup the current user inside the chroot.
+
+    The user account name & id are synced with the active account outside of the
+    SDK.  This helps facilitate copying of files in & out of the SDK without the
+    need of sudo.
+
+    The user account must not already exist inside the SDK (as a pre-existing
+    reserved name) otherwise we can't create it with the right uid.
+
+    Args:
+      user: The username to create.
+      uid: The new account's userid.
+      gid: The new account's groupid.
+    """
+    if not user:
+      user = os.getenv('SUDO_USER')
+    if uid is None:
+      uid = int(os.getenv('SUDO_UID'))
+    if gid is None:
+      gid = pwd.getpwnam(user).pw_gid
+
+    path = self.chroot_path / 'etc' / 'passwd'
+    lines = path.read_text().splitlines()
+
+    # Make sure the user isn't one the existing reserved ones.
+    for line in lines:
+      existing_user = line.split(':', 1)[0]
+      if existing_user == user:
+        cros_build_lib.Die(f'{user}: this account cannot be used to build CrOS')
+
+    # Create the account.
+    home = f'/home/{user}'
+    line = f'{user}:x:{uid}:{gid}:ChromeOS Developer:{home}:/bin/bash'
+    logging.debug('%s: adding user: %s', path, line)
+    lines.insert(0, line)
+    path.write_text('\n'.join(lines) + '\n')
+
+    # Setup the home dir.
+    chroot_home = self.chroot_path / home[1:]
+    shutil.copytree(self.chroot_path / 'etc/skel', chroot_home)
+    osutils.Chown(chroot_home, user=uid, group=gid, recursive=True)
+
+  def init_group(self,
+                 user: Optional[str] = None,
+                 groups: Optional[List[str]] = None,
+                 group: Optional[str] = None,
+                 gid: Optional[int] = None):
+    """Setup the current user's groups inside the chroot.
+
+    This will create the user's primary group and add them to a bunch of
+    supplemental groups.  The primary group is synced with the active account
+    outside of the SDK to help facilitate accessing of files & resources (e.g.
+    any /dev nodes).
+
+    The primary group must not already exist inside the SDK (as a pre-existing
+    reserved name) otherwise we can't create it with the right gid.
+
+    Args:
+      user: The username to add to groups.
+      groups: The account's supplemental groups.
+      group: The account's primary group (to be created).
+      gid: The primary group's gid.
+    """
+    if not user:
+      user = os.getenv('SUDO_USER')
+    if groups is None:
+      groups = self.DEFGROUPS
+    if gid is None:
+      gid = pwd.getpwnam(user).pw_gid
+    if group is None:
+      group = grp.getgrgid(gid).gr_name
+
+    path = self.chroot_path / 'etc' / 'group'
+    lines = path.read_text().splitlines()
+
+    # Make sure the group isn't one the existing reserved ones.
+    # Add the user to all the existing ones too.
+    for i, line in enumerate(lines):
+      entry = line.split(':')
+      if entry[0] == group:
+        cros_build_lib.Die(f'{group}: this group cannot be used to build CrOS')
+      if entry[0] in groups:
+        if entry[-1]:
+          entry[-1] += ','
+        entry[-1] += user
+        lines[i] = ':'.join(entry)
+
+    line = f'{group}:x:{gid}:{user}'
+    logging.debug('%s: adding group: %s', path, line)
+    lines.insert(0, line)
+    path.write_text('\n'.join(lines) + '\n')
+
   def print_success_summary(self):
     """Show a summary of the chroot to the user."""
     default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
@@ -800,8 +911,17 @@ you may end up deleting your source tree too.  To unmount & delete cleanly, use:
 $ cros_sdk --delete%s
 """, chroot_opt, chroot_opt)
 
-  def run(self):
-    """Create the chroot."""
+  def run(self,
+          user: str = None, uid: int = None,
+          group: str = None, gid: int = None):
+    """Create the chroot.
+
+    Args:
+      user: The user account to use (e.g. for testing).
+      uid: The user id to use (e.g. for testing).
+      group: The group account to use (e.g. for testing).
+      gid: The group id to use (e.g. for testing).
+    """
     logging.notice('Creating chroot. This may take a few minutes...')
 
     # Unpack the chroot & reset the version.
@@ -811,6 +931,8 @@ $ cros_sdk --delete%s
     updater.SetVersion(0)
 
     self.init_timezone()
+    self.init_user(user=user, uid=uid, gid=gid)
+    self.init_group(user=user, group=group, gid=gid)
 
     self._make_chroot()
 

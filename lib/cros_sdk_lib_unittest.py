@@ -789,11 +789,19 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.creater = cros_sdk_lib.ChrootCreator(
         self.chroot_path, self.sdk_tarball, self.cache_dir)
 
-    # Create an empty, but real, tarball to extract during testing.
+    # Create a minimal tarball to extract during testing.
     tar_dir = tempdir / 'tar_dir'
     D = cros_test_lib.Directory
     cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
-        D('etc', ()),
+        D('etc', (
+            'passwd',
+            'group',
+            D('skel', (
+                D('.ssh', (
+                    'foo',
+                )),
+            )),
+        )),
     ))
     osutils.Touch(tar_dir / self.creater.DEFAULT_TZ, makedirs=True)
     cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
@@ -811,7 +819,34 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
 
   def testRun(self):
     """Verify run works."""
+    TEST_USER = 'a-test-user'
+    TEST_UID = 20100908
+    TEST_GROUP = 'a-test-group'
+    TEST_GID = 9082010
     self.PatchObject(cros_sdk_lib.ChrootCreator, '_make_chroot')
-    self.creater.run()
+    # The files won't be root owned, but they won't be user owned.
+    self.ExpectRootOwnedFiles()
+
+    self.creater.run(user=TEST_USER, uid=TEST_UID,
+                     group=TEST_GROUP, gid=TEST_GID)
+
+    # Check various root files.
     self.assertExists(self.chroot_path / 'etc' / 'debian_chroot')
     self.assertExists(self.chroot_path / 'etc' / 'localtime')
+
+    # Check user home files.
+    user_file = self.chroot_path / 'home' / 'a-test-user' / '.ssh' / 'foo'
+    self.assertExists(user_file)
+    st = user_file.stat()
+    self.assertEqual(st.st_uid, TEST_UID)
+    self.assertEqual(st.st_gid, TEST_GID)
+
+    # Check the user/group accounts.
+    db = (self.chroot_path / 'etc' / 'passwd').read_text()
+    self.assertStartsWith(db, f'{TEST_USER}:x:{TEST_UID}:{TEST_GID}:')
+    # Make sure Python None didn't leak in.
+    self.assertNotIn('None', db)
+    db = (self.chroot_path / 'etc' / 'group').read_text()
+    self.assertStartsWith(db, f'{TEST_GROUP}:x:{TEST_GID}:{TEST_USER}')
+    # Make sure Python None didn't leak in.
+    self.assertNotIn('None', db)
