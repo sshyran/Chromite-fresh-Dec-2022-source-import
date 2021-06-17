@@ -178,11 +178,25 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
       osutils.SafeSymlink(file_b, user_link)
       self.assertEqual('b', osutils.ReadFile(user_link))
 
+      # Handle Path objects.
+      osutils.SafeSymlink(Path(file_a), Path(user_link))
+      self.assertEqual('a', osutils.ReadFile(user_link))
+
+      osutils.SafeSymlink(Path(file_b), Path(user_link))
+      self.assertEqual('b', osutils.ReadFile(user_link))
+
       # We can create and override links owned by root.
       osutils.SafeSymlink(file_a, root_link, sudo=True)
       self.assertEqual('a', osutils.ReadFile(root_link))
 
       osutils.SafeSymlink(file_b, root_link, sudo=True)
+      self.assertEqual('b', osutils.ReadFile(root_link))
+
+      # Handle Path objects.
+      osutils.SafeSymlink(Path(file_a), Path(root_link), sudo=True)
+      self.assertEqual('a', osutils.ReadFile(root_link))
+
+      osutils.SafeSymlink(Path(file_b), Path(root_link), sudo=True)
       self.assertEqual('b', osutils.ReadFile(root_link))
 
   def testSafeUnlink(self):

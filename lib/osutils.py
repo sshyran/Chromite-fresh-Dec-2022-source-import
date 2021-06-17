@@ -363,7 +363,9 @@ def MD5HashFile(path):
   return hashlib.md5(contents).hexdigest()
 
 
-def SafeSymlink(source, dest, sudo=False):
+def SafeSymlink(source: Union[Path, str],
+                dest: Union[Path, str],
+                sudo: bool = False):
   """Create a symlink at |dest| pointing to |source|.
 
   This will override the |dest| if the symlink exists. This operation is not
@@ -375,7 +377,7 @@ def SafeSymlink(source, dest, sudo=False):
     sudo: If True, create the link as root.
   """
   if sudo and os.getuid() != 0:
-    cros_build_lib.sudo_run(['ln', '-sfT', source, dest],
+    cros_build_lib.sudo_run(['ln', '-sfT', str(source), str(dest)],
                             print_cmd=False, stderr=True)
   else:
     SafeUnlink(dest)
