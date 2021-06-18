@@ -986,13 +986,50 @@ MS_ACTIVE = 1 << 30
 MS_NOUSER = 1 << 31
 
 
-def Mount(source, target, fstype, flags, data=''):
-  """Call the mount(2) func; see the man page for details."""
+def Mount(source: Union[None, Path, str, bytes, int],
+          target: Union[None, Path, str, bytes, int],
+          fstype: Union[None, str, bytes, int],
+          flags: int,
+          data: Union[None, str, bytes, int] = ''):
+  """Call the mount(2) func; see the man page for details.
+
+  Args:
+    source: The source mount path (for bind mounts or block devices), or a
+        human readable description string (for pseudo filesystems).
+    target: The target path to mount over.  It may be a dir or file, but it
+        must exist already.
+    fstype: The filesystem type (e.g. "ext4" or "tmpfs"), or None if a bind
+        mount.
+    flags: Various MS_* flags.
+    data: Additional mount options parsed by the kernel filesystem driver.
+        Not to be confused with the MS_* flags -- NB the `mount` program will
+        convert some of these to MS_* flags for you e.g. "bind"->MS_BIND, but
+        this function does not.
+  """
   libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
-  # These fields might be a string or 0 (for NULL).  Convert to bytes.
-  def _MaybeEncode(s):
-    return s.encode('utf-8') if isinstance(s, str) else s
-  if libc.mount(_MaybeEncode(source), _MaybeEncode(target),
+
+  # These fields might be a Path/string/bytes or None/0 (for NULL).
+  # Convert to bytes or 0.
+  def _MaybeEncode(s: Union[None, Path, str, bytes, int],
+                   path_ok: bool = False):
+    if isinstance(s, Path):
+      if path_ok:
+        s = str(s).encode('utf-8')
+      else:
+        raise TypeError(f'"{s}" cannot be of type Path')
+    elif isinstance(s, str):
+      s = s.encode('utf-8')
+    elif s is None:
+      s = 0
+    elif isinstance(s, int):
+      if s:
+        raise ValueError(f'{s}: only NULL (0) ints are allowed')
+    elif not isinstance(s, bytes):
+      raise TypeError(f'"{s}" is an unsupported type: {type(s)}')
+    return s
+
+  if libc.mount(_MaybeEncode(source, path_ok=True),
+                _MaybeEncode(target, path_ok=True),
                 _MaybeEncode(fstype), ctypes.c_int(flags),
                 _MaybeEncode(data)) != 0:
     e = ctypes.get_errno()
