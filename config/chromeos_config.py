@@ -2598,10 +2598,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
 
       'strongbad-release': {
           'sign_types': ['recovery', 'factory'],
-          # Strongbad has no DUTs in the lab.
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'b/152055929',
       },
 
       'trogdor-release': {
