@@ -663,8 +663,14 @@ class BaseParser(object):
     """Sets up logging based on |opts|."""
     value = opts.log_level.upper()
     logger = logging.getLogger()
-    logger.setLevel(getattr(logging, value))
-    formatter = ColoredFormatter(fmt=opts.log_format,
+    log_level = getattr(logging, value)
+    logger.setLevel(log_level)
+    # If verbose levels, include millisecond output.
+    log_format = opts.log_format
+    if log_level < logging.NOTICE:
+      log_format = log_format.replace(
+          '%(asctime)s:', '%(asctime)s.%(msecs)03d:')
+    formatter = ColoredFormatter(fmt=log_format,
                                  datefmt=constants.LOGGER_DATE_FMT,
                                  enable_color=opts.color)
 
@@ -1008,6 +1014,11 @@ def ScriptWrapperMain(find_target_func, argv=None,
     print('Internal error detected- no main functor found in module %r.' %
           (name,), file=sys.stderr)
     sys.exit(100)
+
+  # If verbose levels, include millisecond output.
+  if log_level < logging.NOTICE:
+    log_format = log_format.replace(
+        '%(asctime)s:', '%(asctime)s.%(msecs)03d:')
 
   # Set up basic logging information for all modules that use logging.
   # Note a script target may setup default logging in its module namespace
