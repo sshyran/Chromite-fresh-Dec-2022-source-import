@@ -697,6 +697,9 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
   CODE_COVERAGE_LLVM_ARTIFACT_TYPE = (
       common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
   )
+  UNIT_TEST_ARTIFACT_TYPE = (
+      common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
+  )
 
   def setUp(self):
     """Set up the class for tests."""
@@ -746,10 +749,17 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
     """Test result contains paths and code_coverage_llvm_json type."""
     self.PatchObject(test_service, 'BundleCodeCoverageLlvmJson',
       return_value='test')
+    self.PatchObject(test_service, 'BuildTargetUnitTestTarball',
+      return_value='unit_tests.tar')
 
     result = test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[
             # Valid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.UNIT_TEST_ARTIFACT_TYPE
+                ]
+            ),
             common_pb2.ArtifactsByService.Test.ArtifactInfo(
                 artifact_types=[
                     self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
@@ -758,5 +768,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
         ]),
         self.chroot, self.sysroot, self.tempdir)
 
-    self.assertEqual(result[0]['paths'], ['test'])
-    self.assertEqual(result[0]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)
+    self.assertEqual(result[0]['paths'], ['unit_tests.tar'])
+    self.assertEqual(result[0]['type'], self.UNIT_TEST_ARTIFACT_TYPE)
+    self.assertEqual(result[1]['paths'], ['test'])
+    self.assertEqual(result[1]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)

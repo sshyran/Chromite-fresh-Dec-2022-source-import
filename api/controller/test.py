@@ -18,13 +18,13 @@ from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.lib import chroot_lib
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test
 from chromite.utils import key_value_store
@@ -343,14 +343,21 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
     A list of dictionary mappings of ArtifactType to list of paths.
   """
   generated = []
+
+  artifact_types = {
+    in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
+    in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
+        test.BundleCodeCoverageLlvmJson,
+  }
+
   for output_artifact in in_proto.output_artifacts:
-    if (in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON
-        in output_artifact.artifact_types):
-      result_path = test.BundleCodeCoverageLlvmJson(chroot, sysroot_class,
-                                                    output_dir)
-      if result_path:
-        generated.append({
-            'paths': [result_path],
-            'type': in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON
-        })
+    for artifact_type, func in artifact_types.items():
+      if artifact_type in output_artifact.artifact_types:
+        paths = func(chroot, sysroot_class, output_dir)
+        if paths:
+          generated.append({
+              'paths': [paths] if isinstance(paths, str) else paths,
+              'type': artifact_type,
+          })
+
   return generated
