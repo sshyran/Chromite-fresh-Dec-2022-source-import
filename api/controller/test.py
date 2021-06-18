@@ -151,7 +151,28 @@ TEST_CONTAINER_BUILD_SCRIPTS = [
 ]
 
 
-@faux.all_empty
+def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
+  """Fake success response"""
+  # pylint: disable=unused-argument
+  output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+      success = test_pb2.TestServiceContainerBuildResult.Success()
+  ))
+
+
+def _BuildTestServiceContainersFailedResponse(
+    _input_proto, output_proto, _config):
+  """Fake failure response"""
+
+  # pylint: disable=unused-argument
+  output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+      failure = test_pb2.TestServiceContainerBuildResult.Failure(
+          error_message='fake error'
+      )
+  ))
+
+
+@faux.success(_BuildTestServiceContainersResponse)
+@faux.error(_BuildTestServiceContainersFailedResponse)
 @validate.require('build_target.name')
 @validate.require('chroot.path')
 @validate.require('version')
