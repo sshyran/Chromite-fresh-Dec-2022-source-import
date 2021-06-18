@@ -1189,6 +1189,16 @@ class TarballTests(cros_test_lib.TempDirTestCase):
                       ("tar's stderr is missing from the exception.\n%s" %
                        e.args[0]))
 
+  def test_IsTarball(self):
+    """Test IsTarball helper function."""
+    self.assertTrue(cros_build_lib.IsTarball('file.tar'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.bz2'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.gz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tbz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.txz'))
+    self.assertFalse(cros_build_lib.IsTarball('file.txt'))
+    self.assertFalse(cros_build_lib.IsTarball('file.tart'))
+    self.assertFalse(cros_build_lib.IsTarball('file.bz2'))
 
 # Tests for tar exceptions.
 class FailedCreateTarballExceptionTests(cros_test_lib.TempDirTestCase,

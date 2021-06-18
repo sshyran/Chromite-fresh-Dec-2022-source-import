@@ -625,17 +625,6 @@ STACK CFI 1234
     files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
     self.assertEqual(files_in_output_dir, ['a_file.sym'])
 
-  def test_IsTarball(self):
-    """Test IsTarball helper function."""
-    self.assertTrue(cros_build_lib.IsTarball('file.tar'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tar.bz2'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tar.gz'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tbz'))
-    self.assertTrue(cros_build_lib.IsTarball('file.txz'))
-    self.assertFalse(cros_build_lib.IsTarball('file.txt'))
-    self.assertFalse(cros_build_lib.IsTarball('file.tart'))
-    self.assertFalse(cros_build_lib.IsTarball('file.bz2'))
-
   def getFilesWithRelativeDir(self, dest_dir):
     """Find all files below dest_dir using dir relative to dest_dir."""
     relative_files = []

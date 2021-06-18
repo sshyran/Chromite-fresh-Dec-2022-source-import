@@ -10,8 +10,8 @@ from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib.parser import package_info
-from chromite.lib.chroot_lib import Chroot
-from chromite.lib.sysroot_lib import Sysroot
+from chromite.lib import chroot_lib
+from chromite.lib import sysroot_lib
 
 class Error(Exception):
   """Base error class for the module."""
@@ -53,7 +53,7 @@ def ParseChroot(chroot_message):
   if features:
     env['FEATURES'] = ' '.join(features)
 
-  chroot = Chroot(
+  chroot = chroot_lib.Chroot(
       path=path, cache_dir=cache_dir, chrome_root=chrome_root, env=env)
 
   return chroot
@@ -73,7 +73,7 @@ def ParseSysroot(sysroot_message):
   """
   assert isinstance(sysroot_message, sysroot_pb2.Sysroot)
 
-  return Sysroot(sysroot_message.path)
+  return sysroot_lib.Sysroot(sysroot_message.path)
 
 
 def ParseGomaConfig(goma_message, chroot_path):
