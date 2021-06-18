@@ -291,6 +291,27 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
   return [dlc_dest_path]
 
 
+def copy_license_credits(board: str, output_dir: str) -> List[str]:
+  """Copies license_credits.html from image build dir to output_dir.
+
+  Args:
+    board: The board name.
+    output_dir: Folder destination for license_credits.html.
+
+  Returns:
+    The output path or None if the source path doesn't exist.
+  """
+  filename = 'license_credits.html'
+  license_credits_source_path = os.path.join(
+    image_lib.GetLatestImageLink(board), filename)
+  if not os.path.exists(license_credits_source_path):
+    return None
+
+  license_credits_dest_path = os.path.join(output_dir, filename)
+  shutil.copytree(license_credits_source_path, license_credits_dest_path)
+  return license_credits_dest_path
+
+
 def Test(board, result_directory, image_dir=None):
   """Run tests on an already built image.
 
