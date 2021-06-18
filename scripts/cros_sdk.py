@@ -1156,6 +1156,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       sdk_tarball = FetchRemoteTarballs(
           sdk_cache, urls, 'stage3' if options.bootstrap else 'SDK')
 
+    mounted = False
     if options.create:
       lock.write_lock()
       # Recheck if the chroot is set up here before creating to make sure we
@@ -1169,9 +1170,12 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
             Path(sdk_tarball),
             Path(options.cache_dir),
             usepkg=not options.bootstrap and not options.nousepkg)
+        mounted = True
 
     if options.enter:
       lock.read_lock()
+      if not mounted:
+        cros_sdk_lib.MountChrootPaths(options.chroot)
       EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
                   options.chrome_root_mount, options.goma_dir,
                   options.goma_client_json, options.working_dir,

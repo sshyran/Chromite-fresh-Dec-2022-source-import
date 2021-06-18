@@ -786,6 +786,9 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.sdk_tarball = tempdir / 'chroot.tar'
     self.cache_dir = tempdir / 'cache_dir'
 
+    # We can't really verify these in any useful way atm.
+    self.mount_mock = self.PatchObject(osutils, 'Mount')
+
     self.creater = cros_sdk_lib.ChrootCreator(
         self.chroot_path, self.sdk_tarball, self.cache_dir)
 

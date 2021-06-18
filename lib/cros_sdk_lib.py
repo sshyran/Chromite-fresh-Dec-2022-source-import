@@ -12,7 +12,7 @@ import pwd
 import re
 import shutil
 import time
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -164,6 +164,53 @@ def IsChrootReady(chroot):
   """
   version = GetChrootVersion(chroot)
   return version is not None and version > 0
+
+
+def MountChrootPaths(path: Union[Path, str]):
+  """Setup all the mounts for |path|.
+
+  NB: This assumes running in a unique mount namespace.  If it is running in the
+  root mount namespace, then it will probably change settings for the worse.
+  """
+  KNOWN_FILESYSTEMS = set(
+      x.split()[-1] for x in osutils.ReadFile('/proc/filesystems').splitlines())
+
+  path = Path(path).resolve()
+
+  logging.debug('Mounting chroot paths at %s', path)
+
+  # Mark all existing mounts as slave mounts: that means changes made to mounts
+  # in the parent mount namespace will propagate down (like unmounts).
+  osutils.Mount(None, '/', None, osutils.MS_REC | osutils.MS_SLAVE)
+
+  # If the mount path is already mounted, make it private so we can make changes
+  # without it propagating back out.
+  for info in osutils.IterateMountPoints():
+    if info.destination == str(path):
+      osutils.Mount(None, path, None, osutils.MS_REC | osutils.MS_PRIVATE)
+      break
+
+  # The source checkout must be mounted first.  We'll be mounting paths into the
+  # chroot, and that chroot lives inside SOURCE_ROOT, so if we did the recursive
+  # bind at the end, we'd double bind things.
+  osutils.Mount(
+      constants.SOURCE_ROOT, path / constants.CHROOT_SOURCE_ROOT[1:],
+      '~/chromiumos', osutils.MS_BIND | osutils.MS_REC)
+
+  defflags = (osutils.MS_NOSUID | osutils.MS_NODEV | osutils.MS_NOEXEC |
+              osutils.MS_RELATIME)
+  osutils.Mount('proc', path / 'proc', 'proc', defflags)
+  osutils.Mount('sysfs', path / 'sys', 'sysfs', defflags)
+
+  if 'binfmt_misc' in KNOWN_FILESYSTEMS:
+    osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
+                  'binfmt_misc', defflags)
+
+  if 'configfs' in KNOWN_FILESYSTEMS:
+    osutils.Mount('configfs', path / 'sys/kernel/config', 'configfs', defflags)
+
+  # We expose /dev so we can access loopback & USB drives for flashing.
+  osutils.Mount('/dev', path / 'dev', '/dev', osutils.MS_BIND | osutils.MS_REC)
 
 
 def FindVolumeGroupForDevice(chroot_path, chroot_dev):
@@ -1028,6 +1075,8 @@ $ cros_sdk --delete%s
     self.init_group(user=user, group=group, gid=gid)
     self.init_filesystem_basic()
     self.init_etc(user=user)
+
+    MountChrootPaths(self.chroot_path)
 
     self._make_chroot()
 
