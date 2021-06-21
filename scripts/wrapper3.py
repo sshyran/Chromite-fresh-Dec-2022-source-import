@@ -147,7 +147,7 @@ def FindTarget(target):
         '\tparent: %s\n'
         '\tCHROMITE_PATH: %s' % (parent, CHROMITE_PATH))
     parent = parent[len(CHROMITE_PATH):].split(os.sep)
-    target = ['chromite'] + parent + [target]
+    target = ['chromite'] + parent + [target.replace('-', '_')]
 
     if target[1] == 'bin':
       # Convert chromite/bin/foo -> chromite/scripts/foo.

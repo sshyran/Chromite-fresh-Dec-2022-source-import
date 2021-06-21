@@ -179,3 +179,11 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
     # Script has syntax errors and cannot be imported.
     prog.with_suffix('.py').write_text('}')
     self._run_tests(prog, verify=verify, check=False)
+
+  def testDashes(self):
+    """Check behavior of scripts with dashes in their names."""
+    script = self.chromite_dir / 'scripts' / 'p_r_o_g'
+    self.gen_script(script)
+    prog = self.chromite_dir / 'bin' / 'p-r-o-g'
+    prog.symlink_to(self.wrapper)
+    self._run_tests(prog)
