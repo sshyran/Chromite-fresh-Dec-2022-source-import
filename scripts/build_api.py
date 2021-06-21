@@ -14,7 +14,6 @@ from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import tee
 from chromite.utils import matching
 
 
@@ -57,11 +56,6 @@ def GetParser():
       '--config-json',
       type='path',
       help='The path to the JSON encoded Build API call configs.')
-  # TODO(crbug.com/1040978): Remove after usages removed.
-  parser.add_argument(
-      '--tee-log',
-      type='path',
-      help='The path to which stdout and stderr should be teed to.')
 
   return parser
 
@@ -149,33 +143,26 @@ def _get_io_handlers(opts):
 
 
 def main(argv):
-  with cros_build_lib.ContextManagerStack() as stack:
-    router = router_lib.GetRouter()
-    opts = _ParseArgs(argv, router)
+  router = router_lib.GetRouter()
+  opts = _ParseArgs(argv, router)
 
-    if opts.tee_log:
-      stack.Add(tee.Tee, opts.tee_log)
-      logging.info('Teeing stdout and stderr to %s', opts.tee_log)
-    if opts.config.log_path:
-      stack.Add(tee.Tee, opts.config.log_path)
-      logging.info('Teeing stdout and stderr to %s', opts.config.log_path)
-    tee_log_env_value = os.environ.get('BUILD_API_TEE_LOG_FILE')
-    if tee_log_env_value:
-      stack.Add(tee.Tee, tee_log_env_value)
-      logging.info('Teeing stdout and stderr to env path %s', tee_log_env_value)
+  if opts.config.log_path:
+    logging.warning('Ignoring log_path config option')
+  if 'BUILD_API_TEE_LOG_FILE' in os.environ:
+    logging.warning('Ignoring $BUILD_API_TEE_LOG_FILE env var')
 
-    if opts.config.mock_invalid:
-      # --mock-invalid handling. We print error messages, but no output is ever
-      # set for validation errors, so we can handle it by just giving back the
-      # correct return code here.
-      return controller.RETURN_CODE_INVALID_INPUT
+  if opts.config.mock_invalid:
+    # --mock-invalid handling. We print error messages, but no output is ever
+    # set for validation errors, so we can handle it by just giving back the
+    # correct return code here.
+    return controller.RETURN_CODE_INVALID_INPUT
 
-    input_handler, output_handlers = _get_io_handlers(opts)
+  input_handler, output_handlers = _get_io_handlers(opts)
 
-    try:
-      return router.Route(opts.service, opts.method, opts.config, input_handler,
-                          output_handlers, opts.config_handler)
-    except router_lib.Error as e:
-      # Handle router_lib.Error derivatives nicely, but let anything else bubble
-      # up.
-      cros_build_lib.Die(e)
+  try:
+    return router.Route(opts.service, opts.method, opts.config, input_handler,
+                        output_handlers, opts.config_handler)
+  except router_lib.Error as e:
+    # Handle router_lib.Error derivatives nicely, but let anything else bubble
+    # up.
+    cros_build_lib.Die(e)
