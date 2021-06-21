@@ -542,7 +542,7 @@ class RemoteAccess(object):
 
   def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
             recursive=True, inplace=False, verbose=False, sudo=False,
-            remote_sudo=False, compress=True, **kwargs):
+            remote_sudo=False, compress=True, files_from=None, **kwargs):
     """Rsync a path to the remote device.
 
     Rsync a path to the remote device. If |to_local| is set True, it
@@ -561,6 +561,8 @@ class RemoteAccess(object):
       sudo: If set, invoke the command via sudo.
       remote_sudo: If set, run the command in remote shell with sudo.
       compress: If set, compress file data during the transfer.
+      files_from: If set, read paths from this file (plus some other changes to
+        behaviour per rsync's --files-from).
       **kwargs: See cros_build_lib.run documentation.
     """
     kwargs.setdefault('debug_level', self.debug_level)
@@ -569,6 +571,8 @@ class RemoteAccess(object):
     rsync_cmd = ['rsync', '--perms', '--verbose', '--times',
                  '--omit-dir-times', '--exclude', '.svn']
     rsync_cmd.append('--copy-links' if follow_symlinks else '--links')
+    if files_from:
+      rsync_cmd.extend(['--files-from', files_from])
     rsync_sudo = 'sudo' if (
         remote_sudo and self.username != ROOT_ACCOUNT) else ''
     rsync_cmd += ['--rsync-path',
