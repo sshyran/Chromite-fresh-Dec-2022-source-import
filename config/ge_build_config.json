@@ -915,6 +915,18 @@
           "arch": "X86_INTERNAL"
         }
       ]
+    },
+    {
+      "name": "zork-minios",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "UNKNOWN"
+        }
+      ]
     }
   ],
   "release_branch": false,
