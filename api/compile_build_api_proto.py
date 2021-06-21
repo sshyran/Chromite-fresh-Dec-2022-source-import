@@ -199,7 +199,7 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
   logging.info('Postprocessing: Fix imports in %s.', directory)
   # We are using a negative address here (the /address/! portion of the sed
   # command) to make sure we don't change any imports from protobuf itself.
-  address = '^from chromite.third_party.google.protobuf'
+  address = '^from google.protobuf'
   # Find: 'from x import y_pb2 as x_dot_y_pb2'.
   # "\(^google.protobuf[^ ]*\)" matches the module we're importing from.
   #   - \( and \) are for groups in sed.
@@ -222,12 +222,32 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
       }
   ]
 
+  seds = [from_sed]
+  if protoc_version is ProtocVersion.CHROMITE:
+    # We also need to change the google.protobuf imports to point directly
+    # at the chromite.third_party version of the library.
+    # The SDK version of the proto is meant to be used with the protobuf
+    # libraries installed in the SDK, so leave those as google.protobuf.
+    g_p_address = '^from google.protobuf'
+    g_p_find = r'from \([^ ]*\) import \(.*\)$'
+    g_p_sub = 'from chromite.third_party.\\1 import \\2'
+    google_protobuf_sed = [
+        'sed', '-i',
+        '/%(address)s/s/%(find)s/%(sub)s/g' % {
+            'address': g_p_address,
+            'find': g_p_find,
+            'sub': g_p_sub
+        }
+    ]
+    seds.append(google_protobuf_sed)
+
   for dirpath, _dirnames, filenames in os.walk(directory):
     # Update the imports in the generated files.
     pb2 = [os.path.join(dirpath, f) for f in filenames if f.endswith('_pb2.py')]
     if pb2:
-      cmd = from_sed + pb2
-      cros_build_lib.run(cmd, print_cmd=False)
+      for sed in seds:
+        cmd = sed + pb2
+        cros_build_lib.run(cmd, print_cmd=False)
 
 
 def CompileProto(output: str, protoc_version: ProtocVersion):
