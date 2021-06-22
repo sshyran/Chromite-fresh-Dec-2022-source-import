@@ -1272,9 +1272,11 @@ class ChromeSDKCommand(command.CliCommand):
     self._SetupTCEnvironment(options, env)
 
     # Add managed components to the PATH.
-    env['PATH'] = '%s:%s' % (constants.CHROMITE_BIN_DIR, os.environ['PATH'])
-    env['PATH'] = '%s:%s' % (os.path.dirname(self.sdk.gs_ctx.gsutil_bin),
-                             env['PATH'])
+    path = os.environ['PATH'].split(os.pathsep)
+    # This is just for `gsutil`.
+    path.insert(0, constants.CHROMITE_SCRIPTS_DIR)
+    path.insert(0, constants.CHROMITE_BIN_DIR)
+    env['PATH'] = os.pathsep.join(path)
 
     # Export internally referenced variables.
     os.environ[self.sdk.SDK_BOARD_ENV] = board
