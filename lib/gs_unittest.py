@@ -10,6 +10,7 @@ import functools
 import numbers
 import os
 import string
+import sys
 from unittest import mock
 
 from chromite.lib import constants
@@ -29,9 +30,9 @@ def PatchGS(*args, **kwargs):
 class GSContextMock(partial_mock.PartialCmdMock):
   """Used to mock out the GSContext class."""
   TARGET = 'chromite.lib.gs.GSContext'
-  ATTRS = ('InitializeCache', 'DoCommand', 'DEFAULT_SLEEP_TIME',
-           'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE', '_DEFAULT_GSUTIL_BIN',
-           '_DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
+  ATTRS = ('InitializeCache', 'DoCommand', '_CRCMOD_METHOD',
+           'DEFAULT_SLEEP_TIME', 'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE',
+           '_DEFAULT_GSUTIL_BIN', '_DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
   DEFAULT_ATTR = 'DoCommand'
 
   GSResponsePreconditionFailed = """\
@@ -46,6 +47,7 @@ PreconditionException: 412 Precondition Failed"""
   DEFAULT_BOTO_FILE = '%s/boto_file' % TMP_ROOT
   _DEFAULT_GSUTIL_BIN = '%s/gsutil_bin' % TMP_ROOT
   _DEFAULT_GSUTIL_BUILDER_BIN = _DEFAULT_GSUTIL_BIN
+  _CRCMOD_METHOD = 'missing'
   GSUTIL_URL = None
 
   def __init__(self):
@@ -750,9 +752,18 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
   def testInitGsutilBin(self):
     """Test we use the given gsutil binary, erroring where appropriate."""
     # pylint: disable=protected-access
-    self.assertEqual(gs.GSContext()._gsutil_bin, self.gsutil_bin)
+    gs.GSContext._CRCMOD_METHOD = 'missing'
+    self.assertEqual(gs.GSContext()._gsutil_bin,
+                     [sys.executable, self.gsutil_bin])
+
+    gs.GSContext._CRCMOD_METHOD = 'vpython'
+    self.assertEqual(gs.GSContext()._gsutil_bin,
+                     ['vpython3', self.gsutil_bin])
+
     self.assertRaises(gs.GSContextException,
                       gs.GSContext, gsutil_bin=self.bad_path)
+
+    gs.GSContext._CRCMOD_METHOD = None
 
   def testBadGSUtilBin(self):
     """Test exception thrown for bad gsutil paths."""
@@ -859,7 +870,7 @@ class GSDoCommandTest(cros_test_lib.TestCase):
                            return_value=result):
       ctx.Copy('/blah', 'gs://foon', version=version, recursive=recursive)
       # pylint: disable=protected-access
-      cmd = [self.ctx._gsutil_bin] + self.ctx.gsutil_flags + list(headers)
+      cmd = self.ctx._gsutil_bin + self.ctx.gsutil_flags + list(headers)
       cmd += ['cp', '-v']
       if recursive:
         cmd += ['-r', '-e']

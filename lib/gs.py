@@ -10,12 +10,13 @@ import datetime
 import errno
 import fnmatch
 import getpass
-import glob
 import hashlib
 import os
+from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import urllib.parse
 
@@ -313,6 +314,7 @@ class GSContext(object):
   # This is set for ease of testing.
   _DEFAULT_GSUTIL_BIN = None
   _DEFAULT_GSUTIL_BUILDER_BIN = '/b/build/third_party/gsutil/gsutil'
+  _CRCMOD_METHOD = None
   # How many times to retry uploads.
   DEFAULT_RETRIES = 3
 
@@ -381,24 +383,8 @@ class GSContext(object):
       # lock on the cached gsutil.
       ref = tar_cache.Lookup(key)
       ref.SetDefault(cls.GSUTIL_URL)
-      gsutil_bin = os.path.join(ref.path, 'gsutil', 'gsutil')
-      # Make sure the shebang uses python3 since some distros (like Debian)
-      # delete `python`.  And do it with a write lock.
-      with ref:
-        with open(gsutil_bin, 'rb') as fp:
-          line = fp.readline()
-          if line.strip().endswith(b'python'):
-            data = b'#!/usr/bin/env python3\n' + fp.read()
-            # Make sure to update the file atomically in case someone executes
-            # it directly.  It shouldn't happen, but who knows.
-            try:
-              osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True)
-            except OSError:
-              # If the cache already existed, as root, but hadn't had its
-              # shebang updated, do it as root now.
-              osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True, sudo=True)
-      cls._DEFAULT_GSUTIL_BIN = gsutil_bin
-      cls._CompileCrcmod(ref.path)
+      cls._DEFAULT_GSUTIL_BIN = os.path.join(ref.path, 'gsutil', 'gsutil')
+      cls._DetermineCrcmodStrategy(Path(ref.path))
     else:
       # Check if the default gsutil path for builders exists. If
       # not, try locating gsutil. If none exists, simply use 'gsutil'.
@@ -410,22 +396,69 @@ class GSContext(object):
       cls._DEFAULT_GSUTIL_BIN = gsutil_bin
 
   @classmethod
-  def _CompileCrcmod(cls, path):
-    """Try to setup a compiled crcmod for gsutil.
+  def _DetermineCrcmodStrategy(cls, path: Path):
+    """Figure out how we'll get a compiled crcmod.
 
-    The native crcmod code is much faster than the python implementation, and
+    The compiled crcmod code is much faster than the python implementation, and
     enables some more features (otherwise gsutil internally disables them).
     Try to compile the module on demand in the crcmod tree bundled with gsutil.
 
+    If that's not working, we'll try to fall back to vpython when available.
+
     For more details, see:
     https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod
+
+    Args:
+      path: The path to our local copy of gsutil.
+
+    Returns:
+      'import' if the active python has it available already (whoo!).
+      'bundle' if we were able to build the bundled copy in the gsutil source.
+      'vpython' if we need to use vpython to pull a wheel on the fly.
+      'missing' if we weren't able to find a compiled version.
     """
-    src_root = os.path.join(path, 'gsutil', 'third_party', 'crcmod')
+    if cls._CRCMOD_METHOD is not None:
+      return cls._CRCMOD_METHOD
+
+    # See if the system includes one in which case we're done.
+    # We'll use the active python interp to run gsutil directly.
+    try:
+      from crcmod.crcmod import _usingExtension
+      if _usingExtension:
+        cls._CRCMOD_METHOD = 'import'
+        return cls._CRCMOD_METHOD
+    except ImportError:
+      pass
+
+    # Try to compile the bundled copy.
+    if cls._SetupBundledCrcmod(path):
+      cls._CRCMOD_METHOD = 'bundle'
+      return cls._CRCMOD_METHOD
+
+    # Give vpython a chance if it exists.
+    if cls._SetupVpython(path):
+      cls._CRCMOD_METHOD = 'vpython'
+      return cls._CRCMOD_METHOD
+
+    cls._CRCMOD_METHOD = 'missing'
+    return cls._CRCMOD_METHOD
+
+  @classmethod
+  def _SetupBundledCrcmod(cls, path: Path) -> bool:
+    """Try to setup a compiled crcmod for gsutil."""
+    src_root = path / 'gsutil' / 'third_party' / 'crcmod'
+
+    # See if module already exists.
+    try:
+      next(src_root.glob('python3/crcmod/_crcfunext*.so'))
+      return True
+    except StopIteration:
+      pass
 
     # Try to build it once.
-    flag = os.path.join(src_root, '.chromite.tried.build')
-    if os.path.exists(flag):
-      return
+    flag = src_root / '.chromite.tried.build'
+    if flag.exists():
+      return False
     # Flag things now regardless of how the attempt below works out.
     try:
       osutils.Touch(flag)
@@ -434,36 +467,28 @@ class GSContext(object):
       # non-root, just flag it and return.
       if e.errno == errno.EACCES:
         logging.debug('Skipping gsutil crcmod compile due to permissions')
-        cros_build_lib.sudo_run(['touch', flag], debug_level=logging.DEBUG)
-        return
+        cros_build_lib.sudo_run(['touch', str(flag)], debug_level=logging.DEBUG)
+        return False
       else:
         raise
-
-    # See if the system includes one in which case we're done.
-    # We probe `python3` as that's what gsutil uses for its shebang (see below).
-    result = cros_build_lib.run(
-        ['python3', '-c', 'from crcmod.crcmod import _usingExtension; '
-         'exit(0 if _usingExtension else 1)'], check=False, capture_output=True)
-    if result.returncode == 0:
-      return
 
     # See if the local copy has one.
     logging.debug('Attempting to compile local crcmod for gsutil')
     with osutils.TempDir(prefix='chromite.gsutil.crcmod') as tempdir:
+      tempdir = Path(tempdir)
       result = cros_build_lib.run(
-          ['python3', 'setup.py', 'build', '--build-base', tempdir,
-           '--build-platlib', tempdir],
+          [sys.executable, 'setup.py', 'build',
+           '--build-base', str(tempdir),
+           '--build-platlib', str(tempdir)],
           cwd=src_root, capture_output=True, check=False,
           debug_level=logging.DEBUG)
       if result.returncode:
-        return
+        return False
 
       # Locate the module in the build dir.
       copied = False
-      for mod_path in glob.glob(
-          os.path.join(tempdir, 'crcmod', '_crcfunext*.so')):
-        dst_mod_path = os.path.join(src_root, 'python3', 'crcmod',
-                                    os.path.basename(mod_path))
+      for mod_path in tempdir.glob('crcmod/_crcfunext*.so'):
+        dst_mod_path = src_root / 'python3' / 'crcmod' / mod_path.name
         try:
           shutil.copy2(mod_path, dst_mod_path)
           copied = True
@@ -476,6 +501,27 @@ class GSContext(object):
         # won't actually be a _crcfunext.so module.  Check for it here to
         # disambiguate other errors from shutil.copy2.
         logging.debug('No crcmod module produced (missing host compiler?)')
+
+      return copied
+
+  @classmethod
+  def _SetupVpython(cls, path: Path) -> bool:
+    """Setup a vpython spec to use later on."""
+    if not osutils.Which('vpython3'):
+      return False
+
+    spec = path / 'gsutil' / 'gsutil.vpython3'
+    if spec.exists():
+      return True
+    data = b"""python_version: "3.8"
+wheel: <
+  name: "infra/python/wheels/crcmod/${vpython_platform}"
+  version: "version:1.7"
+>
+"""
+    # TODO(vapier): Drop str() once WriteFile accepts Path objects.
+    osutils.WriteFile(str(spec), data, mode='wb', atomic=True, sudo=True)
+    return True
 
   def __init__(self, boto_file=None, cache_dir=None, acl=None,
                dry_run=False, gsutil_bin=None, init_boto=False, retries=None,
@@ -502,9 +548,13 @@ class GSContext(object):
     if gsutil_bin is None:
       self.InitializeCache(cache_dir=cache_dir, cache_user=cache_user)
       gsutil_bin = self._DEFAULT_GSUTIL_BIN
+      if self._CRCMOD_METHOD == 'vpython':
+        self._gsutil_bin = ['vpython3', gsutil_bin]
+      else:
+        self._gsutil_bin = [sys.executable, gsutil_bin]
     else:
       self._CheckFile('gsutil not found', gsutil_bin)
-    self._gsutil_bin = gsutil_bin
+      self._gsutil_bin = [gsutil_bin]
 
     # The version of gsutil is retrieved on demand and cached here.
     self._gsutil_version = None
@@ -663,7 +713,7 @@ class GSContext(object):
       env = os.environ.copy()
       env['BOTO_CONFIG'] = self.boto_file
 
-    cmd = [self._gsutil_bin] + self.gsutil_flags + ['cat', path]
+    cmd = self._gsutil_bin + self.gsutil_flags + ['cat', path]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
 
     def read_content():
@@ -867,8 +917,7 @@ class GSContext(object):
     kwargs.setdefault('stderr', True)
     kwargs.setdefault('encoding', 'utf-8')
 
-    cmd = [self._gsutil_bin]
-    cmd += self.gsutil_flags
+    cmd = self._gsutil_bin + self.gsutil_flags
     for header in headers:
       cmd += ['-h', header]
     if version is not None:
