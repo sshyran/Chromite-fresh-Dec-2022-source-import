@@ -30,8 +30,8 @@ class GSContextMock(partial_mock.PartialCmdMock):
   """Used to mock out the GSContext class."""
   TARGET = 'chromite.lib.gs.GSContext'
   ATTRS = ('InitializeCache', 'DoCommand', 'DEFAULT_SLEEP_TIME',
-           'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE', 'DEFAULT_GSUTIL_BIN',
-           'DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
+           'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE', '_DEFAULT_GSUTIL_BIN',
+           '_DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
   DEFAULT_ATTR = 'DoCommand'
 
   GSResponsePreconditionFailed = """\
@@ -44,8 +44,8 @@ PreconditionException: 412 Precondition Failed"""
   DEFAULT_RETRIES = 2
   TMP_ROOT = '/tmp/cros_unittest'
   DEFAULT_BOTO_FILE = '%s/boto_file' % TMP_ROOT
-  DEFAULT_GSUTIL_BIN = '%s/gsutil_bin' % TMP_ROOT
-  DEFAULT_GSUTIL_BUILDER_BIN = DEFAULT_GSUTIL_BIN
+  _DEFAULT_GSUTIL_BIN = '%s/gsutil_bin' % TMP_ROOT
+  _DEFAULT_GSUTIL_BUILDER_BIN = _DEFAULT_GSUTIL_BIN
   GSUTIL_URL = None
 
   def __init__(self):
@@ -69,7 +69,7 @@ PreconditionException: 412 Precondition Failed"""
     self._SetGSUtilUrl()
 
   def InitializeCache(self, *_args, **_kwargs):
-    self.DEFAULT_GSUTIL_BIN = 'gsutil'
+    self._DEFAULT_GSUTIL_BIN = 'gsutil'
 
   def DoCommand(self, inst, gsutil_cmd, **kwargs):
     result = self._results['DoCommand'].LookupResult(
@@ -745,7 +745,7 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
     for f in file_list:
       setattr(self, f, os.path.join(self.tempdir, f))
     self.StartPatcher(PatchGS('DEFAULT_BOTO_FILE', new=self.boto_file))
-    self.StartPatcher(PatchGS('DEFAULT_GSUTIL_BIN', new=self.gsutil_bin))
+    self.StartPatcher(PatchGS('_DEFAULT_GSUTIL_BIN', new=self.gsutil_bin))
 
   def testInitGsutilBin(self):
     """Test we use the given gsutil binary, erroring where appropriate."""

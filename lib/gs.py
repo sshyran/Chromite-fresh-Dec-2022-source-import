@@ -311,8 +311,8 @@ class GSContext(object):
   DEFAULT_BOTO_FILE = os.path.expanduser('~/.boto')
   DEFAULT_GSUTIL_TRACKER_DIR = os.path.expanduser('~/.gsutil/tracker-files')
   # This is set for ease of testing.
-  DEFAULT_GSUTIL_BIN = None
-  DEFAULT_GSUTIL_BUILDER_BIN = '/b/build/third_party/gsutil/gsutil'
+  _DEFAULT_GSUTIL_BIN = None
+  _DEFAULT_GSUTIL_BUILDER_BIN = '/b/build/third_party/gsutil/gsutil'
   # How many times to retry uploads.
   DEFAULT_RETRIES = 3
 
@@ -368,7 +368,7 @@ class GSContext(object):
   @classmethod
   def InitializeCache(cls, cache_dir=None, cache_user=None):
     """Setup the gsutil cache if needed."""
-    if cls.DEFAULT_GSUTIL_BIN is not None:
+    if cls._DEFAULT_GSUTIL_BIN is not None:
       return
 
     if cache_dir is None:
@@ -397,17 +397,17 @@ class GSContext(object):
               # If the cache already existed, as root, but hadn't had its
               # shebang updated, do it as root now.
               osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True, sudo=True)
-      cls.DEFAULT_GSUTIL_BIN = gsutil_bin
+      cls._DEFAULT_GSUTIL_BIN = gsutil_bin
       cls._CompileCrcmod(ref.path)
     else:
       # Check if the default gsutil path for builders exists. If
       # not, try locating gsutil. If none exists, simply use 'gsutil'.
-      gsutil_bin = cls.DEFAULT_GSUTIL_BUILDER_BIN
+      gsutil_bin = cls._DEFAULT_GSUTIL_BUILDER_BIN
       if not os.path.exists(gsutil_bin):
         gsutil_bin = osutils.Which('gsutil')
       if gsutil_bin is None:
         gsutil_bin = 'gsutil'
-      cls.DEFAULT_GSUTIL_BIN = gsutil_bin
+      cls._DEFAULT_GSUTIL_BIN = gsutil_bin
 
   @classmethod
   def _CompileCrcmod(cls, path):
@@ -501,7 +501,7 @@ class GSContext(object):
     """
     if gsutil_bin is None:
       self.InitializeCache(cache_dir=cache_dir, cache_user=cache_user)
-      gsutil_bin = self.DEFAULT_GSUTIL_BIN
+      gsutil_bin = self._DEFAULT_GSUTIL_BIN
     else:
       self._CheckFile('gsutil not found', gsutil_bin)
     self._gsutil_bin = gsutil_bin
