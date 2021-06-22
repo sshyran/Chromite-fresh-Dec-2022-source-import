@@ -154,6 +154,7 @@ class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
 
   def testNoBoardFails(self):
     """Should fail when not given a valid board-ish value."""
+    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
     with self.assertRaises(image.InvalidArgumentError):
       image.BuildRecoveryImage('')
 
