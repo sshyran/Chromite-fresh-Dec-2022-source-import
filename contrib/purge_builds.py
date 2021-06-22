@@ -444,7 +444,8 @@ def main(argv):
   options.Freeze()
 
   ctx = gs.GSContext()
-  ctx.GetDefaultGSUtilBin()  # To force caching of gsutil pre-forking.
+  # To force caching of gsutil pre-forking.
+  ctx.InitializeCache()
 
   now = datetime.datetime.now()
   expired_cutoff = now - BUILD_CLEANUP

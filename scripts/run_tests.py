@@ -43,7 +43,7 @@ def main(argv):
 
   # This is a cheesy hack to make sure gsutil is populated in the cache before
   # we run tests. This is a partial workaround for crbug.com/468838.
-  gs.GSContext.GetDefaultGSUtilBin()
+  gs.GSContext.InitializeCache()
 
   if opts.quick:
     logging.info('Skipping test namespacing due to --quickstart.')

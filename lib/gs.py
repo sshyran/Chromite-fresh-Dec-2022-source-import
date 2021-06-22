@@ -366,48 +366,48 @@ class GSContext(object):
   )
 
   @classmethod
-  def GetDefaultGSUtilBin(cls, cache_dir=None, cache_user=None):
-    if cls.DEFAULT_GSUTIL_BIN is None:
-      if cache_dir is None:
-        cache_dir = path_util.GetCacheDir()
-      if cache_dir is not None:
-        common_path = os.path.join(cache_dir, constants.COMMON_CACHE)
-        tar_cache = cache.TarballCache(common_path, cache_user=cache_user)
-        key = (cls.GSUTIL_TAR,)
-        # The common cache will not be LRU, removing the need to hold a read
-        # lock on the cached gsutil.
-        ref = tar_cache.Lookup(key)
-        ref.SetDefault(cls.GSUTIL_URL)
-        gsutil_bin = os.path.join(ref.path, 'gsutil', 'gsutil')
-        # Make sure the shebang uses python3 since some distros (like Debian)
-        # delete `python`.  And do it with a write lock.
-        with ref:
-          with open(gsutil_bin, 'rb') as fp:
-            line = fp.readline()
-            if line.strip().endswith(b'python'):
-              data = b'#!/usr/bin/env python3\n' + fp.read()
-              # Make sure to update the file atomically in case someone executes
-              # it directly.  It shouldn't happen, but who knows.
-              try:
-                osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True)
-              except OSError:
-                # If the cache already existed, as root, but hadn't had its
-                # shebang updated, do it as root now.
-                osutils.WriteFile(
-                    gsutil_bin, data, 'wb', atomic=True, sudo=True)
-        cls.DEFAULT_GSUTIL_BIN = gsutil_bin
-        cls._CompileCrcmod(ref.path)
-      else:
-        # Check if the default gsutil path for builders exists. If
-        # not, try locating gsutil. If none exists, simply use 'gsutil'.
-        gsutil_bin = cls.DEFAULT_GSUTIL_BUILDER_BIN
-        if not os.path.exists(gsutil_bin):
-          gsutil_bin = osutils.Which('gsutil')
-        if gsutil_bin is None:
-          gsutil_bin = 'gsutil'
-        cls.DEFAULT_GSUTIL_BIN = gsutil_bin
+  def InitializeCache(cls, cache_dir=None, cache_user=None):
+    """Setup the gsutil cache if needed."""
+    if cls.DEFAULT_GSUTIL_BIN is not None:
+      return
 
-    return cls.DEFAULT_GSUTIL_BIN
+    if cache_dir is None:
+      cache_dir = path_util.GetCacheDir()
+    if cache_dir is not None:
+      common_path = os.path.join(cache_dir, constants.COMMON_CACHE)
+      tar_cache = cache.TarballCache(common_path, cache_user=cache_user)
+      key = (cls.GSUTIL_TAR,)
+      # The common cache will not be LRU, removing the need to hold a read
+      # lock on the cached gsutil.
+      ref = tar_cache.Lookup(key)
+      ref.SetDefault(cls.GSUTIL_URL)
+      gsutil_bin = os.path.join(ref.path, 'gsutil', 'gsutil')
+      # Make sure the shebang uses python3 since some distros (like Debian)
+      # delete `python`.  And do it with a write lock.
+      with ref:
+        with open(gsutil_bin, 'rb') as fp:
+          line = fp.readline()
+          if line.strip().endswith(b'python'):
+            data = b'#!/usr/bin/env python3\n' + fp.read()
+            # Make sure to update the file atomically in case someone executes
+            # it directly.  It shouldn't happen, but who knows.
+            try:
+              osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True)
+            except OSError:
+              # If the cache already existed, as root, but hadn't had its
+              # shebang updated, do it as root now.
+              osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True, sudo=True)
+      cls.DEFAULT_GSUTIL_BIN = gsutil_bin
+      cls._CompileCrcmod(ref.path)
+    else:
+      # Check if the default gsutil path for builders exists. If
+      # not, try locating gsutil. If none exists, simply use 'gsutil'.
+      gsutil_bin = cls.DEFAULT_GSUTIL_BUILDER_BIN
+      if not os.path.exists(gsutil_bin):
+        gsutil_bin = osutils.Which('gsutil')
+      if gsutil_bin is None:
+        gsutil_bin = 'gsutil'
+      cls.DEFAULT_GSUTIL_BIN = gsutil_bin
 
   @classmethod
   def _CompileCrcmod(cls, path):
@@ -500,7 +500,8 @@ class GSContext(object):
       cache_user: user for creating cache_dir for gsutil. Default is None.
     """
     if gsutil_bin is None:
-      gsutil_bin = self.GetDefaultGSUtilBin(cache_dir, cache_user=cache_user)
+      self.InitializeCache(cache_dir=cache_dir, cache_user=cache_user)
+      gsutil_bin = self.DEFAULT_GSUTIL_BIN
     else:
       self._CheckFile('gsutil not found', gsutil_bin)
     self.gsutil_bin = gsutil_bin

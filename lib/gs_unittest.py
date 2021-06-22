@@ -29,7 +29,7 @@ def PatchGS(*args, **kwargs):
 class GSContextMock(partial_mock.PartialCmdMock):
   """Used to mock out the GSContext class."""
   TARGET = 'chromite.lib.gs.GSContext'
-  ATTRS = ('GetDefaultGSUtilBin', 'DoCommand', 'DEFAULT_SLEEP_TIME',
+  ATTRS = ('InitializeCache', 'DoCommand', 'DEFAULT_SLEEP_TIME',
            'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE', 'DEFAULT_GSUTIL_BIN',
            'DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
   DEFAULT_ATTR = 'DoCommand'
@@ -68,9 +68,8 @@ PreconditionException: 412 Precondition Failed"""
     # TODO(rcui): Change this when this is fixed in PartialMock.
     self._SetGSUtilUrl()
 
-  @staticmethod
-  def GetDefaultGSUtilBin(*_args, **_kwargs):
-    return 'gsutil'
+  def InitializeCache(self, *_args, **_kwargs):
+    self.DEFAULT_GSUTIL_BIN = 'gsutil'
 
   def DoCommand(self, inst, gsutil_cmd, **kwargs):
     result = self._results['DoCommand'].LookupResult(
