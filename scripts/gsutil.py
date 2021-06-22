@@ -7,11 +7,10 @@
 This takes care of downloading the pinned version we use in chromite.
 """
 
-import os
-
 from chromite.lib import gs
 
 
 def main(argv):
-  gsutil = gs.GSContext.GetDefaultGSUtilBin()
-  os.execv(gsutil, ['gsutil'] + argv)
+  ctx = gs.GSContext(retries=0)
+  return ctx.DoCommand(
+      argv, print_cmd=False, stderr=None, check=False).returncode
