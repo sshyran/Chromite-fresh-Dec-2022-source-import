@@ -1220,7 +1220,7 @@ class ChromeSDKCommand(command.CliCommand):
     wrapper_content = [
         '#!/bin/sh\n',
         '%(rewrapper_dir)s/rewrapper -cfg="%(cros_cfg_path)s" '
-        '-exec_root="%(chrome_src)s" $@\n' % {
+        '-exec_root="%(chrome_src)s" "$@"\n' % {
             'rewrapper_dir': os.path.join(
                 self.options.chrome_src, 'buildtools', 'reclient'),
             'cros_cfg_path': cros_cfg_path,
