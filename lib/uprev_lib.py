@@ -26,9 +26,8 @@ from chromite.utils import pms
 
 CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'
 
-# The directory relative to the source root housing the chrome packages.
-_CHROME_OVERLAY_DIR = 'src/third_party/chromiumos-overlay'
-_CHROME_OVERLAY_PATH = os.path.join(constants.SOURCE_ROOT, _CHROME_OVERLAY_DIR)
+_CHROME_OVERLAY_PATH = os.path.join(constants.SOURCE_ROOT,
+                                    constants.CHROMIUMOS_OVERLAY_DIR)
 
 GitRef = collections.namedtuple('GitRef', ['path', 'ref', 'revision'])
 
@@ -40,11 +39,14 @@ class Error(Exception):
 class NoUnstableEbuildError(Error):
   """When no unstable ebuild can be found."""
 
+
 class EbuildUprevError(Error):
   """An error occurred while uprevving packages."""
 
+
 class EbuildManifestError(Error):
   """Error when running ebuild manifest."""
+
 
 class ChromeEBuild(portage_util.EBuild):
   """Thin sub-class of EBuild that adds a few small helpers."""
