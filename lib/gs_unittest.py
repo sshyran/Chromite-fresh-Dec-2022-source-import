@@ -749,7 +749,8 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
 
   def testInitGsutilBin(self):
     """Test we use the given gsutil binary, erroring where appropriate."""
-    self.assertEqual(gs.GSContext().gsutil_bin, self.gsutil_bin)
+    # pylint: disable=protected-access
+    self.assertEqual(gs.GSContext()._gsutil_bin, self.gsutil_bin)
     self.assertRaises(gs.GSContextException,
                       gs.GSContext, gsutil_bin=self.bad_path)
 
@@ -760,6 +761,7 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
 
   def testInitBotoFileEnv(self):
     """Test boto file environment is set correctly."""
+    # We use gsutil_bin as a file that already exists and is not the default.
     os.environ['BOTO_CONFIG'] = self.gsutil_bin
     self.assertTrue(gs.GSContext().boto_file, self.gsutil_bin)
     self.assertEqual(gs.GSContext(boto_file=self.acl_file).boto_file,
@@ -856,7 +858,8 @@ class GSDoCommandTest(cros_test_lib.TestCase):
     with mock.patch.object(retry_stats, 'RetryWithStats', autospec=True,
                            return_value=result):
       ctx.Copy('/blah', 'gs://foon', version=version, recursive=recursive)
-      cmd = [self.ctx.gsutil_bin] + self.ctx.gsutil_flags + list(headers)
+      # pylint: disable=protected-access
+      cmd = [self.ctx._gsutil_bin] + self.ctx.gsutil_flags + list(headers)
       cmd += ['cp', '-v']
       if recursive:
         cmd += ['-r', '-e']

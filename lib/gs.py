@@ -504,7 +504,7 @@ class GSContext(object):
       gsutil_bin = self.DEFAULT_GSUTIL_BIN
     else:
       self._CheckFile('gsutil not found', gsutil_bin)
-    self.gsutil_bin = gsutil_bin
+    self._gsutil_bin = gsutil_bin
 
     # The version of gsutil is retrieved on demand and cached here.
     self._gsutil_version = None
@@ -663,7 +663,7 @@ class GSContext(object):
       env = os.environ.copy()
       env['BOTO_CONFIG'] = self.boto_file
 
-    cmd = [self.gsutil_bin] + self.gsutil_flags + ['cat', path]
+    cmd = [self._gsutil_bin] + self.gsutil_flags + ['cat', path]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
 
     def read_content():
@@ -867,7 +867,7 @@ class GSContext(object):
     kwargs.setdefault('stderr', True)
     kwargs.setdefault('encoding', 'utf-8')
 
-    cmd = [self.gsutil_bin]
+    cmd = [self._gsutil_bin]
     cmd += self.gsutil_flags
     for header in headers:
       cmd += ['-h', header]
