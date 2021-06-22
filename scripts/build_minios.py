@@ -19,20 +19,20 @@ def GetParser():
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument('--board', '-b', '--build-target', required=True,
                       help='The board name.')
-  parser.add_argument('--image', type='path',
+  parser.add_argument('--image', type='path', required=True,
                       help='The path to the chromium os image.')
   parser.add_argument('--keys-dir', type='path',
                       help='The path to keyset.',
                       default=constants.VBOOT_DEVKEYS_DIR)
-  parser.add_argument('--public-key', type='path',
+  parser.add_argument('--public-key',
                       help='Filename to the public key whose private part '\
                       'signed the keyblock.',
                       default=constants.RECOVERY_PUBLIC_KEY )
-  parser.add_argument('--private-key', type='path',
+  parser.add_argument('--private-key',
                       help='Filename to the private key whose public part is '\
                       'baked into the keyblock.',
                       default=constants.RECOVERY_DATA_PRIVATE_KEY )
-  parser.add_argument('--keyblock', type='path',
+  parser.add_argument('--keyblock',
                       help='Filename to the kernel keyblock.',
                       default=constants.RECOVERY_KEYBLOCK)
   parser.add_argument('--serial', type=str,
