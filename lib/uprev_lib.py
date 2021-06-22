@@ -120,7 +120,35 @@ def best_chrome_ebuild(ebuilds):
   return best
 
 
-def find_chrome_ebuilds(package_dir):
+def get_stable_chrome_version() -> str:
+  """Get the chrome version from the latest, stable chrome ebuild."""
+  return _get_best_stable_chrome_ebuild().chrome_version
+
+
+def _get_best_stable_chrome_ebuild() -> ChromeEBuild:
+  """Find the stable chrome ebuild with the highest version."""
+  package_dir = os.path.join(_CHROME_OVERLAY_PATH, constants.CHROME_CP)
+  _unstable_ebuild, stable_ebuilds = find_chrome_ebuilds(package_dir)
+  return _get_best_stable_chrome_ebuild_from_ebuilds(stable_ebuilds)
+
+
+def _get_best_stable_chrome_ebuild_from_ebuilds(
+    stable_ebuilds: List[ChromeEBuild]) -> ChromeEBuild:
+  """Get the highest versioned chrome ebuild from a list of stable ebuilds."""
+  candidates = []
+  # This is an artifact from the old process.
+  chrome_branch_re = re.compile(r'%s.*_rc.*' % CHROME_VERSION_REGEX)
+  for ebuild in stable_ebuilds:
+    if chrome_branch_re.search(ebuild.version):
+      candidates.append(ebuild)
+
+  if not candidates:
+    return None
+
+  return best_chrome_ebuild(candidates)
+
+
+def find_chrome_ebuilds(package_dir) -> (ChromeEBuild, List[ChromeEBuild]):
   """Return a tuple of chrome's unstable ebuild and stable ebuilds.
 
   Args:
@@ -273,17 +301,9 @@ class UprevChromeManager(object):
       best_stable_candidate: The highest version stable ebuild that exists, or
           None if no stable ebuilds exist.
     """
-    candidates = []
-    # This is an artifact from the old process.
-    chrome_branch_re = re.compile(r'%s.*_rc.*' % CHROME_VERSION_REGEX)
-    for ebuild in stable_ebuilds:
-      if chrome_branch_re.search(ebuild.version):
-        candidates.append(ebuild)
-
-    if not candidates:
-      return (True, None)
-
-    candidate = best_chrome_ebuild(candidates)
+    candidate = _get_best_stable_chrome_ebuild_from_ebuilds(stable_ebuilds)
+    if not candidate:
+      return True, None
 
     # A candidate is only a valid uprev candidate if its chrome version
     # is no better than the target version. We can uprev equal versions
