@@ -522,7 +522,7 @@ def _get_version_pin_src_path(package_path):
 
 
 @uprevs_versioned_package(constants.CHROME_CP)
-def uprev_chrome(build_targets, refs, chroot):
+def uprev_chrome_from_ref(build_targets, refs, chroot):
   """Uprev chrome and its related packages.
 
   See: uprev_versioned_package.
@@ -532,6 +532,22 @@ def uprev_chrome(build_targets, refs, chroot):
   chrome_version = uprev_lib.get_chrome_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
+  return uprev_chrome(build_targets, chrome_version, chroot)
+
+
+def revbump_chrome(build_targets, chroot):
+  """Attempt to revbump chrome.
+
+  Revbumps are done by executing an uprev using the current stable version.
+  E.g. if chrome is on 1.2.3.4 and has a 1.2.3.4_rc-r2.ebuild, performing an
+  uprev on version 1.2.3.4 when there are applicable changes (e.g. to the 9999
+  ebuild) will result in a revbump to 1.2.3.4_rc-r3.ebuild.
+  """
+  chrome_version = uprev_lib.get_stable_chrome_version()
+  return uprev_chrome(build_targets, chrome_version, chroot)
+
+
+def uprev_chrome(build_targets, chrome_version, chroot):
   uprev_manager = uprev_lib.UprevChromeManager(
       chrome_version, build_targets=build_targets, chroot=chroot)
   result = uprev_lib.UprevVersionedPackageResult()
