@@ -1273,8 +1273,6 @@ class ChromeSDKCommand(command.CliCommand):
 
     # Add managed components to the PATH.
     path = os.environ['PATH'].split(os.pathsep)
-    # This is just for `gsutil`.
-    path.insert(0, constants.CHROMITE_SCRIPTS_DIR)
     path.insert(0, constants.CHROMITE_BIN_DIR)
     env['PATH'] = os.pathsep.join(path)
 
