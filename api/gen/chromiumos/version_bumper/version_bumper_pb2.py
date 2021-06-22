@@ -17,9 +17,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/version_bumper/version_bumper.proto',
   package='chromiumos.version_bumper',
   syntax='proto3',
-  serialized_options=b'ZCgo.chromium.org/chromiumos/infra/proto/go/chromiumos/version_bumper',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZCgo.chromium.org/chromiumos/infra/proto/go/chromiumos/version_bumper',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n.chromiumos/version_bumper/version_bumper.proto\x12\x19\x63hromiumos.version_bumper\"\xae\x02\n\x12\x42umpVersionRequest\x12\x1d\n\x15\x63hromiumosOverlayRepo\x18\x01 \x01(\t\x12W\n\x0f\x63omponentToBump\x18\x02 \x01(\x0e\x32>.chromiumos.version_bumper.BumpVersionRequest.VersionComponent\"\x9f\x01\n\x10VersionComponent\x12\x1e\n\x1a\x43OMPONENT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n\x18\x43OMPONENT_TYPE_MILESTONE\x10\x01\x12\x18\n\x14\x43OMPONENT_TYPE_BUILD\x10\x02\x12\x19\n\x15\x43OMPONENT_TYPE_BRANCH\x10\x03\x12\x18\n\x14\x43OMPONENT_TYPE_PATCH\x10\x04\"5\n\x13\x42umpVersionResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\tBEZCgo.chromium.org/chromiumos/infra/proto/go/chromiumos/version_bumperb\x06proto3'
+  serialized_pb=b'\n.chromiumos/version_bumper/version_bumper.proto\x12\x19\x63hromiumos.version_bumper\"\xae\x02\n\x12\x42umpVersionRequest\x12\x1d\n\x15\x63hromiumosOverlayRepo\x18\x01 \x01(\t\x12W\n\x0f\x63omponentToBump\x18\x02 \x01(\x0e\x32>.chromiumos.version_bumper.BumpVersionRequest.VersionComponent\"\x9f\x01\n\x10VersionComponent\x12\x1e\n\x1a\x43OMPONENT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n\x18\x43OMPONENT_TYPE_MILESTONE\x10\x01\x12\x18\n\x14\x43OMPONENT_TYPE_BUILD\x10\x02\x12\x19\n\x15\x43OMPONENT_TYPE_BRANCH\x10\x03\x12\x18\n\x14\x43OMPONENT_TYPE_PATCH\x10\x04\"5\n\x13\x42umpVersionResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\tBh\n!com.google.chrome.crosinfra.protoZCgo.chromium.org/chromiumos/infra/proto/go/chromiumos/version_bumperb\x06proto3'
 )
 
 

@@ -17,9 +17,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/branch.proto',
   package='chromiumos',
   syntax='proto3',
-  serialized_options=b'Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17\x63hromiumos/branch.proto\x12\nchromiumos\"\xb9\x01\n\x06\x42ranch\x12+\n\x04type\x18\x01 \x01(\x0e\x32\x1d.chromiumos.Branch.BranchType\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ndescriptor\x18\x03 \x01(\t\"`\n\nBranchType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07RELEASE\x10\x01\x12\x0b\n\x07\x46\x41\x43TORY\x10\x02\x12\x0c\n\x08\x46IRMWARE\x10\x03\x12\r\n\tSTABILIZE\x10\x04\x12\n\n\x06\x43USTOM\x10\x05\x42\x36Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x17\x63hromiumos/branch.proto\x12\nchromiumos\"\xb9\x01\n\x06\x42ranch\x12+\n\x04type\x18\x01 \x01(\x0e\x32\x1d.chromiumos.Branch.BranchType\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ndescriptor\x18\x03 \x01(\t\"`\n\nBranchType\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07RELEASE\x10\x01\x12\x0b\n\x07\x46\x41\x43TORY\x10\x02\x12\x0c\n\x08\x46IRMWARE\x10\x03\x12\r\n\tSTABILIZE\x10\x04\x12\n\n\x06\x43USTOM\x10\x05\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
 )
 
 

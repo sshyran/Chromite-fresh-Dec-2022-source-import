@@ -19,9 +19,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/generate_build_plan.proto',
   package='chromiumos',
   syntax='proto3',
-  serialized_options=b'Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n$chromiumos/generate_build_plan.proto\x12\nchromiumos\x1a\x1f\x63hromiumos/builder_config.proto\x1a\x17\x63hromiumos/common.proto\"\xc7\x01\n\x18GenerateBuildPlanRequest\x12.\n\x0egerrit_changes\x18\x01 \x03(\x0b\x32\x16.chromiumos.ProtoBytes\x12\x17\n\x0fmanifest_commit\x18\x02 \x01(\t\x12.\n\x0egitiles_commit\x18\x04 \x01(\x0b\x32\x16.chromiumos.ProtoBytes\x12\x32\n\x0f\x62uilder_configs\x18\x03 \x03(\x0b\x32\x19.chromiumos.BuilderConfig\"\xd8\x01\n\x19GenerateBuildPlanResponse\x12\x33\n\rbuilds_to_run\x18\x01 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12G\n!skip_for_global_build_irrelevance\x18\x02 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12=\n\x17skip_for_run_when_rules\x18\x03 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.IdB6Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n$chromiumos/generate_build_plan.proto\x12\nchromiumos\x1a\x1f\x63hromiumos/builder_config.proto\x1a\x17\x63hromiumos/common.proto\"\xc7\x01\n\x18GenerateBuildPlanRequest\x12.\n\x0egerrit_changes\x18\x01 \x03(\x0b\x32\x16.chromiumos.ProtoBytes\x12\x17\n\x0fmanifest_commit\x18\x02 \x01(\t\x12.\n\x0egitiles_commit\x18\x04 \x01(\x0b\x32\x16.chromiumos.ProtoBytes\x12\x32\n\x0f\x62uilder_configs\x18\x03 \x03(\x0b\x32\x19.chromiumos.BuilderConfig\"\xd8\x01\n\x19GenerateBuildPlanResponse\x12\x33\n\rbuilds_to_run\x18\x01 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12G\n!skip_for_global_build_irrelevance\x18\x02 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.Id\x12=\n\x17skip_for_run_when_rules\x18\x03 \x03(\x0b\x32\x1c.chromiumos.BuilderConfig.IdBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[chromiumos_dot_builder__config__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 

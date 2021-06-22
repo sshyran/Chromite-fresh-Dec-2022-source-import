@@ -17,9 +17,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/sdk_cache_state.proto',
   package='chromiumos',
   syntax='proto3',
-  serialized_options=b'Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n chromiumos/sdk_cache_state.proto\x12\nchromiumos\"f\n\rSdkCacheState\x12\x0f\n\x07version\x18\x01 \x01(\x05\x12\x17\n\x0fmanifest_branch\x18\x02 \x01(\t\x12\x14\n\x0cmanifest_url\x18\x03 \x01(\t\x12\x15\n\rsnapshot_hash\x18\x04 \x01(\tB6Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n chromiumos/sdk_cache_state.proto\x12\nchromiumos\"f\n\rSdkCacheState\x12\x0f\n\x07version\x18\x01 \x01(\x05\x12\x17\n\x0fmanifest_branch\x18\x02 \x01(\t\x12\x14\n\x0cmanifest_url\x18\x03 \x01(\t\x12\x15\n\rsnapshot_hash\x18\x04 \x01(\tBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
 )
 
 

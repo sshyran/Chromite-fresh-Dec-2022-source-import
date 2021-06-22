@@ -17,9 +17,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/metrics.proto',
   package='chromiumos',
   syntax='proto3',
-  serialized_options=b'Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x18\x63hromiumos/metrics.proto\x12\nchromiumos\"i\n\x0bMetricEvent\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1e\n\x16timestamp_milliseconds\x18\x02 \x01(\x03\x12\x1d\n\x15\x64uration_milliseconds\x18\x03 \x01(\x04\x12\r\n\x05gauge\x18\x04 \x01(\x04\x42\x36Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x18\x63hromiumos/metrics.proto\x12\nchromiumos\"i\n\x0bMetricEvent\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1e\n\x16timestamp_milliseconds\x18\x02 \x01(\x03\x12\x1d\n\x15\x64uration_milliseconds\x18\x03 \x01(\x04\x12\r\n\x05gauge\x18\x04 \x01(\x04\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
 )
 
 

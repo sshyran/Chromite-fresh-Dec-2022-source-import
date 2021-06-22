@@ -19,9 +19,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='chromiumos/dut_tracking.proto',
   package='chromiumos',
   syntax='proto3',
-  serialized_options=b'Z4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
+  serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1d\x63hromiumos/dut_tracking.proto\x12\nchromiumos\x1a\x1c\x63hromiumos/bot_scaling.proto\"\xe7\x01\n\x0eTrackingPolicy\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x31\n\ndimensions\x18\x02 \x03(\x0b\x32\x1d.chromiumos.SwarmingDimension\x12)\n\x05modes\x18\x03 \x03(\x0e\x32\x1a.chromiumos.MonitoringMode\x12\x16\n\x0elookback_hours\x18\x04 \x01(\x11\x12\x36\n\x0ftask_dimensions\x18\x05 \x03(\x0b\x32\x1d.chromiumos.SwarmingDimension\x12\x19\n\x11swarming_instance\x18\x06 \x01(\t\"A\n\x11TrackingPolicyCfg\x12,\n\x08policies\x18\x01 \x03(\x0b\x32\x1a.chromiumos.TrackingPolicy*b\n\x0eMonitoringMode\x12\x14\n\x10\x44\x45\x46\x41ULT_TRACKING\x10\x00\x12\x12\n\x0eTASK_BOT_COUNT\x10\x01\x12\x11\n\rMAX_PEND_TIME\x10\x02\x12\x13\n\x0fPASS_FAIL_COUNT\x10\x03\x42\x36Z4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1d\x63hromiumos/dut_tracking.proto\x12\nchromiumos\x1a\x1c\x63hromiumos/bot_scaling.proto\"\xe7\x01\n\x0eTrackingPolicy\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x31\n\ndimensions\x18\x02 \x03(\x0b\x32\x1d.chromiumos.SwarmingDimension\x12)\n\x05modes\x18\x03 \x03(\x0e\x32\x1a.chromiumos.MonitoringMode\x12\x16\n\x0elookback_hours\x18\x04 \x01(\x11\x12\x36\n\x0ftask_dimensions\x18\x05 \x03(\x0b\x32\x1d.chromiumos.SwarmingDimension\x12\x19\n\x11swarming_instance\x18\x06 \x01(\t\"A\n\x11TrackingPolicyCfg\x12,\n\x08policies\x18\x01 \x03(\x0b\x32\x1a.chromiumos.TrackingPolicy*b\n\x0eMonitoringMode\x12\x14\n\x10\x44\x45\x46\x41ULT_TRACKING\x10\x00\x12\x12\n\x0eTASK_BOT_COUNT\x10\x01\x12\x11\n\rMAX_PEND_TIME\x10\x02\x12\x13\n\x0fPASS_FAIL_COUNT\x10\x03\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[chromiumos_dot_bot__scaling__pb2.DESCRIPTOR,])
 
