@@ -21,12 +21,6 @@ from chromite.lib.parser import package_info
 
 pytestmark = [cros_test_lib.pytestmark_inside_only]
 
-try:
-  import pytest  # pylint: disable=import-error
-  pytest.importorskip('_emerge')
-except ImportError:
-  pass
-
 # These aren't available outside the SDK.
 # pylint: disable=import-error,wrong-import-order,wrong-import-position
 from _emerge.actions import adjust_configs

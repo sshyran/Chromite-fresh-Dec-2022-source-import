@@ -32,6 +32,46 @@ wheel: <
   version: "version:2.3.75"
 >
 
+# pylint deps.
+# NB: Keep in sync with cli/cros/pylint-2.
+wheel: <
+  name: "infra/python/wheels/pylint-quotes-py3"
+  version: "version:0.2.1"
+>
+wheel: <
+  name: "infra/python/wheels/astroid-py3"
+  version: "version:2.4.2"
+>
+wheel: <
+  name: "infra/python/wheels/pylint-py3"
+  version: "version:2.6.0"
+>
+
+wheel: <
+  name: "infra/python/wheels/futures-py2_py3"
+  version: "version:3.1.1"
+>
+wheel: <
+  name: "infra/python/wheels/isort-py2_py3"
+  version: "version:4.3.4"
+>
+wheel: <
+  name: "infra/python/wheels/mccabe-py2_py3"
+  version: "version:0.6.1"
+>
+wheel: <
+  name: "infra/python/wheels/toml-py3"
+  version: "version:0.10.1"
+>
+wheel: <
+  name: "infra/python/wheels/wrapt/${vpython_platform}"
+  version: "version:1.10.11"
+>
+wheel: <
+  name: "infra/python/wheels/lazy-object-proxy/${vpython_platform}"
+  version: "version:1.4.3"
+>
+
 # pytest deps.
 wheel: <
   name: "infra/python/wheels/apipkg-py2_py3"

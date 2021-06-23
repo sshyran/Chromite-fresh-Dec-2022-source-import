@@ -653,24 +653,6 @@ class DocStringCheckerTest(CheckerTestCase):
       self.assertEqual(expected, sections)
 
 
-class ChromiteLoggingCheckerTest(CheckerTestCase):
-  """Tests for ChromiteLoggingChecker module"""
-
-  CHECKER = lint.ChromiteLoggingChecker
-
-  def testLoggingImported(self):
-    """Test that import logging is flagged."""
-    node = TestNode(names=[('logging', None)], lineno=15)
-    self.checker.visit_import(node)
-    self.assertEqual(self.results, [('R9301', '', 15, None, None)])
-
-  def testLoggingNotImported(self):
-    """Test that importing something else (not logging) is not flagged."""
-    node = TestNode(names=[('myModule', None)], lineno=15)
-    self.checker.visit_import(node)
-    self.assertLintPassed()
-
-
 class SourceCheckerTest(CheckerTestCase):
   """Tests for SourceChecker module"""
 
