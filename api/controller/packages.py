@@ -372,6 +372,11 @@ def NeedsChromeSource(input_proto, output_proto, _config):
     output_proto.reasons.append(
         packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE)
 
+  # Local uprev reason.
+  if result.local_uprev:
+    output_proto.reasons.append(
+        packages_pb2.NeedsChromeSourceResponse.LOCAL_UPREV)
+
   # No chrome prebuilt reason.
   if result.missing_chrome_prebuilt:
     output_proto.reasons.append(

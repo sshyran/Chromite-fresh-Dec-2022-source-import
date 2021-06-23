@@ -307,6 +307,8 @@ class UprevChromeManager(object):
       return result
 
     self._new_ebuild_files.extend(result.changed_files)
+    logging.debug('Modified ebuild(s) for %s: %s', package,
+                  result.changed_files)
     if candidate and not candidate.IsSticky():
       osutils.SafeUnlink(candidate.ebuild_path)
       self._removed_ebuild_files.append(candidate.ebuild_path)
@@ -671,6 +673,9 @@ class UprevVersionedPackageResult(object):
 
   def __init__(self):
     self.modified = []
+
+  def __bool__(self):
+    return self.uprevved
 
   def add_result(self, new_version, modified_files):
     """Adds version/ebuilds tuple to result.

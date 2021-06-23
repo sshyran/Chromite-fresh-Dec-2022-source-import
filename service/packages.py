@@ -12,7 +12,7 @@ import json
 import os
 import re
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -93,6 +93,7 @@ NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (
     'packages',
     'missing_chrome_prebuilt',
     'missing_follower_prebuilt',
+    'local_uprev',
 ))
 
 
@@ -535,7 +536,10 @@ def uprev_chrome_from_ref(build_targets, refs, chroot):
   return uprev_chrome(build_targets, chrome_version, chroot)
 
 
-def revbump_chrome(build_targets, chroot):
+def revbump_chrome(
+    build_targets: List['build_target_lib.BuildTarget'],
+    chroot: Optional['chroot_lib.Chroot'] = None
+) -> uprev_lib.UprevVersionedPackageResult:
   """Attempt to revbump chrome.
 
   Revbumps are done by executing an uprev using the current stable version.
@@ -547,7 +551,11 @@ def revbump_chrome(build_targets, chroot):
   return uprev_chrome(build_targets, chrome_version, chroot)
 
 
-def uprev_chrome(build_targets, chrome_version, chroot):
+def uprev_chrome(
+    build_targets: List['build_target_lib.BuildTarget'], chrome_version: str,
+    chroot: Union['chroot_lib.Chroot', None]
+) -> uprev_lib.UprevVersionedPackageResult:
+  """Attempt to uprev chrome and its related packages to the given version."""
   uprev_manager = uprev_lib.UprevChromeManager(
       chrome_version, build_targets=build_targets, chroot=chroot)
   result = uprev_lib.UprevVersionedPackageResult()
@@ -829,6 +837,8 @@ def needs_chrome_source(
       pkg: pkg in graph for pkg in constants.OTHER_CHROME_PACKAGES
   }
 
+  local_uprev = builds_chrome and revbump_chrome([build_target])
+
   # When we are compiling source set False since we do not use prebuilts.
   # When not compiling from source, start with True, i.e. we have every prebuilt
   # we've checked for up to this point.
@@ -867,7 +877,9 @@ def needs_chrome_source(
       builds_chrome=builds_chrome,
       packages=[package_info.parse(p) for p in pkgs_needing_prebuilts],
       missing_chrome_prebuilt=not has_chrome_prebuilt,
-      missing_follower_prebuilt=not has_follower_prebuilts)
+      missing_follower_prebuilt=not has_follower_prebuilts,
+      local_uprev=local_uprev,
+  )
 
 
 def determine_chrome_version(build_target):

@@ -840,6 +840,61 @@ class BuildsChromeTest(cros_test_lib.MockTestCase, ApiConfigMixin):
                                   [controller_util.PackageInfoToCPV(package)])
 
 
+class NeedsChromeSourceTest(cros_test_lib.MockTempDirTestCase, ApiConfigMixin):
+  """NeedsChromeSource tests."""
+
+  def setUp(self):
+    self.response = packages_pb2.NeedsChromeSourceResponse()
+
+    self.board = 'board'
+    self.sysroot = self.tempdir
+
+  def _GetRequest(self, compile_source=False):
+    """Helper to build a request."""
+    request = packages_pb2.NeedsChromeSourceRequest()
+
+    request.install_request.sysroot.path = self.sysroot
+    request.install_request.sysroot.build_target.name = self.board
+    request.install_request.flags.compile_source = compile_source
+
+    return request
+
+  def testAll(self):
+    """Reason translation test."""
+    result = packages_service.NeedsChromeSourceResult(
+        needs_chrome_source=True,
+        builds_chrome=True,
+        packages=[package_info.parse('cat/pkg')],
+        missing_chrome_prebuilt=True,
+        missing_follower_prebuilt=True,
+        local_uprev=True,
+    )
+    self.PatchObject(packages_service, 'needs_chrome_source',
+                     return_value=result)
+
+    packages_controller.NeedsChromeSource(self._GetRequest(compile_source=True),
+                                          self.response,
+                                          self.api_config)
+
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.LOCAL_UPREV,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.NO_PREBUILT,
+                  self.response.reasons)
+    self.assertIn(
+        packages_pb2.NeedsChromeSourceResponse.FOLLOWER_LACKS_PREBUILT,
+        self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+
+    self.assertEqual(1, len(self.response.packages))
+    self.assertEqual(('cat', 'pkg'), (self.response.packages[0].category,
+                                      self.response.packages[0].package_name))
+
+
 class GetAndroidMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
   """GetAndroidMetadata tests."""
 
