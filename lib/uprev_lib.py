@@ -234,12 +234,39 @@ class UprevResult(object):
     self.changed_files = list(changed_files or [])
 
   def __bool__(self):
-    """Returns True only if this Result indicates that a file was modified."""
-    return self.outcome in (
-        Outcome.REVISION_BUMP,
-        Outcome.VERSION_BUMP,
-        Outcome.NEW_EBUILD_CREATED,
-    )
+    """Returns True if a file was modified (uprev or revbump)."""
+    return self.new_ebuild_created or self.revision_bump or self.version_bump
+
+  # Properties corresponding directly to a specific outcome check.
+  @property
+  def new_ebuild_created(self):
+    """True when the result was a new ebuild created."""
+    return self.outcome is Outcome.NEW_EBUILD_CREATED
+
+  @property
+  def newer_version_exists(self):
+    """True when the existing stable version is newer than the given version."""
+    return self.outcome is Outcome.NEWER_VERSION_EXISTS
+
+  @property
+  def revision_bump(self):
+    """True when the result was a revbump."""
+    return self.outcome is Outcome.REVISION_BUMP
+
+  @property
+  def same_version_exists(self):
+    return self.outcome is Outcome.SAME_VERSION_EXISTS
+
+  @property
+  def version_bump(self):
+    """True when the result was a version bump."""
+    return self.outcome is Outcome.VERSION_BUMP
+
+  # Composite properties to simplify checks.
+  @property
+  def stable_version(self):
+    """True when the supplied and stable version matched."""
+    return self.revision_bump or self.same_version_exists
 
 
 class UprevChromeManager(object):

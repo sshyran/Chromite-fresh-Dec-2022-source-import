@@ -551,8 +551,6 @@ def uprev_chrome(build_targets, chrome_version, chroot):
   uprev_manager = uprev_lib.UprevChromeManager(
       chrome_version, build_targets=build_targets, chroot=chroot)
   result = uprev_lib.UprevVersionedPackageResult()
-  # Start with chrome itself, as we can't do anything else unless chrome
-  # uprevs successfully.
   # TODO(crbug.com/1080429): Handle all possible outcomes of a Chrome uprev
   #     attempt. The expected behavior is documented in the following table:
   #
@@ -565,14 +563,25 @@ def uprev_chrome(build_targets, chrome_version, chroot):
   #     VERSION_BUMP or NEW_EBUILD_CREATED:
   #       Uprev followers
   #       Assert that Chrome & followers are at same package version
-  if not uprev_manager.uprev(constants.CHROME_CP):
+
+  # Start with chrome itself so we can proceed accordingly.
+  chrome_result = uprev_manager.uprev(constants.CHROME_CP)
+  if chrome_result.newer_version_exists:
+    # Cannot use the given version (newer version already exists).
     return result
 
-  # With a successful chrome rev, also uprev related packages.
+  # Also uprev related packages.
   for package in constants.OTHER_CHROME_PACKAGES:
-    uprev_manager.uprev(package)
+    follower_result = uprev_manager.uprev(package)
+    if chrome_result.stable_version and follower_result.version_bump:
+      logging.warning('%s had a version bump, but no more than a revision bump '
+                      'should have been possible.', package)
 
-  return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
+  if uprev_manager.modified_ebuilds:
+    # Record changes when we have them.
+    return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
+
+  return result
 
 
 def _get_latest_version_from_refs(refs_prefix: str,

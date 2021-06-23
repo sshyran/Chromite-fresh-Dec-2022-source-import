@@ -985,40 +985,57 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
 # These test cases cover both CHROME & FOLLOWER ebuilds being identically
 # higher, lower, or the same versions, with no modified ebuilds.
 UPREV_VERSION_CASES = (
+    # Uprev.
     pytest.param(
         '80.0.8080.0',
         '81.0.8181.0',
         # One added and one deleted for chrome and each "other" package.
         2 * (1 + len(constants.OTHER_CHROME_PACKAGES)),
+        False,
         id='newer_chrome_version',
+    ),
+    # Revbump.
+    pytest.param(
+        '80.0.8080.0',
+        '80.0.8080.0',
+        2,
+        True,
+        id='chrome_revbump',
     ),
     # No files should be changed in these cases.
     pytest.param(
         '80.0.8080.0',
         '80.0.8080.0',
         0,
+        False,
         id='same_chrome_version',
     ),
     pytest.param(
         '80.0.8080.0',
         '79.0.7979.0',
         0,
+        False,
         id='older_chrome_version',
     ),
 )
 
 
-@pytest.mark.parametrize('old_version, new_version, expected_count',
-                         UPREV_VERSION_CASES)
+@pytest.mark.parametrize(
+    'old_version, new_version, expected_count, modify_unstable',
+    UPREV_VERSION_CASES)
 def test_uprev_chrome_all_files_already_exist(old_version, new_version,
-                                              expected_count, monkeypatch,
-                                              overlay_stack):
+                                              expected_count, modify_unstable,
+                                              monkeypatch, overlay_stack):
   """Test Chrome uprevs work as expected when all packages already exist."""
   overlay, = overlay_stack(1)
   monkeypatch.setattr(uprev_lib, '_CHROME_OVERLAY_PATH', overlay.path)
 
   unstable_chrome = cr.test.Package(
       'chromeos-base', 'chromeos-chrome', version='9999', keywords='~*')
+  if modify_unstable:
+    # Add some field not set in stable.
+    unstable_chrome.depend = 'foo/bar'
+
   stable_chrome = cr.test.Package(
       'chromeos-base', 'chromeos-chrome', version=f'{old_version}_rc-r1')
 
