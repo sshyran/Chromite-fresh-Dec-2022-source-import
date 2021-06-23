@@ -968,6 +968,17 @@ def DefaultSettings():
       # Whether to convert the image into a guest VM image.
       guest_vm_image=False,
 
+      # b/186631313: On reven the base image has a graphical installer enabled,
+      # which is used to recover the device. Recovery images in the traditional
+      # sense can not be booted on reven devices, which run legacy BIOS or UEFI
+      # firmware.
+      #
+      # When base_is_recovery is set to True, we:
+      #   * Validate that the images list contains a base image.
+      #   * Copy the base image to recovery_image.bin instead of running
+      #     mod_image_for_recovery.sh.
+      base_is_recovery = False,
+
       # Image from which we will build update payloads.  Must either be None
       # or name one of the images in the 'images' list, above.
       payload_image=None,

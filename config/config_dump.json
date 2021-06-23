@@ -12,6 +12,7 @@
         "android_rev": null,
         "archive": true,
         "archive_build_debug": false,
+        "base_is_recovery": false,
         "basic_builder": false,
         "binhost_base_url": null,
         "binhost_bucket": null,
@@ -28214,6 +28215,7 @@
     },
     "reven-release": {
         "_template": "release",
+        "base_is_recovery": true,
         "boards": [
             "reven"
         ],
@@ -28236,6 +28238,7 @@
     },
     "reven-release-tryjob": {
         "_template": "release",
+        "base_is_recovery": true,
         "boards": [
             "reven"
         ],

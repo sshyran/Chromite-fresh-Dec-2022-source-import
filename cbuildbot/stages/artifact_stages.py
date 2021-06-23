@@ -314,9 +314,16 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
       # For recovery image to be generated correctly, BuildRecoveryImage must
       # run before BuildAndArchiveFactoryImages.
       if 'recovery' in config.images:
-        assert os.path.isfile(os.path.join(image_dir, constants.BASE_IMAGE_BIN))
-        logging.info('Running commands.BuildRecoveryImage')
-        commands.BuildRecoveryImage(buildroot, board, image_dir, extra_env)
+        base_image_path = os.path.join(image_dir, constants.BASE_IMAGE_BIN)
+        assert os.path.isfile(base_image_path)
+        if config.base_is_recovery:
+          recovery_image_path = os.path.join(image_dir,
+                                             constants.RECOVERY_IMAGE_BIN)
+          logging.info('Copying the base image to: %s',  recovery_image_path)
+          shutil.copyfile(base_image_path, recovery_image_path)
+        else:
+          logging.info('Running commands.BuildRecoveryImage')
+          commands.BuildRecoveryImage(buildroot, board, image_dir, extra_env)
         self._recovery_image_status_queue.put(True)
         recovery_image = constants.RECOVERY_IMAGE_BIN
         if not self.IsArchivedFile(recovery_image):

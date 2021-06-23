@@ -32,6 +32,34 @@ def _frozen_ge_set(ge_build_config, values, extras=None):
       x for x in values if x in board_names).union(extras or frozenset())
 
 
+def add_images(required_images):
+  """Add required images when applying changes to a BuildConfig.
+
+  Used similarly to append_useflags.
+
+  Args:
+    required_images: A list of image names that need to be present in the
+                     final build config.
+
+  Returns:
+    A callable suitable for use with BuildConfig.apply.
+  """
+  required_images = set(required_images)
+
+  def handler(old_images):
+    if not old_images:
+      old_images = []
+
+    new_images = old_images
+    for image_name in required_images:
+      if set(required_images).issubset(new_images):
+        break
+      new_images.append(image_name)
+    return new_images
+
+  return handler
+
+
 def remove_images(unsupported_images):
   """Remove unsupported images when applying changes to a BuildConfig.
 
@@ -2667,6 +2695,8 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1066311',
+          'images': add_images(['base']),
+          'base_is_recovery': True
       },
 
       # puff-moblab board does not exist in the lab.
