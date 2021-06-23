@@ -7,14 +7,10 @@
 import ast
 import json
 
+from google.cloud import datastore  # pylint: disable=import-error
+
 from chromite.lib import commandline
 from chromite.lib import dslib
-
-try:
-  import pytest  # pylint: disable=import-error
-  datastore = pytest.importorskip('gcloud.datastore')
-except ImportError:
-  from gcloud import datastore  # pylint: disable=import-error
 
 
 def GetParser():

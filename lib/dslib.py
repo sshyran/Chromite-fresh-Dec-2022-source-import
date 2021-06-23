@@ -6,16 +6,11 @@
 
 import json
 
+import google.api_core.exceptions  # pylint: disable=import-error
+from google.cloud import datastore  # pylint: disable=import-error
+
 from chromite.lib import cros_logging as logging
 from chromite.lib import iter_utils
-
-try:
-  import pytest  # pylint: disable=import-error
-  datastore = pytest.importorskip('gcloud.datastore')
-  gcloud = pytest.importorskip('gcloud')
-except ImportError:
-  from gcloud import datastore  # pylint: disable=import-error
-  import gcloud  # pylint: disable=import-error
 
 
 _BATCH_CHUNK_SIZE = 500
@@ -61,6 +56,6 @@ def ChunkedBatchWrite(entities, client, batch_size=_BATCH_CHUNK_SIZE):
       batch.put(entity)
     try:
       batch.commit()
-    except gcloud.exceptions.BadRequest:
+    except google.api_core.exceptions.BadRequest:
       logging.warning('Unexportable entities:\n%s', entities)
       raise

@@ -11,6 +11,8 @@ import os
 import pprint
 import time
 
+import inotify_simple  # pylint: disable=import-error
+
 from chromite.lib import commandline
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
@@ -19,13 +21,6 @@ from chromite.third_party.google.protobuf import timestamp_pb2
 from chromite.third_party.googleapiclient import discovery
 from chromite.third_party.infra_libs import ts_mon
 from chromite.third_party.oauth2client.client import GoogleCredentials
-
-
-try:
-  import pytest  # pylint: disable=import-error
-  inotify_simple = pytest.importorskip('inotify_simple')
-except ImportError:
-  import inotify_simple
 
 
 BATCH_PATIENCE = 10 * 60
