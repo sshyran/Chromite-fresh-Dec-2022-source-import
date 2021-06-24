@@ -86,8 +86,7 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
   if not exists:
     # No existing VM image that we can reuse. Create a new VM image.
     logging.info('Creating %s', dest_path)
-    cmd = [os.path.join(constants.CROSUTILS_DIR, 'image_to_vm.sh'),
-           '--test_image']
+    cmd = ['./image_to_vm.sh', '--test_image']
 
     if image:
       cmd.append('--from=%s' % path_util.ToChrootPath(image_dir))
@@ -114,7 +113,8 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
 
     msg = 'Failed to create the VM image'
     try:
-      cros_build_lib.run(cmd, enter_chroot=True, cwd=constants.SOURCE_ROOT)
+      # When enter_chroot is true the cwd needs to be src/scripts.
+      cros_build_lib.run(cmd, enter_chroot=True, cwd=constants.CROSUTILS_DIR)
     except cros_build_lib.RunCommandError as e:
       logging.error('%s: %s', msg, e)
       if tempdir:
