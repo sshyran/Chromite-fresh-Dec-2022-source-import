@@ -5,10 +5,13 @@
 """The test service unit tests."""
 
 import contextlib
+import json
 import os
 import shutil
+from typing import List
 from unittest import mock
 
+from chromite.utils import code_coverage_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
@@ -25,6 +28,7 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.service import test
+from chromite.service.test import GatherCodeCoverageLlvmJsonFileResult
 
 
 class PartialDict:
@@ -354,7 +358,6 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
     self.PatchObject(os.path, 'exists', return_value=True)
 
-
     ninja_cmd = self.PatchObject(commands.ChromeSDK, 'GetNinjaCommand',
                                  return_value='ninja command')
 
@@ -422,3 +425,163 @@ class ValidateMoblabVmTestTest(MoblabVmTestCase):
     osutils.WriteFile(self.logs_file, 'dummy_PassServer [FAILED]')
     self.assertRaises(failures_lib.TestFailure,
                       test.ValidateMoblabVmTest, self.results_dir)
+
+
+class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
+  """BundleCodeCoverageLlvmJson Tests."""
+
+  def setUp(self):
+    """Set up the class for tests."""
+    chroot_dir = os.path.join(self.tempdir, 'chroot')
+    osutils.SafeMakedirs(chroot_dir)
+    osutils.SafeMakedirs(os.path.join(chroot_dir, 'tmp'))
+    self.chroot = chroot_lib.Chroot(chroot_dir)
+
+    sysroot_path = os.path.join(chroot_dir, 'build', 'board')
+    osutils.SafeMakedirs(sysroot_path)
+    self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+
+    self.output_dir = os.path.join(self.tempdir, 'output')
+
+  def testGatherCodeCoverageLlvmJsonFileIsCalled1Time(self):
+    """Verify GatherCodeCoverageLlvmJsonFile is called on each file."""
+    GatherCodeCoverageLlvmJsonFile_mock = self.PatchObject(
+      test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
+
+    test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
+    GatherCodeCoverageLlvmJsonFile_mock.assert_called_once()
+
+  def testReturnNoneWhenGatherCodeCoverageLlvmJsonFileReturnsNone(self):
+    """Test returns None when no coverage files were found."""
+    self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
+
+    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
+                                             self.output_dir)
+    self.assertIsNone(result)
+
+  def testCreateTarballIsCalled1Time(self):
+    """Test that CreateTarball is called once."""
+    gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
+    self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile',
+      return_value=gather_result)
+
+    create_tarball_result = cros_build_lib.CommandResult(returncode=1)
+    CreateTarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball',
+                                          return_value=create_tarball_result)
+
+    test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
+    CreateTarball_mock.assert_called_once()
+
+  def testShouldReturnNoneWhenCreateTarballFails(self):
+    """Test that None is returned when CreateTarball fails."""
+    gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
+    self.PatchObject(test,
+      'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
+
+    create_tarball_result = cros_build_lib.CommandResult(returncode=1)
+    self.PatchObject(cros_build_lib, 'CreateTarball',
+      return_value=create_tarball_result)
+
+    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
+                                             self.output_dir)
+    self.assertIsNone(result)
+
+  def testShouldReturnPathToTarballOnSuccess(self):
+    """Test that the path to the tarball is returned on success."""
+    gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
+    self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile',
+      return_value=gather_result)
+
+    create_tarball_result = cros_build_lib.CommandResult(returncode=0)
+    self.PatchObject(cros_build_lib, 'CreateTarball',
+      return_value=create_tarball_result)
+
+    result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
+                                             self.output_dir)
+    self.assertEqual(
+      os.path.join(self.output_dir,
+                   constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR), result)
+
+
+class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
+  """GatherCodeCoverageLlvmJsonFile Tests."""
+
+  def getCodeCoverageLlvmContents(self, filenames: List[str], version='1',
+      file_type='llvm.coverage.json.export') -> str:
+    """Helper for generating the contents of an llvm code coverage file."""
+    return json.dumps({
+        'data': [
+            {
+                'files': [{'filename': x} for x in filenames ]
+            }
+        ],
+        'version': version,
+        'type': file_type
+    })
+
+  def writeCodeCoverageLlvm(self, filename, content: str = None):
+    """Helper to write a code coverage file."""
+    if content is None:
+      content = self.getCodeCoverageLlvmContents(['a.txt'])
+
+    osutils.WriteFile(filename, content=content, mode='w', makedirs=True)
+
+  def testJoinedFilePathsMatchesNumFilesProcessed(self):
+    """Test that all coverage files are found."""
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/coverage.json'))
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/coverage.json'))
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/d/coverage.json'))
+    self.writeCodeCoverageLlvm(
+      os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
+
+    result = test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
+    self.assertEqual(len(result.joined_file_paths), 4)
+
+  def testCallsGetLlvmJsonCoverageDataIfValidForEachFile(self):
+    """Test that GetLlvmJsonCoverageDataIfValid is called on each file."""
+    get_llvm_json_coverage_data_if_valid_mock = self.PatchObject(
+      code_coverage_util, 'GetLlvmJsonCoverageDataIfValid', return_value=None)
+
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/coverage.json'))
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/coverage.json'))
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/d/coverage.json'))
+    self.writeCodeCoverageLlvm(
+      os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
+
+    test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
+    self.assertEqual(get_llvm_json_coverage_data_if_valid_mock.call_count, 4)
+
+  def testWritesCombinedFileToOutputDir(self):
+    """Test that all contents of valid files are combined into the output."""
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/src2/coverage.json'),
+                               self.getCodeCoverageLlvmContents(
+                                   ['/src2/a.txt', '/src2/b.txt']))
+    self.writeCodeCoverageLlvm(
+      os.path.join(input_dir, 'a/firmware/coverage.json'),
+      self.getCodeCoverageLlvmContents(['/firmware/c.txt']))
+    self.writeCodeCoverageLlvm(
+      os.path.join(input_dir, 'a/invalid/invalid.json'), 'INVALID')
+
+    test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
+
+    # Verify the contents of each valid file appear in the output.
+    file_obj = json.loads(
+      self.ReadTempFile(os.path.join(output_dir, 'coverage.json')))
+    all_files = file_obj['data'][0]['files']
+
+    self.assertEqual(3, len(all_files))
+    self.assertEqual(1,
+      len([x for x in all_files if x['filename'] == '/src2/a.txt']))
+    self.assertEqual(1,
+      len([x for x in all_files if x['filename'] == '/src2/b.txt']))
+    self.assertEqual(1,
+      len([x for x in all_files if x['filename'] == '/firmware/c.txt']))

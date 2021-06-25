@@ -10,7 +10,9 @@ Handles test related functionality.
 import os
 import re
 import shutil
+import json
 
+from typing import List, NamedTuple
 from chromite.cbuildbot import commands
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -20,10 +22,17 @@ from chromite.lib import image_lib
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import chroot_lib
+from chromite.lib import sysroot_lib
+from chromite.utils import code_coverage_util
 
 
 class Error(Exception):
   """The module's base error class."""
+
+
+class NoFilesError(Error):
+  """When there are no files to archive."""
 
 
 class BuildTargetUnitTestResult(object):
@@ -413,3 +422,113 @@ def ValidateMoblabVmTest(results_dir):
   if not re.match(r'dummy_PassServer\s*\[\s*PASSED\s*]', log_file_contents):
     raise failures_lib.TestFailure('Moblab run_suite succeeded, but did '
                                    'not successfully run dummy_PassServer.')
+
+
+def BundleCodeCoverageLlvmJson(chroot: chroot_lib.Chroot,
+                               sysroot_class: sysroot_lib.Sysroot,
+                               output_dir: str):
+  """Bundle code coverage llvm json into a tarball for importing into GCE.
+
+  Args:
+    chroot: The chroot class used for these artifacts.
+    sysroot_class: The sysroot class used for these artifacts.
+    output_dir: The path to write artifacts to.
+    build_target_name: The build target
+
+  Returns:
+    A string path to the output code_coverage.tar.xz artifact, or None.
+  """
+  try:
+    base_path = chroot.full_path(sysroot_class.path)
+
+    with chroot.tempdir() as dest_tmpdir:
+      coverage_dir = os.path.join(base_path, 'build/coverage_data')
+      coverage_file = GatherCodeCoverageLlvmJsonFile(destdir=dest_tmpdir,
+                                                     paths=[coverage_dir])
+      if coverage_file is None:
+        logging.warning('No coverage files found in %s.', coverage_dir)
+        return None
+
+      tarball_path = os.path.join(output_dir,
+                                  constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR)
+      result = cros_build_lib.CreateTarball(tarball_path, dest_tmpdir)
+      if result.returncode != 0:
+        logging.error('Error (%d) when creating tarball %s from %s',
+                      result.returncode, tarball_path, dest_tmpdir)
+        return None
+    return tarball_path
+  except Exception as e:
+    logging.error('BundleCodeCoverageLlvmJson failed %s', e)
+    return None
+
+
+class GatherCodeCoverageLlvmJsonFileResult(NamedTuple):
+  """Class containing result data of GatherCodeCoverageLlvmJsonFile."""
+  joined_file_paths: List[str]
+
+
+def GatherCodeCoverageLlvmJsonFile(
+    destdir: str,
+    paths: List[str],
+    output_file_name='coverage.json') -> GatherCodeCoverageLlvmJsonFileResult:
+  """Locate code coverage llvm json files in |paths|.
+
+   This function locates all the coverage llvm json files and merges them
+   into one file, in the correct llvm json format.
+
+  Args:
+    destdir: Where the combined coverage file should be output to.
+    paths: A list of input paths to walk.
+    output_file_name: The name of the combined coverage file to output.
+
+  Returns:
+    A CodeCoverageFileTuple containing coverage.json file information or None.
+  """
+  logging.info('GatherCodeCoverageLlvmJsonFile destdir %s paths %s', destdir,
+               paths)
+
+  joined_file_paths = []
+  coverage_type = None
+  coverage_version = None
+  coverage_data = []
+
+  for p in paths:
+    if not os.path.exists(p):
+      raise NoFilesError('The path did not exist: ', p)
+
+    if not os.path.isdir(p):
+      raise ValueError('The path is not a directory: ', p)
+
+    for root, _, files in os.walk(p):
+      for f in files:
+        # Make sure the file contents match the llvm json format.
+        path_to_file = os.path.join(root, f)
+        file_data = code_coverage_util.GetLlvmJsonCoverageDataIfValid(
+          path_to_file)
+        if file_data is None:
+          continue
+
+        # Copy over data from this file.
+        joined_file_paths.append(path_to_file)
+        coverage_type = file_data['type']
+        coverage_version = file_data['version']
+        for datum in file_data['data']:
+          for file_data in datum['files']:
+            coverage_data.append(file_data)
+
+  # Make sure some data was processed.
+  if not coverage_type or coverage_version is None or len(coverage_data) <= 0:
+    return None
+
+  # Write out the file
+  osutils.WriteFile(os.path.join(destdir, output_file_name), json.dumps({
+      'data': [{
+          'files': coverage_data
+      }],
+      'type': coverage_type,
+      'version': coverage_version
+  }))
+
+  return GatherCodeCoverageLlvmJsonFileResult(
+      joined_file_paths=joined_file_paths
+  )

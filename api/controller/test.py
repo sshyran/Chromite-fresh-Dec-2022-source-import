@@ -15,6 +15,7 @@ from chromite.api import validate
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import constants
@@ -23,6 +24,7 @@ from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
+from chromite.lib import chroot_lib
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test
 from chromite.utils import key_value_store
@@ -323,3 +325,34 @@ def CrosSigningTest(_input_proto, _output_proto, _config):
   result = cros_build_lib.run([test_runner], check=False)
 
   return result.returncode
+
+
+def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
+    chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+    output_dir: str) -> list:
+  """Builds and copies test artifacts to specified output_dir.
+
+  Copies test artifacts to output_dir, returning a list of (output_dir: str)
+  paths to the desired files.
+
+  Args:
+    in_proto: Proto request defining reqs.
+    chroot: The chroot class used for these artifacts.
+    sysroot_class: The sysroot class used for these artifacts.
+    output_dir: The path to write artifacts to.
+
+  Returns:
+    A list of dictionary mappings of ArtifactType to list of paths.
+  """
+  generated = []
+  for output_artifact in in_proto.output_artifacts:
+    if (in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON
+        in output_artifact.artifact_types):
+      result_path = test.BundleCodeCoverageLlvmJson(chroot, sysroot_class,
+                                                    output_dir)
+      if result_path:
+        generated.append({
+            'paths': [result_path],
+            'type': in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON
+        })
+  return generated

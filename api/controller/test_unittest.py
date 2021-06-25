@@ -18,6 +18,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
@@ -267,16 +268,15 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
 
 class BuildTestServiceContainers(cros_test_lib.MockTestCase,
-                           api_config.ApiConfigMixin):
+                                 api_config.ApiConfigMixin):
   """Tests for the BuildTestServiceContainers function."""
 
   def setUp(self):
     self.request = test_pb2.BuildTestServiceContainersRequest(
         chroot={'path': '/path/to/chroot'},
         build_target={'name': 'build_target'},
-        version = 'R93-14033.0.0',
+        version='R93-14033.0.0',
     )
-
 
   def testSuccess(self):
     """Check passing case with mocked cros_build_lib.run."""
@@ -292,7 +292,6 @@ class BuildTestServiceContainers(cros_test_lib.MockTestCase,
     patch.assert_called()
     for result in response.results:
       self.assertEqual(result.WhichOneof('result'), 'success')
-
 
   def testFailure(self):
     """Check failure case with mocked cros_build_lib.run."""
@@ -419,7 +418,10 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTestCase,
   def _Output():
     return test_pb2.SimpleChromeWorkflowTestResponse()
 
-  def _Input(self, sysroot_path=None, build_target=None, chrome_root=None,
+  def _Input(self,
+             sysroot_path=None,
+             build_target=None,
+             chrome_root=None,
              goma_config=None):
     proto = test_pb2.SimpleChromeWorkflowTestRequest()
     if sysroot_path:
@@ -687,3 +689,74 @@ class MoblabVmTestTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.MoblabVmTest(request, response, self.api_config)
+
+
+class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
+  """Test GetArtifacts."""
+
+  CODE_COVERAGE_LLVM_ARTIFACT_TYPE = (
+      common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
+  )
+
+  def setUp(self):
+    """Set up the class for tests."""
+    chroot_dir = os.path.join(self.tempdir, 'chroot')
+    osutils.SafeMakedirs(chroot_dir)
+    osutils.SafeMakedirs(os.path.join(chroot_dir, 'tmp'))
+    self.chroot = chroot_lib.Chroot(chroot_dir)
+
+    sysroot_path = os.path.join(chroot_dir, 'build', 'board')
+    osutils.SafeMakedirs(sysroot_path)
+    self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+
+  def testReturnsEmptyListWhenNoOutputArtifactsProvided(self):
+    """Test empty list is returned when there are no output_artifacts."""
+    result = test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[]),
+        self.chroot, self.sysroot, self.tempdir)
+
+    self.assertEqual(len(result), 0)
+
+  def testShouldCallBundleCodeCoverageLlvmJsonForEachValidArtifact(self):
+    """Test BundleCodeCoverageLlvmJson is called on each valid artifact."""
+    BundleCodeCoverageLlvmJson_mock = self.PatchObject(
+      test_service, 'BundleCodeCoverageLlvmJson', return_value='test')
+
+    test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[
+            # Valid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
+                ]
+            ),
+
+            # Invalid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
+                ]
+            ),
+        ]),
+        self.chroot, self.sysroot, self.tempdir)
+
+    BundleCodeCoverageLlvmJson_mock.assert_called_once()
+
+  def testShouldReturnValidResult(self):
+    """Test result contains paths and code_coverage_llvm_json type."""
+    self.PatchObject(test_service, 'BundleCodeCoverageLlvmJson',
+      return_value='test')
+
+    result = test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[
+            # Valid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
+                ]
+            ),
+        ]),
+        self.chroot, self.sysroot, self.tempdir)
+
+    self.assertEqual(result[0]['paths'], ['test'])
+    self.assertEqual(result[0]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)

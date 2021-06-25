@@ -13,6 +13,7 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.controller import image as image_controller
 from chromite.api.controller import sysroot as sysroot_controller
+from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -80,7 +81,11 @@ def Get(input_proto, output_proto, _config):
           output_proto.artifacts.sysroot,
           sysroot_controller.GetArtifacts(
               input_proto.artifact_info.sysroot, chroot, sysroot, build_target,
-              output_dir))
+              output_dir)),
+      RegisteredGet(
+          output_proto.artifacts.test,
+          test_controller.GetArtifacts(
+              input_proto.artifact_info.test, chroot, sysroot, output_dir)),
   ]
 
   for get_res in get_res_list:
