@@ -5,16 +5,16 @@
 import json
 import os
 import unittest
+from unittest import mock
 
-import httplib2
-import mock
+from chromite.third_party import httplib2
 
-from infra_libs import httplib2_utils
-from infra_libs.ts_mon.common import interface
-from infra_libs.ts_mon.common import monitors
-from infra_libs.ts_mon.common import pb_to_popo
-from infra_libs.ts_mon.protos import metrics_pb2
-import infra_libs
+from chromite.third_party.infra_libs import httplib2_utils
+from chromite.third_party.infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import monitors
+from chromite.third_party.infra_libs.ts_mon.common import pb_to_popo
+from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
+from chromite.third_party import infra_libs
 
 
 class MonitorTest(unittest.TestCase):

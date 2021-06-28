@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,14 +8,11 @@ Handles routing requests to the appropriate controller and handles service
 registration.
 """
 
-from __future__ import print_function
-
 import collections
 import importlib
 import os
-import sys
 
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf import symbol_database
 
 from chromite.api import controller
 from chromite.api import field_handler
@@ -39,10 +35,9 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.utils import memoize
 
+
 MethodData = collections.namedtuple(
     'MethodData', ('service_descriptor', 'module_name', 'method_descriptor'))
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):
@@ -170,7 +165,19 @@ class Router(object):
     """List all methods registered with the router."""
     services = []
     for service_name, (svc, _module) in self._services.items():
+      svc_visibility = getattr(
+          svc.GetOptions().Extensions[self._svc_options_ext],
+          'service_visibility', build_api_pb2.LV_VISIBLE)
+      if svc_visibility == build_api_pb2.LV_HIDDEN:
+        continue
+
       for method_name in svc.methods_by_name.keys():
+        method_options = self._get_method_options(service_name, method_name)
+        method_visibility = getattr(method_options, 'method_visibility',
+                                    build_api_pb2.LV_VISIBLE)
+        if method_visibility == build_api_pb2.LV_HIDDEN:
+          continue
+
         services.append('%s/%s' % (service_name, method_name))
 
     return sorted(services)

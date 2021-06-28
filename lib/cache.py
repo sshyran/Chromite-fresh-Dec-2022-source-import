@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Contains on-disk caching functionality."""
 
-from __future__ import print_function
-
 import datetime
 import errno
 import os
 import shutil
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging

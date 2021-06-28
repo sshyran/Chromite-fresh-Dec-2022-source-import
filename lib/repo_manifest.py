@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common functions for interacting with repo manifest XML files."""
 
-from __future__ import print_function
-
 import sys
 
 # TODO(vapier): Use ElementTree directly once we're Python 3-only.
 from xml.etree import cElementTree as ElementTree
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # The ElementTree.tostring method is a bit of a mess.  Under Python 2, it
@@ -41,7 +35,7 @@ class UnsupportedFeature(Error):
 class Manifest(object):
   """Manifest represents the contents of a repo manifest XML file."""
 
-  # https://chromium.googlesource.com/external/repo/+/master/docs/manifest-format.md
+  # https://chromium.googlesource.com/external/repo/+/HEAD/docs/manifest-format.md
 
   def __init__(self, etree, allow_unsupported_features=False):
     """Initialize Manifest.

@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the generic stages."""
-
-from __future__ import print_function
 
 import contextlib
 import copy
@@ -18,13 +15,10 @@ import tempfile
 import time
 import traceback
 
-import six
-
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import repository
 from chromite.cbuildbot import topology
-from chromite.lib import auth
-from chromite.lib import buildbucket_lib
+from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -41,6 +35,43 @@ from chromite.lib import results_lib
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import BuildIdentifier
+
+
+def ReportStageFailure(exception, metrics_fields=None):
+  """Reports stage failure to Mornach along with inner exceptions.
+
+  Args:
+    exception: The failure exception to report.
+    metrics_fields: (Optional) Fields for ts_mon metric.
+  """
+  _InsertFailureToMonarch(
+      exception_category=failures_lib.GetExceptionCategory(type(exception)),
+      metrics_fields=metrics_fields)
+
+  # This assumes that CompoundFailure can't be nested.
+  if isinstance(exception, failures_lib.CompoundFailure):
+    for exc_class, _, _ in exception.exc_infos:
+      _InsertFailureToMonarch(
+          exception_category=failures_lib.GetExceptionCategory(exc_class),
+          metrics_fields=metrics_fields)
+
+
+def _InsertFailureToMonarch(
+    exception_category=constants.EXCEPTION_CATEGORY_UNKNOWN,
+    metrics_fields=None):
+  """Report a single stage failure to Mornach if needed.
+
+  Args:
+    exception_category: (Optional) one of
+                        constants.EXCEPTION_CATEGORY_ALL_CATEGORIES,
+                        Default: 'unknown'.
+    metrics_fields: (Optional) Fields for ts_mon metric.
+  """
+  if (metrics_fields is not None and
+      exception_category != constants.EXCEPTION_CATEGORY_UNKNOWN):
+    counter = metrics.Counter(constants.MON_STAGE_FAILURE_COUNT)
+    metrics_fields['exception_category'] = exception_category
+    counter.increment(fields=metrics_fields)
 
 
 class BuilderStage(object):
@@ -277,7 +308,7 @@ class BuilderStage(object):
           'category': self.category
       })
       if self.buildstore.AreClientsReady():
-        failures_lib.ReportStageFailure(
+        ReportStageFailure(
             stage_result,
             metrics_fields=failed_metrics_fields)
 
@@ -335,30 +366,6 @@ class BuilderStage(object):
 
     return repository.RepoRepository(**kwargs)
 
-  def GetBuildbucketClient(self):
-    """Build a buildbucket_client instance for Buildbucket related operations.
-
-    Returns:
-      An instance of buildbucket_lib.BuildbucketClient if the build is using
-      Buildbucket as the scheduler; else, None.
-    """
-    if buildbucket_lib.GetServiceAccount(constants.CHROMEOS_SERVICE_ACCOUNT):
-      return buildbucket_lib.BuildbucketClient(
-          auth.GetAccessToken,
-          None,
-          service_account_json=constants.CHROMEOS_SERVICE_ACCOUNT)
-
-    if self._run.InProduction():
-      # If the build using Buildbucket is running on buildbot and
-      # is in production mode, buildbucket_client cannot be None.
-      raise buildbucket_lib.NoBuildbucketClientException(
-          'Buildbucket_client is None. '
-          'Please check if the buildbot has a valid service account file. '
-          'Please find the service account json file at %s.' %
-          constants.CHROMEOS_SERVICE_ACCOUNT)
-
-    return None
-
   def GetScheduledSlaveBuildbucketIds(self):
     """Get buildbucket_ids list of the scheduled slave builds.
 
@@ -368,7 +375,7 @@ class BuilderStage(object):
     """
     buildbucket_ids = None
     if self._run.config.slave_configs:
-      buildbucket_ids = buildbucket_lib.GetBuildbucketIds(
+      buildbucket_ids = buildbucket_v2.GetBuildbucketIds(
           self._run.attrs.metadata)
 
     return buildbucket_ids
@@ -925,7 +932,7 @@ class BoardSpecificBuilderStage(BuilderStage):
   """
 
   def __init__(self, builder_run, buildstore, board, suffix=None, **kwargs):
-    if not isinstance(board, six.string_types):
+    if not isinstance(board, str):
       raise TypeError('Expected string, got %r' % (board,))
 
     self._current_board = board
@@ -1146,10 +1153,21 @@ class ArchivingStageMixin(object):
     """
     bot_filter_list = ['paladin', 'trybot', 'pfq', 'pre-cq', 'tryjob',
                        'postsubmit']
-    if ('moblab' in url and
-        any(filter in bot_id for filter in bot_filter_list)):
-      return True
-    return False
+    # Certain partners are using the moblab buckets as a general
+    # build distribution system, not related to moblab.
+    # This allow list ensures that these accounts are left in the
+    # prior behavior, where moblab users now use an on demand
+    # copy via an API vs the "copy everything" approach.
+    account_allow_list = ['chromeos-moblab-intel',
+                          'chromeos-moblab-jetstream',
+                          'chromeos-moblab-parallels',
+                          'chromeos-moblab-cienet']
+    if 'moblab' in url:
+      if any(bot_filter in bot_id for bot_filter in bot_filter_list):
+        return True
+      if any(account in url for account in account_allow_list):
+        return False
+    return True
 
   def _GetUploadUrls(self, filename, builder_run=None, prefix=None):
     """Returns a list of all urls for which to upload filename to.

@@ -3,12 +3,11 @@
 # found in the LICENSE file.
 
 import unittest
+from unittest import mock
 
-import mock
-
-from infra_libs.ts_mon.common import http_metrics
-from infra_libs.ts_mon.common import interface
-from infra_libs.ts_mon.common import targets
+from chromite.third_party.infra_libs.ts_mon.common import http_metrics
+from chromite.third_party.infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import targets
 
 
 class TestHttpMetrics(unittest.TestCase):

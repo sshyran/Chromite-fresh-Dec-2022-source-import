@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,8 @@
 import sys
 from typing import List, Dict
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import cros_build_lib
 from chromite.lib import depgraph
 
 from . import visualize
@@ -73,7 +72,8 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
 
 def main():
   opts = ParseArgs(sys.argv[1:])
-  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.build_target)
+  sysroot = opts.sysroot or build_target_lib.get_default_sysroot_path(
+      opts.build_target)
   out_dir = opts.output_path or '.'
   out_name = opts.output_name
   runtime_tree = CreateRuntimeTree(sysroot, opts.pkgs)

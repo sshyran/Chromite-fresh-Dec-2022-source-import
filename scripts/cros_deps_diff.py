@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2010 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,20 +10,14 @@ some of these dependency graphs) and outputs graphs that trace the divergence
 in the dependency trees until common packages are found.
 """
 
-from __future__ import print_function
-
 import json
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import dot_helper
 
 NORMAL_COLOR = 'black'
 BASE_COLORS = ['red', 'green', 'blue']
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def UnversionedName(dep):

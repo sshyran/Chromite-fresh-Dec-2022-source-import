@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -36,8 +35,6 @@ WARNING, ERROR, CRITICAL/FATAL: These levels are always included in the above
 levels as one would expect. Limiting the output of a script to just these log
 levels is rarely desirable, but the --log-level argument can be used to do so.
 """
-
-from __future__ import print_function
 
 import os
 import sys

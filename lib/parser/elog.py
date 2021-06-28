@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -16,13 +15,11 @@ generate entries in the summary.log file.
 Documentation for the Portage log system can be found at:
 https://wiki.gentoo.org/wiki/Portage_log
 """
+
 from __future__ import absolute_import
-from __future__ import print_function
 
 import re
 from collections import defaultdict
-
-import six
 
 from chromite.lib.parser import package_info
 
@@ -52,7 +49,7 @@ class SummaryLog(object):
 
   def __init__(self, log_contents):
     self.package_logs = sorted(
-        (PackageLog(cpv, logs) for cpv, logs in six.iteritems(log_contents)),
+        (PackageLog(cpv, logs) for cpv, logs in log_contents.items()),
         key=lambda x: x.cpv)
 
   def has_failed_packages(self):
@@ -82,7 +79,7 @@ class PackageLog(object):
 
   def __init__(self, cpv, log_mapping):
     self.cpv = cpv
-    self.log_levels = dict((k, dict(v)) for k, v in six.iteritems(log_mapping))
+    self.log_levels = dict((k, dict(v)) for k, v in log_mapping.items())
 
   @property
   def cp(self):

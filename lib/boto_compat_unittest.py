@@ -1,23 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the boto_compat module."""
 
-from __future__ import print_function
-
+import configparser
 import os
-import sys
-
-from six.moves import configparser
 
 from chromite.lib import boto_compat
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
@@ -29,7 +21,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
       boto_config = os.environ['BOTO_CONFIG']
       self.assertExists(boto_config)
 
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(boto_config)
 
       cafile = config.get('Boto', 'ca_certificates_file')
@@ -43,7 +35,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
     os.environ['BOTO_CONFIG'] = boto_config
 
     with boto_compat.FixBotoCerts(strict=True):
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(os.environ['BOTO_CONFIG'])
       self.assertEqual(config.get('S', 'k'), 'v')
       self.assertTrue(config.has_option('Boto', 'ca_certificates_file'))
@@ -58,7 +50,7 @@ class FixBotoCertsTest(cros_test_lib.TempDirTestCase):
     os.environ['BOTO_PATH'] = boto_path = '%s:%s' % (cfgfile1, cfgfile2)
 
     with boto_compat.FixBotoCerts(strict=True):
-      config = configparser.SafeConfigParser()
+      config = configparser.ConfigParser()
       config.read(os.environ['BOTO_CONFIG'])
       self.assertEqual(config.get('S', 'k'), 'v')
       self.assertEqual(config.get('S', 'k2'), 'v2')

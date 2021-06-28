@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Toolchain and related functionality."""
-
-from __future__ import print_function
 
 import base64
 import collections
@@ -15,7 +12,6 @@ import json
 import os
 import re
 import shutil
-import sys
 
 from chromite.cbuildbot import afdo
 from chromite.lib import alerts
@@ -31,9 +27,6 @@ from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
 
 class PrepareForBuildReturn(object):
   """Return values for PrepareForBuild call."""
@@ -53,34 +46,30 @@ class PrepareForBuildReturn(object):
 # operations from chromite, including access to GS buckets.
 # Need to use build API and recipes to communicate to GS buckets in
 # the future.
-ORDERFILE_GS_URL_UNVETTED = \
-    'gs://chromeos-toolchain-artifacts/orderfile/unvetted'
-ORDERFILE_GS_URL_VETTED = \
-    'gs://chromeos-prebuilt/afdo-job/orderfiles/vetted'
-BENCHMARK_AFDO_GS_URL = \
-    'gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark'
-CWP_AFDO_GS_URL = \
-    'gs://chromeos-prebuilt/afdo-job/cwp/chrome/'
-KERNEL_PROFILE_URL = \
-    'gs://chromeos-prebuilt/afdo-job/cwp/kernel/'
-AFDO_GS_URL_VETTED = \
-    'gs://chromeos-prebuilt/afdo-job/vetted/'
-KERNEL_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'kernel')
-BENCHMARK_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'benchmarks')
-CWP_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'cwp')
-RELEASE_AFDO_GS_URL_VETTED = \
-    os.path.join(AFDO_GS_URL_VETTED, 'release')
+ORDERFILE_GS_URL_UNVETTED = (
+    'gs://chromeos-toolchain-artifacts/orderfile/unvetted')
+ORDERFILE_GS_URL_VETTED = 'gs://chromeos-prebuilt/afdo-job/orderfiles/vetted'
+BENCHMARK_AFDO_GS_URL = (
+    'gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark')
+CWP_AFDO_GS_URL = 'gs://chromeos-prebuilt/afdo-job/cwp/chrome/'
+KERNEL_PROFILE_URL = 'gs://chromeos-prebuilt/afdo-job/cwp/kernel/'
+AFDO_GS_URL_VETTED = 'gs://chromeos-prebuilt/afdo-job/vetted/'
+KERNEL_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'kernel')
+BENCHMARK_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'benchmarks')
+CWP_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'cwp')
+RELEASE_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, 'release')
 
 # Constants
 AFDO_SUFFIX = '.afdo'
 BZ2_COMPRESSION_SUFFIX = '.bz2'
 XZ_COMPRESSION_SUFFIX = '.xz'
 KERNEL_AFDO_COMPRESSION_SUFFIX = '.gcov.xz'
-TOOLCHAIN_UTILS_PATH = os.path.join(
-    constants.SOURCE_ROOT, 'src/third_party/toolchain-utils')
+# FIXME: we should only use constants.SOURCE_ROOT and use
+# path_util.ToChrootPath to convert to inchroot path when needed. So we
+# need fix all the use cases for this variable (we can remove all but one
+# when legacy is retired).
+TOOLCHAIN_UTILS_PATH = os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                    'src/third_party/toolchain-utils')
 AFDO_PROFILE_PATH_IN_CHROMIUM = 'src/chromeos/profiles/%s.afdo.newest.txt'
 MERGED_AFDO_NAME = 'chromeos-chrome-amd64-%s'
 
@@ -103,13 +92,12 @@ _CHROME_DEBUG_BIN = os.path.join('%(root)s', '%(sysroot)s/usr/lib/debug',
 # at least 4GB of memory.
 #
 # This must be consistent with the definitions in autotest.
-AFDO_DATA_GENERATORS_LLVM = ('chell', 'samus')
-CHROME_AFDO_VERIFIER_BOARDS = {'samus': 'atom', 'eve': 'bigcore'}
+AFDO_DATA_GENERATORS_LLVM = ('chell')
+CHROME_AFDO_VERIFIER_BOARDS = {'chell': 'atom', 'eve': 'bigcore'}
 KERNEL_AFDO_VERIFIER_BOARDS = {
-    'lulu': '3.14',
     'chell': '3.18',
     'eve': '4.4',
-    'auron_yuna': '4.14',
+    'octopus': '4.14',
     'banon': '4.19'
 }
 
@@ -203,6 +191,10 @@ class BundleArtifactsHandlerError(Error):
   """Error for BundleArtifactsHandler class."""
 
 
+class GetUpdatedFilesForCommitError(Error):
+  """Error for GetUpdatedFilesForCommit class."""
+
+
 class NoArtifactsToBundleError(Error):
   """Error for bundling empty collection of artifacts."""
 
@@ -281,7 +273,7 @@ def _ParseMergedProfileName(artifact_name):
   """Parse the name of an orderfile or a release profile for Chrome.
 
   Examples:
-    With input: profile_name='chromeos-chrome-orderfile\
+    With input: profile_name='chromeos-chrome-orderfile
     -field-77-3809.38-1562580965
     -benchmark-77.0.3849.0_rc-r1.orderfile.xz'
     the function returns:
@@ -756,10 +748,16 @@ class GenerateChromeOrderfile(object):
     ]
 
     try:
-      cros_build_lib.run(cmd, enter_chroot=True, chroot_args=self.chroot_args)
-    except cros_build_lib.RunCommandError:
+      cros_build_lib.run(
+          cmd,
+          enter_chroot=True,
+          chroot_args=self.chroot_args,
+          check=True,
+          capture_output=True)
+    except cros_build_lib.RunCommandError as e:
       raise GenerateChromeOrderfileError(
-          'Unable to run %s to process orderfile.' % (cmd))
+          f'Unable to run %s to process orderfile {cmd} '
+          f'with error: {e.result.stdout} {e.result.stderr}.')
 
     # Return path inside chroot
     return result
@@ -1347,7 +1345,7 @@ class _CommonPrepareBundle(object):
     self._PatchEbuild(info_9999, update_rules, uprev=False)
 
   def _PatchEbuild(self, info, rules, uprev):
-    """Patch an ebuild file, possibly upreving it.
+    """Patch an ebuild file, possibly uprevving it.
 
     Args:
       info: _EbuildInfo describing the ebuild file.
@@ -2459,10 +2457,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     def FilterFile(file_path):
       return extension is None or file_path.endswith(extension)
 
-    files = self._CollectFiles(
-        src_dir,
-        destination,
-        include_file=FilterFile)
+    files = self._CollectFiles(src_dir, destination, include_file=FilterFile)
     if not files:
       logging.info('No data found for %s, skip bundle artifact', tarball)
       raise NoArtifactsToBundleError(f'No {extension} files in {src_dir}')
@@ -2479,11 +2474,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     with self.chroot.tempdir() as tempdir:
       try:
         return [
-          self._CreateBundle(
-            '/tmp/fatal_clang_warnings',
-            'fatal_clang_warnings',
-            tempdir,
-            '.json')
+            self._CreateBundle('/tmp/fatal_clang_warnings',
+                               'fatal_clang_warnings', tempdir, '.json')
         ]
       except NoArtifactsToBundleError:
         return []
@@ -2496,10 +2488,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     with osutils.TempDir(prefix='clang_crash_diagnoses_tarball') as tempdir:
       try:
         return [
-          self._CreateBundle(
-            '/tmp/clang_crash_diagnostics',
-            'clang_crash_diagnoses',
-            tempdir)
+            self._CreateBundle('/tmp/clang_crash_diagnostics',
+                               'clang_crash_diagnoses', tempdir)
         ]
       except NoArtifactsToBundleError:
         return []
@@ -2514,14 +2504,12 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     with self.chroot.tempdir() as tempdir:
       try:
         return [
-          self._CreateBundle(
-            '/tmp/compiler_rusage',
-            'compiler_rusage_logs',
-            tempdir,
-            '.json')
+            self._CreateBundle('/tmp/compiler_rusage', 'compiler_rusage_logs',
+                               tempdir, '.json')
         ]
       except NoArtifactsToBundleError:
         return []
+
 
 def PrepareForBuild(artifact_name, chroot, sysroot_path, build_target,
                     input_artifacts, profile_info):
@@ -2575,6 +2563,71 @@ def BundleArtifacts(name, chroot, sysroot_path, build_target, output_dir,
       build_target,
       output_dir,
       profile_info=profile_info).Bundle()
+
+
+class GetUpdatedFilesHandler(object):
+  """Find all changed files in the checkout and create a commit message."""
+
+  @staticmethod
+  def _UpdateKernelMetadata(kernel_version: str, profile_version: str):
+    """Update afdo_metadata json file"""
+    kernel_version = kernel_version.replace('.', '_')
+    json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
+                             f'kernel_afdo_{kernel_version}.json')
+    assert os.path.exists(json_file), (
+      f'Metadata for {kernel_version} does not exist')
+    afdo_versions = json.loads(osutils.ReadFile(json_file))
+    kernel_name = f'chromeos-kernel-{kernel_version}'
+    assert kernel_name in afdo_versions, (
+      f'To update {kernel_name}, the entry should be in kernel_afdo.json')
+    old_value = afdo_versions[kernel_name]['name']
+    update_to_newer_profile = _RankValidCWPProfiles(
+        old_value) < _RankValidCWPProfiles(profile_version)
+    # This function is called after Bundle, so normally the profile is newer
+    # is guaranteed because Bundle function only runs when a new profile is
+    # needed to verify at the beginning of the builder. This check is to
+    # make sure there's no other updates happen between the start of the
+    # builder and the time of this function call.
+    assert update_to_newer_profile, (
+        f'Failed to update JSON file because {profile_version} is not '
+        f'newer than {old_value}')
+    afdo_versions[kernel_name]['name'] = profile_version
+    pformat.json(afdo_versions, fp=json_file)
+    return [json_file]
+
+  def __init__(self, artifact_type, artifact_path, profile_info):
+    self.artifact_path = artifact_path
+    self.profile_info = profile_info
+    if artifact_type == 'VerifiedKernelCwpAfdoFile':
+      self._update_func = self.UpdateKernelProfileMetadata
+    else:
+      raise GetUpdatedFilesForCommitError(
+          f'{artifact_type} has no handler in GetUpdatedFiles')
+
+  def UpdateKernelProfileMetadata(self):
+    kernel_version = self.profile_info.get('kernel_version')
+    if not kernel_version:
+      raise GetUpdatedFilesForCommitError('kernel_version not provided')
+    # The path obtained from artifact_path is the full path, containing
+    # extension, so we need to remove it here.
+    profile_version = os.path.basename(self.artifact_path).replace(
+        KERNEL_AFDO_COMPRESSION_SUFFIX, '')
+    files = self._UpdateKernelMetadata(kernel_version, profile_version)
+    commit_message = (
+        f'afdo_metadata: Publish new kernel profiles for {kernel_version}\n\n'
+        f'Update {kernel_version} to {profile_version}\n\n'
+        'Automatically generated in kernel verifier.\n\n'
+        'BUG=None\n'
+        'TEST=Verified in kernel-release-afdo-verify-orchestrator\n')
+    return files, commit_message
+
+  def Update(self):
+    return self._update_func()
+
+
+def GetUpdatedFiles(artifact_type, artifact_path, profile_info):
+  return GetUpdatedFilesHandler(artifact_type, artifact_path,
+                                profile_info).Update()
 
 
 # ###########################################################################
@@ -2845,8 +2898,8 @@ class GenerateBenchmarkAFDOProfile(object):
         self.output_dir,
         os.path.basename(debug_bin) + BZ2_COMPRESSION_SUFFIX)
     chrome_version = CHROME_ARCH_VERSION % afdo_spec
-    debug_bin_name_with_version = \
-        chrome_version + '.debug' + BZ2_COMPRESSION_SUFFIX
+    debug_bin_name_with_version = (
+        chrome_version + '.debug' + BZ2_COMPRESSION_SUFFIX)
 
     # Upload Chrome debug binary and rename it
     _UploadAFDOArtifactToGSBucket(

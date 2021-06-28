@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for running commands via swarming instance."""
 
-from __future__ import print_function
-
 import itertools
 import json
 import os
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -18,9 +14,6 @@ from chromite.lib import osutils
 from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Location of swarming_client.py that is used to send swarming requests

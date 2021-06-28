@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """A library for emitting traces and spans to Google Cloud trace."""
-from __future__ import print_function
 
 import contextlib
 import errno
@@ -14,12 +12,11 @@ import os
 import random
 import re
 
-import google.protobuf.internal.well_known_types as types
-from infra_libs import ts_mon
-
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import structured
+from chromite.third_party.google.protobuf import timestamp_pb2
+from chromite.third_party.infra_libs import ts_mon
 
 
 SPANS_LOG = '/var/log/trace/{pid}-{span_id}.json'
@@ -122,7 +119,7 @@ class Span(structured.Structured):
 
     Side effect: Records the start time as a Timestamp.
     """
-    start = types.Timestamp()
+    start = timestamp_pb2.Timestamp()
     start.GetCurrentTime()
     self.startTime = start.ToJsonString()
     return self
@@ -133,7 +130,7 @@ class Span(structured.Structured):
     Side-effect:
       Record the end Timestamp.
     """
-    end = types.Timestamp()
+    end = timestamp_pb2.Timestamp()
     end.GetCurrentTime()
     self.endTime = end.ToJsonString()
 

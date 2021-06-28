@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,19 +11,17 @@ to an interactive bash shell within the chroot.
 If given args those are passed to the chroot environment, and executed.
 """
 
-from __future__ import print_function
-
 import argparse
 import glob
 import os
+from pathlib import Path
 import pwd
 import random
 import re
 import resource
 import subprocess
 import sys
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -42,15 +39,9 @@ from chromite.lib import toolchain
 from chromite.utils import key_value_store
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 COMPRESSION_PREFERENCE = ('xz', 'bz2')
 
 # TODO(zbehan): Remove the dependency on these, reimplement them in python
-MAKE_CHROOT = [
-    os.path.join(constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
-]
 ENTER_CHROOT = [
     os.path.join(constants.SOURCE_ROOT, 'src/scripts/sdk_lib/enter_chroot.sh')
 ]
@@ -178,48 +169,6 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
     osutils.SafeUnlink(os.path.join(storage_dir, filename))
 
   return tarball_dest
-
-
-def CreateChroot(chroot_path, sdk_tarball, cache_dir, nousepkg=False):
-  """Creates a new chroot from a given SDK.
-
-  Args:
-    chroot_path: Path where the new chroot will be created.
-    sdk_tarball: Path to a downloaded Gentoo Stage3 or Chromium OS SDK tarball.
-    cache_dir: Path to a directory that will be used for caching portage files,
-        etc.
-    nousepkg: If True, pass --nousepkg to cros_setup_toolchains inside the
-        chroot.
-  """
-
-  cmd = MAKE_CHROOT + [
-      '--stage3_path', sdk_tarball, '--chroot', chroot_path, '--cache_dir',
-      cache_dir
-  ]
-
-  if nousepkg:
-    cmd.append('--nousepkg')
-
-  logging.notice('Creating chroot. This may take a few minutes...')
-  try:
-    cros_build_lib.dbg_run(cmd)
-  except cros_build_lib.RunCommandError as e:
-    cros_build_lib.Die('Creating chroot failed!\n%s', e)
-
-
-def DeleteChroot(chroot_path):
-  """Deletes an existing chroot"""
-  cmd = MAKE_CHROOT + ['--chroot', chroot_path, '--delete']
-  try:
-    logging.notice('Deleting chroot.')
-    cros_build_lib.dbg_run(cmd)
-  except cros_build_lib.RunCommandError as e:
-    cros_build_lib.Die('Deleting chroot failed!\n%s', e)
-
-
-def CleanupChroot(chroot_path):
-  """Unmounts a chroot and cleans up any associated devices."""
-  cros_sdk_lib.CleanupChrootMount(chroot_path, delete=False)
 
 
 def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
@@ -852,12 +801,17 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       default=False,
       help='Simulate a restrictive network requiring an outbound'
       ' proxy.')
-  group.add_argument(
-      '--no-ns-pid',
-      dest='ns_pid',
-      default=True,
-      action='store_false',
-      help='Do not create a new PID namespace.')
+  for ns, default in (('pid', True), ('net', None)):
+    group.add_argument(
+        f'--ns-{ns}',
+        default=default,
+        action='store_true',
+        help=f'Create a new {ns} namespace.')
+    group.add_argument(
+        f'--no-ns-{ns}',
+        dest=f'ns_{ns}',
+        action='store_false',
+        help=f'Do not create a new {ns} namespace.')
 
   # Internal options.
   group = parser.add_argument_group(
@@ -1012,9 +966,6 @@ def main(argv):
 
   # If deleting, do it regardless of the use_image flag so that a
   # previously-created loopback chroot can also be cleaned up.
-  # TODO(bmgordon): See if the DeleteChroot call below can be removed in
-  # favor of this block.
-  chroot_deleted = False
   if options.delete:
     # Set a timeout of 300 seconds when getting the lock.
     with locking.FileLock(lock_path, 'chroot lock',
@@ -1028,13 +979,8 @@ def main(argv):
         else:
           logging.warning(
               'cros_sdk was invoked with force option, continuing.')
-      if missing_image_tools:
-        logging.notice('Unmounting chroot.')
-        osutils.UmountTree(options.chroot)
-      else:
-        logging.notice('Deleting chroot.')
-        cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
-        chroot_deleted = True
+      logging.notice('Deleting chroot.')
+      cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
 
   # If cleanup was requested, we have to do it while we're still in the original
   # namespace.  Since cleaning up the mount will interfere with any other
@@ -1055,7 +1001,7 @@ def main(argv):
       # even if we don't get the lock because it will attempt to unmount the
       # tree and will print diagnostic information from 'fuser', 'lsof', and
       # 'ps'.
-      CleanupChroot(options.chroot)
+      cros_sdk_lib.CleanupChrootMount(options.chroot, delete=False)
       sys.exit(0)
 
   # Make sure the main chroot mount is visible.  Contents will be filled in
@@ -1150,7 +1096,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
 
   # Enter a new set of namespaces.  Everything after here cannot directly affect
   # the hosts's mounts or alter LVM volumes.
-  namespaces.SimpleUnshare(pid=options.ns_pid)
+  namespaces.SimpleUnshare(net=options.ns_net, pid=options.ns_pid)
 
   if options.snapshot_list:
     for snap in ListChrootSnapshots(chroot_vg, chroot_lv):
@@ -1175,12 +1121,6 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
   with locking.FileLock(lock_path, 'chroot lock') as lock:
     if options.proxy_sim:
       _ProxySimSetup(options)
-
-    if (options.delete and not chroot_deleted and
-        (os.path.exists(options.chroot) or
-         os.path.exists(_ImageFileForChroot(options.chroot)))):
-      lock.write_lock()
-      DeleteChroot(options.chroot)
 
     sdk_cache = os.path.join(options.cache_dir, 'sdks')
     distfiles_cache = os.path.join(options.cache_dir, 'distfiles')
@@ -1224,11 +1164,11 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       if cros_sdk_lib.IsChrootReady(options.chroot):
         logging.debug('Chroot already exists.  Skipping creation.')
       else:
-        CreateChroot(
-            options.chroot,
-            sdk_tarball,
-            options.cache_dir,
-            nousepkg=(options.bootstrap or options.nousepkg))
+        cros_sdk_lib.CreateChroot(
+            Path(options.chroot),
+            Path(sdk_tarball),
+            Path(options.cache_dir),
+            usepkg=not options.bootstrap and not options.nousepkg)
 
     if options.enter:
       lock.read_lock()

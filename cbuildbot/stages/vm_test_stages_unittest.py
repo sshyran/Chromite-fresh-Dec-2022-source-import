@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for vm_test_stages."""
 
-from __future__ import print_function
-
 import os
 import re
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -28,6 +24,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
+
 
 # pylint: disable=too-many-ancestors
 
@@ -117,8 +114,9 @@ class VMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
     for cmd in ('GenerateStackTraces', 'ArchiveFile',
                 'UploadArchivedFile', 'BuildAndArchiveTestResultsTarball'):
       self.PatchObject(commands, cmd, autospec=True)
+    self.run_test_suite_mock = self.PatchObject(
+        vm_test_stages, 'RunTestSuite', autospec=True)
     for cmd in (
-        'RunTestSuite',
         'ArchiveTestResults',
         'ArchiveVMFiles',
         'RunDevModeTest',
@@ -212,11 +210,7 @@ class VMTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
     # pylint: enable=unused-argument
 
-    self.PatchObject(
-        vm_test_stages,
-        'RunTestSuite',
-        autospec=True,
-        side_effect=_MockRunTestSuite)
+    self.run_test_suite_mock.side_effect = _MockRunTestSuite
     results_lib.Results.Clear()
     self.RunStage()
     result = results_lib.Results.Get()[0]
@@ -394,8 +388,8 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
   BUILD_ROOT = '/fake/root'
   RESULTS_DIR = '/tmp/taco'
   TEST_IMAGE_OUTSIDE_CHROOT = os.path.join(BUILD_ROOT, 'test.img')
-  VM_IMAGE_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT,
-                                        constants.VM_IMAGE_BIN)
+  TEST_IMAGE_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                          constants.TEST_IMAGE_BIN)
   PRIVATE_KEY_OUTSIDE_CHROOT = os.path.join(BUILD_ROOT, 'rsa')
   PRIVATE_KEY_INSIDE_CHROOT = os.path.join(constants.CHROOT_SOURCE_ROOT, 'rsa')
   SSH_PORT = 9226
@@ -440,7 +434,7 @@ class RunTestSuiteTest(cros_test_lib.RunCommandTempDirTestCase):
     else:
       self.assertCommandContains([
           'cros_run_test', '--debug',
-          '--image-path=%s' % self.VM_IMAGE_INSIDE_CHROOT,
+          '--image-path=%s' % self.TEST_IMAGE_INSIDE_CHROOT,
           '--results-dir=%s' % self.RESULTS_DIR,
           '--private-key=%s' % self.PRIVATE_KEY_INSIDE_CHROOT
       ])

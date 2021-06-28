@@ -9,7 +9,7 @@ from ..exceptions import (
     ReadTimeoutError,
     ResponseError,
 )
-from ..packages import six
+from chromite.third_party import six
 
 
 log = logging.getLogger(__name__)

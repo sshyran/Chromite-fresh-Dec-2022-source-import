@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,19 +7,13 @@
 # pylint: disable=protected-access
 
 from __future__ import absolute_import
-from __future__ import print_function
 
 import io
 import os
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import puppet_metrics
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _SUMMARY = u"""\
@@ -123,8 +116,9 @@ class TestPuppetMetrics(cros_test_lib.TempDirTestCase):
   """Tests for puppet_metrics."""
 
   def setUp(self):
-    patcher = mock.patch('infra_libs.ts_mon.common.interface.state.store',
-                         autospec=True)
+    patcher = mock.patch(
+        'chromite.third_party.infra_libs.ts_mon.common.interface.state.store',
+        autospec=True)
     self.store = patcher.start()
     self.addCleanup(patcher.stop)
     self.tempfile = os.path.join(self.tempdir, 'last_run_summary.yaml')

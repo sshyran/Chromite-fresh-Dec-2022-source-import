@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,20 +9,16 @@ crashes on non-release builds (in which case try to only upload the symbols
 for those executables involved).
 """
 
-from __future__ import print_function
-
+import http.client
 import itertools
 import json
 import os
 import socket
 import sys
-import textwrap
 import tempfile
+import textwrap
 import time
-
-import requests
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cache
 from chromite.lib import commandline
@@ -35,9 +30,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats
 from chromite.scripts import cros_generate_breakpad_symbols
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party import requests
 
 
 # Needs to be after chromite imports.
@@ -441,7 +434,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
         def ShouldRetryUpload(exception):
           if isinstance(exception, (requests.exceptions.RequestException,
                                     IOError,
-                                    httplib.HTTPException, socket.error)):
+                                    http.client.HTTPException, socket.error)):
             logging.info('Request failed, retrying: %s', exception)
             return True
           return False
@@ -462,7 +455,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
                         s.display_name, e)
         s.status = SymbolFile.ERROR
         failures += 1
-      except (httplib.HTTPException, OSError) as e:
+      except (http.client.HTTPException, OSError) as e:
         logging.warning('could not upload: %s: %s %s', s.display_name,
                         type(e).__name__, e)
         s.status = SymbolFile.ERROR

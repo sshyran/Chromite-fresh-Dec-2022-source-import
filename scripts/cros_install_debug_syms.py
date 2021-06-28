@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,19 +12,16 @@ builders). On local machines, separatedebug is not set and the debug symbols
 are part of the prebuilt package.
 """
 
-from __future__ import print_function
-
 import argparse
 import functools
 import multiprocessing
 import os
 import pickle
-import sys
 import tempfile
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import binpkg
+from chromite.lib import build_target_lib
 from chromite.lib import cache
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -39,9 +35,6 @@ from chromite.utils import outcap
 if cros_build_lib.IsInsideChroot():
   # pylint: disable=import-error
   from portage import create_trees
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 DEBUG_SYMS_EXT = '.debug.tbz2'
@@ -385,7 +378,7 @@ def main(argv):
 
   # sysroot must have a trailing / as the tree dictionary produced by
   # create_trees in indexed with a trailing /.
-  sysroot = cros_build_lib.GetSysroot(options.board) + '/'
+  sysroot = build_target_lib.get_default_sysroot_path(options.board) + '/'
 
   if options.list:
     ListInstallArgs(options, sysroot)

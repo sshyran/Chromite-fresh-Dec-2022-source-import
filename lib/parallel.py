@@ -1,27 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module for running cbuildbot stages in the background."""
 
-from __future__ import print_function
-
 import collections
 import contextlib
-import ctypes
 import errno
 import functools
 import multiprocessing
 from multiprocessing.managers import SyncManager
 import os
+import queue as Queue
 import signal
 import sys
 import time
 import traceback
-
-import six
-from six.moves import queue as Queue
 
 from chromite.lib import failures_lib
 from chromite.lib import results_lib
@@ -30,6 +24,7 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import signals
 from chromite.lib import timeout_util
+from chromite.utils import prctl
 
 
 _BUFSIZE = 1024
@@ -322,8 +317,7 @@ class _BackgroundTask(multiprocessing.Process):
           running = self.is_alive()
 
           try:
-            errors, results = \
-                self._queue.get(True, self.PRINT_INTERVAL)
+            errors, results = self._queue.get(True, self.PRINT_INTERVAL)
             if errors:
               task_errors.extend(errors)
 
@@ -580,8 +574,7 @@ class _BackgroundTask(multiprocessing.Process):
         # Propagate any exceptions; foreground exceptions take precedence.
         if foreground_except is not None:
           # contextlib ignores caught exceptions unless explicitly re-raised.
-          six.reraise(foreground_except[0], foreground_except[1],
-                      foreground_except[2])
+          raise foreground_except[1].with_traceback(foreground_except[2])
         if errors:
           raise BackgroundFailure(exc_infos=errors)
 
@@ -836,9 +829,6 @@ def RunTasksInProcessPool(task, inputs, processes=None, onexit=None):
     return [x[1] for x in sorted(out_queue.get() for _ in range(len(inputs)))]
 
 
-PR_SET_PDEATHSIG = 1
-
-
 def ExitWithParent(sig=signal.SIGHUP):
   """Sets this process to receive |sig| when the parent dies.
 
@@ -850,14 +840,4 @@ def ExitWithParent(sig=signal.SIGHUP):
   Returns:
     Whether we were successful in setting the deathsignal flag
   """
-  libc_name = ctypes.util.find_library('c')
-  if not libc_name:
-    return False
-  try:
-    libc = ctypes.CDLL(libc_name)
-    libc.prctl(PR_SET_PDEATHSIG, sig)
-    return True
-  # We might not be able to load the library (OSError), or prctl might be
-  # missing (AttributeError)
-  except (OSError, AttributeError):
-    return False
+  return prctl.prctl(prctl.Option.SET_PDEATHSIG, sig) is not None

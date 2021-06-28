@@ -1,26 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for build stages."""
 
-from __future__ import print_function
-
 import contextlib
 import os
 import tempfile
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
-from chromite.lib import auth
-from chromite.lib import buildbucket_lib
+from chromite.cbuildbot.stages.generic_stages_unittest import patch
+from chromite.cbuildbot.stages.generic_stages_unittest import patches
 from chromite.lib import build_summary
-from chromite.lib import builder_status_lib
+from chromite.lib import buildbucket_v2
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -34,9 +30,8 @@ from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import path_util
 from chromite.lib.buildstore import FakeBuildStore
+from chromite.third_party.infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
 
-from chromite.cbuildbot.stages.generic_stages_unittest import patch
-from chromite.cbuildbot.stages.generic_stages_unittest import patches
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
@@ -296,7 +291,7 @@ class AllConfigsTestCase(generic_stages_unittest.AbstractStageTestCase,
     if site_config is None:
       site_config = config_lib.GetConfig()
 
-    boards = ('samus', 'arm-generic')
+    boards = ('hatch', 'arm-generic')
 
     for board in boards:
       self.CreateMockOverlay(board)
@@ -592,10 +587,6 @@ class BuildImageStageTest(BuildPackagesStageTest):
         cfg = self._run.config
         cmd = ['./build_image', '--version=%s' % (self._release_tag or '')]
         rc.assertCommandContains(cmd, expected=cfg['images'])
-        rc.assertCommandContains(
-            ['./image_to_vm.sh'],
-            expected=cfg['vm_tests'] or cfg['tast_vm_tests']
-        )
 
   def RunTestsWithBotId(self, bot_id, options_tests=True):
     """Test with the config for the specified bot_id."""
@@ -619,13 +610,6 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
   BOT_ID = 'amd64-generic-incremental'
 
   def setUp(self):
-    self.PatchObject(buildbucket_lib, 'GetServiceAccount', return_value=True)
-    self.PatchObject(auth.AuthorizedHttp, '__init__', return_value=None)
-    self.PatchObject(
-        buildbucket_lib.BuildbucketClient,
-        '_GetHost',
-        return_value=buildbucket_lib.BUILDBUCKET_TEST_HOST)
-
     self.fake_db = fake_cidb.FakeCIDBConnection()
     self.buildstore = FakeBuildStore(self.fake_db)
     cidb.CIDBConnectionFactory.SetupMockCidb(self.fake_db)
@@ -859,18 +843,11 @@ class CleanUpStageCancelSlaveBuilds(generic_stages_unittest.StageTestCase):
   BOT_ID = 'master-full'
 
   def setUp(self):
-    self.PatchObject(buildbucket_lib, 'GetServiceAccount', return_value=True)
-    self.PatchObject(auth.AuthorizedHttp, '__init__', return_value=None)
-    self.PatchObject(
-        buildbucket_lib.BuildbucketClient,
-        '_GetHost',
-        return_value=buildbucket_lib.BUILDBUCKET_TEST_HOST)
-
     # Mock out the active APIs for both testing and safety.
-    self.cancelMock = self.PatchObject(builder_status_lib, 'CancelBuilds')
-
-    self.searchMock = self.PatchObject(buildbucket_lib.BuildbucketClient,
-                                       'SearchAllBuilds')
+    self.cancelMock = self.PatchObject(buildbucket_v2.BuildbucketV2,
+                                       'BatchCancelBuilds')
+    self.searchMock = self.PatchObject(buildbucket_v2.BuildbucketV2,
+                                       'BatchSearchBuilds')
 
     self._Prepare(extra_config={'chroot_use_image': False})
     self.fake_db = fake_cidb.FakeCIDBConnection()
@@ -882,102 +859,103 @@ class CleanUpStageCancelSlaveBuilds(generic_stages_unittest.StageTestCase):
 
   def testNoPreviousMasterBuilds(self):
     """Test cancellation if the master has never run."""
-    search_results = [[]]
-    self.searchMock.side_effect = search_results
+    search_results = builds_service_pb2.BatchResponse(
+      responses=[
+        builds_service_pb2.BatchResponse.Response(
+          search_builds=builds_service_pb2.SearchBuildsResponse(
+            builds=[],
+          ),
+        ),
+      ],
+    )
+    self.searchMock.return_value = search_results
+    cancel_results = builds_service_pb2.BatchResponse(
+      responses=[],
+    )
+    self.cancelMock.return_value = cancel_results
     stage = self.ConstructStage()
     stage.CancelObsoleteSlaveBuilds()
 
-    # Validate searches and cancellations match expections.
-    self.assertEqual(self.searchMock.call_count, len(search_results))
-    self.cancelMock.assert_not_called()
+    # Validate searches and cancellations match expectations.
+    self.assertEqual(
+      len(self.searchMock.return_value.responses[0].search_builds.builds), 0)
+    self.assertEqual(len(self.cancelMock.return_value.responses), 0)
 
   def testNoPreviousSlaveBuilds(self):
     """Test cancellation if there are no running slave builds."""
-    search_results = [
-        [{
-            'id': 'master_1'
-        }],
-        [],
-        [],
-    ]
-    self.searchMock.side_effect = search_results
-
+    search_results = builds_service_pb2.BatchResponse(
+      responses=[
+        builds_service_pb2.BatchResponse.Response(
+          search_builds=builds_service_pb2.SearchBuildsResponse(
+            builds=[build_pb2.Build(id=1)],
+          ),
+        )
+      ],
+    )
+    self.searchMock.return_value = search_results
+    cancel_results = builds_service_pb2.BatchResponse(
+      responses=[],
+    )
+    self.cancelMock.return_value = cancel_results
     stage = self.ConstructStage()
     stage.CancelObsoleteSlaveBuilds()
 
-    # Validate searches and cancellations match expections.
-    self.assertEqual(self.searchMock.call_count, len(search_results))
-    self.cancelMock.assert_not_called()
+    # Validate searches and cancellations match expectations.
+    self.assertEqual(len(self.searchMock.return_value.responses), 1)
+    self.assertEqual(len(self.cancelMock.return_value.responses), 0)
 
   def testPreviousSlaveBuild(self):
     """Test cancellation if there is a running slave build."""
-    search_results = [
-        [{
-            'id': 'master_1'
-        }],
-        [{
-            'id': 'm1_slave_1'
-        }],
-        [],
-    ]
-    self.searchMock.side_effect = search_results
-
+    search_results = builds_service_pb2.BatchResponse(
+      responses=[
+        builds_service_pb2.BatchResponse.Response(
+          search_builds=builds_service_pb2.SearchBuildsResponse(
+            builds=[build_pb2.Build(id=1,
+                                    status='SUCCESS'),
+                    build_pb2.Build(id=2,
+                                    status='SUCCESS')],
+          ),
+        )
+      ],
+    )
+    self.searchMock.return_value = search_results
     stage = self.ConstructStage()
     stage.CancelObsoleteSlaveBuilds()
 
-    # Validate searches and cancellations match expections.
-    self.assertEqual(self.searchMock.call_count, len(search_results))
+    # Validate searches and cancellations match expectations.
+    self.assertEqual(
+      len(self.searchMock.return_value.responses[0].search_builds.builds), 2)
     self.assertEqual(self.cancelMock.call_count, 1)
 
     cancelled_ids = self.cancelMock.call_args[0][0]
-    self.assertEqual(cancelled_ids, ['m1_slave_1'])
+    self.assertEqual(cancelled_ids, [1, 2])
 
   def testManyPreviousSlaveBuilds(self):
     """Test cancellation with an assortment of running slave builds."""
-    search_results = [
-        [{
-            'id': 'master_1'
-        }, {
-            'id': 'master_2'
-        }],
-        [{
-            'id': 'm1_slave_1'
-        }, {
-            'id': 'm1_slave_2'
-        }],
-        [{
-            'id': 'm1_slave_3'
-        }, {
-            'id': 'm1_slave_4'
-        }],
-        [{
-            'id': 'm2_slave_1'
-        }, {
-            'id': 'm2_slave_2'
-        }],
-        [{
-            'id': 'm2_slave_3'
-        }, {
-            'id': 'm2_slave_4'
-        }],
-    ]
-    self.searchMock.side_effect = search_results
-
+    search_results = builds_service_pb2.BatchResponse(
+      responses=[
+        builds_service_pb2.BatchResponse.Response(
+          search_builds=builds_service_pb2.SearchBuildsResponse(
+            builds=[build_pb2.Build(id=1,
+                                    status='SUCCESS'),
+                    build_pb2.Build(id=2,
+                                    status='SUCCESS'),
+                    build_pb2.Build(id=3,
+                                    status='SUCCESS'),
+                    build_pb2.Build(id=4,
+                                    status='SUCCESS')],
+          ),
+        )
+      ],
+    )
+    self.searchMock.return_value = search_results
     stage = self.ConstructStage()
     stage.CancelObsoleteSlaveBuilds()
 
-    # Validate searches and cancellations match expections.
-    self.assertEqual(self.searchMock.call_count, len(search_results))
+    # Validate searches and cancellations match expectations.
+    self.assertEqual(
+      len(self.searchMock.return_value.responses[0].search_builds.builds), 4)
     self.assertEqual(self.cancelMock.call_count, 1)
 
     cancelled_ids = self.cancelMock.call_args[0][0]
-    self.assertEqual(cancelled_ids, [
-        'm1_slave_1',
-        'm1_slave_2',
-        'm1_slave_3',
-        'm1_slave_4',
-        'm2_slave_1',
-        'm2_slave_2',
-        'm2_slave_3',
-        'm2_slave_4',
-    ])
+    self.assertEqual(cancelled_ids, [1, 2, 3, 4])

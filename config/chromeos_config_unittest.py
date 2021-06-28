@@ -1,36 +1,28 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for config."""
 
-from __future__ import print_function
-
 import copy
 import json
 import os
 import re
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import builders
+from chromite.cbuildbot.builders import generic_builders
 from chromite.config import chromeos_config
 from chromite.config import chromeos_test_config as chromeos_test
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.cbuildbot.builders import generic_builders
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 
-# pylint: disable=protected-access
 
-CHROMIUM_WATCHING_URL = (
-    'http://src.chromium.org/chrome/trunk/tools/build/masters/'
-    'master.chromium.chromiumos/master_chromiumos_cros_cfg.py'
-)
+# pylint: disable=protected-access
 
 
 class ChromeosConfigTestBase(cros_test_lib.TestCase):
@@ -395,15 +387,16 @@ class CBuildBotTest(ChromeosConfigTestBase):
     for build_name, config in self.site_config.items():
       useflags = config.get('useflags')
       if not useflags is None:
-        self.assertTrue(
-            isinstance(useflags, list),
+        self.assertIsInstance(
+            useflags, list,
             'Config %s: useflags should be a list.' % build_name)
 
   def testBoards(self):
     """Verify 'boards' is explicitly set for every config."""
     for build_name, config in self.site_config.items():
-      self.assertTrue(isinstance(config['boards'], (tuple, list)),
-                      "Config %s doesn't have a list of boards." % build_name)
+      self.assertIsInstance(
+          config['boards'], (tuple, list),
+          "Config %s doesn't have a list of boards." % build_name)
       self.assertEqual(len(set(config['boards'])), len(config['boards']),
                        'Config %s has duplicate boards.' % build_name)
       if config['builder_class_name'] in (
@@ -554,7 +547,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
         for test in config.vm_tests:
           self.assertIn(
               test, config.vm_tests_override,
-              'Config %s: has %s VM test, not in override (%s, %s).' % \
+              'Config %s: has %s VM test, not in override (%s, %s).' %
               (build_name, test, config.vm_tests, config.vm_tests_override))
 
   def testVmTestsOnlyOnVmTestBoards(self):
@@ -587,12 +580,12 @@ class CBuildBotTest(ChromeosConfigTestBase):
 
       self.assertIsNone(
           config.vm_tests_override,
-          'Config %s: is tryjob safe, but defines vm_tests_override.' % \
+          'Config %s: is tryjob safe, but defines vm_tests_override.' %
           build_name)
 
       self.assertIsNone(
           config.hw_tests_override,
-          'Config %s: is tryjob safe, but defines hw_tests_override.' % \
+          'Config %s: is tryjob safe, but defines hw_tests_override.' %
           build_name)
 
   def testHWTestsReleaseBuilderRequirement(self):
@@ -817,8 +810,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
 
       # This requirement doesn't apply to payloads(-tryjob)
       # builds. Payloads(-tryjob) are using artifacts from a previous build.
-      if build_name.endswith('-payloads') or \
-         build_name.endswith('-payloads-tryjob'):
+      if (build_name.endswith('-payloads') or
+          build_name.endswith('-payloads-tryjob')):
         continue
 
       if config['paygen'] and not config['paygen_skip_testing']:
@@ -977,7 +970,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
                 self.assertIsInstance(path_regexp, str)
         except (TypeError, ValueError):
           self.fail(('%s has a triggered_gitiles that is malformed: %r\n'
-                     "Simple example: [['url', ['refs/heads/master']]]") %
+                     "Simple example: [['url', ['refs/heads/main']]]") %
                     (config.name, config.triggered_gitiles))
 
   def testNotificationConfigsType(self):
@@ -986,8 +979,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
       if config['notification_configs'] is None:
         continue
       for notification_config in config['notification_configs']:
-        self.assertTrue(
-            isinstance(notification_config, config_lib.NotificationConfig))
+        self.assertIsInstance(
+            notification_config, config_lib.NotificationConfig)
 
 
 class TemplateTest(ChromeosConfigTestBase):

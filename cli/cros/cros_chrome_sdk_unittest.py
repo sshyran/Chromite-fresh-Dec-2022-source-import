@@ -1,34 +1,28 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module tests the cros image command."""
 
-from __future__ import print_function
-
 import copy
 import os
+from pathlib import Path
 import shutil
-import sys
 import threading
+from unittest import mock
 
-import mock
-
-from chromite.lib import constants
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import cache
+from chromite.lib import chromite_config
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from gn_helpers import gn_helpers
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party.gn_helpers import gn_helpers
 
 
 # pylint: disable=protected-access
@@ -39,10 +33,7 @@ class MockChromeSDKCommand(command_unittest.MockCommand):
   TARGET = 'chromite.cli.cros.cros_chrome_sdk.ChromeSDKCommand'
   TARGET_CLASS = cros_chrome_sdk.ChromeSDKCommand
   COMMAND = 'chrome-sdk'
-  ATTRS = (('_GOMA_DOWNLOAD_URL', '_SetupEnvironment') +
-           command_unittest.MockCommand.ATTRS)
-
-  _GOMA_DOWNLOAD_URL = 'Invalid URL'
+  ATTRS = ('_SetupEnvironment',) + command_unittest.MockCommand.ATTRS
 
   def __init__(self, *args, **kwargs):
     command_unittest.MockCommand.__init__(self, *args, **kwargs)
@@ -235,13 +226,18 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     cmd_args = ['--chrome-src', self.chrome_src_dir, 'true']
     if many_boards:
       cmd_args += ['--boards', ':'.join(SDKFetcherMock.BOARDS), '--no-shell']
-      # --no-shell drops gni files in //build/args/chromeos/.
-      osutils.SafeMakedirs(
-          os.path.join(self.chrome_root, 'src', 'build', 'args', 'chromeos'))
     else:
       cmd_args += ['--board', SDKFetcherMock.BOARD]
     if extra_args:
       cmd_args.extend(extra_args)
+    # rewrapper_linux.cfg is used as a reference. The file must exist.
+    osutils.Touch(os.path.join(self.chrome_root, 'src', 'buildtools',
+                               'reclient_cfgs', 'rewrapper_linux.cfg'),
+                  makedirs=True)
+    # --no-shell drops gni files in //build/args/chromeos/.
+    # reclient configs are also dropped here regardless of --no-shell or not.
+    osutils.SafeMakedirs(
+        os.path.join(self.chrome_root, 'src', 'build', 'args', 'chromeos'))
 
     base_args = None if default_cache_dir else ['--cache-dir', self.tempdir]
     self.cmd_mock = MockChromeSDKCommand(cmd_args, base_args=base_args)
@@ -249,7 +245,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.cmd_mock.UnMockAttr('Run')
 
   def SourceEnvironmentMock(self, path, *_args, **_kwargs):
-    if path.endswith('environment'):
+    if str(path).endswith('environment'):
       return copy.deepcopy(self.FAKE_ENV)
     return {}
 
@@ -262,8 +258,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         external_mocks=[self.rc_mock]))
 
     # This needs to occur before initializing MockChromeSDKCommand.
-    self.bashrc = os.path.join(self.tempdir, 'bashrc')
-    self.PatchObject(constants, 'CHROME_SDK_BASHRC', new=self.bashrc)
+    self.bashrc = Path(self.tempdir) / 'bashrc'
+    self.PatchObject(chromite_config, 'CHROME_SDK_BASHRC', new=self.bashrc)
 
     self.PatchObject(osutils, 'SourceEnvironment',
                      autospec=True, side_effect=self.SourceEnvironmentMock)
@@ -285,6 +281,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testIt(self):
     """Test a runthrough of the script."""
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.SetupCommandMock()
     with cros_test_lib.LoggingCapturer() as logs:
       self.cmd_mock.inst.Run()
@@ -298,6 +296,12 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       board_arg_file = os.path.join(
           self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
       self.assertExists(board_arg_file)
+      # Because board is either amd64-generic or arm-generic,
+      # it is a target to create -crostoolchain.gni files, too.
+      board_crostoolchain_arg_file = os.path.join(
+          self.chrome_src_dir,
+          'build/args/chromeos/%s-crostoolchain.gni' % board)
+      self.assertExists(board_crostoolchain_arg_file)
 
   def testManyBoardsBrokenArgs(self):
     """Tests that malformed args.gn files will be fixed in --boards."""
@@ -337,7 +341,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     """We print an error message when GomaError is raised."""
     self.SetupCommandMock()
     with cros_test_lib.LoggingCapturer() as logs:
-      self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_FetchGoma',
+      self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_SetupGoma',
                        side_effect=cros_chrome_sdk.GomaError())
       self.cmd_mock.inst.Run()
       self.AssertLogsContain(logs, 'Goma:')
@@ -374,6 +378,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
 
   def testGomaInPath(self):
     """Verify that we do indeed add Goma to the PATH."""
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.SetupCommandMock()
     self.cmd_mock.inst.Run()
 
@@ -385,6 +391,19 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.cmd_mock.inst.Run()
 
     self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
+
+  def testUseRBE(self):
+    """Verify that we do not add Goma to the PATH."""
+    self.SetupCommandMock(extra_args=['--use-rbe'])
+    self.cmd_mock.inst.Run()
+
+    self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
+    self.assertIn('use_rbe = true', self.cmd_mock.env['GN_ARGS'])
+    wrapper_path = os.path.join(
+        self.chrome_root, 'src', 'build', 'args', 'chromeos',
+        'rewrapper_%s' % SDKFetcherMock.BOARD)
+    self.assertIn('rbe_cros_cc_wrapper = "%s"' % wrapper_path,
+                  self.cmd_mock.env['GN_ARGS'])
 
   def testGnArgsStalenessCheckNoMatch(self):
     """Verifies the GN args are checked for staleness with a mismatch."""
@@ -622,7 +641,7 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
     self.StartPatcher(self.cmd_mock)
 
   def VerifyGomaError(self):
-    self.assertRaises(cros_chrome_sdk.GomaError, self.cmd_mock.inst._FetchGoma)
+    self.assertRaises(cros_chrome_sdk.GomaError, self.cmd_mock.inst._SetupGoma)
 
   def testNoGomaPort(self):
     """We print an error when gomacc is not returning a port."""
@@ -636,7 +655,7 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
         cros_chrome_sdk.ChromeSDKCommand.GOMACC_PORT_CMD, returncode=1)
     self.VerifyGomaError()
 
-  def testFetchError(self):
+  def testSetupError(self):
     """We print an error when we can't fetch Goma."""
     self.rc_mock.AddCmdResult(
         cros_chrome_sdk.ChromeSDKCommand.GOMACC_PORT_CMD, returncode=1)
@@ -645,13 +664,13 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
   def testGomaStart(self):
     """Test that we start Goma if it's not already started."""
     # Duplicate return values.
+    self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaDir',
+                     side_effect=['XXXX'])
     self.PatchObject(cros_chrome_sdk.ChromeSDKCommand, '_GomaPort',
                      side_effect=['XXXX', 'XXXX'])
-    # Run it twice to exercise caching.
-    for _ in range(2):
-      goma_dir, goma_port = self.cmd_mock.inst._FetchGoma()
-      self.assertEqual(goma_port, 'XXXX')
-      self.assertTrue(bool(goma_dir))
+    goma_dir, goma_port = self.cmd_mock.inst._SetupGoma()
+    self.assertEqual(goma_port, 'XXXX')
+    self.assertTrue(bool(goma_dir))
 
 
 class VersionTest(cros_test_lib.MockTempDirTestCase,

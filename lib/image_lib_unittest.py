@@ -1,27 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the image_lib module."""
 
-from __future__ import print_function
-
 import collections
 import gc
 import glob
 import os
 import stat
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import retry_util
 from chromite.lib import partial_mock
+from chromite.lib import retry_util
+
 
 # pylint: disable=protected-access
 

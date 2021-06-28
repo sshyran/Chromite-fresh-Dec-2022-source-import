@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """The test service unit tests."""
 
-from __future__ import print_function
-
 import contextlib
 import os
 import shutil
-
-import mock
+from unittest import mock
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
@@ -104,6 +100,12 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     test.BuildTargetUnitTest(
         self.build_target, self.chroot, testable_packages_optional=True)
     self.assertCommandContains(['--no-testable-packages-ok'])
+
+  def testFilterOnlyCrosWorkon(self):
+    """Test the filter packages argument."""
+    test.BuildTargetUnitTest(
+        self.build_target, self.chroot, filter_only_cros_workon=True)
+    self.assertCommandContains(['--filter-only-cros-workon'])
 
   def testFailure(self):
     """Test non-zero return code and failed package handling."""

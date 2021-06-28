@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,18 +10,12 @@ determined by statically analyzing an ebuild.
 Primarily intended for use by the Chrome OS toolchain team.
 """
 
-from __future__ import print_function
-
 import json
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def is_ebuild_marked_hot(ebuild_path):

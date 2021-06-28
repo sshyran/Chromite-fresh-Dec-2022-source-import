@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests the `cros shell` command."""
-
-from __future__ import print_function
-
-import sys
 
 import pytest  # pylint: disable=import-error
 
@@ -16,9 +11,6 @@ from chromite.cli.cros import cros_shell
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class _KeyMismatchError(remote_access.SSHConnectionError):

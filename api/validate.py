@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,30 +10,27 @@ after the validation decorators, rather than forcing an ordering that could then
 produce incorrect outputs if missed.
 """
 
-from __future__ import print_function
-
 import functools
 import os
-import sys
+from typing import Callable, Iterable, List, Optional, Union
 
-from google.protobuf import message as protobuf_message
+from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
-def _value(field, message):
+def _value(
+    field: str, message: protobuf_message.Message
+) -> Union[bool, int, str, None, List, protobuf_message.Message]:
   """Helper function to fetch the value of the field.
 
   Args:
-    field (str): The field name. Can be nested via . separation.
-    message (Message): The protobuf message it is being fetched from.
+    field: The field name. Can be nested via . separation.
+    message: The protobuf message it is being fetched from.
 
   Returns:
-    str|None|int|list|Message|bool - The value of the field.
+    The value of the field.
   """
   if not field:
     return message
@@ -54,7 +50,7 @@ def _value(field, message):
 
 
 # pylint: disable=docstring-misnamed-args
-def exists(*fields):
+def exists(*fields: str):
   """Validate that the paths in |fields| exist.
 
   Args:
@@ -81,12 +77,12 @@ def exists(*fields):
   return decorator
 
 
-def is_in(field, values):
+def is_in(field: str, values: Iterable):
   """Validate |field| is an element of |values|.
 
   Args:
-    field (str): The field being checked. May be . separated nested fields.
-    values (list): The possible values field may take.
+    field: The field being checked. May be . separated nested fields.
+    values: The possible values field may take.
   """
   assert field
   assert values
@@ -108,15 +104,18 @@ def is_in(field, values):
   return decorator
 
 
-def each_in(field, subfield, values, optional=False):
+def each_in(field: str,
+            subfield: Optional[str],
+            values: Iterable,
+            optional: bool = False):
   """Validate each |subfield| of the repeated |field| is in |values|.
 
   Args:
-    field (str): The field being checked. May be . separated nested fields.
-    subfield (str|None): The field in the repeated |field| to validate, or None
+    field: The field being checked. May be . separated nested fields.
+    subfield: The field in the repeated |field| to validate, or None
       when |field| is not a repeated message, e.g. enum, scalars.
-    values (list): The possible values field may take.
-    optional (bool): Also allow the field to be empty when True.
+    values: The possible values field may take.
+    optional: Also allow the field to be empty when True.
   """
   assert field
   assert values
@@ -144,11 +143,11 @@ def each_in(field, subfield, values, optional=False):
 
 
 # pylint: disable=docstring-misnamed-args
-def require(*fields):
+def require(*fields: str):
   """Verify |fields| have all been set.
 
   Args:
-    fields (str): The fields being checked. May be . separated nested fields.
+    fields: The fields being checked. May be . separated nested fields.
   """
   assert fields
 
@@ -171,11 +170,11 @@ def require(*fields):
 
 
 # pylint: disable=docstring-misnamed-args
-def require_any(*fields):
+def require_any(*fields: str):
   """Verify at least one of |fields| have been set.
 
   Args:
-    fields (str): The fields being checked. May be . separated nested fields.
+    fields: The fields being checked. May be . separated nested fields.
   """
   assert fields
 
@@ -199,7 +198,9 @@ def require_any(*fields):
   return decorator
 
 
-def require_each(field, subfields, allow_empty=True):
+def require_each(field: str,
+                 subfields: Iterable[str],
+                 allow_empty: bool = True):
   """Verify |field| each have all of the |subfields| set.
 
   When |allow_empty| is True, |field| may be empty, and |subfields| are only
@@ -207,10 +208,10 @@ def require_each(field, subfields, allow_empty=True):
   also have at least one entry.
 
   Args:
-    field (str): The repeated field being checked. May be . separated nested
+    field: The repeated field being checked. May be . separated nested
         fields.
-    subfields (list[str]): The fields of the repeated message to validate.
-    allow_empty (bool): Also require at least one entry in the repeated field.
+    subfields: The fields of the repeated message to validate.
+    allow_empty: Also require at least one entry in the repeated field.
   """
   assert field
   assert subfields
@@ -237,7 +238,7 @@ def require_each(field, subfields, allow_empty=True):
   return decorator
 
 
-def validation_complete(func):
+def validation_complete(func: Callable):
   """Automatically skip the endpoint when called after all other validators.
 
   This decorator MUST be applied after all other validate decorators.

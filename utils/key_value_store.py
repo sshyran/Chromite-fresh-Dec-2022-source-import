@@ -1,22 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common python commands used by various build scripts."""
 
-from __future__ import print_function
-
 import contextlib
 import errno
-
-import six
 
 
 @contextlib.contextmanager
 def _Open(obj, mode='r'):
   """Convenience ctx that accepts a file path or an already open file object."""
-  if isinstance(obj, six.string_types):
+  if isinstance(obj, str):
     with open(obj, mode=mode) as f:
       yield f
   else:

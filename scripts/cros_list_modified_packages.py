@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,15 +20,12 @@ Some caveats:
     aren't able to detect when users modify source code during builds.
 """
 
-from __future__ import print_function
-
 import errno
 import multiprocessing
 import os
-import sys
+import queue as Queue
 
-from six.moves import queue as Queue
-
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -40,9 +36,6 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ModificationTimeMonitor(object):
@@ -234,7 +227,7 @@ def main(argv):
   flags = _ParseArguments(argv)
   sysroot = None
   if flags.board:
-    sysroot = cros_build_lib.GetSysroot(flags.board)
+    sysroot = build_target_lib.get_default_sysroot_path(flags.board)
   elif flags.host:
     sysroot = '/'
   else:

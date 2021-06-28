@@ -195,9 +195,9 @@ def get_source_path_mapping(packages, sysroot_path, board):
   for package, ebuild_path in packages_to_ebuild_paths.items():
     attrs = portage_util.EBuild.Classify(ebuild_path)
     if (not attrs.is_workon or
-        # Blacklisted ebuild is pinned to a specific git sha1, so change in
-        # that repo matter to the ebuild.
-        attrs.is_blacklisted):
+        # Manually uprevved ebuild is pinned to a specific git sha1, so change
+        # in that repo does not matter to the ebuild.
+        attrs.is_manually_uprevved):
       continue
     ebuild = portage_util.EBuild(ebuild_path)
     workon_subtrees = ebuild.GetSourceInfo(buildroot, manifest).subtrees

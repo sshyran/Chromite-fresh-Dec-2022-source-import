@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """controller_util unittests."""
-
-from __future__ import print_function
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
@@ -15,6 +12,7 @@ from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
+from chromite.lib.sysroot_lib import Sysroot
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):
@@ -47,6 +45,20 @@ class ParseChrootTest(cros_test_lib.MockTestCase):
     with self.assertRaises(AssertionError):
       controller_util.ParseChroot(common_pb2.BuildTarget())
 
+class ParseSysrootTest(cros_test_lib.MockTestCase):
+  """ParseSysroot tests."""
+
+  def testSuccess(self):
+    """test successful handling case."""
+    path = '/build/rare_pokemon'
+    sysroot_message = sysroot_pb2.Sysroot(path=path)
+    expected = Sysroot(path=path)
+    result = controller_util.ParseSysroot(sysroot_message)
+    self.assertEqual(expected, result)
+
+  def testWrongMessage(self):
+    with self.assertRaises(AssertionError):
+      controller_util.ParseSysroot(common_pb2.BuildTarget())
 
 class ParseBuildTargetTest(cros_test_lib.TestCase):
   """ParseBuildTarget tests."""

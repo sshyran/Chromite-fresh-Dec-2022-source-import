@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,12 +11,9 @@
 If unsure, just use the --safe flag to clean out various objects.
 """
 
-from __future__ import print_function
-
 import errno
 import glob
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.cli import command
@@ -25,9 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('clean')
@@ -144,13 +137,22 @@ class CleanCommand(command.CliCommand):
 
   def Run(self):
     """Perform the cros clean command."""
-
     # If no option is set, default to "--safe"
-    if not (self.options.safe or self.options.clobber or self.options.board or
-            self.options.chroot or self.options.cache or self.options.deploy or
-            self.options.flash or self.options.images or
-            self.options.autotest or self.options.incrementals or
-            self.options.chroot_tmp or self.options.sysroots):
+    if not (self.options.autotest or
+            self.options.board or
+            self.options.cache or
+            self.options.chromite or
+            self.options.chroot or
+            self.options.chroot_tmp or
+            self.options.clobber or
+            self.options.deploy or
+            self.options.flash or
+            self.options.images or
+            self.options.incrementals or
+            self.options.logs or
+            self.options.safe or
+            self.options.sysroots or
+            self.options.workdirs):
       self.options.safe = True
 
     if self.options.clobber:
@@ -260,17 +262,17 @@ class CleanCommand(command.CliCommand):
 
     if self.options.incrementals:
       logging.debug('Clean package incremental objects.')
-      Clean(os.path.join(chroot_dir, 'var', 'cache', 'portage'))
+      Empty(os.path.join(chroot_dir, 'var', 'cache', 'portage'))
       for d in glob.glob(
           os.path.join(chroot_dir, 'build', '*', 'var', 'cache', 'portage')):
-        Clean(d)
+        Empty(d)
 
     if self.options.logs:
       logging.debug('Clean log files.')
-      Clean(os.path.join(chroot_dir, 'var', 'log'))
+      Empty(os.path.join(chroot_dir, 'var', 'log'))
       for d in glob.glob(
           os.path.join(chroot_dir, 'build', '*', 'tmp', 'portage', 'logs')):
-        Clean(d)
+        Empty(d)
 
     if self.options.workdirs:
       logging.debug('Clean package workdirs.')

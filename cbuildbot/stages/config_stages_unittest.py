@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for config stages"""
 
-from __future__ import print_function
-
+import builtins
 import os
-
-import mock
-from six.moves import builtins
+from unittest import mock
 
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import config_stages
@@ -20,6 +16,7 @@ from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
+
 
 # pylint: disable=protected-access
 
@@ -176,12 +173,12 @@ class UpdateConfigStageTest(generic_stages_unittest.AbstractStageTestCase):
       self.assertEqual(
           os.path.basename(config_change_patch), 'config_change.patch')
 
-  def testMasterBasic(self):
-    """Basic test on master branch."""
+  def testMainBasic(self):
+    """Basic test on main branch."""
     template = 'build_config.ToT.json'
     stage = self.ConstructStage(template)
     stage.PerformStage()
-    self.assertTrue(stage.branch == 'master')
+    self.assertTrue(stage.branch == 'main')
 
   def testReleaseBasic(self):
     """Basic test on release branch."""

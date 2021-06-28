@@ -1,27 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Helper methods to make Google API call to query Android build server."""
 
-from __future__ import print_function
-
 import io
-
-import googleapiclient.discovery
-import googleapiclient.http
-import httplib2  # pylint: disable=import-error
-
 
 from chromite.lib import osutils
 from chromite.lib.xbuddy import retry
-from chromite.lib import cros_test_lib
-
-try:
-  from oauth2client.client import SignedJwtAssertionCredentials
-except ImportError:
-  cros_test_lib.pytest_skip(allow_module_level=True)
+from chromite.third_party import httplib2
+from chromite.third_party.googleapiclient import discovery
+from chromite.third_party.googleapiclient import http
+from chromite.third_party.oauth2client.client import SignedJwtAssertionCredentials  # pylint: disable=line-too-long
 
 
 CREDENTIAL_SCOPE = 'https://www.googleapis.com/auth/androidbuild.internal'
@@ -57,8 +47,7 @@ class BuildAccessor(object):
         cls.credential_info['client_email'],
         cls.credential_info['private_key'], CREDENTIAL_SCOPE)
     http_auth = credentials.authorize(httplib2.Http())
-    return googleapiclient.discovery.build(
-        DEFAULT_BUILDER, 'v1', http=http_auth)
+    return discovery.build(DEFAULT_BUILDER, 'v1', http=http_auth)
 
   @staticmethod
   def _GetBuildType(build_id):
@@ -162,7 +151,7 @@ class BuildAccessor(object):
         buildType=build_type, buildId=build_id, target=target,
         attemptId='latest', resourceId=resource_id)
     with io.FileIO(dest_file, mode='wb') as fh:
-      downloader = googleapiclient.http.MediaIoBaseDownload(
+      downloader = http.MediaIoBaseDownload(
           fh, download_req, chunksize=DEFAULT_CHUNKSIZE)
       done = None
       while not done:

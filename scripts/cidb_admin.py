@@ -1,23 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Script for administering the Continuous Integration Database."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import cidb
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MIGRATE = 'migrate'
@@ -84,7 +77,7 @@ def main(argv):
     cros_build_lib.Die('No command or unsupported command. Exiting.')
 
   print(warn)
-  conf_string = cros_build_lib.GetInput('(%s)?: ' % positive_confirmation)
+  conf_string = input('(%s)?: ' % positive_confirmation)
   if conf_string != positive_confirmation:
     cros_build_lib.Die('You changed your mind. Aborting.')
 

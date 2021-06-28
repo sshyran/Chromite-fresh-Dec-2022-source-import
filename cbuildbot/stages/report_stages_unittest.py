@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for report stages."""
 
-from __future__ import print_function
-
 import datetime as dt
 import json
+from unittest import mock
 
-import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.cbuildbot import cbuildbot_run
@@ -27,8 +24,8 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import fake_cidb
 from chromite.lib import failure_message_lib_unittest
+from chromite.lib import fake_cidb
 from chromite.lib import gs_unittest
 from chromite.lib import metrics
 from chromite.lib import osutils
@@ -36,6 +33,7 @@ from chromite.lib import results_lib
 from chromite.lib import retry_stats
 from chromite.lib import toolchain
 from chromite.lib.buildstore import FakeBuildStore
+
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-ancestors

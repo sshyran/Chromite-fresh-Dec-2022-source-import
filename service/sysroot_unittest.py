@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Sysroot service unittest."""
 
-from __future__ import print_function
-
+from operator import attrgetter
 import os
-
-import mock
+import shutil
+from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import constants
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -287,9 +286,12 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   def testGetBuildPackagesArgs(self):
     """Test the build_packages args building for non-empty values."""
     packages = ['cat/pkg', 'cat2/pkg2']
-    instance = sysroot.BuildPackagesRunConfig(usepkg=True,
-                                              install_debug_symbols=True,
-                                              packages=packages)
+    instance = sysroot.BuildPackagesRunConfig(
+        usepkg=True,
+        install_debug_symbols=True,
+        packages=packages,
+        setup_board=False,
+        dryrun=True)
 
     args = instance.GetBuildPackagesArgs()
     self.AssertHasRequiredArgs(args)
@@ -298,9 +300,12 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     self.assertNotIn('--reuse_pkgs_from_local_boards', args)
     # Debug symbols included.
     self.assertIn('--withdebugsymbols', args)
+    self.assertIn('--skip_setup_board', args)
     # Packages included.
     for package in packages:
       self.assertIn(package, args)
+    # Pretend flag included.
+    self.assertIn('--pretend', args)
 
   def testGetBuildPackagesEnv(self):
     """Test the build_packages env."""
@@ -380,3 +385,369 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
       self.fail('Unexpected exception type: %s' % type(e))
     else:
       self.fail('Expected an exception to be thrown.')
+
+
+class GatherSymbolFilesTest(cros_test_lib.MockTempDirTestCase):
+  """Base class for testing GatherSymbolFiles."""
+
+  SLIM_CONTENT = """
+some junk
+"""
+
+  FAT_CONTENT = """
+STACK CFI 1234
+some junk
+STACK CFI 1234
+"""
+
+
+  def createSymbolFile(self, filename, content=FAT_CONTENT, size=0):
+    """Create a symbol file using content with minimum size."""
+    osutils.SafeMakedirs(os.path.dirname(filename))
+
+    # If a file size is given, force that to be the minimum file size. Create
+    # a sparse file so large files are practical.
+    with open(filename, 'w+b') as f:
+      f.truncate(size)
+      f.seek(0)
+      f.write(content.encode('utf-8'))
+
+  def test_ListOutputOfGatherSymbolFiles(self):
+    """Mimic how the controller materializes output of GatherSymbolFiles."""
+    # Create directory with some symbol files.
+    tar_tmp_dir = os.path.join(self.tempdir, 'tar_tmp')
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/file1.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/d/file2.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/file3.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/d/e/file1.sym'))
+
+    # Call sysroot.GatherSymbolFiles to find symbol files under self.tempdir
+    # and copy them to output_dir.
+    symbol_files = list(sysroot.GatherSymbolFiles(
+        tar_tmp_dir, output_dir, [input_dir]))
+    self.assertEqual(len(symbol_files), 4)
+
+  def test_GatherSymbolFiles(self):
+    """Test that files are found and copied."""
+    # Create directory with some symbol files.
+    tar_tmp_dir = os.path.join(self.tempdir, 'tar_tmp')
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/file1.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/d/file2.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/file3.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a/b/c/d/e/file1.sym'))
+
+    # Call sysroot.GatherSymbolFiles to find symbol files under self.tempdir
+    # and copy them to output_dir.
+    symbol_files = list(sysroot.GatherSymbolFiles(
+        tar_tmp_dir, output_dir, [input_dir]))
+
+    # Construct the expected symbol files. Note that the SymbolFileTuple
+    # field source_file_name is the full path to where a symbol file was found,
+    # while relative_path is the relative path (from the search) where
+    # it is created in the output directory.
+    expected_symbol_files = [
+        sysroot.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a/b/c/file1.sym'),
+            relative_path='a/b/c/file1.sym'),
+        sysroot.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a/b/c/d/file2.sym'),
+            relative_path='a/b/c/d/file2.sym'),
+        sysroot.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a/file3.sym'),
+            relative_path='a/file3.sym'),
+        sysroot.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a/b/c/d/e/file1.sym'),
+            relative_path='a/b/c/d/e/file1.sym')
+    ]
+
+    # Sort symbol_files and expected_output_files by the relative_path
+    # attribute.
+    symbol_files = sorted(symbol_files, key=attrgetter('relative_path'))
+    expected_symbol_files = sorted(expected_symbol_files,
+                                   key=attrgetter('relative_path'))
+    # Compare the files to the expected files. This verifies the size and
+    # contents, and on failure shows the full contents.
+    self.assertEqual(symbol_files, expected_symbol_files)
+
+    # Verify that the files in output_dir match the SymbolFile relative_paths.
+    files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
+    files_in_output_dir.sort()
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(files_in_output_dir, symbol_file_relative_paths)
+
+    # Verify that the display_name of each symbol does not contain pathsep.
+    symbol_file_relative_paths = [
+        os.path.basename(obj.relative_path) for obj in symbol_files
+    ]
+    for display_name in symbol_file_relative_paths:
+      self.assertEqual(-1, display_name.find(os.path.sep))
+
+  def test_GatherSymbolTarFiles(self):
+    """Test that symbol files in tar files are extracted."""
+    output_dir = os.path.join(self.tempdir, 'output')
+    osutils.SafeMakedirs(output_dir)
+
+    # Set up test input directory.
+    tarball_dir = os.path.join(self.tempdir, 'some/path')
+    files_in_tarball = ['dir1/fileZ.sym', 'dir2/fileY.sym', 'dir2/fileX.sym',
+                        'fileA.sym', 'fileB.sym', 'fileC.sym']
+    for filename in files_in_tarball:
+      self.createSymbolFile(os.path.join(tarball_dir, filename))
+    temp_tarball_file_path = os.path.join(self.tempdir, 'symfiles.tar')
+    cros_build_lib.CreateTarball(temp_tarball_file_path, tarball_dir)
+    # Now that we've created the tarball, remove the .sym files in
+    # the tarball dir and move the tarball to that dir.
+    for filename in files_in_tarball:
+      os.remove(os.path.join(tarball_dir, filename))
+    tarball_path = os.path.join(tarball_dir, 'symfiles.tar')
+    shutil.move(temp_tarball_file_path, tarball_path)
+
+    # Execute sysroot.GatherSymbolFiles where the path contains the tarball.
+    symbol_files = list(sysroot.GatherSymbolFiles(
+        tarball_dir, output_dir, [tarball_path]))
+
+    self.assertEqual(len(symbol_files), 6)
+    # Verify the symbol_file relative_paths.
+    symbol_file_relative_paths = [
+        obj.relative_path for obj in symbol_files
+    ]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(symbol_file_relative_paths,
+                     ['dir1/fileZ.sym', 'dir2/fileX.sym', 'dir2/fileY.sym',
+                      'fileA.sym', 'fileB.sym', 'fileC.sym'])
+    # Verify the symbol_file source_file_names.
+    symbol_file_source_file_names = [
+        obj.source_file_name for obj in symbol_files
+    ]
+    symbol_file_source_file_names.sort()
+    # Note that the expected symbol_file_source_names are the full path to
+    # the tarfile followed by the relative path, such as
+    # /tmp/chromite.test2ng92vzo/some/path/symfiles.tar/dir1/fileZ.sym
+    expected_symbol_file_source_names = [
+        os.path.join(tarball_path, 'dir1/fileZ.sym'),
+        os.path.join(tarball_path, 'dir2/fileX.sym'),
+        os.path.join(tarball_path, 'dir2/fileY.sym'),
+        os.path.join(tarball_path, 'fileA.sym'),
+        os.path.join(tarball_path, 'fileB.sym'),
+        os.path.join(tarball_path, 'fileC.sym')
+    ]
+    self.assertEqual(symbol_file_source_file_names,
+                     expected_symbol_file_source_names)
+
+    # Verify that the files in output_dir match the SymbolFile relative_paths.
+    files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
+    files_in_output_dir.sort()
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(files_in_output_dir, symbol_file_relative_paths)
+    # Verify that the display_name of each symbol does not contain pathsep.
+    symbol_file_relative_paths = [
+        os.path.basename(obj.relative_path) for obj in symbol_files
+    ]
+    for display_name in symbol_file_relative_paths:
+      self.assertEqual(-1, display_name.find(os.path.sep))
+
+  def test_GatherSymbolTarFilesWithNonSymFiles(self):
+    """Test that non-symbol files in tar files are not extracted."""
+    output_dir = os.path.join(self.tempdir, 'output')
+    osutils.SafeMakedirs(output_dir)
+
+    # Set up test input directory.
+    tarball_dir = os.path.join(self.tempdir, 'some/path')
+    files_in_tarball = ['dir1/fileU.sym', 'dir1/fileU.txt',
+                        'fileD.sym', 'fileD.txt']
+    for filename in files_in_tarball:
+      # we don't care about file contents, so we are using createSymbolFile
+      # for files whether they end with .sym or not.
+      self.createSymbolFile(os.path.join(tarball_dir, filename))
+    temp_tarball_file_path = os.path.join(self.tempdir, 'symfiles.tar')
+    cros_build_lib.CreateTarball(temp_tarball_file_path, tarball_dir)
+    # Now that we've created the tarball, remove the .sym files in
+    # the tarball dir and move the tarball to that dir.
+    for filename in files_in_tarball:
+      os.remove(os.path.join(tarball_dir, filename))
+    tarball_path = os.path.join(tarball_dir, 'symfiles.tar')
+    shutil.move(temp_tarball_file_path, tarball_path)
+
+    # Execute sysroot.GatherSymbolFiles where the path contains the tarball.
+    symbol_files = list(sysroot.GatherSymbolFiles(
+        tarball_dir, output_dir, [tarball_path]))
+
+    # Verify the symbol_file relative_paths only has .sym files.
+    symbol_file_relative_paths = [
+        obj.relative_path for obj in symbol_files
+    ]
+    symbol_file_relative_paths.sort()
+    self.assertEqual(symbol_file_relative_paths,
+                     ['dir1/fileU.sym', 'fileD.sym'])
+    for symfile in symbol_file_relative_paths:
+      extension = symfile.split('.')[1]
+      self.assertEqual(extension, 'sym')
+
+  def test_GatherSymbolFileFullFilePaths(self):
+    """Test full filepaths (.sym and .txt) only gather .sym files."""
+    tar_tmp_dir = os.path.join(self.tempdir, 'tar_tmp')
+    output_dir = os.path.join(self.tempdir, 'output')
+    input_dir = os.path.join(self.tempdir, 'input')
+    osutils.SafeMakedirs(output_dir)
+    # We don't care about contents, so use createSymbolFiles for all files.
+    self.createSymbolFile(os.path.join(input_dir, 'a_file.sym'))
+    self.createSymbolFile(os.path.join(input_dir, 'a_file.txt'))
+
+    # Call sysroot.GatherSymbolFiles with full paths to files, some of which
+    # don't end in .sym, verify that only .sym files get copied to output_dir.
+    symbol_files = list(sysroot.GatherSymbolFiles(
+        tar_tmp_dir, output_dir,
+        [os.path.join(input_dir, 'a_file.sym'),
+         os.path.join(input_dir, 'a_file.txt')]))
+
+    # Construct the expected symbol files. Note that the SymbolFileTuple
+    # field source_file_name is the full path to where a symbol file was found,
+    # while relative_path is the relative path (from the search) where
+    # it is created in the output directory.
+    expected_symbol_files = [
+        sysroot.SymbolFileTuple(
+            source_file_name=os.path.join(input_dir, 'a_file.sym'),
+            relative_path='a_file.sym')
+    ]
+
+    # Compare the files to the expected files. This verifies the size and
+    # contents, and on failure shows the full contents.
+    self.assertEqual(symbol_files, expected_symbol_files)
+    # Verify that only a_file.sym is in the output_dir.
+    files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
+    self.assertEqual(files_in_output_dir, ['a_file.sym'])
+
+  def test_IsTarball(self):
+    """Test IsTarball helper function."""
+    self.assertTrue(cros_build_lib.IsTarball('file.tar'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.bz2'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.gz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tbz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.txz'))
+    self.assertFalse(cros_build_lib.IsTarball('file.txt'))
+    self.assertFalse(cros_build_lib.IsTarball('file.tart'))
+    self.assertFalse(cros_build_lib.IsTarball('file.bz2'))
+
+  def getFilesWithRelativeDir(self, dest_dir):
+    """Find all files below dest_dir using dir relative to dest_dir."""
+    relative_files = []
+    for path, __, files in os.walk(dest_dir):
+      for filename in files:
+        fullpath = os.path.join(path, filename)
+        relpath = os.path.relpath(fullpath, dest_dir)
+        relative_files.append(relpath)
+    return relative_files
+
+
+class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
+  """Base class for testing GenerateBreakpadSymbols."""
+
+  def setUp(self):
+    self.chroot_dir = os.path.join(self.tempdir, 'chroot_dir')
+    osutils.SafeMakedirs(self.chroot_dir)
+
+  def test_generateBreakpadSymbols(self):
+    """Verify that calling the service layer invokes the script as expected."""
+    chroot = chroot_lib.Chroot(self.chroot_dir)
+    build_target = build_target_lib.BuildTarget('board')
+    self.PatchObject(cros_build_lib, 'run')
+
+    # Call the method being tested.
+    sysroot.GenerateBreakpadSymbols(chroot, build_target, False)
+
+    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
+                                           '--board=board',
+                                           '--jobs', mock.ANY,
+                                           '--exclude-dir=firmware'],
+                                          enter_chroot=True,
+                                          chroot_args=['--chroot', mock.ANY])
+
+  def test_generateBreakpadSymbolsWithDebug(self):
+    """Verify that calling with debug invokes the script as expected."""
+    chroot = chroot_lib.Chroot(self.chroot_dir)
+    build_target = build_target_lib.BuildTarget('board')
+    self.PatchObject(cros_build_lib, 'run')
+
+    # Call the method being tested.
+    sysroot.GenerateBreakpadSymbols(chroot, build_target, True)
+
+    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
+                                           '--debug',
+                                           '--board=board',
+                                           '--jobs', mock.ANY,
+                                           '--exclude-dir=firmware'],
+                                          enter_chroot=True,
+                                          chroot_args=['--chroot', mock.ANY])
+
+
+class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
+  """Unittests for BundleDebugSymbols."""
+
+  def setUp(self):
+    # Create a chroot_path that also includes a chroot tmp dir.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    self.sysroot_path = os.path.join(self.chroot_path, 'build/target')
+
+    # Has to be run outside the chroot.
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
+
+    osutils.SafeMakedirs(self.sysroot_path)
+    osutils.SafeMakedirs(os.path.join(self.chroot_path, 'tmp'))
+
+
+    # Create output dir.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+    # Create chroot, sysroot, and build_target objs.
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
+    self.build_target = build_target_lib.BuildTarget('target')
+
+  def testBundleBreakpadDebugSymbols(self):
+    """BundleBreakpadSymbols calls cbuildbot/commands with correct args."""
+    # Patch service layer functions.
+    generate_breakpad_symbols_patch = self.PatchObject(
+        sysroot, 'GenerateBreakpadSymbols',
+        return_value=cros_build_lib.CommandResult(returncode=0, output=''))
+    gather_symbol_files_patch = self.PatchObject(
+        sysroot, 'GatherSymbolFiles',
+        return_value=[sysroot.SymbolFileTuple(
+            source_file_name='path/to/source/file1.sym',
+            relative_path='file1.sym')])
+
+    tar_file = sysroot.BundleBreakpadSymbols(self.chroot, self.sysroot,
+                                             self.build_target, self.output_dir)
+
+    # Verify mock objects were called.
+    generate_breakpad_symbols_patch.assert_called_with(
+        self.chroot, self.build_target, debug=True)
+    gather_symbol_files_patch.assert_called()
+
+    # Verify response proto contents and output directory contents.
+    self.assertTrue(tar_file.endswith('/output_dir/debug_breakpad.tar.xz'))
+
+  def testBundleDebugSymbols(self):
+    """BundleDebugSymbols calls cbuildbot/commands with correct args."""
+    # Patch service layer functions.
+    self.PatchObject(os.path, 'exists', return_value=True)
+    self.PatchObject(os.path, 'isdir', return_value=True)
+
+    create_tarball_patch = self.PatchObject(
+        cros_build_lib, 'CreateTarball',
+        return_value=cros_build_lib.CommandResult(returncode=0, output=''))
+
+    tar_file = sysroot.BundleDebugSymbols(self.chroot, self.sysroot,
+                                          None, self.output_dir)
+    create_tarball_patch.assert_called()
+
+    # Verify response contents.
+    self.assertTrue(tar_file.endswith('/output_dir/debug.tgz'))

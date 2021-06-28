@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Grunt configs."""
 
-from __future__ import print_function
+from chromite.lib.firmware import servo_lib
 
 
 def is_fast_required(use_futility, servo):
@@ -26,24 +25,23 @@ def is_fast_required(use_futility, servo):
   return use_futility and servo.is_v4
 
 
-def get_commands(servo):
-  """Get specific flash commands for grunt
+def get_config(servo):
+  """Get specific flash config for the grunt.
 
-  Each board needs specific commands including the voltage for Vref, to turn
-  on and turn off the SPI flash. The get_*_commands() functions provide a
-  board-specific set of commands for these tasks. The voltage for this board
-  needs to be set to 1.8 V.
+  Each board needs specific config including the voltage for Vref, to turn
+  on and turn off the SPI flash. get_config() returns servo_lib.FirmwareConfig
+  with settings to flash a servo for a particular build target.
+  The voltage for this board needs to be set to 1.8 V.
 
   Args:
     servo (servo_lib.Servo): The servo connected to the target DUT.
 
   Returns:
-    list: [dut_control_on, dut_control_off, flashrom_cmd, futility_cmd]
-      dut_control*=2d arrays formmated like [["cmd1", "arg1", "arg2"],
-                                             ["cmd2", "arg3", "arg4"]]
-                     where cmd1 will be run before cmd2
-      flashrom_cmd=command to flash via flashrom
-      futility_cmd=command to flash via futility
+    servo_lib.FirmwareConfig:
+      dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
+                                                      ["cmd2", "arg3", "arg4"]]
+                            where cmd1 will be run before cmd2.
+      programmer=programmer argument (-p) for flashrom and futility.
   """
   dut_control_on = []
   dut_control_off = []
@@ -70,9 +68,7 @@ def get_commands(servo):
     # These commands were based off the commands for other boards.
     programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
   else:
-    raise Exception('%s not supported' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError('%s not supported' %
+                                                 servo.version)
 
-  flashrom_cmd = ['flashrom', '-p', programmer, '-w']
-  futility_cmd = ['futility', 'update', '-p', programmer, '-i']
-
-  return [dut_control_on, dut_control_off, flashrom_cmd, futility_cmd]
+  return servo_lib.FirmwareConfig(dut_control_on, dut_control_off, programmer)

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This library manages the interfaces to the signer for update payloads."""
 
-from __future__ import print_function
-
-import binascii
 import os
 import re
 import shutil
@@ -433,12 +429,6 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
     Instead of waiting for the signers to sign the hashes, we just sign then and
     copy them to the requested files. It doesn't really support keysets at this
     point.
-
-    Args:
-      Look at SignerPayloadsClientGoogleStorage.GetHashsignatures()
-
-    Returns:
-      Look at SignerPayloadsClientGoogleStorage.GetHashsignatures()
     """
     logging.info('Signing the hashes with unoffical keys.')
 
@@ -447,7 +437,7 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
 
     signatures = []
     for h in hashes:
-      hash_hex = binascii.hexlify(h)
+      hash_hex = h.hex()
       hash_file = os.path.join(self._work_dir, 'hash-%s.bin' % hash_hex)
       signature_file = os.path.join(self._work_dir,
                                     'signature-%s.bin' % hash_hex)

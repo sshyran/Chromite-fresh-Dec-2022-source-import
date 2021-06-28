@@ -29,20 +29,20 @@ import sys
 import tempfile
 import time
 import shutil
-import six
-from six.moves import urllib
+from chromite.third_party import six
+from chromite.third_party.six.moves import urllib
 
-import httplib2
-from oauth2client import GOOGLE_AUTH_URI
-from oauth2client import GOOGLE_DEVICE_URI
-from oauth2client import GOOGLE_REVOKE_URI
-from oauth2client import GOOGLE_TOKEN_URI
-from oauth2client import GOOGLE_TOKEN_INFO_URI
-from oauth2client._helpers import _from_bytes
-from oauth2client._helpers import _to_bytes
-from oauth2client._helpers import _urlsafe_b64decode
-from oauth2client import clientsecrets
-from oauth2client import util
+from chromite.third_party import httplib2
+from . import GOOGLE_AUTH_URI
+from . import GOOGLE_DEVICE_URI
+from . import GOOGLE_REVOKE_URI
+from . import GOOGLE_TOKEN_URI
+from . import GOOGLE_TOKEN_INFO_URI
+from ._helpers import _from_bytes
+from ._helpers import _to_bytes
+from ._helpers import _urlsafe_b64decode
+from . import clientsecrets
+from . import util
 
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
@@ -50,7 +50,7 @@ __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 HAS_OPENSSL = False
 HAS_CRYPTO = False
 try:
-    from oauth2client import crypt
+    from . import crypt
     HAS_CRYPTO = True
     if crypt.OpenSSLVerifier is not None:
         HAS_OPENSSL = True
@@ -305,6 +305,7 @@ class Credentials(object):
             # In case there's an object from the old package structure,
             # update it
             module_name = module_name.replace('.googleapiclient', '')
+            module_name = module_name.replace('oauth2client', 'chromite.third_party.oauth2client')
             module_obj = __import__(module_name)
 
         module_obj = __import__(module_name,
@@ -1148,7 +1149,7 @@ class GoogleCredentials(OAuth2Credentials):
     service that requires authentication::
 
         from googleapiclient.discovery import build
-        from oauth2client.client import GoogleCredentials
+        from .client import GoogleCredentials
 
         credentials = GoogleCredentials.get_application_default()
         service = build('compute', 'v1', credentials=credentials)
@@ -1442,7 +1443,7 @@ def _get_well_known_file():
 def _get_application_default_credential_from_file(filename):
     """Build the Application Default Credentials from file."""
 
-    from oauth2client import service_account
+    from . import service_account
 
     # read the credentials from the file
     with open(filename) as file_obj:
@@ -1496,13 +1497,13 @@ def _raise_exception_for_reading_json(credential_file,
 
 
 def _get_application_default_credential_GAE():
-    from oauth2client.appengine import AppAssertionCredentials
+    from .appengine import AppAssertionCredentials
 
     return AppAssertionCredentials([])
 
 
 def _get_application_default_credential_GCE():
-    from oauth2client.gce import AppAssertionCredentials
+    from .gce import AppAssertionCredentials
 
     return AppAssertionCredentials([])
 

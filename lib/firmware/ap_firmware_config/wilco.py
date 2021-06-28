@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Wilco configs."""
 
-from __future__ import print_function
 from chromite.lib import cros_logging as logging
+from chromite.lib.firmware import servo_lib
 
 # TODO(b/143241417): Use futility anytime flashing over ssh to avoid failures.
 DEPLOY_SSH_FORCE_FUTILITY = True
@@ -31,13 +30,13 @@ def is_fast_required(_use_futility, servo):
   return servo.is_micro
 
 
-def get_commands(servo):
-  """Get specific flash commands for wilco
+def get_config(servo):
+  """Get specific flash config for wilco.
 
-  Each board needs specific commands including the voltage for Vref, to turn
-  on and turn off the SPI flash. The get_*_commands() functions provide a
-  board-specific set of commands for these tasks. The voltage for this board
-  needs to be set to 3.3 V.
+  Each board needs specific config including the voltage for Vref, to turn
+  on and turn off the SPI flash. get_config() returns servo_lib.FirmwareConfig
+  with settings to flash a servo for a particular build target.
+  The voltage for this board needs to be set to 3.3 V.
 
   wilco care and feeding doc only lists commands for servo v2 and servo micro
   TODO: support 4 byte addressing?
@@ -57,39 +56,39 @@ def get_commands(servo):
     servo (servo_lib.Servo): The servo connected to the target DUT.
 
   Returns:
-    list: [dut_control_on, dut_control_off, flashrom_cmd, futility_cmd]
-      dut_control*=2d arrays formmated like [["cmd1", "arg1", "arg2"],
-                                             ["cmd2", "arg3", "arg4"]]
-                   where cmd1 will be run before cmd2
-      flashrom_cmd=command to flash via flashrom
-      futility_cmd=command to flash via futility
+    servo_lib.FirmwareConfig:
+      dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
+                                                      ["cmd2", "arg3", "arg4"]]
+                            where cmd1 will be run before cmd2.
+      programmer=programmer argument (-p) for flashrom and futility.
   """
   dut_control_on = []
   dut_control_off = []
   if servo.is_v2:
-    dut_control_on.append(['spi2_vref:pp3300', 'spi2_buf_en:on',
-                           'spi2_buf_on_flex_en:on',
-                           'cold_reset:on'])
-    dut_control_off.append(['spi2_vref:off', 'spi2_buf_en:off',
-                            'spi2_buf_on_flex_en:off',
-                            'cold_reset:off'])
+    dut_control_on.append([
+        'spi2_vref:pp3300', 'spi2_buf_en:on', 'spi2_buf_on_flex_en:on',
+        'cold_reset:on'
+    ])
+    dut_control_off.append([
+        'spi2_vref:off', 'spi2_buf_en:off', 'spi2_buf_on_flex_en:off',
+        'cold_reset:off'
+    ])
     programmer = 'ft2232_spi:type=google-servo-v2,serial=%s' % servo.serial
   elif servo.is_micro:
-    dut_control_on.append(['spi2_vref:pp3300', 'spi2_buf_en:on',
-                           'cold_reset:on'])
-    dut_control_off.append(['spi2_vref:off', 'spi2_buf_en:off',
-                            'cold_reset:off'])
+    dut_control_on.append(
+        ['spi2_vref:pp3300', 'spi2_buf_en:on', 'cold_reset:on'])
+    dut_control_off.append(
+        ['spi2_vref:off', 'spi2_buf_en:off', 'cold_reset:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
     # According to wilco care and feeding doc there is
     # NO support for CCD on wilco so this will not work.
     logging.error('wilco devices do not support ccd, cannot flash')
     logging.info('Please use a different servo with wilco devices')
-    raise Exception('%s not accepted' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError('%s not accepted' %
+                                                 servo.version)
   else:
-    raise Exception('%s not supported' % servo.version)
+    raise servo_lib.UnsupportedServoVersionError('%s not supported' %
+                                                 servo.version)
 
-  flashrom_cmd = ['flashrom', '-p', programmer, '-w']
-  futility_cmd = ['futility', 'update', '-p', programmer, '-i']
-
-  return [dut_control_on, dut_control_off, flashrom_cmd, futility_cmd]
+  return servo_lib.FirmwareConfig(dut_control_on, dut_control_off, programmer)

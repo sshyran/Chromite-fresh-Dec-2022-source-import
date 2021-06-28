@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module that handles patches applied to a repo checkout."""
 
-from __future__ import print_function
-
 import contextlib
 import functools
 import sys
-
-import six
 
 from chromite.lib import config_lib
 from chromite.lib import cros_logging as logging
@@ -19,9 +14,6 @@ from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import parallel
 from chromite.lib import patch as cros_patch
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MAX_PLAN_RECURSION = 150
@@ -94,12 +86,12 @@ def _PatchWrapException(functor):
         e = ('%s\nSuggest you use gerrit numbers instead (prefixed with a '
              "'chrome-internal:' if it's an internal change)." % e)
       new_exc = cros_patch.PatchException(parent, e)
-      six.reraise(new_exc.__class__, new_exc, sys.exc_info()[2])
+      raise new_exc.with_traceback(sys.exc_info()[2])
     except cros_patch.PatchException as e:
       if e.patch.id == parent.id:
         raise
       new_exc = cros_patch.DependencyError(parent, e)
-      six.reraise(new_exc.__class__, new_exc, sys.exc_info()[2])
+      raise new_exc.with_traceback(sys.exc_info()[2])
 
   f.__name__ = functor.__name__
   return f
@@ -296,6 +288,29 @@ class PatchSeries(object):
     return f
 
   @_ManifestDecorator
+  def GetGitReposForChange(self, change, strict=False, manifest=None):
+    """Get the project path(s) associated with the specified change.
+
+    Args:
+      change: The change to operate on.
+      strict: If True, throw ChangeNotInManifest rather than returning
+        None. Default: False.
+      manifest: A ManifestCheckout instance representing what we're working on.
+
+    Returns:
+      List of the project paths, if found in the manifest. Otherwise returns
+      None (if strict=False).
+    """
+    if manifest is None:
+      manifest = self.manifest
+    if manifest:
+      checkouts = change.GetCheckouts(manifest, strict=strict)
+      if checkouts:
+        return [c.GetPath(absolute=True) for c in checkouts]
+
+    return None
+
+  @_ManifestDecorator
   def GetGitRepoForChange(self, change, strict=False, manifest=None):
     """Get the project path associated with the specified change.
 
@@ -433,9 +448,8 @@ class PatchSeries(object):
     """
     plan = []
     gerrit_deps_seen = cros_patch.PatchCache()
-    cq_deps_seen = cros_patch.PatchCache()
     self._AddChangeToPlanWithDeps(change, plan, gerrit_deps_seen,
-                                  cq_deps_seen, limit_to=limit_to)
+                                  limit_to=limit_to)
     return plan
 
   def CreateTransactions(self, changes, limit_to=None):
@@ -468,8 +482,7 @@ class PatchSeries(object):
 
   @_PatchWrapException
   def _AddChangeToPlanWithDeps(self, change, plan, gerrit_deps_seen,
-                               cq_deps_seen, limit_to=None,
-                               include_cq_deps=True,
+                               limit_to=None,
                                remaining_depth=MAX_PLAN_RECURSION):
     """Add a change and its dependencies into a |plan|.
 
@@ -479,12 +492,8 @@ class PatchSeries(object):
         |change| and any necessary dependencies to |plan|.
       gerrit_deps_seen: The changes whose Gerrit dependencies have already been
         processed.
-      cq_deps_seen: The changes whose CQ-DEPEND and Gerrit dependencies have
-        already been processed.
       limit_to: If non-None, limit the allowed uncommitted patches to
         what's in that container/mapping.
-      include_cq_deps: If True, include CQ dependencies in the list
-        of dependencies. Defaults to True.
       remaining_depth: Amount of permissible recursion depth from this call.
 
     Raises:
@@ -499,32 +508,19 @@ class PatchSeries(object):
 
     # Get a list of the changes that haven't been committed.
     # These are returned as cros_patch.PatchQuery objects.
-    gerrit_deps, cq_deps = self.GetDepsForChange(change)
+    gerrit_deps = self.GetDepsForChange(change)
 
     # Only process the Gerrit dependencies for each change once. We prioritize
     # Gerrit dependencies over CQ dependencies, since Gerrit dependencies might
     # be required in order for the change to apply.
-    old_plan_len = len(plan)
     if change not in gerrit_deps_seen:
       gerrit_deps = self._LookupUncommittedChanges(
           gerrit_deps, limit_to=limit_to)
       gerrit_deps_seen.Inject(change)
       for dep in gerrit_deps:
-        self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen, cq_deps_seen,
-                                      limit_to=limit_to, include_cq_deps=False,
+        self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen,
+                                      limit_to=limit_to,
                                       remaining_depth=remaining_depth - 1)
-
-    if include_cq_deps and change not in cq_deps_seen:
-      cq_deps = self._LookupUncommittedChanges(
-          cq_deps, limit_to=limit_to)
-      cq_deps_seen.Inject(change)
-      for dep in plan[old_plan_len:] + cq_deps:
-        # Add the requested change (plus deps) to our plan, if it we aren't
-        # already in the process of doing that.
-        if dep not in cq_deps_seen:
-          self._AddChangeToPlanWithDeps(dep, plan, gerrit_deps_seen,
-                                        cq_deps_seen, limit_to=limit_to,
-                                        remaining_depth=remaining_depth - 1)
 
     # If there are cyclic dependencies, we might have already applied this
     # patch as part of dependency resolution. If not, apply this patch.
@@ -545,11 +541,7 @@ class PatchSeries(object):
     """
     val = self._change_deps_cache.get(change)
     if val is None:
-      git_repo = self.GetGitRepoForChange(change)
-      val = self._change_deps_cache[change] = (
-          change.GerritDependencies(),
-          change.PaladinDependencies(git_repo))
-
+      val = self._change_deps_cache[change] = change.GerritDependencies()
     return val
 
   def InjectCommittedPatches(self, changes):
@@ -594,13 +586,15 @@ class PatchSeries(object):
 
       repo = None
       try:
-        repo = self.GetGitRepoForChange(change, strict=True, manifest=manifest)
+        repos = self.GetGitReposForChange(change, strict=True,
+                                          manifest=manifest)
       except cros_patch.ChangeNotInManifest as e:
         logging.info("Skipping patch %s as it's not in manifest.", change)
         not_in_manifest.append(e)
         continue
 
-      by_repo.setdefault(repo, []).append(change)
+      for repo in repos:
+        by_repo.setdefault(repo, []).append(change)
       changes_to_fetch.append(change)
 
     # Fetch changes in parallel. The change.Fetch() method modifies the
@@ -744,7 +738,7 @@ class PatchSeries(object):
     # the sha1 of the branch; that information is enough to rewind us back
     # to the original repo state.
     project_state = set(
-        self.GetGitRepoForChange(x, strict=True) for x in commits)
+        r for x in commits for r in self.GetGitReposForChange(x, strict=True))
     resets = []
     for project_dir in project_state:
       current_sha1 = git.RunGit(

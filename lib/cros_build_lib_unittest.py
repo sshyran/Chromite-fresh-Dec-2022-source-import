@@ -1,31 +1,27 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the cros_build_lib module."""
 
-from __future__ import print_function
-
+import builtins
 import contextlib
 import datetime
 import difflib
 import functools
 import itertools
 import os
+from pathlib import Path
 import signal
 import socket
 import subprocess
 import sys
-import unittest
-
-import mock
-from six.moves import builtins
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import signals as cros_signals
 
@@ -913,17 +909,9 @@ class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
 class TestInput(cros_test_lib.MockOutputTestCase):
   """Tests of input gathering functionality."""
 
-  def testGetInput(self):
-    """Verify GetInput() basic behavior."""
-    response = 'Some response'
-    if sys.version_info.major < 3:
-      self.PatchObject(builtins, 'raw_input', return_value=response)
-    self.PatchObject(builtins, 'input', return_value=response)
-    self.assertEqual(response, cros_build_lib.GetInput('prompt'))
-
   def testBooleanPrompt(self):
     """Verify BooleanPrompt() full behavior."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = ''
     self.assertTrue(cros_build_lib.BooleanPrompt())
@@ -962,7 +950,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceLists(self):
     """Verify GetChoice behavior w/lists."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = '1'
     ret = cros_build_lib.GetChoice('title', ['a', 'b', 'c'])
@@ -970,7 +958,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceGenerator(self):
     """Verify GetChoice behavior w/generators."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     m.return_value = '2'
     ret = cros_build_lib.GetChoice('title', list(range(3)))
@@ -978,7 +966,7 @@ class TestInput(cros_test_lib.MockOutputTestCase):
 
   def testGetChoiceWindow(self):
     """Verify GetChoice behavior w/group_size set."""
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
 
     cnt = [0]
     def _Gen():
@@ -1178,10 +1166,16 @@ class TarballTests(cros_test_lib.TempDirTestCase):
 
   def testCreateExtractSuccessWithNoCompressionProgram(self):
     """Create a tarfile without any compression, then extract it."""
-    TARBALL_PATH = os.path.join(self.tempdir, 'test.tar')
+    path = os.path.join(self.tempdir, 'test.tar')
     cros_build_lib.CreateTarball(
-        TARBALL_PATH, self.inputDir, inputs=self.inputs)
-    cros_build_lib.ExtractTarball(TARBALL_PATH, self.tempdir)
+        path, self.inputDir, inputs=self.inputs)
+    cros_build_lib.ExtractTarball(path, self.tempdir)
+
+    # Again, but using Path instead of str paths.
+    path = Path(path)
+    cros_build_lib.CreateTarball(
+        path, Path(self.inputDir), inputs=self.inputs)
+    cros_build_lib.ExtractTarball(path, Path(self.tempdir))
 
   def testExtractFailureWithMissingFile(self):
     """Verify that stderr from tar is printed if in encounters an error."""
@@ -1311,7 +1305,15 @@ class OpenTests(cros_test_lib.TempDirTestCase):
       with cros_build_lib.Open(fp) as fp2:
         self.assertEqual('foo', fp2.read())
 
-  @unittest.skipIf(sys.version_info.major < 3, 'Requires py3')
+  def testPath(self):
+    """Read/write a file by Path."""
+    path = Path(self.tempdir) / 'test.txt'
+    with cros_build_lib.Open(path, mode='w') as fp:
+      fp.write('foo')
+    with cros_build_lib.Open(path, mode='r') as fp:
+      self.assertEqual('foo', fp.read())
+    self.assertEqual('foo', path.read_text())
+
   def testEncoding(self):
     """Verify we pass kwargs down."""
     path = os.path.join(self.tempdir, 'test.txt')

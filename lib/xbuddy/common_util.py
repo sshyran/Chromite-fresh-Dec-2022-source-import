@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Helper class for interacting with the Dev Server."""
-
-from __future__ import print_function
 
 import ast
 import base64
@@ -19,14 +16,9 @@ import threading
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
-from chromite.lib.xbuddy import cherrypy_log_util
-
-
-# Module-local log function.
-def _Log(message, *args):
-  return cherrypy_log_util.LogWithTag('UTIL', message, *args)
 
 
 _HASH_BLOCK_SIZE = 8192
@@ -50,7 +42,7 @@ def MkDirP(directory):
       osutils.Chown(directory, user=os.getuid(), group=os.getgid(),
                     recursive=True)
     except cros_build_lib.RunCommandError as e:
-      _Log('Could not chown: %s', e)
+      logging.error('Could not chown: %s', e)
   else:
     osutils.SafeMakedirs(directory)
 
@@ -257,7 +249,7 @@ def GetFileSha256(file_path):
 
 def CopyFile(source, dest):
   """Copies a file from |source| to |dest|."""
-  _Log('Copy File %s -> %s' % (source, dest))
+  logging.debug('Copy File %s -> %s', source, dest)
   shutil.copy(source, dest)
 
 
@@ -268,10 +260,10 @@ def SymlinkFile(target, link):
   atomically.
   """
   if not os.path.exists(target):
-    _Log('Could not find target for symlink: %s', target)
+    logging.error('Could not find target for symlink: %s', target)
     return
 
-  _Log('Creating symlink: %s --> %s', link, target)
+  logging.debug('Creating symlink: %s --> %s', link, target)
 
   # Use the created link_base file to prevent other calls to SymlinkFile() to
   # pick the same link_base temp file, thanks to mkstemp().
@@ -317,10 +309,6 @@ class LockDict(object):
         self._dict[key] = lock
       return lock
 
-def IsInsideChroot():
-  """Returns True if we are inside chroot."""
-  return os.path.exists('/etc/debian_chroot')
-
 
 def IsRunningOnMoblab():
   """Returns True if this code is running on a chromiumOS DUT."""
@@ -348,5 +336,5 @@ def IsAnonymousCaller(error):
   anon_msg = ('ServiceException: 401 Anonymous caller does not have '
               'storage.objects.get access to')
   is_anon = error.stderr.find(anon_msg) != -1
-  _Log('IsAnonymousCaller? %s', is_anon)
+  logging.debug('IsAnonymousCaller? %s', is_anon)
   return is_anon

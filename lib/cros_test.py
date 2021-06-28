@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Library for running Chrome OS tests."""
 
-from __future__ import print_function
-
 import datetime
 import os
-import sys
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
@@ -19,11 +15,9 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import device
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.lib import retry_util
 from chromite.lib import vm
 from chromite.lib.xbuddy import xbuddy
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CrOSTest(object):
@@ -47,6 +41,7 @@ class CrOSTest(object):
     self.xbuddy = opts.xbuddy
     self.deploy = opts.deploy
     self.deploy_lacros = opts.deploy_lacros
+    self.lacros_launcher_script = opts.lacros_launcher_script
     self.nostrip = opts.nostrip
     self.build_dir = opts.build_dir
     self.mount = opts.mount
@@ -205,6 +200,9 @@ class CrOSTest(object):
     else:
       self._DeployChrome()
 
+    if self.deploy_lacros:
+      self._DeployLacrosLauncherScript()
+
   def _DeployChrome(self):
     """Deploy lacros-chrome or ash-chrome."""
     deploy_cmd = [
@@ -250,6 +248,12 @@ class CrOSTest(object):
                           chrome_util.GetChromeTestCopyPaths(
                               self.build_dir, self.chrome_test_target))
 
+  def _DeployLacrosLauncherScript(self):
+    """Deploy a script that is needed to launch Lacros in Tast tests."""
+    self._DeployCopyPaths(
+        os.path.dirname(self.lacros_launcher_script), '/usr/local/bin',
+        [chrome_util.Path(os.path.basename(self.lacros_launcher_script))])
+
   def _DeployCopyPaths(self, host_src_dir, remote_target_dir, copy_paths):
     """Deploy files in copy_paths to device.
 
@@ -260,12 +264,10 @@ class CrOSTest(object):
                          |copy_paths| are copied to.
       copy_paths: A list of chrome_utils.Path of files to be copied.
     """
-    with osutils.TempDir(set_global=True) as tempdir:
-      self.staging_dir = tempdir
-      strip_bin = None
-      chrome_util.StageChromeFromBuildDir(
-          self.staging_dir, host_src_dir, strip_bin, copy_paths=copy_paths)
-
+    # The rsync connection can occasionally crash during the transfer, so
+    # retry in the hope that it's transient.
+    @retry_util.WithRetry(max_retry=3, sleep=1, backoff_factor=2)
+    def copy_with_retries():
       if self._device.remote.HasRsync():
         self._device.remote.CopyToDevice(
             '%s/' % os.path.abspath(self.staging_dir), remote_target_dir,
@@ -274,6 +276,14 @@ class CrOSTest(object):
         self._device.remote.CopyToDevice(
             '%s/' % os.path.abspath(self.staging_dir), remote_target_dir,
             mode='scp', debug_level=logging.INFO)
+
+    with osutils.TempDir(set_global=True) as tempdir:
+      self.staging_dir = tempdir
+      strip_bin = None
+      chrome_util.StageChromeFromBuildDir(
+          self.staging_dir, host_src_dir, strip_bin, copy_paths=copy_paths)
+      copy_with_retries()
+
 
   def _RunCatapultTests(self):
     """Run catapult tests matching a pattern using run_tests.
@@ -340,7 +350,13 @@ class CrOSTest(object):
 
     if self._device.log_level == 'debug':
       cmd += ['-verbose']
-    cmd += ['run', '-build=false', '-waituntilready',]
+    cmd += ['run', '-build=false', '-waituntilready',
+      # Skip tests depending on private runtime variables.
+      # 'gs://chromeos-prebuilt/board/amd64-host/.../chromeos-base/tast-vars*'
+      # doesn't contain runtime variable files in the tast-tests-private
+      # repository.
+      r'-maybemissingvars=.+\..+',
+    ]
     # If the tests are not informational, then fail on test failure.
     # TODO(dhanyaganesh@): Make this less hack-y crbug.com/1034403.
     if '!informational' in self.tast[0]:
@@ -365,6 +381,7 @@ class CrOSTest(object):
           '-ephemeraldevserver=true',
           '-keyfile',
           private_key,
+          '-maxtestfailures=3',
       ]
       # Tast may make calls to gsutil during the tests. If we're outside the
       # chroot, we may not have gsutil on PATH. So push chromite's copy of
@@ -465,8 +482,12 @@ class CrOSTest(object):
     osutils.SafeMakedirs(self.results_dest_dir)
     for src in self.results_src:
       logging.info('Fetching %s to %s', src, self.results_dest_dir)
+      # Don't raise an error if the filepath doesn't exist on the device since
+      # some log/crash directories are only created under certain conditions.
+      # e.g. When a user logs in.
       self._device.remote.CopyFromDevice(src=src, dest=self.results_dest_dir,
-                                         mode='scp', debug_level=logging.INFO)
+                                         mode='scp', debug_level=logging.INFO,
+                                         ignore_failures=True)
 
   def _RunDeviceCmd(self):
     """Run a command on the device.
@@ -546,8 +567,8 @@ class CrOSTest(object):
     test_binary = os.path.relpath(
         os.path.join(self.build_dir, self.chrome_test_target), chrome_src_dir)
     test_args = self.args[1:]
-    command = 'cd %s && su chronos -c -- "%s %s"' % \
-        (self.chrome_test_deploy_target_dir, test_binary, ' '.join(test_args))
+    command = 'cd %s && su chronos -c -- "%s %s"' % (
+        self.chrome_test_deploy_target_dir, test_binary, ' '.join(test_args))
     result = self._device.remote_run(command, stream_output=True)
     return result
 
@@ -602,6 +623,9 @@ def ParseCommandLine(argv):
   parser.add_argument('--deploy-lacros', action='store_true', default=False,
                       help='Before running tests, deploy lacros-chrome, '
                       '--build-dir must be specified.')
+  parser.add_argument('--lacros-launcher-script', type=str,
+                      help='Absolute path to a python script needed to launch '
+                           'Lacros in tast tests.')
   parser.add_argument('--deploy', action='store_true', default=False,
                       help='Before running tests, deploy ash-chrome, '
                       '--build-dir must be specified.')
@@ -666,6 +690,10 @@ def ParseCommandLine(argv):
 
   if opts.deploy and opts.deploy_lacros:
     parser.error('Cannot deploy lacros-chrome and ash-chrome at the same time.')
+
+  if bool(opts.deploy_lacros) != bool(opts.lacros_launcher_script):
+    parser.error(
+        '--lacros-launcher-script is required when running Lacros tests.')
 
   if opts.results_src:
     for src in opts.results_src:

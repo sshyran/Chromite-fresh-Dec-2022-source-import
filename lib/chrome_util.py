@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Library containing utility functions used for Chrome-specific build tasks."""
-
-from __future__ import print_function
 
 import ast
 import functools
@@ -14,14 +11,11 @@ import os
 import re
 import shlex
 import shutil
-import sys
 
 from chromite.lib import failures_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Taken from external/gyp.git/pylib.
@@ -201,6 +195,9 @@ class Copier(object):
                         src)
       else:
         msg = ('%s does not exist and is required.\n'
+               'You might build Chrome with the wrong configuration. Have you '
+               'configured your args.gn correctly? You may need to edit '
+               'your .gclient file and run `$ gclient runhooks`.\n'
                'You can bypass this error with --sloppy.\n'
                'Aborting copy...' % src)
         raise MissingPathError(msg)
@@ -413,6 +410,8 @@ _COPY_PATHS_CHROME = (
     Path('Packages/content_browser/manifest.json', optional=True),
     Path('resources/chromeos/'),
     Path('resources.pak'),
+    # TODO(crbug.com/1182258): remove once swiftshader is handled as DLC.
+    Path('swiftshader/*.so', dest='swiftshader/', optional=True),
     Path('xdg-settings'),
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
@@ -424,9 +423,21 @@ _COPY_PATHS_LACROS = (
         exe=True,
         optional=True),
     Path(
+        'nacl_helper_bootstrap',
+        exe=True,
+        optional=True),
+    Path(
+        'nacl_helper_nonsfi',
+        exe=True,
+        optional=True),
+    Path(
         'nacl_irt_x86_64.nexe',
         exe=True,
-        optional=False),
+        optional=True),
+    Path(
+        'nacl_irt_arm.nexe',
+        exe=True,
+        optional=True),
     Path('locales/', optional=True),
     Path('*.pak', optional=True),
     Path('icudtl.dat', optional=True),

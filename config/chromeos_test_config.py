@@ -1,29 +1,28 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Configuration options for various cbuildbot tests."""
 
-from __future__ import print_function
-
 import copy
 
 from chromite.lib import config_lib
 from chromite.lib import constants
+from chromite.lib import cros_logging as logging
 
-from chromite.config import chromeos_config_boards as config_boards
 
 vmtest_boards = frozenset([
     # Full VMTest support on ChromeOS is currently limited to devices derived
     # from betty & co.
     'amd64-generic', # Has kernel 4.4, used with public Chromium.
     'betty',         # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
+    'betty-kernelnext', # Like betty but on the next kernel version.
     'betty-pi-arc',  # Like betty but P version of ARC++.
     'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
-]) | config_boards.lakitu_boards  # All lakitu boards have VM support.
+    'reven',         # CloudReady VM board.
+])
 
 
 def getInfoVMTest():
@@ -144,7 +143,7 @@ class HWTestList(object):
     default_dict = dict(file_bugs=True,
                         pool=constants.HWTEST_QUOTA_POOL,
                         quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ,
-                        timeout=config_lib.HWTestConfig.ASYNC_HW_TEST_TIMEOUT,
+                        timeout=config_lib.HWTestConfig.PFQ_HW_TEST_TIMEOUT,
                         priority=constants.HWTEST_PFQ_PRIORITY, minimum_duts=3)
     # Allows kwargs overrides to default_dict for pfq.
     default_dict.update(kwargs)
@@ -165,6 +164,7 @@ class HWTestList(object):
     """
     sanity_dict = dict(pool=constants.HWTEST_QUOTA_POOL,
                        file_bugs=True,
+                       timeout=config_lib.HWTestConfig.PFQ_HW_TEST_TIMEOUT,
                        quota_account=constants.HWTEST_QUOTA_ACCOUNT_PFQ)
     sanity_dict.update(kwargs)
     sanity_dict.update(dict(minimum_duts=1, suite_min_duts=1,
@@ -304,7 +304,7 @@ def EnsureVmTestsOnVmTestBoards(site_config, boards_dict, _gs_build_config):
   """Make sure VMTests are only enabled on boards that support them.
 
   Args:
-    site_config: config_lib.SiteConfig containing builds to have their
+    sIte_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
@@ -330,17 +330,6 @@ def ApplyCustomOverrides(site_config):
   """
 
   overwritten_configs = {
-      'lakitu-release': config_lib.BuildConfig().apply(
-          site_config.templates.lakitu_test_customizations,
-      ),
-
-      # This is the full build of open-source overlay.
-      'lakitu-full': config_lib.BuildConfig().apply(
-          # logging_CrashSender is expected to fail for lakitu-full.
-          # See b/111567339 for more details.
-          useflags=config_lib.append_useflags(['-tests_logging_CrashSender']),
-      ),
-
       'guado_labstation-release': {
           'hw_tests': [],
           # 'hwqual':False,
@@ -364,8 +353,11 @@ def ApplyCustomOverrides(site_config):
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
+      'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
+      # b/189483630: Temporarily disable camera tasts for reven.
+      'reven-release': site_config.templates.tast_vm_reven_tests,
   }
 
   for config_name, overrides in overwritten_configs.items():
@@ -374,7 +366,11 @@ def ApplyCustomOverrides(site_config):
     # for k, v in overrides.items():
     #   assert config[k] != v, ('Unnecessary override: %s: %s' %
     #                           (config_name, k))
-    site_config[config_name].apply(**overrides)
+    if config_name in site_config:
+      site_config[config_name].apply(**overrides)
+    else:
+      logging.warning('ignoring overrides for missing config %s', config_name)
+
 
 
 def IncrementalBuilders(site_config):
@@ -393,10 +389,6 @@ def IncrementalBuilders(site_config):
   site_config['betty-incremental'].apply(
       vm_tests=getInfoVMTest(),
       vm_tests_override=getInfoVMTest(),
-  )
-
-  site_config['lakitu-incremental'].apply(
-      site_config.templates.lakitu_test_customizations,
   )
 
   site_config['x32-generic-incremental'].apply(
@@ -466,6 +458,20 @@ def GeneralTemplates(site_config, ge_build_config):
       image_test=False,
   )
 
+  # b/189483630: Temporarily disable camera tasts for reven.
+  reven_tast_pattern = [(
+     '("group:mainline" && '
+     '!"group:camera-libcamera" && '
+     '!informational)')]
+  site_config.AddTemplate(
+     'tast_vm_reven_tests',
+     tast_vm_tests=[
+            config_lib.TastVMTestConfig(
+                'tast_vm_reven', reven_tast_pattern),
+     ],
+  )
+
+
   site_config.templates.full.apply(
       site_config.templates.default_hw_tests_override,
       image_test=True,
@@ -506,12 +512,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.no_vmtest_builder,
   )
   # END Firmware
-
-  # BEGIN Lakitu
-  site_config.templates.lakitu.apply(
-      site_config.templates.no_hwtest_builder,
-  )
-  # END Lakitu
 
   # BEGIN Loonix
   site_config.templates.loonix.apply(

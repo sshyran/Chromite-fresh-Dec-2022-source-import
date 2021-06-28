@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,23 +7,13 @@
 This service houses the high level business logic for all created artifacts.
 """
 
-from __future__ import print_function
-
 import collections
 import fnmatch
 import glob
-import multiprocessing
 import os
 import shutil
-import tempfile
-
-from typing import List
-from six.moves import urllib
 
 from chromite.lib import autotest_util
-from chromite.lib import build_target_lib
-from chromite.lib import cache
-from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -47,9 +36,12 @@ CPE_RESULT_FILE_TEMPLATE = 'cpe-chromeos-%s.txt'
 
 # The individual image archives for ArchiveImages.
 IMAGE_TARS = {
+    constants.BASE_IMAGE_BIN: constants.BASE_IMAGE_TAR,
     constants.TEST_IMAGE_BIN: constants.TEST_IMAGE_TAR,
+    constants.RECOVERY_IMAGE_BIN: constants.RECOVERY_IMAGE_TAR,
     constants.TEST_GUEST_VM_DIR: constants.TEST_GUEST_VM_TAR,
-    constants.BASE_GUEST_VM_DIR: constants.BASE_GUEST_VM_TAR
+    constants.BASE_GUEST_VM_DIR: constants.BASE_GUEST_VM_TAR,
+    constants.KERNEL_IMAGE_BIN: constants.KERNEL_IMAGE_TAR,
 }
 
 TAST_BUNDLE_NAME = 'tast_bundles.tar.bz2'
@@ -438,7 +430,7 @@ def BundleTestUpdatePayloads(image_path, output_dir):
     list[str] - The list of generated payloads.
   """
   payloads = GenerateTestPayloads(image_path, output_dir, full=True,
-                                  stateful=True, delta=True)
+                                  stateful=True, delta=True, dlc=True)
   payloads.extend(GenerateQuickProvisionPayloads(image_path, output_dir))
 
   return payloads
@@ -689,163 +681,3 @@ def BundleGceTarball(output_dir, image_dir):
         inputs=('disk.raw',), extra_args=['--dereference', '--format=oldgnu'])
 
   return tarball
-
-
-# A SymbolFileTuple is a data object that contains:
-#  relative_path (str): Relative path to the file based on initial search path.
-#  source_file_name (str): Full path to where the SymbolFile was found.
-# For example, if the search path for symbol files is '/some/bot/path/'
-# and a symbol file is found at '/some/bot/path/a/b/c/file1.sym',
-# then the relative_path would be 'a/b/c/file1.sym' and the source_file_name
-# would be '/some/bot/path/a/b/c/file1.sym'.
-# The source_file_name is informational for two reasons:
-# 1) They are typically copied off a machine (such as a build bot) where
-#    that path will disappear, which is why when we find them they get
-#    copied to a destination directory.
-# 2) For tar files, the source_file_name is not a full path that can be
-#    opened, since it is the path the tar file plus the relative path of
-#    the file when we untar it.
-SymbolFileTuple = collections.namedtuple(
-    'SymbolFileTuple', ['relative_path', 'source_file_name'])
-
-def IsTarball(path: str) -> bool:
-  """Guess if this is a tarball based on the filename."""
-  parts = path.split('.')
-  if len(parts) <= 1:
-    return False
-
-  if parts[-1] == 'tar':
-    return True
-
-  if parts[-2] == 'tar':
-    return parts[-1] in ('bz2', 'gz', 'xz')
-
-  return parts[-1] in ('tbz2', 'tbz', 'tgz', 'txz')
-
-
-def GatherSymbolFiles(tempdir:str, destdir:str,
-                      paths: List[str]) -> List[SymbolFileTuple]:
-  """Locate symbol files in |paths|
-
-  This generator function searches all paths for .sym files and copies them to
-  destdir. A path to a tarball will result in the tarball being unpacked and
-  examined. A path to a directory will result in the directory being searched
-  for .sym files. The generator yields SymbolFileTuple objects that contain
-  symbol file references which are valid after this exits. Those files may exist
-  externally, or be created in the tempdir (when expanding tarballs). Typical
-  usage in the BuildAPI will be for the .sym files to exist under a directory
-  such as /build/<board>/usr/lib/debug/breakpad so that the path to a sym file
-  will always be unique.
-  Note: the caller must clean up the tempdir.
-  Note: this function is recursive for tar files.
-
-  Args:
-    tempdir: Path to use for temporary files.
-    destdir: All .sym files are copied to this path. Tarfiles are opened inside
-      a tempdir and any .sym files within them are copied to destdir from within
-      that temp path.
-    paths: A list of input paths to walk. Files are returned based on .sym name
-      w/out any checking internal symbol file format.
-      Dirs are searched for files that end in ".sym". Urls are not handled.
-      Tarballs are unpacked and walked.
-
-  Yields:
-    A SymbolFileTuple for every symbol file found in paths.
-  """
-  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s',
-               tempdir, destdir, paths)
-  for p in paths:
-    o = urllib.parse.urlparse(p)
-    if o.scheme:
-      raise NotImplementedError('URL paths are not expected/handled: ',p)
-
-    elif os.path.isdir(p):
-      for root, _, files in os.walk(p):
-        for f in files:
-          if f.endswith('.sym'):
-            # If p is '/tmp/foo' and filename is '/tmp/foo/bar/bar.sym',
-            # relative_path = 'bar/bar.sym'
-            filename = os.path.join(root, f)
-            relative_path = filename[len(p):].lstrip('/')
-            try:
-              shutil.copy(filename, os.path.join(destdir, relative_path))
-            except IOError:
-              # Handles pre-3.3 Python where we may need to make the target
-              # path's dirname before copying.
-              os.makedirs(os.path.join(destdir, os.path.dirname(relative_path)))
-              shutil.copy(filename, os.path.join(destdir, relative_path))
-            yield SymbolFileTuple(relative_path=relative_path,
-                                  source_file_name=filename)
-
-    elif IsTarball(p):
-      tardir = tempfile.mkdtemp(dir=tempdir)
-      cache.Untar(os.path.realpath(p), tardir)
-      for sym in GatherSymbolFiles(tardir, destdir, [tardir]):
-        # The SymbolFileTuple is generated from [tardir], but we want the
-        # source_file_name (which informational) to reflect the tar path
-        # plus the relative path after the file is untarred.
-        # Thus, something like /botpath/some/path/tmp22dl33sa/dir1/fileB.sym
-        # (where the tardir is /botpath/some/path/tmp22dl33sa)
-        # has a resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
-        # When we call GatherSymbolFiles with [tardir] as the argument,
-        # the os.path.isdir case above will walk the tar contents,
-        # processing only .sym. Non-sym files within the tar file will be
-        # ignored (even tar files within tar files, which we don't expect).
-        new_source_file_name = sym.source_file_name.replace(tardir, p)
-        yield SymbolFileTuple(
-            relative_path=sym.relative_path,
-            source_file_name=new_source_file_name)
-
-    else:
-      # Path p is a file. This code path is only executed when a full file path
-      # is one of the elements in the 'paths' argument. When a directory is an
-      # element of the 'paths' argument, we walk the tree (above) and process
-      # each file. When a tarball is an element of the 'paths' argument, we
-      # untar it into a directory and recurse with the temp tardir as the
-      # directory, so that tarfile contents are processed (above) in the os.walk
-      # of the directory.
-      if p.endswith('.sym'):
-        shutil.copy(p, destdir)
-        yield SymbolFileTuple(relative_path=os.path.basename(p),
-                              source_file_name=p)
-
-
-def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
-                            build_target: build_target_lib.BuildTarget,
-                            debug: bool) -> cros_build_lib.CommandResult:
-  """Generate breakpad (go/breakpad) symbols for debugging.
-
-  This function generates .sym files to /build/<board>/usr/lib/debug/breakpad
-  from .debug files found in /build/<board>/usr/lib/debug by calling
-  cros_generate_breakpad_symbols.
-
-  Args:
-    chroot (chroot_lib.Chroot): The chroot in which the sysroot should be built.
-    build_target: The sysroot's build target.
-    debug: Include extra debugging output.
-  """
-  # The firmware directory contains elf symbols that we have trouble parsing
-  # and that don't help with breakpad debugging (see https://crbug.com/213670).
-  exclude_dirs = ['firmware']
-
-  cmd = [
-      'cros_generate_breakpad_symbols'
-  ]
-  if debug:
-    cmd += ['--debug']
-
-  # Execute for board in parallel with half # of cpus available to avoid
-  # starving other parallel processes on the same machine.
-  cmd += [
-      '--board=%s' % build_target.name,
-      '--jobs', max(1, multiprocessing.cpu_count() // 2)
-  ]
-  cmd += ['--exclude-dir=%s' % x for x in exclude_dirs]
-
-  logging.info('Generating breakpad symbols: %s.', cmd)
-  result = cros_build_lib.run(
-      cmd,
-      capture_output=True,
-      enter_chroot=True,
-      chroot_args=chroot.get_enter_args())
-  return result

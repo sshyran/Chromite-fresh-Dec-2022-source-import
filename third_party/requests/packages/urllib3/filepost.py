@@ -4,7 +4,7 @@ import codecs
 from uuid import uuid4
 from io import BytesIO
 
-from .packages import six
+from chromite.third_party import six
 from .packages.six import b
 from .fields import RequestField
 

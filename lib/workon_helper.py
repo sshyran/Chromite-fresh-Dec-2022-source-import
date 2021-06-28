@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Routines and a delegate for dealing with locally worked on packages."""
 
-from __future__ import print_function
-
 import collections
 import glob
 import os
 import re
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -20,9 +16,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # A package is a canonical CP atom.
@@ -644,12 +637,11 @@ class WorkonHelper(object):
       packages: list of package name fragments.  These will be mapped to
           canonical portage atoms via the same process as
           StartWorkingOnPackages().
-      use_all: True iff instead of the provided package list, we should just
-          stop working on all currently worked on atoms for the system in
-          question.
-      use_workon_only: True iff instead of the provided package list, we should
-          stop working on all currently worked on atoms that define only a
-          -9999 ebuild.
+      use_all: True iff we should ignore the package list, and instead consider
+          all possible workon-able atoms.
+      use_workon_only: True iff we should ignore the package list, and instead
+          consider all possible atoms for the system in question that define
+          only the -9999 ebuild.
 
     Returns:
       Returns a list of PackageInfo tuples.
@@ -676,9 +668,9 @@ class WorkonHelper(object):
       projects = workon_vars.project if workon_vars else []
       ebuild_to_repos[ebuild] = projects
       ebuild_obj = portage_util.EBuild(ebuild)
-      if ebuild_obj.is_blacklisted:
-        # blacklisted ebuilds may have source infos incorrectly defined since
-        # they are not validated by bots
+      if ebuild_obj.is_manually_uprevved:
+        # Manually uprevved ebuild is pinned to a specific git sha1, so change
+        # in that repo matter to the ebuild.
         continue
       src_paths = ebuild_obj.GetSourceInfo(src_root, manifest).srcdirs
       src_paths = [os.path.relpath(path, build_root) for path in src_paths]

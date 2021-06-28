@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Process related utilities."""
-
-from __future__ import print_function
 
 import errno
 import os
@@ -51,11 +48,13 @@ def ExitAsStatus(status):
     os.kill(pid, sig_status)
     time.sleep(0.1)
 
-    # Still here?  Maybe the signal was masked.
+    # Still here?  Maybe the signal was ignored, so set the handler to the
+    # default and try again.
+    # TODO(vapier): Should unmask the signal too (pthread_sigmask).
     try:
       signal.signal(sig_status, signal.SIG_DFL)
-    except RuntimeError as e:
-      if e.args[0] != errno.EINVAL:
+    except OSError as e:
+      if e.errno != errno.EINVAL:
         raise
     os.kill(pid, sig_status)
     time.sleep(0.1)

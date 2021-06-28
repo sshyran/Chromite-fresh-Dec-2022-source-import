@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for setting up Portage objects for testing."""
 
-from __future__ import print_function
 from __future__ import division
 
 import itertools
 import os
-import pathlib  # pylint: disable=import-error
+import pathlib
 from typing import Dict, Iterable, Tuple, Union
 
 from chromite.lib import constants

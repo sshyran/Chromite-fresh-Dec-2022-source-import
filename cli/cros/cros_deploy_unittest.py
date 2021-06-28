@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module tests the cros deploy command."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli import deploy
@@ -15,9 +10,6 @@ from chromite.cli.cros import cros_deploy
 from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
@@ -28,12 +20,6 @@ class MockDeployCommand(command_unittest.MockCommand):
   TARGET = 'chromite.cli.cros.cros_deploy.DeployCommand'
   TARGET_CLASS = cros_deploy.DeployCommand
   COMMAND = 'deploy'
-
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
-  def Run(self, inst):
-    command_unittest.MockCommand.Run(self, inst)
 
 
 class CrosDeployTest(cros_test_lib.MockTempDirTestCase,

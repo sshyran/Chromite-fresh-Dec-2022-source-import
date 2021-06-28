@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Board build dependency service tests."""
-
-from __future__ import print_function
 
 import os
 
@@ -17,6 +14,7 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib.parser import package_info
 from chromite.service import dependency as dependency_service
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -135,7 +133,7 @@ class BoardBuildDependencyTest(cros_test_lib.MockTestCase,
     get_dep.assert_called_once_with('/build/target', 'target', (pkg_mock,))
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Test that a validate only call does not execute any logic."""
     patch = self.PatchObject(dependency_service, 'GetBuildDependency')
     input_proto = depgraph_pb2.GetBuildDependencyGraphRequest()
     input_proto.build_target.name = 'target'
@@ -164,7 +162,7 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     osutils.SafeMakedirs(self.sysroot)
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Test that a validate only call does not execute any logic."""
     sysroot = sysroot_pb2.Sysroot(
         path=self.sysroot, build_target=self.build_target)
     input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
@@ -185,28 +183,44 @@ class ListTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     with self.assertRaises(cros_build_lib.DieSystemExit):
       dependency.List(input_proto, self.response, self.api_config)
 
+  def testDefaultArguments(self):
+    """Test with default arguments."""
+    sysroot = sysroot_pb2.Sysroot(
+        path=self.sysroot, build_target=self.build_target)
+    input_proto = depgraph_pb2.ListRequest(sysroot=sysroot)
+    mock_get_deps = self.PatchObject(dependency_service, 'GetDependencies')
+    dependency.List(input_proto, self.response, self.api_config)
+    mock_get_deps.assert_called_once_with(
+        self.sysroot, src_paths=[], packages=[], include_rev_dependencies=False)
+
   def testListResponse(self):
     """Test calls helper method with correct args."""
-    mock_get_deps = self.PatchObject(
-        dependency_service, 'GetDependencies', return_value=['foo/bar-1.2.3'])
     sysroot = sysroot_pb2.Sysroot(
         path=self.sysroot, build_target=self.build_target)
     path = '/path'
-    package = common_pb2.PackageInfo(category='foo', package_name='bar')
+    return_package_info = package_info.parse('foo/bar-1.2.3')
+    return_package_info_proto = common_pb2.PackageInfo(
+        category='foo', package_name='bar', version='1.2.3')
+    mock_get_deps = self.PatchObject(
+        dependency_service,
+        'GetDependencies',
+        return_value=[return_package_info])
+
+    input_package_info_proto = common_pb2.PackageInfo(
+        category='foo', package_name='bar')
+    input_package_info = package_info.parse('foo/bar')
     input_proto = depgraph_pb2.ListRequest(
         sysroot=sysroot,
         src_paths=[
-            depgraph_pb2.SourcePath(path='/path'),
+            depgraph_pb2.SourcePath(path=path),
         ],
-        packages=[package])
+        packages=[input_package_info_proto],
+        include_rev_deps=True)
     dependency.List(input_proto, self.response, self.api_config)
     mock_get_deps.assert_called_once_with(
         self.sysroot,
-        build_target=controller_util.ParseBuildTarget(self.build_target),
         src_paths=[path],
-        packages=[controller_util.PackageInfoToCPV(package)])
-    expected_deps = [
-        common_pb2.PackageInfo(
-            category='foo', package_name='bar', version='1.2.3')
-    ]
-    self.assertCountEqual(expected_deps, self.response.package_deps)
+        packages=[input_package_info],
+        include_rev_dependencies=True)
+    self.assertCountEqual([return_package_info_proto],
+                          self.response.package_deps)

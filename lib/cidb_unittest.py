@@ -1,29 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for cidb."""
 
-from __future__ import print_function
-
 import os
-import sys
 import unittest
+from unittest import mock
 
-import mock
-
-from chromite.lib import constants
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import factory
 from chromite.lib import osutils
 
+
 if cidb.sqlalchemy_imported:
   import sqlalchemy  # pylint: disable=import-error
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RetryableOperationalError(EnvironmentError):

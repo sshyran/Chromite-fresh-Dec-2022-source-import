@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,15 +8,13 @@ This service handles the creation of the portage build dependency graphs and the
 graphs mapping from portage packages to the dependency source.
 """
 
-from __future__ import print_function
-
 from chromite.api import api_config
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import depgraph_pb2
 # TODO(crbug/1081828): stop using build_target and drop it from the proto.
-from chromite.lib import cros_build_lib
+from chromite.lib import build_target_lib
 from chromite.lib.parser import package_info
 from chromite.service import dependency
 
@@ -76,7 +73,7 @@ def GetBuildDependencyGraph(input_proto, output_proto, _config):
   else:
     # TODO(crbug/1081828): stop using build_target and drop it from the proto.
     board = input_proto.build_target.name
-    sysroot_path = cros_build_lib.GetSysroot(board or None)
+    sysroot_path = build_target_lib.get_default_sysroot_path(board or None)
 
   packages = tuple(
       controller_util.PackageInfoToCPV(x) for x in input_proto.packages)
@@ -111,21 +108,19 @@ def List(input_proto: depgraph_pb2.ListRequest,
     output_proto: The empty output message.
     _config: The API call config.
   """
-  build_target = controller_util.ParseBuildTarget(
-      input_proto.sysroot.build_target)
   sysroot_path = input_proto.sysroot.path
   src_paths = [src_path.path for src_path in input_proto.src_paths]
-  packages = [controller_util.PackageInfoToCPV(x) for x in input_proto.packages]
-
   package_deps = dependency.GetDependencies(
       sysroot_path,
-      build_target=build_target,
       src_paths=src_paths,
-      packages=packages)
+      packages=[
+          controller_util.deserialize_package_info(package)
+          for package in input_proto.packages
+      ],
+      include_rev_dependencies=input_proto.include_rev_deps)
   for package in package_deps:
     pkg_info_msg = output_proto.package_deps.add()
-    pkg_info = package_info.parse(package)
-    controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+    controller_util.serialize_package_info(package, pkg_info_msg)
 
 
 def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):

@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module uprevs a given package's ebuild to the next revision."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -21,9 +17,6 @@ from chromite.lib import portage_util
 from chromite.lib import repo_util
 
 from chromite.cbuildbot import manifest_version
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Commit message subject for uprevving Portage packages.
@@ -139,20 +132,22 @@ def PushChange(stable_branch, tracking_branch, dryrun, cwd,
     logging.info('All changes already pushed for %s. Exiting', cwd)
     return
 
-  # Add a failsafe check here.  Only CLs from the 'chrome-bot' or
-  # 'chromeos-ci-prod' user should be involved here.  If any other CLs are
-  # found then complain. In dryruns extra CLs are normal, though, and can
-  # be ignored.
+  # Add a failsafe check here.  Only CLs from these users should be here.
+  #  - 'chrome-bot',
+  #  - 'chromeos-ci-prod'
+  #  - 'chromeos-ci-release'
+  # If any other CLs are found then complain. In dryruns extra CLs are normal,
+  # though, and can be ignored.
   bad_cl_cmd = [
       'log', '--format=short', '--perl-regexp', '--author',
-      '^(?!chrome-bot|chromeos-ci-prod)',
+      '^(?!chrome-bot|chromeos-ci-prod|chromeos-ci-release)',
       '%s..%s' % (remote_ref.ref, stable_branch)
   ]
   bad_cls = git.RunGit(cwd, bad_cl_cmd).output
   if bad_cls.strip() and not dryrun:
     logging.error(
         'The Uprev stage found changes from users other than '
-        'chrome-bot or chromeos-ci-prod:\n\n%s', bad_cls)
+        'chrome-bot or chromeos-ci-prod or chromeos-ci-release:\n\n%s', bad_cls)
     raise AssertionError('Unexpected CLs found during uprev stage.')
 
   if staging_branch is not None:
@@ -222,7 +217,8 @@ def GetParser():
   parser.add_argument('--dryrun', action='store_true',
                       help='Passes dry-run to git push if pushing a change.')
   parser.add_argument('--force', action='store_true',
-                      help='Force the stabilization of blacklisted packages. '
+                      help='Force the stabilization of packages marked for '
+                           'manual uprev. '
                       '(only compatible with -p)')
   parser.add_argument('--list_revisions', action='store_true',
                       help='List all revisions included in the commit message.')

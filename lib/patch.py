@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011-2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module that handles the processing of patches to the source tree."""
-
-from __future__ import print_function
 
 import calendar
 import collections
@@ -14,8 +11,9 @@ import random
 import re
 import subprocess
 import time
-
-import six
+# We import mock so that we can identify mock.MagicMock instances in tests
+# that use mock.
+from unittest import mock
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -23,14 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
-
-
-# We import mock so that we can identify mock.MagicMock instances in tests
-# that use mock.
-try:
-  import mock
-except ImportError:
-  mock = None
 
 
 _MAXIMUM_GERRIT_NUMBER_LENGTH = 7
@@ -58,23 +48,6 @@ ATTR_FAIL_COUNT = 'fail_count'
 ATTR_PASS_COUNT = 'pass_count'
 ATTR_TOTAL_FAIL_COUNT = 'total_fail_count'
 ATTR_COMMIT_MESSAGE = 'commit_message'
-
-ALL_ATTRS = (
-    ATTR_REMOTE,
-    ATTR_GERRIT_NUMBER,
-    ATTR_PROJECT,
-    ATTR_BRANCH,
-    ATTR_PROJECT_URL,
-    ATTR_REF,
-    ATTR_CHANGE_ID,
-    ATTR_COMMIT,
-    ATTR_PATCH_NUMBER,
-    ATTR_OWNER_EMAIL,
-    ATTR_FAIL_COUNT,
-    ATTR_PASS_COUNT,
-    ATTR_TOTAL_FAIL_COUNT,
-    ATTR_COMMIT_MESSAGE,
-)
 
 def ParseSHA1(text, error_ok=True):
   """Checks if |text| conforms to the SHA1 format and parses it.
@@ -343,21 +316,6 @@ class DependencyError(PatchException):
 
     return key_error
 
-class BrokenCQDepends(PatchException):
-  """Raised if a patch has a CQ-DEPEND line that is ill formated."""
-
-  def __init__(self, patch, text, msg=None):
-    PatchException.__init__(self, patch)
-    self.text = text
-    self.msg = msg
-    self.args = (patch, text, msg)
-
-  def ShortExplanation(self):
-    s = 'has a malformed CQ-DEPEND target: %s' % (self.text,)
-    if self.msg is not None:
-      s += '; %s' % (self.msg,)
-    return s
-
 
 class BrokenChangeID(PatchException):
   """Raised if a patch has an invalid or missing Change-ID."""
@@ -442,7 +400,7 @@ class PatchCache(object):
   def _GetAliases(self, value):
     if hasattr(value, 'LookupAliases'):
       return value.LookupAliases()
-    elif not isinstance(value, six.string_types):
+    elif not isinstance(value, str):
       # This isn't needed in production code; it however is
       # rather useful to flush out bugs in test code.
       raise ValueError("Value %r isn't a string" % (value,))
@@ -768,7 +726,7 @@ class PatchQuery(object):
   def __eq__(self, other):
     """Defines when two PatchQuery objects are considered equal."""
     # We allow comparing against a string to make testing easier.
-    if isinstance(other, six.string_types):
+    if isinstance(other, str):
       return self.id == other
 
     if self.id is not None:
@@ -1293,17 +1251,17 @@ class GitRepoPatch(PatchQuery):
     Raises:
       ApplyPatchException: If the patch failed to apply.
     """
-    checkout = self.GetCheckout(manifest)
-    revision = checkout.get('revision')
-    # revision might be a branch which is written as it would appear on the
-    # remote. If so, rewrite it as a local reference to the remote branch.
-    # For example, refs/heads/master might become refs/remotes/cros/master.
-    if revision and not git.IsSHA1(revision):
-      revision = 'refs/remotes/%s/%s' % \
-          (checkout['remote'], git.StripRefs(revision))
-    upstream = checkout['tracking_branch']
-    self.Apply(checkout.GetPath(absolute=True), upstream, revision=revision,
-               trivial=trivial)
+    for checkout in self.GetCheckouts(manifest):
+      revision = checkout.get('revision')
+      # revision might be a branch which is written as it would appear on the
+      # remote. If so, rewrite it as a local reference to the remote branch.
+      # For example, refs/heads/main might become refs/remotes/cros/main.
+      if revision and not git.IsSHA1(revision):
+        revision = 'refs/remotes/%s/%s' % (
+            checkout['remote'], git.StripRefs(revision))
+      upstream = checkout['tracking_branch']
+      self.Apply(checkout.GetPath(absolute=True), upstream, revision=revision,
+                 trivial=trivial)
 
   def GerritDependencies(self):
     """Returns a list of Gerrit change numbers that this patch depends on.
@@ -1363,37 +1321,6 @@ class GitRepoPatch(PatchQuery):
 
     return ParseChangeID(change_id_match)
 
-  def PaladinDependencies(self, git_repo):
-    """Returns an ordered list of dependencies based on the Commit Message.
-
-    Parses the Commit message for this change looking for lines that follow
-    the format:
-
-    CQ-DEPEND=change_num+ e.g.
-
-    A commit which depends on a couple others.
-
-    BUG=blah
-    TEST=blah
-    CQ-DEPEND=10001,10002
-    """
-    dependencies = []
-    logging.debug('Checking for CQ-DEPEND dependencies for change %s', self)
-
-    # Only fetch the commit message if needed.
-    if self.commit_message is None:
-      self.Fetch(git_repo)
-
-    try:
-      dependencies = GetPaladinDeps(self.commit_message)
-    except ValueError as e:
-      raise BrokenCQDepends(self, str(e))
-
-    if dependencies:
-      logging.debug('Found %s Paladin dependencies for change %s',
-                    dependencies, self)
-    return dependencies
-
   def _FindEbuildConflicts(self, git_repo, upstream, inflight=False):
     """Verify that there are no ebuild conflicts in the given |git_repo|.
 
@@ -1444,6 +1371,22 @@ class GitRepoPatch(PatchQuery):
     existing_filenames = output.split('\0')[:-1]
     return [x for x in files if x not in existing_filenames]
 
+  def GetCheckouts(self, manifest, strict=True):
+    """Get the ProjectCheckout(s) associated with this patch.
+
+    Args:
+      manifest: A ManifestCheckout object.
+      strict: If the change refers to a project/branch that is not in the
+        manifest, raise a ChangeNotInManifest error.
+
+    Returns:
+      A list of the ProjectCheckout(s) for the patch, which may be empty.
+    """
+    checkouts = manifest.FindCheckouts(self.project, self.tracking_branch)
+    if strict and not checkouts:
+      raise ChangeNotInManifest(self)
+    return checkouts
+
   def GetCheckout(self, manifest, strict=True):
     """Get the ProjectCheckout associated with this patch.
 
@@ -1456,12 +1399,10 @@ class GitRepoPatch(PatchQuery):
       ChangeMatchesMultipleCheckouts if there are multiple checkouts that
       match this change.
     """
-    checkouts = manifest.FindCheckouts(self.project, self.tracking_branch)
+    checkouts = self.GetCheckouts(manifest, strict=strict)
     if len(checkouts) != 1:
       if len(checkouts) > 1:
         raise ChangeMatchesMultipleCheckouts(self)
-      elif strict:
-        raise ChangeNotInManifest(self)
       return None
 
     return checkouts[0]
@@ -1722,8 +1663,11 @@ class UploadedLocalPatch(GitRepoPatch):
 
   def __str__(self):
     """Returns custom string to identify this patch."""
-    s = '%s:%s:%s' % (self.project, self.original_branch,
-                      self.original_sha1[:8])
+    s = '%s:%s' % (self.project, self.original_branch)
+    if self._original_sha1_valid:
+      # Pylint-2.2 is unable to see the if guard above.
+      # pylint: disable=unsubscriptable-object
+      s += ':%s' % (self.original_sha1[:8],)
     # TODO(ferringb,build): This gets a bit long in output; should likely
     # do some form of truncation to it.
     if self._subject_line:
@@ -2045,34 +1989,9 @@ class GerritPatch(GerritFetchOnlyPatch):
     else:
       return value in type_approvals
 
-  def HasApprovals(self, flags):
-    """Return whether the current patchset has the specified approval.
-
-    Args:
-      flags: A dictionary of flag -> value mappings in
-        GerritPatch.HasApproval format.
-        ex: { 'CRVW': '2', 'VRIF': '1', 'COMR': ('1', '2') }
-
-    returns boolean telling if all flag requirements are met.
-    """
-    return all(self.HasApproval(field, value)
-               for field, value in flags.items())
-
   def IsPrivate(self):
     """Return whether this CL is currently marked Private."""
     return self.private
-
-  def WasVetoed(self):
-    """Return whether this CL was vetoed with VRIF=-1 or CRVW=-2."""
-    return self.HasApproval('VRIF', '-1') or self.HasApproval('CRVW', '-2')
-
-  def IsMergeable(self):
-    """Return true if all Gerrit approvals required for submission are set."""
-    return not self.GetMergeException()
-
-  def HasReadyFlag(self):
-    """Return true if the commit-ready flag is set."""
-    return self.HasApproval('COMR', ('1', '2'))
 
   def GetMergeException(self):
     """Return the reason why this change is not mergeable.

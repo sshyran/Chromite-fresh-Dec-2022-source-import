@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 Used by Chromium OS buildbot configuration for all Chromium OS builds including
 full and pre-flight-queue builds.
 """
-
-from __future__ import print_function
 
 import distutils.version # pylint: disable=import-error,no-name-in-module
 import glob
@@ -44,9 +41,6 @@ from chromite.lib import tee
 from chromite.lib import timeout_util
 from chromite.lib import ts_mon_config
 from chromite.lib.buildstore import BuildStore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _DEFAULT_LOG_DIR = 'cbuildbot_logs'
@@ -853,14 +847,6 @@ def main(argv):
                    % (options.reference_repo,))
 
   if (options.buildbot or options.remote_trybot) and not options.resume:
-    if not options.cgroups:
-      parser.error('Options --buildbot/--remote-trybot and --nocgroups cannot '
-                   'be used together.  Cgroup support is required for '
-                   'buildbot/remote-trybot mode.')
-    if not cgroups.Cgroup.IsSupported():
-      parser.error('Option --buildbot/--remote-trybot was given, but this '
-                   'system does not support cgroups.  Failing.')
-
     missing = osutils.FindMissingBinaries(_BUILDBOT_REQUIRED_BINARIES)
     if missing:
       parser.error('Option --buildbot/--remote-trybot requires the following '

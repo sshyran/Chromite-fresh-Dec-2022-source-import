@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,12 +8,9 @@ This script takes expanded crash symbols published by the Android build, and
 converts them to breakpad format.
 """
 
-from __future__ import print_function
-
 import multiprocessing
 import os
 import re
-import sys
 import zipfile
 
 from chromite.lib import commandline
@@ -23,9 +19,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.scripts import cros_generate_breakpad_symbols
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 RELOCATION_PACKER_BIN = 'relocation_packer'
@@ -155,7 +148,9 @@ def _UnpackGenerateBreakpad(elf_file, *args, **kwargs):
   breakpad_file = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
       elf_file, *args, **kwargs)
 
-  if offset:
+  if isinstance(breakpad_file, int):
+    logging.error('Unable to generate symbols for %s', elf_file)
+  elif offset:
     _AdjustSymbolOffset(breakpad_file, offset)
 
 

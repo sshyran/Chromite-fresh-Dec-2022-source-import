@@ -1,21 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Run lint checks on the specified files."""
 
-from __future__ import print_function
-
-import errno
 import functools
 import json
 import multiprocessing
 import os
 import re
 import sys
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.cli import command
@@ -26,18 +21,15 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 # Extract a script's shebang.
 SHEBANG_RE = re.compile(br'^#!\s*([^\s]+)(\s+([^\s]+))?')
 
 
 def _GetProjectPath(path):
   """Find the absolute path of the git checkout that contains |path|."""
-  if git.FindRepoCheckoutRoot(path):
-    manifest = git.ManifestCheckout.Cached(path)
-    return manifest.FindCheckoutFromPath(path).GetPath(absolute=True)
+  ret = git.FindGitTopLevel(path)
+  if ret:
+    return ret
   else:
     # Maybe they're running on a file outside of a checkout.
     # e.g. cros lint ~/foo.py /tmp/test.py
@@ -50,8 +42,8 @@ def _GetPylintrc(path):
   If not found - use the default.
   """
   path = os.path.realpath(path)
-  project_path = _GetProjectPath(path)
   parent = os.path.dirname(path)
+  project_path = _GetProjectPath(parent)
   while project_path and parent.startswith(project_path):
     pylintrc = os.path.join(parent, 'pylintrc')
     dotpylintrc = os.path.join(parent, '.pylintrc')
@@ -169,65 +161,18 @@ def _CpplintFile(path, output_format, debug):
   return _LinterRunCommand(cmd, debug)
 
 
-def _PylintFile(path, output_format, debug, interp):
+def _PylintFile(path, output_format, debug):
   """Returns result of running pylint on |path|."""
-  pylint = os.path.join(constants.DEPOT_TOOLS_DIR, 'pylint-1.9')
-  if interp == 'python3':
-    pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
+  pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
   pylintrc = _GetPylintrc(path)
   cmd = [pylint, '--rcfile=%s' % pylintrc]
-  if interp == 'python3':
-    cmd += ['--disable=old-division']
   if output_format != 'default':
     cmd.append('--output-format=%s' % output_format)
   cmd.append(path)
   extra_env = {
-      # When inside the SDK, Gentoo's python wrappers (i.e. `python`, `python2`,
-      # and `python3`) will select a version based on $EPYTHON first.  Make sure
-      # we run through the right Python version when switching.
-      # We can drop this once we are Python 3-only.
-      'EPYTHON': interp,
       'PYTHONPATH': ':'.join(_GetPythonPath([path])),
   }
   return _LinterRunCommand(cmd, debug, extra_env=extra_env)
-
-
-def _Pylint2File(path, output_format, debug):
-  """Returns result of running pylint via python2 on |path|."""
-  return _PylintFile(path, output_format, debug, 'python2')
-
-
-def _Pylint3File(path, output_format, debug):
-  """Returns result of running pylint via python3 on |path|."""
-  return _PylintFile(path, output_format, debug, 'python3')
-
-
-def _Pylint23File(path, output_format, debug):
-  """Returns result of running pylint via python2 & python3 on |path|."""
-  ret2 = _Pylint2File(path, output_format, debug)
-  ret3 = _Pylint3File(path, output_format, debug)
-  # Caller only checks returncode atm.
-  return ret2 if ret2.returncode else ret3
-
-
-def _PylintProbeFile(path, output_format, debug):
-  """Returns result of running pylint based on the interp."""
-  try:
-    with open(path, 'rb') as fp:
-      data = fp.read(128)
-      if data.startswith(b'#!'):
-        if b'python3' in data:
-          return _Pylint3File(path, output_format, debug)
-        elif b'python2' in data:
-          return _Pylint2File(path, output_format, debug)
-        elif b'python' in data:
-          return _Pylint23File(path, output_format, debug)
-  except IOError as e:
-    if e.errno != errno.ENOENT:
-      raise
-
-  # TODO(vapier): Change the unknown default to Python 2+3 compat.
-  return _Pylint2File(path, output_format, debug)
 
 
 def _GolintFile(path, _, debug):
@@ -362,6 +307,11 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
                     'errors.  If the shellcheck findings are not useful, '
                     'please file a bug at:\n%s', bug_url)
     lint_result.returncode = 0
+
+  # Check whitespace.
+  if not _WhiteSpaceLintData(path, osutils.ReadFile(path)):
+    lint_result.returncode = 1
+
   return lint_result
 
 
@@ -389,16 +339,8 @@ def _BreakoutDataByLinter(map_to_return, path):
         if prog == b'/usr/bin/env':
           prog = m.group(3)
         basename = os.path.basename(prog)
-        if basename.startswith(b'python3'):
-          pylint_list = map_to_return.setdefault(_Pylint3File, [])
-          pylint_list.append(path)
-        elif basename.startswith(b'python2'):
-          pylint_list = map_to_return.setdefault(_Pylint2File, [])
-          pylint_list.append(path)
-        elif basename.startswith(b'python'):
-          pylint_list = map_to_return.setdefault(_Pylint2File, [])
-          pylint_list.append(path)
-          pylint_list = map_to_return.setdefault(_Pylint3File, [])
+        if basename.startswith(b'python'):
+          pylint_list = map_to_return.setdefault(_PylintFile, [])
           pylint_list.append(path)
         elif basename in (b'sh', b'dash', b'bash'):
           shlint_list = map_to_return.setdefault(_ShellLintFile, [])
@@ -413,7 +355,7 @@ _EXT_TO_LINTER_MAP = {
     # could include additional ones, but cpplint.py would just filter them out.
     frozenset({'.cc', '.cpp', '.h'}): _CpplintFile,
     frozenset({'.json'}): _JsonLintFile,
-    frozenset({'.py'}): _PylintProbeFile,
+    frozenset({'.py'}): _PylintFile,
     frozenset({'.go'}): _GolintFile,
     frozenset({'.sh'}): _ShellLintFile,
     frozenset({'.ebuild', '.eclass', '.bashrc'}): _GentooShellLintFile,
@@ -461,15 +403,6 @@ run other checks (e.g. pyflakes, etc.)
   @classmethod
   def AddParser(cls, parser):
     super(LintCommand, cls).AddParser(parser)
-    parser.add_argument('--py2', dest='pyver', action='store_const',
-                        const='py2',
-                        help='Assume Python files are Python 2')
-    parser.add_argument('--py3', dest='pyver', action='store_const',
-                        const='py3',
-                        help='Assume Python files are Python 3')
-    parser.add_argument('--py23', dest='pyver', action='store_const',
-                        const='py23',
-                        help='Assume Python files are Python 2 & 3 compatible')
     parser.add_argument('files', help='Files to lint', nargs='*')
     parser.add_argument('--output', default='default',
                         choices=LintCommand.OUTPUT_FORMATS,
@@ -485,13 +418,6 @@ run other checks (e.g. pyflakes, etc.)
       # simple, but print a warning so that if someone runs this manually
       # they are aware that nothing was linted.
       logging.warning('No files provided to lint.  Doing nothing.')
-
-    if self.options.pyver == 'py2':
-      _EXT_TO_LINTER_MAP[frozenset({'.py'})] = _Pylint2File
-    elif self.options.pyver == 'py3':
-      _EXT_TO_LINTER_MAP[frozenset({'.py'})] = _Pylint3File
-    elif self.options.pyver == 'py23':
-      _EXT_TO_LINTER_MAP[frozenset({'.py'})] = _Pylint23File
 
     errors = multiprocessing.Value('i')
     linter_map = _BreakoutFilesByLinter(files)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -15,16 +14,12 @@ Returns chrome-base/chromeos-chrome-8.0.552.0_alpha_r1
 emerge-x86-generic =chrome-base/chromeos-chrome-8.0.552.0_alpha_r1
 """
 
-from __future__ import print_function
-
 import base64
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import filecmp
 import os
 import re
-import sys
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -35,9 +30,6 @@ from chromite.lib import gob_util
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.scripts import cros_mark_as_stable
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Helper regex's for finding ebuilds.

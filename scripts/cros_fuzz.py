@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -41,15 +40,10 @@ log-level to debug ("--log-level debug"). Otherwise it will print commands that
 fail.
 """
 
-from __future__ import print_function
-
 import os
 import shutil
-import sys
 
-from elftools.elf.elffile import ELFFile
-import lddtree
-
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -57,9 +51,8 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 
 # Directory in sysroot's /tmp directory that this script will use for files it
@@ -145,7 +138,7 @@ class SysrootPath(object):
     Returns:
       The path to the sysroot (the value of path_to_sysroot).
     """
-    cls.path_to_sysroot = cros_build_lib.GetSysroot(board)
+    cls.path_to_sysroot = build_target_lib.get_default_sysroot_path(board)
     return cls.path_to_sysroot
 
   @property
@@ -724,7 +717,7 @@ def DownloadFuzzerCorpus(fuzzer, dest_directory=None):
   except gs.GSCommandError as exception:
     logging.error(
         'gsutil failed to download the corpus. You may need to log in. See:\n'
-        'https://chromium.googlesource.com/chromiumos/docs/+/master/gsutil.md'
+        'https://chromium.googlesource.com/chromiumos/docs/+/HEAD/gsutil.md'
         '#setup\n'
         'for instructions on doing this.')
     raise exception

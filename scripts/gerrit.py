@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,15 +9,18 @@ To expose a function directly to the command line interface, name your function
 with the prefix "UserAct".
 """
 
-from __future__ import print_function
-
+import argparse
 import collections
+import configparser
 import functools
 import inspect
 import json
+from pathlib import Path
 import re
+import shlex
 import sys
 
+from chromite.lib import chromite_config
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -27,12 +29,31 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import gob_util
 from chromite.lib import parallel
+from chromite.lib import pformat
+from chromite.lib import retry_util
 from chromite.lib import terminal
 from chromite.lib import uri_lib
 from chromite.utils import memoize
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+class Config:
+  """Manage the user's gerrit config settings.
+
+  This is entirely unique to this gerrit command.  Inspiration for naming and
+  layout is taken from ~/.gitconfig settings.
+  """
+
+  def __init__(self, path: Path = chromite_config.GERRIT_CONFIG):
+    self.cfg = configparser.ConfigParser(interpolation=None)
+    if path.exists():
+      self.cfg.read(chromite_config.GERRIT_CONFIG)
+
+  def expand_alias(self, action):
+    """Expand any aliases."""
+    alias = self.cfg.get('alias', action, fallback=None)
+    if alias is not None:
+      return shlex.split(alias)
+    return action
 
 
 class UserAction(object):
@@ -95,7 +116,23 @@ def blue(s):
 
 def _run_parallel_tasks(task, *args):
   """Small wrapper around BackgroundTaskRunner to enforce job count."""
-  with parallel.BackgroundTaskRunner(task, processes=CONNECTION_LIMIT) as q:
+  # When we run in parallel, we can hit the max requests limit.
+  def check_exc(e):
+    if not isinstance(e, gob_util.GOBError):
+      raise e
+    return e.http_status == 429
+
+  @retry_util.WithRetry(5, handler=check_exc, sleep=1, backoff_factor=2)
+  def retry(*args):
+    try:
+      task(*args)
+    except gob_util.GOBError as e:
+      if e.http_status != 429:
+        logging.warning('%s: skipping due: %s', args, e)
+      else:
+        raise
+
+  with parallel.BackgroundTaskRunner(retry, processes=CONNECTION_LIMIT) as q:
     for arg in args:
       q.put([arg])
 
@@ -293,9 +330,7 @@ class ActionTodo(_ActionSearchQuery):
   @staticmethod
   def __call__(opts):
     """Implement the action."""
-    cls = FilteredQuery(opts, ('reviewer:self status:open NOT owner:self '
-                               'label:Code-Review=0,user=self '
-                               'NOT label:Verified<0'))
+    cls = FilteredQuery(opts, 'attention:self')
     PrintCls(opts, cls)
 
 
@@ -433,10 +468,7 @@ class ActionDeps(_ActionSearchQuery):
 
   @classmethod
   def _Children(cls, opts, querier, cl):
-    """Yields the Gerrit and CQ-Depends dependencies of a patch"""
-    for change in cls._ProcessDeps(
-        opts, querier, cl, cl.PaladinDependencies(None), True):
-      yield change
+    """Yields the Gerrit dependencies of a patch"""
     for change in cls._ProcessDeps(
         opts, querier, cl, cl.GerritDependencies(), False):
       yield change
@@ -477,9 +509,6 @@ class _ActionLabeler(UserAction):
   @classmethod
   def init_subparser(cls, parser):
     """Add arguments to this action's subparser."""
-    parser.add_argument('--ne', '--no-emails', dest='notify',
-                        default='ALL', action='store_const', const='NONE',
-                        help='Do not send e-mail notifications')
     parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
                         help='Optional message to include')
     parser.add_argument('cls', nargs='+', metavar='CL',
@@ -555,7 +584,7 @@ class ActionSubmit(_ActionSimpleParallelCLs):
   @staticmethod
   def _process_one(helper, cl, opts):
     """Use |helper| to process the single |cl|."""
-    helper.SubmitChange(cl, dryrun=opts.dryrun)
+    helper.SubmitChange(cl, dryrun=opts.dryrun, notify=opts.notify)
 
 
 class ActionAbandon(_ActionSimpleParallelCLs):
@@ -564,9 +593,17 @@ class ActionAbandon(_ActionSimpleParallelCLs):
   COMMAND = 'abandon'
 
   @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    _ActionSimpleParallelCLs.init_subparser(parser)
+
+  @staticmethod
   def _process_one(helper, cl, opts):
     """Use |helper| to process the single |cl|."""
-    helper.AbandonChange(cl, dryrun=opts.dryrun)
+    helper.AbandonChange(cl, msg=opts.msg, dryrun=opts.dryrun,
+                         notify=opts.notify)
 
 
 class ActionRestore(_ActionSimpleParallelCLs):
@@ -580,6 +617,28 @@ class ActionRestore(_ActionSimpleParallelCLs):
     helper.RestoreChange(cl, dryrun=opts.dryrun)
 
 
+class ActionWorkInProgress(_ActionSimpleParallelCLs):
+  """Mark CLs as work in progress"""
+
+  COMMAND = 'wip'
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetWorkInProgress(cl, True, dryrun=opts.dryrun)
+
+
+class ActionReadyForReview(_ActionSimpleParallelCLs):
+  """Mark CLs as ready for review"""
+
+  COMMAND = 'ready'
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetWorkInProgress(cl, False, dryrun=opts.dryrun)
+
+
 class ActionReviewers(UserAction):
   """Add/remove reviewers' emails for a CL (prepend with '~' to remove)"""
 
@@ -588,9 +647,6 @@ class ActionReviewers(UserAction):
   @staticmethod
   def init_subparser(parser):
     """Add arguments to this action's subparser."""
-    parser.add_argument('--ne', '--no-emails', dest='notify',
-                        default='ALL', action='store_const', const='NONE',
-                        help='Do not send e-mail notifications')
     parser.add_argument('cl', metavar='CL',
                         help='The CL to update')
     parser.add_argument('reviewers', nargs='+',
@@ -619,24 +675,6 @@ class ActionReviewers(UserAction):
       helper, cl = GetGerrit(opts, opts.cl)
       helper.SetReviewers(cl, add=add_list, remove=remove_list,
                           dryrun=opts.dryrun, notify=opts.notify)
-
-
-class ActionAssign(_ActionSimpleParallelCLs):
-  """Set the assignee for CLs"""
-
-  COMMAND = 'assign'
-
-  @staticmethod
-  def init_subparser(parser):
-    """Add arguments to this action's subparser."""
-    _ActionSimpleParallelCLs.init_subparser(parser)
-    parser.add_argument('assignee',
-                        help='The new assignee')
-
-  @staticmethod
-  def _process_one(helper, cl, opts):
-    """Use |helper| to process the single |cl|."""
-    helper.SetAssignee(cl, opts.assignee, dryrun=opts.dryrun)
 
 
 class ActionMessage(_ActionSimpleParallelCLs):
@@ -779,21 +817,196 @@ class ActionUnignore(_ActionSimpleParallelCLs):
     helper.UnignoreChange(cl, dryrun=opts.dryrun)
 
 
-class ActionAccount(UserAction):
-  """Get the current user account information"""
+class ActionCherryPick(UserAction):
+  """Cherry pick CLs to branches."""
 
-  COMMAND = 'account'
+  COMMAND = 'cherry-pick'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    # Should we add an option to walk Cq-Depend and try to cherry-pick them?
+    parser.add_argument('--rev', '--revision', default='current',
+                        help='A specific revision or patchset')
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    parser.add_argument('--branches', '--branch', '--br', action='split_extend',
+                        default=[], required=True,
+                        help='The destination branches')
+    parser.add_argument('cls', nargs='+', metavar='CL',
+                        help='The CLs to cherry-pick')
 
   @staticmethod
   def __call__(opts):
     """Implement the action."""
+    # Process branches in parallel, but CLs in serial in case of CL stacks.
+    def task(branch):
+      for arg in opts.cls:
+        helper, cl = GetGerrit(opts, arg)
+        ret = helper.CherryPick(cl, branch, rev=opts.rev, msg=opts.msg,
+                                dryrun=opts.dryrun, notify=opts.notify)
+        logging.debug('Response: %s', ret)
+        if opts.raw:
+          print(ret['_number'])
+        else:
+          uri = f'https://{helper.host}/c/{ret["_number"]}'
+          print(uri_lib.ShortenUri(uri))
+
+    _run_parallel_tasks(task, *opts.branches)
+
+
+class ActionReview(_ActionSimpleParallelCLs):
+  """Review CLs with multiple settings
+
+  The label option supports extended/multiple syntax for easy use.  The --label
+  option may be specified multiple times (as settings are merges), and multiple
+  labels are allowed in a single argument.  Each label has the form:
+    <long or short name><=+-><value>
+
+  Common arguments:
+     Commit-Queue=0  Commit-Queue-1  Commit-Queue+2  CQ+2
+     'V+1 CQ+2'
+     'AS=1 V=1'
+  """
+
+  COMMAND = 'review'
+
+  class _SetLabel(argparse.Action):
+    """Argparse action for setting labels."""
+
+    LABEL_MAP = {
+        'AS': 'Auto-Submit',
+        'CQ': 'Commit-Queue',
+        'CR': 'Code-Review',
+        'V': 'Verified',
+    }
+
+    def __call__(self, parser, namespace, values, option_string=None):
+      labels = getattr(namespace, self.dest)
+      for request in values.split():
+        if '=' in request:
+          # Handle Verified=1 form.
+          short, value = request.split('=', 1)
+        elif '+' in request:
+          # Handle Verified+1 form.
+          short, value = request.split('+', 1)
+        elif '-' in request:
+          # Handle Verified-1 form.
+          short, value = request.split('-', 1)
+          value = '-%s' % (value,)
+        else:
+          parser.error('Invalid label setting "%s". Must be Commit-Queue=1 or '
+                       'CQ+1 or CR-1.' % (request,))
+
+        # Convert possible short label names like "V" to "Verified".
+        label = self.LABEL_MAP.get(short)
+        if not label:
+          label = short
+
+        # We allow existing label requests to be overridden.
+        labels[label] = value
+
+  @classmethod
+  def init_subparser(cls, parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Include a message')
+    parser.add_argument('-l', '--label', dest='labels',
+                        action=cls._SetLabel, default={},
+                        help='Set a label with a value')
+    parser.add_argument('--ready', default=None, action='store_true',
+                        help='Set CL status to ready-for-review')
+    parser.add_argument('--wip', default=None, action='store_true',
+                        help='Set CL status to WIP')
+    parser.add_argument('--reviewers', '--re', action='append', default=[],
+                        help='Add reviewers')
+    parser.add_argument('--cc', action='append', default=[],
+                        help='Add people to CC')
+    _ActionSimpleParallelCLs.init_subparser(parser)
+
+  @staticmethod
+  def _process_one(helper, cl, opts):
+    """Use |helper| to process the single |cl|."""
+    helper.SetReview(cl, msg=opts.msg, labels=opts.labels, dryrun=opts.dryrun,
+                     notify=opts.notify, reviewers=opts.reviewers, cc=opts.cc,
+                     ready=opts.ready, wip=opts.wip)
+
+
+class ActionAccount(_ActionSimpleParallelCLs):
+  """Get user account information"""
+
+  COMMAND = 'account'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('accounts', nargs='*', default=['self'],
+                        help='The accounts to query')
+
+  @classmethod
+  def __call__(cls, opts):
+    """Implement the action."""
     helper, _ = GetGerrit(opts)
-    acct = helper.GetAccount()
-    if opts.json:
-      json.dump(acct, sys.stdout)
-    else:
-      print('account_id:%i  %s <%s>' %
-            (acct['_account_id'], acct['name'], acct['email']))
+
+    def print_one(header, data):
+      print(f'### {header}')
+      print(pformat.json(data, compact=opts.json).rstrip())
+
+    def task(arg):
+      detail = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/detail')
+      if not detail:
+        print(f'{arg}: account not found')
+      else:
+        print_one('detail', detail)
+        for field in ('groups', 'capabilities', 'preferences', 'sshkeys',
+                      'gpgkeys'):
+          data = gob_util.FetchUrlJson(helper.host, f'accounts/{arg}/{field}')
+          print_one(field, data)
+
+    _run_parallel_tasks(task, *opts.accounts)
+
+
+class ActionConfig(UserAction):
+  """Manage the gerrit tool's own config file
+
+  Gerrit may be customized via ~/.config/chromite/gerrit.cfg.
+  It is an ini file like ~/.gitconfig.  See `man git-config` for basic format.
+
+  # Set up subcommand aliases.
+  [alias]
+      common-search = search 'is:open project:something/i/care/about'
+  """
+
+  COMMAND = 'config'
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # For now, this is a place holder for raising visibility for the config file
+    # and its associated help text documentation.
+    opts.parser.parse_args(['config', '--help'])
+
+
+class ActionHelp(UserAction):
+  """An alias to --help for CLI symmetry"""
+
+  COMMAND = 'help'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('command', nargs='?',
+                        help='The command to display.')
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # Show global help.
+    if not opts.command:
+      opts.parser.print_help()
+      return
+
+    opts.parser.parse_args([opts.command, '--help'])
 
 
 class ActionHelpAll(UserAction):
@@ -861,8 +1074,23 @@ def _GetActionUsages():
   )
 
 
-def GetParser():
-  """Returns the parser to use for this module."""
+def _AddCommonOptions(parser, subparser):
+  """Add options that should work before & after the subcommand.
+
+  Make it easy to do `gerrit --dry-run foo` and `gerrit foo --dry-run`.
+  """
+  parser.add_common_argument_to_group(
+      subparser, '--ne', '--no-emails', dest='notify',
+      default='ALL', action='store_const', const='NONE',
+      help='Do not send e-mail notifications')
+  parser.add_common_argument_to_group(
+      subparser, '-n', '--dry-run', dest='dryrun',
+      default=False, action='store_true',
+      help='Show what would be done, but do not make changes')
+
+
+def GetBaseParser() -> commandline.ArgumentParser:
+  """Returns the common parser (i.e. no subparsers added)."""
   description = """\
 There is no support for doing line-by-line code review via the command line.
 This helps you manage various bits and CL status.
@@ -887,32 +1115,43 @@ Scripting:
 with Commit-Queue=1.
   $ gerrit label-cq `gerrit --raw -i mine` 1   # Mark *ALL* of your internal \
 CLs with Commit-Queue=1.
-  $ gerrit --json search 'assignee:self'       # Dump all pending CLs in JSON.
+  $ gerrit --json search 'attention:self'      # Dump all pending CLs in JSON.
 
 Actions:
 """
   description += _GetActionUsages()
 
-  actions = _GetActions()
-
   site_params = config_lib.GetSiteParams()
   parser = commandline.ArgumentParser(
       description=description, default_log_level='notice')
-  parser.add_argument('-i', '--internal', dest='gob', action='store_const',
-                      default=site_params.EXTERNAL_GOB_INSTANCE,
-                      const=site_params.INTERNAL_GOB_INSTANCE,
-                      help='Query internal Chromium Gerrit instance')
-  parser.add_argument('-g', '--gob',
-                      default=site_params.EXTERNAL_GOB_INSTANCE,
-                      help=('Gerrit (on borg) instance to query (default: %s)' %
-                            (site_params.EXTERNAL_GOB_INSTANCE)))
+
+  group = parser.add_argument_group('Server options')
+  group.add_argument('-i', '--internal', dest='gob', action='store_const',
+                     default=site_params.EXTERNAL_GOB_INSTANCE,
+                     const=site_params.INTERNAL_GOB_INSTANCE,
+                     help='Query internal Chrome Gerrit instance')
+  group.add_argument('-g', '--gob',
+                     default=site_params.EXTERNAL_GOB_INSTANCE,
+                     help='Gerrit (on borg) instance to query (default: %s)' %
+                          (site_params.EXTERNAL_GOB_INSTANCE))
+
+  group = parser.add_argument_group('CL options')
+  _AddCommonOptions(parser, group)
+
   parser.add_argument('--raw', default=False, action='store_true',
                       help='Return raw results (suitable for scripting)')
   parser.add_argument('--json', default=False, action='store_true',
                       help='Return results in JSON (suitable for scripting)')
-  parser.add_argument('-n', '--dry-run', default=False, action='store_true',
-                      dest='dryrun',
-                      help='Show what would be done, but do not make changes')
+  return parser
+
+
+def GetParser(parser: commandline.ArgumentParser = None) -> (
+    commandline.ArgumentParser):
+  """Returns the full parser to use for this module."""
+  if parser is None:
+    parser = GetBaseParser()
+
+  actions = _GetActions()
 
   # Subparsers are required by default under Python 2.  Python 3 changed to
   # not required, but didn't include a required option until 3.7.  Setting
@@ -923,16 +1162,26 @@ Actions:
     # Format the full docstring by removing the file level indentation.
     description = re.sub(r'^  ', '', cls.__doc__, flags=re.M)
     subparser = subparsers.add_parser(cmd, description=description)
-    subparser.add_argument('-n', '--dry-run', dest='dryrun',
-                           default=False, action='store_true',
-                           help='Show what would be done only')
+    _AddCommonOptions(parser, subparser)
     cls.init_subparser(subparser)
 
   return parser
 
 
 def main(argv):
-  parser = GetParser()
+  base_parser = GetBaseParser()
+  opts, subargs = base_parser.parse_known_args(argv)
+
+  config = Config()
+  if subargs:
+    # If the action is an alias to an expanded value, we need to mutate the argv
+    # and reparse things.
+    action = config.expand_alias(subargs[0])
+    if action != subargs[0]:
+      pos = argv.index(subargs[0])
+      argv = argv[:pos] + action + argv[pos + 1:]
+
+  parser = GetParser(parser=base_parser)
   opts = parser.parse_args(argv)
 
   # In case the action wants to throw a parser error.

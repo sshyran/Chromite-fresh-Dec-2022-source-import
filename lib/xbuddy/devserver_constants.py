@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,7 +9,9 @@
 CHANNELS = 'canary', 'dev', 'beta', 'stable'
 GS_IMAGE_BUCKET = 'chromeos-image-archive'
 GS_IMAGE_DIR = 'gs://%s' % GS_IMAGE_BUCKET
+# TODO(ahassani): Remove MASTER once all buckets have moved to MAIN.
 GS_LATEST_MASTER = '%(image_dir)s/%(board)s%(suffix)s/LATEST-master'
+GS_LATEST_MAIN = '%(image_dir)s/%(board)s%(suffix)s/LATEST-main'
 GS_LATEST_BASE_VERSION = (
     '%(image_dir)s/%(board)s%(suffix)s/LATEST-%(base_version)s')
 IMAGE_DIR = '%(board)s%(suffix)s/%(version)s'

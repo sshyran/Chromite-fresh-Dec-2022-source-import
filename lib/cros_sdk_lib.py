@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for setting up and cleaning up the chroot environment."""
 
-from __future__ import print_function
-
 import collections
 import os
+from pathlib import Path
 import re
-import sys
 import time
 
 from chromite.lib import constants
@@ -19,9 +16,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Version file location inside chroot.
@@ -734,3 +728,98 @@ class ChrootUpdater(object):
 
     self._hook_files = hook_files
     return self._hook_files
+
+
+class ChrootCreator:
+  """Creates a new chroot from a given SDK."""
+
+  MAKE_CHROOT = os.path.join(
+      constants.SOURCE_ROOT, 'src/scripts/sdk_lib/make_chroot.sh')
+
+  # If the host timezone isn't set, we'll use this inside the SDK.
+  DEFAULT_TZ = 'usr/share/zoneinfo/PST8PDT'
+
+  def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
+               usepkg: bool = True):
+    """Initialize.
+
+    Args:
+      chroot_path: Path where the new chroot will be created.
+      sdk_tarball: Path to a downloaded Chromium OS SDK tarball.
+      cache_dir: Path to a directory that will be used for caching files.
+      usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
+          chroot.
+    """
+    self.chroot_path = chroot_path
+    self.sdk_tarball = sdk_tarball
+    self.cache_dir = cache_dir
+    self.usepkg = usepkg
+
+  def _make_chroot(self):
+    """Create the chroot."""
+    cmd = [
+        self.MAKE_CHROOT,
+        '--chroot', str(self.chroot_path),
+        '--cache_dir', str(self.cache_dir),
+    ]
+
+    if not self.usepkg:
+      cmd.append('--nousepkg')
+
+    try:
+      cros_build_lib.dbg_run(cmd)
+    except cros_build_lib.RunCommandError as e:
+      cros_build_lib.Die('Creating chroot failed!\n%s', e)
+
+  def init_timezone(self):
+    """Setup the timezone info inside the chroot."""
+    tz_path = Path('etc/localtime')
+    host_tz = '/' / tz_path
+    chroot_tz = self.chroot_path / tz_path
+    # Nuke it in case it's a broken symlink.
+    chroot_tz.unlink(missing_ok=True)
+    if host_tz.exists():
+      logging.debug('%s: copying from %s', chroot_tz, host_tz)
+      chroot_tz.write_bytes(host_tz.read_bytes())
+    else:
+      logging.debug('%s: symlinking to %s', chroot_tz, self.DEFAULT_TZ)
+      chroot_tz.symlink_to(self.DEFAULT_TZ)
+
+  def print_success_summary(self):
+    """Show a summary of the chroot to the user."""
+    default_chroot = Path(constants.SOURCE_ROOT) / constants.DEFAULT_CHROOT_DIR
+    chroot_opt = ''
+    if default_chroot != self.chroot_path:
+      chroot_opt = f' --chroot={self.chroot_path}'
+    logging.info("""
+All set up.  To enter the chroot, run:
+$ cros_sdk --enter%s
+
+CAUTION: Do *NOT* rm -rf the chroot directory; if there are stale bind mounts
+you may end up deleting your source tree too.  To unmount & delete cleanly, use:
+$ cros_sdk --delete%s
+""", chroot_opt, chroot_opt)
+
+  def run(self):
+    """Create the chroot."""
+    logging.notice('Creating chroot. This may take a few minutes...')
+
+    # Unpack the chroot & reset the version.
+    self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
+    cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
+    updater = ChrootUpdater(self.chroot_path / CHROOT_VERSION_FILE[1:])
+    updater.SetVersion(0)
+
+    self.init_timezone()
+
+    self._make_chroot()
+
+    # TODO(build): Delete this once all users migrate to cros_chroot_version.
+    osutils.Touch(self.chroot_path / 'etc' / 'debian_chroot')
+
+    self.print_success_summary()
+
+
+def CreateChroot(*args, **kwargs):
+  """Convenience method."""
+  ChrootCreator(*args, **kwargs).run()

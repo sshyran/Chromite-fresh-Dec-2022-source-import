@@ -1,26 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Choose the profile for a board that has been or is being setup."""
 
-from __future__ import print_function
-
 import functools
 import os
-import sys
 
-import six
-
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Default value constants.
@@ -43,7 +35,7 @@ def PathPrefixDecorator(f):
     if not prefix or not result:
       # Nothing to do.
       return result
-    elif not isinstance(result, six.string_types):
+    elif not isinstance(result, str):
       # Transform each path in the collection.
       new_result = []
       for path in result:
@@ -228,7 +220,7 @@ class Board(object):
     if self._board_root:
       return self._board_root
 
-    return os.path.join(cros_build_lib.GetSysroot(self.board_variant))
+    return build_target_lib.get_default_sysroot_path(self.board_variant)
 
   @property
   @PathPrefixDecorator

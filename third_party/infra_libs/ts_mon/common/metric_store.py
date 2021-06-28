@@ -8,7 +8,7 @@ import itertools
 import threading
 import time
 
-from infra_libs.ts_mon.common import errors
+from chromite.third_party.infra_libs.ts_mon.common import errors
 
 
 def default_modify_fn(name):

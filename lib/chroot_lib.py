@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,16 +8,10 @@ This is currently a very sparse class, but there's a significant amount of
 functionality that can eventually be centralized here.
 """
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

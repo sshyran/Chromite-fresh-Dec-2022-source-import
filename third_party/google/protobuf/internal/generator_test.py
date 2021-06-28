@@ -46,16 +46,16 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf.internal import test_bad_identifiers_pb2
-from google.protobuf import unittest_custom_options_pb2
-from google.protobuf import unittest_import_pb2
-from google.protobuf import unittest_import_public_pb2
-from google.protobuf import unittest_mset_pb2
-from google.protobuf import unittest_mset_wire_format_pb2
-from google.protobuf import unittest_no_generic_services_pb2
-from google.protobuf import unittest_pb2
-from google.protobuf import service
-from google.protobuf import symbol_database
+from chromite.third_party.google.protobuf.internal import test_bad_identifiers_pb2
+from chromite.third_party.google.protobuf import unittest_custom_options_pb2
+from chromite.third_party.google.protobuf import unittest_import_pb2
+from chromite.third_party.google.protobuf import unittest_import_public_pb2
+from chromite.third_party.google.protobuf import unittest_mset_pb2
+from chromite.third_party.google.protobuf import unittest_mset_wire_format_pb2
+from chromite.third_party.google.protobuf import unittest_no_generic_services_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import service
+from chromite.third_party.google.protobuf import symbol_database
 
 MAX_EXTENSION = 536870912
 
@@ -305,6 +305,16 @@ class GeneratorTest(unittest.TestCase):
         self.assertIs(desc.oneofs[0], field_desc.containing_oneof)
       else:
         self.assertIsNone(field_desc.containing_oneof)
+
+  def testEnumWithDupValue(self):
+    self.assertEqual('FOO1',
+                     unittest_pb2.TestEnumWithDupValue.Name(unittest_pb2.FOO1))
+    self.assertEqual('FOO1',
+                     unittest_pb2.TestEnumWithDupValue.Name(unittest_pb2.FOO2))
+    self.assertEqual('BAR1',
+                     unittest_pb2.TestEnumWithDupValue.Name(unittest_pb2.BAR1))
+    self.assertEqual('BAR1',
+                     unittest_pb2.TestEnumWithDupValue.Name(unittest_pb2.BAR2))
 
 
 class SymbolDatabaseRegistrationTest(unittest.TestCase):

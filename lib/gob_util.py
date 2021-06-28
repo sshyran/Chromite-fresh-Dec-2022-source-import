@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,42 +7,34 @@
 https://gerrit-review.googlesource.com/Documentation/rest-api.html
 """
 
-from __future__ import print_function
-
 import datetime
+import html.parser
+import http.client
+import http.cookiejar
 import json
 import os
 import re
 import socket
 import sys
+import urllib.parse
 import warnings
-
-import httplib2
-try:
-  from oauth2client import gce
-except ImportError:  # Newer oauth2client versions put it in .contrib
-  # pylint: disable=import-error,no-name-in-module
-  from oauth2client.contrib import gce
-import six
-from six.moves import html_parser as HTMLParser
-from six.moves import http_client as httplib
-from six.moves import http_cookiejar as cookielib
-from six.moves import urllib
 
 from chromite.lib import auth
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from chromite.lib import cros_build_lib
+from chromite.third_party import httplib2
+from chromite.third_party.oauth2client import gce
 from chromite.utils import memoize
 
 
 _GAE_VERSION = 'GAE_VERSION'
 
 
-class ErrorParser(HTMLParser.HTMLParser):
+class ErrorParser(html.parser.HTMLParser):
   """Class to parse GOB error message reported as HTML.
 
   Only data inside <div id='af-error-container'> section is retrieved from the
@@ -55,7 +46,7 @@ class ErrorParser(HTMLParser.HTMLParser):
   """
 
   def __init__(self):
-    HTMLParser.HTMLParser.__init__(self)
+    html.parser.HTMLParser.__init__(self)
     self.in_div = False
     self.err_data = ''
 
@@ -84,6 +75,12 @@ class ErrorParser(HTMLParser.HTMLParser):
 
   def ParsedDiv(self):
     return self.err_data.strip()
+
+  def error(self, message):
+    # Pylint correctly flags a missing abstract method, but the error is in
+    # Python itself.  We can delete this method once we move to Python 3.10+.
+    # https://bugs.python.org/issue31844
+    pass
 
 
 @memoize.Memoize
@@ -170,7 +167,8 @@ def GetCookies(host, path, cookie_paths=None):
           if line.strip().startswith('#') or len(fields) != 7:
             continue
           domain, xpath, key, value = fields[0], fields[2], fields[5], fields[6]
-          if cookielib.domain_match(host, domain) and path.startswith(xpath):
+          if (http.cookiejar.domain_match(host, domain) and
+              path.startswith(xpath)):
             cookies[key] = value
   return cookies
 
@@ -230,7 +228,7 @@ def CreateHttpConn(host, path, reqtype='GET', headers=None, body=None):
       logging.debug('%s: %s', key, val)
     if body:
       logging.debug(body)
-  conn = httplib.HTTPSConnection(host)
+  conn = http.client.HTTPSConnection(host)
   conn.req_host = host
   conn.req_params = {
       'url': path,
@@ -343,7 +341,7 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
     except AttributeError:
       logging.warning('peer name unavailable')
 
-    if response.status == httplib.CONFLICT:
+    if response.status == http.client.CONFLICT:
       # 409 conflict
       if GOB_CONFLICT_ERRORS_RE.search(response_body):
         raise GOBError(
@@ -526,10 +524,12 @@ def UnignoreChange(host, change):
   return FetchUrlJson(host, path, reqtype='PUT', ignore_404=False)
 
 
-def AbandonChange(host, change, msg=''):
+def AbandonChange(host, change, msg='', notify=None):
   """Abandon a gerrit change."""
   path = '%s/abandon' % _GetChangePath(change)
   body = {'message': msg}
+  if notify is not None:
+    body['notify'] = notify
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
 
 
@@ -556,12 +556,23 @@ def DeleteDraft(host, change):
                ' %r' % change)
 
 
-def SubmitChange(host, change, revision=None, wait_for_merge=True):
+def CherryPick(host, change, branch, rev='current', msg='', notify=None):
+  """Cherry pick a change to a branch."""
+  path = '%s/revisions/%s/cherrypick' % (_GetChangePath(change), rev)
+  body = {'destination': branch, 'message': msg}
+  if notify is not None:
+    body['notify'] = notify
+  return FetchUrlJson(host, path, reqtype='POST', body=body)
+
+
+def SubmitChange(host, change, revision=None, wait_for_merge=True, notify=None):
   """Submits a gerrit change via Gerrit."""
   if revision is None:
     revision = 'current'
   path = '%s/revisions/%s/submit' % (_GetChangePath(change), revision)
   body = {'wait_for_merge': wait_for_merge}
+  if notify is not None:
+    body['notify'] = notify
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
 
 
@@ -587,25 +598,6 @@ def CheckChange(host, change, sha1=None):
   return FetchUrlJson(host, path, reqtype='POST',
                       body=body, ignore_404=False,
                       headers=headers)
-
-
-def GetAssignee(host, change):
-  """Get assignee for a change."""
-  path = '%s/assignee' % _GetChangePath(change)
-  return FetchUrlJson(host, path)
-
-
-def AddAssignee(host, change, assignee):
-  """Add reviewers to a change.
-
-  Args:
-    host: The Gerrit host to interact with.
-    change: The Gerrit change ID.
-    assignee: Gerrit account email as a string
-  """
-  path = '%s/assignee' % _GetChangePath(change)
-  body = {'assignee': assignee}
-  return  FetchUrlJson(host, path, reqtype='PUT', body=body, ignore_404=False)
 
 
 def MarkPrivate(host, change):
@@ -657,6 +649,32 @@ def MarkNotPrivate(host, change):
     )
 
 
+def MarkWorkInProgress(host, change, msg=''):
+  """Marks the given CL as Work-In-Progress.
+
+  Args:
+    host: The gob host to interact with.
+    change: CL number on the given host.
+    msg: Message to post together with the action.
+  """
+  path = '%s/wip' % _GetChangePath(change)
+  body = {'message': msg}
+  return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+
+
+def MarkReadyForReview(host, change, msg=''):
+  """Marks the given CL as Ready-For-Review.
+
+  Args:
+    host: The gob host to interact with.
+    change: CL number on the given host.
+    msg: Message to post together with the action.
+  """
+  path = '%s/ready' % _GetChangePath(change)
+  body = {'message': msg}
+  return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+
+
 def GetReviewers(host, change):
   """Get information about all reviewers attached to a change.
 
@@ -672,7 +690,7 @@ def AddReviewers(host, change, add=None, notify=None):
   """Add reviewers to a change."""
   if not add:
     return
-  if isinstance(add, six.string_types):
+  if isinstance(add, str):
     add = (add,)
   body = {}
   if notify:
@@ -688,7 +706,7 @@ def RemoveReviewers(host, change, remove=None, notify=None):
   """Remove reveiewers from a change."""
   if not remove:
     return
-  if isinstance(remove, six.string_types):
+  if isinstance(remove, str):
     remove = (remove,)
   body = {}
   if notify:
@@ -703,20 +721,29 @@ def RemoveReviewers(host, change, remove=None, notify=None):
         raise
 
 
-def SetReview(host, change, revision=None, msg=None, labels=None, notify=None):
+def SetReview(host, change, revision=None, msg=None, labels=None, notify=None,
+              reviewers=None, cc=None, ready=None, wip=None):
   """Set labels and/or add a message to a code review."""
   if revision is None:
     revision = 'current'
   if not msg and not labels:
     return
   path = '%s/revisions/%s/review' % (_GetChangePath(change), revision)
-  body = {}
+  body = {'reviewers': []}
   if msg:
     body['message'] = msg
   if labels:
     body['labels'] = labels
   if notify:
     body['notify'] = notify
+  if reviewers:
+    body['reviewers'].extend({'reviewer': x} for x in reviewers)
+  if cc:
+    body['reviewers'].extend({'reviewer': x, 'state': 'CC'} for x in cc)
+  if ready is not None:
+    body['ready'] = ready
+  if wip is not None:
+    body['work_in_progress'] = wip
   response = FetchUrlJson(host, path, reqtype='POST', body=body)
   if response is None:
     raise GOBError(
@@ -803,9 +830,9 @@ def ResetReviewLabels(host, change, label, value='0', revision=None,
 
 
 def GetTipOfTrunkRevision(git_url):
-  """Returns the current git revision on the master branch."""
+  """Returns the current git revision on the default branch."""
   parsed_url = urllib.parse.urlparse(git_url)
-  path = parsed_url[2].rstrip('/') + '/+log/master?n=1&format=JSON'
+  path = parsed_url[2].rstrip('/') + '/+log/HEAD?n=1&format=JSON'
   j = FetchUrlJson(parsed_url[1], path, ignore_404=False)
   if not j:
     raise GOBError(
@@ -851,6 +878,6 @@ def GetCommitDate(git_url, commit):
     raise GOBError(reason='Failed parsing commit time "%s"' % commit_timestr)
 
 
-def GetAccount(host):
+def GetAccount(host, account='self'):
   """Get information about the user account."""
-  return FetchUrlJson(host, 'accounts/self')
+  return FetchUrlJson(host, 'accounts/%s' % (account,))

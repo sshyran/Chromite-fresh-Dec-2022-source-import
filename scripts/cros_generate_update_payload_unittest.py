@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for cros_generate_update_payload."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
@@ -16,9 +11,6 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.scripts import cros_generate_update_payload
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CrOSGenerateUpdatePayloadTest(cros_test_lib.MockTestCase):
@@ -33,7 +25,7 @@ class CrOSGenerateUpdatePayloadTest(cros_test_lib.MockTestCase):
         '--tgt-image', 'foo-tgt-image',
         '--src-image', 'foo-src-image',
         '--output', 'foo-output',
-        '--check',
+        '--check', '--minios',
         '--private-key', 'foo-private-key',
         '--work-dir', 'foo-work-dir',
     ])
@@ -44,4 +36,4 @@ class CrOSGenerateUpdatePayloadTest(cros_test_lib.MockTestCase):
         src_image=partial_mock.HasString('foo-src-image'),
         work_dir=partial_mock.HasString('foo-work-dir'),
         private_key=partial_mock.HasString('foo-private-key'),
-        check=True)
+        check=True, minios=True)

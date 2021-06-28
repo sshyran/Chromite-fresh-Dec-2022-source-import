@@ -7,6 +7,8 @@
 # network to see if there are any updates.
 
 # [VPYTHON:BEGIN]
+# python_version: "3.8"
+#
 # # Third party dependencies.  These are only listed because pylint itself needs
 # # them.  Feel free to add/remove anything here.
 #
@@ -47,6 +49,7 @@
 # >
 #
 # # Pylint dependencies.
+# # NB: Keep in sync with scripts/run_tests.vpython3.
 #
 # wheel: <
 #   name: "infra/python/wheels/astroid-py3"

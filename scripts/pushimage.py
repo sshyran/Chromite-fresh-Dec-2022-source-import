@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,16 +8,12 @@ This pushes files from the archive bucket to the signer bucket and marks
 artifacts for signing (which a signing process will look for).
 """
 
-from __future__ import print_function
-
+import configparser
 import getpass
+import io
 import os
 import re
-import sys
 import textwrap
-
-from six.moves import configparser
-from six.moves import StringIO
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -27,9 +22,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import signing
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # This will split a fully qualified ChromeOS version string up.
@@ -202,7 +194,7 @@ class InputInsns(object):
     https://bugs.python.org/issue16058
     """
     # Write the current config to a string io object.
-    data = StringIO()
+    data = io.StringIO()
     config.write(data)
     data.seek(0)
 
@@ -253,7 +245,7 @@ class InputInsns(object):
     for alt in self.GetAltInsnSets():
       config.remove_section(alt)
 
-    output = StringIO()
+    output = io.StringIO()
     config.write(output)
     data = output.getvalue()
     osutils.WriteFile(output_file, data)

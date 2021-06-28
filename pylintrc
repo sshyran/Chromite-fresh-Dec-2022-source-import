@@ -21,7 +21,9 @@
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
 ignore-patterns=
-    .*_pb2\.py$
+    .*_pb2\.py$,
+    .*third_party\/.*.py$
+
 
 # Pickle collected data for later comparisons.
 #persistent=yes
@@ -46,8 +48,6 @@ docstring-quote = double
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple times.
-# cros-logging-import: logging is deprecated. Use "from chromite.lib import
-#   cros_logging as logging" to import chromite/lib/cros_logging.
 # eq-without-hash: We omit this as we don't require all objects be hashable.
 #   We'll wait for unittest coverage to detect missing __hash__ on objects.
 # no-absolute-import: We don't seem to rely on this behavior, so don't enforce
@@ -55,7 +55,6 @@ docstring-quote = double
 # round-builtin: We omit this as all our usage of round() is OK with either
 #   Python 2 or 3 behavior (and probably leans towards 3 anyways).
 enable=
-    cros-logging-import,
     apply-builtin,
     backtick,
     bad-python3-import,
@@ -85,7 +84,6 @@ enable=
     idiv-method,
     import-star-module-level,
     indexing-exception,
-    input-builtin,
     intern-builtin,
     invalid-str-codec,
     long-builtin,
@@ -96,7 +94,6 @@ enable=
     next-method-defined,
     nonzero-method,
     oct-method,
-    old-division,
     old-ne-operator,
     old-octal-literal,
     old-raise-syntax,
@@ -273,10 +270,8 @@ bad-functions=
     apply,
     exit,
     filter,
-    input,
     map,
     quit,
-    raw_input,
     reduce,
 
 # Regular expression which should only match correct module names
@@ -445,6 +440,7 @@ deprecated-modules=
     HTMLParser,
     httplib,
     md5,
+    mock,
     mox,
     optparse,
     Queue,
@@ -488,6 +484,7 @@ known-third-party=
     oauth2client,
     portage,
     pylint,
+    pytest,
     requests,
     six,
     sqlalchemy,

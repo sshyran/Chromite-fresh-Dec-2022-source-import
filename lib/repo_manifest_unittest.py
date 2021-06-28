@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for chromite.lib.repo_manifest."""
 
-from __future__ import print_function
-
 import io
 import os
 import pickle
-import sys
 
 # TODO(vapier): Use ElementTree directly once we're Python 3-only.
 from xml.etree import cElementTree as ElementTree
@@ -18,9 +14,6 @@ from xml.etree import cElementTree as ElementTree
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import repo_manifest
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MANIFEST_OUTER_XML = """<?xml version="1.0" encoding="UTF-8"?>
@@ -39,7 +32,7 @@ REMOTES_XML = """
           fetch="http://example.com"
           pushurl="http://example.com/push"
           review="http://review.example.com"
-          revision="refs/heads/master"/>
+          revision="refs/heads/main"/>
 """
 
 DEFAULT_XML = '<default remote="simple_remote" upstream="default_upstream"/>'
@@ -48,7 +41,7 @@ SIMPLE_PROJECT_XML = '<project name="simple/project"/>'
 
 COMPLEX_PROJECT_XML = """
   <project name="complex/project" path="src/complex" revision="cafe"
-           remote="complex_remote" upstream="refs/heads/master">
+           remote="complex_remote" upstream="refs/heads/main">
     <annotation name="branch-mode" value="pin"/>
   </project>
 """

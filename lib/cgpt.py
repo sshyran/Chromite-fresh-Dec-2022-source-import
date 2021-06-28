@@ -1,19 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Read disk information from a CrOS image using cgpt."""
 
-from __future__ import print_function
-
 import collections
-import sys
 
 from chromite.lib import cros_build_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

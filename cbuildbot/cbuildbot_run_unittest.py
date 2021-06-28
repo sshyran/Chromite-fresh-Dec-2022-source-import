@@ -1,26 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the cbuildbot_run module."""
 
-from __future__ import print_function
-
 import pickle
-import sys
 import time
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_test_lib
 from chromite.lib import parallel
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 DEFAULT_ARCHIVE_GS_PATH = 'bogus_bucket/TheArchiveBase'
@@ -212,9 +204,8 @@ class BuilderRunTest(_BuilderRunTestCase):
       self.assertEqual(DEFAULT_BRANCH, run.manifest_branch)
       self.assertEqual(DEFAULT_OPTIONS, run.options)
       self.assertEqual(DEFAULT_CONFIG, run.config)
-      self.assertTrue(isinstance(run.attrs, cbuildbot_run.RunAttributes))
-      self.assertTrue(isinstance(run.GetArchive(),
-                                 cbuildbot_run.archive_lib.Archive))
+      self.assertIsInstance(run.attrs, cbuildbot_run.RunAttributes)
+      self.assertIsInstance(run.GetArchive(), cbuildbot_run.archive_lib.Archive)
 
       # Make sure methods behave normally, since BuilderRun messes with them.
       meth1 = run.GetVersionInfo
@@ -429,9 +420,9 @@ class ChildBuilderRunTest(_BuilderRunTestCase):
       self.assertEqual(DEFAULT_OPTIONS, crun.options)
       self.assertEqual(DEFAULT_CONFIG.child_configs[0], crun.config)
       self.assertEqual('foo', crun.config.name)
-      self.assertTrue(isinstance(crun.attrs, cbuildbot_run.RunAttributes))
-      self.assertTrue(isinstance(crun.GetArchive(),
-                                 cbuildbot_run.archive_lib.Archive))
+      self.assertIsInstance(crun.attrs, cbuildbot_run.RunAttributes)
+      self.assertIsInstance(crun.GetArchive(),
+                            cbuildbot_run.archive_lib.Archive)
 
       # Make sure methods behave normally, since BuilderRun messes with them.
       meth1 = crun.GetVersionInfo
@@ -587,9 +578,9 @@ class BoardRunAttributesTest(_BuilderRunTestCase):
     """Stage-like class to wait for then check attr on BoardRunAttributes."""
     def Run(self):
       value = self.GetParallel()
-      assert value == self.expected_value, \
-          ('For run attribute %s expected value %r but got %r.' %
-           (self.attr, self.expected_value, value))
+      assert value == self.expected_value, (
+          'For run attribute %s expected value %r but got %r.' %
+          (self.attr, self.expected_value, value))
 
   class _TimeoutWaitForAttr(_WaitForAttr):
     """Stage-like class to time-out waiting for attr on BoardRunAttributes."""

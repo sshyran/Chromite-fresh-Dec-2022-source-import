@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for sync stages."""
 
-from __future__ import print_function
-
 import os
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import lkgm_manager
@@ -18,13 +14,12 @@ from chromite.cbuildbot import repository
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
-from chromite.lib import auth
-from chromite.lib import buildbucket_lib
 from chromite.lib import cidb
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import fake_cidb
 from chromite.lib.buildstore import FakeBuildStore
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -222,10 +217,6 @@ class MockPatch(mock.MagicMock):
     """Return whether this patch is merged or in the middle of being merged."""
     return self.status in ('SUBMITTED', 'MERGED')
 
-  def IsMergeable(self):
-    """Default implementation of IsMergeable, stubbed out by some tests."""
-    return True
-
   def GetDiffStatus(self, _):
     return self.mock_diff_status
 
@@ -263,13 +254,6 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
         branch=self.branch,
         buildstore=self.buildstore,
         dry_run=True)
-
-    self.PatchObject(buildbucket_lib, 'GetServiceAccount', return_value=True)
-    self.PatchObject(auth.AuthorizedHttp, '__init__', return_value=None)
-    self.PatchObject(
-        buildbucket_lib.BuildbucketClient,
-        '_GetHost',
-        return_value=buildbucket_lib.BUILDBUCKET_TEST_HOST)
 
     self._Prepare()
 

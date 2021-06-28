@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests for the build_api script covering the base Build API functionality."""
 
-from __future__ import print_function
-
 import os
-import sys
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api import api_config
 from chromite.api import message_util
@@ -20,9 +16,6 @@ from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RouterTest(cros_test_lib.RunCommandTempDirTestCase,
@@ -380,3 +373,12 @@ class RouterTest(cros_test_lib.RunCommandTempDirTestCase,
       self.router.Route(service, method, self.api_config,
                         self.binary_input_handler, [self.binary_output_handler],
                         self.binary_config_handler)
+
+  def testListVisibility(self):
+    """Test visibility options."""
+    service = 'HiddenService'
+    method = 'HiddenMethod'
+
+    for current in self.router.ListMethods():
+      self.assertNotIn(service, current)
+      self.assertNotIn(method, current)

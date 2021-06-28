@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Toolchain-related operations."""
-
-from __future__ import print_function
 
 import collections
 
@@ -17,8 +14,9 @@ from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import cros_logging as logging
 from chromite.lib import toolchain_util
+from chromite.lib import chroot_util
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
-
+from chromite.scripts import tricium_cargo_clippy
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
 _TOOLCHAIN_ARTIFACT_HANDLERS = {
@@ -40,8 +38,7 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
                   toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
     BuilderConfig.Artifacts.CHROME_DEBUG_BINARY:
-        _Handlers('ChromeDebugBinary',
-                  toolchain_util.PrepareForBuild,
+        _Handlers('ChromeDebugBinary', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
     BuilderConfig.Artifacts.UNVERIFIED_CHROME_BENCHMARK_PERF_FILE:
         _Handlers('UnverifiedChromeBenchmarkPerfFile',
@@ -79,6 +76,11 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
     BuilderConfig.Artifacts.COMPILER_RUSAGE_LOG:
         _Handlers('CompilerRusageLogs', toolchain_util.PrepareForBuild,
                   toolchain_util.BundleArtifacts),
+}
+
+_TOOLCHAIN_COMMIT_HANDLERS = {
+    BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE:
+        'VerifiedKernelCwpAfdoFile'
 }
 
 
@@ -161,9 +163,9 @@ def PrepareForBuild(input_proto, output_proto, _config):
     # Unknown artifact_types are an error.
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
     if handler.prepare:
-      results.add(handler.prepare(
-          handler.name, chroot, sysroot_path, build_target, input_artifacts,
-          profile_info))
+      results.add(
+          handler.prepare(handler.name, chroot, sysroot_path, build_target,
+                          input_artifacts, profile_info))
 
   # Translate the returns from the handlers we called.
   #   If any NEEDED => NEEDED
@@ -219,15 +221,62 @@ def BundleArtifacts(input_proto, output_proto, _config):
       return controller.RETURN_CODE_UNRECOVERABLE
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
     if handler and handler.bundle:
-      artifacts = handler.bundle(
-          handler.name, chroot, input_proto.sysroot.path,
-          input_proto.sysroot.build_target.name, input_proto.output_dir,
-          profile_info)
+      artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
+                                 input_proto.sysroot.build_target.name,
+                                 input_proto.output_dir, profile_info)
       if artifacts:
         art_info = output_proto.artifacts_info.add()
         art_info.artifact_type = artifact_type
         for artifact in artifacts:
           art_info.artifacts.add().path = artifact
+
+
+def _GetUpdatedFilesResponse(_input_proto, output_proto, _config):
+  """Add successful status to the faux response."""
+  file_info = output_proto.updated_files.add()
+  file_info.path = '/any/modified/file'
+  output_proto.commit_message = 'Commit message'
+
+
+@faux.empty_error
+@faux.success(_GetUpdatedFilesResponse)
+@validate.require('uploaded_artifacts')
+@validate.validation_complete
+def GetUpdatedFiles(input_proto, output_proto, _config):
+  """Use uploaded artifacts to update some updates in a chromeos checkout.
+
+  The function will call toolchain_util.GetUpdatedFiles using the type of
+  uploaded artifacts to make some changes in a checkout, and return the list
+  of change files together with commit message.
+     updated_artifacts: A list of UpdatedArtifacts type which contains a tuple
+        of artifact info and profile info.
+  Note: the actual creation of the commit is done by CI, not here.
+
+  Args:
+    input_proto (GetUpdatedFilesRequest): The input proto
+    output_proto (GetUpdatedFilesResponse): The output proto
+    _config (api_config.ApiConfig): The API call config.
+  """
+  commit_message = ''
+  for artifact in input_proto.uploaded_artifacts:
+    artifact_type = artifact.artifact_info.artifact_type
+    if artifact_type not in _TOOLCHAIN_COMMIT_HANDLERS:
+      logging.error('%s not understood', artifact_type)
+      return controller.RETURN_CODE_UNRECOVERABLE
+    artifact_name = _TOOLCHAIN_COMMIT_HANDLERS[artifact_type]
+    if artifact_name:
+      assert len(artifact.artifact_info.artifacts) == 1, (
+          'Only one file to update per each artifact')
+      updated_files, message = toolchain_util.GetUpdatedFiles(
+          artifact_name, artifact.artifact_info.artifacts[0].path,
+          _GetProfileInfoDict(artifact.profile_info))
+      for f in updated_files:
+        file_info = output_proto.updated_files.add()
+        file_info.path = f
+
+      commit_message += message + '\n'
+    output_proto.commit_message = commit_message
+    # No commit footer is added for now. Can add more here if needed
 
 
 # TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
@@ -236,6 +285,7 @@ _NAMES_FOR_AFDO_ARTIFACTS = {
     toolchain_pb2.KERNEL_AFDO: 'kernel_afdo',
     toolchain_pb2.CHROME_AFDO: 'chrome_afdo'
 }
+
 
 # TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
 # Using a function instead of a dict because we need to mock these
@@ -297,3 +347,43 @@ def UploadVettedAFDOArtifacts(input_proto, output_proto, _config):
   artifact_type = _NAMES_FOR_AFDO_ARTIFACTS[input_proto.artifact_type]
   output_proto.status = toolchain_util.UploadAndPublishVettedAFDOArtifacts(
       artifact_type, board)
+
+
+def _fetch_clippy_lints():
+  """Get lints created by Cargo Clippy during emerge."""
+  lints_dir = '/tmp/cargo_clippy'
+  # TODO(b/188578936): determine relevant files for file filter
+  file_filter = '/**/*'
+  findings = tricium_cargo_clippy.parse_files(lints_dir)
+  findings = tricium_cargo_clippy.filter_diagnostics(findings, file_filter)
+  findings_protos = []
+  for finding in findings:
+    location_protos = []
+    for location in finding.locations:
+      location_protos.append(
+          toolchain_pb2.LinterFindingLocation(
+              filepath=location.file_path,
+              line_start=location.line_start,
+              line_end=location.line_end
+          )
+      )
+    findings_protos.append(
+        toolchain_pb2.LinterFinding(
+            message=finding.message,
+            locations=location_protos
+        )
+    )
+  return findings_protos
+
+
+# TODO(b/188589668): add input validation
+def GetClippyLints(input_proto, output_proto, _config):
+  """Emerges the given packages and retrieves any findings from Cargo Clippy."""
+  chroot_util.Emerge(
+      [package.package_name for package in input_proto.packages],
+      sysroot=input_proto.sysroot.path,
+      with_deps=False,
+      rebuild_deps=True,
+      # TODO(b/188590586): consider setting jobs to emerge in parallel
+  )
+  output_proto.findings.extend(_fetch_clippy_lints())

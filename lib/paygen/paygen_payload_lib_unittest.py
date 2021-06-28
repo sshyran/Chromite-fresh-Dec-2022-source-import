@@ -1,24 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test paygen_payload_lib library."""
 
-from __future__ import print_function
-
 import json
 import os
 import shutil
 import subprocess
 import tempfile
+from unittest import mock
 
-import mock
-
-from chromite.lib import dlc_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib.paygen import download_cache
@@ -28,6 +24,7 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -136,7 +133,8 @@ class PaygenPayloadLibTest(cros_test_lib.RunCommandTempDirTestCase):
 class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
   """PaygenPayloadLib basic (and quick) testing."""
 
-  def _GetStdGenerator(self, work_dir=None, payload=None, sign=True):
+  def _GetStdGenerator(self, work_dir=None, payload=None, sign=True,
+                       minios=False):
     """Helper function to create a standardized PayloadGenerator."""
     if payload is None:
       payload = self.full_payload
@@ -148,7 +146,8 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
         payload=payload,
         work_dir=work_dir,
         sign=sign,
-        verify=False)
+        verify=False,
+        minios=minios)
 
     gen.partition_names = ('foo-root', 'foo-kernel')
     gen.tgt_partitions = ('/work/tgt_root.bin', '/work/tgt_kernel.bin')
@@ -376,7 +375,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     self.PatchObject(partition_lib, 'LookupImageType',
                      return_value=partition_lib.CROS_IMAGE)
     platform_params_mock = self.PatchObject(gen, '_GetPlatformImageParams',
-                                            return_value='foo-appid')
+                                            return_value=('foo-appid', None))
     root_ext_mock = self.PatchObject(partition_lib, 'ExtractRoot')
     kern_ext_mock = self.PatchObject(partition_lib, 'ExtractKernel')
     postinst_mock = self.PatchObject(gen, '_GeneratePostinstConfig')
@@ -387,8 +386,10 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     # Check the appid was correctly set.
     self.assertEqual(gen._appid, 'foo-appid')
     # Check extract partition functions are called correctly.
-    root_ext_mock(gen.tgt_image_file, gen.tgt_partitions[0])
-    kern_ext_mock(gen.tgt_image_file, gen.tgt_partitions[1])
+    root_ext_mock.assert_called_once_with(
+        tgt_image_file, gen.tgt_partitions[0])
+    kern_ext_mock.assert_called_once_with(
+        tgt_image_file, gen.tgt_partitions[1])
     # Checks that postinstall config file was generated.
     postinst_mock.assert_called_once_with(True)
     # Checks we mounted the image and read the lsb-release file correctly.
@@ -408,7 +409,8 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     # Mock out needed functions.
     self.PatchObject(partition_lib, 'LookupImageType',
                      return_value=partition_lib.CROS_IMAGE)
-    self.PatchObject(gen, '_GetPlatformImageParams', return_value='foo-appid')
+    self.PatchObject(gen, '_GetPlatformImageParams',
+                     return_value=('foo-appid', None))
     root_ext_mock = self.PatchObject(partition_lib, 'ExtractRoot')
     kern_ext_mock = self.PatchObject(partition_lib, 'ExtractKernel')
 
@@ -437,6 +439,55 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     self.assertEqual(gen.partition_names, ('dlc/foo-id/foo-package',))
     self.assertFalse(postinst_mock.called)
     get_params_mock.assert_called_once()
+
+  def testPreparePartitionsMiniOSFull(self):
+    """Tests _PreparePartitions function for only the MiniOS partition.
+
+    This test is for full payloads only.
+    """
+    gen = self._GetStdGenerator(payload=self.full_payload,
+                                work_dir=self.tempdir, minios=True)
+    # Mock out needed functions.
+    self.PatchObject(partition_lib, 'LookupImageType',
+                    return_value=partition_lib.CROS_IMAGE)
+    params_mock = self.PatchObject(gen,'_GetPlatformImageParams',
+                                   return_value=('foo-appid_minios', None))
+    minios_ext_mock = self.PatchObject(partition_lib, 'ExtractMiniOS')
+    tgt_image_file = gen.tgt_image_file
+    gen._PreparePartitions()
+    # Check the appid was correctly set.
+    self.assertEqual(gen._appid, 'foo-appid_minios')
+    # Check extract partition function is called correctly.
+    self.assertEqual(len(gen.tgt_partitions), 1)
+    minios_ext_mock.assert_called_once_with(
+        tgt_image_file, gen.tgt_partitions[0])
+    # Checks we mounted the image and read the lsb-release file correctly.
+    params_mock.assert_called_once_with(tgt_image_file)
+    # Make sure the tgt_image_file variable is set to None so no one can use it
+    # again.
+    self.assertIsNone(gen.tgt_image_file)
+
+
+  def testPreparePartitionsMiniOSDelta(self):
+    """Tests _PreparePartitions function for only the MiniOS partition.
+
+    This test is for delta payloads only.
+    """
+    gen = self._GetStdGenerator(payload=self.delta_payload,
+                              work_dir=self.tempdir, minios=True)
+    # Mock out needed functions.
+    self.PatchObject(partition_lib, 'LookupImageType',
+                     return_value=partition_lib.CROS_IMAGE)
+    self.PatchObject(gen, '_GetPlatformImageParams',
+                     return_value=('foo-appid', '6'))
+
+    minios_ext_mock = self.PatchObject(partition_lib, 'ExtractMiniOS')
+
+    gen._PreparePartitions()
+    # Check extract partition functions are called correctly. Two times each
+    # partition once for source partition and once for target partition.
+    self.assertEqual(minios_ext_mock.call_count, 2)
+
 
   def _TestGetDlcImageParams(self, tgt_id, tgt_package):
     """Utility function for Testing _GetDlcImageParams."""
@@ -514,6 +565,31 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
            '--partition_names=' + ':'.join(gen.partition_names),
            '--new_partitions=' + ':'.join(gen.tgt_partitions),
            '--old_partitions=' + ':'.join(gen.src_partitions)]
+    run_mock.assert_called_once_with(cmd, squawk_wrap=True)
+
+  def testGenerateUnsignedPayloadMiniOSDelta(self):
+    """Test _GenerateUnsignedPayload with MiniOS delta payload."""
+    gen = self._GetStdGenerator(payload=self.delta_payload,
+                                work_dir=self.tempdir, minios=True)
+
+    # Stub out the required functions.
+    run_mock = self.PatchObject(gen, '_RunGeneratorCmd')
+    self.PatchObject(gen, '_GetPlatformImageParams',
+                     return_value=('foo-appid_minios', '6'))
+
+    # Run the test.
+    _,gen._minor_version = gen._GetPlatformImageParams(gen.tgt_image_file)
+    gen._GenerateUnsignedPayload()
+
+    # Check the expected function calls.
+    cmd = ['delta_generator',
+           '--major_version=2',
+           '--out_file=' + gen.payload_file,
+           '--partition_names=' + ':'.join(gen.partition_names),
+           '--new_partitions=' + ':'.join(gen.tgt_partitions),
+           '--old_partitions=' + ':'.join(gen.src_partitions),
+           '--minor_version=' + gen._minor_version]
+
     run_mock.assert_called_once_with(cmd, squawk_wrap=True)
 
   def testGenerateHashes(self):
@@ -869,12 +945,12 @@ class PaygenPayloadLibEndToEndTest(PaygenPayloadLibTest):
     self.assertEqual(os.path.exists(output_metadata_uri), sign)
     self.assertExists(output_metadata_json)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testEndToEndIntegrationFull(self):
     """Integration test to generate a full payload for old_image."""
     self._EndToEndIntegrationTest(self.old_image, None, sign=True)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testEndToEndIntegrationDelta(self):
     """Integration test to generate a delta payload for N -> N."""
     self._EndToEndIntegrationTest(self.new_image, self.new_image, sign=False)

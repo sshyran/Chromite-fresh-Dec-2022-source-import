@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,23 +8,21 @@ CIPD is the Chrome Infra Package Deployer, a simple method of resolving a
 package/version into a GStorage link and installing them.
 """
 
-from __future__ import print_function
-
 import hashlib
 import json
 import os
 import pprint
 import tempfile
+import urllib.parse
 
-import httplib2
-from six.moves import urllib
-
-import chromite.lib.cros_logging as log
 from chromite.lib import cache
+from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import cros_build_lib
+import chromite.lib.cros_logging as log
+from chromite.third_party import httplib2
 from chromite.utils import memoize
+
 
 # pylint: disable=line-too-long
 # CIPD client to download.
@@ -176,7 +173,8 @@ def InstallPackage(cipd_path, package, version, destination,
   Args:
     cipd_path: The path to a cipd executable. GetCIPDFromCache can give this.
     package: A package name.
-    version: The CIPD version of the package to install (can be instance ID or a ref).
+    version: The CIPD version of the package to install (can be instance ID or a
+        ref).
     destination: The folder to install the package under.
     service_account_json: The path of the service account credentials.
 

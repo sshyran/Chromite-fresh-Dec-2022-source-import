@@ -11,18 +11,18 @@ import re
 import socket
 import time
 
-import httplib2
-import oauth2client.client
-import six
-from six.moves import http_client as httplib
+from chromite.third_party import httplib2
+from chromite.third_party.oauth2client import client
+from chromite.third_party import six
+from chromite.third_party.six.moves import http_client as httplib
 
-from googleapiclient import errors
-from infra_libs.ts_mon.common import http_metrics
+from chromite.third_party.googleapiclient import errors
+from chromite.third_party.infra_libs.ts_mon.common import http_metrics
 
 # TODO(nxia): crbug.com/790760 upgrade oauth2client to 4.1.2.
 oauth2client_util_imported = False
 try:
-  from oauth2client import util
+  from chromite.third_party.oauth2client import util
   oauth2client_util_imported = True
 except ImportError:
   pass
@@ -36,8 +36,7 @@ class AuthError(Exception):
   pass
 
 
-class DelegateServiceAccountCredentials(
-    oauth2client.client.AssertionCredentials):
+class DelegateServiceAccountCredentials(client.AssertionCredentials):
   """Authorizes an HTTP client with a service account for which we are an actor.
 
   This class uses the IAM API to sign a JWT with the private key of another
@@ -110,7 +109,7 @@ class DelegateServiceAccountCredentials(
     return assertion_input + b'.' + signature
 
   def _urlsafe_b64encode(self, data):
-    # Copied verbatim from oauth2client.service_account.
+    # Copied verbatim from chromite.third_party.oauth2client.service_account.
     return base64.urlsafe_b64encode(
         json.dumps(data, separators=(',', ':')).encode('UTF-8')).rstrip(b'=')
 

@@ -1,18 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for the deploy_chrome script."""
 
-from __future__ import print_function
-
 import errno
 import os
-import sys
 import time
-
-import mock
+from unittest import mock
 
 from chromite.cli.cros import cros_chrome_sdk_unittest
 from chromite.lib import chrome_util
@@ -24,9 +19,6 @@ from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
 from chromite.scripts import deploy_chrome
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
@@ -51,6 +43,24 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
                          list(_REGULAR_TO) + ['--board', _TARGET_BOARD],
                          check_attrs={'code': 2})
 
+  def testBuildDirSpecified(self):
+    """Test case of build dir specified."""
+    argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--build-dir',
+                                '/path/to/chrome']
+    _ParseCommandLine(argv)
+
+  def testBuildDirSpecifiedWithoutBoard(self):
+    """Test case of build dir specified without --board."""
+    argv = list(_REGULAR_TO) + [
+        '--build-dir', '/path/to/chrome/out_' + _TARGET_BOARD + '/Release']
+    options = _ParseCommandLine(argv)
+    self.assertEqual(options.board, _TARGET_BOARD)
+
+  def testBuildDirSpecifiedWithoutBoardError(self):
+    """Test case of irregular build dir specified without --board."""
+    argv = list(_REGULAR_TO) + ['--build-dir', '/path/to/chrome/foo/bar']
+    self.assertParseError(argv)
+
   def testGsPathSpecified(self):
     """Test case of GS path specified."""
     argv = list(_REGULAR_TO) + ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
@@ -62,15 +72,14 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
                                 '/path/to/chrome']
     _ParseCommandLine(argv)
 
+  def testNoBoard(self):
+    """Test no board specified."""
+    argv = list(_REGULAR_TO) + ['--gs-path', _GS_PATH]
+    self.assertParseError(argv)
+
   def testNoTarget(self):
     """Test no target specified."""
     argv = ['--board', _TARGET_BOARD, '--gs-path', _GS_PATH]
-    self.assertParseError(argv)
-
-  def testToAndDevice(self):
-    """Test no target specified."""
-    argv = ['--board', _TARGET_BOARD, '--build-dir', '/path/to/nowhere',
-            '--to', 'localhost', '--device', 'localhost']
     self.assertParseError(argv)
 
   def testLacros(self):
@@ -174,9 +183,8 @@ class DeployTest(cros_test_lib.MockTempDirTestCase):
     self.deploy = self._GetDeployChrome(list(_REGULAR_TO) +
                                         ['--board', _TARGET_BOARD, '--gs-path',
                                          _GS_PATH, '--force', '--mount'])
-    self.remote_reboot_mock = \
-      self.PatchObject(remote_access.RemoteAccess, 'RemoteReboot',
-                       return_value=True)
+    self.remote_reboot_mock = self.PatchObject(
+        remote_access.RemoteAccess, 'RemoteReboot', return_value=True)
 
 
 class TestCheckIfBoardMatches(DeployTest):

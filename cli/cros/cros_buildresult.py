@@ -1,25 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """cros buildresult: Look up results for a single build."""
 
-from __future__ import print_function
-
 import datetime
 import json
 import os
-import sys
 
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib.buildstore import BuildStore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _FINISHED_STATUSES = (
@@ -148,9 +141,9 @@ Look up a single build result:
   cros buildresult --buildbucket-id 1234567890123
 
 Look up results by build config name:
-  cros buildresult --build-config samus-pre-cq
-  cros buildresult --build-config samus-pre-cq --date 2018-1-2
-  cros buildresult --build-config samus-pre-cq \
+  cros buildresult --build-config hatch-pre-cq
+  cros buildresult --build-config hatch-pre-cq --date 2018-1-2
+  cros buildresult --build-config hatch-pre-cq \
       --start-date 2018-1-2 --end-date 2018-1-7
 
 Output can be json formatted with:

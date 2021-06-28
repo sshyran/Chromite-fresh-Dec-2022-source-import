@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,15 +17,10 @@ Returns chromeos-base/android-container-pi-6417892-r1
 emerge-eve =chromeos-base/android-container-pi-6417892-r1
 """
 
-from __future__ import print_function
-
 import filecmp
 import glob
 import json
 import os
-import re
-import time
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -34,11 +28,11 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import repo_util
 from chromite.scripts import cros_mark_as_stable
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.service import android
 
 
 # Dir where all the action happens.
@@ -52,113 +46,6 @@ TEST=CQ
 """
 
 _RUNTIME_ARTIFACTS_BUCKET_URL = 'gs://chromeos-arc-images/runtime_artifacts'
-
-def IsBuildIdValid(bucket_url, build_branch, build_id, targets):
-  """Checks that a specific build_id is valid.
-
-  Looks for that build_id for all builds. Confirms that the subpath can
-  be found and that the zip file is present in that subdirectory.
-
-  Args:
-    bucket_url: URL of Android build gs bucket
-    build_branch: branch of Android builds
-    build_id: A string. The Android build id number to check.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
-
-  Returns:
-    Returns subpaths dictionary if build_id is valid.
-    None if the build_id is not valid.
-  """
-  gs_context = gs.GSContext()
-  subpaths_dict = {}
-  for build, (target, _) in targets.items():
-    build_dir = '%s-%s' % (build_branch, target)
-    build_id_path = os.path.join(bucket_url, build_dir, build_id)
-
-    # Find name of subpath.
-    try:
-      subpaths = gs_context.List(build_id_path)
-    except gs.GSNoSuchKey:
-      logging.warning(
-          'Directory [%s] does not contain any subpath, ignoring it.',
-          build_id_path)
-      return None
-    if len(subpaths) > 1:
-      logging.warning(
-          'Directory [%s] contains more than one subpath, ignoring it.',
-          build_id_path)
-      return None
-
-    subpath_dir = subpaths[0].url.rstrip('/')
-    subpath_name = os.path.basename(subpath_dir)
-
-    # Look for a zipfile ending in the build_id number.
-    try:
-      gs_context.List(subpath_dir)
-    except gs.GSNoSuchKey:
-      logging.warning(
-          'Did not find a file for build id [%s] in directory [%s].',
-          build_id, subpath_dir)
-      return None
-
-    # Record subpath for the build.
-    subpaths_dict[build] = subpath_name
-
-  # If we got here, it means we found an appropriate build for all platforms.
-  return subpaths_dict
-
-
-def GetLatestBuild(bucket_url, build_branch, targets):
-  """Searches the gs bucket for the latest green build.
-
-  Args:
-    bucket_url: URL of Android build gs bucket
-    build_branch: branch of Android builds
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
-
-  Returns:
-    Tuple of (latest version string, subpaths dictionary)
-    If no latest build can be found, returns None, None
-  """
-  gs_context = gs.GSContext()
-  common_build_ids = None
-  # Find builds for each target.
-  for target, _ in targets.values():
-    build_dir = '-'.join((build_branch, target))
-    base_path = os.path.join(bucket_url, build_dir)
-    build_ids = []
-    for gs_result in gs_context.List(base_path):
-      # Remove trailing slashes and get the base name, which is the build_id.
-      build_id = os.path.basename(gs_result.url.rstrip('/'))
-      if not build_id.isdigit():
-        logging.warning('Directory [%s] does not look like a valid build_id.',
-                        gs_result.url)
-        continue
-      build_ids.append(build_id)
-
-    # Update current list of builds.
-    if common_build_ids is None:
-      # First run, populate it with the first platform.
-      common_build_ids = set(build_ids)
-    else:
-      # Already populated, find the ones that are common.
-      common_build_ids.intersection_update(build_ids)
-
-  if common_build_ids is None:
-    logging.warning('Did not find a build_id common to all platforms.')
-    return None, None
-
-  # Otherwise, find the most recent one that is valid.
-  for build_id in sorted(common_build_ids, key=int, reverse=True):
-    subpaths = IsBuildIdValid(bucket_url, build_branch, build_id, targets)
-    if subpaths:
-      return build_id, subpaths
-
-  # If not found, no build_id is valid.
-  logging.warning('Did not find a build_id valid on all platforms.')
-  return None, None
 
 
 def FindAndroidCandidates(package_dir):
@@ -189,204 +76,6 @@ def FindAndroidCandidates(package_dir):
     logging.warning('Missing stable ebuild for %s', package_dir)
 
   return portage_util.BestEBuild(unstable_ebuilds), stable_ebuilds
-
-
-def _GetArcBasename(build, basename):
-  """Tweaks filenames between Android bucket and ARC++ bucket.
-
-  Android builders create build artifacts with the same name for -user and
-  -userdebug builds, which breaks the android-container ebuild (b/33072485).
-  When copying the artifacts from the Android bucket to the ARC++ bucket some
-  artifacts will be renamed from the usual pattern
-  *cheets_${ARCH}-target_files-S{VERSION}.zip to
-  cheets_${BUILD_NAME}-target_files-S{VERSION}.zip which will typically look
-  like cheets_(${LABEL})*${ARCH}_userdebug-target_files-S{VERSION}.zip.
-
-  Args:
-    build: the build being mirrored, e.g. 'X86', 'ARM', 'X86_USERDEBUG'.
-    basename: the basename of the artifact to copy.
-
-  Returns:
-    The basename of the destination.
-  """
-  if build not in constants.ARC_BUILDS_NEED_ARTIFACTS_RENAMED:
-    return basename
-  if basename in constants.ARC_ARTIFACTS_RENAME_NOT_NEEDED:
-    return basename
-  to_discard, sep, to_keep = basename.partition('-')
-  if not sep:
-    logging.error(('Build %s: Could not find separator "-" in artifact'
-                   ' basename %s'), build, basename)
-    return basename
-  if 'cheets_' in to_discard:
-    return 'cheets_%s-%s' % (build.lower(), to_keep)
-  elif 'bertha_' in to_discard:
-    return 'bertha_%s-%s' % (build.lower(), to_keep)
-  logging.error('Build %s: Unexpected artifact basename %s',
-                build, basename)
-  return basename
-
-
-def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
-                    targets, arc_bucket_url, acls):
-  """Copies from source Android bucket to ARC++ specific bucket.
-
-  Copies each build to the ARC bucket eliminating the subpath.
-  Applies build specific ACLs for each file.
-
-  Args:
-    android_bucket_url: URL of Android build gs bucket
-    build_branch: branch of Android builds
-    build_id: A string. The Android build id number to check.
-    subpaths: Subpath dictionary for each build to copy.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
-    arc_bucket_url: URL of the target ARC build gs bucket
-    acls: ACLs dictionary for each build to copy.
-  """
-  gs_context = gs.GSContext()
-  for build, subpath in subpaths.items():
-    target, pattern = targets[build]
-    build_dir = '%s-%s' % (build_branch, target)
-    android_dir = os.path.join(android_bucket_url, build_dir, build_id, subpath)
-    arc_dir = os.path.join(arc_bucket_url, build_dir, build_id)
-
-    # Copy all target files from android_dir to arc_dir, setting ACLs.
-    for targetfile in gs_context.List(android_dir):
-      if re.search(pattern, targetfile.url):
-        basename = os.path.basename(targetfile.url)
-        arc_path = os.path.join(arc_dir, _GetArcBasename(build, basename))
-        acl = acls[build]
-        needs_copy = True
-        retry_count = 2
-
-        # Retry in case race condition when several boards trying to copy the
-        # same resource
-        while True:
-          # Check a pre-existing file with the original source.
-          if gs_context.Exists(arc_path):
-            if (gs_context.Stat(targetfile.url).hash_crc32c !=
-                gs_context.Stat(arc_path).hash_crc32c):
-              logging.warning('Removing incorrect file %s', arc_path)
-              gs_context.Remove(arc_path)
-            else:
-              logging.info('Skipping already copied file %s', arc_path)
-              needs_copy = False
-
-          # Copy if necessary, and set the ACL unconditionally.
-          # The Stat() call above doesn't verify the ACL is correct and
-          # the ChangeACL should be relatively cheap compared to the copy.
-          # This covers the following caes:
-          # - handling an interrupted copy from a previous run.
-          # - rerunning the copy in case one of the googlestorage_acl_X.txt
-          #   files changes (e.g. we add a new variant which reuses a build).
-          if needs_copy:
-            logging.info('Copying %s -> %s (acl %s)',
-                         targetfile.url, arc_path, acl)
-            try:
-              gs_context.Copy(targetfile.url, arc_path, version=0)
-            except gs.GSContextPreconditionFailed as error:
-              if not retry_count:
-                raise error
-              # Retry one more time after a short delay
-              logging.warning('Will retry copying %s -> %s',
-                              targetfile.url, arc_path)
-              time.sleep(5)
-              retry_count = retry_count - 1
-              continue
-          gs_context.ChangeACL(arc_path, acl_args_file=acl)
-          break
-
-
-def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
-                    acls, targets, version=None):
-  """Mirrors artifacts from Android bucket to ARC bucket.
-
-  First, this function identifies which build version should be copied,
-  if not given. Please see GetLatestBuild() and IsBuildIdValid() for details.
-
-  On build version identified, then copies target artifacts to the ARC bucket,
-  with setting ACLs.
-
-  Args:
-    android_bucket_url: URL of Android build gs bucket
-    android_build_branch: branch of Android builds
-    arc_bucket_url: URL of the target ARC build gs bucket
-    acls: ACLs dictionary for each build to copy.
-    targets: Dict from build key to (targe build suffix, artifact file pattern)
-        pair.
-    version: (optional) A string. The Android build id number to check.
-        If not passed, detect latest good build version.
-
-  Returns:
-    Mirrored version.
-  """
-  if version:
-    subpaths = IsBuildIdValid(
-        android_bucket_url, android_build_branch, version, targets)
-    if not subpaths:
-      logging.error('Requested build %s is not valid', version)
-  else:
-    version, subpaths = GetLatestBuild(
-        android_bucket_url, android_build_branch, targets)
-
-  CopyToArcBucket(android_bucket_url, android_build_branch, version, subpaths,
-                  targets, arc_bucket_url, acls)
-
-  return version
-
-
-def MakeAclDict(package_dir):
-  """Creates a dictionary of acl files for each build type.
-
-  Args:
-    package_dir: The path to where the package acl files are stored.
-
-  Returns:
-    Returns acls dictionary.
-  """
-  return dict(
-      (k, os.path.join(package_dir, v))
-      for k, v in constants.ARC_BUCKET_ACLS.items()
-  )
-
-
-def MakeBuildTargetDict(package_name, build_branch):
-  """Creates a dictionary of build targets.
-
-  Not all targets are common between branches, for example
-  sdk_google_cheets_x86 only exists on N.
-  This generates a dictionary listing the available build targets for a
-  specific branch.
-
-  Args:
-    package_name: package name of chromeos arc package.
-    build_branch: branch of Android builds.
-
-  Returns:
-    Returns build target dictionary.
-
-  Raises:
-    ValueError: if the Android build branch is invalid.
-  """
-  if constants.ANDROID_CONTAINER_PACKAGE_KEYWORD in package_name:
-    target_list = {
-        constants.ANDROID_PI_BUILD_BRANCH:
-        constants.ANDROID_PI_BUILD_TARGETS,
-    }
-  elif constants.ANDROID_VM_PACKAGE_KEYWORD in package_name:
-    target_list = {
-        constants.ANDROID_VMMST_BUILD_BRANCH:
-        constants.ANDROID_VMMST_BUILD_TARGETS,
-        constants.ANDROID_VMRVC_BUILD_BRANCH:
-        constants.ANDROID_VMRVC_BUILD_TARGETS,
-    }
-  else:
-    raise ValueError('Unknown package: %s' % package_name)
-  target = target_list.get(build_branch)
-  if not target:
-    raise ValueError('Unknown branch: %s' % build_branch)
-  return target
 
 
 def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
@@ -521,8 +210,7 @@ def UpdateDataCollectorArtifacts(android_version,
 def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
                               android_package, android_version, package_dir,
                               build_branch, arc_bucket_url,
-                              runtime_artifacts_bucket_url,
-                              build_targets):
+                              runtime_artifacts_bucket_url):
   r"""Uprevs the Android ebuild.
 
   This is the main function that uprevs from a stable candidate
@@ -539,10 +227,12 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     build_branch: branch of Android builds.
     arc_bucket_url: URL of the target ARC build gs bucket.
     runtime_artifacts_bucket_url: root of runtime artifacts
-    build_targets: build targets for this particular Android branch.
 
   Returns:
-    Full portage version atom (including rc's, etc) that was revved.
+    Tuple[str, List[str], List[str]] if revved, or None
+    1. Full portage version atom (including rc's, etc) that was revved.
+    2. List of files to be `git add`ed.
+    3. List of files to be `git rm`ed.
   """
   def IsTheNewEBuildRedundant(new_ebuild, stable_ebuild):
     """Returns True if the new ebuild is redundant.
@@ -567,9 +257,10 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     pf = '%s-%s-r1' % (android_package, android_version)
     new_ebuild_path = os.path.join(package_dir, '%s.ebuild' % pf)
 
+  build_targets = constants.ANDROID_BRANCH_TO_BUILD_TARGETS[build_branch]
   variables = {'BASE_URL': arc_bucket_url}
-  for build, (target, _) in build_targets.items():
-    variables[build + '_TARGET'] = '%s-%s' % (build_branch, target)
+  for var, target in build_targets.items():
+    variables[var] = f'{build_branch}-linux-{target}'
 
   variables.update(UpdateDataCollectorArtifacts(
       android_version, runtime_artifacts_bucket_url, build_branch))
@@ -586,28 +277,53 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     logging.PrintBuildbotStepText('%s %s not revved'
                                   % (stable_candidate.pkgname,
                                      stable_candidate.version))
-    os.unlink(new_ebuild_path)
+    osutils.SafeUnlink(new_ebuild_path)
     return None
 
   # PFQ runs should always be able to find a stable candidate.
   if stable_candidate:
     PrintUprevMetadata(build_branch, stable_candidate, new_ebuild)
 
-  git.RunGit(package_dir, ['add', new_ebuild_path])
+  files_to_add = [new_ebuild_path]
+  files_to_remove = []
   if stable_candidate and not stable_candidate.IsSticky():
-    git.RunGit(package_dir, ['rm', stable_candidate.ebuild_path])
+    osutils.SafeUnlink(stable_candidate.ebuild_path)
+    files_to_remove.append(stable_candidate.ebuild_path)
 
   # Update ebuild manifest and git add it.
   gen_manifest_cmd = ['ebuild', new_ebuild_path, 'manifest', '--force']
   cros_build_lib.run(gen_manifest_cmd, extra_env=None, print_cmd=True)
-  git.RunGit(package_dir, ['add', 'Manifest'])
+  files_to_add.append('Manifest')
 
-  portage_util.EBuild.CommitChange(
-      _GIT_COMMIT_MESSAGE % {'android_package': android_package,
-                             'android_version': android_version},
-      package_dir)
+  return (
+      f'{new_ebuild.package}-{new_ebuild.version}',
+      files_to_add,
+      files_to_remove,
+  )
 
-  return '%s-%s' % (new_ebuild.package, new_ebuild.version)
+
+def _PrepareGitBranch(overlay_dir):
+  """Prepares a git branch for the uprev commit.
+
+  If the overlay project is currently on a branch (e.g. patches are being
+  applied), rebase the new branch on top of it.
+
+  Args:
+    overlay_dir: The overlay directory.
+  """
+  existing_branch = git.GetCurrentBranch(overlay_dir)
+  repo_util.Repository.MustFind(overlay_dir).StartBranch(
+      constants.STABLE_EBUILD_BRANCH, projects=['.'], cwd=overlay_dir)
+  if existing_branch:
+    git.RunGit(overlay_dir, ['rebase', existing_branch])
+
+
+def _CommitChange(message, android_package_dir, files_to_add, files_to_remove):
+  """Commit changes to git with list of files to add/remove."""
+  git.RunGit(android_package_dir, ['add', '--'] + files_to_add)
+  git.RunGit(android_package_dir, ['rm', '--'] + files_to_remove)
+
+  portage_util.EBuild.CommitChange(message, android_package_dir)
 
 
 def GetParser():
@@ -615,14 +331,15 @@ def GetParser():
   parser = commandline.ArgumentParser()
   parser.add_argument('-b', '--boards')
   parser.add_argument('--android_bucket_url',
-                      default=constants.ANDROID_BUCKET_URL,
+                      default=android.ANDROID_BUCKET_URL,
                       type='gs_path')
   parser.add_argument('--android_build_branch',
-                      required=True,
-                      help='Android branch to import from. '
-                           'Ex: git_mnc-dr-arc-dev')
+                      choices=constants.ANDROID_BRANCH_TO_BUILD_TARGETS,
+                      help='Android branch to import from, overriding default')
   parser.add_argument('--android_package',
-                      default=constants.ANDROID_PACKAGE_NAME)
+                      required=True,
+                      choices=constants.ANDROID_ALL_PACKAGES,
+                      help='Android package to uprev')
   parser.add_argument('--arc_bucket_url',
                       default=constants.ARC_BUCKET_URL,
                       type='gs_path')
@@ -631,11 +348,12 @@ def GetParser():
   parser.add_argument('-s', '--srcroot',
                       default=os.path.join(os.environ['HOME'], 'trunk', 'src'),
                       help='Path to the src directory')
-  parser.add_argument('-t', '--tracking_branch', default='cros/master',
-                      help='Branch we are tracking changes against')
   parser.add_argument('--runtime_artifacts_bucket_url',
                       default=_RUNTIME_ARTIFACTS_BUCKET_URL,
                       type='gs_path')
+  parser.add_argument('--skip_commit',
+                      action='store_true',
+                      help='Skip commiting uprev changes to git')
   return parser
 
 
@@ -649,18 +367,19 @@ def main(argv):
   android_package_dir = os.path.join(
       overlay_dir,
       portage_util.GetFullAndroidPortagePackageName(options.android_package))
-  version_to_uprev = None
+
+  # Use default Android branch if not overridden.
+  android_build_branch = (
+      options.android_build_branch or
+      android.GetAndroidBranchForPackage(options.android_package))
 
   (unstable_ebuild, stable_ebuilds) = FindAndroidCandidates(android_package_dir)
-  acls = MakeAclDict(android_package_dir)
-  build_targets = MakeBuildTargetDict(options.android_package,
-                                      options.android_build_branch)
   # Mirror artifacts, i.e., images and some sdk tools (e.g., adb, aapt).
-  version_to_uprev = MirrorArtifacts(options.android_bucket_url,
-                                     options.android_build_branch,
-                                     options.arc_bucket_url, acls,
-                                     build_targets,
-                                     options.force_version)
+  version_to_uprev = android.MirrorArtifacts(options.android_bucket_url,
+                                             android_build_branch,
+                                             options.arc_bucket_url,
+                                             android_package_dir,
+                                             options.force_version)
 
   stable_candidate = portage_util.BestEBuild(stable_ebuilds)
 
@@ -669,24 +388,24 @@ def main(argv):
   else:
     logging.info('No stable candidate found.')
 
-  tracking_branch = 'remotes/m/%s' % os.path.basename(options.tracking_branch)
-  existing_branch = git.GetCurrentBranchOrId(android_package_dir)
-  work_branch = cros_mark_as_stable.GitBranch(constants.STABLE_EBUILD_BRANCH,
-                                              tracking_branch,
-                                              android_package_dir)
-  work_branch.CreateBranch()
+  if not options.skip_commit:
+    _PrepareGitBranch(overlay_dir)
 
-  # In the case of uprevving overlays that have patches applied to them,
-  # include the patched changes in the stabilizing branch.
-  if existing_branch:
-    git.RunGit(overlay_dir, ['rebase', existing_branch])
-
-  android_version_atom = MarkAndroidEBuildAsStable(
+  revved = MarkAndroidEBuildAsStable(
       stable_candidate, unstable_ebuild, options.android_package,
-      version_to_uprev, android_package_dir,
-      options.android_build_branch, options.arc_bucket_url,
-      options.runtime_artifacts_bucket_url, build_targets)
-  if android_version_atom:
+      version_to_uprev, android_package_dir, android_build_branch,
+      options.arc_bucket_url, options.runtime_artifacts_bucket_url)
+
+  if revved:
+    android_version_atom, files_to_add, files_to_remove = revved
+    if not options.skip_commit:
+      _CommitChange(
+          _GIT_COMMIT_MESSAGE % {'android_package': options.android_package,
+                                 'android_version': version_to_uprev},
+          android_package_dir,
+          files_to_add,
+          files_to_remove,
+      )
     if options.boards:
       cros_mark_as_stable.CleanStalePackages(options.srcroot,
                                              options.boards.split(':'),

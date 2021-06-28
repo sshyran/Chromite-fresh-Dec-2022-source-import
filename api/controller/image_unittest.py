@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Image service tests."""
 
-from __future__ import print_function
-
 import os
-
-import mock
+from unittest import mock
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -95,7 +91,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
 
   def testSingleTypeSpecified(self):
     """Test it's properly using a specified type."""
-    request = self._GetRequest(board='board', types=[common_pb2.DEV])
+    request = self._GetRequest(board='board', types=[common_pb2.IMAGE_TYPE_DEV])
 
     # Failed result to avoid the success handling logic.
     result = image_service.BuildResult(1, [])
@@ -108,7 +104,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
   def testMultipleAndImpliedTypes(self):
     """Test multiple types and implied type handling."""
     # The TEST_VM type should force it to build the test image.
-    types = [common_pb2.BASE, common_pb2.TEST_VM]
+    types = [common_pb2.IMAGE_TYPE_BASE, common_pb2.IMAGE_TYPE_TEST_VM]
     expected_images = [constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_TEST]
 
     request = self._GetRequest(board='board', types=types)
@@ -120,6 +116,21 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
     image_controller.Create(request, self.response, self.api_config)
     build_patch.assert_called_with(
         images=expected_images, board='board', config=mock.ANY)
+
+  def testRecoveryImpliedTypes(self):
+    """Test implied type handling of recovery images."""
+    # The TEST_VM type should force it to build the test image.
+    types = [common_pb2.IMAGE_TYPE_RECOVERY]
+
+    request = self._GetRequest(board='board', types=types)
+
+    # Failed result to avoid the success handling logic.
+    result = image_service.BuildResult(1, [])
+    build_patch = self.PatchObject(image_service, 'Build', return_value=result)
+
+    image_controller.Create(request, self.response, self.api_config)
+    build_patch.assert_called_with(
+        images=[constants.IMAGE_TYPE_BASE], board='board', config=mock.ANY)
 
   def testFailedPackageHandling(self):
     """Test failed packages are populated correctly."""

@@ -1,25 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Device-related helper functions/classes."""
 
-from __future__ import print_function
-
 import argparse
 import os
 import subprocess
-import sys
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class DeviceError(Exception):

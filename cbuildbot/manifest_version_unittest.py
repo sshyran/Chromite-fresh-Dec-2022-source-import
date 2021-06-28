@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for manifest_version. Needs to be run inside of chroot."""
 
-from __future__ import print_function
-
 import os
-import sys
 import tempfile
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import build_status
 from chromite.cbuildbot import manifest_version
@@ -23,9 +18,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_VERSION = """

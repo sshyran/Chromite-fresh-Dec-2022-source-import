@@ -21,8 +21,8 @@ import threading
 
 import keyring
 
-from oauth2client.client import Credentials
-from oauth2client.client import Storage as BaseStorage
+from .client import Credentials
+from .client import Storage as BaseStorage
 
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
@@ -44,7 +44,7 @@ class Storage(BaseStorage):
 
     Usage::
 
-        from oauth2client.keyring_storage import Storage
+        from .keyring_storage import Storage
 
         s = Storage('name_of_application', 'user1')
         credentials = s.get()

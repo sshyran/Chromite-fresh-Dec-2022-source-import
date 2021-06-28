@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Fake CIDB for unit testing."""
 
-from __future__ import print_function
-
 import datetime
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cidb
 from chromite.lib import failure_message_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class FakeCIDBConnection(object):

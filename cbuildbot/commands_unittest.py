@@ -1,33 +1,28 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for commands."""
 
-from __future__ import print_function
-
 import base64
 import collections
 import datetime as dt
-import json
 import hashlib
+import json
 import os
 import struct
 import subprocess
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.lib import config_lib
-from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
 from chromite.lib import chroot_lib
+from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import failures_lib
 from chromite.lib import gob_util
 from chromite.lib import osutils
 from chromite.lib import partial_mock
@@ -36,11 +31,7 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import pushimage
-
 from chromite.service import artifacts as artifacts_service
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RunBuildScriptTest(cros_test_lib.RunCommandTempDirTestCase):
@@ -261,7 +252,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         quota_account=quota_account, max_retries=max_retries,
         timeout_mins=timeout_mins)
 
-    self.assertTrue(isinstance(result, commands.HWTestSuiteResult))
+    self.assertIsInstance(result, commands.HWTestSuiteResult)
     self.assertEqual(result.to_raise, None)
     self.assertEqual(result.json_dump_result, None)
 
@@ -337,7 +328,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         build, suite, board, pool=pool, timeout_mins=None,
         wait_for_results=True)
     error = result.to_raise
-    self.assertTrue(isinstance(error, failures_lib.TestFailure))
+    self.assertIsInstance(error, failures_lib.TestFailure)
     self.assertIn('Suite failed', str(error))
     self.assertIn(board, str(error))
 
@@ -378,7 +369,7 @@ class SkylabHWLabCommandsTest(cros_test_lib.RunCommandTestCase):
         test_plan=test_plan, build=build, pool=pool,
         quota_account=quota_account, board=board, model=model,
         timeout_mins=timeout_mins, keyvals=keyvals, legacy_suite=suite)
-    self.assertTrue(isinstance(result, commands.HWTestSuiteResult))
+    self.assertIsInstance(result, commands.HWTestSuiteResult)
     self.assertEqual(result.to_raise, None)
     self.assertEqual(result.json_dump_result, None)
 
@@ -1199,7 +1190,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
     chrome_lkgm = b'3322.0.0'
     url = '%s/+/%s/%s?format=text' % (
         constants.CHROMIUM_SRC_PROJECT,
-        chrome_revision or 'refs/heads/master',
+        chrome_revision or 'HEAD',
         constants.PATH_TO_CHROME_LKGM)
     site_params = config_lib.GetSiteParams()
     with mock.patch.object(
@@ -1726,7 +1717,7 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
     tarred_files = [os.path.join('logs', x) for x in log_files]
-    board = 'samus'
+    board = 'hatch'
     log_files_root = os.path.join(self.tempdir,
                                   'chroot/build/%s/tmp/portage/logs' % board)
     # Generate a representative set of log files produced by a typical build.
@@ -1755,7 +1746,7 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
 
-    board = 'samus'
+    board = 'hatch'
     # Create a malformed directory name.
     log_files_root = os.path.join(self.tempdir,
                                   '%s/tmp/portage/wrong_dir_name' % board)
@@ -1925,7 +1916,6 @@ class MarkAndroidAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test input and success handling."""
     # Raw arguments for the function.
     buildroot = '/buildroot'
-    tracking_branch = 'refs/tracking'
     android_package = 'android/android-1.0-r1'
     android_build_branch = 'refs/build'
     boards = ['foo', 'bar']
@@ -1940,14 +1930,13 @@ class MarkAndroidAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
         return_value={'status': 1, 'android_atom': response_package})
 
     new_atom = commands.MarkAndroidAsStable(
-        buildroot, tracking_branch, android_package, android_build_branch,
+        buildroot, android_package, android_build_branch,
         boards=boards, android_version=android_version)
 
     # Make sure the atom is rebuilt correctly from the package info.
     self.assertEqual('android/android-1.0-r2', new_atom)
 
     expected_input = {
-        'trackingBranch': tracking_branch,
         'packageName': android_package,
         'androidBuildBranch': android_build_branch,
         'androidVersion': android_version,
@@ -1955,3 +1944,23 @@ class MarkAndroidAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
     }
     call_patch.assert_called_with(
         buildroot, 'chromite.api.AndroidService/MarkStable', expected_input)
+
+
+class MarkChromeAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
+  """MarkChromeAsStable tests."""
+
+  def testUprevSpec(self):
+    """Verify handling of chrome_rev=spec."""
+    buildroot = self.tempdir
+    board = 'bored'
+    chromite_bindir = os.path.join(buildroot, 'chromite', 'bin')
+
+    self.rc.AddCmdResult(
+        partial_mock.In(
+            os.path.join(chromite_bindir, 'cros_mark_chrome_as_stable')),
+        stdout='=chromeos-base/chromeos-chrome-1234_alpha-r1')
+
+    ret = commands.MarkChromeAsStable(
+        buildroot, 'main', constants.CHROME_REV_SPEC, [board],
+        chrome_version='HEAD')
+    assert ret == 'chromeos-base/chromeos-chrome-1234_alpha-r1'

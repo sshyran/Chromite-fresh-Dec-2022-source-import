@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -16,8 +15,6 @@ build directory) and rsyncs the contents of the staging directory onto your
 device's rootfs.
 """
 
-from __future__ import print_function
-
 import argparse
 import collections
 import contextlib
@@ -25,28 +22,25 @@ import functools
 import glob
 import multiprocessing
 import os
+import re
 import shlex
 import shutil
-import sys
 import time
 
-from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access as remote
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from gn_helpers import gn_helpers
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party.gn_helpers import gn_helpers
 
 
 KERNEL_A_PARTITION = 2
@@ -137,12 +131,8 @@ class DeployChrome(object):
     self.options = options
     self.staging_dir = staging_dir
     if not self.options.staging_only:
-      if options.device:
-        hostname = options.device.hostname
-        port = options.device.port
-      else:
-        hostname = options.to
-        port = options.port
+      hostname = options.device.hostname
+      port = options.device.port
       self.device = remote.ChromiumOSDevice(hostname, port=port,
                                             ping=options.ping,
                                             private_key=options.private_key,
@@ -200,7 +190,7 @@ class DeployChrome(object):
       if not cros_build_lib.BooleanPrompt('Remove rootfs verification?', False):
         return False
 
-    logging.info('Removing rootfs verification from %s', self.options.to)
+    logging.info('Removing rootfs verification from %s', self.options.device)
     # Running in VM's cause make_dev_ssd's firmware sanity checks to fail.
     # Use --force to bypass the checks.
     cmd = ('/usr/share/vboot/bin/make_dev_ssd.sh --partitions %d '
@@ -595,12 +585,6 @@ def _CreateParser():
                       default=True,
                       help="Don't strip binaries during deployment.  Warning: "
                            'the resulting binaries will be very large!')
-  parser.add_argument('-p', '--port', type=int, default=remote.DEFAULT_SSH_PORT,
-                      help='This arg is deprecated. Please use --device '
-                           'instead.')
-  parser.add_argument('-t', '--to', deprecated='Use --device instead',
-                      help='This arg is deprecated. Please use --device '
-                           'instead.')
   parser.add_argument(
       '-d', '--device',
       type=commandline.DeviceParser(commandline.DEVICE_SCHEME_SSH),
@@ -720,11 +704,16 @@ def _ParseCommandLine(argv):
     if options.local_pkg_path:
       parser.error('--lacros does not support --local-pkg-path')
   else:
+    if not options.board and options.build_dir:
+      match = re.search(r'out_([^/]+)/Release$', options.build_dir)
+      if match:
+        options.board = match.group(1)
+        logging.info('--board is set to %s', options.board)
     if not options.board:
       parser.error('--board is required')
   if options.gs_path and options.local_pkg_path:
     parser.error('Cannot specify both --gs-path and --local-pkg-path')
-  if not (options.staging_only or options.to or options.device):
+  if not (options.staging_only or options.device):
     parser.error('Need to specify --device')
   if options.staging_flags and not options.build_dir:
     parser.error('--staging-flags require --build-dir to be set.')
@@ -743,14 +732,6 @@ def _ParseCommandLine(argv):
 
   if options.mount and not options.mount_dir:
     options.mount_dir = _CHROME_DIR
-
-  if options.to:
-    if options.device:
-      parser.error('--to and --device are mutually exclusive.')
-    else:
-      logging.warning(
-          "The args '--to' & '--port' are deprecated. Please use '--device' "
-          'instead.')
 
   return options
 

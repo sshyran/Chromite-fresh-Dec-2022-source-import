@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Sync the Chrome source code used by Chrome OS to the specified directory."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -16,9 +12,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import gclient
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():

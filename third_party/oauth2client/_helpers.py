@@ -15,7 +15,7 @@
 
 import base64
 import json
-import six
+from chromite.third_party import six
 
 
 def _parse_pem_key(raw_key_input):

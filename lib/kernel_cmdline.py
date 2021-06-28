@@ -1,20 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for kernel commandline strings."""
 
-from __future__ import print_function
-
 import collections
 import re
-import sys
-
-import six
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class KernelArg(object):
@@ -34,7 +25,7 @@ class KernelArg(object):
     Raises:
       ValueError: Invalid quotes in |value|.
     """
-    if value and (not isinstance(value, six.string_types) or
+    if value and (not isinstance(value, str) or
                   '"' in value[1:-1] or
                   value.startswith('"') != value.endswith('"')):
       raise ValueError(value)
@@ -82,7 +73,8 @@ _KEYVALUE_RE = r'(?:(--|[^\s=]+)(?:(=)("[^"]*"|[^\s"]*))?)'
 _VALID_CMDLINE_RE = (
     r'\s*'  r'%s?'  r'(\s+%s)*'  r'\s*$') % (_KEYVALUE_RE, _KEYVALUE_RE)
 
-class KernelArgList(collections.MutableMapping, collections.MutableSequence):
+class KernelArgList(collections.abc.MutableMapping,
+                    collections.abc.MutableSequence):
   """A tokenized collection of key(=value) pairs.
 
   Behaves as a list, with some extra features.
@@ -104,7 +96,7 @@ class KernelArgList(collections.MutableMapping, collections.MutableSequence):
     """
     # If we got a string, split it into KernelArg pairs.  If not, just pass
     # it through list().
-    if isinstance(data, six.string_types):
+    if isinstance(data, str):
       valid = re.match(_VALID_CMDLINE_RE, data)
       if not valid:
         raise ValueError(data)
@@ -155,7 +147,7 @@ class KernelArgList(collections.MutableMapping, collections.MutableSequence):
            argument (which is compared against only |entry.arg|, ignoring
            |entry.value|).
     """
-    if isinstance(item, six.string_types):
+    if isinstance(item, str):
       for kern_arg in self._data:
         if kern_arg.arg == item:
           return True
@@ -173,7 +165,7 @@ class KernelArgList(collections.MutableMapping, collections.MutableSequence):
       key: Either a slice, an integer index, or a string argument to delete.
           A string is converted to a numeric index via index().
     """
-    if isinstance(key, six.string_types):
+    if isinstance(key, str):
       idx = self.index(key)
       if idx is None:
         raise KeyError(key)
@@ -218,7 +210,7 @@ class KernelArgList(collections.MutableMapping, collections.MutableSequence):
     if not isinstance(value, KernelArg):
       raise ValueError(value)
     # Convert string keys into integer indexes.
-    if isinstance(key, six.string_types):
+    if isinstance(key, str):
       idx = self.index(key)
       # Setting a non-existent string index does an append.
       if idx is None:
@@ -275,7 +267,7 @@ class KernelArgList(collections.MutableMapping, collections.MutableSequence):
     if not isinstance(obj, KernelArg):
       raise ValueError(obj)
     # Convert string index to an integer index.
-    if isinstance(index, six.string_types):
+    if isinstance(index, str):
       key = index
       index = self.index(index)
       if index is None:

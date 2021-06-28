@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Library to make common google storage operations more reliable."""
-
-from __future__ import print_function
 
 import collections
 import contextlib
@@ -20,9 +17,7 @@ import re
 import shutil
 import subprocess
 import tempfile
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cache
@@ -325,7 +320,7 @@ class GSContext(object):
   # (1*sleep) the first time, then (2*sleep), continuing via attempt * sleep.
   DEFAULT_SLEEP_TIME = 60
 
-  GSUTIL_VERSION = '4.51'
+  GSUTIL_VERSION = '4.60'
   GSUTIL_TAR = 'gsutil_%s.tar.gz' % GSUTIL_VERSION
   GSUTIL_URL = (PUBLIC_BASE_HTTPS_URL +
                 'chromeos-mirror/gentoo/distfiles/%s' % GSUTIL_TAR)
@@ -383,7 +378,24 @@ class GSContext(object):
         # lock on the cached gsutil.
         ref = tar_cache.Lookup(key)
         ref.SetDefault(cls.GSUTIL_URL)
-        cls.DEFAULT_GSUTIL_BIN = os.path.join(ref.path, 'gsutil', 'gsutil')
+        gsutil_bin = os.path.join(ref.path, 'gsutil', 'gsutil')
+        # Make sure the shebang uses python3 since some distros (like Debian)
+        # delete `python`.  And do it with a write lock.
+        with ref:
+          with open(gsutil_bin, 'rb') as fp:
+            line = fp.readline()
+            if line.strip().endswith(b'python'):
+              data = b'#!/usr/bin/env python3\n' + fp.read()
+              # Make sure to update the file atomically in case someone executes
+              # it directly.  It shouldn't happen, but who knows.
+              try:
+                osutils.WriteFile(gsutil_bin, data, 'wb', atomic=True)
+              except OSError:
+                # If the cache already existed, as root, but hadn't had its
+                # shebang updated, do it as root now.
+                osutils.WriteFile(
+                    gsutil_bin, data, 'wb', atomic=True, sudo=True)
+        cls.DEFAULT_GSUTIL_BIN = gsutil_bin
         cls._CompileCrcmod(ref.path)
       else:
         # Check if the default gsutil path for builders exists. If
@@ -428,44 +440,42 @@ class GSContext(object):
         raise
 
     # See if the system includes one in which case we're done.
-    # We probe `python` as that's what gsutil uses for its shebang.
+    # We probe `python3` as that's what gsutil uses for its shebang (see below).
     result = cros_build_lib.run(
-        ['python', '-c', 'from crcmod.crcmod import _usingExtension; '
+        ['python3', '-c', 'from crcmod.crcmod import _usingExtension; '
          'exit(0 if _usingExtension else 1)'], check=False, capture_output=True)
     if result.returncode == 0:
       return
 
     # See if the local copy has one.
-    for pyver in ('python2', 'python3'):
-      logging.debug('Attempting to compile local crcmod for %s gsutil', pyver)
-      with osutils.TempDir(prefix='chromite.gsutil.crcmod') as tempdir:
-        result = cros_build_lib.run(
-            [pyver, 'setup.py', 'build', '--build-base', tempdir,
-             '--build-platlib', tempdir],
-            cwd=src_root, capture_output=True, check=False,
-            debug_level=logging.DEBUG)
-        if result.returncode:
-          continue
+    logging.debug('Attempting to compile local crcmod for gsutil')
+    with osutils.TempDir(prefix='chromite.gsutil.crcmod') as tempdir:
+      result = cros_build_lib.run(
+          ['python3', 'setup.py', 'build', '--build-base', tempdir,
+           '--build-platlib', tempdir],
+          cwd=src_root, capture_output=True, check=False,
+          debug_level=logging.DEBUG)
+      if result.returncode:
+        return
 
-        # Locate the module in the build dir.
-        copied = False
-        for mod_path in glob.glob(
-            os.path.join(tempdir, 'crcmod', '_crcfunext*.so')):
-          dst_mod_path = os.path.join(src_root, pyver, 'crcmod',
-                                      os.path.basename(mod_path))
-          try:
-            shutil.copy2(mod_path, dst_mod_path)
-            copied = True
-          except shutil.Error:
-            pass
+      # Locate the module in the build dir.
+      copied = False
+      for mod_path in glob.glob(
+          os.path.join(tempdir, 'crcmod', '_crcfunext*.so')):
+        dst_mod_path = os.path.join(src_root, 'python3', 'crcmod',
+                                    os.path.basename(mod_path))
+        try:
+          shutil.copy2(mod_path, dst_mod_path)
+          copied = True
+        except shutil.Error:
+          pass
 
-        if not copied:
-          # If the module compile failed (missing compiler/headers/whatever),
-          # then the setup.py build command above would have passed, but there
-          # won't actually be a _crcfunext.so module.  Check for it here to
-          # disambiguate other errors from shutil.copy2.
-          logging.debug('No crcmod module produced (missing host compiler?)')
-          continue
+      if not copied:
+        # If the module compile failed (missing compiler/headers/whatever),
+        # then the setup.py build command above would have passed, but there
+        # won't actually be a _crcfunext.so module.  Check for it here to
+        # disambiguate other errors from shutil.copy2.
+        logging.debug('No crcmod module produced (missing host compiler?)')
 
   def __init__(self, boto_file=None, cache_dir=None, acl=None,
                dry_run=False, gsutil_bin=None, init_boto=False, retries=None,
@@ -575,10 +585,10 @@ class GSContext(object):
   def _TestGSLs(self):
     """Quick test of gsutil functionality."""
     # The bucket in question is readable by any authenticated account.
-    # If we can list it's contents, we have valid authentication.
+    # If we can list its contents, we have valid authentication.
     cmd = ['ls', AUTHENTICATION_BUCKET]
     result = self.DoCommand(cmd, retries=0, debug_level=logging.DEBUG,
-                            stderr=True, check=False)
+                            capture_output=True, check=False)
 
     # Did we fail with an authentication error?
     if (result.returncode == 1 and
@@ -647,8 +657,13 @@ class GSContext(object):
     if self.dry_run:
       return (lambda: (yield ''))()
 
+    env = None
+    if self.boto_file and os.path.isfile(self.boto_file):
+      env = os.environ.copy()
+      env['BOTO_CONFIG'] = self.boto_file
+
     cmd = [self.gsutil_bin] + self.gsutil_flags + ['cat', path]
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
 
     def read_content():
       try:
@@ -766,7 +781,7 @@ class GSContext(object):
     if error:
       # Since the captured error will use the encoding the user requested,
       # normalize to bytes for testing below.
-      if isinstance(error, six.text_type):
+      if isinstance(error, str):
         error = error.encode('utf-8')
 
       # gsutil usually prints PreconditionException when a precondition fails.
@@ -937,7 +952,7 @@ class GSContext(object):
       if src_path == '-' and kwargs.get('input') is not None:
         f = stack.Add(tempfile.NamedTemporaryFile, mode='wb')
         data = kwargs['input']
-        if isinstance(data, six.text_type):
+        if isinstance(data, str):
           data = data.encode('utf-8')
         f.write(data)
         f.flush()

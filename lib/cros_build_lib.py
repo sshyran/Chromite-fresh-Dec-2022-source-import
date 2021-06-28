@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common python commands used by various build scripts."""
-
-from __future__ import print_function
 
 import base64
 import contextlib
@@ -17,6 +14,7 @@ import getpass
 import inspect
 import operator
 import os
+from pathlib import Path
 import re
 import signal
 import socket
@@ -24,10 +22,8 @@ import subprocess
 import sys
 import tempfile
 import time
+from typing import List, Optional, TextIO, Union
 
-import six
-
-from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_collections
 from chromite.lib import cros_logging as logging
@@ -86,7 +82,7 @@ def ShellQuote(s):
     # This is a bit of a hack.  Python 2 will display strings with u prefixes
     # when logging which makes things harder to work with.  Writing bytes to
     # stdout will be interpreted as UTF-8 content implicitly.
-    if isinstance(s, six.string_types):
+    if isinstance(s, str):
       try:
         s = s.encode('utf-8')
       except UnicodeDecodeError:
@@ -96,9 +92,9 @@ def ShellQuote(s):
       return repr(s)
   else:
     # If callers pass down bad types, don't blow up.
-    if isinstance(s, six.binary_type):
+    if isinstance(s, bytes):
       s = s.decode('utf-8', 'backslashreplace')
-    elif not isinstance(s, six.string_types):
+    elif not isinstance(s, str):
       return repr(s)
 
   # See if no quoting is needed so we can return the string as-is.
@@ -338,17 +334,17 @@ class CalledProcessError(subprocess.CalledProcessError):
     ]
     if stderr and self.stderr:
       stderr = self.stderr
-      if isinstance(stderr, six.binary_type):
+      if isinstance(stderr, bytes):
         stderr = stderr.decode('utf-8', 'replace')
       items.append(stderr)
     if stdout and self.stdout:
       stdout = self.stdout
-      if isinstance(stdout, six.binary_type):
+      if isinstance(stdout, bytes):
         stdout = stdout.decode('utf-8', 'replace')
       items.append(stdout)
     if self.msg:
       msg = self.msg
-      if isinstance(msg, six.binary_type):
+      if isinstance(msg, bytes):
         msg = msg.decode('utf-8', 'replace')
       items.append(msg)
     return u'\n'.join(items)
@@ -467,7 +463,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs):
   # Finally, block people from passing options to sudo.
   sudo_cmd.append('--')
 
-  if isinstance(cmd, six.string_types):
+  if isinstance(cmd, str):
     # We need to handle shell ourselves so the order is correct:
     #  $ sudo [sudo args] -- bash -c '[shell command]'
     # If we let run take care of it, we'd end up with:
@@ -737,7 +733,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   # what a separate process did to that file can result in a bad
   # view of the file.
   log_stdout_to_file = False
-  if isinstance(stdout, six.string_types):
+  if isinstance(stdout, str):
     popen_stdout = open(stdout, stdout_file_mode)
     log_stdout_to_file = True
   elif hasattr(stdout, 'fileno'):
@@ -773,16 +769,16 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
 
   # If input is a string, we'll create a pipe and send it through that.
   # Otherwise we assume it's a file object that can be read from directly.
-  if isinstance(input, (six.string_types, six.binary_type)):
+  if isinstance(input, (str, bytes)):
     stdin = subprocess.PIPE
     # Allow people to always pass in bytes or strings regardless of encoding.
     # Our Popen usage takes care of converting everything to bytes first.
     #
     # Linter can't see that we're using |input| as a var, not a builtin.
     # pylint: disable=input-builtin
-    if encoding and isinstance(input, six.text_type):
+    if encoding and isinstance(input, str):
       input = input.encode(encoding, errors)
-    elif not encoding and isinstance(input, six.text_type):
+    elif not encoding and isinstance(input, str):
       input = input.encode('utf-8')
   elif input is not None:
     stdin = input
@@ -790,7 +786,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
 
   # Sanity check the command.  This helps when RunCommand is deep in the call
   # chain, but the command itself was constructed along the way.
-  if isinstance(cmd, (six.string_types, six.binary_type)):
+  if isinstance(cmd, (str, bytes)):
     if not shell:
       raise ValueError('Cannot run a string command without a shell')
     cmd = ['/bin/bash', '-c', cmd]
@@ -802,7 +798,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   elif not isinstance(cmd, (list, tuple)):
     raise TypeError('cmd must be list or tuple, not %s: %r' %
                     (type(cmd), repr(cmd)))
-  elif not all(isinstance(x, (six.binary_type, six.string_types)) for x in cmd):
+  elif not all(isinstance(x, (bytes, str)) for x in cmd):
     raise TypeError('All command elements must be bytes/strings: %r' % (cmd,))
 
   # If we are using enter_chroot we need to use enterchroot pass env through
@@ -1064,7 +1060,9 @@ COMP_BZIP2 = 2
 COMP_XZ = 3
 
 
-def FindCompressor(compression, chroot=None):
+def FindCompressor(
+    compression,
+    chroot: Optional[Union[Path, str]] = None) -> str:
   """Locate a compressor utility program (possibly in a chroot).
 
   Since we compress/decompress a lot, make it easy to locate a
@@ -1085,11 +1083,9 @@ def FindCompressor(compression, chroot=None):
   if compression == COMP_XZ:
     return os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'xz_auto')
   elif compression == COMP_GZIP:
-    std = 'gzip'
-    para = 'pigz'
+    possible_progs = ['pigz', 'gzip']
   elif compression == COMP_BZIP2:
-    std = 'bzip2'
-    para = 'pbzip2'
+    possible_progs = ['lbzip2', 'pbzip2', 'bzip2']
   elif compression == COMP_NONE:
     return 'cat'
   else:
@@ -1100,14 +1096,14 @@ def FindCompressor(compression, chroot=None):
     roots.append(chroot)
   roots.append('/')
 
-  for prog in [para, std]:
+  for prog in possible_progs:
     for root in roots:
       for subdir in ['', 'usr']:
         path = os.path.join(root, subdir, 'bin', prog)
         if os.path.exists(path):
           return path
 
-  return std
+  return possible_progs[-1]
 
 
 def CompressionStrToType(s):
@@ -1130,7 +1126,7 @@ def CompressionStrToType(s):
     return COMP_NONE
 
 
-def CompressionExtToType(file_name):
+def CompressionExtToType(file_name: Union[Path, str]):
   """Retrieve a compression type constant from a compression file's name.
 
   Args:
@@ -1188,12 +1184,19 @@ class TarballError(RunCommandError):
 
 
 def CreateTarball(
-    tarball_path, cwd, sudo=False, compression=COMP_XZ, chroot=None,
-    inputs=None, timeout=300, extra_args=None, **kwargs):
+    tarball_path: Union[Path, int, str],
+    cwd: Union[Path, str],
+    sudo: Optional[bool] = False,
+    compression=COMP_XZ,
+    chroot: Optional[Union[Path, str]] = None,
+    inputs: Optional[List[str]] = None,
+    timeout: int = 300,
+    extra_args: Optional[List[str]] = None,
+    **kwargs):
   """Create a tarball.  Executes 'tar' on the commandline.
 
   Args:
-    tarball_path: The path of the tar file to generate.
+    tarball_path: The path of the tar file to generate. Can be file descriptor.
     cwd: The directory to run the tar command.
     sudo: Whether to run with "sudo".
     compression: The type of compression desired.  See the FindCompressor
@@ -1220,10 +1223,22 @@ def CreateTarball(
 
   # Use a separate compression program - this enables parallel compression
   # in some cases.
+  # Using 'raw' hole detection instead of 'seek' isn't that much slower, but
+  # will provide much better results when archiving large disk images that are
+  # not fully sparse.
   comp = FindCompressor(compression, chroot=chroot)
   cmd = (['tar'] +
          extra_args +
-         ['--sparse', '--use-compress-program', comp, '-cf', tarball_path])
+         ['--sparse', '--hole-detection=raw',
+          '--use-compress-program', comp, '-c'])
+
+  rc_stdout = None
+  if isinstance(tarball_path, int):
+    cmd += ['--to-stdout']
+    rc_stdout = tarball_path
+  else:
+    cmd += ['-f', str(tarball_path)]
+
   if len(inputs) > _THRESHOLD_TO_USE_T_FOR_TAR:
     cmd += ['--null', '-T', '/dev/stdin']
     rc_input = b'\0'.join(x.encode('utf-8') for x in inputs)
@@ -1238,7 +1253,7 @@ def CreateTarball(
   for try_count in range(3):
     try:
       result = rc_func(cmd, cwd=cwd, **dict(kwargs, check=False,
-                                            input=rc_input))
+                                            input=rc_input, stdout=rc_stdout))
     except RunCommandError as rce:
       # There are cases where run never executes the command (cannot find tar,
       # cannot execute tar, such as when cwd does not exist). Although the run
@@ -1265,8 +1280,11 @@ def CreateTarball(
     logging.PrintBuildbotStepWarnings()
 
 
-def ExtractTarball(tarball_path, install_path, files_to_extract=None,
-                   excluded_files=None, return_extracted_files=False):
+def ExtractTarball(tarball_path: Union[Path, str],
+                   install_path: Union[Path, str],
+                   files_to_extract: Optional[List[str]] = None,
+                   excluded_files: Optional[List[str]] = None,
+                   return_extracted_files: bool = False) -> List[str]:
   """Extracts a tarball using tar.
 
   Detects whether the tarball is compressed or not based on the file
@@ -1288,7 +1306,8 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   """
   # Use a separate decompression program - this enables parallel decompression
   # in some cases.
-  cmd = ['tar', '--sparse', '-xf', tarball_path, '--directory', install_path]
+  cmd = ['tar', '--sparse', '-xf', str(tarball_path),
+         '--directory', str(install_path)]
 
   comp_type = CompressionExtToType(tarball_path)
   if comp_type != COMP_NONE:
@@ -1323,15 +1342,19 @@ def ExtractTarball(tarball_path, install_path, files_to_extract=None,
   return []
 
 
-def GetInput(prompt):
-  """Helper function to grab input from a user.   Makes testing easier."""
-  # We have people use GetInput() so they don't have to use these bad builtins
-  # themselves or deal with version skews.
-  # pylint: disable=bad-builtin,input-builtin,raw_input-builtin,undefined-variable
-  if sys.version_info.major < 3:
-    return raw_input(prompt)
-  else:
-    return input(prompt)
+def IsTarball(path: str) -> bool:
+  """Guess if this is a tarball based on the filename."""
+  parts = path.split('.')
+  if len(parts) <= 1:
+    return False
+
+  if parts[-1] == 'tar':
+    return True
+
+  if parts[-2] == 'tar':
+    return parts[-1] in ('bz2', 'gz', 'xz')
+
+  return parts[-1] in ('tbz2', 'tbz', 'tgz', 'txz')
 
 
 def GetChoice(title, options, group_size=0):
@@ -1358,7 +1381,7 @@ def GetChoice(title, options, group_size=0):
     prompt += ': '
 
     while True:
-      choice = GetInput(prompt)
+      choice = input(prompt)
       if more and not choice.strip():
         return None
       try:
@@ -1416,7 +1439,7 @@ def BooleanPrompt(prompt='Do you want to continue?', default=True,
 
   while True:
     try:
-      response = GetInput(prompt).lower()
+      response = input(prompt).lower()
     except EOFError:
       # If the user hits CTRL+D, or stdin is disabled, use the default.
       print()
@@ -1464,7 +1487,7 @@ def BooleanShellValue(sval, default, msg=None):
   if sval is None:
     return default
 
-  if isinstance(sval, six.string_types):
+  if isinstance(sval, str):
     s = sval.lower()
     if s in ('yes', 'y', '1', 'true'):
       return True
@@ -1586,11 +1609,11 @@ class ContextManagerStack(object):
     # Normally a single context manager would return False to allow caller to
     # re-raise the exception itself, but here the exception might have been
     # raised during the exiting of one of the individual context managers.
-    six.reraise(exc_type, exc, exc_tb)
+    raise exc.with_traceback(exc_tb)
 
 
 def iflatten_instance(iterable,
-                      terminate_on_kls=(six.string_types, six.binary_type)):
+                      terminate_on_kls=(str, bytes)):
   """Derivative of snakeoil.lists.iflatten_instance; flatten an object.
 
   Given an object, flatten it into a single depth iterable-
@@ -1610,7 +1633,7 @@ def iflatten_instance(iterable,
       return False
     # Note strings can be infinitely descended through- thus this
     # recursion limiter.
-    return not isinstance(item, six.string_types) or len(item) > 1
+    return not isinstance(item, str) or len(item) > 1
 
   if not descend_into(iterable):
     yield iterable
@@ -1624,11 +1647,13 @@ def iflatten_instance(iterable,
 
 
 @contextlib.contextmanager
-def Open(obj, mode='r', **kwargs):
+def Open(obj: Union[str, os.PathLike, TextIO], mode: str = 'r', **kwargs):
   """Convenience ctx that accepts a file path or an already open file object."""
-  if isinstance(obj, six.string_types):
+  if isinstance(obj, str):
     with open(obj, mode=mode, **kwargs) as f:
       yield f
+  elif isinstance(obj, Path):
+    yield obj.open(mode=mode, **kwargs)
   else:
     yield obj
 
@@ -1663,7 +1688,7 @@ def SafeRun(functors, combine_exceptions=False):
     if len(errors) == 1 or not combine_exceptions:
       # To preserve the traceback.
       inst, tb = errors[0]
-      six.reraise(type(inst), inst, tb)
+      raise inst.with_traceback(tb)
     else:
       raise RuntimeError([e[0] for e in errors])
 
@@ -1779,15 +1804,6 @@ def GetBoard(device_board, override_board=None, force=False, strict=False):
     logging.warning(msg)
 
   return board
-
-
-def GetSysroot(board=None):
-  """Returns the sysroot for |board| or '/' if |board| is None.
-
-  Deprecated: Use chromite.lib.build_target_lib.get_default_sysroot_path().
-  TODO: Convert the usages of this function to the new one.
-  """
-  return build_target_lib.get_default_sysroot_path(board)
 
 
 # Structure to hold the values produced by TimedSection.

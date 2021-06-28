@@ -165,10 +165,10 @@ class RequestHooksMixin(object):
         if event not in self.hooks:
             raise ValueError('Unsupported event specified, with event name "%s"' % (event))
 
-        if isinstance(hook, collections.Callable):
+        if isinstance(hook, collections.abc.Callable):
             self.hooks[event].append(hook)
         elif hasattr(hook, '__iter__'):
-            self.hooks[event].extend(h for h in hook if isinstance(h, collections.Callable))
+            self.hooks[event].extend(h for h in hook if isinstance(h, collections.abc.Callable))
 
     def deregister_hook(self, event, hook):
         """Deregister a previously registered hook.

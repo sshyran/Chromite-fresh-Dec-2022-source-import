@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -7,8 +6,6 @@
 
 Handles all testing related functionality, it is not itself a test.
 """
-
-from __future__ import print_function
 
 import os
 
@@ -19,6 +16,7 @@ from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.cbuildbot import goma_util
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
@@ -40,7 +38,7 @@ def DebugInfoTest(input_proto, _output_proto, config):
 
   if not sysroot_path:
     if target_name:
-      sysroot_path = cros_build_lib.GetSysroot(target_name)
+      sysroot_path = build_target_lib.get_default_sysroot_path(target_name)
     else:
       cros_build_lib.Die("The sysroot path or the sysroot's build target name "
                          'must be provided.')
@@ -106,6 +104,9 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   for package_info_msg in blocklisted_package_info:
     blocklist.append(controller_util.PackageInfoToString(package_info_msg))
 
+  # Allow call to filter out non-cros_workon packages from the input packages.
+  filter_only_cros_workon = input_proto.flags.filter_only_cros_workon
+
   # Allow call to succeed if no tests were found.
   testable_packages_optional = input_proto.flags.testable_packages_optional
 
@@ -121,7 +122,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       blocklist=blocklist,
       was_built=was_built,
       code_coverage=code_coverage,
-      testable_packages_optional=testable_packages_optional)
+      testable_packages_optional=testable_packages_optional,
+      filter_only_cros_workon=filter_only_cros_workon)
 
   if not result.success:
     # Failed to run tests or some tests failed.
@@ -141,14 +143,68 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   deserialize_metrics_log(output_proto.events, prefix=build_target.name)
 
 
+SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
+TEST_SERVICE_DIR = os.path.join(SRC_DIR, 'platform/dev/src/chromiumos/test')
+TEST_CONTAINER_BUILD_SCRIPTS = [
+    os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
+    os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
+]
+
+
+def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
+  """Fake success response"""
+  # pylint: disable=unused-argument
+  output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+      success = test_pb2.TestServiceContainerBuildResult.Success()
+  ))
+
+
+def _BuildTestServiceContainersFailedResponse(
+    _input_proto, output_proto, _config):
+  """Fake failure response"""
+
+  # pylint: disable=unused-argument
+  output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+      failure = test_pb2.TestServiceContainerBuildResult.Failure(
+          error_message='fake error'
+      )
+  ))
+
+
+@faux.success(_BuildTestServiceContainersResponse)
+@faux.error(_BuildTestServiceContainersFailedResponse)
+@validate.require('build_target.name')
+@validate.require('chroot.path')
+@validate.require('version')
+@validate.validation_complete
+def BuildTestServiceContainers(input_proto, output_proto, _config):
+  """Builds docker containers for all test services and pushes them to gcr.io"""
+  build_target = controller_util.ParseBuildTarget(input_proto.build_target)
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  version = input_proto.version
+  sysroot = sysroot_lib.Sysroot(build_target.root)
+
+  for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
+    cmd = [build_script, chroot.path, version, sysroot.path]
+    cmd_result = cros_build_lib.run(cmd, check=False)
+    if cmd_result.returncode == 0:
+      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+          success = test_pb2.TestServiceContainerBuildResult.Success()
+      ))
+    else:
+      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
+          failure = test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message = cmd_result.stderr
+          )
+      ))
+
+
 @faux.empty_success
 @faux.empty_completed_unsuccessfully_error
 @validate.validation_complete
 def ChromiteUnitTest(_input_proto, _output_proto, _config):
   """Run the chromite unit tests."""
-  cmd = [os.path.join(constants.CHROMITE_DIR, 'scripts', 'run_tests'), '--py2']
-  result = cros_build_lib.run(cmd, check=False)
-  if result.returncode == 0:
+  if test.ChromiteUnitTest():
     return controller.RETURN_CODE_SUCCESS
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
@@ -159,10 +215,8 @@ def ChromiteUnitTest(_input_proto, _output_proto, _config):
 @validate.validation_complete
 def ChromitePytest(_input_proto, _output_proto, _config):
   """Run the chromite unit tests."""
-  if test.ChromitePytest():
-    return controller.RETURN_CODE_SUCCESS
-  else:
-    return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+  # TODO(vapier): Delete this stub.
+  return controller.RETURN_CODE_SUCCESS
 
 
 @faux.all_empty

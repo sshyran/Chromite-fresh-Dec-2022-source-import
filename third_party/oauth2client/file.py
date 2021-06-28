@@ -21,8 +21,8 @@ credentials.
 import os
 import threading
 
-from oauth2client.client import Credentials
-from oauth2client.client import Storage as BaseStorage
+from .client import Credentials
+from .client import Storage as BaseStorage
 
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'

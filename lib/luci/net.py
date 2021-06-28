@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,15 +7,12 @@
 
 """Wrapper around httplib2 to call REST API with service account credentials."""
 
-from __future__ import print_function
-
-import httplib2
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import auth
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
+from chromite.third_party import httplib2
 
 
 def httprequest(http, **kwargs):
@@ -110,8 +106,8 @@ def request(url,
     headers['Authorization'] = 'Bearer %s' % tok
 
   if payload is not None:
-    assert isinstance(payload, (six.string_types, six.binary_type)), \
-        type(payload)
+    assert isinstance(payload, (str, bytes)), (
+        type(payload))
     assert method in ('CREATE', 'POST', 'PUT'), method
 
   attempt = 0

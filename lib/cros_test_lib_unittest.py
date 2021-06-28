@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittest for cros_test_lib (tests for tests? Who'd a thunk it)."""
 
-from __future__ import print_function
-
 import os
 import subprocess
 import sys
 import time
 import unittest
+from unittest import mock
 
-import mock
-
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import timeout_util
@@ -190,6 +186,9 @@ class MockTestCaseTest(cros_test_lib.TestCase):
     patcher.stop()
     self.assertEqual(self.Mockable.TO_BE_MOCKED2, -200)
     self.assertEqual(self.Mockable.TO_BE_MOCKED3, -300)
+    def abort():
+      raise RuntimeError()
+    patcher.stop = abort
     self.assertRaises(RuntimeError, tc.tearDown)
     # Make sure that even though exception is raised for stopping 'patcher', we
     # continue to stop 'patcher2', and run patcher.stopall().

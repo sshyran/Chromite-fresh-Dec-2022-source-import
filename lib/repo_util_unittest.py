@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for chromite.lib.repo and helpers for testing that module."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -17,9 +13,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import repo_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def RepoInitSideEffects(*_args, **kwargs):
@@ -275,7 +268,7 @@ class RepositoryCommandMethodTest(cros_test_lib.RunCommandTempDirTestCase):
     ], **kwargs)
 
 
-@cros_test_lib.NetworkTest()
+@cros_test_lib.pytestmark_network_test
 class RepositoryIntegrationTest(cros_test_lib.TempDirTestCase):
   """Tests for repo_util.Repository that actually call `repo`.
 

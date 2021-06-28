@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """A library to generate and store the manifests for cros builders to use."""
-
-from __future__ import print_function
 
 import datetime
 import fnmatch
@@ -13,12 +10,11 @@ import glob
 import os
 import re
 import shutil
-import sys
 import tempfile
 from xml.dom import minidom
 
 from chromite.cbuildbot import build_status
-from chromite.lib import buildbucket_lib
+from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -28,9 +24,6 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 PUSH_BRANCH = 'temp_auto_checkin_branch'
@@ -584,7 +577,7 @@ class BuildSpecsManager(object):
       metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
                 builder.
       buildstore: BuildStore object to make DB calls.
-      buildbucket_client: Instance of buildbucket_lib.buildbucket_client.
+      buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
     """
     self.cros_source = source_repo
     buildroot = source_repo.directory
@@ -808,7 +801,7 @@ class BuildSpecsManager(object):
       ignore_timeout_exception: Whether to ignore when the timeout exception is
         raised in waiting. Default to True.
     """
-    builders_array = buildbucket_lib.FetchCurrentSlaveBuilders(
+    builders_array = buildbucket_v2.FetchCurrentSlaveBuilders(
         self.config, self.metadata, builders_array)
     logging.info('Waiting for the following builds to complete: %s',
                  builders_array)
@@ -966,7 +959,8 @@ class BuildSpecsManager(object):
     # high traffic manifest_versions repository.
     push_to_git = git.GetTrackingBranch(
         self.manifest_dir, for_checkout=False, for_push=False)
-    push_to = git.RemoteRef(push_to_git.remote, 'refs/for/master%submit',
+    push_to = git.RemoteRef(push_to_git.remote,
+                            f'refs/for/{push_to_git.ref}%submit',
                             push_to_git.project_name)
     _PushGitChanges(
         self.manifest_dir,

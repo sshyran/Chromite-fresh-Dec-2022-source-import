@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,22 +7,18 @@
 For a description of AFDO see gcc.gnu.org/wiki/AutoFDO.
 """
 
-from __future__ import print_function
-
 import collections
 import datetime
 import glob
 import json
 import os
 import re
-import sys
 
 from chromite.lib import constants, cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import (failures_lib, git, gs, osutils, path_util,
                           timeout_util)
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 # AFDO-specific constants.
 AFDO_SUFFIX = '.afdo'
@@ -163,8 +158,8 @@ def CompressAFDOFile(to_compress, buildroot):
     Name of the compressed data file.
   """
   local_dir = AFDO_BUILDROOT_LOCAL % {'build_root': buildroot}
-  dest = os.path.join(local_dir, os.path.basename(to_compress)) + \
-      COMPRESSION_SUFFIX
+  dest = (os.path.join(local_dir, os.path.basename(to_compress)) +
+          COMPRESSION_SUFFIX)
   cros_build_lib.CompressFile(to_compress, dest)
   return dest
 

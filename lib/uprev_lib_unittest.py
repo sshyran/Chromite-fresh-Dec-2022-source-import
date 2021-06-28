@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,13 +5,11 @@
 """uprev_lib tests."""
 
 from __future__ import division
-from __future__ import print_function
 
 import os
 import pathlib
-import sys
+from unittest import mock
 
-import mock
 import pytest
 
 import chromite as cr
@@ -24,8 +21,6 @@ from chromite.lib import uprev_lib
 from chromite.lib.build_target_lib import BuildTarget
 from chromite.lib.chroot_lib import Chroot
 from chromite.lib.parser import package_info
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class ChromeVersionTest(cros_test_lib.TestCase):
@@ -529,3 +524,29 @@ def test_simple_uprev_workon_ebuild_to_version(overlay_stack):
   )
 
   assert stable_package in overlay
+
+
+def test_uprev_workon_ebuild_to_version_newer_exists(overlay_stack):
+  """Test no uprev occurs when downrev not allowed and newer version exists."""
+  overlay, = overlay_stack(1)
+  unstable_ebuild = cr.test.Package(
+      'chromeos-base',
+      'uprev-test',
+      version='9999',
+      keywords='~*',
+      inherit='cros-workon')
+  stable_ebuild = cr.test.Package(
+      'chromeos-base', 'uprev-test', version='5.0.3-r2', inherit='cros-workon')
+
+  overlay.add_package(unstable_ebuild)
+  overlay.add_package(stable_ebuild)
+
+  result = uprev_lib.uprev_workon_ebuild_to_version(
+      'chromeos-base/uprev-test',
+      '1.2.3',
+      allow_downrev=False,
+      src_root=overlay.path,
+      chroot_src_root=overlay.path)
+
+  assert not result
+  assert result.outcome is uprev_lib.Outcome.NEWER_VERSION_EXISTS

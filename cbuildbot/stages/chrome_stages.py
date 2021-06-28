@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the Chrome stages."""
-
-from __future__ import print_function
 
 import glob
 import multiprocessing
@@ -236,8 +233,8 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
                  osutils.ReadFile(os.path.join(self.out_board_dir, 'args.gn')))
 
   def _ShouldEnableGoma(self):
-    # Enable goma if 1) Chrome actually needs to be built, 2) goma is available and
-    # 3) config says goma should be used to build Chrome.
+    # Enable goma if 1) Chrome actually needs to be built, 2) goma is available
+    # and 3) config says goma should be used to build Chrome.
     return (self._run.options.managed_chrome and
             self._run.options.goma_dir and
             self._run.config.chrome_sdk_goma)
@@ -305,7 +302,7 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
   def _VMTest(self, sdk_cmd):
     """Run cros_run_test."""
     image_path = os.path.join(self.GetImageDirSymlink(),
-                              constants.VM_IMAGE_BIN)
+                              constants.TEST_IMAGE_BIN)
     # Run VM test for boards where we've built a VM.
     if image_path and os.path.exists(image_path):
       sdk_cmd.VMTest(image_path)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -19,8 +18,6 @@ Also, the initial sync will usually take about 40 minutes, so performance should
 be considered carefully.
 """
 
-from __future__ import print_function
-
 import os
 import re
 
@@ -30,6 +27,7 @@ from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -41,7 +39,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import request_build
-from chromite.lib import retry_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
 
@@ -53,6 +50,7 @@ BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
 BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
+USE_TOOLCHAINS_BOARDS = '6480.0.0'
 
 
 class InvalidWorkspace(failures_lib.StepFailure):
@@ -282,8 +280,8 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
   """Stage that syncs Chrome sources if needed."""
   category = constants.PRODUCT_CHROME_STAGE
 
-  # 6 hours in seconds should be long enough to fetch Chrome. I hope.
-  SYNC_CHROME_TIMEOUT = 6 * 60 * 60
+  # 12 hours in seconds should be long enough to fetch Chrome. I hope.
+  SYNC_CHROME_TIMEOUT = 12 * 60 * 60
 
   def DetermineChromeVersion(self):
     cpv = portage_util.PortageqBestVisible(constants.CHROME_CP,
@@ -297,51 +295,45 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
 
     logging.PrintBuildbotStepText('tag %s' % chrome_version)
 
-    sync_chrome = os.path.join(
-        self._orig_root, 'chromite', 'bin', 'sync_chrome')
-
-    # Branched gclient can use git-cache incompatibly, so use a temp one.
-    with osutils.TempDir(prefix='dummy') as git_cache:
-      # --reset tells sync_chrome to blow away local changes and to feel
-      # free to delete any directories that get in the way of syncing. This
-      # is needed for unattended operation.
-      # --gclient is not specified here, sync_chrome will locate the one
-      # on the $PATH.
-      cmd = [sync_chrome,
-             '--reset',
-             '--tag', chrome_version,
-             '--git_cache_dir', git_cache]
-
-      if constants.USE_CHROME_INTERNAL in self._run.config.useflags:
-        cmd += ['--internal']
-
-      cmd += [self._run.options.chrome_root]
-      with timeout_util.Timeout(self.SYNC_CHROME_TIMEOUT):
-        retry_util.RunCommandWithRetries(
-            constants.SYNC_RETRIES, cmd, cwd=self._build_root)
+    git_cache_dir = (
+        self._run.options.chrome_preload_dir or self._run.options.git_cache_dir)
+    with timeout_util.Timeout(self.SYNC_CHROME_TIMEOUT):
+      commands.SyncChrome(self._orig_root,
+                          self._run.options.chrome_root,
+                          self._run.config.useflags,
+                          tag=chrome_version,
+                          git_cache_dir=git_cache_dir,
+                          workspace=self._build_root)
 
 
-class WorkspaceUprevAndPublishStage(WorkspaceStageBase):
-  """Uprev ebuilds, and immediately publish them.
+class WorkspaceUprevStage(WorkspaceStageBase):
+  """Uprev ebuilds.
 
   This stage updates ebuilds to top of branch with no verification, or prebuilt
   generation. This is generally intended only for branch builds.
   """
-  config = 'push_overlays'
+  config_name = 'uprev'
 
   def __init__(self, builder_run, buildstore, boards=None, **kwargs):
-    super(WorkspaceUprevAndPublishStage, self).__init__(builder_run,
-                                                        buildstore,
-                                                        **kwargs)
+    super(WorkspaceUprevStage, self).__init__(builder_run,
+                                              buildstore,
+                                              **kwargs)
     if boards is not None:
       self._boards = boards
 
   def PerformStage(self):
-    """Perform the uprev and push."""
+    """Perform the uprev."""
     commands.UprevPackages(self._orig_root, self._boards,
                            overlay_type=self._run.config.overlays,
                            workspace=self._build_root)
 
+
+class WorkspacePublishStage(WorkspaceStageBase):
+  """Publish ebuilds."""
+  config_name = 'push_overlays'
+
+  def PerformStage(self):
+    """Perform the push."""
     logging.info('Pushing.')
     commands.UprevPush(self._orig_root,
                        overlay_type=self._run.config.push_overlays,
@@ -396,20 +388,31 @@ class WorkspaceScheduleChildrenStage(WorkspaceStageBase):
       extra_args.append('--debug')
 
     for child_name in self._run.config.slave_configs:
-      child = request_build.RequestBuild(
+      request = request_build.RequestBuild(
           build_config=child_name,
           # See crbug.com/940969. These id's get children killed during
           # multiple quick builds.
           # master_cidb_id=build_id,
           # master_buildbucket_id=master_buildbucket_id,
           extra_args=extra_args,
-      )
-      result = child.Submit(dryrun=self._run.options.debug)
+      ).CreateBuildRequest()
+      buildbucket_client = buildbucket_v2.BuildbucketV2()
+
+      if self._run.options.debug:
+        continue
+      result = buildbucket_client.ScheduleBuild(
+        request_id=str(request['request_id']),
+        builder=request['builder'],
+        properties=request['properties'],
+        tags=request['tags'],
+        dimensions=request['dimensions'])
 
       logging.info(
           'Build_name %s buildbucket_id %s created_timestamp %s',
-          result.build_config, result.buildbucket_id, result.created_ts)
-      logging.PrintBuildbotLink(result.build_config, result.url)
+          child_name, result.id, result.create_time.ToJsonString())
+      logging.PrintBuildbotLink(child_name,
+                                '{}{}'.format(constants.CHROMEOS_MILO_HOST,
+                                              result.id))
 
 
 class WorkspaceInitSDKStage(WorkspaceStageBase):
@@ -431,7 +434,7 @@ class WorkspaceInitSDKStage(WorkspaceStageBase):
     logging.PrintBuildbotStepText(post_ver)
 
 
-class WorkspaceUpdateSDKStage(generic_stages.BuilderStage):
+class WorkspaceUpdateSDKStage(WorkspaceStageBase):
   """Stage that is responsible for updating the chroot."""
 
   option_name = 'build'
@@ -441,11 +444,15 @@ class WorkspaceUpdateSDKStage(generic_stages.BuilderStage):
     """Do the work of updating the chroot."""
     usepkg_toolchain = (
         self._run.config.usepkg_toolchain and not self._latest_toolchain)
+    toolchain_boards = None
+    if self.AfterLimit(USE_TOOLCHAINS_BOARDS):
+      toolchain_boards = self._run.config.boards
 
     commands.UpdateChroot(
         self._build_root,
         usepkg=usepkg_toolchain,
         extra_env=self._portage_extra_env,
+        toolchain_boards=toolchain_boards,
         chroot_args=['--cache-dir', self._run.options.cache_dir])
 
 
@@ -462,7 +469,7 @@ class WorkspaceSetupBoardStage(generic_stages.BoardSpecificBuilderStage,
         self._build_root, board=self._current_board, usepkg=usepkg,
         force=self._run.config.board_replace,
         profile=self._run.options.profile or self._run.config.profile,
-        chroot_upgrade=True,
+        chroot_upgrade=False,
         chroot_args=ChrootArgs(self._run.options),
         extra_env=self._portage_extra_env)
 
@@ -813,11 +820,6 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
         if 'cheets_userdebug' in use_flag or 'cheets_sdk_userdebug' in use_flag:
           return 'userdebug'
         elif 'cheets_user' in use_flag or 'cheets_sdk_user' in use_flag:
-          # TODO(b/120999609): bertha builds always download userdebug builds
-          # at the moment because user builds are broken. Remove this clause
-          # when resolved.
-          if self.DetermineAndroidTarget(package) == 'bertha':
-            return 'userdebug'
           return 'user'
 
     # We iterated through all the flags and could not find user or userdebug.
@@ -856,11 +858,6 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
     arch = self.DetermineAndroidABI()
     variant = self.DetermineAndroidVariant(android_package)
     android_target = self.DetermineAndroidTarget(android_package)
-    # For user builds, there are no suffix.
-    # For userdebug builds, there is an explicit '_userdebug' suffix.
-    suffix = ''
-    if variant != 'user':
-      suffix = '_' + variant
 
     logging.info(
         'Downloading symbols of Android %s (%s)...',
@@ -872,7 +869,7 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
         'arch': arch,
         'version': android_version,
         'variant': variant,
-        'suffix': suffix}
+    }
 
     # Should be based on self.archive_path, but we need a path inside
     # the workspace chroot, not infra chroot.

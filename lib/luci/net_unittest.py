@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests for net.py."""
 
-from __future__ import print_function
-
 import sys
 import unittest
-
-import httplib2
 
 from chromite.lib import auth
 from chromite.lib import cros_logging as logging
 from chromite.lib.luci import net
 from chromite.lib.luci.test_support import test_case, test_env
+from chromite.third_party import httplib2
+
 
 test_env.setup_test_env()
 

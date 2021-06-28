@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,8 +12,6 @@ This module contains two important definitions used by all commands:
 Commands can be either imported directly or looked up using this module's
 ListCommands() function.
 """
-
-from __future__ import print_function
 
 import importlib
 import os

@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Various URI related helpers."""
 
-from __future__ import print_function
-
 import os
 import re
-import sys
-
-from six.moves import urllib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+import urllib.parse
 
 
 def _ExtractGobClAndSubpath(o):

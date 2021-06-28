@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """ChromeOS encryption/decryption key management"""
 
-from __future__ import print_function
-
 import collections
+import configparser
 import os
 import re
-
-from six.moves import configparser
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging

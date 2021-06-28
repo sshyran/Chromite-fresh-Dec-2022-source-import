@@ -1,25 +1,23 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for upload_symbols.py"""
 
-from __future__ import print_function
-
 import errno
+import http.server
 import itertools
 import os
 import signal
 import socket
+import socketserver
 import sys
 import time
+from unittest import mock
+import urllib.request
 
-import mock
-from six.moves import BaseHTTPServer
-from six.moves import socketserver
-from six.moves import urllib
 import pytest  # pylint: disable=import-error
+
 
 # We specifically set up a local server to connect to, so make sure we
 # delete any proxy settings that might screw that up.  We also need to
@@ -30,6 +28,7 @@ import pytest  # pylint: disable=import-error
 os.environ.pop('http_proxy', None)
 
 from chromite.lib import constants
+
 
 # The isolateserver includes a bunch of third_party python packages that clash
 # with chromite's bundled third_party python packages (like oauth2client).
@@ -53,9 +52,6 @@ from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.scripts import cros_generate_breakpad_symbols
 from chromite.scripts import upload_symbols
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class SymbolsTestBase(cros_test_lib.MockTempDirTestCase):
@@ -120,7 +116,7 @@ STACK CFI 1234
     return result
 
 
-class SymbolServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class SymbolServerRequestHandler(http.server.BaseHTTPRequestHandler):
   """HTTP handler for symbol POSTs"""
 
   RESP_CODE = None
@@ -141,7 +137,7 @@ class SymbolServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Stub the logger as it writes to stderr"""
 
 
-class SymbolServer(socketserver.ThreadingTCPServer, BaseHTTPServer.HTTPServer):
+class SymbolServer(socketserver.ThreadingTCPServer, http.server.HTTPServer):
   """Simple HTTP server that forks each request"""
 
 

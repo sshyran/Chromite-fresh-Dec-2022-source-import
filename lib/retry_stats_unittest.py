@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the retry_stats.py module."""
 
-from __future__ import print_function
-
-from six.moves import StringIO
+import io
 
 from chromite.lib import cros_test_lib
 from chromite.lib import parallel
@@ -72,7 +69,7 @@ class TestRetryStats(cros_test_lib.MockTestCase):
   def testReportCategoryStatsEmpty(self):
     retry_stats.SetupStats()
 
-    out = StringIO()
+    out = io.StringIO()
 
     retry_stats.ReportCategoryStats(out, self.CAT)
 
@@ -91,7 +88,7 @@ class TestRetryStats(cros_test_lib.MockTestCase):
   def testReportStatsEmpty(self):
     retry_stats.SetupStats()
 
-    out = StringIO()
+    out = io.StringIO()
     retry_stats.ReportStats(out)
 
     # No data collected means no categories are known, nothing to report.
@@ -109,7 +106,7 @@ class TestRetryStats(cros_test_lib.MockTestCase):
                       retry_stats.RetryWithStats,
                       self.CAT, self.handlerRetry, 3, self.callFailure)
 
-    out = StringIO()
+    out = io.StringIO()
     retry_stats.ReportStats(out)
 
     # Expecting reports for both CAT and CAT_B used above.

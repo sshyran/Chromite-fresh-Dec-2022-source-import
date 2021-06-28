@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,17 +5,13 @@
 """Run xz from PATH with a thread for each core in the system."""
 
 from __future__ import division
-from __future__ import print_function
 
 import multiprocessing
 import os
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import osutils
 from chromite.utils import memoize
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @memoize.Memoize

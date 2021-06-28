@@ -1,24 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for cros_install_debug_syms.py"""
 
-from __future__ import print_function
-
 from collections import namedtuple
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_install_debug_syms
 from chromite.utils import outcap
 
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 SimpleIndex = namedtuple('SimpleIndex', 'header packages')

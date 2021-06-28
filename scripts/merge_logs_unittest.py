@@ -1,24 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for merge_logs."""
 
-from __future__ import print_function
-
 import datetime
-import sys
 
 import dateutil.tz  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import merge_logs
-
-pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 TZOFFSET = dateutil.tz.tzoffset(None, -25200)
@@ -94,8 +85,8 @@ class ParsePowerdDateTest(ParseDateTestBase):
                                            TZOFFSET))
 
 
-class ParseFileContentsTest(cros_test_lib.TestCase):
-  """Test that ParseFileContents behaves correctly."""
+class ParseFileContentsTest(ParseDateTestBase):
+  """Test that parsers can parse old and new log formats."""
 
   def testParseSysinfoPatterns(self):
     filename = 'messages'
@@ -104,13 +95,59 @@ class ParseFileContentsTest(cros_test_lib.TestCase):
 
     logs = merge_logs.ParseFileContents(filename, content)
     lines = content.splitlines()
+    expected_logs = [
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 7, 31, 7, 5, 10, 257860, TZOFFSET),
+            log=lines[0]),
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 7, 31, 7, 5, 10, 257860,
+                                   dateutil.tz.tzutc()),
+            log=lines[1])
+    ]
 
-    self.assertEqual(len(logs), 2)
-    self.assertEqual(logs[0].filename, filename)
-    self.assertEqual(logs[0].date,
-                     datetime.datetime(2017, 7, 31, 7, 5, 10, 257860, TZOFFSET))
-    self.assertEqual(logs[0].log, lines[0])
-    self.assertEqual(
-        logs[1].date,
-        datetime.datetime(2017, 7, 31, 7, 5, 10, 257860, dateutil.tz.tzutc()))
-    self.assertEqual(logs[1].log, lines[1])
+    self.assertCountEqual(logs, expected_logs)
+
+  def testParseChromePatterns(self):
+    filename = 'ui.LATEST'
+    content = """[1694:1694:0731/072833.409065:VERBOSE1:main.cc(480)] Error
+2017-01-27T05:34:14.464052Z ERROR chrome[1694:1694]: [main.cc(11)] Error"""
+
+    logs = merge_logs.ParseFileContents(filename, content)
+    lines = content.splitlines()
+    expected_logs = [
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 7, 31, 7, 28, 33, 409065, TZOFFSET),
+            log=lines[0]),
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 1, 27, 5, 34, 14, 464052,
+                                   dateutil.tz.tzutc()),
+            log=lines[1])
+    ]
+
+    self.assertCountEqual(logs, expected_logs)
+
+  def testParsePowerdPatterns(self):
+    filename = 'powerd.LATEST'
+    content = """[0731/070232:INFO:main.cc(289)] System uptime: 5s
+2017-01-27T05:34:14.464052Z INFO powerd: [main.cc(289)] System uptime: 5s"""
+
+    logs = merge_logs.ParseFileContents(filename, content)
+
+    lines = content.splitlines()
+    expected_logs = [
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 7, 31, 7, 2, 32, 0, TZOFFSET),
+            log=lines[0]),
+        merge_logs.Log(
+            filename=filename,
+            date=datetime.datetime(2017, 1, 27, 5, 34, 14, 464052,
+                                   dateutil.tz.tzutc()),
+            log=lines[1])
+    ]
+
+    self.assertCountEqual(logs, expected_logs)

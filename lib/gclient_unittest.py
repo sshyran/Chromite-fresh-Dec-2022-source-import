@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for gclient.py."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gclient
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestGclientWriteConfigFile(cros_test_lib.RunCommandTempDirTestCase):
@@ -43,7 +36,6 @@ class TestGclientWriteConfigFile(cros_test_lib.RunCommandTempDirTestCase):
     gclient.WriteConfigFile('gclient', self._TEST_CWD, False, None)
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git'}]
@@ -57,7 +49,6 @@ cache_dir = '/b/git-cache'
                             git_cache_dir='/exists')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git'}]
@@ -71,7 +62,6 @@ cache_dir = '/exists'
                             git_cache_dir='/doesnotexist')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git'}]
@@ -85,7 +75,6 @@ cache_dir = '/tmp/git-cache'
                             use_cache=False)
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git'}]
@@ -96,17 +85,11 @@ target_os = ['chromeos']
     """Test WriteConfigFile with chrome checkout and no revision."""
     gclient.WriteConfigFile('gclient', self._TEST_CWD, True, None)
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'managed': True,
   'name': 'src',
-  'url': 'https://chromium.googlesource.com/chromium/src.git'},
- {'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
-  'managed': True,
-  'name': 'src-internal',
-  'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git'}]
+  'url': 'https://chromium.googlesource.com/chromium/src.git'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)
@@ -117,7 +100,6 @@ cache_dir = '/b/git-cache'
                             '7becbe4afb42b3301d42149d7d1cade017f150ff')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'}]
@@ -130,17 +112,11 @@ cache_dir = '/b/git-cache'
     gclient.WriteConfigFile('gclient', self._TEST_CWD, True,
                             '7becbe4afb42b3301d42149d7d1cade017f150ff')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'managed': True,
   'name': 'src',
-  'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'},
- {'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
-  'managed': True,
-  'name': 'src-internal',
-  'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git'}]
+  'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)
@@ -150,7 +126,6 @@ cache_dir = '/b/git-cache'
     gclient.WriteConfigFile('gclient', self._TEST_CWD, False, 'HEAD')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git@HEAD'}]
@@ -162,17 +137,11 @@ cache_dir = '/b/git-cache'
     """Test WriteConfigFile with chrome checkout at a given git revision."""
     gclient.WriteConfigFile('gclient', self._TEST_CWD, True, 'HEAD')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'managed': True,
   'name': 'src',
-  'url': 'https://chromium.googlesource.com/chromium/src.git@HEAD'},
- {'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
-  'managed': True,
-  'name': 'src-internal',
-  'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git'}]
+  'url': 'https://chromium.googlesource.com/chromium/src.git@HEAD'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)
@@ -183,17 +152,11 @@ cache_dir = '/b/git-cache'
                             '7becbe4afb42b3301d42149d7d1cade017f150ff',
                             managed=False)
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'managed': False,
   'name': 'src',
-  'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'},
- {'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
-  'managed': False,
-  'name': 'src-internal',
-  'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git'}]
+  'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)
@@ -202,7 +165,8 @@ cache_dir = '/b/git-cache'
     """Test WriteConfigFile with chrome checkout at a given release tag."""
     gclient.WriteConfigFile('gclient', self._TEST_CWD, True, '45.0.2431.1')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'deps_file': 'releases/45.0.2431.1/DEPS',
   'managed': True,
   'name': 'CHROME_DEPS',
@@ -216,10 +180,9 @@ cache_dir = '/b/git-cache'
     gclient.WriteConfigFile('gclient', self._TEST_CWD, False, '41.0.2270.0')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
   'custom_vars': {},
-  'deps_file': '.DEPS.git',
   'managed': True,
   'name': 'src',
-  'url': 'https://chromium.googlesource.com/chromium/src.git@refs/tags/41.0.2270.0'}]
+  'url': 'https://chromium.googlesource.com/chromium/src.git@41.0.2270.0'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)
@@ -228,7 +191,8 @@ cache_dir = '/b/git-cache'
     """Test WriteConfigFile with chrome checkout at a given release tag."""
     gclient.WriteConfigFile('gclient', self._TEST_CWD, True, '41.0.2270.0')
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
-  'custom_vars': {},
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'deps_file': 'releases/41.0.2270.0/.DEPS.git',
   'managed': True,
   'name': 'CHROME_DEPS',
@@ -264,19 +228,40 @@ cache_dir = '/b/git-cache'
                             '7becbe4afb42b3301d42149d7d1cade017f150ff',
                             template=template_path)
     self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {'dep1': '1'},
-  'custom_vars': {'var1': 'test1', 'var2': 'test2'},
-  'deps_file': '.DEPS.git',
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True,
+                  'var1': 'test1',
+                  'var2': 'test2'},
   'managed': True,
   'name': 'src',
   'url': 'https://chromium.googlesource.com/chromium/src.git@7becbe4afb42b3301d42149d7d1cade017f150ff'},
  {'custom_deps': {'dep2': '2', 'dep3': '3'}, 'name': 'no-vars'},
- {'custom_vars': {'var3': 'a', 'var4': 'b'}, 'name': 'no-deps'},
- {'custom_deps': {},
-  'custom_vars': {},
-  'deps_file': '.DEPS.git',
+ {'custom_vars': {'var3': 'a', 'var4': 'b'}, 'name': 'no-deps'}]
+target_os = ['chromeos']
+cache_dir = '/b/git-cache'
+""")
+
+  def testChromeSpecWithReleaseTagAfter90(self):
+    """Test WriteConfigFile with chrome checkout at a given release tag."""
+    gclient.WriteConfigFile('gclient', self._TEST_CWD, True, '91.0.2431.1')
+    self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
+  'custom_vars': {'checkout_google_internal': True,
+                  'checkout_src_internal': True},
   'managed': True,
-  'name': 'src-internal',
-  'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git'}]
+  'name': 'src',
+  'url': 'https://chromium.googlesource.com/chromium/src.git@91.0.2431.1'}]
+target_os = ['chromeos']
+cache_dir = '/b/git-cache'
+""")
+
+  def testChromeSpecWithReleaseTagPublicAfter90(self):
+    """Test WriteConfigFile with chrome checkout at a given release tag."""
+    gclient.WriteConfigFile('gclient', self._TEST_CWD, False, '91.0.2431.1')
+    self._AssertGclientConfigSpec("""solutions = [{'custom_deps': {},
+  'custom_vars': {},
+  'managed': True,
+  'name': 'src',
+  'url': 'https://chromium.googlesource.com/chromium/src.git@91.0.2431.1'}]
 target_os = ['chromeos']
 cache_dir = '/b/git-cache'
 """)

@@ -37,7 +37,7 @@ import sys
 
 try:
   # pylint: disable=g-import-not-at-top
-  from google.protobuf.internal import _api_implementation
+  from chromite.third_party.google.protobuf.internal import _api_implementation
   # The compile-time constants in the _api_implementation module can be used to
   # switch to a certain implementation of the Python API at build time.
   _api_version = _api_implementation.api_version
@@ -54,7 +54,7 @@ if _api_version < 0:  # Still unspecified?
     # be upgraded merely via build deps rather than a compiler flag or the
     # runtime environment variable.
     # pylint: disable=g-import-not-at-top
-    from google.protobuf import _use_fast_cpp_protos
+    from chromite.third_party.google.protobuf import _use_fast_cpp_protos
     # Work around a known issue in the classic bootstrap .par import hook.
     if not _use_fast_cpp_protos:
       raise ImportError('_use_fast_cpp_protos import succeeded but was None')
@@ -63,7 +63,7 @@ if _api_version < 0:  # Still unspecified?
   except ImportError:
     try:
       # pylint: disable=g-import-not-at-top
-      from google.protobuf.internal import use_pure_python
+      from chromite.third_party.google.protobuf.internal import use_pure_python
       del use_pure_python  # Avoids a pylint error and namespace pollution.
     except ImportError:
       # TODO(b/74017912): It's unsafe to enable :use_fast_cpp_protos by default;
@@ -123,7 +123,7 @@ try:
   # this boolean outside of this module.
   #
   # pylint: disable=g-import-not-at-top,unused-import
-  from google.protobuf import enable_deterministic_proto_serialization
+  from chromite.third_party.google.protobuf import enable_deterministic_proto_serialization
   _python_deterministic_proto_serialization = True
 except ImportError:
   _python_deterministic_proto_serialization = False
@@ -137,6 +137,12 @@ def Type():
   return _implementation_type
 
 
+def _SetType(implementation_type):
+  """Never use! Only for protobuf benchmark."""
+  global _implementation_type
+  _implementation_type = implementation_type
+
+
 # See comment on 'Type' above.
 def Version():
   return _implementation_version
@@ -145,29 +151,3 @@ def Version():
 # For internal use only
 def IsPythonDefaultSerializationDeterministic():
   return _python_deterministic_proto_serialization
-
-# DO NOT USE: For migration and testing only. Will be removed when Proto3
-# defaults to preserve unknowns.
-if _implementation_type == 'cpp':
-  try:
-    # pylint: disable=g-import-not-at-top
-    from google.protobuf.pyext import _message
-
-    def GetPythonProto3PreserveUnknownsDefault():
-      return _message.GetPythonProto3PreserveUnknownsDefault()
-
-    def SetPythonProto3PreserveUnknownsDefault(preserve):
-      _message.SetPythonProto3PreserveUnknownsDefault(preserve)
-  except ImportError:
-    # Unrecognized cpp implementation. Skipping the unknown fields APIs.
-    pass
-else:
-  _python_proto3_preserve_unknowns_default = True
-
-  def GetPythonProto3PreserveUnknownsDefault():
-    return _python_proto3_preserve_unknowns_default
-
-  def SetPythonProto3PreserveUnknownsDefault(preserve):
-    global _python_proto3_preserve_unknowns_default
-    _python_proto3_preserve_unknowns_default = preserve
-

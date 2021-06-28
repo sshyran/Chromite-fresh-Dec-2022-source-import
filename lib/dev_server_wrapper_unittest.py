@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module tests helpers in devserver_wrapper."""
 
-from __future__ import print_function
-
 from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import partial_mock
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

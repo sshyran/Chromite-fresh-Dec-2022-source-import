@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,25 +17,17 @@ libraries loaded at runtime with dlopen(). It also computes size and file type
 in several cases to help understand the contents of the built image.
 """
 
-from __future__ import print_function
-
 import json
 import multiprocessing
 import os
 import stat
-import sys
-
-from six.moves import map as imap
 
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import filetype
 from chromite.lib import parseelf
 from chromite.lib import portage_util
-from chromite.scripts import lddtree
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party import lddtree
 
 
 # Regex to parse Gentoo atoms. This should match the following ebuild names,
@@ -90,7 +81,7 @@ class DepTracker(object):
       self._pool = multiprocessing.Pool(jobs)
       self._imap = self._pool.map
     else:
-      self._imap = imap
+      self._imap = map
 
     self._files = {}
     self._ebuilds = {}

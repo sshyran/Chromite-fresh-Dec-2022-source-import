@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the test stages."""
-
-from __future__ import print_function
 
 import collections
 import os
@@ -14,6 +11,7 @@ from chromite.cbuildbot import afdo
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import build_target_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -179,8 +177,8 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       # a different bucket for PFQ AFDO. Also for async AFDO builders, no need
       # to check here because there's an earlier check to avoid generating
       # AFDO for the same version.
-      if not self._run.config.afdo_generate_async and \
-         afdo.CheckAFDOPerfData(cpv, arch, gs.GSContext()):
+      if (not self._run.config.afdo_generate_async and
+          afdo.CheckAFDOPerfData(cpv, arch, gs.GSContext())):
         logging.info(
             'AFDO profile already generated for arch %s '
             'and Chrome %s. Not generating it again', arch,
@@ -462,7 +460,7 @@ class DebugInfoTestStage(generic_stages.BoardSpecificBuilderStage,
     cmd = [
         'debug_info_test',
         os.path.join(
-            cros_build_lib.GetSysroot(board=self._current_board),
+            build_target_lib.get_default_sysroot_path(self._current_board),
             'usr/lib/debug')
     ]
     cros_build_lib.run(cmd, enter_chroot=True)

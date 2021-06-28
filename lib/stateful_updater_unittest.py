@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for StatefulUpdater."""
 
-from __future__ import print_function
-
 import os
 import shutil
+from unittest import mock
 
-import mock
-
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import stateful_updater
-from chromite.lib import partial_mock
+
 
 # pylint: disable=protected-access
 
@@ -77,6 +74,21 @@ class StatefulUpdaterTest(cros_test_lib.MockTempDirTestCase):
           device, stateful_dir=self._stateful_dir)
 
       updater.Update(self._payload)
+      self.assertEqual(osutils.ReadFile(os.path.join(
+          self._stateful_dir, updater._UPDATE_TYPE_FILE)), '')
+
+  def testUpdateFileDescriptor(self):
+    """Tests Update function with file descriptor input."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      updater = stateful_updater.StatefulUpdater(
+          device, stateful_dir=self._stateful_dir)
+
+      r, w = os.pipe()
+      with os.fdopen(w, 'wb') as fp:
+        fp.write(osutils.ReadFile(self._payload, 'rb'))
+
+      updater.Update(r, is_payload_on_device=False)
+      os.close(r)
       self.assertEqual(osutils.ReadFile(os.path.join(
           self._stateful_dir, updater._UPDATE_TYPE_FILE)), '')
 

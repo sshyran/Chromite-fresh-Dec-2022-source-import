@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,9 +10,8 @@ This takes care of creating a consistent environment for chromite scripts
 lots of places.
 """
 
-from __future__ import print_function
-
 import importlib
+import importlib.abc
 import os
 import sys
 
@@ -27,10 +25,17 @@ if sys.version_info < (3, 6):
   sys.exit(1)
 
 
-CHROMITE_PATH = None
+CHROMITE_PATH = os.path.dirname(os.path.realpath(__file__))
+while not os.path.exists(os.path.join(CHROMITE_PATH, 'PRESUBMIT.cfg')):
+  CHROMITE_PATH = os.path.dirname(CHROMITE_PATH)
+  assert str(CHROMITE_PATH) != '/', 'Unable to locate chromite dir'
+CHROMITE_PATH += '/'
 
 
-class ChromiteImporter(object):
+# module_repr triggers an abstract warning, but it's deprecated in Python 3.+,
+# so we don't want to bother implementing it.
+# pylint: disable=abstract-method
+class ChromiteLoader(importlib.abc.Loader):
   """Virtual chromite module
 
   If the checkout is not named 'chromite', trying to do 'from chromite.xxx'
@@ -44,41 +49,49 @@ class ChromiteImporter(object):
   import would also search those for .py modules.
   """
 
-  # When trying to load the chromite dir from disk, we'll get called again,
-  # so make sure to disable our logic to avoid an infinite loop.
-  _loading = False
+  def __init__(self):
+    # When trying to load the chromite dir from disk, we'll get called again,
+    # so make sure to disable our logic to avoid an infinite loop.
+    self.loading = False
 
-  def find_module(self, fullname, _path=None):
-    """Handle the 'chromite' module"""
-    if fullname == 'chromite' and not self._loading:
-      return self
-    return None
-
-  def load_module(self, _fullname):
-    """Return our cache of the 'chromite' module"""
-    # Locate the top of the chromite dir by searching for the PRESUBMIT.cfg
-    # file.  This assumes that file isn't found elsewhere in the tree.
-    path = os.path.dirname(os.path.realpath(__file__))
-    while not os.path.exists(os.path.join(path, 'PRESUBMIT.cfg')):
-      path = os.path.dirname(path)
-
-    # pylint: disable=global-statement
-    global CHROMITE_PATH
-    CHROMITE_PATH = path + '/'
-
-    # Finally load the chromite dir.
-    path, mod = os.path.split(path)
+  # pylint: disable=unused-argument
+  def create_module(self, spec):
+    """Load the current dir."""
+    if self.loading:
+      return None
+    path, mod = os.path.split(CHROMITE_PATH[:-1])
     sys.path.insert(0, path)
-    self._loading = True
+    self.loading = True
     try:
       return importlib.import_module(mod)
     finally:
       # We can't pop by index as the import might have changed sys.path.
       sys.path.remove(path)
-      self._loading = False
+      self.loading = False
+
+  # pylint: disable=unused-argument
+  def exec_module(self, module):
+    """Required stub as a loader."""
 
 
-sys.meta_path.insert(0, ChromiteImporter())
+class ChromiteFinder(importlib.abc.MetaPathFinder):
+  """Virtual chromite finder.
+
+  We'll route any requests for the 'chromite' module.
+  """
+
+  def __init__(self, loader):
+    self._loader = loader
+
+  # pylint: disable=unused-argument
+  def find_spec(self, fullname, path=None, target=None):
+    if fullname != 'chromite' or self._loader.loading:
+      return None
+    return importlib.machinery.ModuleSpec(fullname, self._loader)
+
+
+sys.meta_path.insert(0, ChromiteFinder(ChromiteLoader()))
+
 
 # We have to put these imports after our meta-importer above.
 # pylint: disable=wrong-import-position
@@ -134,7 +147,7 @@ def FindTarget(target):
         '\tparent: %s\n'
         '\tCHROMITE_PATH: %s' % (parent, CHROMITE_PATH))
     parent = parent[len(CHROMITE_PATH):].split(os.sep)
-    target = ['chromite'] + parent + [target]
+    target = ['chromite'] + parent + [target.replace('-', '_')]
 
     if target[1] == 'bin':
       # Convert chromite/bin/foo -> chromite/scripts/foo.
@@ -171,6 +184,20 @@ def FindTarget(target):
   if target[-1].rsplit('_', 1)[-1] in ('test', 'unittest'):
     from chromite.lib import cros_test_lib
     return lambda _argv: cros_test_lib.main(module=module)
+
+  # Is this a package?  Import it like `python -m...` does.
+  if target != 'wrapper3.py':
+    mod_name = '.'.join(target + ['__main__'])
+    try:
+      module = importlib.import_module(mod_name)
+    except ImportError:
+      module = None
+    if module:
+      spec = importlib.util.find_spec(mod_name)
+      loader = spec.loader
+      code = loader.get_code(mod_name)
+      # pylint: disable=exec-used
+      return lambda _argv: exec(code, {**globals(), '__name__': '__main__'})
 
 
 def DoMain():

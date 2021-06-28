@@ -1,21 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests the gce module."""
 
-from __future__ import print_function
-
 import os
-
-from googleapiclient.errors import HttpError
-from googleapiclient.http import HttpMockSequence
-from oauth2client.client import GoogleCredentials
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gce
 from chromite.lib import osutils
+from chromite.third_party.googleapiclient.errors import HttpError
+from chromite.third_party.googleapiclient.http import HttpMockSequence
+from chromite.third_party.oauth2client.client import GoogleCredentials
 
 
 class GceTest(cros_test_lib.MockTempDirTestCase):
@@ -32,7 +28,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(gce.GceContext, 'GetZoneRegion', autospec=True,
                      return_value=self._ZONE)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetImage(self):
     """Tests that GetImage returns the correct image."""
     good_http = HttpMockSequence([
@@ -47,7 +43,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     self.assertDictEqual(gce_context.GetImage('foo-image'),
                          dict(name='foo-image'))
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetImageRaisesIfImageNotFound(self):
     """Tests that GetImage raies exception when image is not found."""
     bad_http = HttpMockSequence([
@@ -62,7 +58,7 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     with self.assertRaises(gce.ResourceNotFoundError):
       gce_context.GetImage('not-exising-image')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testRetryOnServerErrorHttpRequest(self):
     """Tests that 500 errors are retried."""
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,22 +9,21 @@
 
 """Unit tests for afdo module."""
 
-from __future__ import print_function
-
 import collections
 import datetime
 import json
 import os
-import sys
 import time
+from unittest import mock
 
-import mock
 from chromite.cbuildbot import afdo
-from chromite.lib import (cros_build_lib, cros_test_lib, gs, osutils, path_util)
+from chromite.lib import cros_build_lib
+from chromite.lib import cros_test_lib
+from chromite.lib import gs
+from chromite.lib import osutils
+from chromite.lib import path_util
 from chromite.lib.parser import package_info
 
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 MockGsFile = collections.namedtuple('MockGsFile', ['url', 'creation_time'])
 
@@ -345,10 +343,9 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
   def testCreateAndUploadMergedAFDOProfileMergesBranchProfiles(self):
     unmerged_name = _benchmark_afdo_profile_name(major=10, build=13, patch=99)
 
-    _, uploaded, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            recent_to_merge=5,
-            unmerged_name=unmerged_name)
+    _, uploaded, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=5,
+        unmerged_name=unmerged_name)
     self.assertTrue(uploaded)
 
     def _afdo_name(major, build, patch=0, merged_suffix=False):
@@ -383,10 +380,9 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
   def testCreateAndUploadMergedAFDOProfileRemovesIndirectCallTargets(self):
     unmerged_name = _benchmark_afdo_profile_name(major=10, build=13, patch=99)
 
-    merged_name, uploaded, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            recent_to_merge=2,
-            unmerged_name=unmerged_name)
+    merged_name, uploaded, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=2,
+        unmerged_name=unmerged_name)
     self.assertTrue(uploaded)
 
     def _afdo_name(major, build, patch=0, merged_suffix=False):
@@ -420,8 +416,8 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
         '/tmp/' + merge_output_name, '/tmp/' + merged_name)
 
   def testCreateAndUploadMergedAFDOProfileWorksInTheHappyCase(self):
-    merged_name, uploaded, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(recent_to_merge=5)
+    merged_name, uploaded, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=5)
 
     self.assertTrue(uploaded)
     # Note that we always return the *basename*
@@ -494,48 +490,43 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
     ))
 
   def testCreateAndUploadMergedAFDOProfileSucceedsIfUploadFails(self):
-    merged_name, uploaded, _ = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(upload_ok=False)
+    merged_name, uploaded, _ = self.runCreateAndUploadMergedAFDOProfileOnce(
+        upload_ok=False)
     self.assertIsNotNone(merged_name)
     self.assertFalse(uploaded)
 
   def testMergeIsOKIfWeFindFewerProfilesThanWeWant(self):
-    merged_name, uploaded, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(recent_to_merge=1000,
-                                                     max_age_days=1000)
+    merged_name, uploaded, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        recent_to_merge=1000, max_age_days=1000)
     self.assertTrue(uploaded)
     self.assertIsNotNone(merged_name)
     self.assertEqual(mocks.gs_context.Copy.call_count, 9)
 
   def testNoProfileIsGeneratedIfNoFilesBeforeMergedNameExist(self):
-    merged_name, uploaded, _ = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
+    merged_name, uploaded, _ = self.runCreateAndUploadMergedAFDOProfileOnce(
             unmerged_name=_benchmark_afdo_profile_name())
     self.assertIsNone(merged_name)
     self.assertFalse(uploaded)
 
-    merged_name, uploaded, _ = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            unmerged_name=_benchmark_afdo_profile_name(major=10, build=8))
+    merged_name, uploaded, _ = self.runCreateAndUploadMergedAFDOProfileOnce(
+        unmerged_name=_benchmark_afdo_profile_name(major=10, build=8))
     self.assertIsNone(merged_name)
     self.assertFalse(uploaded)
 
-    merged_name, uploaded, _ = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            unmerged_name=_benchmark_afdo_profile_name(major=10, build=9))
+    merged_name, uploaded, _ = self.runCreateAndUploadMergedAFDOProfileOnce(
+        unmerged_name=_benchmark_afdo_profile_name(major=10, build=9))
     self.assertIsNone(merged_name)
     self.assertFalse(uploaded)
 
-    merged_name, uploaded, _ = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(
-            unmerged_name=_benchmark_afdo_profile_name(major=10, build=10))
+    merged_name, uploaded, _ = self.runCreateAndUploadMergedAFDOProfileOnce(
+        unmerged_name=_benchmark_afdo_profile_name(major=10, build=10))
     self.assertIsNotNone(merged_name)
     self.assertTrue(uploaded)
 
   def testNoFilesAfterUnmergedNameAreIncluded(self):
     max_name = _benchmark_afdo_profile_name(major=10, build=11)
-    merged_name, uploaded, mocks = \
-        self.runCreateAndUploadMergedAFDOProfileOnce(unmerged_name=max_name)
+    merged_name, uploaded, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+        unmerged_name=max_name)
 
     self.assertEqual(
         _benchmark_afdo_profile_name(
@@ -693,7 +684,8 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
     ebuilds = [(os.path.basename(ebuild[0]), ebuild[1])
                for ebuild in afdo.FindKernelEbuilds()]
     self.assertIn(('chromeos-kernel-4_4-9999.ebuild', '4.4'), ebuilds)
-    self.assertIn(('chromeos-kernel-3_8-9999.ebuild', '3.8'), ebuilds)
+    self.assertIn(('chromeos-kernel-4_19-9999.ebuild', '4.19'), ebuilds)
+    self.assertIn(('chromeos-kernel-5_4-9999.ebuild', '5.4'), ebuilds)
 
   def testProfileAge(self):
     self.assertEqual(0, afdo.ProfileAge([0, 0, 0, int(time.time())]))

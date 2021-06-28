@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the various individual commands a builder can run."""
-
-from __future__ import print_function
 
 import base64
 import collections
@@ -21,14 +18,14 @@ import subprocess
 import sys
 import tempfile
 
-from google.protobuf import json_format
-import six
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.chromite.api import android_pb2
 
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
 
+from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cipd
 from chromite.lib import config_lib
@@ -48,14 +45,11 @@ from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import sysroot_lib
 from chromite.lib import timeout_util
-
+from chromite.lib.parser import package_info
 from chromite.lib.paygen import filelib
 
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'
@@ -151,8 +145,8 @@ def RunBuildScript(buildroot, cmd, chromite_cmd=False, **kwargs):
       kwargs['extra_env'] = (kwargs.get('extra_env') or {}).copy()
       status_file = stack.Add(tempfile.NamedTemporaryFile, dir=chroot_tmp,
                               mode='w+', encoding='utf-8')
-      kwargs['extra_env'][constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = \
-          path_util.ToChrootPath(status_file.name)
+      kwargs['extra_env'][constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = (
+          path_util.ToChrootPath(status_file.name))
     runcmd = cros_build_lib.run
     if sudo:
       runcmd = cros_build_lib.sudo_run
@@ -474,8 +468,7 @@ def SetupToolchains(buildroot,
   if sysroot:
     cmd += ['--sysroot', sysroot]
   if boards:
-    boards_str = (boards if isinstance(boards, six.string_types)
-                  else ','.join(boards))
+    boards_str = boards if isinstance(boards, str) else ','.join(boards)
     cmd += ['--include-boards', boards_str]
   if output_dir:
     cmd += ['--output-dir', output_dir]
@@ -644,9 +637,10 @@ def GetFirmwareVersionCmdResult(buildroot, board):
   Returns:
     Command execution result.
   """
-  updater = os.path.join(buildroot, constants.DEFAULT_CHROOT_DIR,
-                         cros_build_lib.GetSysroot(board).lstrip(os.path.sep),
-                         'usr', 'sbin', 'chromeos-firmwareupdate')
+  updater = os.path.join(
+      buildroot, constants.DEFAULT_CHROOT_DIR,
+      build_target_lib.get_default_sysroot_path(board).lstrip(os.path.sep),
+      'usr', 'sbin', 'chromeos-firmwareupdate')
   if not os.path.isfile(updater):
     return ''
   updater = path_util.ToChrootPath(updater)
@@ -765,8 +759,8 @@ def RunCrosConfigHost(buildroot, board, args, log_output=True):
   tool = path_util.ToChrootPath(tool)
 
   config_fname = os.path.join(
-      cros_build_lib.GetSysroot(board), 'usr', 'share', 'chromeos-config',
-      'yaml', 'config.yaml')
+      build_target_lib.get_default_sysroot_path(board), 'usr', 'share',
+      'chromeos-config', 'yaml', 'config.yaml')
   result = cros_build_lib.run(
       [tool, '-c', config_fname] + args,
       enter_chroot=True,
@@ -852,15 +846,6 @@ def BuildImage(buildroot,
       enter_chroot=True,
       extra_env=extra_env,
       chroot_args=chroot_args)
-
-
-def BuildVMImageForTesting(buildroot, board, extra_env=None, disk_layout=None):
-  cmd = ['./image_to_vm.sh', '--board=%s' % board, '--test_image']
-
-  if disk_layout:
-    cmd += ['--disk_layout=%s' % disk_layout]
-
-  RunBuildScript(buildroot, cmd, extra_env=extra_env, enter_chroot=True)
 
 
 def RunTestImage(buildroot, board, image_dir, results_dir):
@@ -1818,7 +1803,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
   stack_trace_filenames = []
   asan_log_signaled = False
 
-  board_path = cros_build_lib.GetSysroot(board=board)
+  board_path = build_target_lib.get_default_sysroot_path(board)
   symbol_dir = os.path.join(board_path, 'usr', 'lib', 'debug', 'breakpad')
   for curr_dir, _subdirs, files in os.walk(test_results_dir):
     for curr_file in files:
@@ -1938,14 +1923,12 @@ class ChromeIsPinnedUprevError(failures_lib.InfrastructureFailure):
 
 
 def MarkAndroidAsStable(buildroot,
-                        tracking_branch,
                         android_package,
                         android_build_branch,
                         boards=None,
                         android_version=None):
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   input_msg = android_pb2.MarkStableRequest()
-  input_msg.tracking_branch = tracking_branch
   input_msg.package_name = android_package
   input_msg.android_build_branch = android_build_branch
   if android_version:
@@ -1989,12 +1972,11 @@ def MarkChromeAsStable(buildroot,
                        boards,
                        chrome_version=None):
   """Returns the portage atom for the revved chrome ebuild - see man emerge."""
-  cwd = os.path.join(buildroot, 'src', 'scripts')
   extra_env = None
   chroot_args = None
 
   command = [
-      '../../chromite/bin/cros_mark_chrome_as_stable',
+      'cros_mark_chrome_as_stable',
       '--tracking_branch=%s' % tracking_branch
   ]
   if boards:
@@ -2002,9 +1984,10 @@ def MarkChromeAsStable(buildroot,
   if chrome_version:
     command.append('--force_version=%s' % chrome_version)
 
-  portage_atom_string = cros_build_lib.run(
+  portage_atom_string = RunBuildScript(
+      buildroot,
       command + [chrome_rev],
-      cwd=cwd,
+      chromite_cmd=True,
       stdout=True,
       enter_chroot=True,
       chroot_args=chroot_args,
@@ -2021,19 +2004,14 @@ def MarkChromeAsStable(buildroot,
     # If we're using a version of Chrome other than the latest one, we need
     # to unmask it manually.
     if chrome_rev != constants.CHROME_REV_LATEST:
-      keywords_file = CHROME_KEYWORDS_FILE % {'board': board}
-      for keywords_file in (CHROME_KEYWORDS_FILE % {
-          'board': board
-      }, CHROME_UNMASK_FILE % {
-          'board': board
-      }):
-        cros_build_lib.sudo_run(
-            ['mkdir', '-p', os.path.dirname(keywords_file)],
-            enter_chroot=True,
-            cwd=cwd)
-        cros_build_lib.sudo_run(['tee', keywords_file],
-                                input='=%s\n' % chrome_atom,
-                                enter_chroot=True, cwd=cwd)
+      data = f'={chrome_atom}\n'
+      atom = package_info.parse(chrome_atom)
+      for package in constants.OTHER_CHROME_PACKAGES:
+        data += f'={package}-{atom.vr}\n'
+
+      for cfg_file in (CHROME_KEYWORDS_FILE, CHROME_UNMASK_FILE):
+        cfg_file %= {'board': board}
+        osutils.WriteFile(cfg_file, data, makedirs=True, sudo=True)
 
     # Sanity check: We should always be able to merge the version of
     # Chrome we just unmasked.
@@ -2211,8 +2189,8 @@ def GenerateBuildConfigs(board, config_useflags):
     and use flags.
   """
   config_chroot_path = os.path.join(
-      cros_build_lib.GetSysroot(board), 'usr', 'share', 'chromeos-config',
-      'yaml', 'config.yaml')
+      build_target_lib.get_default_sysroot_path(board), 'usr', 'share',
+      'chromeos-config', 'yaml', 'config.yaml')
 
   config_fname = path_util.FromChrootPath(config_chroot_path)
 
@@ -2302,7 +2280,7 @@ def GenerateAndroidBreakpadSymbols(buildroot,
     extra_env: A dictionary of environmental variables to set during generation.
     chroot_args: The args to the chroot.
   """
-  board_path = cros_build_lib.GetSysroot(board=board)
+  board_path = build_target_lib.get_default_sysroot_path(board)
   breakpad_dir = os.path.join(board_path, 'usr', 'lib', 'debug', 'breakpad')
   cmd = [
       'cros_generate_android_breakpad_symbols',
@@ -2422,7 +2400,7 @@ def GenerateHtmlIndex(index, files, title='Index', url_base=None):
     return ('<li><a href="%s%s">%s</a></li>' % (url_base, target,
                                                 name if name else target))
 
-  if isinstance(files, six.string_types):
+  if isinstance(files, str):
     if os.path.isdir(files):
       files = os.listdir(files)
     else:
@@ -3387,11 +3365,8 @@ def BuildFactoryZip(buildroot,
   """
   filename = 'factory_image.zip'
 
-  # Creates a staging temporary folder.
-  temp_dir = tempfile.mkdtemp(prefix='cbuildbot_factory')
-
   zipfile = os.path.join(archive_dir, filename)
-  cmd = ['zip', '-r', zipfile, '.']
+  cmd = ['zip', '-r', zipfile]
 
   # Rules for archive: { folder: pattern }
   rules = {
@@ -3404,32 +3379,33 @@ def BuildFactoryZip(buildroot,
   for folder, patterns in rules.items():
     if not folder or not os.path.exists(folder):
       continue
+    dirname = os.path.dirname(folder)
     basename = os.path.basename(folder)
-    target = os.path.join(temp_dir, basename)
-    os.symlink(folder, target)
+    pattern_options = []
     for pattern in patterns:
-      cmd.extend(['--include', os.path.join(basename, pattern)])
+      pattern_options.extend(['--include', os.path.join(basename, pattern)])
+    # factory_shim_dir may be a symlink. We can not use '-y' here.
+    cros_build_lib.run(cmd + [basename] + pattern_options, cwd=dirname,
+                       capture_output=True)
 
   # Everything in /usr/local/factory/bundle gets overlaid into the
   # bundle.
   bundle_src_dir = os.path.join(buildroot, 'chroot', 'build', board, 'usr',
                                 'local', 'factory', 'bundle')
   if os.path.exists(bundle_src_dir):
-    for f in os.listdir(bundle_src_dir):
-      src_path = os.path.join(bundle_src_dir, f)
-      os.symlink(src_path, os.path.join(temp_dir, f))
-      cmd.extend([
-          '--include', f if os.path.isfile(src_path) else os.path.join(f, '*')
-      ])
+    cros_build_lib.run(cmd + ['-y', '.'], cwd=bundle_src_dir,
+                       capture_output=True)
 
   # Add a version file in the zip file.
   if version is not None:
-    version_file = os.path.join(temp_dir, 'BUILD_VERSION')
-    osutils.WriteFile(version_file, version)
-    cmd.extend(['--include', version_file])
+    version_filename = 'BUILD_VERSION'
+    # Creates a staging temporary folder.
+    with osutils.TempDir(prefix='cbuildbot_factory') as temp_dir:
+      version_file = os.path.join(temp_dir, version_filename)
+      osutils.WriteFile(version_file, version)
+      cros_build_lib.run(cmd + [version_filename], cwd=temp_dir,
+                         capture_output=True)
 
-  cros_build_lib.run(cmd, cwd=temp_dir, capture_output=True)
-  osutils.RmDir(temp_dir)
   return filename
 
 
@@ -3507,7 +3483,7 @@ def GeneratePayloads(target_image_path,
 
 def GetChromeLKGM(revision):
   """Returns the ChromeOS LKGM from Chrome given the git revision."""
-  revision = revision or 'refs/heads/master'
+  revision = revision or 'HEAD'
   lkgm_url_path = '%s/+/%s/%s?format=text' % (
       constants.CHROMIUM_SRC_PROJECT, revision, constants.PATH_TO_CHROME_LKGM)
   contents_b64 = gob_util.FetchUrl(config_lib.GetSiteParams().EXTERNAL_GOB_HOST,
@@ -3522,7 +3498,8 @@ def SyncChrome(build_root,
                useflags,
                tag=None,
                revision=None,
-               git_cache_dir=None):
+               git_cache_dir=None,
+               workspace=None):
   """Sync chrome.
 
   Args:
@@ -3532,6 +3509,7 @@ def SyncChrome(build_root,
     tag: If supplied, the Chrome tag to sync.
     revision: If supplied, the Chrome revision to sync.
     git_cache_dir: Directory to use for git-cache.
+    workspace: Alternative buildroot directory to sync.
   """
   sync_chrome = os.path.join(build_root, 'chromite', 'bin', 'sync_chrome')
   internal = constants.USE_CHROME_INTERNAL in useflags
@@ -3548,7 +3526,8 @@ def SyncChrome(build_root,
   if git_cache_dir:
     cmd += ['--git_cache_dir', git_cache_dir]
   cmd += [chrome_root]
-  retry_util.RunCommandWithRetries(constants.SYNC_RETRIES, cmd, cwd=build_root)
+  retry_util.RunCommandWithRetries(constants.SYNC_RETRIES, cmd,
+                                   cwd=workspace or build_root)
 
 
 class ChromeSDK(object):

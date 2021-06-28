@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """AP firmware utilities."""
 
-from __future__ import print_function
-
 import collections
 import importlib
+from typing import Optional
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -116,13 +114,15 @@ def build(build_target, fw_name=None, dry_run=False):
 
   logging.notice('Done! AP firmware successfully built.')
 
+
 def deploy(build_target,
            image,
            device,
            flashrom=False,
            fast=False,
            verbose=False,
-           dryrun=False):
+           dryrun=False,
+           flash_contents: Optional[str] = None):
   """Deploy a firmware image to a device.
 
   Args:
@@ -134,6 +134,7 @@ def deploy(build_target,
     verbose (bool): Whether to enable verbose output of the flash commands.
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
+    flash_contents: Path to the file that contains the existing contents.
   """
   try:
     flash_ap.deploy(
@@ -143,7 +144,8 @@ def deploy(build_target,
         flashrom=flashrom,
         fast=fast,
         verbose=verbose,
-        dryrun=dryrun)
+        dryrun=dryrun,
+        flash_contents=flash_contents)
   except flash_ap.Error as e:
     # Reraise as a DeployError for future compatibility.
     raise DeployError(str(e))
@@ -156,16 +158,16 @@ class DeployConfig(object):
   FORCE_FUTILITY = 'futility'
 
   def __init__(self,
-               get_commands,
+               get_config,
                force_fast=None,
                servo_force_command=None,
                ssh_force_command=None):
     """DeployConfig init.
 
     Args:
-      get_commands: A function that takes a servo and returns four sets of
-        commands: The dut on, dut off, flashrom, and futility commands to flash
-        a servo for a particular build target.
+      get_config: A function that takes a servo and returns a
+        servo_lib.FirmwareConfig with settings to flash a servo
+        for a particular build target.
       force_fast: A function that takes two arguments; a bool to indicate if it
         is for a futility (True) or flashrom (False) command.
       servo_force_command: One of the FORCE_{command} constants to force use of
@@ -173,7 +175,7 @@ class DeployConfig(object):
       ssh_force_command: One of the FORCE_{command} constants to force use of
         a specific command, or None to not force.
     """
-    self._get_commands = get_commands
+    self._get_config = get_config
     self._force_fast = force_fast
     self._servo_force_command = servo_force_command
     self._ssh_force_command = ssh_force_command
@@ -220,7 +222,7 @@ class DeployConfig(object):
                          fast=False,
                          verbose=False):
     """Get the servo flash commands from the build target config."""
-    dut_on, dut_off, flashrom_cmd, futility_cmd = self._get_commands(servo)
+    ap_conf = self._get_config(servo)
 
     # Make any forced changes to the given options.
     if not flashrom and self.servo_force_flashrom:
@@ -235,8 +237,15 @@ class DeployConfig(object):
       fast = True
 
     # Make common command additions here to simplify the config modules.
-    flashrom_cmd += [image_path]
-    futility_cmd += [image_path]
+    flashrom_cmd = ['flashrom', '-p', ap_conf.programmer, '-w', image_path]
+    futility_cmd = [
+        'futility',
+        'update',
+        '-p',
+        ap_conf.programmer,
+        '-i',
+        image_path,
+    ]
     futility_cmd += ['--force', '--wp=0']
 
     if fast:
@@ -247,14 +256,14 @@ class DeployConfig(object):
       futility_cmd += ['-v']
 
     return ServoDeployCommands(
-        dut_on=dut_on,
-        dut_off=dut_off,
+        dut_on=ap_conf.dut_control_on,
+        dut_off=ap_conf.dut_control_off,
         flash=flashrom_cmd if flashrom else futility_cmd)
 
 
 def _get_build_config(build_target):
   """Get the relevant build config for |build_target|."""
-  module = _get_config_module(build_target)
+  module = get_config_module(build_target.name)
   workon_pkgs = getattr(module, _CONFIG_BUILD_WORKON_PACKAGES, None)
   build_pkgs = getattr(module, _CONFIG_BUILD_PACKAGES, None)
 
@@ -269,7 +278,7 @@ def _get_build_config(build_target):
 
 def _get_deploy_config(build_target):
   """Get the relevant deploy config for |build_target|."""
-  module = _get_config_module(build_target)
+  module = get_config_module(build_target.name)
 
   # Get the force fast function if available.
   force_fast = getattr(module, 'is_fast_required', None)
@@ -289,17 +298,24 @@ def _get_deploy_config(build_target):
     ssh_force = DeployConfig.FORCE_FUTILITY
 
   return DeployConfig(
-      module.get_commands,
+      module.get_config,
       force_fast=force_fast,
       servo_force_command=servo_force,
       ssh_force_command=ssh_force)
 
 
-def _get_config_module(build_target):
-  """Get the |build_target|'s config module."""
-  name = _BUILD_TARGET_CONFIG_MODULE % build_target.name
+def get_config_module(build_target_name):
+  """Return configuration module for a given build target.
+
+  Args:
+    build_target_name: Name of the build target, e.g. 'dedede'.
+
+  Returns:
+    module: Python configuration module for a given build target.
+  """
+  name = _BUILD_TARGET_CONFIG_MODULE % build_target_name
   try:
     return importlib.import_module(name)
   except ImportError:
     raise BuildTargetNotConfiguredError(
-        'Could not find a config module for %s.' % build_target.name)
+        'Could not find a config module for %s.' % build_target_name)

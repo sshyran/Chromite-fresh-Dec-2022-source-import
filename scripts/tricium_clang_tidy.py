@@ -41,6 +41,8 @@ from typing import (Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple,
                     Union)
 
 import yaml  # pylint: disable=import-error
+
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -48,7 +50,6 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import workon_helper
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 # The directory under which the compiler wrapper stores clang-tidy reports.
 LINT_BASE = Path('/tmp/linting_output/clang-tidy')
@@ -359,7 +360,7 @@ Clang-tidy apparently crashed; dumping lots of invocation info:
                          f'{json_file}. Output:\n{meta.stdstreams}')
 
     with yaml_file.open('rb') as f:
-      yaml_data = yaml.load(f)
+      yaml_data = yaml.safe_load(f)
     return meta, list(parse_tidy_fixes_file(Path(meta.wd), yaml_data))
   except Exception:
     return ExceptionData()
@@ -444,7 +445,8 @@ def setup_tidy(board: str, ebuild_list: List[portage_util.EBuild]):
   packages = [x.package for x in ebuild_list]
   logging.info('Setting up to lint %r', packages)
 
-  workon = workon_helper.WorkonHelper(cros_build_lib.GetSysroot(board))
+  workon = workon_helper.WorkonHelper(
+      build_target_lib.get_default_sysroot_path(board))
   workon.StopWorkingOnPackages(packages=[], use_all=True)
   workon.StartWorkingOnPackages(packages)
 
@@ -475,15 +477,16 @@ def run_tidy(board: str, ebuild_list: List[portage_util.EBuild],
   # Since we rely on build actions _actually_ running, we can't live with a
   # cache.
   osutils.RmDir(
-      Path(cros_build_lib.GetSysroot(board)) / 'var' / 'cache' / 'portage',
+      Path(build_target_lib.get_default_sysroot_path(
+          board)) / 'var' / 'cache' / 'portage',
       ignore_missing=True,
       sudo=True,
   )
 
   results = set()
   # If clang-tidy dumps a lot of diags, it can take 1-10secs of CPU while
-  # holding the GIL to |yaml.load| on my otherwise-idle dev box. |yaml_pool|
-  # lets us do this in parallel.
+  # holding the GIL to |yaml.safe_load| on my otherwise-idle dev box.
+  # |yaml_pool| lets us do this in parallel.
   with multiprocessing.pool.Pool() as yaml_pool:
     for ebuild in ebuild_list:
       lint_tmpdir = generate_lints(board, ebuild.ebuild_path)

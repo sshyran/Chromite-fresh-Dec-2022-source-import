@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module to manage a setup of moblab and its DUT VMs."""
-
-from __future__ import print_function
 
 import collections
 import contextlib
@@ -13,7 +10,6 @@ import json
 import os
 import random
 import shutil
-import sys
 
 from chromite.lib import chroot_util
 from chromite.lib import constants
@@ -23,9 +19,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _CONFIG_FILE_NAME = 'moblabvm.json'

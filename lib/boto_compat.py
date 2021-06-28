@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,21 +10,14 @@ boto/gsutil.
 NOTE: This should eventually be removed as part of crbug.com/845304.
 """
 
-from __future__ import print_function
-
+import configparser
 import contextlib
 import os
-import sys
 import tempfile
-
-from six.moves import configparser
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Path to an updated cacerts.txt file, which will override the cacerts.txt file
@@ -52,7 +44,7 @@ def FixBotoCerts(activate=True, strict=False):
 
   boto_cfg_path = None
   try:
-    config = configparser.SafeConfigParser()
+    config = configparser.ConfigParser()
 
     # Read existing boto config file(s); this mimics what boto itself does.
     if 'BOTO_CONFIG' in os.environ:

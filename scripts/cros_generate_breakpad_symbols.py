@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -17,23 +16,18 @@ files are then stored in /build/$BOARD/usr/lib/debug/breakpad/.
 If you want to actually upload things, see upload_symbols.py.
 """
 
-from __future__ import print_function
-
 import collections
 import ctypes
 import multiprocessing
 import os
-import sys
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import signals
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 SymbolHeader = collections.namedtuple('SymbolHeader',
@@ -80,7 +74,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
     dump_syms_cmd: Command to use for dumping symbols.
 
   Returns:
-    The name of symbol file written out.
+    The name of symbol file written out on success, or the failure count.
   """
   assert breakpad_dir
   if num_errors is None:
@@ -142,7 +136,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
         else:
           num_errors.value += 1
           logging.error('dumping symbols for %s failed:\n%s', elf_file,
-                        result.error)
+                        result.error.decode('utf-8'))
         os.unlink(temp.name)
         return num_errors.value
 
@@ -190,7 +184,7 @@ def GenerateBreakpadSymbols(board, breakpad_dir=None, strip_cfi=False,
     The number of errors that were encountered.
   """
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board=board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   if breakpad_dir is None:
     breakpad_dir = FindBreakpadDir(board, sysroot=sysroot)
   if clean_breakpad:
@@ -288,7 +282,7 @@ def GenerateBreakpadSymbols(board, breakpad_dir=None, strip_cfi=False,
 def FindDebugDir(board, sysroot=None):
   """Given a |board|, return the path to the split debug dir for it"""
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board=board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   return os.path.join(sysroot, 'usr', 'lib', 'debug')
 
 

@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """A library to generate and store the manifests for cros builders to use."""
 
-from __future__ import print_function
-
 import codecs
 import os
 import re
-import sys
 from xml.dom import minidom
 
 from chromite.lib import config_lib
@@ -19,9 +15,6 @@ from chromite.cbuildbot import manifest_version
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Paladin constants for manifest names.
@@ -89,7 +82,7 @@ class _LKGMCandidateInfo(manifest_version.VersionInfo):
     self.revision_number += 1
     return self.VersionString()
 
-  # pylint: disable=arguments-differ
+  # pylint: disable=arguments-differ, signature-differs
   def UpdateVersionFile(self, *args, **kwargs):
     """Update the version file on disk.
 
@@ -135,7 +128,7 @@ class LKGMManager(manifest_version.BuildSpecsManager):
       metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
                 builder.
       buildstore: BuildStore instance to make DB calls.
-      buildbucket_client: Instance of buildbucket_lib.buildbucket_client.
+      buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
     """
     super(LKGMManager, self).__init__(
         source_repo=source_repo, manifest_repo=manifest_repo,

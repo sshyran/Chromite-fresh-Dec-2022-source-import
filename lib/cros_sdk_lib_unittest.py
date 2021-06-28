@@ -1,23 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the cros_sdk_lib module."""
 
-from __future__ import print_function
-
 import os
-import sys
+from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class VersionHookTestCase(cros_test_lib.TempDirTestCase):
@@ -781,3 +775,43 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
     self.PatchObject(self.chroot, 'GetVersion',
                      side_effect=cros_sdk_lib.UninitializedChrootError())
     self.assertFalse(self.chroot.IsInitialized())
+
+
+class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
+  """ChrootCreator tests."""
+
+  def setUp(self):
+    tempdir = Path(self.tempdir)
+    self.chroot_path = tempdir / 'chroot'
+    self.sdk_tarball = tempdir / 'chroot.tar'
+    self.cache_dir = tempdir / 'cache_dir'
+
+    self.creater = cros_sdk_lib.ChrootCreator(
+        self.chroot_path, self.sdk_tarball, self.cache_dir)
+
+    # Create an empty, but real, tarball to extract during testing.
+    tar_dir = tempdir / 'tar_dir'
+    D = cros_test_lib.Directory
+    cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
+        D('etc', ()),
+    ))
+    osutils.Touch(tar_dir / self.creater.DEFAULT_TZ, makedirs=True)
+    cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
+
+  def testMakeChroot(self):
+    """Verify make_chroot invocation."""
+    with cros_test_lib.RunCommandMock() as rc_mock:
+      rc_mock.SetDefaultCmdResult()
+      # pylint: disable=protected-access
+      self.creater._make_chroot()
+      rc_mock.assertCommandContains([
+          '--chroot', str(self.chroot_path),
+          '--cache_dir', str(self.cache_dir),
+      ])
+
+  def testRun(self):
+    """Verify run works."""
+    self.PatchObject(cros_sdk_lib.ChrootCreator, '_make_chroot')
+    self.creater.run()
+    self.assertExists(self.chroot_path / 'etc' / 'debian_chroot')
+    self.assertExists(self.chroot_path / 'etc' / 'localtime')

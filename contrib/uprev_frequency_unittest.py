@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for the uprev_frequency script."""
 
-from __future__ import print_function
-
 import datetime
-
-import mock
+from unittest import mock
 
 from chromite.contrib import uprev_frequency
 from chromite.lib import cros_test_lib

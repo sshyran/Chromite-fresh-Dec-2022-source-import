@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Android operations."""
-
-from __future__ import print_function
 
 import os
 
@@ -16,6 +13,7 @@ from chromite.api.gen.chromite.api import android_pb2
 from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
+from chromite.service import android
 from chromite.service import packages
 
 
@@ -23,6 +21,22 @@ ANDROIDPIN_MASK_PATH = os.path.join(constants.SOURCE_ROOT,
                                     constants.CHROMIUMOS_OVERLAY_DIR,
                                     'profiles', 'default', 'linux',
                                     'package.mask', 'androidpin')
+
+
+def _GetLatestBuildResponse(_input_proto, output_proto, _config):
+  """Fake GetLatestBuild response."""
+  output_proto.android_version = '7123456'
+
+
+@faux.success(_GetLatestBuildResponse)
+@faux.empty_error
+@validate.require_any('android_build_branch', 'android_package')
+@validate.validation_complete
+def GetLatestBuild(input_proto, output_proto, _config):
+  branch = (input_proto.android_build_branch or
+            android.GetAndroidBranchForPackage(input_proto.android_package))
+  build_id, _ = android.GetLatestBuild(branch)
+  output_proto.android_version = build_id
 
 
 def _MarkStableResponse(_input_proto, output_proto, _config):
@@ -35,7 +49,7 @@ def _MarkStableResponse(_input_proto, output_proto, _config):
 
 @faux.success(_MarkStableResponse)
 @faux.empty_error
-@validate.require('package_name', 'android_build_branch')
+@validate.require('package_name')
 @validate.validation_complete
 def MarkStable(input_proto, output_proto, _config):
   """Uprev Android, if able.
@@ -52,10 +66,10 @@ def MarkStable(input_proto, output_proto, _config):
   """
   chroot = controller_util.ParseChroot(input_proto.chroot)
   build_targets = controller_util.ParseBuildTargets(input_proto.build_targets)
-  tracking_branch = input_proto.tracking_branch
   package_name = input_proto.package_name
   android_build_branch = input_proto.android_build_branch
   android_version = input_proto.android_version
+  skip_commit = input_proto.skip_commit
 
   # Assume success.
   output_proto.status = android_pb2.MARK_STABLE_STATUS_SUCCESS
@@ -63,12 +77,13 @@ def MarkStable(input_proto, output_proto, _config):
   # should be finished.
   try:
     android_atom_to_build = packages.uprev_android(
-        tracking_branch=tracking_branch,
         android_package=package_name,
-        android_build_branch=android_build_branch,
         chroot=chroot,
         build_targets=build_targets,
-        android_version=android_version)
+        android_build_branch=android_build_branch,
+        android_version=android_version,
+        skip_commit=skip_commit,
+    )
   except packages.AndroidIsPinnedUprevError as e:
     # If the uprev failed due to a pin, CI needs to unpin and retry.
     android_atom_to_build = e.new_android_atom

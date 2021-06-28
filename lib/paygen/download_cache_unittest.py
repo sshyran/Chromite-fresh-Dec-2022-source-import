@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -7,8 +6,6 @@
 
 DEPRECATED: Should be migrated to chromite.lib.cache_unittest.
 """
-
-from __future__ import print_function
 
 import multiprocessing
 import os
@@ -208,7 +205,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     cache = download_cache.DownloadCache(self.cache_dir)
     self._validateCacheContents(cache, ())
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetFileObject(self):
     """Just create a download cache, and GetFile on it."""
 
@@ -243,7 +240,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     self._validateCacheContents(cache,
                                 (self.hash_a, self.hash_b, self.hash_large))
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetFileCopy(self):
     """Just create a download cache, and GetFileCopy from it."""
 
@@ -276,7 +273,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
 
     self.assertEqual(contents_a, contents_b)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testPurgeLogic(self):
     cache = download_cache.DownloadCache(self.cache_dir)
 
@@ -304,7 +301,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     cache.Purge(max_age=1000)
     self._validateCacheContents(cache, (self.hash_b,))
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testContextMgr(self):
     """Make sure we behave properly with 'with'."""
 
@@ -323,7 +320,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     # After the with exited, which should have purged everything.
     self._validateCacheContents(cache, ())
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testThreadedDownloads(self):
     """Spin off multiple processes and fetch a file.
 
@@ -343,7 +340,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     results.sort()
     self.assertEqual(results, [False] * 19 + [True])
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testThreadedGetFile(self):
     """Spin off multiple processes and call GetFile.
 
@@ -367,7 +364,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     expected = [contents_a] * 20
     self.assertEqual(results, expected)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testThreadedGetFileMultiple(self):
     """Spin off multiple processes and call GetFile with multiple uris.
 
@@ -397,7 +394,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
     expected = [contents_a, contents_b] * 10
     self.assertEqual(results, expected)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testThreadedGetFileMultiplePurge(self):
     """Do fetches and purges in a multiprocess environment.
 

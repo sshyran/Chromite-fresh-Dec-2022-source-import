@@ -1,22 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test cros_generate_os_release."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import cros_generate_os_release
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CrosGenerateOsReleaseTest(cros_test_lib.TempDirTestCase):
@@ -66,3 +59,10 @@ class CrosGenerateOsReleaseTest(cros_test_lib.TempDirTestCase):
                       'TEST2=bonjour',
                       'TEST3=hola'],
                      output)
+
+  def testDefaultsOnly(self):
+    """Make sure we always emit defaults even without any os-release.d frags."""
+    osutils.RmDir(self.osreleased)
+    cros_generate_os_release.GenerateOsRelease(self.tempdir, {'FOO': 'bar'})
+    self.assertExists(self.osrelease)
+    self.assertEqual('FOO=bar\n', osutils.ReadFile(self.osrelease))

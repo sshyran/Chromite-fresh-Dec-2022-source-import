@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the lint module."""
-
-from __future__ import print_function
 
 import collections
 import io
@@ -14,8 +11,6 @@ import os
 from chromite.cli.cros import lint
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-
-pytestmark = cros_test_lib.pytestmark_inside_only
 
 
 # pylint: disable=protected-access
@@ -89,11 +84,12 @@ class PylintrcConfigTest(cros_test_lib.TempDirTestCase):
 class TestNode(object):
   """Object good enough to stand in for lint funcs"""
 
-  Args = collections.namedtuple('Args', ('args', 'vararg', 'kwarg'))
+  Args = collections.namedtuple(
+      'Args', ('args', 'vararg', 'kwarg', 'kwonlyargs'))
   Arg = collections.namedtuple('Arg', ('name',))
 
   def __init__(self, doc='', fromlineno=0, path='foo.py', args=(), vararg='',
-               kwarg='', names=None, lineno=0, name='module',
+               kwarg='', kwonlyargs=(), names=None, lineno=0, name='module',
                display_type='Module', col_offset=None):
     if names is None:
       names = [('name', None)]
@@ -103,7 +99,7 @@ class TestNode(object):
     self.lineno = lineno
     self.file = path
     self.args = self.Args(args=[self.Arg(name=x) for x in args],
-                          vararg=vararg, kwarg=kwarg)
+                          vararg=vararg, kwarg=kwarg, kwonlyargs=kwonlyargs)
     self.names = names
     self.name = name
     self._display_type = display_type
@@ -127,12 +123,13 @@ class StatStub(object):
 class CheckerTestCase(cros_test_lib.TestCase):
   """Helpers for Checker modules"""
 
-  def add_message(self, msg_id, node=None, line=None, args=None):
+  def add_message(self, msg_id, node=None, line=None, col_offset=None,
+                  args=None):
     """Capture lint checks"""
     # We include node.doc here explicitly so the pretty assert message
     # inclues it in the output automatically.
     doc = node.doc if node else ''
-    self.results.append((msg_id, doc, line, args))
+    self.results.append((msg_id, doc, line, args, col_offset))
 
   def setUp(self):
     assert hasattr(self, 'CHECKER'), 'TestCase must set CHECKER'
@@ -656,24 +653,6 @@ class DocStringCheckerTest(CheckerTestCase):
       self.assertEqual(expected, sections)
 
 
-class ChromiteLoggingCheckerTest(CheckerTestCase):
-  """Tests for ChromiteLoggingChecker module"""
-
-  CHECKER = lint.ChromiteLoggingChecker
-
-  def testLoggingImported(self):
-    """Test that import logging is flagged."""
-    node = TestNode(names=[('logging', None)], lineno=15)
-    self.checker.visit_import(node)
-    self.assertEqual(self.results, [('R9301', '', 15, None)])
-
-  def testLoggingNotImported(self):
-    """Test that importing something else (not logging) is not flagged."""
-    node = TestNode(names=[('myModule', None)], lineno=15)
-    self.checker.visit_import(node)
-    self.assertLintPassed()
-
-
 class SourceCheckerTest(CheckerTestCase):
   """Tests for SourceChecker module"""
 
@@ -709,6 +688,8 @@ class SourceCheckerTest(CheckerTestCase):
         b'#!/usr/bin/env python\n',
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
+        b'#!/usr/bin/env vpython\n',
+        b'#!/usr/bin/env vpython3\n',
     )
     self._testShebang(shebangs, ('R9202',), 0o644)
 
@@ -719,6 +700,8 @@ class SourceCheckerTest(CheckerTestCase):
         b'#!/usr/bin/env python2\n',
         b'#!/usr/bin/env python3\n',
         b'#!/usr/bin/env python2\t\n',
+        b'#!/usr/bin/env vpython\n',
+        b'#!/usr/bin/env vpython3\n',
     )
     self._testShebang(shebangs, (), 0o755)
 
@@ -749,7 +732,8 @@ class SourceCheckerTest(CheckerTestCase):
       self.results = []
       stream = io.BytesIO(header)
       self.checker._check_encoding(node, stream, StatStub(size=len(header)))
-      self.assertLintFailed(expected=('R9204',))
+      # NB: We no longer require file encodings w/Python 3.
+      self.assertLintPassed()
 
   def testBadEncoding(self):
     """_check_encoding should reject non-"utf-8" encodings"""
@@ -800,6 +784,77 @@ class SourceCheckerTest(CheckerTestCase):
       self.results = []
       self.checker._check_module_name(node)
       self.assertLintFailed(expected=('R9203',))
+
+  def testAcceptableBackslashes(self):
+    """Verify _check_backslashes allows certain backslash usage"""
+    snippets = (
+        # With context manager.
+        b"""with foo() \\
+                as bar:""",
+        b"""with foo() as bar, \\
+                 foo() as barar:""",
+        # Leading docstrings.
+        b"""'''\\
+            long string is long'''""",
+        # Comments.
+        b"""# Blah blah: \\
+            # another point.""",
+        # Docstring with split content.
+        b"""foo = '''
+            blah bl-\\
+            ah'''"""
+    )
+    node = TestNode()
+    for snippet in snippets:
+      # Make sure there's actually a \ to test against.
+      self.assertIn(b'\\', snippet)
+      print('Checking snippet', snippet)
+      self.results = []
+      stream = io.BytesIO(snippet)
+      self.checker._check_backslashes(node, stream)
+      self.assertLintPassed()
+
+  def testBadBackslashes(self):
+    """Verify _check_backslashes rejects bad backslash usage"""
+    snippets = (
+        # kwarg in a function call.
+        b"""foo(bar=\\
+                True)""",
+        # Variable assignment.
+        b"""foo = \\
+                bar""",
+        # If statements.
+        b"""if True and \\
+               True:""",
+        b"""if True or \\
+               True:""",
+        # Assert statements.
+        b"""assert False, \\
+                "blah blah" """,
+        # Interpolation.
+        b"""foo = BLAH % \\
+                {}""",
+        # Binary operators.
+        b"""foo = 1 + \\
+                2""",
+        b"""foo = 1 - \\
+                2""",
+        b"""foo = 1 | \\
+                2""",
+        b"""foo = 1 * \\
+                2""",
+        b"""foo = 1 / \\
+                2""",
+    )
+    node = TestNode()
+    for snippet in snippets:
+      # Make sure there's actually a \ to test against.
+      self.assertIn(b'\\', snippet)
+      print('Checking snippet', snippet)
+      self.results = []
+      stream = io.BytesIO(snippet)
+      self.checker._check_backslashes(node, stream)
+      self.assertLintFailed(expected=('R9206',))
 
 
 class CommentCheckerTest(CheckerTestCase):

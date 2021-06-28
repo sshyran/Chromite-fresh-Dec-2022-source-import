@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,29 +5,20 @@
 """Module containing methods and classes to interact with a devserver instance.
 """
 
-from __future__ import print_function
-
+import http.client
 import multiprocessing
 import os
 import re
 import socket
 import subprocess
 import tempfile
-
-from six.moves import http_client as httplib
-from six.moves import urllib
-
-# cherrypy may not be available outside the chroot.
-try:
-  import cherrypy  # pylint: disable=import-error
-except ImportError:
-  cherrypy = None
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from chromite.lib import constants
-from chromite.cli import command
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access
@@ -108,20 +98,10 @@ def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
   # Since xbuddy often wants to use gsutil from $PATH, make sure our local copy
   # shows up first.
   upath = os.environ['PATH'].split(os.pathsep)
-  upath.insert(0, os.path.dirname(gs.GSContext.GetDefaultGSUtilBin()))
+  upath.insert(0, constants.CHROMITE_SCRIPTS_DIR)
   os.environ['PATH'] = os.pathsep.join(upath)
 
-  # If we are using the progress bar, quiet the logging output of cherrypy.
-  if cherrypy and command.UseProgressBar():
-    if (hasattr(cherrypy.log, 'access_log') and
-        hasattr(cherrypy.log, 'error_log')):
-      cherrypy.log.access_log.setLevel(logging.NOTICE)
-      cherrypy.log.error_log.setLevel(logging.NOTICE)
-    else:
-      cherrypy.config.update({'server.log_to_screen': False})
-
-  xb = xbuddy.XBuddy(board=board, version=version, log_screen=False,
-                     static_dir=static_dir)
+  xb = xbuddy.XBuddy(board=board, version=version, static_dir=static_dir)
   path_list = GetXbuddyPath(path).rsplit(os.path.sep)
   try:
     return xb.Get(path_list)
@@ -263,7 +243,7 @@ class DevServerWrapper(multiprocessing.Process):
     logging.debug('Retrieving %s', url)
     try:
       res = urllib.request.urlopen(url, timeout=timeout)
-    except (urllib.error.HTTPError, httplib.HTTPException) as e:
+    except (urllib.error.HTTPError, http.client.HTTPException) as e:
       logging.error('Devserver responded with HTTP error (%s)', e)
       raise DevServerResponseError(e)
     except (urllib.error.URLError, socket.timeout) as e:

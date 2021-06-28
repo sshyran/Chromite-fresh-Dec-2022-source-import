@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,16 +20,12 @@ that run attributes (e.g. self.attrs.release_tag) are shared between them
 all, as intended.
 """
 
-from __future__ import print_function
-
 import functools
 import os
 import pickle
+import queue as Queue
 import re
-import sys
 import types
-
-from six.moves import queue as Queue
 
 from chromite.cbuildbot import archive_lib
 from chromite.lib import buildstore
@@ -43,9 +38,6 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import uri_lib
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RunAttributesError(Exception):
@@ -287,8 +279,8 @@ class RunAttributes(object):
       AssertionError if the board/target combination does not exist.
     """
     board_target = RunAttributes.BOARD_ATTR_SEP.join((board, target))
-    assert board_target in self._board_targets, \
-        'Unknown board/target combination: %s/%s' % (board, target)
+    assert board_target in self._board_targets, (
+        'Unknown board/target combination: %s/%s' % (board, target))
 
     # Translate to the unique attribute name for attr/board/target.
     return RunAttributes.BOARD_ATTR_SEP.join((attr, board, target))
@@ -672,7 +664,7 @@ class _BuilderRunBase(object):
     """Return the dashboard URL
 
     This is the direct link to logdog logs if given a stage, or the link to the
-    legoland build page for the build.
+    build page for the build.
 
     Args:
       stage: Link to a specific |stage|, otherwise the general buildbot log
@@ -849,11 +841,6 @@ class _BuilderRunBase(object):
         if 'cheets_userdebug' in use_flag or 'cheets_sdk_userdebug' in use_flag:
           return 'userdebug'
         elif 'cheets_user' in use_flag or 'cheets_sdk_user' in use_flag:
-          # TODO(b/120999609): bertha builds always download userdebug builds
-          # at the moment because user builds are broken. Remove this clause
-          # when resolved.
-          if self.DetermineAndroidTarget(board) == 'bertha':
-            return 'userdebug'
           return 'user'
 
     # We iterated through all the flags and could not find user or userdebug.
@@ -887,8 +874,8 @@ class _BuilderRunBase(object):
     packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
     # We assume there is only one Android package in the depgraph.
     for package in packages:
-      if package.startswith('chromeos-base/android-container-') or \
-         package.startswith('chromeos-base/android-vm-'):
+      if (package.startswith('chromeos-base/android-container-') or
+          package.startswith('chromeos-base/android-vm-')):
         return package
     return None
 

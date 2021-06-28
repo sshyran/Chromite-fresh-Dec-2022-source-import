@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,10 +8,8 @@ Documentation on this script is also available here:
   https://dev.chromium.org/chromium-os/licensing
 """
 
-from __future__ import print_function
-
 import codecs
-import html  # pylint: disable=import-error
+import html
 import os
 import re
 from typing import List, Optional
@@ -31,6 +28,21 @@ from chromite.lib.parser import package_info
 try:
   # pylint: disable=wrong-import-order
   import yaml
+
+  class SaferLoader(yaml.SafeLoader):
+    """Augment the yaml.SafeLoader with unicode and tuple types."""
+    def construct_tuple(self, node):
+      return tuple(self.construct_sequence(node))
+    def construct_unicode(self, node):
+      return node.value
+
+  SaferLoader.add_constructor(
+      'tag:yaml.org,2002:python/tuple',
+      SaferLoader.construct_tuple)
+  SaferLoader.add_constructor(
+      'tag:yaml.org,2002:python/unicode',
+      SaferLoader.construct_unicode)
+
 except ImportError:
   yaml = None
 
@@ -135,7 +147,7 @@ PACKAGE_LICENSES = {
 # Any license listed list here found in the ebuild will make the code look for
 # license files inside the package source code in order to get copyright
 # attribution from them.
-COPYRIGHT_ATTRIBUTION_LICENSES = [
+COPYRIGHT_ATTRIBUTION_LICENSES = {
     'BSD',    # requires distribution of copyright notice
     'BSD-2',  # so does BSD-2 https://opensource.org/licenses/BSD-2-Clause
     'BSD-3',  # and BSD-3? https://opensource.org/licenses/BSD-3-Clause
@@ -145,7 +157,7 @@ COPYRIGHT_ATTRIBUTION_LICENSES = [
     'MIT',
     'MIT-with-advertising',
     'Old-MIT',
-]
+}
 
 # The following licenses are not invalid or to show as a less helpful stock
 # license, but it's better to look in the source code for a more specific
@@ -181,6 +193,14 @@ LICENCES_IGNORE = [
     ')',              # Ignore OR tokens from LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
     '(',
     '||',
+]
+
+# List of overlays that must use 'metapackage' license for virtual packages.
+# Throw error for those, print a warning for others.
+OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
+    'chromiumos-overlay',
+    'chromeos-overlay',
+    'chromeos-partner-overlay',
 ]
 
 # The full names of packages which we want to generate license information for
@@ -274,6 +294,14 @@ class PackageLicenseError(Exception):
   """
 
 
+class PackageCorrectnessError(Exception):
+  """Thrown if a package has build info incompatible with the license.
+
+  For example, thrown when a package with LICENSE=metapackage installs files.
+  This will cause the processing to error in the end.
+  """
+
+
 class PackageInfo(object):
   """Package specific information, mostly about licenses."""
 
@@ -333,6 +361,8 @@ class PackageInfo(object):
 
     # Set to something by GetLicenses().
     self.tainted = None
+
+    self.ebuild_path = None
 
   @property
   def fullnamerev(self):
@@ -436,9 +466,9 @@ class PackageInfo(object):
       return
 
     if not src_dir:
-      ebuild_path = self._FindEbuildPath()
-      self._RunEbuildPhases(ebuild_path, ['clean', 'fetch'])
-      raw_output = self._RunEbuildPhases(ebuild_path, ['unpack'])
+      self.ebuild_path = self._FindEbuildPath()
+      self._RunEbuildPhases(self.ebuild_path, ['clean', 'fetch'])
+      raw_output = self._RunEbuildPhases(self.ebuild_path, ['unpack'])
       output = raw_output.output.splitlines()
       # Output is spammy, it looks like this:
       #  * gc-7.2d.tar.gz RMD160 SHA1 SHA256 size ;-) ...                 [ ok ]
@@ -499,24 +529,28 @@ class PackageInfo(object):
 
     if not license_files:
       if need_copyright_attribution:
-        logging.error("""
+        google_bsd_msg = ''
+        if need_copyright_attribution == {'BSD'}:
+          google_bsd_msg = """
+If this source code was entirely authored by Google employees, you can instead
+just change the ebuild settings like so:
+  -LICENSE="BSD"
+  +LICENSE="BSD-Google"\
+"""
+        logging.error("""\
 %s: unable to find usable license.
-Typically this will happen because the ebuild says it's MIT or BSD, but there
-was no license file that this script could find to include along with a
-copyright attribution (required for BSD/MIT).
+The ebuild says it uses at least %s which requires copyright attribution,
+but there was no license file that this script could find in the package's
+source distribution:
+  %s
 
-If this is Google source, please change
-LICENSE="BSD"
-to
-LICENSE="BSD-Google"
-
-If not, go investigate the unpacked source in %s,
-and find which license to assign.  Once you found it, you should copy that
-license to a file under %s
-(or you can modify LICENSE_NAMES_REGEX to pickup a license file that isn't
-being scraped currently).""",
-                      self.fullnamerev, src_dir, COPYRIGHT_ATTRIBUTION_DIR)
-        raise PackageLicenseError()
+You will need to investigate that source directory to figure out which license
+to assign.  Once you've found it, copy the entire license file to:
+  %s
+%s""", self.fullnamerev, need_copyright_attribution, src_dir,
+                      COPYRIGHT_ATTRIBUTION_DIR, google_bsd_msg)
+        raise PackageLicenseError(
+            f'Missing copyright attribution for {need_copyright_attribution}')
       else:
         # We can get called for a license like as-is where it's preferable
         # to find a better one in the source, but not fatal if we didn't.
@@ -714,7 +748,7 @@ being scraped currently).""",
           license_name not in COPYRIGHT_ATTRIBUTION_LICENSES):
         or_licenses_and_one_is_no_attribution = True
 
-    need_copyright_attribution = False
+    need_copyright_attribution = set()
     scan_source_for_licenses = False
 
     for license_name in [x for x in ebuild_license_names
@@ -735,7 +769,7 @@ being scraped currently).""",
         else:
           logging.info("%s: can't use %s, will scan source code for copyright",
                        self.fullnamerev, license_name)
-          need_copyright_attribution = True
+          need_copyright_attribution.add(license_name)
           scan_source_for_licenses = True
       else:
         self.license_names.add(license_name)
@@ -780,6 +814,61 @@ being scraped currently).""",
     logging.debug('Saving license to %s', save_file)
     yaml_dump = list(self.__dict__.items())
     osutils.WriteFile(save_file, yaml.dump(yaml_dump), makedirs=True)
+
+  def AssertCorrectness(self, build_info_dir, ebuild_path):
+    """AssertCorrectness runs various correctness checks on the package.
+
+    Args:
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+      ebuild_path: Path to the ebuild. Unknown and therefore None during the
+        emerge hook.
+
+    Raises:
+      PackageCorrectnessError: if one of the checks fails.
+    """
+    self._AssertMetapackageNoContent(build_info_dir)
+    if ebuild_path is not None:
+      self._AssertVirtualIsMetapackage(build_info_dir, ebuild_path)
+
+  def _AssertMetapackageNoContent(self, build_info_dir):
+    """_AssertMetapackageNoContent ensures metapackages do not install files.
+
+    Args:
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+
+    Raises:
+      PackageCorrectnessError: if metapackage installs files.
+    """
+    if _BuildInfo(build_info_dir, 'LICENSE') == 'metapackage':
+      content = _BuildInfo(build_info_dir, 'CONTENTS')
+      if content:
+        content_list = ', '.join(x.split()[1] for x in content.splitlines())
+        raise PackageCorrectnessError('Metapackage %s installs files: %s.' %
+                                      (self.fullnamerev, content_list))
+
+  def _AssertVirtualIsMetapackage(self, build_info_dir, ebuild_path):
+    """_AssertVirtualIsMetapackage ensures that virtual pkgs are metapackages.
+
+    Args:
+      ebuild_path: Path to the ebuild.
+      build_info_dir: Path to the build_info for the ebuild. This can be from
+        the working directory during the emerge hook, or in the portage pkg db.
+
+    Raises:
+      PackageCorrectnessError: if virtual pkg does not use metapackage license.
+    """
+    category = ebuild_path.split('/')[-3]
+    overlay = ebuild_path.split('/')[-4]
+    license_name = _BuildInfo(build_info_dir, 'LICENSE')
+    if category == 'virtual' and license_name != 'metapackage':
+      err_msg = (f'Virtual package {ebuild_path} must use LICENSE='
+                 f'"metapackage". Got: {self.license_names}.')
+      if overlay in OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL:
+        raise PackageCorrectnessError(err_msg)
+      else:
+        logging.warning(err_msg)
 
 
 def _GetLicenseDirectories(board: Optional[str] = None,
@@ -910,6 +999,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'chromeos-base/intel-hdcp',
         'chromeos-base/monotype-fonts',
         'chromeos-base/qc7180-modem-firmware',
+        'chromeos-base/sc7280-modem-firmware',
         'chromeos-base/rialto-cellular-autoconnect',
         'chromeos-base/rialto-modem-watchdog',
         'chromeos-base/rialto-override-apn',
@@ -925,6 +1015,8 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'media-libs/arc-img-ddk',
         'media-libs/arc-mali-drivers',
         'media-libs/arc-mali-drivers-bifrost',
+        'media-libs/cros-camera-hal-qti',
+        'media-libs/cros-camera-hal-qti-bin',
         'media-libs/dlm',
         'media-libs/glk-hotword-support',
         'media-libs/go2001-fw',
@@ -939,6 +1031,7 @@ def _CheckForDeprecatedLicense(cpf, licenses):
         'media-libs/mfc-fw',
         'media-libs/mfc-fw-v7',
         'media-libs/mfc-fw-v8',
+        'media-libs/qti-7c-camera-bins',
         'media-libs/rk3399-hotword-support',
         'media-libs/skl-hotword-support',
         'net-print/brother_mlaser',
@@ -1048,7 +1141,7 @@ class Licensing(object):
   def _LoadLicenseDump(self, pkg):
     save_file = pkg.license_dump_path
     logging.debug('Getting license from %s for %s', save_file, pkg.name)
-    yaml_dump = yaml.load(osutils.ReadFile(save_file))
+    yaml_dump = yaml.load(osutils.ReadFile(save_file), Loader=SaferLoader)
     for key, value in yaml_dump:
       pkg.__dict__[key] = value
 
@@ -1089,6 +1182,7 @@ class Licensing(object):
         build_info_path = os.path.join(
             self.sysroot, PER_PKG_LICENSE_DIR, pkg.fullnamerev)
         pkg.GetLicenses(build_info_path, None)
+        pkg.AssertCorrectness(build_info_path, self.ebuild_path)
 
         # We dump packages where licensing failed too.
         pkg.SaveLicenseDump(pkg.license_dump_path)
@@ -1244,7 +1338,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
             'binpkg—run emerge on the package to rebuild. See more info at '
             'https://dev.chromium.org/chromium-os/licensing',
             sln, pkg.fullnamerev)
-        raise e
+        cros_build_lib.Die(e)
       license_pointers.append(
           "<li><a href='#%s'>%s License %s</a></li>" % (
               sln, license_type, sln))
@@ -1312,7 +1406,7 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
 
     for pkg in self.packages.values():
       if pkg.skip:
-        logging.debug('Skipping package %s', pkg.fullnamerev)
+        logging.debug('Skipping empty package %s', pkg.fullnamerev)
         continue
       license_txts[pkg] = self._GeneratePackageLicenseText(pkg)
 
@@ -1416,6 +1510,7 @@ def ListInstalledPackages(sysroot, all_packages=False):
     # flex. This is why we use bdep=y and not bdep=n.
 
     packages = []
+    bad_packages = []
     # [binary   R    ] x11-libs/libva-1.1.1 to /build/x86-alex/
     pkg_rgx = re.compile(r'\[[^]]+R[^]]+\] (.+) to /build/.*')
     # If we match something else without the 'R' like
@@ -1428,8 +1523,11 @@ def ListInstalledPackages(sysroot, all_packages=False):
       if match:
         packages.append(match.group(1))
       elif match2:
-        raise AssertionError('Package incorrectly installed, try reinstalling',
-                             '\n%s' % match2.group(1))
+        bad_packages.append(match2.group(1))
+
+    if bad_packages:
+      raise AssertionError('Package incorrectly installed, try reinstalling',
+                           '\n%s' % '\n'.join(bad_packages))
 
   return packages
 
@@ -1530,5 +1628,6 @@ def HookPackageProcess(pkg_build_path):
   src_dir = os.path.join(pkg_build_path, 'work')
   pkg.GetLicenses(build_info_dir, src_dir)
 
+  pkg.AssertCorrectness(build_info_dir, None)
   _CheckForDeprecatedLicense(fullnamerev, pkg.license_names)
   pkg.SaveLicenseDump(os.path.join(build_info_dir, 'license.yaml'))

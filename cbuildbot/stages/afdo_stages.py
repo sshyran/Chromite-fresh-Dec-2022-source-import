@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the AFDO stages."""
-
-from __future__ import print_function
 
 import multiprocessing
 import os
@@ -90,9 +87,8 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
           logging.info('AFDO profile already existed in GS. Quit')
           return
 
-        merged_file, uploaded_merged = \
-            afdo.CreateAndUploadMergedAFDOProfile(gs_context, buildroot,
-                                                  afdo_file)
+        merged_file, uploaded_merged = afdo.CreateAndUploadMergedAFDOProfile(
+            gs_context, buildroot, afdo_file)
 
         if merged_file is not None:
           logging.info('Generated %s merged AFDO profile %s', arch,

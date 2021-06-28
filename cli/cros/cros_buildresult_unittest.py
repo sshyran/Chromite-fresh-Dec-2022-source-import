@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests the `cros buildresult` command."""
 
-from __future__ import print_function
-
 import json
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_buildresult
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_BUILD_STATUS = {

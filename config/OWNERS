@@ -5,7 +5,5 @@ include ../OWNERS.ci
 bhthompson@chromium.org
 
 # APAC Config Reviewers
-chavey@google.com
-cywang@chromium.org
 hidehiko@chromium.org
 stimim@chromium.org

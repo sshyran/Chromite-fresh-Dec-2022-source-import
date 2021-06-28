@@ -1,25 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests the `cros chroot` command."""
 
-from __future__ import print_function
-
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.cli import command_unittest
+from chromite.cli.cros import cros_tryjob
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
-from chromite.cli.cros import cros_tryjob
 from chromite.lib import cros_test_lib
 from chromite.utils import outcap
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class MockTryjobCommand(command_unittest.MockCommand):
@@ -65,34 +57,34 @@ class TryjobTestPrintKnownConfigs(TryjobTest):
     tryjob_configs = cros_tryjob.ConfigsToPrint(
         self.site_config, production=False, build_config_fragments=[])
 
-    samus_tryjob_configs = cros_tryjob.ConfigsToPrint(
-        self.site_config, production=False, build_config_fragments=['samus'])
+    board_tryjob_configs = cros_tryjob.ConfigsToPrint(
+        self.site_config, production=False, build_config_fragments=['hatch'])
 
-    samus_release_tryjob_configs = cros_tryjob.ConfigsToPrint(
+    board_release_tryjob_configs = cros_tryjob.ConfigsToPrint(
         self.site_config, production=False,
-        build_config_fragments=['samus', 'release'])
+        build_config_fragments=['hatch', 'release'])
 
     # Prove expecting things are there.
-    self.assertIn(self.site_config['samus-release-tryjob'],
+    self.assertIn(self.site_config['hatch-release-tryjob'],
                   tryjob_configs)
-    self.assertIn(self.site_config['samus-release-tryjob'],
-                  samus_tryjob_configs)
-    self.assertIn(self.site_config['samus-release-tryjob'],
-                  samus_release_tryjob_configs)
+    self.assertIn(self.site_config['hatch-release-tryjob'],
+                  board_tryjob_configs)
+    self.assertIn(self.site_config['hatch-release-tryjob'],
+                  board_release_tryjob_configs)
 
     # Unexpecting things aren't.
-    self.assertNotIn(self.site_config['samus-release'],
+    self.assertNotIn(self.site_config['hatch-release'],
                      tryjob_configs)
     self.assertNotIn(self.site_config['glados-release'],
-                     samus_tryjob_configs)
-    self.assertNotIn(self.site_config['samus-full'],
-                     samus_release_tryjob_configs)
+                     board_tryjob_configs)
+    self.assertNotIn(self.site_config['hatch-full'],
+                     board_release_tryjob_configs)
 
     # And that we really filtered something out in every case.
-    self.assertLess(len(samus_release_tryjob_configs),
-                    len(samus_tryjob_configs))
+    self.assertLess(len(board_release_tryjob_configs),
+                    len(board_tryjob_configs))
 
-    self.assertLess(len(samus_tryjob_configs), len(tryjob_configs))
+    self.assertLess(len(board_tryjob_configs), len(tryjob_configs))
 
   def testListTryjobs(self):
     """Test we can generate results for --list."""
@@ -133,7 +125,7 @@ class TryjobTestParsing(TryjobTest):
     self.expected = {
         'where': cros_tryjob.REMOTE,
         'buildroot': None,
-        'branch': 'master',
+        'branch': 'main',
         'production': False,
         'yes': False,
         'list': False,
@@ -149,7 +141,8 @@ class TryjobTestParsing(TryjobTest):
     self.SetupCommandMock(['eve-full-tryjob'])
     options = self.cmd_mock.inst.options
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingRemote(self):
     """Tests flow for an interactive session."""
@@ -173,7 +166,7 @@ class TryjobTestParsing(TryjobTest):
     self.expected.update({
         'where': cros_tryjob.REMOTE,
         'buildroot': '/buildroot',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -189,7 +182,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full-tryjob', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingLocal(self):
     """Tests flow for an interactive session."""
@@ -215,7 +209,7 @@ class TryjobTestParsing(TryjobTest):
         'where': cros_tryjob.LOCAL,
         'buildroot': '/buildroot',
         'git_cache_dir': '/git-cache',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -231,7 +225,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testComplexParsingCbuildbot(self):
     """Tests flow for an interactive session."""
@@ -256,7 +251,7 @@ class TryjobTestParsing(TryjobTest):
         'where': cros_tryjob.CBUILDBOT,
         'buildroot': '/buildroot',
         'git_cache_dir': '/git-cache',
-        'branch': 'master',
+        'branch': 'main',
         'yes': True,
         'list': True,
         'gerrit_patches': ['123', '*123', '123..456'],
@@ -271,7 +266,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-full-tryjob', 'eve-release'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
   def testPayloadsParsing(self):
     """Tests flow for an interactive session."""
@@ -285,7 +281,8 @@ class TryjobTestParsing(TryjobTest):
         'build_configs': ['eve-payloads'],
     })
 
-    self.assertDictContainsSubset(self.expected, vars(options))
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
 
 class TryjobTestAdjustOptions(TryjobTest):
@@ -614,7 +611,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master',
+        '--remote-trybot', '-b', 'main',
     ])
 
   def testCbuildbotArgsSimpleRemote(self):
@@ -623,7 +620,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master', '-g', '123',
+        '--remote-trybot', '-b', 'main', '-g', '123',
     ])
 
   def testCbuildbotArgsSimpleInfraTesting(self):
@@ -632,7 +629,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--remote-trybot', '-b', 'master', '-g', '123',
+        '--remote-trybot', '-b', 'main', '-g', '123',
     ])
 
   def testCbuildbotArgsSimpleLocal(self):
@@ -647,7 +644,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
         '--buildroot', mock.ANY,
         '--git-cache-dir', mock.ANY,
         '--no-buildbot-tags', '--debug',
-        '-b', 'master',
+        '-b', 'main',
         '-g', '123',
     ])
 
@@ -751,7 +748,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     args_out = self.helperOptionsToCbuildbotArgs(args_in)
 
     self.assertEqual(args_out, [
-        '--buildbot', '-b', 'master',
+        '--buildbot', '-b', 'main',
     ])
 
   def testCbuildbotArgsProductionLocal(self):
@@ -766,7 +763,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
         '--buildroot', mock.ANY,
         '--git-cache-dir', mock.ANY,
         '--no-buildbot-tags', '--buildbot',
-        '-b', 'master',
+        '-b', 'main',
     ])
 
 class TryjobTestDisplayLabel(TryjobTest):
@@ -778,18 +775,18 @@ class TryjobTestDisplayLabel(TryjobTest):
     config_name = options.build_configs[-1]
     return cros_tryjob.DisplayLabel(site_config, options, config_name)
 
-  def testMasterTryjob(self):
+  def testMainTryjob(self):
     label = self.FindLabel(['eve-full-tryjob'])
     self.assertEqual(label, 'tryjob')
 
-  def testMasterUnknown(self):
+  def testMainUnknown(self):
     label = self.FindLabel(['bogus-config'])
     self.assertEqual(label, 'tryjob')
 
-  def testMasterKnownProduction(self):
+  def testMainKnownProduction(self):
     label = self.FindLabel(['--production', 'eve-full'])
     self.assertEqual(label, 'production_tryjob')
 
-  def testMasterUnknownProduction(self):
+  def testMainUnknownProduction(self):
     label = self.FindLabel(['--production', 'bogus-config'])
     self.assertEqual(label, 'production_tryjob')

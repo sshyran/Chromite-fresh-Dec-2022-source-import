@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,17 +20,11 @@ Note: The --image argument can be a path or a basename. When a basename is
       very differently.
 """
 
-from __future__ import print_function
-
 import re
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():

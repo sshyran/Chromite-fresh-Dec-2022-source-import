@@ -12,7 +12,6 @@ ARGV0="cros_mirror"
 
 MANIFEST_URL_EXT='https://chromium.googlesource.com/chromiumos/manifest.git'
 MANIFEST_URL_INT='https://chrome-internal.googlesource.com/chromeos/manifest-internal.git'
-REPO_URL='https://chromium.googlesource.com/external/repo.git'
 # When we make commits to manifest git repos, we want the owner info to be the
 # same, and we want it to map to info that end users are unlikely to use.  That
 # way when the local repo rebase runs, it handles the update gracefully.
@@ -66,7 +65,7 @@ and restored at runtime by this script.
 
 Example:
 # Create a full mirror in \${PWD} and have users fetch from the local machine.
-\$ ${ARGV0} -r . -u git://$(hostname -f)
+\$ ${ARGV0} -r . -u git://${HOSTNAME}
 # Update the mirror (put this into a cronjob).
 \$ ${ARGV0} -q -r ${ROOT:-${PWD}}
 
@@ -76,6 +75,7 @@ EOF
   exit ${1:-0}
 }
 
+HOSTNAME=$(hostname -f 2>/dev/null || hostname)
 JOBS=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)
 MANIFEST_URL=
 MANIFEST_NAME=default.xml
@@ -136,8 +136,7 @@ fi
 # Initialize the whole tree mirror style.
 #
 repo_init() {
-  repo init -u "${MANIFEST_URL}" -m "${MANIFEST_NAME}" \
-    --repo-url="${REPO_URL}" ${QUIET} "$@"
+  repo init -u "${MANIFEST_URL}" -m "${MANIFEST_NAME}" ${QUIET} "$@"
 }
 if [[ ! -d .repo ]]; then
   # Default to external manifest.
@@ -206,7 +205,7 @@ update_manifests() {
     URL=$(eval $(grep -h fetch= *.xml); echo ${fetch})
     if [[ ${URL} == "https://chromium.googlesource.com" ]]; then
       # Guess they want the current system.
-      URL="git://$(hostname -f)"
+      URL="git://${HOSTNAME}"
     fi
   fi
 

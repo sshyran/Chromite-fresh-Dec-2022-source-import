@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test simple_chrome_builder  module."""
 
-from __future__ import print_function
-
 import os
+from unittest import mock
 
-import mock
-
-from chromite.cros_bisect import simple_chrome_builder
 from chromite.cbuildbot import commands
+from chromite.cros_bisect import simple_chrome_builder
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib

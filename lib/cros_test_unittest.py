@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for CrOSTest."""
 
-from __future__ import print_function
-
 import os
-import sys
+from unittest import mock
 
-import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.lib import constants
@@ -21,10 +17,8 @@ from chromite.lib import partial_mock
 from chromite.scripts import cros_set_lsb_release
 from chromite.utils import outcap
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
@@ -129,6 +123,8 @@ class CrOSTester(CrOSTesterBase):
   def testAlwaysFlashForLacros(self):
     """Tests flash command is always executed for lacros-chrome tests."""
     self._tester.deploy_lacros = True
+    self._tester.lacros_launcher_script = self.TempFilePath('launcher.py')
+    osutils.Touch(self._tester.lacros_launcher_script)
     self._tester.build_dir = self.TempFilePath('out/Lacros')
     self._tester.flash = True
     self._tester.public_image = True
@@ -157,15 +153,22 @@ class CrOSTester(CrOSTesterBase):
   def testDeployLacrosChrome(self):
     """Tests basic deploy lacros-chrome command."""
     self._tester.deploy_lacros = True
+    self._tester.lacros_launcher_script = self.TempFilePath('launcher.py')
+    osutils.Touch(self._tester.lacros_launcher_script)
     self._tester.build_dir = self.TempFilePath('out/Lacros')
-    self._tester.Run()
-    self.assertCommandContains([
-        'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
-        '--process-timeout', '180', '--device',
-        self._tester._device.device + ':9222', '--cache-dir',
-        self._tester.cache_dir, '--lacros', '--nostrip',
-        '--skip-modifying-config-file'
-    ])
+
+    with mock.patch.object(self._tester,
+                           '_DeployLacrosLauncherScript') as mock_deploy:
+      self._tester.Run()
+      self.assertCommandContains([
+          'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
+          '--process-timeout', '180', '--device',
+          self._tester._device.device + ':9222', '--cache-dir',
+          self._tester.cache_dir, '--lacros', '--nostrip',
+          '--skip-modifying-config-file'
+      ])
+      mock_deploy.assert_called_once()
+
 
   def testDeployChromeWithArgs(self):
     """Tests deploy ash-chrome command with additional arguments."""
@@ -414,8 +417,8 @@ class CrOSTesterTast(CrOSTesterBase):
     self._tester.Run()
     self.assertCommandContains([
         'tast', 'run', '-build=false', '-waituntilready',
-        '-extrauseflags=tast_vm', '-var=key=value', 'localhost:9222',
-        'ui.ChromeLogin'
+        r'-maybemissingvars=.+\..+', '-extrauseflags=tast_vm',
+        '-var=key=value', 'localhost:9222', 'ui.ChromeLogin'
     ])
 
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot')
@@ -699,3 +702,7 @@ class CrOSTesterParser(CrOSTesterBase):
     self.CheckParserError(
         ['--deploy-lacros', '--deploy', '--build-dir', build_dir],
         'Cannot deploy lacros-chrome and ash-chrome at the same time.')
+
+    self.CheckParserError(
+        ['--deploy-lacros', '--build-dir', build_dir],
+        '--lacros-launcher-script is required when running Lacros tests.')

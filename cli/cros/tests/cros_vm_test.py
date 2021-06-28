@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,13 +8,10 @@ To run this command, first build a test image. e.g.
 (host)$ cros_sdk
 (sdk)$ ./build_packages --board=betty
 (sdk)$ ./build_image --board=betty test
-(sdk)$ ./image_to_vm.sh --board=betty --test_image
 (sdk)$ cd ../../chromite/cli/cros/tests/
 (sdk)$ ./cros_vm_test --board=betty --image_path \
-~/trunk/src/build/images/betty/latest/chromiumos_qemu_image.bin
+~/trunk/src/build/images/betty/latest/chromiumos_test_image.bin
 """
-
-from __future__ import print_function
 
 from chromite.cli import command_vm_test
 from chromite.lib import commandline

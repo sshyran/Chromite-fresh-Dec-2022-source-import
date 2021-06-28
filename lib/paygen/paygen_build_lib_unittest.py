@@ -1,18 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests for paygen_build_lib."""
 
-from __future__ import print_function
-
 import json
 import os
-import sys
 import tarfile
-
-import mock
+from unittest import mock
 
 from chromite.lib import config_lib_unittest
 from chromite.lib import cros_build_lib
@@ -28,9 +23,6 @@ from chromite.lib.paygen import test_params
 
 # We access a lot of protected members during testing.
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class BasePaygenBuildLibTest(cros_test_lib.MockTestCase):

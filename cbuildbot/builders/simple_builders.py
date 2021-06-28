@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the simple builders."""
-
-from __future__ import print_function
 
 import collections
 import traceback
@@ -327,22 +324,22 @@ class SimpleBuilder(generic_builders.Builder):
       for builder_run, board in tasks:
         # Skip generate benchmark AFDO if the board is not suitable or
         # if it's already in the bucket
-        if builder_run.config.afdo_generate_async and \
-           toolchain_util.CanGenerateAFDOData(board) and \
-           toolchain_util.CheckAFDOArtifactExists(
-               buildroot=builder_run.buildroot,
-               chrome_root=builder_run.options.chrome_root,
-               board=board,
-               target='benchmark_afdo'):
+        if (builder_run.config.afdo_generate_async and
+            toolchain_util.CanGenerateAFDOData(board) and
+            toolchain_util.CheckAFDOArtifactExists(
+                buildroot=builder_run.buildroot,
+                chrome_root=builder_run.options.chrome_root,
+                board=board,
+                target='benchmark_afdo')):
           continue
 
-        # Only generate orderfile if Chrome is upreved since last generation
-        if builder_run.config.orderfile_generate and \
-           toolchain_util.CheckAFDOArtifactExists(
-               buildroot=builder_run.buildroot,
-               chrome_root=builder_run.options.chrome_root,
-               board=board,
-               target='orderfile_generate'):
+        # Only generate orderfile if Chrome is uprevved since last generation.
+        if (builder_run.config.orderfile_generate and
+            toolchain_util.CheckAFDOArtifactExists(
+                buildroot=builder_run.buildroot,
+                chrome_root=builder_run.options.chrome_root,
+                board=board,
+                target='orderfile_generate')):
           continue
 
         # Update Chrome ebuild with unvetted orderfile

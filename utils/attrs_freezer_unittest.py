@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the attrs_freezer module."""
-
-from __future__ import print_function
-
-import six
 
 from chromite.lib import cros_test_lib
 from chromite.utils import attrs_freezer
@@ -46,14 +41,12 @@ class FrozenAttributesTest(cros_test_lib.TestCase):
 
   def testFrozenByMetaclass(self):
     """Test attribute freezing with FrozenAttributesClass."""
-    @six.add_metaclass(attrs_freezer.Class)
-    class DummyByMeta(self.DummyClass):
+    class DummyByMeta(self.DummyClass, metaclass=attrs_freezer.Class):
       """Class that freezes DummyClass using metaclass construct."""
 
     self._TestBasics(DummyByMeta)
 
-    @six.add_metaclass(attrs_freezer.Class)
-    class SetattrByMeta(self.SetattrClass):
+    class SetattrByMeta(self.SetattrClass, metaclass=attrs_freezer.Class):
       """Class that freezes SetattrClass using metaclass construct."""
 
     self._TestBasics(SetattrByMeta)

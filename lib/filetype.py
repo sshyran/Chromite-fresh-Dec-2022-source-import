@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -21,16 +20,12 @@ of a Chromium OS build in small buckets, partitioning cases where other standard
 classifications keep in the same set.
 """
 
-from __future__ import print_function
-
 import itertools
 import mmap
 import os
 import re
 import stat
 import sys
-
-import six
 
 from chromite.lib import parseelf
 
@@ -39,9 +34,6 @@ try:
   magic = pytest.importorskip('magic')
 except ImportError:
   import magic  # pylint: disable=import-error
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # The buffer size we would use to read files from the disk.
@@ -67,7 +59,7 @@ def SplitShebang(header):
   # worry about being given non-UTF-8 binary data.  If we're unable to decode
   # back into UTF-8, we'll just ignore the shebang.  There's no situation that
   # we care to support that would matter here.
-  if isinstance(header, six.string_types):
+  if isinstance(header, str):
     header = header.encode('utf-8')
   m = re.match(br'#!\s*(/[^\s]+)\s*(.*)$', header)
   if m:

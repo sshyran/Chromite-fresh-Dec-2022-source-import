@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -13,18 +12,12 @@ a file containing serialized data into a protobuf message instance, and
 writing serialized data from a message instance out to a file.
 """
 
-from __future__ import print_function
-
 import os
-import sys
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FORMAT_BINARY = 1

@@ -18,4 +18,5 @@
         "python.sortImports.args": [
                 "--settings-path=${workspaceFolder}/.vscode/",
         ],
+        "python.linting.pylintEnabled": true,
 }

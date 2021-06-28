@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,18 +8,15 @@
 
 """Helpers dealing with binpkg Packages index files"""
 
-from __future__ import print_function
-
 import collections
 import io
 import math
 import operator
 import os
-import sys
 import tempfile
 import time
-
-from six.moves import urllib
+import urllib.error
+import urllib.request
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
@@ -30,9 +26,6 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import sysroot_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 TWO_WEEKS = 60 * 60 * 24 * 7 * 2

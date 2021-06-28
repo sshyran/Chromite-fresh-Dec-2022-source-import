@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """The test controller tests."""
 
-from __future__ import print_function
-
 import contextlib
 import os
-
-import mock
+from unittest import mock
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -268,6 +264,50 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                                         self.api_config)
     self.assertEqual(response.tarball_path,
                      os.path.join(input_msg.result_path, 'unit_tests.tar'))
+
+
+class BuildTestServiceContainers(cros_test_lib.MockTestCase,
+                           api_config.ApiConfigMixin):
+  """Tests for the BuildTestServiceContainers function."""
+
+  def setUp(self):
+    self.request = test_pb2.BuildTestServiceContainersRequest(
+        chroot={'path': '/path/to/chroot'},
+        build_target={'name': 'build_target'},
+        version = 'R93-14033.0.0',
+    )
+
+
+  def testSuccess(self):
+    """Check passing case with mocked cros_build_lib.run."""
+    patch = self.PatchObject(
+        cros_build_lib, 'run',
+        return_value=cros_build_lib.CommandResult(returncode=0))
+
+    response = test_pb2.BuildTestServiceContainersResponse()
+    test_controller.BuildTestServiceContainers(
+        self.request,
+        response,
+        self.api_config)
+    patch.assert_called()
+    for result in response.results:
+      self.assertEqual(result.WhichOneof('result'), 'success')
+
+
+  def testFailure(self):
+    """Check failure case with mocked cros_build_lib.run."""
+    patch = self.PatchObject(
+        cros_build_lib, 'run',
+        return_value=cros_build_lib.CommandResult(returncode=1))
+
+    response = test_pb2.BuildTestServiceContainersResponse()
+    test_controller.BuildTestServiceContainers(
+        self.request,
+        response,
+        self.api_config)
+    patch.assert_called()
+    for result in response.results:
+      self.assertEqual(result.WhichOneof('result'), 'failure')
 
 
 class ChromiteUnitTestTest(cros_test_lib.MockTestCase,

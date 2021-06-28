@@ -1,26 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for trigger_gsc_signing.py."""
 
-from __future__ import print_function
-
 import json
-import sys
+from unittest import mock
 
-import mock
-
-from chromite.scripts import trigger_gsc_signing as trigger
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.scripts import trigger_gsc_signing as trigger
 
 
 # pylint: disable=protected-access
@@ -69,7 +61,7 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
             'gsc_instructions': {
                 'target': sign_image_pb2.GscInstructions.PREPVT},
-            'image_type': common_pb2.GSC_FIRMWARE,
+            'image_type': common_pb2.IMAGE_TYPE_GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -82,7 +74,7 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
     build_target = 'board'
     target = 'prepvt'
     signer = 'production'
-    image = 'gsc_firmware'
+    image = 'image_type_gsc_firmware'
 
     args = ['--archive', archive, '--keyset', keyset, '--channel', channel,
             '--build-target', build_target, '--target', target,
@@ -111,7 +103,7 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
             'gsc_instructions': {
                 'target': sign_image_pb2.GscInstructions.PREPVT},
-            'image_type': common_pb2.GSC_FIRMWARE,
+            'image_type': common_pb2.IMAGE_TYPE_GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -128,7 +120,7 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
             'channel': common_pb2.CHANNEL_UNSPECIFIED,
             'gsc_instructions': {
                 'target': sign_image_pb2.GscInstructions.PREPVT},
-            'image_type': common_pb2.GSC_FIRMWARE,
+            'image_type': common_pb2.IMAGE_TYPE_GSC_FIRMWARE,
             'keyset': 'test-keyset',
             'signer_type': sign_image_pb2.SIGNER_PRODUCTION})
 
@@ -174,13 +166,15 @@ class TestMain(cros_test_lib.RunCommandTempDirTestCase):
          'gsc_instructions': {'target': trigger._target_types['node_locked'],
                                'device_id': '00000001-00001234'},
          'signer_type': sign_image_pb2.SIGNER_PRODUCTION,
-         'image_type': common_pb2.GSC_FIRMWARE, 'keyset': 'test-keyset'},
+         'image_type': common_pb2.IMAGE_TYPE_GSC_FIRMWARE,
+         'keyset': 'test-keyset'},
         {'archive': 'gs://test/file.bin', 'build_target': {'name': 'unknown'},
          'channel': 0,
          'gsc_instructions': {'target': trigger._target_types['node_locked'],
                                'device_id': '00000002-00000021'},
          'signer_type': sign_image_pb2.SIGNER_PRODUCTION,
-         'image_type': common_pb2.GSC_FIRMWARE, 'keyset': 'test-keyset'}]
+         'image_type': common_pb2.IMAGE_TYPE_GSC_FIRMWARE,
+         'keyset': 'test-keyset'}]
     # Check the calls in two parts, since we need to convert the json string
     # back to a dict.
     self.assertEqual(self.rc.call_args_list, [

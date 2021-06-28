@@ -1,16 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Functions for automatic caching of expensive function calls."""
 
-from __future__ import print_function
-
 import functools
 import sys
-
-import six
 
 
 def MemoizedSingleCall(functor):
@@ -102,6 +97,6 @@ def SafeRun(functors, combine_exceptions=False):
     if len(errors) == 1 or not combine_exceptions:
       # To preserve the traceback.
       inst, tb = errors[0]
-      six.reraise(inst, None, tb)
+      raise inst.with_traceback(tb)
     else:
       raise RuntimeError([e[0] for e in errors])

@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This script manages the installed toolchains in the chroot."""
-
-from __future__ import print_function
 
 import errno
 import glob
@@ -14,19 +11,17 @@ import json
 import os
 import re
 import shutil
-import sys
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import toolchain
+from chromite.third_party import lddtree
 from chromite.utils import key_value_store
 
-# Needs to be after chromite imports.
-import lddtree  # pylint: disable=wrong-import-order
 
 if cros_build_lib.IsInsideChroot():
   # Only import portage after we've checked that we're inside the chroot.
@@ -34,9 +29,6 @@ if cros_build_lib.IsInsideChroot():
   # We'll check in main() if the operation needs portage.
   # pylint: disable=import-error
   import portage
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 EMERGE_CMD = os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge')
@@ -76,15 +68,14 @@ HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust-bootstrap',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
+    'dev-embedded/ti50-sdk',
 )
 
 # New packages that we're in the process of adding to the SDK.  Since the SDK
 # bot hasn't had a chance to run yet, there are no binary packages available,
 # so we have to list them here and wait.  Once it completes, entries here can
 # be removed so they'll end up on bots & dev's systems.
-NEW_PACKAGES = (
-    'dev-lang/rust-bootstrap',
-)
+NEW_PACKAGES = ()
 
 # Enable the Go compiler for these targets.
 TARGET_GO_ENABLED = (
@@ -117,19 +108,6 @@ LLVM_PKGS_TABLE = {
     'ex_libcxx' : ['--ex-pkg', 'sys-libs/libcxx'],
     'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
 }
-
-# Overrides for {gcc,binutils}-config, pick a package with particular suffix.
-CONFIG_TARGET_SUFFIXES = {
-    'binutils' : {
-        'aarch64-cros-linux-gnu' : '-gold',
-        'armv6j-cros-linux-gnueabi': '-gold',
-        'armv7a-cros-linux-gnueabi': '-gold',
-        'armv7a-cros-linux-gnueabihf': '-gold',
-        'i686-pc-linux-gnu' : '-gold',
-        'x86_64-cros-linux-gnu' : '-gold',
-    },
-}
-
 
 class Crossdev(object):
   """Class for interacting with crossdev and caching its output."""
@@ -224,11 +202,11 @@ class Crossdev(object):
         cmd = ['crossdev', '--show-target-cfg', '--ex-gdb']
         if target in TARGET_COMPILER_RT_ENABLED:
           cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
-        if target in TARGET_GO_ENABLED:
-          cmd.extend(CROSSDEV_GO_ARGS)
         if target in TARGET_LLVM_PKGS_ENABLED:
           for pkg in LLVM_PKGS_TABLE:
             cmd.extend(LLVM_PKGS_TABLE[pkg])
+        if target in TARGET_GO_ENABLED:
+          cmd.extend(CROSSDEV_GO_ARGS)
         cmd.extend(['-t', target])
         # Catch output of crossdev.
         out = cros_build_lib.run(
@@ -569,12 +547,12 @@ def UpdateTargets(targets, usepkg, root='/'):
     cmd.extend(packages)
     cros_build_lib.run(cmd)
   else:
-    post_cross_cmd = cmd[:]
-    cmd.extend([pkg for pkg in packages if pkg not in post_cross_pkgs])
-    cros_build_lib.run(cmd)
+    pre_cross_items = [pkg for pkg in packages if pkg not in post_cross_pkgs]
+    if pre_cross_items:
+      cros_build_lib.run(cmd + pre_cross_items)
     post_cross_items = [pkg for pkg in packages if pkg in post_cross_pkgs]
-    if len(post_cross_items) > 0:
-      cros_build_lib.run(post_cross_cmd + post_cross_items)
+    if post_cross_items:
+      cros_build_lib.run(cmd + post_cross_items)
   return True
 
 
@@ -624,12 +602,11 @@ def CleanTargets(targets, root='/'):
     logging.info('Nothing to clean!')
 
 
-def SelectActiveToolchains(targets, suffixes, root='/'):
+def SelectActiveToolchains(targets, root='/'):
   """Runs gcc-config and binutils-config to select the desired.
 
   Args:
     targets: The targets to select
-    suffixes: Optional target-specific hacks
     root: The root where we want to select toolchain versions.
   """
   for package in ['gcc', 'binutils']:
@@ -653,11 +630,6 @@ def SelectActiveToolchains(targets, suffixes, root='/'):
 
       # And finally, attach target to it.
       desired = '%s-%s' % (target, desired)
-
-      # Target specific hacks
-      if package in suffixes:
-        if target in suffixes[package]:
-          desired += suffixes[package][target]
 
       extra_env = {'CHOST': target}
       if root != '/':
@@ -755,7 +727,7 @@ def UpdateToolchains(usepkg, deleteold, hostonly, reconfig,
 
   # Now update all packages.
   if UpdateTargets(targets, usepkg, root=root) or crossdev_targets or reconfig:
-    SelectActiveToolchains(targets, CONFIG_TARGET_SUFFIXES, root=root)
+    SelectActiveToolchains(targets, root=root)
 
   if deleteold:
     CleanTargets(targets, root=root)
@@ -1054,23 +1026,12 @@ def _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,
     e = lddtree.ParseELF(elf, root=root, ldpaths=ldpaths)
     logging.debug('Parsed elf %s data: %s', elf, e)
     interp = e['interp']
-    # Do not create wrapper for libc. crbug.com/766827
-    if interp and not glibc_re.search(elf):
-      # Generate a wrapper if it is executable.
-      interp = os.path.join('/lib', os.path.basename(interp))
-      lddtree.GenerateLdsoWrapper(output_dir, path_rewrite_func(elf), interp,
-                                  libpaths=e['rpath'] + e['runpath'])
-      FixClangXXWrapper(output_dir, path_rewrite_func(elf))
-
-      # Wrap any symlinks to the wrapper.
-      if elf in sym_paths:
-        link = sym_paths[elf]
-        GeneratePathWrapper(output_dir, link, elf)
 
     # TODO(crbug.com/917193): Drop this hack once libopcodes linkage is fixed.
     if os.path.basename(elf).startswith('libopcodes-'):
       continue
 
+    # Copy all the dependencies before we copy the program & generate wrappers.
     for lib, lib_data in e['libs'].items():
       src = path = lib_data['path']
       if path is None:
@@ -1104,6 +1065,19 @@ def _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,
       logging.debug('Linking lib %s -> %s', root + src, dst)
       os.link(root + src, dst)
 
+    # Do not create wrapper for libc. crbug.com/766827
+    if interp and not glibc_re.search(elf):
+      # Generate a wrapper if it is executable.
+      interp = os.path.join('/lib', os.path.basename(interp))
+      lddtree.GenerateLdsoWrapper(output_dir, path_rewrite_func(elf), interp,
+                                  libpaths=e['rpath'] + e['runpath'])
+      FixClangXXWrapper(output_dir, path_rewrite_func(elf))
+
+      # Wrap any symlinks to the wrapper.
+      if elf in sym_paths:
+        link = sym_paths[elf]
+        GeneratePathWrapper(output_dir, link, elf)
+
 
 def _EnvdGetVar(envd, var):
   """Given a Gentoo env.d file, extract a var from it
@@ -1125,40 +1099,18 @@ def _ProcessBinutilsConfig(target, output_dir):
   """Do what binutils-config would have done"""
   binpath = os.path.join('/bin', target + '-')
 
-  # Locate the bin dir holding the gold linker.
+  # Locate the bin dir holding the linker and perform some sanity checks
   binutils_bin_path = os.path.join(output_dir, 'usr', toolchain.GetHostTuple(),
                                    target, 'binutils-bin')
-  globpath = os.path.join(binutils_bin_path, '*-gold')
+  globpath = os.path.join(binutils_bin_path, '*')
   srcpath = glob.glob(globpath)
-  if not srcpath:
-    # Maybe this target doesn't support gold.
-    globpath = os.path.join(binutils_bin_path, '*')
-    srcpath = glob.glob(globpath)
-    assert len(srcpath) == 1, ('%s: matched more than one path (but not *-gold)'
-                               % globpath)
-    srcpath = srcpath[0]
-    ld_path = os.path.join(srcpath, 'ld')
-    assert os.path.exists(ld_path), '%s: linker is missing!' % ld_path
-    ld_path = os.path.join(srcpath, 'ld.bfd')
-    assert os.path.exists(ld_path), '%s: linker is missing!' % ld_path
-    ld_path = os.path.join(srcpath, 'ld.gold')
-    assert not os.path.exists(ld_path), ('%s: exists, but gold dir does not!'
-                                         % ld_path)
-
-    # Nope, no gold support to be found.
-    gold_supported = False
-    logging.warning('%s: binutils lacks support for the gold linker', target)
-  else:
-    assert len(srcpath) == 1, '%s: did not match exactly 1 path' % globpath
-    srcpath = srcpath[0]
-
-    # Package the binutils-bin directory without the '-gold' suffix
-    # if gold is not enabled as the default linker for this target.
-    gold_supported = CONFIG_TARGET_SUFFIXES['binutils'].get(target) == '-gold'
-    if not gold_supported:
-      srcpath = srcpath[:-len('-gold')]
-      ld_path = os.path.join(srcpath, 'ld')
-      assert os.path.exists(ld_path), '%s: linker is missing!' % ld_path
+  assert len(srcpath) == 1, ('%s: matched more than one path. Is Gold enabled?'
+                             % globpath)
+  srcpath = srcpath[0]
+  ld_path = os.path.join(srcpath, 'ld')
+  assert os.path.exists(ld_path), '%s: linker is missing!' % ld_path
+  ld_path = os.path.join(srcpath, 'ld.bfd')
+  assert os.path.exists(ld_path), '%s: linker is missing!' % ld_path
 
   srcpath = srcpath[len(output_dir):]
   gccpath = os.path.join('/usr', 'libexec', 'gcc')
@@ -1172,14 +1124,6 @@ def _ProcessBinutilsConfig(target, output_dir):
 
   libpath = os.path.join('/usr', toolchain.GetHostTuple(), target, 'lib')
   envd = os.path.join(output_dir, 'etc', 'env.d', 'binutils', '*')
-  if gold_supported:
-    envd += '-gold'
-  else:
-    # If gold is not enabled as the default linker and 2 env.d
-    # files exist, pick the one without the '-gold' suffix.
-    envds = sorted(glob.glob(envd))
-    if len(envds) == 2 and envds[1] == envds[0] + '-gold':
-      envd = envds[0]
   srcpath = _EnvdGetVar(envd, 'LIBPATH')
   os.symlink(os.path.relpath(srcpath, os.path.dirname(libpath)),
              output_dir + libpath)

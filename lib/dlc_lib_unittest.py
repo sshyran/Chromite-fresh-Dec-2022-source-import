@@ -1,26 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Unit tests for dlc_lib."""
 
-from __future__ import print_function
-
 import json
 import os
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-
-from chromite.lib import dlc_lib
 from chromite.scripts import cros_set_lsb_release
 
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 _PRE_ALLOCATED_BLOCKS = 100
 _VERSION = '1.0'
@@ -33,6 +25,7 @@ _FULLNAME_REV = None
 _BLOCK_SIZE = 4096
 _IMAGE_SIZE_NEARING_RATIO = 1.05
 _IMAGE_SIZE_GROWTH_RATIO = 1.2
+_DAYS_TO_PURGE = 3
 
 # pylint: disable=protected-access
 
@@ -78,6 +71,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         'version': f'{_VERSION}_new',
         'preload': True,
         'used_by': dlc_lib.USED_BY_USER,
+        'days_to_purge': _DAYS_TO_PURGE,
         'mount_file_required': True,
     }
 
@@ -101,6 +95,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   version=_VERSION,
                   preload=False,
                   used_by=dlc_lib.USED_BY_SYSTEM,
+                  days_to_purge=_DAYS_TO_PURGE,
                   mount_file_required=False,
                   fullnamerev=_FULLNAME_REV):
     """Tests EbuildParams JSON values"""
@@ -114,6 +109,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                           'description': description,
                           'preload': preload,
                           'used_by': used_by,
+                          'days_to_purge': days_to_purge,
                           'mount_file_required': mount_file_required,
                           'fullnamerev': fullnamerev})
 
@@ -128,6 +124,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      version=_VERSION,
                      preload=False,
                      used_by=dlc_lib.USED_BY_SYSTEM,
+                     days_to_purge=_DAYS_TO_PURGE,
                      mount_file_required=False,
                      fullnamerev=_FULLNAME_REV):
     """Creates and Stores DLC params at install_root_dir"""
@@ -141,6 +138,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         version=version,
         preload=preload,
         used_by=used_by,
+        days_to_purge=days_to_purge,
         mount_file_required=mount_file_required,
         fullnamerev=fullnamerev)
     return params.StoreDlcParameters(
@@ -218,6 +216,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
         version=_VERSION,
         preload=False,
         used_by=dlc_lib.USED_BY_SYSTEM,
+        days_to_purge=_DAYS_TO_PURGE,
         mount_file_required=False,
         fullnamerev=_FULLNAME_REV)
     return dlc_lib.DlcGenerator(
@@ -318,6 +317,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
             'mount-file-required': False,
             'preload-allowed': False,
             'used-by': dlc_lib.USED_BY_SYSTEM,
+            'days-to-purge': _DAYS_TO_PURGE,
         })
 
   def testVerifyImageSize(self):

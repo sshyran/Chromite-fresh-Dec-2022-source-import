@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test Utils library."""
-
-from __future__ import print_function
 
 import os
 import time
@@ -69,6 +66,14 @@ class TestUtils(cros_test_lib.TempDirTestCase):
 
     self.assertEqual(utils.ReadLsbRelease(self.tempdir),
                      {'key': 'value', 'foo': 'bar'})
+
+  def testReadMinorVersion(self):
+    """Tests that we correctly read the update_engine.conf file."""
+    path = os.path.join(self.tempdir, 'etc', 'update_engine.conf')
+    osutils.WriteFile(path,'PAYLOAD_VERSION=2\nPAYLOAD_MINOR_VERSION=6\n',
+                      makedirs=True)
+
+    self.assertEqual(utils.ReadMinorVersion(self.tempdir), '6')
 
   def testMassiveMemoryConsumptionSemaphore(self):
     """Tests that we block on not having enough memory."""
@@ -229,7 +234,7 @@ class TestUtils(cros_test_lib.TempDirTestCase):
       mock_clock.add_time(0.1)
 
       # Maybe we can break early? (and waste some time for other threads).
-      threads_dead = [not x.isAlive() for x in threads]
+      threads_dead = [not x.is_alive() for x in threads]
       if all(threads_dead):
         break
 

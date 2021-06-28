@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test signer_payloads_client library."""
 
-from __future__ import print_function
-
 import base64
 import os
 import shutil
 import tempfile
-
-import mock
+from unittest import mock
 
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
@@ -24,6 +20,7 @@ from chromite.lib import remote_access
 from chromite.lib.paygen import gslock
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import signer_payloads_client
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -378,7 +375,7 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     downloads = self.client._DownloadSignatures(uris)
     self.assertEqual(downloads, uris)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testGetHashSignatures(self):
     """Integration test that talks to the real signer with test hashes."""
     ctx = gs.GSContext()

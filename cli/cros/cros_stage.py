@@ -1,32 +1,23 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Stage a custom image on a Moblab device or in Google Storage."""
 
-from __future__ import print_function
-
 import os
 import re
-import sys
 
 from chromite.cbuildbot import commands
-
 from chromite.cli import command
-
+from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import remote_access
-
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MOBLAB_STATIC_DIR = '/mnt/moblab/static'
@@ -227,7 +218,7 @@ NOTES:
     Args:
       tempdir: Temporary Directory to store the generated test artifacts.
     """
-    build_root = cros_build_lib.GetSysroot(board=self.board)
+    build_root = build_target_lib.get_default_sysroot_path(self.board)
     cwd = os.path.join(build_root, BOARD_BUILD_DIR)
     commands.BuildAutotestTarballsForHWTest(build_root, cwd, tempdir)
 

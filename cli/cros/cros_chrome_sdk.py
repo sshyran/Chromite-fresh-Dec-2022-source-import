@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """The cros chrome-sdk command for the simple chrome workflow."""
-
-from __future__ import print_function
 
 import argparse
 import collections
@@ -14,15 +11,15 @@ import datetime
 import glob
 import json
 import os
-import re
-import sys
+from pathlib import Path
 import queue
+import re
 import textwrap
 import threading
 
-from chromite.cbuildbot import archive_lib
 from chromite.cli import command
 from chromite.lib import cache
+from chromite.lib import chromite_config
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -33,12 +30,8 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import portage_util
-from chromite.lib import retry_util
+from chromite.third_party.gn_helpers import gn_helpers
 from chromite.utils import memoize
-from gn_helpers import gn_helpers
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 COMMAND_NAME = 'chrome-sdk'
@@ -74,8 +67,8 @@ class MissingSDK(Exception):
 
   def _ConstructLegolandURL(self, config):
     """Returns a link to the given board's release builder."""
-    return ('http://cros-goldeneye/chromeos/legoland/builderHistory?'
-            'buildConfig=%s' % config)
+    return ('https://https://dashboards.corp.google.com/chromeos_ci_release?'
+            'f=cbb_config:in:%s' % config)
 
   def __init__(self, config, version=None):
     msg = 'Cannot find SDK for %s' % config
@@ -149,7 +142,7 @@ class SDKFetcher(object):
     self.board = board
     self.config = site_config.FindCanonicalConfigForBoard(
         board, allow_internal=not use_external_config)
-    self.gs_base = archive_lib.GetBaseUploadURI(self.config)
+    self.gs_base = f'gs://chromeos-image-archive/{self.config.name}'
     self.clear_cache = clear_cache
     self.chrome_src = chrome_src
     self.sdk_path = sdk_path
@@ -187,7 +180,7 @@ class SDKFetcher(object):
           self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
           ref.SetDefault(local_path, lock=True)
         except gs.GSNoSuchKey:
-          if key == constants.VM_IMAGE_TAR:
+          if key == constants.TEST_IMAGE_TAR:
             logging.warning(
                 'No VM available for board %s. Please try a different '
                 'board, e.g. amd64-generic.',
@@ -721,8 +714,8 @@ class SDKFetcher(object):
     else:
       logging.warning('Failed to find Tast binaries to download.')
 
-    # Also fetch QEMU binary if VM_IMAGE_TAR is specified.
-    if constants.VM_IMAGE_TAR in components:
+    # Also fetch QEMU binary if VM download is requested.
+    if constants.TEST_IMAGE_TAR in components:
       qemu_bin_path = self._GetBinPackageGSPath(version, self.QEMU_BIN_PATH)
       seabios_bin_path = self._GetBinPackageGSPath(version,
                                                    self.SEABIOS_BIN_PATH)
@@ -746,7 +739,7 @@ class SDKFetcher(object):
         # the remaining threads sit idle.
         if not tarball_ref.Exists(lock=True):
           pri = 3
-          if key == constants.VM_IMAGE_TAR:
+          if key == constants.TEST_IMAGE_TAR:
             pri = 1
           elif key == constants.CHROME_SYSROOT_TAR:
             pri = 2
@@ -803,14 +796,8 @@ class ChromeSDKCommand(command.CliCommand):
   sets up the environment for building Chrome, and runs a command in the
   environment, starting a bash session if no command is specified.
 
-  The bash session environment is set up by a user-configurable rc file located
-  at ~/.chromite/chrome_sdk.bashrc.
+  The bash session environment is set up by a user-configurable rc file.
   """
-
-  # Note, this URL is not accessible outside of corp.
-  _GOMA_DOWNLOAD_URL = ('https://clients5.google.com/cxx-compiler-service/'
-                        'download/downloadurl')
-  _GOMA_TGZ = 'goma-goobuntu.tgz'
 
   _CHROME_CLANG_DIR = 'third_party/llvm-build/Release+Asserts/bin'
   _BUILD_ARGS_DIR = 'build/args/chromeos/'
@@ -877,9 +864,9 @@ class ChromeSDKCommand(command.CliCommand):
              'out_${BOARD}/')
     parser.add_argument(
         '--bashrc', type='path',
-        default=constants.CHROME_SDK_BASHRC,
+        default=chromite_config.CHROME_SDK_BASHRC,
         help='A bashrc file used to set up the SDK shell environment. '
-             'Defaults to %s.' % constants.CHROME_SDK_BASHRC)
+             '(default: %(default)s')
     parser.add_argument(
         '--chroot', type='path',
         help='Path to a ChromeOS chroot to use. If set, '
@@ -946,6 +933,10 @@ class ChromeSDKCommand(command.CliCommand):
     parser.add_argument(
         '--gomadir', type='path',
         help='Use the goma installation at the specified PATH.')
+    parser.add_argument(
+        '--use-rbe', action='store_true', default=False,
+        help='Enable RBE client for the build. '
+             'This automatically disables Goma.')
     parser.add_argument(
         '--version', default=None, type=cls.ValidateVersion,
         help='Specify the SDK version to use. This can be a platform version '
@@ -1029,6 +1020,35 @@ class ChromeSDKCommand(command.CliCommand):
     ps1_prefix = ChromeSDKCommand._PS1Prefix(board, version, chroot)
     return '%s %s' % (ps1_prefix, current_ps1)
 
+  def _SaveSharedGnArgs(self, gn_args, board):
+    """Saves the new gn args data to the shared location."""
+    shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
+
+    file_path = os.path.join(shared_dir, board + '.gni')
+    osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+
+    # If the board is a generic family, generate -crostoolchain.gni files,
+    # too, which is used by Lacros build.
+    if board in ('amd64-generic', 'arm-generic'):
+      toolchain_key_pattern = re.compile(r'^(%s)$' % '|'.join([
+          'cros_board',
+          'cros_sdk_version',
+          'host_pkg_config',
+          'is_clang',
+          'target_cpu',
+          'cros_host_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
+          'cros_target_(ar|cc|cxx|ld|nm|readelf|extra_(c|cpp|cxx|ld)flags)',
+          'cros_v8_snapshot_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
+          '(custom|host|v8_snapshot)_toolchain',
+          'system_libdir',
+          'target_sysroot',
+          'arm_(arch|float_abi|use_neon)',
+      ]))
+      toolchain_gn_args = {k: v for k, v in gn_args.items()
+                           if toolchain_key_pattern.match(k)}
+      file_path = os.path.join(shared_dir, board + '-crostoolchain.gni')
+      osutils.WriteFile(file_path, gn_helpers.ToGNString(toolchain_gn_args))
+
   def _UpdateGnArgsIfStale(self, out_dir, build_label, gn_args, board):
     """Runs 'gn gen' if gn args are stale or logs a warning."""
     build_dir = os.path.join(out_dir, build_label)
@@ -1036,9 +1056,6 @@ class ChromeSDKCommand(command.CliCommand):
         self.options.chrome_src, build_dir, 'args.gn')
 
     if not self.options.use_shell:
-      shared_args_file_path = os.path.join(
-          self.options.chrome_src, self._BUILD_ARGS_DIR, board + '.gni')
-      osutils.WriteFile(shared_args_file_path, gn_helpers.ToGNString(gn_args))
       import_line = 'import("//%s%s.gni")' % (self._BUILD_ARGS_DIR, board)
       if (os.path.exists(gn_args_file_path) and
           not import_line in osutils.ReadFile(gn_args_file_path)):
@@ -1131,6 +1148,88 @@ class ChromeSDKCommand(command.CliCommand):
       return os.path.join(tc_path, 'bin', binary)
     return binary
 
+  def _GenerateReclientConfig(self, sdk_ctx, board):
+    """Generate a config and a wrapper for reclient.
+
+    This function generates a configuration to be used by rewrapper
+    (rewrapper_<board>.cfg) and a wrapper script for the rewrapper to make it
+    passed with --gomacc-path (rewrapper_<board>).
+    The configuration is based on the linux configuration, which has already
+    been installed in Chromium repository, and this function adds a flag to
+    preserve symlink and updates inputs so that the configuration can be used
+    for compiling with ChromeOS clang.
+
+    Args:
+      sdk_ctx: An SDKFetcher.SDKContext namedtuple object for getting toolchain
+               location.
+      board: Target board name to be used as a config name and a wrapper name.
+
+    Returns:
+      Absolute path to the wrapper script to be used as --gomacc-path.
+    """
+    shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
+    tc_tarball_path = None
+    # Since we want a path to tarball extraction not a path to clang in
+    # symlink directory, we cannot find the path with
+    # sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].
+    # That is why we search like this.
+    for key, value in sdk_ctx.key_map.items():
+      if isinstance(key, tuple) and key[0].startswith('target_toolchain/'):
+        assert tc_tarball_path is None
+        tc_tarball_path = value.path
+
+    linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
+                                  'reclient_cfgs', 'rewrapper_linux.cfg')
+    linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
+
+    # TODO(b:190794287): remove code for inputs.  It will eventually be
+    #                    provided by the file in the toolchain tarball.
+    inputs = [
+        'usr/bin/clang',
+        'usr/bin/clang++',
+        'usr/bin/clang++-13',
+        'usr/bin/clang-13',
+        'usr/bin/clang-13.elf',
+        'usr/bin/clang++-13.elf',
+        'lib/ld-linux-x86-64.so.2',
+        'lib/libc++abi.so.1',
+        'lib/libc++.so.1',
+        'lib/libc.so.6',
+        'lib/libdl.so.2',
+        'lib/libgcc_s.so.1',
+        'lib/libm.so.6',
+        'lib/libpthread.so.0',
+        'lib/libtinfo.so.5',
+        'lib/libz.so.1',
+    ]
+    rel_tc_tarball_path = os.path.relpath(tc_tarball_path,
+                                          self.options.chrome_src)
+    inputs = [os.path.join(rel_tc_tarball_path, i) for i in inputs]
+    cros_cfg = ['preserve_symlink=true']
+    for line in linux_cfg:
+      if line.startswith('inputs='):
+        line = 'inputs=%s' % ','.join(inputs)
+      cros_cfg.append(line)
+    cros_cfg_path = os.path.join(shared_dir, f'rewrapper_{board}.cfg')
+    osutils.WriteFile(cros_cfg_path, '\n'.join(cros_cfg))
+    Log('generated rewrapper_cfg %s', cros_cfg_path, silent=self.silent)
+
+    # TODO(b:190741226): remove the wrapper if the compiler wrapper supports
+    #                    flags for reclient.
+    wrapper_path = os.path.join(shared_dir, 'rewrapper_%s' % board)
+    wrapper_content = [
+        '#!/bin/sh\n',
+        '%(rewrapper_dir)s/rewrapper -cfg="%(cros_cfg_path)s" '
+        '-exec_root="%(chrome_src)s" "$@"\n' % {
+            'rewrapper_dir': os.path.join(
+                self.options.chrome_src, 'buildtools', 'reclient'),
+            'cros_cfg_path': cros_cfg_path,
+            'chrome_src': self.options.chrome_src},
+    ]
+    osutils.WriteFile(wrapper_path, wrapper_content, chmod=0o755)
+    Log('generated rewrapper wrapper %s', wrapper_path, silent=self.silent)
+    return wrapper_path
+
   def _SetupEnvironment(self, board, sdk_ctx, options, goma_dir=None,
                         goma_port=None):
     """Sets environment variables to export to the SDK shell."""
@@ -1173,9 +1272,9 @@ class ChromeSDKCommand(command.CliCommand):
     self._SetupTCEnvironment(options, env)
 
     # Add managed components to the PATH.
-    env['PATH'] = '%s:%s' % (constants.CHROMITE_BIN_DIR, os.environ['PATH'])
-    env['PATH'] = '%s:%s' % (os.path.dirname(self.sdk.gs_ctx.gsutil_bin),
-                             env['PATH'])
+    path = os.environ['PATH'].split(os.pathsep)
+    path.insert(0, constants.CHROMITE_BIN_DIR)
+    env['PATH'] = os.pathsep.join(path)
 
     # Export internally referenced variables.
     os.environ[self.sdk.SDK_BOARD_ENV] = board
@@ -1246,8 +1345,11 @@ class ChromeSDKCommand(command.CliCommand):
     # adjustment made in _SetupTCEnvironment is for split debug which
     # is done with 'use_debug_fission'.
 
+    if options.use_rbe:
+      gn_args['use_rbe'] = True
+
     # Enable goma if requested.
-    if not options.goma:
+    if not options.goma or options.use_rbe:
       # If --nogoma option is explicitly set, disable goma, even if it is
       # used in the original GN_ARGS.
       gn_args['use_goma'] = False
@@ -1295,6 +1397,9 @@ class ChromeSDKCommand(command.CliCommand):
                    '--gn-extra-args to specify a non default value.',
                    symbol_level)
 
+    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientConfig(
+        sdk_ctx, board)
+
     if options.gn_extra_args:
       gn_args.update(gn_helpers.FromGNArgs(options.gn_extra_args))
 
@@ -1320,6 +1425,8 @@ class ChromeSDKCommand(command.CliCommand):
     # For context, see crbug.com/407417
     env['CHROMIUM_OUT_DIR'] = os.path.join(options.chrome_src, out_dir)
 
+    if not self.options.use_shell:
+      self._SaveSharedGnArgs(gn_args, board)
     self._UpdateGnArgsIfStale(
         out_dir, options.build_label, gn_args, board)
 
@@ -1403,66 +1510,34 @@ class ChromeSDKCommand(command.CliCommand):
         check=False, encoding='utf-8', capture_output=True).output.strip()
     return port
 
-  def _FetchGoma(self):
-    """Fetch, install, and start Goma, using cached version if it exists.
-
-    Returns:
-      A tuple (dir, port) containing the path to the cached goma/ dir and the
-      Goma port.
-    """
-    common_path = os.path.join(self.options.cache_dir, constants.COMMON_CACHE)
-    common_cache = cache.DiskCache(common_path)
-
-    goma_dir = self.options.gomadir
+  def _GomaDir(self, goma_dir):
+    """Returns current active Goma directory."""
     if not goma_dir:
       goma_dir_cmd = ['goma_ctl', 'goma_dir']
       goma_dir = cros_build_lib.run(
           goma_dir_cmd, check=False, capture_output=True,
           encoding='utf-8').stdout.strip()
+    if goma_dir and os.path.exists(os.path.join(goma_dir, 'gomacc')):
+      return goma_dir
 
-    # TODO(crbug.com/1072400): Remove use of Goma in legacy location.
-    if not goma_dir or not os.path.exists(os.path.join(goma_dir, 'gomacc')):
-      logging.warning('Falling back to legacy Goma location')
-      ref = common_cache.Lookup(('goma', '2'))
-      if not ref.Exists():
-        Log('Installing Goma.', silent=self.silent)
-        with osutils.TempDir() as tempdir:
-          goma_dir = os.path.join(tempdir, 'goma')
-          osutils.SafeMakedirs(goma_dir)
-          with osutils.ChdirContext(tempdir):
-            try:
-              result = retry_util.RunCurl(['--fail', self._GOMA_DOWNLOAD_URL],
-                                          stdout=True, encoding='utf-8')
-              if result.returncode:
-                raise GomaError('Failed to fetch Goma Download URL')
-              download_url = result.output.strip()
-              result = retry_util.RunCurl(
-                  ['--fail', '%s/%s' % (download_url, self._GOMA_TGZ),
-                   '--output', self._GOMA_TGZ])
-              if result.returncode:
-                raise GomaError('Failed to fetch Goma')
-            except retry_util.DownloadError:
-              raise GomaError('Failed to fetch Goma')
-            result = cros_build_lib.dbg_run(
-                ['tar', 'xf', self._GOMA_TGZ,
-                 '--strip=1', '-C', goma_dir])
-            if result.returncode:
-              raise GomaError('Failed to extract Goma')
-            # TODO(crbug.com/1007384): Stop forcing Python 2.
-            result = cros_build_lib.dbg_run(
-                ['python2', os.path.join(goma_dir, 'goma_ctl.py'), 'update'],
-                extra_env={'PLATFORM': 'goobuntu'})
-            if result.returncode:
-              raise GomaError('Failed to install Goma')
-          ref.SetDefault(goma_dir)
-      goma_dir = ref.path
+  def _SetupGoma(self):
+    """Find installed Goma and start Goma.
+
+    Returns:
+      A tuple (dir, port) containing the path to the cached goma/ dir and the
+      Goma port.
+    """
+    goma_dir = self._GomaDir(self.options.gomadir)
+    if not goma_dir:
+      raise GomaError('Failed to find the Goma client.'
+                      ' Please confirm depot_tools is in PATH,'
+                      ' and you do not set GOMA_DIR.')
 
     port = None
     if self.options.start_goma:
       Log('Starting Goma.', silent=self.silent)
-      # TODO(crbug.com/1007384): Stop forcing Python 2.
       cros_build_lib.dbg_run(
-          ['python2', os.path.join(goma_dir, 'goma_ctl.py'), 'ensure_start'],
+          [os.path.join(goma_dir, 'goma_ctl.py'), 'ensure_start'],
           extra_env={'GOMA_ARBITRARY_TOOLCHAIN_SUPPORT': 'true'})
       port = self._GomaPort(goma_dir)
       Log('Goma is started on port %s', port, silent=self.silent)
@@ -1482,6 +1557,16 @@ class ChromeSDKCommand(command.CliCommand):
 
     if os.environ.get(SDKFetcher.SDK_VERSION_ENV) is not None:
       cros_build_lib.Die('Already in an SDK shell.')
+
+    # Migrate config file from old to new path.
+    old_config = Path('~/.chromite/chrome_sdk.bashrc').expanduser()
+    if old_config.exists() and not chromite_config.CHROME_SDK_BASHRC.exists():
+      chromite_config.initialize()
+      old_config.rename(chromite_config.CHROME_SDK_BASHRC)
+      try:
+        old_config.parent.rmdir()
+      except OSError:
+        pass
 
     src_path = self.options.chrome_src or os.getcwd()
     checkout = path_util.DetermineCheckout(src_path)
@@ -1555,13 +1640,13 @@ class ChromeSDKCommand(command.CliCommand):
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
     if self.options.download_vm:
-      components.append(constants.VM_IMAGE_TAR)
+      components.append(constants.TEST_IMAGE_TAR)
 
     goma_dir = None
     goma_port = None
-    if self.options.goma:
+    if self.options.goma and not self.options.use_rbe:
       try:
-        goma_dir, goma_port = self._FetchGoma()
+        goma_dir, goma_port = self._SetupGoma()
       except GomaError as e:
         logging.error('Goma: %s.  Bypass by running with --nogoma.', e)
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 This module contains cbuildbot test stages that run Tast integration tests. See
 https://chromium.googlesource.com/chromiumos/platform/tast/ for more details.
 """
-
-from __future__ import print_function
 
 import json
 import os
@@ -182,7 +179,7 @@ class TastVMTestStage(generic_stages.BoardSpecificBuilderStage,
     Raises:
       failures_lib.TestFailure if an internal error is encountered.
     """
-    vm_path = os.path.join(self.GetImageDirSymlink(), constants.VM_IMAGE_BIN)
+    vm_path = os.path.join(self.GetImageDirSymlink(), constants.TEST_IMAGE_BIN)
     results_dir = self._MakeChrootPathAbsolute(suite_chroot_results_dir)
     cmd = ['./cros_run_test', '--no-display', '--copy-on-write', '--debug',
            '--board=%s' % self._current_board, '--image-path=%s' % vm_path,

@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Configuration options for various cbuildbot builders."""
 
-from __future__ import print_function
-
 import copy
 import itertools
 import json
 import numbers
 import os
-import re
 
 from chromite.lib import constants
 from chromite.lib import osutils
@@ -42,6 +38,7 @@ DISPLAY_LABEL_PI_ANDROID_PFQ = 'pi_android_pfq'
 DISPLAY_LABEL_QT_ANDROID_PFQ = 'qt_android_pfq'
 DISPLAY_LABEL_RVC_ANDROID_PFQ = 'rvc_android_pfq'
 DISPLAY_LABEL_VMRVC_ANDROID_PFQ = 'vmrvc_android_pfq'
+DISPLAY_LABEL_VMSC_ANDROID_PFQ = 'vmsc_android_pfq'
 DISPLAY_LABEL_FIRMWARE = 'firmware'
 DISPLAY_LABEL_FACTORY = 'factory'
 DISPLAY_LABEL_TOOLCHAIN = 'toolchain'
@@ -63,6 +60,7 @@ ALL_DISPLAY_LABEL = {
     DISPLAY_LABEL_QT_ANDROID_PFQ,
     DISPLAY_LABEL_RVC_ANDROID_PFQ,
     DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
+    DISPLAY_LABEL_VMSC_ANDROID_PFQ,
     DISPLAY_LABEL_FIRMWARE,
     DISPLAY_LABEL_FACTORY,
     DISPLAY_LABEL_TOOLCHAIN,
@@ -100,6 +98,20 @@ ALL_LUCI_BUILDER = {
     LUCI_BUILDER_STAGING,
     LUCI_BUILDER_TRY,
 }
+
+GOLDENEYE_IGNORED_BOARDS = [
+  'capri',
+  'capri-zfpga',
+  'cobblepot',
+  'gonzo',
+  'lakitu',
+  'lasilla-ground',
+  'lasilla-sky',
+  'macchiato-ground',
+  'octavius',
+  'romer',
+  'wooten',
+]
 
 
 def isTryjobConfig(build_config):
@@ -145,7 +157,8 @@ def IsCanaryMaster(builder_run):
   """Returns True if this build type is master-release"""
   return (builder_run.config.build_type == constants.CANARY_TYPE and
           builder_run.config.master and
-          builder_run.manifest_branch == 'master')
+          builder_run.manifest_branch in ('main', 'master'))
+
 
 def IsPFQType(b_type):
   """Returns True if this build type is a PFQ."""
@@ -508,6 +521,7 @@ class HWTestConfig(object):
   # timeouts equal.
   GTS_QUAL_HW_TEST_TIMEOUT = CTS_QUAL_HW_TEST_TIMEOUT
   SHARED_HW_TEST_TIMEOUT = int(3.0 * _HOUR)
+  PFQ_HW_TEST_TIMEOUT = int(6.0 * _HOUR)
   PALADIN_HW_TEST_TIMEOUT = int(2.0 * _HOUR)
   BRANCHED_HW_TEST_TIMEOUT = int(10.0 * _HOUR)
 
@@ -1487,8 +1501,8 @@ class SiteConfig(dict):
 
     # Select the template name based on template argument, or nothing.
     resolved_template = template.get('_template') if template else None
-    assert not resolved_template or resolved_template in self.templates, \
-        '%s inherits from non-template %s' % (name, resolved_template)
+    assert not resolved_template or resolved_template in self.templates, (
+        '%s inherits from non-template %s' % (name, resolved_template))
 
     # Our name is passed as an explicit argument. We use the first build
     # config as our template, or nothing.
@@ -1817,6 +1831,10 @@ def GroupBoardsByBuilderAndBoardGroup(board_list):
 
   for b in board_list:
     name = b[CONFIG_TEMPLATE_NAME]
+    # Until Lakitu is removed from GE, skip the board
+    # http://b/180437658
+    if name in GOLDENEYE_IGNORED_BOARDS:
+      continue
     # Invalid build configs being written out with no config templates,
     # thus the default. See https://crbug.com/1012278.
     for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):
@@ -1848,6 +1866,10 @@ def GroupBoardsByBuilder(board_list):
   builder_to_boards_dict = {}
 
   for b in board_list:
+    # Until Lakitu is removed from GE, skip the board
+    # http://b/180437658
+    if b['name'] in GOLDENEYE_IGNORED_BOARDS:
+      continue
     # Invalid build configs being written out with no configs array, thus the
     # default. See https://crbug.com/1005803.
     for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):
@@ -1864,16 +1886,32 @@ def GetNonUniBuildLabBoardName(board):
   # Those special string represent special configuration used in the image,
   # and should run on DUT without those string.
   # We strip those string from the board so that lab can handle it correctly.
-  SPECIAL_SUFFIX = [
-      '-arcnext$', '-arcvm$', '-arc-r$', '-arc-r-userdebug$', '-blueznext$',
-      '-kernelnext$', '-kvm$', '-ndktranslation$', '-cfm$', '-campfire$',
-      '-borealis$',
+  # NOTE: please try to keep this list in sync with the corresponding list in
+  # infra/suite_scheduler/build_lib.py
+  special_suffixes = [
+      '-arc64',  #
+      '-arc-r',  #
+      '-arc-r-userdebug',  #
+      '-arc-s',  #
+      '-arcnext',  #
+      '-arcvm',  #
+      '-blueznext',  #
+      '-borealis',  #
+      '-campfire',  #
+      '-cfm',  #
+      '-kernelnext',  #
+      '-kvm',  #
+      '-libcamera',  #
+      '-manatee', #
+      '-ndktranslation',  #
+      '-userdebug',  #
   ]
   # ARM64 userspace boards use 64 suffix but can't put that in list above
   # because of collisions with boards like kevin-arc64.
-  ARM64_BOARDS = ['cheza64', 'kevin64', 'trogdor64']
-  for suffix in SPECIAL_SUFFIX:
-    board = re.sub(suffix, '', board)
+  ARM64_BOARDS = ['kevin64', 'trogdor64']
+  for s in special_suffixes:
+    if board.endswith(s):
+      board = board[:-len(s)]
   if board in ARM64_BOARDS:
     # Remove '64' suffix from the board name.
     board = board[:-2]

@@ -10,7 +10,6 @@ import multiprocessing
 import os
 from pathlib import Path
 import subprocess
-import sys
 import tempfile
 from typing import NamedTuple
 from unittest import mock
@@ -18,8 +17,6 @@ from unittest import mock
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import tricium_clang_tidy
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Replacement(NamedTuple):
@@ -256,7 +253,7 @@ class TriciumClangTidyTests(cros_test_lib.MockTestCase):
   def test_parse_tidy_invocation_functions_on_success(self):
     result = tricium_clang_tidy.parse_tidy_invocation('/file/path.json')
     # If we got an |Exception|, print it out.
-    self.assertFalse(isinstance(result, tricium_clang_tidy.Error), result)
+    self.assertNotIsInstance(result, tricium_clang_tidy.Error)
     meta, info = result
     self.assertEqual(
         meta,

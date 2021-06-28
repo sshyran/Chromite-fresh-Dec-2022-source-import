@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,8 +8,6 @@ This ranges from optparse, to a basic script wrapper setup (much like
 what is used for chromite.bin.*).
 """
 
-from __future__ import print_function
-
 import argparse
 import collections
 import datetime
@@ -19,9 +16,7 @@ import os
 import optparse  # pylint: disable=deprecated-module
 import signal
 import sys
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -83,11 +78,6 @@ class ExecRequiredError(Exception):
     """
     super(ExecRequiredError, self).__init__()
     self.cmd = cmd
-
-
-def AbsolutePath(_option, _opt, value):
-  """Expand paths and make them absolute."""
-  return osutils.ExpandPath(value)
 
 
 def NormalizeGSPath(value):
@@ -237,7 +227,7 @@ class DeviceParser(object):
     Args:
       schemes: A scheme or list of schemes to accept.
     """
-    self.schemes = ([schemes] if isinstance(schemes, six.string_types)
+    self.schemes = ([schemes] if isinstance(schemes, str)
                     else schemes)
     # Provide __name__ for argparse to print on failure, or else it will use
     # repr() which creates a confusing error message.
@@ -673,8 +663,14 @@ class BaseParser(object):
     """Sets up logging based on |opts|."""
     value = opts.log_level.upper()
     logger = logging.getLogger()
-    logger.setLevel(getattr(logging, value))
-    formatter = ColoredFormatter(fmt=opts.log_format,
+    log_level = getattr(logging, value)
+    logger.setLevel(log_level)
+    # If verbose levels, include millisecond output.
+    log_format = opts.log_format
+    if log_level < logging.NOTICE:
+      log_format = log_format.replace(
+          '%(asctime)s:', '%(asctime)s.%(msecs)03d:')
+    formatter = ColoredFormatter(fmt=log_format,
                                  datefmt=constants.LOGGER_DATE_FMT,
                                  enable_color=opts.color)
 
@@ -740,8 +736,7 @@ class BaseParser(object):
     return path_util.FindCacheDir()
 
 
-@six.add_metaclass(attrs_freezer.Class)
-class ArgumentNamespace(argparse.Namespace):
+class ArgumentNamespace(argparse.Namespace, metaclass=attrs_freezer.Class):
   """Class to mimic argparse.Namespace with value freezing support."""
   _FROZEN_ERR_MSG = 'Option values are frozen, cannot alter %s.'
 
@@ -1019,6 +1014,11 @@ def ScriptWrapperMain(find_target_func, argv=None,
     print('Internal error detected- no main functor found in module %r.' %
           (name,), file=sys.stderr)
     sys.exit(100)
+
+  # If verbose levels, include millisecond output.
+  if log_level < logging.NOTICE:
+    log_format = log_format.replace(
+        '%(asctime)s:', '%(asctime)s.%(msecs)03d:')
 
   # Set up basic logging information for all modules that use logging.
   # Note a script target may setup default logging in its module namespace

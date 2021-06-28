@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,18 +7,15 @@
 This script is intended to checkout chromite on the branch specified by -b or
 --branch (as normally accepted by cbuildbot), and then invoke cbuildbot. Most
 arguments are not parsed, only passed along. If a branch is not specified, this
-script will use 'master'.
+script will use 'main'.
 
 Among other things, this allows us to invoke build configs that exist on a given
 branch, but not on TOT.
 """
 
-from __future__ import print_function
-
 import base64
 import functools
 import os
-import sys
 import time
 
 from chromite.cbuildbot import repository
@@ -36,9 +32,6 @@ from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.lib import ts_mon_config
 from chromite.scripts import cbuildbot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # This number should be incremented when we change the layout of the buildroot
@@ -121,7 +114,7 @@ def PreParseArguments(argv):
     argv: The command line arguments to parse.
 
   Returns:
-    Branch as a string ('master' if nothing is specified).
+    Branch as a string ('main' if nothing is specified).
   """
   parser = cbuildbot.CreateParser()
   options = cbuildbot.ParseCommandLine(parser, argv)
@@ -333,7 +326,7 @@ def CleanBuildRoot(root, repo, cache_dir, build_state):
 
 
 @StageDecorator
-def InitialCheckout(repo):
+def InitialCheckout(repo, options):
   """Preliminary ChromeOS checkout.
 
   Perform a complete checkout of ChromeOS on the specified branch. This does NOT
@@ -347,12 +340,14 @@ def InitialCheckout(repo):
 
   Args:
     repo: repository.RepoRepository instance.
+    options: A parsed options object from a cbuildbot parser.
   """
   logging.PrintBuildbotStepText('Branch: %s' % repo.branch)
   logging.info('Bootstrap script starting initial sync on branch: %s',
                repo.branch)
   repo.PreLoad('/preload/chromeos')
-  repo.Sync(detach=True)
+  repo.Sync(detach=True,
+            downgrade_repo=_ShouldDowngradeRepo(options))
 
 
 def ShouldFixBotoCerts(options):
@@ -369,6 +364,34 @@ def ShouldFixBotoCerts(options):
       version = branch[:-2].split('-')[-1]
       major = int(version.split('.')[0])
       return major <= 9667  # This is the newest known to be failing.
+
+    return False
+  except Exception as e:
+    logging.warning(' failed: %s', e)
+    # Conservatively continue without the fix.
+    return False
+
+
+def _ShouldDowngradeRepo(options):
+  """Determine which repo version to set for the branch.
+
+  Repo version is set at cache creation time, in the nightly builder,
+  which means we are typically at the latest version.  Older branches
+  are incompatible with newer version of ToT, therefore we downgrade
+  repo to a known working version.
+
+  Args:
+    options: A parsed options object from a cbuildbot parser.
+
+  Returns:
+    bool of whether to downgrade repo version based on branch.
+  """
+  try:
+    branch = options.branch or ''
+    # Only apply to "old" branches.
+    if branch.endswith('.B'):
+      branch_num = branch[:-2].split('-')[1][1:3]
+      return branch_num <= 79  # This is the newest known to be failing.
 
     return False
   except Exception as e:
@@ -478,7 +501,7 @@ def _main(options, argv):
   Returns:
     Return code of cbuildbot as an integer.
   """
-  branchname = options.branch or 'master'
+  branchname = options.branch or 'main'
   root = options.buildroot
   buildroot = os.path.join(root, 'repository')
   workspace = os.path.join(root, 'workspace')
@@ -510,7 +533,7 @@ def _main(options, argv):
       # Get a checkout close enough to the branch that cbuildbot can handle it.
       if options.sync:
         with metrics.SecondsTimer(METRIC_INITIAL):
-          InitialCheckout(repo)
+          InitialCheckout(repo, options)
 
     # Run cbuildbot inside the full ChromeOS checkout, on the specified branch.
     with metrics.SecondsTimer(METRIC_CBUILDBOT), \
@@ -541,7 +564,7 @@ def _main(options, argv):
 def main(argv):
   options = PreParseArguments(argv)
   metric_fields = {
-      'branch_name': options.branch or 'master',
+      'branch_name': options.branch or 'main',
       'build_config': options.build_config_name,
       'tryjob': options.remote_trybot,
   }

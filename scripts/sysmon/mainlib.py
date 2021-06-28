@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,7 +5,6 @@
 """Send system monitoring data to the timeseries monitoring API."""
 
 from __future__ import absolute_import
-from __future__ import print_function
 
 import time
 
@@ -21,7 +19,7 @@ from chromite.scripts.sysmon import osinfo_metrics
 from chromite.scripts.sysmon import proc_metrics
 from chromite.scripts.sysmon import puppet_metrics
 from chromite.scripts.sysmon import system_metrics
-from infra_libs.ts_mon.common import interface
+from chromite.third_party.infra_libs.ts_mon.common import interface
 
 
 logger = logging.getLogger(__name__)

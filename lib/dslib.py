@@ -1,28 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Helpers for interacting with gcloud datastore."""
 
-from __future__ import print_function
-
 import json
-import sys
+
+import google.api_core.exceptions  # pylint: disable=import-error
+from google.cloud import datastore  # pylint: disable=import-error
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import iter_utils
-
-try:
-  import pytest  # pylint: disable=import-error
-  datastore = pytest.importorskip('gcloud.datastore')
-  gcloud = pytest.importorskip('gcloud')
-except ImportError:
-  from gcloud import datastore  # pylint: disable=import-error
-  import gcloud  # pylint: disable=import-error
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _BATCH_CHUNK_SIZE = 500
@@ -68,6 +56,6 @@ def ChunkedBatchWrite(entities, client, batch_size=_BATCH_CHUNK_SIZE):
       batch.put(entity)
     try:
       batch.commit()
-    except gcloud.exceptions.BadRequest:
+    except google.api_core.exceptions.BadRequest:
       logging.warning('Unexportable entities:\n%s', entities)
       raise

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -7,8 +6,6 @@
 
 Handles test related functionality.
 """
-
-from __future__ import print_function
 
 import os
 import re
@@ -54,7 +51,8 @@ def BuildTargetUnitTest(build_target,
                         blocklist=None,
                         was_built=True,
                         code_coverage=False,
-                        testable_packages_optional=False):
+                        testable_packages_optional=False,
+                        filter_only_cros_workon: bool = False):
   """Run the ebuild unit tests for the target.
 
   Args:
@@ -67,6 +65,8 @@ def BuildTargetUnitTest(build_target,
     code_coverage (bool): Whether to produce code coverage data.
     testable_packages_optional (bool): Whether to allow no testable packages to
     be found.
+    filter_only_cros_workon (bool): Whether to filter out non-cros_workon
+      packages from input package list.
 
   Returns:
     BuildTargetUnitTestResult
@@ -80,6 +80,9 @@ def BuildTargetUnitTest(build_target,
 
   if blocklist:
     cmd.extend(['--skip-packages', ' '.join(blocklist)])
+
+  if filter_only_cros_workon:
+    cmd.append('--filter-only-cros-workon')
 
   if testable_packages_optional:
     cmd.append('--no-testable-packages-ok')
@@ -147,14 +150,14 @@ def DebugInfoTest(sysroot_path):
   return result.returncode == 0
 
 
-def ChromitePytest():
-  """Run Pytest tests in Chromite.
+def ChromiteUnitTest():
+  """Run chromite unittests.
 
   Returns:
     bool: True iff all tests passed, False otherwise.
   """
   cmd = [
-      os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'run_pytest'),
+      os.path.join(constants.CHROMITE_DIR, 'run_tests'),
       constants.CHROMITE_DIR,
   ]
   result = cros_build_lib.run(cmd, check=False)

@@ -1,20 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for nebraska_wrapper."""
 
-from __future__ import print_function
-
 import multiprocessing
 import os
 import subprocess
+from unittest import mock
 
-import mock
-
-from chromite.lib import cros_test_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_test_lib
 from chromite.lib import gob_util
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
@@ -135,18 +131,6 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     log = self._nebraska.PrintLog()
     self.assertTrue('blah blah' in log)
 
-  def testCollectRequestLogs(self):
-    """Tests CollectRequestLogs."""
-    self.PatchObject(multiprocessing.Process, 'is_alive', return_value=True)
-    run_command_mock = self._PatchRemoteCommand()
-    self._nebraska._port = 10
-
-    # The success case.
-    self._nebraska.CollectRequestLogs('/path/to/file')
-    run_command_mock.assert_called_once_with(
-        ['curl', 'http://127.0.0.1:10/requestlog', '-o',
-         nebraska_wrapper.RemoteNebraskaWrapper.REQUEST_LOG_FILE_PATH])
-
   def testStart(self):
     """Tests Start."""
     # Since the run() function runs in a different thread, its exception doesn't
@@ -159,7 +143,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
     self._nebraska._update_metadata_dir = '/path/to/dir'
     self._nebraska.run()
     run_command_mock.assert_called_once_with(
-        ['python', nebraska_wrapper.RemoteNebraskaWrapper.NEBRASKA_PATH,
+        [nebraska_wrapper.RemoteNebraskaWrapper.NEBRASKA_PATH,
          '--update-metadata', '/path/to/dir'],
         stdout=True, stderr=subprocess.STDOUT)
 
@@ -204,7 +188,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         'chromium.googlesource.com',
         'chromiumos/platform/dev-util/+/HEAD/nebraska/nebraska.py?format=text')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   @mock.patch.object(path_util, 'DetermineCheckout',
                      return_value=path_util.CheckoutInfo(
                          path_util.CHECKOUT_TYPE_GCLIENT, None, None))

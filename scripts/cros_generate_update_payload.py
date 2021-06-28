@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,16 +7,9 @@
 If a source .bin is specified, the update is assumed to be a delta update.
 """
 
-from __future__ import print_function
-
-import sys
-
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib.paygen import paygen_payload_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def ParseArguments(argv):
@@ -38,6 +30,9 @@ def ParseArguments(argv):
   parser.add_argument('--extract', action='store_true',
                       help='If set, extract old/new kernel/rootfs to '
                            '[old|new]_[kern|root].dat. Useful for debugging.')
+  parser.add_argument('--minios', action='store_true',
+                      help='If set, extract the miniOS partition, otherwise '
+                           'extract the kernel and rootfs partitions.')
   parser.add_argument('--work-dir', type='path',
                       help='Path to a temporary directory in the chroot.')
   parser.add_argument('--payload', type='path',
@@ -65,4 +60,5 @@ def main(argv):
 
   return paygen_payload_lib.GenerateUpdatePayload(
       opts.tgt_image, opts.output, src_image=opts.src_image,
-      work_dir=opts.work_dir, private_key=opts.private_key, check=opts.check)
+      work_dir=opts.work_dir, private_key=opts.private_key, check=opts.check,
+      minios=opts.minios)

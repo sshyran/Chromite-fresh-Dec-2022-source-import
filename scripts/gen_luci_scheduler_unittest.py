@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test gen_luci_scheduler."""
-from __future__ import print_function
-
-import sys
 
 from chromite.config import chromeos_config
 from chromite.lib import cros_test_lib
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
 from chromite.scripts import gen_luci_scheduler
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # It's reasonable for unittests to look at internals.
@@ -46,10 +39,10 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "LegacyRelease"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -165,11 +158,11 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "LegacyRelease"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     tags: "cbb_workspace_branch:work_branch"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_workspace_branch:work_branch"
@@ -198,11 +191,11 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "LegacyRelease"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
     tags: "cbb_display_label:MockLabel"
     tags: "cbb_goma_client_type:client_type"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:amd64-generic-release"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_goma_client_type:client_type"
@@ -289,12 +282,12 @@ job {
     expected = """# Defines buckets on luci-scheduler.appspot.com.
 #
 # For schema of this file and documentation see ProjectConfig message in
-# https://github.com/luci/luci-go/blob/master/scheduler/appengine/messages/config.proto
+# https://github.com/luci/luci-go/blob/HEAD/scheduler/appengine/messages/config.proto
 
 # Generated with chromite/scripts/gen_luci_scheduler
 
 # Autodeployed with:
-# http://cros-goldeneye/chromeos/legoland/builderHistory?buildConfig=luci-scheduler-updater
+# https://data.corp.google.com/sites/chromeos_ci_cros_ci_builds/utility/?f=board_name:in:luci-scheduler-updater
 
 acl_sets {
   name: "default"
@@ -352,10 +345,10 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "ReleaseBuilder"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:build_prod"
     tags: "cbb_display_label:MockLabel"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:build_prod"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -371,10 +364,10 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "TestBuilder"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:build_tester"
     tags: "cbb_display_label:TestLabel"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:build_tester"
     properties: "cbb_display_label:TestLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -390,10 +383,10 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "ReleaseBuilder"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:build_triggered_a"
     tags: "cbb_display_label:MockLabel"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:build_triggered_a"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"
@@ -409,10 +402,10 @@ job {
     server: "cr-buildbucket.appspot.com"
     bucket: "luci.chromeos.general"
     builder: "ProdBuilder"
-    tags: "cbb_branch:master"
+    tags: "cbb_branch:main"
     tags: "cbb_config:build_triggered_b"
     tags: "cbb_display_label:MockLabel"
-    properties: "cbb_branch:master"
+    properties: "cbb_branch:main"
     properties: "cbb_config:build_triggered_b"
     properties: "cbb_display_label:MockLabel"
     properties: "cbb_extra_args:[\\"--buildbot\\"]"

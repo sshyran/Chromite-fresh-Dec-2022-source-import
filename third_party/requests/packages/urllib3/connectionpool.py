@@ -31,7 +31,7 @@ from .exceptions import (
     NewConnectionError,
 )
 from .packages.ssl_match_hostname import CertificateError
-from .packages import six
+from chromite.third_party import six
 from .connection import (
     port_by_scheme,
     DummyConnection,

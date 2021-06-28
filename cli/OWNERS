@@ -4,3 +4,4 @@
 
 per-file deploy*=file:/OWNERS.chrome
 per-file flash*=file:/OWNERS.au
+per-file device_imager*=file:/OWNERS.au

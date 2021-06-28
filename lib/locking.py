@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Basic locking functionality."""
-
-from __future__ import print_function
 
 import contextlib
 import os
@@ -127,13 +124,10 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       raise
     except EnvironmentError as e:
       if e.errno != errno.EDEADLK:
-        message = ('%s: blocking wait failed errno %s'
-                   % (self.description, e))
+        logging.error('%s: blocking wait failed errno %s', self.description, e)
         raise
       self.unlock()
       self.locking_mechanism(self.fd, flags)
-    logging.debug('%s: lock has been acquired (%s), continuing.',
-                  self.description, self.locktype)
 
   def lock(self, shared=False):
     """Take a lock of type |shared|.
@@ -199,8 +193,6 @@ class _Lock(cros_build_lib.MasterPidContextManager):
       IOError if the operation fails in some way.
     """
     if self._fd is not None:
-      logging.debug('%s: lock is being released (%s).',
-                    self.description, self.locktype)
       self.locking_mechanism(self._fd, fcntl.LOCK_UN)
 
   def __del__(self):
@@ -280,12 +272,8 @@ class FileLock(_Lock):
     # There exist race conditions where the lock may be created by
     # root, thus denying subsequent accesses from others. To prevent
     # this, we create the lock with mode 0o666.
-    try:
-      value = os.umask(000)
-      fd = os.open(self.path, os.W_OK|os.O_CREAT|cloexec, 0o666)
-    finally:
-      os.umask(value)
-    return fd
+    with osutils.UmaskContext(000):
+      return os.open(self.path, os.W_OK|os.O_CREAT|cloexec, 0o666)
 
 
 class ProcessLock(_Lock):

@@ -1,26 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test git_bisector module."""
 
-from __future__ import print_function
-
+import builtins
 import copy
 import os
+from unittest import mock
 
-import mock
-
-from chromite.cros_bisect import common
 from chromite.cros_bisect import builder as builder_module
+from chromite.cros_bisect import common
 from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import git_bisector
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
-from chromite.lib import cros_logging as logging
+
 
 class GitMock(partial_mock.PartialCmdMock):
   """Mocks git.RunGit.
@@ -403,8 +401,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
     """Tests GetThresholdFromUser()."""
     logging.notice('testGetThresholdFromUser')
     self.setDefaultCommitInfo()
-    input_mock = self.PatchObject(cros_build_lib, 'GetInput',
-                                  return_value=self.THRESHOLD_SPLITTER)
+    input_mock = self.PatchObject(
+        builtins, 'input', return_value=self.THRESHOLD_SPLITTER)
     self.assertTrue(self.bisector.GetThresholdFromUser())
     self.assertEqual(self.THRESHOLD, self.bisector.threshold)
     input_mock.assert_called()
@@ -420,8 +418,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
   def testGetThresholdFromUserOutOfBoundFail(self):
     """Tests GetThresholdFromUser() with out-of-bound input."""
     self.setDefaultCommitInfo()
-    input_mock = self.PatchObject(cros_build_lib, 'GetInput',
-                                  side_effect=['0', '1000', '-10'])
+    input_mock = self.PatchObject(
+        builtins, 'input', side_effect=['0', '1000', '-10'])
     self.assertFalse(self.bisector.GetThresholdFromUser())
     self.assertIsNone(self.bisector.threshold)
     self.assertEqual(3, input_mock.call_count)
@@ -430,7 +428,8 @@ class TestGitBisector(cros_test_lib.MockTempDirTestCase):
     """Tests GetThresholdFromUser() with retry."""
     self.setDefaultCommitInfo()
     input_mock = self.PatchObject(
-        cros_build_lib, 'GetInput',
+        builtins,
+        'input',
         side_effect=['not_a_number', '1000', self.THRESHOLD_SPLITTER])
     self.assertTrue(self.bisector.GetThresholdFromUser())
     self.assertEqual(self.THRESHOLD, self.bisector.threshold)

@@ -19,7 +19,7 @@ an OAuth 2.0 protected service.
 """
 
 import json
-import six
+from chromite.third_party import six
 
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'

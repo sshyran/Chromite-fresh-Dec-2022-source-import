@@ -1,30 +1,23 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for repository.py."""
 
-from __future__ import print_function
-
 import os
-import sys
 import time
+from unittest import mock
 
-import mock
-
+from chromite.cbuildbot import repository
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.cbuildbot import repository
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import cros_build_lib
+
 
 # pylint: disable=protected-access
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class RepositoryTests(cros_test_lib.RunCommandTestCase):
@@ -56,7 +49,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
                                           self.tempdir, branch=branch)
     self.repo.Initialize()
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testReInitialization(self):
     """Test ability to switch between branches."""
     self._Initialize('release-R19-2046.B')
@@ -68,7 +61,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     self.assertRaises(Exception, self._Initialize, 'monkey')
     self._Initialize('release-R20-2268.B')
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testBuildRootGitCleanup(self):
     """Test successful repo cleanup."""
     self._Initialize()
@@ -79,7 +72,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     # run should be called twice.
     self.assertEqual(run_cmd_mock.call_count, 2)
 
-  @cros_test_lib.NetworkTest()
+  @cros_test_lib.pytestmark_network_test
   def testCleanStaleLocks(self):
     """Test successful repo lock cleanup."""
     self._Initialize('release-R19-2046.B')
@@ -136,6 +129,7 @@ class RepoSyncTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     site_params = config_lib.GetSiteParams()
     self.repo = repository.RepoRepository(site_params.MANIFEST_URL,
                                           self.tempdir, branch='master')
+    self.PatchObject(repository.RepoRepository, '_RepoDebugInfo')
     self.PatchObject(repository.RepoRepository, 'Initialize')
     self.PatchObject(repository.RepoRepository, '_EnsureMirroring')
     self.PatchObject(repository.RepoRepository, 'BuildRootGitCleanup')
@@ -181,26 +175,23 @@ gpg: Can't check signature: public key not found
 
 warning: Skipped upgrade to unverified version
 """
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     cmd_result = cros_build_lib.CommandResult(error=warnning_stderr)
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     mock_rm.assert_called_once_with(mock.ANY, ignore_missing=True)
 
   def test_RepoSelfupdateRaisesException(self):
     """Test _RepoSelfupdate when exception is raised."""
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     ex = cros_build_lib.RunCommandError('msg')
     self.PatchObject(cros_build_lib, 'run', side_effect=ex)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     mock_rm.assert_called_once_with(mock.ANY, ignore_missing=True)
 
   def test_RepoSelfupdateSucceeds(self):
-    mock_rm = self.PatchObject(osutils, 'RmDir')
     cmd_result = cros_build_lib.CommandResult()
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
-    self.repo._RepoSelfupdate()
-
+    with mock.patch.object(osutils, 'RmDir') as mock_rm:
+      self.repo._RepoSelfupdate()
     self.assertFalse(mock_rm.called)

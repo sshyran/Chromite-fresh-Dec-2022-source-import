@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,7 +8,6 @@ This module should only be imported inside the chroot.
 """
 
 from __future__ import division
-from __future__ import print_function
 
 import collections
 import errno
@@ -19,15 +17,15 @@ import io
 import itertools
 import mimetypes
 import os
+from pathlib import Path
 import re
 import stat
+from typing import NamedTuple
 import unittest
 
-from elftools.elf import elffile
-from elftools.common import exceptions
-import lddtree
 import magic  # pylint: disable=import-error
 
+from chromite.cros.test import usergroup_baseline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import filetype
@@ -35,8 +33,9 @@ from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.lib import parseelf
 from chromite.lib import portage_util
-
-from chromite.cros.test import usergroup_baseline
+from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.common import exceptions
+from chromite.third_party.pyelftools.elftools.elf import elffile
 
 
 class LocaltimeTest(image_test_lib.ImageTestCase):
@@ -961,5 +960,66 @@ class DBusServiceTest(image_test_lib.ImageTestCase):
         success = False
         logging.error('%s: Add an Upstart script to manage D-Bus activated '
                       'service lifecycle: see crbug.com/1025914.', filename)
+
+    self.assertTrue(success)
+
+
+class TmpfilesdEntry(NamedTuple):
+  """An entry in a tmpfiles.d file."""
+  config: str
+  type: str
+  path: str
+  mode: str
+  user: str
+  group: str
+  age: str
+  argument: str
+
+
+class TmpfilesdTest(image_test_lib.ImageTestCase):
+  """Verify tmpfiles.d configuration settings."""
+
+  def _parse(self, conf):
+    """Parse a tmpfiles.d file and yield each entry."""
+    for line in conf.read_text('utf-8').splitlines():
+      line = line.strip().split('#', 1)[0]
+      if not line:
+        continue
+
+      line = line.split()
+      yield TmpfilesdEntry(conf, *(line + (['-'] * 5))[0:7])
+
+  def _iter_tmpfiles_d(self):
+    """Yield every tmpfiles.d entry in the rootfs."""
+    root = Path(image_test_lib.ROOT_A)
+    etc_tmpfiles_d = root / 'etc' / 'tmpfiles.d'
+    usr_tmpfiles_d = root / 'usr' / 'lib' / 'tmpfiles.d'
+    for tmpfiles_d in (etc_tmpfiles_d, usr_tmpfiles_d):
+      for conf in tmpfiles_d.glob('*.conf'):
+        yield from self._parse(conf)
+
+  def TestAccounts(self):
+    """Make sure every user & group actually exist.
+
+    If the accounts don't exist at runtime, tmpfiles.d likes to blow up.
+    """
+    root = Path(image_test_lib.ROOT_A)
+    etc_passwd = root / 'etc' / 'passwd'
+    etc_group = root / 'etc' / 'group'
+    valid_users = set(x.split(':', 1)[0]
+                      for x in etc_passwd.read_text('utf-8').splitlines())
+    valid_users.add('-')
+    valid_groups = set(x.split(':', 1)[0]
+                       for x in etc_group.read_text('utf-8').splitlines())
+    valid_groups.add('-')
+
+    success = True
+    for entry in self._iter_tmpfiles_d():
+      if entry.user not in valid_users:
+        logging.error('%s: unknown user', entry)
+        success = False
+      if entry.group not in valid_groups:
+        logging.error('%s: unknown group', entry)
+        success = False
 
     self.assertTrue(success)

@@ -1,16 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for gob_util.py"""
 
-from __future__ import print_function
-
+import http.client
 import tempfile
 import time
-
-from six.moves import http_client as httplib
 
 from chromite.lib import config_lib
 from chromite.lib import cros_test_lib
@@ -24,13 +20,13 @@ gob_util.TRY_LIMIT = 1
 class FakeHTTPResponse(object):
   """Enough of a HTTPResponse for FetchUrl.
 
-  See https://docs.python.org/2/library/httplib.html#httpresponse-objects
+  See https://docs.python.org/3/library/http.client.html#httpresponse-objects
   for more details.
   """
 
   def __init__(self, body=b'', headers=(), reason=None, status=200, version=11):
     if reason is None:
-      reason = httplib.responses[status]
+      reason = http.client.responses[status]
 
     self.body = body
     self.headers = dict(headers)
@@ -144,7 +140,7 @@ class GetCookieTests(cros_test_lib.TestCase):
     self.assertEqual(cookies, {})
 
 
-@cros_test_lib.NetworkTest()
+@cros_test_lib.pytestmark_network_test
 class NetworkGobTest(cros_test_lib.TestCase):
   """Unittests that talk to real Gerrit."""
 

@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-path + os.sep)
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the dependency.py module."""
 
-from __future__ import print_function
-
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_test_lib
+from chromite.lib import depgraph
+from chromite.lib import dependency_graph
+from chromite.lib.parser import package_info
 from chromite.service import dependency
 
 pytestmark = cros_test_lib.pytestmark_inside_only
@@ -16,6 +15,32 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 
 class DependencyTests(cros_test_lib.MockTestCase):
   """General unittests for dependency module."""
+
+  def _build_sysroot_depgraph(self):
+    """Build a DependencyGraph to test against."""
+    sysroot = '/build/target'
+
+    virtual = package_info.parse('virtual/target-foo-1.2.3')
+    dep1 = package_info.parse('cat/dep-1.0.0-r1')
+    dep2 = package_info.parse('cat/dep-2.0.0-r1')
+    depdep = package_info.parse('cat/depdep-2.0.1-r5')
+
+    virtual_node = dependency_graph.PackageNode(
+        virtual, sysroot, src_paths=['/virtual/foo'])
+    dep1_node = dependency_graph.PackageNode(
+        dep1, sysroot, src_paths=['/cat/dep/one'])
+    dep2_node = dependency_graph.PackageNode(
+        dep2, sysroot, src_paths=['/cat/dep/two'])
+    depdep_node = dependency_graph.PackageNode(
+        depdep, sysroot, src_paths=['/cat/depdep', '/other/depdep'])
+
+    virtual_node.add_dependency(dep1_node)
+    virtual_node.add_dependency(dep2_node)
+    dep1_node.add_dependency(depdep_node)
+
+    nodes = (virtual_node, dep1_node, dep2_node, depdep_node)
+
+    return dependency_graph.DependencyGraph(nodes, sysroot, [virtual])
 
   def setUp(self):
     self.json_deps = {
@@ -95,30 +120,42 @@ class DependencyTests(cros_test_lib.MockTestCase):
   def testGetDependenciesWithDefaultArgs(self):
     """Test GetDependencies using the default args."""
     self.PatchObject(
-        dependency,
-        'GetBuildDependency',
-        return_value=(self.json_deps, self.json_deps))
-    sysroot_path = '/build/deathstar'
-    build_target = common_pb2.BuildTarget(name='target')
-    actual_deps = dependency.GetDependencies(sysroot_path, build_target)
-    expected_deps = [
-        'commander/darthvader-1.49.3.3',
-        'troop/clone-1.2.3',
-        'troop/robot-2.3.4',
-        'equipment/jetpack-3.4.5',
-    ]
+        depgraph,
+        'get_sysroot_dependency_graph',
+        return_value=(self._build_sysroot_depgraph()))
+    sysroot_path = '/build/target'
+    actual_deps = dependency.GetDependencies(sysroot_path)
+    dep1 = package_info.parse('cat/dep-1.0.0-r1')
+    dep2 = package_info.parse('cat/dep-2.0.0-r1')
+    virtual = package_info.parse('virtual/target-foo-1.2.3')
+    depdep = package_info.parse('cat/depdep-2.0.1-r5')
+
+    expected_deps = [dep1, dep2, virtual, depdep]
     self.assertCountEqual(expected_deps, actual_deps)
 
   def testGetDependenciesWithSrcPaths(self):
     """Test GetDependencies given a list of paths."""
     self.PatchObject(
-        dependency,
-        'GetBuildDependency',
-        return_value=(self.json_deps, self.json_deps))
-    sysroot_path = '/build/deathstar'
-    build_target = common_pb2.BuildTarget(name='target')
-    src_paths = ['/bunker', '/nowhere']
-    actual_deps = dependency.GetDependencies(sysroot_path, build_target,
-                                             src_paths)
-    expected_deps = ['troop/clone-1.2.3']
-    self.assertCountEqual(expected_deps, actual_deps)
+        depgraph,
+        'get_sysroot_dependency_graph',
+        return_value=(self._build_sysroot_depgraph()))
+    sysroot_path = '/build/target'
+    src_paths = ['/cat/dep/one']
+    actual_deps = dependency.GetDependencies(sysroot_path, src_paths)
+    dep = package_info.parse('cat/dep-1.0.0-r1')
+    self.assertCountEqual([dep], actual_deps)
+
+  def testGetDependenciesWithSrcPathsAndReverseDeps(self):
+    """Test GetDependencies given a list of paths."""
+    self.PatchObject(
+        depgraph,
+        'get_sysroot_dependency_graph',
+        return_value=(self._build_sysroot_depgraph()))
+    sysroot_path = '/build/target'
+    src_paths = ['/cat/dep/one']
+    actual_deps = dependency.GetDependencies(
+        sysroot_path, src_paths, include_rev_dependencies=True)
+
+    revdep = package_info.parse('virtual/target-foo-1.2.3')
+    dep = package_info.parse('cat/dep-1.0.0-r1')
+    self.assertCountEqual([dep, revdep], actual_deps)

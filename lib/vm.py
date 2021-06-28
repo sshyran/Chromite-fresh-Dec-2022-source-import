@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """VM-related helper functions/classes."""
-
-from __future__ import print_function
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import errno
@@ -16,7 +13,6 @@ import os
 import re
 import shutil
 import socket
-import sys
 import time
 
 from chromite.cli.cros import cros_chrome_sdk
@@ -30,9 +26,6 @@ from chromite.lib import path_util
 from chromite.lib import remote_access
 from chromite.lib import retry_util
 from chromite.utils import memoize
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class VMError(device.DeviceError):
@@ -76,10 +69,10 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
     raise VMError('Cannot create VM when both image and board are None.')
 
   image_dir = os.path.dirname(image)
-  src_path = dest_path = os.path.join(image_dir, constants.VM_IMAGE_BIN)
+  src_path = dest_path = os.path.join(image_dir, constants.TEST_IMAGE_BIN)
 
   if dest_dir:
-    dest_path = os.path.join(dest_dir, constants.VM_IMAGE_BIN)
+    dest_path = os.path.join(dest_dir, constants.TEST_IMAGE_BIN)
 
   exists = False
   # Do not create a new VM image if a matching image already exists.
@@ -133,7 +126,7 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
       # Move VM from tempdir to dest_dir.
       shutil.move(
           path_util.FromChrootPath(
-              os.path.join(tempdir, constants.VM_IMAGE_BIN)), dest_path)
+              os.path.join(tempdir, constants.TEST_IMAGE_BIN)), dest_path)
       osutils.RmDir(path_util.FromChrootPath(tempdir), ignore_missing=True)
 
   if not os.path.exists(dest_path):
@@ -339,6 +332,8 @@ class VM(device.Device):
       qemu_exe = 'qemu-system-x86_64'
     elif self.qemu_arch == VM.ARCH_AARCH64:
       qemu_exe = 'qemu-system-aarch64'
+    # Newer CrOS qemu builds provide a standalone version under libexec.
+    qemu_wrapper_path = os.path.join('usr/libexec/qemu/bin', qemu_exe)
     qemu_exe_path = os.path.join('usr/bin', qemu_exe)
 
     # Check SDK cache.
@@ -346,15 +341,20 @@ class VM(device.Device):
       qemu_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
           cros_chrome_sdk.SDKFetcher.QEMU_BIN_PATH, self.cache_dir, self.board)
       if qemu_dir:
-        qemu_path = os.path.join(qemu_dir, qemu_exe_path)
-        if os.path.isfile(qemu_path):
-          self.qemu_path = qemu_path
+        for qemu_path in (qemu_wrapper_path, qemu_exe_path):
+          qemu_path = os.path.join(qemu_dir, qemu_path)
+          if os.path.isfile(qemu_path):
+            self.qemu_path = qemu_path
+            break
 
     # Check chroot.
     if not self.qemu_path:
-      qemu_path = os.path.join(self.chroot_path, qemu_exe_path)
-      if os.path.isfile(qemu_path):
-        self.qemu_path = qemu_path
+      for qemu_path in (qemu_wrapper_path, qemu_exe_path):
+        qemu_path = os.path.join(self.chroot_path, qemu_path)
+        print('checking', qemu_path)
+        if os.path.isfile(qemu_path):
+          self.qemu_path = qemu_path
+          break
 
     # Check system.
     if not self.qemu_path:
@@ -379,15 +379,15 @@ class VM(device.Device):
     """Get path of a locally built VM image."""
     vm_image_path = os.path.join(
         constants.SOURCE_ROOT, 'src/build/images', self.board,
-        'latest', constants.VM_IMAGE_BIN)
+        'latest', constants.TEST_IMAGE_BIN)
     return vm_image_path if os.path.isfile(vm_image_path) else None
 
   def _GetCacheVMImagePath(self):
     """Get path of a cached VM image."""
     cache_path = cros_chrome_sdk.SDKFetcher.GetCachePath(
-        constants.VM_IMAGE_TAR, self.cache_dir, self.board)
+        constants.TEST_IMAGE_TAR, self.cache_dir, self.board)
     if cache_path:
-      vm_image = os.path.join(cache_path, constants.VM_IMAGE_BIN)
+      vm_image = os.path.join(cache_path, constants.TEST_IMAGE_BIN)
       if os.path.isfile(vm_image):
         return vm_image
     return None
@@ -401,7 +401,7 @@ class VM(device.Device):
       raise VMError('No VM image found. Use cros chrome-sdk --download-vm.')
     if not os.path.isfile(self.image_path):
       # Checks if the image path points to a directory containing the bin file.
-      image_path = os.path.join(self.image_path, constants.VM_IMAGE_BIN)
+      image_path = os.path.join(self.image_path, constants.TEST_IMAGE_BIN)
       if os.path.isfile(image_path):
         self.image_path = image_path
       else:
@@ -768,7 +768,11 @@ class VM(device.Device):
                         'QEMU hostfwd format, eg tcp:127.0.0.1:12345-:54321 to '
                         'forward port 54321 on the VM to 12345 on the host.')
     parser.add_argument('--qemu-args', action='append',
-                        help='Additional args to pass to qemu.')
+                        help='Additional args to pass to qemu. Note that if '
+                             'you want to pass an argument that starts with a '
+                             'dash, e.g. -display you will need to enclose it '
+                             'in quotes and add a space at the beginning: '
+                             '" -display ..."')
     parser.add_argument('--copy-on-write', action='store_true', default=False,
                         help='Generates a temporary copy-on-write image backed '
                              'by the normal boot image. All filesystem changes '

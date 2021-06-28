@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Sysroot controller tests."""
-
-from __future__ import print_function
 
 import datetime
 import os
@@ -605,13 +602,18 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
                                             self.api_config)
     self.assertFalse(rc)
-    rc_patch.assert_called_with(usepkg=True, install_debug_symbols=True,
-                                packages=[],
-                                package_indexes=[
-                                    binpkg.PackageIndexInfo.from_protobuf(x)
-                                    for x in package_indexes
-                                ], use_flags=[], use_goma=False,
-                                incremental_build=False)
+    rc_patch.assert_called_with(
+        usepkg=True,
+        install_debug_symbols=True,
+        packages=[],
+        package_indexes=[
+            binpkg.PackageIndexInfo.from_protobuf(x) for x in package_indexes
+        ],
+        use_flags=[],
+        use_goma=False,
+        incremental_build=False,
+        setup_board=False,
+        dryrun=False)
 
   def testSuccessWithGomaLogs(self):
     """Test successful call with goma."""

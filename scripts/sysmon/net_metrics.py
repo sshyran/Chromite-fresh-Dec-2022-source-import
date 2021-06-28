@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,16 +5,16 @@
 """Network metrics."""
 
 from __future__ import absolute_import
-from __future__ import print_function
 
 import collections
 import socket
 
 import psutil  # pylint: disable=import-error
-from infra_libs import ts_mon
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
+from chromite.third_party.infra_libs import ts_mon
+
 
 logger = logging.getLogger(__name__)
 

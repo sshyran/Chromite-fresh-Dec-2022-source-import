@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Invokes git bisect to find culprit commit."""
-
-from __future__ import print_function
 
 import datetime
 
@@ -284,9 +281,10 @@ class GitBisector(common.OptionsChecker):
     retry = 3
     for _ in range(retry):
       try:
-        splitter = float(cros_build_lib.GetInput(
-            'Please give a threshold that tell apart good and bad commit '
-            '(within range [%.3f, %.3f]: ' % (ref_score_min, ref_score_max)))
+        splitter = float(
+            input('Please give a threshold that tell apart good and bad commit '
+                  '(within range [%.3f, %.3f]: ' %
+                  (ref_score_min, ref_score_max)))
       except ValueError:
         logging.error('Threshold should be a floating number.')
         continue

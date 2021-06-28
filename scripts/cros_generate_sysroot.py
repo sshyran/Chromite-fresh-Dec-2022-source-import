@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,10 +7,9 @@
 Meant for use after setup_board and build_packages have been run.
 """
 
-from __future__ import print_function
-
 import os
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import commandline
@@ -83,7 +81,7 @@ class GenerateSysroot(object):
 
   def _InstallBuildDependencies(self):
     # Calculate buildtime deps that are not runtime deps.
-    raw_sysroot = cros_build_lib.GetSysroot(board=self.options.board)
+    raw_sysroot = build_target_lib.get_default_sysroot_path(self.options.board)
     packages = []
     if not self.options.deps_only:
       packages = self.options.package.split()

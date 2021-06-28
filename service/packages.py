@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Package utility functionality."""
-
-from __future__ import print_function
 
 import collections
 from distutils.version import LooseVersion
@@ -15,9 +12,9 @@ import json
 import os
 import re
 import sys
-from typing import List
+from typing import List, Optional
 
-from google.protobuf import json_format
+from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.config import replication_config_pb2
 from chromite.cbuildbot import manifest_version
@@ -33,8 +30,8 @@ from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
   from chromite.service import dependency
-
 
 # Registered handlers for uprevving versioned packages.
 _UPREV_FUNCS = {}
@@ -90,6 +87,15 @@ class GeneratedCrosConfigFilesError(Error):
     super(GeneratedCrosConfigFilesError, self).__init__(msg)
 
 
+NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (
+    'needs_chrome_source',
+    'builds_chrome',
+    'packages',
+    'missing_chrome_prebuilt',
+    'missing_follower_prebuilt',
+))
+
+
 def patch_ebuild_vars(ebuild_path, variables):
   """Updates variables in ebuild.
 
@@ -129,23 +135,25 @@ def uprevs_versioned_package(package):
   return register
 
 
-def uprev_android(tracking_branch,
-                  android_package,
-                  android_build_branch,
+def uprev_android(android_package,
                   chroot,
                   build_targets=None,
-                  android_version=None):
+                  android_build_branch=None,
+                  android_version=None,
+                  skip_commit=False):
   """Returns the portage atom for the revved Android ebuild - see man emerge."""
   command = [
       'cros_mark_android_as_stable',
-      '--tracking_branch=%s' % tracking_branch,
-      '--android_package=%s' % android_package,
-      '--android_build_branch=%s' % android_build_branch,
+      f'--android_package={android_package}',
   ]
   if build_targets:
-    command.append('--boards=%s' % ':'.join(bt.name for bt in build_targets))
+    command.append(f'--boards={":".join(bt.name for bt in build_targets)}')
+  if android_build_branch:
+    command.append(f'--android_build_branch={android_build_branch}')
   if android_version:
-    command.append('--force_version=%s' % android_version)
+    command.append(f'--force_version={android_version}')
+  if skip_commit:
+    command.append('--skip_commit')
 
   result = cros_build_lib.run(
       command,
@@ -165,7 +173,7 @@ def uprev_android(tracking_branch,
   for target in build_targets or []:
     # Sanity check: We should always be able to merge the version of
     # Android we just unmasked.
-    command = ['emerge-%s' % target.name, '-p', '--quiet', '=%s' % android_atom]
+    command = [f'emerge-{target.name}', '-p', '--quiet', f'={android_atom}']
     try:
       cros_build_lib.run(
           command, enter_chroot=True, chroot_args=chroot.get_enter_args())
@@ -290,6 +298,7 @@ def uprev_virglrenderer(_build_targets, refs, _chroot):
 def uprev_drivefs(_build_targets, refs, chroot):
   """Updates drivefs ebuilds.
 
+  DriveFS versions follow the tag format of refs/tags/drivefs_1.2.3.
   See: uprev_versioned_package.
 
   Returns:
@@ -300,7 +309,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   result = uprev_lib.UprevVersionedPackageResult()
   all_changed_files = []
 
-  drivefs_version = get_latest_drivefs_version_from_refs(refs)
+  DRIVEFS_REFS_PREFIX = 'refs/tags/drivefs_'
+  drivefs_version = _get_latest_version_from_refs(DRIVEFS_REFS_PREFIX, refs)
   if not drivefs_version:
     # No valid DriveFS version is identified.
     return result
@@ -311,7 +321,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
-                                                          chroot)
+                                                          chroot,
+                                                          allow_downrev=False)
 
   if not uprev_result:
     return result
@@ -321,7 +332,8 @@ def uprev_drivefs(_build_targets, refs, chroot):
   pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
                                                           drivefs_version,
-                                                          chroot)
+                                                          chroot,
+                                                          allow_downrev=False)
 
   if not uprev_result:
     logging.warning(
@@ -334,6 +346,42 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   return result
 
+@uprevs_versioned_package('chromeos-base/perfetto')
+def uprev_perfetto(_build_targets, refs, chroot):
+  """Updates Perfetto ebuilds.
+
+  Perfetto versions follow the tag format of refs/tags/v1.2.
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result of updating Perfetto ebuilds.
+  """
+  result = uprev_lib.UprevVersionedPackageResult()
+
+  PERFETTO_REFS_PREFIX = 'refs/tags/v'
+  perfetto_version = _get_latest_version_from_refs(PERFETTO_REFS_PREFIX, refs)
+  if not perfetto_version:
+    # No valid Perfetto version is identified.
+    return result
+
+  logging.debug('Perfetto version determined from refs: %s', perfetto_version)
+
+  # Attempt to uprev perfetto package.
+  PERFETTO_PATH = 'src/third_party/chromiumos-overlay/chromeos-base/perfetto'
+
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(
+      PERFETTO_PATH,
+      perfetto_version,
+      chroot,
+      allow_downrev=False,
+      ref=PERFETTO_REFS_PREFIX + perfetto_version)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(perfetto_version, uprev_result.changed_files)
+
+  return result
 
 @uprevs_versioned_package('afdo/kernel-profiles')
 def uprev_kernel_afdo(*_args, **_kwargs):
@@ -391,6 +439,20 @@ def uprev_termina_dlc(_build_targets, _refs, chroot):
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
   return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+
+
+@uprevs_versioned_package('chromeos-base/chromeos-lacros')
+def uprev_lacros(_build_targets, refs, chroot):
+  """Updates lacros ebuilds.
+
+  Information used is gathered from the QA qualified version tracking file
+  stored in chromium/src.
+
+  See: uprev_versioned_package.
+  """
+  path = os.path.join(
+      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base','chromeos-lacros')
+  return uprev_lib.uprev_ebuild_from_pin(path, refs[0].revision, chroot)
 
 
 @uprevs_versioned_package('app-emulation/parallels-desktop')
@@ -497,24 +559,23 @@ def uprev_chrome(build_targets, refs, chroot):
   return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
 
 
-def get_latest_drivefs_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
-  """Get the latest DriveFS version from refs
+def _get_latest_version_from_refs(refs_prefix: str,
+                                  refs: List[uprev_lib.GitRef]) -> str:
+  """Get the latest version from refs
 
-  DriveFS versions follow the tag format of refs/tags/drivefs_1.2.3.
   Versions are compared using |distutils.version.LooseVersion| and
   the latest version is returned.
 
   Args:
-    refs: The tags to parse for the latest DriveFS version.
+    refs_prefix: The refs prefix of the tag format.
+    refs: The tags to parse for the latest Perfetto version.
 
   Returns:
-    The latest DriveFS version to use.
+    The latest Perfetto version to use.
   """
-  DRIVEFS_REFS_PREFIX = 'refs/tags/drivefs_'
-
   valid_refs = []
   for gitiles in refs:
-    if gitiles.ref.startswith(DRIVEFS_REFS_PREFIX):
+    if gitiles.ref.startswith(refs_prefix):
       valid_refs.append(gitiles.ref)
 
   if not valid_refs:
@@ -524,7 +585,7 @@ def get_latest_drivefs_version_from_refs(refs: List[uprev_lib.GitRef]) -> str:
   target_version_ref = sorted(valid_refs,
                               key=LooseVersion,
                               reverse=True)[0]
-  return target_version_ref.replace(DRIVEFS_REFS_PREFIX, '')
+  return target_version_ref.replace(refs_prefix, '')
 
 
 def _generate_platform_c_files(replication_config, chroot):
@@ -722,6 +783,68 @@ def builds(atom, build_target, packages=None):
   return any(atom in package for package in graph['package_deps'])
 
 
+def needs_chrome_source(
+    build_target: 'build_target_lib.BuildTarget',
+    compile_source=False,
+    packages: Optional[List[package_info.PackageInfo]] = None,
+    useflags=None):
+  """Check if the chrome source is needed.
+
+  The chrome source is needed if the build target builds chrome or any of its
+  follower packages, and can't use a prebuilt for them either because it's not
+  available, or because we can't use prebuilts because it must build from
+  source.
+  """
+  cros_build_lib.AssertInsideChroot()
+
+  # Check if it builds chrome and/or a follower package.
+  graph = depgraph.get_sysroot_dependency_graph(build_target.root, packages)
+  builds_chrome = constants.CHROME_CP in graph
+  builds_follower = {
+      pkg: pkg in graph for pkg in constants.OTHER_CHROME_PACKAGES
+  }
+
+  # When we are compiling source set False since we do not use prebuilts.
+  # When not compiling from source, start with True, i.e. we have every prebuilt
+  # we've checked for up to this point.
+  has_chrome_prebuilt = not compile_source
+  has_follower_prebuilts = not compile_source
+  # Save packages that need prebuilts for reporting.
+  pkgs_needing_prebuilts = []
+  if compile_source:
+    # Need everything.
+    pkgs_needing_prebuilts.append(constants.CHROME_CP)
+    pkgs_needing_prebuilts.extend(
+        [pkg for pkg, builds_pkg in builds_follower.items() if builds_pkg])
+  else:
+    # Check chrome itself.
+    if builds_chrome:
+      has_chrome_prebuilt = has_prebuilt(
+          constants.CHROME_CP, build_target=build_target, useflags=useflags)
+      if not has_chrome_prebuilt:
+        pkgs_needing_prebuilts.append(constants.CHROME_CP)
+    # Check follower packages.
+    for pkg, builds_pkg in builds_follower.items():
+      if not builds_pkg:
+        continue
+      prebuilt = has_prebuilt(pkg, build_target=build_target, useflags=useflags)
+      has_follower_prebuilts &= prebuilt
+      if not prebuilt:
+        pkgs_needing_prebuilts.append(pkg)
+  # Postcondition: has_chrome_prebuilt and has_follower_prebuilts now correctly
+  # reflect whether we actually have the corresponding prebuilts for the build.
+
+  needs_chrome = builds_chrome and not has_chrome_prebuilt
+  needs_follower = any(builds_follower.values()) and not has_follower_prebuilts
+
+  return NeedsChromeSourceResult(
+      needs_chrome_source=needs_chrome or needs_follower,
+      builds_chrome=builds_chrome,
+      packages=[package_info.parse(p) for p in pkgs_needing_prebuilts],
+      missing_chrome_prebuilt=not has_chrome_prebuilt,
+      missing_follower_prebuilt=not has_follower_prebuilts)
+
+
 def determine_chrome_version(build_target):
   """Returns the current Chrome version for the board (or in buildroot).
 
@@ -765,57 +888,46 @@ def determine_android_package(board):
 
   # We assume there is only one Android package in the depgraph.
   for package in packages:
-    if package.startswith('chromeos-base/android-container-') or \
-        package.startswith('chromeos-base/android-vm-'):
+    if (package.startswith('chromeos-base/android-container-') or
+        package.startswith('chromeos-base/android-vm-')):
       return package
   return None
 
 
-def determine_android_version(boards=None):
+def determine_android_version(board, package=None):
   """Determine the current Android version in buildroot now and return it.
 
   This uses the typical portage logic to determine which version of Android
   is active right now in the buildroot.
 
   Args:
-    boards: List of boards to check version of.
+    board: The board name this is specific to.
+    package: The Android package, if already computed.
 
   Returns:
-    The Android build ID of the container for the boards.
+    The Android build ID of the container for the board.
 
   Raises:
     NoAndroidVersionError: if no unique Android version can be determined.
   """
-  if not boards:
-    return None
-  # Verify that all boards have the same version.
-  version = None
-  for board in boards:
+  if not package:
     package = determine_android_package(board)
-    if not package:
-      return None
-    cpv = package_info.SplitCPV(package)
-    if not cpv:
-      raise NoAndroidVersionError(
-          'Android version could not be determined for %s' % board)
-    if not version:
-      version = cpv.version_no_rev
-    elif version != cpv.version_no_rev:
-      raise NoAndroidVersionError('Different Android versions (%s vs %s) for %s'
-                                  % (version, cpv.version_no_rev, boards))
-  return version
-
-
-def determine_android_branch(board):
-  """Returns the Android branch in use by the active container ebuild."""
-  try:
-    android_package = determine_android_package(board)
-  except cros_build_lib.RunCommandError:
-    raise NoAndroidBranchError(
-        'Android branch could not be determined for %s' % board)
-  if not android_package:
+  if not package:
     return None
-  ebuild_path = portage_util.FindEbuildForBoardPackage(android_package, board)
+  cpv = package_info.SplitCPV(package)
+  if not cpv:
+    raise NoAndroidVersionError(
+        'Android version could not be determined for %s' % board)
+  return cpv.version_no_rev
+
+
+def determine_android_branch(board, package=None):
+  """Returns the Android branch in use by the active container ebuild."""
+  if not package:
+    package = determine_android_package(board)
+  if not package:
+    return None
+  ebuild_path = portage_util.FindEbuildForBoardPackage(package, board)
   # We assume all targets pull from the same branch and that we always
   # have at least one of the following targets.
   targets = constants.ANDROID_ALL_BUILD_TARGETS
@@ -829,23 +941,20 @@ def determine_android_branch(board):
       'Android branch could not be determined for %s (ebuild empty?)' % board)
 
 
-def determine_android_target(board):
+def determine_android_target(board, package=None):
   """Returns the Android target in use by the active container ebuild."""
-  try:
-    android_package = determine_android_package(board)
-  except cros_build_lib.RunCommandError:
-    raise NoAndroidTargetError(
-        'Android Target could not be determined for %s' % board)
-  if not android_package:
+  if not package:
+    package = determine_android_package(board)
+  if not package:
     return None
-  if android_package.startswith('chromeos-base/android-vm-'):
+  if package.startswith('chromeos-base/android-vm-'):
     return 'bertha'
-  elif android_package.startswith('chromeos-base/android-container-'):
+  elif package.startswith('chromeos-base/android-container-'):
     return 'cheets'
 
   raise NoAndroidTargetError(
       'Android Target cannot be determined for the package: %s' %
-      android_package)
+      package)
 
 
 def determine_platform_version():

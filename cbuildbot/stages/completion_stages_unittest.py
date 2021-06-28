@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for completion stages."""
 
-from __future__ import print_function
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
@@ -15,14 +12,15 @@ from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import completion_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
-from chromite.cbuildbot.stages import sync_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
+from chromite.cbuildbot.stages import sync_stages_unittest
 from chromite.lib import builder_status_lib
 from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
+
 
 # pylint: disable=protected-access
 

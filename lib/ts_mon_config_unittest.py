@@ -1,22 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for chromite.lib.metrics."""
 
-from __future__ import print_function
-
 import itertools
 import multiprocessing
-
-from six.moves import queue as Queue
+import queue as Queue
 
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
-
-from infra_libs import ts_mon
+from chromite.third_party.infra_libs import ts_mon
 
 
 # pylint: disable=protected-access

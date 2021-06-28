@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for portage_util.py."""
 
-from __future__ import print_function
-
 import json
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -20,9 +16,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 MANIFEST = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
@@ -177,13 +170,13 @@ inherit cros-workon superpower
           fake_ebuild_path, fake_ebuild_content=['KEYWORDS="%s"\n' % keywords])
       self.assertEqual(fake_ebuild.is_stable, stable)
 
-  def testEBuildBlacklisted(self):
-    """Test blacklisted ebuild"""
+  def testEBuildManuallyUpreved(self):
+    """Test manually uprevved ebuild"""
     basedir = os.path.join(self.tempdir, 'cat', 'test_package')
     fake_ebuild_path = os.path.join(basedir, 'test_package-9999.ebuild')
 
     fake_ebuild = self._MakeFakeEbuild(fake_ebuild_path)
-    self.assertEqual(fake_ebuild.is_blacklisted, False)
+    self.assertEqual(fake_ebuild.is_manually_uprevved, False)
 
     PATTERNS = (
         'CROS_WORKON_BLACKLIST=1',
@@ -196,7 +189,7 @@ inherit cros-workon superpower
     for pattern in PATTERNS:
       fake_ebuild = self._MakeFakeEbuild(
           fake_ebuild_path, fake_ebuild_content=[pattern + '\n'])
-      self.assertTrue(fake_ebuild.is_blacklisted, msg=pattern)
+      self.assertTrue(fake_ebuild.is_manually_uprevved, msg=pattern)
 
   def testEBuildAutoUprev(self):
     """Test auto uprev ebuild"""
@@ -204,7 +197,7 @@ inherit cros-workon superpower
     fake_ebuild_path = os.path.join(basedir, 'test_package-9999.ebuild')
 
     fake_ebuild = self._MakeFakeEbuild(fake_ebuild_path)
-    self.assertEqual(fake_ebuild.is_blacklisted, False)
+    self.assertEqual(fake_ebuild.is_manually_uprevved, False)
 
     PATTERNS = (
         'CROS_WORKON_MANUAL_UPREV=',
@@ -213,7 +206,7 @@ inherit cros-workon superpower
     for pattern in PATTERNS:
       fake_ebuild = self._MakeFakeEbuild(
           fake_ebuild_path, fake_ebuild_content=[pattern + '\n'])
-      self.assertFalse(fake_ebuild.is_blacklisted, msg=pattern)
+      self.assertFalse(fake_ebuild.is_manually_uprevved, msg=pattern)
 
   def testHasTest(self):
     """Tests that we detect test stanzas correctly."""
@@ -281,7 +274,7 @@ inherit cros-workon superpower
     attrs = portage_util.EBuild.Classify(ebuild_path)
     self.assertFalse(attrs.is_workon)
     self.assertFalse(attrs.is_stable)
-    self.assertFalse(attrs.is_blacklisted)
+    self.assertFalse(attrs.is_manually_uprevved)
     self.assertFalse(attrs.has_test)
 
   def testClassifyUnstable(self):
@@ -505,7 +498,7 @@ class StubEBuild(portage_util.EBuild):
   def _ReadEBuild(self, path):
     pass
 
-  def GetCommitId(self, srcdir):
+  def GetCommitId(self, srcdir, ref: str = 'HEAD'):
     id_map = {
         'p1_path1': 'my_id1',
         'p1_path2': 'my_id2'
@@ -1174,24 +1167,25 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
         portage_util, '_FindUprevCandidates',
         side_effect=GetOverlayEBuildsTest._FindUprevCandidateMock)
 
-  def _CreatePackage(self, name, blacklisted=False):
+  def _CreatePackage(self, name, manually_uprevved=False):
     """Helper that creates an ebuild."""
     package_path = os.path.join(self.overlay, name,
                                 'test_package-0.0.1.ebuild')
-    content = 'CROS_WORKON_MANUAL_UPREV=1' if blacklisted else ''
+    content = 'CROS_WORKON_MANUAL_UPREV=1' if manually_uprevved else ''
     osutils.WriteFile(package_path, content, makedirs=True)
 
   @staticmethod
-  def _FindUprevCandidateMock(files, allow_blacklisted, _subdir_support):
+  def _FindUprevCandidateMock(files, allow_manual_uprev, _subdir_support):
     """Mock for the FindUprevCandidateMock function.
 
     Simplified implementation of FindUprevCandidate: consider an ebuild worthy
-    of uprev if |allow_blacklisted| is set or the ebuild is not blacklisted.
+    of uprev if |allow_manual_uprev| is set or the ebuild is not manually
+    uprevved.
     """
     for f in files:
       if (f.endswith('.ebuild') and
           (not 'CROS_WORKON_MANUAL_UPREV=1' in osutils.ReadFile(f) or
-           allow_blacklisted)):
+           allow_manual_uprev)):
         pkgdir = os.path.dirname(f)
         return _Package(os.path.join(os.path.basename(os.path.dirname(pkgdir)),
                                      os.path.basename(pkgdir)))
@@ -1230,20 +1224,24 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
     self.assertFalse(self.uprev_candidate_mock.called)
     self._assertFoundPackages(ebuilds, [])
 
-  def testBlacklistedPackagesIgnoredByDefault(self):
-    """Test that blacklisted packages are ignored by default."""
-    package_name = 'chromeos-base/blacklisted_package'
-    self._CreatePackage(package_name, blacklisted=True)
+  def testManuallyUprevedPackagesIgnoredByDefault(self):
+    """Test that manually uprevved packages are ignored by default."""
+    package_name = 'chromeos-base/manuallyuprevved_package'
+    self._CreatePackage(package_name, manually_uprevved=True)
     ebuilds = portage_util.GetOverlayEBuilds(
         self.overlay, False, [package_name])
     self._assertFoundPackages(ebuilds, [])
 
-  def testBlacklistedPackagesAllowed(self):
-    """Test that we can find blacklisted packages with |allow_blacklisted|."""
-    package_name = 'chromeos-base/blacklisted_package'
-    self._CreatePackage(package_name, blacklisted=True)
+  def testManuallyUprevedPackagesAllowed(self):
+    """Test that we can find manually uprevved packages.
+
+    When we specify the |allow_manual_uprev| parameter.
+    """
+    package_name = 'chromeos-base/manuallyuprevved_package'
+    self._CreatePackage(package_name, manually_uprevved=True)
     ebuilds = portage_util.GetOverlayEBuilds(
-        self.overlay, False, [package_name], allow_blacklisted=True)
+        self.overlay, False, [package_name],
+        allow_manual_uprev=True)
     self._assertFoundPackages(ebuilds, [package_name])
 
 
@@ -1261,12 +1259,12 @@ class ProjectMappingTest(cros_test_lib.TestCase):
     """Test if we can find the list of workon projects."""
     frecon = 'sys-apps/frecon'
     frecon_project = 'chromiumos/platform/frecon'
-    this = 'chromeos-base/chromite'
-    this_project = 'chromiumos/chromite'
+    dev_install = 'chromeos-base/dev-install'
+    dev_install_project = 'chromiumos/platform2'
     matches = [
-        ([frecon], set([frecon_project])),
-        ([this], set([this_project])),
-        ([frecon, this], set([frecon_project, this_project]))
+        ([frecon], {frecon_project}),
+        ([dev_install], {dev_install_project}),
+        ([frecon, dev_install], {frecon_project, dev_install_project}),
     ]
     if portage_util.FindOverlays(constants.BOTH_OVERLAYS):
       for packages, projects in matches:

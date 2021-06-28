@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,18 +10,13 @@ and installs the toolchain and some core dependency packages (e.g. kernel
 headers, gcc-libs).
 """
 
-from __future__ import print_function
-
-import sys
+import argparse
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
 from chromite.service import sysroot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():
@@ -32,8 +26,8 @@ def GetParser():
   deprecated = 'Argument will be removed 2019-06-01. Use %s instead.'
   parser = commandline.ArgumentParser(description=__doc__)
 
-  parser.add_argument('--board', required=True,
-                      help='The name of the board to set up.')
+  parser.add_argument('-b', '--board', '--build-target', required=True,
+                      dest='board', help='The name of the board to set up.')
   parser.add_argument('--default', action='store_true', default=False,
                       help='Set the board to the default board in your chroot.')
   parser.add_argument('--force', action='store_true', default=False,
@@ -107,6 +101,13 @@ def GetParser():
                      deprecated=deprecated % '--reuse-pkgs-from-local-boards',
                      help='Deprecated form of --reuse-pkgs-from-local-boards.')
 
+  parser.add_argument(
+      '--fewer-binhosts',
+      dest='expanded_binhost_inheritance',
+      default=True,
+      action='store_false',
+      help=argparse.SUPPRESS)
+
   return parser
 
 
@@ -122,12 +123,18 @@ def _ParseArgs(args):
                                                    profile=opts.profile)
 
   opts.run_config = sysroot.SetupBoardRunConfig(
-      set_default=opts.default, force=opts.force, usepkg=opts.usepkg,
-      jobs=opts.jobs, regen_configs=opts.regen_configs, quiet=opts.quiet,
+      set_default=opts.default,
+      force=opts.force,
+      usepkg=opts.usepkg,
+      jobs=opts.jobs,
+      regen_configs=opts.regen_configs,
+      quiet=opts.quiet,
       update_toolchain=not opts.skip_toolchain_update,
       upgrade_chroot=not opts.skip_chroot_upgrade,
       init_board_pkgs=not opts.skip_board_pkg_init,
-      local_build=opts.reuse_local)
+      local_build=opts.reuse_local,
+      expanded_binhost_inheritance=opts.expanded_binhost_inheritance,
+  )
 
   opts.Freeze()
   return opts

@@ -1,26 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for parallel library."""
 
-from __future__ import print_function
-
 import contextlib
 import multiprocessing
 import numbers
 import os
+import pickle
+import queue as Queue
 import signal
 import sys
 import tempfile
 import threading
 import time
 import unittest
-
-import mock
-from six.moves import cPickle as pickle
-from six.moves import queue as Queue
+from unittest import mock
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
@@ -88,10 +84,10 @@ class ParallelMock(partial_mock.PartialMock):
 
   def PreStart(self):
     self.PatchObject(parallel, 'Manager', side_effect=FakeMultiprocessManager)
-    partial_mock.PartialMock.PreStart(self)
 
+  @classmethod
   @contextlib.contextmanager
-  def ParallelTasks(self, steps, max_parallel=None, halt_on_error=False):
+  def ParallelTasks(cls, steps, max_parallel=None, halt_on_error=False):
     assert max_parallel is None or isinstance(max_parallel, numbers.Integral)
     assert isinstance(halt_on_error, bool)
     try:

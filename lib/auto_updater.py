@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -28,16 +27,12 @@ ChromiumOSUpdater includes:
   * Post-check stateful/rootfs update/whole update.
 """
 
-from __future__ import print_function
-
 import json
 import os
 import re
 import subprocess
 import tempfile
 import time
-
-import six
 
 from chromite.cli import command
 from chromite.lib import auto_update_util
@@ -52,6 +47,7 @@ from chromite.lib import stateful_updater
 from chromite.lib import timeout_util
 
 from chromite.utils import key_value_store
+
 
 # Naming conventions for global variables:
 #   File on remote host without slash: REMOTE_XXX_FILENAME
@@ -344,18 +340,11 @@ class ChromiumOSUpdater(BaseUpdater):
 
     return values
 
-  @classmethod
-  def GetRootDev(cls, device):
-    """Get the current root device on |device|.
-
-    Args:
-      device: a ChromiumOSDevice object, defines whose root device we
-          want to fetch.
-    """
-    rootdev = device.run(
-        ['rootdev', '-s'], capture_output=True).output.strip()
-    logging.debug('Current root device is %s', rootdev)
-    return rootdev
+  def GetRootDev(self):
+    """Get the current root device on |device|."""
+    root_dev = self.device.root_dev
+    logging.debug('Current root device is %s', root_dev)
+    return root_dev
 
   def _StartUpdateEngineIfNotRunning(self, device):
     """Starts update-engine service if it is not running.
@@ -428,7 +417,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def RevertBootPartition(self):
     """Revert the boot partition."""
-    part = self.GetRootDev(self.device)
+    part = self.GetRootDev()
     logging.warning('Reverting update; Boot partition will be %s', part)
     try:
       self.device.run(['/postinst', part], **self._cmd_kwargs)
@@ -598,14 +587,14 @@ class ChromiumOSUpdater(BaseUpdater):
     # and before reboot, since SetupRootfsUpdate may reboot the device if there
     # is a pending update, which changes the root device, and reboot will
     # definitely change the root device if update successfully finishes.
-    old_root_dev = self.GetRootDev(self.device)
+    old_root_dev = self.GetRootDev()
     self.device.Reboot()
     if self._clobber_stateful:
       self.device.run(['mkdir', '-p', self.device.work_dir])
 
     if self._do_rootfs_update:
       logging.notice('Verifying that the device has been updated...')
-      new_root_dev = self.GetRootDev(self.device)
+      new_root_dev = self.GetRootDev()
       if old_root_dev is None:
         raise AutoUpdateVerifyError(
             'Failed to locate root device before update.')
@@ -669,7 +658,7 @@ class ChromiumOSUpdater(BaseUpdater):
       logging.info('Stateful update completed.')
 
     if self._clear_tpm_owner:
-      self.SetClearTpmOwnerRequest()
+      self.device.ClearTpmOwner()
 
     if self._reboot:
       self.RebootAndVerify()
@@ -686,7 +675,7 @@ class ChromiumOSUpdater(BaseUpdater):
       if timeout is None:
         timeout = self.REBOOT_TIMEOUT
       self.device.Reboot(timeout_sec=timeout)
-    except cros_build_lib.DieSystemExit:
+    except remote_access.RebootError:
       raise ChromiumOSUpdateError('Could not recover from reboot at %s' %
                                   error_stage)
     except remote_access.SSHConnectionError:
@@ -724,7 +713,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
   def _GetKernelState(self):
     """Returns the (<active>, <inactive>) kernel state as a pair."""
-    active_root = int(re.findall(r'(\d+\Z)', self.GetRootDev(self.device))[0])
+    active_root = int(re.findall(r'(\d+\Z)', self.GetRootDev())[0])
     if active_root == self.KERNEL_A['root']:
       return self.KERNEL_A, self.KERNEL_B
     elif active_root == self.KERNEL_B['root']:
@@ -846,7 +835,7 @@ class ChromiumOSUpdater(BaseUpdater):
         MAX_RETRY,
         self.device.run,
         cmd, delay_sec=DELAY_SEC_FOR_RETRY,
-        shell=isinstance(cmd, six.string_types),
+        shell=isinstance(cmd, str),
         **kwargs)
 
   def PreSetupStatefulUpdate(self):
@@ -910,19 +899,6 @@ class ChromiumOSUpdater(BaseUpdater):
     except nebraska_wrapper.NebraskaStartupError as e:
       raise ChromiumOSUpdateError(
           'Unable to restore stateful partition: %s' % e)
-
-  def SetClearTpmOwnerRequest(self):
-    """Set clear_tpm_owner_request flag."""
-    # The issue is that certain AU tests leave the TPM in a bad state which
-    # most commonly shows up in provisioning.  Executing this 'crossystem'
-    # command before rebooting clears the problem state during the reboot.
-    # It's also worth mentioning that this isn't a complete fix:  The bad
-    # TPM state in theory might happen some time other than during
-    # provisioning.  Also, the bad TPM state isn't supposed to happen at
-    # all; this change is just papering over the real bug.
-    logging.info('Setting clear_tpm_owner_request to 1.')
-    self._RetryCommand('crossystem clear_tpm_owner_request=1',
-                       **self._cmd_kwargs_omit_error)
 
   def PostCheckRootfsUpdate(self):
     """Post-check for rootfs update for CrOS host."""

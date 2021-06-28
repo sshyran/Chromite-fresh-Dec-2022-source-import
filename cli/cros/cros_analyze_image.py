@@ -37,9 +37,6 @@ from chromite.lib import osutils
 from chromite.lib import pformat
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 IMAGE_NAME = 'chromiumos_base_image'
 TEMPFILE_PREFIX = 'cros_analyze_image-'
 DEFAULT_MIN_SIZE = 1024 * 1024 * 10

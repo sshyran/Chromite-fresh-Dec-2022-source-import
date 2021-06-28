@@ -1,21 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Repository module to handle different types of repositories."""
 
-from __future__ import print_function
-
 import glob
 import multiprocessing
 import os
 import re
 import shutil
-import sys
 import time
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -29,9 +24,6 @@ from chromite.lib import path_util
 from chromite.lib import repo_util
 from chromite.lib import retry_util
 from chromite.lib import rewrite_git_alternates
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Default sleep time(second) between retries
@@ -146,6 +138,7 @@ class RepoRepository(object):
     self.groups = groups
     self.repo_cmd = repo_cmd
     self.preserve_paths = preserve_paths
+    self.repo_rev = None
 
     # It's perfectly acceptable to pass in a reference pathway that isn't
     # usable.  Detect it, and suppress the setting so that any depth
@@ -435,10 +428,14 @@ class RepoRepository(object):
     # Handle branch / manifest options.
     if self.branch:
       init_cmd.extend(['--manifest-branch', self.branch])
+    if self.repo_rev:
+      init_cmd.extend(['--repo-rev', 'v2.7'])
     if self.repo_branch:
       init_cmd.extend(['--repo-branch', self.repo_branch])
     if self.groups:
       init_cmd.extend(['--groups', self.groups])
+    else:
+      init_cmd.extend(['--groups', 'all'])
 
     def _StatusCallback(attempt, _):
       if attempt:
@@ -520,8 +517,16 @@ class RepoRepository(object):
 
     cros_build_lib.run(*args, **kwargs)
 
+  def _RepoDebugInfo(self):
+    """Display debugging information for the repo binary."""
+    logging.info('Repo path: %s', osutils.Which('repo'))
+    cmd = [self.repo_cmd, 'version']
+    cros_build_lib.run(cmd, capture_output=True, encoding='utf-8',
+                       log_output=True)
+
   def Sync(self, local_manifest=None, jobs=None, all_branches=True,
-           network_only=False, detach=False):
+           network_only=False, detach=False,
+           downgrade_repo=False):
     """Sync/update the source.  Changes manifest if specified.
 
     Args:
@@ -540,8 +545,13 @@ class RepoRepository(object):
         invoking code is fine w/ operating on bare repos, ie .repo/projects/*.
       detach: If true, throw away all local changes, even if on tracking
         branches.
+      downgrade_repo (bool): Bool whether to downgrade repo version.
     """
     try:
+      if downgrade_repo:
+        self.repo_rev = 'v2.7'
+      # Repo debugging information.
+      self._RepoDebugInfo()
       # Always re-initialize to the current branch.
       self.Initialize(local_manifest)
       # Fix existing broken mirroring configurations.

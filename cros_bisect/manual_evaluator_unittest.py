@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test manual_evaluator module."""
 
-from __future__ import print_function
-
+import builtins
 import os
 
 from chromite.cros_bisect import common
 from chromite.cros_bisect import manual_evaluator
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
@@ -39,7 +36,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     """Tests Evaluate()."""
     report_path = self.evaluator.GetReportPath(self.BUILD_LABEL)
 
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.assertEqual(common.Score([1.0]),
                      self.evaluator.Evaluate(None, self.BUILD_LABEL))
@@ -56,7 +53,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     self.assertFalse(self.evaluator.CheckLastEvaluate(self.BUILD_LABEL))
 
     # Generate a report for BUILD_LABEL
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.evaluator.Evaluate(None, self.BUILD_LABEL)
 
@@ -87,7 +84,7 @@ class TestManualEvaluator(cros_test_lib.MockTempDirTestCase,
     self.assertFalse(self.evaluator.CheckLastEvaluate(self.BUILD_LABEL))
 
     # Generate a report for BUILD_LABEL
-    m = self.PatchObject(cros_build_lib, 'GetInput')
+    m = self.PatchObject(builtins, 'input')
     m.return_value = 'yes'
     self.evaluator.Evaluate(None, self.BUILD_LABEL)
 

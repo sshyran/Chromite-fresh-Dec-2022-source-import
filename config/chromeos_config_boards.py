@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Configuration options for cbuildbot boards."""
-
-from __future__ import print_function
 
 #
 # Define assorted constants describing various sets of boards.
@@ -25,16 +22,13 @@ arm_internal_release_boards = frozenset([
     'arkham',
     'beaglebone',
     'beaglebone_servo',
-    'capri-zfpga',
     'gale',
+    'hana',
     'kevin-arc64',
     'littlejoe',
     'nyan_big',
     'nyan_blaze',
-    'oak',
     'tael',
-    'veyron_jaq',
-    'veyron_jerry',
     'veyron_mighty',
     'veyron_minnie',
     'veyron_rialto',
@@ -57,12 +51,9 @@ x86_internal_release_boards = frozenset([
     'guado_labstation',
     'guybrush',
     'jecht',
-    'lakitu',
     'majolica',
     'mancomb',
-    'monroe',
     'poppy',
-    'samus-kernelnext',
     'sludge',
     'tatl',
     'wristpin',
@@ -95,24 +86,11 @@ dustbuster_boards = frozenset([
     'wristpin',
 ])
 
-lakitu_boards = frozenset([
-    'lakitu',
-])
-
 lassen_boards = frozenset([
     'lassen',
 ])
 
-loonix_boards = frozenset([
-    'capri',
-    'capri-zfpga',
-    'cobblepot',
-    'gonzo',
-    'lasilla-ground',
-    'octavius',
-    'romer',
-    'wooten',
-])
+loonix_boards = frozenset([])
 
 reven_boards = frozenset([
     'reven',
@@ -142,7 +120,7 @@ termina_boards = frozenset([
 ])
 
 nofactory_boards = (
-    lakitu_boards | termina_boards | lassen_boards | reven_boards | frozenset([
+    termina_boards | lassen_boards | reven_boards | frozenset([
         'x30evb',
     ])
 )
@@ -151,14 +129,14 @@ toolchains_from_source = frozenset([
     'x32-generic',
 ])
 
-noimagetest_boards = (lakitu_boards | loonix_boards | termina_boards
-                      | scribe_boards | wshwos_boards | dustbuster_boards)
+noimagetest_boards = (termina_boards | scribe_boards
+                      | wshwos_boards | dustbuster_boards)
 
-nohwqual_boards = (lakitu_boards | lassen_boards | loonix_boards
-                   | termina_boards | beaglebone_boards | wshwos_boards
+nohwqual_boards = (lassen_boards | termina_boards
+                   | beaglebone_boards | wshwos_boards
                    | dustbuster_boards | reven_boards)
 
-base_layout_boards = lakitu_boards | termina_boards
+base_layout_boards = termina_boards
 
 builder_incompatible_binaries_boards = frozenset([
     'grunt',
@@ -168,5 +146,6 @@ builder_incompatible_binaries_boards = frozenset([
     'majolica',
     'mancomb',
     'zork',
+    'zork-arc-r',
     'zork-borealis',
 ])

@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tool to run ebuild unittests."""
 
-from __future__ import print_function
-
 import argparse
 import multiprocessing
 import os
-import sys
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import chroot_util
@@ -21,9 +18,6 @@ from chromite.lib import osutils
 from chromite.lib import workon_helper
 from chromite.lib import portage_util
 from chromite.scripts import cros_extract_deps
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BOARD_VIRTUAL_PACKAGES = (constants.TARGET_OS_PKG,
@@ -82,7 +76,13 @@ def ParseArgs(argv):
       default=False,
       action='store_true',
       dest='testable_packages_optional',
-      help="If specified, don't fail if no testable packages are found.")
+      help='If specified, do not fail if no testable packages are found.')
+  parser.add_argument(
+      '--filter-only-cros-workon',
+      default=False,
+      action='store_true',
+      help='If specified and packages are given, filters out non-cros_workon '
+      'packages.')
 
   options = parser.parse_args(argv)
   options.Freeze()
@@ -102,7 +102,8 @@ def main(argv):
 
   cros_build_lib.AssertInsideChroot()
 
-  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
+  sysroot = (opts.sysroot or
+             build_target_lib.get_default_sysroot_path(opts.board))
   skipped_packages = set()
   if opts.skip_packages:
     skipped_packages |= set(opts.skip_packages.split())
@@ -110,7 +111,7 @@ def main(argv):
   packages = set()
   # The list of packages to test can be passed as a file containing a
   # space-separated list of package names.
-  # This is used by the builder to test only the packages that were upreved.
+  # This is used by the builder to test only the packages that were uprevved.
   if opts.package_file and os.path.exists(opts.package_file):
     packages = set(osutils.ReadFile(opts.package_file).split())
 
@@ -133,7 +134,8 @@ def main(argv):
     logging.info('Skipping package %s.', cp)
 
   packages = packages - skipped_packages
-  pkg_with_test = portage_util.PackagesWithTest(sysroot, packages)
+  pkg_with_test = portage_util.PackagesWithTest(sysroot, packages,
+                                                opts.filter_only_cros_workon)
 
   if packages - pkg_with_test:
     logging.warning('The following packages do not have tests:\n  %s',

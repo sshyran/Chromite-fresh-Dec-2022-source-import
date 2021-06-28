@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Perform various tasks related to updating Portage packages."""
 
-from __future__ import print_function
-
 import filecmp
-import fnmatch
 import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 
 import portage  # pylint: disable=import-error
 
+from chromite.lib import build_target_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -30,9 +26,6 @@ from chromite.lib import upgrade_table as utable
 from chromite.scripts import merge_package_status as mps
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 oper = operation.Operation('cros_portage_upgrade')
 
 NOT_APPLICABLE = 'N/A'
@@ -42,8 +35,8 @@ UPGRADED = 'Upgraded'
 # Arches we care about -- we actively develop/support/ship.
 STANDARD_BOARD_ARCHS = set(('amd64', 'arm'))
 
-# Files we do not include in our upgrades by convention.
-IGNORE_FILES = set(['Manifest', 'ChangeLog*'])
+# Files that we authored.
+CROS_AUTHORED_FILES = {'OWNERS', 'README.md'}
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -720,12 +713,12 @@ class Upgrader(object):
       raise RuntimeError('Cannot find upstream ebuild at "%s"' %
                          upstream_ebuild_path)
 
-    # If pkgdir already exists, remove everything in it except Manifest.
+    # If pkgdir already exists, remove everything except files we maintain.
     # Note that git will remove a parent directory when it removes
     # the last item in the directory.
     if os.path.exists(pkgdir):
-      items = os.listdir(pkgdir)
-      items = [os.path.join(catpkgsubdir, i) for i in items if i != 'Manifest']
+      items = set(os.listdir(pkgdir)) - CROS_AUTHORED_FILES
+      items = [os.path.join(catpkgsubdir, x) for x in items]
       if items:
         args = ['rm', '-rf', '--ignore-unmatch'] + items
         self._RunGit(self._stable_repo, args, stdout=True)
@@ -735,23 +728,16 @@ class Upgrader(object):
 
     osutils.SafeMakedirs(pkgdir)
 
-    # Grab all non-ignored, non-ebuilds from upstream plus the specific
-    # ebuild requested.
+    # Grab all non-ebuilds from upstream plus the specific ebuild requested.
     items = os.listdir(upstream_pkgdir)
     for item in items:
-      ignored = [x for x in IGNORE_FILES
-                 if fnmatch.fnmatch(os.path.basename(item), x)]
-      if not ignored:
-        if not item.endswith('.ebuild') or item == ebuild:
-          src = os.path.join(upstream_pkgdir, item)
-          dst = os.path.join(pkgdir, item)
-          if os.path.isdir(src):
-            shutil.copytree(src, dst, symlinks=True)
-          else:
-            shutil.copy2(src, dst)
-
-    # Create a new Manifest file for this package.
-    self._CreateManifest(upstream_pkgdir, pkgdir, ebuild)
+      if not item.endswith('.ebuild') or item == ebuild:
+        src = os.path.join(upstream_pkgdir, item)
+        dst = os.path.join(pkgdir, item)
+        if os.path.isdir(src):
+          shutil.copytree(src, dst, symlinks=True)
+        else:
+          shutil.copy2(src, dst)
 
     # Now copy any eclasses that this package requires.
     eclass = self._IdentifyNeededEclass(upstream_cpv)
@@ -775,65 +761,6 @@ class Upgrader(object):
 
     # Write ebuild file back out.
     osutils.WriteFile(ebuild_path, content)
-
-  def _CreateManifest(self, upstream_pkgdir, pkgdir, ebuild):
-    """Create a trusted Manifest from available Manifests.
-
-    Combine the current Manifest in |pkgdir| (if it exists) with
-    the Manifest from |upstream_pkgdir| to create a new trusted
-    Manifest.  Supplement with 'ebuild manifest' command.
-
-    It is assumed that a Manifest exists in |upstream_pkgdir|, but
-    there may not be one in |pkgdir|.  The new |ebuild| in pkgdir
-    should be used for 'ebuild manifest' command.
-
-    The algorithm is this:
-    1) Remove all lines in upstream Manifest that duplicate
-    lines in current Manifest.
-    2) Concatenate the result of 1) onto the current Manifest.
-    3) Run 'ebuild manifest' to add to results.
-    """
-    upstream_manifest = os.path.join(upstream_pkgdir, 'Manifest')
-    current_manifest = os.path.join(pkgdir, 'Manifest')
-
-    # Don't bother to proceed if the package doesn't have external code.
-    if not os.path.exists(upstream_manifest):
-      return
-
-    if os.path.exists(current_manifest):
-      # Determine which files have DIST entries in current_manifest.
-      dists = set()
-      with open(current_manifest, 'r') as f:
-        for line in f:
-          tokens = line.split()
-          if len(tokens) > 1 and tokens[0] == 'DIST':
-            dists.add(tokens[1])
-
-      # Find DIST lines in upstream manifest not overlapping with current.
-      new_lines = []
-      with open(upstream_manifest, 'r') as f:
-        for line in f:
-          tokens = line.split()
-          if len(tokens) > 1 and tokens[0] == 'DIST' and tokens[1] not in dists:
-            new_lines.append(line)
-
-      # Write all new_lines to current_manifest.
-      if new_lines:
-        with open(current_manifest, 'a') as f:
-          f.writelines(new_lines)
-    else:
-      # Use upstream_manifest as a starting point.
-      shutil.copyfile(upstream_manifest, current_manifest)
-
-    manifest_cmd = ['ebuild', os.path.join(pkgdir, ebuild), 'manifest']
-    manifest_result = cros_build_lib.run(
-        manifest_cmd, check=False, print_cmd=False,
-        stdout=True, stderr=subprocess.STDOUT, encoding='utf-8')
-
-    if manifest_result.returncode != 0:
-      raise RuntimeError('Failed "ebuild manifest" for upgraded package.\n'
-                         'Output of %r:\n%s' %
-                         (' '.join(manifest_cmd), manifest_result.output))
 
   def _CopyUpstreamEclass(self, eclass):
     """Upgrades eclass in |eclass| to upstream copy.
@@ -1525,11 +1452,6 @@ class Upgrader(object):
 
   def PrepareToRun(self):
     """Checkout upstream gentoo if necessary, and any other prep steps."""
-
-    if not os.path.exists(os.path.join(
-        self._upstream, '.git', 'shallow')):
-      osutils.RmDir(self._upstream, ignore_missing=True)
-
     if os.path.exists(self._upstream):
       if self._local_only:
         oper.Notice('Using upstream cache as-is (no network) %s.' %
@@ -1811,7 +1733,7 @@ class Upgrader(object):
 
 def _BoardIsSetUp(board):
   """Return true if |board| has been setup."""
-  return os.path.isdir(cros_build_lib.GetSysroot(board=board))
+  return os.path.isdir(build_target_lib.get_default_sysroot_path(board))
 
 
 def _CreateParser():

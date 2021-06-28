@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Interface for calculating dependency graphs via Portage internals"""
-
-from __future__ import print_function
 
 import collections
 import copy
@@ -14,20 +11,15 @@ import sys
 import time
 from typing import List, Optional, Union
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
+from chromite.lib import dependency_graph
+from chromite.lib import dependency_lib
 from chromite.lib.parser import package_info
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
 pytestmark = [cros_test_lib.pytestmark_inside_only]
-
-try:
-  import pytest  # pylint: disable=import-error
-  pytest.importorskip('_emerge')
-except ImportError:
-  pass
 
 # These aren't available outside the SDK.
 # pylint: disable=import-error,wrong-import-order,wrong-import-position
@@ -157,8 +149,8 @@ class DepGraphGenerator(object):
     # point our tools at /build/BOARD and to setup cross compiles to the
     # appropriate board as configured in toolchain.conf.
     if self.board:
-      self.sysroot = os.environ.get('SYSROOT',
-                                    cros_build_lib.GetSysroot(self.board))
+      self.sysroot = os.environ.get(
+          'SYSROOT', build_target_lib.get_default_sysroot_path(self.board))
 
     if self.sysroot:
       os.environ['PORTAGE_CONFIGROOT'] = self.sysroot
@@ -316,8 +308,15 @@ class DepGraphGenerator(object):
 
     return False
 
-  def GenDependencyTree(self):
+  def GenDependencyTree(self, with_roots: bool = False):
     """Get dependency tree info from emerge.
+
+    Args:
+      with_roots: When True, changes the output to have a list of packages for
+        each cpv, and for the deps of each package. This allows more accurately
+        reporting dependencies with the corresponding root information. This
+        format is NOT compatible with other functions in this class, e.g.
+        GenDependencyGraph.
 
     Returns:
       A 3-tuple of the dependency tree, the dependency tree info, and the
@@ -356,7 +355,6 @@ class DepGraphGenerator(object):
     # pylint: disable=protected-access
     digraph = depgraph._dynamic_config.digraph
     root = emerge.settings['ROOT']
-    final_db = depgraph._dynamic_config._filtered_trees[root]['graph_db']
     for node, node_deps in digraph.nodes.items():
       # Calculate dependency packages that need to be installed first. Each
       # child on the digraph is a dependency. The "operation" field specifies
@@ -375,61 +373,64 @@ class DepGraphGenerator(object):
       #
       # We just refer to CPVs as packages here because it's easier.
 
-      # Clear the entry for 'child' that persisted from the previous loop
-      # iteration. In Python 2 loop variables continue to hold their value
-      # in the enclosing function scope (outside the loop body), so if
-      # node_deps[0] is empty then 'child' would have whatever value was
-      # left in it from the previous loop.
-      child = None
+      if not isinstance(node, Package):
+        # Some nodes may be the AtomArgs (usually the virtuals) or sets.
+        # We only want to deal with the packages themselves.
+        continue
 
       deps = {}
       for child, priorities in node_deps[0].items():
-        if (isinstance(node, Package) and isinstance(child, Package) and
-            (self.include_bdepend or child.root == node.root)):
+        if not isinstance(child, Package):
+          continue
+
+        if self.include_bdepend or child.root == node.root:
           cpv = str(child.cpv)
           action = str(child.operation)
 
-          # If we're uninstalling a package, check whether Portage is
-          # installing a replacement. If so, just depend on the installation
-          # of the new package, because the old package will automatically
-          # be uninstalled at that time.
-          if action == 'uninstall':
-            for pkg in final_db.match_pkgs(child.slot_atom):
-              cpv = str(pkg.cpv)
-              action = 'merge'
-              break
-
-          deps[cpv] = dict(
-              action=action, deptypes=[str(x) for x in priorities], deps={},
-              root=child.root)
+          dep = {
+              'action': action,
+              'deptypes': [str(x) for x in priorities],
+              'deps': {},
+              'root': child.root,
+          }
+          if with_roots:
+            deps.setdefault(cpv, []).append(dep)
+          else:
+            deps[cpv] = dep
 
       # We've built our list of deps, so we can add our package to the tree.
 
-      # Some objects in digraph.nodes can be sets instead of packages, but we
-      # only want to return packages in our dependency graph.
-      if isinstance(node, Package) and isinstance(child, Package):
+      cpv = str(node.cpv)
+      pkg_data = {
+          'action': str(node.operation),
+          'deps': deps,
+          'root': node.root,
+      }
+      # If a package is destined for ROOT, then it is in DEPEND OR RDEPEND
+      # and we want to include it in the deps tree. If the package is not
+      # destined for ROOT, then (in the Chrome OS build) we must be building
+      # for a board and the package is a BDEPEND. We only want to add that
+      # package to the deps_tree if include_bdepend is set.
+      if node.root == root or self.include_bdepend:
+        if with_roots:
+          deps_tree.setdefault(cpv, []).append(pkg_data)
+        else:
+          deps_tree[cpv] = pkg_data
 
-        # If a package is destined for ROOT, then it is in DEPEND OR RDEPEND
-        # and we want to include it in the deps tree. If the package is not
-        # destined for ROOT, then (in the Chrome OS build) we must be building
-        # for a board and the package is a BDEPEND. We only want to add that
-        # package to the deps_tree if include_bdepend is set.
-        if (node.root == root or self.include_bdepend):
-          deps_tree[str(node.cpv)] = dict(action=str(node.operation), deps=deps,
-                                          root=node.root)
-
-        # The only packages that will have a distinct root (in the Chrome OS
-        # build) are BDEPEND packages for a board target. If we are building
-        # for the host (the SDK) then BDEPEND packages 1. Will have the same
-        # root as every other package and 2. Are functionally the same as
-        # DEPEND packages and belong in the deps_tree.
-        #
-        # If include_bdepend is passed and we are building for a board target,
-        # BDEPEND packages will intentionally show up in both deps_tree and
-        # bdeps_tree.
-        if node.root != root:
-          bdeps_tree[str(node.cpv)] = dict(
-              action=str(node.operation), deps=deps, root=node.root)
+      # The only packages that will have a distinct root (in the Chrome OS
+      # build) are BDEPEND packages for a board target. If we are building
+      # for the host (the SDK) then BDEPEND packages 1. Will have the same
+      # root as every other package and 2. Are functionally the same as
+      # DEPEND packages and belong in the deps_tree.
+      #
+      # If include_bdepend is passed and we are building for a board target,
+      # BDEPEND packages will intentionally show up in both deps_tree and
+      # bdeps_tree.
+      if node.root != root:
+        if with_roots:
+          bdeps_tree.setdefault(cpv, []).append(pkg_data)
+        else:
+          bdeps_tree[cpv] = pkg_data
 
     # Ask portage for its install plan, so that we can only throw out
     # dependencies that portage throws out.
@@ -862,8 +863,9 @@ def PrintDepsMap(deps_map):
 
 
 # Depgraph results data container used by the raw depgraph functions. The
-# deps attribute has the main depgraph info, while the bdeps attribute
-# contains just the bdepends depgraph, i.e. the depgraph installed to the SDK.
+# deps attribute has the main depgraph info (DEPEND, RDEPEND, and optionally
+# BDEPEND), while the bdeps attribute contains just the bdepends depgraph,
+# i.e. the depgraph installed to the SDK.
 DepgraphResult = collections.namedtuple('DepgraphResult',
                                         ('deps', 'bdeps', 'packages'))
 
@@ -875,11 +877,13 @@ def _get_emerge_args(sysroot_path: str,
   # Pretend: Don't actually install anything.
   # Emptytree: Act as though nothing is installed (even if some packages are).
   # Sysroot: Which sysroot we're considering.
-  args = ['--quiet', '--pretend', '--emptytree', '--sysroot', sysroot_path]
-  # Also set the root for DepGraphGenerator specific semantics. This might not
-  # be necessary, pending more investigation.
-  # TODO: Document final reason or remove if unnecessary.
-  args.extend(['--root', sysroot_path])
+  args = [
+      '--quiet',
+      '--pretend',
+      '--emptytree',
+      # Sysroot needs to be set this way so parallel emerge parses it correctly.
+      f'--sysroot={sysroot_path}',
+  ]
   if include_bdeps:
     args.append('--include-bdepend')
 
@@ -913,7 +917,7 @@ def _get_sysroot_path(
     try:
       return build_target.root
     except AttributeError:
-      return cros_build_lib.GetSysroot(build_target)
+      return build_target_lib.get_default_sysroot_path(build_target)
 
 
 def _get_raw_sdk_depgraph(
@@ -924,12 +928,13 @@ def _get_raw_sdk_depgraph(
   The SDK deps will contain the packages installed to a fresh SDK.
   The bdeps will always be empty since everything is installed to the SDK.
   """
-  sysroot_path = cros_build_lib.GetSysroot(board=None)
+  sysroot_path = build_target_lib.get_default_sysroot_path(None)
   packages = packages or [constants.TARGET_SDK]
   lib_argv = _get_emerge_args(sysroot_path, packages, include_bdeps=True)
+
   deps = DepGraphGenerator()
   deps.Initialize(lib_argv)
-  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree()
+  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree(with_roots=True)
 
   return DepgraphResult(deps=deps_tree, bdeps=bdeps_tree, packages=packages)
 
@@ -953,7 +958,7 @@ def _get_raw_sysroot_depgraph(
 
   deps = DepGraphGenerator()
   deps.Initialize(lib_argv)
-  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree()
+  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree(with_roots=True)
 
   return DepgraphResult(deps=deps_tree, bdeps=bdeps_tree, packages=packages)
 
@@ -977,7 +982,86 @@ def _get_raw_build_target_depgraph(
 
   deps = DepGraphGenerator()
   deps.Initialize(lib_argv)
+  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree(with_roots=True)
 
-  deps_tree, _deps_info, bdeps_tree = deps.GenDependencyTree()
   return DepgraphResult(deps=deps_tree, bdeps=bdeps_tree, packages=packages)
 
+
+def get_sdk_dependency_graph(
+    pkgs: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
+    with_src_paths: bool = False
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the SDK itself."""
+  result = _get_raw_sdk_depgraph(packages=pkgs)
+  return _create_graph_from_deps(
+      result.deps, build_target_lib.get_default_sysroot_path(None),
+      result.packages, with_src_paths)
+
+
+def get_sysroot_dependency_graph(
+    sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
+    with_src_paths: bool = False
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the sysroot only."""
+  result = _get_raw_sysroot_depgraph(sysroot, packages=packages)
+  return _create_graph_from_deps(result.deps, sysroot, result.packages,
+                                 with_src_paths)
+
+
+def get_build_target_dependency_graph(
+    sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
+    with_src_paths: bool = False
+) -> dependency_graph.DependencyGraph:
+  """Get the DependencyGraph for the sysroot and its bdeps."""
+  result = _get_raw_build_target_depgraph(sysroot, packages=packages)
+  return _create_graph_from_deps(result.deps, sysroot, result.packages,
+                                 with_src_paths)
+
+
+def _create_graph_from_deps(
+    deps: dict, sysroot: Union[str, 'sysroot_lib.Sysroot'],
+    packages: Union[List[str], List[package_info.PackageInfo]],
+    with_src_paths: bool
+) -> dependency_graph.DependencyGraph:
+  """Create DependencyGraph from the raw DepGraphGenerator deps.
+
+  Translate the raw DepGraphGenerator deps into PackageNodes for a
+  DependencyGraph. DepGraphGenerator must be run with with_roots=True.
+  This is extracted from the DependencyGraph class to make testing the
+  DependencyGraph class itself much easier.
+  """
+  node_dict = collections.defaultdict(dict)
+  nodes = []
+  src_paths = {}
+  if with_src_paths:
+    sysroot_path = getattr(sysroot, 'path', sysroot)
+    board = os.path.basename(sysroot_path)
+    src_paths = dependency_lib.get_source_path_mapping(
+        packages=deps.keys(),
+        sysroot_path=sysroot_path,
+        board=board)
+
+  for pkg_cpv, pkg_instances in deps.items():
+    pkg_info = package_info.parse(pkg_cpv)
+    for pkg_data in pkg_instances:
+      node = dependency_graph.PackageNode(pkg_info, pkg_data['root'],
+                                          src_paths.get(pkg_info.cpvr))
+      node_dict[pkg_info][pkg_data['root']] = node
+      nodes.append(node)
+
+  for pkg_cpv, pkg_instances in deps.items():
+    pkg_info = package_info.parse(pkg_cpv)
+    for pkg_data in pkg_instances:
+      pkg_node = node_dict[pkg_info][pkg_data['root']]
+      for dep_cpv, pkg_deps in pkg_data['deps'].items():
+        dep_info = package_info.parse(dep_cpv)
+        for dep_data in pkg_deps:
+          if dep_data['root'] not in node_dict[dep_info]:
+            print(pkg_data, dep_data)
+          dep_node = node_dict[dep_info][dep_data['root']]
+          pkg_node.add_dependency(dep_node)
+
+  return dependency_graph.DependencyGraph(
+      nodes, sysroot=sysroot, root_packages=packages)

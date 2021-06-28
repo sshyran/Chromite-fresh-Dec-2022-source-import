@@ -1,21 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """cros deploy: Deploy the packages onto the target device."""
 
-from __future__ import print_function
-
-import sys
-
 from chromite.cli import command
 from chromite.cli import deploy
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 @command.CommandDecorator('deploy')

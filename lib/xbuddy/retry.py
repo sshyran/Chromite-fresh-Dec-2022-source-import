@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,17 +10,11 @@ be done in main thread. For devserver, the call is handled in a thread kicked
 off by cherrypy, so timeotu can't be supported.
 """
 
-from __future__ import print_function
-
 import random
 import sys
 import time
 
-from chromite.lib.xbuddy import cherrypy_log_util
-
-# Module-local log function.
-def _Log(message, *args):
-  return cherrypy_log_util.LogWithTag('RETRY', message, *args)
+from chromite.lib import cros_logging as logging
 
 
 def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, denylist=None):
@@ -49,7 +42,7 @@ def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, denylist=None):
     def delay():
       """'Jitter' the delay, up to 50% in either direction."""
       random_delay = random.uniform(.5 * delay_sec, 1.5 * delay_sec)
-      _Log('Retrying in %f seconds...', random_delay)
+      logging.info('Retrying in %f seconds...', random_delay)
       time.sleep(random_delay)
 
     def func_retry(*args, **kwargs):
@@ -72,7 +65,7 @@ def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, denylist=None):
         except exception_tuple:  # pylint: disable=catching-non-exception
           raise
         except ExceptionToCheck as e:
-          _Log('%s(%s)', e.__class__, e)
+          logging.error('%s', e)
           # Cache the exception to be raised later.
           exc_info = sys.exc_info()
 

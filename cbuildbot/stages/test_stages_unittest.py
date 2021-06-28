@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for test stages."""
 
-from __future__ import print_function
-
 import copy
 import os
+from unittest import mock
 
-import mock
 import pytest  # pylint: disable=import-error
 
+from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import cbuildbot_run
-from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import generic_stages
+from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import test_stages
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
@@ -30,6 +27,7 @@ from chromite.lib import path_util
 from chromite.lib import timeout_util
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

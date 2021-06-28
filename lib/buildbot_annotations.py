@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Functions and classes for formatting buildbot stage annotations."""
 
-from __future__ import print_function
-
 import abc
 import itertools
 import json
-
-import six
 
 
 class Annotation(object):
@@ -43,8 +38,7 @@ class Annotation(object):
       return self.name
 
 
-@six.add_metaclass(abc.ABCMeta)
-class _NamedAnnotation(Annotation):
+class _NamedAnnotation(Annotation, metaclass=abc.ABCMeta):
   """Abstract subclass for creating named annotations.
 
   Concrete subclasses should define the ANNOTATION_NAME class attribute.

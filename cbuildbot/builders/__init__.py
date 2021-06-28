@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,13 +17,7 @@ for each config.  e.g. builder_class_name='Simple' would look for the class
 whose name is 'SimpleBuilder' in all the *_builders.py modules.
 """
 
-from __future__ import print_function
-
 import importlib
-import sys
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetBuilderClass(name):

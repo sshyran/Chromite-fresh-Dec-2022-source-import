@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """cros build: Build the requested packages."""
 
-from __future__ import print_function
-
 import subprocess
-import sys
 
 from chromite.cli import command
+from chromite.lib import build_target_lib
 from chromite.lib import chroot_util
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
@@ -18,9 +15,6 @@ from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import parallel
 from chromite.lib import workon_helper
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class BrilloBuildOperation(operation.ParallelEmergeOperation):
@@ -64,7 +58,7 @@ To just build a single package:
       self.board = cros_build_lib.GetDefaultBoard()
 
     # Set sysroot and friendly name. The latter is None if building for host.
-    self.sysroot = cros_build_lib.GetSysroot(self.board)
+    self.sysroot = build_target_lib.get_default_sysroot_path(self.board)
 
   @classmethod
   def AddParser(cls, parser):

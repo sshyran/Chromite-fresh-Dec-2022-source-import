@@ -5,8 +5,8 @@
 import logging
 import sys
 
-from google.protobuf.descriptor import FieldDescriptor as fd
-import six
+from chromite.third_party.google.protobuf.descriptor import FieldDescriptor as fd
+from chromite.third_party import six
 
 
 def convert(pb):

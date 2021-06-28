@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for managing the toolchains in the chroot."""
 
-from __future__ import print_function
-
 import os
 import subprocess
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -26,9 +22,6 @@ if cros_build_lib.IsInsideChroot():
   # We'll check in main() if the operation needs portage.
   # pylint: disable=import-error
   import portage
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class Error(Exception):

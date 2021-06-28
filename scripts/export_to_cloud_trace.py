@@ -1,38 +1,26 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Export spans to Cloud Trace."""
-from __future__ import print_function
 
 import errno
 import itertools
 import json
 import os
 import pprint
-import sys
 import time
 
-from googleapiclient import discovery
-import google.protobuf.internal.well_known_types as types
-from oauth2client.client import GoogleCredentials
-
-from infra_libs import ts_mon
+import inotify_simple  # pylint: disable=import-error
 
 from chromite.lib import commandline
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
-
-try:
-  import pytest  # pylint: disable=import-error
-  inotify_simple = pytest.importorskip('inotify_simple')
-except ImportError:
-  import inotify_simple
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party.google.protobuf import timestamp_pb2
+from chromite.third_party.googleapiclient import discovery
+from chromite.third_party.infra_libs import ts_mon
+from chromite.third_party.oauth2client.client import GoogleCredentials
 
 
 BATCH_PATIENCE = 10 * 60
@@ -284,7 +272,7 @@ def _ParseDatetime(date_str):
   Returns:
     A datetime object at the same timestamp as the date_str.
   """
-  time_pb = types.Timestamp()
+  time_pb = timestamp_pb2.Timestamp()
   time_pb.FromJsonString(date_str)
   return time_pb.ToDatetime()
 

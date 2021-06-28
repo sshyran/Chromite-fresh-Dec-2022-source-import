@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -73,12 +72,10 @@ By default, when no package is specified, this script processes all
 packages for $BOARD.
 """
 
-from __future__ import print_function
-
 import os
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
@@ -162,7 +159,8 @@ def main(args):
   if not opts.output and not opts.gen_licenses:
     parser.error('You must specify --output and/or --generate-licenses')
 
-  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
+  sysroot = (opts.sysroot or
+             build_target_lib.get_default_sysroot_path(opts.board))
 
   licensing = LoadPackageInfo(
       sysroot, opts.all_packages, opts.gen_licenses, opts.packages)

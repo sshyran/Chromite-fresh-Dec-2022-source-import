@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Chromite email utility functions."""
 
-from __future__ import print_function
-
 import base64
 import collections
 import gzip
+import http.client
 import io
 import json
 import os
@@ -22,27 +20,14 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import six
-from six.moves import http_client as httplib
-
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
-
-# TODO(fdeng): Cleanup the try-catch once crbug.com/482063 is fixed.
-try:
-  # pylint: disable=wrong-import-order
-  import httplib2
-  from googleapiclient.discovery import build as apiclient_build
-  from googleapiclient import errors as apiclient_errors
-  from oauth2client import file as oauth_client_fileio
-  from oauth2client import client
-except (RuntimeError, ImportError) as e:
-  apiclient_build = None
-  oauth_client_fileio = None
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party import httplib2
+from chromite.third_party.googleapiclient import errors as apiclient_errors
+from chromite.third_party.googleapiclient.discovery import build as apiclient_build
+from chromite.third_party.oauth2client import client
+from chromite.third_party.oauth2client import file as oauth_client_fileio
 
 
 class MailServer(object):
@@ -166,18 +151,14 @@ class GmailServer(MailServer):
     Returns:
       True if the email was sent, else False.
     """
-    if not apiclient_build:
-      logging.warning('Could not send email: Google API client not installed.')
-      return False
-
     try:
       credentials = self._GetCachedCredentials()
     except AuthenticationError as e:
       logging.warning('Could not get gmail credentials: %s', e)
       return False
 
-    http = credentials.authorize(httplib2.Http())
-    service = apiclient_build('gmail', 'v1', http=http)
+    httpcreds = credentials.authorize(httplib2.Http())
+    service = apiclient_build('gmail', 'v1', http=httpcreds)
     try:
       # 'me' represents the default authorized user.
       payload = {
@@ -186,7 +167,7 @@ class GmailServer(MailServer):
       }
       service.users().messages().send(userId='me', body=payload).execute()
       return True
-    except (apiclient_errors.HttpError, httplib.HTTPException,
+    except (apiclient_errors.HttpError, http.client.HTTPException,
             client.Error) as error:
       logging.warning('Could not send email: %s', error)
       return False
@@ -271,7 +252,7 @@ def CreateEmail(subject, recipients, message='', attachment=None,
 
   msg.attach(MIMEText(message))
   if attachment:
-    if isinstance(attachment, six.string_types):
+    if isinstance(attachment, str):
       attachment = attachment.encode()
     s = io.BytesIO()
     with gzip.GzipFile(fileobj=s, mode='wb') as f:

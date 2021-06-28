@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests for cipd."""
 
-from __future__ import print_function
-
 import hashlib
 import json
-import mock
-
-import httplib2
+from unittest import mock
 
 from chromite.lib import cipd
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
+from chromite.third_party import httplib2
 
 
 class CIPDTest(cros_test_lib.MockTestCase):

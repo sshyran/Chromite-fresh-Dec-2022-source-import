@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing firmware builders."""
-
-from __future__ import print_function
 
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.stages import branch_archive_stages
@@ -32,11 +29,16 @@ class BuildSpecBuilder(generic_builders.Builder):
 
     if not self._run.options.force_version:
       # If we were not given a specific buildspec to build, create one.
-      self._RunStage(workspace_stages.WorkspaceUprevAndPublishStage,
+      self._RunStage(workspace_stages.WorkspaceUprevStage,
                      build_root=self._run.options.workspace)
 
-      self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
-                     build_root=self._run.options.workspace)
+      if not self._run.options.debug:
+        # If this is not a tryjob, push uprevs and the buildspec.
+        self._RunStage(workspace_stages.WorkspacePublishStage,
+                       build_root=self._run.options.workspace)
+
+        self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
+                       build_root=self._run.options.workspace)
 
     if self._run.config.slave_configs:
       # If there are child builds to schedule, schedule them.
@@ -79,7 +81,7 @@ class FirmwareBranchBuilder(BuildSpecBuilder):
                      board=board)
 
 
-class FactoryBranchBuilder(BuildSpecBuilder):
+class FactoryBranchBuilder(generic_builders.Builder):
   """Builder that builds factory branches.
 
   This builder checks out a second copy of ChromeOS into the workspace
@@ -87,12 +89,27 @@ class FactoryBranchBuilder(BuildSpecBuilder):
   board.
   """
 
+  def GetSyncInstance(self):
+    """Returns an instance of a SyncStage that should be run."""
+    return self._GetStageInstance(workspace_stages.WorkspaceSyncStage,
+                                  build_root=self._run.options.workspace)
+
   def RunStages(self):
     """Run the stages."""
-    super(FactoryBranchBuilder, self).RunStages()
-
     assert len(self._run.config.boards) == 1
     board = self._run.config.boards[0]
+
+    if not self._run.options.force_version:
+      self._RunStage(workspace_stages.WorkspaceUprevStage,
+                     build_root=self._run.options.workspace)
+      # If we were not given a specific buildspec to build and this is not a
+      # tryjob, create one.
+      if not self._run.options.debug:
+        self._RunStage(workspace_stages.WorkspacePublishStage,
+                       build_root=self._run.options.workspace)
+
+        self._RunStage(workspace_stages.WorkspacePublishBuildspecStage,
+                       build_root=self._run.options.workspace)
 
     self._RunStage(workspace_stages.WorkspaceInitSDKStage,
                    build_root=self._run.options.workspace)

@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module tests the cros flash command."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli import flash
@@ -19,20 +14,11 @@ from chromite.lib import remote_access
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class MockFlashCommand(command_unittest.MockCommand):
   """Mock out the flash command."""
   TARGET = 'chromite.cli.cros.cros_flash.FlashCommand'
   TARGET_CLASS = cros_flash.FlashCommand
   COMMAND = 'flash'
-
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
-  def Run(self, inst):
-    command_unittest.MockCommand.Run(self, inst)
 
 
 class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
@@ -79,13 +65,11 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
     expected_kwargs = {
         'board': None,
         'version': 'latest',
-        'src_image_to_delta': None,
-        'rootfs_update': True,
-        'stateful_update': True,
+        'no_rootfs_update': False,
+        'no_stateful_update': False,
         'clobber_stateful': False,
         'clear_tpm_owner': False,
         'reboot': True,
-        'wipe': True,
         'ssh_private_key': None,
         'ping': True,
         'disable_rootfs_verification': False,
@@ -93,7 +77,6 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
         'yes': False,
         'force': False,
         'debug': False,
-        'send_payload_in_parallel': False,
     }
     # Overwrite defaults with any variations in this test.
     expected_kwargs.update(kwargs)

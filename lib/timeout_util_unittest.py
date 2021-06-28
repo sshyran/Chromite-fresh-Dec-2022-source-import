@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test suite for timeout_util.py"""
-
-from __future__ import print_function
 
 import datetime
 from multiprocessing.pool import ThreadPool
@@ -182,7 +179,7 @@ class TestWaitFors(cros_test_lib.TestCase):
     """Verify side_effect_func works."""
     side_effect_called = [False]
     def _SideEffect(remaining):
-      self.assertTrue(isinstance(remaining, datetime.timedelta))
+      self.assertIsInstance(remaining, datetime.timedelta)
       side_effect_called[0] = True
     self.assertEqual(1, self._TestWaitForSuccess(
         1, 10, period=0.1, side_effect_func=_SideEffect))

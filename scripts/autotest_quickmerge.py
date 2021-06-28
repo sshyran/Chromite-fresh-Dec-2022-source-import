@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,8 +7,6 @@
 Simple script to be run inside the chroot. Used as a fast approximation of
 emerge-$board autotest-all, by simply rsync'ing changes from trunk to sysroot.
 """
-
-from __future__ import print_function
 
 import argparse
 import glob
@@ -29,9 +26,6 @@ from chromite.lib.parser import package_info
 if cros_build_lib.IsInsideChroot():
   # pylint: disable=import-error
   import portage
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 INCLUDE_PATTERNS_FILENAME = 'autotest-quickmerge-includepatterns'

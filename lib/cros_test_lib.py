@@ -1,36 +1,27 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Cros unit test library, with utility functions."""
 
-from __future__ import print_function
-
 import collections
 import contextlib
-import functools
+import io
 import os
 import re
 import sys
 import time
 import unittest
-
-import mock
-import six
-from six.moves import StringIO
+from unittest import mock
 
 from chromite.lib import cache
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import osutils
-from chromite.lib import parallel
 from chromite.lib import partial_mock
-from chromite.lib import remote_access
-from chromite.lib import retry_util
 from chromite.lib import terminal
 from chromite.lib import timeout_util
 from chromite.utils import outcap
@@ -67,33 +58,7 @@ Directory = collections.namedtuple('Directory', ['name', 'contents'])
 class GlobalTestConfig(object):
   """Global configuration for tests."""
 
-  # By default, disable all network tests.
-  RUN_NETWORK_TESTS = False
   UPDATE_GENERATED_FILES = False
-  NETWORK_TESTS_SKIPPED = 0
-
-
-def NetworkTest(reason='Skipping network test (re-run w/--network)'):
-  """Decorator for unit tests. Skip the test if --network is not specified."""
-  def Decorator(test_item):
-    @functools.wraps(test_item)
-    @pytestmark_network_test
-    def NetworkWrapper(*args, **kwargs):
-      if not GlobalTestConfig.RUN_NETWORK_TESTS:
-        GlobalTestConfig.NETWORK_TESTS_SKIPPED += 1
-        raise unittest.SkipTest(reason)
-      test_item(*args, **kwargs)
-
-    # We can't check GlobalTestConfig.RUN_NETWORK_TESTS here because
-    # __main__ hasn't run yet. Wrap each test so that we check the flag before
-    # running it.
-    if isinstance(test_item, type) and issubclass(test_item, TestCase):
-      test_item.setUp = Decorator(test_item.setUp)
-      return test_item
-    else:
-      return NetworkWrapper
-
-  return Decorator
 
 
 def _FlattenStructure(base_path, dir_struct):
@@ -105,7 +70,7 @@ def _FlattenStructure(base_path, dir_struct):
       flattened.append(new_base + os.sep)
       flattened.extend(_FlattenStructure(new_base, obj.contents))
     else:
-      assert isinstance(obj, six.string_types)
+      assert isinstance(obj, str)
       flattened.append(os.path.join(base_path, obj))
   return flattened
 
@@ -217,8 +182,8 @@ class StackedSetup(type):
        for any test classes that were partially or completely set up.
     3) All test cases time out after TEST_CASE_TIMEOUT seconds.
 
-  Use by adding this line before a class:
-    @six.add_metaclass(StackedSetup)
+  Use by including this line in the class signature:
+    class ...(..., metaclass=StackedSetup)
 
   Since cros_test_lib.TestCase uses this metaclass, all derivatives of TestCase
   also inherit the above behavior (unless they override the metaclass attribute
@@ -297,7 +262,7 @@ class StackedSetup(type):
     if exc_info:
       # Chuck the saved exception, w/ the same TB from
       # when it occurred.
-      six.reraise(exc_info[0], exc_info[1], exc_info[2])
+      raise exc_info[1].with_traceback(exc_info[2])
 
 
 class TruthTable(object):
@@ -465,7 +430,7 @@ class LogFilter(logging.Filter):
 
   def __init__(self):
     logging.Filter.__init__(self)
-    self.messages = StringIO()
+    self.messages = io.StringIO()
 
   def filter(self, record):
     self.messages.write(record.getMessage() + '\n')
@@ -516,8 +481,7 @@ class LoggingCapturer(object):
     return self.LogsMatch(re.escape(msg))
 
 
-@six.add_metaclass(StackedSetup)
-class TestCase(unittest.TestCase):
+class TestCase(unittest.TestCase, metaclass=StackedSetup):
   """Basic chromite test case.
 
   Provides sane setUp/tearDown logic so that tearDown is correctly cleaned up.
@@ -720,6 +684,8 @@ class TestCase(unittest.TestCase):
                          (deprecated, replacement))
     return disable_func
 
+  assertDictContainsSubset = _disable('assertDictContainsSubset',
+                                      'assertGreaterEqual')
   assertEquals = _disable('assertEquals', 'assertEqual')
   assertNotEquals = _disable('assertNotEquals', 'assertNotEqual')
   assertAlmostEquals = _disable('assertAlmostEquals', 'assertAlmostEqual')
@@ -1090,122 +1056,6 @@ class TempDirTestCase(TestCase):
     osutils.WriteFile(os.path.join(self.tempdir, path), content, **kwargs)
 
 
-class LocalSqlServerTestCase(TempDirTestCase):
-  """A TestCase that launches a local mysqld server in the background.
-
-  - This test must run insde the chroot.
-  - This class provides attributes:
-    - mysqld_host: The IP of the local mysqld server.
-    - mysqld_port: The port of the local mysqld server.
-  """
-
-  # Neither of these are in the PATH for a non-sudo user.
-  MYSQL_INSTALL_DB = '/usr/share/mysql/scripts/mysql_install_db'
-  MYSQLD = '/usr/sbin/mysqld'
-  MYSQLD_SHUTDOWN_TIMEOUT_S = 30
-
-  def __init__(self, *args, **kwargs):
-    TempDirTestCase.__init__(self, *args, **kwargs)
-    self.mysqld_host = None
-    self.mysqld_port = None
-    self._mysqld_dir = None
-    self._mysqld_runner = None
-
-    # This class has assumptions about the mariadb installation that are only
-    # guaranteed to hold inside the chroot.
-    cros_build_lib.AssertInsideChroot()
-
-  def setUp(self):
-    """Launch mysqld in a clean temp directory."""
-
-    self._mysqld_dir = os.path.join(self.tempdir, 'mysqld_dir')
-    osutils.SafeMakedirs(self._mysqld_dir)
-    mysqld_tmp_dir = os.path.join(self._mysqld_dir, 'tmp')
-    osutils.SafeMakedirs(mysqld_tmp_dir)
-
-    # MYSQL_INSTALL_DB is stupid. It can't parse '--flag value'.
-    # Must give it options in '--flag=value' form.
-    cmd = [
-        self.MYSQL_INSTALL_DB,
-        '--no-defaults',
-        '--basedir=/usr',
-        '--ldata=%s' % self._mysqld_dir,
-    ]
-    cros_build_lib.run(cmd, quiet=True)
-
-    self.mysqld_host = '127.0.0.1'
-    self.mysqld_port = remote_access.GetUnusedPort()
-    cmd = [
-        self.MYSQLD,
-        '--no-defaults',
-        '--datadir', self._mysqld_dir,
-        '--socket', os.path.join(self._mysqld_dir, 'mysqld.socket'),
-        '--port', str(self.mysqld_port),
-        '--pid-file', os.path.join(self._mysqld_dir, 'mysqld.pid'),
-        '--tmpdir', mysqld_tmp_dir,
-    ]
-    self._mysqld_runner = parallel.BackgroundTaskRunner(
-        cros_build_lib.run,
-        processes=1,
-        halt_on_error=True)
-    queue = self._mysqld_runner.__enter__()
-    queue.put((cmd,))
-    self.addCleanup(self._ShutdownMysqld)
-
-    # Ensure that the Sql server is up before continuing.
-    cmd = [
-        'mysqladmin',
-        '-S', os.path.join(self._mysqld_dir, 'mysqld.socket'),
-        'ping',
-    ]
-    try:
-      # Retry at:
-      # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255 seconds total timeout in case
-      # of failure.
-      # Smaller timeouts make this check flaky on heavily loaded builders.
-      retry_util.RunCommandWithRetries(cmd=cmd, quiet=True, max_retry=8,
-                                       sleep=1, backoff_factor=2)
-    except Exception as e:
-      self.addCleanup(lambda: self._CleanupMysqld(
-          'mysqladmin failed to ping mysqld: %s' % e))
-      raise
-
-  def _ShutdownMysqld(self):
-    """Cleanup mysqld and our mysqld data directory."""
-    if self._mysqld_runner is None:
-      return
-
-    try:
-      cmd = [
-          'mysqladmin',
-          '-S', os.path.join(self._mysqld_dir, 'mysqld.socket'),
-          '-u', 'root',
-          'shutdown',
-      ]
-      cros_build_lib.run(cmd, quiet=True)
-    except cros_build_lib.RunCommandError as e:
-      self._CleanupMysqld(
-          failure='mysqladmin failed to shutdown mysqld: %s' % e)
-    else:
-      self._CleanupMysqld()
-
-  def _CleanupMysqld(self, failure=None):
-    if self._mysqld_runner is None:
-      return
-
-    try:
-      if failure is not None:
-        self._mysqld_runner.__exit__(
-            Exception,
-            '%s. We force killed the mysqld process.' % failure,
-            None,
-        )
-      else:
-        self._mysqld_runner.__exit__(None, None, None)
-    finally:
-      self._mysqld_runner = None
-
-
 class FakeSDKCache(object):
   """Creates a fake SDK Cache."""
 
@@ -1435,12 +1285,7 @@ class TestProgram(unittest.TestProgram):
     self.default_log_level = kwargs.pop('level', 'critical')
     self._leaked_tempdir = None
 
-    try:
-      super(TestProgram, self).__init__(**kwargs)
-    finally:
-      if GlobalTestConfig.NETWORK_TESTS_SKIPPED:
-        print('Note: %i network test(s) skipped; use --network to run them.' %
-              GlobalTestConfig.NETWORK_TESTS_SKIPPED)
+    super(TestProgram, self).__init__(**kwargs)
 
   def parseArgs(self, argv):
     """Parse the command line for the test"""
@@ -1468,9 +1313,6 @@ class TestProgram(unittest.TestProgram):
     # These are custom options we added.
     parser.add_argument('-l', '--list', default=False, action='store_true',
                         help='List all the available tests')
-    parser.add_argument('--network', default=False, action='store_true',
-                        help='Run tests that depend on good network '
-                             'connectivity')
     parser.add_argument('--no-wipe', default=True, action='store_false',
                         dest='wipe',
                         help='Do not wipe the temporary working directory '
@@ -1520,9 +1362,6 @@ class TestProgram(unittest.TestProgram):
       self.buffer = True
 
     # Then handle the chromite extensions.
-    if opts.network:
-      GlobalTestConfig.RUN_NETWORK_TESTS = True
-
     if opts.update:
       GlobalTestConfig.UPDATE_GENERATED_FILES = True
 
@@ -1626,7 +1465,7 @@ class PopenMock(partial_mock.PartialCmdMock):
     # specified in strings or in bytes, but there's no value in forcing all code
     # to use the same encoding with the mocks.
     def _MaybeEncode(src):
-      return src.encode('utf-8') if isinstance(src, six.text_type) else src
+      return src.encode('utf-8') if isinstance(src, str) else src
     osutils.WriteFile(stdout, _MaybeEncode(result.output), mode='wb')
     osutils.WriteFile(stderr, _MaybeEncode(result.error), mode='wb')
     osutils.WriteFile(

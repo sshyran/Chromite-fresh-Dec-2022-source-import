@@ -1,21 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the field_mask_util.py module."""
 
-from __future__ import print_function
-
-import sys
-
-from google.protobuf import field_mask_pb2
+from chromite.third_party.google.protobuf import field_mask_pb2
 
 from chromite.lib import cros_test_lib
 from chromite.utils import field_mask_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CreateFilteredDictTest(cros_test_lib.TestCase):

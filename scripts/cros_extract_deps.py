@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2010 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,22 +7,19 @@
 This produces JSON output for other tools to process.
 """
 
-from __future__ import print_function
 from __future__ import absolute_import
 
 import sys
 
 from chromite.lib.depgraph import DepGraphGenerator
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import pformat
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def FlattenDepTree(deptree, pkgtable=None, parentcpv=None, get_cpe=False):
@@ -310,7 +306,8 @@ def ExtractDeps(sysroot,
 def main(argv):
   opts = ParseArgs(argv)
 
-  sysroot = opts.sysroot or cros_build_lib.GetSysroot(opts.board)
+  sysroot = (opts.sysroot or
+             build_target_lib.get_default_sysroot_path(opts.board))
   deps_list, _ = ExtractDeps(sysroot, opts.pkgs, opts.format)
 
   pformat.json(deps_list,

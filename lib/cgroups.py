@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """A class for managing the Linux cgroup subsystem."""
-
-from __future__ import print_function
 
 import contextlib
 import errno
@@ -13,7 +10,6 @@ import numbers
 import os
 import signal
 import subprocess
-import sys
 import time
 
 from chromite.lib import cros_build_lib
@@ -22,9 +18,6 @@ from chromite.lib import osutils
 from chromite.lib import signals
 from chromite.lib import sudo
 from chromite.utils import memoize
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Rough hierarchy sketch:
@@ -151,8 +144,8 @@ class Cgroup(object):
     opts = ','.join(cls.NEEDED_SUBSYSTEMS)
     cgroup_root_args = ['-t', 'cgroup', '-o', opts, 'cros']
 
-    return _EnsureMounted(cls.MOUNT_ROOT, mount_root_args) and \
-        _EnsureMounted(cls.CGROUP_ROOT, cgroup_root_args)
+    return (_EnsureMounted(cls.MOUNT_ROOT, mount_root_args) and
+            _EnsureMounted(cls.CGROUP_ROOT, cgroup_root_args))
 
   @classmethod
   @memoize.MemoizedSingleCall

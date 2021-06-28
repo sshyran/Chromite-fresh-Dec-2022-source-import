@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,7 +9,7 @@ This generates the LUCI Scheduler configuration file for ChromeOS builds based
 on the chromeos_config contents.
 
 Changes to chromite/config/luci-scheduler.cfg will be autodeployed:
-  http://cros-goldeneye/chromeos/legoland/builderHistory?buildConfig=luci-scheduler-updater
+  https://data.corp.google.com/sites/chromeos_ci_cros_ci_builds/utility/?f=board_name:in:luci-scheduler-updater
 
 Notes:
   Normal builds are scheduled based on the builder values for
@@ -21,8 +20,6 @@ Notes:
 """
 # pylint: enable=line-too-long
 
-from __future__ import print_function
-
 import sys
 
 from chromite.config import chromeos_config
@@ -30,18 +27,15 @@ from chromite.lib import commandline
 from chromite.lib import config_lib
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 _CONFIG_HEADER = """# Defines buckets on luci-scheduler.appspot.com.
 #
 # For schema of this file and documentation see ProjectConfig message in
-# https://github.com/luci/luci-go/blob/master/scheduler/appengine/messages/config.proto
+# https://github.com/luci/luci-go/blob/HEAD/scheduler/appengine/messages/config.proto
 
 # Generated with chromite/scripts/gen_luci_scheduler
 
 # Autodeployed with:
-# http://cros-goldeneye/chromeos/legoland/builderHistory?buildConfig=luci-scheduler-updater
+# https://data.corp.google.com/sites/chromeos_ci_cros_ci_builds/utility/?f=board_name:in:luci-scheduler-updater
 
 acl_sets {
   name: "default"
@@ -84,7 +78,7 @@ def genSchedulerJob(build_config):
   if 'schedule_branch' in build_config:
     branch = build_config.schedule_branch
   else:
-    branch = 'master'
+    branch = 'main'
 
   tags = {
       'cbb_branch': branch,

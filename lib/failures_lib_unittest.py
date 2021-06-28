@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the failures_lib module."""
-
-from __future__ import print_function
 
 import json
 
@@ -109,24 +106,6 @@ class CompoundFailureTest(cros_test_lib.TestCase):
     self.assertEqual(stage_failure_msg.exception_type, 'CompoundFailure')
     self.assertEqual(stage_failure_msg.exception_category, 'unknown')
 
-class ReportStageFailureTest(cros_test_lib.MockTestCase):
-  """Tests for ReportStageFailure."""
-
-  def testReportStageFailure(self):
-    """Test ReportStageFailure."""
-
-    class FakeStepFailure(failures_lib.StepFailure):
-      """A fake StepFailure subclass for unittest."""
-      EXCEPTION_CATEGORY = 'unittest'
-
-    fake_failure = FakeStepFailure('Toot! Toot!')
-    insert_failure_fn = self.PatchObject(failures_lib,
-                                         '_InsertFailureToMonarch')
-    failures_lib.ReportStageFailure(
-        fake_failure, {})
-    insert_failure_fn.assert_called_once_with(exception_category='unittest',
-                                              metrics_fields={})
-
 
 class SetFailureTypeTest(cros_test_lib.TestCase):
   """Test that the SetFailureType decorator works."""
@@ -172,24 +151,24 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
       self._GetFunction(self.TacoNotTasty, self.FooException,
                         self.ERROR_MESSAGE)()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.TacoNotTasty))
+      self.assertIsInstance(e, self.TacoNotTasty)
       self.assertTrue(e.msg, self.ERROR_MESSAGE)
       self.assertEqual(len(e.exc_infos), 1)
       self.assertEqual(e.exc_infos[0].str, self.ERROR_MESSAGE)
       self.assertEqual(e.exc_infos[0].type, self.FooException)
-      self.assertTrue(isinstance(e.exc_infos[0].traceback, str))
+      self.assertIsInstance(e.exc_infos[0].traceback, str)
 
   def testReraiseACompoundFailure(self):
     """Tests that the list of ExceptInfo objects are copied over."""
     tb1 = 'Dummy traceback1'
     tb2 = 'Dummy traceback2'
-    org_infos = failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) + \
-                failures_lib.CreateExceptInfo(OSError('No salsa'), tb2)
+    org_infos = (failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) +
+                 failures_lib.CreateExceptInfo(OSError('No salsa'), tb2))
     try:
       self._GetFunction(self.SubparLunch, self.TacoNotTasty,
                         exc_infos=org_infos)()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.SubparLunch))
+      self.assertIsInstance(e, self.SubparLunch)
       # The orignal exceptions stored in exc_infos are preserved.
       self.assertEqual(e.exc_infos, org_infos)
       # All essential inforamtion should be included in the message of
@@ -211,7 +190,7 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
       self._GetFunction(self.SubparLunch, self.TacoNotTasty,
                         message='empty list')()
     except Exception as e:
-      self.assertTrue(isinstance(e, self.SubparLunch))
+      self.assertIsInstance(e, self.SubparLunch)
       self.assertEqual(e.exc_infos[0].type, self.TacoNotTasty)
 
   def testReraiseOriginalException(self):

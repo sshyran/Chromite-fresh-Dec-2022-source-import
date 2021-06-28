@@ -1,19 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for workspace stages."""
 
-from __future__ import print_function
-
 import os
+from unittest import mock
 
-import mock
-
-from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
+from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import workspace_stages
@@ -22,6 +18,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
+
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
@@ -361,6 +358,7 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
         return_value=fake_cpv)
 
   def ConstructStage(self):
+    self._run.options.chrome_preload_dir = '/preload/chrome_cache'
     return workspace_stages.WorkspaceSyncChromeStage(
         self._run, self.buildstore, build_root=self.workspace)
 
@@ -385,9 +383,9 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
             mock.call([os.path.join(self.build_root,
                                     'chromite/bin/sync_chrome'),
                        '--reset',
+                       '--internal',
                        '--tag', '0.0.1',
                        '--git_cache_dir', mock.ANY,
-                       '--internal',
                        '/chrome'],
                       cwd=self.workspace),
         ])
@@ -532,6 +530,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
             './setup_board',
             '--board=board',
             '--accept_licenses=@CHROMEOS',
+            '--skip_chroot_upgrade',
             '--nousepkg',
         ],
         enter_chroot=True,
@@ -558,6 +557,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
             self.setup_board,
             '--board=board',
             '--accept-licenses=@CHROMEOS',
+            '--skip-chroot-upgrade',
             '--nousepkg',
         ],
         enter_chroot=True,
@@ -584,6 +584,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
             './setup_board',
             '--board=board',
             '--accept_licenses=@CHROMEOS',
+            '--skip_chroot_upgrade',
             '--nousepkg',
         ],
         enter_chroot=True,
@@ -611,6 +612,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
             self.setup_board,
             '--board=board',
             '--accept-licenses=@CHROMEOS',
+            '--skip-chroot-upgrade',
             '--nousepkg',
         ],
         enter_chroot=True,

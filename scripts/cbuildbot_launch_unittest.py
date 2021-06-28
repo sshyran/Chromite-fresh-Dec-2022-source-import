@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for chromite.scripts.cbuildbot_launch."""
 
-from __future__ import print_function
-
 import os
-import sys
 import time
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import repository
@@ -22,9 +17,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import timeout_util
 from chromite.scripts import cbuildbot_launch
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 EXPECTED_MANIFEST_URL = 'https://chrome-internal-review.googlesource.com/chromeos/manifest-internal'  # pylint: disable=line-too-long
@@ -74,12 +66,14 @@ class CbuildbotLaunchTest(cros_test_lib.MockTestCase):
     """Test InitialCheckout with minimum settings."""
     mock_repo = mock.MagicMock()
     mock_repo.branch = 'branch'
+    argv = ['-r', '/root', 'config']
+    options = cbuildbot_launch.PreParseArguments(argv)
 
-    cbuildbot_launch.InitialCheckout(mock_repo)
+    cbuildbot_launch.InitialCheckout(mock_repo, options)
 
     self.assertEqual(mock_repo.mock_calls, [
         mock.call.PreLoad('/preload/chromeos'),
-        mock.call.Sync(detach=True),
+        mock.call.Sync(detach=True, downgrade_repo=False),
     ])
 
   def testConfigureGlobalEnvironment(self):
@@ -148,7 +142,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
                      autospec=True, return_value=(constants.REEXEC_API_MAJOR,
                                                   constants.REEXEC_API_MINOR))
     mock_repo = mock.MagicMock()
-    mock_repo.branch = 'master'
+    mock_repo.branch = 'main'
     mock_repo.directory = '/root/repository'
 
     mock_repo_create = self.PatchObject(repository, 'RepoRepository',
@@ -164,7 +158,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
 
     expected_build_state = build_summary.BuildSummary(
         build_number=0, master_build_id=0, status=mock.ANY,
-        buildroot_layout=2, branch='master')
+        buildroot_layout=2, branch='main')
 
     argv = ['-r', '/root', 'config']
     options = cbuildbot_launch.PreParseArguments(argv)
@@ -173,7 +167,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
     # Did we create the repo instance correctly?
     self.assertEqual(mock_repo_create.mock_calls,
                      [mock.call(EXPECTED_MANIFEST_URL, '/root/repository',
-                                git_cache_dir=None, branch='master')])
+                                git_cache_dir=None, branch='main')])
 
     # Ensure we clean, as expected.
     self.assertEqual(mock_clean.mock_calls, [
@@ -182,7 +176,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
 
     # Ensure we checkout, as expected.
     self.assertEqual(mock_checkout.mock_calls,
-                     [mock.call(mock_repo)])
+                     [mock.call(mock_repo, options)])
 
     # Ensure we invoke cbuildbot, as expected.
     self.assertCommandCalled(
@@ -273,7 +267,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
 
     # Ensure we checkout, as expected.
     self.assertEqual(mock_checkout.mock_calls,
-                     [mock.call(mock_repo)])
+                     [mock.call(mock_repo, options)])
 
     # Ensure we invoke cbuildbot, as expected.
     self.assertCommandCalled(
@@ -342,18 +336,18 @@ class CleanBuildRootTest(cros_test_lib.MockTempDirTestCase):
 
   def testNoBuildroot(self):
     """Test CleanBuildRoot with no history."""
-    self.mock_repo.branch = 'master'
+    self.mock_repo.branch = 'main'
 
     build_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_INFLIGHT,
         buildroot_layout=cbuildbot_launch.BUILDROOT_BUILDROOT_LAYOUT,
-        branch='master')
+        branch='main')
     cbuildbot_launch.CleanBuildRoot(
         self.root, self.mock_repo, self.cache, build_state)
 
     new_summary = cbuildbot_launch.GetLastBuildState(self.root)
     self.assertEqual(new_summary.buildroot_layout, 2)
-    self.assertEqual(new_summary.branch, 'master')
+    self.assertEqual(new_summary.branch, 'main')
     self.assertIsNotNone(new_summary.distfiles_ts)
     self.assertEqual(new_summary, build_state)
 
@@ -362,18 +356,18 @@ class CleanBuildRootTest(cros_test_lib.MockTempDirTestCase):
   def testBuildrootNoState(self):
     """Test CleanBuildRoot with no state information."""
     self.populateBuildroot()
-    self.mock_repo.branch = 'master'
+    self.mock_repo.branch = 'main'
 
     build_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_INFLIGHT,
         buildroot_layout=cbuildbot_launch.BUILDROOT_BUILDROOT_LAYOUT,
-        branch='master')
+        branch='main')
     cbuildbot_launch.CleanBuildRoot(
         self.root, self.mock_repo, self.cache, build_state)
 
     new_summary = cbuildbot_launch.GetLastBuildState(self.root)
     self.assertEqual(new_summary.buildroot_layout, 2)
-    self.assertEqual(new_summary.branch, 'master')
+    self.assertEqual(new_summary.branch, 'main')
     self.assertIsNotNone(new_summary.distfiles_ts)
     self.assertEqual(new_summary, build_state)
 
@@ -388,20 +382,20 @@ class CleanBuildRootTest(cros_test_lib.MockTempDirTestCase):
     old_build_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_PASSED,
         buildroot_layout=1,
-        branch='master')
+        branch='main')
     self.populateBuildroot(previous_build_state=old_build_state.to_json())
-    self.mock_repo.branch = 'master'
+    self.mock_repo.branch = 'main'
 
     build_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_INFLIGHT,
         buildroot_layout=cbuildbot_launch.BUILDROOT_BUILDROOT_LAYOUT,
-        branch='master')
+        branch='main')
     cbuildbot_launch.CleanBuildRoot(
         self.root, self.mock_repo, self.cache, build_state)
 
     new_summary = cbuildbot_launch.GetLastBuildState(self.root)
     self.assertEqual(new_summary.buildroot_layout, 2)
-    self.assertEqual(new_summary.branch, 'master')
+    self.assertEqual(new_summary.branch, 'main')
     self.assertIsNotNone(new_summary.distfiles_ts)
     self.assertEqual(new_summary, build_state)
 
@@ -663,12 +657,12 @@ class CleanBuildRootTest(cros_test_lib.MockTempDirTestCase):
     options = cbuildbot_launch.PreParseArguments([
         '--buildroot', self.root, 'config'
     ])
-    state = cbuildbot_launch.GetCurrentBuildState(options, 'master')
+    state = cbuildbot_launch.GetCurrentBuildState(options, 'main')
 
     expected_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_INFLIGHT,
         buildroot_layout=2,
-        branch='master')
+        branch='main')
     self.assertEqual(state, expected_state)
 
   def testGetCurrentBuildStateHasArgs(self):

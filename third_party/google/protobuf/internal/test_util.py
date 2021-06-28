@@ -40,8 +40,8 @@ import numbers
 import operator
 import os.path
 
-from google.protobuf import unittest_import_pb2
-from google.protobuf import unittest_pb2
+from chromite.third_party.google.protobuf import unittest_import_pb2
+from chromite.third_party.google.protobuf import unittest_pb2
 
 try:
   long        # Python 2

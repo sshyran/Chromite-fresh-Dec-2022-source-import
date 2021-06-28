@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for config."""
-
-from __future__ import print_function
 
 import copy
 import pickle
@@ -221,7 +218,7 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
     result = base.derive(site_config.templates.stackedDeep)
     self.assertEqual(result.foo, 'fixed one one one deep')
 
-    # Just get crazy with it.
+    # We must go deeper.
     result = base.derive(site_config.templates.stackedDeeper)
     self.assertEqual(result.foo, 'fixed one one one deep deeper')
 
@@ -505,31 +502,35 @@ class SiteConfigTest(cros_test_lib.TestCase):
     # Make sure each one contains
     self.longMessage = True
     for name in expected:
-      self.assertDictContainsSubset(expected[name],
-                                    self.site_config[name],
-                                    name)
+      # pylint: disable=dict-items-not-iterating
+      self.assertGreaterEqual(self.site_config[name].items(),
+                              expected[name].items(),
+                              name)
 
     # Special handling for child configs.
 
     children = self.site_config['parent'].child_configs
     self.assertEqual(len(children), 2)
-    self.assertDictContainsSubset(
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(
+        children[0].items(),
         {
             '_template': None,
             'name': 'default',
             'value': 'default',
             'grouped': True,
-        },
-        children[0])
+        }.items(),
+    )
 
-    self.assertDictContainsSubset(
+    self.assertGreaterEqual(
+        children[1].items(),
         {
             '_template': None,
             'name': 'default_with_override',
             'value': 'override',
             'grouped': True,
-        },
-        children[1])
+        }.items(),
+    )
 
   def testAddErrors(self):
     """Test the SiteConfig.Add behavior."""

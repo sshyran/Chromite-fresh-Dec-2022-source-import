@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -36,19 +35,17 @@ LabEndToEndPayloadTransfer includes:
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import print_function
 
 import abc
 import os
-
-import six
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
 from chromite.lib import retry_util
+
 
 # Naming conventions for global variables:
 #   Path on remote host with slash: REMOTE_XXX_PATH
@@ -88,7 +85,7 @@ def GetPayloadPropertiesFileName(payload):
   return payload + '.json'
 
 
-class Transfer(six.with_metaclass(abc.ABCMeta, object)):
+class Transfer(object, metaclass=abc.ABCMeta):
   """Abstract Base Class that handles payload precheck and transfer."""
 
   PAYLOAD_DIR_NAME = 'payloads'

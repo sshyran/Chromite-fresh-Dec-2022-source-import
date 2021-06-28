@@ -1,23 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for updating Chrome ebuild stages."""
 
-from __future__ import print_function
-
 import os
-import mock
+from unittest import mock
 
 from chromite.api.gen.chromite.api import toolchain_pb2
-
 from chromite.cbuildbot import afdo
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import afdo_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
-
 from chromite.lib import alerts
 from chromite.lib import cros_test_lib
 from chromite.lib import gs

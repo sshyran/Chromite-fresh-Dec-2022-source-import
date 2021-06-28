@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Commits files to the chromium git repository."""
 
-from __future__ import print_function
-
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -16,9 +12,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class CommitError(Exception):
@@ -100,7 +93,8 @@ class ChromeCommitter(object):
       # not part of the shallow checkout, -f to skip editing the CL message,
       upload_args = self._git_committer_args + [
           'cl', 'upload', '-v', '-m', self._commit_msg, '--bypass-hooks', '-f',
-          '--tbrs', constants.CHROME_GARDENER_REVIEW_EMAIL]
+          '--reviewers', constants.CHROME_GARDENER_REVIEW_EMAIL,
+          '--set-bot-commit']
       # Marks CL as ready.
       upload_args += ['--send-mail']
       if self._dryrun:

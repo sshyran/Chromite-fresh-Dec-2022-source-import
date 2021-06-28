@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Connect to a DUT in firmware via remote GDB, install custom GDB commands."""
-
-from __future__ import print_function
 
 import errno
 import glob
@@ -14,12 +11,12 @@ import re
 import socket
 import time
 
-from elftools.elf.elffile import ELFFile
-
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import timeout_util
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 # Need to do this before Servo import
 cros_build_lib.AssertInsideChroot()
@@ -96,7 +93,8 @@ def FindSymbols(firmware_dir, board):
           (', '.join(unified_build_dirs)))
 
   if not firmware_dir:
-    firmware_dir = os.path.join(cros_build_lib.GetSysroot(board), 'firmware')
+    firmware_dir = os.path.join(
+        build_target_lib.get_default_sysroot_path(board), 'firmware')
 
   # Very old firmware you might still find on GoldenEye had dev.ro.elf.
   basenames = ['dev.elf', 'dev.ro.elf']

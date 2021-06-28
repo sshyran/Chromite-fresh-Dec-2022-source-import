@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Main module for parsing and interpreting XBuddy paths for the devserver."""
 
-from __future__ import print_function
-
+import configparser
 import datetime
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import operator
@@ -16,8 +14,6 @@ import shutil
 import sys
 import time
 import threading
-
-from six.moves import configparser
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
@@ -29,12 +25,7 @@ from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import downloader
-from chromite.lib.xbuddy import cherrypy_log_util
 
-
-# Module-local log function.
-def _Log(message, *args):
-  return cherrypy_log_util.LogWithTag('XBUDDY', message, *args)
 
 # xBuddy config constants
 CONFIG_FILE = 'xbuddy_config.ini'
@@ -126,6 +117,8 @@ LATEST_OFFICIAL = 'latest-official'
 
 RELEASE = '-release'
 
+DEFAULT_STATIC_DIR = os.path.join(constants.SOURCE_ROOT, 'devserver', 'static')
+
 
 class XBuddyException(Exception):
   """Exception classes used by this module."""
@@ -149,7 +142,7 @@ class Timestamp(object):
   def UpdateTimestamp(timestamp_dir, build_id):
     """Update timestamp file of build with build_id."""
     common_util.MkDirP(timestamp_dir)
-    _Log('Updating timestamp for %s', build_id)
+    logging.debug('Updating timestamp for %s', build_id)
     time_file = os.path.join(timestamp_dir,
                              Timestamp.BuildToTimestamp(build_id))
     with open(time_file, 'a'):
@@ -186,9 +179,7 @@ class XBuddy(object):
   _staging_thread_count_lock = threading.Lock()
 
   def __init__(self, manage_builds=False, board=None, version=None,
-               images_dir=None, log_screen=True, static_dir=None):
-    if not log_screen:
-      cherrypy_log_util.UpdateConfig({'log.screen': False})
+               images_dir=None, static_dir=DEFAULT_STATIC_DIR):
 
     self.config = self._ReadConfig()
     self._manage_builds = manage_builds or self._ManageBuilds()
@@ -242,7 +233,7 @@ class XBuddy(object):
     else:
       shadow_config_file = os.path.join(devserver_dir, SHADOW_CONFIG_FILE)
 
-    _Log('Using shadow config file stored at %s', shadow_config_file)
+    logging.debug('Using shadow config file stored at %s', shadow_config_file)
     if os.path.exists(shadow_config_file):
       shadow_xbuddy_config = configparser.ConfigParser()
       shadow_xbuddy_config.read(shadow_config_file)
@@ -312,7 +303,6 @@ class XBuddy(object):
       val = val % {'board': board or self._board,
                    'version': version or self._version or LATEST}
 
-    _Log('Path is %s, location suffix is %s', val, suffix)
     return val, suffix
 
   @staticmethod
@@ -332,18 +322,28 @@ class XBuddy(object):
 
   def _LookupOfficial(self, board, suffix, image_dir=None):
     """Check LATEST-master for the version number of interest."""
-    _Log('Checking gs for latest %s-%s image', board, suffix)
+    logging.debug('Checking gs for latest %s-%s image', board, suffix)
     image_dir = XBuddy._ResolveImageDir(image_dir)
-    latest_addr = (devserver_constants.GS_LATEST_MASTER %
-                   {'image_dir': image_dir,
-                    'board': board,
-                    'suffix': suffix})
-    # Full release + version is in the LATEST file.
-    version = self._ctx.Cat(latest_addr, encoding='utf-8')
 
-    return devserver_constants.IMAGE_DIR % {'board':board,
-                                            'suffix':suffix,
-                                            'version':version}
+    version = None
+    for f in (devserver_constants.GS_LATEST_MAIN,
+              devserver_constants.GS_LATEST_MASTER):
+      latest_addr = f % {'image_dir': image_dir,
+                         'board': board,
+                         'suffix': suffix}
+
+      try:
+        # Full release + version is in the LATEST file.
+        version = self._ctx.Cat(latest_addr, encoding='utf-8')
+        return devserver_constants.IMAGE_DIR % {'board':board,
+                                                'suffix':suffix,
+                                                'version':version}
+      except Exception as e:
+        logging.warning(
+            'Failed to look up file %s with error %s. ignoring', f, e)
+
+    raise build_artifact.ArtifactDownloadError(
+        'Cannot look up the official image version.')
 
   def _LS(self, path, list_subdirectory=False):
     """Does a directory listing of the given gs path.
@@ -393,7 +393,7 @@ class XBuddy(object):
                      image_dir=None):
     """Check the channel folder for the version number of interest."""
     # Get all names in channel dir. Get 10 highest directories by version.
-    _Log("Checking channel '%s' for latest '%s' image", channel, board)
+    logging.debug("Checking channel '%s' for latest '%s' image", channel, board)
     # Due to historical reasons, gs://chromeos-releases uses
     # daisy-spring as opposed to the board name daisy_spring. Convert
     # he board name for the lookup.
@@ -422,7 +422,8 @@ class XBuddy(object):
   def _LookupVersion(self, board, suffix, version):
     """Search GS image releases for the highest match to a version prefix."""
     # Build the pattern for GS to match.
-    _Log("Checking gs for latest '%s' image with prefix '%s'", board, version)
+    logging.debug("Checking gs for latest '%s' image with prefix '%s'",
+                  board, version)
     image_url = devserver_constants.IMAGE_DIR % {'board': board,
                                                  'suffix': suffix,
                                                  'version': version + '*'}
@@ -457,7 +458,7 @@ class XBuddy(object):
         return build_id
       except gs.GSContextException as e:
         if common_util.IsAnonymousCaller(e):
-          _Log('Anonymous caller cannot list chromeos image archive')
+          logging.error('Anonymous caller cannot list chromeos image archive')
           return build_id_as_is
         continue
 
@@ -466,7 +467,8 @@ class XBuddy(object):
 
   def _ResolveBuildVersion(self, board, suffix, base_version):
     """Check LATEST-<base_version> and returns a full build version."""
-    _Log('Checking gs for full version for %s of %s', base_version, board)
+    logging.debug('Checking gs for full version for %s of %s',
+                  base_version, board)
     # TODO(garnold) We might want to accommodate version prefixes and pick the
     # most recent found, as done in _LookupVersion().
     latest_addr = (devserver_constants.GS_LATEST_BASE_VERSION %
@@ -535,7 +537,7 @@ class XBuddy(object):
   @staticmethod
   def _Symlink(link, target):
     """Symlinks link to target, and removes whatever link was there before."""
-    _Log('Linking to %s from %s', link, target)
+    logging.debug('Linking to %s from %s', link, target)
     if os.path.lexists(link):
       os.unlink(link)
     os.symlink(target, link)
@@ -600,7 +602,7 @@ class XBuddy(object):
     Raises:
       XBuddyException: if the path can't be resolved into valid components
     """
-    if path.startswith('xbuddy://'):
+    if path.lower().startswith('xbuddy://'):
       path = path[9:]
     path_list = [p for p in path.split('/') if p]
 
@@ -644,8 +646,8 @@ class XBuddy(object):
       raise XBuddyException('Path is not valid. Could not figure out how to '
                             'parse remaining components: %s.' % path_list)
 
-    _Log("Get artifact '%s' with board %s and version %s'. Locally? %s",
-         image_type, board, version, is_local)
+    logging.debug("Get artifact '%s' with board %s and version %s'. "
+                  'Locally? %s', image_type, board, version, is_local)
 
     return image_type, board, version, is_local
 
@@ -660,7 +662,8 @@ class XBuddy(object):
     """
     if not os.path.isdir(self.images_dir):
       # Skip syncing if images_dir does not exist.
-      _Log('Cannot find %s; skip syncing image registry.', self.images_dir)
+      logging.error('Cannot find %s; skip syncing image registry.',
+                    self.images_dir)
       return
 
     build_ids = []
@@ -714,7 +717,7 @@ class XBuddy(object):
     with XBuddy._staging_thread_count_lock:
       XBuddy._staging_thread_count += 1
     try:
-      _Log('Downloading %s from %s', artifacts, gs_url)
+      logging.debug('Downloading %s from %s', artifacts, gs_url)
       dl = downloader.GoogleStorageDownloader(self.static_dir, gs_url, build_id)
       factory = build_artifact.ChromeOSArtifactFactory(
           dl.GetBuildDir(), artifacts, [], dl.GetBuild())
@@ -730,11 +733,11 @@ class XBuddy(object):
     if not self._manage_builds:
       return
     cached_builds = [e[0] for e in self._ListBuildTimes()]
-    _Log('In cache now: %s', cached_builds)
+    logging.debug('In cache now: %s', cached_builds)
 
     for b in range(self._Capacity(), len(cached_builds)):
       b_path = cached_builds[b]
-      _Log("Clearing '%s' from cache", b_path)
+      logging.debug("Clearing '%s' from cache", b_path)
 
       time_file = os.path.join(self._timestamp_folder,
                                Timestamp.BuildToTimestamp(b_path))
@@ -744,13 +747,13 @@ class XBuddy(object):
         # Handle symlinks, in the case of links to local builds if enabled.
         if os.path.islink(clear_dir):
           target = os.readlink(clear_dir)
-          _Log('Deleting locally built image at %s', target)
+          logging.debug('Deleting locally built image at %s', target)
 
           os.unlink(clear_dir)
           if os.path.exists(target):
             shutil.rmtree(target)
         elif os.path.exists(clear_dir):
-          _Log('Deleting downloaded image at %s', clear_dir)
+          logging.debug('Deleting downloaded image at %s', clear_dir)
           shutil.rmtree(clear_dir)
 
       except Exception as err:
@@ -889,7 +892,7 @@ class XBuddy(object):
                               (image_type, GS_ALIASES))
       build_id, channel = self._ResolveVersionToBuildIdAndChannel(
           board, suffix, version, image_dir=image_dir)
-      _Log('Resolved version %s to %s.', version, build_id)
+      logging.debug('Resolved version %s to %s.', version, build_id)
 
       if not lookup_only:
         file_name = self._GetFromGS(build_id, image_type, image_dir=image_dir,
@@ -961,5 +964,6 @@ class XBuddy(object):
     # TODO(joyc): Run in separate thread.
     self.CleanCache()
 
-    _Log('Returning build id: %s and path to payload: %s', build_id, file_name)
+    logging.debug('Returning build id: %s and path to payload: %s',
+                  build_id, file_name)
     return build_id, file_name

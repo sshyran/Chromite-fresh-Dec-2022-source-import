@@ -11,5 +11,3 @@ per-file dlc*=file:/OWNERS.au
 per-file nebraska*=file:/OWNERS.au
 per-file toolchain_util*=file:chromiumos/third_party/toolchain-utils:/OWNERS.toolchain
 per-file vm*=file:/OWNERS.chrome
-
-# COMPONENT: Infra>ChromeOS>Build

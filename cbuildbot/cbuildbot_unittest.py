@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the cbuildbot script."""
 
-from __future__ import print_function
-
 import argparse
+import builtins
 import glob
 import optparse  # pylint: disable=deprecated-module
 import os
-import sys
 
 import pytest  # pylint: disable=import-error
 
@@ -31,9 +28,6 @@ from chromite.lib import partial_mock
 from chromite.lib import sudo
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.scripts import cbuildbot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # pylint: disable=protected-access
@@ -267,13 +261,13 @@ class InterfaceTest(cros_test_lib.MockTestCase, cros_test_lib.LoggingTestCase):
   def testValidateClobberUserDeclines_1(self):
     """Test case where user declines in prompt."""
     self.PatchObject(os.path, 'exists', return_value=True)
-    self.PatchObject(cros_build_lib, 'GetInput', return_value='No')
+    self.PatchObject(builtins, 'input', return_value='No')
     self.assertFalse(commands.ValidateClobber(self._BUILD_ROOT))
 
   def testValidateClobberUserDeclines_2(self):
     """Test case where user does not enter the full 'yes' pattern."""
     self.PatchObject(os.path, 'exists', return_value=True)
-    m = self.PatchObject(cros_build_lib, 'GetInput', side_effect=['asdf', 'No'])
+    m = self.PatchObject(builtins, 'input', side_effect=['asdf', 'No'])
     self.assertFalse(commands.ValidateClobber(self._BUILD_ROOT))
     self.assertEqual(m.call_count, 2)
 
@@ -382,8 +376,8 @@ class FullInterfaceTest(cros_test_lib.MockTempDirTestCase):
                      side_effect=TestArgsparseError())
     self.inchroot_mock = self.PatchObject(cros_build_lib, 'IsInsideChroot',
                                           return_value=False)
-    self.input_mock = self.PatchObject(cros_build_lib, 'GetInput',
-                                       side_effect=Exception())
+    self.input_mock = self.PatchObject(
+        builtins, 'input', side_effect=Exception())
     self.PatchObject(cbuildbot, '_RunBuildStagesWrapper', return_value=True)
     # Suppress cgroups code.  For cbuildbot invocation, it doesn't hugely
     # care about cgroups- that's a blackbox to it.  As such these unittests

@@ -19,19 +19,19 @@ object supporting an execute() method that does the
 actuall HTTP request.
 """
 from __future__ import absolute_import
-import six
-from six.moves import http_client
-from six.moves import range
+from chromite.third_party import six
+from chromite.third_party.six.moves import http_client
+from chromite.third_party.six.moves import range
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 
-from six import BytesIO, StringIO
-from six.moves.urllib.parse import urlparse, urlunparse, quote, unquote
+from chromite.third_party.six import BytesIO, StringIO
+from chromite.third_party.six.moves.urllib.parse import urlparse, urlunparse, quote, unquote
 
 import base64
 import copy
 import gzip
-import httplib2
+from chromite.third_party import httplib2
 import json
 import logging
 import mimetypes
@@ -58,18 +58,18 @@ from email.parser import FeedParser
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it
 # in '_helpers'.
 try:
-  from oauth2client import util
+  from chromite.third_party.oauth2client import util
 except ImportError:
-  from oauth2client import _helpers as util
+  from chromite.third_party.oauth2client import _helpers as util
 
-from googleapiclient import mimeparse
-from googleapiclient.errors import BatchError
-from googleapiclient.errors import HttpError
-from googleapiclient.errors import InvalidChunkSizeError
-from googleapiclient.errors import ResumableUploadError
-from googleapiclient.errors import UnexpectedBodyError
-from googleapiclient.errors import UnexpectedMethodError
-from googleapiclient.model import JsonModel
+from . import mimeparse
+from .errors import BatchError
+from .errors import HttpError
+from .errors import InvalidChunkSizeError
+from .errors import ResumableUploadError
+from .errors import UnexpectedBodyError
+from .errors import UnexpectedMethodError
+from .model import JsonModel
 
 
 LOGGER = logging.getLogger(__name__)

@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the sync stages."""
-
-from __future__ import print_function
 
 import contextlib
 import os
@@ -19,6 +16,7 @@ from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import patch_series
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import commandline
@@ -29,8 +27,8 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import patch as cros_patch
 from chromite.lib import timeout_util
-from chromite.scripts import cros_mark_android_as_stable
 from chromite.scripts import cros_mark_chrome_as_stable
+from chromite.service import android
 
 
 class PatchChangesStage(generic_stages.BuilderStage):
@@ -307,7 +305,7 @@ class SyncStage(generic_stages.BuilderStage):
     # TODO(mtennant): Why keep a duplicate copy of this config value
     # at self.internal when it can always be retrieved from config?
     self.internal = self._run.config.internal
-    self.buildbucket_client = self.GetBuildbucketClient()
+    self.buildbucket_client = buildbucket_v2.BuildbucketV2()
 
   def _GetManifestVersionsRepoUrl(self, internal=None, test=False):
     if internal is None:
@@ -443,8 +441,8 @@ class ManifestVersionedSyncStage(SyncStage):
     self._InitializeRepo()
 
     # If chrome_rev is somehow set, fail.
-    assert not self._chrome_rev, \
-        'chrome_rev is unsupported on release builders.'
+    assert not self._chrome_rev, (
+        'chrome_rev is unsupported on release builders.')
 
     self.RegisterManifestManager(
         manifest_version.BuildSpecsManager(
@@ -507,8 +505,8 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def GetNextManifest(self):
     """Uses the initialized manifest manager to get the next manifest."""
-    assert self.manifest_manager, \
-        'Must run GetStageManager before checkout out build.'
+    assert self.manifest_manager, (
+        'Must run GetStageManager before checkout out build.')
 
     build_id = self._run.attrs.metadata.GetDict().get('build_id')
 
@@ -691,8 +689,8 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
     self.RegisterManifestManager(self._GetInitializedManager(self.internal))
     if self._run.config.master and self._GetSlaveConfigs():
       assert self.internal, 'Unified masters must use an internal checkout.'
-      MasterSlaveLKGMSyncStage.external_manager = \
-          self._GetInitializedManager(False)
+      MasterSlaveLKGMSyncStage.external_manager = self._GetInitializedManager(
+          False)
 
   def ForceVersion(self, version):
     manifest = super(MasterSlaveLKGMSyncStage, self).ForceVersion(version)
@@ -711,10 +709,10 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def GetNextManifest(self):
     """Gets the next manifest using LKGM logic."""
-    assert self.manifest_manager, \
-        'Must run Initialize before we can get a manifest.'
-    assert isinstance(self.manifest_manager, lkgm_manager.LKGMManager), \
-        'Manifest manager instantiated with wrong class.'
+    assert self.manifest_manager, (
+        'Must run Initialize before we can get a manifest.')
+    assert isinstance(self.manifest_manager, lkgm_manager.LKGMManager), (
+        'Manifest manager instantiated with wrong class.')
     assert self._run.config.master
 
     build_id = self._run.attrs.metadata.GetDict().get('build_id')
@@ -736,11 +734,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def GetLatestAndroidVersion(self):
     """Returns the version of Android to uprev."""
-    return cros_mark_android_as_stable.GetLatestBuild(
-        constants.ANDROID_BUCKET_URL, self._run.config.android_import_branch,
-        cros_mark_android_as_stable.MakeBuildTargetDict(
-            self._run.config.android_package,
-            self._run.config.android_import_branch))[0]
+    return android.GetLatestBuild(self._run.config.android_import_branch)[0]
 
   def GetLatestChromeVersion(self):
     """Returns the version of Chrome to uprev."""
@@ -753,6 +747,8 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
     if self._android_rev and self._run.config.master:
       self._android_version = self.GetLatestAndroidVersion()
       logging.info('Latest Android version is: %s', self._android_version)
+      logging.PrintKitchenSetBuildProperty('android_version',
+                                           self._android_version)
 
     if (self._chrome_rev == constants.CHROME_REV_LATEST and
         self._run.config.master):

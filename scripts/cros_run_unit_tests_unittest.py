@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for cros_run_unit_tests.py."""
 
-from __future__ import print_function
-
-import sys
-
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_run_unit_tests
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class DetermineBoardPackagesTest(cros_test_lib.TestCase):

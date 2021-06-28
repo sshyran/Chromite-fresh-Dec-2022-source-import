@@ -6,7 +6,7 @@
 
 Usage:
   import argparse
-  from infra_libs import ts_mon
+  from chromite.third_party.infra_libs import ts_mon
 
   p = argparse.ArgumentParser()
   ts_mon.add_argparse_options(p)
@@ -23,7 +23,7 @@ Usage:
   m2.set(5)
 
 Library usage:
-  from infra_libs.ts_mon import CounterMetric
+  from chromite.third_party.infra_libs.ts_mon import CounterMetric
   # No need to set up Monitor or Target, assume calling code did that.
   c = CounterMetric('/my/counter', fields={'source': 'mylibrary'})
   c.set(0)
@@ -37,9 +37,9 @@ import random
 import threading
 import time
 
-from infra_libs.ts_mon.common import errors
-from infra_libs.ts_mon.common import metric_store
-from infra_libs.ts_mon.protos import metrics_pb2
+from chromite.third_party.infra_libs.ts_mon.common import errors
+from chromite.third_party.infra_libs.ts_mon.common import metric_store
+from chromite.third_party.infra_libs.ts_mon.protos import metrics_pb2
 
 # The maximum number of MetricsData messages to include in each HTTP request.
 # MetricsCollections larger than this will be split into multiple requests.
@@ -105,8 +105,10 @@ def flush():
     logging.debug('ts_mon: sending metrics is disabled.')
     return
 
-  if not state.global_monitor or not state.target:
+  if not state.global_monitor:
     raise errors.MonitoringNoConfiguredMonitorError(None)
+  if not state.target:
+    raise errors.MonitoringNoConfiguredTargetError(None)
 
   if state.invoke_global_callbacks_on_flush:
     invoke_global_callbacks()

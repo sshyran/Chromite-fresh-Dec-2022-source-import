@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Payload service tests."""
-
-from __future__ import print_function
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import payload_pb2
@@ -35,9 +32,9 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image defs.
     src_image = payload_pb2.UnsignedImage(
-        build=self.src_build, image_type='BASE', milestone='R79')
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', milestone='R79')
     tgt_image = payload_pb2.UnsignedImage(
-        build=self.tgt_build, image_type='BASE', milestone='R80')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,
@@ -54,9 +51,9 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image defs.
     src_image = payload_pb2.SignedImage(
-        build=self.src_build, image_type='BASE', key='cave-mp-v4')
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
     tgt_image = payload_pb2.SignedImage(
-        build=self.tgt_build, image_type='BASE', key='cave-mp-v4')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', key='cave-mp-v4')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,
@@ -73,7 +70,7 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     # Image def.
     tgt_image = payload_pb2.UnsignedImage(
-        build=self.tgt_build, image_type='BASE', milestone='R80')
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
 
     payload_config = payload.PayloadConfig(
         tgt_image=tgt_image,

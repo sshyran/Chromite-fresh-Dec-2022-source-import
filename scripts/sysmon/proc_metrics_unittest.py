@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,18 +7,13 @@
 # pylint: disable=protected-access
 
 from __future__ import absolute_import
-from __future__ import print_function
 
-import sys
+from unittest import mock
 
-import mock
 import psutil  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import proc_metrics
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _mock_process(name, cmdline, parent=None):
@@ -51,8 +45,9 @@ class TestProcMetrics(cros_test_lib.TestCase):
   """Tests for proc_metrics."""
 
   def setUp(self):
-    patcher = mock.patch('infra_libs.ts_mon.common.interface.state.store',
-                         autospec=True)
+    patcher = mock.patch(
+        'chromite.third_party.infra_libs.ts_mon.common.interface.state.store',
+        autospec=True)
     self.store = patcher.start()
     self.addCleanup(patcher.stop)
 

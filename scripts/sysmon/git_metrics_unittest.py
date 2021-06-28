@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -8,36 +7,31 @@
 # pylint: disable=protected-access
 
 from __future__ import absolute_import
-from __future__ import print_function
 
 import os
 import subprocess
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts.sysmon import git_metrics
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class TestGitMetricCollector(cros_test_lib.TestCase):
   """Tests for _GitMetricCollector."""
 
   def setUp(self):
-    patcher = mock.patch('infra_libs.ts_mon.common.interface.state.store',
-                         autospec=True)
+    patcher = mock.patch(
+        'chromite.third_party.infra_libs.ts_mon.common.interface.state.store',
+        autospec=True)
     self.store = patcher.start()
     self.addCleanup(patcher.stop)
 
   def test_collect(self):
     with mock.patch.object(git_metrics, '_GitRepo', autospec=True) as _GitRepo:
       instance = _GitRepo('dummy')
-      instance.get_commit_hash.return_value = \
-          '2b1ce059425edc91e013c260e59019195f927a07'
+      instance.get_commit_hash.return_value = (
+          '2b1ce059425edc91e013c260e59019195f927a07')
       instance.get_commit_time.return_value = 1483257600
       instance.get_unstaged_changes.return_value = (0, 3)
 

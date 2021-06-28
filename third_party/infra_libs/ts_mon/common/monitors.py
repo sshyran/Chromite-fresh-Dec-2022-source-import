@@ -8,17 +8,17 @@ import json
 import logging
 import socket
 
-import httplib2
+from chromite.third_party import httplib2
 
-from googleapiclient import errors
-from infra_libs import httplib2_utils
-from infra_libs.ts_mon.common import pb_to_popo
+from chromite.third_party.googleapiclient import errors
+from chromite.third_party.infra_libs import httplib2_utils
+from chromite.third_party.infra_libs.ts_mon.common import pb_to_popo
 try: # pragma: no cover
-  from oauth2client import gce
+  from chromite.third_party.oauth2client import gce
 except ImportError: # pragma: no cover
-  from oauth2client.contrib import gce
-from oauth2client.client import GoogleCredentials
-from oauth2client.file import Storage
+  from chromite.third_party.oauth2client.contrib import gce
+from chromite.third_party.oauth2client.client import GoogleCredentials
+from chromite.third_party.oauth2client.file import Storage
 
 # Special string that can be passed through as the credentials path to use the
 # default Appengine or GCE service account.
@@ -51,7 +51,7 @@ class GCECredentials(CredentialFactory):
 class AppengineCredentials(CredentialFactory):
   def create(self, scopes):  # pragma: no cover
     # This import doesn't work outside appengine, so delay it until it's used.
-    from oauth2client import appengine
+    from chromite.third_party.oauth2client import appengine
     return appengine.AppAssertionCredentials(scopes)
 
 

@@ -1,34 +1,29 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Wrapper for inframon's command-line flag based configuration."""
 
-from __future__ import print_function
-
 import argparse
 import contextlib
 import multiprocessing
 import os
-import socket
+import queue as Queue
 import signal
+import socket
 import time
-
-from six.moves import queue as Queue
-
-import six
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 from chromite.lib import parallel
+from chromite.third_party.googleapiclient import discovery
+
 
 try:
-  from infra_libs.ts_mon import config
-  from infra_libs.ts_mon import BooleanField
-  from infra_libs.ts_mon import IntegerField
-  from infra_libs.ts_mon import StringField
-  import googleapiclient.discovery
+  from chromite.third_party.infra_libs.ts_mon import BooleanField
+  from chromite.third_party.infra_libs.ts_mon import config
+  from chromite.third_party.infra_libs.ts_mon import IntegerField
+  from chromite.third_party.infra_libs.ts_mon import StringField
 except (ImportError, RuntimeError) as e:
   config = None
   logging.warning('Failed to import ts_mon, monitoring is disabled: %s', e)
@@ -62,7 +57,7 @@ def GetMetricFieldSpec(fields=None):
         field_spec.append(BooleanField(key))
       elif isinstance(val, int):
         field_spec.append(IntegerField(key))
-      elif isinstance(val, six.string_types):
+      elif isinstance(val, str):
         field_spec.append(StringField(key))
       else:
         logging.error("Couldn't classify the metric field %s:%s",
@@ -147,7 +142,7 @@ def _SetupTsMonFromOptions(options, suppress_exception):
     suppress_exception: True to silence any exception during the setup. Default
                         is set to True.
   """
-  googleapiclient.discovery.logger.setLevel(logging.WARNING)
+  discovery.logger.setLevel(logging.WARNING)
   try:
     config.process_argparse_options(options)
     logging.notice('ts_mon was set up.')

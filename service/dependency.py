@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Deps analysis service."""
-
-from __future__ import print_function
 
 import functools
 import os
@@ -19,6 +16,9 @@ from chromite.lib import dependency_lib
 from chromite.lib import git
 from chromite.lib import portage_util
 from chromite.scripts import cros_extract_deps
+
+if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
 
 
 class Error(Exception):
@@ -94,7 +94,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       depends on
   """
   if not sysroot_path:
-    sysroot_path = cros_build_lib.GetSysroot(board)
+    sysroot_path = build_target_lib.get_default_sysroot_path(board)
 
   results = {
       'sysroot_path': sysroot_path,
@@ -103,7 +103,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       'source_path_mapping': {},
   }
 
-  sdk_sysroot = cros_build_lib.GetSysroot(None)
+  sdk_sysroot = build_target_lib.get_default_sysroot_path(None)
   sdk_results = {
       'sysroot_path': sdk_sysroot,
       'target_board': 'sdk',
@@ -138,8 +138,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
     sdk_results['package_deps'].update(board_bdeps)
 
   indep_packages = [
-      'virtual/target-sdk', 'chromeos-base/chromite',
-      'virtual/target-sdk-post-cross'
+      'virtual/target-sdk', 'virtual/target-sdk-post-cross',
   ]
 
   indep_deps, _ = cros_extract_deps.ExtractDeps(
@@ -187,33 +186,38 @@ def determine_package_relevance(dep_src_paths: List[str],
 
 
 def GetDependencies(sysroot_path: str,
-                    build_target: build_target_lib.BuildTarget,
                     src_paths: Optional[List[str]] = None,
-                    packages: Optional[List[str]] = None) -> List[str]:
+                    packages: Optional[List[str]] = None,
+                    include_rev_dependencies: bool = False) -> List[str]:
   """Return the packages dependent on the given source paths for |board|.
 
   Args:
     sysroot_path: The path to the sysroot.
-    build_target: The build_target whose dependencies are being calculated.
     src_paths: List of paths for which to get a list of dependent packages. If
       empty / None returns all package dependencies.
     packages: The packages that need to be built, or empty / None to use the
       default list.
+    include_rev_dependencies: Whether to include the reverse dependencies of
+      relevant packages.
 
   Returns:
     The relevant package dependencies based on the given list of packages and
       src_paths.
   """
+  cros_build_lib.AssertInsideChroot()
   pkgs = tuple(packages) if packages else None
-  json_deps, _sdk_json_deps = GetBuildDependency(
-      sysroot_path, build_target.name, packages=pkgs)
+  dep_graph = depgraph.get_sysroot_dependency_graph(
+      sysroot_path, pkgs, with_src_paths=True)
 
-  relevant_packages = set()
-  for cpv, dep_src_paths in json_deps['source_path_mapping'].items():
-    if determine_package_relevance(dep_src_paths, src_paths):
-      relevant_packages.add(cpv)
+  if not src_paths:
+    return [x.pkg_info for x in dep_graph.get_nodes()]
 
-  return relevant_packages
+  dep_nodes = dep_graph.get_relevant_nodes(src_paths=src_paths)
+  rev_dep_nodes = []
+  if include_rev_dependencies:
+    for dep in dep_nodes:
+      rev_dep_nodes.extend(dep.reverse_dependencies)
+  return list({dep.pkg_info for dep in dep_nodes + rev_dep_nodes})
 
 
 def DetermineToolchainSourcePaths():
@@ -249,9 +253,9 @@ def DetermineToolchainSourcePaths():
   for ebuild_path in toolchain_pkg_ebuilds.values():
     attrs = portage_util.EBuild.Classify(ebuild_path)
     if (not attrs.is_workon or
-        # Blacklisted ebuild is pinned to a specific git sha1, so change in
-        # that repo matter to the ebuild.
-        attrs.is_blacklisted):
+        # Manually uprevved ebuild is pinned to a specific git sha1, so change
+        # in that repo does not matter to the ebuild.
+        attrs.is_manually_uprevved):
       continue
     ebuild = portage_util.EBuild(ebuild_path)
     workon_subtrees = ebuild.GetSourceInfo(buildroot, manifest).subtrees

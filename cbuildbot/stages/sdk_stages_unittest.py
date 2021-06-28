@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for SDK stages."""
 
-from __future__ import print_function
-
 import json
 import os
 import unittest
-
-import six
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -62,10 +57,10 @@ class SDKBuildToolchainsStageTest(generic_stages_unittest.AbstractStageTestCase,
     # Sanity check args passed to RunBuildScript.
     for call in self.run_mock.call_args_list:
       buildroot, cmd = call[0]
-      self.assertTrue(isinstance(buildroot, six.string_types))
-      self.assertTrue(isinstance(cmd, (tuple, list)))
+      self.assertIsInstance(buildroot, str)
+      self.assertIsInstance(cmd, (tuple, list))
       for ele in cmd:
-        self.assertTrue(isinstance(ele, six.string_types))
+        self.assertIsInstance(ele, str)
 
 
 class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,

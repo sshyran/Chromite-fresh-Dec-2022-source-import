@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utilities for updating and building in the chroot environment."""
 
-from __future__ import print_function
-
 import contextlib
 import os
-import sys
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -23,9 +19,6 @@ if cros_build_lib.IsInsideChroot():
   # These import libraries outside chromite. See brbug.com/472.
   from chromite.scripts import cros_list_modified_packages as workon
   from chromite.scripts import cros_setup_toolchains as toolchain
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 _HOST_PKGS = ('virtual/target-sdk', 'world',)

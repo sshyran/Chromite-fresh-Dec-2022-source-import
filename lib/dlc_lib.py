@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright 2020 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 """Library to generate a DLC (Downloadable Content) artifact."""
 
 from __future__ import division
-from __future__ import print_function
 
 import hashlib
 import json
@@ -13,8 +11,8 @@ import math
 import os
 import re
 import shutil
-import sys
 
+from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
@@ -23,7 +21,6 @@ from chromite.lib import pformat
 from chromite.licensing import licenses_lib
 from chromite.scripts import cros_set_lsb_release
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 DLC_BUILD_DIR = 'build/rootfs/dlc'
 DLC_IMAGE = 'dlc.img'
@@ -102,12 +99,21 @@ class EbuildParams(object):
     preload: (bool) allow for preloading DLC.
     mount_file_required: (bool) allow for mount file generation for DLC.
     used_by: (str) The user of this DLC, e.g. "system" or "user"
+    days_to_purge: (int) The number of days to keep a DLC after uninstall and
+        before it is purged.
     fullnamerev: (str) The full package & version name.
   """
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
                version, name, description, preload, used_by,
-               mount_file_required, fullnamerev):
+               mount_file_required, fullnamerev, days_to_purge=0):
+    """Initializes the object.
+
+    When adding a new variable in here, always set a default value. The reason
+    is that this class is sometimes used to load a pre-existing ebuild params
+    JSON file (through bin packages) and that file may not contain the new
+    arguemnt. So the build will fail.
+    """
     self.dlc_id = dlc_id
     self.dlc_package = dlc_package
     self.fs_type = fs_type
@@ -119,6 +125,7 @@ class EbuildParams(object):
     self.used_by = used_by
     self.mount_file_required = mount_file_required
     self.fullnamerev = fullnamerev
+    self.days_to_purge = days_to_purge
 
   def StoreDlcParameters(self, install_root_dir, sudo):
     """Store DLC parameters defined in the ebuild.
@@ -360,7 +367,7 @@ class DlcGenerator(object):
     if not self.ebuild_params.fullnamerev:
       return
 
-    sysroot = cros_build_lib.GetSysroot(self.board)
+    sysroot = build_target_lib.get_default_sysroot_path(self.board)
     licensing = licenses_lib.Licensing(sysroot,
                                        [self.ebuild_params.fullnamerev], True)
     licensing.LoadPackageInfo()
@@ -459,6 +466,7 @@ class DlcGenerator(object):
         'version': self.ebuild_params.version,
         'preload-allowed': self.ebuild_params.preload,
         'used-by': self.ebuild_params.used_by,
+        'days-to-purge': self.ebuild_params.days_to_purge,
         'mount-file-required': self.ebuild_params.mount_file_required,
     }
 
@@ -669,7 +677,7 @@ def ValidateDlcIdentifier(name):
     - Maximum length of 40 (_MAX_ID_NAME) characters.
 
   For more info see:
-  https://chromium.googlesource.com/chromiumos/platform2/+/master/dlcservice/docs/developer.md#create-a-dlc-module
+  https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/dlcservice/docs/developer.md#create-a-dlc-module
 
   Args:
     name: The value of the string to be validated.

@@ -20,17 +20,17 @@ for converting between the wire format and the Python
 object representation.
 """
 from __future__ import absolute_import
-import six
+from chromite.third_party import six
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 
 import json
 import logging
 
-from six.moves.urllib.parse import urlencode
+from chromite.third_party.six.moves.urllib.parse import urlencode
 
-from googleapiclient import __version__
-from googleapiclient.errors import HttpError
+from . import __version__
+from .errors import HttpError
 
 
 LOGGER = logging.getLogger(__name__)

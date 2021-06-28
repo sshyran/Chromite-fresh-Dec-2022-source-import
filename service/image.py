@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """The Image API is the entry point for image functionality."""
 
-from __future__ import print_function
-
 import os
+import shutil
+from typing import List
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -145,6 +144,35 @@ def Build(board=None, images=None, config=None, extra_env=None):
 
     return BuildResult(result.returncode, failed)
 
+def BuildRecoveryImage(board=None, image_path=None):
+  """Build a recovery image.
+
+  This must be done after a base image has been created.
+
+  Args:
+    board (str): The board name.
+    image_path (str): The chrooted path to the image, defaults
+      to chromiums_image.bin.
+
+  Returns:
+    BuildResult
+  """
+  board = board or cros_build_lib.GetDefaultBoard()
+  if not board:
+    raise InvalidArgumentError('board is required.')
+
+  if cros_build_lib.IsInsideChroot():
+    cmd = [os.path.join(constants.CROSUTILS_DIR, 'mod_image_for_recovery.sh')]
+  else:
+    cmd = ['./mod_image_for_recovery.sh']
+
+  cmd.extend(['--board', board])
+  if image_path:
+    cmd.extend(['--image', image_path])
+
+  result = cros_build_lib.run(cmd, enter_chroot=True,
+                              check=False)
+  return BuildResult(result.returncode, None)
 
 def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
   """Create a VM from an image.
@@ -227,6 +255,40 @@ def CreateGuestVm(board, is_test=False, chroot=None):
                          'Consult the logs to determine the problem.')
 
   return os.path.realpath(output_path)
+
+
+def _get_dlc_images_path(base_path: str) -> str:
+  """Get the source path containing the dlc images.
+
+  Specifically files expected to be in:
+    /.../build/rootfs/dlc
+
+  Args:
+    base_path: Base path wherein DLC images are expected to be.
+
+  Returns:
+    Full path for the dlc images.
+  """
+  return os.path.join(base_path, 'build', 'rootfs', 'dlc')
+
+
+def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
+  """Copies DLC image folder from base_path to output_dir.
+
+  Args:
+    base_path: Base path wherein DLC images are expected to be.
+    output_dir: Folder destination for DLC images folder.
+
+  Returns:
+    A list of folder paths after move or None if the source path doesn't exist
+  """
+  dlc_source_path = _get_dlc_images_path(base_path)
+  if not os.path.exists(dlc_source_path):
+    return None
+
+  dlc_dest_path = os.path.join(output_dir, 'dlc')
+  shutil.copytree(dlc_source_path, dlc_dest_path)
+  return [dlc_dest_path]
 
 
 def Test(board, result_directory, image_dir=None):

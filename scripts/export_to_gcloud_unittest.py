@@ -1,26 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for export_to_gcloud."""
 
-from __future__ import print_function
-
 import io
-import sys
+
+from google.cloud import datastore  # pylint: disable=import-error
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import export_to_gcloud
-
-try:
-  import pytest  # pylint: disable=import-error
-  datastore = pytest.importorskip('gcloud.datastore')
-except ImportError:
-  from gcloud import datastore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class GetEntitiesTest(cros_test_lib.TestCase):

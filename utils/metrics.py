@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -9,22 +8,16 @@ See infra/proto/metrics.proto for a description of the type of record that this
 module will be creating.
 """
 
-from __future__ import print_function
-
 import collections
 import contextlib
 import functools
 import os
-import sys
 import tempfile
 import time
 import uuid
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import locking
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 UTILS_METRICS_LOG_ENVVAR = 'BUILD_API_METRICS_LOG'

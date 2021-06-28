@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Library for handling Chrome OS partition."""
-
-from __future__ import print_function
 
 import os
 import tempfile
@@ -119,6 +116,16 @@ def ExtractRoot(image, root_out, truncate=True):
     logging.info('Truncated root to %d bytes.', root_out_size)
   else:
     raise IOError('Error truncating the rootfs to filesystem size.')
+
+
+def ExtractMiniOS(image, minios_out):
+  """Extract the minios partition from a gpt image.
+
+  Args:
+    image: The input image file.
+    minios_out: The output minios partition file.
+  """
+  ExtractPartition(image, constants.PART_MINIOS_A, minios_out)
 
 
 def IsSquashfsImage(image):

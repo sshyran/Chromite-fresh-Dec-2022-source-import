@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common file and os related utilities, including tempdir manipulation."""
-
-from __future__ import print_function
 
 import collections
 import contextlib
@@ -16,14 +13,14 @@ import errno
 import glob
 import hashlib
 import os
+from pathlib import Path
 import pwd
 import re
 import shutil
 import stat
 import subprocess
 import tempfile
-
-import six
+from typing import Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -119,8 +116,9 @@ _VALID_WRITE_MODES = {
 }
 
 
-def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
-              makedirs=False, sudo=False):
+def WriteFile(path: Union[Path, str],
+              content, mode='w', encoding=None, errors=None, atomic=False,
+              makedirs=False, sudo=False, chmod: Optional[int] = None):
   """Write the given content to disk.
 
   Args:
@@ -135,6 +133,8 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
             option is incompatible w/ append mode.
     makedirs: If True, create missing leading directories in the path.
     sudo: If True, write the file as root.
+    chmod: Permissions to make sure the file uses.  By default, permissions will
+        be maintained if |path| exists, or default to 0644.
   """
   if mode not in _VALID_WRITE_MODES:
     raise ValueError('mode must be one of {"%s"}, not %r' %
@@ -165,30 +165,52 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
       for item in iterable:
         yield item.encode(encoding, errors)
 
+  def get_existing_perms(path):
+    """Return permissions for |path| if available."""
+    try:
+      return os.stat(path).st_mode & 0o7777
+    except OSError as e:
+      # EPERM: We have access to dir, but not the file.
+      # EACCES: We don't have access to the dir.
+      if e.errno in (errno.EPERM, errno.EACCES):
+        if sudo:
+          result = cros_build_lib.sudo_run(
+              ['stat', '-c%a', '--', str(path)], stdout=True)
+          return int(result.stdout, 8)
+        else:
+          raise
+      elif e.errno != errno.ENOENT:
+        raise
+      else:
+        return 0o644
+
   # If the file needs to be written as root and we are not root, write to a temp
   # file, move it and change the permission.
   if sudo and os.getuid() != 0:
-    if 'a' in mode or '+' in mode:
+    if 'a' in mode or mode.startswith('r+'):
       # Use dd to run through sudo & append the output, and write the new data
       # to it through stdin.
-      cros_build_lib.sudo_run(
-          ['dd', 'conv=notrunc', 'oflag=append', 'status=none',
-           'of=%s' % (path,)], print_cmd=False, input=content)
+      cmd = ['dd', 'conv=notrunc', 'status=none', f'of={path}']
+      if 'a' in mode:
+        cmd += ['oflag=append']
+      cros_build_lib.sudo_run(cmd, print_cmd=False, input=content)
+      if chmod is not None:
+        Chmod(path, chmod, sudo=True)
 
     else:
       with tempfile.NamedTemporaryFile(mode=mode, delete=False) as temp:
         write_path = temp.name
         temp.writelines(write_wrapper(
             cros_build_lib.iflatten_instance(content)))
-      os.chmod(write_path, 0o644)
+      os.chmod(write_path, get_existing_perms(path) if chmod is None else chmod)
 
       try:
-        mv_target = path if not atomic else path + '.tmp'
+        mv_target = str(path) if not atomic else str(path) + '.tmp'
         cros_build_lib.sudo_run(['mv', write_path, mv_target],
                                 print_cmd=False, stderr=True)
         Chown(mv_target, user='root', group='root')
         if atomic:
-          cros_build_lib.sudo_run(['mv', mv_target, path],
+          cros_build_lib.sudo_run(['mv', mv_target, str(path)],
                                   print_cmd=False, stderr=True)
 
       except cros_build_lib.RunCommandError:
@@ -200,9 +222,12 @@ def WriteFile(path, content, mode='w', encoding=None, errors=None, atomic=False,
     # We have the right permissions, simply write the file in python.
     write_path = path
     if atomic:
-      write_path = path + '.tmp'
+      write_path = tempfile.NamedTemporaryFile(prefix=path, delete=False).name
     with open(write_path, mode) as f:
       f.writelines(write_wrapper(cros_build_lib.iflatten_instance(content)))
+      if atomic or chmod is not None:
+        os.fchmod(
+            f.fileno(), get_existing_perms(path) if chmod is None else chmod)
 
     if not atomic:
       return
@@ -234,16 +259,43 @@ def Touch(path, makedirs=False, mode=None):
   os.utime(path, None)
 
 
-def Chown(path, user=None, group=None, recursive=False):
+def Chmod(path: Union[Path, str], mode: int, sudo: bool = False):
+  """Helper for changing file modes even if we have to elevate to root.
+
+  Args:
+    path: File/directory to chmod.
+    mode: The permissions (e.g. 0o644) to change the file mode to.  String
+        permissions (e.g. a+r) are *not* supported.
+    sudo: If True, chmod the permissions as root.
+  """
+  # Try to chmod the file directly ourselves.  If we have access, no need to
+  # elevate via sudo.  Faster this way in general.
+  try:
+    os.chmod(path, mode)
+    return
+  except OSError as e:
+    # EPERM: We have access to dir, but not the file.
+    # EACCES: We don't have access to the dir.
+    if not sudo or e.errno not in (errno.EPERM, errno.EACCES):
+      raise
+
+  # If we're still here, we got permission denied and sudo=True was requested.
+  cros_build_lib.sudo_run(['chmod', f'{mode:o}', '--', str(path)])
+
+
+def Chown(path: Union[Path, str],
+          user: Optional[Union[str, int]] = None,
+          group: Optional[Union[str, int]] = None,
+          recursive: bool = False):
   """Simple sudo chown path to the user.
 
   Defaults to user running command. Does nothing if run as root user unless
   a new owner is provided.
 
   Args:
-    path: str - File/directory to chown.
-    user: str|int|None - User to chown the file to. Defaults to current user.
-    group: str|int|None - Group to assign the file to.
+    path: File/directory to chown.
+    user: User to chown the file to. Defaults to current user.
+    group: Group to assign the file to.
     recursive: Also chown child files/directories recursively.
   """
   if user is None:
@@ -257,12 +309,15 @@ def Chown(path, user=None, group=None, recursive=False):
     cmd = ['chown']
     if recursive:
       cmd += ['-R']
-    cmd += ['%s:%s' % (user, group), path]
+    cmd += ['%s:%s' % (user, group), str(path)]
     cros_build_lib.sudo_run(cmd, print_cmd=False,
                             stderr=True, stdout=True)
 
 
-def ReadFile(path, mode='r', encoding=None, errors=None):
+def ReadFile(path: Union[Path, str],
+             mode: str = 'r',
+             encoding: Optional[str] = None,
+             errors: Optional[str] = None):
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.
@@ -312,7 +367,9 @@ def MD5HashFile(path):
   return hashlib.md5(contents).hexdigest()
 
 
-def SafeSymlink(source, dest, sudo=False):
+def SafeSymlink(source: Union[Path, str],
+                dest: Union[Path, str],
+                sudo: bool = False):
   """Create a symlink at |dest| pointing to |source|.
 
   This will override the |dest| if the symlink exists. This operation is not
@@ -324,14 +381,15 @@ def SafeSymlink(source, dest, sudo=False):
     sudo: If True, create the link as root.
   """
   if sudo and os.getuid() != 0:
-    cros_build_lib.sudo_run(['ln', '-sfT', source, dest],
+    cros_build_lib.sudo_run(['ln', '-sfT', str(source), str(dest)],
                             print_cmd=False, stderr=True)
   else:
     SafeUnlink(dest)
     os.symlink(source, dest)
 
 
-def SafeUnlink(path, sudo=False):
+def SafeUnlink(path: Union[Path, str],
+              sudo: bool = False):
   """Unlink a file from disk, ignoring if it doesn't exist.
 
   Returns:
@@ -348,7 +406,16 @@ def SafeUnlink(path, sudo=False):
       raise
 
   # If we're still here, we're falling back to sudo.
-  cros_build_lib.sudo_run(['rm', '--', path], print_cmd=False, stderr=True)
+  try:
+    cros_build_lib.sudo_run(['rm', '--', str(path)], print_cmd=False,
+                            stderr=True)
+  except cros_build_lib.RunCommandError as e:
+    # If the dir is inaccessible to non-root users, we'd end up here.
+    if b'No such file or directory' in e.stderr:
+      return False
+
+    raise
+
   return True
 
 
@@ -761,8 +828,8 @@ def _TempDirSetup(self, prefix='tmp', set_global=False, base_dir=None):
   os.chmod(self.tempdir, 0o700)
 
   if set_global:
-    self._orig_tempdir_value, self._orig_tempdir_env = \
-        SetGlobalTempDir(self.tempdir)
+    self._orig_tempdir_value, self._orig_tempdir_env = SetGlobalTempDir(
+        self.tempdir)
 
 
 def _TempDirTearDown(self, force_sudo, delete=True):
@@ -919,13 +986,50 @@ MS_ACTIVE = 1 << 30
 MS_NOUSER = 1 << 31
 
 
-def Mount(source, target, fstype, flags, data=''):
-  """Call the mount(2) func; see the man page for details."""
+def Mount(source: Union[None, Path, str, bytes, int],
+          target: Union[None, Path, str, bytes, int],
+          fstype: Union[None, str, bytes, int],
+          flags: int,
+          data: Union[None, str, bytes, int] = ''):
+  """Call the mount(2) func; see the man page for details.
+
+  Args:
+    source: The source mount path (for bind mounts or block devices), or a
+        human readable description string (for pseudo filesystems).
+    target: The target path to mount over.  It may be a dir or file, but it
+        must exist already.
+    fstype: The filesystem type (e.g. "ext4" or "tmpfs"), or None if a bind
+        mount.
+    flags: Various MS_* flags.
+    data: Additional mount options parsed by the kernel filesystem driver.
+        Not to be confused with the MS_* flags -- NB the `mount` program will
+        convert some of these to MS_* flags for you e.g. "bind"->MS_BIND, but
+        this function does not.
+  """
   libc = ctypes.CDLL(ctypes.util.find_library('c'), use_errno=True)
-  # These fields might be a string or 0 (for NULL).  Convert to bytes.
-  def _MaybeEncode(s):
-    return s.encode('utf-8') if isinstance(s, six.string_types) else s
-  if libc.mount(_MaybeEncode(source), _MaybeEncode(target),
+
+  # These fields might be a Path/string/bytes or None/0 (for NULL).
+  # Convert to bytes or 0.
+  def _MaybeEncode(s: Union[None, Path, str, bytes, int],
+                   path_ok: bool = False):
+    if isinstance(s, Path):
+      if path_ok:
+        s = str(s).encode('utf-8')
+      else:
+        raise TypeError(f'"{s}" cannot be of type Path')
+    elif isinstance(s, str):
+      s = s.encode('utf-8')
+    elif s is None:
+      s = 0
+    elif isinstance(s, int):
+      if s:
+        raise ValueError(f'{s}: only NULL (0) ints are allowed')
+    elif not isinstance(s, bytes):
+      raise TypeError(f'"{s}" is an unsupported type: {type(s)}')
+    return s
+
+  if libc.mount(_MaybeEncode(source, path_ok=True),
+                _MaybeEncode(target, path_ok=True),
                 _MaybeEncode(fstype), ctypes.c_int(flags),
                 _MaybeEncode(data)) != 0:
     e = ctypes.get_errno()
@@ -1211,19 +1315,73 @@ def StatFilesInDirectory(path, recursive=False, to_string=False):
 
 
 @contextlib.contextmanager
-def ChdirContext(target_dir):
+def OpenContext(path: Union[Path, str],
+                flags: int = os.O_RDONLY,
+                mode: int = 0o777) -> int:
+  """Context manager to open & close |path| and return the OS file descriptor.
+
+  Args:
+    path: The path to open.
+    flags: The O_* flags to use.
+    mode: The permission bits to use (when creating a file).
+
+  Yields:
+    The open OS file descriptor.
+  """
+  fd = None
+  try:
+    fd = os.open(path, flags, mode)
+    yield fd
+  finally:
+    if fd is not None:
+      os.close(fd)
+
+
+@contextlib.contextmanager
+def ChdirContext(target_dir: Union[Path, str]) -> int:
   """A context manager to chdir() into |target_dir| and back out on exit.
 
   Args:
     target_dir: A target directory to chdir into.
-  """
 
-  cwd = os.getcwd()
-  os.chdir(target_dir)
-  try:
-    yield
-  finally:
-    os.chdir(cwd)
+  Yields:
+    File descriptor to old working directory.
+  """
+  with OpenContext('.', flags=os.O_RDONLY | os.O_PATH | os.O_CLOEXEC) as fd:
+    try:
+      os.chdir(target_dir)
+      yield fd
+    finally:
+      os.fchdir(fd)
+
+
+@contextlib.contextmanager
+def ChrootContext(target_dir: Union[Path, str]) -> int:
+  """A context manager to chroot() into |target_dir| and back out on exit.
+
+  The current process must already be running with sufficient privileges
+  (e.g. root).
+
+  Args:
+    target_dir: A target directory to chdir into.
+  """
+  # Order here is important, and use of handles & . avoids races.
+  # First chdir to the new path and save a handle to the old one.  The open
+  # handle stays viable across chroot calls.
+  with ChdirContext(target_dir):
+    # Get a handle to the current / so we can restore to it later.
+    with OpenContext('/', flags=os.O_RDONLY | os.O_PATH | os.O_CLOEXEC) as fd:
+      try:
+        # Chroot to the target_dir (via the cwd . symlink).
+        os.chroot('.')
+        # Pause here for the caller as we're now inside the chroot.
+        yield
+      finally:
+        # chdir to the saved / handle (breaking out of the chroot).
+        os.fchdir(fd)
+        # chroot to the saved / (via the cwd . symlink).
+        os.chroot('.')
+    # Context manager will chdir back to the original cwd via its saved handle.
 
 
 def _SameFileSystem(path1, path2):
@@ -1412,3 +1570,21 @@ def IsInsideVm():
         return True
 
   return False
+
+
+@contextlib.contextmanager
+def UmaskContext(mask: int) -> int:
+  """Context manager for changing umask.
+
+  Args:
+    mask: The new umask setting to apply.  Should be an octal number.
+
+  Yields:
+    The old umask setting in case it's useful.  It will still be restored
+    automatically by this context manager.
+  """
+  try:
+    old = os.umask(mask)
+    yield old
+  finally:
+    os.umask(old)

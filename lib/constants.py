@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module contains constants used by cbuildbot and related code."""
-
-from __future__ import print_function
 
 import itertools
 import os
@@ -80,24 +77,25 @@ HOME_DIRECTORY = os.path.expanduser('~')
 CIDB_PROD_BOT_CREDS = os.path.join(HOME_DIRECTORY, '.cidb_creds',
                                    'prod_cidb_bot')
 CIDB_DEBUG_BOT_CREDS = os.path.join(HOME_DIRECTORY, '.cidb_creds',
-                                    'debug_cidb_bot')
+                                   'debug_cidb_bot')
 
 # Crash Server upload API key.
 CRASH_API_KEY = os.path.join('/', 'creds', 'api_keys',
                              'api_key-chromeos-crash-uploader')
 
 # Buildbucket build status
+BUILDBUCKET_BUILDER_STATUS_CANCELED = 'CANCELED'
+BUILDBUCKET_BUILDER_STATUS_FAILURE = 'FAILURE'
+BUILDBUCKET_BUILDER_STATUS_INFRA_FAILURE = 'INFRA_FAILURE'
 BUILDBUCKET_BUILDER_STATUS_SCHEDULED = 'SCHEDULED'
 BUILDBUCKET_BUILDER_STATUS_STARTED = 'STARTED'
-BUILDBUCKET_BUILDER_STATUS_COMPLETED = 'COMPLETED'
+BUILDBUCKET_BUILDER_STATUS_SUCCESS = 'SUCCESS'
 
-BUILDBUCKET_BUILDER_STATUSES = (BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
+BUILDBUCKET_BUILDER_STATUSES = (BUILDBUCKET_BUILDER_STATUS_FAILURE,
+                                BUILDBUCKET_BUILDER_STATUS_INFRA_FAILURE,
+                                BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
                                 BUILDBUCKET_BUILDER_STATUS_STARTED,
-                                BUILDBUCKET_BUILDER_STATUS_COMPLETED)
-
-BUILDBUCKET_BUILDER_RESULT_SUCCESS = 'SUCCESS'
-BUILDBUCKET_BUILDER_RESULT_FAILURE = 'FAILURE'
-BUILDBUCKET_BUILDER_RESULT_CANCELED = 'CANCELED'
+                                BUILDBUCKET_BUILDER_STATUS_SUCCESS)
 
 # Builder status strings
 BUILDER_STATUS_FAILED = 'fail'
@@ -130,9 +128,6 @@ BUILDER_NON_FAILURE_STATUSES = (BUILDER_STATUS_PLANNED,
                                 # Quick fix for Buildbucket race problems.
                                 BUILDER_STATUS_INFLIGHT,
                                 BUILDER_STATUS_FORGIVEN)
-
-# Partition labels
-CROS_PART_STATEFUL = 'STATE'
 
 # Signer status strings
 SIGNER_STATUS_PASSED = 'passed'
@@ -265,114 +260,77 @@ DEFAULT_CTS_TEST_XML_MAP = {
 DEFAULT_CTS_RESULTS_GSURI = 'gs://chromeos-cts-results/'
 DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 
-ANDROID_CONTAINER_PACKAGE_KEYWORD = 'android-container'
-ANDROID_VM_PACKAGE_KEYWORD = 'android-vm'
+# List of Android Portage packages.
+ANDROID_PI_PACKAGE = 'android-container-pi'
+ANDROID_VMRVC_PACKAGE = 'android-vm-rvc'
+ANDROID_VMSC_PACKAGE = 'android-vm-sc'
+ANDROID_VMMST_PACKAGE = 'android-vm-master'
 
-ANDROID_BUCKET_URL = 'gs://android-build-chromeos/builds'
+ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
+                                  ANDROID_VMRVC_PACKAGE,
+                                  ANDROID_VMSC_PACKAGE,
+                                  ANDROID_VMMST_PACKAGE])
+
+# List of supported Android branches. When adding/removing branches make sure
+# the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
+ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
 ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
 
-ANDROID_PI_BUILD_TARGETS = {
-    # Roll XkbToKcmConverter with system image. It's a host executable and
-    # doesn't depend on the target as long as it's pi-arc branch. The converter
-    # is ARC specific and not a part of Android SDK. Having a custom target like
-    # SDK_TOOLS might be better in the long term, but let's use one from ARM or
-    # X86 target as there's no other similar executables right now.
-    # We put it in two buckets because we have separate ACLs for arm and x86.
-    # http://b/128405786
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM': ('linux-cheets_arm-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'ARM64': ('linux-cheets_arm64-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86': ('linux-cheets_x86-user', r'(\.zip|/XkbToKcmConverter)$'),
-    'X86_64': ('linux-cheets_x86_64-user', r'\.zip$'),
-    'ARM_USERDEBUG': ('linux-cheets_arm-userdebug', r'\.zip$'),
-    'ARM64_USERDEBUG': ('linux-cheets_arm64-userdebug', r'\.zip$'),
-    'X86_USERDEBUG': ('linux-cheets_x86-userdebug', r'\.zip$'),
-    'X86_64_USERDEBUG': ('linux-cheets_x86_64-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_USERDEBUG': ('linux-sdk_cheets_x86-userdebug', r'\.zip$'),
-    'SDK_GOOGLE_X86_64_USERDEBUG': ('linux-sdk_cheets_x86_64-userdebug',
-                                    r'\.zip$'),
-}
-ANDROID_VMMST_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-    # installed on the board, but not into the VM.
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
-                         (r'(\.zip|/XkbToKcmConverter'
-                          r'|/org.chromium.arc.cts.helpers.apk)$')),
-}
-ANDROID_VMRVC_BUILD_TARGETS = {
-    # For XkbToKcmConverter, see the comment in ANDROID_PI_BUILD_TARGETS.
-    # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-    # installed on the board, but not into the VM.
-    'APPS': ('linux-apps', 'org.chromium.arc.cachebuilder.jar'),
-    'ARM64': ('linux-bertha_arm64-user',
-              (r'(\.zip|/XkbToKcmConverter'
-               r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64': ('linux-bertha_x86_64-user',
-               (r'(\.zip|/XkbToKcmConverter'
-                r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'ARM64_USERDEBUG': ('linux-bertha_arm64-userdebug',
-                        (r'(\.zip|/XkbToKcmConverter'
-                         r'|/org.chromium.arc.cts.helpers.apk)$')),
-    'X86_64_USERDEBUG': ('linux-bertha_x86_64-userdebug',
-                         (r'(\.zip|/XkbToKcmConverter'
-                          r'|/org.chromium.arc.cts.helpers.apk)$')),
+# Supported Android build targets for each branch. Maps from *_TARGET variables
+# in Android ebuilds to Android build targets. Used during Android uprev to fill
+# in corresponding variables.
+# TODO(crbug/1192431): Move this next to uprev code once
+# ANDROID_ALL_BUILD_TARGETS is removed.
+ANDROID_BRANCH_TO_BUILD_TARGETS = {
+    ANDROID_PI_BUILD_BRANCH: {
+        'APPS_TARGET': 'apps',
+        'ARM_TARGET': 'cheets_arm-user',
+        'ARM64_TARGET': 'cheets_arm64-user',
+        'X86_TARGET': 'cheets_x86-user',
+        'X86_64_TARGET': 'cheets_x86_64-user',
+        'ARM_USERDEBUG_TARGET': 'cheets_arm-userdebug',
+        'ARM64_USERDEBUG_TARGET': 'cheets_arm64-userdebug',
+        'X86_USERDEBUG_TARGET': 'cheets_x86-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'cheets_x86_64-userdebug',
+        'SDK_GOOGLE_X86_USERDEBUG_TARGET': 'sdk_cheets_x86-userdebug',
+        'SDK_GOOGLE_X86_64_USERDEBUG_TARGET': 'sdk_cheets_x86_64-userdebug',
+    },
+    ANDROID_VMMST_BUILD_BRANCH: {
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMRVC_BUILD_BRANCH: {
+        'APPS_TARGET': 'apps',
+        'ARM64_TARGET': 'bertha_arm64-user',
+        'X86_64_TARGET': 'bertha_x86_64-user',
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMSC_BUILD_BRANCH: {
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
 }
 
-# These refer to *_TARGET variables in Android ebuild files, used when
-# parsing ebuilds to determine the corresponding Android branch.
-# NOTE: We may use `|` operator to union dict keys after we completely go
-# Python 3.
-ANDROID_ALL_BUILD_TARGETS = frozenset(
-    x + '_TARGET' for x in itertools.chain(
-        ANDROID_PI_BUILD_TARGETS,
-        ANDROID_VMMST_BUILD_TARGETS,
-        ANDROID_VMRVC_BUILD_TARGETS,
-    )
-)
+# All possible *_TARGET variables in Android ebuild files, used when parsing
+# ebuilds to determine the corresponding Android branch.
+# TODO(crbug/1193413): Remove this.
+ANDROID_ALL_BUILD_TARGETS = frozenset(itertools.chain.from_iterable(
+    ANDROID_BRANCH_TO_BUILD_TARGETS.values()
+))
 
+# The bucket where we save Android artifacts indefinitely, to ensure any old
+# Android versions in the commit history can be built.
+# TODO(crbug/1192431): Move to service.android.
 ARC_BUCKET_URL = 'gs://chromeos-arc-images/builds'
-ARC_BUCKET_ACLS = {
-    'APPS': 'googlestorage_acl_public.txt',
-    'ARM': 'googlestorage_acl_arm.txt',
-    'ARM64': 'googlestorage_acl_arm.txt',
-    'X86': 'googlestorage_acl_x86.txt',
-    'X86_64': 'googlestorage_acl_x86.txt',
-    'ARM_USERDEBUG': 'googlestorage_acl_arm.txt',
-    'ARM64_USERDEBUG': 'googlestorage_acl_arm.txt',
-    'X86_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'X86_64_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'SDK_GOOGLE_X86_USERDEBUG': 'googlestorage_acl_x86.txt',
-    'SDK_GOOGLE_X86_64_USERDEBUG': 'googlestorage_acl_x86.txt',
-}
+
+# URL template to Android symbols, used by release builders.
 ANDROID_SYMBOLS_URL_TEMPLATE = (
     ARC_BUCKET_URL +
     '/%(branch)s-linux-%(target)s_%(arch)s-%(variant)s/%(version)s'
-    '/%(target)s_%(arch)s%(suffix)s-symbols-%(version)s.zip')
+    '/%(target)s_%(arch)s-symbols-%(version)s.zip')
 ANDROID_SYMBOLS_FILE = 'android-symbols.zip'
-# x86-user, x86-userdebug and x86-eng builders create build artifacts with the
-# same name, e.g. cheets_x86-target_files-${VERSION}.zip. Chrome OS builders
-# that need to select x86-user or x86-userdebug artifacts at emerge time need
-# the artifacts to have different filenames to avoid checksum failures. These
-# targets will have their artifacts renamed when the PFQ copies them from the
-# the Android bucket to the ARC++ bucket (b/33072485).
-ARC_BUILDS_NEED_ARTIFACTS_RENAMED = {
-    'ARM_USERDEBUG',
-    'ARM64_USERDEBUG',
-    'X86_USERDEBUG',
-    'X86_64_USERDEBUG',
-    'SDK_GOOGLE_X86_USERDEBUG',
-    'SDK_GOOGLE_X86_64_USERDEBUG',
-}
-# All builds will have the same name without target prefix.
-# Emerge checksum failures will be workarounded by ebuild rename symbol (->).
-ARC_ARTIFACTS_RENAME_NOT_NEEDED = [
-    'push_to_device.zip',
-    'sepolicy.zip',
-    'XkbToKcmConverter',
-]
 
 GOB_COOKIE_PATH = os.path.expanduser('~/.git-credential-cache/cookie')
 GITCOOKIES_PATH = os.path.expanduser('~/.gitcookies')
@@ -474,10 +432,8 @@ VALID_CHROME_REVISIONS = [CHROME_REV_TOT, CHROME_REV_LATEST,
 
 # Constants for uprevving Android.
 
-# Portage package name for Android container.
-ANDROID_PACKAGE_NAME = 'android-container'
-
 # Builds and validates the latest Android release.
+# TODO(b/187788131): cleanup this
 ANDROID_REV_LATEST = 'latest_release'
 VALID_ANDROID_REVISIONS = [ANDROID_REV_LATEST]
 
@@ -649,10 +605,6 @@ HWTEST_STATUES_NOT_PASSED = frozenset([HWTEST_STATUS_FAIL,
                                        HWTEST_STATUS_ABORT,
                                        HWTEST_STATUS_OTHER])
 
-# Define HWTEST subsystem logic constants.
-SUBSYSTEMS = 'subsystems'
-SUBSYSTEM_UNUSED = 'subsystem_unused'
-
 # Build messages
 MESSAGE_TYPE_IGNORED_REASON = 'ignored_reason'
 MESSAGE_TYPE_ANNOTATIONS_FINALIZED = 'annotations_finalized'
@@ -805,6 +757,10 @@ TEST_GUEST_VM_DIR = 'guest-vm-test'
 BASE_GUEST_VM_TAR = '%s.tar.xz' % BASE_GUEST_VM_DIR
 TEST_GUEST_VM_TAR = '%s.tar.xz' % TEST_GUEST_VM_DIR
 
+KERNEL_IMAGE_NAME = 'vmlinuz'
+KERNEL_IMAGE_BIN = '%s.bin' % KERNEL_IMAGE_NAME
+KERNEL_IMAGE_TAR = '%s.tar.xz' % KERNEL_IMAGE_NAME
+
 TEST_IMAGE_NAME = 'chromiumos_test_image'
 TEST_IMAGE_TAR = '%s.tar.xz' % TEST_IMAGE_NAME
 TEST_IMAGE_BIN = '%s.bin' % TEST_IMAGE_NAME
@@ -812,8 +768,11 @@ TEST_IMAGE_GCE_TAR = ImageBinToGceTar(TEST_IMAGE_BIN)
 TEST_KEY_PRIVATE = 'id_rsa'
 TEST_KEY_PUBLIC = 'id_rsa.pub'
 
-DEBUG_SYMBOLS_NAME = 'debug_breakpad'
-DEBUG_SYMBOLS_TAR = '%s.tar.xz' % DEBUG_SYMBOLS_NAME
+BREAKPAD_DEBUG_SYMBOLS_NAME = 'debug_breakpad'
+BREAKPAD_DEBUG_SYMBOLS_TAR = '%s.tar.xz' % BREAKPAD_DEBUG_SYMBOLS_NAME
+
+DEBUG_SYMBOLS_NAME = 'debug'
+DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
 
 DEV_IMAGE_NAME = 'chromiumos_image'
 DEV_IMAGE_BIN = '%s.bin' % DEV_IMAGE_NAME
@@ -856,8 +815,6 @@ FIRMWARE_ARCHIVE_NAME = 'firmware_from_source.tar.bz2'
 FPMCU_UNITTESTS_ARCHIVE_NAME = 'fpmcu_unittests.tar.bz2'
 
 # Global configuration constants.
-CHROMITE_CONFIG_DIR = os.path.expanduser('~/.chromite')
-CHROME_SDK_BASHRC = os.path.join(CHROMITE_CONFIG_DIR, 'chrome_sdk.bashrc')
 SYNC_RETRIES = 4
 SLEEP_TIMEOUT = 30
 
@@ -869,7 +826,7 @@ GOLO_SMTP_SERVER = 'mail.golo.chromium.org'
 CHROME_GARDENER = 'chrome'
 # Email alias to add as reviewer in Gerrit, which GWSQ will then automatically
 # assign to the current gardener.
-CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners@google.com'
+CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 
 # Useful config targets.
 CANARY_MASTER = 'master-release'
@@ -877,6 +834,7 @@ PFQ_MASTER = 'master-chromium-pfq'
 VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
+VMSC_ANDROID_PFQ_MASTER = 'master-vmsc-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
 
 
@@ -912,9 +870,12 @@ CHROMEOS_SERVICE_ACCOUNT = os.path.join('/', 'creds', 'service_accounts',
                                         'service-account-chromeos.json')
 
 # Buildbucket buckets
-CHROMEOS_RELEASE_BUILDBUCKET_BUCKET = 'master.chromeos_release'
-CHROMEOS_BUILDBUCKET_BUCKET = 'master.chromeos'
-INTERNAL_SWARMING_BUILDBUCKET_BUCKET = 'luci.chromeos.general'
+CHROMEOS_RELEASE_BUILDBUCKET_BUCKET = 'chromeos_release'
+CHROMEOS_BUILDBUCKET_BUCKET = 'chromeos'
+INTERNAL_SWARMING_BUILDBUCKET_BUCKET = 'general'
+
+# Milo URL
+CHROMEOS_MILO_HOST = 'https://ci.chromium.org/b/'
 
 ACTIVE_BUCKETS = [
     CHROMEOS_RELEASE_BUILDBUCKET_BUCKET,
@@ -957,6 +918,7 @@ PART_ROOT_A = 'ROOT-A'
 PART_ROOT_B = 'ROOT-B'
 PART_KERN_A = 'KERN-A'
 PART_KERN_B = 'KERN-B'
+PART_MINIOS_A = 'MINIOS-A'
 
 # Quick provision payloads. These file names should never be changed, otherwise
 # very bad things can happen :). The reason is we have already uploaded these
@@ -987,3 +949,12 @@ TOPOLOGY_DICT = {
 
 # Percentage of child builders that need to complete to update LKGM
 LKGM_THRESHOLD = 80
+
+# Dev key related names.
+VBOOT_DEVKEYS_DIR = os.path.join('/usr/share/vboot/devkeys')
+KERNEL_PUBLIC_SUBKEY = 'kernel_subkey.vbpubk'
+KERNEL_DATA_PRIVATE_KEY = 'kernel_data_key.vbprivk'
+KERNEL_KEYBLOCK = 'kernel.keyblock'
+RECOVERY_PUBLIC_KEY = 'recovery_key.vbpubk'
+RECOVERY_DATA_PRIVATE_KEY = 'recovery_kernel_data_key.vbprivk'
+RECOVERY_KEYBLOCK = 'recovery_kernel.keyblock'

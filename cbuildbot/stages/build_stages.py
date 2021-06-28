@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the build stages."""
-
-from __future__ import print_function
 
 import base64
 import glob
@@ -16,9 +13,8 @@ from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import test_stages
-from chromite.lib import buildbucket_lib
-from chromite.lib import builder_status_lib
 from chromite.lib import build_summary
+from chromite.lib import buildbucket_v2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -32,6 +28,8 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
 from chromite.service import image as image_service
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
 
 
 class CleanUpStage(generic_stages.BuilderStage):
@@ -194,49 +192,71 @@ class CleanUpStage(generic_stages.BuilderStage):
     return master_status['build_number'], master_status['status']
 
   def CancelObsoleteSlaveBuilds(self):
-    """Cancel the obsolete slave builds scheduled by the previous master."""
-    logging.info('Cancelling obsolete slave builds.')
+    """Cancel the obsolete builds scheduled by the previous orchestrator."""
+    logging.info('Canceling obsolete builds.')
 
-    buildbucket_client = self.GetBuildbucketClient()
+    buildbucket_client = buildbucket_v2.BuildbucketV2()
     if not buildbucket_client:
-      logging.info('No buildbucket_client, not cancelling slaves.')
+      logging.info('No buildbucket_client, not canceling builds.')
       return
-
-    # Find the 3 most recent master buildbucket ids.
-    master_builds = buildbucket_client.SearchAllBuilds(
-        self._run.options.debug,
-        buckets=constants.ACTIVE_BUCKETS,
-        limit=3,
-        tags=[
-            'cbb_config:%s' % self._run.config.name,
-            'cbb_branch:%s' % self._run.manifest_branch
-        ],
-        status=constants.BUILDBUCKET_BUILDER_STATUS_COMPLETED)
-
-    slave_ids = []
-
+    main_search = []
+    # Find the 3 most recent master buildbucket ids in active buckets.
+    for bucket in constants.ACTIVE_BUCKETS:
+      for status in [
+        constants.BUILDBUCKET_BUILDER_STATUS_CANCELED,
+        constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS,
+      ]:
+        build_predicate = builds_service_pb2.BuildPredicate(
+          builder=builder_pb2.BuilderID(
+            project='chromeos',
+            bucket=bucket),
+          status=status,
+          tags=[common_pb2.StringPair(key='cbb_config',
+                                    value=self._run.config.name),
+              common_pb2.StringPair(key='cbb_branch',
+                                    value=self._run.manifest_branch)],
+        )
+        main_search.append(builds_service_pb2.SearchBuildsRequest(
+              predicate=build_predicate,
+              fields=field_mask_pb2.FieldMask(paths=['builds.*.id']),
+              page_size=3))
+    main_builds = buildbucket_client.BatchSearchBuilds(
+      search_requests=main_search
+    )
+    main_ids = []
+    for br in main_builds.responses:
+      for build in br.search_builds.builds:
+        main_ids.append(str(build.id))
     # Find the scheduled or started slaves for those master builds.
-    master_ids = buildbucket_lib.ExtractBuildIds(master_builds)
-    logging.info('Found Previous Master builds: %s', ', '.join(master_ids))
-    for master_id in master_ids:
+    logging.info('Found Previous Orchestrator builds: %s', ', '.join(main_ids))
+    builds = []
+    batch_search = []
+    for main_id in main_ids:
       for status in [
           constants.BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
-          constants.BUILDBUCKET_BUILDER_STATUS_STARTED
-      ]:
-        builds = buildbucket_client.SearchAllBuilds(
-            self._run.options.debug,
-            tags=['buildset:%s' % request_build.ChildBuildSet(master_id)],
-            status=status)
-
-        ids = buildbucket_lib.ExtractBuildIds(builds)
-        if ids:
-          logging.info('Found builds %s in status %s from master %s.', ids,
-                       status, master_id)
-          slave_ids.extend(ids)
-
-    if slave_ids:
-      builder_status_lib.CancelBuilds(slave_ids, buildbucket_client,
-                                      self._run.options.debug, self._run.config)
+          constants.BUILDBUCKET_BUILDER_STATUS_STARTED]:
+        child_predicate = builds_service_pb2.BuildPredicate(
+          builder=builder_pb2.BuilderID(
+            project='chromeos',
+            bucket=bucket),
+          status=status,
+          tags=[common_pb2.StringPair(
+            key='buildset',
+            value=request_build.ChildBuildSet(main_id))],
+        )
+        batch_search.append(builds_service_pb2.SearchBuildsRequest(
+          predicate=child_predicate))
+    builds = buildbucket_client.BatchSearchBuilds(
+      search_requests=batch_search)
+    cancel_nodes = []
+    for cr in builds.responses:
+      for cb in cr.search_builds.builds:
+        logging.info(
+          'Found build %s in status %s from previous orchestrator.',
+          str(cb.id), common_pb2.Status.Name(cb.status))
+        cancel_nodes.append(cb.id)
+    buildbucket_client.BatchCancelBuilds(cancel_nodes,
+      'Canceling builds from a previous orchestrator.')
 
   def CanReuseChroot(self, chroot_path):
     """Determine if the chroot can be reused.
@@ -813,22 +833,8 @@ class BuildImageStage(BuildPackagesStage):
 
     self.board_runattrs.SetParallel('images_generated', True)
 
-    parallel.RunParallelSteps([self._BuildVMImage,
-                               self._BuildGuestVMImage,
+    parallel.RunParallelSteps([self._BuildGuestVMImage,
                                self._BuildGceTarballs])
-
-  def _BuildVMImage(self):
-    # Adding startswith('betty') hack to create VM image for betty-arc-r.
-    # VM testing doesn't work on ARCVM but we still need the image.
-    # https://crbug.com/1092972.
-    if ((self._run.config.vm_tests or self._run.config.tast_vm_tests
-         or self._current_board.startswith('betty'))
-        and not self._afdo_generate_min):
-      commands.BuildVMImageForTesting(
-          self._build_root,
-          self._current_board,
-          extra_env=self._portage_extra_env,
-          disk_layout=self._run.config.disk_layout)
 
   def _BuildGuestVMImage(self):
     if self._run.config.guest_vm_image:

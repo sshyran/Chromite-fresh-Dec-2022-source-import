@@ -4,7 +4,7 @@
 
 import unittest
 
-from infra_libs.ts_mon.common import errors
+from chromite.third_party.infra_libs.ts_mon.common import errors
 
 class ErrorsTest(unittest.TestCase):
 

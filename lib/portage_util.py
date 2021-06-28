@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Routines and classes for working with Portage overlays and ebuilds."""
-
-from __future__ import print_function
 
 import collections
 import errno
@@ -16,11 +13,9 @@ import multiprocessing
 import os
 import re
 import shutil
-import sys
 from typing import Dict, List, Optional
 
-import six
-
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import failures_lib
 from chromite.lib import cros_build_lib
@@ -30,9 +25,6 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.parser import package_info
 from chromite.utils import key_value_store
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # The parsed output of running `ebuild <ebuild path> info`.
@@ -244,7 +236,7 @@ def FindOverlaysForBoards(overlay_type, boards):
   return list(overlays)
 
 
-def FindOverlayFile(filename, overlay_type='both', board=None,
+def FindOverlayFile(filename, overlay_type=constants.BOTH_OVERLAYS, board=None,
                     buildroot=constants.SOURCE_ROOT):
   """Attempt to find a file in the overlay directories.
 
@@ -284,7 +276,7 @@ def FindSysrootOverlays(sysroot):
   return PortageqEnvvar('PORTDIR_OVERLAY', board=os.path.basename(sysroot))
 
 
-def ReadOverlayFile(filename, overlay_type='both', board=None,
+def ReadOverlayFile(filename, overlay_type=constants.BOTH_OVERLAYS, board=None,
                     buildroot=constants.SOURCE_ROOT):
   """Attempt to open a file in the overlay directories.
 
@@ -345,7 +337,7 @@ class EbuildFormatIncorrectError(Error):
 
 # Container for Classify return values.
 EBuildClassifyAttributes = collections.namedtuple('EBuildClassifyAttributes', (
-    'is_workon', 'is_stable', 'is_blacklisted', 'has_test'))
+    'is_workon', 'is_stable', 'is_manually_uprevved', 'has_test'))
 
 
 class EBuild(object):
@@ -362,14 +354,14 @@ class EBuild(object):
       r"""^CROS_WORKON_(MANUAL_UPREV|BLACKLIST)=(['"])?1\2?$""")
 
   # These eclass files imply that src_test is defined for an ebuild.
-  _ECLASS_IMPLIES_TEST = set((
+  _ECLASS_IMPLIES_TEST = {
       'cros-common.mk',
       'cros-ec',      # defines src_test
       'cros-firmware',
       'cros-go',      # defines src_test
       'cros-rust',    # defines src_test
       'tast-bundle',  # inherits cros-go
-  ))
+  }
 
   @classmethod
   def _RunCommand(cls, command, **kwargs):
@@ -485,7 +477,7 @@ class EBuild(object):
 
     self.is_workon = False
     self.is_stable = False
-    self.is_blacklisted = False
+    self.is_manually_uprevved = False
     self.has_test = False
     self._ReadEBuild(path)
 
@@ -513,16 +505,16 @@ class EBuild(object):
 
   @staticmethod
   def Classify(ebuild_path):
-    """Return whether this ebuild is workon, stable, and/or blacklisted
+    """Return whether this ebuild is workon, stable, and/or manually uprevved
 
     workon is determined by whether the ebuild inherits from the
     'cros-workon' eclass. stable is determined by whether there's a '~'
-    in the KEYWORDS setting in the ebuild. An ebuild is considered blacklisted
+    in the KEYWORDS setting in the ebuild. An ebuild is only manually uprevved
     if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
     """
     is_workon = False
     is_stable = False
-    is_blacklisted = False
+    is_manually_uprevved = False
     has_test = False
     restrict_tests = False
     with open(ebuild_path, mode='rb') as fp:
@@ -550,7 +542,7 @@ class EBuild(object):
             if not keyword.startswith('~') and keyword != '-*':
               is_stable = True
         elif EBuild._RE_MANUAL_UPREV.match(line.strip()):
-          is_blacklisted = True
+          is_manually_uprevved = True
         elif (line.startswith('src_test()') or
               line.startswith('platform_pkg_test()') or
               line.startswith('multilib_src_test()')):
@@ -558,15 +550,16 @@ class EBuild(object):
         elif line.startswith('RESTRICT=') and 'test' in line:
           restrict_tests = True
     return EBuildClassifyAttributes(
-        is_workon, is_stable, is_blacklisted, has_test and not restrict_tests)
+        is_workon, is_stable, is_manually_uprevved,
+        has_test and not restrict_tests)
 
   def _ReadEBuild(self, path):
-    """Determine the settings of `is_workon`, `is_stable` and is_blacklisted
+    """Determine the settings of is_workon, is_stable and is_manually_uprevved
 
     These are determined using the static Classify function.
     """
     (self.is_workon, self.is_stable,
-     self.is_blacklisted, self.has_test) = EBuild.Classify(path)
+     self.is_manually_uprevved, self.has_test) = EBuild.Classify(path)
 
   @staticmethod
   def _GetAutotestTestsFromSettings(settings):
@@ -898,7 +891,7 @@ class EBuild(object):
         projects=projects, srcdirs=subdir_paths, subdirs=[],
         subtrees=subtree_paths)
 
-  def GetCommitId(self, srcdir):
+  def GetCommitId(self, srcdir, ref: str = 'HEAD'):
     """Get the commit id for this ebuild.
 
     Returns:
@@ -907,12 +900,12 @@ class EBuild(object):
     Raises:
       raise Error if git fails to return the HEAD commit id.
     """
-    output = self._RunGit(srcdir, ['rev-parse', 'HEAD'])
+    output = self._RunGit(srcdir, ['rev-parse', '%s^{commit}' % ref])
     if not output:
-      raise Error('Cannot determine HEAD commit for %s' % srcdir)
+      raise Error('Cannot determine %s commit for %s' % (ref, srcdir))
     return output.rstrip()
 
-  def GetTreeId(self, path):
+  def GetTreeId(self, path, ref: str = 'HEAD'):
     """Get the SHA1 of the source tree for this ebuild.
 
     Unlike the commit hash, the SHA1 of the source tree is unaffected by the
@@ -932,9 +925,9 @@ class EBuild(object):
     else:
       basedir = os.path.dirname(path)
       relpath = os.path.basename(path)
-    output = self._RunGit(basedir, ['rev-parse', 'HEAD:./%s' % relpath])
+    output = self._RunGit(basedir, ['rev-parse', ref + ':./%s' % relpath])
     if not output:
-      raise Error('Cannot determine HEAD tree hash for %s' % path)
+      raise Error('Cannot determine %s tree hash for %s' % (ref, path))
     return output.rstrip()
 
   def GetVersion(self, srcroot, manifest, default):
@@ -1080,7 +1073,7 @@ class EBuild(object):
     test_dirs_changed = False
     if sorted(subdirs_to_rev) != sorted(old_subdirs_to_rev):
       logging.info(
-          'The list of subdirs in the ebuild %s has changed, upreving.',
+          'The list of subdirs in the ebuild %s has changed, uprevving.',
           self.pkgname)
       test_dirs_changed = True
 
@@ -1444,7 +1437,7 @@ def BestEBuild(ebuilds):
   return winner
 
 
-def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
+def _FindUprevCandidates(files, allow_manual_uprev, subdir_support):
   """Return the uprev candidate ebuild from a specified list of files.
 
   Usually an uprev candidate is a the stable ebuild in a cros_workon
@@ -1455,7 +1448,7 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
 
   Args:
     files: List of files in a package directory.
-    allow_blacklisted: If False, discard blacklisted packages.
+    allow_manual_uprev: If False, discard manually uprevved packages.
     subdir_support: Support obsolete CROS_WORKON_SUBDIR.
                     Intended for branchs older than 10363.0.0.
 
@@ -1468,8 +1461,8 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
     if not path.endswith('.ebuild') or os.path.islink(path):
       continue
     ebuild = EBuild(path, subdir_support)
-    if not ebuild.is_workon or (ebuild.is_blacklisted and
-                                not allow_blacklisted):
+    if not ebuild.is_workon or (ebuild.is_manually_uprevved and
+                                not allow_manual_uprev):
       continue
     if ebuild.is_stable:
       if ebuild.version == WORKON_EBUILD_VERSION:
@@ -1514,7 +1507,7 @@ def _FindUprevCandidates(files, allow_blacklisted, subdir_support):
   return uprev_ebuild
 
 
-def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
+def GetOverlayEBuilds(overlay, use_all, packages, allow_manual_uprev=False,
                       subdir_support=False):
   """Get ebuilds from the specified overlay.
 
@@ -1525,7 +1518,7 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
       of whether they are in our set of packages.
     packages: A set of the packages we want to gather.  If use_all is
       True, this argument is ignored, and should be None.
-    allow_blacklisted: Whether or not to consider blacklisted ebuilds.
+    allow_manual_uprev: Whether or not to consider manually uprevved ebuilds.
     subdir_support: Support obsolete CROS_WORKON_SUBDIR.
                     Intended for branchs older than 10363.0.0.
 
@@ -1536,8 +1529,8 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
   for package_dir, _dirs, files in os.walk(overlay):
     # If we were given a list of packages to uprev, only consider the files
     # whose potential CP match.
-    # This allows us to uprev specific blacklisted without throwing errors on
-    # every badly formatted blacklisted ebuild.
+    # This allows us to manually uprev a specific ebuild without throwing
+    # errors on every badly formatted manually uprevved ebuild.
     package_name = os.path.basename(package_dir)
     category = os.path.basename(os.path.dirname(package_dir))
 
@@ -1547,7 +1540,7 @@ def GetOverlayEBuilds(overlay, use_all, packages, allow_blacklisted=False,
       continue
 
     paths = [os.path.join(package_dir, path) for path in files]
-    ebuild = _FindUprevCandidates(paths, allow_blacklisted, subdir_support)
+    ebuild = _FindUprevCandidates(paths, allow_manual_uprev, subdir_support)
 
     # Add stable ebuild.
     if ebuild:
@@ -1691,7 +1684,7 @@ def BuildFullWorkonPackageDictionary(buildroot, overlay_type, manifest):
 
   pkg_map = dict()
   for ebuild in WorkonEBuildGenerator(buildroot, overlay_type):
-    if ebuild.is_blacklisted:
+    if ebuild.is_manually_uprevved:
       continue
     package = ebuild.package
     paths = ebuild.GetSourceInfo(directory_src, manifest).srcdirs
@@ -1876,7 +1869,6 @@ def _EqueryWhich(
       version, and slot.
     sysroot: The root directory being inspected.
     include_masked: True iff we should include masked ebuilds in our query.
-    equery_cmd_args: List containing equery command args.
     extra_env: optional dictionary of extra string/string pairs to use as the
       environment of equery command.
     check: If False, do not raise an exception when run returns
@@ -2226,12 +2218,13 @@ def CleanOutdatedBinaryPackages(sysroot):
       [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean'), '-d', 'packages'])
 
 
-def _CheckHasTest(cp, sysroot):
+def _CheckHasTest(cp, sysroot, require_workon: bool = False):
   """Checks if the ebuild for |cp| has tests.
 
   Args:
     cp: A portage package in the form category/package_name.
     sysroot: Path to the sysroot.
+    require_workon: Whether to only test workon packages.
 
   Returns:
     |cp| if the ebuild for |cp| defines a test stanza, None otherwise.
@@ -2246,20 +2239,25 @@ def _CheckHasTest(cp, sysroot):
     logging.error('FindEbuildForPackage error %s', e)
     raise failures_lib.PackageBuildFailure(e, 'equery', cp)
   ebuild = EBuild(path, False)
-  return cp if ebuild.has_test else None
+  if require_workon and not ebuild.is_workon:
+    return None
+  elif ebuild.has_test:
+    return cp
+  return None
 
 
-def PackagesWithTest(sysroot, packages):
+def PackagesWithTest(sysroot, packages, require_workon: bool = False):
   """Returns the subset of |packages| that have unit tests.
 
   Args:
     sysroot: Path to the sysroot.
     packages: List of packages to filter.
+    require_workon: Whether to only test workon packages.
 
   Returns:
     The subset of |packages| that defines unit tests.
   """
-  inputs = [(cp, sysroot) for cp in packages]
+  inputs = [(cp, sysroot, require_workon) for cp in packages]
   pkg_with_test = set(parallel.RunTasksInProcessPool(_CheckHasTest, inputs))
 
   # CheckHasTest will return None for packages that do not have tests. We can
@@ -2332,7 +2330,7 @@ def _GetPortageq(board=None, sysroot=None):
 
   # Prefer the sysroot tool if it exists.
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   tool = cros_build_lib.GetSysrootToolPath(sysroot, 'portageq')
   if os.path.exists(tool):
     return tool
@@ -2380,7 +2378,7 @@ def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
     A package_info.CPV object.
   """
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board=board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   cmd = ['best_visible', sysroot, pkg_type, atom]
   result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
   return package_info.SplitCPV(result.output.strip())
@@ -2406,7 +2404,7 @@ def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
     TypeError when variable is not a valid type.
     ValueError when variable is empty.
   """
-  if not isinstance(variable, six.string_types):
+  if not isinstance(variable, str):
     raise TypeError('Variable must be a string.')
   elif not variable:
     raise ValueError('Variable must not be empty.')
@@ -2434,7 +2432,7 @@ def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
     PortageqError when a variable is undefined and not allowed to be.
     cros_build_lib.RunCommandError when the command does not run successfully.
   """
-  if isinstance(variables, six.string_types):
+  if isinstance(variables, str):
     raise TypeError('Variables must not be a string. '
                     'See PortageqEnvvar for single variable support.')
 
@@ -2474,7 +2472,7 @@ def PortageqHasVersion(category_package, board=None, sysroot=None):
     cros_build_lib.RunCommandError when the command fails to run.
   """
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board=board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   # Exit codes 0/1+ indicate "have"/"don't have".
   # Normalize them into True/False values.
   result = _Portageq(['has_version', sysroot, category_package], board=board,
@@ -2496,7 +2494,7 @@ def PortageqMatch(atom, board=None, sysroot=None):
     package_info.CPV|None
   """
   if sysroot is None:
-    sysroot = cros_build_lib.GetSysroot(board=board)
+    sysroot = build_target_lib.get_default_sysroot_path(board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
   return package_info.SplitCPV(result.output.strip()) if result.output else None
 
@@ -2548,7 +2546,7 @@ def GeneratePackageSizes(db, root, installed_packages):
         total_package_filesize += filesize
     logging.debug('%s installed_package size is %d', package_cpv,
                   total_package_filesize)
-    yield (package_cpv, total_package_filesize)
+    yield package_cpv, total_package_filesize
 
 
 def UpdateEbuildManifest(ebuild_path, chroot=None):

@@ -1,18 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Chrome OS imagefile signing unittests"""
 
-from __future__ import print_function
-
 import os
 import re
 import tempfile
-
-import mock
-import six
+from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -23,9 +18,9 @@ from chromite.lib import image_lib_unittest
 from chromite.lib import kernel_cmdline
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.signing.image_signing import imagefile
 from chromite.signing.lib import firmware
 from chromite.signing.lib import keys
-from chromite.signing.image_signing import imagefile
 from chromite.utils import key_value_store
 
 
@@ -117,7 +112,7 @@ class TestGetKernelConfig(cros_test_lib.RunCommandTestCase):
                   capture_output=True, print_cmd=False, check=True,
                   encoding='utf-8')]
     self.assertEqual(expected_rc, self.rc.call_args_list)
-    self.assertTrue(isinstance(ret, six.string_types))
+    self.assertIsInstance(ret, str)
     self.assertEqual(SAMPLE_KERNEL_CONFIG.strip(), ret)
 
   def testCallsPassesCheck(self):
@@ -128,7 +123,7 @@ class TestGetKernelConfig(cros_test_lib.RunCommandTestCase):
                   capture_output=True, print_cmd=False, check=555,
                   encoding='utf-8')]
     self.assertEqual(expected_rc, self.rc.call_args_list)
-    self.assertTrue(isinstance(ret, six.string_types))
+    self.assertIsInstance(ret, str)
     self.assertEqual(SAMPLE_KERNEL_CONFIG.strip(), ret)
 
   def testCallsHandlesErrorCode(self):
@@ -148,7 +143,7 @@ class TestGetKernelCmdLine(cros_test_lib.MockTestCase):
                            return_value=SAMPLE_KERNEL_CONFIG.strip())
     ret = imagefile._GetKernelCmdLine('/dev/loop9999p4')
     gkc.assert_called_once_with('/dev/loop9999p4', True)
-    self.assertTrue(isinstance(ret, kernel_cmdline.CommandLine))
+    self.assertIsInstance(ret, kernel_cmdline.CommandLine)
     self.assertEqual(SAMPLE_KERNEL_CONFIG.strip(), ret.Format())
 
   def testCallsPassesErrorCodeOk(self):
@@ -157,7 +152,7 @@ class TestGetKernelCmdLine(cros_test_lib.MockTestCase):
                            return_value=SAMPLE_KERNEL_CONFIG.strip())
     ret = imagefile._GetKernelCmdLine('/dev/loop9999p4', check=555)
     gkc.assert_called_once_with('/dev/loop9999p4', 555)
-    self.assertTrue(isinstance(ret, kernel_cmdline.CommandLine))
+    self.assertIsInstance(ret, kernel_cmdline.CommandLine)
     self.assertEqual(SAMPLE_KERNEL_CONFIG.strip(), ret.Format())
 
   def testCallsHandlesNone(self):

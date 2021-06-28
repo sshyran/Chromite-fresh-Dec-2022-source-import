@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Cros Eventing library, for tracking tasks using a shared eventing system"""
 
-from __future__ import print_function
-
 from time import time
 
 import atexit
 import json
 import multiprocessing
-import sys
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Static Keys and Strings

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -20,11 +19,8 @@ https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/contrib/README.
 https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/README.md
 """
 
-from __future__ import print_function
-
 import os
 import re
-import sys
 
 from chromite.api import message_util
 from chromite.api import router as router_lib
@@ -33,9 +29,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 EXAMPLES_PATH = os.path.join(os.path.dirname(__file__), 'call_templates')

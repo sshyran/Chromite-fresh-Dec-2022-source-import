@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Image API unittests."""
-
-from __future__ import print_function
 
 import os
 
@@ -69,6 +66,10 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
              constants.IMAGE_TYPE_TEST]
     image.Build('board', multi)
     self.assertCommandContains(multi)
+
+    # Building RECOVERY only should cause base to be built.
+    image.Build('board', [constants.IMAGE_TYPE_RECOVERY])
+    self.assertCommandContains([constants.IMAGE_TYPE_BASE])
 
 
 class BuildConfigTest(cros_test_lib.MockTestCase):
@@ -143,6 +144,24 @@ class CreateVmTest(cros_test_lib.RunCommandTestCase):
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value='/tmp')
     self.assertEqual(os.path.join('/tmp', constants.VM_IMAGE_BIN),
                      image.CreateVm('board'))
+
+
+class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
+  """Create recovery image tests."""
+
+  def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
+
+  def testNoBoardFails(self):
+    """Should fail when not given a valid board-ish value."""
+    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
+    with self.assertRaises(image.InvalidArgumentError):
+      image.BuildRecoveryImage('')
+
+  def testBoardArgument(self):
+    """Test the board argument."""
+    image.BuildRecoveryImage('board')
+    self.assertCommandContains(['--board', 'board'])
 
 
 class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):

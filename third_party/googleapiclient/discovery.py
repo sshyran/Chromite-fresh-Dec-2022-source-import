@@ -17,8 +17,8 @@
 A client library for Google's discovery based APIs.
 """
 from __future__ import absolute_import
-import six
-from six.moves import zip
+from chromite.third_party import six
+from chromite.third_party.six.moves import zip
 
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 __all__ = [
@@ -28,9 +28,9 @@ __all__ = [
     'key2param',
     ]
 
-from six import BytesIO
-from six.moves import http_client
-from six.moves.urllib.parse import urlencode, urlparse, urljoin, \
+from chromite.third_party.six import BytesIO
+from chromite.third_party.six.moves import http_client
+from chromite.third_party.six.moves.urllib.parse import urlencode, urlparse, urljoin, \
   urlunparse, parse_qsl
 
 # Standard library imports
@@ -49,35 +49,35 @@ import os
 import re
 
 # Third-party imports
-import httplib2
-import uritemplate
+from chromite.third_party import httplib2
+from chromite.third_party import uritemplate
 
 # Local imports
-from googleapiclient import mimeparse
-from googleapiclient.errors import HttpError
-from googleapiclient.errors import InvalidJsonError
-from googleapiclient.errors import MediaUploadSizeError
-from googleapiclient.errors import UnacceptableMimeTypeError
-from googleapiclient.errors import UnknownApiNameOrVersion
-from googleapiclient.errors import UnknownFileType
-from googleapiclient.http import BatchHttpRequest
-from googleapiclient.http import HttpRequest
-from googleapiclient.http import MediaFileUpload
-from googleapiclient.http import MediaUpload
-from googleapiclient.model import JsonModel
-from googleapiclient.model import MediaModel
-from googleapiclient.model import RawModel
-from googleapiclient.schema import Schemas
-from oauth2client.client import GoogleCredentials
+from . import mimeparse
+from .errors import HttpError
+from .errors import InvalidJsonError
+from .errors import MediaUploadSizeError
+from .errors import UnacceptableMimeTypeError
+from .errors import UnknownApiNameOrVersion
+from .errors import UnknownFileType
+from .http import BatchHttpRequest
+from .http import HttpRequest
+from .http import MediaFileUpload
+from .http import MediaUpload
+from .model import JsonModel
+from .model import MediaModel
+from .model import RawModel
+from .schema import Schemas
+from chromite.third_party.oauth2client.client import GoogleCredentials
 
 # Oauth2client < 3 has the positional helper in 'util', >= 3 has it
 # in '_helpers'.
 try:
-  from oauth2client.util import _add_query_parameter
-  from oauth2client.util import positional
+  from chromite.third_party.oauth2client.util import _add_query_parameter
+  from chromite.third_party.oauth2client.util import positional
 except ImportError:
-  from oauth2client._helpers import _add_query_parameter
-  from oauth2client._helpers import positional
+  from chromite.third_party.oauth2client._helpers import _add_query_parameter
+  from chromite.third_party.oauth2client._helpers import positional
 
 
 # The client library requires a version of httplib2 that supports RETRIES.

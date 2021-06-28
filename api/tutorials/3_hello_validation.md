@@ -10,6 +10,10 @@ and have all the code in place.
 
 In this tutorial, we'll be looking at argument validation in Build API
 endpoints.
+This provides a hands-on walkthrough of how to use the validation functionality
+in the Build API.
+For a full listing of all the validators, and more details about their
+functionality see the [validation reference](../references/validation.md).
 
 ### "Hello, !"?!?
 

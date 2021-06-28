@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Logic to handle uprevving packages."""
-
-from __future__ import print_function
 
 import collections
 import enum
@@ -13,7 +10,6 @@ import filecmp
 import functools
 import os
 import re
-import sys
 from typing import Iterable, List, Optional, Tuple, Union
 
 from chromite.cbuildbot import manifest_version
@@ -25,16 +21,13 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib.chroot_lib import Chroot
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.utils import pms
 
 
 CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'
 
-# The directory relative to the source root housing the chrome packages.
-_CHROME_OVERLAY_DIR = 'src/third_party/chromiumos-overlay'
-_CHROME_OVERLAY_PATH = os.path.join(constants.SOURCE_ROOT, _CHROME_OVERLAY_DIR)
+_CHROME_OVERLAY_PATH = os.path.join(constants.SOURCE_ROOT,
+                                    constants.CHROMIUMOS_OVERLAY_DIR)
 
 GitRef = collections.namedtuple('GitRef', ['path', 'ref', 'revision'])
 
@@ -46,11 +39,14 @@ class Error(Exception):
 class NoUnstableEbuildError(Error):
   """When no unstable ebuild can be found."""
 
+
 class EbuildUprevError(Error):
   """An error occurred while uprevving packages."""
 
+
 class EbuildManifestError(Error):
   """Error when running ebuild manifest."""
+
 
 class ChromeEBuild(portage_util.EBuild):
   """Thin sub-class of EBuild that adds a few small helpers."""
@@ -720,6 +716,8 @@ def uprev_workon_ebuild_to_version(
     target_version: str,
     chroot: Optional['chromite.lib.chroot_lib.Chroot'] = None,
     *,
+    allow_downrev: bool = True,
+    ref: str = 'HEAD',
     src_root: str = constants.SOURCE_ROOT,
     chroot_src_root: str = constants.CHROOT_SOURCE_ROOT) -> UprevResult:
   """Uprev a cros-workon ebuild to a specified version.
@@ -730,11 +728,13 @@ def uprev_workon_ebuild_to_version(
     target_version: The version to use for the stable ebuild to be generated.
       Should not contain a revision number.
     chroot: The path to the chroot to enter, if not the default.
-    srcroot: Path to the root of the source checkout. Only override for testing.
+    allow_downrev: Whether the downrev should be proceed. If not and the target
+      version is older than the existing version, abort this downrev.
+    ref: The target version's ref tag in the git repository to be used.
+    src_root: Path to the root of the source checkout. Only for testing.
     chroot_src_root: Path to the root of the source checkout when inside the
       chroot. Only override for testing.
   """
-
   package_path = str(package_path)
   package = os.path.basename(package_path)
 
@@ -762,6 +762,13 @@ def uprev_workon_ebuild_to_version(
   if not unstable_ebuild.is_workon:
     raise EbuildUprevError('A workon ebuild was expected '
                            f'but {unstable_ebuild.ebuild_path} is not workon.')
+
+  # If downrev is not allowed, and the new version is older than the existing
+  # version, early return without uprevving.
+  if (not allow_downrev and stable_ebuild and
+      pms.version_lt(target_version, stable_ebuild.version_no_rev)):
+    return UprevResult(outcome=Outcome.NEWER_VERSION_EXISTS)
+
   # If the new version is the same as the old version, bump the revision number,
   # otherwise reset it to 1
   if stable_ebuild and target_version == stable_ebuild.version_no_rev:
@@ -782,11 +789,11 @@ def uprev_workon_ebuild_to_version(
   manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
   info = unstable_ebuild.GetSourceInfo(
       os.path.join(constants.SOURCE_ROOT, 'src'), manifest)
-  commit_ids = [unstable_ebuild.GetCommitId(x) for x in info.srcdirs]
+  commit_ids = [unstable_ebuild.GetCommitId(x, ref) for x in info.srcdirs]
   if not commit_ids:
     raise EbuildUprevError('No commit_ids found for %s' % info.srcdirs)
 
-  tree_ids = [unstable_ebuild.GetTreeId(x) for x in info.subtrees]
+  tree_ids = [unstable_ebuild.GetTreeId(x, ref) for x in info.subtrees]
   tree_ids = [tree_id for tree_id in tree_ids if tree_id]
   if not tree_ids:
     raise EbuildUprevError('No tree_ids found for %s' % info.subtrees)
@@ -800,9 +807,9 @@ def uprev_workon_ebuild_to_version(
 
   # If the newly generated stable ebuild is identical to the previous one,
   # early return without incrementing the revision number.
-  if stable_ebuild and target_version == stable_ebuild.version_no_rev and \
-    filecmp.cmp(
-        new_ebuild_src_path, stable_ebuild.ebuild_path, shallow=False):
+  if (stable_ebuild and target_version == stable_ebuild.version_no_rev and
+      filecmp.cmp(new_ebuild_src_path, stable_ebuild.ebuild_path,
+                  shallow=False)):
     return UprevResult(outcome=Outcome.SAME_VERSION_EXISTS)
 
   if stable_ebuild is not None:

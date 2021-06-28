@@ -1,22 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for LOAS helper functions."""
 
-from __future__ import print_function
-
 import datetime
-import sys
 
 from chromite.lib import alerts
 from chromite.lib import cros_test_lib
 from chromite.lib import loas
 from chromite.lib import partial_mock
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestLoas(cros_test_lib.MockTestCase):
@@ -66,11 +59,12 @@ class TestLoas(cros_test_lib.MockTestCase):
     """Verify that expiring certs generate e-mails once a day."""
     self.rc_mock.AddCmdResult(
         partial_mock.In('gcertstatus'), returncode=1,
-        error='  WARNING LOAS2 expires in 76h')
+        stderr='  WARNING LOAS2 expires in 76h')
 
     # This should invoke gcertstatus & send an e-mail.
     self.loas.Status()
     self.assertEqual(self.email_mock.call_count, 1)
+    self.assertIn('WARNING LOAS2', self.email_mock.call_args.kwargs['message'])
 
     # While this should do nothing but return (only one e-mail a day).
     self.loas.Status()

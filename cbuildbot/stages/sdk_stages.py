@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing SDK stages."""
-
-from __future__ import print_function
 
 import glob
 import json
@@ -34,8 +31,8 @@ PACKAGE_EXCLUDED_PATHS = ('usr/lib/debug', 'usr/lib64/debug',
 
 # Names of various packaged artifacts.
 SDK_TARBALL_NAME = 'built-sdk.tar.xz'
-TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE = \
-    'built-sdk-overlay-toolchains-%(toolchains)s.tar.xz'
+TOOLCHAINS_OVERLAY_TARBALL_TEMPLATE = (
+    'built-sdk-overlay-toolchains-%(toolchains)s.tar.xz')
 
 
 def SdkPerfPath(buildroot):
@@ -264,6 +261,8 @@ class SDKPackageToolchainOverlaysStage(generic_stages.BuilderStage):
             delete=False) as merged_dir:
           with osutils.MountOverlayContext(
               sdk_dir, overlay_dir, merged_dir, cleanup=True):
+            # Pylint-2.2 is unable to see self.tempdir is a string.
+            # pylint: disable=unsubscriptable-object
             sysroot = merged_dir[len(chroot_dir):]
             cmd = [
                 'cros_setup_toolchains', '--targets=boards',

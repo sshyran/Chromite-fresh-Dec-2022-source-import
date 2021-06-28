@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -6,15 +5,12 @@
 """Module containing methods and classes to interact with a nebraska instance.
 """
 
-from __future__ import print_function
-
 import base64
 import os
 import shutil
 import multiprocessing
 import subprocess
-
-from six.moves import urllib
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -58,7 +54,6 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
   PID_FILE_PATH = os.path.join(RUNTIME_ROOT, 'pid')
   PORT_FILE_PATH = os.path.join(RUNTIME_ROOT, 'port')
   LOG_FILE_PATH = '/tmp/nebraska.log'
-  REQUEST_LOG_FILE_PATH = '/tmp/nebraska_request_log.json'
 
   NEBRASKA_PATH = os.path.join('/usr/local/bin', NEBRASKA_FILENAME)
 
@@ -178,7 +173,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           'Update metadata directory location is not passed.')
 
     cmd = [
-        'python', self._nebraska_bin,
+        self._nebraska_bin,
         '--update-metadata', self._update_metadata_dir,
     ]
 
@@ -277,26 +272,6 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
     except (remote_access.RemoteAccessException,
             cros_build_lib.RunCommandError) as err:
       logging.error('Failed to copy nebraska logs from device, ignoring: %s',
-                    str(err))
-
-  def CollectRequestLogs(self, target_log):
-    """Copies the nebraska logs from the device.
-
-    Args:
-      target_log: The file to write the log to.
-    """
-    if not self.is_alive():
-      return
-
-    request_log_url = 'http://%s:%d/requestlog' % (remote_access.LOCALHOST_IP,
-                                                   self._port)
-    try:
-      self._RemoteCommand(
-          ['curl', request_log_url, '-o', self.REQUEST_LOG_FILE_PATH])
-      self._device.CopyFromDevice(self.REQUEST_LOG_FILE_PATH, target_log)
-    except (remote_access.RemoteAccessException,
-            cros_build_lib.RunCommandError) as err:
-      logging.error('Failed to get requestlog from nebraska. ignoring: %s',
                     str(err))
 
   def CheckNebraskaCanRun(self):

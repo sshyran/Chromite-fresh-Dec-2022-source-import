@@ -1,19 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Script to generate a DLC (Downloadable Content) artifact."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.lib import dlc_lib
 from chromite.lib import commandline
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():
@@ -94,6 +87,12 @@ def GetParser():
       'dlcservice does ref counting when DLC is installed/uninstalled. For '
       '"system", there will be no such provisions.')
   one_dlc.add_argument(
+      '--days-to-purge',
+      type=int,
+      default=0,
+      help='Defines the number of days before purging a DLC after it has '
+      'been uninstalled.')
+  one_dlc.add_argument(
       '--mount-file-required',
       default=False,
       action='store_true',
@@ -145,12 +144,13 @@ def main(argv):
   per_dlc_invalid_args = []
   if opts.build_package:
     per_dlc_req_args += ['pre_allocated_blocks', 'version', 'name',
-                         'description', 'package', 'install_root_dir']
+                         'description', 'package', 'install_root_dir',
+                         'days_to_purge']
     per_dlc_invalid_args += ['src_dir', 'sysroot']
   else:
     per_dlc_req_args += ['sysroot', 'board']
     per_dlc_invalid_args += ['name', 'pre_allocated_blocks', 'version',
-                             'package']
+                             'package', 'days_to_purge']
 
   ValidateArguments(parser, opts, per_dlc_req_args, per_dlc_invalid_args)
 
@@ -167,6 +167,7 @@ def main(argv):
         preload=opts.preload,
         mount_file_required=opts.mount_file_required,
         used_by=opts.used_by,
+        days_to_purge=opts.days_to_purge,
         fullnamerev=opts.fullnamerev)
     params.StoreDlcParameters(install_root_dir=opts.install_root_dir, sudo=True)
 

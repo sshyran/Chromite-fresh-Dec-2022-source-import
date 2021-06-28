@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """This module tests the cros debug command."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_debug
@@ -18,18 +13,12 @@ from chromite.lib import remote_access
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class MockDebugCommand(command_unittest.MockCommand):
   """Mock out the debug command."""
   TARGET = 'chromite.cli.cros.cros_debug.DebugCommand'
   TARGET_CLASS = cros_debug.DebugCommand
   COMMAND = 'debug'
   ATTRS = ('_ListProcesses', '_DebugNewProcess', '_DebugRunningProcess')
-
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
 
   def _ListProcesses(self, _inst, *_args, **_kwargs):
     """Mock out _ListProcesses."""
@@ -39,9 +28,6 @@ class MockDebugCommand(command_unittest.MockCommand):
 
   def _DebugRunningProcess(self, _inst, *_args, **_kwargs):
     """Mock out _DebugRunningProcess."""
-
-  def Run(self, inst):
-    command_unittest.MockCommand.Run(self, inst)
 
 
 class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):

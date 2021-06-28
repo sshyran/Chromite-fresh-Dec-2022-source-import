@@ -1,21 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """The Package Size Reporting CLI entry point."""
 
-from __future__ import print_function
-
 import json
-import sys
 
 from chromite.lib import commandline
 from chromite.lib import portage_util
 from chromite.utils import metrics
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _get_parser():

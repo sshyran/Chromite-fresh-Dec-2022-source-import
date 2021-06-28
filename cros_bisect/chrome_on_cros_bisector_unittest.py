@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test chrome_on_cros_bisector module."""
 
-from __future__ import print_function
-
 import copy
 import itertools
 import os
-
-import mock
+from unittest import mock
 
 from chromite.cli import flash
-from chromite.cros_bisect import common
 from chromite.cros_bisect import builder as builder_module
-from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import chrome_on_cros_bisector
+from chromite.cros_bisect import common
+from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import git_bisector_unittest
 from chromite.lib import commandline
 from chromite.lib import cros_test_lib

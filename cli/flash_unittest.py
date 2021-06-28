@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for the flash module."""
 
-from __future__ import print_function
-
 import os
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.cli import flash
-from chromite.lib import auto_updater_transfer
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -21,151 +15,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from chromite.lib import remote_access
-from chromite.lib import remote_access_unittest
-
-from chromite.lib.paygen import paygen_payload_lib
-from chromite.lib.paygen import paygen_stateful_payload_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
-class RemoteDeviceUpdaterMock(partial_mock.PartialCmdMock):
-  """Mock out RemoteDeviceUpdater."""
-  TARGET = 'chromite.lib.auto_updater.ChromiumOSUpdater'
-  ATTRS = ('UpdateStateful', 'UpdateRootfs', 'SetupRootfsUpdate',
-           'RebootAndVerify')
-
-  def __init__(self):
-    partial_mock.PartialCmdMock.__init__(self)
-
-  def UpdateStateful(self, _inst, *_args, **_kwargs):
-    """Mock out UpdateStateful."""
-
-  def UpdateRootfs(self, _inst, *_args, **_kwargs):
-    """Mock out UpdateRootfs."""
-
-  def SetupRootfsUpdate(self, _inst, *_args, **_kwargs):
-    """Mock out SetupRootfsUpdate."""
-
-  def RebootAndVerify(self, _inst, *_args, **_kwargs):
-    """Mock out RebootAndVerify."""
-
-
-class RemoteAccessMock(remote_access_unittest.RemoteShMock):
-  """Mock out RemoteAccess."""
-
-  ATTRS = ('RemoteSh', 'Rsync', 'Scp')
-
-  def Rsync(self, *_args, **_kwargs):
-    return cros_build_lib.CommandResult(returncode=0)
-
-  def Scp(self, *_args, **_kwargs):
-    return cros_build_lib.CommandResult(returncode=0)
-
-
-class RemoteDeviceUpdaterTest(cros_test_lib.MockTempDirTestCase):
-  """Test the flow of flash.Flash() with RemoteDeviceUpdater."""
-
-  IMAGE = '/path/to/image'
-  DEVICE = commandline.Device(scheme=commandline.DEVICE_SCHEME_SSH,
-                              hostname=remote_access.TEST_IP)
-
-  def setUp(self):
-    """Patches objects."""
-    self.updater_mock = self.StartPatcher(RemoteDeviceUpdaterMock())
-    self.PatchObject(dev_server_wrapper, 'GetImagePathWithXbuddy',
-                     return_value=('taco-paladin/R36/chromiumos_test_image.bin',
-                                   'remote/taco-paladin/R36/test'))
-    self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
-    self.PatchObject(paygen_stateful_payload_lib, 'GenerateStatefulPayload')
-    self.PatchObject(remote_access, 'CHECK_INTERVAL', new=0)
-    self.PatchObject(remote_access.ChromiumOSDevice, 'Pingable',
-                     return_value=True)
-    m = self.StartPatcher(RemoteAccessMock())
-    m.AddCmdResult(['cat', '/etc/lsb-release'],
-                   stdout='CHROMEOS_RELEASE_BOARD=board')
-    m.SetDefaultCmdResult()
-
-  def _ExistsMock(self, path, ret=True):
-    """Mock function for os.path.exists.
-
-    os.path.exists is used a lot; we only want to mock it for devserver/static,
-    and actually check if the file exists in all other cases (using os.access).
-
-    Args:
-      path: path to check.
-      ret: return value of mock.
-
-    Returns:
-      ret for paths under devserver/static, and the expected value of
-      os.path.exists otherwise.
-    """
-    if path.startswith(dev_server_wrapper.DEFAULT_STATIC_DIR):
-      return ret
-    return os.access(path, os.F_OK)
-
-  def testUpdateAll(self):
-    """Tests that update methods are called correctly."""
-    with mock.patch('os.path.exists', side_effect=self._ExistsMock):
-      flash.Flash(self.DEVICE, self.IMAGE)
-      self.assertTrue(self.updater_mock.patched['UpdateStateful'].called)
-      self.assertTrue(self.updater_mock.patched['UpdateRootfs'].called)
-
-  def testUpdateStateful(self):
-    """Tests that update methods are called correctly."""
-    with mock.patch('os.path.exists', side_effect=self._ExistsMock):
-      flash.Flash(self.DEVICE, self.IMAGE, rootfs_update=False)
-      self.assertTrue(self.updater_mock.patched['UpdateStateful'].called)
-      self.assertFalse(self.updater_mock.patched['UpdateRootfs'].called)
-
-  def testUpdateRootfs(self):
-    """Tests that update methods are called correctly."""
-    with mock.patch('os.path.exists', side_effect=self._ExistsMock):
-      flash.Flash(self.DEVICE, self.IMAGE, stateful_update=False)
-      self.assertFalse(self.updater_mock.patched['UpdateStateful'].called)
-      self.assertTrue(self.updater_mock.patched['UpdateRootfs'].called)
-
-  def testMissingPayloads(self):
-    """Tests we raise FlashError when payloads are missing."""
-    with mock.patch('os.path.exists',
-                    side_effect=lambda p: self._ExistsMock(p, ret=False)):
-      self.assertRaises(auto_updater_transfer.ChromiumOSTransferError,
-                        flash.Flash, self.DEVICE, self.IMAGE)
-
-  def testFullPayload(self):
-    """Tests that we download full_payload and stateful using xBuddy."""
-    with mock.patch.object(
-        dev_server_wrapper,
-        'GetImagePathWithXbuddy',
-        return_value=('translated/xbuddy/path',
-                      'resolved/xbuddy/path')) as mock_xbuddy:
-      with mock.patch('os.path.exists', side_effect=self._ExistsMock):
-        flash.Flash(self.DEVICE, self.IMAGE)
-
-      # Call to download full_payload and stateful. No other calls.
-      mock_xbuddy.assert_has_calls(
-          [mock.call('/path/to/image/full_payload', 'board', None, silent=True),
-           mock.call('/path/to/image/stateful', 'board', None, silent=True)])
-      self.assertEqual(mock_xbuddy.call_count, 2)
-
-  def testTestImage(self):
-    """Tests that we download the test image when the full payload fails."""
-    with mock.patch.object(
-        dev_server_wrapper,
-        'GetImagePathWithXbuddy',
-        side_effect=(dev_server_wrapper.ImagePathError,
-                     ('translated/xbuddy/path',
-                      'resolved/xbuddy/path'))) as mock_xbuddy:
-      with mock.patch('os.path.exists', side_effect=self._ExistsMock):
-        flash.Flash(self.DEVICE, self.IMAGE)
-
-      # Call to download full_payload and image. No other calls.
-      mock_xbuddy.assert_has_calls(
-          [mock.call('/path/to/image/full_payload', 'board', None, silent=True),
-           mock.call('/path/to/image', 'board', None)])
-      self.assertEqual(mock_xbuddy.call_count, 2)
 
 
 class USBImagerMock(partial_mock.PartialCmdMock):

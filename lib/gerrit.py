@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing helper class and methods for interacting with Gerrit."""
 
-from __future__ import print_function
-
 import operator
+import re
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -17,6 +15,7 @@ from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import parallel
 from chromite.lib import patch as cros_patch
+from chromite.lib import retry_util
 
 
 class GerritException(Exception):
@@ -80,19 +79,6 @@ class GerritHelper(object):
     # We should get rid of remotes altogether and just use the host.
     return cls(host, site_params.GOB_REMOTES.get(gob, gob), **kwargs)
 
-  def SetAssignee(self, change, assignee, dryrun=False):
-    """Set assignee on a gerrit change.
-
-    Args:
-      change: ChangeId or change number for a gerrit review.
-      assignee: email address of reviewer to add.
-      dryrun: If True, only print what would have been done.
-    """
-    if dryrun:
-      logging.info('Would have added %s to "%s"', assignee, change)
-    else:
-      gob_util.AddAssignee(self.host, change, assignee)
-
   def SetPrivate(self, change, private, dryrun=False):
     """Sets the private bit on the given CL.
 
@@ -132,6 +118,26 @@ class GerritHelper(object):
         logging.info('Would have removed %s to "%s"', remove, change)
       else:
         gob_util.RemoveReviewers(self.host, change, remove, notify=notify)
+
+  def SetWorkInProgress(self, change, wip, msg='', dryrun=False):
+    """Sets the work in progress bit on the given CL.
+
+    Args:
+      change: CL number.
+      wip: bool to indicate what value to set for the work in progress bit.
+      msg: Message to post to the CL.
+      dryrun: If True, only print what would have been done.
+    """
+    if wip:
+      if dryrun:
+        logging.info('Would have made "%s" work in progress', change)
+      else:
+        gob_util.MarkWorkInProgress(self.host, change, msg)
+    else:
+      if dryrun:
+        logging.info('Would have made "%s" ready for review', change)
+      else:
+        gob_util.MarkReadyForReview(self.host, change, msg)
 
   def GetChangeDetail(self, change_num, verbose=False):
     """Return detailed information about a gerrit change.
@@ -375,19 +381,21 @@ class GerritHelper(object):
 
     return change
 
-  def SetReview(self, change, msg=None, labels=None,
-                dryrun=False, notify='ALL'):
+  def SetReview(self, change, msg=None, labels=None, notify='ALL',
+                reviewers=None, cc=None, ready=None, wip=None, dryrun=False):
     """Update the review labels on a gerrit change.
 
     Args:
       change: A gerrit change number.
       msg: A text comment to post to the review.
       labels: A dict of label/value to set on the review.
-      dryrun: If True, don't actually update the review.
       notify: A string, parameter controlling gerrit's email generation.
+      reviewers: List of people to add as reviewers.
+      cc: List of people to add to CC.
+      ready: Mark CL as ready.
+      wip: Mark CL as work-in-progress.
+      dryrun: If True, don't actually update the review.
     """
-    if not msg and not labels:
-      return
     if dryrun:
       if msg:
         logging.info('Would have added message "%s" to change "%s".', msg,
@@ -396,9 +404,18 @@ class GerritHelper(object):
         for key, val in labels.items():
           logging.info('Would have set label "%s" to "%s" for change "%s".',
                        key, val, change)
+      if reviewers:
+        logging.info('Would have add %s as reviewers', reviewers)
+      if cc:
+        logging.info('Would have add %s to CC', cc)
+      if ready:
+        logging.info('Would mark it as ready')
+      elif wip:
+        logging.info('Would mark it as WIP')
       return
-    gob_util.SetReview(self.host, self._to_changenum(change),
-                       msg=msg, labels=labels, notify=notify)
+    gob_util.SetReview(self.host, self._to_changenum(change), msg=msg,
+                       labels=labels, notify=notify, reviewers=reviewers, cc=cc,
+                       ready=ready, wip=wip)
 
   def SetTopic(self, change, topic, dryrun=False):
     """Update the topic on a gerrit change.
@@ -437,7 +454,7 @@ class GerritHelper(object):
     gob_util.ResetReviewLabels(self.host, self._to_changenum(change),
                                label='Commit-Queue', notify='OWNER')
 
-  def SubmitChange(self, change, dryrun=False):
+  def SubmitChange(self, change, dryrun=False, notify=None):
     """Land (merge) a gerrit change using the JSON API."""
     if dryrun:
       logging.info('Would have submitted change %s', change)
@@ -446,7 +463,8 @@ class GerritHelper(object):
       rev = change.sha1
     else:
       rev = None
-    gob_util.SubmitChange(self.host, self._to_changenum(change), revision=rev)
+    gob_util.SubmitChange(self.host, self._to_changenum(change), revision=rev,
+                          notify=notify)
 
   def ReviewedChange(self, change, dryrun=False):
     """Mark a gerrit change as reviewed."""
@@ -476,12 +494,13 @@ class GerritHelper(object):
       return
     gob_util.UnignoreChange(self.host, self._to_changenum(change))
 
-  def AbandonChange(self, change, msg='', dryrun=False):
+  def AbandonChange(self, change, msg='', dryrun=False, notify=None):
     """Mark a gerrit change as 'Abandoned'."""
     if dryrun:
       logging.info('Would have abandoned change %s', change)
       return
-    gob_util.AbandonChange(self.host, self._to_changenum(change), msg=msg)
+    gob_util.AbandonChange(self.host, self._to_changenum(change), msg=msg,
+                           notify=notify)
 
   def RestoreChange(self, change, dryrun=False):
     """Re-activate a previously abandoned gerrit change."""
@@ -497,9 +516,70 @@ class GerritHelper(object):
       return
     gob_util.DeleteDraft(self.host, self._to_changenum(change))
 
-  def GetAccount(self):
+  def CherryPick(self, change, branch, rev='current', msg='', dryrun=False,
+                 notify=None):
+    """Cherry pick a CL to a branch.
+
+    Args:
+      change: A gerrit change number.
+      branch: The destination branch.
+      rev: The specific revision to cherry pick back.
+      msg: An additional message to include.
+      dryrun: If True, don't actually set the hashtag.
+      notify: Who to send notifications to.
+    """
+    if dryrun:
+      logging.info('Would cherry-pick change %s (revision %s) to branch %s',
+                   change, rev, branch)
+      return
+    return gob_util.CherryPick(self.host, self._to_changenum(change), branch,
+                               rev=rev, msg=msg, notify=notify)
+
+  def GetAccount(self, account='self'):
     """Get information about the user account."""
-    return gob_util.GetAccount(self.host)
+    return gob_util.GetAccount(self.host, account=account)
+
+  def _get_changenumber_from_stdout(self, stdout):
+    """Retrieve the change number written in the URL of the git stdout."""
+    match = re.search(r'^remote:\s+[^\s]+/\+/(?P<changenum>[0-9]+)',
+                      stdout,flags=re.MULTILINE)
+    if match:
+      return match['changenum']
+    return None
+
+  def CreateGerritPatch(self, cwd, remote, ref, dryrun=False, **kwargs):
+    """Upload a change and retrieve a GerritPatch describing it.
+
+    Args:
+      cwd: The repository that we are working on.
+      remote: The remote to upload changes to.
+      ref: The ref where changes will be uploaded to.
+      dryrun: If True, then return None.
+      **kwargs: Keyword arguments to be passed to QuerySingleRecord.
+
+    Returns:
+      A GerritPatch object describing the change for the HEAD commit.
+    """
+    # If dryrun is true then skip all network calls and return None.
+    if dryrun:
+      logging.info('Would have returned a GerritPatch object describing the'
+                   'local changes.')
+      return None
+
+    # Upload the local changes to remote.
+    ret = git.RunGit(cwd, ['push', remote, f'HEAD:refs/for/{ref}'])
+    change_number = self._get_changenumber_from_stdout(ret.stdout)
+
+    # If we fail to grab a change number from the stdout then fall back to the
+    # ChangeID.
+    change_number = change_number or git.GetChangeId(cwd)
+
+    def PatchQuery():
+      """Retrieve the GerritPatch describing the change."""
+      return self.QuerySingleRecord(change=change_number, **kwargs)
+
+    return retry_util.RetryException(QueryHasNoResults, 5, PatchQuery,
+                                     sleep=1)
 
 
 def GetGerritPatchInfo(patches):

@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 # This file is heavily based off of LUCI encoding.py.
 
-from __future__ import print_function
-
-from google.protobuf import json_format, text_format
+from chromite.third_party.google.protobuf import json_format, text_format
 
 
 class Encoding(object):

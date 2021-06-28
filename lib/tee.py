@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module that handles tee-ing output to a file."""
-
-from __future__ import print_function
 
 import errno
 import fcntl
@@ -19,6 +16,7 @@ import warnings
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+
 
 warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 

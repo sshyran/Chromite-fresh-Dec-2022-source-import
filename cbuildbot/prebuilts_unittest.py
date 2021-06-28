@@ -1,26 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for prebuilts."""
 
-from __future__ import print_function
-
 import os
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_unittest
-from chromite.lib import constants
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages_unittest
+from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 DEFAULT_CHROME_BRANCH = '27'
 

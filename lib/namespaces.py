@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Support for Linux namespaces"""
-
-from __future__ import print_function
 
 import ctypes
 import ctypes.util
@@ -19,15 +16,11 @@ import signal
 import subprocess
 import sys
 
-import six
-
+from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import process_util
 from chromite.lib import proctitle
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 CLONE_FS = 0x00000200
@@ -52,7 +45,7 @@ def SetNS(fd, nstype):
   """
   try:
     fp = None
-    if isinstance(fd, six.string_types):
+    if isinstance(fd, str):
       fp = open(fd)
       fd = fp.fileno()
 
@@ -89,21 +82,20 @@ def _ReapChildren(pid):
   Returns:
     The wait status of the |pid| child.
   """
-  pid_status = 0
 
   while True:
     try:
       (wpid, status) = os.wait()
       if pid == wpid:
-        # Save the status of our main child so we can exit with it below.
-        pid_status = status
+        return status
     except OSError as e:
       if e.errno == errno.ECHILD:
-        break
+        raise ValueError(
+            'All children of the current processes have been reaped, but %u '
+            'was not one of them. This means that %u is not a child of the '
+            'current processes.' % (pid))
       elif e.errno != errno.EINTR:
         raise
-
-  return pid_status
 
 
 def _SafeTcSetPgrp(fd, pgrp):
@@ -125,7 +117,14 @@ def _SafeTcSetPgrp(fd, pgrp):
 def _ForwardToChildPid(pid, signal_to_forward):
   """Setup a signal handler that forwards the given signal to the given pid."""
   def _ForwardingHandler(signum, _frame):
-    os.kill(pid, signum)
+    try:
+      os.kill(pid, signum)
+    except ProcessLookupError:
+      # The target PID might have already exited, and thus we get a
+      # ProcessLookupError when trying to send it a signal.
+      logging.debug(
+        "Can't forward signal %u to pid %u as it doesn't exist", signum, pid)
+
   signal.signal(signal_to_forward, _ForwardingHandler)
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,8 +17,6 @@ This class is mainly designed for:
 This file also offers external functions that are related to add/check/delete
 the progress of the CrOS auto-update process.
 """
-
-from __future__ import print_function
 
 import datetime
 import glob

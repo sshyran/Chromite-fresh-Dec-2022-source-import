@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the remote_access module."""
 
-from __future__ import print_function
-
+import collections
 import os
 
 from chromite.lib import cros_build_lib
@@ -99,8 +97,10 @@ class CreateTunnelPopenMock(partial_mock.PartialCmdMock):
   ATTRS = ('_mockable_popen',)
   DEFAULT_ATTR = '_mockable_popen'
 
-  def _mockable_popen(self, inst, *args, **kwargs):
-    return inst, args, kwargs
+  PopenFake = collections.namedtuple('PopenFake', ('args',))
+
+  def _mockable_popen(self, inst, *_args, **_kwargs):
+    return self.PopenFake(inst)
 
 
 class RemoteShMock(partial_mock.PartialCmdMock):
@@ -149,9 +149,9 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
 
   def testDefault(self):
     """Test default behavior."""
-    plain_result = self.host.CreateTunnel()[0]
-    self.assertRaises(ValueError, plain_result.index, '-R')
-    self.assertRaises(ValueError, plain_result.index, '-L')
+    plain_result = self.host.CreateTunnel().args
+    self.assertNotIn('-R', plain_result)
+    self.assertNotIn('-L', plain_result)
 
   def testLocal(self):
     """Test behavior of to_local parameter."""
@@ -162,7 +162,7 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
                                        remote_host='', remote_port=12345),
          '12345:foo:3240',),
         ):
-      result = self.host.CreateTunnel(to_local=[spec])[0]
+      result = self.host.CreateTunnel(to_local=[spec]).args
       self.assertEqual(result[result.index('-L') + 1], expected_output)
 
   def testRemote(self):
@@ -174,7 +174,7 @@ class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
                                        remote_host='', remote_port=12345),
          '12345:foo:3240',),
         ):
-      result = self.host.CreateTunnel(to_remote=[spec])[0]
+      result = self.host.CreateTunnel(to_remote=[spec]).args
       self.assertEqual(result[result.index('-R') + 1], expected_output)
 
   def testInvalid(self):
@@ -384,13 +384,13 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.rsh_mock.call_count, 2)
 
-  def testSELinux(self):
-    """Tests behavior of IsSELinuxAvailable() and IsSELinuxEnforced()."""
+  def testSELinuxAvailable(self):
+    """Test IsSELinuxAvailable() and IsSELinuxEnforced() when available."""
     self.rsh_mock.AddCmdResult(
         partial_mock.ListRegex('which restorecon'), returncode=0)
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('test -f'), returncode=0)
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
-      self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=0)
       self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
           returncode=0, output='1')
@@ -398,17 +398,45 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
       self.assertEqual(device.IsSELinuxEnforced(), True)
 
       self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=0)
-      self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
           returncode=0, output='0')
       self.assertEqual(device.IsSELinuxAvailable(), True)
       self.assertEqual(device.IsSELinuxEnforced(), False)
 
-      self.rsh_mock.AddCmdResult(
-          partial_mock.ListRegex('test -f'), returncode=1)
+  def testSELinuxUnavailable(self):
+    """Test IsSELinuxAvailable() and IsSELinuxEnforced() when unavailable."""
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('which restorecon'), returncode=0)
+    self.rsh_mock.AddCmdResult(
+        partial_mock.ListRegex('test -f'), returncode=1)
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.assertEqual(device.IsSELinuxAvailable(), False)
       self.assertEqual(device.IsSELinuxEnforced(), False)
+
+  def testGetDecompressor(self):
+    """Test correct decompressor is returned."""
+    self.rsh_mock.AddCmdResult(partial_mock.In('xz'), returncode=0)
+    self.rsh_mock.AddCmdResult(partial_mock.In('bzip2'), returncode=0)
+    self.rsh_mock.AddCmdResult(partial_mock.In('gzip'), returncode=0)
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
+      self.assertEqual(['xz', '--decompress', '--stdout'],
+                       device.GetDecompressor(cros_build_lib.COMP_XZ))
+      self.assertEqual(['bzip2', '--decompress', '--stdout'],
+                       device.GetDecompressor(cros_build_lib.COMP_BZIP2))
+      self.assertEqual(['gzip', '--decompress', '--stdout'],
+                       device.GetDecompressor(cros_build_lib.COMP_GZIP))
+      self.assertEqual(['cat'],
+                       device.GetDecompressor(cros_build_lib.COMP_NONE))
+
+      with self.assertRaises(ValueError):
+        device.GetDecompressor('foo')
+
+  def testGetDecompressorFails(self):
+    """Tests decompressor program not found."""
+    self.rsh_mock.AddCmdResult(partial_mock.In('xz'), returncode=1)
+    with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
+      with self.assertRaises(remote_access.ProgramNotFoundError):
+        device.GetDecompressor(cros_build_lib.COMP_XZ)
 
 
 class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
@@ -417,17 +445,16 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
   def setUp(self):
     self.rsh_mock = self.StartPatcher(RemoteShMock())
     self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), output='')
+    self.path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
 
   def testRun(self):
     """Tests simple run() usage."""
-    path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
-
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       # RemoteSh accepts cmd as either string or list, so try both.
-      self.rsh_mock.AddCmdResult([path_env, 'echo', 'foo'], stdout='foo')
+      self.rsh_mock.AddCmdResult([self.path_env, 'echo', 'foo'], stdout='foo')
       self.assertEqual('foo', device.run(['echo', 'foo']).stdout)
 
-      self.rsh_mock.AddCmdResult(path_env + ' echo foo', stdout='foo')
+      self.rsh_mock.AddCmdResult(self.path_env + ' echo foo', stdout='foo')
       self.assertEqual('foo', device.run('echo foo', shell=True).stdout)
 
       # Run the same commands, but make sure PATH isn't modified when fix_path
@@ -438,6 +465,20 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
 
       self.rsh_mock.AddCmdResult('echo foo', stdout='foo')
       self.assertEqual('foo', device.run('echo foo', shell=True).stdout)
+
+  def test_root_dev(self):
+    """Tests getting the path to the current root device."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult([self.path_env, 'rootdev', '-s'],
+                                 stdout='/dev/foop5')
+      self.assertEqual(device.root_dev, '/dev/foop5')
+
+  def testClearTpmOwner(self):
+    """Test clearing the TPM owner."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      self.rsh_mock.AddCmdResult(
+        [self.path_env, 'crossystem', 'clear_tpm_owner_request=1'])
+      device.ClearTpmOwner()
 
 
 class ScpTest(cros_test_lib.MockTempDirTestCase):

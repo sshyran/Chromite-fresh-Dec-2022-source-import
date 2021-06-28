@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -12,16 +11,11 @@ This library is reponsible for locking builds during processing, and checking
 and setting flags to show that a build has been processed.
 """
 
-from __future__ import print_function
-
 import functools
 import json
 import operator
 import os
-import sys
-
-from google.protobuf import json_format
-from six.moves import urllib
+import urllib.parse
 
 from chromite.api.gen.chromite.api import test_metadata_pb2
 from chromite.api.gen.test_platform import request_pb2
@@ -40,9 +34,7 @@ from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import test_control
 from chromite.lib.paygen import test_params
 from chromite.lib.paygen import utils
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.third_party.google.protobuf import json_format
 
 
 # The oldest release milestone for which run_suite should be attempted.

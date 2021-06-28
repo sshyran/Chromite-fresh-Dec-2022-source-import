@@ -1,19 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for lkgm_manager"""
 
-from __future__ import print_function
-
 import contextlib
 import os
-import sys
 import tempfile
+from unittest import mock
 from xml.dom import minidom
-
-import mock
 
 from chromite.cbuildbot import lkgm_manager
 from chromite.cbuildbot import manifest_version
@@ -26,9 +21,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib.buildstore import FakeBuildStore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 FAKE_VERSION_STRING = '1.2.4-rc3'

@@ -1,20 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for workspace stages."""
 
-from __future__ import print_function
-
 import os
 import shutil
+from unittest import mock
 
-import mock
-
-from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
+from chromite.cbuildbot.builders import workspace_builders_unittest
 from chromite.cbuildbot.stages import branch_archive_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import workspace_stages_unittest
@@ -23,6 +19,7 @@ from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import portage_util
+
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access

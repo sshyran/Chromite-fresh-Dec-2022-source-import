@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -18,19 +17,12 @@ Then pylint will import the register function and call it.  So we can have
 as many/few checkers as we want in this one module.
 """
 
-from __future__ import print_function
-
 import collections
+import itertools
 import tokenize
 import os
 import re
 import sys
-
-try:
-  import pytest  # pylint: disable=import-error
-  pytest.importorskip('pylint')
-except ImportError:
-  pass
 
 import pylint.checkers
 from pylint.config import ConfigurationMixIn
@@ -515,7 +507,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
 
   def _check_all_args_in_doc(self, node, _lines, sections):
     """All function arguments are mentioned in doc"""
-    if not hasattr(node, 'argnames'):
+    if not hasattr(node, 'args'):
       return
 
     # If they don't have an Args section, then give it a pass.
@@ -527,7 +519,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
     # TODO: Should we verify arg order matches doc order ?
     # TODO: Should we check indentation of wrapped docs ?
     missing_args = []
-    for arg in node.args.args:
+    for arg in itertools.chain(node.args.args, node.args.kwonlyargs):
       # Ignore class related args.
       if arg.name in ('cls', 'self'):
         continue
@@ -631,6 +623,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
   class _MessageR9203(object): pass
   class _MessageR9204(object): pass
   class _MessageR9205(object): pass
+  class _MessageR9206(object): pass
   # pylint: enable=class-missing-docstring,multiple-statements
 
   name = 'source_checker'
@@ -651,6 +644,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
                 ('missing-file-encoding'), _MessageR9204),
       'R9205': ('File encoding should be "utf-8"',
                 ('bad-file-encoding'), _MessageR9205),
+      'R9206': ('Use parens for long line wrapping, not backslashes',
+                ('parens-not-backslashes'), _MessageR9206),
   }
   options = ()
 
@@ -664,6 +659,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
       self._check_shebang(node, stream, st)
       self._check_encoding(node, stream, st)
       self._check_module_name(node)
+      self._check_backslashes(node, stream)
 
   def _check_shebang(self, _node, stream, st):
     """Verify the shebang is version specific"""
@@ -681,8 +677,11 @@ class SourceChecker(pylint.checkers.BaseChecker):
       self.add_message('R9202')
 
     if shebang.strip() not in (
-        b'#!/usr/bin/env python2', b'#!/usr/bin/env python3',
-        b'#!/usr/bin/env python'):
+        b'#!/usr/bin/env python2',
+        b'#!/usr/bin/env python3',
+        b'#!/usr/bin/env python',
+        b'#!/usr/bin/env vpython',
+        b'#!/usr/bin/env vpython3'):
       self.add_message('R9200')
 
   def _check_encoding(self, _node, stream, st):
@@ -718,6 +717,17 @@ class SourceChecker(pylint.checkers.BaseChecker):
     name = node.name.rsplit('.', 2)[-1]
     if name.rsplit('_', 2)[-1] in ('unittests',):
       self.add_message('R9203')
+
+  def _check_backslashes(self, _node, stream):
+    """Make sure we use () for line continuations, not backslashes"""
+    stream.seek(0)
+    # This is a rough heuristic by nature: try and flag common uses, but not
+    # all \ usage as there are a few that are legitimate.
+    matcher = re.compile(br'^\s*([^#]*(and|or|=| [-%+|*/])|assert.*) *\\\n$')
+    for lineno, line in enumerate(stream, start=1):
+      if matcher.search(line):
+        s = line.decode('utf8')
+        self.add_message('R9206', line=lineno, col_offset=len(s) - 1)
 
 
 class CommentChecker(pylint.checkers.BaseTokenChecker):
@@ -757,36 +767,6 @@ class CommentChecker(pylint.checkers.BaseTokenChecker):
     for (tok_type, token, (start_row, _), _, _) in tokens:
       if tok_type == tokenize.COMMENT:
         self._visit_comment(start_row, token)
-
-
-class ChromiteLoggingChecker(pylint.checkers.BaseChecker):
-  """Make sure we enforce rules on importing logging."""
-
-  __implements__ = pylint.interfaces.IAstroidChecker
-
-  # pylint: disable=class-missing-docstring,multiple-statements
-  class _MessageR9301(object): pass
-  # pylint: enable=class-missing-docstring,multiple-statements
-
-  name = 'chromite_logging_checker'
-  priority = -1
-  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
-  msgs = {
-      'R9301': ('logging is deprecated. Use "from chromite.lib import '
-                'cros_logging as logging" to import chromite/lib/cros_logging',
-                ('cros-logging-import'), _MessageR9301),
-  }
-  options = ()
-  # This checker is disabled by default because we only want to disallow "import
-  # logging" in chromite and not in other places cros lint is used. To enable
-  # this checker, modify the pylintrc file.
-  enabled = False
-
-  def visit_import(self, node):
-    """Called when node is an import statement."""
-    for name, _ in node.names:
-      if name == 'logging':
-        self.add_message('R9301', line=node.lineno)
 
 
 def register(linter):

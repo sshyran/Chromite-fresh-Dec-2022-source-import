@@ -1,26 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module for tracking and querying build status."""
 
-from __future__ import print_function
-
 import collections
 import datetime
-import sys
 
-from chromite.lib import buildbucket_lib
+from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
-from chromite.lib import build_requests
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
+BUILD_START_TIMEOUT_MIN = 60
 
 # TODO(nxia): Rename this module to slave_status, since this module is for
 # a master build which has slave builds and there is builder_status_lib for
@@ -32,9 +26,6 @@ class SlaveStatus(object):
   interpret slave statuses by querying CIDB and Buildbucket; otherwise,
   it will only interpret slave statuses by querying CIDB.
   """
-
-  BUILD_START_TIMEOUT_MIN = 30
-
   ACCEPTED_STATUSES = (constants.BUILDER_STATUS_PASSED,
                        constants.BUILDER_STATUS_SKIPPED,)
 
@@ -51,7 +42,7 @@ class SlaveStatus(object):
       config: Instance of config_lib.BuildConfig. Config dict of this build.
       metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
                 build.
-      buildbucket_client: Instance of buildbucket_lib.buildbucket_client.
+      buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
       version: Current manifest version string. See the return type of
                VersionInfo.VersionString().
       dry_run: Boolean indicating whether it's a dry run. Default to True.
@@ -77,7 +68,6 @@ class SlaveStatus(object):
     self.all_cidb_status_dict = None
     self.missing_builds = None
     self.scheduled_builds = None
-    self.builds_to_retry = None
     # Dict mapping config names of slaves not in self.completed_builds to
     # their new BuildbucketInfo. Everytime UpdateSlaveStatus is called,
     # new (current) status will be pulled from Buildbucket.
@@ -142,7 +132,7 @@ class SlaveStatus(object):
     logging.info('Updating slave status...')
 
     if self.config and self.metadata:
-      scheduled_buildbucket_info_dict = buildbucket_lib.GetBuildInfoDict(
+      scheduled_buildbucket_info_dict = buildbucket_v2.GetBuildInfoDict(
           self.metadata)
       # It's possible that CQ-master has a list of important slaves configured
       # but doesn't schedule any slaves as no CLs were picked up in SyncStage.
@@ -150,8 +140,7 @@ class SlaveStatus(object):
       self.all_builders = list(scheduled_buildbucket_info_dict)
       self.all_buildbucket_info_dict = (
           builder_status_lib.SlaveBuilderStatus.GetAllSlaveBuildbucketInfo(
-              self.buildbucket_client, scheduled_buildbucket_info_dict,
-              dry_run=self.dry_run))
+              self.buildbucket_client, scheduled_buildbucket_info_dict))
       self.new_buildbucket_info_dict = self._GetNewSlaveBuildbucketInfo(
           self.all_buildbucket_info_dict, self.completed_builds)
       self._SetStatusBuildsDict()
@@ -165,7 +154,6 @@ class SlaveStatus(object):
 
     self.missing_builds = self._GetMissingBuilds()
     self.scheduled_builds = self._GetScheduledBuilds()
-    self.builds_to_retry = self._GetBuildsToRetry()
     self.completed_builds = self._GetCompletedBuilds()
 
 
@@ -236,47 +224,6 @@ class SlaveStatus(object):
     else:
       return None
 
-  def _GetRetriableBuilds(self, completed_builds):
-    """Get retriable builds from completed builds.
-
-    Args:
-      completed_builds: a set of builds with 'COMPLETED' status in Buildbucket.
-
-    Returns:
-      A set of config names of retriable builds.
-    """
-    builds_to_retry = set()
-
-    for build in completed_builds:
-      build_result = self.new_buildbucket_info_dict[build].result
-      if build_result == constants.BUILDBUCKET_BUILDER_RESULT_SUCCESS:
-        logging.info('Not retriable build %s completed with result %s.',
-                     build, build_result)
-        continue
-
-      build_retry = self.new_buildbucket_info_dict[build].retry
-      if build_retry >= constants.BUILDBUCKET_BUILD_RETRY_LIMIT:
-        logging.info('Not retriable build %s reached the build retry limit %d.',
-                     build, constants.BUILDBUCKET_BUILD_RETRY_LIMIT)
-        continue
-
-      builds_to_retry.add(build)
-
-    return builds_to_retry
-
-  def _GetBuildsToRetry(self):
-    """Get the config names of the builds to retry.
-
-    Returns:
-      A set config names of builds to be retried.
-    """
-    if self.new_buildbucket_info_dict is not None:
-      return self._GetRetriableBuilds(
-          self.GetBuildbucketBuilds(
-              constants.BUILDBUCKET_BUILDER_STATUS_COMPLETED))
-    else:
-      return None
-
   def _GetCompletedBuilds(self):
     """Returns the builds that have completed and will not be retried.
 
@@ -290,13 +237,10 @@ class SlaveStatus(object):
         b in self._GetExpectedBuilders())
 
     if self.new_buildbucket_info_dict is not None:
-      assert self.builds_to_retry is not None
-
       # current completed builds (not in self.completed_builds) from Buildbucket
       current_completed_buildbucket = self.GetBuildbucketBuilds(
-          constants.BUILDBUCKET_BUILDER_STATUS_COMPLETED)
-      current_completed = ((current_completed | current_completed_buildbucket) -
-                           self.builds_to_retry)
+          constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS)
+      current_completed = ((current_completed | current_completed_buildbucket))
 
     for build in current_completed:
       cidb_status = (self.new_cidb_status_dict[build].status if
@@ -304,9 +248,8 @@ class SlaveStatus(object):
       status_output = ('Build config %s completed: CIDB status: %s.' %
                        (build, cidb_status))
       if self.new_buildbucket_info_dict is not None:
-        status_output += (' Buildbucket status %s result %s.' %
-                          (self.new_buildbucket_info_dict[build].status,
-                           self.new_buildbucket_info_dict[build].result))
+        status_output += (' Buildbucket status %s.' %
+                          (self.new_buildbucket_info_dict[build].status))
       logging.info(status_output)
 
     completed_builds = self.completed_builds | current_completed
@@ -353,8 +296,7 @@ class SlaveStatus(object):
     all_experimental_bb_info_dict = (
         builder_status_lib.SlaveBuilderStatus.GetAllSlaveBuildbucketInfo(
             self.buildbucket_client,
-            buildbucket_lib.GetScheduledBuildDict(experimental_slaves),
-            self.dry_run
+            buildbucket_v2.GetScheduledBuildDict(experimental_slaves)
         )
     )
     all_experimental_cidb_status_dict = (
@@ -365,7 +307,7 @@ class SlaveStatus(object):
 
     completed_experimental_builds = set(
         name for name, info in all_experimental_bb_info_dict.items() if
-        info.status == constants.BUILDBUCKET_BUILDER_STATUS_COMPLETED
+        info.status == constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS
     )
     completed_experimental_builds |= set(
         name for name, info in all_experimental_cidb_status_dict.items()
@@ -389,7 +331,7 @@ class SlaveStatus(object):
     """
     # Check that we're at least past the start timeout.
     builder_start_deadline = datetime.timedelta(
-        minutes=self.BUILD_START_TIMEOUT_MIN)
+        minutes=BUILD_START_TIMEOUT_MIN)
     past_deadline = current_time - self.start_time > builder_start_deadline
 
     # Check that we have missing builders and logging who they are.
@@ -417,59 +359,6 @@ class SlaveStatus(object):
       return (past_deadline and other_builders_completed and
               self.missing_builds)
 
-  def _RetryBuilds(self, builds):
-    """Retry builds with Buildbucket.
-
-    Args:
-      builds: config names of the builds to retry with Buildbucket.
-
-    Returns:
-      A set of retried builds.
-    """
-    assert builds is not None
-
-    new_scheduled_important_slaves = []
-    new_scheduled_build_reqs = []
-    for build in builds:
-      try:
-        buildbucket_id = self.new_buildbucket_info_dict[build].buildbucket_id
-        build_retry = self.new_buildbucket_info_dict[build].retry
-
-        logging.info('Going to retry build %s buildbucket_id %s '
-                     'with retry # %d',
-                     build, buildbucket_id, build_retry + 1)
-
-        if not self.dry_run:
-          fields = {'build_type': self.config.build_type,
-                    'build_name': self.config.name}
-          metrics.Counter(constants.MON_BB_RETRY_BUILD_COUNT).increment(
-              fields=fields)
-
-        content = self.buildbucket_client.RetryBuildRequest(
-            buildbucket_id, dryrun=self.dry_run)
-
-        new_buildbucket_id = buildbucket_lib.GetBuildId(content)
-        new_created_ts = buildbucket_lib.GetBuildCreated_ts(content)
-
-        new_scheduled_important_slaves.append(
-            (build, new_buildbucket_id, new_created_ts))
-        new_scheduled_build_reqs.append(build_requests.BuildRequest(
-            None, self.master_build_id, build, None, new_buildbucket_id,
-            build_requests.REASON_IMPORTANT_CQ_SLAVE, None))
-
-        logging.info('Retried build %s buildbucket_id %s created_ts %s',
-                     build, new_buildbucket_id, new_created_ts)
-      except buildbucket_lib.BuildbucketResponseException as e:
-        logging.error('Failed to retry build %s buildbucket_id %s: %s',
-                      build, buildbucket_id, e)
-
-    if new_scheduled_important_slaves:
-      self.metadata.ExtendKeyListWithList(
-          constants.METADATA_SCHEDULED_IMPORTANT_SLAVES,
-          new_scheduled_important_slaves)
-
-    return set([build for build, _, _ in new_scheduled_important_slaves])
-
   @staticmethod
   def _LastSlavesToComplete(completed_builds_history):
     """Given a |completed_builds_history|, find the last to complete.
@@ -491,8 +380,7 @@ class SlaveStatus(object):
     This will be the retry function for timeout_util.WaitForSuccess, basically
     this function will return False if all builds finished or we see a problem
     with the builds. Otherwise it returns True to continue polling
-    for the builds statuses. If the slave builds are scheduled by Buildbucket
-    and there're builds to retry, call RetryBuilds on those builds.
+    for the builds statuses.
 
     Returns:
       A bool of True if we should continue to wait and False if we should not.
@@ -528,11 +416,14 @@ class SlaveStatus(object):
 
     # Check if all builders completed.
     if self._Completed():
-      builder_status_lib.CancelBuilds(
-          list(uncompleted_experimental_build_buildbucket_ids),
-          self.buildbucket_client,
-          self.dry_run,
-          self.config)
+      buildbucket_client = buildbucket_v2.BuildbucketV2()
+      summary_markdown = ('Experimental build, cancelled as all others ' +
+                          'completed.')
+      logging.info(summary_markdown)
+      buildbucket_client.BatchCancelBuilds(
+        list(uncompleted_experimental_build_buildbucket_ids),
+        summary_markdown,
+      )
       return False, False, True
 
     current_time = datetime.datetime.now()
@@ -548,21 +439,19 @@ class SlaveStatus(object):
         uncompleted_experimental_build_buildbucket_ids)
 
     if self._ShouldFailForBuilderStartTimeout(current_time):
-      logging.error('Ending build since at least one builder has not started '
-                    'within 5 mins.')
-      builder_status_lib.CancelBuilds(uncompleted_build_buildbucket_ids,
-                                      self.buildbucket_client,
-                                      self.dry_run,
-                                      self.config)
+      summary_markdown = ('Ending build since at least one builder has ' +
+                    'not started within %d minutes.' % BUILD_START_TIMEOUT_MIN)
+      logging.error(summary_markdown)
+      buildbucket_client = buildbucket_v2.BuildbucketV2()
+      buildbucket_client.BatchCancelBuilds(
+        uncompleted_build_buildbucket_ids,
+        summary_markdown,
+      )
       return False, False, False
 
     # We got here which means no problems, we should still wait.
     logging.info('Still waiting for the following builds to complete: %r',
                  sorted(set(self._GetExpectedBuilders()) -
                         self.completed_builds))
-
-    if self.builds_to_retry:
-      retried_builds = self._RetryBuilds(self.builds_to_retry)
-      self.builds_to_retry -= retried_builds
 
     return True, True, False

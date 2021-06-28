@@ -1,19 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Show the builder layout for CrOS waterfalls."""
 
-from __future__ import print_function
-
-import sys
-
 from chromite.lib import config_lib
 from chromite.lib import commandline
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def _ParseArguments(argv):

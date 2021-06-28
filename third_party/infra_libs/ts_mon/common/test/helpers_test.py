@@ -4,11 +4,10 @@
 
 import time
 import unittest
+from unittest import mock
 
-import mock
-
-from infra_libs.ts_mon.common import metrics
-from infra_libs.ts_mon.common import helpers
+from chromite.third_party.infra_libs.ts_mon.common import metrics
+from chromite.third_party.infra_libs.ts_mon.common import helpers
 
 
 class _CustomException(Exception):

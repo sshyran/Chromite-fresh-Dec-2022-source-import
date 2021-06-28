@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """cros pinchrome: Pin chrome to an earlier version."""
 
-from __future__ import print_function
-
 import fnmatch
 import glob
 import os
 import re
 import shutil
-import sys
 import tempfile
 
 from chromite.lib import config_lib
@@ -25,9 +21,6 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_mark_as_stable
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class UprevNotFound(Exception):
@@ -322,7 +315,7 @@ class PinchromeCommand(command.CliCommand):
   Pinning procedure:
 
   When pinning chrome, this script first looks through the history of the
-  public overlay repository looking for changes which upreved chrome. It shows
+  public overlay repository looking for changes which uprevved chrome. It shows
   the user what versions chrome has been at recently and when the uprevs
   happened, and lets the user pick a point in that history to go back to.
 

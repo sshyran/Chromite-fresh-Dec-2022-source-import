@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,18 +10,13 @@ Google production resources.
 If you don't know what any of this means, then you don't need this module :).
 """
 
-from __future__ import print_function
-
 import datetime
 import socket
-import sys
+import subprocess
 
 from chromite.lib import alerts
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class LoasError(Exception):
@@ -76,6 +70,7 @@ class Loas(object):
                                      user=self.user,
                                      check=False,
                                      stdout=True,
+                                     stderr=subprocess.STDOUT,
                                      encoding='utf-8')
 
     # Send out one notification a day if there's a week or less left

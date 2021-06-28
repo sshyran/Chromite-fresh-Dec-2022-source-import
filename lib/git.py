@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common functions for interacting with git and repo."""
-
-from __future__ import print_function
 
 import collections
 import datetime
@@ -17,8 +14,6 @@ import re
 import string
 import subprocess
 from xml import sax
-
-import six
 
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
@@ -468,7 +463,7 @@ class Manifest(object):
 
   @staticmethod
   def _GetManifestHash(source, ignore_missing=False):
-    if isinstance(source, six.string_types):
+    if isinstance(source, str):
       try:
         # TODO(build): convert this to osutils.ReadFile once these
         # classes are moved out into their own module (if possible;
@@ -670,8 +665,8 @@ class ManifestCheckout(Manifest):
     for key, value in self.checkouts_by_path.items():
       self.checkouts_by_path[key] = ProjectCheckout(value)
     for key, value in self.checkouts_by_name.items():
-      self.checkouts_by_name[key] = \
-          [ProjectCheckout(x) for x in value]
+      self.checkouts_by_name[key] = [
+          ProjectCheckout(x) for x in value]
 
   def _FinalizeProjectData(self, attrs):
     Manifest._FinalizeProjectData(self, attrs)

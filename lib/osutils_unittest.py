@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-path + os.sep)
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the osutils.py module (imagine that!)."""
-
-from __future__ import print_function
 
 import collections
 import filecmp
@@ -13,16 +10,17 @@ import glob
 import grp
 import os
 import pwd
+import re
 import stat
 import sys
 import unittest
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+
 
 if sys.version_info.major >= 3:
   from pathlib import Path
@@ -55,6 +53,13 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
   def testReadWriteFile(self):
     """Verify we can write data to a file, and then read it back."""
     filename = os.path.join(self.tempdir, 'foo')
+    data = 'alsdkfjasldkfjaskdlfjasdf'
+    self.assertEqual(osutils.WriteFile(filename, data), None)
+    self.assertEqual(osutils.ReadFile(filename), data)
+
+  def testReadWritePath(self):
+    """Verify we can write data to a Path, and then read it back."""
+    filename = Path(self.tempdir) / 'foo'
     data = 'alsdkfjasldkfjaskdlfjasdf'
     self.assertEqual(osutils.WriteFile(filename, data), None)
     self.assertEqual(osutils.ReadFile(filename), data)
@@ -110,11 +115,51 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
       osutils.WriteFile(path, 'two', mode='a', sudo=True)
       self.assertEqual('onetwo', osutils.ReadFile(path))
 
+  def testSudoReadNoTrunc(self):
+    """Verify that we can write a new file as sudo when r+."""
+    def testit(path, sudo):
+      osutils.WriteFile(path, 'two')
+      self.assertEqual('two', osutils.ReadFile(path))
+      osutils.WriteFile(path, 'X', mode='r+', sudo=sudo)
+      self.assertEqual('Xwo', osutils.ReadFile(path))
+
+    # Make sure that r+ works as we think it does.
+    path = os.path.join(self.tempdir, 'foo')
+    testit(path, False)
+
+    # Now run it again with sudo.
+    with osutils.TempDir(sudo_rm=True) as tempdir:
+      path = os.path.join(tempdir, 'foo')
+      testit(path, True)
+
   def testReadFileNonExistent(self):
     """Verify what happens if you ReadFile a file that isn't there."""
     filename = os.path.join(self.tempdir, 'bogus')
     with self.assertRaises(IOError):
       osutils.ReadFile(filename)
+
+  def testWriteChmod(self):
+    """Verify writing files with perms works."""
+    def getmode(path):
+      return os.stat(path).st_mode & 0o7777
+    def assertMode(path, mode):
+      self.assertEqual(getmode(path), mode)
+
+    path = os.path.join(self.tempdir, 'file')
+    osutils.WriteFile(path, 'asdf')
+    assertMode(path, 0o644)
+
+    osutils.WriteFile(path, 'asdf', chmod=0o666)
+    assertMode(path, 0o666)
+
+    osutils.WriteFile(path, 'asdf', atomic=True, chmod=0o664)
+    assertMode(path, 0o664)
+
+    osutils.WriteFile(path, 'asdf', sudo=True, chmod=0o755)
+    assertMode(path, 0o755)
+
+    osutils.WriteFile(path, 'asdf', sudo=True, atomic=True, chmod=0o775)
+    assertMode(path, 0o775)
 
   def testSafeSymlink(self):
     """Test that we can create symlinks."""
@@ -140,6 +185,13 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
       osutils.SafeSymlink(file_b, user_link)
       self.assertEqual('b', osutils.ReadFile(user_link))
 
+      # Handle Path objects.
+      osutils.SafeSymlink(Path(file_a), Path(user_link))
+      self.assertEqual('a', osutils.ReadFile(user_link))
+
+      osutils.SafeSymlink(Path(file_b), Path(user_link))
+      self.assertEqual('b', osutils.ReadFile(user_link))
+
       # We can create and override links owned by root.
       osutils.SafeSymlink(file_a, root_link, sudo=True)
       self.assertEqual('a', osutils.ReadFile(root_link))
@@ -147,25 +199,47 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
       osutils.SafeSymlink(file_b, root_link, sudo=True)
       self.assertEqual('b', osutils.ReadFile(root_link))
 
+      # Handle Path objects.
+      osutils.SafeSymlink(Path(file_a), Path(root_link), sudo=True)
+      self.assertEqual('a', osutils.ReadFile(root_link))
+
+      osutils.SafeSymlink(Path(file_b), Path(root_link), sudo=True)
+      self.assertEqual('b', osutils.ReadFile(root_link))
+
   def testSafeUnlink(self):
     """Test unlinking files work (existing or not)."""
-    def f(dirname, sudo=False):
-      dirname = os.path.join(self.tempdir, dirname)
-      path = os.path.join(dirname, 'foon')
-      os.makedirs(dirname)
-      open(path, 'w').close()
-      self.assertExists(path)
-      if sudo:
-        cros_build_lib.sudo_run(
-            ['chown', 'root:root', '-R', '--', dirname], print_cmd=False)
-        self.assertRaises(EnvironmentError, os.unlink, path)
-      self.assertTrue(osutils.SafeUnlink(path, sudo=sudo))
-      self.assertNotExists(path)
-      self.assertFalse(osutils.SafeUnlink(path))
-      self.assertNotExists(path)
+    def f(sudo=False, as_path=False):
+      with osutils.TempDir(sudo_rm=sudo) as dirname:
+        path = os.path.join(dirname, 'foon')
+        if as_path:
+          path = Path(path)
+        osutils.Touch(path, makedirs=True)
+        self.assertExists(path)
+        if sudo:
+          osutils.Chown(dirname, user='root', group='root', recursive=False)
+          self.assertRaises(EnvironmentError, os.unlink, path)
+        self.assertTrue(osutils.SafeUnlink(path, sudo=sudo))
+        self.assertNotExists(path)
+        self.assertFalse(osutils.SafeUnlink(path))
+        self.assertNotExists(path)
 
-    f('nonsudo', False)
-    f('sudo', True)
+    f(False)
+    f(True)
+    f(False, True)
+    f(True, True)
+
+  def testSafeUnlinkSudoInaccessible(self):
+    """Test unlinking files work in a dir only root can read."""
+    with osutils.TempDir(sudo_rm=True) as dirname:
+      path = os.path.join(dirname, 'exists')
+      osutils.Touch(path, mode=0o000)
+      os.chmod(dirname, 0o000)
+      self.assertRaises(EnvironmentError, os.unlink, path)
+      self.assertTrue(osutils.SafeUnlink(path, sudo=True))
+      self.assertFalse(osutils.SafeUnlink(path, sudo=True))
+
+      os.chmod(dirname, 0o700)
+      self.assertNotExists(path)
 
   def testSafeMakedirs(self):
     """Test creating directory trees work (existing or not)."""
@@ -285,6 +359,28 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertExists(path)
     self.assertEqual(os.path.getsize(path), 0)
 
+  def testChmod(self):
+    """Test Chmod."""
+    def getmode(path):
+      return os.stat(path).st_mode & 0o7777
+
+    path = os.path.join(self.tempdir, 'chmodtests')
+    osutils.Touch(path)
+
+    osutils.Chmod(path, 0o700)
+    self.assertEqual(getmode(path), 0o700)
+
+    osutils.Chmod(Path(path), 0o644)
+    self.assertEqual(getmode(path), 0o644)
+
+    osutils.Chown(path, user='root', group='root')
+    osutils.Chmod(path, 0o660, sudo=True)
+    self.assertEqual(getmode(path), 0o660)
+    osutils.Chmod(Path(path), 0o661, sudo=True)
+    self.assertEqual(getmode(path), 0o661)
+
+    self.assertRaises(OSError, osutils.Chmod, path, 0o600)
+
   def testChown(self):
     """Test chown."""
     # Helpers to get the user and group name of the given path's owner.
@@ -321,6 +417,14 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertEqual(new_user, User(filename))
     self.assertEqual(new_group, Group(filename))
     osutils.Chown(filename)
+    self.assertEqual(user, User(filename))
+    self.assertEqual(group, Group(filename))
+
+    # With Path object.
+    osutils.Chown(Path(filename), user=new_user, group=new_group)
+    self.assertEqual(new_user, User(filename))
+    self.assertEqual(new_group, Group(filename))
+    osutils.Chown(Path(filename))
     self.assertEqual(user, User(filename))
     self.assertEqual(group, Group(filename))
 
@@ -640,7 +744,7 @@ class IteratePathsTest(cros_test_lib.TestCase):
 
   def testType(self):
     """Check that return value is an iterator."""
-    self.assertTrue(isinstance(osutils.IteratePaths('/'), collections.Iterator))
+    self.assertIsInstance(osutils.IteratePaths('/'), collections.abc.Iterator)
 
   def testRoot(self):
     """Test iterating from root directory."""
@@ -1229,3 +1333,25 @@ class WhichTests(cros_test_lib.TempDirTestCase):
     self.assertEqual(None, osutils.Which('prog', root='/.........'))
     self.assertEqual(self.prog_path, osutils.Which('prog', path='/',
                                                    root=self.tempdir))
+
+
+class UmaskTests(cros_test_lib.TestCase):
+  """Test Umask."""
+
+  @staticmethod
+  def getUmask():
+    """Return the current umask setting."""
+    # Testing this is messy because there is no syscall to look this up without
+    # side-effects.  os.umask sets & queries at once.
+    m = re.search(r'^Umask:\s+([0-7]+)', osutils.ReadFile('/proc/self/status'),
+                  flags=re.M)
+    assert m is not None
+    return int(m.group(1), 8)
+
+  def testBasic(self):
+    """Verify umask is saved & restored."""
+    os.umask(0o222)
+    with osutils.UmaskContext(0o123) as old:
+      assert self.getUmask() == 0o123
+    assert self.getUmask() == old
+    assert old == 0o222

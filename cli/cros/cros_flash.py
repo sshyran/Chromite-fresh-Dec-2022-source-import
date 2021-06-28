@@ -1,24 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Install/copy the image to the device."""
 
-from __future__ import print_function
-
-import sys
-
 from chromite.cli import command
 from chromite.cli import flash
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.lib import pformat
 
 
 @command.CommandDecorator('flash')
@@ -69,7 +63,7 @@ Examples:
   cros flash usb:// xbuddy://remote/eve/latest-stable/signed
 
   For more information and known problems/fixes, please see:
-  https://dev.chromium.org/chromium-os/build/cros-flash
+  https://chromium.googlesource.com/chromiumos/docs/+/HEAD/cros_flash.md
 """
 
   # Override base class property to use cache related commandline options.
@@ -118,19 +112,19 @@ Examples:
     update.add_argument(
         '--no-wipe', action='store_false', dest='wipe', default=True,
         help='Do not wipe the temporary working directory. Default '
-        'is always wipe.')
+        'is always wipe.', deprecated='No temp directory anymore.')
     update.add_argument(
-        '--no-stateful-update', action='store_false', dest='stateful_update',
+        '--no-stateful-update', action='store_true',
         help='Do not update the stateful partition on the device. '
         'Default is always update.')
     update.add_argument(
-        '--no-rootfs-update', action='store_false', dest='rootfs_update',
+        '--no-rootfs-update', action='store_true',
         help='Do not update the rootfs partition on the device. '
         'Default is always update.')
     update.add_argument(
         '--src-image-to-delta', type='path',
         help='Local path to an image to be used as the base to generate '
-        'delta payloads.')
+        'delta payloads.', deprecated='Not used anymore.')
     update.add_argument(
         '--clobber-stateful', action='store_true', default=False,
         help='Clobber stateful partition when performing update. '
@@ -139,8 +133,9 @@ Examples:
         '--clear-tpm-owner', action='store_true', default=False,
         help='Clear the TPM owner on reboot.')
     update.add_argument(
-        '--restore-stateful', action='store_false', dest='rootfs_update',
-        help='Restore the stateful partition. Same as --no-rootfs-update.')
+        '--restore-stateful', action='store_false',
+        help='Restore the stateful partition. Same as --no-rootfs-update.',
+        deprecated='Not used anymore.')
     update.add_argument(
         '--private-key', type='path', default=None,
         help='SSH identify file (private key).')
@@ -153,12 +148,18 @@ Examples:
     update.add_argument(
         '--send-payload-in-parallel', default=False, action='store_true',
         help=('To speed up transfer payload files for long haul, chop '
-              'payload in chunks and transfer them in parallel.'))
+              'payload in chunks and transfer them in parallel.'),
+        deprecated='Not used anymore.')
     update.add_argument(
         '--no-copy-payloads-to-device', dest='copy_payloads_to_device',
         action='store_false', default=True,
         help=('Do not copy the update payloads to the device. For now this '
-              'only works for the stateful payload.'))
+              'only works for the stateful payload.'),
+        deprecated='This is default behavior now.')
+    update.add_argument(
+        '--exp-new-flash', action='store_true', default=True,
+        help=('Use the faster version of cros flash (experimental).'),
+        deprecated='The new flash mechanism is ON by default.')
 
   def _GetDefaultVersion(self):
     """Get default full SDK version.
@@ -183,28 +184,27 @@ Examples:
     self.options.Freeze()
 
     try:
-      flash.Flash(
-          self.options.device,
-          self.options.image,
-          board=self.options.board,
-          version=self._GetDefaultVersion(),
-          src_image_to_delta=self.options.src_image_to_delta,
-          rootfs_update=self.options.rootfs_update,
-          stateful_update=self.options.stateful_update,
-          clobber_stateful=self.options.clobber_stateful,
-          clear_tpm_owner=self.options.clear_tpm_owner,
-          reboot=self.options.reboot,
-          wipe=self.options.wipe,
-          ssh_private_key=self.options.private_key,
-          ping=self.options.ping,
-          disable_rootfs_verification=self.options.disable_rootfs_verification,
-          clear_cache=self.options.clear_cache,
-          yes=self.options.yes,
-          force=self.options.force,
-          debug=self.options.debug,
-          send_payload_in_parallel=self.options.send_payload_in_parallel,
-          copy_payloads_to_device=self.options.copy_payloads_to_device)
-      logging.notice('cros flash completed successfully.')
+      with cros_build_lib.TimedSection() as timer:
+        flash.Flash(
+            self.options.device,
+            self.options.image,
+            board=self.options.board,
+            version=self._GetDefaultVersion(),
+            no_rootfs_update=self.options.no_rootfs_update,
+            no_stateful_update=self.options.no_stateful_update,
+            clobber_stateful=self.options.clobber_stateful,
+            clear_tpm_owner=self.options.clear_tpm_owner,
+            reboot=self.options.reboot,
+            ssh_private_key=self.options.private_key,
+            ping=self.options.ping,
+            disable_rootfs_verification=
+              self.options.disable_rootfs_verification,
+            clear_cache=self.options.clear_cache,
+            yes=self.options.yes,
+            force=self.options.force,
+            debug=self.options.debug)
+      logging.notice('cros flash completed successfully in %s',
+                     pformat.timedelta(timer.delta))
     except dev_server_wrapper.ImagePathError:
       logging.error('To get the latest remote image, please run:\n'
                     'cros flash --board=%s %s remote/latest',

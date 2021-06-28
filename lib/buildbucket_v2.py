@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -10,27 +9,21 @@ usecases. Other users should, instead, prefer to copy the Python
 client out of lib/luci/prpc and third_party/infra_libs/buildbucket.
 """
 
-from __future__ import print_function
-
 import ast
+import collections
+import http.client
 import socket
 from ssl import SSLError
-import sys
-
-from google.protobuf import field_mask_pb2
-from six.moves import http_client as httplib
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.lib.luci import utils
-from chromite.lib.luci.prpc.client import Client, ProtocolError
-
-from infra_libs.buildbucket.proto import build_pb2, common_pb2, rpc_pb2
-from infra_libs.buildbucket.proto.rpc_prpc_pb2 import BuildsServiceDescription
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
+from chromite.lib.luci.prpc.client import Client
+from chromite.lib.luci.prpc.client import ProtocolError
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (builder_pb2, builds_service_pb2, builds_service_prpc_pb2,
+                                                               common_pb2)
 
 
 BBV2_URL_ENDPOINT_PROD = (
@@ -42,7 +35,7 @@ BBV2_URL_ENDPOINT_TEST = (
 BB_STATUS_DICT = {
     # A mapping of Buildbucket V2 statuses to chromite's statuses. For
     # buildbucket reference, see here:
-    # https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/common.proto
+    # https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/common.proto
     0: 'unspecified',
     1: constants.BUILDER_STATUS_PLANNED,
     2: constants.BUILDER_STATUS_INFLIGHT,
@@ -50,6 +43,169 @@ BB_STATUS_DICT = {
     20: constants.BUILDER_STATUS_FAILED,
     68: constants.BUILDER_STATUS_ABORTED
 }
+
+# Namedtupe to store buildbucket related info.
+BuildbucketInfo = collections.namedtuple(
+    'BuildbucketInfo',
+    ['buildbucket_id', 'retry', 'created_ts', 'status', 'url'])
+
+class BuildbucketResponseException(Exception):
+  """Exception got from Buildbucket Response."""
+
+
+class NoBuildbucketBucketFoundException(Exception):
+  """Failed to found the corresponding buildbucket bucket."""
+
+
+class NoBuildbucketClientException(Exception):
+  """No Buildbucket client exception."""
+
+
+def GetScheduledBuildDict(scheduled_slave_list):
+  """Parse the build information from the scheduled_slave_list metadata.
+
+  Treats all listed builds as newly-scheduled.
+
+  Args:
+    scheduled_slave_list: A list of scheduled builds recorded in the
+                          master metadata. In the format of
+                          [(build_config, buildbucket_id, created_ts)].
+
+  Returns:
+    A dict mapping build config name to its buildbucket information
+    (in the format of BuildbucketInfo).
+  """
+  if scheduled_slave_list is None:
+    return {}
+
+  buildbucket_info_dict = {}
+  for (build_config, buildbucket_id, created_ts) in scheduled_slave_list:
+    if build_config not in buildbucket_info_dict:
+      buildbucket_info_dict[build_config] = BuildbucketInfo(
+          buildbucket_id, 0, created_ts, None, None)
+    else:
+      old_info = buildbucket_info_dict[build_config]
+      # If a slave occurs multiple times, increment retry count and keep
+      # the buildbucket_id and created_ts of most recently created one.
+      new_retry = old_info.retry + 1
+      if created_ts > buildbucket_info_dict[build_config].created_ts:
+        buildbucket_info_dict[build_config] = BuildbucketInfo(
+            buildbucket_id, new_retry, created_ts, None, None)
+      else:
+        buildbucket_info_dict[build_config] = BuildbucketInfo(
+            old_info.buildbucket_id, new_retry, old_info.created_ts, None, None)
+
+  return buildbucket_info_dict
+
+def GetBuildInfoDict(metadata, exclude_experimental=True):
+  """Get buildbucket_info_dict from metadata.
+
+  Args:
+    metadata: Instance of metadata_lib.CBuildbotMetadata.
+    exclude_experimental: Whether to exclude the builds which are important in
+      the config but are marked as experimental in the tree status. Default to
+      True.
+
+  Returns:
+    buildbucket_info_dict: A dict mapping build config name to its buildbucket
+        information in the format of BuildbucketInfo. Build configs that are
+        marked experimental through the tree status will not be in the dict.
+        (See GetScheduledBuildDict for details.)
+  """
+  assert metadata is not None
+
+  scheduled_slaves_list = metadata.GetValueWithDefault(
+      constants.METADATA_SCHEDULED_IMPORTANT_SLAVES, [])
+
+  if exclude_experimental:
+    experimental_builders = metadata.GetValueWithDefault(
+        constants.METADATA_EXPERIMENTAL_BUILDERS, [])
+    scheduled_slaves_list = [
+        (config, bb_id, ts) for config, bb_id, ts in scheduled_slaves_list
+        if config not in experimental_builders
+    ]
+
+  return GetScheduledBuildDict(scheduled_slaves_list)
+
+def GetBuildbucketIds(metadata, exclude_experimental=True):
+  """Get buildbucket_ids of scheduled slave builds from metadata.
+
+  Args:
+    metadata: Instance of metadata_lib.CBuildbotMetadata.
+    exclude_experimental: Whether to exclude the builds which are important in
+      the config but are marked as experimental in the tree status. Default to
+      True.
+
+  Returns:
+    A list of buildbucket_ids (string) of slave builds.
+  """
+  buildbucket_info_dict = GetBuildInfoDict(
+      metadata, exclude_experimental=exclude_experimental)
+  return [info_dict.buildbucket_id
+          for info_dict in buildbucket_info_dict.values()]
+
+def FetchCurrentSlaveBuilders(config, metadata, builders_array,
+                              exclude_experimental=True):
+  """Fetch the current important slave builds.
+
+  Args:
+    config: Instance of config_lib.BuildConfig. Config dict of this build.
+    metadata: Instance of metadata_lib.CBuildbotMetadata. Metadata of this
+              build.
+    builders_array: A list of slave build configs to check.
+    exclude_experimental: Whether to exclude the builds which are important in
+      the config but are marked as experimental in the tree status. Default to
+      True.
+
+  Returns:
+    An updated list of slave build configs for a master build.
+  """
+  if config and metadata:
+    scheduled_buildbucket_info_dict = GetBuildInfoDict(
+        metadata, exclude_experimental=exclude_experimental)
+    return list(scheduled_buildbucket_info_dict)
+  else:
+    return builders_array
+
+def GetStringPairValue(content, path, key, default=None):
+  """Get the value of a repeated StringValue pair.
+
+  Get the (nested) value from a nested dict.
+
+  Args:
+    content: A dict of (nested) attributes.
+    path: String list presenting the (nested) attribute to get.
+    key: String representing which key to find.
+    default: Default value to return if the attribute doesn't exist.
+
+  Returns:
+    The corresponding value if the attribute exists; else, default.
+  """
+  assert isinstance(path, list), 'nested_attr must be a list.'
+
+  if content is None:
+    return default
+
+  assert isinstance(content, dict), 'content must be a dict.'
+
+  value = None
+  path_value = content
+  for attr in path:
+    assert isinstance(attr, str), 'attribute name must be a string.'
+
+    if not isinstance(path_value, dict):
+      return default
+
+    path_value = path_value.get(attr, default)
+
+  for sp in path_value:
+    dimensions_kv = list(sp.items())
+    for i, (k, v) in enumerate(dimensions_kv):
+      dimensions_kv[i] = (k, [v,])
+      if v == key:
+        if len(dimensions_kv) >= i+1:
+          return dimensions_kv[i+1][i+1]
+  return value
 
 def UpdateSelfBuildPropertiesNonBlocking(key, value):
   """Updates the build.output.properties with key:value through a service.
@@ -180,7 +336,7 @@ def BuildStepToDict(step, build_values=None):
   """Extract information from a Buildbucket Step instance.
 
   Reference:
-  https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/step.proto
+  https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/step.proto
 
   Args:
     step: A step_pb2.Step instance from Buildbucket to be extracted.
@@ -226,6 +382,25 @@ def DateToTimeRange(start_date=None, end_date=None):
   return common_pb2.TimeRange(start_time=start_timestamp,
                               end_time=end_timestamp)
 
+def GetBotId(build):
+  """Return the bot id that ran a build, or None.
+
+  Args:
+    build: BuildbucketV2 build
+
+  Returns:
+    hostname: Swarming hostname
+  """
+  # This produces a list of bot_ids for each build (or None).
+  # I don't think there can ever be more than one entry in the list, but
+  # could be zero.
+  bot_id = GetStringPairValue(build, ['infra', 'swarming', 'botDimensions'],
+                             'id')
+  if not bot_id:
+    return None
+
+  return bot_id
+
 class BuildbucketV2(object):
   """Connection to Buildbucket V2 database."""
 
@@ -236,33 +411,215 @@ class BuildbucketV2(object):
       test_env: Whether to have the client connect to test URL endpoint on GAE.
     """
     if test_env:
-      self.client = Client(BBV2_URL_ENDPOINT_TEST, BuildsServiceDescription)
+      self.client = Client(BBV2_URL_ENDPOINT_TEST,
+                           builds_service_prpc_pb2.BuildsServiceDescription)
     else:
-      self.client = Client(BBV2_URL_ENDPOINT_PROD, BuildsServiceDescription)
+      self.client = Client(BBV2_URL_ENDPOINT_PROD,
+                           builds_service_prpc_pb2.BuildsServiceDescription)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
   @retry_util.WithRetry(max_retry=5, sleep=20.0,
-                        exception=httplib.ResponseNotReady)
+                        exception=http.client.ResponseNotReady)
+  def BatchCancelBuilds(self, buildbucket_ids, summary_markdown,
+                        properties=None):
+    """BatchGetBuild repeated GetBuild request with provided ids.
+
+    Args:
+      buildbucket_ids: list of ids of the builds in buildbucket.
+      summary_markdown: summary of reason for cancel.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding BatchResponse message. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+    """
+    batch_requests = []
+    for buildbucket_id in buildbucket_ids:
+      logging.info('Canceling buildbucket_id: %s', str(buildbucket_id))
+      if isinstance(buildbucket_id, str):
+        buildbucket_id = int(buildbucket_id)
+      batch_requests.append(
+        builds_service_pb2.BatchRequest.Request(
+          cancel_build=(
+            builds_service_pb2.CancelBuildRequest(
+              id=buildbucket_id,
+              summary_markdown=summary_markdown,
+              fields=(field_mask_pb2.FieldMask(paths=[properties])
+                      if properties else None)
+            )
+          )
+        )
+      )
+    return self.client.Batch(builds_service_pb2.BatchRequest(
+      requests=batch_requests))
+
+  # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=http.client.ResponseNotReady)
+  def BatchGetBuilds(self, buildbucket_ids, properties=None):
+    """BatchGetBuild repeated GetBuild request with provided ids.
+
+    Args:
+      buildbucket_ids: list of ids of the builds in buildbucket.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding BatchResponse message. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+    """
+    batch_requests = []
+    for buildbucket_id in buildbucket_ids:
+      batch_requests.append(
+        builds_service_pb2.BatchRequest.Request(
+          get_build=(
+            builds_service_pb2.GetBuildRequest(
+              id=buildbucket_id,
+              fields=(field_mask_pb2.FieldMask(paths=[properties])
+                      if properties else None)
+            )
+          )
+        )
+      )
+    return self.client.Batch(builds_service_pb2.BatchRequest(
+      requests=batch_requests))
+
+  def BatchSearchBuilds(self, search_requests):
+    """SearchBuild RPC call wrapping function.
+
+    Args:
+      search_requests: List of SearchBuildRequests
+
+    Returns:
+      The corresponding BatchResponse message. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/builds_service.proto
+    """
+    requests = []
+    for request in search_requests:
+      requests.append(
+        builds_service_pb2.BatchRequest.Request(search_builds=request)
+      )
+    return self.client.Batch(builds_service_pb2.BatchRequest(
+      requests=requests))
+
+  # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=http.client.ResponseNotReady)
+  def CancelBuild(self, buildbucket_id, summary_markdown, properties=None):
+    """CancelBuild call of a specific build with buildbucket_id.
+
+    Args:
+      buildbucket_id: id of the build in buildbucket.
+      summary_markdown: summary of reason for cancel.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+    """
+    cancel_build_request = builds_service_pb2.CancelBuildRequest(
+         id=buildbucket_id,
+         summary_markdown=summary_markdown,
+         fields=(field_mask_pb2.FieldMask(paths=[properties])
+                 if properties else None)
+    )
+    return self.client.CancelBuild(cancel_build_request)
+
+  # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=http.client.ResponseNotReady)
   def GetBuild(self, buildbucket_id, properties=None):
     """GetBuild call of a specific build with buildbucket_id.
 
     Args:
       buildbucket_id: id of the build in buildbucket.
-      properties: specific build.output.properties to query.
+      properties: list or string of fields to include in the response.
 
     Returns:
       The corresponding Build proto. See here:
-      https://chromium.googlesource.com/infra/luci/luci-go/+/master/buildbucket/proto/build.proto
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
-    if properties:
-      field_mask = field_mask_pb2.FieldMask(paths=[properties])
-      get_build_request = rpc_pb2.GetBuildRequest(id=buildbucket_id,
-                                                  fields=field_mask)
-    else:
-      get_build_request = rpc_pb2.GetBuildRequest(id=buildbucket_id)
+    field_mask = []
+    if isinstance(properties, list):
+      field_mask = properties
+    elif properties:
+      field_mask.append(properties)
+    get_build_request = builds_service_pb2.GetBuildRequest(
+        id=buildbucket_id,
+        fields=(field_mask_pb2.FieldMask(paths=field_mask)
+                if field_mask else None)
+    )
     return self.client.GetBuild(get_build_request)
+
+# TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=http.client.ResponseNotReady)
+  def ScheduleBuild(self, request_id, template_build_id=None,
+                    builder=None, properties=None,
+                    gerrit_changes=None, tags=None,
+                    dimensions=None, fields=None, critical=True):
+    """ScheduleBuild call of a specific build with buildbucket_id.
+
+    Args:
+      request_id: unique string used to prevent duplicates.
+      template_build_id: ID of a build to retry.
+      builder: Tuple (builder.project, builder.bucket) defines build ACL
+      properties: properties key in parameters_json
+      gerrit_changes: Repeated GerritChange message type.
+      tags: repeated StringPair of Build.tags to associate with build.
+      dimensions: RequestedDimension Swarming dimension to override in config.
+      fields: fields to include in the response.
+      critical: bool for build.critical.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+    """
+    schedule_build_request = builds_service_pb2.ScheduleBuildRequest(
+        request_id=request_id,
+        template_build_id=template_build_id if template_build_id else None,
+        builder=builder,
+        properties=properties if properties else None,
+        gerrit_changes=gerrit_changes if gerrit_changes else None,
+        tags=tags if tags else None,
+        dimensions=dimensions if dimensions else None,
+        fields=field_mask_pb2.FieldMask(paths=[fields]) if fields else None,
+        critical=common_pb2.YES if critical else common_pb2.NO)
+    return self.client.ScheduleBuild(schedule_build_request)
+
+# TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=20.0,
+                        exception=http.client.ResponseNotReady)
+  def UpdateBuild(self, build, update_properties, properties=None):
+    """GetBuild call of a specific build with buildbucket_id.
+
+    Args:
+      build: Buildbucket build to update.
+      update_properties: fields to update.
+      properties: fields to include in the response.
+
+    Returns:
+      The corresponding Build proto. See here:
+      https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
+    """
+    update_build_request = builds_service_pb2.UpdateBuildRequest(
+        build=build,
+        update_mask=field_mask_pb2.FieldMask(paths=[update_properties]),
+        fields=(field_mask_pb2.FieldMask(paths=[properties])
+                if properties else None)
+    )
+    return self.client.UpdateBuild(update_build_request)
 
   def GetKilledChildBuilds(self, buildbucket_id):
     """Get IDs of all the builds killed by self-destructed master build.
@@ -420,15 +777,15 @@ class BuildbucketV2(object):
     Returns:
       A SearchBuildResponse instance corresponding to the query.
     """
-    assert isinstance(build_predicate, rpc_pb2.BuildPredicate)
+    assert isinstance(build_predicate, builds_service_pb2.BuildPredicate)
     if fields is not None:
       assert isinstance(fields, field_mask_pb2.FieldMask)
     assert isinstance(page_size, int)
     if fields is None:
-      search_build_request = rpc_pb2.SearchBuildsRequest(
+      search_build_request = builds_service_pb2.SearchBuildsRequest(
           predicate=build_predicate, page_size=page_size)
     else:
-      search_build_request = rpc_pb2.SearchBuildsRequest(
+      search_build_request = builds_service_pb2.SearchBuildsRequest(
           predicate=build_predicate, fields=fields, page_size=page_size)
 
     return self.client.SearchBuilds(search_build_request)
@@ -462,7 +819,7 @@ class BuildbucketV2(object):
       build statuses in descending order (if |reverse| is True, ascending
       order).
     """
-    builder = build_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value=build_config)]
     create_time = DateToTimeRange(start_date, end_date)
@@ -473,8 +830,8 @@ class BuildbucketV2(object):
                                         value=branch))
     build = None
     if start_build_id:
-      build = rpc_pb2.BuildRange(start_build_id=int(start_build_id))
-    build_predicate = rpc_pb2.BuildPredicate(
+      build = builds_service_pb2.BuildRange(start_build_id=int(start_build_id))
+    build_predicate = builds_service_pb2.BuildPredicate(
         builder=builder, tags=tags, create_time=create_time, build=build)
     search_result = self.SearchBuild(build_predicate, page_size=num_results)
     build_ids = [build.id for build in search_result.builds]
@@ -498,10 +855,10 @@ class BuildbucketV2(object):
       A list of dictionary corresponding to each child build with keys like
       start_time, end_time, status, version info, critical, build_config, etc.
     """
-    builder = build_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(buildbucket_id))
-    build_predicate = rpc_pb2.BuildPredicate(
+    build_predicate = builds_service_pb2.BuildPredicate(
         builder=builder, tags=[tag])
     child_builds = self.SearchBuild(build_predicate, page_size=200)
     return [self.GetBuildStatus(child_build.id)

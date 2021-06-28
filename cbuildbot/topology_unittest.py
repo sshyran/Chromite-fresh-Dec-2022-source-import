@@ -1,19 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for topology module."""
 
-from __future__ import print_function
-
-import sys
-
 from chromite.cbuildbot import topology
 from chromite.lib import cros_test_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TopologyTest(cros_test_lib.TestCase):
@@ -51,7 +43,8 @@ class FakeFetchTopologyTest(cros_test_lib.TestCase):
   def testFakeTopology(self):
     data = {1:'one', 2:'two', 3:'three'}
     FakeFetchTopology(data)
-    self.assertDictContainsSubset(data, topology.topology)
+    # pylint: disable=dict-items-not-iterating
+    self.assertGreaterEqual(topology.topology.items(), data.items())
 
   def testFakeTopologyEmpty(self):
     FakeFetchTopology()

@@ -1,28 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common functions for interacting with repo."""
 
-from __future__ import print_function
-
 import collections
 import contextlib
 import os
 import re
-import sys
-
-import six
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import repo_manifest
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Match `repo` error: "error: project <name> not found"
@@ -340,7 +331,7 @@ def _ListArg(arg):
   Raises:
     TypeError: if arg is a string or non-iterable (except None).
   """
-  if isinstance(arg, six.string_types):
+  if isinstance(arg, str):
     raise TypeError('string not allowed')
   if arg is None:
     return []

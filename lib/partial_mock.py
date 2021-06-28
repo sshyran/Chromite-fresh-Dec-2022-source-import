@@ -1,18 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Contains functionality used to implement a partial mock."""
 
-from __future__ import print_function
-
 import collections
 import os
 import re
-
-import mock
-import six
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
@@ -150,7 +145,7 @@ class ListRegex(Regex):
 
   @staticmethod
   def _ProcessArg(arg):
-    if not isinstance(arg, six.string_types):
+    if not isinstance(arg, str):
       return ' '.join(arg)
     return arg
 
@@ -378,6 +373,8 @@ class MockedCallResults(object):
       raise AssertionError('%s: %r not mocked!' % (self.name, params))
 
     if is_exception(side_effect):
+      # Pylint-2.2 can't handle this if guard.
+      # pylint: disable=raising-bad-type
       raise side_effect
     if side_effect:
       assert hook_args is not None
@@ -725,12 +722,12 @@ class PartialCmdMock(PartialMock):
 
   @property
   @CheckAttr
-  def call_count(self, mock_attr=None):
+  def call_count(self, mock_attr=None):  # pylint: disable=property-with-parameters
     """Return the number of times we've been called."""
     return self.patched[mock_attr].call_count
 
   @property
   @CheckAttr
-  def call_args_list(self, mock_attr=None):
+  def call_args_list(self, mock_attr=None):  # pylint: disable=property-with-parameters
     """Return the list of args we've been called with."""
     return self.patched[mock_attr].call_args_list

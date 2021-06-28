@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Tests the `cros chroot` command."""
-
-from __future__ import print_function
-
-import sys
 
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chroot
@@ -17,20 +12,11 @@ from chromite.lib import cros_test_lib
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
-
-
 class MockChrootCommand(command_unittest.MockCommand):
   """Mock out the `cros chroot` command."""
   TARGET = 'chromite.cli.cros.cros_chroot.ChrootCommand'
   TARGET_CLASS = cros_chroot.ChrootCommand
   COMMAND = 'chroot'
-
-  def __init__(self, *args, **kwargs):
-    command_unittest.MockCommand.__init__(self, *args, **kwargs)
-
-  def Run(self, inst):
-    return command_unittest.MockCommand.Run(self, inst)
 
 
 class ChrootTest(cros_test_lib.MockTestCase):

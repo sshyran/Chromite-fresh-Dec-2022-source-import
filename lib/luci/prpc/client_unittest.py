@@ -1,24 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 # pylint: disable=unused-argument
 
-from __future__ import print_function
-
 import contextlib
 import sys
 import unittest
+from unittest import mock
 
-from google.protobuf import empty_pb2
-import mock
+from chromite.third_party.google.protobuf import empty_pb2
 
 from chromite.lib.luci import net
 from chromite.lib.luci.prpc import client as prpc_client
 from chromite.lib.luci.prpc import codes
 from chromite.lib.luci.prpc.test import test_pb2, test_prpc_pb2
 from chromite.lib.luci.test_support import test_case, test_env
+
 
 test_env.setup_test_env()
 

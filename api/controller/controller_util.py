@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Utility functions that are useful for controllers."""
-
-from __future__ import print_function
 
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -14,7 +11,7 @@ from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
-
+from chromite.lib.sysroot_lib import Sysroot
 
 class Error(Exception):
   """Base error class for the module."""
@@ -60,6 +57,24 @@ def ParseChroot(chroot_message):
       path=path, cache_dir=cache_dir, chrome_root=chrome_root, env=env)
 
   return chroot
+
+
+def ParseSysroot(sysroot_message):
+  """Create a sysroot object from the sysroot message.
+
+  Args:
+    sysroot_message (commmon_pb2.Sysroot): The sysroot message.
+
+  Returns:
+    Sysroot: The parsed sysroot object.
+
+  Raises:
+    AssertionError: When the message is not a Sysroot message.
+  """
+  assert isinstance(sysroot_message, sysroot_pb2.Sysroot)
+
+  return Sysroot(sysroot_message.path)
+
 
 def ParseGomaConfig(goma_message, chroot_path):
   """Parse a goma config message."""

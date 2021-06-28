@@ -1,20 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Common python commands used by various internal build scripts."""
 
-from __future__ import print_function
-
 import os
 import time
 import multiprocessing
 
 from collections import namedtuple
+from chromite.utils import key_value_store
 
 
 AcquireResult = namedtuple('AcquireResult', ['result', 'reason'])
+
+MINOR_VERSION = 'PAYLOAD_MINOR_VERSION'
 
 def ListdirFullpath(directory):
   """Return all files in a directory with full pathnames.
@@ -119,6 +119,21 @@ def ReadLsbRelease(sysroot):
 
   return lsb_release
 
+def ReadMinorVersion(sysroot: str):
+  """Reads the /etc/update_engine.conf file out of the given sysroot.
+
+  Args:
+    sysroot: The path to sysroot of an image to read
+      sysroot/etc/update_engine.conf
+
+  Returns:
+    The the minor version.
+  """
+  update_engine_conf = os.path.join(sysroot, 'etc', 'update_engine.conf')
+  versions = key_value_store.LoadFile(update_engine_conf)
+  if MINOR_VERSION in versions:
+    return versions.get(MINOR_VERSION)
+  return None
 
 class MemoryConsumptionSemaphore(object):
   """A semaphore that tries to acquire only if there is enough memory available.
@@ -206,9 +221,9 @@ class MemoryConsumptionSemaphore(object):
   def _set_timer(self):
     """Set a time in the future to unblock after."""
     with self._lock:
-      self._timer_future.value = \
-          max(self._clock() + self.quiescence_time_seconds,
-              self._timer_future.value)
+      self._timer_future.value = max(
+          self._clock() + self.quiescence_time_seconds,
+          self._timer_future.value)
 
   def _allow_consumption(self):
     """Calculate max utilization to determine if another should be allowed.

@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Library containing functions to access a remote test device."""
 
-from __future__ import print_function
-
+import functools
 import glob
 import os
 import re
@@ -16,8 +14,6 @@ import stat
 import subprocess
 import tempfile
 import time
-
-import six
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -98,6 +94,14 @@ class CatFileError(RemoteAccessException):
 
 class RunningPidsError(RemoteAccessException):
   """Raised when unable to get running pids on the device."""
+
+
+class RebootError(RemoteAccessException):
+  """Raised when a device fails to reboot."""
+
+
+class ProgramNotFoundError(RemoteAccessException):
+  """Raised when a program on device is not found."""
 
 
 def NormalizePort(port, str_ok=True):
@@ -395,7 +399,7 @@ class RemoteAccess(object):
         # Prepend sudo to cmd.
         ssh_cmd.append('sudo')
 
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         if kwargs.get('shell'):
           ssh_cmd = '%s %s' % (' '.join(ssh_cmd),
                                cros_build_lib.ShellQuote(cmd))
@@ -533,8 +537,8 @@ class RemoteAccess(object):
     self.RemoteSh(['reboot'], ssh_error_ok=True, remote_sudo=True)
     time.sleep(CHECK_INTERVAL)
     if not self.AwaitReboot(old_boot_id, timeout_sec):
-      cros_build_lib.Die('Reboot has not completed after %s seconds; giving up.'
-                         % (timeout_sec,))
+      raise RebootError('Reboot has not completed after %s seconds; giving up.'
+                        % (timeout_sec,))
 
   def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
             recursive=True, inplace=False, verbose=False, sudo=False,
@@ -608,6 +612,7 @@ class RemoteAccess(object):
       verbose: If set, print more verbose output during scp file transfer.
       sudo: If set, invoke the command via sudo.
       remote_sudo: If set, run the command in remote shell with sudo.
+      compress: If set, passes the -C flag to scp to enable compression.
       **kwargs: See cros_build_lib.run documentation.
 
     Returns:
@@ -618,6 +623,8 @@ class RemoteAccess(object):
     if remote_sudo and self.username != ROOT_ACCOUNT:
       # TODO: Implement scp with remote sudo.
       raise NotImplementedError('Cannot run scp with sudo!')
+
+    compress = kwargs.pop('compress', False)
 
     kwargs.setdefault('debug_level', self.debug_level)
     # scp relies on 'scp' being in the $PATH of the non-interactive,
@@ -635,6 +642,9 @@ class RemoteAccess(object):
       scp_cmd.append('-r')
     if verbose:
       scp_cmd.append('-v')
+
+    if compress:
+      scp_cmd.append('-C')
 
     # Check for an IPv6 address
     if ':' in self.remote_host:
@@ -814,12 +824,18 @@ class RemoteDevice(object):
 
     return self._work_dir
 
-  def HasProgramInPath(self, binary):
-    """Checks if the given binary exists on the device."""
+  @functools.lru_cache(maxsize=256)
+  def HasProgramInPath(self, binary: str) -> bool:
+    """Checks if the given |binary| exists on the device.
+
+    This will cache the result and assume that $PATH does not have entries
+    added ore removed for the life of the connection.
+    """
     result = self.GetAgent().RemoteSh(
         ['PATH=%s:$PATH which' % DEV_BIN_PATHS, binary], check=False)
     return result.returncode == 0
 
+  @memoize.MemoizedSingleCall
   def HasRsync(self):
     """Checks if rsync exists on the device."""
     return self.HasProgramInPath('rsync')
@@ -834,6 +850,7 @@ class RemoteDevice(object):
                                       capture_output=True)
     return re.search(r'Speed: \d+000Mb/s', result.output)
 
+  @memoize.MemoizedSingleCall
   def IsSELinuxAvailable(self):
     """Check whether the device has SELinux compiled in."""
     # Note that SELinux can be enabled for some devices that lack SELinux
@@ -1035,13 +1052,14 @@ class RemoteDevice(object):
     result = self.BaseRunCommand(cmd, remote_sudo=True, capture_output=True)
     return int(result.output.split()[0])
 
-  def CatFile(self, path, max_size=1000000):
+  def CatFile(self, path, max_size=1000000, encoding='utf-8'):
     """Reads the file on device to string if its size is less than |max_size|.
 
     Args:
       path: The full path to the file on the device to read.
       max_size: Read the file only if its size is less than |max_size| in bytes.
         If None, do not check its size and always cat the path.
+      encoding: Encoding for return value.  Use None to get bytes.
 
     Returns:
       A string of the file content.
@@ -1059,8 +1077,8 @@ class RemoteDevice(object):
         raise CatFileError('File "%s" is larger than %d bytes' %
                            (path, max_size))
 
-    result = self.BaseRunCommand(['cat', path], remote_sudo=True,
-                                 check=False, capture_output=True)
+    result = self.base_run(['cat', path], remote_sudo=True, check=False,
+                           capture_output=True, encoding=encoding)
     if result.returncode:
       raise CatFileError('Failed to read file "%s" on the device' % path)
     return result.output
@@ -1172,7 +1190,7 @@ class RemoteDevice(object):
       ARG_MAX = 32 * 1024
 
       # What the command line would generally look like on the remote.
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         if not kwargs.get('shell', False):
           raise ValueError("'shell' must be True when 'cmd' is a string.")
         cmdline = ' '.join(flat_vars) + ' ' + cmd
@@ -1196,7 +1214,7 @@ class RemoteDevice(object):
           new_cmd += ['sudo']
         new_cmd += flat_vars
 
-      if isinstance(cmd, six.string_types):
+      if isinstance(cmd, str):
         cmd = ' '.join(new_cmd) + ' ' + cmd
       else:
         cmd = new_cmd + cmd
@@ -1226,6 +1244,36 @@ class RemoteDevice(object):
       True if the device has successfully rebooted.
     """
     return self.GetAgent().AwaitReboot(old_boot_id)
+
+  def GetDecompressor(self, compression):
+    """Returns a decompressor command on a remote device.
+
+    Args:
+      compression: The type of compression desired. See cros_build_lib.COMP_*.
+
+    Returns:
+      command to a decompressor as a string list.
+
+    Raises:
+      ValueError: If compression is unknown.
+    """
+
+    if compression == cros_build_lib.COMP_XZ:
+      prog = 'xz'
+    elif compression == cros_build_lib.COMP_GZIP:
+      prog = 'gzip'
+    elif compression == cros_build_lib.COMP_BZIP2:
+      prog = 'bzip2'
+    elif compression == cros_build_lib.COMP_NONE:
+      return ['cat']
+    else:
+      raise ValueError(f'Unknown compression: {compression}')
+
+    if self.HasProgramInPath(prog):
+      return [prog, '--decompress', '--stdout']
+
+    raise ProgramNotFoundError(
+        f'No decompressor found for compression: {compression}')
 
 
 class ChromiumOSDevice(RemoteDevice):
@@ -1319,6 +1367,11 @@ class ChromiumOSDevice(RemoteDevice):
     """The App ID of the device."""
     return self.lsb_release.get(cros_set_lsb_release.LSB_KEY_APPID_RELEASE, '')
 
+  @property
+  def root_dev(self):
+    """The current root device path."""
+    return self.run(['rootdev', '-s'], capture_output=True).stdout.strip()
+
   def _RemountRootfsAsWritable(self):
     """Attempts to Remount the root partition."""
     logging.info("Remounting '/' with rw...")
@@ -1370,6 +1423,11 @@ class ChromiumOSDevice(RemoteDevice):
     self.DisableRootfsVerification()
 
     return not self._RootfsIsReadOnly()
+
+  def ClearTpmOwner(self):
+    """Clears the TPM owner flag."""
+    logging.info('Clearing TPM owner.')
+    self.run(['crossystem', 'clear_tpm_owner_request=1'])
 
   def run(self, cmd, **kwargs):
     """Executes a shell command on the device with output captured by default.

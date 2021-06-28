@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for xbuddy.py."""
 
-from __future__ import print_function
-
+import configparser
 import os
 import shutil
 import tempfile
 import time
-
-import mock
-from six.moves import configparser
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import path_util
 from chromite.lib.xbuddy import xbuddy
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -86,7 +83,7 @@ class xBuddyTest(cros_test_lib.TestCase):
     with mock.patch.object(gs.GSContext, 'Cat', return_value='v') as cat_mock:
       self.assertEqual(self.mock_xb._LookupOfficial('b', suffix='-s'), 'b-s/v')
       cat_mock.assert_called_with(
-          'gs://chromeos-image-archive/b-s/LATEST-master', encoding='utf-8')
+          'gs://chromeos-image-archive/b-s/LATEST-main', encoding='utf-8')
 
   @mock.patch.object(xbuddy.XBuddy, '_GetLatestVersionFromGsDir',
                      side_effect=['4100.68.0', 'R28-4100.68.0'])

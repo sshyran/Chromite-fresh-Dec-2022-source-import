@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -17,25 +16,21 @@ been extended significantly since.
 """
 
 from __future__ import division
-from __future__ import print_function
 
 import collections
+import http.client
 import json
 import math
 import os
 import re
 import string
-import sys
-
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import retry_util
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 # Clearly mark perf values coming from chromite by default.
@@ -349,7 +344,7 @@ def _SendToDashboard(data_obj, dashboard=DASHBOARD_URL):
   except urllib.error.URLError as e:
     raise PerfUploadingError('URLError: %s for JSON %s\n' %
                              (str(e.reason), data_obj['data']), e)
-  except httplib.HTTPException as e:
+  except http.client.HTTPException as e:
     raise PerfUploadingError(
         'HTTPException for JSON %s\n' % data_obj['data'], e)
 

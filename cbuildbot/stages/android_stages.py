@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Module containing the Android stages."""
-
-from __future__ import print_function
 
 import os
 
@@ -50,9 +47,10 @@ class UprevAndroidStage(generic_stages.BuilderStage,
       logging.info('Not uprevving Android.')
       return
 
-    android_package = self._run.config.android_package
-    android_build_branch = self._run.config.android_import_branch
-    android_version = _GetAndroidVersionFromMetadata(self._run.attrs.metadata)
+    with osutils.ChdirContext(self._build_root):
+      android_package = self._run.config.android_package
+      android_build_branch = self._run.config.android_import_branch
+      android_version = _GetAndroidVersionFromMetadata(self._run.attrs.metadata)
 
     assert android_package
     assert android_build_branch
@@ -67,7 +65,6 @@ class UprevAndroidStage(generic_stages.BuilderStage,
     try:
       android_atom_to_build = commands.MarkAndroidAsStable(
           buildroot=self._build_root,
-          tracking_branch=self._run.manifest_branch,
           android_package=android_package,
           android_build_branch=android_build_branch,
           boards=self._boards,
@@ -165,7 +162,8 @@ class AndroidMetadataStage(generic_stages.BuilderStage,
     return (versions, branches, targets)
 
   def PerformStage(self):
-    versions, branches, targets = self._UpdateBoardDictsForAndroidBuildInfo()
+    with osutils.ChdirContext(self._build_root):
+      versions, branches, targets = self._UpdateBoardDictsForAndroidBuildInfo()
 
     # Unfortunately we can't inspect Android build info in slaves from masters,
     # so metadata is usually unavailable on masters (e.g. master-release).
@@ -243,14 +241,10 @@ class DownloadAndroidDebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
         'Downloading symbols of Android %s (%s)...',
         android_version, android_build_branch)
 
-    arch = self._run.DetermineAndroidABI(self._current_board)
-    variant = self._run.DetermineAndroidVariant(self._current_board)
-    android_target = self._run.DetermineAndroidTarget(self._current_board)
-    # For user builds, there are no suffix.
-    # For userdebug builds, there is an explicit '_userdebug' suffix.
-    suffix = ''
-    if variant != 'user':
-      suffix = '_' + variant
+    with osutils.ChdirContext(self._build_root):
+      arch = self._run.DetermineAndroidABI(self._current_board)
+      variant = self._run.DetermineAndroidVariant(self._current_board)
+      android_target = self._run.DetermineAndroidTarget(self._current_board)
 
     symbols_file_url = constants.ANDROID_SYMBOLS_URL_TEMPLATE % {
         'branch': android_build_branch,
@@ -258,7 +252,7 @@ class DownloadAndroidDebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
         'arch': arch,
         'version': android_version,
         'variant': variant,
-        'suffix': suffix}
+    }
     symbols_file = os.path.join(self.archive_path,
                                 constants.ANDROID_SYMBOLS_FILE)
     gs_context = gs.GSContext()

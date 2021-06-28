@@ -1,31 +1,27 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for generic stages."""
 
-from __future__ import print_function
-
 import contextlib
 import copy
 import os
 import sys
 import unittest
-
-import mock
+from unittest import mock
 
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cidb
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import fake_cidb
-from chromite.lib import failures_lib
 from chromite.lib import failure_message_lib
+from chromite.lib import failures_lib
+from chromite.lib import fake_cidb
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import partial_mock
@@ -419,7 +415,7 @@ class BuilderStageTest(AbstractStageTestCase):
     self.assertRaises(failures_lib.StepFailure, self._RunCapture, stage)
 
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'fail!')
     self.buildstore.StartBuildStage.assert_called_once_with(
         DEFAULT_BUILD_STAGE_ID)
@@ -440,7 +436,7 @@ class BuilderStageTest(AbstractStageTestCase):
     self.assertRaises(failures_lib.StepFailure, self._RunCapture, stage)
 
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'fail!')
     self.buildstore.StartBuildStage.assert_called_once_with(
         DEFAULT_BUILD_STAGE_ID)
@@ -507,7 +503,7 @@ class BuilderStageTest(AbstractStageTestCase):
 
     # Verify the results tracked the original exception.
     results = results_lib.Results.Get()[0]
-    self.assertTrue(isinstance(results.result, TestError))
+    self.assertIsInstance(results.result, TestError)
     self.assertEqual(str(results.result), 'first fail')
 
     self.assertEqual(stage.handled_exceptions, ['first fail'])
@@ -542,8 +538,8 @@ class BuilderStageGetBuildFailureMessage(AbstractStageTestCase):
     stage = self.ConstructStage()
     build_failure_msg = stage.GetBuildFailureMessageFromResults()
     self.assertEqual(build_failure_msg.builder, self.BOT_ID)
-    self.assertTrue(isinstance(build_failure_msg.failure_messages[0],
-                               failure_message_lib.StageFailureMessage))
+    self.assertIsInstance(build_failure_msg.failure_messages[0],
+                          failure_message_lib.StageFailureMessage)
 
   def testGetBuildFailureMessageWithoutBuildStore(self):
     """Test GetBuildFailureMessage without working BuildStore instance."""
@@ -688,3 +684,21 @@ class ArchivingStageMixinMock(partial_mock.PartialMock):
     with patch(commands, 'ArchiveFile', return_value='foo.txt'):
       with patch(commands, 'UploadArchivedFile'):
         self.backup['UploadArtifact'](*args, **kwargs)
+
+
+class ReportStageFailureTest(cros_test_lib.MockTestCase):
+  """Tests for ReportStageFailure."""
+
+  def testReportStageFailure(self):
+    """Test ReportStageFailure."""
+
+    class FakeStepFailure(failures_lib.StepFailure):
+      """A fake StepFailure subclass for unittest."""
+      EXCEPTION_CATEGORY = 'unittest'
+
+    fake_failure = FakeStepFailure('Toot! Toot!')
+    insert_failure_fn = self.PatchObject(generic_stages,
+                                         '_InsertFailureToMonarch')
+    generic_stages.ReportStageFailure(fake_failure, {})
+    insert_failure_fn.assert_called_once_with(exception_category='unittest',
+                                              metrics_fields={})

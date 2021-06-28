@@ -1,28 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for the functions in test_image."""
 
-from __future__ import print_function
-
 import os
-import sys
 import tempfile
 import unittest
 
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.scripts import test_image
-
-pytestmark = cros_test_lib.pytestmark_inside_only
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class TestImageTest(cros_test_lib.MockTempDirTestCase):
@@ -32,10 +24,15 @@ class TestImageTest(cros_test_lib.MockTempDirTestCase):
   """
 
   def setUp(self):
-    # create dummy image file
+    # Create empty image file.
     self.image_file = os.path.join(self.tempdir,
                                    constants.BASE_IMAGE_NAME + '.bin')
-    osutils.WriteFile(self.image_file, '')
+    osutils.AllocateFile(self.image_file, 1024 * 1024)
+    # In case sfdisk is in /sbin, search that too.
+    cros_build_lib.run(
+        ['sfdisk', self.image_file],
+        extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']},
+        input='label: dos')
     fake_partitions = (
         image_lib.PartitionInfo(1, 0, 0, 0, 'fs', 'STATE', 'flag'),
         image_lib.PartitionInfo(2, 0, 0, 0, 'fs', 'KERN-A', 'flag'),

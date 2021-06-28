@@ -1,25 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for buildstore library."""
 
-from __future__ import print_function
+from unittest import mock
 
-import sys
-
-import mock
-
+from chromite.lib import buildbucket_v2
+from chromite.lib import buildstore
 from chromite.lib import cidb
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import buildstore
-from chromite.lib import buildbucket_v2
 from chromite.lib import failure_message_lib
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 BuildStore = buildstore.BuildStore
@@ -116,7 +108,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     self.PatchObject(bs, '_IsCIDBClientMissing',
                      return_value=False)
     result = bs.InitializeClients()
-    self.assertTrue(isinstance(bs.bb_client, buildbucket_v2.BuildbucketV2))
+    self.assertIsInstance(bs.bb_client, buildbucket_v2.BuildbucketV2)
     self.assertEqual(result, True)
 
   def testInitializeClientsWhenBuildbucketIsNotNeeded(self):
@@ -461,7 +453,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
     self.PatchObject(bs.bb_client, 'GetStageFailures', return_value=fake_return)
     fail = bs.GetBuildsFailures(buildbucket_ids=[1234])
     bs.bb_client.GetStageFailures.assert_called_with(1234)
-    self.assertTrue(isinstance(fail[0], failure_message_lib.StageFailure))
+    self.assertIsInstance(fail[0], failure_message_lib.StageFailure)
     init.return_value = False
     with self.assertRaises(buildstore.BuildStoreException):
       bs.GetBuildsFailures(buildbucket_ids=buildbucket_ids)

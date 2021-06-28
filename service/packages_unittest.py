@@ -1,30 +1,29 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Packages service tests."""
 
-from __future__ import print_function
-
 import json
 import os
 import re
 
-from google.protobuf import json_format
-from google.protobuf.field_mask_pb2 import FieldMask
+from chromite.third_party.google.protobuf import json_format
+from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
 import pytest
 
 import chromite as cr
 from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
-    REPLICATION_TYPE_FILTER
+  ReplicationConfig, FileReplicationRule, FILE_TYPE_JSON,
+  REPLICATION_TYPE_FILTER
 )
 from chromite.cbuildbot import manifest_version
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import depgraph
+from chromite.lib import dependency_graph
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -47,21 +46,52 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
                          stdout='ANDROID_ATOM=android/android-1.0\n')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
 
-    packages.uprev_android('refs/tracking-branch', 'android/package',
-                           'refs/android-build-branch', Chroot(),
+    packages.uprev_android('android/package', Chroot(),
                            build_targets=build_targets)
     self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
                                 '--boards=foo:bar'])
     self.assertCommandContains(['emerge-foo'])
     self.assertCommandContains(['emerge-bar'])
+
+  def test_android_build_branch(self):
+    """Test specifying android_build_branch option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('android/package', Chroot(),
+                           android_build_branch='android-build-branch')
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--android_build_branch=android-build-branch'])
+
+  def test_android_version(self):
+    """Test specifying android_version option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('android/package', Chroot(),
+                           android_version='7123456')
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--force_version=7123456'])
+
+  def test_skip_commit(self):
+    """Test specifying skip_commit option."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='ANDROID_ATOM=android/android-1.0\n')
+
+    packages.uprev_android('android/package', Chroot(), skip_commit=True)
+    self.assertCommandContains(['cros_mark_android_as_stable',
+                                '--android_package=android/package',
+                                '--skip_commit'])
 
   def test_no_uprev(self):
     """Test no uprev handling."""
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
                          stdout='')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
-    packages.uprev_android('refs/tracking-branch', 'android/package',
-                           'refs/android-build-branch', Chroot(),
+    packages.uprev_android('android/package', Chroot(),
                            build_targets=build_targets)
 
     self.assertCommandContains(['cros_mark_android_as_stable',
@@ -1026,7 +1056,6 @@ class GetModelsTest(cros_test_lib.RunCommandTempDirTestCase):
                              'usr', 'bin')
     osutils.Touch(os.path.join(build_bin, 'cros_config_host'), makedirs=True)
 
-
   def testGetModels(self):
     """Test get_models."""
     build_target = build_target_lib.BuildTarget(self.board)
@@ -1056,12 +1085,13 @@ class GetKeyIdTest(cros_test_lib.MockTestCase):
     self.assertEqual(result, None)
 
 
-class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
-  """Tests for get_latest_drivefs_version_from_refs."""
+class GetLatestVersionTest(cros_test_lib.TestCase):
+  """Tests for get_latest_version_from_refs."""
 
   def setUp(self):
+    self.prefix = 'refs/tags/drivefs_'
     # The tag ref template.
-    ref_tpl = 'refs/tags/drivefs_%s'
+    ref_tpl = self.prefix + '%s'
 
     self.latest = '44.0.20'
     self.versions = ['42.0.1', self.latest, '44.0.19', '39.0.15']
@@ -1071,17 +1101,154 @@ class GetLatestDrivefsVersionTest(cros_test_lib.TestCase):
 
   def test_single_ref(self):
     """Test a single ref is supplied."""
+    # pylint: disable=protected-access
     self.assertEqual(self.latest,
-        packages.get_latest_drivefs_version_from_refs([self.latest_ref]))
+        packages._get_latest_version_from_refs(self.prefix, [self.latest_ref]))
 
   def test_multiple_ref_versions(self):
     """Test multiple refs supplied."""
+    # pylint: disable=protected-access
     self.assertEqual(self.latest,
-        packages.get_latest_drivefs_version_from_refs(self.refs))
+        packages._get_latest_version_from_refs(self.prefix, self.refs))
 
   def test_no_refs_returns_none(self):
     """Test no refs supplied."""
-    self.assertEqual(packages.get_latest_drivefs_version_from_refs([]), None)
+    # pylint: disable=protected-access
+    self.assertEqual(packages._get_latest_version_from_refs(self.prefix, []),
+                     None)
+
+
+class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
+  """Tests for needs_chrome_source."""
+
+  def _build_graph(self, with_chrome: bool, with_followers: bool):
+    root = '/build/build_target'
+    foo_bar = package_info.parse('foo/bar-1')
+    chrome = package_info.parse(f'{constants.CHROME_CP}-1.2.3.4')
+    followers = [
+        package_info.parse(f'{pkg}-1.2.3.4')
+        for pkg in constants.OTHER_CHROME_PACKAGES
+    ]
+    nodes = [dependency_graph.PackageNode(foo_bar, root)]
+    root_pkgs = ['foo/bar-1']
+    if with_chrome:
+      nodes.append(dependency_graph.PackageNode(chrome, root))
+      root_pkgs.append(chrome.cpvr)
+    if with_followers:
+      nodes.extend([dependency_graph.PackageNode(f, root) for f in followers])
+      root_pkgs.extend([f.cpvr for f in followers])
+
+    return dependency_graph.DependencyGraph(nodes, root, root_pkgs)
+
+  def test_needs_all(self):
+    """Verify we need source when we have no prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+
+  def test_needs_none(self):
+    """Verify not building any of the chrome packages prevents needing it."""
+    graph = self._build_graph(with_chrome=False, with_followers=False)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertFalse(result.needs_chrome_source)
+    self.assertFalse(result.builds_chrome)
+    self.assertFalse(result.packages)
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_needs_chrome_only(self):
+    """Verify only chrome triggers needs chrome source."""
+    graph = self._build_graph(with_chrome=True, with_followers=False)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(set([p.atom for p in result.packages]),
+                     {constants.CHROME_CP})
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_needs_followers_only(self):
+    """Verify only chrome followers triggers needs chrome source."""
+    graph = self._build_graph(with_chrome=False, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertFalse(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(set([p.atom for p in result.packages]),
+                     set(constants.OTHER_CHROME_PACKAGES))
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+
+  def test_has_prebuilts(self):
+    """Test prebuilts prevent us from needing chrome source."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=True)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target)
+
+    self.assertFalse(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertFalse(result.packages)
+    self.assertFalse(result.missing_chrome_prebuilt)
+    self.assertFalse(result.missing_follower_prebuilt)
+
+  def test_compile_source(self):
+    """Test compile source ignores prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=True)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target, compile_source=True)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
 
 
 class UprevDrivefsTest(cros_test_lib.MockTestCase):
@@ -1172,3 +1339,143 @@ class UprevDrivefsTest(cros_test_lib.MockTestCase):
         side_effect=[drivefs_outcome, drivefs_ipc_outcome])
     output = packages.uprev_drivefs(None, self.refs, None)
     self.assertTrue(output.uprevved)
+
+
+# TODO(chenghaoyang): Shouldn't use uprev_workon_ebuild_to_version.
+class UprevPerfettoTest(cros_test_lib.MockTestCase):
+  """Tests for uprev_perfetto."""
+
+  def setUp(self):
+    self.refs = [
+        GitRef(
+            path='/foo',
+            ref='refs/tags/v12.0',
+            revision='123')
+    ]
+    self.MOCK_PERFETTO_EBUILD_PATH = 'perfetto-12.0-r1.ebuild'
+
+  def revisionBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
+
+  def majorBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
+
+  def newerVersionOutcome(self):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.NEWER_VERSION_EXISTS)
+
+  def sameVersionOutcome(self):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.SAME_VERSION_EXISTS)
+
+  def test_latest_version_returns_none(self):
+    """Test no refs were supplied"""
+    output = packages.uprev_perfetto(None, [], None)
+    self.assertFalse(output.uprevved)
+
+  def test_perfetto_uprev_fails(self):
+    """Test a single ref is supplied."""
+    self.PatchObject(
+        uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_newer_version_exists(self):
+    """Test the newer version exists uprev should not happen."""
+    perfetto_outcome = self.newerVersionOutcome()
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_same_version_exists(self):
+    """Test the same version exists uprev should not happen."""
+    perfetto_outcome = self.sameVersionOutcome()
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_revision_bump_perfetto_package(self):
+    """Test perfetto package uprev."""
+    perfetto_outcome = self.revisionBumpOutcome(self.MOCK_PERFETTO_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_major_bump_perfetto_package(self):
+    """Test perfetto package uprev."""
+    perfetto_outcome = self.majorBumpOutcome(self.MOCK_PERFETTO_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[perfetto_outcome])
+    output = packages.uprev_perfetto(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+class UprevLacrosTest(cros_test_lib.MockTestCase):
+  """Tests for uprev_lacros"""
+
+  def setUp(self):
+    self.refs = [
+      GitRef(
+        path='/lacros',
+        ref='refs/heads/main',
+        revision='123.456.789.0'
+      )
+    ]
+    self.MOCK_LACROS_EBUILD_PATH = 'chromeos-lacros-123.456.789.0-r1.ebuild'
+
+  def revisionBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
+
+  def majorBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
+
+  def newEbuildCreatedOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(
+        uprev_lib.Outcome.NEW_EBUILD_CREATED, [ebuild_path])
+
+  def test_lacros_uprev_fails(self):
+    self.PatchObject(
+      uprev_lib,
+      'uprev_ebuild_from_pin',
+      side_effect=[None]
+    )
+    with self.assertRaises(IndexError):
+      packages.uprev_lacros(None, [], None)
+
+  def test_lacros_uprev_revision_bump(self):
+    lacros_outcome = self.revisionBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_ebuild_from_pin',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertEqual(output.outcome, uprev_lib.Outcome.REVISION_BUMP)
+
+  def test_lacros_uprev_version_bump(self):
+    lacros_outcome = self.majorBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_ebuild_from_pin',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertEqual(output.outcome, uprev_lib.Outcome.VERSION_BUMP)
+
+  def test_lacros_uprev_new_ebuild_created(self):
+    lacros_outcome = self.newEbuildCreatedOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_ebuild_from_pin',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertEqual(output.outcome, uprev_lib.Outcome.NEW_EBUILD_CREATED)

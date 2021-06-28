@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright 2014 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Test the license_lib module."""
 
-from __future__ import print_function
-
 import os
+from unittest import mock
 
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.licensing import licenses_lib
+
 
 # pylint: disable=protected-access
 
@@ -171,6 +171,29 @@ masters = %(masters)s
         },
     }
 
+    self.build_infos = {
+        'metapackage-with-files': {
+            'files': {
+                'CATEGORY': 'virtual',
+                'CONTENTS': """dir /foo
+sym /sym -> / 1611355469
+obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
+                'LICENSE': 'metapackage',
+                'PF': 'metapackage-with-files-1'
+            },
+            'expected_exception': licenses_lib.PackageCorrectnessError,
+        },
+        'metapackage-valid': {
+            'files': {
+                'CATEGORY': 'virtual',
+                'CONTENTS': '',
+                'LICENSE': 'metapackage',
+                'PF': 'metapackage-valid-1'
+            },
+            'expected_exception': None,
+        },
+    }
+
     # .ebuild content template.
     ebuild_template = 'LICENSE="%(license)s"'
 
@@ -223,6 +246,14 @@ masters = %(masters)s
                 )),
             )),
         )),
+        D('build_infos', (
+            D('metapackage-with-files', (
+                D('build-info', ('CATEGORY', 'CONTENTS', 'LICENSE', 'PF')),
+            )),
+            D('metapackage-valid', (
+                D('build-info', ('CATEGORY', 'CONTENTS', 'LICENSE', 'PF')),
+            )),
+        )),
     )
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
 
@@ -241,6 +272,11 @@ masters = %(masters)s
       content = ebuild_template % {'license': ebuild['license']}
       self.ebuilds[name]['content'] = content
       osutils.WriteFile(os.path.join(self.tempdir, ebuild['dir']), content)
+
+    for pkg, build_info in self.build_infos.items():
+      for filename, content in build_info['files'].items():
+        osutils.WriteFile(os.path.join(self.tempdir, 'build_infos', pkg,
+                                       'build-info', filename), content)
 
   def testGetLicenseTypesFromEbuild(self):
     """Tests the fetched license from ebuilds are correct."""
@@ -332,3 +368,26 @@ masters = %(masters)s
     with self.assertRaises(licenses_lib.PackageLicenseError):
       licenses_lib._CheckForDeprecatedLicense(
           'sys-apps/portage-123', {'no-source-code'})
+
+  def testHookPackageProcess(self):
+    build_infos_path = os.path.join(self.tempdir, 'build_infos')
+    for pkg, build_info in self.build_infos.items():
+      if build_info['expected_exception']:
+        with self.assertRaises(licenses_lib.PackageCorrectnessError):
+          licenses_lib.HookPackageProcess(os.path.join(build_infos_path, pkg))
+      else:
+        licenses_lib.HookPackageProcess(os.path.join(build_infos_path, pkg))
+
+  @mock.patch('chromite.lib.cros_build_lib.run')
+  def testListInstalledPackages(self, run_mock):
+    result = '[ U ] test to /build/test_dir\n[ U ] test2 to /build/test_dir'
+    run_mock.return_value = cros_build_lib.CommandResult(
+        args=[], returncode=0, stdout=result)
+    self.assertRaisesRegex(
+        AssertionError, r'^.*\[ U \] test.*\[ U \] test2.*$',
+        licenses_lib.ListInstalledPackages, '')
+
+    result = '[ R ] test to /build/test_dir\n[ R ] test2 to /build/test_dir'
+    run_mock.return_value = cros_build_lib.CommandResult(
+        args=[], returncode=0, stdout=result)
+    self.assertEqual(licenses_lib.ListInstalledPackages(''), ['test', 'test2'])

@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-path + os.sep)
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the binhost.py service."""
 
-from __future__ import print_function
-
 import os
-
-import mock
+from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib

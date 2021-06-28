@@ -1,37 +1,29 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unittests for the stage results."""
 
-from __future__ import print_function
-
+import io
 import os
 import signal
-import sys
 import time
+from unittest import mock
 
-import mock
-from six.moves import StringIO
-
-from chromite.lib import constants
-from chromite.lib import config_lib_unittest
-from chromite.lib import failures_lib
-from chromite.lib import results_lib
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cidb
+from chromite.lib import config_lib_unittest
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
+from chromite.lib import failures_lib
 from chromite.lib import fake_cidb
 from chromite.lib import parallel
+from chromite.lib import results_lib
 from chromite.lib.buildstore import FakeBuildStore
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 class PassStage(generic_stages.BuilderStage):
@@ -197,7 +189,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
       entry = actualResults[i]
 
       if entry.result not in results_lib.Results.NON_FAILURE_TYPES:
-        self.assertTrue(isinstance(entry.result, BaseException))
+        self.assertIsInstance(entry.result, BaseException)
         if isinstance(entry.result, failures_lib.StepFailure):
           self.assertEqual(str(entry.result), entry.description)
 
@@ -387,7 +379,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
             'Command "/bin/false /nosuchdir" failed.\n', result),
         time=4)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results)
 
@@ -429,7 +421,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
         'FailRunCommand msg',
         time=4)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results)
 
@@ -470,7 +462,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     # Store off a known set of results and generate a report
     results_lib.Results.Record('Pass', results_lib.Results.SUCCESS, time=1)
 
-    results = StringIO()
+    results = io.StringIO()
 
     results_lib.Results.Report(results, current_version)
 
@@ -499,15 +491,14 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     results_lib.Results.Record('Fail', FailStage.FAIL_EXCEPTION)
     results_lib.Results.Record('Pass2', results_lib.Results.SUCCESS)
 
-    saveFile = StringIO()
+    saveFile = io.StringIO()
     results_lib.Results.SaveCompletedStages(saveFile)
     self.assertEqual(saveFile.getvalue(), self._PassString())
 
   def testRestoreCompletedStages(self):
     """Tests that we can read in completed stages."""
 
-    results_lib.Results.RestoreCompletedStages(
-        StringIO(self._PassString()))
+    results_lib.Results.RestoreCompletedStages(io.StringIO(self._PassString()))
 
     previous = results_lib.Results.GetPrevious()
     self.assertEqual(list(previous), ['Pass'])
@@ -516,8 +507,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
     """Tests that we skip previously completed stages."""
 
     # Fake results_lib.Results.RestoreCompletedStages
-    results_lib.Results.RestoreCompletedStages(
-        StringIO(self._PassString()))
+    results_lib.Results.RestoreCompletedStages(io.StringIO(self._PassString()))
 
     self._runStages()
 
@@ -532,6 +522,6 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
   def testFailedButForgiven(self):
     """Tests that warnings are flagged as such."""
     results_lib.Results.Record('Warn', results_lib.Results.FORGIVEN, time=1)
-    results = StringIO()
+    results = io.StringIO()
     results_lib.Results.Report(results)
     self.assertTrue('@@@STEP_WARNINGS@@@' in results.getvalue())

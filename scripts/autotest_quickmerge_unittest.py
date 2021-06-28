@@ -1,21 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Unit tests for autotest_quickmerge."""
 
-from __future__ import print_function
-
-import sys
-
-import mock
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.scripts import autotest_quickmerge
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 RSYNC_TEST_OUTPUT = """.d..t...... ./
@@ -41,8 +33,8 @@ cd+++++++++ new_empty_directory/
 # that would rarely or never be encountered in the wild, rsync quickmerge
 # will exclude all files which contain the substring " -> " in their name.
 
-RSYNC_TEST_OUTPUT_FOR_PACKAGE_UPDATE = \
-""">f..t...... client/ardvark.py
+RSYNC_TEST_OUTPUT_FOR_PACKAGE_UPDATE = """\
+>f..t...... client/ardvark.py
 .d..t...... client/site_tests/
 >f+++++++++ client/site_tests/nothing.py
 .d..t...... client/site_tests/factory_Leds/

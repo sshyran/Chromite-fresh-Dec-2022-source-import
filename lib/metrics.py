@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -11,21 +10,19 @@ deployed with your code.
 """
 
 from __future__ import division
-from __future__ import print_function
 
 import collections
 import contextlib
+from functools import wraps
+import queue as Queue
 import ssl
 import time
-from functools import wraps
-
-import six
-from six.moves import queue as Queue
 
 from chromite.lib import cros_logging as logging
 
+
 try:
-  from infra_libs import ts_mon
+  from chromite.third_party.infra_libs import ts_mon
 except (ImportError, RuntimeError):
   ts_mon = None
 
@@ -147,7 +144,7 @@ class FieldSpecAdapter(object):
       bool: ts_mon.BooleanField,
       int: ts_mon.IntegerField,
       str: ts_mon.StringField,
-      six.text_type: ts_mon.StringField,
+      str: ts_mon.StringField,
   }
 
   def __init__(self, metric_cls, *args, **kwargs):

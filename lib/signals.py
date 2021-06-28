@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2011-2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Signal related functionality."""
-
-from __future__ import print_function
 
 import signal
 import contextlib
@@ -131,7 +128,8 @@ def StrSignal(sig_num):
   # Probe the module looking for matching signal constant.
   sig_names = []
   for name, num in signal.__dict__.items():
-    if name.startswith('SIG') and num == sig_num:
+    # Filter out SIG_DFL and related constants.
+    if name.startswith('SIG') and name[3] != '_' and num == sig_num:
       sig_names.append(name)
   if sig_names:
     return '|'.join(sig_names)

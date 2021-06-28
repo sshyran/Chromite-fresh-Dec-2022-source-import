@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Import keys from legacy signer config."""
 
-from __future__ import print_function
-
+import configparser
 import os
 
-from six.moves import configparser
 import yaml # pylint: disable=import-error
 
 from chromite.lib import commandline
@@ -51,7 +48,7 @@ class KeyringData(object):
     default = {'metadata-version': METADATA_VERSION}
     if os.path.exists(self.contents_yaml):
       with open(self.contents_yaml) as fp:
-        ret = yaml.load(fp)
+        ret = yaml.safe_load(fp)
       if not ret or 'metadata-version' not in ret:
         logging.error('%s: no metadata-version.', self.contents_yaml)
         raise KeyimportError('metadata-version missing.')

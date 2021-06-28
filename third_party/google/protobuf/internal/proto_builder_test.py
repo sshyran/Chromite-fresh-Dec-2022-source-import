@@ -41,10 +41,10 @@ try:
 except ImportError:
   import unittest
 
-from google.protobuf import descriptor_pb2
-from google.protobuf import descriptor_pool
-from google.protobuf import proto_builder
-from google.protobuf import text_format
+from chromite.third_party.google.protobuf import descriptor_pb2
+from chromite.third_party.google.protobuf import descriptor_pool
+from chromite.third_party.google.protobuf import proto_builder
+from chromite.third_party.google.protobuf import text_format
 
 
 class ProtoBuilderTest(unittest.TestCase):

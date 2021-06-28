@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Script for dumping build config contents."""
-
-from __future__ import print_function
 
 import sys
 
@@ -13,9 +10,6 @@ from chromite.config import chromeos_config
 from chromite.lib import constants
 from chromite.lib import commandline
 from chromite.lib import pformat
-
-
-assert sys.version_info >= (3, 6), 'This module requires Python 3.6+'
 
 
 def GetParser():
