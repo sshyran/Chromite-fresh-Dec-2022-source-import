@@ -45,6 +45,8 @@ def get_config(servo):
   elif servo.is_ccd:
     # Note nothing listed for flashing with ccd_cr50 on go/volteer-care.
     # These commands were based off the commands for other boards.
+    dut_control_on = []
+    dut_control_off = []
     programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
   else:
     raise servo_lib.UnsupportedServoVersionError('%s not supported' %
