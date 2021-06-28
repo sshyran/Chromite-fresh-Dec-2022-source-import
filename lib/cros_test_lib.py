@@ -536,12 +536,25 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     # be configured per-user.
     os.environ['NOCOLOR'] = 'no'
 
+    self.__global_config_patchers__ = [
+        mock.patch.object(cros_build_lib, 'GetDefaultBoard', return_value=None)
+    ]
+    for p in self.__global_config_patchers__:
+      p.start()
+
   def tearDown(self):
     self._CheckTestEnv('%s.tearDown' % (self.id(),))
 
     osutils.SetEnvironment(self.__saved_env__)
     os.chdir(self.__saved_cwd__)
     os.umask(self.__saved_umask__)
+
+    try:
+      cros_build_lib.SafeRun([p.stop for p in self.__global_config_patchers__] +
+                             [mock.patch.stopall])
+    except RuntimeError:
+      # "stop called on unstarted patcher".
+      pass
 
   def id(self):
     """Return a name that can be passed in via the command line."""

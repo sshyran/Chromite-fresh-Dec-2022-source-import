@@ -38,7 +38,6 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
   def testBuildBoardHandling(self):
     """Test the argument handling."""
     # No board and no default should raise an error.
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
     with self.assertRaises(image.InvalidArgumentError):
       image.Build()
 
@@ -154,7 +153,6 @@ class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
 
   def testNoBoardFails(self):
     """Should fail when not given a valid board-ish value."""
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
     with self.assertRaises(image.InvalidArgumentError):
       image.BuildRecoveryImage('')
 

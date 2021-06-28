@@ -27,7 +27,6 @@ class SecurityTestImageTest(cros_test_lib.MockTempDirTestCase):
     """Argument parsing tests."""
     # pylint: disable=protected-access
     # Test no arguments.
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
     with self.assertRaises(SystemExit):
       security_test_image._ParseArgs([])
 
