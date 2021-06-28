@@ -27,6 +27,7 @@ from chromite.api import router as router_lib
 from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
@@ -94,6 +95,11 @@ def write_script(filename, service, method):
 
 
 def write_scripts(build_target, force=False):
+  fmt_vars = {
+      'build_target': build_target,
+      'chroot': constants.DEFAULT_CHROOT_PATH,
+      'src_root': constants.SOURCE_ROOT,
+  }
   for service_data in get_services():
     for method_data in service_data['methods']:
       filename = '__'.join([service_data['name'], method_data['name']])
@@ -110,7 +116,7 @@ def write_scripts(build_target, force=False):
       elif os.path.exists(example_input):
         logging.info('Example %s exists, building input.', example_input)
         content = osutils.ReadFile(example_input)
-        osutils.WriteFile(input_file, content % {'build_target': build_target})
+        osutils.WriteFile(input_file, content % fmt_vars)
       elif not os.path.exists(input_file):
         logging.info('No input could be found, writing empty input.')
         osutils.WriteFile(input_file, '{}')
