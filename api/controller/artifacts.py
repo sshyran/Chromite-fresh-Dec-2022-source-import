@@ -60,6 +60,11 @@ def Get(input_proto, output_proto, _config):
   output_dir = input_proto.result_path.path.path
 
   sysroot = controller_util.ParseSysroot(input_proto.sysroot)
+  # This endpoint does not currently support any artifacts that are built
+  # without a sysroot being present.
+  if not sysroot.path:
+    return controller.RETURN_CODE_SUCCESS
+
   chroot = controller_util.ParseChroot(input_proto.chroot)
   build_target = controller_util.ParseBuildTarget(
       input_proto.sysroot.build_target)
