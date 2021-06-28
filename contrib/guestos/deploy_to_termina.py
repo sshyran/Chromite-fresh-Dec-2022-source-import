@@ -116,13 +116,12 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
             mode='rsync',
             files_from=files_file)
 
-    logging.notice('Repacking DLC, this is the slow bit')
-    # TODO(1222489): Add -nocompress to dlctool once http://crrev/c/2977279
-    # lands.
+    logging.notice('Repacking DLC')
     command = textwrap.dedent(f"""
         cd {remote_dir} &&
         umount vm_rootfs vm_tools &&
-        dlctool --id termina-dlc dlc""")
+        dlctool --id termina-dlc dlc $(
+          grep -qm1 compress $(which dlctool) && echo --nocompress)""")
     remote.run(command, shell=True, capture_output=False)
 
 
