@@ -1131,6 +1131,7 @@ def _GetSkylabCreateSuiteArgs(build,
                               board,
                               pool,
                               model=None,
+                              extra_dims=None,
                               priority=None,
                               timeout_mins=None,
                               max_retries=None,
@@ -1147,6 +1148,7 @@ def _GetSkylabCreateSuiteArgs(build,
     board: board name to run suite for
     pool: pool to run the suite in
     model: (optional) model name to run suite for
+    extra_dims: (optional) list of additional scheduling dimensions
     priority: (optional) integer priority for the suite. Higher number is a
         lower priority
     timeout_mins: (optional) suite timeout
@@ -1167,6 +1169,10 @@ def _GetSkylabCreateSuiteArgs(build,
 
   if pool is not None:
     args += ['-pool', pool]
+
+  if extra_dims is not None:
+    for dim in extra_dims:
+      args += ['-dim', dim]
 
   if priority is not None:
     args += ['-priority', str(priority)]
@@ -1220,6 +1226,7 @@ def RunSkylabHWTestSuite(
     model=None,
     # TODO(akeshet): Make this required argument a positional arg.
     pool=None,
+    extra_dims=None,
     wait_for_results=False,
     priority=None,
     timeout_mins=120,
@@ -1267,6 +1274,7 @@ def RunSkylabHWTestSuite(
       board,
       pool,
       model=model,
+      extra_dims=extra_dims,
       priority=priority,
       timeout_mins=timeout_mins,
       max_retries=max_retries,
