@@ -158,7 +158,7 @@ def RevGitFile(filename, data, dryrun=False):
   remote_name = git.RunGit(cwd, ['remote']).stdout.strip()
   gerrit_helper = gerrit.GetGerritHelper(remote_name)
   remote_url = git.RunGit(
-      cwd,['config', '--get', f'remote.{remote_name}.url']).stdout.strip()
+      cwd, ['config', '--get', f'remote.{remote_name}.url']).stdout.strip()
   description = '%s: updating %s' % (os.path.basename(filename),
                                      ', '.join(data.keys()))
   # UpdateLocalFile will print out the keys/values for us.
@@ -173,8 +173,9 @@ def RevGitFile(filename, data, dryrun=False):
       cwd, prebuilt_branch, for_push=True, for_checkout=False)
   gpatch = gerrit_helper.CreateGerritPatch(
       cwd, remote_url, ref=tracking_info.ref)
-  gerrit_helper.SetReview(gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun)
-  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun)
+  gerrit_helper.SetReview(
+      gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun, notify='NONE')
+  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun, notify='NONE')
 
 
 def GetVersion():
