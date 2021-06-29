@@ -777,7 +777,7 @@ class ChrootCreator:
     host_tz = '/' / tz_path
     chroot_tz = self.chroot_path / tz_path
     # Nuke it in case it's a broken symlink.
-    chroot_tz.unlink(missing_ok=True)
+    osutils.SafeUnlink(chroot_tz)
     if host_tz.exists():
       logging.debug('%s: copying from %s', chroot_tz, host_tz)
       chroot_tz.write_bytes(host_tz.read_bytes())
