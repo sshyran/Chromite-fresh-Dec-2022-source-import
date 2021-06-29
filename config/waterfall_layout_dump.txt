@@ -347,6 +347,7 @@
     mancomb-release
     mistral-release
     mushu-release
+    nami-kernelnext-release
     nami-release
     nautilus-release
     ninja-release
@@ -1559,6 +1560,7 @@
     mancomb-release-tryjob
     mistral-release-tryjob
     mushu-release-tryjob
+    nami-kernelnext-release-tryjob
     nami-release-tryjob
     nautilus-release-tryjob
     ninja-release-tryjob
@@ -1652,6 +1654,12 @@
   mushu-unittest-stress
   nami-factory-nami-10715.B-factorybranch-tryjob
   nami-full-tryjob
+  nami-kernelnext-full-tryjob
+  nami-kernelnext-llvm-next-toolchain-tryjob
+  nami-kernelnext-llvm-toolchain-tryjob
+  nami-kernelnext-payloads-tryjob
+  nami-kernelnext-release-tryjob
+  nami-kernelnext-unittest-stress
   nami-llvm-next-toolchain-tryjob
   nami-llvm-toolchain-tryjob
   nami-payloads-tryjob
