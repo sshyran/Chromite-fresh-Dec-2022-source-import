@@ -376,7 +376,9 @@ def _fetch_clippy_lints():
   return findings_protos
 
 
-# TODO(b/188589668): add input validation
+@validate.exists('sysroot.path')
+@validate.require('packages')
+@validate.validation_complete
 def GetClippyLints(input_proto, output_proto, _config):
   """Emerges the given packages and retrieves any findings from Cargo Clippy."""
   chroot_util.Emerge(
