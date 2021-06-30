@@ -626,18 +626,6 @@
       ]
     },
     {
-      "name": "nami-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "nami",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "ninja",
       "configs": [
         {
@@ -5447,6 +5435,87 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 351,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "nami-kernelnext",
+      "reference_board_name": "nami-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "nami-kernelnext",
+          "name": "akali",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "akali360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "bard",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "ekko",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "nami",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "pantheon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "sona",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "syndra",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
+          "is_active": true
+        },
+        {
+          "board_name": "nami-kernelnext",
+          "name": "vayne",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7195,
           "is_active": true
         }
       ]
