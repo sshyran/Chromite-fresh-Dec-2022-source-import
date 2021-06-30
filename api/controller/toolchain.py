@@ -12,6 +12,7 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
 from chromite.lib import toolchain_util
 from chromite.lib import chroot_util
@@ -381,11 +382,11 @@ def _fetch_clippy_lints():
 @validate.validation_complete
 def GetClippyLints(input_proto, output_proto, _config):
   """Emerges the given packages and retrieves any findings from Cargo Clippy."""
-  chroot_util.Emerge(
-      [package.package_name for package in input_proto.packages],
-      sysroot=input_proto.sysroot.path,
-      with_deps=False,
-      rebuild_deps=True,
-      # TODO(b/188590586): consider setting jobs to emerge in parallel
+  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
+  package_names = [package.package_name for package in input_proto.packages]
+  cros_build_lib.sudo_run(
+    emerge_cmd + package_names,
+    preserve_env=True,
+    extra_env={'ENABLE_RUST_CLIPPY':1}
   )
   output_proto.findings.extend(_fetch_clippy_lints())
