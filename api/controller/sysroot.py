@@ -68,21 +68,24 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
     A list of dictionary mappings of ArtifactType to list of paths.
   """
   generated = []
-  artifact_types = {
-    in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
-    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols
-  }
-
   for output_artifact in in_proto.output_artifacts:
-    for artifact_type, func in artifact_types.items():
-      if artifact_type in output_artifact.artifact_types:
-        result = func(chroot, sysroot_class, build_target, output_dir)
-        if result:
-          generated.append({
-              'paths': [result] if isinstance(result, str) else result,
-              'type': artifact_type,
-          })
-
+    if (in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS
+        in output_artifact.artifact_types):
+      result_path = sysroot.BundleBreakpadSymbols(chroot, sysroot_class,
+                                                  build_target, output_dir)
+      if result_path:
+        generated.append({
+            'paths': [result_path],
+            'type': in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS,
+        })
+    if in_proto.ArtifactType.DEBUG_SYMBOLS in output_artifact.artifact_types:
+      result_path = sysroot.BundleDebugSymbols(chroot, sysroot_class,
+                                               build_target, output_dir)
+      if result_path:
+        generated.append({
+            'paths': [result_path],
+            'type': in_proto.ArtifactType.DEBUG_SYMBOLS,
+        })
   return generated
 
 

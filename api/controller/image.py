@@ -7,7 +7,6 @@
 The image related API endpoints should generally be found here.
 """
 
-import functools
 import os
 
 from chromite.api import controller
@@ -104,7 +103,7 @@ def ExampleGetResponse():
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
         chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-        build_target: build_target_lib.BuildTarget, output_dir) -> list:
+        _build_target: build_target_lib.BuildTarget, output_dir) -> list:
   """Builds and copies images to specified output_dir.
 
   Copies (after optionally bundling) all required images into the output_dir,
@@ -123,28 +122,20 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
   Returns:
     A list of dictionary mappings of ArtifactType to list of paths.
   """
-  base_path = chroot.full_path(sysroot_class.path)
-  board = build_target.name
-
   generated = []
-  dlc_func = functools.partial(image.copy_dlc_image, base_path)
-  license_func = functools.partial(image.copy_license_credits, board)
-  artifact_types = {
-    in_proto.ArtifactType.DLC_IMAGE: dlc_func,
-    in_proto.ArtifactType.LICENSE_CREDITS: license_func,
-  }
+  base_path = chroot.full_path(sysroot_class.path)
 
   for output_artifact in in_proto.output_artifacts:
-    for artifact_type, func in artifact_types.items():
-      if artifact_type in output_artifact.artifact_types:
-        result = func(output_dir)
-        if result:
-          generated.append({
-              'paths': [result] if isinstance(result, str) else result,
-              'type': artifact_type,
-          })
-
+    if in_proto.ArtifactType.DLC_IMAGE in output_artifact.artifact_types:
+      # Handling DLC copying.
+      result_paths = image.copy_dlc_image(base_path, output_dir)
+      if result_paths:
+        generated.append({
+            'paths': result_paths,
+            'type': in_proto.ArtifactType.DLC_IMAGE,
+        })
   return generated
+
 
 def _CreateResponse(_input_proto, output_proto, _config):
   """Set output_proto success field on a successful Create response."""
