@@ -121,7 +121,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
         chroot={'path': chroot_path, 'cache_dir': cache_dir},
         flags={'empty_sysroot': empty_sysroot},
         packages=formatted_packages,
-        package_blacklist=formatted_blocklist,
+        package_blocklist=formatted_blocklist,
     )
 
   def _GetOutput(self):

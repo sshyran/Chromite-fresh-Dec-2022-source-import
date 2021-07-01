@@ -99,9 +99,7 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
     packages.append(cpv.cp)
 
   # Skipped tests.
-  # TODO: Remove blacklist when we fully switch to blocklist.
-  blocklisted_package_info = (
-      input_proto.package_blacklist or input_proto.package_blocklist)
+  blocklisted_package_info = input_proto.package_blocklist
   blocklist = []
   for package_info_msg in blocklisted_package_info:
     blocklist.append(controller_util.PackageInfoToString(package_info_msg))
