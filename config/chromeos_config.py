@@ -2634,10 +2634,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
 
       'trogdor64-release': {
           'sign_types': ['recovery', 'factory'],
-          # Trogdor64 has no DUTs in the lab. (b/152055929)
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'b/152055929',
       },
 
       'shadowkeep-release': {
