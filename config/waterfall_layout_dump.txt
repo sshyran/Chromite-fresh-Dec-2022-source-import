@@ -408,6 +408,7 @@
     zork-borealis-release
     zork-floss-release
     zork-kernelnext-release
+    zork-minios-release
     zork-release
   master-release-basic
     atlas-release-basic
@@ -1621,6 +1622,7 @@
     zork-borealis-release-tryjob
     zork-floss-release-tryjob
     zork-kernelnext-release-tryjob
+    zork-minios-release-tryjob
     zork-release-tryjob
   master-vmmst-android-pfq-tryjob
     betty-arcvm-master-vmmst-android-pfq-tryjob
@@ -2140,6 +2142,12 @@
   zork-kernelnext-unittest-stress
   zork-llvm-next-toolchain-tryjob
   zork-llvm-toolchain-tryjob
+  zork-minios-full-tryjob
+  zork-minios-llvm-next-toolchain-tryjob
+  zork-minios-llvm-toolchain-tryjob
+  zork-minios-payloads-tryjob
+  zork-minios-release-tryjob
+  zork-minios-unittest-stress
   zork-payloads-tryjob
   zork-release-tryjob
   zork-unittest-stress

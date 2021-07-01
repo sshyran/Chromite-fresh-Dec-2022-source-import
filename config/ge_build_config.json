@@ -924,7 +924,7 @@
           "experimental": true,
           "leader_board": false,
           "board_group": "",
-          "arch": "UNKNOWN"
+          "arch": "X86_INTERNAL"
         }
       ]
     }
@@ -4488,6 +4488,17 @@
         {
           "board_name": "jacuzzi",
           "name": "cozmo",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 401,
