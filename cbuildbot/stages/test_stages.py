@@ -126,7 +126,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
     self._board_name = lab_board_name or board
 
     self._pool = suite_config.pool
-    self.extra_dims = []
+    self._extra_dims = []
     dut_dims_override = self._run.options.hwtest_dut_override
     if dut_dims_override:
       self._pool = dut_dims_override.pool
