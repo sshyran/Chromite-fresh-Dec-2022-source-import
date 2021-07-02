@@ -915,18 +915,6 @@
           "arch": "X86_INTERNAL"
         }
       ]
-    },
-    {
-      "name": "zork-minios",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
     }
   ],
   "release_branch": false,
@@ -9357,6 +9345,127 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 452,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "zork-minios",
+      "reference_board_name": "zork-minios",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "zork-minios",
+          "name": "berknip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "dalboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "dirinboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "ezkinil",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "gumboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "jelboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "jelboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "morphius",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "shuboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "trembyle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "vilboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "vilboz14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "vilboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-minios",
+          "name": "woomax",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7193,
           "is_active": true
         }
       ]
