@@ -8,7 +8,6 @@ This service houses the high level business logic for all created artifacts.
 """
 
 import collections
-import fnmatch
 import glob
 import os
 import shutil
@@ -274,12 +273,6 @@ def ArchiveFilesFromImageDir(images_dir, archive_path):
     list[str] - The paths to the tarballs.
   """
   images = []
-  for prefix in [constants.VM_DISK_PREFIX, constants.VM_MEM_PREFIX]:
-    for path, _, filenames in os.walk(images_dir):
-      images.extend([
-          os.path.join(path, filename)
-          for filename in fnmatch.filter(filenames, prefix + '*')
-      ])
 
   tar_files = []
   for image_path in images:

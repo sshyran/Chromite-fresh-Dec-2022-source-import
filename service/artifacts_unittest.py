@@ -352,11 +352,7 @@ class BundleVmFilesTest(cros_test_lib.TempDirTestCase):
 
     # Create a set of files where some should get bundled up as VM files.
     # Add a suffix (123) to one of the files matching the VM pattern prefix.
-    vm_files = ('file1.txt',
-                'file2.txt',
-                'chromiumos_qemu_disk.bin' + '123',
-                'chromiumos_qemu_mem.bin'
-               )
+    vm_files = ('file1.txt', 'file2.txt')
 
     target_test_dir = os.path.join(chroot_path, test_results_dir)
     cros_test_lib.CreateOnDiskHierarchy(target_test_dir, vm_files)
@@ -367,9 +363,7 @@ class BundleVmFilesTest(cros_test_lib.TempDirTestCase):
 
     archives = artifacts.BundleVmFiles(
         chroot, test_results_dir, output_dir)
-    expected_archive_files = [
-        output_dir + '/chromiumos_qemu_disk.bin' + '123.tar',
-        output_dir + '/chromiumos_qemu_mem.bin.tar']
+    expected_archive_files = []
     self.assertCountEqual(archives, expected_archive_files)
 
 

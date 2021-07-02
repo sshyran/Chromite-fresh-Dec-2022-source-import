@@ -596,14 +596,12 @@ Some random stuff.
     image_dir = os.path.join(test_buildroot, 'chroot', 'testResultsDir')
     test_path_archive_output = os.path.join(self.tempdir, 'testResultsDir')
     os.makedirs(test_path_archive_output)
-    vm_files = ['abc.txt', 'chromiumos_qemu_mem.bin']
+    vm_files = ['abc.txt']
     cros_test_lib.CreateOnDiskHierarchy(image_dir, vm_files)
     result = vm_test_stages.ArchiveVMFiles(test_buildroot, 'testResultsDir',
                                            test_path_archive_output)
     # The expected output is the test_path_archive_output with the one file that
     # matches the constants VM pattern prefix, which will be converted to a
     # .bin.tar file.
-    expected_result = [
-        os.path.join(test_path_archive_output, 'chromiumos_qemu_mem.bin.tar')
-    ]
+    expected_result = []
     self.assertEqual(result, expected_result)
