@@ -53,8 +53,10 @@ from chromite.service import artifacts as artifacts_service
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'
-CHROME_KEYWORDS_FILE = ('/build/%(board)s/etc/portage/package.keywords/chrome')
-CHROME_UNMASK_FILE = ('/build/%(board)s/etc/portage/package.unmask/chrome')
+CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s'
+                        '/build/%(board)s/etc/portage/package.keywords/chrome')
+CHROME_UNMASK_FILE = ('%(buildroot)s/%(chroot)s'
+                      '/build/%(board)s/etc/portage/package.unmask/chrome')
 _CROS_ARCHIVE_URL = 'CROS_ARCHIVE_URL'
 _FACTORY_SHIM = 'factory_shim'
 _AUTOTEST_RPC_CLIENT = ('/b/build_internal/scripts/slave-internal/autotest_rpc/'
@@ -2018,7 +2020,11 @@ def MarkChromeAsStable(buildroot,
         data += f'={package}-{atom.vr}\n'
 
       for cfg_file in (CHROME_KEYWORDS_FILE, CHROME_UNMASK_FILE):
-        cfg_file %= {'board': board}
+        cfg_file %= {
+            'buildroot': buildroot,
+            'chroot': constants.DEFAULT_CHROOT_DIR,
+            'board': board,
+        }
         osutils.WriteFile(cfg_file, data, makedirs=True, sudo=True)
 
     # Sanity check: We should always be able to merge the version of
@@ -2040,10 +2046,12 @@ def MarkChromeAsStable(buildroot,
 def CleanupChromeKeywordsFile(boards, buildroot):
   """Cleans chrome uprev artifact if it exists."""
   for board in boards:
-    keywords_path_in_chroot = CHROME_KEYWORDS_FILE % {'board': board}
-    keywords_file = '%s/chroot%s' % (buildroot, keywords_path_in_chroot)
-    if os.path.exists(keywords_file):
-      cros_build_lib.sudo_run(['rm', '-f', keywords_file])
+    keywords_file = CHROME_KEYWORDS_FILE % {
+        'buildroot': buildroot,
+        'chroot': constants.DEFAULT_CHROOT_DIR,
+        'board': board,
+    }
+    osutils.SafeUnlink(keywords_file, sudo=True)
 
 
 def UprevPackages(buildroot, boards, overlay_type, workspace=None):

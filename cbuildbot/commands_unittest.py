@@ -1961,9 +1961,9 @@ class MarkChromeAsStableTest(cros_test_lib.RunCommandTempDirTestCase):
     self.rc.AddCmdResult(
         partial_mock.In(
             os.path.join(chromite_bindir, 'cros_mark_chrome_as_stable')),
-        stdout='=chromeos-base/chromeos-chrome-1234_alpha-r1')
+        stdout='CHROME_VERSION_ATOM=chromeos-base/chromeos-chrome-123_alpha-r1')
 
     ret = commands.MarkChromeAsStable(
         buildroot, 'main', constants.CHROME_REV_SPEC, [board],
         chrome_version='HEAD')
-    assert ret == 'chromeos-base/chromeos-chrome-1234_alpha-r1'
+    assert ret == 'chromeos-base/chromeos-chrome-123_alpha-r1'
