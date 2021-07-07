@@ -12,6 +12,7 @@ from typing import List, Mapping, Union
 from chromite.lib import constants
 from chromite.lib import git
 from chromite.lib import osutils
+from chromite.lib import path_util
 from chromite.lib import portage_util
 
 
@@ -25,38 +26,6 @@ class MissingCacheEntry(Error):
 
 class NoMatchingFileForDigest(Error):
   """No ebuild or eclass file could be found with the given MD5 digest."""
-
-
-def normalize_source_paths(source_paths):
-  """Return the "normalized" form of a list of source paths.
-
-  Normalizing includes:
-    * Sorting the source paths in alphabetical order.
-    * Remove paths that are sub-path of others in the source paths.
-    * Ensure all the directory path strings are ended with the trailing '/'.
-    * Convert all the path from absolute paths to relative path (relative to
-      the chroot source root).
-  """
-  for i, path in enumerate(source_paths):
-    assert os.path.isabs(path), 'path %s is not an aboslute path' % path
-    source_paths[i] = os.path.normpath(path)
-
-  source_paths.sort()
-
-  results = []
-
-  for i, path in enumerate(source_paths):
-    is_subpath_of_other = False
-    for j, other in enumerate(source_paths):
-      if j != i and osutils.IsSubPath(path, other):
-        is_subpath_of_other = True
-    if not is_subpath_of_other:
-      if os.path.isdir(path) and not path.endswith('/'):
-        path += '/'
-      path = os.path.relpath(path, constants.SOURCE_ROOT)
-      results.append(path)
-
-  return results
 
 
 def _get_eclasses_for_ebuild(ebuild_path, path_cache, overlay_dirs):
@@ -264,6 +233,6 @@ def get_source_path_mapping(
                        constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos', 'config'))
 
   for p in results:
-    results[p] = normalize_source_paths(results[p])
+    results[p] = path_util.normalize_paths_to_source_root(results[p])
 
   return results

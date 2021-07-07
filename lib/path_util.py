@@ -7,6 +7,7 @@
 import collections
 import os
 import tempfile
+from typing import List
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -360,3 +361,37 @@ def FromChrootPath(path, source_path=None):
     The same path converted to "outside chroot" namespace.
   """
   return ChrootPathResolver(source_path=source_path).FromChroot(path)
+
+
+def normalize_paths_to_source_root(
+    source_paths: List[str],
+    source_root: str = constants.SOURCE_ROOT) -> List[str]:
+  """Return the "normalized" list of source paths relative to |source_root|.
+
+  Normalizing includes:
+    * Sorting the source paths in alphabetical order.
+    * Remove paths that are sub-path of others in the source paths.
+    * Ensure all the directory path strings are ended with the trailing '/'.
+    * Convert all the path from absolute paths to relative path (relative to
+      the |source_root|).
+  """
+  for i, path in enumerate(source_paths):
+    assert os.path.isabs(path), 'path %s is not an aboslute path' % path
+    source_paths[i] = os.path.normpath(path)
+
+  source_paths.sort()
+
+  results = []
+
+  for i, path in enumerate(source_paths):
+    is_subpath_of_other = False
+    for j, other in enumerate(source_paths):
+      if j != i and osutils.IsSubPath(path, other):
+        is_subpath_of_other = True
+    if not is_subpath_of_other:
+      if os.path.isdir(path) and not path.endswith('/'):
+        path += '/'
+      path = os.path.relpath(path, source_root)
+      results.append(path)
+
+  return results

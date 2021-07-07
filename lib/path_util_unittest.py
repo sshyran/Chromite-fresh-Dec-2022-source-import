@@ -12,6 +12,7 @@ from unittest import mock
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import git
+from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import path_util
 
@@ -306,3 +307,50 @@ class TestPathResolver(cros_test_lib.MockTestCase):
     # Should be able to handle translating the linked location to a chroot path.
     self.assertEqual('/some/path',
                      resolver.ToChroot('/another/path/some/path'))
+
+
+def test_normalize_paths_to_source_root_collapsing_sub_paths():
+  """Test normalize removes sub paths."""
+  actual_paths = path_util.normalize_paths_to_source_root(
+      [os.path.join(constants.SOURCE_ROOT, 'foo'),
+       os.path.join(constants.SOURCE_ROOT, 'ab', 'cd'),
+       os.path.join(constants.SOURCE_ROOT, 'foo', 'bar')])
+  expected_paths = {'ab/cd', 'foo'}
+  assert set(actual_paths) == expected_paths
+
+  actual_paths = path_util.normalize_paths_to_source_root([
+      os.path.join(constants.SOURCE_ROOT, 'foo', 'bar'),
+      os.path.join(constants.SOURCE_ROOT, 'ab', 'cd'),
+      os.path.join(constants.SOURCE_ROOT, 'foo', 'bar', '..'),
+      os.path.join(constants.SOURCE_ROOT, 'ab', 'cde'),
+  ])
+  expected_paths = {'ab/cd', 'ab/cde', 'foo'}
+  assert set(actual_paths) == expected_paths
+
+
+def test_normalize_paths_to_source_root_formatting_directory_paths(tmp_path):
+  """Test normalize correctly handles /path/to/file and /path/to/dir/."""
+  foo_dir = tmp_path / 'foo'
+  foo_dir.mkdir()
+  bar_baz_dir = tmp_path / 'bar' / 'baz'
+  bar_baz_dir.mkdir(parents=True)
+  ab_dir = tmp_path / 'ab'
+  ab_dir.mkdir()
+  ab_cd_file = ab_dir / 'cd'
+
+  osutils.WriteFile(ab_cd_file, 'alphabet')
+
+  expected_paths = [
+      str(ab_cd_file.relative_to(tmp_path)),
+      str(bar_baz_dir.relative_to(tmp_path)),
+      str(foo_dir.relative_to(tmp_path)),
+  ]
+
+  actual_paths = path_util.normalize_paths_to_source_root(
+      [
+          str(foo_dir) + '/',
+          str(ab_cd_file),
+          str(bar_baz_dir) + '/',
+      ],
+      source_root=str(tmp_path))
+  assert actual_paths == expected_paths
