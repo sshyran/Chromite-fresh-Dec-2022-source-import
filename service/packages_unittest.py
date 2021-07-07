@@ -1488,6 +1488,14 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
   def majorBumpOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
 
+  def newerVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(
+        uprev_lib.Outcome.NEWER_VERSION_EXISTS, [ebuild_path])
+
+  def sameVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(
+        uprev_lib.Outcome.SAME_VERSION_EXISTS, [ebuild_path])
+
   def newEbuildCreatedOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(
         uprev_lib.Outcome.NEW_EBUILD_CREATED, [ebuild_path])
@@ -1495,7 +1503,7 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
   def test_lacros_uprev_fails(self):
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[None]
     )
     with self.assertRaises(IndexError):
@@ -1505,28 +1513,48 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     lacros_outcome = self.revisionBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.REVISION_BUMP)
+    self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_version_bump(self):
     lacros_outcome = self.majorBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.VERSION_BUMP)
+    self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_new_ebuild_created(self):
     lacros_outcome = self.newEbuildCreatedOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.NEW_EBUILD_CREATED)
+    self.assertTrue(output.uprevved)
+
+  def test_lacros_uprev_newer_version_exist(self):
+    lacros_outcome = self.newerVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_workon_ebuild_to_version',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_lacros_uprev_same_version_exist(self):
+    lacros_outcome = self.sameVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_workon_ebuild_to_version',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertFalse(output.uprevved)

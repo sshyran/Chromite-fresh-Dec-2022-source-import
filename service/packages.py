@@ -446,14 +446,26 @@ def uprev_termina_dlc(_build_targets, _refs, chroot):
 def uprev_lacros(_build_targets, refs, chroot):
   """Updates lacros ebuilds.
 
-  Information used is gathered from the QA qualified version tracking file
-  stored in chromium/src.
+  Version to uprev to is gathered from the QA qualified version tracking file
+  stored in chromium/src/chrome/LACROS_QA_QUALIFIED_VERSION. Uprev is triggered
+  on modification of this file across all chromium/src branches.
 
   See: uprev_versioned_package.
   """
+  result = uprev_lib.UprevVersionedPackageResult()
   path = os.path.join(
       constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base','chromeos-lacros')
-  return uprev_lib.uprev_ebuild_from_pin(path, refs[0].revision, chroot)
+  lacros_version = refs[0].revision
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
+                                                          lacros_version,
+                                                          chroot,
+                                                          allow_downrev=False)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(lacros_version, uprev_result.changed_files)
+  return result
 
 
 @uprevs_versioned_package('app-emulation/parallels-desktop')
