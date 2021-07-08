@@ -399,13 +399,13 @@ def uprev_kernel_afdo(*_args, **_kwargs):
     versions = json.load(f)
 
   result = uprev_lib.UprevVersionedPackageResult()
-  for version, version_info in versions.items():
-    path = os.path.join('src', 'third_party', 'chromiumos-overlay',
-                        'sys-kernel', version)
+  for kernel_pkg, version_info in versions.items():
+    path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                        'sys-kernel', kernel_pkg)
     ebuild_path = os.path.join(constants.SOURCE_ROOT, path,
-                               '%s-9999.ebuild' % version)
+                               '%s-9999.ebuild' % kernel_pkg)
     chroot_ebuild_path = os.path.join(constants.CHROOT_SOURCE_ROOT, path,
-                                      '%s-9999.ebuild' % version)
+                                      '%s-9999.ebuild' % kernel_pkg)
     afdo_profile_version = version_info['name']
     patch_ebuild_vars(ebuild_path,
                       dict(AFDO_PROFILE_VERSION=afdo_profile_version))
