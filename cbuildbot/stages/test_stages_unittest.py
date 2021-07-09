@@ -474,4 +474,4 @@ class HWTestPlanStageTest(cros_test_lib.MockTempDirTestCase):
     models_to_test = stage.ModelsToTest()
     # Too many models to list them all; just check the first few.
     self.assertEqual([model.name for model in models_to_test[0:3]],
-                     ['ampton', 'apel', 'bip'])
+                     ['ampton', 'apel', 'apel-e'])
