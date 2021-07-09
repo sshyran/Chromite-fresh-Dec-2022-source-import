@@ -6,6 +6,7 @@
 
 import os
 import re
+from typing import List, Mapping, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_logging as logging
@@ -145,19 +146,23 @@ def _parse_ebuild_cache_entry(cache_file_path):
   return [(c.group('eclass'), c.group('digest')) for c in entries]
 
 
-def get_source_path_mapping(packages, sysroot_path, board):
+def get_source_path_mapping(
+    packages: List[str],
+    sysroot_path: str,
+    board: Union[str, None],
+    include_eclass: bool = True,
+    include_overlay: bool = True) -> Mapping[str, List[str]]:
   """Returns a map from each package to the source paths it depends on.
 
   A source path is considered dependency of a package if modifying files in that
   path might change the content of the resulting package.
 
   Notes:
-    1) This method errs on the side of returning unneeded dependent paths.
+    1) This method errs on the side of returning unneeded dependent paths by
+       default.
        i.e: for a given package X, some of its dependency source paths may
-       contain files which doesn't affect the content of X.
-
-       On the other hands, any missing dependency source paths for package X is
-       considered a bug.
+       contain files which doesn't affect the content of X. By contrast, any
+       missing dependency source paths for package X is considered a bug.
     2) This only outputs the direct dependency source paths for a given package
        and does not takes include the dependency source paths of dependency
        packages.
@@ -167,10 +172,12 @@ def get_source_path_mapping(packages, sysroot_path, board):
 
   Args:
     packages: The list of packages CPV names (str)
-    sysroot_path (str): The path to the sysroot.  If the packages are board
+    sysroot_path: The path to the sysroot.  If the packages are board
       agnostic, then this should be '/'.
-    board (str): The name of the board if packages are dependency of board. If
+    board: The name of the board if packages are dependency of board. If
       the packages are board agnostic, then this should be None.
+    include_eclass: Whether to include eclass paths.
+    include_overlay: Whether to include overlay paths.
 
   Returns:
     Map from each package to the source path (relative to the repo checkout
@@ -193,16 +200,14 @@ def get_source_path_mapping(packages, sysroot_path, board):
   buildroot = os.path.join(constants.SOURCE_ROOT, 'src')
   manifest = git.ManifestCheckout.Cached(buildroot)
   for package, ebuild_path in packages_to_ebuild_paths.items():
-    attrs = portage_util.EBuild.Classify(ebuild_path)
-    if (not attrs.is_workon or
-        # Manually uprevved ebuild is pinned to a specific git sha1, so change
-        # in that repo does not matter to the ebuild.
-        attrs.is_manually_uprevved):
-      continue
     ebuild = portage_util.EBuild(ebuild_path)
+    if not ebuild.is_workon or ebuild.is_manually_uprevved:
+      # Can only fetch workon source paths from workon ebuilds, and manually
+      # uprevved packages are pinned so changes to the source repo don't matter.
+      continue
+
     workon_subtrees = ebuild.GetSourceInfo(buildroot, manifest).subtrees
-    for path in workon_subtrees:
-      results[package].append(path)
+    results[package].extend(workon_subtrees)
 
   if board:
     overlay_directories = portage_util.FindOverlays(
@@ -213,47 +218,50 @@ def get_source_path_mapping(packages, sysroot_path, board):
     overlay_directories = portage_util.FindOverlays(
         overlay_type='both', board=constants.CHROOT_BUILDER_BOARD)
 
-  eclass_path_cache = {}
-
-  for package, ebuild_path in packages_to_ebuild_paths.items():
-    eclass_paths = _get_eclasses_for_ebuild(ebuild_path, eclass_path_cache,
-                                            overlay_directories)
-    results[package].extend(eclass_paths)
+  # Package's inherited eclass paths.
+  if include_eclass:
+    eclass_path_cache = {}
+    for package, ebuild_path in packages_to_ebuild_paths.items():
+      eclass_paths = _get_eclasses_for_ebuild(ebuild_path, eclass_path_cache,
+                                              overlay_directories)
+      results[package].extend(eclass_paths)
 
   # Source paths which are the overlay directories for the given board
   # (packages are board specific).
+  if include_overlay:
+    # The only parts of the overlay that affect every package are the current
+    # profile (which lives somewhere in the profiles/ subdir) and a top-level
+    # make.conf (if it exists).
+    profile_directories = [
+        os.path.join(x, 'profiles') for x in overlay_directories
+    ]
+    make_conf_paths = [
+        os.path.join(x, 'make.conf') for x in overlay_directories
+    ]
 
-  # The only parts of the overlay that affect every package are the current
-  # profile (which lives somewhere in the profiles/ subdir) and a top-level
-  # make.conf (if it exists).
-  profile_directories = [
-      os.path.join(x, 'profiles') for x in overlay_directories
-  ]
-  make_conf_paths = [os.path.join(x, 'make.conf') for x in overlay_directories]
+    # These directories *might* affect a build, so we include them for now to
+    # be safe.
+    metadata_directories = [
+        os.path.join(x, 'metadata') for x in overlay_directories
+    ]
+    scripts_directories = [
+        os.path.join(x, 'scripts') for x in overlay_directories
+    ]
 
-  # These directories *might* affect a build, so we include them for now to
-  # be safe.
-  metadata_directories = [
-      os.path.join(x, 'metadata') for x in overlay_directories
-  ]
-  scripts_directories = [
-      os.path.join(x, 'scripts') for x in overlay_directories
-  ]
+    for package in results:
+      results[package].extend(profile_directories)
+      results[package].extend(make_conf_paths)
+      results[package].extend(metadata_directories)
+      results[package].extend(scripts_directories)
+      # The 'crosutils' repo potentially affects the build of every package.
+      results[package].append(constants.CROSUTILS_DIR)
 
-  for package in results:
-    results[package].extend(profile_directories)
-    results[package].extend(make_conf_paths)
-    results[package].extend(metadata_directories)
-    results[package].extend(scripts_directories)
-    # The 'crosutils' repo potentially affects the build of every package.
-    results[package].append(constants.CROSUTILS_DIR)
-
-  # chromiumos-overlay specifies default settings for every target in
-  # chromeos/config  and so can potentially affect every board.
-  for package in results:
-    results[package].append(
-        os.path.join(constants.CHROOT_SOURCE_ROOT,
-                     constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos', 'config'))
+    # chromiumos-overlay specifies default settings for every target in
+    # chromeos/config  and so can potentially affect every board.
+    for package in results:
+      results[package].append(
+          os.path.join(constants.CHROOT_SOURCE_ROOT,
+                       constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos', 'config'))
 
   for p in results:
     results[p] = normalize_source_paths(results[p])
