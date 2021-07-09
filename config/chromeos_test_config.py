@@ -356,8 +356,7 @@ def ApplyCustomOverrides(site_config):
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
-      # b/189483630: Temporarily disable camera tasts for reven.
-      'reven-release': site_config.templates.tast_vm_reven_tests,
+      'reven-release': site_config.templates.tast_vm_canary_tests,
   }
 
   for config_name, overrides in overwritten_configs.items():
@@ -457,20 +456,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.no_vmtest_builder,
       image_test=False,
   )
-
-  # b/189483630: Temporarily disable camera tasts for reven.
-  reven_tast_pattern = [(
-     '("group:mainline" && '
-     '!"group:camera-libcamera" && '
-     '!informational)')]
-  site_config.AddTemplate(
-     'tast_vm_reven_tests',
-     tast_vm_tests=[
-            config_lib.TastVMTestConfig(
-                'tast_vm_reven', reven_tast_pattern),
-     ],
-  )
-
 
   site_config.templates.full.apply(
       site_config.templates.default_hw_tests_override,
