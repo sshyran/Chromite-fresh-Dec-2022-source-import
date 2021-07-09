@@ -929,6 +929,10 @@ class ChrootCreator:
     for i, line in enumerate(lines):
       entry = line.split(':')
       if entry[0] == group:
+        # If the group exists with the same gid, no need to add a new one.
+        # This often comes up with e.g. the "users" group.
+        if entry[2] == str(gid):
+          return
         cros_build_lib.Die(f'{group}: this group cannot be used to build CrOS')
       if entry[0] in groups:
         if entry[-1]:

@@ -807,6 +807,8 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
             )),
         )),
     ))
+    (tar_dir / 'etc/passwd').write_text('root:x:0:0:Root:/root:/bin/bash\n')
+    (tar_dir / 'etc/group').write_text('root::0\nusers::100\n')
     osutils.Touch(tar_dir / self.creater.DEFAULT_TZ, makedirs=True)
     cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
 
@@ -861,3 +863,16 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.assertIn(f'PORTAGE_USERNAME="{TEST_USER}"',
                   (etc / 'env.d' / '99chromiumos').read_text())
     self.assertIn('en_US.UTF-8 UTF-8', (etc / 'locale.gen').read_text())
+
+  def testExistingCompatGroup(self):
+    """Verify running with an existing, but matching, group works."""
+    TEST_USER = 'a-test-user'
+    TEST_UID = 20100908
+    TEST_GROUP = 'users'
+    TEST_GID = 100
+    self.PatchObject(cros_sdk_lib.ChrootCreator, '_make_chroot')
+    # The files won't be root owned, but they won't be user owned.
+    self.ExpectRootOwnedFiles()
+
+    self.creater.run(user=TEST_USER, uid=TEST_UID,
+                     group=TEST_GROUP, gid=TEST_GID)
