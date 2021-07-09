@@ -99,6 +99,15 @@ def get_default_sysroot_path(build_target_name=None):
   return os.path.join('/build', build_target_name)
 
 
+def get_sdk_sysroot_path() -> str:
+  """Get the SDK's sysroot path.
+
+  Convenience/clarification wrapper for get_default_sysroot_path for use when
+  explicitly fetching the SDK's sysroot path.
+  """
+  return get_default_sysroot_path()
+
+
 def is_valid_name(build_target_name):
   """Validate |build_target_name| is a valid name."""
   return bool(re.match(r'^[a-zA-Z0-9-_]+$', build_target_name))
