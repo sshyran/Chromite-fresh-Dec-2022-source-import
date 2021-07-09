@@ -82,7 +82,7 @@ class ChromeLKGMCommitter(object):
     """
     query_params = {
         'project': constants.CHROMIUM_SRC_PROJECT,
-        'branch': 'master',
+        'branch': 'main',
         'author': self._committer.author,
         'file': constants.PATH_TO_CHROME_LKGM,
         'age': '1d',
