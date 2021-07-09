@@ -171,21 +171,34 @@ class CreateSimpleChromeSysrootTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(self.source_root)
     self.PatchObject(constants, 'SOURCE_ROOT', new=self.source_root)
 
+    # Create a chroot_path that also includes a chroot tmp dir.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    osutils.SafeMakedirs(os.path.join(self.chroot_path, 'tmp'))
+
+    # Create output dir.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+    # Create chroot and build_target objs.
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.build_target = build_target_lib.BuildTarget('target')
+
+
+
   def testCreateSimpleChromeSysroot(self):
-    # A board for which we will create a simple chrome sysroot.
-    target = 'board'
-    use_flags = ['cros-debug', 'chrome_internal']
-
+    # Mock the artifact copy.
+    tar_dest = os.path.join(self.output_dir, constants.CHROME_SYSROOT_TAR)
+    self.PatchObject(shutil, 'copy', return_value=tar_dest)
     # Call service, verify arguments passed to run.
-    sysroot.CreateSimpleChromeSysroot(target, use_flags)
-    self.run_mock.assert_called_with(
-        ['cros_generate_sysroot', '--out-dir', mock.ANY, '--board', target,
-         '--deps-only', '--package', 'chromeos-base/chromeos-chrome'],
-        extra_env={'USE': 'cros-debug chrome_internal'},
-        enter_chroot=True,
-        cwd=self.source_root
-    )
+    sysroot.CreateSimpleChromeSysroot(self.chroot, None,
+                                      self.build_target, self.output_dir)
 
+    self.run_mock.assert_called_with(
+        ['cros_generate_sysroot', '--out-dir', mock.ANY, '--board',
+         self.build_target.name, '--deps-only', '--package',
+         'chromeos-base/chromeos-chrome'], enter_chroot=True,
+         cwd=self.source_root, chroot_args=mock.ANY, extra_env=mock.ANY
+    )
 
 class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase):
   """Tests for GenerateArchive."""

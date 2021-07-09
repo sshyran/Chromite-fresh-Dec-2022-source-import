@@ -351,27 +351,28 @@ def GenerateArchive(output_dir, build_target_name, pkg_list):
   return os.path.join(output_dir, constants.TARGET_SYSROOT_TAR)
 
 
-def CreateSimpleChromeSysroot(target, use_flags):
+def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
   """Create a sysroot for SimpleChrome to use.
 
   Args:
-    target (build_target.BuildTarget): The build target being installed for the
-      sysroot being created.
-    use_flags (list[string]|None): Additional USE flags for building chrome.
+    chroot: The chroot class used for these artifacts.
+    sysroot_class: The sysroot class used for these artifacts.
+    build_target: The build target used for these artifacts.
+    output_dir: The path to write artifacts to.
 
   Returns:
     Path to the sysroot tar file.
   """
-  extra_env = {}
-  if use_flags:
-    extra_env['USE'] = ' '.join(use_flags)
-  with osutils.TempDir(delete=False) as tempdir:
-    cmd = ['cros_generate_sysroot', '--out-dir', tempdir, '--board',
-           target, '--deps-only', '--package', constants.CHROME_CP]
-    cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT, enter_chroot=True,
-                       extra_env=extra_env)
-    sysroot_tar_path = os.path.join(tempdir, constants.CHROME_SYSROOT_TAR)
-    return sysroot_tar_path
+  cmd = ['cros_generate_sysroot', '--out-dir', '/tmp', '--board',
+         build_target.name, '--deps-only', '--package', constants.CHROME_CP]
+  cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT, enter_chroot=True,
+                     chroot_args=chroot.get_enter_args(), extra_env=chroot.env)
+
+  # Move the artifact out of the chroot.
+  sysroot_tar_path = os.path.join(
+      chroot.path, os.path.join('tmp', constants.CHROME_SYSROOT_TAR))
+  shutil.copy(sysroot_tar_path, output_dir)
+  return os.path.join(output_dir, constants.CHROME_SYSROOT_TAR)
 
 
 def InstallToolchain(target, sysroot, run_configs):

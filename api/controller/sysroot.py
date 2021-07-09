@@ -32,6 +32,14 @@ def ExampleGetResponse():
   uabs = common_pb2.UploadedArtifactsByService
   cabs = common_pb2.ArtifactsByService
   return uabs.Sysroot(artifacts=[
+     uabs.Sysroot.ArtifactPaths(
+          artifact_type=cabs.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT,
+          paths=[
+              common_pb2.Path(
+                  path='/tmp/sysroot_chromeos-base_chromeos-chrome.tar.xz',
+                  location=common_pb2.Path.OUTSIDE)
+          ],
+      ),
       uabs.Sysroot.ArtifactPaths(
           artifact_type=cabs.Sysroot.ArtifactType.DEBUG_SYMBOLS,
           paths=[
@@ -69,8 +77,10 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   """
   generated = []
   artifact_types = {
+    in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
+        sysroot.CreateSimpleChromeSysroot,
     in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
-    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols
+    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
   }
 
   for output_artifact in in_proto.output_artifacts:
@@ -84,7 +94,6 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
           })
 
   return generated
-
 
 
 @faux.all_empty
@@ -113,24 +122,6 @@ def Create(input_proto, output_proto, _config):
 
   output_proto.sysroot.path = created.path
   output_proto.sysroot.build_target.name = build_target.name
-
-  return controller.RETURN_CODE_SUCCESS
-
-
-@faux.all_empty
-@validate.require('build_target.name')
-@validate.validation_complete
-def CreateSimpleChromeSysroot(input_proto, output_proto, _config):
-  """Create a sysroot for SimpleChrome to use."""
-  build_target_name = input_proto.build_target.name
-  use_flags = input_proto.use_flags
-
-  sysroot_tar_path = sysroot.CreateSimpleChromeSysroot(build_target_name,
-                                                       use_flags)
-  # By assigning this Path variable to the tar path, the tar file will be
-  # copied out to the input_proto's ResultPath location.
-  output_proto.sysroot_archive.path = sysroot_tar_path
-  output_proto.sysroot_archive.location = common_pb2.Path.INSIDE
 
   return controller.RETURN_CODE_SUCCESS
 
