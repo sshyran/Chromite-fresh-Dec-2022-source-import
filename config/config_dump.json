@@ -12483,7 +12483,7 @@
         "_template": "buildspec",
         "build_timeout": 43200,
         "display_label": "factory",
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "slave_configs": [
             "volteer-factory-volteer-13600.B-factorybranch"
         ],
