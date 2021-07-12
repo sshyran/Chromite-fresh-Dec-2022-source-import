@@ -113,7 +113,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       'source_path_mapping': {},
   }
 
-  sdk_sysroot = build_target_lib.get_default_sysroot_path(None)
+  sdk_sysroot = build_target_lib.get_sdk_sysroot_path()
   sdk_results = {
       'sysroot_path': sdk_sysroot,
       'target_board': 'sdk',

@@ -921,7 +921,7 @@ def _get_raw_sdk_depgraph(
   The SDK deps will contain the packages installed to a fresh SDK.
   The bdeps will always be empty since everything is installed to the SDK.
   """
-  sysroot_path = build_target_lib.get_default_sysroot_path(None)
+  sysroot_path = build_target_lib.get_sdk_sysroot_path()
   packages = packages or [constants.TARGET_SDK]
   lib_argv = _get_emerge_args(sysroot_path, packages, include_bdeps=True)
 
@@ -987,7 +987,7 @@ def get_sdk_dependency_graph(
   """Get the DependencyGraph for the SDK itself."""
   result = _get_raw_sdk_depgraph(packages=pkgs)
   return _create_graph_from_deps(
-      result.deps, build_target_lib.get_default_sysroot_path(None),
+      result.deps, build_target_lib.get_sdk_sysroot_path(),
       result.packages, with_src_paths)
 
 
