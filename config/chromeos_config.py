@@ -3237,7 +3237,7 @@ def BranchScheduleConfig():
   RELEASES = [
       ('release-R93-14092.B',
        ['kevin-android-pi-pre-flight-branch',
-        'hatch-arc-r-android-rvc-pre-flight-branch'],
+        'hatch-android-rvc-pre-flight-branch'],
        '',
        [],
        [],
@@ -3245,7 +3245,7 @@ def BranchScheduleConfig():
 
       ('release-R92-13982.B',
        ['kevin-android-pi-pre-flight-branch',
-        'hatch-arc-r-android-rvc-pre-flight-branch'],
+        'hatch-android-rvc-pre-flight-branch'],
        '',
        [],
        [],
@@ -3253,7 +3253,7 @@ def BranchScheduleConfig():
 
       ('release-R91-13904.B',
        ['kevin-android-pi-pre-flight-branch',
-        'hatch-arc-r-android-rvc-pre-flight-branch'],
+        'hatch-android-rvc-pre-flight-branch'],
        '',
        [],
        [],
