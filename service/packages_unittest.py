@@ -1177,6 +1177,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      len(constants.OTHER_CHROME_PACKAGES) + 1)
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_none(self):
     """Verify not building any of the chrome packages prevents needing it."""
@@ -1184,6 +1185,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(packages, 'uprev_chrome', return_value=False)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1194,6 +1196,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.assertFalse(result.packages)
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_chrome_only(self):
     """Verify only chrome triggers needs chrome source."""
@@ -1201,6 +1204,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(packages, 'uprev_chrome', return_value=False)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1213,6 +1217,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      {constants.CHROME_CP})
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_followers_only(self):
     """Verify only chrome followers triggers needs chrome source."""
@@ -1220,6 +1225,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(packages, 'uprev_chrome', return_value=False)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1232,6 +1238,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      set(constants.OTHER_CHROME_PACKAGES))
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_has_prebuilts(self):
     """Test prebuilts prevent us from needing chrome source."""
@@ -1239,6 +1246,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
+    self.PatchObject(packages, 'uprev_chrome', return_value=False)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1249,6 +1257,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.assertFalse(result.packages)
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_compile_source(self):
     """Test compile source ignores prebuilts."""
@@ -1256,6 +1265,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
+    self.PatchObject(packages, 'uprev_chrome', return_value=False)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1268,6 +1278,28 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      len(constants.OTHER_CHROME_PACKAGES) + 1)
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
+
+  def test_local_uprev(self):
+    """Test compile source ignores prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(packages, 'uprev_chrome', return_value=True)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target, compile_source=True)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+    self.assertTrue(result.local_uprev)
 
 
 class UprevDrivefsTest(cros_test_lib.MockTestCase):
