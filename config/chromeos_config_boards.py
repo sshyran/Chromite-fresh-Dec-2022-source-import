@@ -24,7 +24,6 @@ arm_internal_release_boards = frozenset([
     'beaglebone_servo',
     'gale',
     'hana',
-    'kevin-arc64',
     'littlejoe',
     'nyan_big',
     'nyan_blaze',
