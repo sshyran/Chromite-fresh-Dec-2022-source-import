@@ -5481,6 +5481,17 @@
         {
           "board_name": "nami-kernelnext",
           "name": "akali",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5489,6 +5500,14 @@
         {
           "board_name": "nami-kernelnext",
           "name": "akali360",
+          "test_suites": [
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-arc",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5497,6 +5516,17 @@
         {
           "board_name": "nami-kernelnext",
           "name": "bard",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5505,6 +5535,17 @@
         {
           "board_name": "nami-kernelnext",
           "name": "ekko",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5521,6 +5562,14 @@
         {
           "board_name": "nami-kernelnext",
           "name": "pantheon",
+          "test_suites": [
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-arc",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5529,6 +5578,14 @@
         {
           "board_name": "nami-kernelnext",
           "name": "sona",
+          "test_suites": [
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-arc",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5537,6 +5594,17 @@
         {
           "board_name": "nami-kernelnext",
           "name": "syndra",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
@@ -5545,6 +5613,14 @@
         {
           "board_name": "nami-kernelnext",
           "name": "vayne",
+          "test_suites": [
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-arc",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7195,
