@@ -116,6 +116,7 @@ class KeyringData(object):
       logging.warning('Bad keyset setname %s', setname)
       group = 'bad-keysets'
     self.keysets.setdefault(group, []).append(setname)
+    self.keysets[group].sort()
     return self._WriteConfig(config_file, set_config)
 
 

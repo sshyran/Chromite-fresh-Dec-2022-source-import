@@ -49,7 +49,7 @@ class TestImportKeyset(cros_test_lib.MockTempDirTestCase):
 
   def test_ImportKeys(self):
     """Test normal case."""
-    data = (
+    data = sorted((
         ('update_signer', 'update-payload-key', 'mp'),
         ('oci_containers_signer', 'oci-containers-key', 'mp'),
         ('foo-xp', 'FooXPKeys', 'bad'),
@@ -57,7 +57,7 @@ class TestImportKeyset(cros_test_lib.MockTempDirTestCase):
         ('foo-mp-v3', 'FooMPKeys-v3', 'mp'),
         ('foo-premp', 'FooPreMPKeys', 'premp'),
         ('test-keys-blah', 'test-keys-blah', 'test'),
-    )
+    ))
 
     kd = self.keydata
     expected_keysets = {'metadata-version': 0}
