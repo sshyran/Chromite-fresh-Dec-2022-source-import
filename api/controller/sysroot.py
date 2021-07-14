@@ -80,6 +80,7 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   artifact_types = {
     in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
         sysroot.CreateSimpleChromeSysroot,
+    in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
     in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
     in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
   }

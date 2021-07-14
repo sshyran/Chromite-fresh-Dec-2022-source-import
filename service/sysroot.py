@@ -5,6 +5,7 @@
 """Sysroot service."""
 
 import logging
+import glob
 import multiprocessing
 import os
 import shutil
@@ -373,6 +374,41 @@ def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
       chroot.path, os.path.join('tmp', constants.CHROME_SYSROOT_TAR))
   shutil.copy(sysroot_tar_path, output_dir)
   return os.path.join(output_dir, constants.CHROME_SYSROOT_TAR)
+
+
+def CreateChromeEbuildEnv(_chroot, sysroot_class, _build_target, output_dir):
+  """Generate Chrome ebuild environment.
+
+  Args:
+    sysroot_class (sysroot_lib.Sysroot): The sysroot where the original
+      environment archive can be found.
+    output_dir (str): Where the result should be stored.
+
+  Returns:
+    str: The path to the archive, or None.
+  """
+  pkg_dir = os.path.join(sysroot_class.path, portage_util.VDB_PATH)
+  files = glob.glob(os.path.join(pkg_dir, constants.CHROME_CP) + '-*')
+  if not files:
+    return None
+
+  if len(files) > 1:
+    logging.warning('Expected one package for %s, found %d',
+                    constants.CHROME_CP, len(files))
+
+  chrome_dir = sorted(files)[-1]
+  env_bzip = os.path.join(chrome_dir, 'environment.bz2')
+  result_path = os.path.join(output_dir, constants.CHROME_ENV_TAR)
+  with osutils.TempDir() as tempdir:
+    # Convert from bzip2 to tar format.
+    bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+    tempdir_tar_path = os.path.join(tempdir, constants.CHROME_ENV_FILE)
+    cros_build_lib.run([bzip2, '-d', env_bzip, '-c'],
+                       stdout=tempdir_tar_path)
+
+    cros_build_lib.CreateTarball(result_path, tempdir)
+
+  return result_path
 
 
 def InstallToolchain(target, sysroot, run_configs):
