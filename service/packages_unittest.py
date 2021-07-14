@@ -1165,6 +1165,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1185,7 +1189,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
-    self.PatchObject(packages, 'uprev_chrome', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1204,7 +1211,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
-    self.PatchObject(packages, 'uprev_chrome', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1225,7 +1235,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
-    self.PatchObject(packages, 'uprev_chrome', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1246,7 +1259,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
-    self.PatchObject(packages, 'uprev_chrome', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1265,7 +1281,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
-    self.PatchObject(packages, 'uprev_chrome', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1286,7 +1305,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
-    self.PatchObject(packages, 'uprev_chrome', return_value=True)
+
+    uprev_result = uprev_lib.UprevVersionedPackageResult()
+    uprev_result.add_result('1.2.3.4', ['/tmp/foo'])
+    self.PatchObject(packages, 'uprev_chrome', return_value=uprev_result)
 
     build_target = build_target_lib.BuildTarget('build_target')
 
