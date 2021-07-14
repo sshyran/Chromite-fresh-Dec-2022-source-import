@@ -11,7 +11,7 @@ Data structures that power Requests.
 import collections
 
 
-class CaseInsensitiveDict(collections.MutableMapping):
+class CaseInsensitiveDict(collections.abc.MutableMapping):
     """
     A case-insensitive ``dict``-like object.
 
@@ -71,7 +71,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         )
 
     def __eq__(self, other):
-        if isinstance(other, collections.Mapping):
+        if isinstance(other, collections.abc.Mapping):
             other = CaseInsensitiveDict(other)
         else:
             return NotImplemented
