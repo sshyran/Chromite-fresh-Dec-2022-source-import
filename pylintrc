@@ -222,6 +222,10 @@ score=no
 # Maximum number of characters on a single line.
 max-line-length=80
 
+# Disable line length enforcement for import statements or comment lines
+# containing URLs.
+ignore-long-lines=(^(import|from))|(^\s*(# )?<?https?://\S+>?$)
+
 # Maximum number of lines in a module
 #max-module-lines=1000
 
