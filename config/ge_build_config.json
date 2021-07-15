@@ -26,18 +26,6 @@
       ]
     },
     {
-      "name": "banjo",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "banon",
       "configs": [
         {
@@ -206,18 +194,6 @@
       ]
     },
     {
-      "name": "candy",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "caroline",
       "configs": [
         {
@@ -350,30 +326,6 @@
       ]
     },
     {
-      "name": "enguarde",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "expresso",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "gale",
       "configs": [
         {
@@ -382,18 +334,6 @@
           "leader_board": true,
           "board_group": "gale",
           "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "gnawty",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
         }
       ]
     },
@@ -482,18 +422,6 @@
       ]
     },
     {
-      "name": "heli",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "herobrine",
       "configs": [
         {
@@ -550,18 +478,6 @@
           "leader_board": false,
           "board_group": "gru",
           "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "kip",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
         }
       ]
     },
@@ -626,18 +542,6 @@
       ]
     },
     {
-      "name": "ninja",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "novato",
       "configs": [
         {
@@ -657,18 +561,6 @@
           "experimental": false,
           "leader_board": true,
           "board_group": "vm builds",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "orco",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
           "arch": "X86_INTERNAL"
         }
       ]
@@ -770,30 +662,6 @@
       ]
     },
     {
-      "name": "sumo",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "swanky",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "tael",
       "configs": [
         {
@@ -888,18 +756,6 @@
           "experimental": true,
           "leader_board": false,
           "board_group": "zephyr-poc",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "winky",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "rambi",
           "arch": "X86_INTERNAL"
         }
       ]

@@ -249,7 +249,6 @@
     atlas-release
     aurora-borealis-release
     aurora-release
-    banjo-release
     banon-release
     beaglebone-release
     beaglebone_servo-release
@@ -266,7 +265,6 @@
     brya-release
     bubs-release
     buddy-cfm-release
-    candy-release
     caroline-arc64-release
     caroline-kernelnext-release
     caroline-ndktranslation-release
@@ -286,7 +284,6 @@
     elm-kernelnext-release
     elm-release
     endeavour-release
-    enguarde-release
     eve-arc-r-release
     eve-arcvm-mesa-virgl-next-release
     eve-arm64-release
@@ -295,13 +292,11 @@
     eve-release
     eve-userdebug-release
     excelsior-release
-    expresso-release
     fizz-cfm-release
     fizz-labstation-release
     fizz-moblab-release
     fizz-release
     gale-release
-    gnawty-release
     goroh-release
     grunt-arc-r-release
     grunt-kernelnext-release
@@ -323,7 +318,6 @@
     hatch-kernelnext-release
     hatch-manatee-release
     hatch-release
-    heli-release
     herobrine-release
     jacuzzi-kernelnext-release
     jacuzzi-release
@@ -334,7 +328,6 @@
     kevin-release
     kevin-userdebug-release
     kevin64-release
-    kip-release
     kukui-arc-r-release
     kukui-kernelnext-release
     kukui-release
@@ -347,13 +340,11 @@
     nami-kernelnext-release
     nami-release
     nautilus-release
-    ninja-release
     nocturne-kernelnext-release
     nocturne-release
     novato-arc64-release
     novato-release
     octopus-release
-    orco-release
     palkia-release
     puff-borealis-release
     puff-macrophage-release
@@ -380,8 +371,6 @@
     soraka-libcamera-release
     soraka-release
     strongbad-release
-    sumo-release
-    swanky-release
     tael-release
     tatl-release
     terra-release
@@ -399,7 +388,6 @@
     volteer-manatee-release
     volteer-release
     volteer-zephyr-release
-    winky-release
     wizpig-release
     zork-arc-r-release
     zork-borealis-release
@@ -536,12 +524,6 @@
   aurora-release-tryjob
   aurora-unittest-stress
   banjo-factory-rambi-6420.B-factorybranch-tryjob
-  banjo-full-tryjob
-  banjo-llvm-next-toolchain-tryjob
-  banjo-llvm-toolchain-tryjob
-  banjo-payloads-tryjob
-  banjo-release-tryjob
-  banjo-unittest-stress
   banon-factory-strago-7458.B-factorybranch-tryjob
   banon-full-tryjob
   banon-llvm-next-toolchain-tryjob
@@ -649,12 +631,6 @@
   buddy-factory-auron-6459.B-factorybranch-tryjob
   buddy-factory-auron-6772.B-factorybranch-tryjob
   candy-factory-rambi-6420.B-factorybranch-tryjob
-  candy-full-tryjob
-  candy-llvm-next-toolchain-tryjob
-  candy-llvm-toolchain-tryjob
-  candy-payloads-tryjob
-  candy-release-tryjob
-  candy-unittest-stress
   caroline-arc64-full-tryjob
   caroline-arc64-llvm-next-toolchain-tryjob
   caroline-arc64-llvm-toolchain-tryjob
@@ -801,12 +777,6 @@
   endeavour-unittest-stress
   enguarde-factory-rambi-5517.B-factorybranch-tryjob
   enguarde-factory-rambi-6420.B-factorybranch-tryjob
-  enguarde-full-tryjob
-  enguarde-llvm-next-toolchain-tryjob
-  enguarde-llvm-toolchain-tryjob
-  enguarde-payloads-tryjob
-  enguarde-release-tryjob
-  enguarde-unittest-stress
   eve-arc-r-full-tryjob
   eve-arc-r-llvm-next-toolchain-tryjob
   eve-arc-r-llvm-toolchain-tryjob
@@ -862,12 +832,6 @@
   excelsior-release-tryjob
   excelsior-unittest-stress
   expresso-factory-rambi-5517.B-factorybranch-tryjob
-  expresso-full-tryjob
-  expresso-llvm-next-toolchain-tryjob
-  expresso-llvm-toolchain-tryjob
-  expresso-payloads-tryjob
-  expresso-release-tryjob
-  expresso-unittest-stress
   factory-asurada-13929.B-buildspec-tryjob
     asurada-factory-asurada-13929.B-factorybranch-tryjob
   factory-atlas-11907.B-buildspec-tryjob
@@ -1119,12 +1083,6 @@
   glados-release-tryjob
   glados-unittest-stress
   gnawty-factory-rambi-6420.B-factorybranch-tryjob
-  gnawty-full-tryjob
-  gnawty-llvm-next-toolchain-tryjob
-  gnawty-llvm-toolchain-tryjob
-  gnawty-payloads-tryjob
-  gnawty-release-tryjob
-  gnawty-unittest-stress
   goroh-full-tryjob
   goroh-llvm-next-toolchain-tryjob
   goroh-llvm-toolchain-tryjob
@@ -1264,12 +1222,6 @@
   hatch-unittest-stress
   hatch-vmrvc-android-pfq-tryjob
   heli-factory-rambi-6420.B-factorybranch-tryjob
-  heli-full-tryjob
-  heli-llvm-next-toolchain-tryjob
-  heli-llvm-toolchain-tryjob
-  heli-payloads-tryjob
-  heli-release-tryjob
-  heli-unittest-stress
   herobrine-full-tryjob
   herobrine-llvm-next-toolchain-tryjob
   herobrine-llvm-toolchain-tryjob
@@ -1349,12 +1301,6 @@
   kevin64-unittest-stress
   kip-factory-rambi-5517.B-factorybranch-tryjob
   kip-factory-strago-7458.B-factorybranch-tryjob
-  kip-full-tryjob
-  kip-llvm-next-toolchain-tryjob
-  kip-llvm-toolchain-tryjob
-  kip-payloads-tryjob
-  kip-release-tryjob
-  kip-unittest-stress
   kukui-arc-r-full-tryjob
   kukui-arc-r-llvm-next-toolchain-tryjob
   kukui-arc-r-llvm-toolchain-tryjob
@@ -1452,7 +1398,6 @@
     atlas-release-tryjob
     aurora-borealis-release-tryjob
     aurora-release-tryjob
-    banjo-release-tryjob
     banon-release-tryjob
     beaglebone-release-tryjob
     beaglebone_servo-release-tryjob
@@ -1469,7 +1414,6 @@
     brya-release-tryjob
     bubs-release-tryjob
     buddy-cfm-release-tryjob
-    candy-release-tryjob
     caroline-arc64-release-tryjob
     caroline-kernelnext-release-tryjob
     caroline-ndktranslation-release-tryjob
@@ -1489,7 +1433,6 @@
     elm-kernelnext-release-tryjob
     elm-release-tryjob
     endeavour-release-tryjob
-    enguarde-release-tryjob
     eve-arc-r-release-tryjob
     eve-arcvm-mesa-virgl-next-release-tryjob
     eve-arm64-release-tryjob
@@ -1498,13 +1441,11 @@
     eve-release-tryjob
     eve-userdebug-release-tryjob
     excelsior-release-tryjob
-    expresso-release-tryjob
     fizz-cfm-release-tryjob
     fizz-labstation-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
     gale-release-tryjob
-    gnawty-release-tryjob
     goroh-release-tryjob
     grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob
@@ -1526,7 +1467,6 @@
     hatch-kernelnext-release-tryjob
     hatch-manatee-release-tryjob
     hatch-release-tryjob
-    heli-release-tryjob
     herobrine-release-tryjob
     jacuzzi-kernelnext-release-tryjob
     jacuzzi-release-tryjob
@@ -1537,7 +1477,6 @@
     kevin-release-tryjob
     kevin-userdebug-release-tryjob
     kevin64-release-tryjob
-    kip-release-tryjob
     kukui-arc-r-release-tryjob
     kukui-kernelnext-release-tryjob
     kukui-release-tryjob
@@ -1550,13 +1489,11 @@
     nami-kernelnext-release-tryjob
     nami-release-tryjob
     nautilus-release-tryjob
-    ninja-release-tryjob
     nocturne-kernelnext-release-tryjob
     nocturne-release-tryjob
     novato-arc64-release-tryjob
     novato-release-tryjob
     octopus-release-tryjob
-    orco-release-tryjob
     palkia-release-tryjob
     puff-borealis-release-tryjob
     puff-macrophage-release-tryjob
@@ -1583,8 +1520,6 @@
     soraka-libcamera-release-tryjob
     soraka-release-tryjob
     strongbad-release-tryjob
-    sumo-release-tryjob
-    swanky-release-tryjob
     tael-release-tryjob
     tatl-release-tryjob
     terra-release-tryjob
@@ -1602,7 +1537,6 @@
     volteer-manatee-release-tryjob
     volteer-release-tryjob
     volteer-zephyr-release-tryjob
-    winky-release-tryjob
     wizpig-release-tryjob
     zork-arc-r-release-tryjob
     zork-borealis-release-tryjob
@@ -1661,12 +1595,6 @@
   nautilus-release-tryjob
   nautilus-unittest-stress
   ninja-factory-rambi-6420.B-factorybranch-tryjob
-  ninja-full-tryjob
-  ninja-llvm-next-toolchain-tryjob
-  ninja-llvm-toolchain-tryjob
-  ninja-payloads-tryjob
-  ninja-release-tryjob
-  ninja-unittest-stress
   nocturne-factory-nocturne-11066.B-factorybranch-tryjob
   nocturne-full-tryjob
   nocturne-kernelnext-full-tryjob
@@ -1713,12 +1641,6 @@
   octopus-release-tryjob
   octopus-unittest-stress
   orco-factory-rambi-6420.B-factorybranch-tryjob
-  orco-full-tryjob
-  orco-llvm-next-toolchain-tryjob
-  orco-llvm-toolchain-tryjob
-  orco-payloads-tryjob
-  orco-release-tryjob
-  orco-unittest-stress
   orderfile-generate-toolchain-tryjob
   orderfile-verify-toolchain-tryjob
   palkia-full-tryjob
@@ -1912,19 +1834,7 @@
   strongbad-unittest-stress
   success-build
   sumo-factory-rambi-6420.B-factorybranch-tryjob
-  sumo-full-tryjob
-  sumo-llvm-next-toolchain-tryjob
-  sumo-llvm-toolchain-tryjob
-  sumo-payloads-tryjob
-  sumo-release-tryjob
-  sumo-unittest-stress
   swanky-factory-rambi-5517.B-factorybranch-tryjob
-  swanky-full-tryjob
-  swanky-llvm-next-toolchain-tryjob
-  swanky-llvm-toolchain-tryjob
-  swanky-payloads-tryjob
-  swanky-release-tryjob
-  swanky-unittest-stress
   sync-test-cbuildbot-tryjob
   tael-full-tryjob
   tael-llvm-next-toolchain-tryjob
@@ -2073,12 +1983,6 @@
   whirlwind-test-ap-tryjob
   whirlwind-unittest-stress
   winky-factory-rambi-5517.B-factorybranch-tryjob
-  winky-full-tryjob
-  winky-llvm-next-toolchain-tryjob
-  winky-llvm-toolchain-tryjob
-  winky-payloads-tryjob
-  winky-release-tryjob
-  winky-unittest-stress
   wizpig-factory-strago-7458.B-factorybranch-tryjob
   wizpig-full-tryjob
   wizpig-llvm-next-toolchain-tryjob
