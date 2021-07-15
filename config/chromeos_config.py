@@ -1253,11 +1253,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       schedule='with 60m interval',
   )
 
-  _pi_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'caroline',
-      'eve', # TODO(b/172889735): Temporary no_hwtest.
-      'reef',
-  ])
+  _pi_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
   _pi_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _pi_hwtest_boards = _frozen_ge_set(ge_build_config, [
       # TODO(b/172889735): Temporary disable eve because DUTs are reserved
