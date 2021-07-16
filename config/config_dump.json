@@ -857,24 +857,6 @@
             "manifest_version": true,
             "vm_tests": []
         },
-        "vmmst_android_pfq": {
-            "_template": "vmmst_android_pfq",
-            "android_import_branch": "git_master-arc-dev",
-            "android_package": "android-vm-master",
-            "android_rev": "latest_release",
-            "build_timeout": 28800,
-            "build_type": "android",
-            "description": "Preflight Android Uprev & Build (internal)",
-            "display_label": "vmmst_android_pfq",
-            "internal": true,
-            "luci_builder": "PFQ",
-            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-            "manifest_version": true,
-            "overlays": "both",
-            "sync_chrome": true,
-            "uprev": false,
-            "vm_tests": []
-        },
         "vmrvc_android_pfq": {
             "_template": "vmrvc_android_pfq",
             "android_import_branch": "git_rvc-arc",
@@ -902,6 +884,24 @@
             "build_type": "android",
             "description": "Preflight Android Uprev & Build (internal)",
             "display_label": "vmsc_android_pfq",
+            "internal": true,
+            "luci_builder": "PFQ",
+            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+            "manifest_version": true,
+            "overlays": "both",
+            "sync_chrome": true,
+            "uprev": false,
+            "vm_tests": []
+        },
+        "vmt_android_pfq": {
+            "_template": "vmt_android_pfq",
+            "android_import_branch": "git_master-arc-dev",
+            "android_package": "android-vm-master",
+            "android_rev": "latest_release",
+            "build_timeout": 28800,
+            "build_type": "android",
+            "description": "Preflight Android Uprev & Build (internal)",
+            "display_label": "vmt_android_pfq",
             "internal": true,
             "luci_builder": "PFQ",
             "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
@@ -4268,6 +4268,9 @@
         "boards": [
             "betty-arc-t"
         ],
+        "hw_tests": [],
+        "hw_tests_disabled_bug": "https://crbug.com/998427",
+        "hw_tests_override": [],
         "important": false,
         "vm_tests": [],
         "vm_tests_override": null
@@ -4279,15 +4282,8 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "hw_tests": [
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-        ],
+        "hw_tests": [],
+        "hw_tests_disabled_bug": "https://crbug.com/998427",
         "hw_tests_override": null,
         "luci_builder": "Try",
         "paygen": false,
@@ -4307,6 +4303,31 @@
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "betty-arc-t-vmt-android-pfq": {
+        "_template": "vmt_android_pfq",
+        "boards": [
+            "betty-arc-t"
+        ],
+        "important": false,
+        "manifest": "official.xml",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "betty-arc-t-vmt-android-pfq-tryjob": {
+        "_template": "vmt_android_pfq",
+        "boards": [
+            "betty-arc-t"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "uprev": true,
         "useflags": [
             "chrome_internal"
         ]
@@ -4435,30 +4456,6 @@
         "manifest": "official.xml",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "betty-arcvm-master-vmmst-android-pfq": {
-        "_template": "vmmst_android_pfq",
-        "boards": [
-            "betty-arcvm-master"
-        ],
-        "manifest": "official.xml",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "betty-arcvm-master-vmmst-android-pfq-tryjob": {
-        "_template": "vmmst_android_pfq",
-        "boards": [
-            "betty-arcvm-master"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "uprev": true,
         "useflags": [
             "chrome_internal"
         ]
@@ -22403,30 +22400,6 @@
         "sync_chrome": true,
         "vm_tests_override": null
     },
-    "master-vmmst-android-pfq": {
-        "_template": "vmmst_android_pfq",
-        "boards": [],
-        "master": true,
-        "push_overlays": "both",
-        "schedule": "with 150m interval",
-        "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq"
-        ]
-    },
-    "master-vmmst-android-pfq-tryjob": {
-        "_template": "vmmst_android_pfq",
-        "boards": [],
-        "debug": true,
-        "debug_cidb": true,
-        "display_label": "tryjob",
-        "luci_builder": "Try",
-        "master": true,
-        "push_overlays": "both",
-        "slave_configs": [
-            "betty-arcvm-master-vmmst-android-pfq-tryjob"
-        ],
-        "uprev": true
-    },
     "master-vmrvc-android-pfq": {
         "_template": "vmrvc_android_pfq",
         "boards": [],
@@ -22484,6 +22457,30 @@
         "slave_configs": [
             "betty-arc-s-vmsc-android-pfq-tryjob",
             "hatch-arc-s-vmsc-android-pfq-tryjob"
+        ],
+        "uprev": true
+    },
+    "master-vmt-android-pfq": {
+        "_template": "vmt_android_pfq",
+        "boards": [],
+        "master": true,
+        "push_overlays": "both",
+        "schedule": "with 150m interval",
+        "slave_configs": [
+            "betty-arc-t-vmt-android-pfq"
+        ]
+    },
+    "master-vmt-android-pfq-tryjob": {
+        "_template": "vmt_android_pfq",
+        "boards": [],
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "master": true,
+        "push_overlays": "both",
+        "slave_configs": [
+            "betty-arc-t-vmt-android-pfq-tryjob"
         ],
         "uprev": true
     },

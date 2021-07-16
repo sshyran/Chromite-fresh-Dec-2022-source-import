@@ -408,10 +408,6 @@
   config-updater
   luci-scheduler-updater
 
-== vmmst_android_pfq ==
-  master-vmmst-android-pfq
-    betty-arcvm-master-vmmst-android-pfq
-
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
     eve-arc-r-vmrvc-android-pfq
@@ -425,6 +421,10 @@
   master-vmsc-android-pfq
     betty-arc-s-vmsc-android-pfq
     hatch-arc-s-vmsc-android-pfq
+
+== vmt_android_pfq ==
+  master-vmt-android-pfq
+    betty-arc-t-vmt-android-pfq
 
 == tryjob ==
   adlrvp-full-tryjob
@@ -563,13 +563,13 @@
   betty-arc-t-payloads-tryjob
   betty-arc-t-release-tryjob
   betty-arc-t-unittest-stress
+  betty-arc-t-vmt-android-pfq-tryjob
   betty-arcvm-master-full-tryjob
   betty-arcvm-master-llvm-next-toolchain-tryjob
   betty-arcvm-master-llvm-toolchain-tryjob
   betty-arcvm-master-payloads-tryjob
   betty-arcvm-master-release-tryjob
   betty-arcvm-master-unittest-stress
-  betty-arcvm-master-vmmst-android-pfq-tryjob
   betty-asan-tryjob
   betty-full-tryjob
   betty-incremental-tryjob
@@ -1552,8 +1552,6 @@
     zork-kernelnext-release-tryjob
     zork-minios-release-tryjob
     zork-release-tryjob
-  master-vmmst-android-pfq-tryjob
-    betty-arcvm-master-vmmst-android-pfq-tryjob
   master-vmrvc-android-pfq-tryjob
     eve-arc-r-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
@@ -1564,6 +1562,8 @@
   master-vmsc-android-pfq-tryjob
     betty-arc-s-vmsc-android-pfq-tryjob
     hatch-arc-s-vmsc-android-pfq-tryjob
+  master-vmt-android-pfq-tryjob
+    betty-arc-t-vmt-android-pfq-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-full-tryjob
   mistral-llvm-next-toolchain-tryjob

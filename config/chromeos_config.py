@@ -1195,14 +1195,14 @@ def AndroidTemplates(site_config):
       android_import_branch=constants.ANDROID_VMSC_BUILD_BRANCH,
   )
 
-  # Template for Android VM Master.
+  # Template for Android T.
   site_config.AddTemplate(
-      'vmmst_android_pfq',
+      'vmt_android_pfq',
       site_config.templates.generic_android_pfq,
       site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMMST_ANDROID_PFQ,
-      android_package=constants.ANDROID_VMMST_PACKAGE,
-      android_import_branch=constants.ANDROID_VMMST_BUILD_BRANCH,
+      display_label=config_lib.DISPLAY_LABEL_VMT_ANDROID_PFQ,
+      android_package=constants.ANDROID_VMT_PACKAGE,
+      android_import_branch=constants.ANDROID_VMT_BUILD_BRANCH,
   )
 
   # Mixin for masters.
@@ -1232,17 +1232,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   # suites blocking RVC PFQ.
   vmrvc_hwtest_list = [hwtest for hwtest in hw_test_list.SharedPoolPFQ()
                        if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE]
-
-  # Android VM MST master
-  vmmst_master_config = site_config.Add(
-      constants.VMMST_ANDROID_PFQ_MASTER,
-      site_config.templates.vmmst_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 150m interval'
-  )
-  _vmmst_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'betty-arcvm-master', # No HWTest, No VMTest.
-  ])
 
   # Android PI master.
   pi_master_config = site_config.Add(
@@ -1318,16 +1307,21 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmsc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmsc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
-  # Android VMMST slaves.
-  # No board to build for now (just roll). empty slave to pass test.
-  vmmst_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmmst-android-pfq',
-          _vmmst_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmmst_android_pfq,
-      )
+  # Android VM T master
+  vmt_master_config = site_config.Add(
+      constants.VMT_ANDROID_PFQ_MASTER,
+      site_config.templates.vmt_android_pfq,
+      site_config.templates.master_android_pfq_mixin,
+      schedule='with 150m interval'
   )
+  _vmt_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmt_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [
+      'betty-arc-t', # No HWTest, No VMTest.
+  ])
+  _vmt_hwtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmt_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmt_vmtest_boards = _frozen_ge_set(ge_build_config, [])
+  _vmt_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
   # Android PI slaves.
   pi_master_config.AddSlaves(
@@ -1465,6 +1459,48 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _vmsc_vmtest_boards,
           board_configs,
           site_config.templates.vmsc_android_pfq,
+          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
+                                            test_suite='smoke')],
+      )
+  )
+
+  # Android VMT slaves.
+  vmt_master_config.AddSlaves(
+      site_config.AddForBoards(
+          'vmt-android-pfq',
+          _vmt_hwtest_boards,
+          board_configs,
+          site_config.templates.vmt_android_pfq,
+          enable_skylab_hw_tests=True,
+          hw_tests=hw_test_list.SharedPoolPFQ(),
+      ) +
+      site_config.AddForBoards(
+          'vmt-android-pfq',
+          _vmt_hwtest_experimental_boards,
+          board_configs,
+          site_config.templates.vmt_android_pfq,
+          enable_skylab_hw_tests=True,
+          hw_tests=hw_test_list.SharedPoolPFQ(),
+          important=False,
+      ) +
+      site_config.AddForBoards(
+          'vmt-android-pfq',
+          _vmt_no_hwtest_boards,
+          board_configs,
+          site_config.templates.vmt_android_pfq,
+      ) +
+      site_config.AddForBoards(
+          'vmt-android-pfq',
+          _vmt_no_hwtest_experimental_boards,
+          board_configs,
+          site_config.templates.vmt_android_pfq,
+          important=False,
+      ) +
+      site_config.AddForBoards(
+          'vmt-android-pfq',
+          _vmt_vmtest_boards,
+          board_configs,
+          site_config.templates.vmt_android_pfq,
           vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
                                             test_suite='smoke')],
       )
@@ -2440,6 +2476,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       },
       # Currently betty-arc-r is VM only.
       'betty-arc-r-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/998427',
+          'vm_tests': [],
+          'vm_tests_override': []
+      },
+      'betty-arc-t-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/998427',
