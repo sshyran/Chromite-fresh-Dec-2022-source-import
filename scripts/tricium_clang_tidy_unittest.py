@@ -467,8 +467,7 @@ class TriciumClangTidyTests(cros_test_lib.MockTestCase):
 
   @mock.patch.object(osutils, 'CopyDirContents')
   @mock.patch.object(osutils, 'SafeMakedirs')
-  @mock.patch.object(osutils, 'RmDir')
-  def test_lint_generation_functions(self, rmdir_mock, safe_makedirs_mock,
+  def test_lint_generation_functions(self, safe_makedirs_mock,
                                      copy_dir_contents_mock):
     run_mock = self.StartPatcher(cros_test_lib.PopenMock())
     run_mock.SetDefaultCmdResult()
@@ -477,8 +476,9 @@ class TriciumClangTidyTests(cros_test_lib.MockTestCase):
     mkdtemp_mock = self.PatchObject(tempfile, 'mkdtemp')
     mkdtemp_path = '/path/to/temp/dir'
     mkdtemp_mock.return_value = mkdtemp_path
-    dir_name = str(
-        tricium_clang_tidy.generate_lints('${board}', '/path/to/the.ebuild'))
+    with mock.patch.object(osutils, 'RmDir') as rmdir_mock:
+      dir_name = str(
+          tricium_clang_tidy.generate_lints('${board}', '/path/to/the.ebuild'))
     self.assertEqual(mkdtemp_path, dir_name)
 
     rmdir_mock.assert_called_with(
