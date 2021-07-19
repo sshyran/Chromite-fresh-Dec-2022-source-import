@@ -114,7 +114,8 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
             transfer.source_root,
             f'{remote_dir}/{transfer.destination_image}',
             mode='rsync',
-            files_from=files_file)
+            files_from=files_file,
+            inplace=True)
 
     logging.notice('Repacking DLC')
     command = textwrap.dedent(f"""
