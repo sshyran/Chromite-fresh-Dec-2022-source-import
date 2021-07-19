@@ -520,7 +520,13 @@ wheel: <
 >
 """
     # TODO(vapier): Drop str() once WriteFile accepts Path objects.
-    osutils.WriteFile(str(spec), data, mode='wb', atomic=True, sudo=True)
+    spec = str(spec)
+    try:
+      osutils.WriteFile(spec, data, mode='wb', atomic=True)
+    except OSError:
+      # If the cache already existed, as root, but hadn't had the spec written,
+      # do it as root now.
+      osutils.WriteFile(spec, data, mode='wb', atomic=True, sudo=True)
     return True
 
   def __init__(self, boto_file=None, cache_dir=None, acl=None,
