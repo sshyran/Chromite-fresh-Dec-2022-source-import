@@ -112,7 +112,9 @@ def build(build_target, fw_name=None, dry_run=False):
     raise BuildError('The emerge command failed. Run with --verbose or --debug '
                      'to see the emerge output for details.')
 
-  logging.notice('Done! AP firmware successfully built.')
+  logging.notice('AP firmware image for device %s was built successfully '
+                 'and is available at %s.',
+                 build_target.name, build_target.full_path())
 
 
 def deploy(build_target,
