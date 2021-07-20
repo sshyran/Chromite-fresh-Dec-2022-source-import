@@ -4,6 +4,7 @@
 
 """A library for emitting traces and spans to Google Cloud trace."""
 
+import collections
 import contextlib
 import errno
 import functools
@@ -14,7 +15,6 @@ import re
 
 from chromite.lib import cros_logging as log
 from chromite.lib import metrics
-from chromite.lib import structured
 from chromite.third_party.google.protobuf import timestamp_pb2
 from chromite.third_party.infra_libs import ts_mon
 
@@ -42,11 +42,9 @@ def LogSpan(span):
   _RecordSpanMetrics(span)
   try:
     with open(GetSpanLogFilePath(span), 'w') as fh:
-      fh.write(json.dumps(span.ToDict()))
+      fh.write(json.dumps(span, default=serialize_span))
   # Catch various configuration errors.
-  # TODO(vapier): Drop IOError when we're Python 3-only.
-  # pylint: disable=overlapping-except
-  except (OSError, IOError) as error:
+  except OSError as error:
     if error.errno == errno.EPERM:
       log.warning(
           'Received permissions error while trying to open the span log file.')
@@ -56,6 +54,14 @@ def LogSpan(span):
       return None
     else:
       raise
+
+
+def serialize_span(obj):
+  """Helper function to provide serialization of Spans for `json.dump`."""
+  if isinstance(obj, Span):
+    return dict(obj)
+  else:
+    raise TypeError(f'Unable to serialize an object of type {type(obj)}')
 
 
 def _RecordSpanMetrics(span):
@@ -72,12 +78,11 @@ def _RecordSpanMetrics(span):
 
 
 # -- User-facing API -----------------------------------------------------------
-class Span(structured.Structured):
+class Span(collections.abc.Mapping):
   """An object corresponding to a cloud trace Span."""
 
-  VISIBLE_KEYS = (
-      'name', 'spanId', 'parentSpanId', 'labels',
-      'startTime', 'endTime', 'status')
+  __keys = ('name', 'spanId', 'parentSpanId', 'labels', 'startTime', 'endTime',
+            'status')
 
   def __init__(self, name, spanId=None, labels=None, parentSpanId=None,
                traceId=None):
@@ -133,6 +138,28 @@ class Span(structured.Structured):
     end = timestamp_pb2.Timestamp()
     end.GetCurrentTime()
     self.endTime = end.ToJsonString()
+
+  def __getitem__(self, key: str):
+    if not isinstance(key, str):
+      raise TypeError('Span keys must be of type str')
+
+    if key not in self.__keys:
+      raise KeyError(key)
+
+    val = getattr(self, key, None)
+    if val is not None:
+      return val
+    else:
+      raise KeyError(key)
+
+  def keys(self):
+    return (key for key in self.__keys if getattr(self, key, None) is not None)
+
+  def __len__(self) -> int:
+    return len(self.keys())
+
+  def __iter__(self):
+    return ((key, self[key]) for key in self.keys())
 
 
 class SpanStack(object):
