@@ -3261,8 +3261,9 @@ def BranchScheduleConfig():
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       # BOT-TAG:NO_PRUNE
-      ('release-R86-13421.B',
-       ['kevin-android-pi-pre-flight-branch'],
+      ('release-R90-13816.B',
+       ['kevin-android-pi-pre-flight-branch',
+        'hatch-android-rvc-pre-flight-branch'],
        'chell-chrome-no-afdo-uprev-pre-flight-branch',
        ['orderfile-generate-toolchain',
         'orderfile-verify-toolchain'],
