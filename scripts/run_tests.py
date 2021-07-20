@@ -20,6 +20,7 @@ $ ./run_tests lib/osutils_unittest.py::TestOsutils::testIsSubPath
 $ ./run_tests -- --collect-only
 """
 
+import logging
 import os
 import sys
 
@@ -29,7 +30,6 @@ from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
-from chromite.lib import cros_logging as logging
 from chromite.lib import namespaces
 
 

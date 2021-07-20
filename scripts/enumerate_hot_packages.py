@@ -11,10 +11,10 @@ Primarily intended for use by the Chrome OS toolchain team.
 """
 
 import json
+import logging
 import os
 
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
 
 

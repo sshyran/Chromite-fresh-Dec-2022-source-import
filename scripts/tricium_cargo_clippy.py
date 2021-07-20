@@ -8,14 +8,14 @@ This script is intended specifically for use with Tricium (go/tricium).
 """
 
 import json
+import logging
 import os
 from pathlib import Path
 import re
-from typing import List, Dict, Iterable, Any, Text, NamedTuple
+from typing import Any, Dict, Iterable, List, NamedTuple, Text
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 class Error(Exception):

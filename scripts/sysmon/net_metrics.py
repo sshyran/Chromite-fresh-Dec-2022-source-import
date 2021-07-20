@@ -7,13 +7,13 @@
 from __future__ import absolute_import
 
 import collections
+import logging
 import socket
 
+from chromite.third_party.infra_libs import ts_mon
 import psutil  # pylint: disable=import-error
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
-from chromite.third_party.infra_libs import ts_mon
 
 
 logger = logging.getLogger(__name__)

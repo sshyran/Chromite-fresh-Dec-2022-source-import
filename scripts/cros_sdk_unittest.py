@@ -4,12 +4,12 @@
 
 """Tests for cros_sdk."""
 
+import logging
 import os
 import subprocess
 import unittest
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils

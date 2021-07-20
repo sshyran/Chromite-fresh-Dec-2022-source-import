@@ -4,6 +4,7 @@
 
 """The Build API entry point."""
 
+import logging
 import os
 
 from chromite.api import api_config as api_config_lib
@@ -13,7 +14,6 @@ from chromite.api import router as router_lib
 from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.utils import matching
 
 

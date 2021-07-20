@@ -6,11 +6,12 @@
 
 from __future__ import absolute_import
 
+import logging
 import os
 import subprocess
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
+
 
 logger = logging.getLogger(__name__)
 

@@ -11,6 +11,7 @@ qemu, bind mounts, etc...
 import argparse
 import contextlib
 import errno
+import logging
 import os
 import sys
 import tempfile
@@ -20,7 +21,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import namespaces
 from chromite.lib import osutils
 from chromite.lib import path_util

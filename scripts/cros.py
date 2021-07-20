@@ -13,9 +13,10 @@ example, `cros lint` will use the cli/cros/cros_lint.py subcommand.
 See cli/ for actual command implementations.
 """
 
+import logging
+
 from chromite.cli import command
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 
 
 def GetOptions(cmd_name=None):

@@ -5,13 +5,13 @@
 """Update the CHROMEOS_LKGM file in a chromium repository."""
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
+import logging
 import os
 
 from chromite.cbuildbot import manifest_version
 from chromite.lib import chrome_committer
 from chromite.lib import commandline
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import osutils
 

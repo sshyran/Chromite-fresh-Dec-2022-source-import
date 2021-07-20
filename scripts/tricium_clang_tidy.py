@@ -29,6 +29,7 @@ This script is intended specifically for use with Tricium (go/tricium).
 
 import bisect
 import json
+import logging
 import multiprocessing
 import os
 from pathlib import Path
@@ -37,15 +38,13 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from typing import (Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple,
-                    Union)
+from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 
 import yaml  # pylint: disable=import-error
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import workon_helper

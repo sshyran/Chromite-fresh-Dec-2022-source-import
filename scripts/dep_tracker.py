@@ -18,16 +18,17 @@ in several cases to help understand the contents of the built image.
 """
 
 import json
+import logging
 import multiprocessing
 import os
 import stat
 
+from chromite.third_party import lddtree
+
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import filetype
 from chromite.lib import parseelf
 from chromite.lib import portage_util
-from chromite.third_party import lddtree
 
 
 # Regex to parse Gentoo atoms. This should match the following ebuild names,

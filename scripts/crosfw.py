@@ -99,16 +99,16 @@ Note the standard bmpblk is at:
 """
 
 import glob
+import logging
 import multiprocessing
 import os
 import re
 import subprocess
 import sys
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 

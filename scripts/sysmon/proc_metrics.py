@@ -7,11 +7,12 @@
 from __future__ import absolute_import
 
 from functools import partial
+import logging
 
 import psutil  # pylint: disable=import-error
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
+
 
 logger = logging.getLogger(__name__)
 

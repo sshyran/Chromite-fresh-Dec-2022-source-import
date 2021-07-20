@@ -6,9 +6,9 @@
 
 from __future__ import absolute_import
 
+import logging
 import time
 
-from chromite.lib import cros_logging as logging
 
 logger = logging.getLogger(__name__)
 

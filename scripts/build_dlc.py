@@ -4,9 +4,10 @@
 
 """Script to generate a DLC (Downloadable Content) artifact."""
 
-from chromite.lib import dlc_lib
+import logging
+
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
+from chromite.lib import dlc_lib
 
 
 def GetParser():

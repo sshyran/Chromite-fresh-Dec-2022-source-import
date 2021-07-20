@@ -6,11 +6,11 @@
 
 from __future__ import absolute_import
 
+import logging
 import time
 
 import yaml  # pylint: disable=import-error
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 
 

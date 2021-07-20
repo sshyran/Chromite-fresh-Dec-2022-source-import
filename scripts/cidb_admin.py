@@ -4,12 +4,12 @@
 
 """Script for administering the Continuous Integration Database."""
 
+import logging
 import os
 
 from chromite.lib import cidb
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 
 

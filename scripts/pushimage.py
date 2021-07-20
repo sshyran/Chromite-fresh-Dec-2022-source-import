@@ -11,14 +11,14 @@ artifacts for signing (which a signing process will look for).
 import configparser
 import getpass
 import io
+import logging
 import os
 import re
 import textwrap
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import signing

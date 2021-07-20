@@ -7,8 +7,9 @@
 If a source .bin is specified, the update is assumed to be a delta update.
 """
 
+import logging
+
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib.paygen import paygen_payload_lib
 
 

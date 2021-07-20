@@ -9,19 +9,20 @@ emerge-$board autotest-all, by simply rsync'ing changes from trunk to sysroot.
 """
 
 import argparse
+from collections import namedtuple
 import glob
+import logging
 import os
 import re
 import sys
-from collections import namedtuple
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
+
 
 if cros_build_lib.IsInsideChroot():
   # pylint: disable=import-error

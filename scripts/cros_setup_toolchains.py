@@ -8,18 +8,19 @@ import errno
 import glob
 import hashlib
 import json
+import logging
 import os
 import re
 import shutil
 
+from chromite.third_party import lddtree
+
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import toolchain
-from chromite.third_party import lddtree
 from chromite.utils import key_value_store
 
 
