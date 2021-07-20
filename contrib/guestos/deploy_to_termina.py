@@ -95,12 +95,21 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
     logging.notice('Unpacking DLC')
     remote_dir = remote.work_dir
     command = 'restart vm_concierge ' if restart_services else ''
+    # We unpack the dlc disk image, add an extra 200M of empty space to each
+    # inner image to fit whatever we're about to copy over, then mount the
+    # images. Run the the entire thing inside set -e so a failure of any step
+    # causes the entire command to fail, which then turns into an exception.
     command += textwrap.dedent(f"""
-        cd {remote_dir} &&
-        dlctool --unpack --id termina-dlc dlc &&
-        mkdir vm_rootfs vm_tools &&
-        mount dlc/root/vm_rootfs.img vm_rootfs/ &&
-        mount dlc/root/vm_tools.img vm_tools/""")
+        (set -e
+          cd {remote_dir}
+          dlctool --unpack --id termina-dlc dlc
+          mkdir vm_rootfs vm_tools
+          for path in dlc/root/vm_tools.img dlc/root/vm_rootfs.img; do
+            truncate -s +200M $path
+            e2fsck -yf $path
+            resize2fs $path
+            mount $path $(basename $path .img)
+          done)""")
     remote.run(command, shell=True, capture_output=False)
 
     logging.notice('Transferring files')
@@ -118,11 +127,20 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
             inplace=True)
 
     logging.notice('Repacking DLC')
+    # Unmount the inner images, shrink them back to minimum size (so we don't
+    # constantly grow the image by 200M every time we run) then repack the DLC
+    # image. Run the the entire thing inside set -e so a failure of any step
+    # causes the entire command to fail, which then turns into an exception.
     command = textwrap.dedent(f"""
-        cd {remote_dir} &&
-        umount vm_rootfs vm_tools &&
-        dlctool --id termina-dlc dlc $(
-          grep -qm1 compress $(which dlctool) && echo --nocompress)""")
+        (set -e
+          cd {remote_dir}
+          umount vm_rootfs vm_tools
+          for path in dlc/root/vm_tools.img dlc/root/vm_rootfs.img; do
+            e2fsck -yf $path
+            resize2fs -M $path
+          done
+          dlctool --id termina-dlc dlc $(
+            grep -qm1 compress $(which dlctool) && echo --nocompress))""")
     remote.run(command, shell=True, capture_output=False)
 
 
