@@ -14964,6 +14964,7 @@
         "boards": [
             "goroh"
         ],
+        "chrome_sdk_build_chrome": false,
         "important": false,
         "vm_tests": [],
         "vm_tests_override": null
@@ -14973,6 +14974,7 @@
         "boards": [
             "goroh"
         ],
+        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [
