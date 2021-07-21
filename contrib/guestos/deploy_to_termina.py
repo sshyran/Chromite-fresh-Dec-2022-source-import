@@ -4,6 +4,7 @@
 
 """Deploy packages into a termina-dlc image on a device"""
 
+import logging
 import os
 import tempfile
 import textwrap
@@ -11,7 +12,6 @@ from typing import List, NamedTuple
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access

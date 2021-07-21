@@ -11,11 +11,11 @@ from __future__ import division
 
 import collections
 import datetime
+import logging
 import os
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import portage_util
 from chromite.scripts import cros_mark_as_stable
