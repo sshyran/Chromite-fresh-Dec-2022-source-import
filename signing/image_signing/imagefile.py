@@ -5,13 +5,13 @@
 """Chrome OS Image file signing."""
 
 import glob
+import logging
 import os
 import re
 import tempfile
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import image_lib
 from chromite.lib import kernel_cmdline
 from chromite.lib import osutils

@@ -5,12 +5,12 @@
 """Import keys from legacy signer config."""
 
 import configparser
+import logging
 import os
 
 import yaml  # pylint: disable=import-error
 
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.signing.lib import keys
 

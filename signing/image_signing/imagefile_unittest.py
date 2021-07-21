@@ -4,6 +4,7 @@
 
 """Chrome OS imagefile signing unittests"""
 
+import logging
 import os
 import re
 import tempfile
@@ -11,7 +12,6 @@ from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import image_lib_unittest

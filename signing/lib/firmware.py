@@ -6,13 +6,13 @@
 
 import csv
 import glob
+import logging
 import os
 import re
 import shutil
 import tempfile
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.signing.lib import signer

@@ -7,10 +7,10 @@
 from __future__ import absolute_import
 from __future__ import division
 
+import logging
 import os
 from unittest import mock
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.signing.bin import update_release_keys

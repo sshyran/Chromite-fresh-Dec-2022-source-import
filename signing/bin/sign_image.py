@@ -5,9 +5,9 @@
 """Chrome OS Image file signing."""
 
 import collections
+import logging
 
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.signing.image_signing import imagefile
 
 
