@@ -5,10 +5,10 @@
 """Configuration options for various cbuildbot tests."""
 
 import copy
+import logging
 
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 
 
 vmtest_boards = frozenset([

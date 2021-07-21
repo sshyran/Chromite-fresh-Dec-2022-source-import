@@ -5,20 +5,18 @@
 """Configuration options for various cbuildbot builders."""
 
 import copy
+import logging
 import re
-
-from chromite.lib import config_lib
-from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.utils import memoize
 
 from chromite.config import chromeos_config_boards as chromeos_boards
 from chromite.config import chromeos_test_config as chromeos_test
-
 # TODO(yshaul): Restrict the import when we're done splitting
+from chromite.config.chromeos_test_config import getInfoVMTest
 from chromite.config.chromeos_test_config import HWTestList
 from chromite.config.chromeos_test_config import TRADITIONAL_VM_TESTS_SUPPORTED
-from chromite.config.chromeos_test_config import getInfoVMTest
+from chromite.lib import config_lib
+from chromite.lib import constants
+from chromite.utils import memoize
 
 
 def _frozen_ge_set(ge_build_config, values, extras=None):
