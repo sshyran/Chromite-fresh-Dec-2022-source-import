@@ -4,13 +4,14 @@
 
 """This module tests the cros build command."""
 
+import logging
+
 import pytest  # pylint: disable=import-error
 
 from chromite.cli import command
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_build
 from chromite.lib import chroot_util
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock

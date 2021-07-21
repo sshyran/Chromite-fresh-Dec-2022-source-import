@@ -4,13 +4,13 @@
 
 """Unit tests for the flash module."""
 
+import logging
 import os
 from unittest import mock
 
 from chromite.cli import flash
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils

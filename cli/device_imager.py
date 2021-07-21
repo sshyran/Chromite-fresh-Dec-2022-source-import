@@ -6,18 +6,18 @@
 
 import abc
 import enum
+import logging
 import os
 import re
 import tempfile
 import threading
 import time
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 from chromite.cli import command
 from chromite.cli import flash
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import image_lib
 from chromite.lib import operation

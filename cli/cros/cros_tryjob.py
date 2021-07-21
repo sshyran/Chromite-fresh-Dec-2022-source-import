@@ -4,21 +4,21 @@
 
 """cros tryjob: Schedule a tryjob."""
 
+import logging
 import os
 import time
 
 from chromite.third_party.google.protobuf import json_format
 
-from chromite.lib import constants
+from chromite.cbuildbot import trybot_patch_pool
 from chromite.cli import command
 from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import pformat
 from chromite.lib import request_build
 from chromite.scripts import cbuildbot as cbuildbot_lib
-from chromite.cbuildbot import trybot_patch_pool
 
 
 REMOTE = 'remote'

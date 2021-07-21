@@ -16,11 +16,11 @@ A typical moblab VM setup involves:
 See README.moblab_vm.md in this folder for usage examples.
 """
 
+import logging
 import os
 
 from chromite.cli import command
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
 

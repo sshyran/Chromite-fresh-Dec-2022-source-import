@@ -22,6 +22,7 @@ $ cros analyze-image --image=/tmp/cros-analyze-coral-m86.bin
 """
 
 import csv
+import logging
 import shutil
 import sys
 import typing
@@ -30,7 +31,6 @@ from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import image_lib
 from chromite.lib import osutils

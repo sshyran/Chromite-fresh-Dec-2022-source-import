@@ -4,6 +4,7 @@
 
 """Stage a custom image on a Moblab device or in Google Storage."""
 
+import logging
 import os
 import re
 
@@ -11,7 +12,6 @@ from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import gs
 from chromite.lib import osutils

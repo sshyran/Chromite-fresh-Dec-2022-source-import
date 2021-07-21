@@ -14,12 +14,12 @@ ListCommands() function.
 """
 
 import importlib
+import logging
 import os
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 # Paths for finding and importing subcommand modules.

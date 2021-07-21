@@ -5,14 +5,14 @@
 """Bisect culprit commit that causes regression."""
 
 import argparse
+import logging
 
+from chromite.cli import command
 from chromite.cros_bisect import autotest_evaluator
 from chromite.cros_bisect import chrome_on_cros_bisector
 from chromite.cros_bisect import manual_evaluator
 from chromite.cros_bisect import simple_chrome_builder
-from chromite.cli import command
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 
 

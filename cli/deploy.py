@@ -14,13 +14,13 @@ import bz2
 import fnmatch
 import functools
 import json
+import logging
 import os
 import tempfile
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dlc_lib
 from chromite.lib import operation
 from chromite.lib import osutils
@@ -28,6 +28,7 @@ from chromite.lib import portage_util
 from chromite.lib import remote_access
 from chromite.lib import workon_helper
 from chromite.lib.parser import package_info
+
 
 try:
   import portage

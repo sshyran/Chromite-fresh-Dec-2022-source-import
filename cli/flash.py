@@ -6,16 +6,15 @@
 
 from __future__ import division
 
+import logging
 import os
 import re
 import shutil
 
 from chromite.cli import device_imager
 from chromite.cli.cros import cros_chrome_sdk
-
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import operation
 from chromite.lib import osutils

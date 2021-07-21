@@ -4,19 +4,22 @@
 
 """cros ap: firmware AP related commands."""
 
+from abc import ABCMeta, abstractmethod
+import logging
 import os
 from pathlib import Path
 import sys
 
-from abc import ABCMeta, abstractmethod
-from chromite.lib import build_target_lib
 from chromite.cli import command
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import pformat
-from chromite.lib.firmware import ap_firmware, flash_ap, servo_lib
+from chromite.lib.firmware import ap_firmware
+from chromite.lib.firmware import flash_ap
+from chromite.lib.firmware import servo_lib
+
 
 COMMAND_DUMP_CONFIG = 'dump-config'
 COMMAND_BUILD = 'build'

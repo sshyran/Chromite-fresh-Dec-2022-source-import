@@ -4,6 +4,7 @@
 
 """cros build: Build the requested packages."""
 
+import logging
 import subprocess
 
 from chromite.cli import command
@@ -11,7 +12,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import chroot_util
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import parallel
 from chromite.lib import workon_helper

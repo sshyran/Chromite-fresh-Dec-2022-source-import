@@ -6,16 +6,16 @@
 
 import functools
 import json
+import logging
 import multiprocessing
 import os
 import re
 import sys
 import urllib.parse
 
-from chromite.lib import constants
 from chromite.cli import command
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
