@@ -5,11 +5,11 @@
 """Invokes git bisect to find culprit commit inside Chromium repository."""
 
 import json
+import logging
 import re
 
 from chromite.cli import flash
 from chromite.cros_bisect import git_bisector
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import retry_util

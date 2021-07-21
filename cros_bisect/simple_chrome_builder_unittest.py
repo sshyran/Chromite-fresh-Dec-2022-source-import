@@ -4,13 +4,13 @@
 
 """Test simple_chrome_builder  module."""
 
+import logging
 import os
 from unittest import mock
 
 from chromite.cbuildbot import commands
 from chromite.cros_bisect import simple_chrome_builder
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import gclient
 from chromite.lib import git

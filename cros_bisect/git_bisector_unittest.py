@@ -6,6 +6,7 @@
 
 import builtins
 import copy
+import logging
 import os
 from unittest import mock
 
@@ -15,7 +16,6 @@ from chromite.cros_bisect import evaluator as evaluator_module
 from chromite.cros_bisect import git_bisector
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
 

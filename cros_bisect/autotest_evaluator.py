@@ -6,6 +6,7 @@
 
 from __future__ import division
 
+import logging
 import os
 import shutil
 
@@ -13,7 +14,6 @@ from chromite.cros_bisect import common
 from chromite.cros_bisect import evaluator
 from chromite.cros_bisect import simple_chrome_builder
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import json_lib
 from chromite.lib import osutils
 from chromite.lib import path_util

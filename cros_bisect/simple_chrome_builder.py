@@ -4,14 +4,14 @@
 
 """Builds Chrome on ChromeOS."""
 
+import logging
 import os
 import shutil
 
-from chromite.cros_bisect import builder
 from chromite.cbuildbot import commands
+from chromite.cros_bisect import builder
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gclient
 from chromite.lib import git
 from chromite.lib import osutils

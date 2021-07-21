@@ -11,9 +11,9 @@
 
 from __future__ import division
 
+import logging
 import math
 
-from chromite.lib import cros_logging as logging
 
 class Score(object):
   """Stores a list of scores and calculates its statistics.
