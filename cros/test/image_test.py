@@ -15,6 +15,7 @@ import fnmatch
 import glob
 import io
 import itertools
+import logging
 import mimetypes
 import os
 from pathlib import Path
@@ -23,19 +24,18 @@ import stat
 from typing import NamedTuple
 import unittest
 
+from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.common import exceptions
+from chromite.third_party.pyelftools.elftools.elf import elffile
 import magic  # pylint: disable=import-error
 
 from chromite.cros.test import usergroup_baseline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import filetype
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.lib import parseelf
 from chromite.lib import portage_util
-from chromite.third_party import lddtree
-from chromite.third_party.pyelftools.elftools.common import exceptions
-from chromite.third_party.pyelftools.elftools.elf import elffile
 
 
 class LocaltimeTest(image_test_lib.ImageTestCase):
