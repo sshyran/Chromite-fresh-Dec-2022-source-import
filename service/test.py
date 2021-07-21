@@ -7,22 +7,22 @@
 Handles test related functionality.
 """
 
+import json
+import logging
 import os
 import re
 import shutil
-import json
-
 from typing import List, NamedTuple
+
 from chromite.cbuildbot import commands
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import image_lib
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
 from chromite.lib import portage_util
-from chromite.lib import chroot_lib
 from chromite.lib import sysroot_lib
 from chromite.utils import code_coverage_util
 

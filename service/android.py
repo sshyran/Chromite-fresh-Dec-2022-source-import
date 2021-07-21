@@ -4,12 +4,12 @@
 
 """Provides utility for performing Android uprev."""
 
+import logging
 import os
 import re
 import time
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 

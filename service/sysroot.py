@@ -4,6 +4,7 @@
 
 """Sysroot service."""
 
+import logging
 import multiprocessing
 import os
 import shutil
@@ -16,7 +17,6 @@ from chromite.lib import cache
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib

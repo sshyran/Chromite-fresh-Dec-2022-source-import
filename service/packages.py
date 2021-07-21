@@ -9,6 +9,7 @@ from distutils.version import LooseVersion
 import fileinput
 import functools
 import json
+import logging
 import os
 import re
 import sys
@@ -20,7 +21,6 @@ from chromite.api.gen.config import replication_config_pb2
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import image_lib
 from chromite.lib import osutils
@@ -28,6 +28,7 @@ from chromite.lib import portage_util
 from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
+
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph

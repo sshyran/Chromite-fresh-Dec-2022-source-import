@@ -9,13 +9,13 @@ This service houses the high level business logic for all created artifacts.
 
 import collections
 import glob
+import logging
 import os
 import shutil
 
 from chromite.lib import autotest_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain_util
