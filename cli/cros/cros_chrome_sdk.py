@@ -1168,16 +1168,8 @@ class ChromeSDKCommand(command.CliCommand):
       Absolute path to the wrapper script to be used as --gomacc-path.
     """
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-    tc_tarball_path = None
-    # Since we want a path to tarball extraction not a path to clang in
-    # symlink directory, we cannot find the path with
-    # sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].
-    # That is why we search like this.
-    for key, value in sdk_ctx.key_map.items():
-      if isinstance(key, tuple) and key[0].startswith('target_toolchain/'):
-        assert tc_tarball_path is None
-        tc_tarball_path = value.path
-
+    tc_tarball_path = os.path.realpath(
+        sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path)
     linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
                                   'reclient_cfgs', 'rewrapper_linux.cfg')
     linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
