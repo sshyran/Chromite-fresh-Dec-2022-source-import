@@ -4,9 +4,8 @@
 
 """Utilities for working with FieldMask protobufs."""
 
+import logging
 from typing import Dict, List
-
-from chromite.lib import cros_logging as logging
 
 
 def _MergeDictWithPathParts(path_parts: List[str], source: Dict,

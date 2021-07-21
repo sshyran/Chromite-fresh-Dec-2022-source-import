@@ -5,9 +5,11 @@
 """Utilities for working with code coverage files."""
 
 import json
+import logging
 import os
+
 from chromite.lib import osutils
-from chromite.lib import cros_logging as logging
+
 
 def GetLlvmJsonCoverageDataIfValid(path_to_file: str):
   """Gets the content of a file if it matches the llvm coverage json format.
