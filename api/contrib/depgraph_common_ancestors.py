@@ -25,10 +25,10 @@ $> ./depgraph_common_inheritance dev-libs/libxml2 app-text/docbook-xml-dtd
 
 import copy
 import json
+import logging
 import os
 
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

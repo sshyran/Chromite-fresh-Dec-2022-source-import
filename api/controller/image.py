@@ -8,6 +8,7 @@ The image related API endpoints should generally be found here.
 """
 
 import functools
+import logging
 import os
 
 from chromite.api import controller
@@ -18,14 +19,14 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
-from chromite.lib import cros_build_lib
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import sysroot_lib
 from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
+
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE

@@ -8,7 +8,8 @@ See infra/proto/metrics.proto for a description of the type of record that this
 module will be creating.
 """
 
-from chromite.lib import cros_logging as logging
+import logging
+
 from chromite.utils import metrics
 
 

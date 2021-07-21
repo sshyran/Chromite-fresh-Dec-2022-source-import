@@ -19,6 +19,7 @@ https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/contrib/README.
 https://chromium.googlesource.com/chromiumos/chromite/+/HEAD/api/README.md
 """
 
+import logging
 import os
 import re
 
@@ -28,7 +29,6 @@ from chromite.api.gen.chromite.api import build_api_config_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

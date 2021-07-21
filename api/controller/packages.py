@@ -4,6 +4,8 @@
 
 """Package related functionality."""
 
+import logging
+
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
@@ -12,10 +14,9 @@ from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
-from chromite.lib.uprev_lib import GitRef
 from chromite.lib.parser import package_info
+from chromite.lib.uprev_lib import GitRef
 from chromite.service import packages
 
 

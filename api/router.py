@@ -10,6 +10,7 @@ registration.
 
 import collections
 import importlib
+import logging
 import os
 
 from chromite.third_party.google.protobuf import symbol_database
@@ -31,7 +32,6 @@ from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.utils import memoize
 

@@ -8,13 +8,13 @@ Install proto using CIPD to ensure a consistent protoc version.
 """
 
 import enum
+import logging
 import os
 import tempfile
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 

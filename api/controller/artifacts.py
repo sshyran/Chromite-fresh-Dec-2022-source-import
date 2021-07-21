@@ -4,6 +4,7 @@
 
 """Implements ArtifactService."""
 
+import logging
 import os
 from typing import Any, NamedTuple
 
@@ -20,7 +21,6 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import sysroot_lib
 from chromite.service import artifacts
 

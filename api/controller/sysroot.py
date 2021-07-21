@@ -4,25 +4,26 @@
 
 """Sysroot controller."""
 
+import logging
 import os
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import sysroot
 from chromite.utils import metrics
+
 
 _ACCEPTED_LICENSES = '@CHROMEOS'
 
