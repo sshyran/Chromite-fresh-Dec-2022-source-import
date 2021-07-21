@@ -5,6 +5,7 @@
 """Module containing the simple builders."""
 
 import collections
+import logging
 import traceback
 
 from chromite.cbuildbot import afdo
@@ -26,7 +27,6 @@ from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import parallel
 from chromite.lib import results_lib

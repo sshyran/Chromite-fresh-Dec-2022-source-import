@@ -8,25 +8,26 @@ import datetime
 import glob
 import itertools
 import json
+import logging
 import multiprocessing
-import re
 import os
+import re
 import shutil
 
 from chromite.cbuildbot import commands
-from chromite.lib import failures_lib
-from chromite.lib import config_lib
-from chromite.lib import constants
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
 from chromite.lib import pformat
 from chromite.lib import portage_util
+
 
 _FULL_BINHOST = 'FULL_BINHOST'
 _PORTAGE_BINHOST = 'PORTAGE_BINHOST'

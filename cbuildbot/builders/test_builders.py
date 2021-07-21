@@ -4,18 +4,18 @@
 
 """Module containing builders intended for testing cbuildbot behaviors."""
 
-from chromite.lib import cros_logging as logging
-from chromite.lib import parallel
+import logging
 
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.builders import simple_builders
-from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import android_stages
 from chromite.cbuildbot.stages import artifact_stages
+from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import chrome_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
+from chromite.lib import parallel
 
 
 class SuccessStage(generic_stages.BuilderStage):

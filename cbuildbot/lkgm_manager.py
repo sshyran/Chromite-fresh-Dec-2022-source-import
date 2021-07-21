@@ -5,15 +5,15 @@
 """A library to generate and store the manifests for cros builders to use."""
 
 import codecs
+import logging
 import os
 import re
 from xml.dom import minidom
 
+from chromite.cbuildbot import manifest_version
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.cbuildbot import manifest_version
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 
 

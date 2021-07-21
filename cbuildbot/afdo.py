@@ -11,13 +11,18 @@ import collections
 import datetime
 import glob
 import json
+import logging
 import os
 import re
 
-from chromite.lib import constants, cros_build_lib
-from chromite.lib import cros_logging as logging
-from chromite.lib import (failures_lib, git, gs, osutils, path_util,
-                          timeout_util)
+from chromite.lib import constants
+from chromite.lib import cros_build_lib
+from chromite.lib import failures_lib
+from chromite.lib import git
+from chromite.lib import gs
+from chromite.lib import osutils
+from chromite.lib import path_util
+from chromite.lib import timeout_util
 
 
 # AFDO-specific constants.

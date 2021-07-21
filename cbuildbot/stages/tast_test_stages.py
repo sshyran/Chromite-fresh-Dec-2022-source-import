@@ -9,6 +9,7 @@ https://chromium.googlesource.com/chromiumos/platform/tast/ for more details.
 """
 
 import json
+import logging
 import os
 import shutil
 
@@ -17,7 +18,6 @@ from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cgroups
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import osutils
 from chromite.lib import timeout_util

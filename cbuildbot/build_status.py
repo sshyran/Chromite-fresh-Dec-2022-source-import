@@ -6,11 +6,11 @@
 
 import collections
 import datetime
+import logging
 
 from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 
 

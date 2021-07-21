@@ -9,12 +9,12 @@ import datetime
 import getpass
 import glob
 import json
+import logging
 import os
 import shlex
 import tempfile
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util

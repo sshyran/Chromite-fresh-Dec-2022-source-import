@@ -6,10 +6,10 @@
 
 import itertools
 import json
+import logging
 import os
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import pformat
 from chromite.lib import retry_util

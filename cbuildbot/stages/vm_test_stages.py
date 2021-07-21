@@ -11,6 +11,7 @@ archiving results and VM images in case of failure.
 """
 
 import datetime
+import logging
 import os
 import re
 import shutil
@@ -20,7 +21,6 @@ from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cgroups
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cts_helper
 from chromite.lib import failures_lib
 from chromite.lib import moblab_vm
@@ -28,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
 from chromite.service import artifacts as artifacts_svc
+
 
 _GCE_TEST_RESULTS = 'gce_test_results_%(attempt)s'
 _VM_TEST_RESULTS = 'vm_test_results_%(attempt)s'

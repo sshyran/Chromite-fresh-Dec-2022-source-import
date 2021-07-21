@@ -5,11 +5,11 @@
 """cbuildbot logic for uploading prebuilts and managing binhosts."""
 
 import glob
+import logging
 import os
 
 from chromite.cbuildbot import commands
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib.parser import package_info
 
 

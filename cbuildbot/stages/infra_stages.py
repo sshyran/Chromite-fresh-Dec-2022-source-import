@@ -4,6 +4,7 @@
 
 """Module containing infra build stages."""
 
+import logging
 import os
 import shutil
 
@@ -11,7 +12,6 @@ from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cipd
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 

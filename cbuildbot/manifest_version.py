@@ -7,6 +7,7 @@
 import datetime
 import fnmatch
 import glob
+import logging
 import os
 import re
 import shutil
@@ -19,7 +20,6 @@ from chromite.lib import builder_status_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import retry_util

@@ -4,12 +4,11 @@
 
 """Module with utilities for archiving functionality."""
 
+import logging
 import os
 
 from chromite.cbuildbot import commands
 from chromite.lib import config_lib
-
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 
