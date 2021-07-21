@@ -72,13 +72,12 @@ By default, when no package is specified, this script processes all
 packages for $BOARD.
 """
 
+import logging
 import os
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-
 from chromite.licensing import licenses_lib
 
 
