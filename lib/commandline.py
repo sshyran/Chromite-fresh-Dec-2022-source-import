@@ -12,8 +12,9 @@ import argparse
 import collections
 import datetime
 import functools
-import os
+import logging
 import optparse  # pylint: disable=deprecated-module
+import os
 import signal
 import sys
 import urllib.parse
@@ -21,7 +22,6 @@ import urllib.parse
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_collections
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util

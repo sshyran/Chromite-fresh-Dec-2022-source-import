@@ -6,6 +6,7 @@
 
 import collections
 import grp
+import logging
 import os
 from pathlib import Path
 import pwd
@@ -16,7 +17,6 @@ from typing import List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util

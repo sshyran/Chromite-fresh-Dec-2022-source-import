@@ -7,18 +7,18 @@
 import configparser
 import datetime
 import distutils.version  # pylint: disable=import-error,no-name-in-module
+import logging
 import operator
 import os
 import re
 import shutil
 import sys
-import time
 import threading
+import time
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.lib import image_lib
 from chromite.lib import gs
+from chromite.lib import image_lib
 from chromite.lib import path_util
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import build_artifact

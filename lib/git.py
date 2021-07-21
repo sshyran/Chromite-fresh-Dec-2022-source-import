@@ -9,6 +9,7 @@ import datetime
 import errno
 import fnmatch
 import hashlib
+import logging
 import os
 import re
 import string
@@ -17,7 +18,6 @@ from xml import sax
 
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

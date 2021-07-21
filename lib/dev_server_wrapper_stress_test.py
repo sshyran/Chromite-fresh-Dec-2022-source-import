@@ -8,7 +8,8 @@ Test script runs a long time stressing the ability to start and stop the
 dev_server_wrapper. Even very rare hangs will cause significant build flake.
 """
 
-from chromite.lib import cros_logging as logging
+import logging
+
 from chromite.lib import dev_server_wrapper
 
 

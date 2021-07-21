@@ -12,6 +12,7 @@ import datetime
 import errno
 import glob
 import hashlib
+import logging
 import os
 from pathlib import Path
 import pwd
@@ -23,7 +24,6 @@ import tempfile
 from typing import Optional, Union
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.utils import key_value_store
 

@@ -4,14 +4,14 @@
 
 """MiniOS build library."""
 
+import logging
 import os
 import pathlib
 
 from chromite.lib import build_target_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_build_lib
-from chromite.lib import kernel_builder
 from chromite.lib import image_lib
+from chromite.lib import kernel_builder
 
 
 MINIOS_KERNEL_IMAGE = 'minios_vmlinuz.image'

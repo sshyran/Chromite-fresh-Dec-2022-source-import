@@ -4,12 +4,12 @@
 
 """Dependency calculation functionality/utilities."""
 
+import logging
 import os
 import re
 from typing import List, Mapping, Union
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import portage_util

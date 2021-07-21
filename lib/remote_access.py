@@ -6,6 +6,7 @@
 
 import functools
 import glob
+import logging
 import os
 import re
 import shutil
@@ -17,7 +18,6 @@ import time
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import timeout_util

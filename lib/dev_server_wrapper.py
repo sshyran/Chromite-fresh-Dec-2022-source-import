@@ -6,6 +6,7 @@
 """
 
 import http.client
+import logging
 import multiprocessing
 import os
 import re
@@ -18,7 +19,6 @@ import urllib.request
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access

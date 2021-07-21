@@ -5,6 +5,7 @@
 """Unit tests for VM."""
 
 import fcntl
+import logging
 import multiprocessing
 import os
 import socket
@@ -15,7 +16,6 @@ from unittest import mock
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import device
 from chromite.lib import osutils

@@ -5,13 +5,13 @@
 """Basic infrastructure for implementing retries."""
 
 import functools
+import logging
 import random
 import re
 import sys
 import time
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 # Match stderr of curl's --fail option to see HTTP status code.

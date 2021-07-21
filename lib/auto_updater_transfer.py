@@ -37,11 +37,11 @@ from __future__ import absolute_import
 from __future__ import division
 
 import abc
+import logging
 import os
 import urllib.parse
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
 from chromite.lib import retry_util

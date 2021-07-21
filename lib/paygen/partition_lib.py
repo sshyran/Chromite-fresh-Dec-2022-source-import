@@ -4,15 +4,14 @@
 
 """Library for handling Chrome OS partition."""
 
+import logging
 import os
 import tempfile
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import image_lib
 from chromite.lib import path_util
-
 from chromite.lib.paygen import filelib
 
 

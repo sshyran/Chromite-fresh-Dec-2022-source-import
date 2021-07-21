@@ -7,6 +7,7 @@
 import collections
 import contextlib
 import io
+import logging
 import os
 import re
 import sys
@@ -18,7 +19,6 @@ from chromite.lib import cache
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import partial_mock

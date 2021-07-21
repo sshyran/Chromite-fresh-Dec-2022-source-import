@@ -4,8 +4,10 @@
 
 """Volteer configs."""
 
-from chromite.lib import cros_logging as logging
+import logging
+
 from chromite.lib.firmware import servo_lib
+
 
 BUILD_WORKON_PACKAGES = None
 

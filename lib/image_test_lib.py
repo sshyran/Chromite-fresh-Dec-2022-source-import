@@ -4,10 +4,10 @@
 
 """Functions related to image tests."""
 
+import logging
 import os
 import unittest
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import perf_uploader
 
 

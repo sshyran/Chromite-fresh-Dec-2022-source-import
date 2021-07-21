@@ -6,9 +6,9 @@
 
 import collections
 import json
+import logging
 import re
 
-from chromite.lib import cros_logging as logging
 
 # Currently, an exception is reported to CIDB failureTabe using the exception
 # class name as the exception_type. failure_message_lib.FailureMessageManager

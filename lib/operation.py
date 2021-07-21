@@ -13,6 +13,7 @@ from __future__ import division
 import collections
 import contextlib
 import fcntl
+import logging
 import multiprocessing
 import os
 import pty
@@ -22,7 +23,6 @@ import struct
 import sys
 import termios
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.terminal import Color

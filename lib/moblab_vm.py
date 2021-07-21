@@ -7,6 +7,7 @@
 import collections
 import contextlib
 import json
+import logging
 import os
 import random
 import shutil
@@ -14,7 +15,6 @@ import shutil
 from chromite.lib import chroot_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import pformat

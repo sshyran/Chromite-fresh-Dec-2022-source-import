@@ -5,8 +5,10 @@
 """Hold the functions that do the real work generating payloads."""
 
 import base64
+from collections import deque
 import datetime
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -14,13 +16,10 @@ import tempfile
 import threading
 import time
 
-from collections import deque
-
-from chromite.lib import dlc_lib
 from chromite.lib import chroot_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import dlc_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -32,7 +31,6 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
-
 from chromite.scripts import cros_set_lsb_release
 
 

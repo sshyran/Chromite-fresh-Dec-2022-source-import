@@ -6,11 +6,11 @@
 
 import array
 import errno
+import logging
 import os
 import re
 import tempfile
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

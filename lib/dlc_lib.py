@@ -7,6 +7,7 @@ from __future__ import division
 
 import hashlib
 import json
+import logging
 import math
 import os
 import re
@@ -14,10 +15,8 @@ import shutil
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import pformat
-
 from chromite.licensing import licenses_lib
 from chromite.scripts import cros_set_lsb_release
 

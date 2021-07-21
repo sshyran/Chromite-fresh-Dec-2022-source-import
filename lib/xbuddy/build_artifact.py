@@ -5,13 +5,13 @@
 """Module containing classes that wrap artifact downloads."""
 
 import itertools
+import logging
 import os
 import pickle
 import shutil
 import traceback
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants

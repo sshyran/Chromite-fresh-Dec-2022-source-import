@@ -6,15 +6,16 @@
 
 import collections
 import importlib
+import logging
 import os
 from typing import Optional
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
 from chromite.lib import workon_helper
 from chromite.lib.firmware import flash_ap
 from chromite.service import sysroot
+
 
 _BUILD_TARGET_CONFIG_MODULE = 'chromite.lib.firmware.ap_firmware_config.%s'
 _CONFIG_BUILD_WORKON_PACKAGES = 'BUILD_WORKON_PACKAGES'

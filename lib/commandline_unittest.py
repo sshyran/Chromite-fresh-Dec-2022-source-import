@@ -5,15 +5,15 @@
 """Test the commandline module."""
 
 import argparse
+import logging
+import os
 import pickle
 import signal
-import os
 import sys
 
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import path_util

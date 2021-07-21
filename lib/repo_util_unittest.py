@@ -4,11 +4,11 @@
 
 """Unit tests for chromite.lib.repo and helpers for testing that module."""
 
+import logging
 import os
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils

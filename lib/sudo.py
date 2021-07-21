@@ -5,13 +5,13 @@
 """Helper methods and classes related to managing sudo."""
 
 import errno
+import logging
 import os
 import signal
 import subprocess
 import sys
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 class SudoKeepAlive(cros_build_lib.MasterPidContextManager):

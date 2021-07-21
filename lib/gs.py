@@ -11,6 +11,7 @@ import errno
 import fnmatch
 import getpass
 import hashlib
+import logging
 import os
 from pathlib import Path
 import re
@@ -20,11 +21,10 @@ import sys
 import tempfile
 import urllib.parse
 
-from chromite.lib import constants
 from chromite.lib import cache
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_collections
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats

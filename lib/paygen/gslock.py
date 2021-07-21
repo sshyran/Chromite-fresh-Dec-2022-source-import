@@ -28,9 +28,9 @@ the creating server.
 """
 
 import datetime
+import logging
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 

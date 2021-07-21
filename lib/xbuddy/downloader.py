@@ -5,14 +5,14 @@
 """Downloaders used to download artifacts and files from a given source."""
 
 import collections
+from datetime import datetime
 import glob
+import logging
 import os
 import re
 import shutil
 import threading
-from datetime import datetime
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib.xbuddy import android_build
 from chromite.lib.xbuddy import build_artifact

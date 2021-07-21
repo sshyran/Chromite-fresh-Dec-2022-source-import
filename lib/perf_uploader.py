@@ -20,6 +20,7 @@ from __future__ import division
 import collections
 import http.client
 import json
+import logging
 import math
 import os
 import re
@@ -28,7 +29,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import retry_util
 

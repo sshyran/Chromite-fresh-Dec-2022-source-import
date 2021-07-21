@@ -8,6 +8,7 @@ import collections
 import enum
 import filecmp
 import functools
+import logging
 import os
 import re
 from typing import Iterable, List, Optional, Tuple, Union
@@ -15,7 +16,6 @@ from typing import Iterable, List, Optional, Tuple, Union
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel

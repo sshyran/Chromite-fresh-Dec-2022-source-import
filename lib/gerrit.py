@@ -4,13 +4,13 @@
 
 """Module containing helper class and methods for interacting with Gerrit."""
 
+import logging
 import operator
 import re
 
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import parallel

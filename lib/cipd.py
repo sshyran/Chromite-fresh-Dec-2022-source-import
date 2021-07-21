@@ -10,17 +10,18 @@ package/version into a GStorage link and installing them.
 
 import hashlib
 import json
+import logging
 import os
 import pprint
 import tempfile
 import urllib.parse
 
+from chromite.third_party import httplib2
+
 from chromite.lib import cache
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-import chromite.lib.cros_logging as log
-from chromite.third_party import httplib2
 from chromite.utils import memoize
 
 
@@ -91,7 +92,7 @@ def _DownloadCIPD(instance_sha256):
       },
   })
   if 'clientBinary' not in resp:
-    log.error(
+    logging.error(
         'Error requesting the link to download CIPD from. Got:\n%s',
         pprint.pformat(resp))
     raise Error('Failed to bootstrap CIPD client')
@@ -122,7 +123,8 @@ class CipdCache(cache.RemoteCache):
   def _Fetch(self, url, local_path):
     instance_sha256 = urllib.parse.urlparse(url).netloc
     binary = _DownloadCIPD(instance_sha256)
-    log.info('Fetched CIPD package %s:%s', CIPD_CLIENT_PACKAGE, instance_sha256)
+    logging.info('Fetched CIPD package %s:%s', CIPD_CLIENT_PACKAGE,
+                 instance_sha256)
     osutils.WriteFile(local_path, binary, mode='wb')
     os.chmod(local_path, 0o755)
 

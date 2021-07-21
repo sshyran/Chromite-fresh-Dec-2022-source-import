@@ -12,6 +12,7 @@ import html.parser
 import http.client
 import http.cookiejar
 import json
+import logging
 import os
 import re
 import socket
@@ -19,15 +20,15 @@ import sys
 import urllib.parse
 import warnings
 
+from chromite.third_party import httplib2
+from chromite.third_party.oauth2client import gce
+
 from chromite.lib import auth
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from chromite.third_party import httplib2
-from chromite.third_party.oauth2client import gce
 from chromite.utils import memoize
 
 

@@ -6,11 +6,11 @@
 
 import collections
 import contextlib
+import logging
 import os
 import re
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import repo_manifest

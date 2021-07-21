@@ -11,12 +11,12 @@ If you don't know what any of this means, then you don't need this module :).
 """
 
 import datetime
+import logging
 import socket
 import subprocess
 
 from chromite.lib import alerts
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 class LoasError(Exception):

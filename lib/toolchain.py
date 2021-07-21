@@ -4,17 +4,18 @@
 
 """Utilities for managing the toolchains in the chroot."""
 
+import logging
 import os
 import subprocess
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain_list
 from chromite.utils import key_value_store
+
 
 if cros_build_lib.IsInsideChroot():
   # Only import portage after we've checked that we're inside the chroot.

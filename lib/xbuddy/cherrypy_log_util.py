@@ -4,15 +4,15 @@
 
 """Logging via CherryPy."""
 
+import logging
 import re
+
 
 # cherrypy may not be available outside the chroot.
 try:
   import cherrypy  # pylint: disable=import-error
 except ImportError:
   cherrypy = None
-
-from chromite.lib import cros_logging as logging
 
 
 class Loggable(object):

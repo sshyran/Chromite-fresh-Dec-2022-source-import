@@ -5,6 +5,7 @@
 """Utilities to create sysroots."""
 
 import glob
+import logging
 import multiprocessing
 import os
 from pathlib import Path
@@ -13,7 +14,6 @@ from typing import Iterable, List, Union
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import portage_util

@@ -28,6 +28,7 @@ ChromiumOSUpdater includes:
 """
 
 import json
+import logging
 import os
 import re
 import subprocess
@@ -38,14 +39,12 @@ from chromite.cli import command
 from chromite.lib import auto_update_util
 from chromite.lib import auto_updater_transfer
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import operation
 from chromite.lib import remote_access
 from chromite.lib import retry_util
 from chromite.lib import stateful_updater
 from chromite.lib import timeout_util
-
 from chromite.utils import key_value_store
 
 

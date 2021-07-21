@@ -7,6 +7,7 @@
 import ctypes
 import ctypes.util
 import errno
+import logging
 import os
 import signal
 # Note: We avoid cros_build_lib here as that's a "large" module and we want
@@ -16,7 +17,6 @@ import signal
 import subprocess
 import sys
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import process_util

@@ -10,11 +10,10 @@ be done in main thread. For devserver, the call is handled in a thread kicked
 off by cherrypy, so timeotu can't be supported.
 """
 
+import logging
 import random
 import sys
 import time
-
-from chromite.lib import cros_logging as logging
 
 
 def retry(ExceptionToCheck, timeout_min=1.0, delay_sec=3, denylist=None):

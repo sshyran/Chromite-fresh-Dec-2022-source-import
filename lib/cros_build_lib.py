@@ -12,6 +12,7 @@ import errno
 import functools
 import getpass
 import inspect
+import logging
 import operator
 import os
 from pathlib import Path
@@ -27,7 +28,6 @@ from typing import List, Optional, TextIO, Union
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
 from chromite.lib import cros_collections
-from chromite.lib import cros_logging as logging
 from chromite.lib import signals
 
 

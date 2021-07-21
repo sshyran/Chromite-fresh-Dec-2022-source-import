@@ -8,6 +8,7 @@ import distutils.version  # pylint: disable=import-error,no-name-in-module
 import errno
 import fcntl
 import glob
+import logging
 import multiprocessing
 import os
 import re
@@ -18,7 +19,6 @@ import time
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import device
 from chromite.lib import image_lib
 from chromite.lib import osutils

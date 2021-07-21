@@ -5,13 +5,13 @@
 """Library for running Chrome OS tests."""
 
 import datetime
+import logging
 import os
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import device
 from chromite.lib import osutils
 from chromite.lib import path_util

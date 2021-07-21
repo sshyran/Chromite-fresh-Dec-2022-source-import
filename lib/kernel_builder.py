@@ -4,15 +4,14 @@
 
 """A set of utilities to build the Chrome OS kernel."""
 
+import logging
 import os
 import pathlib
-
 from typing import List, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import kernel_cmdline
 
 

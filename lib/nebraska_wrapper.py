@@ -6,15 +6,15 @@
 """
 
 import base64
+import logging
+import multiprocessing
 import os
 import shutil
-import multiprocessing
 import subprocess
 import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gob_util
 from chromite.lib import osutils
 from chromite.lib import path_util

@@ -6,12 +6,12 @@
 
 import datetime
 import json
+import logging
 import math
 
-from chromite.lib import results_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import results_lib
 
 
 class _DummyLock(object):

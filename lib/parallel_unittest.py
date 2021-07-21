@@ -5,6 +5,7 @@
 """Unittests for parallel library."""
 
 import contextlib
+import logging
 import multiprocessing
 import numbers
 import os
@@ -18,7 +19,6 @@ import time
 import unittest
 from unittest import mock
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel

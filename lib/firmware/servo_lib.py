@@ -4,10 +4,11 @@
 
 """Servo-related functionality."""
 
+import logging
 from typing import List, NamedTuple
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+
 
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'

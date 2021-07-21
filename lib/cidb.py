@@ -7,11 +7,11 @@
 import collections
 import datetime
 import glob
+import logging
 import os
 import re
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import factory
 from chromite.lib import failure_message_lib
 from chromite.lib import osutils
@@ -22,9 +22,9 @@ from chromite.utils import memoize
 sqlalchemy_imported = False
 try:
   import sqlalchemy
+  from sqlalchemy import MetaData
   import sqlalchemy.exc
   import sqlalchemy.interfaces
-  from sqlalchemy import MetaData
   sqlalchemy_imported = True
 except ImportError:
   pass

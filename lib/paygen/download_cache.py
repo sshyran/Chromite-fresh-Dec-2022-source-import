@@ -8,12 +8,12 @@ DEPRECATED: Should be merged into chromite.lib.cache.
 """
 
 import hashlib
+import logging
 import os
 import shutil
 import stat
 import time
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib.paygen import urilib

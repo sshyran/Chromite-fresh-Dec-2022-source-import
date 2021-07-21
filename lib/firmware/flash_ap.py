@@ -14,6 +14,7 @@ be extended to support more in the future.
 """
 
 import importlib
+import logging
 import os
 import shutil
 import tempfile
@@ -22,7 +23,6 @@ from typing import Optional
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib.firmware import servo_lib
 
 

@@ -6,28 +6,28 @@
 
 import base64
 import collections
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import gzip
 import http.client
 import io
 import json
+import logging
 import os
 import smtplib
 import socket
 import sys
 import traceback
 
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-
-from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.lib import retry_util
 from chromite.third_party import httplib2
 from chromite.third_party.googleapiclient import errors as apiclient_errors
 from chromite.third_party.googleapiclient.discovery import build as apiclient_build
 from chromite.third_party.oauth2client import client
 from chromite.third_party.oauth2client import file as oauth_client_fileio
+
+from chromite.lib import constants
+from chromite.lib import retry_util
 
 
 class MailServer(object):

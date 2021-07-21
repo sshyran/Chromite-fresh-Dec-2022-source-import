@@ -5,16 +5,17 @@
 """Module to manage builder statuses."""
 
 import collections
+import logging
 import pickle
+
+from chromite.third_party.infra_libs.buildbucket.proto import common_pb2
 
 from chromite.lib import build_failure_message
 from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_collections
-from chromite.lib import cros_logging as logging
 from chromite.lib import failure_message_lib
-from chromite.third_party.infra_libs.buildbucket.proto import common_pb2
 
 
 BUILD_STATUS_URL = (

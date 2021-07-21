@@ -6,6 +6,7 @@
 
 import argparse
 import contextlib
+import logging
 import multiprocessing
 import os
 import queue as Queue
@@ -13,10 +14,10 @@ import signal
 import socket
 import time
 
-from chromite.lib import cros_logging as logging
+from chromite.third_party.googleapiclient import discovery
+
 from chromite.lib import metrics
 from chromite.lib import parallel
-from chromite.third_party.googleapiclient import discovery
 
 
 try:
