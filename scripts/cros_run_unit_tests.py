@@ -152,11 +152,15 @@ def main(argv):
     print('\n'.join(sorted(pkg_with_test)))
     return 0
 
-  env = None
+  env = {}
   if opts.nowithdebug:
     use_flags = os.environ.get('USE', '')
     use_flags += ' -cros-debug'
-    env = {'USE': use_flags}
+    env['USE'] = use_flags
+
+  metrics_dir = os.environ.get(constants.CROS_METRICS_DIR_ENVVAR)
+  if metrics_dir:
+    env[constants.CROS_METRICS_DIR_ENVVAR] = metrics_dir
 
   if opts.empty_sysroot:
     try:
