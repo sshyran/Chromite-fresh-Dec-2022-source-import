@@ -7,7 +7,8 @@
 import glob
 import multiprocessing
 import os
-from typing import Iterable, Union
+from pathlib import Path
+from typing import Iterable, List, Union
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -24,11 +25,14 @@ class ConfigurationError(Exception):
   """Raised when an invalid configuration is found."""
 
 
+CACHED_FIELD_PROFILE_OVERRIDE = 'PROFILE_OVERRIDE'
 STANDARD_FIELD_PORTDIR_OVERLAY = 'PORTDIR_OVERLAY'
 STANDARD_FIELD_CHOST = 'CHOST'
 STANDARD_FIELD_BOARD_OVERLAY = 'BOARD_OVERLAY'
 STANDARD_FIELD_BOARD_USE = 'BOARD_USE'
 STANDARD_FIELD_ARCH = 'ARCH'
+
+DEFAULT_PROFILE = 'base'
 
 _PORTAGE_WRAPPER_TEMPLATE = """#!/bin/sh
 
@@ -355,6 +359,66 @@ class Sysroot(object):
       if value is not None:
         lines.append('%s="%s"' % (field, value))
       osutils.WriteFile(self._cache_file, '\n'.join(lines), sudo=True)
+
+  @property
+  def build_target_name(self) -> str:
+    """Get the name of the build target this sysroot was created for."""
+    return self.GetStandardField(STANDARD_FIELD_BOARD_USE)
+
+  @property
+  def profile_name(self) -> str:
+    """Get the name of the sysroot's profile."""
+    return self.GetCachedField(CACHED_FIELD_PROFILE_OVERRIDE) or DEFAULT_PROFILE
+
+  @property
+  def build_target_overlays(self) -> List[str]:
+    """The BOARD_OVERLAY standard field as a list.
+
+    The BOARD_OVERLAY field is set on creation, and stores the list of overlays
+    more directly associated with the build target itself. In an ideal world,
+    this would be the single, top level overlay for the build target (e.g.
+    overlay-eve-private) and everything else could be derived from that. In
+    practice, this is currently every available overlay that is not in
+    src/third_party.
+    """
+    return self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY).split()
+
+  @property
+  def overlays(self) -> List[str]:
+    """The PORTDIR_OVERLAY field as a list.
+
+    The PORTDIR_OVERLAY field is set on creation, and stores the list of all
+    overlays available to the sysroot.
+    """
+    return self.GetStandardField(STANDARD_FIELD_PORTDIR_OVERLAY).split()
+
+  @property
+  def use_flags(self):
+    return portage_util.PortageqEnvvar('USE', sysroot=self.path)
+
+  def get_overlays(self,
+                   build_target_only: bool = False,
+                   relative: bool = False) -> List[Path]:
+    """Get a list of the overlays available to the sysroot.
+
+    Note: The overlay paths are always inside the SDK. If the outside the SDK
+    paths are needed, we should add an option to transform them here.
+
+    Args:
+      build_target_only: Only fetch the overlays more relevant to the build
+        target. By default, fetch all overlays available to the sysroot.
+      relative: Get the overlay paths relative to the source root rather than
+        as absolute paths.
+    """
+    overlays = (
+        self.build_target_overlays if build_target_only else self.overlays)
+    overlay_paths = [Path(x) for x in overlays]
+    if relative:
+      return [
+          x.relative_to(constants.CHROOT_SOURCE_ROOT) for x in overlay_paths
+      ]
+
+    return overlay_paths
 
   def _WrapperPath(self, command, friendly_name=None):
     """Returns the path to the wrapper for |command|.

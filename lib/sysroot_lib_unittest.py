@@ -30,6 +30,45 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
     self.relative_sysroot = sysroot_lib.Sysroot('sysroot')
 
+  def _writeOverlays(self, board_overlays=None, portdir_overlays=None):
+    """Helper function to write board and portdir overlays for the sysroot.
+
+    By default uses one fake board overlay, and the chromiumos and portage
+    stable overlays. Set the arguments to an empty list to set no values for
+    that field. When not explicitly set, |portdir_overlays| includes all values
+    in |board_overlays|.
+    """
+    if board_overlays is None:
+      board_overlays = ['overlay/board']
+    if portdir_overlays is None:
+      portdir_overlays = [
+          constants.CHROMIUMOS_OVERLAY_DIR, constants.PORTAGE_STABLE_OVERLAY_DIR
+      ] + board_overlays
+
+    board_field = sysroot_lib.STANDARD_FIELD_BOARD_OVERLAY
+    portdir_field = sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY
+
+    board_values = [
+        f'{constants.CHROOT_SOURCE_ROOT}/{x}' for x in board_overlays
+    ]
+    board_value = '\n'.join(board_values)
+
+    portdir_values = [
+        f'{constants.CHROOT_SOURCE_ROOT}/{x}' for x in portdir_overlays
+    ]
+    portdir_value = '\n'.join(portdir_values)
+
+    config_values = {}
+    if board_values:
+      config_values[board_field] = board_value
+    if portdir_values:
+      config_values[portdir_field] = portdir_value
+
+    config = '\n'.join(f'{k}="{v}"' for k, v in config_values.items())
+    self.sysroot.WriteConfig(config)
+
+    return board_values, portdir_values
+
   def testGetStandardField(self):
     """Tests that standard field can be fetched correctly."""
     self.sysroot.WriteConfig('FOO="bar"')
@@ -100,6 +139,48 @@ baz
     sysroot1 = sysroot_lib.Sysroot(self.tempdir)
     sysroot2 = sysroot_lib.Sysroot(self.tempdir)
     self.assertEqual(sysroot1, sysroot2)
+
+  def testProfileName(self):
+    """Test the profile_name property when a value is set."""
+    profile = 'foo'
+    self.sysroot.SetCachedField(sysroot_lib.CACHED_FIELD_PROFILE_OVERRIDE,
+                                profile)
+    self.assertEqual(profile, self.sysroot.profile_name)
+
+  def testProfileNameDefault(self):
+    """Test the profile_name property when no value is set."""
+    self.assertEqual(sysroot_lib.DEFAULT_PROFILE, self.sysroot.profile_name)
+
+  def testBoardOverlay(self):
+    """Test the board_overlay property."""
+    board_overlays, _portdir_overlays = self._writeOverlays()
+
+    self.assertEqual(board_overlays, self.sysroot.build_target_overlays)
+
+  def testOverlays(self):
+    """Test the overlays property."""
+    _board_overlays, portdir_overlays = self._writeOverlays()
+
+    self.assertEqual(portdir_overlays, self.sysroot.overlays)
+
+  def testGetOverlays(self):
+    """Test the get_overlays function."""
+    board_overlays, portdir_overlays = self._writeOverlays()
+
+    self.assertEqual(
+        board_overlays,
+        [str(x) for x in self.sysroot.get_overlays(build_target_only=True)])
+    self.assertEqual(portdir_overlays,
+                     [str(x) for x in self.sysroot.get_overlays()])
+
+  def testGetOverlaysRelative(self):
+    portdir_overlays = [
+        constants.CHROMIUMOS_OVERLAY_DIR, constants.PORTAGE_STABLE_OVERLAY_DIR
+    ]
+    self._writeOverlays(portdir_overlays=portdir_overlays)
+
+    self.assertEqual(portdir_overlays,
+                     [str(x) for x in self.sysroot.get_overlays(relative=True)])
 
 
 class ProfileTest(cros_test_lib.MockTempDirTestCase):
