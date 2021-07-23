@@ -240,7 +240,7 @@ def PackageInfoToCPV(package_info_msg):
 
 
 def PackageInfoToString(package_info_msg):
-  # Combine the components into the full CPV string that SplitCPV parses.
+  """Combine the components into the full package string."""
   # TODO: Use the lib.parser.package_info.PackageInfo class instead.
   if not package_info_msg.package_name:
     raise ValueError('Invalid PackageInfo message.')
@@ -249,24 +249,3 @@ def PackageInfoToString(package_info_msg):
   p = package_info_msg.package_name
   v = ('-%s' % package_info_msg.version) if package_info_msg.version else ''
   return '%s%s%s' % (c, p, v)
-
-
-def CPVToString(cpv: package_info.CPV) -> str:
-  """Get the most useful string representation from a CPV.
-
-  Args:
-    cpv: The CPV object.
-
-  Raises:
-    ValueError - when the CPV has no useful fields set.
-  """
-  if cpv.cpf:
-    return cpv.cpf
-  elif cpv.cpv:
-    return cpv.cpv
-  elif cpv.cp:
-    return cpv.cp
-  elif cpv.package:
-    return cpv.package
-  else:
-    raise ValueError('Invalid CPV provided.')

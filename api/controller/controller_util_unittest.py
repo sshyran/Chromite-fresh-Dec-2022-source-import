@@ -187,31 +187,6 @@ class PackageInfoToStringTest(cros_test_lib.TestCase):
       controller_util.PackageInfoToString(pi)
 
 
-class CPVToStringTest(cros_test_lib.TestCase):
-  """CPVToString tests."""
-
-  def testTranslations(self):
-    """Test standard translations used."""
-    cases = [
-        'cat/pkg-2.0.0-r1',
-        'cat/pkg-2.0.0',
-        'cat/pkg',
-        'pkg',
-    ]
-
-    for case in cases:
-      cpv = package_info.SplitCPV(case, strict=False)
-      # We should end up with as much info as is available, so we should see
-      # the original value in each case.
-      self.assertEqual(case, controller_util.CPVToString(cpv))
-
-  def testInvalidCPV(self):
-    """Test invalid CPV object."""
-    cpv = package_info.SplitCPV('', strict=False)
-    with self.assertRaises(ValueError):
-      controller_util.CPVToString(cpv)
-
-
 def test_serialize_package_info():
   pkg_info = package_info.parse('foo/bar-1.2.3-r4')
   pkg_info_msg = common_pb2.PackageInfo()
