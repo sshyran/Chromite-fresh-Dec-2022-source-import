@@ -93,6 +93,7 @@ loonix_boards = frozenset([])
 
 reven_boards = frozenset([
     'reven',
+    'reven-vmtest',
 ])
 
 wshwos_boards = frozenset([

@@ -22,6 +22,7 @@ vmtest_boards = frozenset([
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
     'reven',         # CloudReady VM board.
+    'reven-vmtest',  # Like betty, but based on reven.
 ])
 
 
@@ -328,7 +329,6 @@ def ApplyCustomOverrides(site_config):
     site_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
   """
-
   overwritten_configs = {
       'guado_labstation-release': {
           'hw_tests': [],
@@ -357,6 +357,7 @@ def ApplyCustomOverrides(site_config):
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
       'reven-release': site_config.templates.tast_vm_canary_tests,
+      'reven-vmtest-release': site_config.templates.tast_vm_canary_tests,
   }
 
   for config_name, overrides in overwritten_configs.items():
