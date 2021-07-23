@@ -22,6 +22,7 @@ from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
 from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
 from chromite.api.gen.chromiumos.test.api import test_suite_pb2
 from chromite.api.gen.chromiumos.test.plan import source_test_plan_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -722,11 +723,13 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(sysroot_path)
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
 
+    self.build_target = build_target_lib.BuildTarget('board')
+
   def testReturnsEmptyListWhenNoOutputArtifactsProvided(self):
     """Test empty list is returned when there are no output_artifacts."""
     result = test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[]),
-        self.chroot, self.sysroot, self.tempdir)
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
 
     self.assertEqual(len(result), 0)
 
@@ -751,7 +754,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
                 ]
             ),
         ]),
-        self.chroot, self.sysroot, self.tempdir)
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
 
     BundleCodeCoverageLlvmJson_mock.assert_called_once()
 
@@ -776,7 +779,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
                 ]
             ),
         ]),
-        self.chroot, self.sysroot, self.tempdir)
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
 
     self.assertEqual(result[0]['paths'], ['unit_tests.tar'])
     self.assertEqual(result[0]['type'], self.UNIT_TEST_ARTIFACT_TYPE)

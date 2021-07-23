@@ -15,6 +15,7 @@ from chromite.utils import code_coverage_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
+from chromite.lib import autotest_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -618,3 +619,69 @@ class FindMetadataTestCase(cros_test_lib.MockTestCase):
         self.expected_tast_remote_metadata_file,
     ]
     self.assertEqual(sorted(actual), sorted(expected))
+
+
+class BundleHwqualTarballTest(cros_test_lib.MockTempDirTestCase):
+  """BundleHwqualTarball tests."""
+
+  def setUp(self):
+    # Create the chroot and sysroot instances.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.sysroot_path = os.path.join(self.chroot_path, 'sysroot_dir')
+    self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+    osutils.SafeMakedirs(self.sysroot_path)
+
+    # Create the output directory.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+  def testNoArchiveDir(self):
+    """Test a run when the archive dir does not exist."""
+    self.assertIsNone(test.BundleHwqualTarball('foo', 'bar', self.chroot,
+      self.sysroot, self.output_dir))
+
+  def testAutotestUtilFailure(self):
+    """Test a run when autotest_util fails to bundle autotest."""
+    archive_dir = self.chroot.full_path(self.sysroot.path,
+                                     constants.AUTOTEST_BUILD_PATH)
+    osutils.SafeMakedirs(archive_dir)
+
+    self.PatchObject(autotest_util, 'AutotestTarballBuilder',
+                     return_value=None)
+    self.assertIsNone(test.BundleHwqualTarball('foo', 'bar', self.chroot,
+      self.sysroot, self.output_dir))
+
+  def testSuccess(self):
+    """Test a successful multiple version run."""
+    archive_dir = self.chroot.full_path(self.sysroot.path,
+                                     constants.AUTOTEST_BUILD_PATH)
+    osutils.SafeMakedirs(archive_dir)
+
+    bundle_tmp_path = 'tmp/path/'
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=bundle_tmp_path)
+    self.PatchObject(autotest_util, 'AutotestTarballBuilder',
+                     return_value=bundle_tmp_path)
+
+    image_dir = 'path/to/image/'
+    self.PatchObject(image_lib, 'GetLatestImageLink', return_value=image_dir)
+
+    script_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
+      'crostestutils')
+    ssh_private_key = os.path.join(image_dir, constants.TEST_KEY_PRIVATE)
+
+    run_mock = self.PatchObject(cros_build_lib, 'run')
+    # Fake artifact placement.
+    env_file = os.path.join(self.output_dir, 'chromeos-hwqual-foo-bar.tar.bz2')
+    osutils.Touch(env_file)
+
+    created = test.BundleHwqualTarball('foo', 'bar', self.chroot,
+      self.sysroot, self.output_dir)
+    run_mock.assert_called_with(
+      [os.path.join(script_dir, 'archive_hwqual'),
+      '--from', bundle_tmp_path,
+      '--to', self.output_dir,
+      '--image_dir', image_dir, '--ssh_private_key', ssh_private_key,
+      '--output_tag', 'chromeos-hwqual-foo-bar'],
+    )
+    self.assertStartsWith(created, self.output_dir)

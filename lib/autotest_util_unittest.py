@@ -94,3 +94,12 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
 
     tar_mock.assert_called_once_with(expected_files, tar_path,
                                      extra_args=mock.ANY, check=False)
+
+  def testBuildAutotestTarball(self):
+    """Tests that generating the autotest tarball is correct."""
+    tar_mock = self.PatchObject(self.builder, '_BuildTarball')
+    tar_path = os.path.join(self.tempdir, self.builder._AUTOTEST_ARCHIVE)
+
+    self.builder.BuildAutotestTarball()
+
+    tar_mock.assert_called_once_with(['autotest/'], tar_path)

@@ -86,7 +86,8 @@ def Get(input_proto, output_proto, _config):
       RegisteredGet(
           output_proto.artifacts.test,
           test_controller.GetArtifacts(
-              input_proto.artifact_info.test, chroot, sysroot, output_dir)),
+              input_proto.artifact_info.test, chroot, sysroot, build_target,
+              output_dir)),
   ]
 
   for get_res in get_res_list:

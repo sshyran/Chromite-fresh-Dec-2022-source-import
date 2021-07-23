@@ -7,6 +7,7 @@
 Handles all testing related functionality, it is not itself a test.
 """
 
+import functools
 import os
 
 from chromite.api import controller
@@ -29,6 +30,7 @@ from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
+from chromite.service import packages as packages_service
 from chromite.service import test
 from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf import text_format
@@ -333,6 +335,7 @@ def CrosSigningTest(_input_proto, _output_proto, _config):
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
     chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+    build_target: build_target_lib.BuildTarget,
     output_dir: str) -> list:
   """Builds and copies test artifacts to specified output_dir.
 
@@ -343,6 +346,7 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
     in_proto: Proto request defining reqs.
     chroot: The chroot class used for these artifacts.
     sysroot_class: The sysroot class used for these artifacts.
+    build_target: The build target used for these artifacts.
     output_dir: The path to write artifacts to.
 
   Returns:
@@ -354,6 +358,8 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
     in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
     in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
         test.BundleCodeCoverageLlvmJson,
+    in_proto.ArtifactType.HWQUAL: functools.partial(test.BundleHwqualTarball,
+      build_target.name, packages_service.determine_full_version()),
   }
 
   for output_artifact in in_proto.output_artifacts:

@@ -15,6 +15,7 @@ import shutil
 from typing import List, NamedTuple
 
 from chromite.cbuildbot import commands
+from chromite.lib import autotest_util
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -142,6 +143,58 @@ def BuildTargetUnitTestTarball(chroot, sysroot, result_path):
                                         check=False)
 
   return tarball_path if result.returncode == 0 else None
+
+
+def BundleHwqualTarball(board, version, chroot, sysroot, result_path):
+  """Build the hwqual tarball.
+
+  Args:
+    board (str): The board name.
+    version (str): The version string to use for the image.
+    chroot (chroot_lib.Chroot): Chroot where the tests were run.
+    sysroot (sysroot_lib.Sysroot): The sysroot where the tests were run.
+    result_path (str): The directory where the archive should be created.
+
+  Returns:
+    The output path or None.
+  """
+  # Create an autotest.tar.bz2 file to pass to archive_hwqual
+
+  # archive_basedir is the base directory where the archive commands are run.
+  # We want the folder containing the board's autotest folder.
+  archive_basedir = chroot.full_path(sysroot.path,
+                                     constants.AUTOTEST_BUILD_PATH)
+  archive_basedir = os.path.dirname(archive_basedir)
+
+  if not os.path.exists(archive_basedir):
+    logging.warning('%s does not exist, not creating hwqual', archive_basedir)
+    return None
+
+  with chroot.tempdir() as autotest_bundle_dir:
+    if not autotest_util.AutotestTarballBuilder(archive_basedir,
+                                                autotest_bundle_dir):
+      logging.warning('could not create autotest bundle, not creating hwqual')
+      return None
+
+    image_dir = image_lib.GetLatestImageLink(board)
+    ssh_private_key = os.path.join(image_dir, constants.TEST_KEY_PRIVATE)
+
+    output_tag = 'chromeos-hwqual-%s-%s' % (board, version)
+
+    script_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
+      'crostestutils')
+    cmd = [os.path.join(script_dir, 'archive_hwqual'),
+      '--from', autotest_bundle_dir,
+      '--to', result_path,
+      '--image_dir', image_dir, '--ssh_private_key', ssh_private_key,
+      '--output_tag', output_tag]
+
+    cros_build_lib.run(cmd)
+
+  artifact_path = os.path.join(result_path, '%s.tar.bz2' % output_tag)
+  if not os.path.exists(artifact_path):
+    return None
+  return artifact_path
 
 
 def DebugInfoTest(sysroot_path):
