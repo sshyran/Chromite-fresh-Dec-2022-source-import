@@ -116,3 +116,16 @@ class Disk(object):
       raise KeyError(label)
 
     return part
+
+  def GetPartitionByTypeGuid(self, type_guid):
+    """Returns Partitions with the given |type_guid|.
+
+    Raises:
+      KeyError: if the type GUID is not found
+    """
+    parts = [x for x in self.partitions.values() if x.part_type == type_guid]
+
+    if not parts:
+      raise KeyError(type_guid)
+
+    return parts
