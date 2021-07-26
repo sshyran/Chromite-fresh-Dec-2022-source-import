@@ -1314,10 +1314,10 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.master_android_pfq_mixin,
       schedule='with 150m interval'
   )
-  _vmt_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmt_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [
-      'betty-arc-t', # No HWTest, No VMTest.
+  _vmt_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
+      'betty-arc-t',
   ])
+  _vmt_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmt_hwtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmt_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmt_vmtest_boards = _frozen_ge_set(ge_build_config, [])

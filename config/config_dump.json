@@ -4312,7 +4312,6 @@
         "boards": [
             "betty-arc-t"
         ],
-        "important": false,
         "manifest": "official.xml",
         "useflags": [
             "chrome_internal"
