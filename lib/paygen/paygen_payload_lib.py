@@ -896,7 +896,7 @@ class PaygenPayload(object):
         logging.info('Acquired lock (reason: %s)', acq_result.reason)
         break
       else:
-        logging.info('Failed to acquire the lock in 10 minutes (reason: %s)'
+        logging.info('Still waiting to run this particular payload (reason: %s)'
                      ', trying again ...', acq_result.reason)
     try:
       # Time the actual paygen operation started.
