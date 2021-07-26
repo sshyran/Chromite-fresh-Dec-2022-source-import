@@ -786,12 +786,18 @@ RECOVERY_IMAGE_NAME = 'recovery_image'
 RECOVERY_IMAGE_BIN = '%s.bin' % RECOVERY_IMAGE_NAME
 RECOVERY_IMAGE_TAR = '%s.tar.xz' % RECOVERY_IMAGE_NAME
 
+FACTORY_IMAGE_NAME = 'factory_install_shim'
+FACTORY_IMAGE_BIN = f'{FACTORY_IMAGE_NAME}.bin'
+
 # Image type constants.
 IMAGE_TYPE_BASE = 'base'
 IMAGE_TYPE_DEV = 'dev'
 IMAGE_TYPE_TEST = 'test'
 IMAGE_TYPE_RECOVERY = 'recovery'
+# This is the image type used by legacy CBB configs.
 IMAGE_TYPE_FACTORY = 'factory'
+# This is the image type mapping to the factory image type in build_image.
+IMAGE_TYPE_FACTORY_SHIM = 'factory_install'
 IMAGE_TYPE_FIRMWARE = 'firmware'
 # USB PD accessory microcontroller firmware (e.g. power brick, display dongle).
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
@@ -807,6 +813,7 @@ IMAGE_TYPE_TO_NAME = {
     IMAGE_TYPE_DEV: DEV_IMAGE_BIN,
     IMAGE_TYPE_RECOVERY: RECOVERY_IMAGE_BIN,
     IMAGE_TYPE_TEST: TEST_IMAGE_BIN,
+    IMAGE_TYPE_FACTORY_SHIM: FACTORY_IMAGE_BIN,
 }
 IMAGE_NAME_TO_TYPE = dict((v, k) for k, v in IMAGE_TYPE_TO_NAME.items())
 
