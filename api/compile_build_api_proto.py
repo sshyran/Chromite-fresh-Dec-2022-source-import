@@ -128,22 +128,6 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
 
   targets = []
 
-  # Only compile the subset we need for the API.
-  subdirs = [
-      os.path.join(source, 'chromite'),
-      os.path.join(source, 'chromiumos'),
-      os.path.join(source, 'client'),
-      os.path.join(source, 'config'),
-      os.path.join(source, 'test_platform'),
-      os.path.join(source, 'device')
-  ]
-  for basedir in subdirs:
-    for dirpath, _dirnames, filenames in os.walk(basedir):
-      for filename in filenames:
-        if filename.endswith('.proto'):
-          # We have a match, add the file.
-          targets.append(os.path.join(dirpath, filename))
-
   chromeos_config_path = os.path.realpath(
       os.path.join(constants.SOURCE_ROOT, 'src/config'))
 
@@ -156,6 +140,23 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
                 '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
                 depth=1
       )
+
+    # Only compile the subset we need for the API.
+    subdirs = [
+        os.path.join(source, 'chromite'),
+        os.path.join(source, 'chromiumos'),
+        os.path.join(source, 'client'),
+        os.path.join(source, 'config'),
+        os.path.join(source, 'test_platform'),
+        os.path.join(source, 'device'),
+        os.path.join(chromeos_config_path, 'proto/chromiumos'),
+    ]
+    for basedir in subdirs:
+      for dirpath, _dirnames, filenames in os.walk(basedir):
+        for filename in filenames:
+          if filename.endswith('.proto'):
+            # We have a match, add the file.
+            targets.append(os.path.join(dirpath, filename))
 
     cmd = [
         _get_protoc_command(protoc_version),
