@@ -15,7 +15,6 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib.parser import package_info
 
-
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
 
 
@@ -34,9 +33,14 @@ class ImageToVmError(Error):
 class BuildConfig(object):
   """Value object to hold the build configuration options."""
 
-  def __init__(self, builder_path=None, disk_layout=None,
-               enable_rootfs_verification=True, replace=False, version=None,
-               build_attempt=None, symlink=None):
+  def __init__(self,
+               builder_path=None,
+               disk_layout=None,
+               enable_rootfs_verification=True,
+               replace=False,
+               version=None,
+               build_attempt=None,
+               symlink=None):
     """Build config initialization.
 
     Args:
@@ -131,9 +135,8 @@ def Build(board=None, images=None, config=None, extra_env=None):
   with osutils.TempDir() as tempdir:
     status_file = os.path.join(tempdir, PARALLEL_EMERGE_STATUS_FILE_NAME)
     extra_env_local[constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = status_file
-    result = cros_build_lib.run(cmd, enter_chroot=True,
-                                check=False,
-                                extra_env=extra_env_local)
+    result = cros_build_lib.run(
+        cmd, enter_chroot=True, check=False, extra_env=extra_env_local)
     try:
       content = osutils.ReadFile(status_file).strip()
     except IOError:
@@ -143,6 +146,7 @@ def Build(board=None, images=None, config=None, extra_env=None):
       failed = content.split() if content else None
 
     return BuildResult(result.returncode, failed)
+
 
 def BuildRecoveryImage(board=None, image_path=None):
   """Build a recovery image.
@@ -170,9 +174,9 @@ def BuildRecoveryImage(board=None, image_path=None):
   if image_path:
     cmd.extend(['--image', image_path])
 
-  result = cros_build_lib.run(cmd, enter_chroot=True,
-                              check=False)
+  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
   return BuildResult(result.returncode, None)
+
 
 def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
   """Create a VM from an image.
@@ -199,8 +203,8 @@ def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
   if chroot and cros_build_lib.IsOutsideChroot():
     chroot_args = chroot.get_enter_args()
 
-  result = cros_build_lib.run(cmd, check=False,
-                              enter_chroot=True, chroot_args=chroot_args)
+  result = cros_build_lib.run(
+      cmd, check=False, enter_chroot=True, chroot_args=chroot_args)
 
   if result.returncode:
     # Error running the command. Unfortunately we can't be much more helpful
@@ -208,8 +212,8 @@ def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
     raise ImageToVmError('Unable to convert the image to a VM. '
                          'Consult the logs to determine the problem.')
 
-  vm_path = os.path.join(image_lib.GetLatestImageLink(board),
-                         constants.VM_IMAGE_BIN)
+  vm_path = os.path.join(
+      image_lib.GetLatestImageLink(board), constants.VM_IMAGE_BIN)
   return os.path.realpath(vm_path)
 
 
@@ -233,8 +237,8 @@ def CreateGuestVm(board, is_test=False, chroot=None):
   image_file = constants.TEST_IMAGE_BIN if is_test else constants.BASE_IMAGE_BIN
   image_path = os.path.join(image_dir, image_file)
 
-  output_dir = (constants.TEST_GUEST_VM_DIR if is_test
-                else constants.BASE_GUEST_VM_DIR)
+  output_dir = (
+      constants.TEST_GUEST_VM_DIR if is_test else constants.BASE_GUEST_VM_DIR)
   output_path = os.path.join(image_dir, output_dir)
 
   cmd.append(image_path)
@@ -244,8 +248,8 @@ def CreateGuestVm(board, is_test=False, chroot=None):
   if chroot and cros_build_lib.IsOutsideChroot():
     chroot_args = chroot.get_enter_args()
 
-  result = cros_build_lib.sudo_run(cmd, check=False, enter_chroot=True,
-                                   chroot_args=chroot_args)
+  result = cros_build_lib.sudo_run(
+      cmd, check=False, enter_chroot=True, chroot_args=chroot_args)
 
   if result.returncode:
     # Error running the command. Unfortunately we can't be much more helpful
@@ -303,7 +307,7 @@ def copy_license_credits(board: str, output_dir: str) -> List[str]:
   """
   filename = 'license_credits.html'
   license_credits_source_path = os.path.join(
-    image_lib.GetLatestImageLink(board), filename)
+      image_lib.GetLatestImageLink(board), filename)
   if not os.path.exists(license_credits_source_path):
     return None
 
@@ -342,8 +346,10 @@ def Test(board, result_directory, image_dir=None):
   cmd = [
       os.path.join(constants.CHROOT_SOURCE_ROOT, constants.CHROMITE_BIN_SUBDIR,
                    'test_image'),
-      '--board', board,
-      '--test_results_root', result_directory,
+      '--board',
+      board,
+      '--test_results_root',
+      result_directory,
       image_dir,
   ]
 
