@@ -27,7 +27,6 @@ from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
 
-
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE
 _DEV_ID = common_pb2.IMAGE_TYPE_DEV
@@ -104,8 +103,9 @@ def ExampleGetResponse():
 
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
-        chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-        build_target: build_target_lib.BuildTarget, output_dir) -> list:
+                 chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+                 build_target: build_target_lib.BuildTarget,
+                 output_dir) -> list:
   """Builds and copies images to specified output_dir.
 
   Copies (after optionally bundling) all required images into the output_dir,
@@ -131,8 +131,8 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
   dlc_func = functools.partial(image.copy_dlc_image, base_path)
   license_func = functools.partial(image.copy_license_credits, board)
   artifact_types = {
-    in_proto.ArtifactType.DLC_IMAGE: dlc_func,
-    in_proto.ArtifactType.LICENSE_CREDITS: license_func,
+      in_proto.ArtifactType.DLC_IMAGE: dlc_func,
+      in_proto.ArtifactType.LICENSE_CREDITS: license_func,
   }
 
   for output_artifact in in_proto.output_artifacts:
@@ -146,6 +146,7 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
           })
 
   return generated
+
 
 def _CreateResponse(_input_proto, output_proto, _config):
   """Set output_proto success field on a successful Create response."""
@@ -199,8 +200,8 @@ def Create(input_proto, output_proto, _config):
     for mod_type in mod_image_types:
       if mod_type == _RECOVERY_ID:
         base_image_path = _GetBaseImagePath(output_proto)
-        result = image.BuildRecoveryImage(board=board,
-                                          image_path=base_image_path)
+        result = image.BuildRecoveryImage(
+            board=board, image_path=base_image_path)
         if result.success:
           _PopulateBuiltImages(board, [_IMAGE_MAPPING[mod_type]], output_proto)
         else:
@@ -222,6 +223,7 @@ def Create(input_proto, output_proto, _config):
       controller_util.serialize_package_info(package, current)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
+
 
 def _GetBaseImagePath(output_proto):
   """From image_pb2.CreateImageResult, return base image path or None."""
