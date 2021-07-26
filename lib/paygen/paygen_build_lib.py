@@ -336,7 +336,7 @@ class PayloadTest(utils.RestrictedAttrDict):
 
     assert payload_type is not None and payload_type in PAYLOAD_TYPES
 
-    super(PayloadTest, self).__init__(payload=payload,
+    super().__init__(payload=payload,
                                       src_channel=src_channel,
                                       src_version=src_version,
                                       payload_type=payload_type,

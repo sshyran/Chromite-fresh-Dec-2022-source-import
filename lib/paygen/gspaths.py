@@ -92,7 +92,7 @@ class Image(utils.RestrictedAttrDict):
   DEFAULT_IMAGE_TYPE = 'recovery'
 
   def __init__(self, *args, **kwargs):
-    super(Image, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
     # Pylint isn't able to follow utils.RestrictedAttrDict & _slots trickery.
     # pylint: disable=access-member-before-definition
@@ -134,7 +134,7 @@ class DLCImage(Image):
     if self.uri:
       return self.uri.split('/')[-1]
     else:
-      return '%s %s/%s/%s' % (super(DLCImage, self).__str__(),
+      return '%s %s/%s/%s' % (super().__str__(),
                               self.dlc_id,
                               self.dlc_package,
                               self.dlc_image)
@@ -183,7 +183,7 @@ class Payload(utils.RestrictedAttrDict):
 
   def __init__(self, exists=False, *args, **kwargs):
     kwargs.update(exists=exists)
-    super(Payload, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
     # Pylint isn't able to follow utils.RestrictedAttrDict & _slots trickery.
     # pylint: disable=access-member-before-definition

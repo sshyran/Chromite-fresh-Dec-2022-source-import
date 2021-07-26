@@ -408,8 +408,7 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
 
     self._private_key = private_key
 
-    super(UnofficialSignerPayloadsClient, self).__init__(gspaths.Build(),
-                                                         work_dir)
+    super().__init__(gspaths.Build(), work_dir)
 
   def ExtractPublicKey(self, public_key):
     """Extracts the public key from the private key.
