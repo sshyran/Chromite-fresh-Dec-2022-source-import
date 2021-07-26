@@ -121,7 +121,7 @@ class ManifestVersionedSyncStageTest(
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(ManifestVersionedSyncStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.config['manifest_version'] = self.manifest_version_url
     self.sync_stage = sync_stages.ManifestVersionedSyncStage(
@@ -183,7 +183,7 @@ class MockPatch(mock.MagicMock):
   mock_diff_status = {}
 
   def __init__(self, *args, **kwargs):
-    super(MockPatch, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
     # Flags can vary per-patch.
     self.flags = {
@@ -264,7 +264,7 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(MasterSlaveLKGMSyncTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.config['manifest_version'] = self.manifest_version_url
     self.sync_stage = sync_stages.MasterSlaveLKGMSyncStage(

@@ -1913,7 +1913,7 @@ class AndroidIsPinnedUprevError(failures_lib.InfrastructureFailure):
     assert new_android_atom
     msg = ('Failed up uprev to Android version %s as Android was pinned.' %
            new_android_atom)
-    super(AndroidIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_android_atom = new_android_atom
 
 
@@ -1929,7 +1929,7 @@ class ChromeIsPinnedUprevError(failures_lib.InfrastructureFailure):
     """
     msg = ('Failed up uprev to chrome version %s as chrome was pinned.' %
            new_chrome_atom)
-    super(ChromeIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_chrome_atom = new_chrome_atom
 
 

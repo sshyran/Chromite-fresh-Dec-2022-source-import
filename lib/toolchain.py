@@ -44,7 +44,7 @@ class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
       exception (Exception): The original exception.
       tc_info (list): A list of the failed packages' package_info.CPVs.
     """
-    super(ToolchainInstallError, self).__init__(msg, result, exception)
+    super().__init__(msg, result, exception)
     self.failed_toolchain_info = tc_info
 
 

@@ -40,13 +40,13 @@ class LockedDefaultDict(collections.defaultdict):
   """collections.defaultdict which cannot be read from until unlocked."""
 
   def __init__(self):
-    super(LockedDefaultDict, self).__init__()
+    super().__init__()
     self._locked = True
 
   def get(self, key):
     if self._locked:
       raise LockedDictAccessException()
-    return super(LockedDefaultDict, self).get(key)
+    return super().get(key)
 
   def unlock(self):
     self._locked = False

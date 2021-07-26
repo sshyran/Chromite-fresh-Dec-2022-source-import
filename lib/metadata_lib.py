@@ -42,7 +42,7 @@ class CBuildbotMetadata(object):
                             multiprocess containers so that its state
                             is correctly synced across processes.
     """
-    super(CBuildbotMetadata, self).__init__()
+    super().__init__()
     if multiprocess_manager:
       self._metadata_dict = multiprocess_manager.dict()
       self._cl_action_list = multiprocess_manager.list()

@@ -82,7 +82,7 @@ class InOrder(Comparator):
     Args:
       items: A list of things that could be in a list or a key in a dict
     """
-    super(InOrder, self).__init__()
+    super().__init__()
     self.items = items
 
   def Match(self, arg):

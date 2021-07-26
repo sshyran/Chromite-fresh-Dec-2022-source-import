@@ -74,7 +74,7 @@ class SetAttrStage(generic_stages.BuilderStage):
                attr=DEFAULT_ATTR,
                *args,
                **kwargs):
-    super(SetAttrStage, self).__init__(builder_run, buildstore, *args, **kwargs)
+    super().__init__(builder_run, buildstore, *args, **kwargs)
     self.delay = delay
     self.attr = attr
 
@@ -100,7 +100,7 @@ class GetAttrStage(generic_stages.BuilderStage):
                attr=DEFAULT_ATTR,
                *args,
                **kwargs):
-    super(GetAttrStage, self).__init__(builder_run, buildstore, *args, **kwargs)
+    super().__init__(builder_run, buildstore, *args, **kwargs)
     self.tester = tester
     self.timeout = timeout
     self.attr = attr

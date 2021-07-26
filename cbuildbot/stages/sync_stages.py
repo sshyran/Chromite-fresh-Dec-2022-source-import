@@ -46,7 +46,7 @@ class PatchChangesStage(generic_stages.BuilderStage):
       patch_pool: A TrybotPatchPool object containing the different types of
                   patches to apply.
     """
-    super(PatchChangesStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.patch_pool = patch_pool
 
   @staticmethod
@@ -134,9 +134,9 @@ class BootstrapStage(PatchChangesStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, patch_pool, **kwargs):
-    super(BootstrapStage, self).__init__(builder_run, buildstore,
-                                         trybot_patch_pool.TrybotPatchPool(),
-                                         **kwargs)
+    super().__init__(builder_run, buildstore,
+                     trybot_patch_pool.TrybotPatchPool(),
+                     **kwargs)
 
     self.patch_pool = patch_pool
     self.returncode = None
@@ -299,7 +299,7 @@ class SyncStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(SyncStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.repo = None
     self.skip_sync = False
 
@@ -389,8 +389,7 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def __init__(self, builder_run, buildstore, **kwargs):
     # Perform the sync at the end of the stage to the given manifest.
-    super(ManifestVersionedSyncStage, self).__init__(builder_run, buildstore,
-                                                     **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.repo = None
     self.manifest_manager = None
 
@@ -409,7 +408,7 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def HandleSkip(self):
     """Initializes a manifest manager to the specified version if skipped."""
-    super(ManifestVersionedSyncStage, self).HandleSkip()
+    super().HandleSkip()
     if self._run.options.force_version:
       self.Initialize()
       self.ForceVersion(self._run.options.force_version)
@@ -652,8 +651,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(MasterSlaveLKGMSyncStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     # lkgm_manager deals with making sure we're synced to whatever manifest
     # we get back in GetNextManifest so syncing again is redundant.
     self._android_version = None
@@ -694,7 +692,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
           False)
 
   def ForceVersion(self, version):
-    manifest = super(MasterSlaveLKGMSyncStage, self).ForceVersion(version)
+    manifest = super().ForceVersion(version)
     if MasterSlaveLKGMSyncStage.external_manager:
       MasterSlaveLKGMSyncStage.external_manager.BootstrapFromVersion(version)
 
@@ -702,7 +700,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def _VerifyMasterId(self, master_id):
     """Verify that our master id is current and valid."""
-    super(MasterSlaveLKGMSyncStage, self)._VerifyMasterId(master_id)
+    super()._VerifyMasterId(master_id)
     if not self._run.config.master and not master_id:
       raise failures_lib.StepFailure(
           'Cannot start build without a master_build_id. Did you hit force '

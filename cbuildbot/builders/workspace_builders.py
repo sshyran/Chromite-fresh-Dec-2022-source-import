@@ -59,7 +59,7 @@ class FirmwareBranchBuilder(BuildSpecBuilder):
 
   def RunStages(self):
     """Run the stages."""
-    super(FirmwareBranchBuilder, self).RunStages()
+    super().RunStages()
 
     self._RunStage(workspace_stages.WorkspaceInitSDKStage,
                    build_root=self._run.options.workspace)

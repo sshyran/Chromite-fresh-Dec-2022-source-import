@@ -54,7 +54,7 @@ class ChrootRequiredError(Exception):
       chroot_args: Arguments to pass directly to cros_sdk.
       extra_env: Environmental variables to set in the chroot.
     """
-    super(ChrootRequiredError, self).__init__()
+    super().__init__()
     self.cmd = cmd
     self.chroot_args = chroot_args
     self.extra_env = extra_env
@@ -76,7 +76,7 @@ class ExecRequiredError(Exception):
     Args:
       cmd: Command line to run inside the chroot as a list of strings.
     """
-    super(ExecRequiredError, self).__init__()
+    super().__init__()
     self.cmd = cmd
 
 
@@ -398,8 +398,7 @@ class _AppendOption(argparse.Action):
   def __init__(self, option_strings, dest, **kwargs):
     if 'nargs' in kwargs:
       raise ValueError('nargs is not supported for append_option action')
-    super(_AppendOption, self).__init__(
-        option_strings, dest, nargs=0, **kwargs)
+    super().__init__(option_strings, dest, nargs=0, **kwargs)
 
   def __call__(self, parser, namespace, values, option_string=None):
     if getattr(namespace, self.dest, None) is None:
@@ -467,14 +466,14 @@ class _DeprecatedAction(object):
   def __init__(self, *args, **kwargs):
     """Init override to extract the deprecated argument when it exists."""
     self.deprecated_message = kwargs.pop('deprecated', None)
-    super(_DeprecatedAction, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def __call__(self, parser, namespace, values, option_string=None):
     """Log the message then defer to the parent action."""
     if self.deprecated_message:
       logging.warning('Argument %s is deprecated: %s', option_string,
                       self.deprecated_message)
-    return super(_DeprecatedAction, self).__call__(
+    return super().__call__(
         parser, namespace, values, option_string=option_string)
 
 
@@ -539,11 +538,11 @@ class ColoredFormatter(logging.Formatter):
         to None, where terminal.Color will set to a sane default.
     """
     self.color = terminal.Color(enabled=kwargs.pop('enable_color', None))
-    super(ColoredFormatter, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def format(self, record):
     """Formats |record| with color."""
-    msg = super(ColoredFormatter, self).format(record)
+    msg = super().format(record)
     color = self._COLOR_MAPPING.get(record.levelname)
     return msg if not color else self.color.Color(color, msg)
 

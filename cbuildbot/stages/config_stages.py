@@ -120,7 +120,7 @@ class CheckTemplateStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(CheckTemplateStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.ctx = gs.GSContext(init_boto=True)
 
   def SortAndGetReleasePaths(self, release_list):
@@ -222,7 +222,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
 
   def __init__(self, builder_run, buildstore, template_gs_path, branch,
                chromite_dir, dry_run, **kwargs):
-    super(UpdateConfigStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.template_gs_path = template_gs_path
     self.chromite_dir = chromite_dir
     self.branch = branch
@@ -416,8 +416,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
                              'chromeos/infra/config')
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(DeployLuciSchedulerStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.legacy_project_dir = None
     self.project_dir = None
 

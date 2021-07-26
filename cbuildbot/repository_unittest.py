@@ -38,7 +38,7 @@ class RepoInitTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
 
   def __init__(self, *args, **kwargs):
     self.repo = None
-    super(RepoInitTests, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def setUp(self):
     self.PatchObject(time, 'sleep')

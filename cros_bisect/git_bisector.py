@@ -53,7 +53,7 @@ class GitBisector(common.OptionsChecker):
       builder: Builder to build/deploy image. Should contain repo_dir.
       evaluator: Evaluator to get score
     """
-    super(GitBisector, self).__init__(options)
+    super().__init__(options)
     self.good_commit = options.good
     self.bad_commit = options.bad
     self.remote = options.remote

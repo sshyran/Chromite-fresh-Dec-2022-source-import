@@ -102,7 +102,7 @@ class SlaveFailureSummaryStageTest(
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, **kwargs):  # pylint: disable=arguments-differ
     """Prepare stage with config['master']=True."""
-    super(SlaveFailureSummaryStageTest, self)._Prepare(**kwargs)
+    super()._Prepare(**kwargs)
     self._run.config['master'] = True
 
   def ConstructStage(self):

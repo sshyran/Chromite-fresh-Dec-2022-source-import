@@ -985,7 +985,7 @@ class ChromeSDKCommand(command.CliCommand):
              '2014/04/%%(target)s-2014.04.23.220740.tar.xz')
 
   def __init__(self, options):
-    super(ChromeSDKCommand, self).__init__(options)
+    super().__init__(options)
     self.board = options.board
     # Lazy initialized.
     self.sdk = None

@@ -37,7 +37,7 @@ class UsbImagerOperation(operation.ProgressBarOperation):
   """Progress bar for flashing image to operation."""
 
   def __init__(self, image):
-    super(UsbImagerOperation, self).__init__()
+    super().__init__()
     self._size = os.path.getsize(image)
     self._transferred = 0
     self._bytes = re.compile(r'(\d+) bytes')

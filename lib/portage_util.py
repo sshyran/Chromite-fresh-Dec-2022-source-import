@@ -324,7 +324,7 @@ class EBuildVersionFormatError(Error):
     self.filename = filename
     message = ('Ebuild file name %s '
                'does not match expected format.' % filename)
-    super(EBuildVersionFormatError, self).__init__(message)
+    super().__init__(message)
 
 
 class EbuildFormatIncorrectError(Error):
@@ -332,7 +332,7 @@ class EbuildFormatIncorrectError(Error):
 
   def __init__(self, filename, message):
     message = 'Ebuild %s has invalid format: %s ' % (filename, message)
-    super(EbuildFormatIncorrectError, self).__init__(message)
+    super().__init__(message)
 
 
 # Container for Classify return values.

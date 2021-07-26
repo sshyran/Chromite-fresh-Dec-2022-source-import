@@ -26,7 +26,7 @@ class FindDebugDirMock(partial_mock.PartialMock):
 
   def __init__(self, path, *args, **kwargs):
     self.path = path
-    super(FindDebugDirMock, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   # pylint: disable=unused-argument
   def FindDebugDir(self, _board, sysroot=None):

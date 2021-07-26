@@ -43,7 +43,7 @@ class NothingToArchiveException(Exception):
   # We duplicate __init__ to specify a default for message.
   # pylint: disable=useless-super-delegation
   def __init__(self, message='No images found to archive.'):
-    super(NothingToArchiveException, self).__init__(message)
+    super().__init__(message)
 
 
 class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
@@ -67,7 +67,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                board,
                chrome_version=None,
                **kwargs):
-    super(ArchiveStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
     self.chrome_version = chrome_version
 
     # TODO(mtennant): Places that use this release_tag attribute should
@@ -423,7 +423,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
   def HandleSkip(self):
     """Tell other stages to not wait on us if we are skipped."""
     self.board_runattrs.SetParallel('autotest_tarball_generated', True)
-    return super(ArchiveStage, self).HandleSkip()
+    return super().HandleSkip()
 
   def _HandleStageException(self, exc_info):
     # Tell the HWTestStage not to wait for artifacts to be uploaded
@@ -431,7 +431,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
     self._recovery_image_status_queue.put(False)
     self.board_runattrs.SetParallel('instruction_urls_per_channel', None)
     self.board_runattrs.SetParallel('autotest_tarball_generated', True)
-    return super(ArchiveStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
 
 class CPEExportStage(generic_stages.BoardSpecificBuilderStage,
@@ -616,7 +616,7 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
     """Tell other stages to not wait on us if we are skipped."""
     self._SymbolsNotGenerated()
     self.board_runattrs.SetParallel('debug_symbols_completed', True)
-    return super(DebugSymbolsStage, self).HandleSkip()
+    return super().HandleSkip()
 
   def _HandleStageException(self, exc_info):
     """Tell other stages to not wait on us if we die for some reason."""
@@ -630,7 +630,7 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
          e.MatchesFailureType(DebugSymbolsUploadException))):
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(DebugSymbolsStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
 
 class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
@@ -642,8 +642,7 @@ class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
 
   def __init__(self, builder_run, buildstore, board, version=None, **kwargs):
     self.prebuilts_version = version
-    super(UploadPrebuiltsStage, self).__init__(builder_run, buildstore, board,
-                                               **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def GenerateCommonArgs(self, inc_chrome_ver=True):
     """Generate common prebuilt arguments."""
@@ -860,12 +859,12 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
     # UploadTestArtifacts throws an exception.
     self.board_runattrs.SetParallel('test_artifacts_uploaded', False)
 
-    return super(UploadTestArtifactsStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def HandleSkip(self):
     """Launch DebugSymbolsStage if UnitTestStage is skipped."""
     self.board_runattrs.SetParallel('test_artifacts_uploaded', False)
-    return super(UploadTestArtifactsStage, self).HandleSkip()
+    return super().HandleSkip()
 
 
 # TODO(mtennant): This class continues to exist only for subclasses that still
@@ -883,8 +882,7 @@ class ArchivingStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, board, archive_stage, **kwargs):
-    super(ArchivingStage, self).__init__(builder_run, buildstore, board,
-                                         **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
     self.archive_stage = archive_stage
 
 
@@ -897,7 +895,7 @@ class GenerateSysrootStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(GenerateSysrootStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
 
   def _GenerateSysroot(self):
@@ -936,7 +934,7 @@ class GenerateTidyWarningsStage(generic_stages.BoardSpecificBuilderStage,
   GS_URL = 'gs://chromeos-clang-tidy-artifacts/clang-tidy-1'
 
   def __init__(self, *args, **kwargs):
-    super(GenerateTidyWarningsStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
 
   def _UploadTidyWarnings(self, path, tar_file):
@@ -994,7 +992,7 @@ class CollectPGOProfilesStage(generic_stages.BoardSpecificBuilderStage,
   PROFDATA = 'llvm.profdata'
 
   def __init__(self, *args, **kwargs):
-    super(CollectPGOProfilesStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
     self._merge_cmd = ''
 

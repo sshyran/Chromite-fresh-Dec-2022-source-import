@@ -150,7 +150,7 @@ class VM(device.Device):
     Args:
       opts: command line options.
     """
-    super(VM, self).__init__(opts)
+    super().__init__(opts)
 
     self.qemu_path = opts.qemu_path
     self.qemu_img_path = opts.qemu_img_path
@@ -651,7 +651,7 @@ class VM(device.Device):
     if not os.path.exists(self.vm_dir):
       self.Start()
 
-    super(VM, self).WaitForBoot(sleep=sleep, max_retry=max_retry)
+    super().WaitForBoot(sleep=sleep, max_retry=max_retry)
 
     # Chrome can take a while to start with software emulation.
     if not self.enable_kvm:

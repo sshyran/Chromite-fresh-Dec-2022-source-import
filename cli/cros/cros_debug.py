@@ -38,7 +38,7 @@ To debug a process by its pid:
 
   def __init__(self, options):
     """Initialize DebugCommand."""
-    super(DebugCommand, self).__init__(options)
+    super().__init__(options)
     # SSH connection settings.
     self.ssh_hostname = None
     self.ssh_port = None

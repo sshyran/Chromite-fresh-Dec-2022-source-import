@@ -806,7 +806,7 @@ class NonHaltingBuilderStage(BuilderStage):
 
   def Run(self):
     try:
-      super(NonHaltingBuilderStage, self).Run()
+      super().Run()
     except failures_lib.StepFailure:
       name = self.__class__.__name__
       logging.error('Ignoring StepFailure in %s', name)
@@ -945,13 +945,12 @@ class BoardSpecificBuilderStage(BuilderStage):
     if len(builder_run.config.boards) > 1 or builder_run.config.grouped:
       suffix = self.UpdateSuffix(board, suffix)
 
-    super(BoardSpecificBuilderStage, self).__init__(
-        builder_run, buildstore, suffix=suffix, **kwargs)
+    super().__init__(builder_run, buildstore, suffix=suffix, **kwargs)
 
   def _RecordResult(self, *args, **kwargs):
     """Record a successful or failed result."""
     kwargs.setdefault('board', self._current_board)
-    super(BoardSpecificBuilderStage, self)._RecordResult(*args, **kwargs)
+    super()._RecordResult(*args, **kwargs)
 
   def _InsertBuildStageInCIDB(self,
                               name,
@@ -960,8 +959,7 @@ class BoardSpecificBuilderStage(BuilderStage):
     """Insert a build stage in cidb."""
     if not board:
       board = self._current_board
-    super(BoardSpecificBuilderStage, self)._InsertBuildStageInCIDB(
-        name, board, status)
+    super()._InsertBuildStageInCIDB(name, board, status)
 
   def GetListOfPackagesToBuild(self):
     """Returns a list of packages to build."""

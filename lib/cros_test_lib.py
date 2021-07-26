@@ -1298,7 +1298,7 @@ class TestProgram(unittest.TestProgram):
     self.default_log_level = kwargs.pop('level', 'critical')
     self._leaked_tempdir = None
 
-    super(TestProgram, self).__init__(**kwargs)
+    super().__init__(**kwargs)
 
   def parseArgs(self, argv):
     """Parse the command line for the test"""
@@ -1446,7 +1446,7 @@ class TestProgram(unittest.TestProgram):
       sys.modules['chromite.lib.cidb'].CIDBConnectionFactory.SetupMockCidb()
 
     try:
-      super(TestProgram, self).runTests()
+      super().runTests()
     finally:
       if self._leaked_tempdir is not None:
         logging.info('Working directory %s left behind. Please cleanup later.',

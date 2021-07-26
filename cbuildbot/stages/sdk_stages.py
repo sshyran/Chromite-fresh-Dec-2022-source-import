@@ -131,7 +131,7 @@ class SDKPackageStage(generic_stages.BuilderStage,
 
   def __init__(self, builder_run, buildstore, version=None, **kwargs):
     self.sdk_version = version
-    super(SDKPackageStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
   def PerformStage(self):
     tarball_location = os.path.join(self._build_root, SDK_TARBALL_NAME)
@@ -220,8 +220,7 @@ class SDKPackageToolchainOverlaysStage(generic_stages.BuilderStage):
 
   def __init__(self, builder_run, buildstore, version=None, **kwargs):
     self.sdk_version = version
-    super(SDKPackageToolchainOverlaysStage, self).__init__(
-        builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
   def PerformStage(self):
     chroot_dir = os.path.join(self._build_root, constants.DEFAULT_CHROOT_DIR)
@@ -366,7 +365,7 @@ class SDKUprevStage(generic_stages.BuilderStage):
   category = constants.PRODUCT_TOOLCHAIN_STAGE
 
   def __init__(self, builder_run, buildstore, version=None, **kwargs):
-    super(SDKUprevStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self._version = version
 
   def PerformStage(self):

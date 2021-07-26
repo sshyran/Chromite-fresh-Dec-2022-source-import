@@ -49,7 +49,7 @@ class Failure(Exception):
 
   def __init__(self, message=None, status=EVENT_STATUS_FAIL):
     """Create event with an optional message, status can be overridden"""
-    super(Failure, self).__init__(message, status)
+    super().__init__(message, status)
     self.msg = message
     self.status = status
 
@@ -79,7 +79,7 @@ class Event(dict):
       emit_func: Callback function to be called when event is complete.
         The function will be passed current event as sole argument.
     """
-    super(Event, self).__init__()
+    super().__init__()
 
     self[EVENT_ID] = eid if eid is not None else next(_next_event_id)
 
@@ -190,7 +190,7 @@ class EventFileLogger(EventLogger):
   def __init__(self, file_out, data=None, encoder_func=json.dumps):
     self.file_out = file_out
     self.encoder_func = encoder_func
-    super(EventFileLogger, self).__init__(self.write_event, data=data)
+    super().__init__(self.write_event, data=data)
 
   def write_event(self, event):
     """Writes Event(dict) to file"""
@@ -199,7 +199,7 @@ class EventFileLogger(EventLogger):
 
   def shutdown(self):
     """Close given file object"""
-    super(EventFileLogger, self).shutdown()
+    super().shutdown()
     self.file_out.close()
 
 
@@ -210,7 +210,7 @@ class EventDummyLogger(EventLogger):
     def nop(event):
       # pylint: disable=unused-argument
       pass
-    super(EventDummyLogger, self).__init__(nop)
+    super().__init__(nop)
 
 
 # Default logger to use

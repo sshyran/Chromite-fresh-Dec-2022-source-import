@@ -75,7 +75,7 @@ class AndroidIsPinnedUprevError(UprevError):
     assert new_android_atom
     msg = ('Failed up uprev to Android version %s as Android was pinned.' %
            new_android_atom)
-    super(AndroidIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_android_atom = new_android_atom
 
 
@@ -85,7 +85,7 @@ class GeneratedCrosConfigFilesError(Error):
   def __init__(self, expected_files, found_files):
     msg = ('Expected to find generated C files: %s. Actually found: %s' %
            (expected_files, found_files))
-    super(GeneratedCrosConfigFilesError, self).__init__(msg)
+    super().__init__(msg)
 
 
 NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (

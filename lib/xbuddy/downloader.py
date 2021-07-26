@@ -70,7 +70,7 @@ class Downloader(object):
   _TIMESTAMP_FILENAME = 'staged.timestamp'
 
   def __init__(self, static_dir, build_dir, build):
-    super(Downloader, self).__init__()
+    super().__init__()
     self._static_dir = static_dir
     self._build_dir = build_dir
     self._build = build
@@ -277,7 +277,7 @@ class GoogleStorageDownloader(Downloader):
     (board, build) = build_id.split('/')[-2:]
     build_dir = os.path.join(static_dir, build_id)
 
-    super(GoogleStorageDownloader, self).__init__(static_dir, build_dir, build)
+    super().__init__(static_dir, build_dir, build)
 
     self._archive_url = archive_url
     self._board = board
@@ -371,7 +371,7 @@ class LocalDownloader(Downloader):
     build = os.path.basename(source_path)
     build_dir = os.path.join(static_dir, rel_path, build)
 
-    super(LocalDownloader, self).__init__(static_dir, build_dir, build)
+    super().__init__(static_dir, build_dir, build)
 
   def Wait(self, name, is_regex_name, alt_name, timeout):
     """Verifies the local artifact exists and returns the appropriate names.
@@ -436,7 +436,7 @@ class AndroidBuildDownloader(Downloader):
     self.build_id = build_id
     self.target = target
 
-    super(AndroidBuildDownloader, self).__init__(static_dir, build_dir, build)
+    super().__init__(static_dir, build_dir, build)
 
   def Wait(self, name, is_regex_name, alt_name, timeout):
     """Verifies the local artifact exists and returns the appropriate names.

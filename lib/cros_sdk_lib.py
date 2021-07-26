@@ -54,7 +54,7 @@ class ChrootDeprecatedError(Error):
            'Your chroot is so old that some updates have been deprecated and'
            'it will need to be recreated. A fresh chroot can be built with:\n'
            '    cros_sdk --replace\n')
-    super(ChrootDeprecatedError, self).__init__(msg, *args, **kwargs)
+    super().__init__(msg, *args, **kwargs)
 
 
 class ChrootUpdateError(Error):

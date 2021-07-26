@@ -27,7 +27,7 @@ class MockBuildCommand(command_unittest.MockCommand):
   TARGET_CLASS = cros_build.BuildCommand
 
   def __init__(self, *args, **kwargs):
-    super(MockBuildCommand, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.chroot_update_called = 0
 
   def OnChrootUpdate(self, *_args, **_kwargs):

@@ -248,7 +248,7 @@ class NonMainlineMerge(ForbiddenMerge):
     msg = ('Neither parent of this merge commit is already submitted in '
            'the destination branch. The CQ can only handle merge commits '
            'that meet this criteria.')
-    super(NonMainlineMerge, self).__init__(patch, message=msg)
+    super().__init__(patch, message=msg)
 
 
 class PatchNoParents(PatchException):
@@ -256,7 +256,7 @@ class PatchNoParents(PatchException):
 
   def __init__(self, patch):
     msg = 'This patch has no parents, and therefore cannot be applied.'
-    super(PatchNoParents, self).__init__(patch, message=msg)
+    super().__init__(patch, message=msg)
 
 
 class PatchIsEmpty(ApplyPatchException):
@@ -767,10 +767,8 @@ class GitRepoPatch(PatchQuery):
         be None if not yet known- in which case Fetch will update it.
       change_id: See PatchQuery for documentation.
     """
-    super(GitRepoPatch, self).__init__(remote, project=project,
-                                       tracking_branch=tracking_branch,
-                                       change_id=change_id,
-                                       sha1=sha1, gerrit_number=None)
+    super().__init__(remote, project=project, tracking_branch=tracking_branch,
+                     change_id=change_id, sha1=sha1, gerrit_number=None)
 
     # git_remote_url is the url of the remote git repo that this patch
     # belongs to. Differs from project_url as that may point to a local
@@ -1683,7 +1681,7 @@ class GerritFetchOnlyPatch(GitRepoPatch):
                fail_count=0, pass_count=0, total_fail_count=0,
                commit_message=None):
     """Initializes a GerritFetchOnlyPatch object."""
-    super(GerritFetchOnlyPatch, self).__init__(
+    super().__init__(
         project_url, project, ref, tracking_branch, remote,
         change_id=change_id, sha1=sha1)
     self.gerrit_number = gerrit_number
@@ -1812,7 +1810,7 @@ class GerritPatch(GerritFetchOnlyPatch):
     # id - The CL's ChangeId
     # revision - The CL's SHA1 hash.
     # number - The CL's gerrit number.
-    super(GerritPatch, self).__init__(
+    super().__init__(
         os.path.join(url_prefix, patch_dict['project']),
         patch_dict['project'],
         current_patch_set.get('ref'),
@@ -2053,7 +2051,7 @@ class GerritPatch(GerritFetchOnlyPatch):
     Returns:
       The modified commit message with necessary Gerrit footers.
     """
-    msg = super(GerritPatch, self)._AddFooters(msg)
+    msg = super()._AddFooters(msg)
 
     # This function is adapted from the version in Gerrit:
     # goto/createCherryPickCommitMessage

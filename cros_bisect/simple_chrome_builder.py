@@ -47,7 +47,7 @@ ChromeOS (board specified.) Also, it can deploy the result to ChromeOS DUT
         * archive_build: True to archive build.
         * reuse_build: True to reuse previous build.
     """
-    super(SimpleChromeBuilder, self).__init__(options)
+    super().__init__(options)
     self.reuse_build = options.reuse_build
     self.archive_build = options.archive_build
 

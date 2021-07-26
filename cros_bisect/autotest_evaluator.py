@@ -56,7 +56,7 @@ class AutotestEvaluator(evaluator.Evaluator):
         * eval_passing_only: If set, use existing perf result only if test was
             passing.
     """
-    super(AutotestEvaluator, self).__init__(options)
+    super().__init__(options)
     self.board = options.board
     self.test_name = options.test_name
     self.metric = options.metric

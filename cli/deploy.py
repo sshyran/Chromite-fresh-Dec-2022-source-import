@@ -82,7 +82,7 @@ class BrilloDeployOperation(operation.ProgressBarOperation):
     Args:
       emerge: True if emerge, False is unmerge.
     """
-    super(BrilloDeployOperation, self).__init__()
+    super().__init__()
     if emerge:
       self._events = self.MERGE_EVENTS
     else:

@@ -43,7 +43,7 @@ class SimpleBuilder(generic_builders.Builder):
   """Builder that performs basic vetting operations."""
 
   def __init__(self, *args, **kwargs):
-    super(SimpleBuilder, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.sync_stage = None
 
   def GetSyncInstance(self):
@@ -452,7 +452,7 @@ class DistributedBuilder(SimpleBuilder):
       completion_stage_class:  Stage used to complete a build.  Set in the Sync
         stage.
     """
-    super(DistributedBuilder, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.completion_stage_class = None
     self.sync_stage = None
     self._completion_stage = None
@@ -570,7 +570,7 @@ class DistributedBuilder(SimpleBuilder):
     was_build_successful = False
     build_finished = False
     try:
-      super(DistributedBuilder, self).RunStages()
+      super().RunStages()
       build_identifier, _ = self._run.GetCIDBHandle()
       buildbucket_id = build_identifier.buildbucket_id
       was_build_successful = results_lib.Results.BuildSucceededSoFar(

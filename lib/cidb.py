@@ -646,7 +646,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
 
   def __init__(self, db_credentials_dir, for_service=False,
                query_retry_args=SqlConnectionRetryArgs(8, 4, 2)):
-    super(CIDBConnection, self).__init__(
+    super().__init__(
         'cidb', CIDB_MIGRATIONS_DIR, db_credentials_dir,
         for_service=for_service, query_retry_args=query_retry_args)
 
@@ -1311,7 +1311,7 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
     return False
 
   def __init__(self):
-    super(CIDBConnectionFactoryClass, self).__init__(
+    super().__init__(
         'cidb connection', self._CIDB_CONNECTION_TYPES,
         self._allowed_cidb_transition)
 

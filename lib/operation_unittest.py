@@ -24,11 +24,11 @@ class TestWrapperProgressBarOperation(operation.ProgressBarOperation):
 class FakeParallelEmergeOperation(operation.ParallelEmergeOperation):
   """Fake for operation.ParallelEmergeOperation."""
   def __init__(self, queue):
-    super(FakeParallelEmergeOperation, self).__init__()
+    super().__init__()
     self._queue = queue
 
   def ParseOutput(self, output=None):
-    super(FakeParallelEmergeOperation, self).ParseOutput()
+    super().ParseOutput()
     self._queue.put('advance')
 
 

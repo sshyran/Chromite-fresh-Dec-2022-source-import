@@ -447,7 +447,7 @@ class InitSDKStage(generic_stages.BuilderStage):
       buildstore: BuildStore instance to make DB calls with.
       chroot_replace: If True, force the chroot to be replaced.
     """
-    super(InitSDKStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.force_chroot_replace = chroot_replace
 
   def PerformStage(self):
@@ -586,7 +586,7 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
                **kwargs):
     if not afdo_use:
       suffix = self.UpdateSuffix('-' + constants.USE_AFDO_USE, suffix)
-    super(BuildPackagesStage, self).__init__(
+    super().__init__(
         builder_run, buildstore, board, suffix=suffix, **kwargs)
     self._afdo_generate_min = afdo_generate_min
     self._update_metadata = update_metadata
@@ -915,7 +915,7 @@ class BuildImageStage(BuildPackagesStage):
   def _HandleStageException(self, exc_info):
     """Tell other stages to not wait on us if we die for some reason."""
     self.board_runattrs.SetParallelDefault('images_generated', False)
-    return super(BuildImageStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def PerformStage(self):
     self._BuildImages()
@@ -930,7 +930,7 @@ class UprevStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, boards=None, **kwargs):
-    super(UprevStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     if boards is not None:
       self._boards = boards
 

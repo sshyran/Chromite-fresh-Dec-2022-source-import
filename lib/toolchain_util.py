@@ -1804,7 +1804,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
 
   def __init__(self, artifact_name, chroot, sysroot_path, build_target,
                input_artifacts, profile_info):
-    super(PrepareForBuildHandler, self).__init__(
+    super().__init__(
         artifact_name,
         chroot,
         sysroot_path,
@@ -2109,7 +2109,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
 
   def __init__(self, artifact_name, chroot, sysroot_path, build_target,
                output_dir, profile_info):
-    super(BundleArtifactHandler, self).__init__(
+    super().__init__(
         artifact_name,
         chroot,
         sysroot_path,

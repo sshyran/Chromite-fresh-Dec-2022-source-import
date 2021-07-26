@@ -47,7 +47,7 @@ class SimpleChromeArtifactsStage(cbuildbot_unittest.SimpleBuilderTestCase,
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(SimpleChromeArtifactsStage, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.options.chrome_root = '/tmp/non-existent'
     self._run.attrs.metadata.UpdateWithDict({'toolchain-tuple': ['target'],

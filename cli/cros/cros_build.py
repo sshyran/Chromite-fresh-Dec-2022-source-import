@@ -41,7 +41,7 @@ To just build a single package:
 """
 
   def __init__(self, options):
-    super(BuildCommand, self).__init__(options)
+    super().__init__(options)
     self.chroot_update = options.chroot_update and options.deps
     if options.chroot_update and not options.deps:
       logging.debug('Skipping chroot update due to --nodeps')

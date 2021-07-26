@@ -578,7 +578,7 @@ class Py3kCompatChecker(pylint.checkers.BaseChecker):
   options = ()
 
   def __init__(self, *args, **kwargs):
-    super(Py3kCompatChecker, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.seen_print_func = False
     self.saw_imports = False
 

@@ -58,14 +58,13 @@ class _LKGMCandidateInfo(manifest_version.VersionInfo):
     if version_string:
       match = re.search(self.LKGM_RE, version_string)
       assert match, 'LKGM did not re %s' % self.LKGM_RE
-      super(_LKGMCandidateInfo, self).__init__(match.group(1), chrome_branch,
+      super().__init__(match.group(1), chrome_branch,
                                                incr_type=incr_type)
       if match.group(2):
         self.revision_number = int(match.group(2))
 
     else:
-      super(_LKGMCandidateInfo, self).__init__(version_file=version_file,
-                                               incr_type=incr_type)
+      super().__init__(version_file=version_file, incr_type=incr_type)
 
   def VersionString(self):
     """returns the full version string of the lkgm candidate"""
@@ -130,7 +129,7 @@ class LKGMManager(manifest_version.BuildSpecsManager):
       buildstore: BuildStore instance to make DB calls.
       buildbucket_client: Instance of buildbucket_v2.BuildbucketV2 client.
     """
-    super(LKGMManager, self).__init__(
+    super().__init__(
         source_repo=source_repo, manifest_repo=manifest_repo,
         manifest=manifest, build_names=build_names, incr_type=incr_type,
         force=force, branch=branch, dry_run=dry_run,
@@ -160,7 +159,7 @@ class LKGMManager(manifest_version.BuildSpecsManager):
 
   def GetCurrentVersionInfo(self):
     """Returns the lkgm version info from the version file."""
-    version_info = super(LKGMManager, self).GetCurrentVersionInfo()
+    version_info = super().GetCurrentVersionInfo()
     return _LKGMCandidateInfo(version_info.VersionString(),
                               chrome_branch=version_info.chrome_branch,
                               incr_type=self.incr_type)

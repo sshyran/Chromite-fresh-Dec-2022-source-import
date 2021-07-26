@@ -51,7 +51,7 @@ class ChromeOnCrosBisector(git_bisector.GitBisector):
       builder: Builder to build/deploy image. Should contain repo_dir.
       evaluator: Evaluator to get score
     """
-    super(ChromeOnCrosBisector, self).__init__(options, builder, evaluator)
+    super().__init__(options, builder, evaluator)
     self.cros_flash_retry = max(0, options.cros_flash_retry)
     self.cros_flash_sleep = max(0, options.cros_flash_sleep)
     self.cros_flash_backoff = max(1, options.cros_flash_backoff)

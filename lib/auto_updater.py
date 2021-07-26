@@ -191,7 +191,7 @@ class ChromiumOSUpdater(BaseUpdater):
           Chromium OS device first. Otherwise, they are piped through SSH.
           Currently, this only applies to the stateful payloads.
     """
-    super(ChromiumOSUpdater, self).__init__(device, payload_dir)
+    super().__init__(device, payload_dir)
 
     self.tempdir = (tempdir if tempdir is not None
                     else tempfile.mkdtemp(prefix='cros-update'))

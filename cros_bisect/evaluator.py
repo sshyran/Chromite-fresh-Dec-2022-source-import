@@ -40,7 +40,7 @@ class Evaluator(common.OptionsChecker):
         * base_dir: Parent directory of repository folder
         * reuse_eval: True to reuse report if available.
     """
-    super(Evaluator, self).__init__(options)
+    super().__init__(options)
     self.base_dir = options.base_dir
     self.report_base_dir = os.path.join(self.base_dir, 'reports')
     self.reuse_eval = options.reuse_eval

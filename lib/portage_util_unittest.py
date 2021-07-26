@@ -491,7 +491,7 @@ class StubEBuild(portage_util.EBuild):
   """Test helper to StubEBuild."""
 
   def __init__(self, path, subdir_support):
-    super(StubEBuild, self).__init__(path, subdir_support)
+    super().__init__(path, subdir_support)
     self.is_workon = True
     self.is_stable = True
 

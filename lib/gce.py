@@ -31,7 +31,7 @@ class RetryOnServerErrorHttpRequest(HttpRequest):
   def __init__(self, num_retries, *args, **kwargs):
     """Constructor for RetryOnServerErrorHttpRequest."""
     self.num_retries = num_retries
-    super(RetryOnServerErrorHttpRequest, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def execute(self, http=None, num_retries=None):
     """Excutes a RetryOnServerErrorHttpRequest.
@@ -49,7 +49,7 @@ class RetryOnServerErrorHttpRequest(HttpRequest):
       A deserialized object model of the response body as determined
           by the postproc. See HttpRequest.execute().
     """
-    return super(RetryOnServerErrorHttpRequest, self).execute(
+    return super().execute(
         http=http, num_retries=num_retries or self.num_retries)
 
 

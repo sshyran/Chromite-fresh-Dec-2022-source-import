@@ -60,8 +60,7 @@ class ManifestVersionedSyncCompletionStage(
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, sync_stage, success, **kwargs):
-    super(ManifestVersionedSyncCompletionStage, self).__init__(
-        builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.sync_stage = sync_stage
     self.success = success
     # Message that can be set that well be sent along with the status in
@@ -91,7 +90,7 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(MasterSlaveSyncCompletionStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     # TODO(nxia): rename to _build_statuses as it contains local status and
     # slave statuses for master builds
     self._slave_statuses = {}
@@ -240,7 +239,7 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
       ]))
 
   def PerformStage(self):
-    super(MasterSlaveSyncCompletionStage, self).PerformStage()
+    super().PerformStage()
 
     builder_statusess_fetcher = self._GetBuilderStatusesFetcher()
     self._slave_statuses, self._experimental_build_statuses = (
@@ -533,7 +532,7 @@ class CanaryCompletionStage(MasterSlaveSyncCompletionStage):
       return self._HandleExceptionAsWarning(exc_info)
     else:
       # In all other cases, exceptions should be treated as fatal.
-      return super(CanaryCompletionStage, self)._HandleStageException(exc_info)
+      return super()._HandleStageException(exc_info)
 
 
 class UpdateChromeosLKGMStage(generic_stages.BuilderStage):
@@ -598,8 +597,7 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
       sync_stage: An instance of sync stage.
       success: Boolean indicating whether the build succeeded.
     """
-    super(PublishUprevChangesStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.sync_stage = sync_stage
     self.success = success
 

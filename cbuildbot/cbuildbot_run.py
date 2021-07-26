@@ -61,7 +61,7 @@ class ParallelAttributeError(AttributeError):
                   (attr, board, target))
     else:
       self.msg = 'No such parallel run attribute %r' % attr
-    super(ParallelAttributeError, self).__init__(self.msg, *args)
+    super().__init__(self.msg, *args)
     self.args = (attr, board, target) + tuple(args)
 
   def __str__(self):
@@ -73,7 +73,7 @@ class AttrSepCountError(ValueError):
   def __init__(self, attr, *args):
     self.msg = ('Attribute name has an unexpected number of "%s" occurrences'
                 ' in it: %s' % (RunAttributes.BOARD_ATTR_SEP, attr))
-    super(AttrSepCountError, self).__init__(self.msg, *args)
+    super().__init__(self.msg, *args)
     self.args = (attr, ) + tuple(args)
 
   def __str__(self):
@@ -85,7 +85,7 @@ class AttrNotPickleableError(RunAttributesError):
 
   def __init__(self, attr, value, *args):
     self.msg = 'Run attribute "%s" value cannot be pickled: %r' % (attr, value)
-    super(AttrNotPickleableError, self).__init__(self.msg, *args)
+    super().__init__(self.msg, *args)
     self.args = (attr, value) + tuple(args)
 
 
@@ -94,7 +94,7 @@ class AttrTimeoutError(RunAttributesError):
 
   def __init__(self, attr, *args):
     self.msg = 'Timed out waiting for value for run attribute "%s".' % attr
-    super(AttrTimeoutError, self).__init__(self.msg, *args)
+    super().__init__(self.msg, *args)
     self.args = (attr, ) + tuple(args)
 
 
@@ -262,7 +262,7 @@ class RunAttributes(object):
   #   """Override __setattr__ to prevent misuse of run attributes."""
   #   if attr in self.REGULAR_ATTRS:
   #     assert not self._IsChildProcess()
-  #   super(RunAttributes, self).__setattr__(attr, value)
+  #   super().__setattr__(attr, value)
 
   def _GetBoardAttrName(self, attr, board, target):
     """Translate plain |attr| to uniquified board attribute name.
@@ -1052,7 +1052,7 @@ class BuilderRun(_RealBuilderRun):
       multiprocess_manager: A multiprocessing.Manager.
     """
     run_base = _BuilderRunBase(site_config, options, multiprocess_manager)
-    super(BuilderRun, self).__init__(run_base, build_config)
+    super().__init__(run_base, build_config)
 
 
 class ChildBuilderRun(_RealBuilderRun):
@@ -1071,4 +1071,4 @@ class ChildBuilderRun(_RealBuilderRun):
     # pylint: disable=protected-access
     run_base = builder_run._run_base
     config = builder_run.config.child_configs[child_index]
-    super(ChildBuilderRun, self).__init__(run_base, config)
+    super().__init__(run_base, config)

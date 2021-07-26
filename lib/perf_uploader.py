@@ -59,11 +59,11 @@ class PerfUploadingError(Exception):
   """
 
   def __init__(self, value, orig_exc=None):
-    super(PerfUploadingError, self).__init__(value)
+    super().__init__(value)
     self.orig_exc = orig_exc
 
   def __str__(self):
-    r = super(PerfUploadingError, self).__str__()
+    r = super().__str__()
     if self.orig_exc:
       r += '\ncaused by: %s' % str(self.orig_exc)
     return r

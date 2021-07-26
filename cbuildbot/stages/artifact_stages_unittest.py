@@ -57,8 +57,7 @@ class ArchiveStageTest(generic_stages_unittest.AbstractStageTestCase,
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
     extra_config = {'upload_symbols': True, 'push_image': True}
-    super(ArchiveStageTest, self)._Prepare(
-        bot_id, extra_config=extra_config, **kwargs)
+    super()._Prepare(bot_id, extra_config=extra_config, **kwargs)
 
   def ConstructStage(self):
     self._run.GetArchive().SetupArchivePath()
@@ -102,7 +101,7 @@ class UploadPrebuiltsStageTest(
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(UploadPrebuiltsStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
     self.cmd = os.path.join(self.build_root, constants.CHROMITE_BIN_SUBDIR,
                             'upload_prebuilts')
     self._run.options.prebuilts = True
@@ -174,7 +173,7 @@ class UploadDevInstallerPrebuiltsStageTest(
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(UploadDevInstallerPrebuiltsStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.options.prebuilts = True
     self._run.config['dev_installer_prebuilts'] = True
@@ -274,8 +273,7 @@ class DebugSymbolsStageTest(generic_stages_unittest.AbstractStageTestCase,
           'upload_symbols': True,
           'basic_builder': False,
       }
-    super(DebugSymbolsStageTest, self)._Prepare(
-        extra_config=extra_config, **kwargs)
+    super()._Prepare(extra_config=extra_config, **kwargs)
     self._run.attrs.release_tag = self.VERSION
     self.buildstore = FakeBuildStore()
   # pylint: enable=arguments-differ

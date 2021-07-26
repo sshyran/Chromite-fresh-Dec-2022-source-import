@@ -21,7 +21,7 @@ class NetTest(test_case.TestCase):
   """Tests for Net."""
 
   def setUp(self):
-    super(NetTest, self).setUp()
+    super().setUp()
 
     def GetAccessToken(service_account_json): # pylint: disable=unused-argument
       return 'token'

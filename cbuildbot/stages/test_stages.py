@@ -115,8 +115,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       suffix += ' [DISABLED]'
 
     suffix = self.UpdateSuffix(suite_config.suite, suffix)
-    super(HWTestStage, self).__init__(
-        builder_run, buildstore, board, suffix=suffix, **kwargs)
+    super().__init__(builder_run, buildstore, board, suffix=suffix, **kwargs)
     if not self._run.IsToTBuild():
       self._SetBranchedSuiteConfig(suite_config)
 
@@ -147,7 +146,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       return self._HandleExceptionAsWarning(exc_info)
 
     if self.suite_config.critical:
-      return super(HWTestStage, self)._HandleStageException(exc_info)
+      return super()._HandleStageException(exc_info)
 
     if issubclass(exc_type, failures_lib.TestWarning):
       # HWTest passed with warning. All builders should pass.
@@ -161,7 +160,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
                      'available in the lab yet')
         return self._HandleExceptionAsSuccess(exc_info)
 
-    return super(HWTestStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def WaitUntilReady(self):
     """Wait until payloads and test artifacts are ready or not."""
@@ -279,7 +278,7 @@ class ASyncSkylabHWTestStage(SkylabHWTestStage,
   category = constants.TEST_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(ASyncSkylabHWTestStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.wait_for_results = False
 
 
@@ -376,8 +375,7 @@ class CbuildbotLaunchTestBuildStage(generic_stages.BuilderStage):
       build_config: Name of build config to build.
       expect_success: Is the test build expected to pass?
     """
-    super(CbuildbotLaunchTestBuildStage, self).__init__(builder_run, buildstore,
-                                                        **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
     self.build_config = build_config
     self.tryjob_buildroot = tryjob_buildroot
@@ -410,8 +408,7 @@ class CbuildbotLaunchTestStage(generic_stages.BuilderStage):
       builder_run: See builder_run on ArchiveStage
       buildstore: BuildStore instance to make DB calls with.
     """
-    super(CbuildbotLaunchTestStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.tryjob_buildroot = None
 
   def RunCbuildbotLauncher(self, suffix, branch, build_config, expect_success):

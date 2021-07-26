@@ -38,7 +38,7 @@ class GitMock(partial_mock.PartialCmdMock):
     Args:
       cwd: default git repository.
     """
-    super(GitMock, self).__init__()
+    super().__init__()
     self.cwd = cwd
 
   def RunGit(self, *args, **kwargs):
@@ -773,7 +773,7 @@ class GitBisectorMock(partial_mock.PartialMock):
   ATTRS = ('PrepareBisect', 'GitBisect', 'BuildDeployEval', 'LabelBuild')
 
   def __init__(self):
-    super(GitBisectorMock, self).__init__()
+    super().__init__()
     self.good_commit_info = None
     self.bad_commit_info = None
     self.threshold = None

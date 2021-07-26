@@ -99,7 +99,7 @@ class SigningStage(generic_stages.BoardSpecificBuilderStage):
       buildstore: BuildStore instance to make DB calls with.
       board: See board on ArchivingStage.
     """
-    super(SigningStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
     # Used to remember partial results between retries.
     self.signing_results = {}
@@ -119,7 +119,7 @@ class SigningStage(generic_stages.BoardSpecificBuilderStage):
     if issubclass(exc_type, MissingInstructionException):
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(SigningStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def _JsonFromUrl(self, gs_ctx, url):
     """Fetch a GS Url, and parse it as Json.
@@ -333,7 +333,7 @@ class PaygenStage(generic_stages.BoardSpecificBuilderStage):
                 Channels is normally None in release builds, and normally set
                 for trybot 'payloads' builds.
     """
-    super(PaygenStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
     self.channels = channels
 
   def _HandleStageException(self, exc_info):
@@ -349,7 +349,7 @@ class PaygenStage(generic_stages.BoardSpecificBuilderStage):
     # outright. Let SigningStage decide if this should kill the build.
     if issubclass(exc_type, SignerFailure):
       return self._HandleExceptionAsWarning(exc_info)
-    return super(PaygenStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def WaitUntilReady(self):
     """Block until signed images are ready.
@@ -428,7 +428,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
       skip_testing: Do not generate test artifacts or run payload tests.
       skip_delta_payloads: Skip generating delta payloads.
     """
-    super(PaygenBuildStage, self).__init__(
+    super().__init__(
         builder_run, buildstore, board, suffix=channel.capitalize(), **kwargs)
     self._run = builder_run
     self.board = board
@@ -610,8 +610,7 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
     if model:
       suffix += ' [%s]' % model
 
-    super(PaygenTestStage, self).__init__(
-        builder_run, buildstore, board, suffix=suffix, **kwargs)
+    super().__init__(builder_run, buildstore, board, suffix=suffix, **kwargs)
 
   def PerformStage(self):
     """Schedule the tests to run."""
@@ -635,4 +634,4 @@ class PaygenTestStage(generic_stages.BoardSpecificBuilderStage):
          exc_value.MatchesFailureType(failures_lib.TestLabFailure))):
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(PaygenTestStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)

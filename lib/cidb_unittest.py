@@ -23,14 +23,14 @@ class RetryableOperationalError(EnvironmentError):
   """An operational error with retryable error code."""
 
   def __init__(self):
-    super(RetryableOperationalError, self).__init__(1053, 'retryable')
+    super().__init__(1053, 'retryable')
 
 
 class FatalOperationalError(EnvironmentError):
   """An operational error with fatal error code."""
 
   def __init__(self):
-    super(FatalOperationalError, self).__init__(9999, 'fatal')
+    super().__init__(9999, 'fatal')
 
 
 class UnknownError(Exception):

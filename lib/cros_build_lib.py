@@ -218,7 +218,7 @@ class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
       self.stderr = stderr
       self.returncode = returncode
     else:
-      super(CompletedProcess, self).__init__(
+      super().__init__(
           args=args, returncode=returncode, stdout=stdout, stderr=stderr)
 
   @property
@@ -267,8 +267,8 @@ class CommandResult(CompletedProcess):
     elif error is not None:
       raise TypeError('Only specify |stderr|, not |error|')
 
-    super(CommandResult, self).__init__(args=args, stdout=stdout, stderr=stderr,
-                                        returncode=returncode)
+    super().__init__(args=args, stdout=stdout, stderr=stderr,
+                     returncode=returncode)
 
   @property
   def output(self):
@@ -300,7 +300,7 @@ class CalledProcessError(subprocess.CalledProcessError):
       raise TypeError('exception must be an exception instance; got %r'
                       % (exception,))
 
-    super(CalledProcessError, self).__init__(returncode, cmd, stdout)
+    super().__init__(returncode, cmd, stdout)
     # The parent class will set |output|, so delete it.
     del self.output
     # TODO(vapier): When we're Python 3-only, delete this assignment as the
@@ -391,7 +391,7 @@ class RunCommandError(CalledProcessError):
 
     self.args = (msg, result, exception)
     self.result = result
-    super(RunCommandError, self).__init__(
+    super().__init__(
         returncode=result.returncode, cmd=result.args, stdout=result.stdout,
         stderr=result.stderr, msg=msg, exception=exception)
 

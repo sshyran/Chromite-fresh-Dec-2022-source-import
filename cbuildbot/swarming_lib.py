@@ -202,7 +202,7 @@ class SwarmingCommandResult(cros_build_lib.CommandResult):
       task_summary_json: A dictionary, loaded from the json file output by
           swarming client. It cantains all details about the swarming task.
     """
-    super(SwarmingCommandResult, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.task_summary_json = task_summary_json
 
   @staticmethod

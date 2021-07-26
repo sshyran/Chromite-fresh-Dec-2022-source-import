@@ -1295,7 +1295,7 @@ class ChromiumOSDevice(RemoteDevice):
       include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all commands.
       kwargs: Args to pass to the parent constructor.
     """
-    super(ChromiumOSDevice, self).__init__(hostname, **kwargs)
+    super().__init__(hostname, **kwargs)
     self._orig_path = None
     self._path = None
     self._include_dev_paths = include_dev_paths
@@ -1448,4 +1448,4 @@ class ChromiumOSDevice(RemoteDevice):
       extra_env = kwargs.pop('extra_env', {})
       extra_env.setdefault('PATH', self.path)
       kwargs['extra_env'] = extra_env
-    return super(ChromiumOSDevice, self).run(cmd, **kwargs)
+    return super().run(cmd, **kwargs)

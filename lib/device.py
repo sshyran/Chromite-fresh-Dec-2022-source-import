@@ -19,7 +19,7 @@ class DeviceError(Exception):
   """Exception for Device failures."""
 
   def __init__(self, message):
-    super(DeviceError, self).__init__()
+    super().__init__()
     logging.error(message)
 
 

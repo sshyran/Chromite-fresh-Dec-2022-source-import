@@ -110,7 +110,7 @@ NOTES:
 
   def __init__(self, options):
     """Initializes cros stage."""
-    super(StageCommand, self).__init__(options)
+    super().__init__(options)
     self.board = self.options.board
     self.staged_image_name = self.options.staged_image_name
     # Determine if we are staging a local custom image or an official image.

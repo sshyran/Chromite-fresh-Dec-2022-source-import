@@ -143,7 +143,7 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
       exception (BaseException|None): An origin exception.
       packages (list[package_info.CPV]): The list of failed packages.
     """
-    super(PackageInstallError, self).__init__(msg, result, exception)
+    super().__init__(msg, result, exception)
     self.failed_packages = packages
     self.args = (self.args, packages)
 
@@ -153,7 +153,7 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
     See:
       cros_build_lib.RunCommandError.Stringify
     """
-    items = [super(PackageInstallError, self).Stringify(stdout, stderr)]
+    items = [super().Stringify(stdout, stderr)]
 
     pkgs = []
     for cpv in self.failed_packages:
@@ -186,8 +186,7 @@ class ToolchainInstallError(PackageInstallError):
       exception (BaseException|None): An origin exception.
       tc_info (list[package_info.CPV]): The list of failed toolchain packages.
     """
-    super(ToolchainInstallError, self).__init__(msg, result, exception,
-                                                packages=tc_info)
+    super().__init__(msg, result, exception, packages=tc_info)
 
   @property
   def failed_toolchain_info(self):

@@ -106,7 +106,7 @@ class HWTestStageTest(generic_stages_unittest.AbstractStageTestCase,
   # Our API here is not great when it comes to kwargs passing.
   # pylint: disable=arguments-differ
   def _Prepare(self, bot_id=None, version=None, warn_only=False, **kwargs):
-    super(HWTestStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self.version = version or self.VERSION
     self._run.options.log_dir = '/b/cbuild/mylogdir'
@@ -338,7 +338,7 @@ class ImageTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(ImageTestStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
     self._run.GetArchive().SetupArchivePath()
 
   def ConstructStage(self):

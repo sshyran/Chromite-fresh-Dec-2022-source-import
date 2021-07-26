@@ -208,7 +208,7 @@ class AttrDict(dict):
       return self[name]
 
     # Super class (dict) has no __getattr__ method, so use __getattribute__.
-    return super(AttrDict, self).__getattribute__(name)
+    return super().__getattribute__(name)
 
 
 class BuildConfig(AttrDict):
@@ -1334,7 +1334,7 @@ class SiteConfig(dict):
                  other BuildConfigs can be based on. Mostly used to reduce
                  verbosity of the config dump file format.
     """
-    super(SiteConfig, self).__init__()
+    super().__init__()
     self._defaults = DefaultSettings()
     if defaults:
       self._defaults.update(defaults)

@@ -42,7 +42,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(SyncChromeStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     # PerformStage() will fill this out for us.
     # TODO(mtennant): Replace with a run param.
     self.chrome_version = None
@@ -53,7 +53,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
     logging.debug('Existing chrome version is %s.',
                   self._run.attrs.chrome_version)
     self._WriteChromeVersionToMetadata()
-    super(SyncChromeStage, self).HandleSkip()
+    super().HandleSkip()
 
   def _GetChromeVersionFromMetadata(self):
     """Return the Chrome version from metadata; None if is does not exist."""
@@ -132,7 +132,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
     # means something.  In other words, this stage tried to run.
     self._run.attrs.chrome_version = self.chrome_version
     self._WriteChromeVersionToMetadata()
-    super(SyncChromeStage, self).Finish()
+    super().Finish()
 
 
 class SimpleChromeArtifactsStage(generic_stages.BoardSpecificBuilderStage,
@@ -144,7 +144,7 @@ class SimpleChromeArtifactsStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(SimpleChromeArtifactsStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
     self._pkg_dir = os.path.join(
         self._build_root, constants.DEFAULT_CHROOT_DIR,
@@ -211,7 +211,7 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(TestSimpleChromeWorkflowStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     if self._run.options.chrome_root:
       self.chrome_src = os.path.join(self._run.options.chrome_root, 'src')
       board_dir = 'out_%s' % self._current_board

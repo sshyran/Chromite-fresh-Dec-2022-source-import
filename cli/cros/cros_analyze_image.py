@@ -194,7 +194,7 @@ class AnalyzeImageCommand(command.CliCommand):
   """Analyze cros images listing large directory and file sizes."""
 
   def __init__(self, options: commandline.ArgumentNamespace):
-    super(AnalyzeImageCommand, self).__init__(options)
+    super().__init__(options)
 
     if self.options.image:
       return

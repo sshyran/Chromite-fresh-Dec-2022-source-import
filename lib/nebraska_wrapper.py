@@ -80,7 +80,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
           One specific use case is updating between <board> and
           <board>-kernelnext images.
     """
-    super(RemoteNebraskaWrapper, self).__init__()
+    super().__init__()
 
     self._device = remote_device
     self._hostname = remote_device.hostname

@@ -341,7 +341,7 @@ class PinchromeCommand(command.CliCommand):
   """
 
   def __init__(self, options):
-    super(PinchromeCommand, self).__init__(options)
+    super().__init__(options)
 
     # Make up a branch name which is unlikely to collide.
     self.branch_name = 'chrome_pin_' + cros_build_lib.GetRandomString()

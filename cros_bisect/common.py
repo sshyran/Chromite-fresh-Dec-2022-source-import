@@ -169,12 +169,12 @@ class OptionsChecker(object):
     class ClassA(OptionsChecker):
       REQUIRED_ARGS = ['a']
       def __init__(self, options):
-        super(ClassA, self).__init__(options)
+        super().__init__(options)
 
     class ClassB(ClassA):
       REQUIRED_ARGS = ClassA.REQUIRED_ARGS + ['b']
       def __init__(self, options):
-        super(ClassB, self).__init__(options)
+        super().__init__(options)
 
     then calling
       ClassA(argparse.Namespace(a='a'))

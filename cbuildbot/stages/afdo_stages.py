@@ -34,7 +34,7 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
 
   def PerformStage(self):
     """Collect a 'perf' profile and convert it into the AFDO format."""
-    super(AFDODataGenerateStage, self).PerformStage()
+    super().PerformStage()
 
     board = self._current_board
     if not afdo.CanGenerateAFDOData(board):
@@ -259,7 +259,7 @@ class GenerateAFDOArtifactStage(generic_stages.BoardSpecificBuilderStage,
     if 'is_orderfile' not in kwargs:
       raise ValueError('Need to specify argument is_orderfile.')
     self.is_orderfile = kwargs.pop('is_orderfile')
-    super(GenerateAFDOArtifactStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
 
   def PerformStage(self):
@@ -287,14 +287,12 @@ class GenerateAFDOArtifactStage(generic_stages.BoardSpecificBuilderStage,
 class GenerateBenchmarkAFDOStage(GenerateAFDOArtifactStage):
   """Generate benchmark AFDO artifact in the builder."""
   def __init__(self, *args, **kwargs):
-    super(GenerateBenchmarkAFDOStage, self).__init__(
-        *args, is_orderfile=False, **kwargs)
+    super().__init__(*args, is_orderfile=False, **kwargs)
 
 class GenerateChromeOrderfileStage(GenerateAFDOArtifactStage):
   """Generate Chrome orderfile in the builder."""
   def __init__(self, *args, **kwargs):
-    super(GenerateChromeOrderfileStage, self).__init__(
-        *args, is_orderfile=True, **kwargs)
+    super().__init__(*args, is_orderfile=True, **kwargs)
 
 
 class VerifyAFDOArtifactStage(generic_stages.BoardSpecificBuilderStage):
@@ -306,7 +304,7 @@ class VerifyAFDOArtifactStage(generic_stages.BoardSpecificBuilderStage):
       raise ValueError('Need to specify a build API to execute the stage with.')
     self.afdo_type = kwargs.pop('afdo_type')
     self.build_api = kwargs.pop('build_api')
-    super(VerifyAFDOArtifactStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def PerformStage(self):
     status = commands.VerifyAFDOArtifacts(
@@ -323,7 +321,7 @@ class OrderfileUpdateChromeEbuildStage(VerifyAFDOArtifactStage):
   """Updates the Chrome ebuild with the most recent unvetted orderfile."""
 
   def __init__(self, *args, **kwargs):
-    super(OrderfileUpdateChromeEbuildStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.ORDERFILE,
         build_api='chromite.api.ToolchainService/UpdateEbuildWithAFDOArtifacts',
         **kwargs)
@@ -332,7 +330,7 @@ class OrderfileUpdateChromeEbuildStage(VerifyAFDOArtifactStage):
 class KernelAFDOUpdateEbuildStage(VerifyAFDOArtifactStage):
   """Updates kernel ebuilds with latest unvetted AFDO profiles."""
   def __init__(self, *args, **kwargs):
-    super(KernelAFDOUpdateEbuildStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.KERNEL_AFDO,
         build_api='chromite.api.ToolchainService/UpdateEbuildWithAFDOArtifacts',
         **kwargs)
@@ -341,7 +339,7 @@ class KernelAFDOUpdateEbuildStage(VerifyAFDOArtifactStage):
 class ChromeAFDOUpdateEbuildStage(VerifyAFDOArtifactStage):
   """Updates Chrome ebuilds with latest unvetted AFDO profiles."""
   def __init__(self, *args, **kwargs):
-    super(ChromeAFDOUpdateEbuildStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.CHROME_AFDO,
         build_api='chromite.api.ToolchainService/UpdateEbuildWithAFDOArtifacts',
         **kwargs)
@@ -350,7 +348,7 @@ class ChromeAFDOUpdateEbuildStage(VerifyAFDOArtifactStage):
 class UploadVettedOrderfileStage(VerifyAFDOArtifactStage):
   """Upload a vetted orderfile to GS bucket."""
   def __init__(self, *args, **kwargs):
-    super(UploadVettedOrderfileStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.ORDERFILE,
         build_api='chromite.api.ToolchainService/UploadVettedAFDOArtifacts',
         **kwargs)
@@ -359,7 +357,7 @@ class UploadVettedOrderfileStage(VerifyAFDOArtifactStage):
 class UploadVettedKernelAFDOStage(VerifyAFDOArtifactStage):
   """Upload latest kernel AFDO profiles."""
   def __init__(self, *args, **kwargs):
-    super(UploadVettedKernelAFDOStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.KERNEL_AFDO,
         build_api='chromite.api.ToolchainService/UploadVettedAFDOArtifacts',
         **kwargs)
@@ -368,7 +366,7 @@ class UploadVettedKernelAFDOStage(VerifyAFDOArtifactStage):
 class UploadVettedChromeAFDOStage(VerifyAFDOArtifactStage):
   """Upload latest Chrome AFDO profiles."""
   def __init__(self, *args, **kwargs):
-    super(UploadVettedChromeAFDOStage, self).__init__(
+    super().__init__(
         *args, afdo_type=toolchain_pb2.CHROME_AFDO,
         build_api='chromite.api.ToolchainService/UploadVettedAFDOArtifacts',
         **kwargs)

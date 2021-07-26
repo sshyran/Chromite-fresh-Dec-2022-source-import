@@ -147,7 +147,7 @@ class Artifact(object, metaclass=ArtifactMeta):
         exists, we download it. Otherwise, we fall back to wait for |name|.
       alt_name: Name to use for anonymous callers to download artifacts.
     """
-    super(Artifact, self).__init__()
+    super().__init__()
 
     # In-memory lock to keep the devserver from colliding with itself while
     # attempting to stage the same artifact.
@@ -370,14 +370,14 @@ class MultiArtifact(Artifact):
       *args: See Artifact documentation.
       **kwargs: See Artifact documentation.
     """
-    super(MultiArtifact, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.single_name = False
 
   def _UpdateName(self, names):
     self.name = names if isinstance(names, list) else [names]
 
   def _Setup(self):
-    super(MultiArtifact, self)._Setup()
+    super()._Setup()
 
     self.installed_files = [os.path.join(self.install_dir, self.install_subdir,
                                          name) for name in self.name]
@@ -398,7 +398,7 @@ class BundledArtifact(Artifact):
     """
     self._files_to_extract = kwargs.pop('files_to_extract', None)
     self._exclude = kwargs.pop('exclude', None)
-    super(BundledArtifact, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
     # We modify the marker so that it is unique to what was staged.
     if self._files_to_extract:
@@ -411,7 +411,7 @@ class BundledArtifact(Artifact):
     If there are any files to unzip, only returns the extracted files since
     there is usually no need for the compressed files.
     """
-    files = super(BundledArtifact, self).StagedFiles()
+    files = super().StagedFiles()
     if self._files_to_extract:
       return [x for x in files if os.path.basename(x) in self._files_to_extract]
     return files
@@ -482,14 +482,14 @@ class AutotestTarball(BundledArtifact):
   """Wrapper around the autotest tarball to download from gsutil."""
 
   def __init__(self, *args, **kwargs):
-    super(AutotestTarball, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     # We don't store/check explicit file lists in Autotest tarball markers;
     # this can get huge and unwieldy, and generally make little sense.
     self.store_installed_files = False
 
   def _Setup(self):
     """Extracts the tarball into the install path excluding test suites."""
-    super(AutotestTarball, self)._Setup()
+    super()._Setup()
 
     # Deal with older autotest packages that may not be bundled.
     autotest_dir = os.path.join(self.install_dir,
@@ -514,7 +514,7 @@ class SignedArtifact(Artifact):
   """Wrapper for signed artifacts which need a path translation."""
 
   def _Setup(self):
-    super(SignedArtifact, self)._Setup()
+    super()._Setup()
 
     # Rename to signed_image.bin.
     install_path = os.path.join(self.install_dir, self.install_subdir,
@@ -554,8 +554,7 @@ def _CreateNewArtifact(tag, base, name, *fixed_args, **fixed_kwargs):
       all_kwargs = {}
       all_kwargs.update(fixed_kwargs)
       all_kwargs.update(kwargs)
-      super(NewArtifact, self).__init__(self.ARTIFACT_NAME,
-                                        *all_args, **all_kwargs)
+      super().__init__(self.ARTIFACT_NAME, *all_args, **all_kwargs)
 
   NewArtifact.__name__ = base.__name__
   return NewArtifact
@@ -777,7 +776,7 @@ class ChromeOSArtifactFactory(BaseArtifactFactory):
 
   def __init__(self, download_dir, artifacts, files, build):
     """Pass the ChromeOS artifact map to the base class."""
-    super(ChromeOSArtifactFactory, self).__init__(
+    super().__init__(
         chromeos_artifact_map, download_dir, artifacts, files, build,
         artifact_info.CROS_REQUESTED_TO_OPTIONAL_MAP)
 
@@ -787,6 +786,6 @@ class AndroidArtifactFactory(BaseArtifactFactory):
 
   def __init__(self, download_dir, artifacts, files, build):
     """Pass the Android artifact map to the base class."""
-    super(AndroidArtifactFactory, self).__init__(
+    super().__init__(
         android_artifact_map, download_dir, artifacts, files, build,
         artifact_info.ANDROID_REQUESTED_TO_OPTIONAL_MAP)

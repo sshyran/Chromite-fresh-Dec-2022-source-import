@@ -39,7 +39,7 @@ Builder base class.
         * board: Board name
         * reuse_repo: Reuse repo if available
     """
-    super(Builder, self).__init__(options)
+    super().__init__(options)
     self.options = options
     self.base_dir = options.base_dir
     self.board = options.board

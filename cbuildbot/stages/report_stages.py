@@ -544,7 +544,7 @@ class ReportStage(generic_stages.BuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, completion_instance, **kwargs):
-    super(ReportStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
     # TODO(mtennant): All these should be retrieved from builder_run instead.
     # Or, more correctly, the info currently retrieved from these stages should
@@ -1026,4 +1026,4 @@ class ReportStage(generic_stages.BuilderStage,
       # results.
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(ReportStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)

@@ -27,7 +27,7 @@ class Error(Exception):
   """
 
   def __init__(self, msg, status_code, response, headers=None):
-    super(Error, self).__init__(msg)
+    super().__init__(msg)
     self.status_code = status_code
     self.headers = headers
     self.response = response

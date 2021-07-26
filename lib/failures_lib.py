@@ -100,7 +100,7 @@ class CompoundFailure(StepFailure):
                           for ex in self.exc_infos)
     self.msg = message
 
-    super(CompoundFailure, self).__init__(message)
+    super().__init__(message)
 
   def ToSummaryString(self):
     """Returns a string with type and string of each ExceptInfo object.

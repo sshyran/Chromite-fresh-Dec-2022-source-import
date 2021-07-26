@@ -124,7 +124,7 @@ class GOBError(Exception):
     if not message:
       message = 'Unknown error'
 
-    super(GOBError, self).__init__(message)
+    super().__init__(message)
 
 
 class InternalGOBError(GOBError):

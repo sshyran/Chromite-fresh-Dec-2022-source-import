@@ -91,9 +91,8 @@ class VMTestStage(generic_stages.BoardSpecificBuilderStage,
     self._vm_tests = vm_tests
     self._ssh_port = ssh_port
     self._test_basename = test_basename
-    self._stage_exception_handler = super(VMTestStage,
-                                          self)._HandleStageException
-    super(VMTestStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    self._stage_exception_handler = super()._HandleStageException
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def _PrintFailedTests(self, results_path, test_basename):
     """Print links to failed tests.
@@ -349,7 +348,7 @@ class GCETestStage(VMTestStage):
                 builder_run.config.gce_tests instead.
     """
     self._gce_tests = gce_tests
-    super(GCETestStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def _RunTest(self, test_config, test_results_dir):
     """Run a GCE test.

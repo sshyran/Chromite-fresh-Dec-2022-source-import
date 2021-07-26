@@ -231,7 +231,7 @@ class ParallelEmergeOperation(ProgressBarOperation):
   """ProgressBarOperation specific for scripts/parallel_emerge.py."""
 
   def __init__(self):
-    super(ParallelEmergeOperation, self).__init__()
+    super().__init__()
     self._total = None
     self._completed = 0
     self._printed_no_packages = False
