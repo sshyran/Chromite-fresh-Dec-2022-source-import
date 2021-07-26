@@ -11,7 +11,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import workon_helper
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
-
+from chromite.service import sysroot
 
 class BuildTest(cros_test_lib.RunCommandTestCase):
   """Tests for building ap firmware."""
@@ -81,6 +81,9 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
                                    'StartWorkingOnPackages')
     stop_patch = self.PatchObject(workon_helper.WorkonHelper,
                                   'StopWorkingOnPackages')
+
+    # Patch the SetupBoard command.
+    self.PatchObject(sysroot, 'SetupBoard')
 
     # Patch in the build config.
     self.PatchObject(

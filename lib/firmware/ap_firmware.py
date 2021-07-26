@@ -6,12 +6,15 @@
 
 import collections
 import importlib
+import os
 from typing import Optional
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_logging as logging
+from chromite.lib import portage_util
 from chromite.lib import workon_helper
 from chromite.lib.firmware import flash_ap
+from chromite.service import sysroot
 
 _BUILD_TARGET_CONFIG_MODULE = 'chromite.lib.firmware.ap_firmware_config.%s'
 _CONFIG_BUILD_WORKON_PACKAGES = 'BUILD_WORKON_PACKAGES'
@@ -56,6 +59,16 @@ def build(build_target, fw_name=None, dry_run=False):
     dry_run (bool): Whether to perform a dry run.
   """
   logging.notice('Building AP Firmware.')
+
+  if not os.path.exists(build_target.root):
+    logging.warning('Sysroot for target %s is not available. Attempting '
+                    'to configure sysroot via default setup_board command.',
+                    build_target.name)
+    try:
+      sysroot.SetupBoard(build_target)
+    except (portage_util.MissingOverlayError, sysroot.Error):
+      cros_build_lib.Die('setup_board with default specifications failed. '
+                         "Please configure the board's sysroot separately.")
 
   workon = workon_helper.WorkonHelper(build_target.root, build_target.name)
   config = _get_build_config(build_target)
