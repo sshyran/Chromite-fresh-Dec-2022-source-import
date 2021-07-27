@@ -4,9 +4,11 @@
 
 """The Image API is the entry point for image functionality."""
 
+import logging
 import os
 import shutil
-from typing import List, Optional
+from pathlib import Path
+from typing import Iterable, List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -22,8 +24,12 @@ class Error(Exception):
   """Base module error."""
 
 
-class InvalidArgumentError(Error):
+class InvalidArgumentError(Error, ValueError):
   """Invalid argument values."""
+
+
+class MissingImageError(Error):
+  """An image that was expected to exist was not found."""
 
 
 class ImageToVmError(Error):
@@ -84,40 +90,95 @@ class BuildConfig(object):
 
 
 class BuildResult(object):
-  """Value object to report build image results."""
+  """Class to record and report build image results."""
 
-  def __init__(self, return_code, failed_packages):
+  def __init__(self, image_types: List[str]):
     """Init method.
 
     Args:
-      return_code (int): The build return code.
-      failed_packages (list[str]): A list of failed packages as strings.
+      image_types: A list of image names that were requested to be built.
     """
-    self.failed_packages = []
-    for package in failed_packages or []:
-      self.failed_packages.append(package_info.parse(package))
+    self._unbuilt_image_types = image_types
+    self.images = {}
+    self.return_code = None
+    self._failed_packages = []
 
-    # The return code should always be non-zero if there's any failed packages,
-    # but it's cheap insurance, so check it.
-    self.success = return_code == 0 and not self.failed_packages
+  @property
+  def failed_packages(self) -> List[package_info.PackageInfo]:
+    """Get the failed packages."""
+    return self._failed_packages
+
+  @failed_packages.setter
+  def failed_packages(self, packages: Union[Iterable[str], None]):
+    """Set the failed packages."""
+    self._failed_packages = [package_info.parse(x) for x in packages or []]
+
+  @property
+  def all_built(self) -> bool:
+    """Check that all of the images that were meant to be built were built."""
+    return not self._unbuilt_image_types
+
+  @property
+  def build_run(self) -> bool:
+    """Check if build images has been run."""
+    return self.return_code is not None
+
+  @property
+  def run_error(self) -> bool:
+    """Check if an error occurred during the build.
+
+    True iff build images ran and returned a non-zero return code.
+    """
+    return bool(self.return_code)
+
+  @property
+  def run_success(self) -> bool:
+    """Check if the build was successful.
+
+    True when the build ran, returned a zero return code, and no failed packages
+    were parsed.
+    """
+    return self.return_code == 0 and not self.failed_packages
+
+  def add_image(self, image_type: str, image_path: Path):
+    """Add an image to the result.
+
+    Record the image path by the image name, and remove the image type from the
+    un-built image list.
+    """
+    if image_path and image_path.exists():
+      self.images[image_type] = image_path
+      logging.debug('Added %s image path %s', image_type, image_path)
+      if image_type in self._unbuilt_image_types:
+        self._unbuilt_image_types.remove(image_type)
+        logging.debug('Removed unbuilt type %s', image_type)
+      else:
+        logging.warning('Unexpected Image Type %s', image_type)
+    else:
+      logging.error('%s image path does not exist: %s', image_type, image_path)
 
 
-def Build(board=None, images=None, config=None, extra_env=None):
+def Build(board: str,
+          images: List[str],
+          config: Optional[BuildConfig] = None,
+          extra_env: Optional[dict] = None) -> BuildResult:
   """Build an image.
 
   Args:
-    board (str): The board name.
-    images (list): The image types to build.
-    config (BuildConfig): The build configuration options.
-    extra_env (dict): Environment variables to set for build_image.
+    board: The board name.
+    images: The image types to build.
+    config: The build configuration options.
+    extra_env: Environment variables to set for build_image.
 
   Returns:
     BuildResult
   """
-  board = board or cros_build_lib.GetDefaultBoard()
   if not board:
-    raise InvalidArgumentError('board is required.')
-  images = images or [constants.IMAGE_TYPE_BASE]
+    raise InvalidArgumentError('A build target name is required.')
+
+  build_result = BuildResult(images[:])
+  if not images:
+    return build_result
   config = config or BuildConfig()
 
   if cros_build_lib.IsInsideChroot():
@@ -136,31 +197,40 @@ def Build(board=None, images=None, config=None, extra_env=None):
     extra_env_local[constants.PARALLEL_EMERGE_STATUS_FILE_ENVVAR] = status_file
     result = cros_build_lib.run(
         cmd, enter_chroot=True, check=False, extra_env=extra_env_local)
+    build_result.return_code = result.returncode
     try:
       content = osutils.ReadFile(status_file).strip()
     except IOError:
       # No file means no packages.
-      failed = None
+      pass
     else:
-      failed = content.split() if content else None
+      build_result.failed_packages = content.split() if content else None
 
-    return BuildResult(result.returncode, failed)
+  # Save the path to each image that was built.
+  image_dir = Path(
+      image_lib.GetLatestImageLink(board, pointer=config.symlink))
+  for image_type in images:
+    filename = constants.IMAGE_TYPE_TO_NAME[image_type]
+    image_path = (image_dir / filename).resolve()
+    logging.debug('%s Resolved Image Path: %s', image_type, image_path)
+    build_result.add_image(image_type, image_path)
+
+  return build_result
 
 
-def BuildRecoveryImage(board=None, image_path=None):
+def BuildRecoveryImage(board: str,
+                       image_path: Optional[str] = None) -> BuildResult:
   """Build a recovery image.
 
   This must be done after a base image has been created.
 
   Args:
-    board (str): The board name.
-    image_path (str): The chrooted path to the image, defaults
-      to chromiums_image.bin.
+    board: The board name.
+    image_path: The chrooted path to the image, defaults to chromiums_image.bin.
 
   Returns:
     BuildResult
   """
-  board = board or cros_build_lib.GetDefaultBoard()
   if not board:
     raise InvalidArgumentError('board is required.')
 
@@ -173,18 +243,41 @@ def BuildRecoveryImage(board=None, image_path=None):
   if image_path:
     cmd.extend(['--image', image_path])
 
+  build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
   result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
-  return BuildResult(result.returncode, None)
+  build_result.return_code = result.returncode
+
+  if result.returncode:
+    return build_result
+
+  # Record the image path.
+  image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
+  if image_path:
+    recovery_image = Path(image_path).parent / image_name
+  else:
+    image_dir = Path(image_lib.GetLatestImageLink(board))
+    image_path = image_dir / image_name
+    recovery_image = image_path.resolve()
+
+  if recovery_image.exists():
+    build_result.add_image(constants.IMAGE_TYPE_RECOVERY, recovery_image)
+
+  return build_result
 
 
-def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
+def CreateVm(board: str,
+             disk_layout: Optional[str] = None,
+             is_test: bool = False,
+             chroot: Optional['chroot_lib.Chroot'] = None,
+             image_dir: Optional[str] = None) -> str:
   """Create a VM from an image.
 
   Args:
-    board (str): The board for which the VM is being created.
-    disk_layout (str): The disk layout type.
-    is_test (bool): Whether it is a test image.
-    chroot (chroot_lib.Chroot): The chroot where the image lives.
+    board: The board for which the VM is being created.
+    disk_layout: The disk layout type.
+    is_test: Whether it is a test image.
+    chroot: The chroot where the image lives.
+    image_dir: The built image directory.
 
   Returns:
     str: Path to the created VM .bin file.
@@ -197,6 +290,13 @@ def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
 
   if disk_layout:
     cmd.extend(['--disk_layout', disk_layout])
+
+  if image_dir:
+    if chroot:
+      inside_image_dir = chroot.chroot_path(image_dir)
+    else:
+      inside_image_dir = path_util.ToChrootPath(image_dir)
+    cmd.extend(['--from', inside_image_dir])
 
   chroot_args = None
   if chroot and cros_build_lib.IsOutsideChroot():
@@ -212,17 +312,18 @@ def CreateVm(board, disk_layout=None, is_test=False, chroot=None):
                          'Consult the logs to determine the problem.')
 
   vm_path = os.path.join(
-      image_lib.GetLatestImageLink(board), constants.VM_IMAGE_BIN)
+      image_dir or image_lib.GetLatestImageLink(board), constants.VM_IMAGE_BIN)
   return os.path.realpath(vm_path)
 
 
-def CreateGuestVm(board, is_test=False, chroot=None):
+def CreateGuestVm(board, is_test=False, chroot=None, image_dir=None):
   """Convert an existing image into a guest VM image.
 
   Args:
     board (str): The name of the board to convert.
     is_test (bool): Flag to create a test guest VM image.
     chroot (chroot_lib.Chroot): The chroot where the cros image lives.
+    image_dir: The directory containing the built images.
 
   Returns:
     str: Path to the created guest VM folder.
@@ -231,7 +332,13 @@ def CreateGuestVm(board, is_test=False, chroot=None):
 
   cmd = [os.path.join(constants.TERMINA_TOOLS_DIR, 'termina_build_image.py')]
 
-  image_dir = image_lib.GetLatestImageLink(board, force_chroot=True)
+  if image_dir:
+    if chroot:
+      image_dir = chroot.chroot_path(image_dir)
+    else:
+      image_dir = path_util.ToChrootPath(image_dir)
+  else:
+    image_dir = image_lib.GetLatestImageLink(board, force_chroot=True)
 
   image_file = constants.TEST_IMAGE_BIN if is_test else constants.BASE_IMAGE_BIN
   image_path = os.path.join(image_dir, image_file)
@@ -294,19 +401,22 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
   return [dlc_dest_path]
 
 
-def copy_license_credits(board: str, output_dir: str) -> List[str]:
+def copy_license_credits(board: str,
+                         output_dir: str,
+                         symlink: Optional[str] = None) -> List[str]:
   """Copies license_credits.html from image build dir to output_dir.
 
   Args:
     board: The board name.
     output_dir: Folder destination for license_credits.html.
+    symlink: Symlink name to use instead of "latest".
 
   Returns:
     The output path or None if the source path doesn't exist.
   """
   filename = 'license_credits.html'
   license_credits_source_path = os.path.join(
-      image_lib.GetLatestImageLink(board), filename)
+      image_lib.GetLatestImageLink(board, pointer=symlink), filename)
   if not os.path.exists(license_credits_source_path):
     return None
 
