@@ -367,8 +367,10 @@ _COPY_PATHS_CHROME = (
     Path('chrome-wrapper'),
     Path('chrome_100_percent.pak'),
     Path('chrome_200_percent.pak', cond=C.StagingFlagSet(_HIGHDPI_FLAG)),
-    # TODO(jperaza): make the handler required when  Crashpad is enabled.
+    # TODO(crbug.com/1233008): remove crashpad_handler and make
+    # chrome_crashpad_handler required.
     Path('crashpad_handler', exe=True, optional=True),
+    Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('dbus/', optional=True),
     Path('keyboard_resources.pak'),
     Path('libassistant.so', exe=True, optional=True),
@@ -444,6 +446,7 @@ _COPY_PATHS_LACROS = (
     Path('snapshot_blob.bin', optional=True),
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
+    Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('WidevineCdm/', optional=True),
 )
 
