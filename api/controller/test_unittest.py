@@ -13,6 +13,12 @@ from chromite.api import controller
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos.build.api import system_image_pb2
+from chromite.api.gen.chromiumos.build.api import portage_pb2
+from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
+from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
+from chromite.api.gen.chromiumos.test.api import test_suite_pb2
+from chromite.api.gen.chromiumos.test.plan import source_test_plan_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -22,6 +28,7 @@ from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
+from chromite.third_party.google.protobuf import json_format
 from chromite.utils import key_value_store
 
 
@@ -772,3 +779,93 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(result[0]['type'], self.UNIT_TEST_ARTIFACT_TYPE)
     self.assertEqual(result[1]['paths'], ['test'])
     self.assertEqual(result[1]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)
+
+
+class GetCoverageRulesTest(cros_test_lib.RunCommandTempDirTestCase,
+                           api_config.ApiConfigMixin):
+  """Tests for GetCoverageRules."""
+
+  @staticmethod
+  def _Input():
+    """Returns a sample GetCoverageRulesRequest for testing."""
+    return test_pb2.GetCoverageRulesRequest(
+        source_test_plans=[
+            source_test_plan_pb2.SourceTestPlan(
+                requirements=source_test_plan_pb2.SourceTestPlan.Requirements(
+                    kernel_versions=source_test_plan_pb2.SourceTestPlan
+                    .Requirements.KernelVersions()),
+                test_tags=['kernel']),
+        ],
+        build_metadata_list=system_image_pb2.SystemImage
+        .BuildMetadataList(values=[
+            system_image_pb2.SystemImage.BuildMetadata(
+                build_target=system_image_pb2.SystemImage.BuildTarget(
+                    portage_build_target=portage_pb2.Portage.BuildTarget(
+                        overlay_name='overlayA')),
+                package_summary=system_image_pb2.SystemImage.BuildMetadata
+                .PackageSummary(
+                    kernel=system_image_pb2.SystemImage.BuildMetadata.Kernel(
+                        version='4.4')))
+        ]),
+        dut_attribute_list=dut_attribute_pb2.DutAttributeList(dut_attributes=[
+            dut_attribute_pb2.DutAttribute(
+                id=dut_attribute_pb2.DutAttribute.Id(
+                    value='system_build_target'))
+        ]))
+
+  @staticmethod
+  def _Output():
+    """Returns a sample GetCoverageRulesResponse for testing."""
+    return test_pb2.GetCoverageRulesResponse(coverage_rules=[
+        coverage_rule_pb2.CoverageRule(
+            name='kernel:4.4',
+            test_suites=[
+                test_suite_pb2.TestSuite(
+                    test_case_tag_criteria=test_suite_pb2.TestSuite
+                    .TestCaseTagCriteria(tags=['kernel']))
+            ],
+            dut_criteria=[
+                dut_attribute_pb2.DutCriterion(
+                    attribute_id=dut_attribute_pb2.DutAttribute.Id(
+                        value='system_build_target'),
+                    values=['overlayA'],
+                )
+            ])
+    ])
+
+  @staticmethod
+  def _write_coverage_rules(path, coverage_rules):
+    """Write a list of CoverageRules in the same format as testplan."""
+    osutils.WriteFile(
+        path, '\n'.join(
+            json_format.MessageToJson(rule).replace('\n', '')
+            for rule in coverage_rules))
+
+  def testWritesInputsAndReturnsCoverageRules(self):
+    """Test inputs are written, and output of testplan is parsed."""
+    output_proto = test_pb2.GetCoverageRulesResponse()
+
+    self.rc.SetDefaultCmdResult(
+        side_effect=lambda _: self._write_coverage_rules(
+            os.path.join(self.tempdir, 'out.jsonpb'),
+            self._Output().coverage_rules))
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
+
+    test_controller.GetCoverageRules(self._Input(), output_proto,
+                                     self.api_config)
+
+    build_metadata_list = system_image_pb2.SystemImage.BuildMetadataList()
+    json_format.Parse(
+        osutils.ReadFile(
+            os.path.join(self.tempdir, 'build_metadata_list.jsonpb')),
+        build_metadata_list)
+    self.assertEqual(build_metadata_list, self._Input().build_metadata_list)
+
+    dut_attribute_list = dut_attribute_pb2.DutAttributeList()
+    json_format.Parse(
+        osutils.ReadFile(
+            os.path.join(self.tempdir, 'dut_attribute_list.jsonpb')),
+        dut_attribute_list)
+    self.assertEqual(dut_attribute_list, self._Input().dut_attribute_list)
+
+    self.assertEqual(output_proto, self._Output())

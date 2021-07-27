@@ -1,0 +1,34 @@
+{
+    "source_test_plans": [
+        {
+            "requirements": {
+                "kernel_versions": {}
+            }
+        }
+    ],
+    "build_metadata_list": {
+        "values": [
+            {
+                "build_target": {
+                    "portage_build_target": {
+                        "overlay_name": "overlayA"
+                    }
+                },
+                "package_summary": {
+                    "kernel": {
+                        "version": "4.4"
+                    }
+                }
+            }
+        ]
+    },
+    "dut_attribute_list": {
+        "dut_attributes": [
+            {
+                "id": {
+                    "value": "system_build_target"
+                }
+            }
+        ]
+    }
+}
