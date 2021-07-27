@@ -26818,7 +26818,8 @@
         "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
-        ]
+        ],
+        "vm_tests": []
     },
     "reven-full-tryjob": {
         "_template": "full",
@@ -26850,7 +26851,8 @@
         "run_cpeexport": true,
         "useflags": [
             "-chrome_internal"
-        ]
+        ],
+        "vm_tests": []
     },
     "reven-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
@@ -26930,9 +26932,8 @@
             "test"
         ],
         "important": false,
-        "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
-        ]
+        "vm_tests": [],
+        "vm_tests_override": null
     },
     "reven-release-tryjob": {
         "_template": "release",
@@ -26958,9 +26959,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "tast_vm_tests": [
-            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 3600\n}"
-        ],
+        "vm_tests": [],
         "vm_tests_override": null
     },
     "reven-unittest-stress": {
