@@ -345,7 +345,7 @@ class SDKFetcher(object):
     return None
 
   @classmethod
-  def ClearOldItems(cls, cache_dir, max_age_days=28):
+  def ClearOldItems(cls, cache_dir, max_age_days=14):
     """Removes old items from the tarball cache older than max_age_days.
 
     Inspects the entire cache, not just a single board's items.
