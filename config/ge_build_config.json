@@ -26,6 +26,18 @@
       ]
     },
     {
+      "name": "asurada-zephyr",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": false,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "ARM_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "banon",
       "configs": [
         {

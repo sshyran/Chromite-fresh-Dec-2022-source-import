@@ -244,6 +244,7 @@
     amd64-generic-cheets-release
     asuka-release
     asurada-release
+    asurada-zephyr-release
     atlas-blueznext-release
     atlas-kernelnext-release
     atlas-release
@@ -490,6 +491,12 @@
   asurada-payloads-tryjob
   asurada-release-tryjob
   asurada-unittest-stress
+  asurada-zephyr-full-tryjob
+  asurada-zephyr-llvm-next-toolchain-tryjob
+  asurada-zephyr-llvm-toolchain-tryjob
+  asurada-zephyr-payloads-tryjob
+  asurada-zephyr-release-tryjob
+  asurada-zephyr-unittest-stress
   atlas-blueznext-full-tryjob
   atlas-blueznext-llvm-next-toolchain-tryjob
   atlas-blueznext-llvm-toolchain-tryjob
@@ -1401,6 +1408,7 @@
     amd64-generic-cheets-release-tryjob
     asuka-release-tryjob
     asurada-release-tryjob
+    asurada-zephyr-release-tryjob
     atlas-blueznext-release-tryjob
     atlas-kernelnext-release-tryjob
     atlas-release-tryjob
