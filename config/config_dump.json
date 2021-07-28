@@ -2480,6 +2480,9 @@
         "boards": [
             "asurada-zephyr"
         ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada-zephyr\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -2501,6 +2504,9 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada-zephyr\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
