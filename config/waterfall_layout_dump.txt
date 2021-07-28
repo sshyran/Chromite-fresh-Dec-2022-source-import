@@ -115,6 +115,7 @@
     wizpig-factory-strago-7458.B-factorybranch
   factory-strongbad-13963.B-buildspec
     strongbad-factory-strongbad-13963.B-factorybranch
+    trogdor-factory-strongbad-13963.B-factorybranch
   factory-trogdor-13443.B-buildspec
     strongbad-factory-trogdor-13443.B-factorybranch
     trogdor-factory-trogdor-13443.B-factorybranch
@@ -963,6 +964,7 @@
     wizpig-factory-strago-7458.B-factorybranch-tryjob
   factory-strongbad-13963.B-buildspec-tryjob
     strongbad-factory-strongbad-13963.B-factorybranch-tryjob
+    trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   factory-trogdor-13443.B-buildspec-tryjob
     strongbad-factory-trogdor-13443.B-factorybranch-tryjob
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
@@ -1885,6 +1887,7 @@
   trogdor-arc-r-payloads-tryjob
   trogdor-arc-r-release-tryjob
   trogdor-arc-r-unittest-stress
+  trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
   trogdor-kernelnext-full-tryjob
