@@ -1353,6 +1353,11 @@ class ChromeSDKCommand(command.CliCommand):
 
     gn_args.pop('internal_khronos_glcts_tests', None)  # crbug.com/588080
 
+    # The ebuild sets dcheck_always_on to false to avoid a default value of
+    # true for bots. But we'd like developers using DCHECKs when possible, so
+    # we let dcheck_always_on use the default value for Simple Chrome.
+    gn_args.pop('dcheck_always_on', None)
+
     # Disable ThinLTO and CFI for simplechrome. Tryjob machines do not have
     # enough file descriptors to use. crbug.com/789607
     if not options.thinlto:
