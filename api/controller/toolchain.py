@@ -354,10 +354,12 @@ def UploadVettedAFDOArtifacts(input_proto, output_proto, _config):
 def _fetch_clippy_lints():
   """Get lints created by Cargo Clippy during emerge."""
   lints_dir = '/tmp/cargo_clippy'
-  # TODO(b/188578936): determine relevant files for file filter
-  file_filter = '/**/*'
-  findings = tricium_cargo_clippy.parse_files(lints_dir)
-  findings = tricium_cargo_clippy.filter_diagnostics(findings, file_filter)
+  # FIXME(b/195056381): default git-repo should be replaced with logic in
+  # build_linters recipe to detect the repo path for applied patches.
+  # As of 07-29-21 only platform2 is supported so this value works temporarily.
+  git_repo_path = '/mnt/host/source/src/platform2'
+  findings = tricium_cargo_clippy.parse_files(lints_dir, git_repo_path)
+  findings = tricium_cargo_clippy.filter_diagnostics(findings)
   findings_protos = []
   for finding in findings:
     location_protos = []

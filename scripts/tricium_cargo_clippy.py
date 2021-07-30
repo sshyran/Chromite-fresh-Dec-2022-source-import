@@ -11,7 +11,6 @@ import json
 import logging
 import os
 from pathlib import Path
-import re
 from typing import Any, Dict, Iterable, List, NamedTuple, Text
 
 from chromite.lib import commandline
@@ -68,7 +67,7 @@ class CodeLocation(NamedTuple):
   def to_dict(self):
     return {
         **self._asdict(),
-        'file_path': resolve_path(self.file_path)
+        'file_path': self.file_path
     }
 
 
@@ -87,13 +86,15 @@ class ClippyDiagnostic(NamedTuple):
 
 
 def parse_file_path(
-    src: Text, src_line: int, orig_json: Dict[Text, Any]) -> Text:
+    src: Text, src_line: int, orig_json: Dict[Text, Any], git_repo: Text
+) -> Text:
   """The path to the file targeted by the lint.
 
   Args:
     src: Name of the file orig_json was found in.
     src_line: Line number where orig_json was found.
     orig_json: An iterable of clippy entries in original json.
+    git_repo: Base directory for git repo to strip out in diagnostics.
 
   Returns:
     A resolved path to the original source location as a string.
@@ -104,7 +105,11 @@ def parse_file_path(
   target_src_path = orig_json.get('target', {}).get('src_path')
   if not target_src_path:
     raise CargoClippyFieldError(src, src_line, 'file_path')
-  return resolve_path(target_src_path)
+
+  resolved_path = resolve_path(target_src_path)
+  if resolved_path.startswith(f'{git_repo}/'):
+    return resolved_path[len(git_repo)+1:]
+  return resolved_path
 
 
 def parse_locations(
@@ -188,12 +193,13 @@ def parse_message(
 
 
 def parse_diagnostics(
-    src: Text, orig_jsons: Iterable[Text]) -> ClippyDiagnostic:
+    src: Text, orig_jsons: Iterable[Text], git_repo: Text) -> ClippyDiagnostic:
   """Parses original JSON to find the fields of a Clippy Diagnostic.
 
   Args:
     src: Name of the file orig_json was found in.
     orig_jsons: An iterable of clippy entries in original json.
+    git_repo: Base directory for git repo to strip out in diagnostics.
 
   Yields:
     A ClippyDiagnostic for orig_json.
@@ -220,7 +226,7 @@ def parse_diagnostics(
     if reason != 'compiler-message':
       continue
 
-    file_path = parse_file_path(src, src_line, line_json)
+    file_path = parse_file_path(src, src_line, line_json, git_repo)
     locations = parse_locations(line_json, file_path)
     level = parse_level(src, src_line, line_json)
     message = parse_message(src, src_line, line_json)
@@ -229,11 +235,12 @@ def parse_diagnostics(
     yield ClippyDiagnostic(file_path, locations, level, message)
 
 
-def parse_files(input_dir: Text) -> Iterable[ClippyDiagnostic]:
+def parse_files(input_dir: Text, git_repo: Text) -> Iterable[ClippyDiagnostic]:
   """Gets all compiler-message lints from all the input files in input_dir.
 
   Args:
     input_dir: path to directory to scan for files
+    git_repo: Base directory for git repo to strip out in diagnostics.
 
   Yields:
     Clippy Diagnostics objects found in files in the input directory
@@ -242,17 +249,13 @@ def parse_files(input_dir: Text) -> Iterable[ClippyDiagnostic]:
     for file_name in file_names:
       file_path = os.path.join(root_path, file_name)
       with open(file_path, encoding='utf-8') as clippy_file:
-        yield from parse_diagnostics(file_path, clippy_file)
+        yield from parse_diagnostics(file_path, clippy_file, git_repo)
 
 
 def filter_diagnostics(
-    diags: Iterable[ClippyDiagnostic],
-    file_filter: Text) -> Iterable[ClippyDiagnostic]:
-  """Filters diagnostics by file_path and message and validates schemas."""
+    diags: Iterable[ClippyDiagnostic]) -> Iterable[ClippyDiagnostic]:
+  """Filters diagnostics and validates schemas."""
   for diag in diags:
-    # only include diagnostics if their file path matches the file_filter
-    if not include_file_pattern(file_filter).fullmatch(diag.file_path):
-      continue
     # ignore redundant messages: "aborting due to previous error..."
     if 'aborting due to previous error' in diag.message:
       continue
@@ -262,47 +265,20 @@ def filter_diagnostics(
     yield diag
 
 
-
-def include_file_pattern(file_filter: Text) -> 're.Pattern':
-  """Constructs a regex pattern matching relevant file paths."""
-  # FIXME(ryanbeltran): currently does not support prefixes for recursive
-  #   wildcards such as a**/b.
-  assert not re.search(r'[^/]\*\*', file_filter), (
-      'prefixes for recursive wildcard ** not supported unless ending with /')
-  tmp_char = chr(0)
-  return re.compile(
-      file_filter
-      # Escape any .'s
-      .replace('.', r'\.')
-      # Squash recursive wildcards into a single symbol
-      .replace('**/', tmp_char)
-      .replace('**', tmp_char)
-      # Nonrecursive wildcards match any string of non-"/" symbols
-      .replace('*', r'[^/]*')
-      # Recursive wildcards match any string of symbols
-      .replace(tmp_char, r'(.*/)?')
-      # Some paths may contain "//" which is equivalent to "/"
-      .replace('//', '/')
-  )
-
-
 def get_arg_parser() -> commandline.ArgumentParser:
   """Creates an argument parser for this script."""
   parser = commandline.ArgumentParser(description=__doc__)
   parser.add_argument(
       '--output', required=True, type='path', help='File to write results to.')
   parser.add_argument(
-      '--files',
-      required=False,
-      default='/**/*',
-      type='path',
-      help='File(s) to output lints for. If none are specified, this tool '
-      'outputs all lints from clippy after applying filtering '
-      'from |--git-repo-base|, if applicable.')
-  parser.add_argument(
       '--clippy-json-dir',
       type='path',
       help='Directory where clippy outputs were previously written to.')
+  parser.add_argument(
+      '--git-repo-path',
+      type='path',
+      default='',
+      help='Base directory for git repo to strip out in diagnostics.')
   return parser
 
 
@@ -317,8 +293,8 @@ def main(argv: List[str]) -> None:
 
   input_dir = resolve_path(opts.clippy_json_dir)
   output_path = resolve_path(opts.output)
-  file_filter = resolve_path(opts.files)
+  git_repo = opts.git_repo_path
 
-  diagnostics = filter_diagnostics(parse_files(input_dir), file_filter)
+  diagnostics = filter_diagnostics(parse_files(input_dir, git_repo))
   with open(output_path, 'w', encoding='utf-8') as output_file:
     output_file.writelines(f'{diag}\n' for diag in diagnostics)

@@ -23,7 +23,7 @@ valid_test_cases = {
             'kind': ['lib'],
             'crate_types': ['lib'],
             'name': 'trace_events',
-            'src_path': '/absolute/path/to/file_path_1',
+            'src_path': '/path/to/some/git/repo/path/to/file_path_1',
             'edition': '2018',
             'doctest': True,
             'test': True
@@ -72,10 +72,10 @@ valid_test_cases = {
             }]
         }
     }): {
-        'file_path': '/absolute/path/to/file_path_1',
+        'file_path': 'path/to/file_path_1',
         'locations': [
             tricium_cargo_clippy.CodeLocation(
-                file_path='/absolute/path/to/file_path_1',
+                file_path='path/to/file_path_1',
                 file_name='file_name_1',
                 line_start=262,
                 line_end=262,
@@ -177,7 +177,7 @@ valid_test_cases = {
             'kind': ['lib'],
             'crate_types': ['lib'],
             'name': 'trace_events',
-            'src_path': '/absolute/path/to/file_path_3',
+            'src_path': '/path/to/some/git/repo//path/to/file_path_3',
             'edition': '2018', 'doctest': True, 'test': True
         },
         'message': {
@@ -227,10 +227,10 @@ valid_test_cases = {
             }]
         }
     }): {
-        'file_path': '/absolute/path/to/file_path_3',
+        'file_path': 'path/to/file_path_3',
         'locations': [
             tricium_cargo_clippy.CodeLocation(
-                file_path='/absolute/path/to/file_path_3',
+                file_path='path/to/file_path_3',
                 file_name='file_name_3',
                 line_start=14,
                 line_end=14,
@@ -280,6 +280,8 @@ invalid_test_cases = {
     }): ['message'],
 }
 
+test_git_repo = '/path/to/some/git/repo'
+
 
 class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
   """Tests for Cargo Clippy."""
@@ -290,7 +292,8 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
       if 'file_path' not in exp_results:
         continue
       test_json = json.loads(test_case)
-      file_path = tricium_cargo_clippy.parse_file_path('valid', i, test_json)
+      file_path = tricium_cargo_clippy.parse_file_path(
+          'valid', i, test_json, test_git_repo)
       self.assertEqual(file_path, exp_results['file_path'])
 
   def test_parse_locations(self):
@@ -324,7 +327,7 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
   def test_parse_diagnostics(self):
     """Tests that parse_diagnostics yields correct diagnostics."""
     diags = list(tricium_cargo_clippy.parse_diagnostics(
-        'valid_test_cases', list(valid_test_cases.keys())))
+        'valid_test_cases', list(valid_test_cases.keys()), test_git_repo))
 
     # Verify parse_diagnostics retrieved correct amount of diagnostics
     exp_len = len([
@@ -345,7 +348,8 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
       with self.assertRaises(
           tricium_cargo_clippy.Error,
           msg=f'Expected error parsing {invalid_case} but got none.') as ctx:
-        list(tricium_cargo_clippy.parse_diagnostics('invalid', [invalid_case]))
+        list(tricium_cargo_clippy.parse_diagnostics(
+            'invalid', [invalid_case], test_git_repo))
       if 'json' in exp_errors:
         exp_error = tricium_cargo_clippy.CargoClippyJSONError('invalid', 0)
       elif 'reason' in exp_errors:
@@ -359,50 +363,11 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
       self.assertIs(type(ctx.exception), type(exp_error))
       self.assertEqual(ctx.exception.args, exp_error.args)
 
-  def test_clippy_include_file_pattern(self):
-    """Tests that Clippy.include_file_pattern is as expected."""
-    pattern_test_cases = {
-        'a/b/c.d': {
-            'includes': ['a/b/c.d'],
-            'excludes': ['a/b/c/d', 'a/b/c', 'b/c.d', 'a/b/c.e', '/a/b/c.d'],
-        },
-        'a/*/c': {
-            'includes': ['a/b/c', 'a/bbb/c', 'a/b.b/c', 'a/*/c'],
-            'excludes': ['a/b/b', '/a/b/c', 'a/b/d/c', 'a/c'],
-        },
-        'a/**/c': {
-            'includes': ['a/b1/b2/b3/c', 'a/b/c', 'a/c'],
-            'excludes': ['ac'],
-        },
-        'a/b*/c': {
-            'includes': ['a/b/c', 'a/b1/c', 'a/b2/c', 'a/b.b/c'],
-            'excludes': ['a/b/d/c', 'a/c'],
-        },
-        'a/b.*': {
-            'includes': ['a/b.', 'a/b.json', 'a/b.txt'],
-            'excludes': ['a/b', 'a/b.c/d', 'a/b1.json'],
-        },
-    }
-    for pattern, cases in pattern_test_cases.items():
-      re_pattern = tricium_cargo_clippy.include_file_pattern(pattern)
-      for case in cases['includes']:
-        self.assertTrue(
-            bool(re_pattern.fullmatch(case)),
-            f'Pattern {pattern} should match case {case} but did not. '
-            f'Hint: generated regex was {re_pattern}'
-        )
-      for case in cases['excludes']:
-        self.assertFalse(
-            bool(re_pattern.fullmatch(case)),
-            f'Pattern {pattern} should not match case {case} but did. '
-            f'Hint: generated regex was {re_pattern}'
-        )
-
   def test_filter_diagnostics(self):
-    file_filter = 'acceptable_filepath.json'
+    file_path = 'some_filepath.json'
     example_code_location = tricium_cargo_clippy.CodeLocation(
-        file_path=file_filter,
-        file_name=file_filter,
+        file_path=file_path,
+        file_name=file_path,
         line_start=1,
         line_end=4,
         column_start=0,
@@ -410,35 +375,28 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
     )
     accepted_diags = [
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_filter,
+            file_path=file_path,
             locations=[example_code_location],
             level='warning',
             message='warning: be warned.'
         )
     ]
     ignored_diags = [
-        # File filter not matched
-        tricium_cargo_clippy.ClippyDiagnostic(
-            file_path='not_a_match.json',
-            locations=[example_code_location],
-            level='warning',
-            message='warning: be warned.'
-        ),
         # "aborting due to previous error" messages
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_filter,
+            file_path=file_path,
             locations=[example_code_location],
             level='warning',
             message='warning: aborting due to previous error...'
         ),
         # No locations provided
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_filter,
+            file_path=file_path,
             locations=[],
             level='warning',
             message='warning: 6 warnings emitted.'
         )
     ]
     filtered_diags = list(tricium_cargo_clippy.filter_diagnostics(
-        accepted_diags + ignored_diags, file_filter))
+        accepted_diags + ignored_diags))
     self.assertEqual(filtered_diags, accepted_diags)
