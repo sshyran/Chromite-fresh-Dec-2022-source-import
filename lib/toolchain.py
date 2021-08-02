@@ -7,6 +7,7 @@
 import logging
 import os
 import subprocess
+from typing import List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -36,14 +37,16 @@ class UnknownToolchainError(Error):
 class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
   """An error when installing a toolchain."""
 
-  def __init__(self, msg, result, exception=None, tc_info=None):
+  def __init__(self, msg: str, result: cros_build_lib.CommandResult,
+               exception: Optional[Exception] = None,
+               tc_info: Optional[List[str]] = None):
     """ToolchainInstallError init.
 
     Args:
-      msg (str): Error message.
-      result (cros_build_lib.CommandResult): The command result.
-      exception (Exception): The original exception.
-      tc_info (list): A list of the failed packages' package_info.CPVs.
+      msg: Error message.
+      result: The command result.
+      exception: The original exception.
+      tc_info: A list of the failed packages' package_info.CPVs.
     """
     super().__init__(msg, result, exception)
     self.failed_toolchain_info = tc_info

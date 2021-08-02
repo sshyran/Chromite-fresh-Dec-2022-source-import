@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import shutil
+from typing import Iterable, Optional
 
 from chromite.cbuildbot import afdo
 from chromite.lib import alerts
@@ -1085,12 +1086,13 @@ class _CommonPrepareBundle(object):
     info = self._ebuild_info.get(pkg, self._GetEbuildInfo(pkg))
     return info.CPV.version_no_rev.split('.')[0]
 
-  def _GetEbuildInfo(self, package, category=None):
+  def _GetEbuildInfo(self, package: str,
+                     category: Optional[str] = None) -> _EbuildInfo:
     """Get the ebuild info for a cataegory/package in chromiumos-overlay.
 
     Args:
-      package (str): package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
-      category (str): category (e.g. chromeos-base, or sys-kernel)
+      package: package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
+      category: category (e.g. chromeos-base, or sys-kernel)
 
     Returns:
       _EbuildInfo for the stable ebuild.
@@ -1299,14 +1301,14 @@ class _CommonPrepareBundle(object):
     logging.info('Latest AFDO artifact is %s', name)
     return name
 
-  def _AfdoTmpPath(self, path=''):
+  def _AfdoTmpPath(self, path: str = '') -> str:
     """Return the directory for benchmark-afdo-generate artifacts.
 
     Args:
-      path (str): path relative to the directory.
+      path: path relative to the directory.
 
     Returns:
-      string, path to the directory.
+      Path to the directory.
     """
     gen_dir = '/tmp/benchmark-afdo-generate'
     if path:
@@ -1314,12 +1316,12 @@ class _CommonPrepareBundle(object):
     else:
       return gen_dir
 
-  def _FindArtifact(self, name, gs_urls):
+  def _FindArtifact(self, name: str, gs_urls: Iterable[str]) -> Optional[str]:
     """Find an artifact |name|, from a list of |gs_urls|.
 
     Args:
-      name (string): The name of the artifact.
-      gs_urls (list[string]): List of full gs:// directory paths to check.
+      name: The name of the artifact.
+      gs_urls: List of full gs:// directory paths to check.
 
     Returns:
       The url of the located artifact, or None.
