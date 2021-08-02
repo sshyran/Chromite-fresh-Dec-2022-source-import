@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/test/lab/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n!chromiumos/test/lab/api/dut.proto\x12\x17\x63hromiumos.test.lab.api\x1a,chromiumos/config/api/device_config_id.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\xd8\x02\n\x03\x44ut\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x39\n\x08\x63hromeos\x18\x02 \x01(\x0b\x32%.chromiumos.test.lab.api.Dut.ChromeOSH\x00\x12\x37\n\x07\x61ndroid\x18\x03 \x01(\x0b\x32$.chromiumos.test.lab.api.Dut.AndroidH\x00\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x83\x01\n\x08\x43hromeOS\x12?\n\x10\x64\x65vice_config_id\x18\x03 \x01(\x0b\x32%.chromiumos.config.api.DeviceConfigId\x12\x30\n\x03ssh\x18\x02 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpointJ\x04\x08\x01\x10\x02\x1a\t\n\x07\x41ndroidB\n\n\x08\x64ut_type\"\xb3\x01\n\x0b\x44utTopology\x12\x33\n\x02id\x18\x03 \x01(\x0b\x32\'.chromiumos.test.lab.api.DutTopology.Id\x12)\n\x03\x64ut\x18\x01 \x01(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x12/\n\tpeer_duts\x18\x02 \x03(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\tB3Z1go.chromium.org/chromiumos/config/go/test/lab/apib\x06proto3'
+  serialized_pb=b'\n!chromiumos/test/lab/api/dut.proto\x12\x17\x63hromiumos.test.lab.api\x1a,chromiumos/config/api/device_config_id.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\xd8\x02\n\x03\x44ut\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x39\n\x08\x63hromeos\x18\x02 \x01(\x0b\x32%.chromiumos.test.lab.api.Dut.ChromeOSH\x00\x12\x37\n\x07\x61ndroid\x18\x03 \x01(\x0b\x32$.chromiumos.test.lab.api.Dut.AndroidH\x00\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x83\x01\n\x08\x43hromeOS\x12?\n\x10\x64\x65vice_config_id\x18\x03 \x01(\x0b\x32%.chromiumos.config.api.DeviceConfigId\x12\x30\n\x03ssh\x18\x02 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpointJ\x04\x08\x01\x10\x02\x1a\t\n\x07\x41ndroidB\n\n\x08\x64ut_type\"\x8f\x01\n\x0b\x44utTopology\x12\x33\n\x02id\x18\x03 \x01(\x0b\x32\'.chromiumos.test.lab.api.DutTopology.Id\x12*\n\x04\x64uts\x18\x04 \x03(\x0b\x32\x1c.chromiumos.test.lab.api.Dut\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\tJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03\x42\x33Z1go.chromium.org/chromiumos/config/go/test/lab/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_config_dot_api_dot_device__config__id__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2.DESCRIPTOR,])
 
@@ -219,15 +219,8 @@ _DUTTOPOLOGY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='dut', full_name='chromiumos.test.lab.api.DutTopology.dut', index=1,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='peer_duts', full_name='chromiumos.test.lab.api.DutTopology.peer_duts', index=2,
-      number=2, type=11, cpp_type=10, label=3,
+      name='duts', full_name='chromiumos.test.lab.api.DutTopology.duts', index=1,
+      number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -245,7 +238,7 @@ _DUTTOPOLOGY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=499,
-  serialized_end=678,
+  serialized_end=642,
 )
 
 _DUT_ID.containing_type = _DUT
@@ -264,8 +257,7 @@ _DUT.oneofs_by_name['dut_type'].fields.append(
 _DUT.fields_by_name['android'].containing_oneof = _DUT.oneofs_by_name['dut_type']
 _DUTTOPOLOGY_ID.containing_type = _DUTTOPOLOGY
 _DUTTOPOLOGY.fields_by_name['id'].message_type = _DUTTOPOLOGY_ID
-_DUTTOPOLOGY.fields_by_name['dut'].message_type = _DUT
-_DUTTOPOLOGY.fields_by_name['peer_duts'].message_type = _DUT
+_DUTTOPOLOGY.fields_by_name['duts'].message_type = _DUT
 DESCRIPTOR.message_types_by_name['Dut'] = _DUT
 DESCRIPTOR.message_types_by_name['DutTopology'] = _DUTTOPOLOGY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
