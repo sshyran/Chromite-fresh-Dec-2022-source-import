@@ -558,6 +558,13 @@ class ActionLabelCommitQueue(_ActionLabeler):
   LABEL = 'Commit-Queue'
   VALUES = ('0', '1', '2')
 
+class ActionLabelOwnersOverride(_ActionLabeler):
+  """Change the Owners-Override label (1=Override)"""
+
+  COMMAND = 'label-oo'
+  LABEL = 'Owners-Override'
+  VALUES = ('0', '1')
+
 
 class _ActionSimpleParallelCLs(UserAction):
   """Base helper for actions that only accept CLs."""
