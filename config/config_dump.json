@@ -12110,7 +12110,7 @@
         "_template": "buildspec",
         "build_timeout": 43200,
         "display_label": "factory",
-        "schedule": "with 24h interval",
+        "schedule": "with 168h interval",
         "slave_configs": [
             "strongbad-factory-trogdor-13443.B-factorybranch",
             "trogdor-factory-trogdor-13443.B-factorybranch"
