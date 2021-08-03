@@ -1,6 +1,20 @@
 {
   "packages": [
-    {"package_name": "cros_fuzz"}
+    {
+      "category": "dev-rust",
+      "packageName": "cros_fuzz",
+      "version": "0.1.0-r42"
+    },
+    {
+      "category": "chromeos-base",
+      "packageName": "chromeos-dbus-bindings",
+      "version": "0.0.1-r2664"
+    },
+    {
+      "category": "dev-rust",
+      "packageName": "chromeos-dbus-bindings",
+      "version": "0.24.52-r7"
+    }
   ],
   "sysroot": {
     "buildTarget": {

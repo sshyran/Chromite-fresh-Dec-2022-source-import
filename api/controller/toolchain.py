@@ -386,10 +386,12 @@ def _fetch_clippy_lints():
 def GetClippyLints(input_proto, output_proto, _config):
   """Emerges the given packages and retrieves any findings from Cargo Clippy."""
   emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
-  package_names = [package.package_name for package in input_proto.packages]
+  packages = [
+      f'{package.category}/{package.package_name}'
+      for package in input_proto.packages]
   cros_build_lib.sudo_run(
-    emerge_cmd + package_names,
-    preserve_env=True,
-    extra_env={'ENABLE_RUST_CLIPPY':1}
+      emerge_cmd + packages,
+      preserve_env=True,
+      extra_env={'ENABLE_RUST_CLIPPY': 1}
   )
   output_proto.findings.extend(_fetch_clippy_lints())
