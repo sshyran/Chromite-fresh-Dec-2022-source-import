@@ -1152,21 +1152,15 @@ class ArchivingStageMixin(object):
     """
     bot_filter_list = ['paladin', 'trybot', 'pfq', 'pre-cq', 'tryjob',
                        'postsubmit']
-    # Certain partners are using the moblab buckets as a general
+    # Jetstream are using the moblab buckets as a general
     # build distribution system, not related to moblab.
-    # This allow list ensures that these accounts are left in the
+    # This code ensutes that jetstream is left in the
     # prior behavior, where moblab users now use an on demand
     # copy via an API vs the "copy everything" approach.
-    account_allow_list = ['chromeos-moblab-intel',
-                          'chromeos-moblab-jetstream',
-                          'chromeos-moblab-parallels',
-                          'chromeos-moblab-cienet']
-    if 'moblab' in url:
-      if any(bot_filter in bot_id for bot_filter in bot_filter_list):
-        return True
-      if any(account in url for account in account_allow_list):
-        return False
+    if 'chromeos-moblab-jetstream' in url:
+      return any(bot_filter in bot_id for bot_filter in bot_filter_list)
     return True
+
 
   def _GetUploadUrls(self, filename, builder_run=None, prefix=None):
     """Returns a list of all urls for which to upload filename to.
