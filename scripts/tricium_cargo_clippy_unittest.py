@@ -18,12 +18,12 @@ from chromite.scripts import tricium_cargo_clippy
 valid_test_cases = {
     json.dumps({
         'reason': 'compiler-message',
-        'package_id': 'package_id_1',
+        'package_id': 'pkg 0.1.0 (path+file:///path/to/repo/pkg)',
         'target': {
             'kind': ['lib'],
             'crate_types': ['lib'],
             'name': 'trace_events',
-            'src_path': '/path/to/some/git/repo/path/to/file_path_1',
+            'src_path': '/path/to/repo/pkg/src/main_file',
             'edition': '2018',
             'doctest': True,
             'test': True
@@ -42,7 +42,7 @@ valid_test_cases = {
                     'level': 'help',
                     'message': 'sub message 1',
                     'spans': [{
-                        'file_name': 'file_name_1',
+                        'file_name': 'src/file_name_1',
                         'byte_end': 7342, 'byte_start': 7336,
                         'column_end': 35, 'column_start': 29,
                         'is_primary': True,
@@ -62,7 +62,7 @@ valid_test_cases = {
             'spans': [{
                 'byte_end': 7342, 'byte_start': 7336,
                 'column_end': 35, 'column_start': 29,
-                'file_name': 'file_name_1',
+                'file_name': 'src/file_name_1',
                 'is_primary': True,
                 'line_end': 262, 'line_start': 262,
                 'text': [{
@@ -72,11 +72,9 @@ valid_test_cases = {
             }]
         }
     }): {
-        'file_path': 'path/to/file_path_1',
         'locations': [
             tricium_cargo_clippy.CodeLocation(
-                file_path='path/to/file_path_1',
-                file_name='file_name_1',
+                file_path='pkg/src/file_name_1',
                 line_start=262,
                 line_end=262,
                 column_start=29,
@@ -88,12 +86,12 @@ valid_test_cases = {
     },
     json.dumps({
         'reason': 'compiler-message',
-        'package_id': 'package_id 1',
+        'package_id': 'pkg 1.2.3 (path+file:///path/to/repo/pkg)',
         'target': {
             'kind': ['lib'],
             'crate_types': ['lib'],
             'name': 'trace_events',
-            'src_path': '/absolute/path/to/file_path_2',
+            'src_path': '/path/to/repo/pkg/src/main',
             'edition': '2018', 'doctest': True, 'test': True
         },
         'message': {
@@ -116,7 +114,7 @@ valid_test_cases = {
                     'children': [],
                     'message': 'submessage 2.3',
                     'spans': [{
-                        'file_name': 'file_name_2',
+                        'file_name': 'src/file_name_2',
                         'byte_end': 7342, 'byte_start': 7327,
                         'column_end': 35, 'column_start': 20,
                         'line_end': 262, 'line_start': 262,
@@ -135,7 +133,7 @@ valid_test_cases = {
             'level': 'warning',
             'message': 'message 2',
             'spans': [{
-                'file_name': 'file_name_2',
+                'file_name': 'src/file_name_2',
                 'byte_end': 7335, 'byte_start': 7328,
                 'column_end': 28, 'column_start': 21,
                 'line_end': 262, 'line_start': 262,
@@ -148,19 +146,16 @@ valid_test_cases = {
             }]
         }
     }): {
-        'file_path': '/absolute/path/to/file_path_2',
         'locations': [
             tricium_cargo_clippy.CodeLocation(
-                file_path='/absolute/path/to/file_path_2',
-                file_name='file_name_2',
+                file_path='pkg/src/file_name_2',
                 line_start=262,
                 line_end=262,
                 column_start=21,
                 column_end=28
             ),
             tricium_cargo_clippy.CodeLocation(
-                file_path='/absolute/path/to/file_path_2',
-                file_name='file_name_2',
+                file_path='pkg/src/file_name_2',
                 line_start=262,
                 line_end=262,
                 column_start=20,
@@ -172,12 +167,12 @@ valid_test_cases = {
     },
     json.dumps({
         'reason': 'compiler-message',
-        'package_id': 'package id 3',
+        'package_id': 'pkg 0.1.0 (path+file:///path/to/repo/pkg)',
         'target': {
             'kind': ['lib'],
             'crate_types': ['lib'],
             'name': 'trace_events',
-            'src_path': '/path/to/some/git/repo//path/to/file_path_3',
+            'src_path': '/path/to/repo/pkg/path/to/main',
             'edition': '2018', 'doctest': True, 'test': True
         },
         'message': {
@@ -195,7 +190,7 @@ valid_test_cases = {
                     'message': 'submessage 3.2',
                     'spans': [
                         {
-                            'file_name': 'file_name_3',
+                            'file_name': 'path/to/file_name_3',
                             'byte_end': 448, 'byte_start': 447,
                             'column_end': 8, 'column_start': 7,
                             'line_end': 14, 'line_start': 14,
@@ -214,7 +209,7 @@ valid_test_cases = {
             'level': 'warning',
             'message': 'message 3',
             'spans': [{
-                'file_name': 'file_name_3',
+                'file_name': 'path/to/file_name_3',
                 'byte_end': 448, 'byte_start': 447,
                 'column_end': 8, 'column_start': 7,
                 'line_end': 14, 'line_start': 14,
@@ -227,11 +222,9 @@ valid_test_cases = {
             }]
         }
     }): {
-        'file_path': 'path/to/file_path_3',
         'locations': [
             tricium_cargo_clippy.CodeLocation(
-                file_path='path/to/file_path_3',
-                file_name='file_name_3',
+                file_path='pkg/path/to/file_name_3',
                 line_start=14,
                 line_end=14,
                 column_start=7,
@@ -254,14 +247,7 @@ invalid_test_cases = {
     r'{}': ['reason'],
     json.dumps({
         'reason': 'compiler-message',
-    }): ['file_path', 'level', 'message'],
-    json.dumps({
-        'reason': 'compiler-message',
-        'level': 'warning',
-        'message': {
-            'rendered': 'warning: a message'
-        }
-    }): ['file_path'],
+    }): ['level', 'message'],
     json.dumps({
         'reason': 'compiler-message',
         'target': {
@@ -280,21 +266,11 @@ invalid_test_cases = {
     }): ['message'],
 }
 
-test_git_repo = '/path/to/some/git/repo'
-
+test_git_repo = '/path/to/repo'
+test_package_path = '/path/to/repo/pkg'
 
 class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
   """Tests for Cargo Clippy."""
-
-  def test_parse_file_path(self):
-    """Tests that parse_file_path is as expected."""
-    for i, (test_case, exp_results) in enumerate(valid_test_cases.items()):
-      if 'file_path' not in exp_results:
-        continue
-      test_json = json.loads(test_case)
-      file_path = tricium_cargo_clippy.parse_file_path(
-          'valid', i, test_json, test_git_repo)
-      self.assertEqual(file_path, exp_results['file_path'])
 
   def test_parse_locations(self):
     """Tests that parse_locations is as expected."""
@@ -303,7 +279,7 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
         continue
       test_json = json.loads(test_case)
       locations = list(tricium_cargo_clippy.parse_locations(
-          test_json, exp_results['file_path']))
+          test_json, test_package_path, test_git_repo))
       self.assertEqual(locations, exp_results['locations'])
 
   def test_parse_level(self):
@@ -326,8 +302,10 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
 
   def test_parse_diagnostics(self):
     """Tests that parse_diagnostics yields correct diagnostics."""
+    package_path_json = json.dumps({'package_path': test_package_path})
+    orig_jsons = [package_path_json] + list(valid_test_cases.keys())
     diags = list(tricium_cargo_clippy.parse_diagnostics(
-        'valid_test_cases', list(valid_test_cases.keys()), test_git_repo))
+        'valid_test_cases', orig_jsons, test_git_repo))
 
     # Verify parse_diagnostics retrieved correct amount of diagnostics
     exp_len = len([
@@ -344,21 +322,22 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
 
   def test_logs_invalid_parse_diagnostic_cases(self):
     """Tests that parse_diagnostics logs proper exceptions."""
+    package_path_json = json.dumps({'package_path': test_package_path})
     for invalid_case, exp_errors in invalid_test_cases.items():
       with self.assertRaises(
           tricium_cargo_clippy.Error,
           msg=f'Expected error parsing {invalid_case} but got none.') as ctx:
         list(tricium_cargo_clippy.parse_diagnostics(
-            'invalid', [invalid_case], test_git_repo))
+            'invalid', [package_path_json, invalid_case], test_git_repo))
       if 'json' in exp_errors:
-        exp_error = tricium_cargo_clippy.CargoClippyJSONError('invalid', 0)
+        exp_error = tricium_cargo_clippy.CargoClippyJSONError('invalid', 1)
       elif 'reason' in exp_errors:
-        exp_error = tricium_cargo_clippy.CargoClippyReasonError('invalid', 0)
+        exp_error = tricium_cargo_clippy.CargoClippyReasonError('invalid', 1)
       else:
-        for field in ('file_path', 'locations', 'level', 'message'):
+        for field in ('locations', 'level', 'message'):
           if field in exp_errors:
             exp_error = tricium_cargo_clippy.CargoClippyFieldError(
-                'invalid', 0, field)
+                'invalid', 1, field)
             break
       self.assertIs(type(ctx.exception), type(exp_error))
       self.assertEqual(ctx.exception.args, exp_error.args)
@@ -367,7 +346,6 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
     file_path = 'some_filepath.json'
     example_code_location = tricium_cargo_clippy.CodeLocation(
         file_path=file_path,
-        file_name=file_path,
         line_start=1,
         line_end=4,
         column_start=0,
@@ -375,7 +353,6 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
     )
     accepted_diags = [
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_path,
             locations=[example_code_location],
             level='warning',
             message='warning: be warned.'
@@ -384,14 +361,12 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
     ignored_diags = [
         # "aborting due to previous error" messages
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_path,
             locations=[example_code_location],
             level='warning',
             message='warning: aborting due to previous error...'
         ),
         # No locations provided
         tricium_cargo_clippy.ClippyDiagnostic(
-            file_path=file_path,
             locations=[],
             level='warning',
             message='warning: 6 warnings emitted.'

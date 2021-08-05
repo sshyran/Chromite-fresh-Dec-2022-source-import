@@ -21,6 +21,13 @@ class Error(Exception):
   """Base error class for tricium-cargo-clippy."""
 
 
+class CargoClippyPackagePathError(Error):
+  """Raised when no Package Path is provided."""
+
+  def __init__(self, source: Text):
+    super().__init__(f'{source} does not start with a package path')
+    self.source = source
+
 class CargoClippyJSONError(Error):
   """Raised when cargo-clippy parsing jobs are not proper JSON."""
 
@@ -58,7 +65,6 @@ def resolve_path(file_path: Text) -> Text:
 class CodeLocation(NamedTuple):
   """Holds the location a ClippyDiagnostic Finding."""
   file_path: Text
-  file_name: Text
   line_start: int
   line_end: int
   column_start: int
@@ -73,7 +79,6 @@ class CodeLocation(NamedTuple):
 
 class ClippyDiagnostic(NamedTuple):
   """Holds information about a compiler message from Clippy."""
-  file_path: Text
   locations: Iterable['CodeLocation']
   level: Text
   message: Text
@@ -85,36 +90,9 @@ class ClippyDiagnostic(NamedTuple):
     })
 
 
-def parse_file_path(
-    src: Text, src_line: int, orig_json: Dict[Text, Any], git_repo: Text
-) -> Text:
-  """The path to the file targeted by the lint.
-
-  Args:
-    src: Name of the file orig_json was found in.
-    src_line: Line number where orig_json was found.
-    orig_json: An iterable of clippy entries in original json.
-    git_repo: Base directory for git repo to strip out in diagnostics.
-
-  Returns:
-    A resolved path to the original source location as a string.
-
-  Raises:
-    CargoClippyFieldError: Parsing failed to determine the file path.
-  """
-  target_src_path = orig_json.get('target', {}).get('src_path')
-  if not target_src_path:
-    raise CargoClippyFieldError(src, src_line, 'file_path')
-
-  resolved_path = resolve_path(target_src_path)
-  if resolved_path.startswith(f'{git_repo}/'):
-    return resolved_path[len(git_repo)+1:]
-  return resolved_path
-
-
 def parse_locations(
     orig_json: Dict[Text, Any],
-    file_path: Text) -> Iterable['CodeLocation']:
+    package_path: Text, git_repo: Text) -> Iterable['CodeLocation']:
   """The code locations associated with this diagnostic as an iter.
 
   The relevant code location can appear in either the messages[spans] field,
@@ -123,7 +101,8 @@ def parse_locations(
 
   Args:
     orig_json: An iterable of clippy entries in original json.
-    file_path: A resolved path to the original source location.
+    package_path: A resolved path to the rust package.
+    git_repo: Base directory for git repo to strip out in diagnostics.
 
   Yields:
     A CodeLocation object associated with a relevant span.
@@ -137,9 +116,11 @@ def parse_locations(
     spans = spans + child.get('spans', [])
   locations = set()
   for span in spans:
+    file_path = os.path.join(package_path, span.get('file_name'))
+    if file_path.startswith(f'{git_repo}/'):
+      file_path = file_path[len(git_repo)+1:]
     location = CodeLocation(
         file_path=file_path,
-        file_name=span.get('file_name'),
         line_start=span.get('line_start'),
         line_end=span.get('line_end'),
         column_start=span.get('column_start'),
@@ -216,6 +197,15 @@ def parse_diagnostics(
       json_error = CargoClippyJSONError(src, src_line)
       logging.error(json_error)
       raise json_error
+
+    # We pass the path to the package in a special JSON on the first line
+    if src_line == 0:
+      package_path = line_json.get('package_path')
+      if not package_path:
+        raise CargoClippyPackagePathError(src)
+      package_path = resolve_path(package_path)
+      continue
+
     # Clippy outputs several types of logs, as distinguished by the "reason"
     # field, but we only want to process "compiler-message" logs.
     reason = line_json.get('reason')
@@ -226,13 +216,12 @@ def parse_diagnostics(
     if reason != 'compiler-message':
       continue
 
-    file_path = parse_file_path(src, src_line, line_json, git_repo)
-    locations = parse_locations(line_json, file_path)
+    locations = parse_locations(line_json, package_path, git_repo)
     level = parse_level(src, src_line, line_json)
     message = parse_message(src, src_line, line_json)
 
     # TODO(ryanbeltran): Export suggested replacements
-    yield ClippyDiagnostic(file_path, locations, level, message)
+    yield ClippyDiagnostic(locations, level, message)
 
 
 def parse_files(input_dir: Text, git_repo: Text) -> Iterable[ClippyDiagnostic]:
