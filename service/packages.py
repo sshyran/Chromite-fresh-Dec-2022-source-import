@@ -886,7 +886,7 @@ def needs_chrome_source(
   needs_follower = any(builds_follower.values()) and not has_follower_prebuilts
 
   return NeedsChromeSourceResult(
-      needs_chrome_source=needs_chrome or needs_follower,
+      needs_chrome_source=needs_chrome or needs_follower or local_uprev,
       builds_chrome=builds_chrome,
       packages=[package_info.parse(p) for p in pkgs_needing_prebuilts],
       missing_chrome_prebuilt=not has_chrome_prebuilt,
