@@ -2464,14 +2464,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1011171',
       },
 
-      # No tests for ARCVM builders.
-      'betty-arcvm-master-release': {
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://b/144139998',
-          'vm_tests': [],
-          'vm_tests_override': []
-      },
       # Currently betty-arc-r is VM only.
       'betty-arc-r-release': {
           'hw_tests': [],
