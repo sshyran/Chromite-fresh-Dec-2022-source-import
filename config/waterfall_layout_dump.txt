@@ -328,6 +328,7 @@
     kalista-release
     keeby-release
     kefka-release
+    kevin-kernelnext-release
     kevin-release
     kevin-userdebug-release
     kevin64-release
@@ -1297,6 +1298,12 @@
   kevin-android-pi-pre-flight-branch-tryjob
   kevin-factory-gru-8652.B-factorybranch-tryjob
   kevin-full-tryjob
+  kevin-kernelnext-full-tryjob
+  kevin-kernelnext-llvm-next-toolchain-tryjob
+  kevin-kernelnext-llvm-toolchain-tryjob
+  kevin-kernelnext-payloads-tryjob
+  kevin-kernelnext-release-tryjob
+  kevin-kernelnext-unittest-stress
   kevin-llvm-next-toolchain-tryjob
   kevin-llvm-toolchain-tryjob
   kevin-llvm-tot-toolchain-tryjob
@@ -1493,6 +1500,7 @@
     kalista-release-tryjob
     keeby-release-tryjob
     kefka-release-tryjob
+    kevin-kernelnext-release-tryjob
     kevin-release-tryjob
     kevin-userdebug-release-tryjob
     kevin64-release-tryjob
