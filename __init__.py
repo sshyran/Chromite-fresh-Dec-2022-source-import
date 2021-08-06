@@ -32,3 +32,4 @@ logging.setLoggerClass(ChromiteLogger)
 # functions such as `logging.notice(...)` directly.
 logging.notice = functools.partial(logging.log, NOTICE)
 logging.NOTICE = NOTICE
+logging.addLevelName(logging.NOTICE, 'NOTICE')
