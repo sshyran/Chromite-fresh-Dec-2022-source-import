@@ -1907,6 +1907,7 @@ def GetNonUniBuildLabBoardName(board):
       '-arcnext',  #
       '-arcvm',  #
       '-blueznext',  #
+      '-connectivitynext',  #
       '-borealis',  #
       '-campfire',  #
       '-cfm',  #
