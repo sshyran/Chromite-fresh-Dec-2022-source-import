@@ -105,9 +105,9 @@ TARGET_LLVM_PKGS_ENABLED = (
 )
 
 LLVM_PKGS_TABLE = {
+    'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
     'ex_libcxxabi' : ['--ex-pkg', 'sys-libs/libcxxabi'],
     'ex_libcxx' : ['--ex-pkg', 'sys-libs/libcxx'],
-    'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
 }
 
 class Crossdev(object):
@@ -120,10 +120,10 @@ class Crossdev(object):
   MANUAL_PKGS = {
       'rust': 'dev-lang',
       'llvm': 'sys-devel',
+      'llvm-libunwind': 'sys-libs',
       'libcxxabi': 'sys-libs',
       'libcxx': 'sys-libs',
       'elfutils': 'dev-libs',
-      'llvm-libunwind': 'sys-libs',
   }
 
   @classmethod
