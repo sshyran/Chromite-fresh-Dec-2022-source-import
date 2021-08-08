@@ -5,6 +5,7 @@
 """Tests for the build_api script covering the base Build API functionality."""
 
 import os
+from typing import Callable
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -158,15 +159,15 @@ class RouterTest(cros_test_lib.RunCommandTempDirTestCase,
                       self.api_config, self.binary_input_handler,
                       [self.binary_output_handler], self.binary_config_handler)
 
-  def _mock_callable(self, expect_called):
+  def _mock_callable(self, expect_called: bool) -> Callable:
     """Helper to create the implementation mock to test chroot assertions.
 
     Args:
-      expect_called (bool): Whether the implementation should be called.
+      expect_called: Whether the implementation should be called.
        When False, an assertion will fail if it is called.
 
     Returns:
-      callable - The implementation.
+      The implementation.
     """
     def impl(_input_msg, _output_msg, _config):
       self.assertTrue(expect_called,

@@ -12,6 +12,8 @@ import collections
 import importlib
 import logging
 import os
+from types import ModuleType
+from typing import Callable, List, TYPE_CHECKING
 
 from chromite.third_party.google.protobuf import symbol_database
 
@@ -35,6 +37,10 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.utils import memoize
 
+if TYPE_CHECKING:
+  from chromite.api import api_config
+  from chromite.api import message_util
+  from chromite.third_party import google
 
 MethodData = collections.namedtuple(
     'MethodData', ('service_descriptor', 'module_name', 'method_descriptor'))
@@ -140,11 +146,11 @@ class Router(object):
     method_extensions = method_data.method_descriptor.GetOptions().Extensions
     return method_extensions[self._method_options_ext]
 
-  def Register(self, proto_module):
+  def Register(self, proto_module: ModuleType):
     """Register the services from a generated proto module.
 
     Args:
-      proto_module (module): The generated proto module to register.
+      proto_module: The generated proto module to register.
 
     Raises:
       ServiceModuleNotDefinedError when the service cannot be found in the
@@ -182,21 +188,23 @@ class Router(object):
 
     return sorted(services)
 
-  def Route(self, service_name, method_name, config, input_handler,
-            output_handlers, config_handler):
+  def Route(self, service_name: str, method_name: str,
+            config: 'api_config.ApiConfig',
+            input_handler: 'message_util.MessageHandler',
+            output_handlers: List['message_util.MessageHandler'],
+            config_handler: 'message_util.MessageHandler') -> int:
     """Dispatch the request.
 
     Args:
-      service_name (str): The fully qualified service name.
-      method_name (str): The name of the method being called.
-      config (api_config.ApiConfig): The call configs.
-      input_handler (message_util.MessageHandler): The request message handler.
-      output_handlers (list[message_util.MessageHandler]): The response message
-        handlers.
-      config_handler (message_util.MessageHandler): The config message handler.
+      service_name: The fully qualified service name.
+      method_name: The name of the method being called.
+      config: The call configs.
+      input_handler: The request message handler.
+      output_handlers: The response message handlers.
+      config_handler: The config message handler.
 
     Returns:
-      int: The return code.
+      The return code.
 
     Raises:
       InvalidInputFileError when the input file cannot be read.
@@ -242,17 +250,18 @@ class Router(object):
 
     return return_code
 
-  def _ChrootCheck(self, service_options, method_options,
-                   config: 'api_config.ApiConfig'):
+  def _ChrootCheck(self, service_options: 'google.protobuf.Message',
+                   method_options: 'google.protobuf.Message',
+                   config: 'api_config.ApiConfig') -> bool:
     """Check the chroot options, and execute assertion or note reexec as needed.
 
     Args:
-      service_options (google.protobuf.Message): The service options.
-      method_options (google.protobuf.Message): The method options.
+      service_options: The service options.
+      method_options: The method options.
       config: The Build API call config instance.
 
     Returns:
-      bool - True iff it needs to be reexeced inside the chroot.
+      True iff it needs to be reexeced inside the chroot.
 
     Raises:
       cros_build_lib.DieSystemExit when the chroot setting cannot be satisfied.
@@ -277,20 +286,25 @@ class Router(object):
 
     return False
 
-  def _ReexecuteInside(self, input_msg, output_msg, config, input_handler,
-                       output_handlers, config_handler, service_name,
-                       method_name):
+  def _ReexecuteInside(self, input_msg: 'google.protobuf.Message',
+                       output_msg: 'google.protobuf.Message',
+                       config: 'api_config.ApiConfig',
+                       input_handler: 'message_util.MessageHandler',
+                       output_handlers: List['message_util.MessageHandler'],
+                       config_handler: 'message_util.MessageHandler',
+                       service_name: str,
+                       method_name: str):
     """Re-execute the service inside the chroot.
 
     Args:
-      input_msg (Message): The parsed input message.
-      output_msg (Message): The empty output message instance.
-      config (api_config.ApiConfig): The call configs.
-      input_handler (MessageHandler): Input message handler.
-      output_handlers (list[MessageHandler]): Output message handlers.
-      config_handler (MessageHandler): Config message handler.
-      service_name (str): The name of the service to run.
-      method_name (str): The name of the method to run.
+      input_msg: The parsed input message.
+      output_msg: The empty output message instance.
+      config: The call configs.
+      input_handler: Input message handler.
+      output_handlers: Output message handlers.
+      config_handler: Config message handler.
+      service_name: The name of the service to run.
+      method_name: The name of the method to run.
     """
     # Parse the chroot and clear the chroot field in the input message.
     chroot = field_handler.handle_chroot(input_msg)
@@ -376,15 +390,15 @@ class Router(object):
 
       return result.returncode
 
-  def _GetMethod(self, module_name, method_name):
+  def _GetMethod(self, module_name: str, method_name: str) -> Callable:
     """Get the implementation of the method for the service module.
 
     Args:
-      module_name (str): The name of the service module.
-      method_name (str): The name of the method.
+      module_name: The name of the service module.
+      method_name: The name of the method.
 
     Returns:
-      callable - The method.
+      The method.
 
     Raises:
       MethodNotFoundError when the method cannot be found in the module.
@@ -400,11 +414,11 @@ class Router(object):
       raise MethodNotFoundError(str(e))
 
 
-def RegisterServices(router):
+def RegisterServices(router: Router):
   """Register all the services.
 
   Args:
-    router (Router): The router.
+    router: The router.
   """
   router.Register(android_pb2)
   router.Register(api_pb2)
