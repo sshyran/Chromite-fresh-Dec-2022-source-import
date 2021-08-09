@@ -401,7 +401,7 @@ def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
   build_metadata_list = input_proto.build_metadata_list
   flat_config_list = input_proto.flat_config_list
 
-  cmd = ['testplan', 'generate']
+  cmd = ['testplan', 'generate', '-logtostderr', '-v', '2']
 
   with osutils.TempDir(prefix='get_coverage_rules_input') as tempdir:
     # Write all input files required by testplan, and read the output file
