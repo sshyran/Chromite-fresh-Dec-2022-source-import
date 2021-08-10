@@ -11,7 +11,7 @@ from chromite.third_party.google.protobuf import symbol_database as _symbol_data
 _sym_db = _symbol_database.Default()
 
 
-from chromite.api.gen.chromiumos.longrunning import operations_pb2 as chromiumos_dot_longrunning_dot_operations__pb2
+from chromite.api.gen.chromiumos.config.api.test.tls.dependencies.longrunning import operations_pb2 as chromiumos_dot_config_dot_api_dot_test_dot_tls_dot_dependencies_dot_longrunning_dot_operations__pb2
 from chromite.api.gen.chromiumos.config.api.test.xmlrpc import xmlrpc_pb2 as chromiumos_dot_config_dot_api_dot_test_dot_xmlrpc_dot_xmlrpc__pb2
 
 
@@ -21,9 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z1go.chromium.org/chromiumos/config/go/api/test/tls',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n+chromiumos/config/api/test/tls/wiring.proto\x12\x1e\x63hromiumos.config.api.test.tls\x1a\'chromiumos/longrunning/operations.proto\x1a.chromiumos/config/api/test/xmlrpc/xmlrpc.proto\"\x1d\n\rGetDutRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"N\n\x03\x44ut\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x39\n\x08licenses\x18\x02 \x03(\x0b\x32\'.chromiumos.config.api.test.tls.License\"\x9d\x01\n\x07License\x12\x0c\n\x04name\x18\x01 \x01(\t\x12:\n\x04type\x18\x02 \x01(\x0e\x32,.chromiumos.config.api.test.tls.License.Type\"H\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x12\n\x0eWINDOWS_10_PRO\x10\x01\x12\x16\n\x12MS_OFFICE_STANDARD\x10\x02\"0\n\x12OpenDutPortRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"4\n\x13OpenDutPortResponse\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"\xaf\x01\n\x18SetDutPowerSupplyRequest\x12\x0b\n\x03\x64ut\x18\x01 \x01(\t\x12M\n\x05state\x18\x02 \x01(\x0e\x32>.chromiumos.config.api.test.tls.SetDutPowerSupplyRequest.State\"7\n\x05State\x12\x11\n\rSTATE_UNKNOWN\x10\x00\x12\x0c\n\x08STATE_ON\x10\x01\x12\r\n\tSTATE_OFF\x10\x02\"\x80\x02\n\x19SetDutPowerSupplyResponse\x12P\n\x06status\x18\x01 \x01(\x0e\x32@.chromiumos.config.api.test.tls.SetDutPowerSupplyResponse.Status\x12\x0e\n\x06reason\x18\x02 \x01(\t\"\x80\x01\n\x06Status\x12\x12\n\x0eSTATUS_UNKNOWN\x10\x00\x12\r\n\tSTATUS_OK\x10\x01\x12\x12\n\x0eSTATUS_BAD_DUT\x10\x02\x12\x16\n\x12STATUS_BAD_REQUEST\x10\x03\x12\x11\n\rSTATUS_NO_RPM\x10\x04\x12\x14\n\x10STATUS_RPM_ERROR\x10\x05\"3\n\x12\x43\x61\x63heForDutRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x10\n\x08\x64ut_name\x18\x02 \x01(\t\"\"\n\x13\x43\x61\x63heForDutResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\"\x15\n\x13\x43\x61\x63heForDutMetadata\"g\n\x10\x43\x61llServoRequest\x12\x0b\n\x03\x64ut\x18\x01 \x01(\t\x12\x0e\n\x06method\x18\x02 \x01(\t\x12\x36\n\x04\x61rgs\x18\x03 \x03(\x0b\x32(.chromiumos.config.api.test.xmlrpc.Value\"[\n\x11\x43\x61llServoResponse\x12\x37\n\x05value\x18\x01 \x01(\x0b\x32(.chromiumos.config.api.test.xmlrpc.Value\x12\r\n\x05\x66\x61ult\x18\x02 \x01(\x08\"\\\n\x16\x45xposePortToDutRequest\x12\x10\n\x08\x64ut_name\x18\x01 \x01(\t\x12\x12\n\nlocal_port\x18\x02 \x01(\x05\x12\x1c\n\x14require_remote_proxy\x18\x03 \x01(\x08\"H\n\x17\x45xposePortToDutResponse\x12\x17\n\x0f\x65xposed_address\x18\x01 \x01(\t\x12\x14\n\x0c\x65xposed_port\x18\x02 \x01(\x05\x32\xf6\x05\n\x06Wiring\x12\\\n\x06GetDut\x12-.chromiumos.config.api.test.tls.GetDutRequest\x1a#.chromiumos.config.api.test.tls.Dut\x12v\n\x0bOpenDutPort\x12\x32.chromiumos.config.api.test.tls.OpenDutPortRequest\x1a\x33.chromiumos.config.api.test.tls.OpenDutPortResponse\x12\x88\x01\n\x11SetDutPowerSupply\x12\x38.chromiumos.config.api.test.tls.SetDutPowerSupplyRequest\x1a\x39.chromiumos.config.api.test.tls.SetDutPowerSupplyResponse\x12\x93\x01\n\x0b\x43\x61\x63heForDut\x12\x32.chromiumos.config.api.test.tls.CacheForDutRequest\x1a!.chromiumos.longrunning.Operation\"-\xd2\x41*\n\x13\x43\x61\x63heForDutResponse\x12\x13\x43\x61\x63heForDutMetadata\x12p\n\tCallServo\x12\x30.chromiumos.config.api.test.tls.CallServoRequest\x1a\x31.chromiumos.config.api.test.tls.CallServoResponse\x12\x82\x01\n\x0f\x45xposePortToDut\x12\x36.chromiumos.config.api.test.tls.ExposePortToDutRequest\x1a\x37.chromiumos.config.api.test.tls.ExposePortToDutResponseB3Z1go.chromium.org/chromiumos/config/go/api/test/tlsb\x06proto3'
+  serialized_pb=b'\n+chromiumos/config/api/test/tls/wiring.proto\x12\x1e\x63hromiumos.config.api.test.tls\x1aHchromiumos/config/api/test/tls/dependencies/longrunning/operations.proto\x1a.chromiumos/config/api/test/xmlrpc/xmlrpc.proto\"\x1d\n\rGetDutRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"N\n\x03\x44ut\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x39\n\x08licenses\x18\x02 \x03(\x0b\x32\'.chromiumos.config.api.test.tls.License\"\x9d\x01\n\x07License\x12\x0c\n\x04name\x18\x01 \x01(\t\x12:\n\x04type\x18\x02 \x01(\x0e\x32,.chromiumos.config.api.test.tls.License.Type\"H\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x12\n\x0eWINDOWS_10_PRO\x10\x01\x12\x16\n\x12MS_OFFICE_STANDARD\x10\x02\"0\n\x12OpenDutPortRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"4\n\x13OpenDutPortResponse\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"\xaf\x01\n\x18SetDutPowerSupplyRequest\x12\x0b\n\x03\x64ut\x18\x01 \x01(\t\x12M\n\x05state\x18\x02 \x01(\x0e\x32>.chromiumos.config.api.test.tls.SetDutPowerSupplyRequest.State\"7\n\x05State\x12\x11\n\rSTATE_UNKNOWN\x10\x00\x12\x0c\n\x08STATE_ON\x10\x01\x12\r\n\tSTATE_OFF\x10\x02\"\x80\x02\n\x19SetDutPowerSupplyResponse\x12P\n\x06status\x18\x01 \x01(\x0e\x32@.chromiumos.config.api.test.tls.SetDutPowerSupplyResponse.Status\x12\x0e\n\x06reason\x18\x02 \x01(\t\"\x80\x01\n\x06Status\x12\x12\n\x0eSTATUS_UNKNOWN\x10\x00\x12\r\n\tSTATUS_OK\x10\x01\x12\x12\n\x0eSTATUS_BAD_DUT\x10\x02\x12\x16\n\x12STATUS_BAD_REQUEST\x10\x03\x12\x11\n\rSTATUS_NO_RPM\x10\x04\x12\x14\n\x10STATUS_RPM_ERROR\x10\x05\"3\n\x12\x43\x61\x63heForDutRequest\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x10\n\x08\x64ut_name\x18\x02 \x01(\t\"\"\n\x13\x43\x61\x63heForDutResponse\x12\x0b\n\x03url\x18\x01 \x01(\t\"\x15\n\x13\x43\x61\x63heForDutMetadata\"g\n\x10\x43\x61llServoRequest\x12\x0b\n\x03\x64ut\x18\x01 \x01(\t\x12\x0e\n\x06method\x18\x02 \x01(\t\x12\x36\n\x04\x61rgs\x18\x03 \x03(\x0b\x32(.chromiumos.config.api.test.xmlrpc.Value\"[\n\x11\x43\x61llServoResponse\x12\x37\n\x05value\x18\x01 \x01(\x0b\x32(.chromiumos.config.api.test.xmlrpc.Value\x12\r\n\x05\x66\x61ult\x18\x02 \x01(\x08\"\\\n\x16\x45xposePortToDutRequest\x12\x10\n\x08\x64ut_name\x18\x01 \x01(\t\x12\x12\n\nlocal_port\x18\x02 \x01(\x05\x12\x1c\n\x14require_remote_proxy\x18\x03 \x01(\x08\"H\n\x17\x45xposePortToDutResponse\x12\x17\n\x0f\x65xposed_address\x18\x01 \x01(\t\x12\x14\n\x0c\x65xposed_port\x18\x02 \x01(\x05\x32\xf2\x05\n\x06Wiring\x12\\\n\x06GetDut\x12-.chromiumos.config.api.test.tls.GetDutRequest\x1a#.chromiumos.config.api.test.tls.Dut\x12v\n\x0bOpenDutPort\x12\x32.chromiumos.config.api.test.tls.OpenDutPortRequest\x1a\x33.chromiumos.config.api.test.tls.OpenDutPortResponse\x12\x88\x01\n\x11SetDutPowerSupply\x12\x38.chromiumos.config.api.test.tls.SetDutPowerSupplyRequest\x1a\x39.chromiumos.config.api.test.tls.SetDutPowerSupplyResponse\x12\x8f\x01\n\x0b\x43\x61\x63heForDut\x12\x32.chromiumos.config.api.test.tls.CacheForDutRequest\x1a\x1d.google.longrunning.Operation\"-\xca\x41*\n\x13\x43\x61\x63heForDutResponse\x12\x13\x43\x61\x63heForDutMetadata\x12p\n\tCallServo\x12\x30.chromiumos.config.api.test.tls.CallServoRequest\x1a\x31.chromiumos.config.api.test.tls.CallServoResponse\x12\x82\x01\n\x0f\x45xposePortToDut\x12\x36.chromiumos.config.api.test.tls.ExposePortToDutRequest\x1a\x37.chromiumos.config.api.test.tls.ExposePortToDutResponseB3Z1go.chromium.org/chromiumos/config/go/api/test/tlsb\x06proto3'
   ,
-  dependencies=[chromiumos_dot_longrunning_dot_operations__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_test_dot_xmlrpc_dot_xmlrpc__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_config_dot_api_dot_test_dot_tls_dot_dependencies_dot_longrunning_dot_operations__pb2.DESCRIPTOR,chromiumos_dot_config_dot_api_dot_test_dot_xmlrpc_dot_xmlrpc__pb2.DESCRIPTOR,])
 
 
 
@@ -52,8 +52,8 @@ _LICENSE_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=365,
-  serialized_end=437,
+  serialized_start=398,
+  serialized_end=470,
 )
 _sym_db.RegisterEnumDescriptor(_LICENSE_TYPE)
 
@@ -82,8 +82,8 @@ _SETDUTPOWERSUPPLYREQUEST_STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=664,
-  serialized_end=719,
+  serialized_start=697,
+  serialized_end=752,
 )
 _sym_db.RegisterEnumDescriptor(_SETDUTPOWERSUPPLYREQUEST_STATE)
 
@@ -127,8 +127,8 @@ _SETDUTPOWERSUPPLYRESPONSE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=850,
-  serialized_end=978,
+  serialized_start=883,
+  serialized_end=1011,
 )
 _sym_db.RegisterEnumDescriptor(_SETDUTPOWERSUPPLYRESPONSE_STATUS)
 
@@ -160,8 +160,8 @@ _GETDUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=168,
-  serialized_end=197,
+  serialized_start=201,
+  serialized_end=230,
 )
 
 
@@ -199,8 +199,8 @@ _DUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=199,
-  serialized_end=277,
+  serialized_start=232,
+  serialized_end=310,
 )
 
 
@@ -239,8 +239,8 @@ _LICENSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=280,
-  serialized_end=437,
+  serialized_start=313,
+  serialized_end=470,
 )
 
 
@@ -278,8 +278,8 @@ _OPENDUTPORTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=439,
-  serialized_end=487,
+  serialized_start=472,
+  serialized_end=520,
 )
 
 
@@ -317,8 +317,8 @@ _OPENDUTPORTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=489,
-  serialized_end=541,
+  serialized_start=522,
+  serialized_end=574,
 )
 
 
@@ -357,8 +357,8 @@ _SETDUTPOWERSUPPLYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=544,
-  serialized_end=719,
+  serialized_start=577,
+  serialized_end=752,
 )
 
 
@@ -397,8 +397,8 @@ _SETDUTPOWERSUPPLYRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=722,
-  serialized_end=978,
+  serialized_start=755,
+  serialized_end=1011,
 )
 
 
@@ -436,8 +436,8 @@ _CACHEFORDUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=980,
-  serialized_end=1031,
+  serialized_start=1013,
+  serialized_end=1064,
 )
 
 
@@ -468,8 +468,8 @@ _CACHEFORDUTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1033,
-  serialized_end=1067,
+  serialized_start=1066,
+  serialized_end=1100,
 )
 
 
@@ -493,8 +493,8 @@ _CACHEFORDUTMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1069,
-  serialized_end=1090,
+  serialized_start=1102,
+  serialized_end=1123,
 )
 
 
@@ -539,8 +539,8 @@ _CALLSERVOREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1092,
-  serialized_end=1195,
+  serialized_start=1125,
+  serialized_end=1228,
 )
 
 
@@ -578,8 +578,8 @@ _CALLSERVORESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1197,
-  serialized_end=1288,
+  serialized_start=1230,
+  serialized_end=1321,
 )
 
 
@@ -624,8 +624,8 @@ _EXPOSEPORTTODUTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1290,
-  serialized_end=1382,
+  serialized_start=1323,
+  serialized_end=1415,
 )
 
 
@@ -663,8 +663,8 @@ _EXPOSEPORTTODUTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1384,
-  serialized_end=1456,
+  serialized_start=1417,
+  serialized_end=1489,
 )
 
 _DUT.fields_by_name['licenses'].message_type = _LICENSE
@@ -800,8 +800,8 @@ _WIRING = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1459,
-  serialized_end=2217,
+  serialized_start=1492,
+  serialized_end=2246,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetDut',
@@ -839,8 +839,8 @@ _WIRING = _descriptor.ServiceDescriptor(
     index=3,
     containing_service=None,
     input_type=_CACHEFORDUTREQUEST,
-    output_type=chromiumos_dot_longrunning_dot_operations__pb2._OPERATION,
-    serialized_options=b'\322A*\n\023CacheForDutResponse\022\023CacheForDutMetadata',
+    output_type=chromiumos_dot_config_dot_api_dot_test_dot_tls_dot_dependencies_dot_longrunning_dot_operations__pb2._OPERATION,
+    serialized_options=b'\312A*\n\023CacheForDutResponse\022\023CacheForDutMetadata',
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
