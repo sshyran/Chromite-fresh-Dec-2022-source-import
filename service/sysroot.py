@@ -390,6 +390,7 @@ def CreateChromeEbuildEnv(_chroot, sysroot_class, _build_target, output_dir):
   pkg_dir = os.path.join(sysroot_class.path, portage_util.VDB_PATH)
   files = glob.glob(os.path.join(pkg_dir, constants.CHROME_CP) + '-*')
   if not files:
+    logging.warning('No package found for %s', constants.CHROME_CP)
     return None
 
   if len(files) > 1:
