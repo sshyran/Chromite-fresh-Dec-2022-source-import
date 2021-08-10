@@ -45,6 +45,32 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
       [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
       enter_chroot=True, extra_env=extra_env)
 
+  def testCreateCustomKernelOverrideUseFlag(self):
+    """Tests CreateCustomKernel()."""
+    self.rc.AddCmdResult(['portageq-foo-board', 'expand_virtual',
+                          '/build/foo-board', 'virtual/linux-sources'],
+                         stdout='kernel')
+
+    self._kb.CreateCustomKernel(['x', 'y'], ['foo'])
+
+    emerge_board = 'emerge-foo-board'
+    extra_env = {
+      'PKGDIR': os.path.join('foo-tmp', 'packages'),
+      'USE': 'foo x y'
+    }
+    self.assertCommandCalled(
+      [emerge_board, 'chromeos-base/chromeos-initramfs'],
+      enter_chroot=True, extra_env=extra_env)
+    self.assertCommandCalled(
+      [emerge_board, '--onlydeps', 'kernel'],
+      enter_chroot=True, extra_env=extra_env)
+    self.assertCommandCalled(
+      [emerge_board, '--buildpkgonly', 'kernel'],
+      enter_chroot=True, extra_env=extra_env)
+    self.assertCommandCalled(
+      [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
+      enter_chroot=True, extra_env=extra_env)
+
   def testCreateKernelImageDefaultArgs(self):
     """Tests CreateKernelImage() with default arguments."""
     self.rc.AddCmdResult(['portageq-foo-board', 'envvar', 'ARCH'],
