@@ -151,7 +151,6 @@ def write_build_target_file(build_target_name):
 def GetParser():
   """Build the argument parser."""
   parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument_group()
   parser.add_argument(
       '--force',
       action='store_true',
