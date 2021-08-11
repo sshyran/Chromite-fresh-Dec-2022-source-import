@@ -7,28 +7,12 @@
         }
     ],
     "build_metadata_list": {
-        "values": [
-            {
-                "build_target": {
-                    "portage_build_target": {
-                        "overlay_name": "overlayA"
-                    }
-                },
-                "package_summary": {
-                    "kernel": {
-                        "version": "4.4"
-                    }
-                }
-            }
-        ]
+        "path": "../../../../src/config-internal/build/generated/build_metadata.jsonproto"
     },
     "dut_attribute_list": {
-        "dut_attributes": [
-            {
-                "id": {
-                    "value": "system_build_target"
-                }
-            }
-        ]
+        "path": "../../../../src/config-internal/dut_attributes/generated/dut_attributes.jsonproto"
+    },
+    "flat_config_list": {
+        "path": "../../../../src/config-internal/hw_design/generated/flattened.jsonproto"
     }
 }

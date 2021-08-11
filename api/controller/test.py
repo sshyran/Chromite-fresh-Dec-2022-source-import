@@ -390,18 +390,23 @@ def _GetCoverageRulesResponseSuccess(
 
 @faux.success(_GetCoverageRulesResponseSuccess)
 @faux.empty_error
-@validate.require('source_test_plans', 'dut_attribute_list',
-                  'build_metadata_list', 'flat_config_list')
+@validate.require('source_test_plans')
+@validate.exists('dut_attribute_list.path', 'build_metadata_list.path',
+                 'flat_config_list.path')
 @validate.validation_complete
 def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
                      output_proto: test_pb2.GetCoverageRulesResponse, _config):
   """Call the testplan tool to generate CoverageRules."""
   source_test_plans = input_proto.source_test_plans
-  dut_attributes_list = input_proto.dut_attribute_list
+  dut_attribute_list = input_proto.dut_attribute_list
   build_metadata_list = input_proto.build_metadata_list
   flat_config_list = input_proto.flat_config_list
 
-  cmd = ['testplan', 'generate', '-logtostderr', '-v', '2']
+  cmd = [
+      'testplan', 'generate', '-dutattributes', dut_attribute_list.path,
+      '-buildmetadata', build_metadata_list.path, '-flatconfiglist',
+      flat_config_list.path, '-logtostderr', '-v', '2'
+  ]
 
   with osutils.TempDir(prefix='get_coverage_rules_input') as tempdir:
     # Write all input files required by testplan, and read the output file
@@ -410,21 +415,6 @@ def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
       plan_path = os.path.join(tempdir, 'source_test_plan_%d.textpb' % i)
       osutils.WriteFile(plan_path, text_format.MessageToString(plan))
       cmd.extend(['-plan', plan_path])
-
-    dut_attribute_path = os.path.join(tempdir, 'dut_attribute_list.jsonpb')
-    osutils.WriteFile(dut_attribute_path,
-                      json_format.MessageToJson(dut_attributes_list))
-    cmd.extend(['-dutattributes', dut_attribute_path])
-
-    build_metadata_path = os.path.join(tempdir, 'build_metadata_list.jsonpb')
-    osutils.WriteFile(build_metadata_path,
-                      json_format.MessageToJson(build_metadata_list))
-    cmd.extend(['-buildmetadata', build_metadata_path])
-
-    flat_config_path = os.path.join(tempdir, 'flat_config_list.jsonpb')
-    osutils.WriteFile(flat_config_path,
-                      json_format.MessageToJson(flat_config_list))
-    cmd.extend(['-flatconfiglist', flat_config_path])
 
     out_path = os.path.join(tempdir, 'out.jsonpb')
     cmd.extend(['-out', out_path])

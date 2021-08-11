@@ -13,12 +13,9 @@ _sym_db = _symbol_database.Default()
 
 from chromite.api.gen_sdk.chromite.api import build_api_pb2 as chromite_dot_api_dot_build__api__pb2
 from chromite.api.gen_sdk.chromite.api import sysroot_pb2 as chromite_dot_api_dot_sysroot__pb2
-from chromite.api.gen_sdk.chromiumos.build.api import system_image_pb2 as chromiumos_dot_build_dot_api_dot_system__image__pb2
 from chromite.api.gen_sdk.chromiumos import common_pb2 as chromiumos_dot_common__pb2
-from chromite.api.gen_sdk.chromiumos.config.payload import flat_config_pb2 as chromiumos_dot_config_dot_payload_dot_flat__config__pb2
 from chromite.api.gen_sdk.chromiumos import metrics_pb2 as chromiumos_dot_metrics__pb2
 from chromite.api.gen_sdk.chromiumos.test.api import coverage_rule_pb2 as chromiumos_dot_test_dot_api_dot_coverage__rule__pb2
-from chromite.api.gen_sdk.chromiumos.test.api import dut_attribute_pb2 as chromiumos_dot_test_dot_api_dot_dut__attribute__pb2
 from chromite.api.gen_sdk.chromiumos.test.plan import source_test_plan_pb2 as chromiumos_dot_test_dot_plan_dot_source__test__plan__pb2
 
 
@@ -27,9 +24,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x17\x63hromite/api/test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\'chromiumos/build/api/system_image.proto\x1a\x17\x63hromiumos/common.proto\x1a+chromiumos/config/payload/flat_config.proto\x1a\x18\x63hromiumos/metrics.proto\x1a\'chromiumos/test/api/coverage_rule.proto\x1a\'chromiumos/test/api/dut_attribute.proto\x1a+chromiumos/test/plan/source_test_plan.proto\"\x91\x02\n\x1fTestServiceContainerBuildResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12H\n\x07success\x18\x02 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.SuccessH\x00\x12H\n\x07\x66\x61ilure\x18\x03 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.FailureH\x00\x1a \n\x07Success\x12\x15\n\rregistry_path\x18\x01 \x01(\t\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x87\x01\n!BuildTestServiceContainersRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x0f\n\x07version\x18\x03 \x01(\t\"d\n\"BuildTestServiceContainersResponse\x12>\n\x07results\x18\x01 \x03(\x0b\x32-.chromite.api.TestServiceContainerBuildResult\"\xc0\x03\n\x1a\x42uildTargetUnitTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bresult_path\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12=\n\x05\x66lags\x18\x04 \x01(\x0b\x32..chromite.api.BuildTargetUnitTestRequest.Flags\x12)\n\x08packages\x18\x06 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x32\n\x11package_blocklist\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x1a\x95\x01\n\x05\x46lags\x12\x15\n\rempty_sysroot\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\x12\"\n\x1atestable_packages_optional\x18\x04 \x01(\x08\x12\x1f\n\x17\x66ilter_only_cros_workon\x18\x05 \x01(\x08J\x04\x08\x05\x10\x06\"\x8e\x01\n\x1b\x42uildTargetUnitTestResponse\x12\x14\n\x0ctarball_path\x18\x01 \x01(\t\x12\x30\n\x0f\x66\x61iled_packages\x18\x02 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\'\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x17.chromiumos.MetricEvent\"=\n\x17\x43hromiteUnitTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x1a\n\x18\x43hromiteUnitTestResponse\";\n\x15\x43hromitePytestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x18\n\x16\x43hromitePytestResponse\"<\n\x16\x43rosSigningTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x19\n\x17\x43rosSigningTestResponse\"b\n\x14\x44\x65\x62ugInfoTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x17\n\x15\x44\x65\x62ugInfoTestResponse\"\xd2\x03\n\rVmTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12!\n\x07vm_path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12;\n\x0bssh_options\x18\x04 \x01(\x0b\x32&.chromite.api.VmTestRequest.SshOptions\x12=\n\x0ctest_harness\x18\x05 \x01(\x0e\x32\'.chromite.api.VmTestRequest.TestHarness\x12\x34\n\x08vm_tests\x18\x06 \x03(\x0b\x32\".chromite.api.VmTestRequest.VmTest\x1a\x46\n\nSshOptions\x12*\n\x10private_key_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\x12\x0c\n\x04port\x18\x02 \x01(\x05\x1a\x19\n\x06VmTest\x12\x0f\n\x07pattern\x18\x01 \x01(\t\"6\n\x0bTestHarness\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x08\n\x04TAST\x10\x01\x12\x0c\n\x08\x41UTOTEST\x10\x02\"\x10\n\x0eVmTestResponse\"\xe9\x01\n\x13MoblabVmTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12@\n\rimage_payload\x18\x02 \x01(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x12\x41\n\x0e\x63\x61\x63he_payloads\x18\x03 \x03(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x1a)\n\x07Payload\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x16\n\x14MoblabVmTestResponse\"\x8b\x01\n\x1fSimpleChromeWorkflowTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x13\n\x0b\x63hrome_root\x18\x02 \x01(\t\x12+\n\x0bgoma_config\x18\x03 \x01(\x0b\x32\x16.chromiumos.GomaConfig\"\"\n SimpleChromeWorkflowTestResponse\"\xd8\x02\n\x17GetCoverageRulesRequest\x12\"\n\x06\x63hroot\x18\x05 \x01(\x0b\x32\x12.chromiumos.Chroot\x12?\n\x11source_test_plans\x18\x01 \x03(\x0b\x32$.chromiumos.test.plan.SourceTestPlan\x12P\n\x13\x62uild_metadata_list\x18\x02 \x01(\x0b\x32\x33.chromiumos.build.api.SystemImage.BuildMetadataList\x12\x41\n\x12\x64ut_attribute_list\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.DutAttributeList\x12\x43\n\x10\x66lat_config_list\x18\x04 \x01(\x0b\x32).chromiumos.config.payload.FlatConfigList\"U\n\x18GetCoverageRulesResponse\x12\x39\n\x0e\x63overage_rules\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.CoverageRule2\x9e\x08\n\x0bTestService\x12\x87\x01\n\x1a\x42uildTestServiceContainers\x12/.chromite.api.BuildTestServiceContainersRequest\x1a\x30.chromite.api.BuildTestServiceContainersResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12r\n\x13\x42uildTargetUnitTest\x12(.chromite.api.BuildTargetUnitTestRequest\x1a).chromite.api.BuildTargetUnitTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10\x43hromiteUnitTest\x12%.chromite.api.ChromiteUnitTestRequest\x1a&.chromite.api.ChromiteUnitTestResponse\x12[\n\x0e\x43hromitePytest\x12#.chromite.api.ChromitePytestRequest\x1a$.chromite.api.ChromitePytestResponse\x12^\n\x0f\x43rosSigningTest\x12$.chromite.api.CrosSigningTestRequest\x1a%.chromite.api.CrosSigningTestResponse\x12X\n\rDebugInfoTest\x12\".chromite.api.DebugInfoTestRequest\x1a#.chromite.api.DebugInfoTestResponse\x12\x43\n\x06VmTest\x12\x1b.chromite.api.VmTestRequest\x1a\x1c.chromite.api.VmTestResponse\x12]\n\x0cMoblabVmTest\x12!.chromite.api.MoblabVmTestRequest\x1a\".chromite.api.MoblabVmTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x81\x01\n\x18SimpleChromeWorkflowTest\x12-.chromite.api.SimpleChromeWorkflowTestRequest\x1a..chromite.api.SimpleChromeWorkflowTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10GetCoverageRules\x12%.chromite.api.GetCoverageRulesRequest\x1a&.chromite.api.GetCoverageRulesResponse\x1a\x0c\xc2\xed\x1a\x08\n\x04test\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x17\x63hromite/api/test.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\x1a\x18\x63hromiumos/metrics.proto\x1a\'chromiumos/test/api/coverage_rule.proto\x1a+chromiumos/test/plan/source_test_plan.proto\"\x91\x02\n\x1fTestServiceContainerBuildResult\x12\x0c\n\x04name\x18\x01 \x01(\t\x12H\n\x07success\x18\x02 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.SuccessH\x00\x12H\n\x07\x66\x61ilure\x18\x03 \x01(\x0b\x32\x35.chromite.api.TestServiceContainerBuildResult.FailureH\x00\x1a \n\x07Success\x12\x15\n\rregistry_path\x18\x01 \x01(\t\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x87\x01\n!BuildTestServiceContainersRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x0f\n\x07version\x18\x03 \x01(\t\"d\n\"BuildTestServiceContainersResponse\x12>\n\x07results\x18\x01 \x03(\x0b\x32-.chromite.api.TestServiceContainerBuildResult\"\xc0\x03\n\x1a\x42uildTargetUnitTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x13\n\x0bresult_path\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12=\n\x05\x66lags\x18\x04 \x01(\x0b\x32..chromite.api.BuildTargetUnitTestRequest.Flags\x12)\n\x08packages\x18\x06 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\x32\n\x11package_blocklist\x18\x07 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x1a\x95\x01\n\x05\x46lags\x12\x15\n\rempty_sysroot\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\x12\x15\n\rcode_coverage\x18\x03 \x01(\x08\x12\"\n\x1atestable_packages_optional\x18\x04 \x01(\x08\x12\x1f\n\x17\x66ilter_only_cros_workon\x18\x05 \x01(\x08J\x04\x08\x05\x10\x06\"\x8e\x01\n\x1b\x42uildTargetUnitTestResponse\x12\x14\n\x0ctarball_path\x18\x01 \x01(\t\x12\x30\n\x0f\x66\x61iled_packages\x18\x02 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12\'\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x17.chromiumos.MetricEvent\"=\n\x17\x43hromiteUnitTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x1a\n\x18\x43hromiteUnitTestResponse\";\n\x15\x43hromitePytestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x18\n\x16\x43hromitePytestResponse\"<\n\x16\x43rosSigningTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x19\n\x17\x43rosSigningTestResponse\"b\n\x14\x44\x65\x62ugInfoTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x17\n\x15\x44\x65\x62ugInfoTestResponse\"\xd2\x03\n\rVmTestRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12!\n\x07vm_path\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12;\n\x0bssh_options\x18\x04 \x01(\x0b\x32&.chromite.api.VmTestRequest.SshOptions\x12=\n\x0ctest_harness\x18\x05 \x01(\x0e\x32\'.chromite.api.VmTestRequest.TestHarness\x12\x34\n\x08vm_tests\x18\x06 \x03(\x0b\x32\".chromite.api.VmTestRequest.VmTest\x1a\x46\n\nSshOptions\x12*\n\x10private_key_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\x12\x0c\n\x04port\x18\x02 \x01(\x05\x1a\x19\n\x06VmTest\x12\x0f\n\x07pattern\x18\x01 \x01(\t\"6\n\x0bTestHarness\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x08\n\x04TAST\x10\x01\x12\x0c\n\x08\x41UTOTEST\x10\x02\"\x10\n\x0eVmTestResponse\"\xe9\x01\n\x13MoblabVmTestRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12@\n\rimage_payload\x18\x02 \x01(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x12\x41\n\x0e\x63\x61\x63he_payloads\x18\x03 \x03(\x0b\x32).chromite.api.MoblabVmTestRequest.Payload\x1a)\n\x07Payload\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x16\n\x14MoblabVmTestResponse\"\x8b\x01\n\x1fSimpleChromeWorkflowTestRequest\x12&\n\x07sysroot\x18\x01 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x13\n\x0b\x63hrome_root\x18\x02 \x01(\t\x12+\n\x0bgoma_config\x18\x03 \x01(\x0b\x32\x16.chromiumos.GomaConfig\"\"\n SimpleChromeWorkflowTestResponse\"\x87\x02\n\x17GetCoverageRulesRequest\x12\"\n\x06\x63hroot\x18\x05 \x01(\x0b\x32\x12.chromiumos.Chroot\x12?\n\x11source_test_plans\x18\x01 \x03(\x0b\x32$.chromiumos.test.plan.SourceTestPlan\x12-\n\x13\x62uild_metadata_list\x18\x02 \x01(\x0b\x32\x10.chromiumos.Path\x12,\n\x12\x64ut_attribute_list\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\x12*\n\x10\x66lat_config_list\x18\x04 \x01(\x0b\x32\x10.chromiumos.Path\"U\n\x18GetCoverageRulesResponse\x12\x39\n\x0e\x63overage_rules\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.CoverageRule2\x9e\x08\n\x0bTestService\x12\x87\x01\n\x1a\x42uildTestServiceContainers\x12/.chromite.api.BuildTestServiceContainersRequest\x1a\x30.chromite.api.BuildTestServiceContainersResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12r\n\x13\x42uildTargetUnitTest\x12(.chromite.api.BuildTargetUnitTestRequest\x1a).chromite.api.BuildTargetUnitTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10\x43hromiteUnitTest\x12%.chromite.api.ChromiteUnitTestRequest\x1a&.chromite.api.ChromiteUnitTestResponse\x12[\n\x0e\x43hromitePytest\x12#.chromite.api.ChromitePytestRequest\x1a$.chromite.api.ChromitePytestResponse\x12^\n\x0f\x43rosSigningTest\x12$.chromite.api.CrosSigningTestRequest\x1a%.chromite.api.CrosSigningTestResponse\x12X\n\rDebugInfoTest\x12\".chromite.api.DebugInfoTestRequest\x1a#.chromite.api.DebugInfoTestResponse\x12\x43\n\x06VmTest\x12\x1b.chromite.api.VmTestRequest\x1a\x1c.chromite.api.VmTestResponse\x12]\n\x0cMoblabVmTest\x12!.chromite.api.MoblabVmTestRequest\x1a\".chromite.api.MoblabVmTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x81\x01\n\x18SimpleChromeWorkflowTest\x12-.chromite.api.SimpleChromeWorkflowTestRequest\x1a..chromite.api.SimpleChromeWorkflowTestResponse\"\x06\xc2\xed\x1a\x02\x10\x02\x12\x61\n\x10GetCoverageRules\x12%.chromite.api.GetCoverageRulesRequest\x1a&.chromite.api.GetCoverageRulesResponse\x1a\x0c\xc2\xed\x1a\x08\n\x04test\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
-  dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_build_dot_api_dot_system__image__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_config_dot_payload_dot_flat__config__pb2.DESCRIPTOR,chromiumos_dot_metrics__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_coverage__rule__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_dut__attribute__pb2.DESCRIPTOR,chromiumos_dot_test_dot_plan_dot_source__test__plan__pb2.DESCRIPTOR,])
+  dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_metrics__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_coverage__rule__pb2.DESCRIPTOR,chromiumos_dot_test_dot_plan_dot_source__test__plan__pb2.DESCRIPTOR,])
 
 
 
@@ -54,8 +51,8 @@ _VMTESTREQUEST_TESTHARNESS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2280,
-  serialized_end=2334,
+  serialized_start=2153,
+  serialized_end=2207,
 )
 _sym_db.RegisterEnumDescriptor(_VMTESTREQUEST_TESTHARNESS)
 
@@ -86,8 +83,8 @@ _TESTSERVICECONTAINERBUILDRESULT_SUCCESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=561,
-  serialized_end=593,
+  serialized_start=434,
+  serialized_end=466,
 )
 
 _TESTSERVICECONTAINERBUILDRESULT_FAILURE = _descriptor.Descriptor(
@@ -116,8 +113,8 @@ _TESTSERVICECONTAINERBUILDRESULT_FAILURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=595,
-  serialized_end=627,
+  serialized_start=468,
+  serialized_end=500,
 )
 
 _TESTSERVICECONTAINERBUILDRESULT = _descriptor.Descriptor(
@@ -163,8 +160,8 @@ _TESTSERVICECONTAINERBUILDRESULT = _descriptor.Descriptor(
       name='result', full_name='chromite.api.TestServiceContainerBuildResult.result',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=364,
-  serialized_end=637,
+  serialized_start=237,
+  serialized_end=510,
 )
 
 
@@ -208,8 +205,8 @@ _BUILDTESTSERVICECONTAINERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=640,
-  serialized_end=775,
+  serialized_start=513,
+  serialized_end=648,
 )
 
 
@@ -239,8 +236,8 @@ _BUILDTESTSERVICECONTAINERSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=777,
-  serialized_end=877,
+  serialized_start=650,
+  serialized_end=750,
 )
 
 
@@ -298,8 +295,8 @@ _BUILDTARGETUNITTESTREQUEST_FLAGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1173,
-  serialized_end=1322,
+  serialized_start=1046,
+  serialized_end=1195,
 )
 
 _BUILDTARGETUNITTESTREQUEST = _descriptor.Descriptor(
@@ -363,8 +360,8 @@ _BUILDTARGETUNITTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=880,
-  serialized_end=1328,
+  serialized_start=753,
+  serialized_end=1201,
 )
 
 
@@ -408,8 +405,8 @@ _BUILDTARGETUNITTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1331,
-  serialized_end=1473,
+  serialized_start=1204,
+  serialized_end=1346,
 )
 
 
@@ -439,8 +436,8 @@ _CHROMITEUNITTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1475,
-  serialized_end=1536,
+  serialized_start=1348,
+  serialized_end=1409,
 )
 
 
@@ -463,8 +460,8 @@ _CHROMITEUNITTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1538,
-  serialized_end=1564,
+  serialized_start=1411,
+  serialized_end=1437,
 )
 
 
@@ -494,8 +491,8 @@ _CHROMITEPYTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1566,
-  serialized_end=1625,
+  serialized_start=1439,
+  serialized_end=1498,
 )
 
 
@@ -518,8 +515,8 @@ _CHROMITEPYTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1627,
-  serialized_end=1651,
+  serialized_start=1500,
+  serialized_end=1524,
 )
 
 
@@ -549,8 +546,8 @@ _CROSSIGNINGTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1653,
-  serialized_end=1713,
+  serialized_start=1526,
+  serialized_end=1586,
 )
 
 
@@ -573,8 +570,8 @@ _CROSSIGNINGTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1715,
-  serialized_end=1740,
+  serialized_start=1588,
+  serialized_end=1613,
 )
 
 
@@ -611,8 +608,8 @@ _DEBUGINFOTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1742,
-  serialized_end=1840,
+  serialized_start=1615,
+  serialized_end=1713,
 )
 
 
@@ -635,8 +632,8 @@ _DEBUGINFOTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1842,
-  serialized_end=1865,
+  serialized_start=1715,
+  serialized_end=1738,
 )
 
 
@@ -673,8 +670,8 @@ _VMTESTREQUEST_SSHOPTIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2181,
-  serialized_end=2251,
+  serialized_start=2054,
+  serialized_end=2124,
 )
 
 _VMTESTREQUEST_VMTEST = _descriptor.Descriptor(
@@ -703,8 +700,8 @@ _VMTESTREQUEST_VMTEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2253,
-  serialized_end=2278,
+  serialized_start=2126,
+  serialized_end=2151,
 )
 
 _VMTESTREQUEST = _descriptor.Descriptor(
@@ -769,8 +766,8 @@ _VMTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1868,
-  serialized_end=2334,
+  serialized_start=1741,
+  serialized_end=2207,
 )
 
 
@@ -793,8 +790,8 @@ _VMTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2336,
-  serialized_end=2352,
+  serialized_start=2209,
+  serialized_end=2225,
 )
 
 
@@ -824,8 +821,8 @@ _MOBLABVMTESTREQUEST_PAYLOAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2547,
-  serialized_end=2588,
+  serialized_start=2420,
+  serialized_end=2461,
 )
 
 _MOBLABVMTESTREQUEST = _descriptor.Descriptor(
@@ -868,8 +865,8 @@ _MOBLABVMTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2355,
-  serialized_end=2588,
+  serialized_start=2228,
+  serialized_end=2461,
 )
 
 
@@ -892,8 +889,8 @@ _MOBLABVMTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2590,
-  serialized_end=2612,
+  serialized_start=2463,
+  serialized_end=2485,
 )
 
 
@@ -937,8 +934,8 @@ _SIMPLECHROMEWORKFLOWTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2615,
-  serialized_end=2754,
+  serialized_start=2488,
+  serialized_end=2627,
 )
 
 
@@ -961,8 +958,8 @@ _SIMPLECHROMEWORKFLOWTESTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2756,
-  serialized_end=2790,
+  serialized_start=2629,
+  serialized_end=2663,
 )
 
 
@@ -1020,8 +1017,8 @@ _GETCOVERAGERULESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2793,
-  serialized_end=3137,
+  serialized_start=2666,
+  serialized_end=2929,
 )
 
 
@@ -1051,8 +1048,8 @@ _GETCOVERAGERULESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3139,
-  serialized_end=3224,
+  serialized_start=2931,
+  serialized_end=3016,
 )
 
 _TESTSERVICECONTAINERBUILDRESULT_SUCCESS.containing_type = _TESTSERVICECONTAINERBUILDRESULT
@@ -1100,9 +1097,9 @@ _SIMPLECHROMEWORKFLOWTESTREQUEST.fields_by_name['sysroot'].message_type = chromi
 _SIMPLECHROMEWORKFLOWTESTREQUEST.fields_by_name['goma_config'].message_type = chromiumos_dot_common__pb2._GOMACONFIG
 _GETCOVERAGERULESREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _GETCOVERAGERULESREQUEST.fields_by_name['source_test_plans'].message_type = chromiumos_dot_test_dot_plan_dot_source__test__plan__pb2._SOURCETESTPLAN
-_GETCOVERAGERULESREQUEST.fields_by_name['build_metadata_list'].message_type = chromiumos_dot_build_dot_api_dot_system__image__pb2._SYSTEMIMAGE_BUILDMETADATALIST
-_GETCOVERAGERULESREQUEST.fields_by_name['dut_attribute_list'].message_type = chromiumos_dot_test_dot_api_dot_dut__attribute__pb2._DUTATTRIBUTELIST
-_GETCOVERAGERULESREQUEST.fields_by_name['flat_config_list'].message_type = chromiumos_dot_config_dot_payload_dot_flat__config__pb2._FLATCONFIGLIST
+_GETCOVERAGERULESREQUEST.fields_by_name['build_metadata_list'].message_type = chromiumos_dot_common__pb2._PATH
+_GETCOVERAGERULESREQUEST.fields_by_name['dut_attribute_list'].message_type = chromiumos_dot_common__pb2._PATH
+_GETCOVERAGERULESREQUEST.fields_by_name['flat_config_list'].message_type = chromiumos_dot_common__pb2._PATH
 _GETCOVERAGERULESRESPONSE.fields_by_name['coverage_rules'].message_type = chromiumos_dot_test_dot_api_dot_coverage__rule__pb2._COVERAGERULE
 DESCRIPTOR.message_types_by_name['TestServiceContainerBuildResult'] = _TESTSERVICECONTAINERBUILDRESULT
 DESCRIPTOR.message_types_by_name['BuildTestServiceContainersRequest'] = _BUILDTESTSERVICECONTAINERSREQUEST
@@ -1331,8 +1328,8 @@ _TESTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=b'\302\355\032\010\n\004test\020\001',
-  serialized_start=3227,
-  serialized_end=4281,
+  serialized_start=3019,
+  serialized_end=4073,
   methods=[
   _descriptor.MethodDescriptor(
     name='BuildTestServiceContainers',

@@ -15,6 +15,9 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos.build.api import system_image_pb2
 from chromite.api.gen.chromiumos.build.api import portage_pb2
+from chromite.api.gen.chromiumos.config.payload import flat_config_pb2
+from chromite.api.gen.chromiumos.config.api import design_pb2
+from chromite.api.gen.chromiumos.config.api import design_id_pb2
 from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
 from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
 from chromite.api.gen.chromiumos.test.api import test_suite_pb2
@@ -785,19 +788,12 @@ class GetCoverageRulesTest(cros_test_lib.RunCommandTempDirTestCase,
                            api_config.ApiConfigMixin):
   """Tests for GetCoverageRules."""
 
-  @staticmethod
-  def _Input():
+  def _Input(self):
     """Returns a sample GetCoverageRulesRequest for testing."""
-    return test_pb2.GetCoverageRulesRequest(
-        source_test_plans=[
-            source_test_plan_pb2.SourceTestPlan(
-                requirements=source_test_plan_pb2.SourceTestPlan.Requirements(
-                    kernel_versions=source_test_plan_pb2.SourceTestPlan
-                    .Requirements.KernelVersions()),
-                test_tags=['kernel']),
-        ],
-        build_metadata_list=system_image_pb2.SystemImage
-        .BuildMetadataList(values=[
+    build_metadata_list_path = os.path.join(self.tempdir,
+                                            'build_metadata_list.jsonproto')
+    build_metadata_list = system_image_pb2.SystemImage.BuildMetadataList(
+        values=[
             system_image_pb2.SystemImage.BuildMetadata(
                 build_target=system_image_pb2.SystemImage.BuildTarget(
                     portage_build_target=portage_pb2.Portage.BuildTarget(
@@ -806,12 +802,46 @@ class GetCoverageRulesTest(cros_test_lib.RunCommandTempDirTestCase,
                 .PackageSummary(
                     kernel=system_image_pb2.SystemImage.BuildMetadata.Kernel(
                         version='4.4')))
-        ]),
-        dut_attribute_list=dut_attribute_pb2.DutAttributeList(dut_attributes=[
-            dut_attribute_pb2.DutAttribute(
-                id=dut_attribute_pb2.DutAttribute.Id(
-                    value='system_build_target'))
-        ]))
+        ])
+    osutils.WriteFile(build_metadata_list_path,
+                      json_format.MessageToJson(build_metadata_list))
+
+    dut_attribute_list_path = os.path.join(self.tempdir,
+                                           'dut_attribute_list.jsonproto')
+    dut_attribute_list = dut_attribute_pb2.DutAttributeList(dut_attributes=[
+        dut_attribute_pb2.DutAttribute(
+            id=dut_attribute_pb2.DutAttribute.Id(value='system_build_target'))
+    ])
+    osutils.WriteFile(dut_attribute_list_path,
+                      json_format.MessageToJson(dut_attribute_list))
+
+    flat_config_list_path = os.path.join(self.tempdir,
+                                         'flat_config_list.jsonproto')
+    flat_config_list = flat_config_pb2.FlatConfigList(values=[
+        flat_config_pb2.FlatConfig(
+            hw_design=design_pb2.Design(
+                id=design_id_pb2.DesignId(value='design1')
+            )
+        )
+    ])
+    osutils.WriteFile(flat_config_list_path,
+                      json_format.MessageToJson(flat_config_list))
+
+    return test_pb2.GetCoverageRulesRequest(
+        source_test_plans=[
+            source_test_plan_pb2.SourceTestPlan(
+                requirements=source_test_plan_pb2.SourceTestPlan.Requirements(
+                    kernel_versions=source_test_plan_pb2.SourceTestPlan
+                    .Requirements.KernelVersions()),
+                test_tags=['kernel']),
+        ],
+        build_metadata_list=common_pb2.Path(
+            path=build_metadata_list_path, location=common_pb2.Path.OUTSIDE),
+        dut_attribute_list=common_pb2.Path(
+            path=dut_attribute_list_path, location=common_pb2.Path.OUTSIDE),
+        flat_config_list=common_pb2.Path(
+            path=flat_config_list_path, location=common_pb2.Path.OUTSIDE),
+    )
 
   @staticmethod
   def _Output():
@@ -853,19 +883,5 @@ class GetCoverageRulesTest(cros_test_lib.RunCommandTempDirTestCase,
 
     test_controller.GetCoverageRules(self._Input(), output_proto,
                                      self.api_config)
-
-    build_metadata_list = system_image_pb2.SystemImage.BuildMetadataList()
-    json_format.Parse(
-        osutils.ReadFile(
-            os.path.join(self.tempdir, 'build_metadata_list.jsonpb')),
-        build_metadata_list)
-    self.assertEqual(build_metadata_list, self._Input().build_metadata_list)
-
-    dut_attribute_list = dut_attribute_pb2.DutAttributeList()
-    json_format.Parse(
-        osutils.ReadFile(
-            os.path.join(self.tempdir, 'dut_attribute_list.jsonpb')),
-        dut_attribute_list)
-    self.assertEqual(dut_attribute_list, self._Input().dut_attribute_list)
 
     self.assertEqual(output_proto, self._Output())
