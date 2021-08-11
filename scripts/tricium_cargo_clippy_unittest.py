@@ -282,6 +282,27 @@ class TriciumCargoClippyTests(cros_test_lib.LoggingTestCase):
           test_json, test_package_path, test_git_repo))
       self.assertEqual(locations, exp_results['locations'])
 
+  def test_parse_locations_ebuild_directories(self):
+    """Tests that parse_locations strips ebuild work directories."""
+    expected_location = 'src/foo'
+    example_finding = json.dumps({
+        'reason': 'compiler-message',
+        'level': 'warning',
+        'message': {
+            'rendered': 'warning: a message',
+            'spans': [{
+                'file_name': expected_location,
+                'column_end': 1,
+                'column_start': 2,
+                'line_end': 3,
+                'line_start': 4,}]}})
+    for work_dir in (
+        '/build/atlas/tmp/portage/dev-rust/pkg-0.12.3-r3/work/pkg-0.12.3',
+        '/build/atlas/tmp/portage/dev-rust/pkg-99999/work/pkg-9999'):
+      inputs = [json.dumps({'package_path': work_dir}), example_finding]
+      diagnostic = next(tricium_cargo_clippy.parse_diagnostics('', inputs, ''))
+      self.assertEqual(next(diagnostic.locations).file_path, expected_location)
+
   def test_parse_level(self):
     """Tests that parse_level is as expected."""
     for i, (test_case, exp_results) in enumerate(valid_test_cases.items()):

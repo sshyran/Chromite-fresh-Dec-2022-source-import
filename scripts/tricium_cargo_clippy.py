@@ -11,6 +11,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import re
 from typing import Any, Dict, Iterable, List, NamedTuple, Text
 
 from chromite.lib import commandline
@@ -117,8 +118,13 @@ def parse_locations(
   locations = set()
   for span in spans:
     file_path = os.path.join(package_path, span.get('file_name'))
-    if file_path.startswith(f'{git_repo}/'):
+    if git_repo and file_path.startswith(f'{git_repo}/'):
       file_path = file_path[len(git_repo)+1:]
+    else:
+      # Remove ebuild work directories from prefix
+      # Such as: "**/<package>-9999/work/<package>-9999/"
+      #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
+      file_path = re.sub(r'(.*/)?([^/]+)-[^/]+/work/[^/]+/+', '', file_path)
     location = CodeLocation(
         file_path=file_path,
         line_start=span.get('line_start'),
