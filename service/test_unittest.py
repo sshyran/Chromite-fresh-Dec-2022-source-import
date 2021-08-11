@@ -585,3 +585,36 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
       len([x for x in all_files if x['filename'] == '/src2/b.txt']))
     self.assertEqual(1,
       len([x for x in all_files if x['filename'] == '/firmware/c.txt']))
+
+
+class FindMetadataTestCase(cros_test_lib.MockTestCase):
+  """Test case for functions to find metadata files."""
+
+  build_target_name = 'coral'
+  sysroot_path = '/build/coral'
+  chroot_path = '/usr/chroot'
+
+  expected_autotest_metadata_file = (
+      '/usr/chroot/build/coral/usr/local/build/autotest/autotest_metadata.pb')
+  expected_tast_local_metadata_file = (
+        '/usr/chroot/build/coral/usr/share/tast/metadata/local/cros.pb')
+  expected_tast_local_private_metadata_file = (
+        '/usr/chroot/build/coral/build/share/tast/metadata/local/crosint.pb')
+  expected_tast_remote_metadata_file = (
+        '/usr/chroot/usr/share/tast/metadata/remote/cros.pb')
+
+  def setUp(self):
+    self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+    self.chroot = chroot_lib.Chroot(self.chroot_path)
+    self.PatchObject(cros_build_lib, 'AssertOutsideChroot')
+
+  def testFindAllMetadataFiles(self):
+    """Test case for Sysroot.FindAllMetadataFiles."""
+    actual = test.FindAllMetadataFiles(self.chroot, self.sysroot)
+    expected = [
+        self.expected_autotest_metadata_file,
+        self.expected_tast_local_metadata_file,
+        self.expected_tast_local_private_metadata_file,
+        self.expected_tast_remote_metadata_file,
+    ]
+    self.assertEqual(sorted(actual), sorted(expected))

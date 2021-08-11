@@ -266,8 +266,8 @@ class Sysroot(object):
 
   def __init__(self, path):
     self.path = path
-    self._config_file = self._Path(_CONFIGURATION_PATH)
-    self._cache_file = self._Path(_CACHE_PATH)
+    self._config_file = self.Path(_CONFIGURATION_PATH)
+    self._cache_file = self.Path(_CACHE_PATH)
     self._cache_file_lock = self._cache_file + '.lock'
 
   def __eq__(self, other):
@@ -289,7 +289,7 @@ class Sysroot(object):
 
     return os.path.exists(self.path)
 
-  def _Path(self, *args):
+  def Path(self, *args):
     """Helper to build out a path within the sysroot.
 
     Pass args as if calling os.path.join().
@@ -429,7 +429,7 @@ class Sysroot(object):
     """
     if friendly_name:
       return os.path.join(_wrapper_dir, '%s-%s' % (command, friendly_name))
-    return self._Path('build', 'bin', command)
+    return self.Path('build', 'bin', command)
 
   def CreateAllWrappers(self, friendly_name=None):
     """Creates all the wrappers.
@@ -483,7 +483,7 @@ class Sysroot(object):
     # Create a link to the debug symbols in the chroot so that gdb can detect
     # them.
     debug_symlink = os.path.join('/usr/lib/debug', self.path.lstrip('/'))
-    sysroot_debug = self._Path('usr/lib/debug')
+    sysroot_debug = self.Path('usr/lib/debug')
     osutils.SafeMakedirs(os.path.dirname(debug_symlink), sudo=True)
     osutils.SafeMakedirs(os.path.dirname(sysroot_debug), sudo=True)
 
@@ -492,7 +492,7 @@ class Sysroot(object):
   def InstallMakeConf(self):
     """Make sure the make.conf file exists and is up to date."""
     config_file = _GetMakeConfGenericPath()
-    osutils.SafeSymlink(config_file, self._Path(_MAKE_CONF), sudo=True)
+    osutils.SafeSymlink(config_file, self.Path(_MAKE_CONF), sudo=True)
 
   def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False,
                            package_indexes=None,
@@ -509,7 +509,7 @@ class Sysroot(object):
         attempt to improve binhost hit rates.
     """
     board_conf = self.GenerateBoardMakeConf(accepted_licenses=accepted_licenses)
-    make_conf_path = self._Path(_MAKE_CONF_BOARD)
+    make_conf_path = self.Path(_MAKE_CONF_BOARD)
     osutils.WriteFile(make_conf_path, board_conf, sudo=True)
 
     # Once make.conf.board has been generated, generate the binhost config.
@@ -528,7 +528,7 @@ class Sysroot(object):
     Args:
       board (str): The name of the board being setup in the sysroot.
     """
-    osutils.WriteFile(self._Path(_MAKE_CONF_BOARD_SETUP),
+    osutils.WriteFile(self.Path(_MAKE_CONF_BOARD_SETUP),
                       self.GenerateBoardSetupConfig(board), sudo=True)
 
   def InstallMakeConfUser(self):
@@ -539,7 +539,7 @@ class Sysroot(object):
     Only works inside the chroot.
     """
     make_user = _GetChrootMakeConfUserPath()
-    link_path = self._Path(_MAKE_CONF_USER)
+    link_path = self.Path(_MAKE_CONF_USER)
     if not os.path.exists(link_path):
       osutils.SafeSymlink(make_user, link_path, sudo=True)
 
@@ -763,8 +763,8 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
   def CreateSkeleton(self):
     """Creates a sysroot skeleton."""
     needed_dirs = [
-        self._Path('etc', 'portage', 'hooks'),
-        self._Path('etc', 'portage', 'profile'),
+        self.Path('etc', 'portage', 'hooks'),
+        self.Path('etc', 'portage', 'profile'),
         '/usr/local/bin',
     ]
     for d in needed_dirs:
@@ -773,7 +773,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     # Create links for portage hooks.
     hook_glob = os.path.join(constants.CROSUTILS_DIR, 'hooks', '*')
     for filename in glob.glob(hook_glob):
-      linkpath = self._Path('etc', 'portage', 'hooks',
+      linkpath = self.Path('etc', 'portage', 'hooks',
                             os.path.basename(filename))
       osutils.SafeSymlink(filename, linkpath, sudo=True)
 
@@ -845,7 +845,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       # Make the temporary directory in the same folder as the sysroot were
       # deleting to avoid crossing disks, mounts, etc. that'd cause us to
       # synchronously copy the entire thing before we delete it.
-      cwd = os.path.normpath(self._Path('..'))
+      cwd = os.path.normpath(self.Path('..'))
       try:
         result = cros_build_lib.sudo_run(['mktemp', '-d', '-p', cwd],
                                          print_cmd=False, encoding='utf-8',
@@ -874,14 +874,13 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
   def get_sdk_provided_packages(self) -> Iterable[package_info.PackageInfo]:
     """Find all packages provided by the SDK (i.e. package.provided)."""
     # Look at packages in package.provided.
-    sdk_file_path = self._Path('etc', 'portage', 'profile', 'package.provided')
+    sdk_file_path = self.Path('etc', 'portage', 'profile', 'package.provided')
     for line in osutils.ReadFile(sdk_file_path).splitlines():
       # Skip comments and empty lines.
       line = line.split('#', 1)[0].strip()
       if not line:
         continue
       yield package_info.parse(line)
-
 
 def get_sdk_provided_packages(
     sysroot_path: str) -> Iterable[package_info.PackageInfo]:

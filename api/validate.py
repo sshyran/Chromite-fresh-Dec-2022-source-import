@@ -144,7 +144,7 @@ def each_in(field: str,
 
 # pylint: disable=docstring-misnamed-args
 def require(*fields: str):
-  """Verify |fields| have all been set.
+  """Verify |fields| have all been set to truthy values.
 
   Args:
     fields: The fields being checked. May be . separated nested fields.

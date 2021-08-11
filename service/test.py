@@ -532,3 +532,59 @@ def GatherCodeCoverageLlvmJsonFile(
   return GatherCodeCoverageLlvmJsonFileResult(
       joined_file_paths=joined_file_paths
   )
+
+
+def FindAllMetadataFiles(chroot: chroot_lib.Chroot,
+                         sysroot: sysroot_lib.Sysroot) -> List[str]:
+  """Find the full paths to all test metadata paths."""
+  # Right now there's no use case for this function inside the chroot.
+  # If it's useful, we could make the chroot param optional to run in the SDK.
+  cros_build_lib.AssertOutsideChroot()
+  return [
+      _FindAutotestMetadataFile(chroot, sysroot),
+      _FindTastLocalMetadataFile(chroot, sysroot),
+      _FindTastLocalPrivateMetadataFile(chroot, sysroot),
+      _FindTastRemoteMetadataFile(chroot),
+  ]
+
+
+def _FindAutotestMetadataFile(chroot: chroot_lib.Chroot,
+                              sysroot: sysroot_lib.Sysroot) -> str:
+  """Find the full path to the Autotest test metadata file.
+
+  This file is installed during the chromeos-base/autotest ebuild.
+  """
+  return chroot.full_path(sysroot.Path('usr', 'local', 'build', 'autotest',
+      'autotest_metadata.pb'
+  ))
+
+
+def _FindTastLocalMetadataFile(chroot: chroot_lib.Chroot,
+                               sysroot: sysroot_lib.Sysroot) -> str:
+  """Find the full path to the Tast local test metadata file.
+
+  This file is installed during the tast-bundle eclass.
+  """
+  return chroot.full_path(sysroot.Path('usr', 'share', 'tast', 'metadata',
+      'local', 'cros.pb'
+  ))
+
+
+def _FindTastLocalPrivateMetadataFile(chroot: chroot_lib.Chroot,
+                                      sysroot: sysroot_lib.Sysroot) -> str:
+  """Find the full path to the Tast local private test metadata file.
+
+  This file is installed during the tast-bundle eclass.
+  """
+  return chroot.full_path(sysroot.Path('build', 'share', 'tast', 'metadata',
+      'local', 'crosint.pb'
+  ))
+
+
+def _FindTastRemoteMetadataFile(chroot: chroot_lib.Chroot) -> str:
+  """Find the full path to the Tast remote test metadata file.
+
+  This file is installed during the tast-bundle eclass.
+  """
+  return chroot.full_path('usr', 'share', 'tast', 'metadata', 'remote',
+      'cros.pb')
