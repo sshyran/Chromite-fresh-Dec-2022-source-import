@@ -4,7 +4,6 @@
 
 """cros ap: firmware AP related commands."""
 
-from abc import ABCMeta, abstractmethod
 import logging
 import os
 from pathlib import Path
@@ -43,20 +42,20 @@ class APCommand(command.CliCommand):
 
     dump_config_parser = _AddSubparser(parser, subparsers, COMMAND_DUMP_CONFIG,
                                        'Dump the AP Config to a file.')
-    DumpConfigSubcommand.AddCLIArguments(cls, dump_config_parser)
+    DumpConfigSubcommand.AddParser(dump_config_parser)
 
     build_parser = _AddSubparser(
         parser, subparsers, COMMAND_BUILD,
         'Build the AP Firmware for the requested build target.')
-    BuildSubcommand.AddCLIArguments(cls, build_parser)
+    BuildSubcommand.AddParser(build_parser)
 
     flash_parser = _AddSubparser(parser, subparsers, COMMAND_FLASH,
                                  'Update the AP Firmware on a device.')
-    FlashSubcommand.AddCLIArguments(cls, flash_parser)
+    FlashSubcommand.AddParser(flash_parser)
 
     read_parser = _AddSubparser(parser, subparsers, COMMAND_READ,
                                 'Read the AP Firmware from a device.')
-    ReadSubcommand.AddCLIArguments(cls, read_parser)
+    ReadSubcommand.AddParser(read_parser)
 
   def Run(self):
     """The main handler of this CLI."""
@@ -68,7 +67,7 @@ class APCommand(command.CliCommand):
       subcmd = FlashSubcommand(self.options)
     elif self.options.ap_command == COMMAND_READ:
       subcmd = ReadSubcommand(self.options)
-    subcmd.run()
+    subcmd.Run()
 
 
 def _AddSubparser(parser, subparsers, name, description):
@@ -95,23 +94,7 @@ def _AddSubparser(parser, subparsers, name, description):
   )
 
 
-class APSubcommandInterface(metaclass=ABCMeta):
-  """Virtual class declaring methods of AP subcommand."""
-
-  def __init__(self, options) -> None:
-    self.options = options
-
-  @abstractmethod
-  def run(self):
-    """Executes the command."""
-
-  @staticmethod
-  @abstractmethod
-  def AddCLIArguments(cmd, subparser):
-    """Adds subcommand-specific CLI arguments to subparser."""
-
-
-class DumpConfigSubcommand(APSubcommandInterface):
+class DumpConfigSubcommand(command.CliCommand):
   """Dump the AP Config to a file."""
 
   def __init__(self, options):
@@ -120,10 +103,10 @@ class DumpConfigSubcommand(APSubcommandInterface):
       self.options.output = Path(self.options.output)
     self.options.Freeze()
 
-  @staticmethod
-  def AddCLIArguments(cmd, subparser):
-    """Adds AP DumpConfig specific CLI arguments to subparser."""
-    subparser.add_argument(
+  @classmethod
+  def AddParser(cls, parser):
+    """Adds AP DumpConfig specific CLI arguments to parser."""
+    parser.add_argument(
         '-b',
         '--boards',
         default=None,
@@ -131,12 +114,12 @@ class DumpConfigSubcommand(APSubcommandInterface):
         dest='boards',
         help='Space-separated list of boards. '
         '(default: all boards in chromite/lib/firmware/ap_firmware_config)')
-    subparser.add_argument(
+    parser.add_argument(
         '--serial',
         default='%s',
         help='Serial of the servos. (default: %(default)s)')
-    subparser.add_argument('-o', '--output', type='path', help='Output file.')
-    subparser.epilog = """
+    parser.add_argument('-o', '--output', type='path', help='Output file.')
+    parser.epilog = """
 Dump DUT controls and programmer arguments into a provided file.
 
 To dump AP config of all boards into /tmp/cros-read-ap-config.json
@@ -146,7 +129,7 @@ To dump AP config of drallion and dedede boards:
   cros ap dump-config -o /tmp/cros-read-ap-config.json -b drallion,dedede
 """
 
-  def run(self):
+  def Run(self):
     """Perform the cros ap dump-config command."""
     boards = []
     if self.options.boards:
@@ -206,7 +189,7 @@ To dump AP config of drallion and dedede boards:
       pformat.json(output, f)
 
 
-class BuildSubcommand(APSubcommandInterface):
+class BuildSubcommand(command.CliCommand):
   """Build the AP Firmware for the requested build target."""
 
   def __init__(self, options):
@@ -214,30 +197,30 @@ class BuildSubcommand(APSubcommandInterface):
     self.build_target = build_target_lib.BuildTarget(self.options.build_target)
     self.options.Freeze()
 
-  @staticmethod
-  def AddCLIArguments(cmd, subparser):
-    """Adds AP Build specific CLI arguments to subparser."""
-    subparser.add_argument(
+  @classmethod
+  def AddParser(cls, parser):
+    """Adds AP Build specific CLI arguments to parser."""
+    parser.add_argument(
         '-b',
         '--build-target',
         dest='build_target',
         default=cros_build_lib.GetDefaultBoard(),
         required=not bool(cros_build_lib.GetDefaultBoard()),
         help='The build target whose AP firmware should be built.')
-    subparser.add_argument(
+    parser.add_argument(
         '--fw-name',
         '--variant',
         dest='fw_name',
         help='Sets the FW_NAME environment variable. Set to build only the '
         "specified variant's firmware.")
     # TODO(saklein): Remove when added to base parser.
-    subparser.add_argument(
+    parser.add_argument(
         '-n',
         '--dry-run',
         action='store_true',
         default=False,
         help='Perform a dry run, describing the steps without running them.')
-    subparser.epilog = """
+    parser.epilog = """
 To build the AP Firmware for foo:
   cros ap build -b foo
 
@@ -245,7 +228,7 @@ To build the AP Firmware only for foo-variant:
   cros ap build -b foo --fw-name foo-variant
 """
 
-  def run(self):
+  def Run(self):
     commandline.RunInsideChroot(self)
 
     try:
@@ -257,7 +240,7 @@ To build the AP Firmware only for foo-variant:
       cros_build_lib.Die(e)
 
 
-class ReadSubcommand(APSubcommandInterface):
+class ReadSubcommand(command.CliCommand):
   """Read the AP Firmware from a device."""
 
   def __init__(self, options):
@@ -267,34 +250,34 @@ class ReadSubcommand(APSubcommandInterface):
     self.options.output_path = Path(self.options.output)
     self.options.Freeze()
 
-  @staticmethod
-  def AddCLIArguments(cmd, subparser):
-    """Adds AP Read specific CLI arguments to subparser."""
-    cmd.AddDeviceArgument(
-        subparser,
+  @classmethod
+  def AddParser(cls, parser):
+    """Adds AP Read specific CLI arguments to parser."""
+    cls.AddDeviceArgument(
+        parser,
         schemes=[
             commandline.DEVICE_SCHEME_SSH, commandline.DEVICE_SCHEME_SERVO
         ])
-    subparser.add_argument(
+    parser.add_argument(
         '-b',
         '--build-target',
         default=cros_build_lib.GetDefaultBoard(),
         dest='build_target',
         help='The name of the build target.')
-    subparser.add_argument('-r'
+    parser.add_argument('-r'
                            '--region',
                            dest='region',
                            type=str,
                            help='Region to read.')
-    subparser.add_argument(
+    parser.add_argument(
         '-o', '--output', type='path', required=True, help='Output file.')
-    subparser.add_argument(
+    parser.add_argument(
         '-n',
         '--dry-run',
         action='store_true',
         help='Execute a dry-run. Print the commands that would be run instead '
         'of running them.')
-    subparser.epilog = """Command to read the AP firmware from a DUT.
+    parser.epilog = """Command to read the AP firmware from a DUT.
 To read image of device.cros via SSH:
   cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://device.cros
 
@@ -309,7 +292,7 @@ To read a specific region from DUT via SERVO on default port(9999):
   cros ap read -b volteer -r region -o /tmp/volteer-image.bin -d servo:port
 """
 
-  def run(self):
+  def Run(self):
     if not cros_build_lib.IsInsideChroot():
       logging.notice('Command will run in chroot, '
                      'and the output file path will be inside.')
@@ -353,7 +336,7 @@ To read a specific region from DUT via SERVO on default port(9999):
                       'is correct and servod is running in the background.')
 
 
-class FlashSubcommand(APSubcommandInterface):
+class FlashSubcommand(command.CliCommand):
   """Update the AP Firmware on a device."""
 
   def __init__(self, options):
@@ -364,46 +347,46 @@ class FlashSubcommand(APSubcommandInterface):
           'again.', self.options.image)
     self.options.Freeze()
 
-  @staticmethod
-  def AddCLIArguments(cmd, subparser):
-    """Adds AP Flash specific CLI arguments to subparser."""
-    cmd.AddDeviceArgument(
-        subparser,
+  @classmethod
+  def AddParser(cls, parser):
+    """Adds AP Flash specific CLI arguments to parser."""
+    cls.AddDeviceArgument(
+        parser,
         schemes=[
             commandline.DEVICE_SCHEME_SSH, commandline.DEVICE_SCHEME_SERVO
         ])
-    subparser.add_argument(
+    parser.add_argument(
         '-i',
         '--image',
         required=True,
         type='path',
         help='/path/to/BIOS_image.bin')
-    subparser.add_argument(
+    parser.add_argument(
         '-b',
         '--build-target',
         default=cros_build_lib.GetDefaultBoard(),
         dest='build_target',
         help='The name of the build target.')
-    subparser.add_argument(
+    parser.add_argument(
         '--flashrom',
         action='store_true',
         help='Use flashrom to flash instead of futility.')
-    subparser.add_argument(
+    parser.add_argument(
         '--flash-contents',
         type=str,
         help='Assume flash contents to be the specified file. '
         'Only available when using --flashrom.')
-    subparser.add_argument(
+    parser.add_argument(
         '--fast',
         action='store_true',
         help='Speed up flashing by not validating flash.')
-    subparser.add_argument(
+    parser.add_argument(
         '-n',
         '--dry-run',
         action='store_true',
         help='Execute a dry-run. Print the commands that would be run instead '
         'of running them.')
-    subparser.epilog = """
+    parser.epilog = """
 Command to flash the AP firmware onto a DUT.
 
 To flash your zork DUT with an IP of 1.1.1.1 via SSH:
@@ -416,7 +399,7 @@ To flash your volteer DUT via SERVO on port 1234:
   cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
 """
 
-  def run(self):
+  def Run(self):
     commandline.RunInsideChroot(self)
 
     build_target = build_target_lib.BuildTarget(self.options.build_target)
