@@ -5034,7 +5034,7 @@
       "reference_board_name": "keeby",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "keeby",
