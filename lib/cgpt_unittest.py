@@ -81,8 +81,8 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
     """Test ReadGpt with mock cgpt output."""
     disk = self.getMockDisk()
 
-    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'], capture_output=True,
-                             encoding='utf-8')
+    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'], enter_chroot=True,
+                             capture_output=True, encoding='utf-8')
 
     self.assertEqual(len(disk.partitions), 12)
 
