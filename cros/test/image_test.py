@@ -1002,6 +1002,7 @@ class TmpfilesdTest(image_test_lib.ImageTestCase):
     """Make sure every user & group actually exist.
 
     If the accounts don't exist at runtime, tmpfiles.d likes to blow up.
+    Numeric entries are allowed to support ARC++ shared mounts.
     """
     root = Path(image_test_lib.ROOT_A)
     etc_passwd = root / 'etc' / 'passwd'
@@ -1015,10 +1016,10 @@ class TmpfilesdTest(image_test_lib.ImageTestCase):
 
     success = True
     for entry in self._iter_tmpfiles_d():
-      if entry.user not in valid_users:
+      if not entry.user.isnumeric() and entry.user not in valid_users:
         logging.error('%s: unknown user', entry)
         success = False
-      if entry.group not in valid_groups:
+      if not entry.group.isnumeric() and entry.group not in valid_groups:
         logging.error('%s: unknown group', entry)
         success = False
 
