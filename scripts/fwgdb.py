@@ -37,8 +37,8 @@ _SRC_DC = os.path.join(_SRC_ROOT, 'platform/depthcharge')
 _SRC_VB = os.path.join(_SRC_ROOT, 'platform/vboot_reference')
 _SRC_LP = os.path.join(_SRC_ROOT, 'third_party/coreboot/payloads/libpayload')
 
-_PTRN_GDB = 'Ready for GDB connection'
-_PTRN_BOARD = 'Starting(?: read-only| read/write)? depthcharge on ([a-z_]+)...'
+_PTRN_GDB = b'Ready for GDB connection'
+_PTRN_BOARD = b'Starting(?: read-only| read/write)? depthcharge on ([a-z_]+)...'
 
 
 def GetGdbForElf(elf):
@@ -121,35 +121,36 @@ def FindSymbols(firmware_dir, board):
 # whether the delay here is even needed at all anymore.
 def ReadAll(fd, wait=0.03):
   """Read from |fd| until no more data has come for at least |wait| seconds."""
-  data = ''
+  data = []
   try:
     while True:
       time.sleep(wait)
       new_data = os.read(fd, 4096)
       if not new_data:
         break
-      data += new_data
+      data.append(new_data)
   except OSError as e:
     if e.errno != errno.EAGAIN:
       raise
+  data = b''.join(data)
   logging.debug(data)
   return data
 
 
 def GdbChecksum(message):
   """Calculate a remote-GDB style checksum."""
-  chksum = sum([ord(x) for x in message])
-  return ('%.2x' % chksum)[-2:]
+  chksum = sum(message)
+  return (b'%.2x' % chksum)[-2:]
 
 
 def TestConnection(fd):
   """Return True iff there is a resposive GDB stub on the other end of 'fd'."""
-  cmd = 'vUnknownCommand'
+  cmd = b'vUnknownCommand'
   for _ in range(3):
-    os.write(fd, '$%s#%s\n' % (cmd, GdbChecksum(cmd)))
+    os.write(fd, b'$%s#%s\n' % (cmd, GdbChecksum(cmd)))
     reply = ReadAll(fd)
-    if '+$#00' in reply:
-      os.write(fd, '+')
+    if b'+$#00' in reply:
+      os.write(fd, b'+')
       logging.info('TestConnection: Could successfully connect to remote end.')
       return True
   logging.info('TestConnection: Remote end does not respond.')
@@ -190,7 +191,7 @@ def main(argv):
         raise
 
       # Throw away old data to avoid confusion from messages before the reboot
-      data = ''
+      data = b''
       msg = ('Could not reboot into depthcharge!')
       with timeout_util.Timeout(10, msg):
         while not re.search(_PTRN_BOARD, data):
@@ -203,7 +204,7 @@ def main(argv):
         while not re.search(_PTRN_GDB, data):
           # Send a CTRL+G to tell depthcharge to trap into GDB.
           logging.debug('[Ctrl+G]')
-          os.write(fd, chr(ord('G') & 0x1f))
+          os.write(fd, b'\x07')
           data += ReadAll(fd)
 
     if not opts.board:
