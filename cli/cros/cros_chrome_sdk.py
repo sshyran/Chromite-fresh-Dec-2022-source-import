@@ -68,7 +68,7 @@ class MissingSDK(Exception):
 
   def _ConstructLegolandURL(self, config):
     """Returns a link to the given board's release builder."""
-    return ('https://https://dashboards.corp.google.com/chromeos_ci_release?'
+    return ('https://dashboards.corp.google.com/chromeos_ci_release?'
             'f=cbb_config:in:%s' % config)
 
   def __init__(self, config, version=None):
