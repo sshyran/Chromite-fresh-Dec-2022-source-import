@@ -77,7 +77,7 @@ def ParseArgs(argv):
 
 
 def FindSymbols(firmware_dir, board):
-  """Find the symbolized depthcharge ELF (may be supplied by -s flag)."""
+  """Find the symbolized depthcharge ELF (may be supplied by -y flag)."""
 
   # Allow overriding the file directly just in case our detection screws up.
   if firmware_dir and firmware_dir.endswith('.elf'):
@@ -93,7 +93,7 @@ def FindSymbols(firmware_dir, board):
       firmware_dir = unified_build_dirs[0]
     elif len(unified_build_dirs) > 1:
       raise ValueError(
-          'Multiple boards were found (%s). Use -s to specify manually' %
+          'Multiple boards were found (%s). Use -y to specify manually' %
           (', '.join(unified_build_dirs)))
 
   if not firmware_dir:
