@@ -9,12 +9,12 @@ from typing import List, NamedTuple
 
 from chromite.lib import cros_build_lib
 
-
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'
 SERVO_CCD_TI50 = 'ccd_ti50'
 SERVO_MICRO = 'servo_micro'
 SERVO_V2 = 'servo_v2'
+SERVO_V4_CCD = 'servo_v4_with_ccd'
 SERVO_V4_CCD_CR50 = 'servo_v4_with_ccd_cr50'
 SERVO_V4_CCD_TI50 = 'servo_v4_with_ccd_ti50'
 SERVO_V4_MICRO = 'servo_v4_with_servo_micro'
@@ -25,19 +25,21 @@ VALID_SERVOS = (
     SERVO_CCD_TI50,
     SERVO_MICRO,
     SERVO_V2,
+    SERVO_V4_CCD,
     SERVO_V4_CCD_CR50,
     SERVO_V4_CCD_TI50,
     SERVO_V4_MICRO,
 )
 
-CCD_SERVOS = (SERVO_CCD_CR50, SERVO_CCD_TI50, SERVO_V4_CCD_CR50,
+CCD_SERVOS = (SERVO_CCD_CR50, SERVO_CCD_TI50, SERVO_V4_CCD, SERVO_V4_CCD_CR50,
               SERVO_V4_CCD_TI50)
 MICRO_SERVOS = (SERVO_MICRO, SERVO_V4_MICRO)
 V2_SERVOS = (SERVO_V2,)
-V4_SERVOS = (SERVO_V4_CCD_CR50, SERVO_V4_MICRO, SERVO_V4_CCD_TI50)
+V4_SERVOS = (SERVO_V4_CCD, SERVO_V4_CCD_CR50, SERVO_V4_MICRO, SERVO_V4_CCD_TI50)
 
 _SERIAL_NUMBER_OPTION = 'serialname'
 _SERIAL_NUMBER_OPTION_OVERRIDE = {
+    SERVO_V4_CCD: 'ccd_serialname',
     SERVO_V4_CCD_CR50: 'ccd_serialname',
     SERVO_V4_CCD_TI50: 'ccd_serialname',
     SERVO_V4_MICRO: 'servo_micro_serialname',
