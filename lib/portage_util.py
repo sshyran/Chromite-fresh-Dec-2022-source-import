@@ -80,12 +80,16 @@ class EbuildVersionError(Error):
   """Error for when an invalid version is generated for an ebuild."""
 
 
+class InvalidUprevSourceError(Error):
+  """Error for when an uprev source is invalid."""
+
+
 class MissingOverlayError(Error):
   """This exception indicates that a needed overlay is missing."""
 
 
-class InvalidUprevSourceError(Error):
-  """Error for when an uprev source is invalid."""
+class SourceDirectoryDoesNotExistError(Error, FileNotFoundError):
+  """Error when at least one of an ebuild's sources does not exist."""
 
 
 def GetOverlayRoot(path):
@@ -862,10 +866,6 @@ class EBuild(object):
         if self.subdir_support and subdir:
           subdir_path = os.path.join(subdir_path, subdir)
 
-        if not os.path.isdir(subdir_path):
-          raise Error('Source repository %s '
-                      'for project %s does not exist.' % (subdir_path,
-                                                          self.pkgname))
         # Verify that we're grabbing the commit id from the right project name.
         real_project = manifest.FindCheckoutFromPath(subdir_path)['name']
         if project != real_project:
@@ -900,6 +900,10 @@ class EBuild(object):
     Raises:
       raise Error if git fails to return the HEAD commit id.
     """
+    if not os.path.exists(srcdir):
+      raise SourceDirectoryDoesNotExistError(
+          'Source repository %s for project %s does not exist.' %
+          (srcdir, self.pkgname))
     output = self._RunGit(srcdir, ['rev-parse', '%s^{commit}' % ref])
     if not output:
       raise Error('Cannot determine %s commit for %s' % (ref, srcdir))
