@@ -117,12 +117,12 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     cros_build_lib.run(['bzip2', env_file])
     self.env_bz2 = '%s.bz2' % env_file
 
-  def _CreateChromeDir(self, path, populate=True):
+  def _CreateChromeDir(self, path: str, populate: bool = True):
     """Setup a chrome package directory.
 
     Args:
-      path (str): The full chrome package path.
-      populate (bool): Whether to include the environment bz2.
+      path: The full chrome package path.
+      populate: Whether to include the environment bz2.
     """
     osutils.SafeMakedirs(path)
     if populate:
