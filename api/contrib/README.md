@@ -68,6 +68,10 @@ but providing multiple examples is encouraged for manual use when it makes sense
 The option allows generating your input files and substituting in a specific build target everywhere.
 In order to support this feature, simply replace a specific build target name in the example input (e.g. `"betty"`) with `"%(build_target)s"`.
 
+The templates also support two other variables to make adding generic templates easier: `chroot` and `src_root`.
+The `chroot` variable subs in the full, default path to the chroot.
+The `src_root` variable subs in the path to your checkout, which is typically somewhere like `~/chromiumos`.
+
 ### Notes
 
 The `call_scripts/` input files are only overwritten when generating for a new build target (`-b`/`--build-target`), or using the `--force` option.
