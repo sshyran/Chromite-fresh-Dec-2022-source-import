@@ -308,6 +308,90 @@ class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
                      ku._GetRemotePartitionName())
 
 
+class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
+  """Tests MiniOSUpdater class."""
+
+  def test_GetPartitionName(self):
+    """Tests the name of the partitions."""
+    u = device_imager.MiniOSUpdater(*([None] * 5))
+    self.assertEqual(constants.PART_MINIOS_A, u._GetPartitionName())
+
+  def test_GetRemotePartitionName(self):
+    """Tests the name of the partitions."""
+    # TODO(b/190631159, b/196056723): Allow fetching once miniOS payloads exist.
+    u = device_imager.MiniOSUpdater(*([None] * 5))
+    with self.assertRaises(NotImplementedError):
+      u._GetRemotePartitionName()
+
+  @mock.patch.object(device_imager.MiniOSUpdater, '_CopyPartitionFromImage')
+  @mock.patch.object(device_imager.MiniOSUpdater, '_MiniOSPartitionExists',
+                     return_value=True)
+  @mock.patch.object(device_imager.MiniOSUpdater, '_RunPostInstall')
+  def test_Run(self, postinstall_mock, minios_mock, copy_mock):
+    """Test main Run() function."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.MiniOSUpdater(
+          device, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+
+      copy_mock.assert_called_with(constants.PART_MINIOS_A)
+      minios_mock.assert_called_with()
+      postinstall_mock.assert_called_with()
+
+  @mock.patch.object(device_imager.MiniOSUpdater, '_CopyPartitionFromImage')
+  @mock.patch.object(device_imager.MiniOSUpdater, '_MiniOSPartitionExists',
+                     return_value=False)
+  @mock.patch.object(device_imager.MiniOSUpdater, '_RunPostInstall')
+  def test_RunMissingMiniOS(self, postinstall_mock, minios_mock, copy_mock):
+    """Test main Run() function."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.MiniOSUpdater(
+          device, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+
+      copy_mock.assert_not_called()
+      minios_mock.assert_called_with()
+      postinstall_mock.assert_called_with()
+
+  @mock.patch.object(device_imager.MiniOSUpdater, '_FlipMiniOSPriority')
+  def test_RunPostInstall(self, flip_mock):
+    """Test _RunPostInstall() function."""
+    with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
+      device_imager.MiniOSUpdater(
+          device, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)._RunPostInstall()
+
+      flip_mock.assert_called_with()
+
+  @mock.patch.object(device_imager.MiniOSUpdater, '_FlipMiniOSPriority')
+  def test_Revert(self, flip_mock):
+    """Test Revert() function."""
+    u = device_imager.MiniOSUpdater(
+          None, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)
+
+    # Before PostInstall runs.
+    u.Revert()
+    flip_mock.assert_not_called()
+
+    u._ran_postinst = True
+    u.Revert()
+
+    flip_mock.assert_called_with()
+
+  @mock.patch.object(device_imager.MiniOSUpdater, '_GetMiniOSPriority',
+                     return_value='A')
+  @mock.patch.object(device_imager.MiniOSUpdater, '_SetMiniOSPriority')
+  def test_FlipMiniOSPriority(self, set_mock, get_mock):
+    """Test _FlipMiniOSPriority() function."""
+    device_imager.MiniOSUpdater(
+          None, 'foo-image', device_imager.ImageType.FULL,
+          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)._FlipMiniOSPriority()
+
+    get_mock.assert_called_with()
+    set_mock.assert_called_with('B')
+
+
 class RootfsUpdaterTest(cros_test_lib.MockTestCase):
   """Tests RootfsUpdater class."""
 

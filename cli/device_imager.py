@@ -16,6 +16,7 @@ from typing import Dict, Tuple
 
 from chromite.cli import command
 from chromite.cli import flash
+from chromite.lib import cgpt
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
@@ -50,6 +51,7 @@ class Partition(enum.Enum):
   """An enum for partition types like kernel and rootfs."""
   KERNEL = 0
   ROOTFS = 1
+  MINIOS = 2
 
 
 class DeviceImager(object):
@@ -64,11 +66,15 @@ class DeviceImager(object):
   A = {Partition.KERNEL: 2, Partition.ROOTFS: 3}
   B = {Partition.KERNEL: 4, Partition.ROOTFS: 5}
 
+  MINIOS_A = {Partition.MINIOS: 9}
+  MINIOS_B = {Partition.MINIOS: 10}
+
   def __init__(self, device, image: str,
                board: str = None,
                version: str = None,
                no_rootfs_update: bool = False,
                no_stateful_update: bool = False,
+               no_minios_update: bool = False,
                no_reboot: bool = False,
                disable_verification: bool = False,
                clobber_stateful: bool = False,
@@ -82,6 +88,7 @@ class DeviceImager(object):
       version: Image version to use.
       no_rootfs_update: Whether to do rootfs partition update.
       no_stateful_update: Whether to do stateful partition update.
+      no_minios_update: Whether to do minios partition update.
       no_reboot: Whether to reboot device after update. The default is True.
       disable_verification: Whether to disabling rootfs verification on the
           device.
@@ -95,6 +102,7 @@ class DeviceImager(object):
     self._version = version
     self._no_rootfs_update = no_rootfs_update
     self._no_stateful_update = no_stateful_update
+    self._no_minios_update = no_minios_update
     self._no_reboot = no_reboot
     self._disable_verification = disable_verification
     self._clobber_stateful = clobber_stateful
@@ -221,6 +229,20 @@ class DeviceImager(object):
     else:
       raise Error(f'Invalid root partition number {root_num}')
 
+  def _GetMiniOSState(self, minios_num: int) -> Tuple[Dict, Dict]:
+    """Returns the miniOS state.
+
+    Returns:
+      A tuple of dictionaries: The current active miniOS state and the inactive
+      miniOS state.
+    """
+    if minios_num == self.MINIOS_A[Partition.MINIOS]:
+      return self.MINIOS_A, self.MINIOS_B
+    elif minios_num == self.MINIOS_B[Partition.MINIOS]:
+      return self.MINIOS_B, self.MINIOS_A
+    else:
+      raise Error(f'Invalid minios partition number {minios_num}')
+
   def _InstallPartitions(self):
     """The main method that installs the partitions of a Chrome OS device.
 
@@ -245,6 +267,15 @@ class DeviceImager(object):
       updaters.append(StatefulUpdater(self._clobber_stateful, self._device,
                                       self._image, self._image_type, None,
                                       None))
+
+    if not self._no_minios_update:
+      # Reference disk_layout_v3 for partition numbering.
+      _, inactive_minios_state = self._GetMiniOSState(
+          9 if self._device.run(
+              ['crossystem', constants.MINIOS_PRIORITY]).output == 'A' else 10)
+      target_minios = prefix + str(inactive_minios_state[Partition.MINIOS])
+      updaters.append(MiniOSUpdater(self._device, self._image, self._image_type,
+                                    target_minios, self._compression))
 
     # Retry the partitions updates that failed, in case a transient error (like
     # SSH drop, etc) caused the error.
@@ -540,7 +571,7 @@ class RawPartitionUpdater(PartitionUpdaterBase):
     return ' '.join(cmd)
 
   def _GetPartLocation(self, part_name: str):
-    """Extracts the location and size of the kernel partition from the image.
+    """Extracts the location and size of the raw partition from the image.
 
     Args:
       part_name: The name of the partition in the source image that needs to be
@@ -696,6 +727,78 @@ class RootfsUpdater(RawPartitionUpdater):
       # We don't have to do anything for revert if we haven't changed the kernel
       # priorities yet.
       self._RunPostInst(on_target=False)
+
+
+class MiniOSUpdater(RawPartitionUpdater):
+  """A class to update the miniOS partition on a Chromium OS device."""
+
+  def __init__(self, *args):
+    """Initializes the class.
+
+    Args:
+      *args: See PartitionUpdaterBase
+    """
+    super().__init__(*args)
+
+    self._ran_postinst = False
+
+  def _GetPartitionName(self):
+    """See RawPartitionUpdater._GetPartitionName()."""
+    return constants.PART_MINIOS_A
+
+  def _GetRemotePartitionName(self):
+    """See RawPartitionUpdater._GetRemotePartitionName()."""
+    # TODO(b/190631159, b/196056723): Allow fetching once miniOS payloads exist.
+    raise NotImplementedError("MiniOS payloads aren't uploaded yet.")
+
+  def _Run(self):
+    """The function that does the job of rootfs partition update."""
+    if self._image_type in [ImageType.FULL, ImageType.REMOTE_DIRECTORY]:
+      if self._MiniOSPartitionExists():
+        logging.info('Updating miniOS partition.')
+        super()._Run()
+      else:
+        logging.info('Not updating miniOS partition as it does not exist.')
+    else:
+      # Let super() handle this error.
+      super()._Run()
+
+    self._RunPostInstall()
+
+  def _RunPostInstall(self):
+    """The function will change the priority of the miniOS partitions."""
+    self._FlipMiniOSPriority()
+    self._ran_postinst = True
+
+  def Revert(self):
+    """Reverts the miniOS partition update."""
+    if self._ran_postinst:
+      self._FlipMiniOSPriority()
+
+  def _GetMiniOSPriority(self):
+    return self._device.run(['crossystem', constants.MINIOS_PRIORITY]).output
+
+  def _SetMiniOSPriority(self, priority: str):
+    self._device.run(
+        ['crossystem', f'{constants.MINIOS_PRIORITY}={priority}'])
+
+  def _FlipMiniOSPriority(self):
+    inactive_minios_priority = 'B' if self._GetMiniOSPriority() == 'A' else 'A'
+    logging.info('Setting miniOS priority to %s', inactive_minios_priority)
+    self._SetMiniOSPriority(inactive_minios_priority)
+
+  def _MiniOSPartitionExists(self):
+    """Checks if miniOS partition exists."""
+    if self._image_type == ImageType.FULL:
+      d = cgpt.Disk.FromImage(self._image)
+      try:
+        d.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+        return True
+      except KeyError:
+        return False
+    elif self._image_type == ImageType.REMOTE_DIRECTORY:
+      # TODO(b/190631159, b/196056723): Check miniOS payload in remote.
+      return False
 
 
 class StatefulPayloadGenerator(ReaderBase):

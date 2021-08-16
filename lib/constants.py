@@ -932,6 +932,9 @@ PART_KERN_A = 'KERN-A'
 PART_KERN_B = 'KERN-B'
 PART_MINIOS_A = 'MINIOS-A'
 
+# Crossystem related constants.
+MINIOS_PRIORITY = 'minios_priority'
+
 # Quick provision payloads. These file names should never be changed, otherwise
 # very bad things can happen :). The reason is we have already uploaded these
 # files with these names for all boards. So if the name changes, all scripts
