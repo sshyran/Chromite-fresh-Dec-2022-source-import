@@ -90,7 +90,7 @@ def _InstallProtoc(protoc_version: ProtocVersion):
     cros_build_lib.run(cmd, cwd=constants.CHROMITE_DIR, print_cmd=False)
 
 
-def _CleanTargetDirectory(directory):
+def _CleanTargetDirectory(directory: str):
   """Remove any existing generated files in the directory.
 
   This clean only removes the generated files to avoid accidentally destroying
@@ -100,7 +100,7 @@ def _CleanTargetDirectory(directory):
   diagnosing accidental __init__.py changes.
 
   Args:
-    directory (str): Path to be cleaned up.
+    directory: Path to be cleaned up.
   """
   logging.info('Cleaning old files from %s.', directory)
   for dirpath, _dirnames, filenames in os.walk(directory):
