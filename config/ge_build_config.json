@@ -566,18 +566,6 @@
       ]
     },
     {
-      "name": "octopus-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reks",
       "configs": [
         {
@@ -6549,6 +6537,375 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 354,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "octopus-kernelnext",
+      "reference_board_name": "octopus-kernelnext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "ampton",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "apel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "apele",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "bloog",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "blooglet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "blooguard",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "blorb",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "bluebird",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "bobba",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "bobba360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "casta",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "dood",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "dorp",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "droid",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "fleex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "foob",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "foob360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "garfour",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "garg",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "garg360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "grabbiter",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "laser14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "lick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "meep",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "mimrock",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "nospike",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "orbatrix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "phaser",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "phaser360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "sparky",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "sparky360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_ampton",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_bloog",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_bobba",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_casta",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_dood",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_fleex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_foob",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_garg",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_lick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_meep",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "unprovisioned_phaser",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "vorticon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "vortininja",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-kernelnext",
+          "name": "yorp",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7200,
           "is_active": true
         }
       ]
