@@ -177,6 +177,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                users={'crash', 'chronos', 'vm_cicerone'}),
     GroupEntry(group='pstore-access', gid=422, users={'debugd',
                                                       'oobe_config_restore'}),
+    GroupEntry(group='bluetooth-audio', gid=423, users={'bluetooth', 'cras'}),
 
     GroupEntry(group='cras', gid=600, users={'chronos', 'crosvm', 'power',
                                              'rtanalytics', 'sound_card_init'}),
