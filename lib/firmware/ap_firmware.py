@@ -77,55 +77,23 @@ def build(build_target, fw_name=None, dry_run=False):
       cros_build_lib.Die('setup_board with default specifications failed. '
                          "Please configure the board's sysroot separately.")
 
-  workon = workon_helper.WorkonHelper(build_target.root, build_target.name)
   config = _get_build_config(build_target)
 
-  # Workon the required packages. Also calculate the list of packages that need
-  # to be stopped to clean up after ourselves when we're done.
-  if config.workon:
-    before_workon = workon.ListAtoms()
-    logging.info('cros_workon starting packages.')
-    logging.debug('cros_workon-%s start %s', build_target.name,
-                  ' '.join(config.workon))
+  with workon_helper.WorkonScope(build_target, config.workon):
+    extra_env = {'FW_NAME': fw_name} if fw_name else None
+    # Run the emerge command to build the packages. Don't raise an exception
+    # here if it fails so we can cros workon stop afterwords.
+    logging.info('Building the AP firmware packages.')
+    # Print command with --debug.
+    print_cmd = logging.getLogger(__name__).getEffectiveLevel() == logging.DEBUG
+    result = cros_build_lib.run(
+        [build_target.get_command('emerge')] + list(config.build),
+        print_cmd=print_cmd,
+        check=False,
+        debug_level=logging.DEBUG,
+        dryrun=dry_run,
+        extra_env=extra_env)
 
-    if dry_run:
-      # Pretend it worked: after = before U workon.
-      after_workon = set(before_workon) & set(config.workon)
-    else:
-      workon.StartWorkingOnPackages(config.workon)
-      after_workon = workon.ListAtoms()
-
-    # Stop = the set we actually started. Preserves workon started status for
-    # any in the config.workon packages that were already worked on.
-    stop_packages = list(set(after_workon) - set(before_workon))
-  else:
-    stop_packages = []
-
-  extra_env = {'FW_NAME': fw_name} if fw_name else None
-  # Run the emerge command to build the packages. Don't raise an exception here
-  # if it fails so we can cros workon stop afterwords.
-  logging.info('Building the AP firmware packages.')
-  # Print command with --debug.
-  print_cmd = logging.getLogger(__name__).getEffectiveLevel() == logging.DEBUG
-  result = cros_build_lib.run(
-      [build_target.get_command('emerge')] + list(config.build),
-      print_cmd=print_cmd,
-      check=False,
-      debug_level=logging.DEBUG,
-      dryrun=dry_run,
-      extra_env=extra_env)
-
-  # Reset the environment.
-  logging.notice('Restoring cros_workon status.')
-  if stop_packages:
-    # Stop the packages we started.
-    logging.info('Stopping workon packages previously started.')
-    logging.debug('cros_workon-%s stop %s', build_target.name,
-                  ' '.join(stop_packages))
-    if not dry_run:
-      workon.StopWorkingOnPackages(stop_packages)
-  else:
-    logging.info('No packages needed to be stopped.')
 
   if result.returncode:
     # Now raise the emerge failure since we're done cleaning up.

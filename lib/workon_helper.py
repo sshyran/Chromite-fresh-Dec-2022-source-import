@@ -808,3 +808,119 @@ class WorkonHelper(object):
       installed_cp.add('%s/%s' % (pkg.category, pkg.package))
 
     return set(a for a in self.ListAtoms(use_all=True) if a in installed_cp)
+
+
+class WorkonScope:
+  """Context manager to assist managing workon status for packages."""
+
+  def __init__(self, build_target: build_target_lib.BuildTarget,
+               pkgs: Iterable[str] = tuple()):
+    """Construct an instance.
+
+    Args:
+      build_target: The build target (board) being built.
+      pkgs: The workon packages to be used in the context manager dunder
+            methods.
+    """
+    self.helper = WorkonHelper(build_target.root, build_target.name)
+    self.pkgs = pkgs
+    self.target = build_target
+    self.stop_packages = []
+    self.start_packages = []
+    self.before_workon = self.helper.ListAtoms()
+
+  def __enter__(self: 'WorkonScope') -> 'WorkonScope':
+    """Commence context manager tasks for starting and stopping packages.
+
+    Returns:
+      The initialized WorkonScope context manager.
+    """
+    self.start(self.pkgs)
+    after_workon = self.helper.ListAtoms()
+
+    # Stop = the set we actually started. Preserves workon started status for
+    # any in the packages that were already worked on.
+    self.stop_packages = sorted(set(after_workon) - set(self.before_workon))
+    return self
+
+  def __exit__(self, exc_type, exc_val, tb):
+    """Clean up context manager tasks for starting and stopping packages.
+
+    Args:
+      exc_type: The exception type passed when the runtime context raises an
+        exception.
+      exc_val: The exception value raised by the runtime context.
+      tb: The exception traceback raised by the runtime context.
+
+    Raises:
+      Any exception raised in the runtime context will be raised here after
+      cleanup. Beyond that, all WorkonHelper methods are expected to be safe
+      operations.
+    """
+    # Reset the environment.
+    logging.notice('Restoring cros_workon status.')
+    if self.stop_packages:
+      # Stop the packages we started.
+      logging.info('Stopping workon packages previously started.')
+      try:
+        self.stop(self.stop_packages)
+      except WorkonError:
+        to_stop = sorted(set(self.stop_packages) -
+                         set(self.helper.ListAtoms()))
+        logging.critical('Unable to stop started packages. Please stop the '
+                         'following packages: %s', ' '.join(to_stop))
+    else:
+      logging.info('No packages needed to be stopped.')
+    if self.start_packages:
+      # Stop the packages we started.
+      logging.info('Restarting workon packages previously stopped.')
+      try:
+        self._start_packages(self.start_packages)
+      except WorkonError:
+        to_start = sorted(set(self.start_packages) -
+                          set(self.helper.ListAtoms()))
+        logging.critical('Unable to start stopped packages. Please start the '
+                         'following packages: %s', ' '.join(to_start))
+    else:
+      logging.info('No packages needed to be restarted.')
+
+  def _start_packages(self, pkgs: Iterable[str]):
+    """Wrapper for self.WorkonHelper.StartWorkingOnPackages."""
+    self.helper.StartWorkingOnPackages(pkgs)
+
+  def _stop_packages(self, pkgs: Iterable[str]):
+    self.helper.StopWorkingOnPackages(pkgs)
+
+  def start(self, pkgs: Iterable[str]):
+    """Helper method to allow the context manager to explicitly start packages.
+
+    Invocations of this method will track started packages and stop them when
+    __exit__ is invoked, even when explicitly called by a client in a runtime
+    context.
+
+    Args:
+      pkgs: A list of package name fragments.
+    """
+    if pkgs:
+      logging.debug('cros-workon-%s start %s', self.target.name,
+                    ' '.join(pkgs))
+      self._start_packages(pkgs)
+      after_workon = self.helper.ListAtoms()
+      self.stop_packages = sorted(set(after_workon) - set(self.before_workon))
+
+
+  def stop(self, pkgs: Iterable[str]):
+    """Helper method to allow the context manager to explicitly stop packages.
+
+    If a package is stopped that was marked as workon before entering the
+    runtime context, that package will be restarted on exit.
+
+    Args:
+      pkgs: A list of package name fragments.
+    """
+    if pkgs:
+      logging.debug('cros-workon-%s stop %s', self.target.name,
+                    ' '.join(pkgs))
+      self._stop_packages(pkgs)
+      to_restart = set(pkgs) & set(self.before_workon)
+      self.start_packages = sorted(to_restart | set(self.start_packages))

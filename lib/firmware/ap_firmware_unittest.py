@@ -66,8 +66,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     # Inconsequential pkgs + 1 we need.
     existing_workons = ['cat/pkg1', 'cat/pkg2', 'cat/workon1']
     existing_and_required = existing_workons + ['cat/workon2']
-    # Should only stop the ones that weren't previously worked on.
-    expected_workon_stop = ['cat/workon2']
 
     build_config = ap_firmware.BuildConfig(workon=workon_pkgs, build=build_pkgs)
     build_target = build_target_lib.BuildTarget('board')
@@ -79,10 +77,8 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
         'ListAtoms',
         side_effect=[existing_workons, existing_and_required])
     # Start and stop workon patches for verifying calls.
-    start_patch = self.PatchObject(workon_helper.WorkonHelper,
-                                   'StartWorkingOnPackages')
-    stop_patch = self.PatchObject(workon_helper.WorkonHelper,
-                                  'StopWorkingOnPackages')
+    self.PatchObject(workon_helper.WorkonScope, '__enter__')
+    self.PatchObject(workon_helper.WorkonScope, '__exit__')
 
     # Patch the SetupBoard command.
     self.PatchObject(sysroot, 'SetupBoard')
@@ -93,10 +89,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
 
     ap_firmware.build(build_target, 'board-variant')
 
-    # Verify the workon packages. Should be starting all the required workon
-    # packages, but only stopping the ones that we started in the command.
-    start_patch.assert_called_once_with(workon_pkgs)
-    stop_patch.assert_called_once_with(expected_workon_stop)
     # Verify we try to build all the build packages, and that the FW_NAME envvar
     # has been set.
     self.rc.assertCommandContains(

@@ -6,7 +6,9 @@
 
 import collections
 import os
+from typing import Iterable
 
+from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import depgraph
 from chromite.lib import dependency_graph
@@ -341,3 +343,102 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
     helper = self.CreateHelper()
     self.assertEqual(set([VERSIONED_WORKON_ATOM]),
                      helper.InstalledWorkonAtoms())
+
+
+class WorkonScopeTest(cros_test_lib.MockTestCase):
+  """Tests for chromite.lib.workon_helper.WorkonScope."""
+
+  def setUp(self):
+    """Set up a test environment."""
+    self.bt = build_target_lib.BuildTarget(BOARD)
+
+    self.workon = []
+
+    def mock_start(pkgs: Iterable[str]):
+      self.workon = set(self.workon).union(set(pkgs))
+    def mock_stop(pkgs: Iterable[str]):
+      self.workon = set(self.workon).difference(set(pkgs))
+    def mock_list():
+      return self.workon
+    self.start_patch = self.PatchObject(workon_helper.WorkonHelper,
+                                        'StartWorkingOnPackages',
+                                        side_effect=mock_start)
+    self.stop_patch = self.PatchObject(workon_helper.WorkonHelper,
+                                       'StopWorkingOnPackages',
+                                       side_effect=mock_stop)
+    self.PatchObject(workon_helper.WorkonHelper, 'ListAtoms',
+                     side_effect=mock_list)
+
+  def testCMStartsAndStopsWithNoInitialPackages(self):
+    """Verify that the context manager works with no supplied package list."""
+    with workon_helper.WorkonScope(self.bt):
+      self.start_patch.assert_not_called()
+    self.stop_patch.assert_not_called()
+
+  def testCMStartsAndStopsPackages(self):
+    """Verify that the context manager usage starts and stops workon state."""
+    with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
+      self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+
+  def testRetainsExistingWorkons(self):
+    """Verify that the context manager does not stop previously started pkgs."""
+    self.workon = [WORKON_ONLY_ATOM]
+    with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
+      self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.stop_patch.assert_not_called()
+
+  def testStartsStandaloneAtom(self):
+    """Verify that the helper .start() method (non-CM usage) starts workon."""
+    helper = workon_helper.WorkonScope(self.bt)
+    self.start_patch.assert_not_called()
+    helper.start([WORKON_ONLY_ATOM])
+    self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.stop_patch.assert_not_called()
+
+  def testStopsStandaloneAtom(self):
+    """Verify that the helper .stop() method (non-CM usage) stops workon."""
+    helper = workon_helper.WorkonScope(self.bt)
+    self.stop_patch.assert_not_called()
+    helper.stop([WORKON_ONLY_ATOM])
+    self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.start_patch.assert_not_called()
+
+  def testRaisesExceptionForNonexistentBoard(self):
+    """CM usage should perform start & stop in addition to raising exception."""
+    se = workon_helper.WorkonError()
+    self.start_patch = self.PatchObject(workon_helper.WorkonHelper,
+                                        'StartWorkingOnPackages',
+                                        side_effect=se)
+    with self.assertRaises(workon_helper.WorkonError):
+      with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
+        self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+      self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+
+  def testFailedCleanupEmitsLog(self):
+    """Failure in stop() call should emit a critical-level log message."""
+    se = workon_helper.WorkonError()
+    self.stop_patch = self.PatchObject(workon_helper.WorkonHelper,
+                                       'StopWorkingOnPackages',
+                                       side_effect=se)
+    with self.assertLogs(level='CRITICAL') as log_cm:
+      with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
+        self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+      self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.assertRegex(' '.join(log_cm.output),
+                     'Unable to stop started packages.')
+
+  def testManuallyStartedPackageIsStopped(self):
+    with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]) as helper:
+      helper.start([VERSIONED_WORKON_ATOM])
+      self.start_patch.assert_any_call([WORKON_ONLY_ATOM])
+      self.start_patch.assert_any_call([VERSIONED_WORKON_ATOM])
+    self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM,
+                                             VERSIONED_WORKON_ATOM])
+
+  def testManuallyStoppedPackageIsRestarted(self):
+    self.workon = [WORKON_ONLY_ATOM]
+    with workon_helper.WorkonScope(self.bt) as helper:
+      helper.stop([WORKON_ONLY_ATOM])
+      self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
+    self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
