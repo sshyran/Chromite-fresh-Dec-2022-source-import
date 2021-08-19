@@ -7,7 +7,7 @@
 import collections
 import os
 import tempfile
-from typing import List
+from typing import List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -87,18 +87,17 @@ class ChrootPathResolver(object):
       return None
     return os.path.join(source_path, constants.DEFAULT_CHROOT_DIR)
 
-  def _ReadChrootLink(self, path):
+  def _ReadChrootLink(self, path: Optional[str]) -> Optional[str]:
     """Convert a chroot symlink to its absolute path.
 
     This contains defaults/edge cases assumptions for chroot paths. Not
     recommended for non-chroot paths.
 
     Args:
-      path (str|None): The path to resolve.
+      path: The path to resolve.
 
     Returns:
-      str|None: The resolved path if the provided path is a symlink, None
-        otherwise.
+      The resolved path if the provided path is a symlink, None otherwise.
     """
     # Mainly for the "if self._source_from_path_repo:" branch in _GetChrootPath.
     # _GetSourcePathChroot can return None, so double check it here.
