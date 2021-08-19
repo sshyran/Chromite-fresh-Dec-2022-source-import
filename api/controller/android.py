@@ -5,6 +5,7 @@
 """Android operations."""
 
 import os
+from typing import TYPE_CHECKING
 
 from chromite.api import faux
 from chromite.api import validate
@@ -15,6 +16,9 @@ from chromite.lib import osutils
 from chromite.lib.parser import package_info
 from chromite.service import android
 from chromite.service import packages
+
+if TYPE_CHECKING:
+  from chromite.api import api_config
 
 
 ANDROIDPIN_MASK_PATH = os.path.join(constants.SOURCE_ROOT,
@@ -51,7 +55,9 @@ def _MarkStableResponse(_input_proto, output_proto, _config):
 @faux.empty_error
 @validate.require('package_name')
 @validate.validation_complete
-def MarkStable(input_proto, output_proto, _config):
+def MarkStable(input_proto: android_pb2.MarkStableRequest,
+               output_proto: android_pb2.MarkStableResponse,
+               _config: 'api_config.ApiConfig') -> None:
   """Uprev Android, if able.
 
   Uprev Android, verify that the newly uprevved package can be emerged, and
@@ -60,9 +66,9 @@ def MarkStable(input_proto, output_proto, _config):
   See AndroidService documentation in api/proto/android.proto.
 
   Args:
-    input_proto (MarkStableRequest): The input proto.
-    output_proto (MarkStableResponse): The output proto.
-    _config (api_config.ApiConfig): The call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    _config: The call config.
   """
   chroot = controller_util.ParseChroot(input_proto.chroot)
   build_targets = controller_util.ParseBuildTargets(input_proto.build_targets)
@@ -99,14 +105,16 @@ def MarkStable(input_proto, output_proto, _config):
 # We don't use @faux.success for UnpinVersion because output_proto is unused.
 @faux.all_empty
 @validate.validation_complete
-def UnpinVersion(_input_proto, _output_proto, _config):
+def UnpinVersion(_input_proto: android_pb2.UnpinVersionRequest,
+                 _output_proto: android_pb2.UnpinVersionResponse,
+                 _config: 'api_config.ApiConfig') -> None:
   """Unpin the Android version.
 
   See AndroidService documentation in api/proto/android.proto.
 
   Args:
-    _input_proto (UnpinVersionRequest): The input proto. (not used.)
-    _output_proto (UnpinVersionResponse): The output proto. (not used.)
-    _config (api_config.ApiConfig): The call config.
+    _input_proto: The input proto. (not used.)
+    _output_proto: The output proto. (not used.)
+    _config: The call config.
   """
   osutils.SafeUnlink(ANDROIDPIN_MASK_PATH)
