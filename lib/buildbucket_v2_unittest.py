@@ -19,6 +19,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import metadata_lib
 from chromite.lib.luci.prpc.client import Client
 from chromite.lib.luci.prpc.client import ProtocolError
+from chromite.lib.luci.prpc.client import new_request
 
 SUCCESS_BUILD = {'infra': {
                     'swarming': {
@@ -833,3 +834,25 @@ class StaticFunctionsTest(cros_test_lib.MockTestCase):
     buildbucket_ids = buildbucket_v2.GetBuildbucketIds(metadata)
     self.assertTrue('bb_id_2' in buildbucket_ids)
     self.assertTrue('bb_id_3' in buildbucket_ids)
+
+  def testCredentials(self):
+    fake_get_build_request = object()
+    bbv2 = buildbucket_v2.BuildbucketV2(
+        access_token_retriever=lambda: 'some-token')
+    client = bbv2.client
+    self.PatchObject(
+        builds_service_pb2, 'GetBuildRequest',
+        return_value=fake_get_build_request)
+    get_build_function = self.PatchObject(client, 'GetBuild')
+    bbv2.GetBuild('some-id')
+
+    class DisableAuthFn(object):
+      """An object that can be compared to a function"""
+      def __eq__(self, fn):
+        request = new_request('a', 'b', 'c', 'd', 'e')
+        return not fn(request).include_auth
+
+    get_build_function.assert_called_with(
+        fake_get_build_request,
+        metadata=dict(Authorization='Bearer some-token'),
+        credentials=DisableAuthFn())
