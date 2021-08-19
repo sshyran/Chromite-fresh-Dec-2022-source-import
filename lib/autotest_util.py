@@ -39,13 +39,13 @@ class AutotestTarballBuilder(object):
       'src/platform/tast/tools/run_tast.sh',  # Helper script to run SSP tast.
   ]
 
-  def __init__(self, archive_basedir, output_directory):
+  def __init__(self, archive_basedir: str, output_directory: str) -> None:
     """Init function.
 
     Args:
-      archive_basedir (str): The base directory from which the archives will be
+      archive_basedir: The base directory from which the archives will be
         created. This path should contain the `autotest` directory.
-      output_directory (str): The directory where the archives will be written.
+      output_directory: The directory where the archives will be written.
     """
     self.archive_basedir = archive_basedir
     self.output_directory = output_directory
