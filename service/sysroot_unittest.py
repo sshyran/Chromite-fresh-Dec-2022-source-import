@@ -217,7 +217,7 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(self.output_dir)
 
     # The sysroot's /var/db/pkg prefix for the chrome package directories.
-    var_db_pkg = os.path.join(self.sysroot_path, portage_util.VDB_PATH)
+    var_db_pkg = self.chroot.full_path(self.sysroot_path, portage_util.VDB_PATH)
     # Create the var/db/pkg dir so we have that much for no-chrome tests.
     osutils.SafeMakedirs(var_db_pkg)
 
@@ -256,7 +256,7 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     self._CreateChromeDir(self.chrome_v1_dir)
 
     created = sysroot.CreateChromeEbuildEnv(
-      None, self.sysroot, None, self.output_dir)
+      self.chroot, self.sysroot, None, self.output_dir)
 
     self.assertStartsWith(created, self.output_dir)
     cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
@@ -269,7 +269,7 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     self._CreateChromeDir(self.chrome_v2_dir)
 
     created = sysroot.CreateChromeEbuildEnv(
-      None, self.sysroot, None, self.output_dir)
+      self.chroot, self.sysroot, None, self.output_dir)
 
     self.assertStartsWith(created, self.output_dir)
     cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
@@ -277,7 +277,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
   def testNoChrome(self):
     """Test no version of chrome present."""
     self.assertIsNone(
-      sysroot.CreateChromeEbuildEnv(None, self.sysroot, None, self.output_dir))
+      sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
+        self.output_dir))
 
 
 class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase):

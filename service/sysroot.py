@@ -376,10 +376,11 @@ def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
   return os.path.join(output_dir, constants.CHROME_SYSROOT_TAR)
 
 
-def CreateChromeEbuildEnv(_chroot, sysroot_class, _build_target, output_dir):
+def CreateChromeEbuildEnv(chroot, sysroot_class, _build_target, output_dir):
   """Generate Chrome ebuild environment.
 
   Args:
+    chroot: The chroot class used for these artifacts.
     sysroot_class (sysroot_lib.Sysroot): The sysroot where the original
       environment archive can be found.
     output_dir (str): Where the result should be stored.
@@ -387,7 +388,7 @@ def CreateChromeEbuildEnv(_chroot, sysroot_class, _build_target, output_dir):
   Returns:
     str: The path to the archive, or None.
   """
-  pkg_dir = os.path.join(sysroot_class.path, portage_util.VDB_PATH)
+  pkg_dir = chroot.full_path(sysroot_class.path, portage_util.VDB_PATH)
   files = glob.glob(os.path.join(pkg_dir, constants.CHROME_CP) + '-*')
   if not files:
     logging.warning('No package found for %s', constants.CHROME_CP)
