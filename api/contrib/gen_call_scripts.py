@@ -10,7 +10,7 @@ assumptions about the input and output json file names and locations.
 
 The system supports checking in example files which are automatically copied
 in to the input file location. The example files are found in the
-call_templates/ directory, and of the form "service__method_example_input.json".
+call_templates/ directory, and of the form "service__method_input.json".
 When not found, it will write out an empty json dict to the input file.
 
 See the api/contrib and api/ READMEs for more info about the gen_call_scripts
@@ -108,7 +108,7 @@ def write_scripts(build_target, force=False):
                    method_data['full_name'])
 
       example_input = os.path.join(EXAMPLES_PATH,
-                                   '%s_example_input.json' % filename)
+                                   '%s_input.json' % filename)
       input_file = os.path.join(OUTPUT_PATH, '%s_input.json' % filename)
 
       if not force and not _input_file_empty(input_file):
