@@ -153,6 +153,7 @@ TEST_SERVICE_DIR = os.path.join(SRC_DIR, 'platform/dev/src/chromiumos/test')
 TEST_CONTAINER_BUILD_SCRIPTS = [
     os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
     os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
+    os.path.join(TEST_SERVICE_DIR, 'test/container/utils/build-dockerimage.sh'),
 ]
 
 
