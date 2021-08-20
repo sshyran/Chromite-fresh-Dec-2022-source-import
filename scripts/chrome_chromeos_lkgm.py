@@ -2,11 +2,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Update the CHROMEOS_LKGM file in a chromium repository."""
+"""Update the CHROMEOS_LKGM file in a chromium repository.
+
+This script will first query Gerrit for an already-open CL updating the
+CHROMEOS_LKGM file to the given version. If one exists, it will submit that
+CL to the CQ. Else it will upload a new CL and quit _without_ submitting
+it to the CQ.
+"""
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
 import os
+import urllib.parse
 
 from chromite.cbuildbot import manifest_version
 from chromite.lib import chrome_committer
@@ -45,13 +52,17 @@ class ChromeLKGMCommitter(object):
       constants.PATH_TO_CHROME_LKGM,
       'tools/translation/TRANSLATION_OWNERS',
   ]
+  # First line of the commit message for all LKGM CLs.
+  _COMMIT_MSG_HEADER = 'LKGM %(lkgm)s for chromeos.'
 
   def __init__(self, user_email, workdir, lkgm, dryrun=False):
-    self._committer = chrome_committer.ChromeCommitter(
-        user_email, workdir, dryrun)
+    self._dryrun = dryrun
+    self._committer = chrome_committer.ChromeCommitter(user_email, workdir)
+    self._gerrit_helper = gerrit.GetCrosExternal()
 
     # Strip any chrome branch from the lkgm version.
     self._lkgm = manifest_version.VersionInfo(lkgm).VersionString()
+    self._commit_msg_header = self._COMMIT_MSG_HEADER % {'lkgm': self._lkgm}
     self._old_lkgm = None
 
     if not self._lkgm:
@@ -60,11 +71,15 @@ class ChromeLKGMCommitter(object):
 
   def Run(self):
     self.CloseOldLKGMRolls()
-    self._committer.Cleanup()
-    self._committer.Checkout(self._NEEDED_FILES)
-    self.UpdateLKGM()
-    self.CommitNewLKGM()
-    self._committer.Upload()
+    already_open_lkgm_cl = self.FindAlreadyOpenLKGMRoll()
+    if already_open_lkgm_cl:
+      self.SubmitToCQ(already_open_lkgm_cl)
+    else:
+      self._committer.Cleanup()
+      self._committer.Checkout(self._NEEDED_FILES)
+      self.UpdateLKGM()
+      self.CommitNewLKGM()
+      self._committer.Upload()
 
   def CheckoutChrome(self):
     """Checks out chrome into tmp checkout_dir."""
@@ -85,15 +100,59 @@ class ChromeLKGMCommitter(object):
         'branch': 'main',
         'author': self._committer.author,
         'file': constants.PATH_TO_CHROME_LKGM,
-        'age': '1d',
+        'age': '2d',
         'status': 'open',
     }
-    gerrit_helper = gerrit.GetCrosExternal()
-    for open_issue in gerrit_helper.Query(**query_params):
-      logging.info(
-          'Closing old LKGM roll crrev.com/c/%s', open_issue.gerrit_number)
-      gerrit_helper.AbandonChange(
-          open_issue, msg='Superceded by LKGM %s' % self._lkgm)
+    for open_issue in self._gerrit_helper.Query(**query_params):
+      if self._dryrun:
+        logging.info(
+            'Would have closed old LKGM roll crrev.com/c/%s',
+            open_issue.gerrit_number)
+      else:
+        logging.info(
+            'Closing old LKGM roll crrev.com/c/%s', open_issue.gerrit_number)
+        self._gerrit_helper.AbandonChange(
+            open_issue, msg='Superceded by LKGM %s' % self._lkgm)
+
+  def FindAlreadyOpenLKGMRoll(self):
+    """Queries Gerrit for a CL that already rolls the LKGM to our version.
+
+    For a given LKGM, both the master-full and master-release builders provide
+    SDKs needed by Chrome-infra. These two builders aren't synchronized, so
+    one can finish hours before the other. To avoid updating the LKGM in Chrome
+    before they're both finished, we take a two-stage approach:
+    1. Whichever builder finishes first uploads the LKGM CL.
+    2. Whichever builder finishes last submits that CL to the CQ.
+
+    This method queries Gerrit to find the CL for step #2.
+
+    Returns:
+      Returns a patch.GerritPatch for the CL if it exists, None otherwise.
+    """
+    query_params = {
+        'project': constants.CHROMIUM_SRC_PROJECT,
+        'branch': 'main',
+        'author': self._committer.author,
+        'file': constants.PATH_TO_CHROME_LKGM,
+        'status': 'open',
+        # The value of the LKGM is included in the first line of the commit
+        # message. So including that in our query should only return CLs that
+        # roll to our LKGM.
+        'message': urllib.parse.quote(self._commit_msg_header),
+    }
+    issues = self._gerrit_helper.Query(**query_params)
+    if len(issues) > 1:
+      # This shouldn't happen?
+      raise LKGMNotValid('More than one roll CL open for LKGM %s'% self._lkgm)
+    return issues[0] if issues else None
+
+  def SubmitToCQ(self, already_open_lkgm_cl):
+    """Sends the already_open_lkgm_cl to the CQ."""
+    labels = {'Commit-Queue': 2}
+    if self._dryrun:
+      logging.info('Would have applied CQ+2 to %s', already_open_lkgm_cl)
+    else:
+      self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels)
 
   def UpdateLKGM(self):
     """Updates the LKGM file with the new version."""
@@ -116,13 +175,13 @@ class ChromeLKGMCommitter(object):
   def ComposeCommitMsg(self):
     """Constructs and returns the commit message for the LKGM update."""
     commit_msg_template = (
-        'LKGM %(version)s for chromeos.'
+        '%(header)s'
         '\n\n%(cq_includes)s')
     cq_includes = ''
     for bot in self._PRESUBMIT_BOTS:
       cq_includes += 'CQ_INCLUDE_TRYBOTS=luci.chrome.try:%s\n' % bot
     return commit_msg_template % dict(
-        version=self._lkgm, cq_includes=cq_includes)
+        header=self._commit_msg_header, cq_includes=cq_includes)
 
   def CommitNewLKGM(self):
     """Commits the new LKGM file using our template commit message."""
