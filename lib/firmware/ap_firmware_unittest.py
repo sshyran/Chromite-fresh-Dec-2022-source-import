@@ -7,7 +7,9 @@
 from unittest import mock
 
 from chromite.lib import build_target_lib
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib import workon_helper
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
@@ -231,3 +233,41 @@ class DeployConfigTest(cros_test_lib.TestCase):
 
     commands = config.get_servo_commands(self.servo, self.image, verbose=True)
     self._assert_command(commands.flash, flashrom=False, fast_verbose=True)
+
+class CleanTest(cros_test_lib.RunCommandTestCase):
+  """Tests for cleaning up firmware artifacts and dependencies."""
+
+  def setUp(self):
+    self.pkgs = ['pkg1', 'pkg2', 'coreboot-private-files',
+                 'chromeos-config-bsp']
+
+  def test_clean(self):
+    """Sanity check for the clean command (ideal case)."""
+    module = mock.MagicMock(
+        BUILD_WORKON_PACKAGES=None, BUILD_PACKAGES=('pkg3', 'pkg4'))
+
+    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
+
+    pkgs = [*self.pkgs, *module.BUILD_PACKAGES]
+
+    def run_side_effect(*args, **kwargs):
+      if args[0][0].startswith('qfile'):
+        if kwargs.get('capture_output'):
+          return mock.MagicMock(stdout='\n'.join(pkgs).encode())
+        return mock.MagicMock(stdout=''.encode())
+      elif args[0][0].startswith('emerge'):
+        return mock.MagicMock(returncode=0)
+
+    run_mock = self.PatchObject(cros_build_lib, 'run',
+                                side_effect=run_side_effect)
+    self.PatchObject(osutils, 'RmDir')
+    ap_firmware.clean(build_target_lib.BuildTarget('boardname'))
+    run_mock.assert_any_call([mock.ANY, mock.ANY, *sorted(pkgs)],
+                             capture_output=mock.ANY, dryrun=False)
+
+  def test_nonexistent_board_clean(self):
+    """Verifies exception thrown when target board was not configured."""
+    se = cros_build_lib.RunCommandError('nonexistent board')
+    self.PatchObject(cros_build_lib, 'run', side_effect=se)
+    with self.assertRaisesRegex(ap_firmware.CleanError, 'qfile'):
+      ap_firmware.clean(build_target_lib.BuildTarget('schrodinger'))

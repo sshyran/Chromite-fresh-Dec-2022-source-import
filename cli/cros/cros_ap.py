@@ -24,6 +24,7 @@ COMMAND_DUMP_CONFIG = 'dump-config'
 COMMAND_BUILD = 'build'
 COMMAND_FLASH = 'flash'
 COMMAND_READ = 'read'
+COMMAND_CLEAN = 'clean'
 
 
 @command.CommandDecorator('ap')
@@ -57,6 +58,11 @@ class APCommand(command.CliCommand):
                                 'Read the AP Firmware from a device.')
     ReadSubcommand.AddParser(read_parser)
 
+    clean_parser = _AddSubparser(parser, subparsers, COMMAND_CLEAN,
+                                 'Clean up dependencies and artifacts '
+                                 'for a given build target.')
+    CleanSubcommand.AddParser(clean_parser)
+
   def Run(self):
     """The main handler of this CLI."""
     if self.options.ap_command == COMMAND_DUMP_CONFIG:
@@ -67,6 +73,8 @@ class APCommand(command.CliCommand):
       subcmd = FlashSubcommand(self.options)
     elif self.options.ap_command == COMMAND_READ:
       subcmd = ReadSubcommand(self.options)
+    elif self.options.ap_command == COMMAND_CLEAN:
+      subcmd = CleanSubcommand(self.options)
     subcmd.Run()
 
 
@@ -413,5 +421,45 @@ To flash your volteer DUT via SERVO on port 1234:
           verbose=self.options.verbose,
           dryrun=self.options.dry_run,
           flash_contents=self.options.flash_contents)
+    except ap_firmware.Error as e:
+      cros_build_lib.Die(e)
+
+
+class CleanSubcommand(command.CliCommand):
+  """Clean packages and artifacts for the requested build target."""
+
+  def __init__(self, options):
+    super().__init__(options)
+    self.build_target = build_target_lib.BuildTarget(self.options.build_target)
+    self.options.Freeze()
+
+  @classmethod
+  def AddParser(cls, parser):
+    """Adds AP Clean specific CLI arguments to parser."""
+    parser.add_argument(
+        '-b',
+        '--build-target',
+        default=cros_build_lib.GetDefaultBoard(),
+        required=not bool(cros_build_lib.GetDefaultBoard()),
+        help='The build target whose artifacts should be cleaned.')
+    # TODO(saklein): Remove when added to base parser.
+    parser.add_argument(
+        '-n',
+        '--dry-run',
+        action='store_true',
+        help='Perform a dry run, describing the steps without running them.')
+    parser.epilog = """
+This command removes firmware-related packages, including everything in
+`/build/${build_target}/firmware`.
+"""
+
+  def Run(self):
+    if not cros_build_lib.IsInsideChroot():
+      logging.notice('Command will run in chroot, '
+                     'and the output file path will be inside.')
+    commandline.RunInsideChroot(self)
+
+    try:
+      ap_firmware.clean(self.build_target, self.options.dry_run)
     except ap_firmware.Error as e:
       cros_build_lib.Die(e)

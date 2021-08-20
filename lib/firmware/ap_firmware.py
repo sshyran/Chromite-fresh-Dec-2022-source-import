@@ -10,7 +10,9 @@ import logging
 import os
 from typing import Optional
 
+from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import workon_helper
 from chromite.lib.firmware import flash_ap
@@ -48,6 +50,10 @@ class DeployError(Error):
 
 class InvalidConfigError(Error):
   """The config does not contain the required information for the operation."""
+
+
+class CleanError(Error):
+  """Failure in the clean command."""
 
 
 def build(build_target, fw_name=None, dry_run=False):
@@ -335,3 +341,62 @@ def get_config_module(build_target_name):
   except ImportError:
     raise BuildTargetNotConfiguredError(
         'Could not find a config module for %s.' % build_target_name)
+
+
+def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
+  """Cleans packages and dependencies related to a specified target.
+
+  After running the command, the user's environment should be able to
+  successfully build packages for a target board.
+
+  Args:
+    build_target: Target board to be cleaned
+    dry_run: Indicates that packages and system files should not be modified
+  """
+  pkgs = []
+  try:
+    qfile_pkgs = cros_build_lib.run([build_target.get_command('qfile'),
+                                     '/firmware'], capture_output=True,
+                                    check=False, dryrun=dry_run).stdout
+    pkgs = [l.split()[0] for l in qfile_pkgs.decode().splitlines()]
+  except cros_build_lib.RunCommandError as e:
+    raise CleanError('qfile for target board %s is not present; board may '
+                     'not have been set up.' % build_target.name)
+
+  try:
+    config = _get_build_config(build_target)
+    pkgs = set(pkgs).union(config.build)
+  except InvalidConfigError:
+    pass
+  pkgs = sorted(set(pkgs).union(['coreboot-private-files',
+                                 'chromeos-config-bsp']))
+
+  err = []
+  try:
+    cros_build_lib.run([build_target.get_command('emerge'), '--rage-clean',
+                        *pkgs], capture_output=True, dryrun=dry_run)
+  except cros_build_lib.RunCommandError as e:
+    err.append(e)
+
+  try:
+    if dry_run:
+      logging.notice('rm -rf -- /build/%s/firmware/*', build_target.name)
+    else:
+      osutils.RmDir('/build/%s/firmware/*' % build_target.name, sudo=True,
+                    ignore_missing=True)
+  except (EnvironmentError, cros_build_lib.RunCommandError) as e:
+    err.append(e)
+
+  if err:
+    logging.warning('All processes for %s have completed, but some were '
+                    'completed with errors.', build_target.name)
+    for e in err:
+      logging.error(e)
+    raise CleanError("`cros ap clean -b %s' did not complete successfully."
+                     % build_target.name)
+
+  logging.notice('AP firmware image for device %s was successfully cleaned.'
+                 '\nThe following packages were unmerged: %s'
+                 '\nThe following build target directory was removed: '
+                 '/build/%s/firmware', build_target.name, ' '.join(pkgs),
+                 build_target.name)
