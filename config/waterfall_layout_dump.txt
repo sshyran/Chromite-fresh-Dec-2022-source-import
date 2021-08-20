@@ -336,7 +336,6 @@
     lars-kernelnext-release
     lars-release
     majolica-release
-    mancomb-release
     mistral-release
     mushu-release
     nami-kernelnext-release
@@ -1494,7 +1493,6 @@
     lars-kernelnext-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
-    mancomb-release-tryjob
     mistral-release-tryjob
     mushu-release-tryjob
     nami-kernelnext-release-tryjob
