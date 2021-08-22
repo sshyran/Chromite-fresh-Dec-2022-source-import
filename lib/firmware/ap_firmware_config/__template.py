@@ -33,23 +33,23 @@ BUILD_PACKAGES = BUILD_WORKON_PACKAGES + (
 # pylint: disable=unused-argument
 
 
-def is_fast_required(use_futility, servo):
+def is_fast_required(use_futility: bool, servo: servo_lib.Servo) -> bool:
   """Returns true if --fast is necessary to flash successfully.
 
   TODO: Document the bug/reason for the force if this function is required,
     otherwise delete it all together.
 
   Args:
-    use_futility (bool): True if futility is to be used, False if flashrom.
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    use_futility: True if futility is to be used, False if flashrom.
+    servo: The servo connected to the target DUT.
 
   Returns:
-    bool: True if fast is necessary, False otherwise.
+    True if fast is necessary, False otherwise.
   """
   return False
 
 
-def get_config(servo):
+def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   """Get specific flash config for the build target.
 
   Each board needs specific config including the voltage for Vref, to turn
@@ -58,7 +58,7 @@ def get_config(servo):
   The voltage for this board needs to be set to 1.8 V.
 
   Args:
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    servo: The servo connected to the target DUT.
 
   Returns:
     servo_lib.FirmwareConfig:

@@ -13,7 +13,7 @@ from chromite.lib.firmware import servo_lib
 DEPLOY_SSH_FORCE_FUTILITY = True
 
 
-def is_fast_required(_use_futility, servo):
+def is_fast_required(_use_futility: bool, servo: servo_lib.Servo) -> bool:
   """Returns true if --fast is necessary to flash successfully.
 
   The configurations in this function consistently fail on the verify step,
@@ -21,9 +21,9 @@ def is_fast_required(_use_futility, servo):
   flash properly. Meant to be a temporary hack until b/143240576 is fixed.
 
   Args:
-    _use_futility (bool): True if futility is to be used, False if
+    _use_futility: True if futility is to be used, False if
       flashrom.
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    servo: The servo connected to the target DUT.
 
   Returns:
     bool: True if fast is necessary, False otherwise.
@@ -32,7 +32,7 @@ def is_fast_required(_use_futility, servo):
   return servo.is_micro
 
 
-def get_config(servo):
+def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   """Get specific flash config for wilco.
 
   Each board needs specific config including the voltage for Vref, to turn
@@ -55,7 +55,7 @@ def get_config(servo):
   sudo emerge flashrom
 
   Args:
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    servo: The servo connected to the target DUT.
 
   Returns:
     servo_lib.FirmwareConfig:

@@ -17,7 +17,7 @@ BUILD_PACKAGES = ('chromeos-bootimage',)
 DEPLOY_SERVO_FORCE_FLASHROM = True
 
 
-def get_config(servo):
+def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   """Get specific flash config for the Volteer.
 
   Each board needs specific config including the voltage for Vref, to turn
@@ -26,7 +26,7 @@ def get_config(servo):
   The voltage for this board needs to be set to 3.3 V.
 
   Args:
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    servo: The servo connected to the target DUT.
 
   Returns:
     servo_lib.FirmwareConfig:
