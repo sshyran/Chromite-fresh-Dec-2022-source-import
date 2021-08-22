@@ -3214,7 +3214,7 @@
       "reference_board_name": "guybrush",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "guybrush",
