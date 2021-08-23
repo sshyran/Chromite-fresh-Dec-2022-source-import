@@ -13,6 +13,7 @@ import logging
 import os
 import shlex
 import shutil
+from typing import Optional
 
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
@@ -104,11 +105,11 @@ Instead it copies Goma files to a client-specified archive directory.
     return ArchivedFiles(archived_stats_file, archived_counterz_file,
                          archived_log_files)
 
-  def _CopyExpectedGomaFile(self, filename):
+  def _CopyExpectedGomaFile(self, filename: str) -> Optional[str]:
     """Copies expected goma files (stats, counterz).
 
     Args:
-      filename (str): File to copy.
+      filename: File to copy.
 
     Returns:
       The filename on success, None on error.

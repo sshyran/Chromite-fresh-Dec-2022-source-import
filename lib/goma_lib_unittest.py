@@ -26,20 +26,20 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
     self.dest_dir = os.path.join(self.tempdir, 'destination_dir')
     osutils.SafeMakedirs(self.dest_dir)
 
-  def _CreateFile(self, name):
+  def _CreateFile(self, name: str):
     """Creates a basic file, such as a stats or counterz file.
 
     Args:
-      name (str): Filename
+      name: Filename
     """
     osutils.WriteFile(os.path.join(self.goma_log_dir, name), 'File: ' + name)
 
-  def _CreateLogFile(self, name, timestamp):
+  def _CreateLogFile(self, name: str, timestamp: datetime.datetime):
     """Creates a log file for testing.
 
     Args:
-      name (str): Log file name.
-      timestamp (datetime): timestamp that is written to the file.
+      name: Log file name.
+      timestamp: timestamp that is written to the file.
     """
     path = os.path.join(
         self.goma_log_dir,
