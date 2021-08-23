@@ -136,10 +136,10 @@ def rpc(req):
   except net.Error as ex:
     # net.Error means HTTP status code was not 200.
     try:
-      code = codes.INT_TO_CODE[int(ex.headers['X-Prpc-Grpc-Code'])]
+      code = codes.INT_TO_CODE[int(ex.headers['x-prpc-grpc-code'])]
     except (ValueError, KeyError, TypeError):
       raise ProtocolError(
-          'response does not contain a valid X-Prpc-Grpc-Code header')
+          'response does not contain a valid x-prpc-grpc-code header')
     msg = ex.response.decode('utf-8', 'ignore')
     raise RpcError(msg, code, ex.headers)
 
