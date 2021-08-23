@@ -10,6 +10,7 @@ import os
 import pickle
 import signal
 import sys
+from typing import Optional
 
 from chromite.cli import command
 from chromite.lib import commandline
@@ -122,18 +123,24 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
                   commandline.DEVICE_SCHEME_SSH,
                   commandline.DEVICE_SCHEME_USB)
 
-  def _CheckDeviceParse(self, device_input, scheme, username=None,
-                        hostname=None, port=None, path=None, serial=None):
+  def _CheckDeviceParse(self,
+                        device_input: str,
+                        scheme: str,
+                        username: Optional[str] = None,
+                        hostname: Optional[str] = None,
+                        port: Optional[int] = None,
+                        path: Optional[str] = None,
+                        serial: Optional[str] = None):
     """Checks that parsing a device input gives the expected result.
 
     Args:
-      device_input (str): Input specifying a device.
-      scheme (str): Expected scheme.
-      username (str|None): Expected username.
-      hostname (str|None): Expected hostname.
-      port (int|None): Expected port.
-      path (str|None): Expected path.
-      serial (str|None): Expected serial number.
+      device_input: Input specifying a device.
+      scheme: Expected scheme.
+      username: Expected username.
+      hostname: Expected hostname.
+      port: Expected port.
+      path: Expected path.
+      serial: Expected serial number.
     """
     parser = commandline.ArgumentParser()
     parser.add_argument('device', type=commandline.DeviceParser(scheme))
