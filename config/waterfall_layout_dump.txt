@@ -47,6 +47,8 @@
   factory-gru-9017.B-buildspec
     bob-factory-gru-9017.B-factorybranch
     gru-factory-gru-9017.B-factorybranch
+  factory-grunt-11164.135.B-buildspec
+    grunt-factory-grunt-11164.135.B-factorybranch
   factory-grunt-11164.B-buildspec
     grunt-factory-grunt-11164.B-factorybranch
   factory-hatch-12692.B-buildspec
@@ -888,6 +890,8 @@
   factory-gru-9017.B-buildspec-tryjob
     bob-factory-gru-9017.B-factorybranch-tryjob
     gru-factory-gru-9017.B-factorybranch-tryjob
+  factory-grunt-11164.135.B-buildspec-tryjob
+    grunt-factory-grunt-11164.135.B-factorybranch-tryjob
   factory-grunt-11164.B-buildspec-tryjob
     grunt-factory-grunt-11164.B-factorybranch-tryjob
   factory-hatch-12692.B-buildspec-tryjob
@@ -1106,6 +1110,7 @@
   grunt-arc-r-release-tryjob
   grunt-arc-r-unittest-stress
   grunt-arc-r-vmrvc-android-pfq-tryjob
+  grunt-factory-grunt-11164.135.B-factorybranch-tryjob
   grunt-factory-grunt-11164.B-factorybranch-tryjob
   grunt-full-tryjob
   grunt-kernelnext-full-tryjob

@@ -1965,6 +1965,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'factory-nami-10715.B', ['nami', 'kalista']),
       (MONTHLY, 'factory-nocturne-11066.B', ['nocturne']),
       (MONTHLY, 'factory-grunt-11164.B', ['grunt']),
+      (MONTHLY, 'factory-grunt-11164.135.B', ['grunt']),
       (MONTHLY, 'factory-rammus-11289.B', ['rammus']),
       (WEEKLY, 'factory-octopus-11512.B', ['octopus']),
       (WEEKLY, 'factory-atlas-11907.B', ['atlas']),
