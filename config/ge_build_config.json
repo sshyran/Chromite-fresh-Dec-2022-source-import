@@ -6186,86 +6186,6 @@
         },
         {
           "board_name": "octopus",
-          "name": "unprovisioned_bloog",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_bobba",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_casta",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_dood",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_fleex",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_foob",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_garg",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_lick",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_meep",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
-          "name": "unprovisioned_phaser",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 354,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus",
           "name": "vorticon",
           "test_suites": [
             "sanity",
@@ -6884,14 +6804,6 @@
             "bvt-perbuild",
             "bvt-tast-informational"
           ],
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7200,
-          "is_active": true
-        },
-        {
-          "board_name": "octopus-kernelnext",
-          "name": "unprovisioned_ampton",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7200,
