@@ -412,7 +412,7 @@ def GeneralTemplates(site_config):
       builder_class_name='fuzzer_builders.FuzzerBuilder',
       # Need larger rootfs since fuzzing also enables asan.
       disk_layout='2gb-rootfs',
-      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-asan',
+      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-asan-buganizer',
       images=[],
       image_test=None,
       packages=['virtual/target-fuzzers'],
@@ -1721,7 +1721,7 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       boards=['amd64-generic'],
       profile='coverage-fuzzer',
       description='Build for fuzzing coverage testing',
-      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-coverage',
+      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-coverage-buganizer',
       disk_layout='4gb-rootfs',
       image_test=None,
       # Every 3 hours.
@@ -1736,7 +1736,7 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       boards=['amd64-generic'],
       profile='msan-fuzzer',
       description='Build for msan fuzzing testing',
-      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-msan',
+      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-msan-buganizer',
       disk_layout='4gb-rootfs',
       image_test=None,
       # Every 3 hours.
@@ -1766,7 +1766,7 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       boards=['amd64-generic'],
       profile='ubsan-fuzzer',
       description='Build for fuzzing testing',
-      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan',
+      gs_path='gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan-buganizer',
       disk_layout='4gb-rootfs',
       image_test=None,
       # Every 3 hours.

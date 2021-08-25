@@ -343,7 +343,7 @@
             "display_label": "informational",
             "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
             "git_sync": true,
-            "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-asan",
+            "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-asan-buganizer",
             "hw_tests_override": [],
             "image_test": true,
             "images": [],
@@ -1366,7 +1366,7 @@
         ],
         "description": "Build for fuzzing coverage testing",
         "disk_layout": "4gb-rootfs",
-        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-coverage",
+        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-coverage-buganizer",
         "image_test": null,
         "profile": "coverage-fuzzer"
     },
@@ -1584,7 +1584,7 @@
         ],
         "description": "Build for msan fuzzing testing",
         "disk_layout": "4gb-rootfs",
-        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-msan",
+        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-msan-buganizer",
         "image_test": null,
         "profile": "msan-fuzzer",
         "schedule": "0 */3 * * *"
@@ -1630,7 +1630,7 @@
         ],
         "description": "Build for fuzzing testing",
         "disk_layout": "4gb-rootfs",
-        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan",
+        "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-ubsan-buganizer",
         "image_test": null,
         "profile": "ubsan-fuzzer",
         "schedule": "0 */3 * * *"
