@@ -245,7 +245,7 @@ def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
       output_dir=output_dir)
   uprev_manager.uprev()
 
-  return uprev_manager.modified_ebuilds
+  return uprev_manager.modified_ebuilds, uprev_manager.revved_packages
 
 
 def uprev_versioned_package(package, build_targets, refs, chroot):

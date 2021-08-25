@@ -473,6 +473,10 @@ class UprevOverlayManager(object):
     else:
       return []
 
+  @property
+  def revved_packages(self):
+    return self._revved_packages or []
+
   def uprev(self, package_list=None, force=False):
     """Uprev ebuilds.
 
@@ -571,7 +575,7 @@ class UprevOverlayManager(object):
         osutils.SafeUnlink(ebuild_path_to_remove)
         self._removed_ebuild_files.append(ebuild_path_to_remove)
 
-      self._revved_packages.append(ebuild.package)
+      self._revved_packages.append(new_package)
       self._new_package_atoms.append('=%s' % new_package)
 
   def _populate_overlay_ebuilds(self,

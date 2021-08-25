@@ -78,11 +78,12 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     targets = ['foo', 'bar']
     output_dir = '/tmp/uprev_output_dir'
     changed = ['/ebuild-1.0-r1.ebuild', '/ebuild-1.0-r2.ebuild']
+    revved_packages = ['cat1/pkg1-1.11', 'cat2/pkg2-1.12']
     expected_type = constants.BOTH_OVERLAYS
     request = self._GetRequest(targets=targets, overlay_type=self._BOTH,
                                output_dir=output_dir)
     uprev_patch = self.PatchObject(packages_service, 'uprev_build_targets',
-                                   return_value=changed)
+                                   return_value=(changed, revved_packages))
 
     packages_controller.Uprev(request, self.response, self.api_config)
 
@@ -97,6 +98,11 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
       self.assertIn(ebuild.path, changed)
       changed.remove(ebuild.path)
     self.assertFalse(changed)
+
+    for pkg in self.response.packages:
+      self.assertTrue(pkg.category.startswith('cat'))
+      self.assertTrue(pkg.package_name.startswith('pkg'))
+      self.assertTrue(pkg.version.startswith('1.1'))
 
 
 class UprevVersionedPackageTest(cros_test_lib.MockTestCase, ApiConfigMixin):

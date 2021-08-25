@@ -44,15 +44,20 @@ def Uprev(input_proto, output_proto, _config):
   output_dir = input_proto.output_dir or None
 
   try:
-    uprevved = packages.uprev_build_targets(build_targets, overlay_type, chroot,
-                                            output_dir)
+    modified_ebuilds, revved_packages = (
+        packages.uprev_build_targets(build_targets, overlay_type, chroot,
+                                     output_dir))
   except packages.Error as e:
     # Handle module errors nicely, let everything else bubble up.
     cros_build_lib.Die(e)
 
-  for path in uprevved:
+  for path in modified_ebuilds:
     output_proto.modified_ebuilds.add().path = path
 
+  for package in revved_packages:
+    pkg_info = package_info.parse(package)
+    pkg_proto = output_proto.packages.add()
+    controller_util.serialize_package_info(pkg_info, pkg_proto)
 
 def _UprevVersionedPackageResponse(_input_proto, output_proto, _config):
   """Add fake paths to a successful uprev versioned package response."""
