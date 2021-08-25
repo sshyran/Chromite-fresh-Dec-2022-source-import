@@ -640,8 +640,10 @@ class Sysroot(object):
                                    'gs_fetch_binpkg')
     gsutil_cmd = '%s \\"${URI}\\" \\"${DISTDIR}/${FILE}\\"' % gs_fetch_binpkg
     config.append('BOTO_CONFIG="%s"' % boto_config)
-    config.append('FETCHCOMMAND_GS="bash -c \'BOTO_CONFIG=%s %s\'"'
-                  % (boto_config, gsutil_cmd))
+    # Retry the fetch if it fails
+    config.append('FETCHCOMMAND_GS="bash -c \''
+                  'export BOTO_CONFIG=%s; %s || %s\'"'
+                  % (boto_config, gsutil_cmd, gsutil_cmd))
     config.append('RESUMECOMMAND_GS="$FETCHCOMMAND_GS"')
 
     if accepted_licenses:
