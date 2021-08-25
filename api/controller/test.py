@@ -151,11 +151,12 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
 
 SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
-TEST_SERVICE_DIR = os.path.join(SRC_DIR, 'platform/dev/src/chromiumos/test')
+PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
+TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
 TEST_CONTAINER_BUILD_SCRIPTS = [
     os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
     os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
-    os.path.join(TEST_SERVICE_DIR, 'test/container/utils/build-dockerimage.sh'),
+    os.path.join(PLATFORM_DEV_DIR, 'test/container/utils/build-dockerimage.sh'),
 ]
 
 
@@ -193,7 +194,7 @@ def BuildTestServiceContainers(input_proto, output_proto, _config):
   sysroot = sysroot_lib.Sysroot(build_target.root)
 
   for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
-    cmd = [build_script, chroot.path, version, sysroot.path]
+    cmd = [build_script, chroot.path, version.lower(), sysroot.path]
     cmd_result = cros_build_lib.run(cmd, check=False)
     if cmd_result.returncode == 0:
       output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
