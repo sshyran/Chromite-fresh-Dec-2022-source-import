@@ -53,6 +53,8 @@
     grunt-factory-grunt-11164.B-factorybranch
   factory-hatch-12692.B-buildspec
     hatch-factory-hatch-12692.B-factorybranch
+  factory-keeby-14162.B-buildspec
+    keeby-factory-keeby-14162.B-factorybranch
   factory-kukui-12587.B-buildspec
     jacuzzi-factory-kukui-12587.B-factorybranch
     kukui-factory-kukui-12587.B-factorybranch
@@ -896,6 +898,8 @@
     grunt-factory-grunt-11164.B-factorybranch-tryjob
   factory-hatch-12692.B-buildspec-tryjob
     hatch-factory-hatch-12692.B-factorybranch-tryjob
+  factory-keeby-14162.B-buildspec-tryjob
+    keeby-factory-keeby-14162.B-factorybranch-tryjob
   factory-kukui-12587.B-buildspec-tryjob
     jacuzzi-factory-kukui-12587.B-factorybranch-tryjob
     kukui-factory-kukui-12587.B-factorybranch-tryjob
@@ -1268,6 +1272,7 @@
   kalista-payloads-tryjob
   kalista-release-tryjob
   kalista-unittest-stress
+  keeby-factory-keeby-14162.B-factorybranch-tryjob
   keeby-full-tryjob
   keeby-llvm-next-toolchain-tryjob
   keeby-llvm-toolchain-tryjob
