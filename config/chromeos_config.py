@@ -705,7 +705,8 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_canary_critical',
-              ['("group:mainline" && !informational)']),
+              ['("group:mainline" && !informational)'],
+              timeout=2 * 60 * 60 ),
       ],
   )
 
