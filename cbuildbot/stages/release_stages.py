@@ -477,27 +477,32 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
            payload_test_configs) = testdata
           # For unified builds, only test against the specified models.
           if self._run.config.models:
-            models = []
+            au_models = []
             for model in self._run.config.models:
               # 'au' is a test suite generated in ge_build_config.json
               if model.test_suites and 'au' in model.test_suites:
-                models.append(model)
+                au_models.append(model)
 
-            if len(models) > 1:
+            if len(au_models) > 1:
               fsi_configs = set(p for p in payload_test_configs
                                 if p.payload_type ==
                                 paygen_build_lib.PAYLOAD_TYPE_FSI)
               non_fsi_configs = set(p for p in payload_test_configs
                                     if p not in fsi_configs)
+              # Schedule FSI's on every model even those not in the 'au' suite.
+              # This ensures no FSI tests are missed from models being disabled
+              # in the lab.
               stages = self._ScheduleForApplicableModels(
-                  archive_board, archive_build, fsi_configs, suite_name)
-              stages += self._ScheduleForModels(
-                  archive_board, archive_build, models, non_fsi_configs,
+                  archive_board, archive_build, self._run.config.models,
+                  fsi_configs, suite_name)
+              # Schedule the rest only on models in the 'au' suite.
+              stages += self._ScheduleForApplicableModels(
+                  archive_board, archive_build, au_models, non_fsi_configs,
                   suite_name)
               steps = [stage.Run for stage in stages]
               parallel.RunParallelSteps(steps)
-            elif len(models) == 1:
-              model = models[0]
+            elif len(au_models) == 1:
+              model = au_models[0]
               PaygenTestStage(
                   self._run, self.buildstore, suite_name, archive_board,
                   model.name, model.lab_board_name, self.channel,
@@ -522,44 +527,50 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
         logging.info('PaygenBuild for %s skipped because: %s', self.channel, e)
 
   def _ScheduleForModels(self, archive_board, archive_build, models,
-                         non_fsi_configs, suite_name):
-    """Schedule AU tests on models in the 'au' suite.
+                         payload_configs, suite_name):
+    """Schedule AU tests on models.
 
     Args:
       archive_board: The board we schedule against.
       archive_build: The build of the payload config.
       models: The models with 'au' enabled.
-      non_fsi_configs: The list of payload configs.
+      payload_configs: The list of payload configs.
       suite_name: The name of the suite we are scheduling.
     """
     return [
         PaygenTestStage(
             self._run, self.buildstore, suite_name, archive_board,
             model.name, model.lab_board_name, self.channel,
-            archive_build, self.debug, non_fsi_configs,
+            archive_build, self.debug, payload_configs,
             config_lib.GetHWTestEnv(self._run.config, model_config=model))
         for model in models
     ]
 
   def _ScheduleForApplicableModels(self, archive_board, archive_build,
-                                   fsi_configs, suite_name):
-    """Schedule FSI AU tests on every applicable_model, if any.
+                                   models, payload_configs, suite_name):
+    """Schedule AU tests on applicable_models, if any.
 
-    We schedule on every model even if it is not in the 'au' suite.
-    This ensures no FSI tests are missed from models being disabled in the lab.
-    Note that if an fsi config has no applicable models then no tests will be
-    scheduled for it.
+    Note that if a config has no applicable models then no tests will be
+    scheduled for it. N2N configs never have applicable_models so they will run
+    on everything.
 
     Args:
       archive_board: The board we schedule against.
       archive_build: The build of the payload config.
-      fsi_configs: The list of payload configs of type FSI.
+      models: The list of models to iterate over.
+      payload_configs: The list of payload configs.
       suite_name: The name of the suite we are scheduling.
     """
     stages = []
-    for payload_config in fsi_configs:
+    for payload_config in payload_configs:
+      # N2N payloads do not have applicable_models so just schedule on ALL
+      # models that should be running tests in the lab.
+      if payload_config.payload_type == paygen_build_lib.PAYLOAD_TYPE_N2N:
+        stages += self._ScheduleForModels(archive_board, archive_build, models,
+                                          [payload_config], suite_name)
+        continue
       applicable_models = []
-      for m in self._run.config.models:
+      for m in models:
         if m.name in (payload_config.applicable_models or []):
           applicable_models.append(m)
       stages += self._ScheduleForModels(archive_board, archive_build,
