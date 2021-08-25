@@ -347,7 +347,7 @@ def InitialCheckout(repo, options):
   cbuildbot_alerts.PrintBuildbotStepText('Branch: %s' % repo.branch)
   logging.info('Bootstrap script starting initial sync on branch: %s',
                repo.branch)
-  repo.PreLoad('/preload/chromeos')
+  repo.PreLoad('/snapshot_mounts/chromiumos')
   repo.Sync(detach=True,
             downgrade_repo=_ShouldDowngradeRepo(options))
 

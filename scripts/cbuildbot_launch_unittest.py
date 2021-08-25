@@ -72,7 +72,7 @@ class CbuildbotLaunchTest(cros_test_lib.MockTestCase):
     cbuildbot_launch.InitialCheckout(mock_repo, options)
 
     self.assertEqual(mock_repo.mock_calls, [
-        mock.call.PreLoad('/preload/chromeos'),
+        mock.call.PreLoad('/snapshot_mounts/chromiumos'),
         mock.call.Sync(detach=True, downgrade_repo=False),
     ])
 
