@@ -3795,14 +3795,14 @@
       ]
     },
     {
-      "name": "hatch-connectivitynext",
-      "reference_board_name": "hatch-connectivitynext",
+      "name": "hatch-blueznext",
+      "reference_board_name": "hatch-blueznext",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
       "experimental": true,
       "models": [
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "akemi",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3810,7 +3810,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "dragonair",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3818,7 +3818,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "dratini",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3826,7 +3826,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "hatch",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3834,7 +3834,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "helios",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3842,7 +3842,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "helios_diskswap",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3850,7 +3850,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "jinlon",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3858,7 +3858,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "kindred",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3866,7 +3866,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "kled",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3874,7 +3874,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "kohaku",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -3882,7 +3882,7 @@
           "is_active": true
         },
         {
-          "board_name": "hatch-connectivitynext",
+          "board_name": "hatch-blueznext",
           "name": "nightfury",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
