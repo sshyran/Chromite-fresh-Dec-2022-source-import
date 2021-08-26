@@ -38,7 +38,8 @@ _SRC_VB = os.path.join(_SRC_ROOT, 'platform/vboot_reference')
 _SRC_LP = os.path.join(_SRC_ROOT, 'third_party/coreboot/payloads/libpayload')
 
 _PTRN_GDB = b'Ready for GDB connection'
-_PTRN_BOARD = b'Starting(?: read-only| read/write)? depthcharge on ([a-z_]+)...'
+_PTRN_BOARD = (
+    b'Starting(?: read-only| read/write)? depthcharge on ([A-Za-z_]+)...')
 
 
 def GetGdbForElf(elf):
