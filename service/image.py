@@ -219,7 +219,7 @@ def Build(board: str,
 
 
 def BuildRecoveryImage(board: str,
-                       image_path: Optional[str] = None) -> BuildResult:
+                       image_path: Optional[Path] = None) -> BuildResult:
   """Build a recovery image.
 
   This must be done after a base image has been created.
@@ -241,7 +241,7 @@ def BuildRecoveryImage(board: str,
 
   cmd.extend(['--board', board])
   if image_path:
-    cmd.extend(['--image', image_path])
+    cmd.extend(['--image', str(image_path)])
 
   build_result = BuildResult([constants.IMAGE_TYPE_RECOVERY])
   result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
@@ -253,7 +253,7 @@ def BuildRecoveryImage(board: str,
   # Record the image path.
   image_name = constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_RECOVERY]
   if image_path:
-    recovery_image = Path(image_path).parent / image_name
+    recovery_image = image_path.parent / image_name
   else:
     image_dir = Path(image_lib.GetLatestImageLink(board))
     image_path = image_dir / image_name
