@@ -11,7 +11,7 @@ import copy
 import functools
 import logging
 import os
-from typing import List, NamedTuple, Set
+from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -28,6 +28,9 @@ from chromite.lib import sysroot_lib
 from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
+
+if TYPE_CHECKING:
+  from pathlib import Path
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE
@@ -114,10 +117,11 @@ class ImageTypes(NamedTuple):
     return [_IMAGE_MAPPING[_FACTORY_ID]] if self.has_factory else []
 
 
-def _add_image_to_proto(output_proto, path, image_type, board):
+def _add_image_to_proto(output_proto, path: Union['Path', str], image_type: int,
+                        board: str):
   """Quick helper function to add a new image to the output proto."""
   new_image = output_proto.images.add()
-  new_image.path = path
+  new_image.path = str(path)
   new_image.type = image_type
   new_image.build_target.name = board
 
@@ -234,7 +238,7 @@ def Create(input_proto, output_proto, _config):
     # Success! We need to record the images we built in the output.
     all_images = {**core_result.images, **factory_result.images}
     for img_name, img_path in all_images.items():
-      _add_image_to_proto(output_proto, str(img_path), _IMAGE_MAPPING[img_name],
+      _add_image_to_proto(output_proto, img_path, _IMAGE_MAPPING[img_name],
                           board)
 
     # Build and record VMs as necessary.
