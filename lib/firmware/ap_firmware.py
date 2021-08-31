@@ -8,7 +8,7 @@ import collections
 import importlib
 import logging
 import os
-from typing import Optional
+from typing import Iterable, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
@@ -112,7 +112,8 @@ def deploy(build_target,
            fast=False,
            verbose=False,
            dryrun=False,
-           flash_contents: Optional[str] = None):
+           flash_contents: Optional[str] = None,
+           passthrough_args: Iterable[str] = tuple()):
   """Deploy a firmware image to a device.
 
   Args:
@@ -125,6 +126,7 @@ def deploy(build_target,
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
+    passthrough_args: List of additional options passed to flashrom or futility.
   """
   try:
     flash_ap.deploy(
@@ -135,7 +137,8 @@ def deploy(build_target,
         fast=fast,
         verbose=verbose,
         dryrun=dryrun,
-        flash_contents=flash_contents)
+        flash_contents=flash_contents,
+        passthrough_args=passthrough_args)
   except flash_ap.Error as e:
     # Reraise as a DeployError for future compatibility.
     raise DeployError(str(e))

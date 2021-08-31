@@ -4,6 +4,7 @@
 
 """cros ap: firmware AP related commands."""
 
+import argparse
 import logging
 import os
 from pathlib import Path
@@ -395,6 +396,10 @@ class FlashSubcommand(command.CliCommand):
         action='store_true',
         help='Execute a dry-run. Print the commands that would be run instead '
         'of running them.')
+    parser.add_argument(
+        'extra_options',
+        nargs=argparse.REMAINDER,
+        help='Pass additional options to flashrom/futility.')
     parser.epilog = """
 Command to flash the AP firmware onto a DUT.
 
@@ -406,10 +411,18 @@ To flash your volteer DUT via SERVO on the default port (9999):
 
 To flash your volteer DUT via SERVO on port 1234:
   cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
+
+To pass additional options to futility or flashrom, provide them after `--`,
+e.g.:
+  cros ap flash -b zork -i /path/to/image.bin -d ssh://1.1.1.1 -- --force
 """
 
   def Run(self):
     commandline.RunInsideChroot(self)
+
+    passthrough_args = self.options.extra_options
+    if passthrough_args and passthrough_args[0] == '--':
+      del passthrough_args[0]
 
     build_target = build_target_lib.BuildTarget(self.options.build_target)
     try:
@@ -421,7 +434,8 @@ To flash your volteer DUT via SERVO on port 1234:
           fast=self.options.fast,
           verbose=self.options.verbose,
           dryrun=self.options.dry_run,
-          flash_contents=self.options.flash_contents)
+          flash_contents=self.options.flash_contents,
+          passthrough_args=passthrough_args)
     except ap_firmware.Error as e:
       cros_build_lib.Die(e)
 

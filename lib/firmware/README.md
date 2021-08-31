@@ -20,6 +20,10 @@ To flash your volteer DUT via SERVO on the default port (9999):
 To flash your volteer DUT via SERVO on port 1234:
   cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
 
+To pass additional options to futility or flashrom, provide them after `--`,
+e.g.:
+  cros ap flash -b zork -i /path/to/image.bin -d ssh://1.1.1.1 -- --force
+
 ## Reading
 To read image of device.cros via SSH:
   cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://device.cros
