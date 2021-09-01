@@ -345,9 +345,10 @@ def InitialCheckout(repo, options):
     options: A parsed options object from a cbuildbot parser.
   """
   cbuildbot_alerts.PrintBuildbotStepText('Branch: %s' % repo.branch)
-  logging.info('Bootstrap script starting initial sync on branch: %s',
-               repo.branch)
-  repo.PreLoad('/preload/chromeos')
+  if not options.source_cache:
+    logging.info('Bootstrap script starting initial sync on branch: %s',
+                 repo.branch)
+    repo.PreLoad('/preload/chromeos')
   repo.Sync(detach=True,
             downgrade_repo=_ShouldDowngradeRepo(options))
 

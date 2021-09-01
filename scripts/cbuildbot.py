@@ -470,6 +470,8 @@ def _CreateParser():
                                'servers. When both this argument and '
                                '--git-cache-dir are provided this value will '
                                'be preferred for the chrome source cache.')
+  group.add_remote_option('--source_cache', action='store_true', default=False,
+                          help='Whether to utilize cache snapshot mounts.')
   group.add_remote_option('--debug-cidb', action='store_true', default=False,
                           help='Force Debug CIDB to be used.')
   # cbuildbot ChromeOS Findit options
