@@ -2777,22 +2777,17 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       'async': True,
   }
 
+  borealis_test_configs = [
+      config_lib.HWTestConfig(
+          'av-analysis_trace_per-build',
+          **av_analysis_args)
+  ]
+
   _additional_test_config = {
-    'hatch-borealis-release': [
-        config_lib.HWTestConfig(
-            'av-analysis_trace_per-build',
-            **av_analysis_args)
-    ],
-    'puff-borealis-release': [
-        config_lib.HWTestConfig(
-            'av-analysis_trace_per-build',
-            **av_analysis_args)
-    ],
-    'zork-borealis-release': [
-        config_lib.HWTestConfig(
-            'av-analysis_trace_per-build',
-            **av_analysis_args)
-    ],
+    'hatch-borealis-release': borealis_test_configs,
+    'puff-borealis-release': borealis_test_configs,
+    'volteer-borealis-release': borealis_test_configs,
+    'zork-borealis-release': borealis_test_configs,
   }
 
   # Some Uniboard boards need to run additional tests suites. This means
