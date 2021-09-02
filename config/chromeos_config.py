@@ -2151,6 +2151,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   _no_unittest_configs = [
       'grunt-kernelnext-release',
+      'zork-minios-release',
   ]
 
   def _get_skylab_settings(board_name):

@@ -35580,6 +35580,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-minios\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-minios\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
@@ -35620,6 +35621,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "unittests": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
