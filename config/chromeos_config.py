@@ -694,6 +694,12 @@ def GeneralTemplates(site_config):
       description='Buildspec creator.',
   )
 
+  site_config.AddTemplate(
+      'vm',
+      site_config.templates.full,
+      profile='vm-optimized',
+  )
+
 
 def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
   """Create mixin templates for each board."""
@@ -1533,6 +1539,23 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
           important=False,
       )
   )
+
+  vm_config = site_config.Add(
+      'amd64-generic-vm-full',
+      site_config.templates.vm,
+      site_config.templates.build_external_chrome,
+      boards=['amd64-generic'],
+      description='Build for running on VMs',
+      run_cpeexport=True,
+      internal=False,
+      important=False,
+      manifest_version=True,
+      manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
+      overlays=constants.PUBLIC_OVERLAYS,
+      prebuilts=constants.PUBLIC
+  )
+
+  master_config.AddSlave(vm_config)
 
 
 def IncrementalBuilders(site_config, boards_dict, ge_build_config):

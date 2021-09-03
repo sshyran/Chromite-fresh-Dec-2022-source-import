@@ -15,6 +15,7 @@ vmtest_boards = frozenset([
     # Full VMTest support on ChromeOS is currently limited to devices derived
     # from betty & co.
     'amd64-generic', # Has kernel 4.4, used with public Chromium.
+    'amd64-generic-vm', # amd64-generic with optimization for VMs.
     'betty',         # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
     'betty-kernelnext', # Like betty but on the next kernel version.
     'betty-pi-arc',  # Like betty but P version of ARC++.
@@ -352,6 +353,7 @@ def ApplyCustomOverrides(site_config):
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
+      'amd64-generic-vm-full': site_config.templates.tast_vm_canary_tests,
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,

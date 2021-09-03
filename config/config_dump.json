@@ -812,6 +812,27 @@
             "manifest_version": true,
             "vm_tests": []
         },
+        "vm": {
+            "_template": "vm",
+            "archive_build_debug": true,
+            "build_timeout": 43200,
+            "build_type": "full",
+            "chrome_sdk": true,
+            "description": "Full Builds",
+            "display_label": "full",
+            "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
+            "git_sync": true,
+            "image_test": true,
+            "images": [
+                "base",
+                "recovery",
+                "test",
+                "factory_install"
+            ],
+            "luci_builder": "Full",
+            "profile": "vm-optimized",
+            "usepkg_build_packages": false
+        },
         "vmrvc_android_pfq": {
             "_template": "vmrvc_android_pfq",
             "android_import_branch": "git_rvc-arc",
@@ -1504,6 +1525,42 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try"
+    },
+    "amd64-generic-vm-full": {
+        "_template": "vm",
+        "boards": [
+            "amd64-generic"
+        ],
+        "description": "Build for running on VMs",
+        "important": false,
+        "manifest_version": true,
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "tast_vm_tests": [
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 7200\n}"
+        ],
+        "useflags": [
+            "-chrome_internal"
+        ]
+    },
+    "amd64-generic-vm-full-tryjob": {
+        "_template": "vm",
+        "boards": [
+            "amd64-generic"
+        ],
+        "debug": true,
+        "description": "Build for running on VMs",
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "manifest_version": true,
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "tast_vm_tests": [
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 7200\n}"
+        ],
+        "useflags": [
+            "-chrome_internal"
+        ]
     },
     "arkham-full": {
         "_template": "full",
@@ -20027,6 +20084,7 @@
         "schedule": "0 */3 * * *",
         "slave_configs": [
             "amd64-generic-full",
+            "amd64-generic-vm-full",
             "arm-generic-full",
             "arm64-generic-full",
             "eve-full",
@@ -20064,6 +20122,7 @@
         "overlays": "both",
         "slave_configs": [
             "amd64-generic-full-tryjob",
+            "amd64-generic-vm-full-tryjob",
             "arm-generic-full-tryjob",
             "arm64-generic-full-tryjob",
             "eve-full-tryjob",

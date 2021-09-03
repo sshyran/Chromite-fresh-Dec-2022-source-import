@@ -137,6 +137,7 @@
 == full ==
   master-full
     amd64-generic-full
+    amd64-generic-vm-full
     arm-generic-full
     arm64-generic-full
     eve-full
@@ -384,6 +385,7 @@
   amd64-generic-ubsan-fuzzer-tryjob
   amd64-generic-ubsan-tryjob
   amd64-generic-unittest-stress
+  amd64-generic-vm-full-tryjob
   arkham-full-tryjob
   arkham-llvm-next-toolchain-tryjob
   arkham-llvm-toolchain-tryjob
@@ -1223,6 +1225,7 @@
     sarien-master-factorybranch-tryjob
   master-full-tryjob
     amd64-generic-full-tryjob
+    amd64-generic-vm-full-tryjob
     arm-generic-full-tryjob
     arm64-generic-full-tryjob
     eve-full-tryjob

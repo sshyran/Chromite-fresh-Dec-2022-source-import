@@ -163,14 +163,14 @@ class FindConfigsForBoardTest(cros_test_lib.TestCase):
 
   def testOneFullConfigPerBoard(self):
     """There is at most one 'full' config for a board."""
-    # Verifies that there is one external 'full' and one internal 'release'
+    # Verifies the number of external 'full' and internal 'release'
     # build per board.  This is to ensure that we fail any new configs that
     # wrongly have names like *-bla-release or *-bla-full. This case can also
     # be caught if the new suffix was added to
     # config_lib.CONFIG_TYPE_DUMP_ORDER
     # (see testNonOverlappingConfigTypes), but that's not guaranteed to happen.
-    def AtMostOneConfig(board, label, configs):
-      if len(configs) > 1:
+    def AtMostNumConfigs(board, label, configs, number):
+      if len(configs) > number:
         self.fail(
             'Found more than one %s config for %s: %r'
             % (label, board, [c['name'] for c in configs]))
@@ -183,9 +183,10 @@ class FindConfigsForBoardTest(cros_test_lib.TestCase):
     self.assertTrue(boards)
 
     for b in boards:
+      numExternal = 2 if b == 'amd64-generic' else 1
       external, internal = self.config.FindFullConfigsForBoard(b)
-      AtMostOneConfig(b, 'external', external)
-      AtMostOneConfig(b, 'internal', internal)
+      AtMostNumConfigs(b, 'external', external, numExternal)
+      AtMostNumConfigs(b, 'internal', internal, 1)
 
 
 class UnifiedBuildConfigTestCase(object):
