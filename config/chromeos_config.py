@@ -2631,6 +2631,7 @@ def ApplyCustomOverrides(site_config, ge_build_config):
     'zork-borealis-release': borealis_test_configs,
   }
 
+
   # Some Uniboard boards need to run additional tests suites. This means
   # adding the suites at the model level as well.
   for config_name, _configs in _additional_test_config.items():
@@ -2681,6 +2682,26 @@ def ApplyCustomOverrides(site_config, ge_build_config):
                 model.lab_board_name, [],
                 enable_skylab=model.enable_skylab))
       overwritten_configs[config_name]['models'] = models
+
+  # Some devices has limited DUT in the lab and running bvt-tast-informational
+  # may miss tests results due to timeout.
+  # TODO(ddmail): Enable it once we have enough DUT in the lab.
+  _disable_bvt_tast_informational = [
+    'hatch-borealis-release',
+    'puff-borealis-release',
+    'volteer-borealis-release',
+    'zork-borealis-release',
+  ]
+  for config_name in _disable_bvt_tast_informational:
+    config = overwritten_configs.get(config_name)
+    if not config:
+      config = site_config.get(config_name)
+    if not config or 'hw_tests' not in config:
+      continue
+
+    hw_tests = [test for test in config['hw_tests']
+                  if test.suite != 'bvt-tast-informational']
+    overwritten_configs[config_name]['hw_tests'] = hw_tests
 
   # Some boards in toolchain builder are not using the same configuration as
   # release builders. Configure it here since it's easier, for both
