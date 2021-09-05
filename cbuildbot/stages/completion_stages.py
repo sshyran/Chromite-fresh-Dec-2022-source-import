@@ -547,11 +547,7 @@ class UpdateChromeosLKGMStage(generic_stages.BuilderStage):
       return
 
     manager = self._run.attrs.manifest_manager
-    cmd = [
-        'chrome_chromeos_lkgm',
-        '--lkgm=%s' % manager.current_version,
-        '--buildbucket-id', self._run.options.master_buildbucket_id
-    ]
+    cmd = ['chrome_chromeos_lkgm', '--lkgm=%s' % manager.current_version]
     # Always do a dryrun for now so that we can check the output and ensure it
     # is doing the correct thing.
     if self._run.options.debug:
