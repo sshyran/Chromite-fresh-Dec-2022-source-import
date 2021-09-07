@@ -246,7 +246,6 @@
   master-release
     adlrvp-release
     ambassador-release
-    amd64-generic-cheets-release
     asuka-release
     asurada-release
     asurada-zephyr-release
@@ -445,12 +444,6 @@
   ambassador-release-tryjob
   ambassador-unittest-stress
   amd64-generic-asan-tryjob
-  amd64-generic-cheets-full-tryjob
-  amd64-generic-cheets-llvm-next-toolchain-tryjob
-  amd64-generic-cheets-llvm-toolchain-tryjob
-  amd64-generic-cheets-payloads-tryjob
-  amd64-generic-cheets-release-tryjob
-  amd64-generic-cheets-unittest-stress
   amd64-generic-coverage-fuzzer-tryjob
   amd64-generic-full-tryjob
   amd64-generic-fuzzer-tryjob
@@ -1409,7 +1402,6 @@
   master-release-tryjob
     adlrvp-release-tryjob
     ambassador-release-tryjob
-    amd64-generic-cheets-release-tryjob
     asuka-release-tryjob
     asurada-release-tryjob
     asurada-zephyr-release-tryjob
