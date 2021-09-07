@@ -590,7 +590,6 @@ def GetChromeTestCopyPaths(build_dir, test_target):
       re.compile(r'.*build/cros_cache.*'),
       re.compile(r'.*testing/(?!buildbot/filters).*'),
       re.compile(r'.*third_party/chromite.*'),
-      re.compile(r'.*tools/swarming_client.*'),
   ]
 
   src_dir = os.path.dirname(os.path.dirname(build_dir))
