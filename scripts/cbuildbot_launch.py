@@ -429,6 +429,10 @@ def Cbuildbot(buildroot, depot_tools_path, argv):
   for i, arg in enumerate(argv):
     if arg in ('-r', '--buildroot'):
       argv[i + 1] = buildroot
+    # Remove source_cache option if it has not been added to the branch.
+    if constants.REEXEC_API_MINOR < 13:
+      argv.remove('--source_cache')
+  logging.info('Cbuildbot Args: %s', argv)
 
   # Source_cache flag is only used to indicate a transition to cache disks
   # and doesn't need to be passed back to Cbuildbot.
