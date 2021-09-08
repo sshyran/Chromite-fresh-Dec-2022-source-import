@@ -458,10 +458,17 @@ class WorkonHelper(object):
 
     return self._depgraph
 
-  def _GetPathAtoms(self, path) -> Iterable:
+  def _GetPathAtoms(self, raw_path) -> Iterable:
     """Get workon atoms affected by the current path."""
     # Make sure we're in a source path.
-    path = Path(path).resolve()
+    path = Path(raw_path).resolve()
+    if not path.exists():
+      # The path doesn't exist. To avoid the long lookup when the dev misspells
+      # a package name, lets just assume it's that and return no packages.
+      logging.warning('%s (%s) does not exist. Is it a misspelled package?',
+                      path, raw_path)
+      return []
+
     try:
       path = path.relative_to(constants.SOURCE_ROOT)
     except ValueError as e:
