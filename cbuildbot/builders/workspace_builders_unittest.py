@@ -39,11 +39,6 @@ def CreateMockSiteConfig():
   )
 
   site_config.AddTemplate(
-      'firmwarebranch',
-      production_config.templates.firmwarebranch,
-  )
-
-  site_config.AddTemplate(
       'factorybranch',
       production_config.templates.factorybranch,
   )
@@ -62,18 +57,6 @@ def CreateMockSiteConfig():
   )
 
   buildspec_parent.AddSlaves([
-      site_config.Add(
-          'test-firmwarebranch',
-          site_config.templates.firmwarebranch,
-          workspace_branch='test-branch',
-          boards=['board'],
-      ),
-      site_config.Add(
-          'test-multi-firmwarebranch',
-          site_config.templates.firmwarebranch,
-          workspace_branch='test-branch',
-          boards=['boardA', 'boardB'],
-      ),
       site_config.Add(
           'test-factorybranch',
           site_config.templates.factorybranch,
@@ -180,122 +163,6 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
                   build_root=self.workspace),
     ])
 
-  def testFirmwareBranch(self):
-    """Verify RunStages for FirmwareBranchBuilder."""
-    builder_run = self._InitConfig('test-firmwarebranch')
-
-    workspace_builders.FirmwareBranchBuilder(
-        builder_run, self.buildstore).RunStages()
-
-    self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspacePublishStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspacePublishBuildspecStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceInitSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceSetupBoardStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(branch_archive_stages.FirmwareArchiveStage,
-                  build_root=self.workspace,
-                  board='board'),
-    ])
-
-  def testFirmwareBranchTryjob(self):
-    """Verify RunStages for FirmwareBranchBuilder Tryjob."""
-    builder_run = self._InitConfig('test-firmwarebranch-tryjob')
-    workspace_builders.FirmwareBranchBuilder(
-        builder_run, self.buildstore).RunStages()
-
-    self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceInitSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceSetupBoardStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(branch_archive_stages.FirmwareArchiveStage,
-                  build_root=self.workspace,
-                  board='board'),
-    ])
-
-  def testFirmwareBranchWithVersion(self):
-    """Verify RunStages for FirmwareBranchBuilder with --version."""
-    builder_run = self._InitConfig('test-firmwarebranch',
-                                   extra_argv=['--version', '1.2.3'])
-
-    workspace_builders.FirmwareBranchBuilder(
-        builder_run, self.buildstore).RunStages()
-
-    self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceInitSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceSetupBoardStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
-                  build_root=self.workspace,
-                  board='board'),
-        mock.call(branch_archive_stages.FirmwareArchiveStage,
-                  build_root=self.workspace,
-                  board='board'),
-    ])
-
-  def testMultiFirmwareBranch(self):
-    """Verify RunStages for FirmwareBranchBuilder with multiple boards."""
-    builder_run = self._InitConfig('test-multi-firmwarebranch')
-    workspace_builders.FirmwareBranchBuilder(
-        builder_run, self.buildstore).RunStages()
-
-    self.assertEqual(self.mock_run_stage.call_args_list, [
-        mock.call(workspace_stages.WorkspaceUprevStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspacePublishStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspacePublishBuildspecStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceInitSDKStage,
-                  build_root=self.workspace),
-        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
-                  build_root=self.workspace),
-        # Board A
-        mock.call(workspace_stages.WorkspaceSetupBoardStage,
-                  build_root=self.workspace,
-                  board='boardA'),
-        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
-                  build_root=self.workspace,
-                  board='boardA'),
-        mock.call(branch_archive_stages.FirmwareArchiveStage,
-                  build_root=self.workspace,
-                  board='boardA'),
-        # Board B
-        mock.call(workspace_stages.WorkspaceSetupBoardStage,
-                  build_root=self.workspace,
-                  board='boardB'),
-        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
-                  build_root=self.workspace,
-                  board='boardB'),
-        mock.call(branch_archive_stages.FirmwareArchiveStage,
-                  build_root=self.workspace,
-                  board='boardB'),
-    ])
-
   def testFactoryBranch(self):
     """Verify RunStages for FactoryBranchBuilder."""
     builder_run = self._InitConfig('test-factorybranch')
@@ -309,6 +176,41 @@ class BuildspecBuilderTest(cros_test_lib.MockTempDirTestCase):
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspacePublishBuildspecStage,
                   build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceInitSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceUpdateSDKStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceSyncChromeStage,
+                  build_root=self.workspace),
+        mock.call(workspace_stages.WorkspaceSetupBoardStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceBuildPackagesStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceUnitTestStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceBuildImageStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(workspace_stages.WorkspaceDebugSymbolsStage,
+                  build_root=self.workspace,
+                  board='board'),
+        mock.call(branch_archive_stages.FactoryArchiveStage,
+                  build_root=self.workspace,
+                  board='board'),
+    ])
+
+  def testFactoryBranchWithVersion(self):
+    """Verify RunStages for FactoryBranchBuilder with --version."""
+    builder_run = self._InitConfig('test-factorybranch',
+                                   extra_argv=['--version', '1.2.3'])
+
+    workspace_builders.FactoryBranchBuilder(
+        builder_run, self.buildstore).RunStages()
+
+    self.assertEqual(self.mock_run_stage.call_args_list, [
         mock.call(workspace_stages.WorkspaceInitSDKStage,
                   build_root=self.workspace),
         mock.call(workspace_stages.WorkspaceUpdateSDKStage,

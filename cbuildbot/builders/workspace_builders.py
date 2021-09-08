@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Module containing firmware builders."""
+"""Module containing factory builders."""
 
 from chromite.cbuildbot.builders import generic_builders
 from chromite.cbuildbot.stages import branch_archive_stages
@@ -46,46 +46,12 @@ class BuildSpecBuilder(generic_builders.Builder):
                      build_root=self._run.options.workspace)
 
 
-class FirmwareBranchBuilder(BuildSpecBuilder):
-  """Builder that builds firmware branches.
-
-  This builder checks out a second copy of ChromeOS into the workspace
-  on the firmware branch, and performs a firmware build there for 1 or
-  more boards, and publishes all of the results to both it's own build
-  artifacts, as well as to a second location specific to each board
-  that looks like a the results of a traditional single board firmware
-  build.
-  """
-
-  def RunStages(self):
-    """Run the stages."""
-    super().RunStages()
-
-    self._RunStage(workspace_stages.WorkspaceInitSDKStage,
-                   build_root=self._run.options.workspace)
-
-    self._RunStage(workspace_stages.WorkspaceUpdateSDKStage,
-                   build_root=self._run.options.workspace)
-
-    for board in self._run.config.boards:
-      self._RunStage(workspace_stages.WorkspaceSetupBoardStage,
-                     build_root=self._run.options.workspace,
-                     board=board)
-
-      self._RunStage(workspace_stages.WorkspaceBuildPackagesStage,
-                     build_root=self._run.options.workspace,
-                     board=board)
-
-      self._RunStage(branch_archive_stages.FirmwareArchiveStage,
-                     build_root=self._run.options.workspace,
-                     board=board)
-
 
 class FactoryBranchBuilder(generic_builders.Builder):
   """Builder that builds factory branches.
 
   This builder checks out a second copy of ChromeOS into the workspace
-  on the firmware branch, and performs a factory build there for 1
+  on the factory branch, and performs a factory build there for 1
   board.
   """
 

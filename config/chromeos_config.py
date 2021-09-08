@@ -565,12 +565,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'factory_firmware',
-      site_config.templates.release_common,
-      luci_builder=config_lib.LUCI_BUILDER_FACTORY,
-  )
-
-  site_config.AddTemplate(
       'moblab_release',
       site_config.templates.release,
       description='Moblab release builders',
@@ -578,15 +572,15 @@ def GeneralTemplates(site_config):
       signer_tests=False,
   )
 
-  # Factory and Firmware releases much inherit from these classes.
+  # Factory releases much inherit from these classes.
   # Modifications for these release builders should go here.
 
-  # Naming conventions also must be followed. Factory and firmware branches
-  # must end in -factory or -firmware suffixes.
+  # Naming conventions also must be followed. Factory branches must end
+  # in "-factory".
 
   site_config.AddTemplate(
       'factory',
-      site_config.templates.factory_firmware,
+      site_config.templates.release_common,
       display_label=config_lib.DISPLAY_LABEL_FACTORY,
       chrome_sdk=False,
       chrome_sdk_build_chrome=False,
@@ -596,6 +590,7 @@ def GeneralTemplates(site_config):
       hwqual=False,
       images=['test', 'factory_install'],
       image_test=False,
+      luci_builder=config_lib.LUCI_BUILDER_FACTORY,
       paygen=False,
       signer_tests=False,
       sign_types=['factory'],
@@ -607,39 +602,6 @@ def GeneralTemplates(site_config):
   site_config.AddTemplate(
       'workspace',
       postsync_patch=False,
-  )
-
-  # Requires that you set boards, and workspace_branch.
-  site_config.AddTemplate(
-      'firmwarebranch',
-      site_config.templates.factory_firmware,
-      site_config.templates.workspace,
-      display_label=config_lib.DISPLAY_LABEL_FIRMWARE,
-      images=[],
-      hwqual=False,
-      factory_toolkit=False,
-      packages=['virtual/chromeos-firmware'],
-      usepkg_build_packages=False,
-      sync_chrome=False,
-      chrome_sdk=False,
-      unittests=False,
-      dev_installer_prebuilts=False,
-      upload_hw_test_artifacts=False,
-      upload_symbols=False,
-      useflags=config_lib.append_useflags(['chromeless_tty']),
-      signer_tests=False,
-      paygen=False,
-      image_test=False,
-      manifest=constants.DEFAULT_MANIFEST,
-      sign_types=['firmware', 'accessory_rwsig'],
-      build_type=constants.GENERIC_TYPE,
-      uprev=True,
-      overlays=constants.BOTH_OVERLAYS,
-      push_overlays=constants.BOTH_OVERLAYS,
-      builder_class_name='workspace_builders.FirmwareBranchBuilder',
-      build_timeout=6*60 * 60,
-      description='TOT builder to build a firmware branch.',
-      doc='https://goto.google.com/tot-for-firmware-branches',
   )
 
   site_config.AddTemplate(
@@ -1795,127 +1757,6 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
   )
 
 
-def FirmwareBuilders(site_config, _boards_dict, _ge_build_config):
-  """Create all firmware build configs.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-    boards_dict: A dict mapping board types to board name collections.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
-  """
-  # pylint: disable=unused-variable
-  # Defines "interval", "branch", "boards", "kwargs" for firmwarebranch builds.
-  #
-  # Intervals:
-  NONE = ''  # Do not schedule automatically.
-  DAILY = 'with 24h interval'  # 1 day interval
-  WEEKLY = 'with 168h interval'  # 1 week interval
-  MONTHLY = 'with 720h interval'  # 30 day interval
-  TRIGGERED = 'triggered'  # Only when triggered
-  # Override these template variables via kwargs.
-  GSC = {'sign_types': ['gsc_firmware']}
-  # Changes here should be reflected in infra/config/firmware.star as well
-  firmware_branch_builders = [
-      (MONTHLY, 'firmware-enguarde-5216.201.B', ['enguarde'], {}),
-      (MONTHLY, 'firmware-expresso-5216.223.B', ['expresso'], {}),
-      (MONTHLY, 'firmware-kip-5216.227.B', ['kip'], {}),
-      (MONTHLY, 'firmware-swanky-5216.238.B', ['swanky'], {}),
-      (MONTHLY, 'firmware-gnawty-5216.239.B', ['gnawty'], {}),
-      (MONTHLY, 'firmware-winky-5216.265.B', ['winky'], {}),
-      (MONTHLY, 'firmware-candy-5216.310.B', ['candy'], {}),
-      # PrePVT images
-      (TRIGGERED, 'firmware-cr50-9308.B', ['reef'], GSC),
-      # preflashed images for manufacturing
-      (TRIGGERED, 'firmware-cr50-guc-factory-9308.26.B', ['reef'], GSC),
-      # MP images
-      (TRIGGERED, 'firmware-cr50-mp-9311.B', ['reef'], GSC),
-      # R86 MP images
-      (TRIGGERED, 'firmware-cr50-mp-r86-9311.70.B', ['reef'], GSC),
-      (MONTHLY, 'firmware-banjo-5216.334.B', ['banjo'], {}),
-      (MONTHLY, 'firmware-orco-5216.362.B', ['orco'], {}),
-      (MONTHLY, 'firmware-sumo-5216.382.B', ['sumo'], {}),
-      (MONTHLY, 'firmware-ninja-5216.383.B', ['ninja'], {}),
-      (MONTHLY, 'firmware-heli-5216.392.B', ['heli'], {}),
-      (MONTHLY, 'firmware-samus-6300.B', ['samus'], {}),
-      (MONTHLY, 'firmware-paine-6301.58.B', ['auron_paine'], {}),
-      (MONTHLY, 'firmware-yuna-6301.59.B', ['auron_yuna'], {}),
-      (MONTHLY, 'firmware-guado-6301.108.B', ['guado'], {}),
-      (MONTHLY, 'firmware-tidus-6301.109.B', ['tidus'], {}),
-      (MONTHLY, 'firmware-rikku-6301.110.B', ['rikku'], {}),
-      (MONTHLY, 'firmware-lulu-6301.136.B', ['lulu'], {}),
-      (MONTHLY, 'firmware-gandof-6301.155.B', ['gandof'], {}),
-      (MONTHLY, 'firmware-buddy-6301.202.B', ['buddy'], {}),
-      (MONTHLY, 'firmware-veyron-6588.B', [
-          'veyron_rialto', 'veyron_tiger', 'veyron_fievel'], {}),
-      (MONTHLY, 'firmware-glados-7820.B', [
-          'glados', 'chell', 'lars',
-          'sentry', 'cave', 'asuka', 'caroline'], {}),
-      (MONTHLY, 'firmware-strago-7287.B', [
-          'wizpig', 'setzer', 'banon', 'kefka', 'relm'], {}),
-      (MONTHLY, 'firmware-cyan-7287.57.B', ['cyan'], {}),
-      (MONTHLY, 'firmware-celes-7287.92.B', ['celes'], {}),
-      (MONTHLY, 'firmware-ultima-7287.131.B', ['ultima'], {}),
-      (MONTHLY, 'firmware-reks-7287.133.B', ['reks'], {}),
-      (MONTHLY, 'firmware-terra-7287.154.B', ['terra'], {}),
-      (MONTHLY, 'firmware-edgar-7287.167.B', ['edgar'], {}),
-      (MONTHLY, 'firmware-gale-8281.B', ['gale'], {}),
-      (MONTHLY, 'firmware-oak-8438.B', ['oak', 'elm', 'hana'], {}),
-      (MONTHLY, 'firmware-gru-8785.B', ['gru', 'kevin', 'bob'], {}),
-      (MONTHLY, 'firmware-reef-9042.B', [
-          'reef', 'pyro', 'sand', 'snappy'], {}),
-      (MONTHLY, 'firmware-eve-9584.B', ['eve'], {}),
-      (MONTHLY, 'firmware-coral-10068.B', ['coral'], {}),
-      (MONTHLY, 'firmware-fizz-10139.B', ['fizz'], {}),
-      (MONTHLY, 'firmware-fizz-10139.94.B', ['fizz'], {}),
-      (MONTHLY, 'firmware-scarlet-10388.B', ['scarlet'], {}),
-      (MONTHLY, 'firmware-poppy-10431.B', ['poppy', 'soraka', 'nautilus'], {}),
-      (MONTHLY, 'firmware-nami-10775.B', ['nami'], {}),
-      (MONTHLY, 'firmware-nocturne-10984.B', ['nocturne'], {}),
-      (MONTHLY, 'firmware-grunt-11031.B', ['grunt'], {}),
-      (MONTHLY, 'firmware-nami-10775.108.B', ['nami'], {}),
-      (WEEKLY, 'firmware-asurada-13885.B', ['asurada'], {}),
-      (WEEKLY, 'firmware-rammus-11275.B', ['rammus'], {}),
-      (WEEKLY, 'firmware-octopus-11297.B', ['octopus'], {}),
-      (WEEKLY, 'firmware-kalista-11343.B', ['kalista'], {}),
-      (WEEKLY, 'firmware-atlas-11827.B', ['atlas'], {}),
-      (WEEKLY, 'firmware-sarien-12200.B', ['sarien'], {}),
-      (WEEKLY, 'firmware-mistral-12422.B', ['mistral'], {}),
-      (WEEKLY, 'firmware-kukui-12573.B', ['kukui', 'jacuzzi'], {}),
-      (WEEKLY, 'firmware-hatch-12672.B', ['hatch'], {}),
-      (WEEKLY, 'firmware-servo-12768.B', ['nautilus'], {}),
-      (WEEKLY, 'firmware-icarus-12574.B', ['jacuzzi'], {}),
-      (WEEKLY, 'firmware-quiche-13883.B', ['kukui'], {}),
-      (DAILY, 'firmware-drallion-12930.B', ['drallion'], {}),
-      (DAILY, 'firmware-endeavour-13259.B', ['endeavour'], {}),
-      (DAILY, 'firmware-puff-13324.B', ['puff', 'ambassador'], {}),
-      (DAILY, 'firmware-zork-13434.B', ['zork'], {}),
-      (DAILY, 'firmware-trogdor-13577.B', ['strongbad', 'trogdor'], {}),
-      (DAILY, 'firmware-dedede-13606.B', ['dedede'], {}),
-      (DAILY, 'firmware-volteer-13672.B', ['volteer'], {}),
-      (TRIGGERED, 'firmware-octopus-11297.250.B', ['octopus'], {}),
-      # TODO(b/187942470): temporary firmware-volteer-13672.156.B builder
-      (TRIGGERED, 'firmware-volteer-13672.156.B', ['volteer'], {}),
-      # TODO(b/189250648): temporary firmware-volteer-13672.130.B builder
-      (TRIGGERED, 'firmware-volteer-13672.130.B', ['volteer'], {}),
-      # TODO(b/189250648): temporary firmware-volteer-13672.148.B builder
-      (TRIGGERED, 'firmware-volteer-13672.148.B', ['volteer'], {}),
-  ]
-
-  # TODO(b/180525904): All of the legacy "firmwarebranch" builders are being
-  # retired in favor of the recipes implementation.  For now, leave them
-  # present, but only running when triggered.
-  # See chromeos/infra/config/+/HEAD/firmware.star (http://shortn/_be6b7ORzyh)
-  for interval, branch, boards, kwargs in firmware_branch_builders:
-    site_config.Add(
-        '%s-firmwarebranch' % branch,
-        site_config.templates.firmwarebranch,
-        boards=boards,
-        workspace_branch=branch,
-        schedule=TRIGGERED,
-        **kwargs)
-
-
 def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
   """Create all factory build configs.
 
@@ -2008,7 +1849,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       useflags=config_lib.append_useflags(['-cros-debug', 'chrome_internal']),
       builder_class_name='workspace_builders.FactoryBranchBuilder',
       build_timeout=_FACTORYBRANCH_TIMEOUT,
-      description='TOT builder to build a firmware branch.',
+      description='TOT builder to build a factory branch.',
       doc='https://goto.google.com/tot-for-firmware-branches',
   )
 
@@ -2616,12 +2457,12 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'chrome_sdk_build_chrome': True,
       },
 
-      # Currently factory and firmware branches will be created after DVT stage
-      # therefore we need signed factory shim or accessory_rwsig firmware from
-      # ToT temporarily.
+      # Currently factory branches will be created after DVT stage. Therefore
+      # we need signed factory shim or accessory_rwsig firmware from ToT
+      # temporarily.
       #
-      # After factory and firmware branches are created, the configuation of
-      # this project should be removed.
+      # After factory branches are created, the configuration of this project
+      # should be removed.
       # --- start from here ---
       'dedede-release': {
           'sign_types': ['recovery', 'factory'],
@@ -3256,7 +3097,7 @@ def BranchScheduleConfig():
   # Define each branched schedule with:
   #   branch_name: Name of the branch to build as a string.
   #   config_name: Name of the build config already present on the branch.
-  #   label: Display label for UI use. Usually release, factory, firmware.
+  #   label: Display label for UI use. Usually release or factory.
   #   schedule: When to do the build. Can take several formats.
   #     'triggered' for manual builds.
   #     Cron style in UTC timezone: '0 15 * * *'
@@ -3440,8 +3281,6 @@ def GetConfig():
   IncrementalBuilders(site_config, boards_dict, ge_build_config)
 
   InformationalBuilders(site_config, boards_dict, ge_build_config)
-
-  FirmwareBuilders(site_config, boards_dict, ge_build_config)
 
   FactoryBuilders(site_config, boards_dict, ge_build_config)
 

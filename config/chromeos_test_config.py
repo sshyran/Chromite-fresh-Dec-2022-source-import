@@ -304,7 +304,7 @@ def EnsureVmTestsOnVmTestBoards(site_config, boards_dict, _gs_build_config):
   """Make sure VMTests are only enabled on boards that support them.
 
   Args:
-    sIte_config: config_lib.SiteConfig containing builds to have their
+    site_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
@@ -490,12 +490,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.no_hwtest_builder,
   )
   # END Factory
-
-  # BEGIN Firmware
-  site_config.templates.firmwarebranch.apply(
-      site_config.templates.no_vmtest_builder,
-  )
-  # END Firmware
 
   # BEGIN Loonix
   site_config.templates.loonix.apply(

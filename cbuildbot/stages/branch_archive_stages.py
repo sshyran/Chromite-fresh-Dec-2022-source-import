@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Build stages specific to firmware builds.
+"""Build stages specific to factory builds.
 
-Firmware builds use a mix of standard stages, and custom stages
+Factory builds use a mix of standard stages, and custom stages
 related to how build artifacts are generated and published.
 """
 
@@ -39,7 +39,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
 
   The expectation is that the archive stages will be creating a "dummy" upload
   that looks like an older style branched infrastructure build would have
-  generated in addtion to a firmwarebranch set of archive results.
+  generated in addition to a factory branch set of archive results.
   """
   DUMMY_NAME = 'dummy'
 
@@ -97,7 +97,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
       upload_urls += [self.UniqifyArchiveUrl(url) for url in extra_upload_urls]
     return upload_urls
 
-  def UploadDummyArtifact(self, path, faft_hack=False):
+  def UploadDummyArtifact(self, path):
     """Upload artifacts to the dummy build results."""
     logging.info('UploadDummyArtifact: %s', path)
     with osutils.TempDir(prefix='dummy') as tempdir:
@@ -110,14 +110,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
       shutil.copyfile(path, artifact_path)
 
       logging.info('Main artifact from: %s', artifact_path)
-
-      if faft_hack:
-        # We put the firmware artifact in a directory named by board so that
-        # immutable FAFT infrastructure can find it. We should remove this.
-        self.UploadArtifact(
-            artifact_path, archive=True, prefix=self._current_board)
-      else:
-        self.UploadArtifact(artifact_path, archive=True)
+      self.UploadArtifact(artifact_path, archive=True)
 
     gs_context = gs.GSContext(dry_run=self._run.options.debug_forced)
     for url in self.GetDummyArchiveUrls():
@@ -146,7 +139,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
         buildroot=self._build_root)
 
   def CreateDummyMetadataJson(self):
-    """Create/publish the firmware build artifact for the current board."""
+    """Create/publish the factory build artifact for the current board."""
     workspace_version_info = self.GetWorkspaceVersionInfo()
 
     # Use the metadata for the main build, with selected fields modified.
@@ -179,52 +172,6 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
                         atomic=True)
 
       self.UploadDummyArtifact(metadata_path)
-
-
-class FirmwareArchiveStage(WorkspaceArchiveBase):
-  """Generates and publishes firmware specific build artifacts.
-
-  This stage publishes <board>/firmware_from_source.tar.bz2 to this
-  builds standard build artifacts, and also generates a 'fake' build
-  result (called a Dummy result) that looks like it came from a
-  traditional style firmware builder for a single board on the
-  firmware branch.
-
-  The secondary result only contains firmware_from_source.tar.bz2 and
-  a dummy version of metadata.json.
-  """
-  DUMMY_NAME = 'firmware'
-
-  def CreateFirmwareArchive(self):
-    """Create/publish the firmware build artifact for the current board."""
-    with osutils.TempDir(prefix='metadata') as tempdir:
-      firmware_path = os.path.join(tempdir, constants.FIRMWARE_ARCHIVE_NAME)
-
-      logging.info('Create %s', firmware_path)
-
-      commands.BuildFirmwareArchive(
-          self._build_root, self._current_board,
-          self.archive_path, firmware_path)
-
-      self.UploadDummyArtifact(firmware_path, faft_hack=True)
-
-  def PerformStage(self):
-    """Archive and publish the firmware build artifacts."""
-    logging.info('Firmware board: %s', self._current_board)
-    logging.info('Firmware version: %s', self.dummy_version)
-    logging.info('Archive build as: %s', self.dummy_config)
-
-    # Link dummy build artifacts from build.
-    dummy_http_url = gs.GsUrlToHttp(self.dummy_archive_url,
-                                    public=False, directory=True)
-
-    label = '%s firmware [%s]' % (self._current_board, self.dummy_version)
-    cbuildbot_alerts.PrintBuildbotLink(label, dummy_http_url)
-
-    # Upload all artifacts.
-    self.CreateFirmwareArchive()
-    self.CreateDummyMetadataJson()
-    self.PushBoardImage()
 
 
 class FactoryArchiveStage(WorkspaceArchiveBase):

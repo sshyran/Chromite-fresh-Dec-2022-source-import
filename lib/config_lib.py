@@ -19,7 +19,6 @@ GS_PATH_DEFAULT = 'default'  # Means gs://chromeos-image-archive/ + bot_id
 # Contains the valid build config suffixes.
 CONFIG_TYPE_RELEASE = 'release'
 CONFIG_TYPE_FULL = 'full'
-CONFIG_TYPE_FIRMWARE = 'firmware'
 CONFIG_TYPE_FACTORY = 'factory'
 CONFIG_TYPE_TOOLCHAIN = 'toolchain'
 
@@ -39,7 +38,6 @@ DISPLAY_LABEL_RVC_ANDROID_PFQ = 'rvc_android_pfq'
 DISPLAY_LABEL_VMRVC_ANDROID_PFQ = 'vmrvc_android_pfq'
 DISPLAY_LABEL_VMSC_ANDROID_PFQ = 'vmsc_android_pfq'
 DISPLAY_LABEL_VMT_ANDROID_PFQ = 'vmt_android_pfq'
-DISPLAY_LABEL_FIRMWARE = 'firmware'
 DISPLAY_LABEL_FACTORY = 'factory'
 DISPLAY_LABEL_TOOLCHAIN = 'toolchain'
 DISPLAY_LABEL_UTILITY = 'utility'
@@ -61,7 +59,6 @@ ALL_DISPLAY_LABEL = {
     DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
     DISPLAY_LABEL_VMSC_ANDROID_PFQ,
     DISPLAY_LABEL_VMT_ANDROID_PFQ,
-    DISPLAY_LABEL_FIRMWARE,
     DISPLAY_LABEL_FACTORY,
     DISPLAY_LABEL_TOOLCHAIN,
     DISPLAY_LABEL_UTILITY,
