@@ -46,7 +46,8 @@ class BuildConfig(object):
                replace: bool = False,
                version: Optional[str] = None,
                build_attempt: Optional[int] = None,
-               symlink: Optional[str] = None):
+               symlink: Optional[str] = None,
+               output_dir_suffix: Optional[str] = None):
     """Build config initialization.
 
     Args:
@@ -58,6 +59,7 @@ class BuildConfig(object):
       version: The version string to use for the image.
       build_attempt: The build_attempt number to pass to build_image.
       symlink: Symlink name (defaults to "latest").
+      output_dir_suffix: String to append to the image build directory.
     """
     self.builder_path = builder_path
     self.disk_layout = disk_layout
@@ -66,6 +68,7 @@ class BuildConfig(object):
     self.version = version
     self.build_attempt = build_attempt
     self.symlink = symlink
+    self.output_dir_suffix = output_dir_suffix
 
   def GetArguments(self):
     """Get the build_image arguments for the configuration."""
@@ -85,6 +88,8 @@ class BuildConfig(object):
       args.extend(['--build_attempt', self.build_attempt])
     if self.symlink:
       args.extend(['--symlink', self.symlink])
+    if self.output_dir_suffix:
+      args.extend(['--output_suffix', self.output_dir_suffix])
 
     return args
 
