@@ -18,10 +18,10 @@ from chromite.lib import workon_helper
 from chromite.lib.firmware import flash_ap
 from chromite.service import sysroot
 
-
 _BUILD_TARGET_CONFIG_MODULE = 'chromite.lib.firmware.ap_firmware_config.%s'
 _CONFIG_BUILD_WORKON_PACKAGES = 'BUILD_WORKON_PACKAGES'
 _CONFIG_BUILD_PACKAGES = 'BUILD_PACKAGES'
+_GENERIC_CONFIG_NAME = 'generic'
 
 # The build configs. The workon and build fields both contain tuples of
 # packages.
@@ -258,10 +258,7 @@ def _get_build_config(build_target):
   build_pkgs = getattr(module, _CONFIG_BUILD_PACKAGES, None)
 
   if not build_pkgs:
-    raise InvalidConfigError(
-        'No packages specified to build in the configs for %s. Check the '
-        'configs in chromite/lib/firmware/ap_firmware_config/%s.py.' %
-        (build_target.name, build_target.name))
+    build_pkgs = ('chromeos-bootimage',)
 
   return BuildConfig(workon=workon_pkgs, build=build_pkgs)
 
@@ -294,11 +291,13 @@ def _get_deploy_config(build_target):
       ssh_force_command=ssh_force)
 
 
-def get_config_module(build_target_name):
+def get_config_module(build_target_name, disable_fallback=False):
   """Return configuration module for a given build target.
 
   Args:
     build_target_name: Name of the build target, e.g. 'dedede'.
+    disable_fallback: Disables falling back to generic config if the config for
+                      build_target_name is not found.
 
   Returns:
     module: Python configuration module for a given build target.
@@ -307,8 +306,24 @@ def get_config_module(build_target_name):
   try:
     return importlib.import_module(name)
   except ImportError:
-    raise BuildTargetNotConfiguredError(
-        'Could not find a config module for %s.' % build_target_name)
+    name_path = name.replace('.', '/') + '.py'
+    if disable_fallback:
+      raise BuildTargetNotConfiguredError(
+          f'Could not find a config module for {build_target_name}. '
+          f'Fill in the config in {name_path}.')
+  # Failling back to generic config.
+  logging.notice(
+      'Did not find a dedicated config module for %s at %s. '
+      'Using default config.', build_target_name, name_path)
+  name = _BUILD_TARGET_CONFIG_MODULE % _GENERIC_CONFIG_NAME
+  try:
+    return importlib.import_module(name)
+  except ImportError:
+    name_path = name.replace('.', '/') + '.py'
+    if disable_fallback:
+      raise BuildTargetNotConfiguredError(
+          f'Could not find a generic config module at {name_path}. '
+          'Is your checkout broken?')
 
 
 def clean(build_target: build_target_lib.BuildTarget, dry_run=False):

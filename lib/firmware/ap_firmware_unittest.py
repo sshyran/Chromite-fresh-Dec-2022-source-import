@@ -46,17 +46,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     self.assertFalse(build_config.workon)
     self.assertEqual(('pkg3', 'pkg4'), build_config.build)
 
-  def test_invalid_build_config(self):
-    """Test invalid build configs."""
-    module = mock.MagicMock(
-        BUILD_WORKON_PACKAGES=('pkg1', 'pkg2'), BUILD_PACKAGES=tuple())
-
-    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
-
-    with self.assertRaises(ap_firmware.InvalidConfigError):
-      # pylint: disable=protected-access
-      ap_firmware._get_build_config(build_target_lib.BuildTarget('board'))
-
   def test_build(self):
     """Sanity checks the workon and command building functions properly."""
     # Note: The workon helper handles looking up full category/package atom

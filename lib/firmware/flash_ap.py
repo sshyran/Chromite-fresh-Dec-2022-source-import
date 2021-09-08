@@ -13,7 +13,6 @@ this script only works with octopus, grunt, wilco, and hatch devices but will
 be extended to support more in the future.
 """
 
-import importlib
 import logging
 import os
 import shutil
@@ -23,6 +22,7 @@ from typing import Optional
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
 
 
@@ -291,14 +291,7 @@ def deploy(build_target,
   else:
     ip = os.getenv('IP')
 
-  module_name = ('chromite.lib.firmware.ap_firmware_config.%s' %
-                 build_target.name)
-  try:
-    module = importlib.import_module(module_name)
-  except ImportError:
-    raise MissingBuildTargetCommandsError(
-        '%s not valid or supported. Please verify the build target name and '
-        'try again.' % build_target.name)
+  module = ap_firmware.get_config_module(build_target.name)
 
   if ip:
     _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun)
