@@ -308,15 +308,12 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.payload_config1.applicable_models = ['model1', 'model3']
     self.payload_config2 = mock.MagicMock()
     self.payload_config2.payload_type = paygen_build_lib.PAYLOAD_TYPE_OMAHA
-    self.payload_config2.applicable_models = ['model2', 'model3']
-    self.payload_config3 = mock.MagicMock()
-    self.payload_config3.payload_type = paygen_build_lib.PAYLOAD_TYPE_OMAHA
 
     instanceMock.CreatePayloads.side_effect = iter([(
         'foo-suite-name',
         'foo-archive-board',
         'foo-archive-build',
-        [self.payload_config1, self.payload_config2, self.payload_config3],
+        [self.payload_config1, self.payload_config2],
     )])
 
   # pylint: disable=arguments-differ
@@ -434,7 +431,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-archive-board',
           None,
           'foo-archive-build',
-          [self.payload_config1, self.payload_config2, self.payload_config3])
+          [self.payload_config1, self.payload_config2])
 
     # Ensure arguments are properly converted and passed along.
     self.paygenBuildMock.assert_called_with(
@@ -469,7 +466,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'foo-archive-board',
           None,
           'foo-archive-build',
-          [self.payload_config1, self.payload_config2, self.payload_config3])
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInProcessComplex(self):
     """Test that _RunPaygenInProcess with arguments that are more unusual."""
@@ -522,7 +519,7 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'board',
           'model2',
           'foo-archive-build',
-          [self.payload_config1, self.payload_config2, self.payload_config3])
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInProcessWithUnifiedBuildInSkylab(self):
     """Test that _RunPaygenInProcess works for unibuild in Skylab."""
@@ -551,15 +548,13 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           'board',
           'model2',
           'foo-archive-build',
-          [self.payload_config1, self.payload_config2, self.payload_config3])
+          [self.payload_config1, self.payload_config2])
 
   def testRunPaygenInParallelWithUnifiedBuild(self):
     # payload_config1 defines applicable_models as model1 and model3.
     # model3 does not have au enabled but gets scheduled since it has type FSI.
-    # payload_config2 defines applicable_models as model2 and model3.
-    # model3 does not get scheduled since config2 has type OMAHA.
-    # payload_config3 has type OMAHA with no applicable models so doesn't get
-    # scheduled. So we should have 3 tests scheduled in total.
+    # payload_config2 has type OMAHA so gets scheduled on model1 and model2
+    # (all models with au enabled). So we should get 4 parallel runs total.
     self._run.config.models = [
         config_lib.ModelTestConfig('model1', 'model1', ['au']),
         config_lib.ModelTestConfig('model2', 'model1', ['au']),
@@ -577,7 +572,8 @@ class PaygenStageTest(generic_stages_unittest.AbstractStageTestCase,
           True,
           False,
           False)
-      parallel_tests.assert_called_once_with([mock.ANY, mock.ANY, mock.ANY])
+      parallel_tests.assert_called_once_with([mock.ANY, mock.ANY, mock.ANY,
+                                              mock.ANY])
 
   def testPayloadBuildSetCorrectly(self):
     """Test that payload build is passed correctly to PaygenBuild."""
