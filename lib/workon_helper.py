@@ -379,13 +379,13 @@ class WorkonHelper(object):
           for p in path_atoms:
             logging.warning('  %s', p)
           logging.warning('Using %s', path_atoms[0])
-          logging.notice('start and stop commands for the rest of the '
-                          'packages are provided below:')
+          logging.notice(
+              'cros workon start command for the rest of the packages:')
           logging.notice(
               f'cros workon -b {self._system} start {" ".join(path_atoms[1:])}')
-          logging.notice(
-              f'cros workon -b {self._system} stop {" ".join(path_atoms[1:])}')
-        return self._GetCanonicalAtom(path_atoms[0])
+
+        logging.notice('Package %s found for path %s', path_atoms[0], package)
+        return path_atoms[0]
 
       # We want some consistent order for making our selection below.
       possible_ebuilds = sorted(possible_ebuilds)
