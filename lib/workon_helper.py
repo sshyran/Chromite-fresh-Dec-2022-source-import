@@ -332,50 +332,52 @@ class WorkonHelper(object):
 
     return ebuilds
 
-  def _GetCanonicalAtom(self, package, find_stale=False):
-    """Transform a package name or name fragment to the canonical atom.
+  def _GetCanonicalAtom(self, package_fragment: str, find_stale=False):
+    """Transform a package source path or name fragment to the canonical atom.
 
-    If there are multiple atoms that a package name fragment could map to,
+    If there are multiple atoms that a package fragment could map to,
     picks an arbitrary one and prints a warning.
 
     Args:
-      package: string package name or fragment of a name.
+      package_fragment: Package source path or name fragment.
       find_stale: if True, allow stale (missing) worked on package.
 
     Returns:
       string canonical atom name (e.g. 'sys-apps/dbus')
     """
     # Attempt to not hit portage if at all possible for speed.
-    if package in self._GetWorkedOnAtoms():
-      return package
+    if package_fragment in self._GetWorkedOnAtoms():
+      return package_fragment
 
     # Ask portage directly what it thinks about that package.
-    ebuild_path = self._FindEbuildForPackage(package)
+    ebuild_path = self._FindEbuildForPackage(package_fragment)
 
     # If portage didn't know about that package, try and autocomplete it.
     if ebuild_path is None:
       possible_ebuilds = set()
       for ebuild in (portage_util.EbuildToCP(ebuild) for ebuild in
                      self._GetWorkonEbuilds(filter_on_arch=False)):
-        if package in ebuild:
+        if package_fragment in ebuild:
           possible_ebuilds.add(ebuild)
 
       # Also autocomplete from the worked-on list, in case the ebuild was
       # deleted.
       if find_stale:
         for ebuild in self._GetWorkedOnAtoms():
-          if package in ebuild:
+          if package_fragment in ebuild:
             possible_ebuilds.add(ebuild)
 
       if not possible_ebuilds:
         # Try finding the packages affected by a given path.
-        path_atoms = sorted(self._GetPathAtoms(package))
+        path_atoms = sorted(self._GetPathAtoms(package_fragment))
         if not path_atoms:
-          logging.warning('Could not find canonical package for "%s"', package)
+          logging.warning('Could not find canonical package for "%s"',
+                          package_fragment)
           return None
 
         if len(path_atoms) > 1:
-          logging.warning('Multiple affected packages found for %s:', package)
+          logging.warning('Multiple affected packages found for %s:',
+                          package_fragment)
           for p in path_atoms:
             logging.warning('  %s', p)
           logging.warning('Using %s', path_atoms[0])
@@ -384,7 +386,8 @@ class WorkonHelper(object):
           logging.notice(
               f'cros workon -b {self._system} start {" ".join(path_atoms[1:])}')
 
-        logging.notice('Package %s found for path %s', path_atoms[0], package)
+        logging.notice('Package %s found for path %s', path_atoms[0],
+                       package_fragment)
         return path_atoms[0]
 
       # We want some consistent order for making our selection below.
@@ -396,11 +399,11 @@ class WorkonHelper(object):
           logging.warning('  %s', possible_ebuild)
       autocompleted_package = portage_util.EbuildToCP(possible_ebuilds[0])
       # Sanity check to avoid infinite loop.
-      if package == autocompleted_package:
-        logging.error('Resolved %s to itself', package)
+      if package_fragment == autocompleted_package:
+        logging.error('Resolved %s to itself', package_fragment)
         return None
       logging.info('Autocompleted "%s" to: "%s"',
-                   package, autocompleted_package)
+                   package_fragment, autocompleted_package)
 
       return self._GetCanonicalAtom(autocompleted_package)
 
@@ -418,21 +421,23 @@ class WorkonHelper(object):
 
     return portage_util.EbuildToCP(ebuild_path)
 
-  def _GetCanonicalAtoms(self, packages, find_stale=False):
+  def _GetCanonicalAtoms(self,
+                         package_fragments: Iterable[str],
+                         find_stale=False):
     """Transforms a list of package name fragments into a list of CP atoms.
 
     Args:
-      packages: list of package name fragments.
+      package_fragments: list of package source paths and/or name fragments.
       find_stale: if True, allow stale (missing) worked on package.
 
     Returns:
       list of canonical portage atoms corresponding to the given fragments.
     """
-    if not packages:
+    if not package_fragments:
       raise WorkonError('No packages specified')
 
     atoms = []
-    for package_fragment in packages:
+    for package_fragment in package_fragments:
       atom = self._GetCanonicalAtom(package_fragment, find_stale=find_stale)
       if atom is None:
         raise WorkonError('Error parsing package list')
