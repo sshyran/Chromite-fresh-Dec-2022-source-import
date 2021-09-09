@@ -11,9 +11,9 @@ import os
 
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
+from chromite.utils import pformat
 
 
 # Location of swarming_client.py that is used to send swarming requests

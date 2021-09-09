@@ -8,7 +8,7 @@ import json
 import logging
 
 from chromite.lib import constants
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 class BuildSummary(object):

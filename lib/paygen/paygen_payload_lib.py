@@ -24,7 +24,6 @@ from chromite.lib import dlc_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib.paygen import download_cache
 from chromite.lib.paygen import filelib
 from chromite.lib.paygen import gspaths
@@ -33,6 +32,7 @@ from chromite.lib.paygen import signer_payloads_client
 from chromite.lib.paygen import urilib
 from chromite.lib.paygen import utils
 from chromite.scripts import cros_set_lsb_release
+from chromite.utils import pformat
 
 
 DESCRIPTION_FILE_VERSION = 2

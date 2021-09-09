@@ -16,9 +16,9 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
-from chromite.lib import pformat
 from chromite.lib import request_build
 from chromite.scripts import cbuildbot as cbuildbot_lib
+from chromite.utils import pformat
 
 
 REMOTE = 'remote'

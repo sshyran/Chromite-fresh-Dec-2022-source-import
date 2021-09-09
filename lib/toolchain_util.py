@@ -24,10 +24,10 @@ from chromite.lib import gob_util
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
+from chromite.utils import pformat
 
 
 class PrepareForBuildReturn(object):

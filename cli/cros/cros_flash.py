@@ -13,7 +13,7 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 @command.CommandDecorator('flash')

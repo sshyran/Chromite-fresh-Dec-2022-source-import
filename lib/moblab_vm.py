@@ -17,8 +17,8 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import retry_util
+from chromite.utils import pformat
 
 
 _CONFIG_FILE_NAME = 'moblabvm.json'

@@ -29,11 +29,11 @@ from chromite.lib import cros_build_lib
 from chromite.lib import gerrit
 from chromite.lib import gob_util
 from chromite.lib import parallel
-from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import terminal
 from chromite.lib import uri_lib
 from chromite.utils import memoize
+from chromite.utils import pformat
 
 
 class Config:

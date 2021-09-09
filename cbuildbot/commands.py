@@ -39,7 +39,6 @@ from chromite.lib import metrics
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import sysroot_lib
@@ -48,6 +47,7 @@ from chromite.lib.parser import package_info
 from chromite.lib.paygen import filelib
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
+from chromite.utils import pformat
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'

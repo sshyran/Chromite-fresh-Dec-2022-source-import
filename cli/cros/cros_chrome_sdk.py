@@ -30,9 +30,9 @@ from chromite.lib import gclient
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.utils import memoize
+from chromite.utils import pformat
 
 
 COMMAND_NAME = 'chrome-sdk'

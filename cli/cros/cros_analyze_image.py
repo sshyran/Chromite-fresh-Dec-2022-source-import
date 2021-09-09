@@ -34,8 +34,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import pformat
 from chromite.utils import file_util
+from chromite.utils import pformat
 
 
 IMAGE_NAME = 'chromiumos_base_image'

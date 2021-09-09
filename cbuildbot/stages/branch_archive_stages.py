@@ -23,9 +23,9 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import osutils
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
+from chromite.utils import pformat
 
 
 class UnsafeBuildForPushImage(Exception):

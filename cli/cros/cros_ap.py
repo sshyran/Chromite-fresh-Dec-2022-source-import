@@ -14,11 +14,11 @@ from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import pformat
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import flash_ap
 from chromite.lib.firmware import servo_lib
 from chromite.utils import file_util
+from chromite.utils import pformat
 
 
 COMMAND_DUMP_CONFIG = 'dump-config'

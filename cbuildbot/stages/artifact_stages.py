@@ -25,8 +25,8 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
+from chromite.utils import pformat
 
 
 _FULL_BINHOST = 'FULL_BINHOST'

@@ -18,10 +18,10 @@ from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
-from chromite.lib import pformat
 from chromite.lib import timeout_util
 from chromite.lib.paygen import gspaths
 from chromite.lib.paygen import paygen_build_lib
+from chromite.utils import pformat
 
 
 class InvalidTestConditionException(Exception):
