@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import List, Optional, TextIO, Union
+from typing import List, Optional, Union
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -1645,18 +1645,6 @@ def iflatten_instance(iterable,
     else:
       for subitem in iflatten_instance(item, terminate_on_kls):
         yield subitem
-
-
-@contextlib.contextmanager
-def Open(obj: Union[str, os.PathLike, TextIO], mode: str = 'r', **kwargs):
-  """Convenience ctx that accepts a file path or an already open file object."""
-  if isinstance(obj, str):
-    with open(obj, mode=mode, **kwargs) as f:
-      yield f
-  elif isinstance(obj, Path):
-    yield obj.open(mode=mode, **kwargs)
-  else:
-    yield obj
 
 
 def SafeRun(functors, combine_exceptions=False):
