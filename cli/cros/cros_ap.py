@@ -122,7 +122,7 @@ class DumpConfigSubcommand(command.CliCommand):
         default=None,
         action='split_extend',
         dest='boards',
-        help='Space-separated list of boards. '
+        help='Quoted, space-separated list of boards. '
         '(default: all boards in chromite/lib/firmware/ap_firmware_config)')
     parser.add_argument(
         '--serial',
@@ -136,7 +136,7 @@ To dump AP config of all boards into /tmp/cros-read-ap-config.json
   cros ap dump-config -o /tmp/cros-read-ap-config.json
 
 To dump AP config of drallion and dedede boards:
-  cros ap dump-config -o /tmp/cros-read-ap-config.json -b drallion,dedede
+  cros ap dump-config -o /tmp/cros-read-ap-config.json -b "drallion dedede"
 """
 
   def Run(self):

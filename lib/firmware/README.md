@@ -43,7 +43,7 @@ To dump AP config of all boards into /tmp/cros-read-ap-config.json
   cros ap dump-config -o /tmp/cros-read-ap-config.json
 
 To dump AP config of drallion and dedede boards:
-  cros ap dump-config -o /tmp/cros-read-ap-config.json -b drallion,dedede
+  cros ap dump-config -o /tmp/cros-read-ap-config.json -b "drallion dedede"
 
 ## Add support for new board
 Create ${BOARD}.py in chromite/lib/firmware/ap_firmware_config.
