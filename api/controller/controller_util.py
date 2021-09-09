@@ -146,15 +146,6 @@ def ParseBuildTargets(repeated_build_target_field):
   return [ParseBuildTarget(target) for target in repeated_build_target_field]
 
 
-def CPVToPackageInfo(cpv, package_info_msg):
-  """Helper to translate CPVs into a PackageInfo message."""
-  package_info_msg.package_name = cpv.package
-  if cpv.category:
-    package_info_msg.category = cpv.category
-  if cpv.version:
-    package_info_msg.version = cpv.version
-
-
 def serialize_package_info(pkg_info: package_info.PackageInfo,
                            pkg_info_msg: common_pb2.PackageInfo):
   """Serialize a PackageInfo object to a PackageInfo proto."""
