@@ -9,7 +9,7 @@ import json as mod_json
 import os
 from typing import Optional, TextIO, Union
 
-from chromite.lib import cros_build_lib
+from chromite.utils import file_util
 
 
 def timedelta(delta):
@@ -61,7 +61,7 @@ def json(obj, fp: Optional[Union[str, os.PathLike, TextIO]] = None,
       'sort_keys': True,
   }
   if fp:
-    with cros_build_lib.Open(fp, mode='w') as real_fp:
+    with file_util.Open(fp, mode='w') as real_fp:
       mod_json.dump(obj, real_fp, **kwargs)
       if not compact:
         real_fp.write('\n')

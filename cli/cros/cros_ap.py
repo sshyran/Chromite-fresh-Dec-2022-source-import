@@ -18,6 +18,7 @@ from chromite.lib import pformat
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import flash_ap
 from chromite.lib.firmware import servo_lib
+from chromite.utils import file_util
 
 
 COMMAND_DUMP_CONFIG = 'dump-config'
@@ -193,7 +194,7 @@ To dump AP config of drallion and dedede boards:
     for board, servos in failed_board_servos.items():
       logging.notice(f'[{board}] skipping servos ' f'{", ".join(servos)}')
 
-    with cros_build_lib.Open(output_path, 'w', encoding='utf-8') as f:
+    with file_util.Open(output_path, 'w', encoding='utf-8') as f:
       pformat.json(output, f)
 
 

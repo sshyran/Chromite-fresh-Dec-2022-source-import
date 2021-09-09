@@ -35,6 +35,7 @@ from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import pformat
+from chromite.utils import file_util
 
 
 IMAGE_NAME = 'chromiumos_base_image'
@@ -179,7 +180,7 @@ def write_sizes(sizes: dict, required_paths: list, human_readable: bool,
     for path, size in sorted(sizes.items()):
       output.append({'path': path, 'size': size_string(sizes[path])})
 
-  with cros_build_lib.Open(output_path, mode='w') as f:
+  with file_util.Open(output_path, mode='w') as f:
     if output_format == 'csv':
       writer = csv.DictWriter(f, ['path', 'size'])
       writer.writeheader()

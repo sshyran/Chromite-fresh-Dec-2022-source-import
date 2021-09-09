@@ -29,6 +29,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import signals
+from chromite.utils import file_util
 
 
 SymbolHeader = collections.namedtuple('SymbolHeader',
@@ -52,7 +53,7 @@ def ReadSymsHeader(sym_file):
   Raises:
     ValueError if the first line of |sym_file| is invalid
   """
-  with cros_build_lib.Open(sym_file, 'rb') as f:
+  with file_util.Open(sym_file, 'rb') as f:
     header = f.readline().decode('utf-8').split()
 
   if header[0] != 'MODULE' or len(header) != 5:
