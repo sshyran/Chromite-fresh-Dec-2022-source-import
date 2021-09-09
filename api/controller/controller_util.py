@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 """Utility functions that are useful for controllers."""
+import logging
 
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -154,8 +155,16 @@ def CPVToPackageInfo(cpv, package_info_msg):
     package_info_msg.version = cpv.version
 
 
-def serialize_package_info(pkg_info: 'package_info.PackageInfo', pkg_info_msg):
+def serialize_package_info(pkg_info: package_info.PackageInfo,
+                           pkg_info_msg: common_pb2.PackageInfo):
   """Serialize a PackageInfo object to a PackageInfo proto."""
+  if not isinstance(pkg_info, package_info.PackageInfo):
+    # Allows us to swap everything to serialize_package_info, and search the
+    # logs for usages that aren't passing though a PackageInfo yet.
+    logging.warning(
+        'serialize_package_info: Got a %s instead of a PackageInfo.',
+        type(pkg_info))
+    pkg_info = package_info.parse(pkg_info)
   pkg_info_msg.package_name = pkg_info.package
   if pkg_info.category:
     pkg_info_msg.category = pkg_info.category
