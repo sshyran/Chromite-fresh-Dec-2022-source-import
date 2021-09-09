@@ -10,7 +10,7 @@ import os
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 class TestPPrintTimedelta(cros_test_lib.TestCase):
