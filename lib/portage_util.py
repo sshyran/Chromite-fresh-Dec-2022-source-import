@@ -1926,7 +1926,7 @@ def FindEbuildsForPackages(packages_list, sysroot, include_masked=False,
   mismatches = []
   ret = dict(zip(packages_list, ebuilds_results))
   for full_package_name, ebuild_path in ret.items():
-    cpv = package_info.SplitCPV(full_package_name, strict=False)
+    cpv = package_info.parse(full_package_name)
     path_category, path_package_name, _ = SplitEbuildPath(ebuild_path)
     if not ((cpv.category is None or path_category == cpv.category) and
             cpv.package.startswith(path_package_name)):
