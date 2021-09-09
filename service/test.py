@@ -12,7 +12,7 @@ import logging
 import os
 import re
 import shutil
-from typing import List, NamedTuple
+from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING
 
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
@@ -27,6 +27,9 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.utils import code_coverage_util
 
+if TYPE_CHECKING:
+  from chromite.lib.parser import package_info
+
 
 class Error(Exception):
   """The module's base error class."""
@@ -39,20 +42,20 @@ class NoFilesError(Error):
 class BuildTargetUnitTestResult(object):
   """Result value object."""
 
-  def __init__(self, return_code, failed_cpvs):
+  def __init__(self, return_code: int,
+               failed_pkgs: Optional[Iterable['package_info.PackageInfo']]):
     """Init method.
 
     Args:
-      return_code (int): The return code from the command execution.
-      failed_cpvs (list[package_info.CPV]|None): List of packages whose tests
-        failed.
+      return_code: The return code from the command execution.
+      failed_pkgs: List of packages whose tests failed.
     """
     self.return_code = return_code
-    self.failed_cpvs = failed_cpvs or []
+    self.failed_pkgs = failed_pkgs or []
 
   @property
   def success(self):
-    return self.return_code == 0 and len(self.failed_cpvs) == 0
+    return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
 def BuildTargetUnitTest(build_target,

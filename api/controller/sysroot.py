@@ -186,9 +186,9 @@ def InstallToolchain(input_proto, output_proto, _config):
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
     # Error installing - populate the failed package info.
-    for package in e.failed_toolchain_info:
-      package_info = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(package, package_info)
+    for pkg_info in e.failed_toolchain_info:
+      package_info_msg = output_proto.failed_packages.add()
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -252,9 +252,9 @@ def InstallPackages(input_proto, output_proto, _config):
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
     # We need to report the failed packages.
-    for package in e.failed_packages:
-      package_info = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(package, package_info)
+    for pkg_info in e.failed_packages:
+      package_info_msg = output_proto.failed_packages.add()
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 

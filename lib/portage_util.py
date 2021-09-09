@@ -2288,7 +2288,7 @@ def ParseDieHookStatusFile(metrics_dir):
     failed_pkgs = []
     for line in failed_pkgs_file:
       cpv, _phase = line.strip().split()
-      failed_pkgs.append(package_info.SplitCPV(cpv, strict=False))
+      failed_pkgs.append(package_info.parse(cpv))
     return failed_pkgs
 
 
@@ -2495,12 +2495,12 @@ def PortageqMatch(atom, board=None, sysroot=None):
     sysroot: The sysroot to query.
 
   Returns:
-    package_info.CPV|None
+    package_info.PackageInfo|None
   """
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
-  return package_info.SplitCPV(result.output.strip()) if result.output else None
+  return package_info.parse(result.output.strip()) if result.output else None
 
 
 class PackageNotFoundError(Error):

@@ -1574,12 +1574,14 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
       portage_util.PortageqMatch('*/*')
 
   def testValidPackage(self):
-    """Test valid package produces a CPV."""
-    result = cros_build_lib.CommandResult(returncode=0, output='cat/pkg-1.0-r1')
+    """Test valid package produces the corresponding PackageInfo."""
+    cpvr = 'cat/pkg-1.0-r1'
+    result = cros_build_lib.CommandResult(returncode=0, output=cpvr)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
-    self.assertIsInstance(portage_util.PortageqMatch('cat/pkg'),
-                          package_info.CPV)
+    pkg = portage_util.PortageqMatch('cat/pkg')
+    self.assertIsInstance(pkg, package_info.PackageInfo)
+    assert pkg == cpvr
 
 
 class FindEbuildTest(cros_test_lib.RunCommandTestCase):

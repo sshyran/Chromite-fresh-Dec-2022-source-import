@@ -317,17 +317,17 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
   def testInstallToolchainError(self):
     """Test error handling from the libc install."""
     failed = ['cat/pkg', 'cat/pkg2']
-    failed_cpvs = [package_info.SplitCPV(pkg, strict=False) for pkg in failed]
+    failed_pkgs = [package_info.parse(pkg) for pkg in failed]
     result = cros_build_lib.CommandResult(returncode=1)
     error = toolchain.ToolchainInstallError('Error', result=result,
-                                            tc_info=failed_cpvs)
+                                            tc_info=failed_pkgs)
     self.PatchObject(toolchain, 'InstallToolchain', side_effect=error)
 
     try:
       self.sysroot.UpdateToolchain('board')
     except sysroot_lib.ToolchainInstallError as e:
       self.assertTrue(e.failed_toolchain_info)
-      self.assertEqual(failed_cpvs, e.failed_toolchain_info)
+      self.assertEqual(failed_pkgs, e.failed_toolchain_info)
     except Exception as e:
       self.fail('Unexpected exception raised: %s' % type(e))
     else:

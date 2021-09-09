@@ -115,9 +115,9 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testFailure(self):
     """Test non-zero return code and failed package handling."""
     packages = ['foo/bar', 'cat/pkg']
-    cpvs = [package_info.SplitCPV(p, strict=False) for p in packages]
+    pkgs = [package_info.parse(p) for p in packages]
     self.PatchObject(portage_util, 'ParseDieHookStatusFile',
-                     return_value=cpvs)
+                     return_value=pkgs)
     expected_rc = 1
     self.rc.SetDefaultCmdResult(returncode=expected_rc)
 
@@ -125,7 +125,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
     self.assertFalse(result.success)
     self.assertEqual(expected_rc, result.return_code)
-    self.assertCountEqual(cpvs, result.failed_cpvs)
+    self.assertCountEqual(pkgs, result.failed_pkgs)
 
   def testCodeCoverage(self):
     """Test adding use flags for coverage when requested."""

@@ -345,7 +345,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
                                 sysroot_path=self.sysroot)
 
     err_pkgs = ['cat/pkg', 'cat2/pkg2']
-    err_cpvs = [package_info.SplitCPV(pkg, strict=False) for pkg in err_pkgs]
+    err_cpvs = [package_info.parse(pkg) for pkg in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
     err = sysroot_lib.ToolchainInstallError('Error',
                                             cros_build_lib.CommandResult(),

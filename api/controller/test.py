@@ -135,10 +135,10 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   if not result.success:
     # Failed to run tests or some tests failed.
     # Record all failed packages.
-    for cpv in result.failed_cpvs:
+    for pkg_info in result.failed_pkgs:
       package_info_msg = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(cpv, package_info_msg)
-    if result.failed_cpvs:
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY

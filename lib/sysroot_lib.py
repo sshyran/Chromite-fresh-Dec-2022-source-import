@@ -9,7 +9,7 @@ import logging
 import multiprocessing
 import os
 from pathlib import Path
-from typing import Iterable, List, Union
+from typing import Iterable, List, Optional, Union
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -134,14 +134,18 @@ class Error(Exception):
 class PackageInstallError(Error, cros_build_lib.RunCommandError):
   """An error installing packages."""
 
-  def __init__(self, msg, result, exception=None, packages=None):
+  def __init__(self,
+               msg,
+               result,
+               exception=None,
+               packages: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      packages (list[package_info.CPV]): The list of failed packages.
+      packages: The list of failed packages.
     """
     super().__init__(msg, result, exception)
     self.failed_packages = packages
@@ -177,14 +181,18 @@ class ToolchainInstallError(PackageInstallError):
   reflect that the packages are toolchain packages.
   """
 
-  def __init__(self, msg, result, exception=None, tc_info=None):
+  def __init__(self,
+               msg,
+               result,
+               exception=None,
+               tc_info: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      tc_info (list[package_info.CPV]): The list of failed toolchain packages.
+      tc_info: The list of failed toolchain packages.
     """
     super().__init__(msg, result, exception, packages=tc_info)
 
@@ -794,7 +802,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       toolchain.InstallToolchain(self)
     except toolchain.ToolchainInstallError as e:
       raise ToolchainInstallError(str(e), e.result, exception=e.exception,
-                                  tc_info=e.failed_toolchain_info)
+                                  tc_info=e.failed_toolchain_info) from e
 
     if not self.IsToolchainInstalled():
       # Emerge the implicit dependencies.

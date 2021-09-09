@@ -82,69 +82,64 @@ class ToolchainInfoTest(cros_test_lib.MockTestCase):
   """Tests for the ToolchainInfo class."""
 
   def setUp(self):
-    unused_fields = {'pv': None, 'package': None, 'version_no_rev': None,
-                     'rev': None, 'category': None, 'cp': None, 'cpv': None}
-    self.gcc_cpv = package_info.CPV(cpf='sys-devel/gcc-1.2', version='1.2',
-                                    **unused_fields)
-    self.libc_cpv = package_info.CPV(cpf='sys-libs/glibc-3.4.5',
-                                     version='3.4.5', **unused_fields)
-    self.go_cpv = package_info.CPV(cpf='dev-lang/go-6.7-r8', version='6.7-r8',
-                                   **unused_fields)
+    self.gcc_cpv = package_info.parse('sys-devel/gcc-1.2')
+    self.libc_cpv = package_info.parse('sys-libs/glibc-3.4.5')
+    self.go_cpv = package_info.parse('dev-lang/go-6.7-r8')
 
     self.matching_toolchain = toolchain.ToolchainInfo('tc', 'tc')
     self.not_matching_toolchain = toolchain.ToolchainInfo('tc', 'dtc')
 
   def testVersion(self):
     """Test the version fetching functionality."""
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.gcc_cpv)
     self.assertEqual('1.2', self.matching_toolchain.gcc_version)
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.libc_cpv)
     self.assertEqual('3.4.5', self.matching_toolchain.libc_version)
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
     self.assertEqual('6.7-r8', self.matching_toolchain.go_version)
 
   def testCpv(self):
     """Test the CPV version functionality."""
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.gcc_cpv)
-    self.assertEqual(self.gcc_cpv.cpf, self.matching_toolchain.gcc_cpf)
+    self.assertEqual(self.gcc_cpv.cpvr, self.matching_toolchain.gcc_cpf)
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.libc_cpv)
-    self.assertEqual(self.libc_cpv.cpf, self.matching_toolchain.libc_cpf)
+    self.assertEqual(self.libc_cpv.cpvr, self.matching_toolchain.libc_cpf)
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
-    self.assertEqual(self.go_cpv.cpf, self.matching_toolchain.go_cpf)
+    self.assertEqual(self.go_cpv.cpvr, self.matching_toolchain.go_cpf)
 
   def testCP(self):
     """Test the GetCP method."""
     # pylint: disable=protected-access
     # Use wrong CPV instances to make sure it's not using them since _GetCP
     # is the "base case" for fetching the CPV objects.
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
-    self.PatchObject(self.not_matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.not_matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
     self.assertEqual('sys-devel/gcc', self.matching_toolchain._GetCP('gcc'))
     self.assertEqual('cross-tc/gcc', self.not_matching_toolchain._GetCP('gcc'))
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
-    self.PatchObject(self.not_matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.not_matching_toolchain, '_get_pkg',
                      return_value=self.go_cpv)
     self.assertEqual('sys-libs/glibc', self.matching_toolchain._GetCP('glibc'))
     self.assertEqual('cross-tc/glibc',
                      self.not_matching_toolchain._GetCP('glibc'))
 
-    self.PatchObject(self.matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.matching_toolchain, '_get_pkg',
                      return_value=self.gcc_cpv)
-    self.PatchObject(self.not_matching_toolchain, '_GetCPVObj',
+    self.PatchObject(self.not_matching_toolchain, '_get_pkg',
                      return_value=self.gcc_cpv)
     self.assertEqual('dev-lang/go', self.matching_toolchain._GetCP('go'))
     self.assertEqual('cross-tc/go', self.not_matching_toolchain._GetCP('go'))
@@ -183,28 +178,27 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
                                                     'build/board'))
 
     # Build out the testing CPV objects.
-    self.gcc_cpv = package_info.SplitCPV('sys-devel/gcc-1.2', strict=False)
-    self.libc_cpv = package_info.SplitCPV('sys-libs/glibc-3.4.5', strict=False)
+    self.gcc_cpv = package_info.parse('sys-devel/gcc-1.2')
+    self.libc_cpv = package_info.parse('sys-libs/glibc-3.4.5')
 
-    self.go_cpv = package_info.SplitCPV('dev-lang/go-6.7-r8', strict=False)
-    self.rpcsvc_cpv = package_info.SplitCPV('net-libs/rpcsvc-proto-9.10',
-                                            strict=False)
+    self.go_cpv = package_info.parse('dev-lang/go-6.7-r8')
+    self.rpcsvc_cpv = package_info.parse('net-libs/rpcsvc-proto-9.10')
 
     # pylint: disable=protected-access
     self.go_toolchain = toolchain.ToolchainInfo('tc', 'tc')
-    self.go_toolchain._cpvs = {'gcc': self.gcc_cpv,
+    self.go_toolchain._pkgs = {'gcc': self.gcc_cpv,
                                'glibc': self.libc_cpv,
                                'go': self.go_cpv,
                                'rpcsvc': self.rpcsvc_cpv}
 
     self.no_go_toolchain = toolchain.ToolchainInfo('tc', 'tc')
-    self.no_go_toolchain._cpvs = {'gcc': self.gcc_cpv,
+    self.no_go_toolchain._pkgs = {'gcc': self.gcc_cpv,
                                   'glibc': self.libc_cpv,
                                   'go': None,
                                   'rpcsvc': self.rpcsvc_cpv}
 
     self.different_toolchain = toolchain.ToolchainInfo('nottc', 'tc')
-    self.different_toolchain._cpvs = {'gcc': self.gcc_cpv,
+    self.different_toolchain._pkgs = {'gcc': self.gcc_cpv,
                                       'glibc': self.libc_cpv,
                                       'go': self.go_cpv,
                                       'rpcsvc': None}

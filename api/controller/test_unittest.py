@@ -221,7 +221,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     expected = [('cat', 'pkg'), ('foo', 'bar')]
 
     result = test_service.BuildTargetUnitTestResult(1, None)
-    result.failed_cpvs = [package_info.SplitCPV(p, strict=False) for p in pkgs]
+    result.failed_pkgs = [package_info.parse(p) for p in pkgs]
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     input_msg = self._GetInput(board='board', result_path=self.tempdir)
