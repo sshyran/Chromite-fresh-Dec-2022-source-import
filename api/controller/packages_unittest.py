@@ -207,22 +207,6 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         atom=atom,
     )
 
-  def _MakeCpv(self, category, package, version):
-    unused = {
-        'cp': None,
-        'cpv': None,
-        'cpf': None,
-        'pv': None,
-        'version_no_rev': None,
-        'rev': None,
-    }
-    return package_info.CPV(
-        category=category,
-        package=package,
-        version=version,
-        **unused
-    )
-
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
     patch = self.PatchObject(packages_service, 'get_best_visible')
@@ -253,7 +237,7 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
 
   def testSuccess(self):
     """Test overall success, argument handling, result forwarding."""
-    cpv = self._MakeCpv('category', 'package', 'version')
+    cpv = package_info.SplitCPV('category/package-1.2.3.4', strict=False)
     self.PatchObject(packages_service, 'get_best_visible', return_value=cpv)
 
     request = self._GetRequest(atom='chromeos-chrome')

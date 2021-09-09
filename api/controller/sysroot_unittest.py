@@ -404,9 +404,9 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       instance.package_indexes.extend(package_indexes)
     if packages:
       for pkg in packages:
-        pkg_info = instance.packages.add()
-        cpv = package_info.SplitCPV(pkg, strict=False)
-        controller_util.CPVToPackageInfo(cpv, pkg_info)
+        pkg_info = package_info.parse(pkg)
+        pkg_info_msg = instance.packages.add()
+        controller_util.serialize_package_info(pkg_info, pkg_info_msg)
     return instance
 
   def _OutputProto(self):
