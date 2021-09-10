@@ -10,12 +10,14 @@ import shutil
 from pathlib import Path
 from typing import Iterable, List, Optional, Union
 
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib.parser import package_info
+from chromite.lib import sysroot_lib
 
 PARALLEL_EMERGE_STATUS_FILE_NAME = 'status_file'
 
@@ -470,3 +472,63 @@ def Test(board, result_directory, image_dir=None):
   result = cros_build_lib.sudo_run(cmd, enter_chroot=True, check=False)
 
   return result.returncode == 0
+
+def create_factory_image_zip(
+  chroot: chroot_lib.Chroot,
+  sysroot_class: sysroot_lib.Sysroot,
+  factory_shim_dir: Path,
+  version: str,
+  output_dir: str) -> Union[str, None]:
+  """Build factory_image.zip in archive_dir.
+
+  Args:
+    chroot: The chroot class used for these artifacts.
+    sysroot_class (sysroot_lib.Sysroot): The sysroot where the original
+      environment archive can be found.
+    factory_shim_dir: Directory containing factory shim.
+    version: if not None, version to include in factory_image.zip
+    output_dir: Directory to store factory_image.zip.
+
+  Returns:
+    The path to the zipfile if it could be created, else None.
+  """
+  filename = 'factory_image.zip'
+
+  zipfile = os.path.join(output_dir, filename)
+  cmd = ['zip', '-r', zipfile]
+
+  if not factory_shim_dir or not factory_shim_dir.exists():
+    logging.error('create_factory_image_zip: %s not found', factory_shim_dir)
+    return None
+  files = ['*factory_install*.bin', '*partition*',
+            os.path.join('netboot', '*')]
+  cmd_files = []
+  for file in files:
+    cmd_files.extend(['--include', os.path.join(factory_shim_dir.name, file)])
+  # factory_shim_dir may be a symlink. We can not use '-y' here.
+  cros_build_lib.run(cmd + [factory_shim_dir.name] + cmd_files,
+                      cwd=factory_shim_dir.parent,
+                      capture_output=True)
+
+  # Everything in /usr/local/factory/bundle gets overlaid into the
+  # bundle.
+  bundle_src_dir = chroot.full_path(sysroot_class.path, 'usr', 'local',
+                                    'factory', 'bundle')
+  if os.path.exists(bundle_src_dir):
+    cros_build_lib.run(cmd + ['-y', '.'], cwd=bundle_src_dir,
+                       capture_output=True)
+  else:
+    logging.warning('create_factory_image_zip: %s not found, skipping',
+                    bundle_src_dir)
+
+  # Add a version file in the zip file.
+  if version is not None:
+    version_filename = 'BUILD_VERSION'
+    # Creates a staging temporary folder.
+    with osutils.TempDir() as temp_dir:
+      version_file = os.path.join(temp_dir, version_filename)
+      osutils.WriteFile(version_file, version)
+      cros_build_lib.run(cmd + [version_filename], cwd=temp_dir,
+                         capture_output=True)
+
+  return zipfile if os.path.exists(zipfile) else None

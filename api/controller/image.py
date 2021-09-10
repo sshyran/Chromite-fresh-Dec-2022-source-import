@@ -11,7 +11,8 @@ import copy
 import functools
 import logging
 import os
-from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
+from pathlib import Path
+from typing import List, NamedTuple, Set, Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -25,12 +26,10 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import sysroot_lib
+from chromite.service import packages as packages_service
 from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
-
-if TYPE_CHECKING:
-  from pathlib import Path
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE
@@ -164,14 +163,24 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Image,
   """
   base_path = chroot.full_path(sysroot_class.path)
   board = build_target.name
+  factory_shim_location = Path(
+    image_lib.GetLatestImageLink(board, pointer=LOCATION_FACTORY)).resolve()
 
   generated = []
   dlc_func = functools.partial(image.copy_dlc_image, base_path)
   license_func = functools.partial(
       image.copy_license_credits, board, symlink=LOCATION_CORE)
+  factory_image_func = functools.partial(
+      image.create_factory_image_zip,
+      chroot,
+      sysroot_class,
+      factory_shim_location,
+      packages_service.determine_full_version(),
+  )
   artifact_types = {
       in_proto.ArtifactType.DLC_IMAGE: dlc_func,
       in_proto.ArtifactType.LICENSE_CREDITS: license_func,
+      in_proto.ArtifactType.FACTORY_IMAGE: factory_image_func,
   }
 
   for output_artifact in in_proto.output_artifacts:
