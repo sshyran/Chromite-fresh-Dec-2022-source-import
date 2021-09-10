@@ -30,7 +30,7 @@ def _GenerateAFDOGenerateTest(chrome_version_str, expected_to_generate_profile,
 
     def setUp(self):
       self.PatchObject(afdo, 'CanGenerateAFDOData', lambda _: True)
-      chrome_version = package_info.SplitCPV(chrome_version_str)
+      chrome_version = package_info.parse(chrome_version_str)
       self.PatchObject(portage_util, 'PortageqBestVisible',
                        lambda *_, **_2: chrome_version)
       self.wait_for_data = self.PatchObject(

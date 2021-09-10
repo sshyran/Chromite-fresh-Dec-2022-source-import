@@ -88,6 +88,10 @@ class MissingOverlayError(Error):
   """This exception indicates that a needed overlay is missing."""
 
 
+class NoVisiblePackageError(Error):
+  """Error when there is no package matching an atom."""
+
+
 class SourceDirectoryDoesNotExistError(Error, FileNotFoundError):
   """Error when at least one of an ebuild's sources does not exist."""
 
@@ -1829,8 +1833,10 @@ def _EqueryList(
       check=False, encoding='utf-8')
 
 
-def FindPackageNameMatches(pkg_str, board=None,
-                           buildroot=constants.SOURCE_ROOT):
+def FindPackageNameMatches(
+    pkg_str: str,
+    board: Optional[str] = None,
+    buildroot: str = constants.SOURCE_ROOT) -> List[package_info.PackageInfo]:
   """Finds a list of installed packages matching |pkg_str|.
 
   Args:
@@ -1839,13 +1845,13 @@ def FindPackageNameMatches(pkg_str, board=None,
     buildroot: Source root to find overlays.
 
   Returns:
-    A list of matched CPV objects.
+    An iterable of matched PackageInfo objects.
   """
   result = _EqueryList(pkg_str, board, buildroot)
 
   matches = []
   if result.returncode == 0:
-    matches = [package_info.SplitCPV(x) for x in result.output.splitlines()]
+    matches = [package_info.parse(x) for x in result.output.splitlines()]
 
   return matches
 
@@ -2367,8 +2373,12 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
   return cros_build_lib.run([_GetPortageq(board, sysroot)] + command, **kwargs)
 
 
-def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
-                        cwd=None):
+def PortageqBestVisible(
+    atom: str,
+    board: Optional[str] = None,
+    sysroot: Optional[str] = None,
+    pkg_type: str = 'ebuild',
+    cwd: str = None) -> package_info.PackageInfo:
   """Get the best visible ebuild CPV for the given atom.
 
   Args:
@@ -2379,13 +2389,22 @@ def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
     cwd: Path to use for the working directory for run.
 
   Returns:
-    A package_info.CPV object.
+    The parsed package information, which may be empty.
+
+  Raises:
+    NoVisiblePackageError when no version of the package can be found.
   """
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   cmd = ['best_visible', sysroot, pkg_type, atom]
-  result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
-  return package_info.SplitCPV(result.output.strip())
+  try:
+    result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
+  except cros_build_lib.RunCommandError as e:
+    logging.error(e)
+    raise NoVisiblePackageError(
+        f'No best visible package for "{atom}" could be found.') from e
+
+  return package_info.parse(result.output.strip())
 
 
 def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):

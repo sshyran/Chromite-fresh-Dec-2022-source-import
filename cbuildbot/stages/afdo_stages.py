@@ -44,8 +44,8 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
     arch = self._GetCurrentArch()
     buildroot = self._build_root
     gs_context = gs.GSContext()
-    cpv = portage_util.PortageqBestVisible(constants.CHROME_CP, cwd=buildroot)
-    afdo_file = None
+    chrome_pkg = portage_util.PortageqBestVisible(
+        constants.CHROME_CP, cwd=buildroot)
 
     # We have a mismatch between how we version the perf.data we collect and
     # how we version our AFDO profiles.
@@ -67,7 +67,7 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
     # end up using the perf.data collected on Chrome version $N-r1 with a
     # Chrome binary built from Chrome version $N-r2, which may have an entirely
     # different layout than Chrome version $N-r1.
-    if cpv.rev != 'r1':
+    if chrome_pkg.revision != 1:
       logging.warning(
           'Non-r1 version of Chrome detected; skipping AFDO generation')
       return
@@ -76,9 +76,9 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
     # We will ignore the failures and let the master PFQ builder try
     # to find an older AFDO profile.
     try:
-      if afdo.WaitForAFDOPerfData(cpv, arch, buildroot, gs_context):
-        afdo_file, uploaded_afdo = afdo.GenerateAFDOData(cpv, arch, board,
-                                                         buildroot, gs_context)
+      if afdo.WaitForAFDOPerfData(chrome_pkg, arch, buildroot, gs_context):
+        afdo_file, uploaded_afdo = afdo.GenerateAFDOData(
+            chrome_pkg, arch, board, buildroot, gs_context)
         assert afdo_file
         logging.info('Generated %s AFDO profile %s', arch, afdo_file)
 
@@ -104,7 +104,7 @@ class AFDODataGenerateStage(generic_stages.BoardSpecificBuilderStage,
         else:
           newest_afdo_file = afdo_file
 
-        afdo.UpdateLatestAFDOProfileInGS(cpv, arch, buildroot,
+        afdo.UpdateLatestAFDOProfileInGS(chrome_pkg, arch, buildroot,
                                          newest_afdo_file, gs_context)
         logging.info('Pointed newest profile at %s', newest_afdo_file)
       else:
@@ -140,7 +140,8 @@ class AFDOUpdateChromeEbuildStage(generic_stages.BuilderStage):
   def PerformStage(self):
     buildroot = self._build_root
     gs_context = gs.GSContext()
-    cpv = portage_util.PortageqBestVisible(constants.CHROME_CP, cwd=buildroot)
+    pkg_info = portage_util.PortageqBestVisible(
+        constants.CHROME_CP, cwd=buildroot)
 
     # We need the name of one board that has been setup in this
     # builder to find the Chrome ebuild. The chrome ebuild should be
@@ -150,7 +151,7 @@ class AFDOUpdateChromeEbuildStage(generic_stages.BuilderStage):
     profiles = {}
 
     for source, getter in afdo.PROFILE_SOURCES.items():
-      profile = getter(cpv, source, buildroot, gs_context)
+      profile = getter(pkg_info, source, buildroot, gs_context)
       if not profile:
         raise afdo.MissingAFDOData(
             'Could not find appropriate profile for %s' % source)

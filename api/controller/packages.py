@@ -120,8 +120,8 @@ def GetBestVisible(input_proto, output_proto, _config):
   if input_proto.build_target.name:
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
 
-  cpv = packages.get_best_visible(input_proto.atom, build_target=build_target)
-  controller_util.serialize_package_info(cpv, output_proto.package_info)
+  best = packages.get_best_visible(input_proto.atom, build_target=build_target)
+  controller_util.serialize_package_info(best, output_proto.package_info)
 
 
 def _ChromeVersionResponse(_input_proto, output_proto, _config):

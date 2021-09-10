@@ -525,10 +525,11 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
           _build_targets=None, refs=refs, chroot=None)
 
 
-class GetBestVisibleTest(cros_test_lib.TestCase):
+class GetBestVisibleTest(cros_test_lib.MockTestCase):
   """get_best_visible tests."""
 
   def test_empty_atom_fails(self):
+    """Test empty atom raises an error."""
     with self.assertRaises(AssertionError):
       packages.get_best_visible('')
 

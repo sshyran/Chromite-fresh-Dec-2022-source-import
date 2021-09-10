@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import sys
-from typing import List, Optional, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -29,6 +29,8 @@ from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
 
+if TYPE_CHECKING:
+  from chromite.lib import build_target_lib
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
@@ -773,21 +775,26 @@ def replicate_private_config(_build_targets, refs, chroot):
       new_private_version, modified_files)
 
 
-def get_best_visible(atom, build_target=None):
+def get_best_visible(
+    atom: str,
+    build_target: Optional['build_target_lib.BuildTarget'] = None
+) -> package_info.PackageInfo:
   """Returns the best visible CPV for the given atom.
 
   Args:
-    atom (str): The atom to look up.
-    build_target (build_target_lib.BuildTarget): The build target whose
-        sysroot should be searched, or the SDK if not provided.
+    atom: The atom to look up.
+    build_target: The build target whose sysroot should be searched, or the SDK
+      if not provided.
 
   Returns:
-    package_info.CPV|None: The best visible package.
+    The best visible package, or None if none are visible.
   """
   assert atom
 
-  board = build_target.name if build_target else None
-  return portage_util.PortageqBestVisible(atom, board=board)
+  return portage_util.PortageqBestVisible(
+      atom,
+      board=build_target.name if build_target else None,
+      sysroot=build_target.root if build_target else None)
 
 
 def has_prebuilt(atom, build_target=None, useflags=None):
@@ -908,7 +915,7 @@ def determine_chrome_version(build_target):
   # the builds function above only returns True for chrome when
   # determine_chrome_version will succeed.
   try:
-    cpv = portage_util.PortageqBestVisible(
+    pkg_info = portage_util.PortageqBestVisible(
         constants.CHROME_CP, build_target.name, cwd=constants.SOURCE_ROOT)
   except cros_build_lib.RunCommandError as e:
     # Return None because portage failed when trying to determine the chrome
@@ -916,7 +923,7 @@ def determine_chrome_version(build_target):
     logging.warning('Caught exception in determine_chrome_package: %s', e)
     return None
   # Something like 78.0.3877.4_rc -> 78.0.3877.4
-  return cpv.version_no_rev.partition('_')[0]
+  return pkg_info.version.partition('_')[0]
 
 
 def determine_android_package(board):

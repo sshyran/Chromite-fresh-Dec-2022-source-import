@@ -1462,11 +1462,12 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
 
   def testValidPackage(self):
     """Test valid outputs."""
-    result = cros_build_lib.CommandResult(output='cat/pkg-1.0', returncode=0)
+    expected = package_info.PackageInfo('cat', 'pkg', '1.0')
+    result = cros_build_lib.CommandResult(output=expected.cpvr, returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
-    self.assertIsInstance(portage_util.PortageqBestVisible('cat/pkg'),
-                          package_info.CPV)
+    result = portage_util.PortageqBestVisible('cat/pkg')
+    self.assertEqual(expected, result)
 
 
 class PortageqEnvvarTest(cros_test_lib.MockTestCase):

@@ -282,9 +282,9 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
   SYNC_CHROME_TIMEOUT = 12 * 60 * 60
 
   def DetermineChromeVersion(self):
-    cpv = portage_util.PortageqBestVisible(constants.CHROME_CP,
-                                           cwd=self._build_root)
-    return cpv.version_no_rev.partition('_')[0]
+    pkg_info = portage_util.PortageqBestVisible(
+        constants.CHROME_CP, cwd=self._build_root)
+    return pkg_info.version.partition('_')[0]
 
 
   @failures_lib.SetFailureType(failures_lib.InfrastructureFailure)

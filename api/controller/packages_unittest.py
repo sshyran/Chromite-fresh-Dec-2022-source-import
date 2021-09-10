@@ -237,17 +237,17 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
 
   def testSuccess(self):
     """Test overall success, argument handling, result forwarding."""
-    cpv = package_info.SplitCPV('category/package-1.2.3.4', strict=False)
-    self.PatchObject(packages_service, 'get_best_visible', return_value=cpv)
+    pkg = package_info.PackageInfo('category', 'package', '1.2.3.4', 5)
+    self.PatchObject(packages_service, 'get_best_visible', return_value=pkg)
 
-    request = self._GetRequest(atom='chromeos-chrome')
+    request = self._GetRequest(atom='category/package')
 
     packages_controller.GetBestVisible(request, self.response, self.api_config)
 
     package_info_msg = self.response.package_info
-    self.assertEqual(package_info_msg.category, cpv.category)
-    self.assertEqual(package_info_msg.package_name, cpv.package)
-    self.assertEqual(package_info_msg.version, cpv.version)
+    self.assertEqual(package_info_msg.category, pkg.category)
+    self.assertEqual(package_info_msg.package_name, pkg.package)
+    self.assertEqual(package_info_msg.version, pkg.vr)
 
 
 class GetChromeVersion(cros_test_lib.MockTestCase, ApiConfigMixin):

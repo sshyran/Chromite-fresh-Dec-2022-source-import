@@ -195,7 +195,7 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
             'src', 'third_party', 'chromiumos-overlay',
             os.path.dirname(self.chrome_PV), 'chromeos-chrome',
             '%s.ebuild' % os.path.basename(self.chrome_PV)))
-    self.chrome_CPV = package_info.SplitCPV(self.chrome_PV)
+    self.chrome_pkg = package_info.parse(self.chrome_PV)
     self.glob = self.PatchObject(
         glob, 'glob', return_value=[self.chrome_ebuild])
     self.rc.AddCmdResult(partial_mock.In('rm'), returncode=0)
@@ -226,7 +226,7 @@ class CommonPrepareBundleTest(PrepareBundleTest):
         'chromeos-chrome-78.0.3893.10_rc-r1.ebuild'
     ]
     ret = self.obj._GetEbuildInfo('chromeos-chrome')
-    self.assertEqual(ret.CPV.version, '78.0.3893.100_rc-r1')
+    self.assertEqual(ret.CPV.vr, '78.0.3893.100_rc-r1')
 
   def test_GetArtifactVersionInGob(self):
     """Test that we look in the right place in GoB."""
@@ -238,7 +238,7 @@ class CommonPrepareBundleTest(PrepareBundleTest):
         constants.EXTERNAL_GOB_HOST,
         'chromium/src/+/refs/tags/%s/chromeos/profiles/%s.afdo.newest.txt'
         '?format=text' %
-        (self.chrome_CPV.version_no_rev.split('_')[0], self.arch))
+        (self.chrome_pkg.version.split('_')[0], self.arch))
 
     self.fetch.reset_mock()
     self.fetch.return_value = ''
@@ -264,14 +264,14 @@ class CommonPrepareBundleTest(PrepareBundleTest):
     func = self.PatchObject(self.obj, '_PatchEbuild')
     self.obj._UpdateEbuildWithArtifacts('chromeos-chrome', {'var': 'val'})
     info = toolchain_util._EbuildInfo(
-        path=self.chrome_ebuild, CPV=self.chrome_CPV)
+        path=self.chrome_ebuild, CPV=self.chrome_pkg)
     info_9999 = toolchain_util._EbuildInfo(
         path=os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__), '..', '..', 'src', 'third_party',
                 'chromiumos-overlay', 'chromeos-base', 'chromeos-chrome',
                 'chromeos-chrome-9999.ebuild')),
-        CPV=package_info.SplitCPV('chromeos-base/chromeos-chrome-9999'))
+        CPV=package_info.parse('chromeos-base/chromeos-chrome-9999'))
     self.assertEqual([
         mock.call(info, {'var': 'val'}, uprev=True),
         mock.call(info_9999, {'var': 'val'}, uprev=False)
@@ -336,7 +336,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
     """Test that we find a file from prior branch when we have none."""
     self.obj._ebuild_info['chromeos-chrome'] = toolchain_util._EbuildInfo(
         path='path',
-        CPV=package_info.SplitCPV(
+        CPV=package_info.parse(
             'chromeos-base/chromeos-chrome-79.0.3900.0_rc-r1'))
     latest_orderfile = self.obj._FindLatestAFDOArtifact(
         [self.gs_url], self.obj._RankValidOrderfiles)
@@ -350,7 +350,7 @@ class PrepBundLatestAFDOArtifactTest(PrepareBundleTest):
     """Test function fails when no files on current branch."""
     self.obj._ebuild_info['chromeos-chrome'] = toolchain_util._EbuildInfo(
         path='path',
-        CPV=package_info.SplitCPV(
+        CPV=package_info.parse(
             'chromeos-base/chromeos-chrome-80.0.3950.0_rc-r1'))
     self.gsc_list.side_effect = gs.GSNoSuchKey('No files')
     with self.assertRaises(RuntimeError) as context:
@@ -600,7 +600,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.SetUpBundle('UnverifiedLlvmPgoFile')
     llvm_version = '10.0_pre377782_p20200113-r14'
     llvm_clang_sha = 'a21beccea2020f950845cbb68db663d0737e174c'
-    llvm_cpv = package_info.SplitCPV('sys-devel/llvm-%s' % llvm_version)
+    llvm_pkg = package_info.parse('sys-devel/llvm-%s' % llvm_version)
     self.PatchObject(
         self.obj,
         '_GetProfileNames',
@@ -610,13 +610,13 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                                   'libcxxabi-10.0_pre3_1673101222_0.profraw')
         ])
     self.PatchObject(
-        portage_util, 'FindPackageNameMatches', return_value=[llvm_cpv])
+        portage_util, 'FindPackageNameMatches', return_value=[llvm_pkg])
     self.rc.AddCmdResult(
         partial_mock.In('clang'),
         returncode=0,
         stdout=(f'Chromium OS {llvm_version} clang version 10.0.0 '
                 f'(/path/to/{llvm_path} {llvm_clang_sha})'))
-    base = f'{llvm_cpv.pv}-{llvm_clang_sha}'
+    base = f'{llvm_pkg.pvr}-{llvm_clang_sha}'
     artifacts = [
         os.path.join(self.outdir, x)
         for x in (f'{base}.llvm_metadata.json', 'llvm_metadata.json',
@@ -650,7 +650,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.obj,
         '_GetEbuildInfo',
         return_value=toolchain_util._EbuildInfo(
-            path=self.chrome_ebuild, CPV=self.chrome_CPV))
+            path=self.chrome_ebuild, CPV=self.chrome_pkg))
     run_command = self.PatchObject(cros_build_lib, 'run')
     sym_link_command = self.PatchObject(osutils, 'SafeSymlink')
     mock_file_obj = io.StringIO()
@@ -2151,25 +2151,16 @@ class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):
     self.working_dir = os.path.join(self.chroot_dir, 'tmp')
     osutils.SafeMakedirs(self.working_dir)
     self.output_dir = os.path.join(self.tempdir, 'outdir')
-    unused = {
-        'pv': None,
-        'rev': None,
-        'category': None,
-        'cpv': None,
-        'cp': None,
-        'cpf': None
-    }
     self.package = 'chromeos-chrome'
-    self.version = '77.0.3863.0_rc-r1'
-    self.chrome_cpv = package_info.CPV(
-        version_no_rev=self.version.split('_')[0],
-        package=self.package,
-        version=self.version,
-        **unused)
+    version = '77.0.3863.0_rc'
+    revision = 1
+    self.version = f'{version}-r{revision}'
+    self.chrome_pkg = package_info.PackageInfo(
+        package=self.package, version=version, revision=revision)
     self.board = 'board'
     self.arch = 'amd64'
     self.PatchObject(
-        portage_util, 'PortageqBestVisible', return_value=self.chrome_cpv)
+        portage_util, 'PortageqBestVisible', return_value=self.chrome_pkg)
     self.PatchObject(portage_util, 'PortageqEnvvar')
     self.test_obj = toolchain_util.GenerateBenchmarkAFDOProfile(
         board=self.board,

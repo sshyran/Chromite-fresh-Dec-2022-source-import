@@ -86,13 +86,13 @@ def main(argv):
   args = ['-guDNqp', '--with-bdeps=y', '--color=n']
   if board:
     args.append('--board=%s' % board)
-  args.extend('=%s' % best.cpf for best in bests.values())
+  args.extend('=%s' % best.cpvr for best in bests.values())
 
   generator = depgraph.DepGraphGenerator()
   generator.Initialize(args)
 
   results = {}
   for atom, best in bests.items():
-    results[atom] = generator.HasPrebuilt(best.cpf)
+    results[atom] = generator.HasPrebuilt(best.cpvr)
 
   osutils.WriteFile(opts.output, json.dumps(results))

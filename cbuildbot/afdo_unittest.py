@@ -715,18 +715,9 @@ class AfdoTest(cros_test_lib.MockTempDirTestCase):
                      'List', lambda _, path, **kwargs: MockGsList(path))
 
     def _test(version, idx):
-      unused = {
-          'pv': None,
-          'package': None,
-          'version_no_rev': None,
-          'rev': None,
-          'category': None,
-          'cpv': None,
-          'cp': None,
-          'cpf': None
-      }
-      cpv = package_info.CPV(version=version, **unused)
-      profile = afdo.GetCWPProfile(cpv, 'silvermont', 'unused', gs.GSContext())
+      pkg_info = package_info.PackageInfo(version=version)
+      profile = afdo.GetCWPProfile(pkg_info, 'silvermont', 'unused',
+                                   gs.GSContext())
       # Expect the most recent profile on the same branch.
       self.assertEqual(profile, profiles[idx][:-3])
 

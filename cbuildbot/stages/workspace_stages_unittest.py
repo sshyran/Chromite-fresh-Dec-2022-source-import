@@ -18,7 +18,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
-
+from chromite.lib.parser import package_info
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
@@ -350,12 +350,10 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
   """Test the WorkspaceSyncChromeStage."""
 
   def setUp(self):
-    # Fake package_info.CPV with the only field we need set.
-    fake_cpv = mock.Mock()
-    fake_cpv.version_no_rev = '0.0.1'
+    pkg_info = package_info.PackageInfo(version='0.0.1')
     self.mock_best_visible = self.PatchObject(
         portage_util, 'PortageqBestVisible',
-        return_value=fake_cpv)
+        return_value=pkg_info)
 
   def ConstructStage(self):
     self._run.options.chrome_preload_dir = '/preload/chrome_cache'
