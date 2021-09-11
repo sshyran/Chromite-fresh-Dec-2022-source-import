@@ -701,18 +701,6 @@
       ]
     },
     {
-      "name": "volteer-zephyr",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "zephyr-poc",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "wizpig",
       "configs": [
         {
@@ -9070,6 +9058,39 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7170,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "volteer-zephyr",
+      "reference_board_name": "volteer-zephyr",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "volteer-zephyr",
+          "name": "delbin",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7181,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-zephyr",
+          "name": "volteer2",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7181,
+          "is_active": true
+        },
+        {
+          "board_name": "volteer-zephyr",
+          "name": "volteer2_ti50",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7181,
           "is_active": true
         }
       ]
