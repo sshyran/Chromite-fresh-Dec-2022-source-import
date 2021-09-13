@@ -39,7 +39,7 @@ def DownloadCrx(ext, extension, crxdir):
   """Download .crx file from WebStore and update entry."""
   logging.info('Extension "%s"(%s)...', extension['name'], ext)
 
-  update_url = ('%s?x=prodversion%%3D35.1.1.1%%26id%%3D%s%%26uc' %
+  update_url = ('%s?prodversion=90.1.1.1&acceptformat=crx3&x=id%%3D%s%%26uc' %
                 (extension['external_update_url'], ext))
   response = urllib.request.urlopen(update_url)
   if response.getcode() != 200:
