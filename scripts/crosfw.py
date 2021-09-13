@@ -621,7 +621,7 @@ def WriteFirmware(options):
     secure.append('-s')
 
   if options.kernel:
-    kernel = ['--kernel', '##/build/%s/boot/vmlinux.uimg' % options.board]
+    kernel = ['--kernel', '##/build/%s/boot/vmlinuz' % options.board]
 
   if not options.console:
     silent = ['--add-config-int', 'silent-console', '1']
