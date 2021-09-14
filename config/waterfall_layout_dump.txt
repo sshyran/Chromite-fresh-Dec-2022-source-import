@@ -346,6 +346,7 @@
     nocturne-release
     novato-arc64-release
     novato-release
+    octopus-arc-r-release
     octopus-kernelnext-release
     octopus-release
     palkia-release
@@ -1488,6 +1489,7 @@
     nocturne-release-tryjob
     novato-arc64-release-tryjob
     novato-release-tryjob
+    octopus-arc-r-release-tryjob
     octopus-kernelnext-release-tryjob
     octopus-release-tryjob
     palkia-release-tryjob
@@ -1628,6 +1630,12 @@
   nyan_blaze-payloads-tryjob
   nyan_blaze-release-tryjob
   nyan_blaze-unittest-stress
+  octopus-arc-r-full-tryjob
+  octopus-arc-r-llvm-next-toolchain-tryjob
+  octopus-arc-r-llvm-toolchain-tryjob
+  octopus-arc-r-payloads-tryjob
+  octopus-arc-r-release-tryjob
+  octopus-arc-r-unittest-stress
   octopus-factory-octopus-11512.B-factorybranch-tryjob
   octopus-full-tryjob
   octopus-kernelnext-full-tryjob
