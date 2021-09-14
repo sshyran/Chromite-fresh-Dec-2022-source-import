@@ -518,18 +518,6 @@
       ]
     },
     {
-      "name": "octopus-arc-r",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reks",
       "configs": [
         {
@@ -6298,6 +6286,375 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 354,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "octopus-arc-r",
+      "reference_board_name": "octopus-arc-r",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "octopus-arc-r",
+          "name": "ampton",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "apel",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "apele",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "bloog",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "blooglet",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "blooguard",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "blorb",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "bluebird",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "bobba",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "bobba360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "casta",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "dood",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "dorp",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "droid",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "fleex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "foob",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "foob360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "garfour",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "garg",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "garg360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "grabbiter",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "laser14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "lick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "meep",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "mimrock",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "nospike",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "orbatrix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "phaser",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "phaser360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "sparky",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "sparky360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_ampton",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_bloog",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_bobba",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_casta",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_dood",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_fleex",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_foob",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_garg",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_lick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_meep",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "unprovisioned_phaser",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "vorticon",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "vortininja",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
+          "is_active": true
+        },
+        {
+          "board_name": "octopus-arc-r",
+          "name": "yorp",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7201,
           "is_active": true
         }
       ]
