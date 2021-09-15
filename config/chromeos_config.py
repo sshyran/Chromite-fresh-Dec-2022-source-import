@@ -1967,7 +1967,6 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
   _release_experimental_boards = _frozen_ge_set(ge_build_config, [
       'betty-kernelnext',
       'elm-kernelnext',
-      'eve-arcvm-mesa-virgl-next',
       'grunt-kernelnext',
       'hana-kernelnext',
       'hatch-kernelnext',
