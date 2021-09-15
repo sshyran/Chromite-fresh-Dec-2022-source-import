@@ -10,16 +10,17 @@ is intended to support development. The current source tip is fetched,
 source modified and built using the unstable 'live' (9999) ebuild.
 """
 
+import logging
 from pathlib import Path
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import path_util
 from chromite.lib import terminal
 from chromite.lib import workon_helper
+
 
 # These would preferably be class attributes, but it's difficult to make class
 # attributes refer to each other with nested generators in class declarations.
