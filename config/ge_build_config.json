@@ -2388,6 +2388,23 @@
       ]
     },
     {
+      "name": "eve-arcvm-mesa-virgl-next",
+      "reference_board_name": "eve-arcvm-mesa-virgl-next",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "eve-arcvm-mesa-virgl-next",
+          "name": "eve",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 414,
+          "is_active": true
+        }
+      ]
+    },
+    {
       "name": "eve-arm64",
       "reference_board_name": "eve-arm64",
       "arch": "X86_INTERNAL",

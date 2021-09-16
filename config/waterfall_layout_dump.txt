@@ -215,6 +215,7 @@
     elm-release
     endeavour-release
     eve-arc-r-release
+    eve-arcvm-mesa-virgl-next-release
     eve-arm64-release
     eve-kernelnext-release
     eve-kvm-release
@@ -702,6 +703,12 @@
   eve-arc-r-release-tryjob
   eve-arc-r-unittest-stress
   eve-arc-r-vmrvc-android-pfq-tryjob
+  eve-arcvm-mesa-virgl-next-full-tryjob
+  eve-arcvm-mesa-virgl-next-llvm-next-toolchain-tryjob
+  eve-arcvm-mesa-virgl-next-llvm-toolchain-tryjob
+  eve-arcvm-mesa-virgl-next-payloads-tryjob
+  eve-arcvm-mesa-virgl-next-release-tryjob
+  eve-arcvm-mesa-virgl-next-unittest-stress
   eve-arm64-full-tryjob
   eve-arm64-llvm-next-toolchain-tryjob
   eve-arm64-llvm-toolchain-tryjob
@@ -1280,6 +1287,7 @@
     elm-release-tryjob
     endeavour-release-tryjob
     eve-arc-r-release-tryjob
+    eve-arcvm-mesa-virgl-next-release-tryjob
     eve-arm64-release-tryjob
     eve-kernelnext-release-tryjob
     eve-kvm-release-tryjob
