@@ -174,6 +174,7 @@
     adlrvp-release
     ambassador-release
     asuka-release
+    asurada-connectivitynext-release
     asurada-release
     asurada-zephyr-release
     atlas-blueznext-release
@@ -305,6 +306,7 @@
     tatl-release
     terra-release
     trogdor-arc-r-release
+    trogdor-connectivitynext-release
     trogdor-kernelnext-release
     trogdor-release
     trogdor-zephyr-release
@@ -321,6 +323,7 @@
     wizpig-release
     zork-arc-r-release
     zork-borealis-release
+    zork-connectivitynext-release
     zork-floss-release
     zork-kernelnext-release
     zork-minios-release
@@ -405,6 +408,12 @@
   asuka-payloads-tryjob
   asuka-release-tryjob
   asuka-unittest-stress
+  asurada-connectivitynext-full-tryjob
+  asurada-connectivitynext-llvm-next-toolchain-tryjob
+  asurada-connectivitynext-llvm-toolchain-tryjob
+  asurada-connectivitynext-payloads-tryjob
+  asurada-connectivitynext-release-tryjob
+  asurada-connectivitynext-unittest-stress
   asurada-factory-asurada-13929.B-factorybranch-tryjob
   asurada-full-tryjob
   asurada-llvm-next-toolchain-tryjob
@@ -1239,6 +1248,7 @@
     adlrvp-release-tryjob
     ambassador-release-tryjob
     asuka-release-tryjob
+    asurada-connectivitynext-release-tryjob
     asurada-release-tryjob
     asurada-zephyr-release-tryjob
     atlas-blueznext-release-tryjob
@@ -1370,6 +1380,7 @@
     tatl-release-tryjob
     terra-release-tryjob
     trogdor-arc-r-release-tryjob
+    trogdor-connectivitynext-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
     trogdor-zephyr-release-tryjob
@@ -1386,6 +1397,7 @@
     wizpig-release-tryjob
     zork-arc-r-release-tryjob
     zork-borealis-release-tryjob
+    zork-connectivitynext-release-tryjob
     zork-floss-release-tryjob
     zork-kernelnext-release-tryjob
     zork-minios-release-tryjob
@@ -1719,6 +1731,12 @@
   trogdor-arc-r-payloads-tryjob
   trogdor-arc-r-release-tryjob
   trogdor-arc-r-unittest-stress
+  trogdor-connectivitynext-full-tryjob
+  trogdor-connectivitynext-llvm-next-toolchain-tryjob
+  trogdor-connectivitynext-llvm-toolchain-tryjob
+  trogdor-connectivitynext-payloads-tryjob
+  trogdor-connectivitynext-release-tryjob
+  trogdor-connectivitynext-unittest-stress
   trogdor-factory-strongbad-13963.B-factorybranch-tryjob
   trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   trogdor-full-tryjob
@@ -1873,6 +1891,12 @@
   zork-borealis-payloads-tryjob
   zork-borealis-release-tryjob
   zork-borealis-unittest-stress
+  zork-connectivitynext-full-tryjob
+  zork-connectivitynext-llvm-next-toolchain-tryjob
+  zork-connectivitynext-llvm-toolchain-tryjob
+  zork-connectivitynext-payloads-tryjob
+  zork-connectivitynext-release-tryjob
+  zork-connectivitynext-unittest-stress
   zork-factory-zork-13427.B-factorybranch-tryjob
   zork-factory-zork-13700.B-factorybranch-tryjob
   zork-floss-full-tryjob
