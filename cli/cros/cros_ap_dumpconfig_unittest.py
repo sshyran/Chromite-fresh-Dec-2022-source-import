@@ -23,6 +23,7 @@ class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
 
   def testCrosConfigDump(self):
     """Run cros dump-ap-config, read the output, and check validity."""
+    allowed_servos = servo_lib.VALID_SERVOS + ('ssh',)
     output_file = Path(self.tempdir) / 'tmp.json'
     cmd = ['cros', 'ap', 'dump-config', '-o', str(output_file)]
     cros_build_lib.run(cmd)
@@ -39,7 +40,7 @@ class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
     for board, board_config in result.items():
       assert board
       for servo, configs in board_config.items():
-        assert servo in servo_lib.VALID_SERVOS
+        assert servo in allowed_servos
         assert 'dut_control_on' in configs
         if configs['dut_control_on']:
           seen_dut_control_on = True

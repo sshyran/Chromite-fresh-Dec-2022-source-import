@@ -2,12 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Servo-related functionality."""
+"""Servo-related functionality.
 
-import logging
+This module keeps a list of all valid servos, and provides utility functions
+to simplify checking whether a given servo name has a property, such as being a
+CCD/servo v4/servo micro.
+"""
 from typing import List, NamedTuple
-
-from chromite.lib import cros_build_lib
 
 SERVO_C2D2 = 'c2d2'
 SERVO_CCD_CR50 = 'ccd_cr50'
@@ -73,92 +74,25 @@ _SERIAL_NUMBER_OPTION_OVERRIDE = {
 }
 
 
-class FirmwareConfig(NamedTuple):
-  """Stores dut controls for specific servos.
-
-  Attributes:
-    dut_control_on:  2d array formatted like [["cmd1", "arg1", "arg2"],
-                                              ["cmd2", "arg3", "arg4"]]
-                       with commands that need to be ran before flashing,
-                       where cmd1 will be run before cmd2.
-    dut_control_off: 2d array formatted like [["cmd1", "arg1", "arg2"],
-                                              ["cmd2", "arg3", "arg4"]]
-                       with commands that need to be ran after flashing,
-                       where cmd1 will be run before cmd2.
-    programmer:      programmer argument (-p) for flashrom and futility.
-  """
-  dut_control_on: List[List[str]]
-  dut_control_off: List[List[str]]
-  programmer: str
+def get_serial_option(servo_type: str) -> str:
+  """Returns the variable to be used with a given servo to get DUT's serial."""
+  return _SERIAL_NUMBER_OPTION_OVERRIDE.get(servo_type, _SERIAL_NUMBER_OPTION)
 
 
 class Error(Exception):
   """Base error class for the module."""
 
 
-class InvalidServoVersionError(Error):
-  """Invalid servo version error."""
-
-
 class UnsupportedServoVersionError(Error):
   """Unsupported servo version error (e.g. some servos do not support CCD)."""
-
-
-class DutConnectionError(Error):
-  """Error when fetching data from a dut."""
-
-
-class DutControl(object):
-  """Wrapper for dut_control calls."""
-
-  def __init__(self, port):
-    self._base_cmd = ['dut-control']
-    if port:
-      self._base_cmd.append('--port=%s' % port)
-
-  def get_value(self, arg):
-    """Get the value of |arg| from dut_control."""
-    try:
-      result = cros_build_lib.run(
-          self._base_cmd + [arg], stdout=True, encoding='utf-8')
-    except cros_build_lib.CalledProcessError as e:
-      logging.debug('dut-control error: %s', str(e))
-      raise DutConnectionError(
-          'Could not establish servo connection. Verify servod is running in '
-          'the background, and the servo is properly connected.')
-
-    # Return value from the "key:value" output.
-    return result.stdout.partition(':')[2].strip()
-
-  def run(self, cmd_fragment, verbose=False, dryrun=False):
-    """Run a dut_control command.
-
-    Args:
-      cmd_fragment (list[str]): The dut_control command to run.
-      verbose (bool): Whether to print the command before it's run.
-      dryrun (bool): Whether to actually execute the command or just print it.
-    """
-    cros_build_lib.run(
-        self._base_cmd + cmd_fragment, print_cmd=verbose, dryrun=dryrun)
-
-  def run_all(self, cmd_fragments, verbose=False, dryrun=False):
-    """Run multiple dut_control commands in the order given.
-
-    Args:
-      cmd_fragments (list[list[str]]): The dut_control commands to run.
-      verbose (bool): Whether to print the commands as they are run.
-      dryrun (bool): Whether to actually execute the command or just print it.
-    """
-    for cmd in cmd_fragments:
-      self.run(cmd, verbose=verbose, dryrun=dryrun)
 
 
 class Servo(object):
   """Data class for servos."""
 
-  def __init__(self, version, serial):
-    assert version in VALID_SERVOS
-    self.version = version
+  def __init__(self, servo_type, serial):
+    assert servo_type in VALID_SERVOS
+    self.version = servo_type
     self.serial = serial
 
   @property
@@ -182,16 +116,20 @@ class Servo(object):
     return self.version in V4_SERVOS
 
 
-def get(dut_ctl: DutControl) -> Servo:
-  """Get the Servo instance the given dut_control command is using.
+class ServoConfig(NamedTuple):
+  """Stores dut controls for specific servos.
 
-  Args:
-    dut_ctl: The dut_control command wrapper instance.
+  Attributes:
+    dut_control_on:  2d array formatted like [["cmd1", "arg1", "arg2"],
+                                              ["cmd2", "arg3", "arg4"]]
+                       with commands that need to be ran before flashing,
+                       where cmd1 will be run before cmd2.
+    dut_control_off: 2d array formatted like [["cmd1", "arg1", "arg2"],
+                                              ["cmd2", "arg3", "arg4"]]
+                       with commands that need to be ran after flashing,
+                       where cmd1 will be run before cmd2.
+    programmer:      programmer argument (-p) for flashrom and futility.
   """
-  version = dut_ctl.get_value('servo_type')
-  if version not in VALID_SERVOS:
-    raise InvalidServoVersionError('Unrecognized servo version: %s' % version)
-
-  option = _SERIAL_NUMBER_OPTION_OVERRIDE.get(version, _SERIAL_NUMBER_OPTION)
-  serial = dut_ctl.get_value(option)
-  return Servo(version, serial)
+  dut_control_on: List[List[str]]
+  dut_control_off: List[List[str]]
+  programmer: str

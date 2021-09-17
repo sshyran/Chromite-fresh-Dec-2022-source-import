@@ -8,18 +8,14 @@ import argparse
 import logging
 import os
 from pathlib import Path
-import sys
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib.firmware import ap_firmware
-from chromite.lib.firmware import flash_ap
-from chromite.lib.firmware import servo_lib
-from chromite.utils import file_util
-from chromite.utils import pformat
+from chromite.lib.firmware import dut
+from chromite.lib.firmware import firmware_config
+from chromite.lib.firmware import firmware_lib
 
 COMMAND_DUMP_CONFIG = 'dump-config'
 COMMAND_BUILD = 'build'
@@ -141,62 +137,12 @@ To dump AP config of drallion and dedede boards:
 
   def Run(self):
     """Perform the cros ap dump-config command."""
-    boards = []
+    boards = None
     if self.options.boards:
       boards = self.options.boards
-    else:
-      # Get the board list from config python modules in
-      # chromite/lib/firmware/ap_firmware_config
-      path_to_firmware_configs = (
-          Path(constants.CHROMITE_DIR) / 'lib' / 'firmware' /
-          'ap_firmware_config')
-      for p in path_to_firmware_configs.glob('*.py'):
-        if not p.is_file():
-          continue
-        if p.name.startswith('_'):
-          continue
-        # Remove paths, leaving only filenames, and remove .py suffixes.
-        boards.append(p.with_suffix('').name)
-    boards.sort()
 
-    if self.options.output:
-      output_path = self.options.output
-      logging.info('Dumping AP config to %s', output_path)
-      logging.info('List of boards: %s', ', '.join(boards))
-      logging.info('List of servos: %s', ', '.join(servo_lib.VALID_SERVOS))
-    else:
-      output_path = sys.stdout
-
-    output = {}
-    failed_board_servos = {}
-    for board in boards:
-      module = ap_firmware.get_config_module(board)
-      output[board] = {}
-      for servo_version in servo_lib.VALID_SERVOS:
-        servo = servo_lib.Servo(servo_version, self.options.serial)
-        # get_config() call is expected to fail for some board:servo pairs.
-        # Disable logging to avoid inconsistent error messages from config
-        # modules' get_config() calls.
-        logging.disable(logging.CRITICAL)
-        try:
-          ap_config = module.get_config(servo)
-        except servo_lib.UnsupportedServoVersionError:
-          failed_board_servos.setdefault(board, []).append(servo_version)
-          continue
-        finally:
-          # Reenable logging.
-          logging.disable(logging.DEBUG)
-
-        output[board][servo_version] = {
-            'dut_control_on': ap_config.dut_control_on,
-            'dut_control_off': ap_config.dut_control_off,
-            'programmer': ap_config.programmer,
-        }
-    for board, servos in failed_board_servos.items():
-      logging.notice(f'[{board}] skipping servos ' f'{", ".join(servos)}')
-
-    with file_util.Open(output_path, 'w', encoding='utf-8') as f:
-      pformat.json(output, f)
+    firmware_config.export_config_as_json(boards, self.options.output,
+                                          self.options.serial)
 
 
 class BuildSubcommand(command.CliCommand):
@@ -242,11 +188,11 @@ To build the AP Firmware only for foo-variant:
     commandline.RunInsideChroot(self)
 
     try:
-      ap_firmware.build(
+      firmware_lib.build(
           self.build_target,
           fw_name=self.options.fw_name,
           dry_run=self.options.dry_run)
-    except ap_firmware.Error as e:
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)
 
 
@@ -323,14 +269,13 @@ To read a specific region from DUT via SERVO on default port(9999):
       region = self.options.region
 
     if ip:
-      flash_ap.ssh_read(self.options.output, self.options.verbose, ip, port,
-                        self.options.dry_run, region)
+      firmware_lib.ssh_read(self.options.output, self.options.verbose, ip, port,
+                            self.options.dry_run, region)
     else:
-      dut_ctl = servo_lib.DutControl(port)
-      servo = servo_lib.get(dut_ctl)
+      dut_ctl = dut.DutControl(port)
+      servo = dut_ctl.get_servo()
 
-      config_module = ap_firmware.get_config_module(build_target.name)
-      ap_config = config_module.get_config(servo)
+      ap_config = firmware_config.get_config(build_target.name, servo)
 
       flashrom_cmd = [
           'flashrom', '-p', ap_config.programmer, '-r', self.options.output
@@ -339,9 +284,9 @@ To read a specific region from DUT via SERVO on default port(9999):
         flashrom_cmd += ['-V']
       if region:
         flashrom_cmd += ['-i', self.options.region]
-      if not flash_ap.servo_run(dut_ctl, ap_config.dut_control_on,
-                                ap_config.dut_control_off, flashrom_cmd,
-                                self.options.verbose, self.options.dry_run):
+      if not dut_ctl.servo_run(ap_config.dut_control_on,
+                               ap_config.dut_control_off, flashrom_cmd,
+                               self.options.verbose, self.options.dry_run):
         logging.error('Unable to read, verify servo connection '
                       'is correct and servod is running in the background.')
 
@@ -431,17 +376,16 @@ e.g.:
 
     build_target = build_target_lib.BuildTarget(self.options.build_target)
     try:
-      ap_firmware.deploy(
+      firmware_lib.deploy(
           build_target,
           self.options.image,
           self.options.device,
           flashrom=self.options.flashrom,
-          fast=False,
           verbose=self.options.verbose,
           dryrun=self.options.dry_run,
           flash_contents=self.options.flash_contents,
           passthrough_args=passthrough_args)
-    except ap_firmware.Error as e:
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)
 
 
@@ -480,6 +424,6 @@ This command removes firmware-related packages, including everything in
     commandline.RunInsideChroot(self)
 
     try:
-      ap_firmware.clean(self.build_target, self.options.dry_run)
-    except ap_firmware.Error as e:
+      firmware_lib.clean(self.build_target, self.options.dry_run)
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)
