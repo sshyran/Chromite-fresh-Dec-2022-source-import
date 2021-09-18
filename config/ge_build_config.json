@@ -14,18 +14,6 @@
       ]
     },
     {
-      "name": "asurada-connectivitynext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "banon",
       "configs": [
         {
@@ -723,18 +711,6 @@
           "arch": "X86_INTERNAL"
         }
       ]
-    },
-    {
-      "name": "zork-connectivitynext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
     }
   ],
   "release_branch": false,
@@ -859,6 +835,39 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 435,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "asurada-connectivitynext",
+      "reference_board_name": "asurada-connectivitynext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "asurada-connectivitynext",
+          "name": "asurada",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7204,
+          "is_active": true
+        },
+        {
+          "board_name": "asurada-connectivitynext",
+          "name": "hayato",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7204,
+          "is_active": true
+        },
+        {
+          "board_name": "asurada-connectivitynext",
+          "name": "spherion",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7204,
           "is_active": true
         }
       ]
@@ -10077,6 +10086,127 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 456,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "zork-connectivitynext",
+      "reference_board_name": "zork-connectivitynext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "berknip",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "dalboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "dirinboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "ezkinil",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "gumboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "jelboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "jelboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "morphius",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "shuboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "trembyle",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "vilboz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "vilboz14",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "vilboz360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
+          "is_active": true
+        },
+        {
+          "board_name": "zork-connectivitynext",
+          "name": "woomax",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7202,
           "is_active": true
         }
       ]
