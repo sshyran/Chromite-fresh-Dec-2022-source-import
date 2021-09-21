@@ -64,9 +64,8 @@ def _ValidateBinhostConf(path, key):
     raise ValueError(
         'Found empty .conf file %s when a non-empty one was expected.' % path)
   elif len(kvs) > 1:
-    raise ValueError(
-        'Conf file %s must define exactly 1 variable. '
-        'Instead found: %r' % (path, kvs))
+    raise ValueError('Conf file %s must define exactly 1 variable. '
+                     'Instead found: %r' % (path, kvs))
   elif key not in kvs:
     raise KeyError('Did not find key %s in %s' % (key, path))
 
@@ -203,9 +202,8 @@ def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
     Path to the updated .conf file.
   """
   conf_root = os.path.join(
-      constants.SOURCE_ROOT,
-      constants.PRIVATE_BINHOST_CONF_DIR if private else
-      constants.PUBLIC_BINHOST_CONF_DIR, 'target')
+      constants.SOURCE_ROOT, constants.PRIVATE_BINHOST_CONF_DIR
+      if private else constants.PUBLIC_BINHOST_CONF_DIR, 'target')
   conf_file = '%s-%s.conf' % (target, key)
   conf_path = os.path.join(conf_root, conf_file)
   _ValidateBinhostConf(conf_path, key)
@@ -246,8 +244,8 @@ def GetPrebuiltAclArgs(
     A list containing all of the [arg, value] pairs. E.g.
       [['-g', 'group_id:READ'], ['-u', 'user:FULL_CONTROL']]
   """
-  acl_file = portage_util.FindOverlayFile(_GOOGLESTORAGE_GSUTIL_FILE,
-                                          board=build_target.name)
+  acl_file = portage_util.FindOverlayFile(
+      _GOOGLESTORAGE_GSUTIL_FILE, board=build_target.name)
 
   if not acl_file:
     raise NoAclFileFound('No ACL file found for %s.' % build_target.name)
@@ -270,9 +268,8 @@ def GetBinhosts(build_target: 'build_target_lib.BuildTarget') -> List[str]:
   Returns:
     The build target's binhosts.
   """
-  binhosts = portage_util.PortageqEnvvar('PORTAGE_BINHOST',
-                                         board=build_target.name,
-                                         allow_undefined=True)
+  binhosts = portage_util.PortageqEnvvar(
+      'PORTAGE_BINHOST', board=build_target.name, allow_undefined=True)
   return binhosts.split() if binhosts else []
 
 
@@ -319,12 +316,11 @@ def ReadDevInstallFilesToCreatePackageIndex(chroot: 'chroot_lib.Chroot',
   # Read the Packages file, remove packages not in package_list
   package_path = chroot.full_path(sysroot.path, 'packages')
   CreateFilteredPackageIndex(package_path, devinstall_package_list,
-                             package_index_path,
-                             upload_uri, upload_path)
+                             package_index_path, upload_uri, upload_path)
 
   # We have the list of packages, create full path and verify each one.
-  upload_targets_list = GetPrebuiltsForPackages(
-      package_path, devinstall_package_list)
+  upload_targets_list = GetPrebuiltsForPackages(package_path,
+                                                devinstall_package_list)
 
   return upload_targets_list
 
@@ -350,7 +346,6 @@ def CreateFilteredPackageIndex(package_path: str,
     upload_path: The path at the URI for the prebuilts.
     sudo: Whether to write the file as the root user.
   """
-
 
   def ShouldFilterPackage(package):
     """Local func to filter packages not in the devinstall_package_list
