@@ -142,6 +142,75 @@ def each_in(field: str,
   return decorator
 
 
+def constraint(description):
+  """Define a function to be used as a constraint check.
+
+  A constraint is a function that checks the value of a field and either
+  does nothing (returns None) or returns a string indicating why the value
+  isn't valid.
+
+  We bind a human readable description to the constraint for error reporting
+  and logging.
+
+  Args:
+    description: Human readable description of the constraint
+  """
+
+  def decorator(func):
+    @functools.wraps(func)
+    def _func(*args, **kwargs):
+      func(*args, **kwargs)
+
+    setattr(_func, '__constraint_description__', description)
+    return _func
+
+  return decorator
+
+
+def check_constraint(field: str, checkfunc: Callable):
+  """Validate all values of |field| pass a constraint.
+
+  Args:
+    field: The field being checked. May be . separated nested fields.
+    checkfunc: A constraint function to check on each value
+  """
+  assert field
+  assert constraint
+
+  # Get description for the constraint if it's set
+  constraint_description = getattr(
+      checkfunc,
+      '__constraint_description__',
+      checkfunc.__name__,
+  )
+
+  def decorator(func):
+    @functools.wraps(func)
+    def _check_constraint(input_proto, output_proto, config, *args, **kwargs):
+      if config.do_validation:
+        values = _value(field, input_proto) or []
+
+        failed = []
+        for val in values:
+          msg = checkfunc(val)
+          if msg is not None:
+            failed.append((val, msg))
+
+        if failed:
+          msg = '{}.[all] one or more values failed check "{}"\n'.format(
+              field, constraint_description)
+
+          for value, msg in failed:
+            msg += '  {}: {}\n'.format(value, msg)
+          cros_build_lib.Die(msg)
+
+      return func(input_proto, output_proto, config, *args, **kwargs)
+
+    return _check_constraint
+
+  return decorator
+
+
 # pylint: disable=docstring-misnamed-args
 def require(*fields: str):
   """Verify |fields| have all been set to truthy values.

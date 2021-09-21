@@ -278,6 +278,64 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                      os.path.join(input_msg.result_path, 'unit_tests.tar'))
 
 
+class DockerConstraintsTest(cros_test_lib.MockTestCase):
+  """Tests for Docker argument constraints."""
+
+  def assertValid(self, output):
+    return output is None
+
+  def assertInvalid(self, output):
+    return not self.assertValid(output)
+
+  def testValidDockerTag(self):
+    """Check logic for validating docker tag format."""
+    # pylint: disable=protected-access
+
+    invalid_tags = [
+        '.invalid-tag',
+        '-invalid-tag',
+        'invalid-tag;',
+        'invalid'*100,
+    ]
+
+    for tag in invalid_tags:
+      self.assertInvalid(test_controller._ValidDockerTag(tag))
+
+    valid_tags = [
+        'valid-tag',
+        'valid-tag-',
+        'valid.tag.',
+    ]
+
+    for tag in valid_tags:
+      self.assertValid(test_controller._ValidDockerTag(tag))
+
+
+  def testValidDockerLabelKey(self):
+    """Check logic for validating docker label key format."""
+    # pylint: disable=protected-access
+
+    invalid_keys = [
+        'Invalid-keY',
+        'Invalid-key',
+        'invalid-keY',
+        'iNVALID-KEy',
+        'invalid_key',
+        'invalid-key;',
+    ]
+
+    for key in invalid_keys:
+      self.assertInvalid(test_controller._ValidDockerLabelKey(key))
+
+    valid_keys = [
+        'chromeos.valid-key',
+        'chromeos.valid-key-2',
+    ]
+
+    for key in valid_keys:
+      self.assertValid(test_controller._ValidDockerLabelKey(key))
+
+
 class BuildTestServiceContainers(cros_test_lib.MockTestCase,
                                  api_config.ApiConfigMixin):
   """Tests for the BuildTestServiceContainers function."""
@@ -735,8 +793,11 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
 
   def testShouldCallBundleCodeCoverageLlvmJsonForEachValidArtifact(self):
     """Test BundleCodeCoverageLlvmJson is called on each valid artifact."""
-    BundleCodeCoverageLlvmJson_mock = self.PatchObject(
-      test_service, 'BundleCodeCoverageLlvmJson', return_value='test')
+    BundleCodeCoverageLlvmJson_mock = (
+        self.PatchObject(
+            test_service,
+            'BundleCodeCoverageLlvmJson',
+            return_value='test'))
 
     test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[
@@ -761,9 +822,9 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
   def testShouldReturnValidResult(self):
     """Test result contains paths and code_coverage_llvm_json type."""
     self.PatchObject(test_service, 'BundleCodeCoverageLlvmJson',
-      return_value='test')
+                     return_value='test')
     self.PatchObject(test_service, 'BuildTargetUnitTestTarball',
-      return_value='unit_tests.tar')
+                     return_value='unit_tests.tar')
 
     result = test_controller.GetArtifacts(
         common_pb2.ArtifactsByService.Test(output_artifacts=[

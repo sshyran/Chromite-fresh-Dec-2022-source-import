@@ -9,6 +9,7 @@ Handles all testing related functionality, it is not itself a test.
 
 import functools
 import os
+import string
 
 from chromite.api import controller
 from chromite.api import faux
@@ -180,11 +181,56 @@ def _BuildTestServiceContainersFailedResponse(
   ))
 
 
+@validate.constraint('valid docker tag')
+def _ValidDockerTag(tag):
+  """Check that a string meets requirements for Docker tag naming."""
+  # Tags can't start with period or dash
+  if tag[0] in '.-':
+    return "tag can't begin with '.' or '-'"
+
+  # Tags can only consist of [a-zA-Z0-9-_.]
+  allowed_chars = set(string.ascii_letters+string.digits+'-_.')
+  invalid_chars = set(tag) - allowed_chars
+  if invalid_chars:
+    return 'saw one or more invalid characters: [{}]'.format(
+      ''.join(invalid_chars),
+    )
+
+  # Finally, max tag length is 128 characters
+  if len(tag) > 128:
+    return 'maximum tag length is 128 characters'
+
+
+@validate.constraint('valid docker label key')
+def _ValidDockerLabelKey(key):
+  """Check that a string meets requirements for Docker tag naming."""
+
+  # Label keys should start and end with a lowercase letter
+  lowercase = set(string.ascii_lowercase)
+  if not (key[0] in lowercase and key[-1] in lowercase):
+    return "label key doesn't start and end with lowercase letter"
+
+  # Label keys can have lower-case alphanumeric characters, period and dash
+  allowed_chars = set(string.ascii_lowercase+string.digits+'-.')
+  invalid_chars = set(key) - allowed_chars
+  if invalid_chars:
+    return 'saw one or more invalid characters: [{}]'.format(
+      ''.join(invalid_chars),
+    )
+
+  # Repeated . and - aren't allowed
+  for char in '.-':
+    if char*2 in key:
+      return "'{}' can\'t be repeated in label key".format(char)
+
+
 @faux.success(_BuildTestServiceContainersResponse)
 @faux.error(_BuildTestServiceContainersFailedResponse)
 @validate.require('build_target.name')
 @validate.require('chroot.path')
 @validate.require('version')
+@validate.check_constraint('tags', _ValidDockerTag)
+@validate.check_constraint('labels', _ValidDockerLabelKey)
 @validate.validation_complete
 def BuildTestServiceContainers(input_proto, output_proto, _config):
   """Builds docker containers for all test services and pushes them to gcr.io"""
