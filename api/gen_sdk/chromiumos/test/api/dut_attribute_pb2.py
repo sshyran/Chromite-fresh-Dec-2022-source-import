@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromiumos.test.api',
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
-  serialized_pb=b'\n\'chromiumos/test/api/dut_attribute.proto\x12\x13\x63hromiumos.test.api\"i\n\x0c\x44utAttribute\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x12\n\nfield_path\x18\x02 \x01(\t\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\"M\n\x10\x44utAttributeList\x12\x39\n\x0e\x64ut_attributes\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.DutAttribute\"Z\n\x0c\x44utCriterion\x12:\n\x0c\x61ttribute_id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0e\n\x06values\x18\x02 \x03(\tB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n\'chromiumos/test/api/dut_attribute.proto\x12\x13\x63hromiumos.test.api\"\x8b\x04\n\x0c\x44utAttribute\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0f\n\x07\x61liases\x18\x02 \x03(\t\x12P\n\x12\x66lat_config_source\x18\x03 \x01(\x0b\x32\x32.chromiumos.test.api.DutAttribute.FlatConfigSourceH\x00\x12\x43\n\x0bhwid_source\x18\x04 \x01(\x0b\x32,.chromiumos.test.api.DutAttribute.HwidSourceH\x00\x12\x16\n\x0e\x61llowed_values\x18\x05 \x03(\t\x12\x16\n\x0e\x65xclude_values\x18\x06 \x03(\t\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x19\n\tFieldSpec\x12\x0c\n\x04path\x18\x01 \x01(\t\x1aO\n\x10\x46latConfigSource\x12;\n\x06\x66ields\x18\x01 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpec\x1a\x61\n\nHwidSource\x12\x16\n\x0e\x63omponent_type\x18\x01 \x01(\t\x12;\n\x06\x66ields\x18\x02 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpecB\r\n\x0b\x64\x61ta_source\"M\n\x10\x44utAttributeList\x12\x39\n\x0e\x64ut_attributes\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.DutAttribute\"Z\n\x0c\x44utCriterion\x12:\n\x0c\x61ttribute_id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0e\n\x06values\x18\x02 \x03(\tB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
 )
 
 
@@ -50,8 +50,105 @@ _DUTATTRIBUTE_ID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=150,
-  serialized_end=169,
+  serialized_start=347,
+  serialized_end=366,
+)
+
+_DUTATTRIBUTE_FIELDSPEC = _descriptor.Descriptor(
+  name='FieldSpec',
+  full_name='chromiumos.test.api.DutAttribute.FieldSpec',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='path', full_name='chromiumos.test.api.DutAttribute.FieldSpec.path', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=368,
+  serialized_end=393,
+)
+
+_DUTATTRIBUTE_FLATCONFIGSOURCE = _descriptor.Descriptor(
+  name='FlatConfigSource',
+  full_name='chromiumos.test.api.DutAttribute.FlatConfigSource',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='fields', full_name='chromiumos.test.api.DutAttribute.FlatConfigSource.fields', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=395,
+  serialized_end=474,
+)
+
+_DUTATTRIBUTE_HWIDSOURCE = _descriptor.Descriptor(
+  name='HwidSource',
+  full_name='chromiumos.test.api.DutAttribute.HwidSource',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='component_type', full_name='chromiumos.test.api.DutAttribute.HwidSource.component_type', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='fields', full_name='chromiumos.test.api.DutAttribute.HwidSource.fields', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=476,
+  serialized_end=573,
 )
 
 _DUTATTRIBUTE = _descriptor.Descriptor(
@@ -69,16 +166,44 @@ _DUTATTRIBUTE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='field_path', full_name='chromiumos.test.api.DutAttribute.field_path', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='aliases', full_name='chromiumos.test.api.DutAttribute.aliases', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='flat_config_source', full_name='chromiumos.test.api.DutAttribute.flat_config_source', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hwid_source', full_name='chromiumos.test.api.DutAttribute.hwid_source', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='allowed_values', full_name='chromiumos.test.api.DutAttribute.allowed_values', index=4,
+      number=5, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='exclude_values', full_name='chromiumos.test.api.DutAttribute.exclude_values', index=5,
+      number=6, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_DUTATTRIBUTE_ID, ],
+  nested_types=[_DUTATTRIBUTE_ID, _DUTATTRIBUTE_FIELDSPEC, _DUTATTRIBUTE_FLATCONFIGSOURCE, _DUTATTRIBUTE_HWIDSOURCE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -86,9 +211,12 @@ _DUTATTRIBUTE = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='data_source', full_name='chromiumos.test.api.DutAttribute.data_source',
+      index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=64,
-  serialized_end=169,
+  serialized_start=65,
+  serialized_end=588,
 )
 
 
@@ -118,8 +246,8 @@ _DUTATTRIBUTELIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=171,
-  serialized_end=248,
+  serialized_start=590,
+  serialized_end=667,
 )
 
 
@@ -156,12 +284,25 @@ _DUTCRITERION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=250,
-  serialized_end=340,
+  serialized_start=669,
+  serialized_end=759,
 )
 
 _DUTATTRIBUTE_ID.containing_type = _DUTATTRIBUTE
+_DUTATTRIBUTE_FIELDSPEC.containing_type = _DUTATTRIBUTE
+_DUTATTRIBUTE_FLATCONFIGSOURCE.fields_by_name['fields'].message_type = _DUTATTRIBUTE_FIELDSPEC
+_DUTATTRIBUTE_FLATCONFIGSOURCE.containing_type = _DUTATTRIBUTE
+_DUTATTRIBUTE_HWIDSOURCE.fields_by_name['fields'].message_type = _DUTATTRIBUTE_FIELDSPEC
+_DUTATTRIBUTE_HWIDSOURCE.containing_type = _DUTATTRIBUTE
 _DUTATTRIBUTE.fields_by_name['id'].message_type = _DUTATTRIBUTE_ID
+_DUTATTRIBUTE.fields_by_name['flat_config_source'].message_type = _DUTATTRIBUTE_FLATCONFIGSOURCE
+_DUTATTRIBUTE.fields_by_name['hwid_source'].message_type = _DUTATTRIBUTE_HWIDSOURCE
+_DUTATTRIBUTE.oneofs_by_name['data_source'].fields.append(
+  _DUTATTRIBUTE.fields_by_name['flat_config_source'])
+_DUTATTRIBUTE.fields_by_name['flat_config_source'].containing_oneof = _DUTATTRIBUTE.oneofs_by_name['data_source']
+_DUTATTRIBUTE.oneofs_by_name['data_source'].fields.append(
+  _DUTATTRIBUTE.fields_by_name['hwid_source'])
+_DUTATTRIBUTE.fields_by_name['hwid_source'].containing_oneof = _DUTATTRIBUTE.oneofs_by_name['data_source']
 _DUTATTRIBUTELIST.fields_by_name['dut_attributes'].message_type = _DUTATTRIBUTE
 _DUTCRITERION.fields_by_name['attribute_id'].message_type = _DUTATTRIBUTE_ID
 DESCRIPTOR.message_types_by_name['DutAttribute'] = _DUTATTRIBUTE
@@ -177,12 +318,36 @@ DutAttribute = _reflection.GeneratedProtocolMessageType('DutAttribute', (_messag
     # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutAttribute.Id)
     })
   ,
+
+  'FieldSpec' : _reflection.GeneratedProtocolMessageType('FieldSpec', (_message.Message,), {
+    'DESCRIPTOR' : _DUTATTRIBUTE_FIELDSPEC,
+    '__module__' : 'chromiumos.test.api.dut_attribute_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutAttribute.FieldSpec)
+    })
+  ,
+
+  'FlatConfigSource' : _reflection.GeneratedProtocolMessageType('FlatConfigSource', (_message.Message,), {
+    'DESCRIPTOR' : _DUTATTRIBUTE_FLATCONFIGSOURCE,
+    '__module__' : 'chromiumos.test.api.dut_attribute_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutAttribute.FlatConfigSource)
+    })
+  ,
+
+  'HwidSource' : _reflection.GeneratedProtocolMessageType('HwidSource', (_message.Message,), {
+    'DESCRIPTOR' : _DUTATTRIBUTE_HWIDSOURCE,
+    '__module__' : 'chromiumos.test.api.dut_attribute_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutAttribute.HwidSource)
+    })
+  ,
   'DESCRIPTOR' : _DUTATTRIBUTE,
   '__module__' : 'chromiumos.test.api.dut_attribute_pb2'
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutAttribute)
   })
 _sym_db.RegisterMessage(DutAttribute)
 _sym_db.RegisterMessage(DutAttribute.Id)
+_sym_db.RegisterMessage(DutAttribute.FieldSpec)
+_sym_db.RegisterMessage(DutAttribute.FlatConfigSource)
+_sym_db.RegisterMessage(DutAttribute.HwidSource)
 
 DutAttributeList = _reflection.GeneratedProtocolMessageType('DutAttributeList', (_message.Message,), {
   'DESCRIPTOR' : _DUTATTRIBUTELIST,

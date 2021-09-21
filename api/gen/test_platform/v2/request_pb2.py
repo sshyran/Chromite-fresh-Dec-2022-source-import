@@ -11,7 +11,9 @@ from chromite.third_party.google.protobuf import symbol_database as _symbol_data
 _sym_db = _symbol_database.Default()
 
 
+from chromite.api.gen.chromiumos import common_pb2 as chromiumos_dot_common__pb2
 from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2 as chromiumos_dot_test_dot_api_dot_coverage__rule__pb2
+from chromite.api.gen.chromiumos.test.api import provision_state_pb2 as chromiumos_dot_test_dot_api_dot_provision__state__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -20,25 +22,32 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z:go.chromium.org/chromiumos/infra/proto/go/test_platform/v2',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1etest_platform/v2/request.proto\x12\x10test_platform.v2\x1a\'chromiumos/test/api/coverage_rule.proto\"\x93\x01\n\x11HWTestRequestBeta\x12@\n\ntest_specs\x18\x01 \x03(\x0b\x32,.test_platform.v2.HWTestRequestBeta.TestSpec\x1a<\n\x08TestSpec\x12\x30\n\x05rules\x18\x01 \x01(\x0b\x32!.chromiumos.test.api.CoverageRule\"X\n\x0bRequestBeta\x12>\n\x0fhw_test_request\x18\x01 \x01(\x0b\x32#.test_platform.v2.HWTestRequestBetaH\x00\x42\t\n\x07requestB<Z:go.chromium.org/chromiumos/infra/proto/go/test_platform/v2b\x06proto3'
+  serialized_pb=b'\n\x1etest_platform/v2/request.proto\x12\x10test_platform.v2\x1a\x17\x63hromiumos/common.proto\x1a\'chromiumos/test/api/coverage_rule.proto\x1a)chromiumos/test/api/provision_state.proto\"\x85\x01\n\nHWTestSpec\x12\x38\n\rcoverage_rule\x18\x01 \x01(\x0b\x32!.chromiumos.test.api.CoverageRule\x12=\n\x10provision_states\x18\x02 \x03(\x0b\x32#.chromiumos.test.api.ProvisionState\"v\n\x08TestSpec\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12\x34\n\x0chw_test_spec\x18\x02 \x01(\x0b\x32\x1c.test_platform.v2.HWTestSpecH\x00\x42\x06\n\x04spec\"\xe7\x01\n\x07Request\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12.\n\ntest_specs\x18\x02 \x03(\x0b\x32\x1a.test_platform.v2.TestSpec\x12G\n\x12scheduler_settings\x18\x03 \x01(\x0b\x32+.test_platform.v2.Request.SchedulerSettings\x1a\x35\n\x11SchedulerSettings\x12\x0c\n\x04pool\x18\x01 \x01(\t\x12\x12\n\nqs_account\x18\x02 \x01(\tB<Z:go.chromium.org/chromiumos/infra/proto/go/test_platform/v2b\x06proto3'
   ,
-  dependencies=[chromiumos_dot_test_dot_api_dot_coverage__rule__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_coverage__rule__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,])
 
 
 
 
-_HWTESTREQUESTBETA_TESTSPEC = _descriptor.Descriptor(
-  name='TestSpec',
-  full_name='test_platform.v2.HWTestRequestBeta.TestSpec',
+_HWTESTSPEC = _descriptor.Descriptor(
+  name='HWTestSpec',
+  full_name='test_platform.v2.HWTestSpec',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='rules', full_name='test_platform.v2.HWTestRequestBeta.TestSpec.rules', index=0,
+      name='coverage_rule', full_name='test_platform.v2.HWTestSpec.coverage_rule', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='provision_states', full_name='test_platform.v2.HWTestSpec.provision_states', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -54,53 +63,29 @@ _HWTESTREQUESTBETA_TESTSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=181,
-  serialized_end=241,
+  serialized_start=162,
+  serialized_end=295,
 )
 
-_HWTESTREQUESTBETA = _descriptor.Descriptor(
-  name='HWTestRequestBeta',
-  full_name='test_platform.v2.HWTestRequestBeta',
+
+_TESTSPEC = _descriptor.Descriptor(
+  name='TestSpec',
+  full_name='test_platform.v2.TestSpec',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='test_specs', full_name='test_platform.v2.HWTestRequestBeta.test_specs', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='build_directory', full_name='test_platform.v2.TestSpec.build_directory', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_HWTESTREQUESTBETA_TESTSPEC, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=94,
-  serialized_end=241,
-)
-
-
-_REQUESTBETA = _descriptor.Descriptor(
-  name='RequestBeta',
-  full_name='test_platform.v2.RequestBeta',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
     _descriptor.FieldDescriptor(
-      name='hw_test_request', full_name='test_platform.v2.RequestBeta.hw_test_request', index=0,
-      number=1, type=11, cpp_type=10, label=1,
+      name='hw_test_spec', full_name='test_platform.v2.TestSpec.hw_test_spec', index=1,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -117,47 +102,143 @@ _REQUESTBETA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='request', full_name='test_platform.v2.RequestBeta.request',
+      name='spec', full_name='test_platform.v2.TestSpec.spec',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=243,
-  serialized_end=331,
+  serialized_start=297,
+  serialized_end=415,
 )
 
-_HWTESTREQUESTBETA_TESTSPEC.fields_by_name['rules'].message_type = chromiumos_dot_test_dot_api_dot_coverage__rule__pb2._COVERAGERULE
-_HWTESTREQUESTBETA_TESTSPEC.containing_type = _HWTESTREQUESTBETA
-_HWTESTREQUESTBETA.fields_by_name['test_specs'].message_type = _HWTESTREQUESTBETA_TESTSPEC
-_REQUESTBETA.fields_by_name['hw_test_request'].message_type = _HWTESTREQUESTBETA
-_REQUESTBETA.oneofs_by_name['request'].fields.append(
-  _REQUESTBETA.fields_by_name['hw_test_request'])
-_REQUESTBETA.fields_by_name['hw_test_request'].containing_oneof = _REQUESTBETA.oneofs_by_name['request']
-DESCRIPTOR.message_types_by_name['HWTestRequestBeta'] = _HWTESTREQUESTBETA
-DESCRIPTOR.message_types_by_name['RequestBeta'] = _REQUESTBETA
+
+_REQUEST_SCHEDULERSETTINGS = _descriptor.Descriptor(
+  name='SchedulerSettings',
+  full_name='test_platform.v2.Request.SchedulerSettings',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='pool', full_name='test_platform.v2.Request.SchedulerSettings.pool', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qs_account', full_name='test_platform.v2.Request.SchedulerSettings.qs_account', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=596,
+  serialized_end=649,
+)
+
+_REQUEST = _descriptor.Descriptor(
+  name='Request',
+  full_name='test_platform.v2.Request',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='build_directory', full_name='test_platform.v2.Request.build_directory', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='test_specs', full_name='test_platform.v2.Request.test_specs', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='scheduler_settings', full_name='test_platform.v2.Request.scheduler_settings', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[_REQUEST_SCHEDULERSETTINGS, ],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=418,
+  serialized_end=649,
+)
+
+_HWTESTSPEC.fields_by_name['coverage_rule'].message_type = chromiumos_dot_test_dot_api_dot_coverage__rule__pb2._COVERAGERULE
+_HWTESTSPEC.fields_by_name['provision_states'].message_type = chromiumos_dot_test_dot_api_dot_provision__state__pb2._PROVISIONSTATE
+_TESTSPEC.fields_by_name['build_directory'].message_type = chromiumos_dot_common__pb2._GCSPATH
+_TESTSPEC.fields_by_name['hw_test_spec'].message_type = _HWTESTSPEC
+_TESTSPEC.oneofs_by_name['spec'].fields.append(
+  _TESTSPEC.fields_by_name['hw_test_spec'])
+_TESTSPEC.fields_by_name['hw_test_spec'].containing_oneof = _TESTSPEC.oneofs_by_name['spec']
+_REQUEST_SCHEDULERSETTINGS.containing_type = _REQUEST
+_REQUEST.fields_by_name['build_directory'].message_type = chromiumos_dot_common__pb2._GCSPATH
+_REQUEST.fields_by_name['test_specs'].message_type = _TESTSPEC
+_REQUEST.fields_by_name['scheduler_settings'].message_type = _REQUEST_SCHEDULERSETTINGS
+DESCRIPTOR.message_types_by_name['HWTestSpec'] = _HWTESTSPEC
+DESCRIPTOR.message_types_by_name['TestSpec'] = _TESTSPEC
+DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-HWTestRequestBeta = _reflection.GeneratedProtocolMessageType('HWTestRequestBeta', (_message.Message,), {
+HWTestSpec = _reflection.GeneratedProtocolMessageType('HWTestSpec', (_message.Message,), {
+  'DESCRIPTOR' : _HWTESTSPEC,
+  '__module__' : 'test_platform.v2.request_pb2'
+  # @@protoc_insertion_point(class_scope:test_platform.v2.HWTestSpec)
+  })
+_sym_db.RegisterMessage(HWTestSpec)
 
-  'TestSpec' : _reflection.GeneratedProtocolMessageType('TestSpec', (_message.Message,), {
-    'DESCRIPTOR' : _HWTESTREQUESTBETA_TESTSPEC,
+TestSpec = _reflection.GeneratedProtocolMessageType('TestSpec', (_message.Message,), {
+  'DESCRIPTOR' : _TESTSPEC,
+  '__module__' : 'test_platform.v2.request_pb2'
+  # @@protoc_insertion_point(class_scope:test_platform.v2.TestSpec)
+  })
+_sym_db.RegisterMessage(TestSpec)
+
+Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
+
+  'SchedulerSettings' : _reflection.GeneratedProtocolMessageType('SchedulerSettings', (_message.Message,), {
+    'DESCRIPTOR' : _REQUEST_SCHEDULERSETTINGS,
     '__module__' : 'test_platform.v2.request_pb2'
-    # @@protoc_insertion_point(class_scope:test_platform.v2.HWTestRequestBeta.TestSpec)
+    # @@protoc_insertion_point(class_scope:test_platform.v2.Request.SchedulerSettings)
     })
   ,
-  'DESCRIPTOR' : _HWTESTREQUESTBETA,
+  'DESCRIPTOR' : _REQUEST,
   '__module__' : 'test_platform.v2.request_pb2'
-  # @@protoc_insertion_point(class_scope:test_platform.v2.HWTestRequestBeta)
+  # @@protoc_insertion_point(class_scope:test_platform.v2.Request)
   })
-_sym_db.RegisterMessage(HWTestRequestBeta)
-_sym_db.RegisterMessage(HWTestRequestBeta.TestSpec)
-
-RequestBeta = _reflection.GeneratedProtocolMessageType('RequestBeta', (_message.Message,), {
-  'DESCRIPTOR' : _REQUESTBETA,
-  '__module__' : 'test_platform.v2.request_pb2'
-  # @@protoc_insertion_point(class_scope:test_platform.v2.RequestBeta)
-  })
-_sym_db.RegisterMessage(RequestBeta)
+_sym_db.RegisterMessage(Request)
+_sym_db.RegisterMessage(Request.SchedulerSettings)
 
 
 DESCRIPTOR._options = None

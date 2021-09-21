@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\'chromiumos/test/api/provision_cli.proto\x12\x13\x63hromiumos.test.api\x1a!chromiumos/test/lab/api/dut.proto\x1a)chromiumos/test/api/provision_state.proto\x1a+chromiumos/test/api/provision_service.proto\"F\n\x11ProvisionCliInput\x12\x31\n\ndut_inputs\x18\x01 \x03(\x0b\x32\x1d.chromiumos.test.api.DutInput\"\x89\x01\n\x08\x44utInput\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x12\n\ndocker_tag\x18\x02 \x01(\t\x12<\n\x0fprovision_state\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\"I\n\x12ProvisionCliOutput\x12\x33\n\x0b\x64ut_outputs\x18\x01 \x03(\x0b\x32\x1e.chromiumos.test.api.DutOutput\"\xb3\x01\n\tDutOutput\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x36\n\x07success\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.InstallSuccessH\x00\x12\x36\n\x07\x66\x61ilure\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.InstallFailureH\x00\x42\t\n\x07outcomeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n\'chromiumos/test/api/provision_cli.proto\x12\x13\x63hromiumos.test.api\x1a!chromiumos/test/lab/api/dut.proto\x1a)chromiumos/test/api/provision_state.proto\x1a+chromiumos/test/api/provision_service.proto\"F\n\x11ProvisionCliInput\x12\x31\n\ndut_inputs\x18\x01 \x03(\x0b\x32\x1d.chromiumos.test.api.DutInput\"\xb6\x02\n\x08\x44utInput\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12<\n\x0fprovision_state\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\x12>\n\x0b\x64ut_service\x18\x04 \x01(\x0b\x32).chromiumos.test.api.DutInput.DockerImage\x12\x44\n\x11provision_service\x18\x05 \x01(\x0b\x32).chromiumos.test.api.DutInput.DockerImage\x1a\x33\n\x0b\x44ockerImage\x12\x17\n\x0frepository_path\x18\x01 \x01(\t\x12\x0b\n\x03tag\x18\x02 \x01(\tJ\x04\x08\x02\x10\x03\"I\n\x12ProvisionCliOutput\x12\x33\n\x0b\x64ut_outputs\x18\x01 \x03(\x0b\x32\x1e.chromiumos.test.api.DutOutput\"\xb3\x01\n\tDutOutput\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x36\n\x07success\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.InstallSuccessH\x00\x12\x36\n\x07\x66\x61ilure\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.InstallFailureH\x00\x42\t\n\x07outcomeB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
   ,
   dependencies=[chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__service__pb2.DESCRIPTOR,])
 
@@ -61,6 +61,44 @@ _PROVISIONCLIINPUT = _descriptor.Descriptor(
 )
 
 
+_DUTINPUT_DOCKERIMAGE = _descriptor.Descriptor(
+  name='DockerImage',
+  full_name='chromiumos.test.api.DutInput.DockerImage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='repository_path', full_name='chromiumos.test.api.DutInput.DockerImage.repository_path', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='tag', full_name='chromiumos.test.api.DutInput.DockerImage.tag', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=513,
+  serialized_end=564,
+)
+
 _DUTINPUT = _descriptor.Descriptor(
   name='DutInput',
   full_name='chromiumos.test.api.DutInput',
@@ -77,15 +115,22 @@ _DUTINPUT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='docker_tag', full_name='chromiumos.test.api.DutInput.docker_tag', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='provision_state', full_name='chromiumos.test.api.DutInput.provision_state', index=1,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='provision_state', full_name='chromiumos.test.api.DutInput.provision_state', index=2,
-      number=3, type=11, cpp_type=10, label=1,
+      name='dut_service', full_name='chromiumos.test.api.DutInput.dut_service', index=2,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='provision_service', full_name='chromiumos.test.api.DutInput.provision_service', index=3,
+      number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -93,7 +138,7 @@ _DUTINPUT = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_DUTINPUT_DOCKERIMAGE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -103,7 +148,7 @@ _DUTINPUT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=260,
-  serialized_end=397,
+  serialized_end=570,
 )
 
 
@@ -134,8 +179,8 @@ _PROVISIONCLIOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=399,
-  serialized_end=472,
+  serialized_start=572,
+  serialized_end=645,
 )
 
 
@@ -185,13 +230,16 @@ _DUTOUTPUT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=475,
-  serialized_end=654,
+  serialized_start=648,
+  serialized_end=827,
 )
 
 _PROVISIONCLIINPUT.fields_by_name['dut_inputs'].message_type = _DUTINPUT
+_DUTINPUT_DOCKERIMAGE.containing_type = _DUTINPUT
 _DUTINPUT.fields_by_name['id'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUT_ID
 _DUTINPUT.fields_by_name['provision_state'].message_type = chromiumos_dot_test_dot_api_dot_provision__state__pb2._PROVISIONSTATE
+_DUTINPUT.fields_by_name['dut_service'].message_type = _DUTINPUT_DOCKERIMAGE
+_DUTINPUT.fields_by_name['provision_service'].message_type = _DUTINPUT_DOCKERIMAGE
 _PROVISIONCLIOUTPUT.fields_by_name['dut_outputs'].message_type = _DUTOUTPUT
 _DUTOUTPUT.fields_by_name['id'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUT_ID
 _DUTOUTPUT.fields_by_name['success'].message_type = chromiumos_dot_test_dot_api_dot_provision__service__pb2._INSTALLSUCCESS
@@ -216,11 +264,19 @@ ProvisionCliInput = _reflection.GeneratedProtocolMessageType('ProvisionCliInput'
 _sym_db.RegisterMessage(ProvisionCliInput)
 
 DutInput = _reflection.GeneratedProtocolMessageType('DutInput', (_message.Message,), {
+
+  'DockerImage' : _reflection.GeneratedProtocolMessageType('DockerImage', (_message.Message,), {
+    'DESCRIPTOR' : _DUTINPUT_DOCKERIMAGE,
+    '__module__' : 'chromiumos.test.api.provision_cli_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutInput.DockerImage)
+    })
+  ,
   'DESCRIPTOR' : _DUTINPUT,
   '__module__' : 'chromiumos.test.api.provision_cli_pb2'
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutInput)
   })
 _sym_db.RegisterMessage(DutInput)
+_sym_db.RegisterMessage(DutInput.DockerImage)
 
 ProvisionCliOutput = _reflection.GeneratedProtocolMessageType('ProvisionCliOutput', (_message.Message,), {
   'DESCRIPTOR' : _PROVISIONCLIOUTPUT,
