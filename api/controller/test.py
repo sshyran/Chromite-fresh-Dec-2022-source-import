@@ -165,7 +165,7 @@ def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
   """Fake success response"""
   # pylint: disable=unused-argument
   output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-      success = test_pb2.TestServiceContainerBuildResult.Success()
+      success=test_pb2.TestServiceContainerBuildResult.Success()
   ))
 
 
@@ -175,7 +175,7 @@ def _BuildTestServiceContainersFailedResponse(
 
   # pylint: disable=unused-argument
   output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-      failure = test_pb2.TestServiceContainerBuildResult.Failure(
+      failure=test_pb2.TestServiceContainerBuildResult.Failure(
           error_message='fake error'
       )
   ))
@@ -193,7 +193,7 @@ def _ValidDockerTag(tag):
   invalid_chars = set(tag) - allowed_chars
   if invalid_chars:
     return 'saw one or more invalid characters: [{}]'.format(
-      ''.join(invalid_chars),
+        ''.join(invalid_chars),
     )
 
   # Finally, max tag length is 128 characters
@@ -215,7 +215,7 @@ def _ValidDockerLabelKey(key):
   invalid_chars = set(key) - allowed_chars
   if invalid_chars:
     return 'saw one or more invalid characters: [{}]'.format(
-      ''.join(invalid_chars),
+        ''.join(invalid_chars),
     )
 
   # Repeated . and - aren't allowed
@@ -244,12 +244,12 @@ def BuildTestServiceContainers(input_proto, output_proto, _config):
     cmd_result = cros_build_lib.run(cmd, check=False)
     if cmd_result.returncode == 0:
       output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          success = test_pb2.TestServiceContainerBuildResult.Success()
+          success=test_pb2.TestServiceContainerBuildResult.Success()
       ))
     else:
       output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          failure = test_pb2.TestServiceContainerBuildResult.Failure(
-              error_message = cmd_result.stderr
+          failure=test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message=cmd_result.stderr
           )
       ))
 
@@ -381,9 +381,9 @@ def CrosSigningTest(_input_proto, _output_proto, _config):
 
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
-    chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-    build_target: build_target_lib.BuildTarget,
-    output_dir: str) -> list:
+                 chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+                 build_target: build_target_lib.BuildTarget,
+                 output_dir: str) -> list:
   """Builds and copies test artifacts to specified output_dir.
 
   Copies test artifacts to output_dir, returning a list of (output_dir: str)
@@ -402,11 +402,12 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
   generated = []
 
   artifact_types = {
-    in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
-    in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
-        test.BundleCodeCoverageLlvmJson,
-    in_proto.ArtifactType.HWQUAL: functools.partial(test.BundleHwqualTarball,
-      build_target.name, packages_service.determine_full_version()),
+      in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
+      in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
+          test.BundleCodeCoverageLlvmJson,
+      in_proto.ArtifactType.HWQUAL: functools.partial(
+          test.BundleHwqualTarball,
+          build_target.name, packages_service.determine_full_version()),
   }
 
   for output_artifact in in_proto.output_artifacts:
