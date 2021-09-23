@@ -341,8 +341,8 @@ class MasterSlaveSyncCompletionStage(ManifestVersionedSyncCompletionStage):
           text = '%s: [status] %s' % (config_name, status)
 
           if status in [
-            constants.BUILDBUCKET_BUILDER_STATUS_FAILURE,
-            constants.BUILDBUCKET_BUILDER_STATUS_INFRA_FAILURE]:
+              constants.BUILDBUCKET_BUILDER_STATUS_FAILURE,
+              constants.BUILDBUCKET_BUILDER_STATUS_INFRA_FAILURE]:
             failure_reason = build.summary_markdown
             if failure_reason:
               text += ' [failure_reason] %s' % failure_reason
@@ -547,7 +547,11 @@ class UpdateChromeosLKGMStage(generic_stages.BuilderStage):
       return
 
     manager = self._run.attrs.manifest_manager
-    cmd = ['chrome_chromeos_lkgm', '--lkgm=%s' % manager.current_version]
+    cmd = [
+        'chrome_chromeos_lkgm',
+        '--debug',
+        '--lkgm=%s' % manager.current_version
+    ]
     # Always do a dryrun for now so that we can check the output and ensure it
     # is doing the correct thing.
     if self._run.options.debug:

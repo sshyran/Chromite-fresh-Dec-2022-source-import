@@ -98,12 +98,19 @@ class ChromeLKGMCommitter(object):
     query_params = {
         'project': constants.CHROMIUM_SRC_PROJECT,
         'branch': 'main',
-        'author': self._committer.author,
         'file': constants.PATH_TO_CHROME_LKGM,
         'age': '2d',
         'status': 'open',
+        # Use 'owner' rather than 'uploader' or 'author' since those last two
+        # can be overwritten when the gardener resolves a merge-conflict and
+        # uploads a new patchset.
+        'owner': self._committer.author,
     }
-    for open_issue in self._gerrit_helper.Query(**query_params):
+    open_issues = self._gerrit_helper.Query(**query_params)
+    if not open_issues:
+      logging.info('No old LKGM rolls detected.')
+      return
+    for open_issue in open_issues:
       if self._dryrun:
         logging.info(
             'Would have closed old LKGM roll crrev.com/c/%s',
@@ -132,9 +139,12 @@ class ChromeLKGMCommitter(object):
     query_params = {
         'project': constants.CHROMIUM_SRC_PROJECT,
         'branch': 'main',
-        'author': self._committer.author,
         'file': constants.PATH_TO_CHROME_LKGM,
         'status': 'open',
+        # Use 'owner' rather than 'uploader' or 'author' since those last two
+        # can be overwritten when the gardener resolves a merge-conflict and
+        # uploads a new patchset.
+        'owner': self._committer.author,
         # The value of the LKGM is included in the first line of the commit
         # message. So including that in our query should only return CLs that
         # roll to our LKGM.
@@ -152,6 +162,7 @@ class ChromeLKGMCommitter(object):
     if self._dryrun:
       logging.info('Would have applied CQ+2 to %s', already_open_lkgm_cl)
     else:
+      logging.info('Applying CQ+2 to %s', already_open_lkgm_cl)
       self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels)
 
   def UpdateLKGM(self):
