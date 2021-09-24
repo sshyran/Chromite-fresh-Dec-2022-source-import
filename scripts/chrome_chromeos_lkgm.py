@@ -55,8 +55,10 @@ class ChromeLKGMCommitter(object):
   # First line of the commit message for all LKGM CLs.
   _COMMIT_MSG_HEADER = 'LKGM %(lkgm)s for chromeos.'
 
-  def __init__(self, user_email, workdir, lkgm, dryrun=False):
+  def __init__(self, user_email, workdir, lkgm, dryrun=False,
+               buildbucket_id=None):
     self._dryrun = dryrun
+    self._buildbucket_id = buildbucket_id
     self._committer = chrome_committer.ChromeCommitter(user_email, workdir)
     self._gerrit_helper = gerrit.GetCrosExternal()
 
@@ -186,13 +188,19 @@ class ChromeLKGMCommitter(object):
   def ComposeCommitMsg(self):
     """Constructs and returns the commit message for the LKGM update."""
     commit_msg_template = (
-        '%(header)s'
-        '\n\n%(cq_includes)s')
+        '%(header)s\n'
+        '%(build_link)s'
+        '\n%(cq_includes)s')
     cq_includes = ''
     for bot in self._PRESUBMIT_BOTS:
       cq_includes += 'CQ_INCLUDE_TRYBOTS=luci.chrome.try:%s\n' % bot
+    build_link = ''
+    if self._buildbucket_id:
+      build_link = '\nUploaded by https://ci.chromium.org/b/%s\n' % (
+          self._buildbucket_id)
     return commit_msg_template % dict(
-        header=self._commit_msg_header, cq_includes=cq_includes)
+        header=self._commit_msg_header, cq_includes=cq_includes,
+        build_link=build_link)
 
   def CommitNewLKGM(self):
     """Commits the new LKGM file using our template commit message."""
@@ -215,11 +223,14 @@ def GetOpts(argv):
                                       add_help=False, logging=False)
   parser.add_argument('--lkgm', required=True,
                       help='LKGM version to update to.')
+  parser.add_argument('--buildbucket-id',
+                      help='Buildbucket ID of the build that ran this script. '
+                           'Will be linked in the commit message if specified.')
   return parser.parse_args(argv)
 
 def main(argv):
   opts = GetOpts(argv)
   committer = ChromeLKGMCommitter(opts.user_email, opts.workdir,
-                                  opts.lkgm, opts.dryrun)
+                                  opts.lkgm, opts.dryrun, opts.buildbucket_id)
   committer.Run()
   return 0

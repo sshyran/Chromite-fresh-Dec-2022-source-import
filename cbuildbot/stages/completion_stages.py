@@ -552,6 +552,8 @@ class UpdateChromeosLKGMStage(generic_stages.BuilderStage):
         '--debug',
         '--lkgm=%s' % manager.current_version
     ]
+    if self._run.options.buildbucket_id:
+      cmd += ['--buildbucket-id', self._run.options.buildbucket_id]
     # Always do a dryrun for now so that we can check the output and ensure it
     # is doing the correct thing.
     if self._run.options.debug:

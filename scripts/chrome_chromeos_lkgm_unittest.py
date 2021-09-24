@@ -94,8 +94,11 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
   def testCommitMsg(self):
     """Tests format of the commit message."""
     self.committer._PRESUBMIT_BOTS = ['bot1', 'bot2']
+    self.committer._buildbucket_id = 'some-build-id'
     commit_msg_lines = self.committer.ComposeCommitMsg().splitlines()
     self.assertIn('LKGM 1001.0.0 for chromeos.', commit_msg_lines)
+    self.assertIn(
+        'Uploaded by https://ci.chromium.org/b/some-build-id', commit_msg_lines)
     self.assertIn('CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot1', commit_msg_lines)
     self.assertIn('CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot2', commit_msg_lines)
 
