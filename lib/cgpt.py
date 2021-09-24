@@ -7,6 +7,8 @@
 import collections
 
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
+from chromite.lib import path_util
 
 
 # MiniOS partition type GUID
@@ -46,8 +48,13 @@ class Disk(object):
       RunCommandError: if error running cgpt command
       CgptError: if error parsing out output of cgpt command
     """
+    # If 'cgpt' binary doesn't exist in path, try within chroot.
+    enter_chroot = osutils.Which('cpgt') is None
+    if enter_chroot:
+      image_file = path_util.ToChrootPath(image_file)
     cmd_result = cros_build_lib.run(['cgpt', 'show', '-n', image_file],
-                                    enter_chroot=True, capture_output=True,
+                                    enter_chroot=enter_chroot,
+                                    capture_output=True,
                                     encoding='utf-8')
 
     # Covert output to a file for processing via readline().

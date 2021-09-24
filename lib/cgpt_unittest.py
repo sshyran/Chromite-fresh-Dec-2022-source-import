@@ -6,6 +6,8 @@
 
 from chromite.lib import cgpt
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
+from chromite.lib import path_util
 
 
 CGPT_SHOW_OUTPUT = """start        size    part  contents
@@ -79,7 +81,35 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
 
   def testDiskFromImage(self):
     """Test ReadGpt with mock cgpt output."""
+    which_mock = self.PatchObject(osutils, 'Which', return_value='/path/foo')
     disk = self.getMockDisk()
+
+    which_mock.assert_called_once()
+    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'],
+                             enter_chroot=False, capture_output=True,
+                             encoding='utf-8')
+
+    self.assertEqual(len(disk.partitions), 12)
+
+    self.assertEqual(disk.partitions[3],
+                     cgpt.Partition(part_num=3,
+                                    label='ROOT-A',
+                                    start=471040,
+                                    size=4915200,
+                                    part_type='3CB8E202-3B7E-47DD-'
+                                              '8A3C-7FF2A13CFCEC',
+                                    uuid='FC606456-D6E0-C64D-A82E-BA7B027D2B20',
+                                    attr='[0]'))
+
+  def testDiskFromImageCgptMissing(self):
+    """Test ReadGpt with mock cgpt output when cpgt is missing."""
+    which_mock = self.PatchObject(osutils, 'Which', return_value=None)
+    to_chroot_path_mock = self.PatchObject(path_util, 'ToChrootPath',
+                                           return_value='foo')
+    disk = self.getMockDisk()
+
+    which_mock.assert_called_once()
+    to_chroot_path_mock.assert_called_once()
 
     self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'], enter_chroot=True,
                              capture_output=True, encoding='utf-8')

@@ -321,8 +321,7 @@ class PaygenPayload(object):
     # For miniOS extraction payloads:
     # Check to see if both target and source images have miniOS partitions.
     try:
-      tgt_disk = cgpt.Disk.FromImage(
-        path_util.ToChrootPath(self.tgt_image_file))
+      tgt_disk = cgpt.Disk.FromImage(self.tgt_image_file)
       try:
         tgt_disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
       except KeyError:
@@ -336,7 +335,7 @@ class PaygenPayload(object):
         except KeyError:
           logging.info('Source missing miniOS partition')
           return True
-    except:
+    except Error:
       logging.warning('Exception during miniOS payload generation skip check.')
       return True
 
