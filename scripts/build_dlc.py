@@ -48,6 +48,11 @@ def GetParser():
       metavar='ROOT_FS_PATH',
       help='Path to the platform rootfs.')
   one_dlc.add_argument(
+      '--stateful',
+      type='path',
+      metavar='STATEFUL_PATH',
+      help='Path to the platform stateful.')
+  one_dlc.add_argument(
       '--pre-allocated-blocks',
       type=int,
       metavar='PREALLOCATEDBLOCKS',
@@ -80,6 +85,11 @@ def GetParser():
       default=False,
       action='store_true',
       help='Allow preloading of DLC.')
+  one_dlc.add_argument(
+      '--factory-install',
+      default=False,
+      action='store_true',
+      help='Allow factory installing of DLC.')
   one_dlc.add_argument(
       '--used-by', default=dlc_lib.USED_BY_SYSTEM,
       choices=(dlc_lib.USED_BY_USER, dlc_lib.USED_BY_SYSTEM),
@@ -147,7 +157,7 @@ def main(argv):
     per_dlc_req_args += ['pre_allocated_blocks', 'version', 'name',
                          'description', 'package', 'install_root_dir',
                          'days_to_purge']
-    per_dlc_invalid_args += ['src_dir', 'sysroot']
+    per_dlc_invalid_args += ['src_dir', 'sysroot', 'stateful']
   else:
     per_dlc_req_args += ['sysroot', 'board']
     per_dlc_invalid_args += ['name', 'pre_allocated_blocks', 'version',
@@ -166,6 +176,7 @@ def main(argv):
         pre_allocated_blocks=opts.pre_allocated_blocks,
         version=opts.version,
         preload=opts.preload,
+        factory_install=opts.factory_install,
         mount_file_required=opts.mount_file_required,
         used_by=opts.used_by,
         days_to_purge=opts.days_to_purge,
@@ -178,6 +189,8 @@ def main(argv):
         dlc_id=opts.id,
         install_root_dir=opts.install_root_dir,
         preload=opts.preload,
+        factory_install=opts.factory_install,
         src_dir=opts.src_dir,
         rootfs=opts.rootfs,
+        stateful=opts.stateful,
         board=opts.board)

@@ -33,6 +33,30 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
     )
     self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
                      return_value=fake_partitions)
+    self.PatchObject(os.path, 'exists', return_value=True)
+    create_tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
+
+    paygen_stateful_payload_lib.GenerateStatefulPayload('dev/null',
+                                                        self.tempdir)
+
+    create_tarball_mock.assert_called_once_with(
+        os.path.join(self.tempdir, 'stateful.tgz'), '.', sudo=True,
+        compression=cros_build_lib.COMP_GZIP,
+        inputs=['dev_image', 'var_overlay', 'unencrypted'],
+        extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
+                    '--transform=s,^dev_image,dev_image_new,',
+                    '--transform=s,^var_overlay,var_new,'])
+
+  def testGenerateStatefulPayloadWhenDirsMissing(self):
+    """Test correct arguments propagated to tar call."""
+
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
+    fake_partitions = (
+        image_lib.PartitionInfo(3, 0, 4, 4, 'fs', 'STATE', ''),
+    )
+    self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
+                     return_value=fake_partitions)
+    self.PatchObject(os.path, 'exists', return_value=False)
     create_tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
 
     paygen_stateful_payload_lib.GenerateStatefulPayload('dev/null',
@@ -55,6 +79,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
     )
     self.PatchObject(image_lib, 'GetImageDiskPartitionInfo',
                      return_value=fake_partitions)
+    self.PatchObject(os.path, 'exists', return_value=True)
     create_tarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball')
 
     # Assuming the fd is 1.
@@ -63,7 +88,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
     create_tarball_mock.assert_called_once_with(
         1, '.', sudo=True,
         compression=cros_build_lib.COMP_GZIP,
-        inputs=['dev_image', 'var_overlay'],
+        inputs=['dev_image', 'var_overlay', 'unencrypted'],
         extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
                     '--transform=s,^dev_image,dev_image_new,',
                     '--transform=s,^var_overlay,var_new,'])

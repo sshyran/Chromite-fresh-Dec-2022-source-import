@@ -37,15 +37,18 @@ def GenerateStatefulPayload(image_path, output):
   # Mount the image to pull out the important directories.
   with osutils.TempDir() as stateful_mnt, \
       image_lib.LoopbackPartitions(image_path, stateful_mnt) as image:
-    rootfs_dir = image.Mount((constants.PART_STATE,))[0]
+    stateful_dir = image.Mount((constants.PART_STATE,))[0]
 
     try:
       logging.info('Tarring up /usr/local and /var!')
+      inputs = ['dev_image', 'var_overlay']
+      if os.path.exists(os.path.join(stateful_dir, 'unencrypted')):
+        inputs += ['unencrypted']
       cros_build_lib.CreateTarball(
           output_gz, '.', sudo=True, compression=cros_build_lib.COMP_GZIP,
-          inputs=['dev_image', 'var_overlay'],
+          inputs=inputs,
           extra_args=[
-              '--directory=%s' % rootfs_dir,
+              '--directory=%s' % stateful_dir,
               '--transform=s,^dev_image,dev_image_new,',
               '--transform=s,^var_overlay,var_new,'])
     except:
