@@ -440,13 +440,8 @@ class _BackgroundTask(multiprocessing.Process):
       # Replace std{out,err} with unbuffered file objects.
       os.dup2(output.fileno(), sys.__stdout__.fileno())
       os.dup2(output.fileno(), sys.__stderr__.fileno())
-      # The API of these funcs changed between versions.
-      if sys.version_info.major < 3:
-        sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', 0)
-        sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', 0)
-      else:
-        sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', closefd=False)
-        sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', closefd=False)
+      sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', closefd=False)
+      sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', closefd=False)
 
       try:
         self._started.set()
