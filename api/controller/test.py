@@ -228,19 +228,27 @@ def _ValidDockerLabelKey(key):
 @faux.error(_BuildTestServiceContainersFailedResponse)
 @validate.require('build_target.name')
 @validate.require('chroot.path')
-@validate.require('version')
 @validate.check_constraint('tags', _ValidDockerTag)
 @validate.check_constraint('labels', _ValidDockerLabelKey)
 @validate.validation_complete
-def BuildTestServiceContainers(input_proto, output_proto, _config):
+def BuildTestServiceContainers(
+    input_proto: test_pb2.BuildTestServiceContainersRequest,
+    output_proto: test_pb2.BuildTestServiceContainersResponse, _config):
   """Builds docker containers for all test services and pushes them to gcr.io"""
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  version = input_proto.version
   sysroot = sysroot_lib.Sysroot(build_target.root)
 
+  tags = ','.join(input_proto.tags)
+  labels = (
+      '{}={}'.format(key, value) for key, value in input_proto.labels.items()
+  )
+
   for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
-    cmd = [build_script, chroot.path, version.lower(), sysroot.path]
+    cmd = [build_script, chroot.path, sysroot.path]
+    cmd += ['--tags', tags]
+    cmd += labels
+
     cmd_result = cros_build_lib.run(cmd, check=False)
     if cmd_result.returncode == 0:
       output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
