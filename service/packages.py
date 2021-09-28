@@ -457,7 +457,7 @@ def uprev_lacros(_build_targets, refs, chroot):
   """
   result = uprev_lib.UprevVersionedPackageResult()
   path = os.path.join(
-      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base','chromeos-lacros')
+      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base', 'chromeos-lacros')
   lacros_version = refs[0].revision
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
                                                           lacros_version,
@@ -793,7 +793,23 @@ def uprev_crosvm(_build_targets, refs, _chroot):
   manifest = git.ManifestCheckout.Cached(repo_path)
 
   uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
-  uprev_manager.uprev(package_list=['chromeos-base/crosvm'], force=True)
+  uprev_manager.uprev(
+      package_list=[
+          'chromeos-base/crosvm',
+          'dev-rust/assertions',
+          'dev-rust/cros_async',
+          'dev-rust/cros_fuzz',
+          'dev-rust/data_model',
+          'dev-rust/enumn',
+          'dev-rust/io_uring',
+          'dev-rust/p9',
+          'dev-rust/sync',
+          'dev-rust/sys_util',
+          'dev-rust/tempfile',
+          'media-sound/audio_streams',
+      ],
+      force=True
+  )
 
   updated_files = uprev_manager.modified_ebuilds
   result = uprev_lib.UprevVersionedPackageResult()
