@@ -352,9 +352,14 @@ class FlashSubcommand(command.CliCommand):
   def __init__(self, options):
     super().__init__(options)
     if not os.path.exists(self.options.image):
-      logging.error(
+      cros_build_lib.Die(
           '%s does not exist, verify the path of your build and try '
           'again.', self.options.image)
+    if options.fast:
+      cros_build_lib.Die(
+          'Flags such as --fast must be passed directly after --\n'
+          'For futility use: cros ap flash ${OTHER_ARGS} -- --fast\n'
+          'For flashrom use: cros ap flash --flashrom ${OTHER_ARGS} -- -n')
     self.options.Freeze()
 
   @classmethod
@@ -389,7 +394,7 @@ class FlashSubcommand(command.CliCommand):
     parser.add_argument(
         '--fast',
         action='store_true',
-        help='Speed up flashing by not validating flash.')
+        help='Deprecated. Pass your arbitrary flags after --.')
     parser.add_argument(
         '-n',
         '--dry-run',
@@ -431,7 +436,7 @@ e.g.:
           self.options.image,
           self.options.device,
           flashrom=self.options.flashrom,
-          fast=self.options.fast,
+          fast=False,
           verbose=self.options.verbose,
           dryrun=self.options.dry_run,
           flash_contents=self.options.flash_contents,
