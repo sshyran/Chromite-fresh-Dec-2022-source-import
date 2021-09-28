@@ -21,7 +21,7 @@ class CommitError(Exception):
 class ChromeCommitter(object):
   """Committer object responsible for committing a git change."""
 
-  def __init__(self, user_email, workdir, dryrun=False):
+  def __init__(self, user_email, workdir, dryrun=False, cq=False):
     logging.info('user_email=%s, checkout_dir=%s', user_email, workdir)
     self.author = user_email
     self._checkout_dir = workdir
@@ -29,6 +29,8 @@ class ChromeCommitter(object):
                                 '-c', 'user.name=%s' % user_email]
     self._commit_msg = ''
     self._dryrun = dryrun
+    self._cq = cq
+    assert not (dryrun and cq), "Can't CQ+1 and CQ+2 simultaneously."
 
   def __del__(self):
     self.Cleanup()
@@ -97,10 +99,10 @@ class ChromeCommitter(object):
           '--set-bot-commit']
       # Marks CL as ready.
       upload_args += ['--send-mail']
-      if self._dryrun:
-        upload_args += ['--dry-run']
-      else:
+      if self._cq:
         upload_args += ['--use-commit-queue']
+      elif self._dryrun:
+        upload_args += ['--dry-run']
       git.RunGit(self._checkout_dir, upload_args, print_cmd=True,
                  stderr=True, capture_output=False)
     except cros_build_lib.RunCommandError as e:
