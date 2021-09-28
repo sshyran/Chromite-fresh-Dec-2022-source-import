@@ -86,14 +86,17 @@ def build(build_target, fw_name=None, dry_run=False):
     logging.info('Building the AP firmware packages.')
     # Print command with --debug.
     print_cmd = logging.getLogger(__name__).getEffectiveLevel() == logging.DEBUG
+    default_build_flags = [
+        '--deep', '--update', '--newuse', '--newrepo', '--jobs', '--verbose'
+    ]
     result = cros_build_lib.run(
-        [build_target.get_command('emerge')] + list(config.build),
+        [build_target.get_command('emerge')] + default_build_flags +
+        list(config.build),
         print_cmd=print_cmd,
         check=False,
         debug_level=logging.DEBUG,
         dryrun=dry_run,
         extra_env=extra_env)
-
 
   if result.returncode:
     # Now raise the emerge failure since we're done cleaning up.
