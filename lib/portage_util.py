@@ -1465,13 +1465,21 @@ def _FindUprevCandidates(files, allow_manual_uprev, subdir_support):
   """
   stable_ebuilds = []
   unstable_ebuilds = []
+  # Track if we found an unstable ebuild that is a manual uprev. This is to
+  # allow adding CROS_WORKON_MANUAL_UPREV to only the unstable ebuild without
+  # causing an error to be thrown here.
+  unstable_manual_uprev = False
   for path in files:
     if not path.endswith('.ebuild') or os.path.islink(path):
       continue
     ebuild = EBuild(path, subdir_support)
-    if not ebuild.is_workon or (ebuild.is_manually_uprevved and
-                                not allow_manual_uprev):
+    if not ebuild.is_workon:
       continue
+    elif ebuild.is_manually_uprevved and not allow_manual_uprev:
+      if not ebuild.is_stable:
+        unstable_manual_uprev = True
+      continue
+
     if ebuild.is_stable:
       if ebuild.version == WORKON_EBUILD_VERSION:
         raise Error('KEYWORDS in %s ebuild should not be stable %s'
@@ -1483,7 +1491,7 @@ def _FindUprevCandidates(files, allow_manual_uprev, subdir_support):
   # If both ebuild lists are empty, the passed in file list was for
   # a non-workon package.
   if not unstable_ebuilds:
-    if stable_ebuilds:
+    if stable_ebuilds and not unstable_manual_uprev:
       path = os.path.dirname(stable_ebuilds[0].ebuild_path)
       raise Error('Missing %s ebuild in %s' % (WORKON_EBUILD_VERSION, path))
     return None
