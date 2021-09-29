@@ -1524,7 +1524,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       description='Build for running on VMs',
       run_cpeexport=True,
       internal=False,
-      important=False,
       manifest_version=True,
       manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
       overlays=constants.PUBLIC_OVERLAYS,

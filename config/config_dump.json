@@ -1532,7 +1532,6 @@
             "amd64-generic"
         ],
         "description": "Build for running on VMs",
-        "important": false,
         "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
