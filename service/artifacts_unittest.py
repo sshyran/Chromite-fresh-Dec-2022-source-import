@@ -590,6 +590,8 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     """Verifies correct files are created for quick_provision script."""
     extract_kernel_mock = self.PatchObject(partition_lib, 'ExtractKernel')
     extract_root_mock = self.PatchObject(partition_lib, 'ExtractRoot')
+    has_minios_mock = self.PatchObject(partition_lib, 'HasMiniOSPartitions',
+                                       return_value=False)
     compress_file_mock = self.PatchObject(cros_build_lib, 'CompressFile')
 
     artifacts.GenerateQuickProvisionPayloads(self.target_image, self.tempdir)
@@ -599,6 +601,35 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     extract_root_mock.assert_called_once_with(
         self.target_image, partial_mock.HasString('rootfs.bin'),
         truncate=False)
+    has_minios_mock.assert_called_once()
+
+    calls = [mock.call(partial_mock.HasString('kernel.bin'),
+                       partial_mock.HasString(
+                           constants.QUICK_PROVISION_PAYLOAD_KERNEL)),
+             mock.call(partial_mock.HasString('rootfs.bin'),
+                       partial_mock.HasString(
+                           constants.QUICK_PROVISION_PAYLOAD_ROOTFS))]
+    compress_file_mock.assert_has_calls(calls)
+
+  def testGenerateQuickProvisionPayloadsWithMiniOS(self):
+    """Verifies correct files are created for quick_provision script."""
+    extract_kernel_mock = self.PatchObject(partition_lib, 'ExtractKernel')
+    extract_root_mock = self.PatchObject(partition_lib, 'ExtractRoot')
+    extract_minios_mock = self.PatchObject(partition_lib, 'ExtractMiniOS')
+    has_minios_mock = self.PatchObject(partition_lib, 'HasMiniOSPartitions',
+                                       return_value=True)
+    compress_file_mock = self.PatchObject(cros_build_lib, 'CompressFile')
+
+    artifacts.GenerateQuickProvisionPayloads(self.target_image, self.tempdir)
+
+    extract_kernel_mock.assert_called_once_with(
+        self.target_image, partial_mock.HasString('kernel.bin'))
+    extract_root_mock.assert_called_once_with(
+        self.target_image, partial_mock.HasString('rootfs.bin'),
+        truncate=False)
+    extract_minios_mock.assert_called_once_with(
+        self.target_image, partial_mock.HasString('minios.bin'))
+    has_minios_mock.assert_called_once()
 
     calls = [mock.call(partial_mock.HasString('kernel.bin'),
                        partial_mock.HasString(

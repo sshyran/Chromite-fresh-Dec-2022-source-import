@@ -943,6 +943,7 @@ MINIOS_PRIORITY = 'minios_priority'
 # that have been using this need to handle both cases to be backward compatible.
 QUICK_PROVISION_PAYLOAD_KERNEL = 'full_dev_part_KERN.bin.gz'
 QUICK_PROVISION_PAYLOAD_ROOTFS = 'full_dev_part_ROOT.bin.gz'
+QUICK_PROVISION_PAYLOAD_MINIOS = 'full_dev_part_MINIOS.bin.gz'
 
 # Mock build and stage IDs.
 MOCK_STAGE_ID = 313377

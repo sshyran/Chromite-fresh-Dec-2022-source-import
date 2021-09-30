@@ -8,6 +8,7 @@ import logging
 import os
 import tempfile
 
+from chromite.lib import cgpt
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
@@ -180,3 +181,20 @@ def LookupImageType(image):
     return DLC_IMAGE
 
   return None
+
+
+def HasMiniOSPartitions(image):
+  """Returns true if the image has miniOS partitions.
+
+  Args:
+    image: The path to the GPT image.
+
+  Returns:
+    True if the image has miniOS partitions.
+  """
+  try:
+    disk = cgpt.Disk.FromImage(image)
+    disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+    return True
+  except KeyError:
+    return False

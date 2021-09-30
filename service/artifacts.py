@@ -549,9 +549,20 @@ def GenerateQuickProvisionPayloads(target_image_path: str,
     partition_lib.ExtractRoot(target_image_path,
                               os.path.join(temp_dir, rootfs_part),
                               truncate=False)
-    for partition, payload in {
+
+    # Partition to payload mapping.
+    mapping = {
         kernel_part: constants.QUICK_PROVISION_PAYLOAD_KERNEL,
-        rootfs_part: constants.QUICK_PROVISION_PAYLOAD_ROOTFS}.items():
+        rootfs_part: constants.QUICK_PROVISION_PAYLOAD_ROOTFS,
+    }
+
+    if partition_lib.HasMiniOSPartitions(target_image_path):
+      minios_part = 'minios.bin'
+      partition_lib.ExtractMiniOS(
+          target_image_path, os.path.join(temp_dir, minios_part))
+      mapping[minios_part] = constants.QUICK_PROVISION_PAYLOAD_MINIOS
+
+    for partition, payload in mapping.items():
       source = os.path.join(temp_dir, partition)
       dest = os.path.join(archive_dir, payload)
       cros_build_lib.CompressFile(source, dest)
