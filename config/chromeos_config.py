@@ -23,11 +23,12 @@ def _frozen_ge_set(ge_build_config, values, extras=None):
   """Return a frozenset of things in GE."""
   separate_board_names = set(config_lib.GeBuildConfigAllBoards(ge_build_config))
   unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-  unified_board_names = set([b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-                             for b in unified_builds])
+  unified_board_names = set([
+      b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME] for b in unified_builds
+  ])
   board_names = separate_board_names | unified_board_names
-  return frozenset(
-      x for x in values if x in board_names).union(extras or frozenset())
+  return frozenset(x for x in values if x in board_names).union(extras or
+                                                                frozenset())
 
 
 def add_images(required_images):
@@ -98,21 +99,17 @@ def GetBoardTypeToBoardsDict(ge_build_config):
 
   arm_internal_release_boards = (
       chromeos_boards.arm_internal_release_boards |
-      ge_arch_board_dict.get(config_lib.CONFIG_ARM_INTERNAL, set())
-  )
+      ge_arch_board_dict.get(config_lib.CONFIG_ARM_INTERNAL, set()))
   arm_external_boards = (
       chromeos_boards.arm_external_boards |
-      ge_arch_board_dict.get(config_lib.CONFIG_ARM_EXTERNAL, set())
-  )
+      ge_arch_board_dict.get(config_lib.CONFIG_ARM_EXTERNAL, set()))
 
   x86_internal_release_boards = (
       chromeos_boards.x86_internal_release_boards |
-      ge_arch_board_dict.get(config_lib.CONFIG_X86_INTERNAL, set())
-  )
+      ge_arch_board_dict.get(config_lib.CONFIG_X86_INTERNAL, set()))
   x86_external_boards = (
       chromeos_boards.x86_external_boards |
-      ge_arch_board_dict.get(config_lib.CONFIG_X86_EXTERNAL, set())
-  )
+      ge_arch_board_dict.get(config_lib.CONFIG_X86_EXTERNAL, set()))
 
   # Every board should be in only 1 of the above sets.
   boards_dict['distinct_board_sets'] = [
@@ -122,42 +119,26 @@ def GetBoardTypeToBoardsDict(ge_build_config):
       x86_external_boards,
   ]
 
-  arm_full_boards = (
-      arm_internal_release_boards |
-      arm_external_boards)
-  x86_full_boards = (
-      x86_internal_release_boards |
-      x86_external_boards)
+  arm_full_boards = (arm_internal_release_boards | arm_external_boards)
+  x86_full_boards = (x86_internal_release_boards | x86_external_boards)
 
   arm_boards = arm_full_boards
   x86_boards = x86_full_boards
 
   boards_dict['all_release_boards'] = (
-      arm_internal_release_boards |
-      x86_internal_release_boards
-  )
-  boards_dict['all_full_boards'] = (
-      arm_full_boards |
-      x86_full_boards
-  )
+      arm_internal_release_boards | x86_internal_release_boards)
+  boards_dict['all_full_boards'] = (arm_full_boards | x86_full_boards)
   all_boards = x86_boards | arm_boards
-  boards_dict['all_boards'] = (
-      all_boards
-  )
+  boards_dict['all_boards'] = (all_boards)
 
   boards_dict['internal_boards'] = boards_dict['all_release_boards']
 
   # This set controls the final vmtest override. It allows us to specify
   # vm_tests for each class of builders, but only execute on vmtest_boards.
-  boards_dict['no_vmtest_boards'] = (
-      all_boards - chromeos_test.vmtest_boards
-  )
+  boards_dict['no_vmtest_boards'] = (all_boards - chromeos_test.vmtest_boards)
 
-  boards_dict['generic_kernel_boards'] = frozenset([
-      'amd64-generic',
-      'arm-generic',
-      'arm64-generic'
-  ])
+  boards_dict['generic_kernel_boards'] = frozenset(
+      ['amd64-generic', 'arm-generic', 'arm64-generic'])
 
   all_ge_boards = set()
   for val in ge_arch_board_dict.values():
@@ -215,7 +196,7 @@ def GeneralTemplates(site_config):
       description='Full Builds',
       image_test=True,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-Continuous',
+      'TOC-Continuous',
   )
 
   # Incremental builders are intended to test the developer workflow.
@@ -230,7 +211,7 @@ def GeneralTemplates(site_config):
       overlays=constants.PUBLIC_OVERLAYS,
       description='Incremental Builds',
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-Continuous',
+      'TOC-Continuous',
   )
 
   site_config.AddTemplate(
@@ -290,9 +271,9 @@ def GeneralTemplates(site_config):
       upload_hw_test_artifacts=False,
       image_test=False,
       images=['base', 'test'],
-      packages=['virtual/target-os',
-                'virtual/target-os-dev',
-                'virtual/target-os-test'],
+      packages=[
+          'virtual/target-os', 'virtual/target-os-dev', 'virtual/target-os-test'
+      ],
   )
 
   site_config.AddTemplate(
@@ -308,9 +289,9 @@ def GeneralTemplates(site_config):
       image_test=False,
       guest_vm_image=True,
       images=['base', 'test'],
-      packages=['virtual/target-os',
-                'virtual/target-os-dev',
-                'virtual/target-os-test'],
+      packages=[
+          'virtual/target-os', 'virtual/target-os-dev', 'virtual/target-os-test'
+      ],
   )
 
   site_config.AddTemplate(
@@ -326,13 +307,9 @@ def GeneralTemplates(site_config):
       paygen=False,
       upload_hw_test_artifacts=False,
       image_test=False,
-      images=remove_images(['recovery', 'factory_install'])
-  )
+      images=remove_images(['recovery', 'factory_install']))
 
-  site_config.AddTemplate(
-      'wshwos',
-      site_config.templates.loonix
-  )
+  site_config.AddTemplate('wshwos', site_config.templates.loonix)
 
   site_config.AddTemplate(
       'dustbuster',
@@ -380,11 +357,13 @@ def GeneralTemplates(site_config):
       # fixed.
       images=['base', 'test'],
       chrome_sdk=False,
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
+      vm_tests=[
+          config_lib.VMTestConfig(
+              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+      ],
       vm_tests_override=None,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-ASAN',
+      'TOC-ASAN',
   )
 
   site_config.AddTemplate(
@@ -394,11 +373,13 @@ def GeneralTemplates(site_config):
       disk_layout='16gb-rootfs',
       images=['base', 'test'],
       chrome_sdk=False,
-      vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                        test_suite='smoke')],
+      vm_tests=[
+          config_lib.VMTestConfig(
+              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+      ],
       vm_tests_override=None,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-ASAN',
+      'TOC-ASAN',
   )
 
   site_config.AddTemplate(
@@ -438,7 +419,7 @@ def GeneralTemplates(site_config):
       overlays=constants.BOTH_OVERLAYS,
       push_overlays=constants.BOTH_OVERLAYS,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-Chrome-PFQ')
+      'TOC-Chrome-PFQ')
 
   # Internal incremental builders don't use official chrome because we want
   # to test the developer workflow.
@@ -468,7 +449,6 @@ def GeneralTemplates(site_config):
       display_label=config_lib.DISPLAY_LABEL_TRYJOB,
       build_type=constants.TRYJOB_TYPE,
       description='Run Unittests repeatedly to look for flake.',
-
       builder_class_name='test_builders.UnittestStressBuilder',
 
       # Make this available, so we can stress a previous build.
@@ -500,21 +480,23 @@ def GeneralTemplates(site_config):
       binhost_bucket='gs://chromeos-dev-installer',
       binhost_key='RELEASE_BINHOST',
       binhost_base_url='https://commondatastorage.googleapis.com/'
-                       'chromeos-dev-installer',
+      'chromeos-dev-installer',
       dev_installer_prebuilts=True,
       git_sync=False,
       vm_tests=[
-          config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                  test_suite='smoke'),
+          config_lib.VMTestConfig(
+              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
           config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)],
+          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
+      ],
       # Some release builders disable VMTests to be able to build on GCE, but
       # still want VMTests enabled on trybot builders.
       vm_tests_override=[
-          config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                  test_suite='smoke'),
+          config_lib.VMTestConfig(
+              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
           config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)],
+          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
+      ],
       paygen=True,
       signer_tests=True,
       hwqual=True,
@@ -522,7 +504,7 @@ def GeneralTemplates(site_config):
       chrome_sdk=True,
       image_test=True,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-Canaries',
+      'TOC-Canaries',
   )
 
   site_config.AddTemplate(
@@ -634,9 +616,9 @@ def GeneralTemplates(site_config):
   site_config.AddTemplate(
       'tast_vm_paladin_tests',
       tast_vm_tests=[
-          config_lib.TastVMTestConfig(
-              'tast_vm_paladin',
-              ['("group:mainline" && !informational)'])],
+          config_lib.TastVMTestConfig('tast_vm_paladin',
+                                      ['("group:mainline" && !informational)'])
+      ],
   )
   # The expression specified here matches the union of the
   # tast.critical-{android,chrome} Autotest server tests, which are executed by
@@ -644,10 +626,11 @@ def GeneralTemplates(site_config):
   site_config.AddTemplate(
       'tast_vm_chrome_pfq_tests',
       tast_vm_tests=[
-          config_lib.TastVMTestConfig(
-              'tast_vm_chrome_pfq',
-              ['("group:mainline" && !informational && '
-               '("dep:android*" || "dep:chrome"))'])],
+          config_lib.TastVMTestConfig('tast_vm_chrome_pfq', [
+              '("group:mainline" && !informational && '
+              '("dep:android*" || "dep:chrome"))'
+          ])
+      ],
   )
   # The expression specified here matches the tast.critical-android Autotest
   # server test, which is executed by the bvt-tast-android-pfq suite on real
@@ -657,7 +640,8 @@ def GeneralTemplates(site_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_android_pfq',
-              ['("group:mainline" && !informational && "dep:android*")'])],
+              ['("group:mainline" && !informational && "dep:android*")'])
+      ],
   )
   # The expression specified here matches the union of the tast.critical-* and
   # tast.informational-* Autotest server tests, which are executed by the
@@ -668,14 +652,15 @@ def GeneralTemplates(site_config):
           config_lib.TastVMTestConfig(
               'tast_vm_canary_critical',
               ['("group:mainline" && !informational)'],
-              timeout=2 * 60 * 60 ),
+              timeout=2 * 60 * 60),
       ],
   )
 
   site_config.AddTemplate(
       'moblab_vm_tests',
       moblab_vm_tests=[
-          config_lib.MoblabVMTestConfig(constants.MOBLAB_VM_SMOKE_TEST_TYPE)],
+          config_lib.MoblabVMTestConfig(constants.MOBLAB_VM_SMOKE_TEST_TYPE)
+      ],
   )
 
   site_config.AddTemplate(
@@ -690,7 +675,7 @@ def GeneralTemplates(site_config):
       overlays=constants.BOTH_OVERLAYS,
       push_overlays=constants.BOTH_OVERLAYS,
       builder_class_name='workspace_builders.BuildSpecBuilder',
-      build_timeout=4*60 * 60,
+      build_timeout=4 * 60 * 60,
       description='Buildspec creator.',
   )
 
@@ -706,8 +691,9 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
   # Extract the full list of board names from GE data.
   separate_board_names = set(config_lib.GeBuildConfigAllBoards(ge_build_config))
   unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-  unified_board_names = set([b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-                             for b in unified_builds])
+  unified_board_names = set([
+      b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME] for b in unified_builds
+  ])
   board_names = separate_board_names | unified_board_names
 
   # TODO(crbug.com/648473): Remove these, after GE adds them to their data set.
@@ -734,10 +720,11 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
     if board in chromeos_boards.termina_boards:
       board_config.apply(site_config.templates.termina)
     if board in chromeos_boards.nofactory_boards:
-      board_config.apply(factory=False,
-                         factory_toolkit=False,
-                         factory_install_netboot=False,
-                         images=remove_images(['factory_install']))
+      board_config.apply(
+          factory=False,
+          factory_toolkit=False,
+          factory_install_netboot=False,
+          images=remove_images(['factory_install']))
     if board in chromeos_boards.toolchains_from_source:
       board_config.apply(usepkg_toolchain=False)
     if board in chromeos_boards.noimagetest_boards:
@@ -758,14 +745,14 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
 
 def CreateInternalBoardConfigs(site_config, boards_dict, ge_build_config):
   """Create mixin templates for each board."""
-  result = CreateBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  result = CreateBoardConfigs(site_config, boards_dict, ge_build_config)
 
   for board in boards_dict['internal_boards']:
     if board in result:
-      result[board].apply(site_config.templates.internal,
-                          site_config.templates.official_chrome,
-                          manifest=constants.OFFICIAL_MANIFEST)
+      result[board].apply(
+          site_config.templates.internal,
+          site_config.templates.official_chrome,
+          manifest=constants.OFFICIAL_MANIFEST)
 
   return result
 
@@ -799,8 +786,8 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                             ge_build_config)
   hw_test_list = HWTestList(ge_build_config)
 
   site_config.AddTemplate(
@@ -820,16 +807,13 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       # Need to reenable cheets_SELinuxTest after crosbug/693308 is fixed.
       # Add strict_toolchain_checks to perform toolchain-related checks
       useflags=config_lib.append_useflags([
-          '-cros-debug',
-          '-tests_security_OpenFDs',
-          '-tests_platform_SyncCrash',
+          '-cros-debug', '-tests_security_OpenFDs', '-tests_platform_SyncCrash',
           '-tests_network_VPNConnect.l2tpipsec_xauth',
           '-tests_network_VPNConnect.l2tpipsec_psk',
           '-tests_power_DarkResumeShutdownServer',
-          '-tests_power_DarkResumeDisplay',
-          '-tests_cheets_SELinuxTest',
-          'thinlto',
-          'strict_toolchain_checks']),
+          '-tests_power_DarkResumeDisplay', '-tests_cheets_SELinuxTest',
+          'thinlto', 'strict_toolchain_checks'
+      ]),
       latest_toolchain=True,
       enable_skylab_hw_tests=True,
       debuginfo_test=True,
@@ -928,8 +912,8 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       'orderfile_generate_toolchain',
       site_config.templates.afdo_toolchain,
       orderfile_generate=True,
-      useflags=config_lib.append_useflags(['orderfile_generate',
-                                           '-orderfile_use']),
+      useflags=config_lib.append_useflags(
+          ['orderfile_generate', '-orderfile_use']),
       description='Build Chrome and generate an orderfile for better layout',
   )
 
@@ -937,9 +921,10 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       'orderfile_verify_toolchain',
       site_config.templates.afdo_verify,
       orderfile_verify=True,
-      useflags=config_lib.append_useflags(['orderfile_verify',
-                                           '-reorder_text_sections',
-                                           'strict_toolchain_checks']),
+      useflags=config_lib.append_useflags([
+          'orderfile_verify', '-reorder_text_sections',
+          'strict_toolchain_checks'
+      ]),
       description='Verify the most recent orderfile is building correctly',
   )
 
@@ -960,12 +945,9 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       # In other words, it turns off afdo_use, thinlto, cfi compared to
       # release images.
       afdo_use=False,
-      useflags=config_lib.append_useflags(['-transparent_hugepage',
-                                           '-debug_fission',
-                                           '-thinlto',
-                                           '-cfi']),
-      description='Generate AFDO profile based on benchmarks.'
-  )
+      useflags=config_lib.append_useflags(
+          ['-transparent_hugepage', '-debug_fission', '-thinlto', '-cfi']),
+      description='Generate AFDO profile based on benchmarks.')
 
   # This build config is used to verify merged and redacted AFDO profile,
   # aka. profiles for release, can build packages without any problems.
@@ -973,8 +955,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       'release_afdo_verify',
       site_config.templates.afdo_verify,
       description='Verify the most recent AFDO profile for release can '
-                  'build Chrome images correctly.'
-  )
+      'build Chrome images correctly.')
 
   #
   # Create toolchain tryjob builders.
@@ -1002,10 +983,10 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
   site_config.Add(
       'eve-llvm-tot-toolchain',
       site_config.templates.llvm_tot_toolchain,
-      vm_tests=[config_lib.VMTestConfig(
-          constants.VM_SUITE_TEST_TYPE,
-          test_suite='smoke',
-          use_ctest=False)],
+      vm_tests=[
+          config_lib.VMTestConfig(
+              constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)
+      ],
       vm_tests_override=TRADITIONAL_VM_TESTS_SUPPORTED,
       boards=['eve'],
   )
@@ -1192,13 +1173,15 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                             ge_build_config)
   hw_test_list = HWTestList(ge_build_config)
   # TODO(b/153392483): Temporarily remove bvt-arc from list of test
   # suites blocking RVC PFQ.
-  vmrvc_hwtest_list = [hwtest for hwtest in hw_test_list.SharedPoolPFQ()
-                       if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE]
+  vmrvc_hwtest_list = [
+      hwtest for hwtest in hw_test_list.SharedPoolPFQ()
+      if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE
+  ]
 
   # Android PI master.
   pi_master_config = site_config.Add(
@@ -1211,28 +1194,31 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
 
   _pi_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
   _pi_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _pi_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      # TODO(b/172889735): Temporary disable eve because DUTs are reserved
-      # due to crbug/1141713. Instead, adding rammus to cover x86_64.
-      # 'eve',
-      'coral',
-      'grunt',
-      'kevin',
-      'rammus',
-  ])
+  _pi_hwtest_boards = _frozen_ge_set(
+      ge_build_config,
+      [
+          # TODO(b/172889735): Temporary disable eve because DUTs are reserved
+          # due to crbug/1141713. Instead, adding rammus to cover x86_64.
+          # 'eve',
+          'coral',
+          'grunt',
+          'kevin',
+          'rammus',
+      ])
   _pi_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _pi_hwtest_skylab_boards = _frozen_ge_set(ge_build_config, [
-      # 'eve', TODO(b/172889735): See above.
-      'coral',
-      'grunt',
-      'kevin',
-      'rammus',
-  ])
+  _pi_hwtest_skylab_boards = _frozen_ge_set(
+      ge_build_config,
+      [
+          # 'eve', TODO(b/172889735): See above.
+          'coral',
+          'grunt',
+          'kevin',
+          'rammus',
+      ])
   _pi_vmtest_boards = _frozen_ge_set(ge_build_config, [
       'betty-pi-arc',
   ])
-  _pi_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [
-  ])
+  _pi_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
   # Android VM RVC master.
   vmrvc_master_config = site_config.Add(
@@ -1250,11 +1236,13 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'kukui-arc-r',
       'rammus-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [
-      # TODO(b/188941140): Temporary marked as experimental.
-      'grunt-arc-r',
-      'zork-arc-r',
-  ])
+  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(
+      ge_build_config,
+      [
+          # TODO(b/188941140): Temporary marked as experimental.
+          'grunt-arc-r',
+          'zork-arc-r',
+      ])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
@@ -1281,8 +1269,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       constants.VMT_ANDROID_PFQ_MASTER,
       site_config.templates.vmt_android_pfq,
       site_config.templates.master_android_pfq_mixin,
-      schedule='with 150m interval'
-  )
+      schedule='with 150m interval')
   _vmt_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
       'betty-arc-t',
   ])
@@ -1300,54 +1287,51 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           board_configs,
           site_config.templates.pi_android_pfq,
           hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_hwtest_skylab_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
           enable_skylab_hw_tests=True,
           hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_no_hwtest_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_no_hwtest_experimental_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_hwtest_experimental_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
           important=False,
           hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_vmtest_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      ) +
-      site_config.AddForBoards(
+          vm_tests=[
+              config_lib.VMTestConfig(
+                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+          ],
+      ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_vmtest_experimental_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
           important=False,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      )
-  )
+          vm_tests=[
+              config_lib.VMTestConfig(
+                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+          ],
+      ))
 
   # Android VMRVC slaves.
   vmrvc_master_config.AddSlaves(
@@ -1358,8 +1342,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.vmrvc_android_pfq,
           enable_skylab_hw_tests=True,
           hw_tests=vmrvc_hwtest_list,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmrvc-android-pfq',
           _vmrvc_hwtest_experimental_boards,
           board_configs,
@@ -1367,29 +1350,27 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           enable_skylab_hw_tests=True,
           hw_tests=vmrvc_hwtest_list,
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmrvc-android-pfq',
           _vmrvc_no_hwtest_boards,
           board_configs,
           site_config.templates.vmrvc_android_pfq,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmrvc-android-pfq',
           _vmrvc_no_hwtest_experimental_boards,
           board_configs,
           site_config.templates.vmrvc_android_pfq,
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmrvc-android-pfq',
           _vmrvc_vmtest_boards,
           board_configs,
           site_config.templates.vmrvc_android_pfq,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      )
-  )
+          vm_tests=[
+              config_lib.VMTestConfig(
+                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+          ],
+      ))
 
   # Android VMSC slaves.
   vmsc_master_config.AddSlaves(
@@ -1400,8 +1381,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.vmsc_android_pfq,
           enable_skylab_hw_tests=True,
           hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmsc-android-pfq',
           _vmsc_hwtest_experimental_boards,
           board_configs,
@@ -1409,29 +1389,27 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           enable_skylab_hw_tests=True,
           hw_tests=hw_test_list.SharedPoolPFQ(),
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmsc-android-pfq',
           _vmsc_no_hwtest_boards,
           board_configs,
           site_config.templates.vmsc_android_pfq,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmsc-android-pfq',
           _vmsc_no_hwtest_experimental_boards,
           board_configs,
           site_config.templates.vmsc_android_pfq,
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmsc-android-pfq',
           _vmsc_vmtest_boards,
           board_configs,
           site_config.templates.vmsc_android_pfq,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      )
-  )
+          vm_tests=[
+              config_lib.VMTestConfig(
+                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+          ],
+      ))
 
   # Android VMT slaves.
   vmt_master_config.AddSlaves(
@@ -1442,8 +1420,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.vmt_android_pfq,
           enable_skylab_hw_tests=True,
           hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmt-android-pfq',
           _vmt_hwtest_experimental_boards,
           board_configs,
@@ -1451,29 +1428,28 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           enable_skylab_hw_tests=True,
           hw_tests=hw_test_list.SharedPoolPFQ(),
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmt-android-pfq',
           _vmt_no_hwtest_boards,
           board_configs,
           site_config.templates.vmt_android_pfq,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmt-android-pfq',
           _vmt_no_hwtest_experimental_boards,
           board_configs,
           site_config.templates.vmt_android_pfq,
           important=False,
-      ) +
-      site_config.AddForBoards(
+      ) + site_config.AddForBoards(
           'vmt-android-pfq',
           _vmt_vmtest_boards,
           board_configs,
           site_config.templates.vmt_android_pfq,
-          vm_tests=[config_lib.VMTestConfig(constants.VM_SUITE_TEST_TYPE,
-                                            test_suite='smoke')],
-      )
-  )
+          vm_tests=[
+              config_lib.VMTestConfig(
+                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
+          ],
+      ))
+
 
 def FullBuilders(site_config, boards_dict, ge_build_config):
   """Create all full builders.
@@ -1497,8 +1473,8 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
   # green.
   unstable_builders = _frozen_ge_set(ge_build_config, [])
 
-  external_board_configs = CreateBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  external_board_configs = CreateBoardConfigs(site_config, boards_dict,
+                                              ge_build_config)
 
   site_config.AddForBoards(
       config_lib.CONFIG_TYPE_FULL,
@@ -1530,8 +1506,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
           config_lib.CONFIG_TYPE_FULL,
           active_builders,
           manifest_version=True,
-      )
-  )
+      ))
 
   master_config.AddSlaves(
       site_config.ApplyForBoards(
@@ -1539,8 +1514,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
           unstable_builders,
           manifest_version=True,
           important=False,
-      )
-  )
+      ))
 
   vm_config = site_config.Add(
       'amd64-generic-vm-full',
@@ -1554,8 +1528,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       manifest_version=True,
       manifest_repo_url=config_lib.GetSiteParams().MANIFEST_URL,
       overlays=constants.PUBLIC_OVERLAYS,
-      prebuilts=constants.PUBLIC
-  )
+      prebuilts=constants.PUBLIC)
 
   master_config.AddSlave(vm_config)
 
@@ -1569,8 +1542,8 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                             ge_build_config)
 
   site_config.AddTemplate(
       'incremental_affinity',
@@ -1597,8 +1570,7 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.incremental_affinity,
           board_configs['amd64-generic'],
           manifest_version=True,
-      )
-  )
+      ))
 
   master_config.AddSlave(
       site_config.Add(
@@ -1608,8 +1580,7 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.incremental_affinity,
           boards=['betty'],
           manifest_version=True,
-      )
-  )
+      ))
 
   master_config.AddSlave(
       site_config.Add(
@@ -1619,8 +1590,7 @@ def IncrementalBuilders(site_config, boards_dict, ge_build_config):
           site_config.templates.incremental_affinity,
           boards=['chell'],
           manifest_version=True,
-      )
-  )
+      ))
 
   #
   # Available, but not regularly scheduled.
@@ -1652,8 +1622,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  internal_board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  internal_board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                                      ge_build_config)
 
   _chrome_boards = frozenset(
       board for board, config in internal_board_configs.items()
@@ -1778,7 +1748,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
       tast_vm_tests=[
           config_lib.TastVMTestConfig(
               'tast_vm_fwupd',
-              ['("group:mainline" && !informational && "dep:fwupd")'])],
+              ['("group:mainline" && !informational && "dep:fwupd")'])
+      ],
   )
 
 
@@ -1799,25 +1770,24 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
   MONTHLY = 'with 720h interval'  # 30 day interval
   TRIGGERED = 'triggered'  # Only when triggered
   branch_builders = [
-      (MONTHLY, 'factory-rambi-5517.B', [
-          'enguarde', 'expresso', 'kip', 'swanky', 'winky']),
+      (MONTHLY, 'factory-rambi-5517.B',
+       ['enguarde', 'expresso', 'kip', 'swanky', 'winky']),
       (MONTHLY, 'factory-rambi-6420.B', [
-          'enguarde', 'candy', 'banjo',
-          'ninja', 'sumo', 'orco', 'heli', 'gnawty']),
-      (MONTHLY, 'factory-auron-6459.B', [
-          'auron_paine', 'auron_yuna', 'lulu',
-          'gandof', 'buddy']),
-      (MONTHLY, 'factory-auron-6772.B', [
-          'guado', 'tidus', 'rikku', 'buddy']),
+          'enguarde', 'candy', 'banjo', 'ninja', 'sumo', 'orco', 'heli',
+          'gnawty'
+      ]),
+      (MONTHLY, 'factory-auron-6459.B',
+       ['auron_paine', 'auron_yuna', 'lulu', 'gandof', 'buddy']),
+      (MONTHLY, 'factory-auron-6772.B', ['guado', 'tidus', 'rikku', 'buddy']),
       (MONTHLY, 'factory-strago-7458.B', [
-          'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar',
-          'wizpig', 'setzer', 'banon', 'kefka', 'relm', 'kip']),
-      (MONTHLY, 'factory-veyron-7505.B', [
-          'veyron_tiger', 'veyron_fievel', 'veyron_rialto']),
+          'cyan', 'celes', 'ultima', 'reks', 'terra', 'edgar', 'wizpig',
+          'setzer', 'banon', 'kefka', 'relm', 'kip'
+      ]),
+      (MONTHLY, 'factory-veyron-7505.B',
+       ['veyron_tiger', 'veyron_fievel', 'veyron_rialto']),
       (MONTHLY, 'factory-glados-7657.B', ['glados', 'chell']),
-      (MONTHLY, 'factory-glados-7828.B', [
-          'glados', 'chell', 'lars',
-          'sentry', 'cave', 'asuka', 'caroline']),
+      (MONTHLY, 'factory-glados-7828.B',
+       ['glados', 'chell', 'lars', 'sentry', 'cave', 'asuka', 'caroline']),
       (MONTHLY, 'factory-oak-8182.B', ['elm', 'hana']),
       (MONTHLY, 'factory-gru-8652.B', ['kevin']),
       (MONTHLY, 'factory-gale-8743.19.B', ['gale']),
@@ -1855,8 +1825,10 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-asurada-13929.B', ['asurada']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
-      (None, 'master', ['atlas', 'octopus', 'rammus', 'coral', 'eve',
-                        'sarien', 'mistral', 'drallion']),
+      (None, 'master', [
+          'atlas', 'octopus', 'rammus', 'coral', 'eve', 'sarien', 'mistral',
+          'drallion'
+      ]),
   ]
 
   _FACTORYBRANCH_TIMEOUT = 12 * 60 * 60
@@ -1919,8 +1891,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         display_label=config_lib.DISPLAY_LABEL_FACTORY,
         workspace_branch=branch,
         build_timeout=_FACTORYBRANCH_TIMEOUT,
-        **schedule
-    )
+        **schedule)
 
     # Define the per-board builders for the branch.
     for board in boards:
@@ -1944,12 +1915,13 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                             ge_build_config)
 
   unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-  unified_board_names = set([b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-                             for b in unified_builds])
+  unified_board_names = set([
+      b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME] for b in unified_builds
+  ])
 
   def _CreateMasterConfig(name,
                           template=site_config.templates.release,
@@ -2045,8 +2017,8 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   site_config.AddForBoards(
       config_lib.CONFIG_TYPE_RELEASE,
-      ((boards_dict['all_release_boards'] | _all_release_builder_boards)
-       - unified_board_names),
+      ((boards_dict['all_release_boards'] | _all_release_builder_boards) -
+       unified_board_names),
       board_configs,
       site_config.templates.release,
   )
@@ -2067,16 +2039,17 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
       if config_lib.CONFIG_TEMPLATE_MODEL_TEST_SUITES in model:
         test_suites = model[config_lib.CONFIG_TEMPLATE_MODEL_TEST_SUITES]
-        models.append(config_lib.ModelTestConfig(
-            name,
-            lab_board_name,
-            test_suites,
-            enable_skylab=enable_skylab))
+        models.append(
+            config_lib.ModelTestConfig(
+                name, lab_board_name, test_suites, enable_skylab=enable_skylab))
       else:
         no_model_test_suites = []
-        models.append(config_lib.ModelTestConfig(
-            name, lab_board_name, no_model_test_suites,
-            enable_skylab=enable_skylab))
+        models.append(
+            config_lib.ModelTestConfig(
+                name,
+                lab_board_name,
+                no_model_test_suites,
+                enable_skylab=enable_skylab))
 
     reference_board_name = unibuild[
         config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
@@ -2097,13 +2070,9 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     }
     if config_name in _no_unittest_configs:
       props['unittests'] = False
-    site_config.AddForBoards(
-        config_lib.CONFIG_TYPE_RELEASE,
-        [reference_board_name],
-        board_configs,
-        site_config.templates.release,
-        **props
-    )
+    site_config.AddForBoards(config_lib.CONFIG_TYPE_RELEASE,
+                             [reference_board_name], board_configs,
+                             site_config.templates.release, **props)
     _AssignToMaster(site_config[config_name])
 
   def GetReleaseConfigName(board):
@@ -2141,9 +2110,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       for board in builder_ungrouped_dict[builder]:
         config_name = GetConfigName(builder,
                                     board[config_lib.CONFIG_TEMPLATE_NAME])
-        site_config[config_name].apply(
-            _GetConfigValues(board),
-        )
+        site_config[config_name].apply(_GetConfigValues(board),)
         _AssignToMaster(site_config[config_name])
 
   def _AdjustGroupedReleaseConfigs(builder_group_dict):
@@ -2157,9 +2124,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
         for board in board_group.leader_boards:
           config_name = GetConfigName(builder,
                                       board[config_lib.CONFIG_TEMPLATE_NAME])
-          site_config[config_name].apply(
-              _GetConfigValues(board),
-          )
+          site_config[config_name].apply(_GetConfigValues(board),)
           _AssignToMaster(site_config[config_name])
 
         # Followers are built on GCE instances, and turn off testing that breaks
@@ -2327,7 +2292,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1011171',
       },
-
       'expresso-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -2350,14 +2314,12 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'vm_tests_override': []
       },
 
-
       # No hw tests for any betty builders.  See crbug/998427.
       'betty-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/998427',
       },
-
       'betty-pi-arc-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -2391,25 +2353,21 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'http://crbug.com/1085769',
       },
-
       'heli-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'http://b/148950027',
       },
-
       'novato-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1000717',
       },
-
       'novato-arc64-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1000717',
       },
-
       'setzer-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -2423,14 +2381,12 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://b/141387161',
       },
 
-
       # No hw_tests for arkham, whirlwind, gale, mistral.  See b/140317527.
       'arkham-release': {
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://b/140317527',
       },
-
       'whirlwind-release': {
           'dev_installer_prebuilts': True,
           'hw_tests': [],
@@ -2438,7 +2394,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://b/140317527',
           'paygen_skip_testing': True,
       },
-
       'gale-release': {
           'dev_installer_prebuilts': True,
           'hw_tests': [],
@@ -2446,7 +2401,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://b/140317527',
           'paygen_skip_testing': True,
       },
-
       'mistral-release': {
           'dev_installer_prebuilts': True,
           'hw_tests': [],
@@ -2455,7 +2409,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'paygen_skip_testing': True,
       },
 
-
       # TODO(yshaul): find out if hwqual needs to go as well
       # TODO(yshaul): fix apply method to merge base and test
       'guado_labstation-release': {
@@ -2463,7 +2416,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'images': ['base', 'test'],
           'paygen': False,
       },
-
       'fizz-labstation-release': {
           'hwqual': False,
           'images': ['base', 'test'],
@@ -2506,35 +2458,27 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://b/147462165',
       },
-
       'jacuzzi-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'puff-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'kukui-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'sarien-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'strongbad-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'trogdor-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'trogdor64-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'shadowkeep-release': {
           'sign_types': ['recovery', 'factory'],
           # Shadowkeep has no DUTs in the lab (b/159934902).
@@ -2542,7 +2486,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/159934902',
       },
-
       'brya-release': {
           'sign_types': ['recovery', 'factory'],
           # Brya has no DUTs in the lab (b/167721012).
@@ -2550,7 +2493,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/167721012',
       },
-
       'keeby-release': {
           'sign_types': ['recovery', 'factory'],
           # Keeby has no DUTs in the lab. (b/185377942)
@@ -2558,7 +2500,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/185377942',
       },
-
       'aurora-release': {
           'sign_types': ['recovery', 'factory'],
           # Aurora has no DUTs in the lab. (b/186859558)
@@ -2566,7 +2507,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/186859558',
       },
-
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
       },
@@ -2576,11 +2516,9 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       'zork-release': {
           'sign_types': ['recovery', 'factory', 'accessory_rwsig'],
       },
-
       'guybrush-release': {
           'sign_types': ['recovery', 'factory'],
       },
-
       'drallion-release': {
           'sign_types': ['recovery', 'factory'],
       },
@@ -2593,7 +2531,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'images': add_images(['base']),
           'base_is_recovery': True
       },
-
       'reven-vmtest-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -2620,14 +2557,12 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1145306',
       },
 
-
       # --- end from here ---
 
       # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
       'nocturne-release': {
           'useflags': config_lib.append_useflags(['goma_thinlto']),
       },
-
   }
 
   # Kick off for *-borealis builds the 'av-analysis_trace_per-build'
@@ -2635,27 +2570,24 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   # TODO(ddmail): Clean up once -borealis gets merged back into their
   # parent boards.
   av_analysis_args = {
-      'pool':'cros_av_analysis',
-      'timeout':3 * 60*60,
-      'retry':False,
-      'max_retries':0,
-      'blocking':False,
+      'pool': 'cros_av_analysis',
+      'timeout': 3 * 60 * 60,
+      'retry': False,
+      'max_retries': 0,
+      'blocking': False,
       'async': True,
   }
 
   borealis_test_configs = [
-      config_lib.HWTestConfig(
-          'av-analysis_trace_per-build',
-          **av_analysis_args)
+      config_lib.HWTestConfig('av-analysis_trace_per-build', **av_analysis_args)
   ]
 
   _additional_test_config = {
-    'hatch-borealis-release': borealis_test_configs,
-    'puff-borealis-release': borealis_test_configs,
-    'volteer-borealis-release': borealis_test_configs,
-    'zork-borealis-release': borealis_test_configs,
+      'hatch-borealis-release': borealis_test_configs,
+      'puff-borealis-release': borealis_test_configs,
+      'volteer-borealis-release': borealis_test_configs,
+      'zork-borealis-release': borealis_test_configs,
   }
-
 
   # Some Uniboard boards need to run additional tests suites. This means
   # adding the suites at the model level as well.
@@ -2681,13 +2613,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
     if config and 'models' in config:
       models = []
       for model in config['models']:
-        models.append(config_lib.ModelTestConfig(
-          model.name,
-          model.lab_board_name,
-          model.test_suites + suites,
-          enable_skylab = model.enable_skylab,
-          )
-        )
+        models.append(
+            config_lib.ModelTestConfig(
+                model.name,
+                model.lab_board_name,
+                model.test_suites + suites,
+                enable_skylab=model.enable_skylab,
+            ))
       overwritten_configs[config_name]['models'] = models
 
   # Some Unibuild boards need to have hardware tests disabled.  This means
@@ -2712,10 +2644,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   # may miss tests results due to timeout.
   # TODO(ddmail): Enable it once we have enough DUT in the lab.
   _disable_bvt_tast_informational = [
-    'hatch-borealis-release',
-    'puff-borealis-release',
-    'volteer-borealis-release',
-    'zork-borealis-release',
+      'hatch-borealis-release',
+      'puff-borealis-release',
+      'volteer-borealis-release',
+      'zork-borealis-release',
   ]
   for config_name in _disable_bvt_tast_informational:
     config = overwritten_configs.get(config_name)
@@ -2724,8 +2656,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
     if not config or 'hw_tests' not in config:
       continue
 
-    hw_tests = [test for test in config['hw_tests']
-                  if test.suite != 'bvt-tast-informational']
+    hw_tests = [
+        test for test in config['hw_tests']
+        if test.suite != 'bvt-tast-informational'
+    ]
     overwritten_configs[config_name]['hw_tests'] = hw_tests
 
   # Some boards in toolchain builder are not using the same configuration as
@@ -2733,19 +2667,18 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   # llvm-toolchain and llvm-next-toolchain builders.
   for board in ['fizz-moblab', 'gale', 'mistral', 'whirlwind']:
     if board == 'fizz-moblab':
-      overwritten_configs[board+'-llvm-toolchain'] = {
-          'enable_skylab_hw_tests': False,
+      overwritten_configs[board + '-llvm-toolchain'] = {
+          'enable_skylab_hw_tests':
+              False,
           'hw_tests': [
-              config_lib.HWTestConfig(
-                  constants.HWTEST_MOBLAB_QUICK_SUITE)
+              config_lib.HWTestConfig(constants.HWTEST_MOBLAB_QUICK_SUITE)
           ],
           'hw_tests_override': [
-              config_lib.HWTestConfig(
-                  constants.HWTEST_MOBLAB_QUICK_SUITE)
+              config_lib.HWTestConfig(constants.HWTEST_MOBLAB_QUICK_SUITE)
           ],
       }
-    else: # This is the case for gale, mistral and whirlwind
-      overwritten_configs[board+'-llvm-toolchain'] = {
+    else:  # This is the case for gale, mistral and whirlwind
+      overwritten_configs[board + '-llvm-toolchain'] = {
           'hw_tests': [
               config_lib.HWTestConfig(
                   constants.HWTEST_JETSTREAM_COMMIT_SUITE,
@@ -2763,10 +2696,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       }
 
     # Use the same configuration for llvm-next
-    overwritten_configs[board+'-llvm-next-toolchain'] = (
-        overwritten_configs[board+'-llvm-toolchain'])
+    overwritten_configs[board + '-llvm-next-toolchain'] = (
+        overwritten_configs[board + '-llvm-toolchain'])
 
-  for config_name, overrides  in overwritten_configs.items():
+  for config_name, overrides in overwritten_configs.items():
     # TODO: Turn this assert into a unittest.
     # config = site_config[config_name]
     # for k, v in overrides.items():
@@ -2786,8 +2719,8 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(
-      site_config, boards_dict, ge_build_config)
+  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
+                                             ge_build_config)
 
   site_config.AddWithoutTemplate(
       'success-build',
@@ -2831,9 +2764,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.no_hwtest_builder,
       # The amd64-host has to be last as that is when the toolchains
       # are bundled up for inclusion in the sdk.
-      boards=[
-          'arm-generic', 'amd64-generic'
-      ],
+      boards=['arm-generic', 'amd64-generic'],
       display_label=config_lib.DISPLAY_LABEL_UTILITY,
       build_type=constants.CHROOT_BUILDER_TYPE,
       builder_class_name='sdk_builders.ChrootSdkBuilder',
@@ -2842,7 +2773,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       build_timeout=18 * 60 * 60,
       description='Build the SDK and all the cross-compilers',
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-          'TOC-Continuous',
+      'TOC-Continuous',
       schedule='with 30m interval',
   )
 
@@ -2850,9 +2781,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       'chromiumos-sdk-llvm-next',
       site_config.templates.full,
       site_config.templates.no_hwtest_builder,
-      boards=[
-          'arm-generic', 'amd64-generic'
-      ],
+      boards=['arm-generic', 'amd64-generic'],
       display_label=config_lib.DISPLAY_LABEL_UTILITY,
       build_type=constants.CHROOT_BUILDER_TYPE,
       builder_class_name='sdk_builders.ChrootSdkBuilder',
@@ -2894,15 +2823,16 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       boards=[],
       builder_class_name='config_builders.LuciSchedulerBuilder',
       schedule='triggered',
-      triggered_gitiles=[[
-          'https://chromium.googlesource.com/chromiumos/chromite',
-          ['refs/heads/main'],
-          ['config/luci-scheduler.cfg']
-      ], [
-          'https://chrome-internal.googlesource.com/chromeos/infra/config',
-          ['refs/heads/main'],
-          ['generated/luci-scheduler.cfg']
-      ]],
+      triggered_gitiles=[
+          [
+              'https://chromium.googlesource.com/chromiumos/chromite',
+              ['refs/heads/main'], ['config/luci-scheduler.cfg']
+          ],
+          [
+              'https://chrome-internal.googlesource.com/chromeos/infra/config',
+              ['refs/heads/main'], ['generated/luci-scheduler.cfg']
+          ]
+      ],
   )
 
   site_config.Add(
@@ -2933,12 +2863,12 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
 
   site_config.AddGroup(
       'test-ap-group',
-      site_config.Add('whirlwind-test-ap',
-                      site_config.templates.test_ap,
-                      boards=['whirlwind']),
-      site_config.Add('gale-test-ap',
-                      site_config.templates.test_ap,
-                      boards=['gale']),
+      site_config.Add(
+          'whirlwind-test-ap',
+          site_config.templates.test_ap,
+          boards=['whirlwind']),
+      site_config.Add(
+          'gale-test-ap', site_config.templates.test_ap, boards=['gale']),
       description='Create images used to power access points in WiFi lab.',
   )
 
@@ -3035,13 +2965,17 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       description='Build Chromium OS infra Go binaries',
       doc='https://goto.google.com/cros-infra-go-packaging',
       schedule='triggered',
-      triggered_gitiles=[[
-          'https://chromium.googlesource.com/chromiumos/infra/lucifer',
-          ['refs/heads/main']
-      ], [
-          'https://chromium.googlesource.com/chromiumos/infra/skylab_inventory',
-          ['refs/heads/main'],
-      ]],
+      triggered_gitiles=[
+          [
+              'https://chromium.googlesource.com/chromiumos/infra/lucifer',
+              ['refs/heads/main']
+          ],
+          [
+              'https://chromium.googlesource.com/chromiumos/infra/'
+              'skylab_inventory',
+              ['refs/heads/main'],
+          ]
+      ],
   )
 
 
@@ -3096,12 +3030,12 @@ def TryjobMirrors(site_config):
     # In trybots, we want to always run VM tests and all unit tests, so that
     # developers will get better testing for their changes.
     if tryjob_config.hw_tests_override is not None:
-      tryjob_config.apply(hw_tests=tryjob_config.hw_tests_override,
-                          hw_tests_override=None)
+      tryjob_config.apply(
+          hw_tests=tryjob_config.hw_tests_override, hw_tests_override=None)
 
     if tryjob_config.vm_tests_override is not None:
-      tryjob_config.apply(vm_tests=tryjob_config.vm_tests_override,
-                          vm_tests_override=None)
+      tryjob_config.apply(
+          vm_tests=tryjob_config.vm_tests_override, vm_tests_override=None)
 
     if tryjob_config.master:
       tryjob_config.apply(debug_cidb=True)
@@ -3166,43 +3100,30 @@ def BranchScheduleConfig():
   # Do not remove BOT-TAG:* comments. They are used to help parse config.
   # BOT-TAG:RELEASES_START
   RELEASES = [
-      ('release-R94-14150.B',
-       ['kevin-android-pi-pre-flight-branch',
-        'hatch-android-rvc-pre-flight-branch'],
-       '',
-       [],
-       [],
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-
-      ('release-R93-14092.B',
-       ['kevin-android-pi-pre-flight-branch',
-        'hatch-android-rvc-pre-flight-branch'],
-       '',
-       [],
-       [],
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-
-      ('release-R92-13982.B',
-       ['kevin-android-pi-pre-flight-branch',
-        'hatch-android-rvc-pre-flight-branch'],
-       '',
-       [],
-       [],
-       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+      ('release-R94-14150.B', [
+          'kevin-android-pi-pre-flight-branch',
+          'hatch-android-rvc-pre-flight-branch'
+      ], '', [], [], config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+      ('release-R93-14092.B', [
+          'kevin-android-pi-pre-flight-branch',
+          'hatch-android-rvc-pre-flight-branch'
+      ], '', [], [], config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+      ('release-R92-13982.B', [
+          'kevin-android-pi-pre-flight-branch',
+          'hatch-android-rvc-pre-flight-branch'
+      ], '', [], [], config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       # BOT-TAG:NO_PRUNE
-      ('release-R90-13816.B',
-       ['kevin-android-pi-pre-flight-branch',
-        'hatch-android-rvc-pre-flight-branch'],
-       'chell-chrome-no-afdo-uprev-pre-flight-branch',
-       ['orderfile-generate-toolchain',
-        'orderfile-verify-toolchain'],
-       ['benchmark-afdo-generate',
-        'chrome-silvermont-release-afdo-verify',
-        'chrome-airmont-release-afdo-verify',
-        'chrome-broadwell-release-afdo-verify'],
-       config_lib.LUCI_BUILDER_LTS_RELEASE ),
+      ('release-R90-13816.B', [
+          'kevin-android-pi-pre-flight-branch',
+          'hatch-android-rvc-pre-flight-branch'
+      ], 'chell-chrome-no-afdo-uprev-pre-flight-branch',
+       ['orderfile-generate-toolchain', 'orderfile-verify-toolchain'], [
+           'benchmark-afdo-generate', 'chrome-silvermont-release-afdo-verify',
+           'chrome-airmont-release-afdo-verify',
+           'chrome-broadwell-release-afdo-verify'
+       ], config_lib.LUCI_BUILDER_LTS_RELEASE),
   ]
   # BOT-TAG:RELEASES_END
 
@@ -3230,59 +3151,60 @@ def BranchScheduleConfig():
 
   assert len(RELEASES) == len(PFQ_SCHEDULE)
   for ((branch, android_pfq, chrome_pfq, orderfile, afdo, builder),
-       android_schedule) in zip(
-           RELEASES, PFQ_SCHEDULE):
+       android_schedule) in zip(RELEASES, PFQ_SCHEDULE):
     release_num = re.search(r'release-R(\d+)-.*', branch).group(1)
     # All branches are only triggered by a Chrome uprev, or manually.
-    branch_builds.append(
-        [branch, 'master-release',
-         config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
-         [[('https://chromium.googlesource.com/chromiumos/' +
-            'overlays/chromiumos-overlay'),
-           [r'regexp:refs/heads/%s\\..*' % branch],
-           [('chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild'
-             % release_num)]]], builder])
-    branch_builds.extend([[branch, pfq,
-                           config_lib.DISPLAY_LABEL_RELEASE,
-                           android_schedule, None, builder]
-                          for pfq in android_pfq])
+    branch_builds.append([
+        branch, 'master-release', config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
+        [[('https://chromium.googlesource.com/chromiumos/' +
+           'overlays/chromiumos-overlay'),
+          [r'regexp:refs/heads/%s\\..*' % branch],
+          [('chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild' %
+            release_num)]]], builder
+    ])
+    branch_builds.extend([[
+        branch, pfq, config_lib.DISPLAY_LABEL_RELEASE, android_schedule, None,
+        builder
+    ] for pfq in android_pfq])
 
     if chrome_pfq:
       # We extract the release number from the branch, and use it to
       # watch for new chrome tags to trigger Chrome PFQ builds.
       # release-R71-11151.B -> 71 -> regexp:refs/tags/71\\..*
       # Chrome PFQ is retired as of R88, so chrome_pfq may be empty.
-      branch_builds.append(
-          [branch, chrome_pfq, config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
-           [['https://chromium.googlesource.com/chromium/src',
-             [r'regexp:refs/tags/%s\\..*' % release_num]]], builder])
+      branch_builds.append([
+          branch, chrome_pfq, config_lib.DISPLAY_LABEL_RELEASE, 'triggered',
+          [[
+              'https://chromium.googlesource.com/chromium/src',
+              [r'regexp:refs/tags/%s\\..*' % release_num]
+          ]], builder
+      ])
     if orderfile:
       assert len(orderfile) == len(ORDERFILE_SCHEDULES)
       for b, s in zip(orderfile, ORDERFILE_SCHEDULES):
-        branch_builds.append([branch, b,
-                              config_lib.DISPLAY_LABEL_RELEASE,
-                              s, None, builder])
+        branch_builds.append(
+            [branch, b, config_lib.DISPLAY_LABEL_RELEASE, s, None, builder])
 
     if afdo:
       assert len(afdo) == len(AFDO_SCHEDULES)
       for b, s in zip(afdo, AFDO_SCHEDULES):
-        branch_builds.append([branch, b,
-                              config_lib.DISPLAY_LABEL_RELEASE,
-                              s, None, builder])
+        branch_builds.append(
+            [branch, b, config_lib.DISPLAY_LABEL_RELEASE, s, None, builder])
 
   # Convert all branch builds into scheduler config entries.
   default_config = config_lib.GetConfig().GetDefault()
 
   result = []
   for branch, config_name, label, schedule, trigger, builder in branch_builds:
-    result.append(default_config.derive(
-        name=config_name,
-        display_label=label,
-        luci_builder=builder,
-        schedule_branch=branch,
-        schedule=schedule,
-        triggered_gitiles=trigger,
-    ))
+    result.append(
+        default_config.derive(
+            name=config_name,
+            display_label=label,
+            luci_builder=builder,
+            schedule_branch=branch,
+            schedule=schedule,
+            triggered_gitiles=trigger,
+        ))
 
   return result
 
@@ -3305,8 +3227,9 @@ def GetConfig():
   if unknown:
     logging.warning('dropping unknown boards from GE config: %s',
                     ' '.join(x for x in unknown))
-    ge_build_config['boards'] = [x for x in ge_build_config['boards']
-                                 if x['name'] not in unknown]
+    ge_build_config['boards'] = [
+        x for x in ge_build_config['boards'] if x['name'] not in unknown
+    ]
     boards_dict = GetBoardTypeToBoardsDict(ge_build_config)
 
   # site_config with no templates or build configurations.
