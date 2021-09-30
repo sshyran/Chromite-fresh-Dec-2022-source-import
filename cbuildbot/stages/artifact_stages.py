@@ -807,8 +807,6 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
         image_path = os.path.join(self.GetImageDirSymlink(), image_name)
         logging.info('Running commands.GeneratePayloads')
         commands.GeneratePayloads(image_path, tempdir, **kwargs)
-        logging.info('Running commands.GenerateQuickProvisionPayloads')
-        commands.GenerateQuickProvisionPayloads(image_path, tempdir)
         for payload in os.listdir(tempdir):
           queue.put([os.path.join(tempdir, payload)])
 

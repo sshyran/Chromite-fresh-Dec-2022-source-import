@@ -3461,19 +3461,6 @@ def CreateTestRoot(build_root):
   return os.path.sep + os.path.relpath(test_root, start=chroot)
 
 
-def GenerateQuickProvisionPayloads(target_image_path, archive_dir):
-  """Generates payloads needed for quick_provision script.
-
-  Args:
-    target_image_path: The path to the image to extract the partitions.
-    archive_dir: Where to store partitions when generated.
-  """
-  # TODO(saklein): Remove this function entirely in favor of a combined call to
-  #   the endpoint with GeneratePayloads when its arguments have been added to
-  #   the API.
-  artifacts_service.GenerateQuickProvisionPayloads(target_image_path,
-                                                   archive_dir)
-
 def GeneratePayloads(target_image_path,
                      archive_dir,
                      full=False,
@@ -3490,12 +3477,11 @@ def GeneratePayloads(target_image_path,
     stateful: Generate stateful payload.
     dlc: Generate sample-dlc payloads.
   """
-  # TODO(saklein): Change to a combined call to the endpoint with
-  #   GenerateQuickProvisionPayloads after the payload type arguments have been
-  #   added.
   artifacts_service.GenerateTestPayloads(target_image_path, archive_dir,
                                          full=full, delta=delta,
                                          stateful=stateful, dlc=dlc)
+  artifacts_service.GenerateQuickProvisionPayloads(target_image_path,
+                                                   archive_dir)
 
 
 def GetChromeLKGM(revision):

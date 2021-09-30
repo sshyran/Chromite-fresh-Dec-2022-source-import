@@ -465,8 +465,6 @@ class UploadTestArtifactsStageTest(build_stages_unittest.AllConfigsTestCase,
     board_runattrs = self._run.GetBoardRunAttrs(self._current_board)
     board_runattrs.SetParallel('images_generated', True)
 
-    generate_quick_provision_payloads_mock = self.PatchObject(
-        commands, 'GenerateQuickProvisionPayloads')
     generate_update_payloads_mock = self.PatchObject(commands,
                                                      'GeneratePayloads')
 
@@ -475,11 +473,8 @@ class UploadTestArtifactsStageTest(build_stages_unittest.AllConfigsTestCase,
         if (self._run.config.upload_hw_test_artifacts and
             self._run.config.images):
           self.assertNotEqual(generate_update_payloads_mock.call_count, 0)
-          self.assertNotEqual(generate_quick_provision_payloads_mock.call_count,
-                              0)
         else:
           self.assertEqual(generate_update_payloads_mock.call_count, 0)
-          self.assertEqual(generate_quick_provision_payloads_mock.call_count, 0)
 
   def testAllConfigs(self):
     """Test all major configurations"""

@@ -607,8 +607,6 @@ class MoblabVMTestStage(generic_stages.BoardSpecificBuilderStage,
                                 archive_dir=payloads_dir,
                                 full=True, delta=False, stateful=True,
                                 dlc=False)
-      commands.GenerateQuickProvisionPayloads(
-          target_image_path=target_image_path, archive_dir=payloads_dir)
       cwd = os.path.abspath(
           os.path.join(self._build_root, 'chroot', 'build', self._current_board,
                        constants.AUTOTEST_BUILD_PATH, '..'))
