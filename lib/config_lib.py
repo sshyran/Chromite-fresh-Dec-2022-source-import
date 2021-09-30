@@ -97,17 +97,17 @@ ALL_LUCI_BUILDER = {
 }
 
 GOLDENEYE_IGNORED_BOARDS = [
-  'capri',
-  'capri-zfpga',
-  'cobblepot',
-  'gonzo',
-  'lakitu',
-  'lasilla-ground',
-  'lasilla-sky',
-  'macchiato-ground',
-  'octavius',
-  'romer',
-  'wooten',
+    'capri',
+    'capri-zfpga',
+    'cobblepot',
+    'gonzo',
+    'lakitu',
+    'lasilla-ground',
+    'lasilla-sky',
+    'macchiato-ground',
+    'octavius',
+    'romer',
+    'wooten',
 ]
 
 
@@ -974,7 +974,7 @@ def DefaultSettings():
       #   * Validate that the images list contains a base image.
       #   * Copy the base image to recovery_image.bin instead of running
       #     mod_image_for_recovery.sh.
-      base_is_recovery = False,
+      base_is_recovery=False,
 
       # Image from which we will build update payloads.  Must either be None
       # or name one of the images in the 'images' list, above.
@@ -1374,7 +1374,14 @@ class SiteConfig(dict):
     int_cfgs = []
 
     for name, c in self.items():
-      if c['boards'] and (board is None or board in c['boards']):
+      possible_names = []
+      if board:
+        possible_names = [
+            board + '-' + CONFIG_TYPE_RELEASE,
+            board + '-' + CONFIG_TYPE_FULL,
+        ]
+      if c['boards'] and (board is None or board in c['boards'] or
+                          name in possible_names):
         if name.endswith('-%s' % CONFIG_TYPE_RELEASE) and c['internal']:
           int_cfgs.append(c.deepcopy())
         elif name.endswith('-%s' % CONFIG_TYPE_FULL) and not c['internal']:
