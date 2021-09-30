@@ -88,7 +88,7 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
       ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbols(
           self.board, sysroot=self.board_dir)
       self.assertEqual(ret, 0)
-      self.assertEqual(gen_mock.call_count, 3)
+      self.assertEqual(gen_mock.call_count, 4)
 
       # The largest ELF should be processed first.
       call1 = (os.path.join(self.board_dir, 'iii/large-elf'),
@@ -100,9 +100,12 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
                os.path.join(self.debug_dir, 'bin/elf.debug'))
       call3 = (os.path.join(self.board_dir, 'usr/sbin/elf'),
                os.path.join(self.debug_dir, 'usr/sbin/elf.debug'))
-      exp_calls = set((call2, call3))
+      call4 = (os.path.join(self.board_dir, 'lib/modules/3.10/module.ko'),
+               os.path.join(self.debug_dir, 'lib/modules/3.10/module.ko.debug'))
+      exp_calls = set((call2, call3, call4))
       actual_calls = set((gen_mock.call_args_list[1][0],
-                          gen_mock.call_args_list[2][0]))
+                          gen_mock.call_args_list[2][0],
+                          gen_mock.call_args_list[3][0]))
       self.assertEqual(exp_calls, actual_calls)
 
   def testFileList(self, gen_mock):
@@ -160,8 +163,8 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
     with parallel_unittest.ParallelMock():
       ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbols(
           self.board, sysroot=self.board_dir)
-      self.assertEqual(ret, 3)
-      self.assertEqual(gen_mock.call_count, 3)
+      self.assertEqual(ret, 4)
+      self.assertEqual(gen_mock.call_count, 4)
 
   def testCleaningTrue(self, gen_mock):
     """Verify behavior of clean_breakpad=True"""
@@ -216,7 +219,7 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
       ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbols(
           self.board, sysroot=self.board_dir, exclude_dirs=exclude_dirs)
       self.assertEqual(ret, 0)
-      self.assertEqual(gen_mock.call_count, 1)
+      self.assertEqual(gen_mock.call_count, 2)
 
 class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
   """Test GenerateBreakpadSymbol."""

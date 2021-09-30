@@ -233,10 +233,6 @@ def GenerateBreakpadSymbols(board, breakpad_dir=None, strip_cfi=False,
       if not debug_file.endswith('.debug'):
         continue
 
-      elif debug_file.endswith('.ko.debug'):
-        logging.debug('Skipping kernel module %s', debug_file)
-        continue
-
       elif os.path.islink(debug_file):
         # The build-id stuff is common enough to filter out by default.
         if '/.build-id/' in debug_file:
