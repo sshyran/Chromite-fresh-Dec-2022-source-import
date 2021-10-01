@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorus',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n%test_platform/phosphorus/common.proto\x12\x18test_platform.phosphorus\"&\n\x0e\x42otEnvironment\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\"|\n\x0fTaskEnvironment\x12\x13\n\x0bresults_dir\x18\x02 \x01(\t\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02R\x17synchronous_offload_dir\"`\n\nPrejobStep\x12R\n\x18provision_dut_experiment\x18\x01 \x01(\x0b\x32\x30.test_platform.phosphorus.ProvisionDutExperiment\"\xc0\x02\n\x16ProvisionDutExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12g\n\x17\x63ros_version_allow_list\x18\x02 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x12j\n\x1a\x63ros_version_disallow_list\x18\x03 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x1a\'\n\x13\x43rosVersionSelector\x12\x10\n\x08prefixes\x18\x01 \x03(\tB\x17\n\x15\x63ros_version_selector\"3\n\x11LogDataUploadStep\x12\x1e\n\x16max_concurrent_uploads\x18\x01 \x01(\x05\"R\n\x10\x46\x65tchCrashesStep\x12\x1f\n\x17\x63rash_server_report_url\x18\x01 \x01(\t\x12\x1d\n\x15\x63rash_server_view_url\x18\x02 \x01(\t\"\xc6\x02\n\x06\x43onfig\x12\x35\n\x03\x62ot\x18\x01 \x01(\x0b\x32(.test_platform.phosphorus.BotEnvironment\x12\x37\n\x04task\x18\x02 \x01(\x0b\x32).test_platform.phosphorus.TaskEnvironment\x12I\n\x14log_data_upload_step\x18\x03 \x01(\x0b\x32+.test_platform.phosphorus.LogDataUploadStep\x12\x46\n\x12\x66\x65tch_crashes_step\x18\x04 \x01(\x0b\x32*.test_platform.phosphorus.FetchCrashesStep\x12\x39\n\x0bprejob_step\x18\x05 \x01(\x0b\x32$.test_platform.phosphorus.PrejobStepBDZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
+  serialized_pb=b'\n%test_platform/phosphorus/common.proto\x12\x18test_platform.phosphorus\"&\n\x0e\x42otEnvironment\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\"|\n\x0fTaskEnvironment\x12\x13\n\x0bresults_dir\x18\x02 \x01(\t\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02R\x17synchronous_offload_dir\"\xb2\x01\n\nPrejobStep\x12R\n\x18provision_dut_experiment\x18\x01 \x01(\x0b\x32\x30.test_platform.phosphorus.ProvisionDutExperiment\x12P\n\x17\x64ut_topology_experiment\x18\x02 \x01(\x0b\x32/.test_platform.phosphorus.DutTopologyExperiment\"\xc0\x02\n\x16ProvisionDutExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12g\n\x17\x63ros_version_allow_list\x18\x02 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x12j\n\x1a\x63ros_version_disallow_list\x18\x03 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x1a\'\n\x13\x43rosVersionSelector\x12\x10\n\x08prefixes\x18\x01 \x03(\tB\x17\n\x15\x63ros_version_selector\"(\n\x15\x44utTopologyExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"3\n\x11LogDataUploadStep\x12\x1e\n\x16max_concurrent_uploads\x18\x01 \x01(\x05\"R\n\x10\x46\x65tchCrashesStep\x12\x1f\n\x17\x63rash_server_report_url\x18\x01 \x01(\t\x12\x1d\n\x15\x63rash_server_view_url\x18\x02 \x01(\t\"\xc6\x02\n\x06\x43onfig\x12\x35\n\x03\x62ot\x18\x01 \x01(\x0b\x32(.test_platform.phosphorus.BotEnvironment\x12\x37\n\x04task\x18\x02 \x01(\x0b\x32).test_platform.phosphorus.TaskEnvironment\x12I\n\x14log_data_upload_step\x18\x03 \x01(\x0b\x32+.test_platform.phosphorus.LogDataUploadStep\x12\x46\n\x12\x66\x65tch_crashes_step\x18\x04 \x01(\x0b\x32*.test_platform.phosphorus.FetchCrashesStep\x12\x39\n\x0bprejob_step\x18\x05 \x01(\x0b\x32$.test_platform.phosphorus.PrejobStepBDZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
 )
 
 
@@ -118,6 +118,13 @@ _PREJOBSTEP = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dut_topology_experiment', full_name='test_platform.phosphorus.PrejobStep.dut_topology_experiment', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -130,8 +137,8 @@ _PREJOBSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=233,
-  serialized_end=329,
+  serialized_start=234,
+  serialized_end=412,
 )
 
 
@@ -162,8 +169,8 @@ _PROVISIONDUTEXPERIMENT_CROSVERSIONSELECTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=588,
-  serialized_end=627,
+  serialized_start=671,
+  serialized_end=710,
 )
 
 _PROVISIONDUTEXPERIMENT = _descriptor.Descriptor(
@@ -212,8 +219,40 @@ _PROVISIONDUTEXPERIMENT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=332,
-  serialized_end=652,
+  serialized_start=415,
+  serialized_end=735,
+)
+
+
+_DUTTOPOLOGYEXPERIMENT = _descriptor.Descriptor(
+  name='DutTopologyExperiment',
+  full_name='test_platform.phosphorus.DutTopologyExperiment',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='enabled', full_name='test_platform.phosphorus.DutTopologyExperiment.enabled', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=737,
+  serialized_end=777,
 )
 
 
@@ -244,8 +283,8 @@ _LOGDATAUPLOADSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=654,
-  serialized_end=705,
+  serialized_start=779,
+  serialized_end=830,
 )
 
 
@@ -283,8 +322,8 @@ _FETCHCRASHESSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=707,
-  serialized_end=789,
+  serialized_start=832,
+  serialized_end=914,
 )
 
 
@@ -343,11 +382,12 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=792,
-  serialized_end=1118,
+  serialized_start=917,
+  serialized_end=1243,
 )
 
 _PREJOBSTEP.fields_by_name['provision_dut_experiment'].message_type = _PROVISIONDUTEXPERIMENT
+_PREJOBSTEP.fields_by_name['dut_topology_experiment'].message_type = _DUTTOPOLOGYEXPERIMENT
 _PROVISIONDUTEXPERIMENT_CROSVERSIONSELECTOR.containing_type = _PROVISIONDUTEXPERIMENT
 _PROVISIONDUTEXPERIMENT.fields_by_name['cros_version_allow_list'].message_type = _PROVISIONDUTEXPERIMENT_CROSVERSIONSELECTOR
 _PROVISIONDUTEXPERIMENT.fields_by_name['cros_version_disallow_list'].message_type = _PROVISIONDUTEXPERIMENT_CROSVERSIONSELECTOR
@@ -366,6 +406,7 @@ DESCRIPTOR.message_types_by_name['BotEnvironment'] = _BOTENVIRONMENT
 DESCRIPTOR.message_types_by_name['TaskEnvironment'] = _TASKENVIRONMENT
 DESCRIPTOR.message_types_by_name['PrejobStep'] = _PREJOBSTEP
 DESCRIPTOR.message_types_by_name['ProvisionDutExperiment'] = _PROVISIONDUTEXPERIMENT
+DESCRIPTOR.message_types_by_name['DutTopologyExperiment'] = _DUTTOPOLOGYEXPERIMENT
 DESCRIPTOR.message_types_by_name['LogDataUploadStep'] = _LOGDATAUPLOADSTEP
 DESCRIPTOR.message_types_by_name['FetchCrashesStep'] = _FETCHCRASHESSTEP
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
@@ -406,6 +447,13 @@ ProvisionDutExperiment = _reflection.GeneratedProtocolMessageType('ProvisionDutE
   })
 _sym_db.RegisterMessage(ProvisionDutExperiment)
 _sym_db.RegisterMessage(ProvisionDutExperiment.CrosVersionSelector)
+
+DutTopologyExperiment = _reflection.GeneratedProtocolMessageType('DutTopologyExperiment', (_message.Message,), {
+  'DESCRIPTOR' : _DUTTOPOLOGYEXPERIMENT,
+  '__module__' : 'test_platform.phosphorus.common_pb2'
+  # @@protoc_insertion_point(class_scope:test_platform.phosphorus.DutTopologyExperiment)
+  })
+_sym_db.RegisterMessage(DutTopologyExperiment)
 
 LogDataUploadStep = _reflection.GeneratedProtocolMessageType('LogDataUploadStep', (_message.Message,), {
   'DESCRIPTOR' : _LOGDATAUPLOADSTEP,
