@@ -89,7 +89,7 @@ def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
     if verbose:
       flash_cmd += ['-V']
   if passthrough_args:
-    flash_cmd += passthrough_args
+    flash_cmd.extend(passthrough_args)
   flash_cmd += ['&& reboot']
   return scp_cmd, flash_cmd
 
@@ -366,8 +366,8 @@ def _deploy_servo(image,
   if flash_contents is not None:
     flashrom_cmd += ['--flash-contents', flash_contents]
   if passthrough_args:
-    flashrom_cmd += passthrough_args
-    futility_cmd += passthrough_args
+    flashrom_cmd.extend(passthrough_args)
+    futility_cmd.extend(passthrough_args)
   flash_cmd = flashrom_cmd if flashrom else futility_cmd
   if servo_run(dut_ctl, ap_config.dut_control_on, ap_config.dut_control_off,
                flash_cmd, verbose, dryrun):
