@@ -17,6 +17,7 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import osutils
 from chromite.lib import workon_helper
+from chromite.lib import unittest_lib
 
 
 BOARD = 'this_is_a_board_name'
@@ -162,6 +163,8 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
     # Setup the sysroots.
     sysroot_lib.Sysroot(self._sysroot).WriteConfig(
         'ARCH="amd64"\nPORTDIR_OVERLAY="%s"' % overlay)
+    # make.conf needs to exist to correctly read back config.
+    unittest_lib.create_stub_make_conf(self._sysroot)
 
     # Create helpers for the host or board.
     return workon_helper.WorkonHelper(

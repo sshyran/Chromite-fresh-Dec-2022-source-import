@@ -70,10 +70,19 @@ class GenerateSysroot(object):
     kwargs.setdefault('extra_env', self.extra_env)
     cros_build_lib.sudo_run(cmd, **kwargs)
 
+  def _WriteConfig(self, sysroot):
+    sysroot.WriteConfig(sysroot.GenerateBoardSetupConfig(self.options.board))
+    # For the config to be correctly read, a stub make.conf is needed.
+    # pylint: disable=protected-access
+    make_conf_path = os.path.join(self.sysroot, sysroot_lib._MAKE_CONF)
+    assert not os.path.exists(make_conf_path), 'Expecting an empty sysroot.'
+    osutils.WriteFile(os.path.join(make_conf_path),
+                      'source make.conf.board_setup', makedirs=True, sudo=True)
+
   def _InstallToolchain(self):
     # Create the sysroot's config.
     sysroot = sysroot_lib.Sysroot(self.sysroot)
-    sysroot.WriteConfig(sysroot.GenerateBoardSetupConfig(self.options.board))
+    self._WriteConfig(sysroot)
     toolchain.InstallToolchain(sysroot, configure=False)
 
   def _InstallKernelHeaders(self):

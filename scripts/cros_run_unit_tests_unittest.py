@@ -16,5 +16,5 @@ class DetermineBoardPackagesTest(cros_test_lib.TestCase):
 
   def testNonEmptyPackageSet(self):
     """Asserts that the deps of a known package are non-empty"""
-    self.assertTrue(cros_run_unit_tests.determine_board_packages(
+    self.assertTrue(cros_run_unit_tests.determine_packages(
         '/', ('virtual/implicit-system',)))

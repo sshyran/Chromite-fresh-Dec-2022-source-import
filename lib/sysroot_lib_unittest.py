@@ -15,6 +15,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib import toolchain
+from chromite.lib import unittest_lib
 from chromite.lib.parser import package_info
 
 
@@ -30,6 +31,8 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(sysroot_path)
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
     self.relative_sysroot = sysroot_lib.Sysroot('sysroot')
+    # make.conf needs to exist to correctly read back config.
+    unittest_lib.create_stub_make_conf(sysroot_path)
 
   def _writeOverlays(self,
                      board_overlays: Optional[Iterable[str]] = None,
