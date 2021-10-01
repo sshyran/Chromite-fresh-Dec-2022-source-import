@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import sys
-from typing import List, Optional, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -31,6 +31,7 @@ from chromite.lib.parser import package_info
 
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
+  from chromite.lib import chroot_lib
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
@@ -563,11 +564,11 @@ def uprev_chrome_from_ref(build_targets, refs, chroot):
   chrome_version = uprev_lib.get_chrome_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
-  return uprev_chrome(build_targets, chrome_version, chroot)
+  return uprev_chrome(chrome_version, build_targets, chroot)
 
 
 def revbump_chrome(
-    build_targets: List['build_target_lib.BuildTarget'],
+    build_targets: List['build_target_lib.BuildTarget'] = None,
     chroot: Optional['chroot_lib.Chroot'] = None
 ) -> uprev_lib.UprevVersionedPackageResult:
   """Attempt to revbump chrome.
@@ -578,12 +579,13 @@ def revbump_chrome(
   ebuild) will result in a revbump to 1.2.3.4_rc-r3.ebuild.
   """
   chrome_version = uprev_lib.get_stable_chrome_version()
-  return uprev_chrome(build_targets, chrome_version, chroot)
+  return uprev_chrome(chrome_version, build_targets, chroot)
 
 
 def uprev_chrome(
-    build_targets: List['build_target_lib.BuildTarget'], chrome_version: str,
-    chroot: Union['chroot_lib.Chroot', None]
+    chrome_version: str,
+    build_targets: Optional[List['build_target_lib.BuildTarget']],
+    chroot: Optional['chroot_lib.Chroot']
 ) -> uprev_lib.UprevVersionedPackageResult:
   """Attempt to uprev chrome and its related packages to the given version."""
   uprev_manager = uprev_lib.UprevChromeManager(

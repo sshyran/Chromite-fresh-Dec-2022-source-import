@@ -89,9 +89,18 @@ def UprevVersionedPackage(input_proto, output_proto, _config):
     # Handle module errors nicely, let everything else bubble up.
     cros_build_lib.Die(e)
 
-  if not result.uprevved:
-    # No uprevs executed, skip the output population.
-    return
+  for modified in result.modified:
+    uprev_response = output_proto.responses.add()
+    uprev_response.version = modified.new_version
+    for path in modified.files:
+      uprev_response.modified_ebuilds.add().path = path
+
+
+@faux.success(_UprevVersionedPackageResponse)
+@faux.empty_error
+@validate.validation_complete
+def RevBumpChrome(_input_proto, output_proto, _config):
+  result = packages.revbump_chrome()
 
   for modified in result.modified:
     uprev_response = output_proto.responses.add()
