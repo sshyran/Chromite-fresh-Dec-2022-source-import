@@ -2058,8 +2058,8 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
         toolchain_util,
         '_FindCurrentChromeBranch',
         return_value=self.chrome_branch)
-    self.mock_warn = self.PatchObject(
-        toolchain_util, '_WarnSheriffAboutKernelProfileExpiration')
+    self.mock_send_email_log = self.PatchObject(
+        toolchain_util.alerts, 'SendEmailLog')
     self.PatchObject(
         toolchain_util, '_FindCurrentChromeBranch', return_value='78')
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
@@ -2126,7 +2126,7 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
     mock_find.assert_called_once_with(url, toolchain_util._RankValidCWPProfiles)
     mock_age.assert_called_once_with(self.kernel_stripped, 'kernel_afdo')
 
-    self.mock_warn.assert_not_called()
+    self.mock_send_email_log.assert_not_called()
 
     self.mock_obj.assert_called_with(
         board=self.board,
@@ -2156,7 +2156,15 @@ class AFDOUpdateEbuildTests(cros_test_lib.RunCommandTempDirTestCase):
         toolchain_util, '_FindLatestAFDOArtifact', return_value=self.kernel)
     ret = toolchain_util.AFDOUpdateKernelEbuild(self.board)
     self.assertTrue(ret)
-    self.mock_warn.assert_called_once_with(self.kver, self.kernel_stripped)
+    self.mock_send_email_log.assert_called_once()
+    # Check kernel version in the subject.
+    self.assertIn(self.kver,
+                  self.mock_send_email_log.call_args[0][0])
+    # Check kernel version and kernel AFDO in the message body.
+    self.assertIn(self.kver,
+                  self.mock_send_email_log.call_args[1]['message'])
+    self.assertIn(self.kernel_stripped,
+                  self.mock_send_email_log.call_args[1]['message'])
 
 
 class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):

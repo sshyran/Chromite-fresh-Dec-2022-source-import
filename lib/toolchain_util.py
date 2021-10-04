@@ -1042,9 +1042,8 @@ def _WarnSheriffAboutKernelProfileExpiration(kver, profile):
   """
   # FIXME(tcwang): Fix the subject and email format before deployment.
   subject_msg = (
-      '[Test Async builder] Kernel AutoFDO profile too old for kernel %s' %
-      kver)
-  alert_msg = ('AutoFDO profile too old for kernel %s. Name=%s' % kver, profile)
+      f'[Test Async builder] Kernel AutoFDO profile too old for kernel {kver}')
+  alert_msg = f'AutoFDO profile too old for kernel {kver}. Name={profile}'
   alerts.SendEmailLog(
       subject_msg,
       AFDO_ALERT_RECIPIENTS,
