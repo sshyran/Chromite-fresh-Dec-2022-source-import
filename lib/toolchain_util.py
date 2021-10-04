@@ -1392,9 +1392,8 @@ class _CommonPrepareBundle(object):
     CPV = info.CPV
     if uprev:
       assert CPV.version != '9999'
-      new_rev = 'r%d' % (int(CPV.rev[1:]) + 1) if CPV.rev else 'r1'
-      new_CPV = '%s/%s-%s-%s' % (CPV.category, CPV.package, CPV.version_no_rev,
-                                 new_rev)
+      new_CPV = (
+          f'{CPV.category}/{CPV.package}-{CPV.version}-r{CPV.revision + 1}')
       new_path = os.path.join(
           os.path.dirname(info.path), '%s.ebuild' % os.path.basename(new_CPV))
       os.rename(new_name, new_path)

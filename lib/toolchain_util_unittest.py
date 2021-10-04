@@ -214,9 +214,27 @@ class CommonPrepareBundleTest(PrepareBundleTest):
 
   def testGetEbuildInfo(self):
     """Verify that EbuildInfo is correctly returned."""
-    # chrome_branch calls GetEbuildInfo.
-    self.assertEqual('78', self.obj.chrome_branch)
+    self.glob.return_value = [
+        'chromeos-chrome-96.0.4657.0_rc-r2.ebuild'
+    ]
+    ret = self.obj._GetEbuildInfo('chromeos-chrome')
+    self.assertEqual(ret.CPV.vr, '96.0.4657.0_rc-r2')
+    self.assertEqual(ret.CPV.version, '96.0.4657.0_rc')
+    self.assertEqual(ret.CPV.revision, 2)
+    self.assertTrue(ret.CPV.with_version('96.0.4657.0_rc'))
+    self.assertEqual(ret.CPV.category, 'chromeos-base')
+    self.assertEqual(ret.CPV.package, 'chromeos-chrome')
     self.glob.assert_called_once()
+
+  def testGetEbuildInfoWithoutRevision(self):
+    """Verify that EbuildInfo is correctly returned."""
+    self.glob.return_value = [
+        'chromeos-chrome-96.0.4657.0_rc.ebuild'
+    ]
+    ret = self.obj._GetEbuildInfo('chromeos-chrome')
+    self.assertEqual(ret.CPV.vr, '96.0.4657.0_rc')
+    self.assertEqual(ret.CPV.version, '96.0.4657.0_rc')
+    self.assertEqual(ret.CPV.revision, 0)
 
   def testGetEbuildInfoWithMultipleChromes(self):
     self.glob.return_value = [
@@ -227,6 +245,8 @@ class CommonPrepareBundleTest(PrepareBundleTest):
     ]
     ret = self.obj._GetEbuildInfo('chromeos-chrome')
     self.assertEqual(ret.CPV.vr, '78.0.3893.100_rc-r1')
+    self.assertEqual(ret.CPV.version, '78.0.3893.100_rc')
+    self.assertEqual(ret.CPV.revision, 1)
 
   def test_GetArtifactVersionInGob(self):
     """Test that we look in the right place in GoB."""
