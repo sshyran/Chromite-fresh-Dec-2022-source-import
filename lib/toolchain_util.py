@@ -2582,11 +2582,11 @@ class GetUpdatedFilesHandler(object):
     json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
                              f'kernel_afdo_{kernel_version}.json')
     assert os.path.exists(json_file), (
-      f'Metadata for {kernel_version} does not exist')
+        f'Metadata for {kernel_version} does not exist')
     afdo_versions = json.loads(osutils.ReadFile(json_file))
     kernel_name = f'chromeos-kernel-{kernel_version}'
     assert kernel_name in afdo_versions, (
-      f'To update {kernel_name}, the entry should be in kernel_afdo.json')
+        f'To update {kernel_name}, the entry should be in kernel_afdo.json')
     old_value = afdo_versions[kernel_name]['name']
     update_to_newer_profile = _RankValidCWPProfiles(
         old_value) < _RankValidCWPProfiles(profile_version)
