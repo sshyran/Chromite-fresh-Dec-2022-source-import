@@ -21748,7 +21748,6 @@
         "boards": [
             "nissa"
         ],
-        "important": false,
         "vm_tests": [],
         "vm_tests_override": null
     },
