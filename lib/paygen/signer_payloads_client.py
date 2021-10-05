@@ -89,12 +89,12 @@ class SignerPayloadsClientGoogleStorage(object):
 
     end_time = time.time() + timeout
 
+    lock = gslock.Lock(request_uri + '.lock')
     while True:
       try:
-        with gslock.Lock(request_uri + '.lock'):
+        with lock:
           for path in paths:
             self._ctx.Remove(path, ignore_missing=True)
-
           return
       except gslock.LockNotAcquired:
         # If we have timed out.

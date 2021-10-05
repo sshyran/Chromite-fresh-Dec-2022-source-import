@@ -343,11 +343,9 @@ class PayloadTest(utils.RestrictedAttrDict):
 
     assert payload_type is not None and payload_type in PAYLOAD_TYPES
 
-    super().__init__(payload=payload,
-                                      src_channel=src_channel,
-                                      src_version=src_version,
-                                      payload_type=payload_type,
-                                      applicable_models=applicable_models)
+    super().__init__(payload=payload, src_channel=src_channel,
+                     src_version=src_version, payload_type=payload_type,
+                     applicable_models=applicable_models)
 
 
 class PaygenBuild(object):
@@ -929,7 +927,6 @@ class PaygenBuild(object):
 
     Args:
       payloads: gspath.Payload objects defining all of the payloads to generate.
-      lock: gslock protecting this paygen_build run.
 
     Raises:
       Any arbitrary exception raised by CreateAndUploadPayload.

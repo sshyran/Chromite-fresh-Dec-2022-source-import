@@ -123,9 +123,9 @@ class SignerPayloadsClientGoogleStorageTest(gs_unittest.AbstractGSContextTest,
     client = self.createStandardClient()
 
     # Fake lock failed then acquired.
-    lock = self.PatchObject(gslock, 'Lock', autospec=True,
-                            side_effect=[gslock.LockNotAcquired(),
-                                         mock.MagicMock()])
+    lock = self.PatchObject(gslock, 'Lock', autospec=True)
+    lock.Acquire.side_effect = [gslock.LockNotAcquired(),
+                                mock.MagicMock()]
 
     # Do the work.
     client._CleanSignerFilesByKeyset(hashes, keyset)
