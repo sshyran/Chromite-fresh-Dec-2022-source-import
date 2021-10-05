@@ -280,7 +280,7 @@ def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
   if not source_cache:
     if previous_state.buildroot_layout != BUILDROOT_BUILDROOT_LAYOUT:
       cbuildbot_alerts.PrintBuildbotStepText(
-          'Unknown layout: Wiping buildroot.')
+        'Unknown layout: Wiping buildroot.')
       metrics.Counter(METRIC_CLOBBER).increment(
           fields=field({}, reason='layout_change'))
       chroot_dir = os.path.join(root, constants.DEFAULT_CHROOT_DIR)
@@ -293,7 +293,7 @@ def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
         cbuildbot_alerts.PrintBuildbotStepText(
             'Branch change: Cleaning buildroot.')
         logging.info('Unmatched branch: %s -> %s', previous_state.branch,
-                     repo.branch)
+                    repo.branch)
         metrics.Counter(METRIC_BRANCH_CLEANUP).increment(
             fields=field({}, old_branch=previous_state.branch))
 
@@ -429,11 +429,6 @@ def Cbuildbot(buildroot, depot_tools_path, argv):
   for i, arg in enumerate(argv):
     if arg in ('-r', '--buildroot'):
       argv[i + 1] = buildroot
-
-  # Source_cache flag is only used to indicate a transition to cache disks
-  # and doesn't need to be passed back to Cbuildbot.
-  if '--source_cache' in argv:
-    argv.remove('--source_cache')
 
   # This filters out command line arguments not supported by older versions
   # of cbuildbot.
