@@ -130,6 +130,12 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                             'output': image + '.tbz',
                             'archive': 'tar',
                             'compress': 'bz2'})
+      if self._run.config.gce_image:
+        for image in (constants.BASE_IMAGE_GCE_TAR,
+                      constants.TEST_IMAGE_GCE_TAR):
+          if os.path.exists(os.path.join(image_dir, image)):
+            artifacts.append({'input': [image],
+                              'output': image})
       # We add the dlc folder (if exists) as artifact so we can copy all DLC
       # artifacts as is.
       if os.path.isdir(os.path.join(image_dir, 'dlc')):

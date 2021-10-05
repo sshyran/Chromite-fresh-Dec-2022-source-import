@@ -965,6 +965,10 @@ def DefaultSettings():
       # Whether to convert the image into a guest VM image.
       guest_vm_image=False,
 
+      # Whether to build GCE images suitable for passing directly to
+      # "gcloud compute images create".
+      gce_image=False,
+
       # b/186631313: On reven the base image has a graphical installer enabled,
       # which is used to recover the device. Recovery images in the traditional
       # sense can not be booted on reven devices, which run legacy BIOS or UEFI
