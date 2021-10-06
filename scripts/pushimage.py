@@ -419,6 +419,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
         ('dlc', None, None),
         (constants.QUICK_PROVISION_PAYLOAD_KERNEL, None, None),
         (constants.QUICK_PROVISION_PAYLOAD_ROOTFS, None, None),
+        (constants.QUICK_PROVISION_PAYLOAD_MINIOS, None, None),
     )
 
     # The following build artifacts, if present, are always copied.
