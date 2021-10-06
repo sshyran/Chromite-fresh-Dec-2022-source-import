@@ -179,6 +179,7 @@
     asurada-release
     asurada-zephyr-release
     atlas-blueznext-release
+    atlas-connectivitynext-release
     atlas-kernelnext-release
     atlas-release
     aurora-borealis-release
@@ -213,6 +214,7 @@
     drallion-release
     edgar-release
     elm-arc64-release
+    elm-connectivitynext-release
     elm-kernelnext-release
     elm-release
     endeavour-release
@@ -244,6 +246,7 @@
     hatch-arc-s-release
     hatch-blueznext-release
     hatch-borealis-release
+    hatch-connectivitynext-release
     hatch-diskswap-release
     hatch-kernelnext-release
     hatch-manatee-release
@@ -437,6 +440,12 @@
   atlas-blueznext-payloads-tryjob
   atlas-blueznext-release-tryjob
   atlas-blueznext-unittest-stress
+  atlas-connectivitynext-full-tryjob
+  atlas-connectivitynext-llvm-next-toolchain-tryjob
+  atlas-connectivitynext-llvm-toolchain-tryjob
+  atlas-connectivitynext-payloads-tryjob
+  atlas-connectivitynext-release-tryjob
+  atlas-connectivitynext-unittest-stress
   atlas-factory-atlas-11907.B-factorybranch-tryjob
   atlas-full-tryjob
   atlas-kernelnext-full-tryjob
@@ -686,6 +695,12 @@
   elm-arc64-payloads-tryjob
   elm-arc64-release-tryjob
   elm-arc64-unittest-stress
+  elm-connectivitynext-full-tryjob
+  elm-connectivitynext-llvm-next-toolchain-tryjob
+  elm-connectivitynext-llvm-toolchain-tryjob
+  elm-connectivitynext-payloads-tryjob
+  elm-connectivitynext-release-tryjob
+  elm-connectivitynext-unittest-stress
   elm-factory-oak-8182.B-factorybranch-tryjob
   elm-full-tryjob
   elm-kernelnext-full-tryjob
@@ -1049,6 +1064,12 @@
   hatch-borealis-payloads-tryjob
   hatch-borealis-release-tryjob
   hatch-borealis-unittest-stress
+  hatch-connectivitynext-full-tryjob
+  hatch-connectivitynext-llvm-next-toolchain-tryjob
+  hatch-connectivitynext-llvm-toolchain-tryjob
+  hatch-connectivitynext-payloads-tryjob
+  hatch-connectivitynext-release-tryjob
+  hatch-connectivitynext-unittest-stress
   hatch-diskswap-full-tryjob
   hatch-diskswap-llvm-next-toolchain-tryjob
   hatch-diskswap-llvm-toolchain-tryjob
@@ -1257,6 +1278,7 @@
     asurada-release-tryjob
     asurada-zephyr-release-tryjob
     atlas-blueznext-release-tryjob
+    atlas-connectivitynext-release-tryjob
     atlas-kernelnext-release-tryjob
     atlas-release-tryjob
     aurora-borealis-release-tryjob
@@ -1291,6 +1313,7 @@
     drallion-release-tryjob
     edgar-release-tryjob
     elm-arc64-release-tryjob
+    elm-connectivitynext-release-tryjob
     elm-kernelnext-release-tryjob
     elm-release-tryjob
     endeavour-release-tryjob
@@ -1322,6 +1345,7 @@
     hatch-arc-s-release-tryjob
     hatch-blueznext-release-tryjob
     hatch-borealis-release-tryjob
+    hatch-connectivitynext-release-tryjob
     hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
     hatch-manatee-release-tryjob

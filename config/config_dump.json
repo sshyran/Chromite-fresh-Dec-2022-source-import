@@ -2697,6 +2697,138 @@
             "chrome_internal"
         ]
     },
+    "atlas-connectivitynext-full": {
+        "_template": "full",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "atlas-connectivitynext-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "atlas-connectivitynext-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "atlas-connectivitynext"
+        ]
+    },
+    "atlas-connectivitynext-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "atlas-connectivitynext-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "atlas-connectivitynext"
+        ]
+    },
+    "atlas-connectivitynext-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "atlas-connectivitynext-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "atlas-connectivitynext"
+        ]
+    },
+    "atlas-connectivitynext-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "atlas-connectivitynext-release": {
+        "_template": "release",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "atlas-connectivitynext-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "atlas-connectivitynext-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "atlas-connectivitynext"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "atlas-factory-atlas-11907.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -9061,6 +9193,138 @@
         "_template": "unittest_stress",
         "boards": [
             "elm-arc64"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
+    "elm-connectivitynext-full": {
+        "_template": "full",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "elm-connectivitynext-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "elm-connectivitynext-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "elm-connectivitynext"
+        ]
+    },
+    "elm-connectivitynext-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-connectivitynext-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "elm-connectivitynext"
+        ]
+    },
+    "elm-connectivitynext-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-connectivitynext-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "elm-connectivitynext"
+        ]
+    },
+    "elm-connectivitynext-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "elm-connectivitynext-release": {
+        "_template": "release",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "elm-connectivitynext-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "elm-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "elm-connectivitynext-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "elm-connectivitynext"
         ],
         "hw_tests_override": null,
         "internal": true,
@@ -15841,6 +16105,138 @@
             "chrome_internal"
         ]
     },
+    "hatch-connectivitynext-full": {
+        "_template": "full",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "hatch-connectivitynext-full-tryjob": {
+        "_template": "full",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "prebuilts": "public",
+        "run_cpeexport": true,
+        "useflags": [
+            "-chrome_internal"
+        ],
+        "vm_tests": []
+    },
+    "hatch-connectivitynext-llvm-next-toolchain": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "hatch-connectivitynext"
+        ]
+    },
+    "hatch-connectivitynext-llvm-next-toolchain-tryjob": {
+        "_template": "llvm_next_toolchain",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hatch-connectivitynext-llvm-toolchain": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "hatch-connectivitynext"
+        ]
+    },
+    "hatch-connectivitynext-llvm-toolchain-tryjob": {
+        "_template": "llvm_toolchain",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hatch-connectivitynext-payloads": {
+        "_template": "payloads",
+        "boards": [
+            "hatch-connectivitynext"
+        ]
+    },
+    "hatch-connectivitynext-payloads-tryjob": {
+        "_template": "payloads",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "debug": true,
+        "hw_tests_override": null,
+        "luci_builder": "Try"
+    },
+    "hatch-connectivitynext-release": {
+        "_template": "release",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "important": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "hatch-connectivitynext-release-tryjob": {
+        "_template": "release",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests": [
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
+            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
+        ],
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "paygen": false,
+        "push_image": false,
+        "suite_scheduling": false,
+        "vm_tests": [],
+        "vm_tests_override": null
+    },
+    "hatch-connectivitynext-unittest-stress": {
+        "_template": "unittest_stress",
+        "boards": [
+            "hatch-connectivitynext"
+        ],
+        "hw_tests_override": null,
+        "internal": true,
+        "luci_builder": "Try",
+        "manifest": "official.xml",
+        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+        "overlays": "both",
+        "useflags": [
+            "chrome_internal"
+        ]
+    },
     "hatch-diskswap-full": {
         "_template": "full",
         "boards": [
@@ -20249,6 +20645,7 @@
             "asurada-release",
             "asurada-zephyr-release",
             "atlas-blueznext-release",
+            "atlas-connectivitynext-release",
             "atlas-kernelnext-release",
             "atlas-release",
             "aurora-borealis-release",
@@ -20283,6 +20680,7 @@
             "drallion-release",
             "edgar-release",
             "elm-arc64-release",
+            "elm-connectivitynext-release",
             "elm-kernelnext-release",
             "elm-release",
             "endeavour-release",
@@ -20314,6 +20712,7 @@
             "hatch-arc-s-release",
             "hatch-blueznext-release",
             "hatch-borealis-release",
+            "hatch-connectivitynext-release",
             "hatch-diskswap-release",
             "hatch-kernelnext-release",
             "hatch-manatee-release",
@@ -20464,6 +20863,7 @@
             "asurada-release-tryjob",
             "asurada-zephyr-release-tryjob",
             "atlas-blueznext-release-tryjob",
+            "atlas-connectivitynext-release-tryjob",
             "atlas-kernelnext-release-tryjob",
             "atlas-release-tryjob",
             "aurora-borealis-release-tryjob",
@@ -20498,6 +20898,7 @@
             "drallion-release-tryjob",
             "edgar-release-tryjob",
             "elm-arc64-release-tryjob",
+            "elm-connectivitynext-release-tryjob",
             "elm-kernelnext-release-tryjob",
             "elm-release-tryjob",
             "endeavour-release-tryjob",
@@ -20529,6 +20930,7 @@
             "hatch-arc-s-release-tryjob",
             "hatch-blueznext-release-tryjob",
             "hatch-borealis-release-tryjob",
+            "hatch-connectivitynext-release-tryjob",
             "hatch-diskswap-release-tryjob",
             "hatch-kernelnext-release-tryjob",
             "hatch-manatee-release-tryjob",
