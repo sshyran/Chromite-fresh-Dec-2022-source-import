@@ -14,18 +14,6 @@
       ]
     },
     {
-      "name": "atlas-connectivitynext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "banon",
       "configs": [
         {
@@ -298,18 +286,6 @@
           "leader_board": false,
           "board_group": "strago",
           "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "elm-connectivitynext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
         }
       ]
     },
@@ -994,6 +970,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 439,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "atlas-connectivitynext",
+      "reference_board_name": "atlas-connectivitynext",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "atlas-connectivitynext",
+          "name": "atlas",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7209,
           "is_active": true
         }
       ]
@@ -1991,6 +1984,17 @@
         {
           "board_name": "dedede",
           "name": "kracko360",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 419,
@@ -2411,6 +2415,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7156,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "elm-connectivitynext",
+      "reference_board_name": "elm-connectivitynext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "elm-connectivitynext",
+          "name": "elm",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7207,
           "is_active": true
         }
       ]
