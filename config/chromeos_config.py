@@ -1822,6 +1822,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-zork-13700.B', ['zork']),
       (WEEKLY, 'factory-puff-13813.B', ['puff']),
       (WEEKLY, 'factory-asurada-13929.B', ['asurada']),
+      (WEEKLY, 'factory-ambassador-14265.B', ['ambassador']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', [

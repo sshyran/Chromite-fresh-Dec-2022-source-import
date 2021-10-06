@@ -1,4 +1,6 @@
 == factory ==
+  factory-ambassador-14265.B-buildspec
+    ambassador-factory-ambassador-14265.B-factorybranch
   factory-asurada-13929.B-buildspec
     asurada-factory-asurada-13929.B-factorybranch
   factory-atlas-11907.B-buildspec
@@ -371,6 +373,7 @@
   adlrvp-payloads-tryjob
   adlrvp-release-tryjob
   adlrvp-unittest-stress
+  ambassador-factory-ambassador-14265.B-factorybranch-tryjob
   ambassador-full-tryjob
   ambassador-llvm-next-toolchain-tryjob
   ambassador-llvm-toolchain-tryjob
@@ -772,6 +775,8 @@
   excelsior-release-tryjob
   excelsior-unittest-stress
   expresso-factory-rambi-5517.B-factorybranch-tryjob
+  factory-ambassador-14265.B-buildspec-tryjob
+    ambassador-factory-ambassador-14265.B-factorybranch-tryjob
   factory-asurada-13929.B-buildspec-tryjob
     asurada-factory-asurada-13929.B-factorybranch-tryjob
   factory-atlas-11907.B-buildspec-tryjob
