@@ -383,6 +383,7 @@ class TestGBBSigner(cros_test_lib.RunCommandTempDirTestCase):
                          ['gbb',
                           '--set',
                           '--recoverykey=' + ks.keys['recovery_key'].public,
+                          '--rootkey=' + ks.keys['root_key'].public,
                           bios_in,
                           bios_out])
 

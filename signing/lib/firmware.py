@@ -131,8 +131,8 @@ class ECSigner(signer.BaseSigner):
 
 class GBBSigner(signer.FutilitySigner):
   """Sign GBB"""
-  required_keys_public = ('recovery_key',)
-  required_keys_private = ('root_key',)
+  required_keys_public = ('recovery_key', 'root_key')
+  required_keys_private = ()
 
   def GetFutilityArgs(self, keyset, input_name, output_name):
     """Return args for signing GBB
@@ -145,6 +145,7 @@ class GBBSigner(signer.FutilitySigner):
     return ['gbb',
             '--set',
             '--recoverykey=' + keyset.keys['recovery_key'].public,
+            '--rootkey=' + keyset.keys['root_key'].public,
             input_name,
             output_name]
 
