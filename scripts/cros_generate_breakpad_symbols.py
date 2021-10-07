@@ -31,6 +31,10 @@ from chromite.lib import parallel
 from chromite.lib import signals
 from chromite.utils import file_util
 
+# Elf files that don't exist but have a split .debug file installed.
+ALLOWED_DEBUG_ONLY_FILES = {
+    'boot/vmlinux',
+}
 
 SymbolHeader = collections.namedtuple('SymbolHeader',
                                       ('cpu', 'id', 'name', 'os',))
@@ -81,6 +85,7 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
   assert breakpad_dir
   if num_errors is None:
     num_errors = ctypes.c_int()
+  debug_file_only = not os.path.exists(elf_file)
 
   cmd_base = [dump_syms_cmd, '-v']
   if strip_cfi:
@@ -108,7 +113,11 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
       dir=breakpad_dir, delete=False) as temp:
     if debug_file:
       # Try to dump the symbols using the debug file like normal.
-      cmd_args = [elf_file, os.path.dirname(debug_file)]
+      if debug_file_only:
+        cmd_args = [debug_file]
+      else:
+        cmd_args = [elf_file, os.path.dirname(debug_file)]
+
       result = _DumpIt(cmd_args)
 
       if result.returncode:
@@ -243,7 +252,9 @@ def GenerateBreakpadSymbols(board, breakpad_dir=None, strip_cfi=False,
         continue
 
       # Filter out files based on common issues with the elf file.
-      if not os.path.exists(elf_file):
+      elf_path = os.path.relpath(elf_file, sysroot)
+      debug_only = elf_path in ALLOWED_DEBUG_ONLY_FILES
+      if not os.path.exists(elf_file) and not debug_only:
         # Sometimes we filter out programs from /usr/bin but leave behind
         # the .debug file.
         logging.warning('Skipping missing %s', elf_file)
