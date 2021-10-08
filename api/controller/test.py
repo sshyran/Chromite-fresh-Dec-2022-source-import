@@ -10,6 +10,7 @@ Handles all testing related functionality, it is not itself a test.
 import functools
 import os
 import string
+import subprocess
 
 from chromite.api import controller
 from chromite.api import faux
@@ -18,6 +19,7 @@ from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
 from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
 from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
 from chromite.api.gen.chromiumos.test.api import test_suite_pb2
@@ -154,11 +156,17 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
 PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
 TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
-TEST_CONTAINER_BUILD_SCRIPTS = [
-    os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
-    os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
-    os.path.join(PLATFORM_DEV_DIR, 'test/container/utils/build-dockerimage.sh'),
-]
+TEST_CONTAINER_BUILD_SCRIPTS = {
+    'cros-provision':
+        os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
+    'cros-dut':
+        os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
+    'cros-test':
+        os.path.join(
+            PLATFORM_DEV_DIR,
+            'test/container/utils/build-dockerimage.sh'
+        ),
+}
 
 
 def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
@@ -244,22 +252,42 @@ def BuildTestServiceContainers(
       '{}={}'.format(key, value) for key, value in input_proto.labels.items()
   )
 
-  for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
-    cmd = [build_script, chroot.path, sysroot.path]
-    cmd += ['--tags', tags]
-    cmd += labels
+  for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():
+    with osutils.TempDir(prefix='test_container') as tempdir:
+      output_path = os.path.join(tempdir, 'metadata.jsonpb')
 
-    cmd_result = cros_build_lib.run(cmd, check=False)
-    if cmd_result.returncode == 0:
-      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          success=test_pb2.TestServiceContainerBuildResult.Success()
-      ))
-    else:
-      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          failure=test_pb2.TestServiceContainerBuildResult.Failure(
-              error_message=cmd_result.stderr
-          )
-      ))
+      # Note that we use an output file instead of stdout to avoid any issues
+      # with maintaining stdout hygiene.  Stdout and stderr are combined to
+      # form the error log in response to any errors.
+      cmd = [build_script, chroot.path, sysroot.path]
+      cmd += ['--tags', tags]
+      cmd += ['--output', output_path]
+      cmd += labels
+
+      result = test_pb2.TestServiceContainerBuildResult()
+      result.name = human_name
+
+      cmd_result = cros_build_lib.run(cmd, check=False,
+                                      stderr=subprocess.STDOUT,
+                                      stdout=True)
+      if cmd_result.returncode == 0:
+        # Read the ContainerImageInfo message produced by the container build.
+        image_info = container_metadata_pb2.ContainerImageInfo()
+        json_format.Parse(osutils.ReadFile(output_path), image_info)
+
+        result.success.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Success(
+                image_info=image_info
+            )
+        )
+      else:
+        result.failure.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Failure(
+                error_message=cmd_result.stdout
+            )
+        )
+
+      output_proto.results.append(result)
 
 
 @faux.empty_success

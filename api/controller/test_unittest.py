@@ -13,6 +13,7 @@ from chromite.api import controller
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
 from chromite.api.gen.chromiumos.build.api import system_image_pb2
 from chromite.api.gen.chromiumos.build.api import portage_pb2
 from chromite.api.gen.chromiumos.config.payload import flat_config_pb2
@@ -336,7 +337,7 @@ class DockerConstraintsTest(cros_test_lib.MockTestCase):
       self.assertValid(test_controller._ValidDockerLabelKey(key))
 
 
-class BuildTestServiceContainers(cros_test_lib.MockTestCase,
+class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
                                  api_config.ApiConfigMixin):
   """Tests for the BuildTestServiceContainers function."""
 
@@ -349,18 +350,48 @@ class BuildTestServiceContainers(cros_test_lib.MockTestCase,
 
   def testSuccess(self):
     """Check passing case with mocked cros_build_lib.run."""
-    patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+
+    def ContainerMetadata():
+      """Return mocked ContainerImageInfo proto"""
+      metadata = container_metadata_pb2.ContainerImageInfo()
+      metadata.repository.hostname = 'gcr.io'
+      metadata.repository.project = 'chromeos-bot'
+      metadata.name = 'random-container-name'
+      metadata.digest = (
+          '09b730f8b6a862f9c2705cb3acf3554563325f5fca5c784bf5c98beb2e56f6db')
+      metadata.tags[:] = [
+          'staging-cq-amd64-generic.R96-1.2.3',
+          '8834106026340379089',
+      ]
+      return metadata
+
+    def WriteContainerMetadata(path):
+      """Write json formatted metadata to the given file."""
+      osutils.WriteFile(
+          path,
+          json_format.MessageToJson(ContainerMetadata()),
+      )
+
+    # Write out mocked container metadata to a temporary file.
+    output_path = os.path.join(self.tempdir, 'metadata.jsonpb')
+    self.rc.SetDefaultCmdResult(
+        returncode=0,
+        side_effect=lambda *_, **__: WriteContainerMetadata(output_path)
+    )
+
+    # Patch TempDir so that we always use this test's directory.
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
 
     response = test_pb2.BuildTestServiceContainersResponse()
     test_controller.BuildTestServiceContainers(
         self.request,
         response,
         self.api_config)
-    patch.assert_called()
+
+    self.assertTrue(self.rc.called)
     for result in response.results:
       self.assertEqual(result.WhichOneof('result'), 'success')
+      self.assertEqual(result.success.image_info, ContainerMetadata())
 
   def testFailure(self):
     """Check failure case with mocked cros_build_lib.run."""

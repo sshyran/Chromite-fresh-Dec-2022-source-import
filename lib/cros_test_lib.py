@@ -1497,7 +1497,16 @@ class RunCommandMock(partial_mock.PartialCmdMock):
   ATTRS = ('run',)
   DEFAULT_ATTR = 'run'
 
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self._called = False
+
+  @property
+  def called(self):
+    return self._called
+
   def run(self, cmd, *args, **kwargs):
+    self._called = True
     result = self._results['run'].LookupResult(
         (cmd,), kwargs=kwargs, hook_args=(cmd,) + args, hook_kwargs=kwargs)
 
@@ -1522,7 +1531,7 @@ class RunCommandTestCase(MockTestCase):
 
     # These ENV variables affect run behavior, hide them.
     self._old_envs = {e: os.environ.pop(e) for e in constants.ENV_PASSTHRU
-                      if e in os.environ}
+                         if e in os.environ}
 
   def tearDown(self):
     # Restore hidden ENVs.
