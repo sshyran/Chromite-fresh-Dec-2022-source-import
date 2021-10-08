@@ -299,6 +299,7 @@
     reven-vmtest-release
     rex-release
     sand-release
+    sarien-kernelnext-release
     sarien-release
     scarlet-release
     senor-release
@@ -1401,6 +1402,7 @@
     reven-vmtest-release-tryjob
     rex-release-tryjob
     sand-release-tryjob
+    sarien-kernelnext-release-tryjob
     sarien-release-tryjob
     scarlet-release-tryjob
     senor-release-tryjob
@@ -1672,6 +1674,12 @@
   sand-unittest-stress
   sarien-factory-sarien-12033.B-factorybranch-tryjob
   sarien-full-tryjob
+  sarien-kernelnext-full-tryjob
+  sarien-kernelnext-llvm-next-toolchain-tryjob
+  sarien-kernelnext-llvm-toolchain-tryjob
+  sarien-kernelnext-payloads-tryjob
+  sarien-kernelnext-release-tryjob
+  sarien-kernelnext-unittest-stress
   sarien-llvm-next-toolchain-tryjob
   sarien-llvm-toolchain-tryjob
   sarien-master-factorybranch-tryjob
