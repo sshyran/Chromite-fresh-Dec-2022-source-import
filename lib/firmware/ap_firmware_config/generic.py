@@ -63,13 +63,13 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   dut_control_on = [['cpu_fw_spi:on']]
   dut_control_off = [['cpu_fw_spi:off']]
   if servo.is_v2:
-    programmer = 'ft2232_spi:type=google-servo-v2,serial=%s'
+    programmer = 'ft2232_spi:type=google-servo-v2,serial=%s' % servo.serial
   elif servo.is_micro or servo.is_c2d2:
-    programmer = 'raiden_debug_spi:serial=%s'
+    programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
     dut_control_on = []
     dut_control_off = []
-    programmer = 'raiden_debug_spi:target=AP,serial=%s'
+    programmer = 'raiden_debug_spi:target=AP,serial=%s' % servo.serial
   else:
     raise servo_lib.UnsupportedServoVersionError('%s not supported' %
                                                  servo.version)
