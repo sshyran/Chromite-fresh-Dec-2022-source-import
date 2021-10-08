@@ -6,6 +6,7 @@
 
 import os
 from unittest import mock
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
@@ -104,12 +105,18 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
 
   def testFindAlreadyOpenLKGMRoll(self):
     already_open_issues = [123456]
+    self.committer._commit_msg_header = 'A message with spaces'
     with mock.patch.object(
         self.committer._gerrit_helper, 'Query',
-        return_value=already_open_issues):
+        return_value=already_open_issues) as mock_query:
       self.assertEqual(
           self.committer.FindAlreadyOpenLKGMRoll(),
           already_open_issues[0])
+      escaped_quotes = urllib.parse.quote('"')
+      message = mock_query.call_args.kwargs['message']
+      self.assertEqual(message.count(escaped_quotes), 2)
+      self.assertTrue(message.startswith(escaped_quotes))
+      self.assertTrue(message.endswith(escaped_quotes))
     already_open_issues = [123456, 654321]
     with mock.patch.object(
         self.committer._gerrit_helper, 'Query',

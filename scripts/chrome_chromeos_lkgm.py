@@ -150,7 +150,7 @@ class ChromeLKGMCommitter(object):
         # The value of the LKGM is included in the first line of the commit
         # message. So including that in our query should only return CLs that
         # roll to our LKGM.
-        'message': urllib.parse.quote(self._commit_msg_header),
+        'message': urllib.parse.quote('"' + self._commit_msg_header + '"'),
     }
     issues = self._gerrit_helper.Query(**query_params)
     if len(issues) > 1:
