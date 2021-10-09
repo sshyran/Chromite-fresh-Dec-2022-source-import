@@ -6,6 +6,7 @@
 
 import os
 import pathlib
+from typing import Optional
 from unittest import mock
 
 from chromite.api import api_config
@@ -646,15 +647,19 @@ class BundleSimpleChromeArtifactsTest(cros_test_lib.MockTempDirTestCase,
 
     self.response = artifacts_pb2.BundleResponse()
 
-  def _GetRequest(self, chroot=None, sysroot=None, build_target=None,
-                  output_dir=None):
+  def _GetRequest(
+      self,
+      chroot: Optional[str] = None,
+      sysroot: Optional[str] = None,
+      build_target: Optional[str] = None,
+      output_dir: Optional[str] = None) -> artifacts_pb2.BundleRequest:
     """Helper to create a request message instance.
 
     Args:
-      chroot (str): The chroot path.
-      sysroot (str): The sysroot path.
-      build_target (str): The build target name.
-      output_dir (str): The output directory.
+      chroot: The chroot path.
+      sysroot: The sysroot path.
+      build_target: The build target name.
+      output_dir: The output directory.
     """
     return artifacts_pb2.BundleRequest(
         sysroot={'path': sysroot, 'build_target': {'name': build_target}},
@@ -753,17 +758,19 @@ class BundleVmFilesTest(cros_test_lib.MockTempDirTestCase,
 
     self.response = artifacts_pb2.BundleResponse()
 
-  def _GetInput(self, chroot=None, sysroot=None, test_results_dir=None,
-                output_dir=None):
+  def _GetInput(
+      self,
+      chroot: Optional[str] = None,
+      sysroot: Optional[str] = None,
+      test_results_dir: Optional[str] = None,
+      output_dir: Optional[str] = None) -> artifacts_pb2.BundleVmFilesRequest:
     """Helper to build out an input message instance.
 
     Args:
-      chroot (str|None): The chroot path.
-      sysroot (str|None): The sysroot path relative to the chroot.
-      test_results_dir (str|None): The test results directory relative to the
-        sysroot.
-      output_dir (str|None): The directory where the results tarball should be
-        saved.
+      chroot: The chroot path.
+      sysroot: The sysroot path relative to the chroot.
+      test_results_dir: The test results directory relative to the sysroot.
+      output_dir: The directory where the results tarball should be saved.
     """
     return artifacts_pb2.BundleVmFilesRequest(
         chroot={'path': chroot}, sysroot={'path': sysroot},
@@ -875,17 +882,22 @@ class BundleAFDOGenerationArtifactsTestCase(
 
     self.response = artifacts_pb2.BundleResponse()
 
-  def _GetRequest(self, chroot=None, build_target=None, chrome_root=None,
-                  output_dir=None, artifact_type=None):
+  def _GetRequest(
+      self,
+      chroot: Optional[str] = None,
+      build_target: Optional[str] = None,
+      chrome_root: Optional[str] = None,
+      output_dir: Optional[str] = None,
+      artifact_type: Optional['artifacts_pb2.AFDOArtifactType'] = None
+    ) -> 'artifacts_pb2.artifacts_pb2.BundleChromeAFDORequest':
     """Helper to create a request message instance.
 
     Args:
-      chroot (str): The chroot path.
-      build_target (str): The build target name.
-      chrome_root (str): The path to Chrome root.
-      output_dir (str): The output directory.
-      artifact_type (artifacts_pb2.AFDOArtifactType):
-      The type of the artifact.
+      chroot: The chroot path.
+      build_target: The build target name.
+      chrome_root: The path to Chrome root.
+      output_dir: The output directory.
+      artifact_type: The type of the artifact.
     """
     return artifacts_pb2.BundleChromeAFDORequest(
         chroot={'path': chroot, 'chrome_dir': chrome_root},
@@ -1196,4 +1208,4 @@ class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
     actual_filepaths = [fp.path.path for fp in response.filepaths]
     self.assertEqual(sorted(actual_filepaths), sorted(self.expected_filepaths))
     self.assertTrue(all([fp.path.location == common_pb2.Path.OUTSIDE
-        for fp in response.filepaths]))
+                         for fp in response.filepaths]))
