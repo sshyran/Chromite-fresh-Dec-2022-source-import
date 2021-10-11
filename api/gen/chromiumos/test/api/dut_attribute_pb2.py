@@ -11,6 +11,7 @@ from chromite.third_party.google.protobuf import symbol_database as _symbol_data
 _sym_db = _symbol_database.Default()
 
 
+from chromite.api.gen.chromiumos.test.api import provision_state_pb2 as chromiumos_dot_test_dot_api_dot_provision__state__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\'chromiumos/test/api/dut_attribute.proto\x12\x13\x63hromiumos.test.api\"\x8b\x04\n\x0c\x44utAttribute\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0f\n\x07\x61liases\x18\x02 \x03(\t\x12P\n\x12\x66lat_config_source\x18\x03 \x01(\x0b\x32\x32.chromiumos.test.api.DutAttribute.FlatConfigSourceH\x00\x12\x43\n\x0bhwid_source\x18\x04 \x01(\x0b\x32,.chromiumos.test.api.DutAttribute.HwidSourceH\x00\x12\x16\n\x0e\x61llowed_values\x18\x05 \x03(\t\x12\x16\n\x0e\x65xclude_values\x18\x06 \x03(\t\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x19\n\tFieldSpec\x12\x0c\n\x04path\x18\x01 \x01(\t\x1aO\n\x10\x46latConfigSource\x12;\n\x06\x66ields\x18\x01 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpec\x1a\x61\n\nHwidSource\x12\x16\n\x0e\x63omponent_type\x18\x01 \x01(\t\x12;\n\x06\x66ields\x18\x02 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpecB\r\n\x0b\x64\x61ta_source\"M\n\x10\x44utAttributeList\x12\x39\n\x0e\x64ut_attributes\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.DutAttribute\"Z\n\x0c\x44utCriterion\x12:\n\x0c\x61ttribute_id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0e\n\x06values\x18\x02 \x03(\tB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
-)
+  serialized_pb=b'\n\'chromiumos/test/api/dut_attribute.proto\x12\x13\x63hromiumos.test.api\x1a)chromiumos/test/api/provision_state.proto\"\x8b\x04\n\x0c\x44utAttribute\x12\x30\n\x02id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0f\n\x07\x61liases\x18\x02 \x03(\t\x12P\n\x12\x66lat_config_source\x18\x03 \x01(\x0b\x32\x32.chromiumos.test.api.DutAttribute.FlatConfigSourceH\x00\x12\x43\n\x0bhwid_source\x18\x04 \x01(\x0b\x32,.chromiumos.test.api.DutAttribute.HwidSourceH\x00\x12\x16\n\x0e\x61llowed_values\x18\x05 \x03(\t\x12\x16\n\x0e\x65xclude_values\x18\x06 \x03(\t\x1a\x13\n\x02Id\x12\r\n\x05value\x18\x01 \x01(\t\x1a\x19\n\tFieldSpec\x12\x0c\n\x04path\x18\x01 \x01(\t\x1aO\n\x10\x46latConfigSource\x12;\n\x06\x66ields\x18\x01 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpec\x1a\x61\n\nHwidSource\x12\x16\n\x0e\x63omponent_type\x18\x01 \x01(\t\x12;\n\x06\x66ields\x18\x02 \x03(\x0b\x32+.chromiumos.test.api.DutAttribute.FieldSpecB\r\n\x0b\x64\x61ta_source\"M\n\x10\x44utAttributeList\x12\x39\n\x0e\x64ut_attributes\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.DutAttribute\"Z\n\x0c\x44utCriterion\x12:\n\x0c\x61ttribute_id\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.DutAttribute.Id\x12\x0e\n\x06values\x18\x02 \x03(\t\"\x80\x01\n\tDutTarget\x12\x33\n\x08\x63riteria\x18\x01 \x03(\x0b\x32!.chromiumos.test.api.DutCriterion\x12>\n\x10provision_config\x18\x02 \x01(\x0b\x32$.chromiumos.test.api.ProvisionConfigB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  ,
+  dependencies=[chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,])
 
 
 
@@ -52,8 +54,8 @@ _DUTATTRIBUTE_ID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=347,
-  serialized_end=366,
+  serialized_start=390,
+  serialized_end=409,
 )
 
 _DUTATTRIBUTE_FIELDSPEC = _descriptor.Descriptor(
@@ -83,8 +85,8 @@ _DUTATTRIBUTE_FIELDSPEC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=368,
-  serialized_end=393,
+  serialized_start=411,
+  serialized_end=436,
 )
 
 _DUTATTRIBUTE_FLATCONFIGSOURCE = _descriptor.Descriptor(
@@ -114,8 +116,8 @@ _DUTATTRIBUTE_FLATCONFIGSOURCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=395,
-  serialized_end=474,
+  serialized_start=438,
+  serialized_end=517,
 )
 
 _DUTATTRIBUTE_HWIDSOURCE = _descriptor.Descriptor(
@@ -152,8 +154,8 @@ _DUTATTRIBUTE_HWIDSOURCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=476,
-  serialized_end=573,
+  serialized_start=519,
+  serialized_end=616,
 )
 
 _DUTATTRIBUTE = _descriptor.Descriptor(
@@ -223,8 +225,8 @@ _DUTATTRIBUTE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=65,
-  serialized_end=588,
+  serialized_start=108,
+  serialized_end=631,
 )
 
 
@@ -255,8 +257,8 @@ _DUTATTRIBUTELIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=590,
-  serialized_end=667,
+  serialized_start=633,
+  serialized_end=710,
 )
 
 
@@ -294,8 +296,47 @@ _DUTCRITERION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=669,
-  serialized_end=759,
+  serialized_start=712,
+  serialized_end=802,
+)
+
+
+_DUTTARGET = _descriptor.Descriptor(
+  name='DutTarget',
+  full_name='chromiumos.test.api.DutTarget',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='criteria', full_name='chromiumos.test.api.DutTarget.criteria', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='provision_config', full_name='chromiumos.test.api.DutTarget.provision_config', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=805,
+  serialized_end=933,
 )
 
 _DUTATTRIBUTE_ID.containing_type = _DUTATTRIBUTE
@@ -315,9 +356,12 @@ _DUTATTRIBUTE.oneofs_by_name['data_source'].fields.append(
 _DUTATTRIBUTE.fields_by_name['hwid_source'].containing_oneof = _DUTATTRIBUTE.oneofs_by_name['data_source']
 _DUTATTRIBUTELIST.fields_by_name['dut_attributes'].message_type = _DUTATTRIBUTE
 _DUTCRITERION.fields_by_name['attribute_id'].message_type = _DUTATTRIBUTE_ID
+_DUTTARGET.fields_by_name['criteria'].message_type = _DUTCRITERION
+_DUTTARGET.fields_by_name['provision_config'].message_type = chromiumos_dot_test_dot_api_dot_provision__state__pb2._PROVISIONCONFIG
 DESCRIPTOR.message_types_by_name['DutAttribute'] = _DUTATTRIBUTE
 DESCRIPTOR.message_types_by_name['DutAttributeList'] = _DUTATTRIBUTELIST
 DESCRIPTOR.message_types_by_name['DutCriterion'] = _DUTCRITERION
+DESCRIPTOR.message_types_by_name['DutTarget'] = _DUTTARGET
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 DutAttribute = _reflection.GeneratedProtocolMessageType('DutAttribute', (_message.Message,), {
@@ -372,6 +416,13 @@ DutCriterion = _reflection.GeneratedProtocolMessageType('DutCriterion', (_messag
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutCriterion)
   })
 _sym_db.RegisterMessage(DutCriterion)
+
+DutTarget = _reflection.GeneratedProtocolMessageType('DutTarget', (_message.Message,), {
+  'DESCRIPTOR' : _DUTTARGET,
+  '__module__' : 'chromiumos.test.api.dut_attribute_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.test.api.DutTarget)
+  })
+_sym_db.RegisterMessage(DutTarget)
 
 
 DESCRIPTOR._options = None

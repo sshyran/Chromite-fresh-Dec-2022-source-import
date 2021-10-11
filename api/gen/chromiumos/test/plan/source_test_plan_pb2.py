@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z.go.chromium.org/chromiumos/config/go/test/plan',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n+chromiumos/test/plan/source_test_plan.proto\x12\x14\x63hromiumos.test.plan\"\xf8\n\n\x0eSourceTestPlan\x12W\n\x19\x65nabled_test_environments\x18\x01 \x03(\x0e\x32\x34.chromiumos.test.plan.SourceTestPlan.TestEnvironment\x12\x14\n\x0cpath_regexps\x18\x02 \x03(\t\x12\x1c\n\x14path_regexp_excludes\x18\x03 \x03(\t\x12\x11\n\ttest_tags\x18\x04 \x03(\t\x12\x19\n\x11test_tag_excludes\x18\x05 \x03(\t\x12G\n\x0crequirements\x18\r \x01(\x0b\x32\x31.chromiumos.test.plan.SourceTestPlan.Requirements\x1a\x8b\x08\n\x0cRequirements\x12Y\n\x0fkernel_versions\x18\x01 \x01(\x0b\x32@.chromiumos.test.plan.SourceTestPlan.Requirements.KernelVersions\x12S\n\x0csoc_families\x18\x02 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.SocFamilies\x12V\n\rarchitectures\x18\x03 \x01(\x0b\x32?.chromiumos.test.plan.SourceTestPlan.Requirements.Architectures\x12S\n\x0c\x61rc_versions\x18\x04 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.ArcVersions\x12R\n\x0b\x66ingerprint\x18\x05 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.Fingerprint\x12N\n\tparallels\x18\x06 \x01(\x0b\x32;.chromiumos.test.plan.SourceTestPlan.Requirements.Parallels\x12Y\n\x0f\x63hromeos_config\x18\x07 \x01(\x0b\x32@.chromiumos.test.plan.SourceTestPlan.Requirements.ChromeOSConfig\x12\x62\n\x14\x66irmware_ro_versions\x18\x08 \x01(\x0b\x32\x44.chromiumos.test.plan.SourceTestPlan.Requirements.FirmwareROVersions\x1a\x10\n\x0eKernelVersions\x1a\r\n\x0bSocFamilies\x1a\x0f\n\rArchitectures\x1a\r\n\x0b\x41rcVersions\x1a\r\n\x0b\x46ingerprint\x1a\x0b\n\tParallels\x1a\x10\n\x0e\x43hromeOSConfig\x1a\xcb\x01\n\x12\x46irmwareROVersions\x12z\n\x14program_to_milestone\x18\x01 \x03(\x0b\x32\\.chromiumos.test.plan.SourceTestPlan.Requirements.FirmwareROVersions.ProgramToMilestoneEntry\x1a\x39\n\x17ProgramToMilestoneEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"N\n\x0fTestEnvironment\x12 \n\x1cTEST_ENVIRONMENT_UNSPECIFIED\x10\x00\x12\x0c\n\x08HARDWARE\x10\x01\x12\x0b\n\x07VIRTUAL\x10\x02J\x04\x08\x06\x10\rB0Z.go.chromium.org/chromiumos/config/go/test/planb\x06proto3'
+  serialized_pb=b'\n+chromiumos/test/plan/source_test_plan.proto\x12\x14\x63hromiumos.test.plan\"\x99\x0c\n\x0eSourceTestPlan\x12[\n\x19\x65nabled_test_environments\x18\x01 \x03(\x0e\x32\x34.chromiumos.test.plan.SourceTestPlan.TestEnvironmentB\x02\x18\x01\x12\x14\n\x0cpath_regexps\x18\x02 \x03(\t\x12\x1c\n\x14path_regexp_excludes\x18\x03 \x03(\t\x12[\n\x18test_plan_starlark_files\x18\x0f \x03(\x0b\x32\x39.chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile\x12\x15\n\ttest_tags\x18\x04 \x03(\tB\x02\x18\x01\x12\x1d\n\x11test_tag_excludes\x18\x05 \x03(\tB\x02\x18\x01\x12K\n\x0crequirements\x18\r \x01(\x0b\x32\x31.chromiumos.test.plan.SourceTestPlan.RequirementsB\x02\x18\x01\x1a\x32\n\x14TestPlanStarlarkFile\x12\x0c\n\x04repo\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\t\x1a\x8b\x08\n\x0cRequirements\x12Y\n\x0fkernel_versions\x18\x01 \x01(\x0b\x32@.chromiumos.test.plan.SourceTestPlan.Requirements.KernelVersions\x12S\n\x0csoc_families\x18\x02 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.SocFamilies\x12V\n\rarchitectures\x18\x03 \x01(\x0b\x32?.chromiumos.test.plan.SourceTestPlan.Requirements.Architectures\x12S\n\x0c\x61rc_versions\x18\x04 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.ArcVersions\x12R\n\x0b\x66ingerprint\x18\x05 \x01(\x0b\x32=.chromiumos.test.plan.SourceTestPlan.Requirements.Fingerprint\x12N\n\tparallels\x18\x06 \x01(\x0b\x32;.chromiumos.test.plan.SourceTestPlan.Requirements.Parallels\x12Y\n\x0f\x63hromeos_config\x18\x07 \x01(\x0b\x32@.chromiumos.test.plan.SourceTestPlan.Requirements.ChromeOSConfig\x12\x62\n\x14\x66irmware_ro_versions\x18\x08 \x01(\x0b\x32\x44.chromiumos.test.plan.SourceTestPlan.Requirements.FirmwareROVersions\x1a\x10\n\x0eKernelVersions\x1a\r\n\x0bSocFamilies\x1a\x0f\n\rArchitectures\x1a\r\n\x0b\x41rcVersions\x1a\r\n\x0b\x46ingerprint\x1a\x0b\n\tParallels\x1a\x10\n\x0e\x43hromeOSConfig\x1a\xcb\x01\n\x12\x46irmwareROVersions\x12z\n\x14program_to_milestone\x18\x01 \x03(\x0b\x32\\.chromiumos.test.plan.SourceTestPlan.Requirements.FirmwareROVersions.ProgramToMilestoneEntry\x1a\x39\n\x17ProgramToMilestoneEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"N\n\x0fTestEnvironment\x12 \n\x1cTEST_ENVIRONMENT_UNSPECIFIED\x10\x00\x12\x0c\n\x08HARDWARE\x10\x01\x12\x0b\n\x07VIRTUAL\x10\x02J\x04\x08\x06\x10\rB0Z.go.chromium.org/chromiumos/config/go/test/planb\x06proto3'
 )
 
 
@@ -49,11 +49,49 @@ _SOURCETESTPLAN_TESTENVIRONMENT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1386,
-  serialized_end=1464,
+  serialized_start=1547,
+  serialized_end=1625,
 )
 _sym_db.RegisterEnumDescriptor(_SOURCETESTPLAN_TESTENVIRONMENT)
 
+
+_SOURCETESTPLAN_TESTPLANSTARLARKFILE = _descriptor.Descriptor(
+  name='TestPlanStarlarkFile',
+  full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='repo', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.repo', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='path', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.path', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=457,
+  serialized_end=507,
+)
 
 _SOURCETESTPLAN_REQUIREMENTS_KERNELVERSIONS = _descriptor.Descriptor(
   name='KernelVersions',
@@ -75,8 +113,8 @@ _SOURCETESTPLAN_REQUIREMENTS_KERNELVERSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1069,
-  serialized_end=1085,
+  serialized_start=1230,
+  serialized_end=1246,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_SOCFAMILIES = _descriptor.Descriptor(
@@ -99,8 +137,8 @@ _SOURCETESTPLAN_REQUIREMENTS_SOCFAMILIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1087,
-  serialized_end=1100,
+  serialized_start=1248,
+  serialized_end=1261,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_ARCHITECTURES = _descriptor.Descriptor(
@@ -123,8 +161,8 @@ _SOURCETESTPLAN_REQUIREMENTS_ARCHITECTURES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1102,
-  serialized_end=1117,
+  serialized_start=1263,
+  serialized_end=1278,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_ARCVERSIONS = _descriptor.Descriptor(
@@ -147,8 +185,8 @@ _SOURCETESTPLAN_REQUIREMENTS_ARCVERSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1119,
-  serialized_end=1132,
+  serialized_start=1280,
+  serialized_end=1293,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_FINGERPRINT = _descriptor.Descriptor(
@@ -171,8 +209,8 @@ _SOURCETESTPLAN_REQUIREMENTS_FINGERPRINT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1134,
-  serialized_end=1147,
+  serialized_start=1295,
+  serialized_end=1308,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_PARALLELS = _descriptor.Descriptor(
@@ -195,8 +233,8 @@ _SOURCETESTPLAN_REQUIREMENTS_PARALLELS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1149,
-  serialized_end=1160,
+  serialized_start=1310,
+  serialized_end=1321,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_CHROMEOSCONFIG = _descriptor.Descriptor(
@@ -219,8 +257,8 @@ _SOURCETESTPLAN_REQUIREMENTS_CHROMEOSCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1162,
-  serialized_end=1178,
+  serialized_start=1323,
+  serialized_end=1339,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS_PROGRAMTOMILESTONEENTRY = _descriptor.Descriptor(
@@ -257,8 +295,8 @@ _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS_PROGRAMTOMILESTONEENTRY = _descr
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1327,
-  serialized_end=1384,
+  serialized_start=1488,
+  serialized_end=1545,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS = _descriptor.Descriptor(
@@ -288,8 +326,8 @@ _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1181,
-  serialized_end=1384,
+  serialized_start=1342,
+  serialized_end=1545,
 )
 
 _SOURCETESTPLAN_REQUIREMENTS = _descriptor.Descriptor(
@@ -368,8 +406,8 @@ _SOURCETESTPLAN_REQUIREMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=349,
-  serialized_end=1384,
+  serialized_start=510,
+  serialized_end=1545,
 )
 
 _SOURCETESTPLAN = _descriptor.Descriptor(
@@ -386,7 +424,7 @@ _SOURCETESTPLAN = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='path_regexps', full_name='chromiumos.test.plan.SourceTestPlan.path_regexps', index=1,
       number=2, type=9, cpp_type=9, label=3,
@@ -402,30 +440,37 @@ _SOURCETESTPLAN = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='test_tags', full_name='chromiumos.test.plan.SourceTestPlan.test_tags', index=3,
+      name='test_plan_starlark_files', full_name='chromiumos.test.plan.SourceTestPlan.test_plan_starlark_files', index=3,
+      number=15, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='test_tags', full_name='chromiumos.test.plan.SourceTestPlan.test_tags', index=4,
       number=4, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='test_tag_excludes', full_name='chromiumos.test.plan.SourceTestPlan.test_tag_excludes', index=4,
+      name='test_tag_excludes', full_name='chromiumos.test.plan.SourceTestPlan.test_tag_excludes', index=5,
       number=5, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='requirements', full_name='chromiumos.test.plan.SourceTestPlan.requirements', index=5,
+      name='requirements', full_name='chromiumos.test.plan.SourceTestPlan.requirements', index=6,
       number=13, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\030\001', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_SOURCETESTPLAN_REQUIREMENTS, ],
+  nested_types=[_SOURCETESTPLAN_TESTPLANSTARLARKFILE, _SOURCETESTPLAN_REQUIREMENTS, ],
   enum_types=[
     _SOURCETESTPLAN_TESTENVIRONMENT,
   ],
@@ -436,9 +481,10 @@ _SOURCETESTPLAN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=70,
-  serialized_end=1470,
+  serialized_end=1631,
 )
 
+_SOURCETESTPLAN_TESTPLANSTARLARKFILE.containing_type = _SOURCETESTPLAN
 _SOURCETESTPLAN_REQUIREMENTS_KERNELVERSIONS.containing_type = _SOURCETESTPLAN_REQUIREMENTS
 _SOURCETESTPLAN_REQUIREMENTS_SOCFAMILIES.containing_type = _SOURCETESTPLAN_REQUIREMENTS
 _SOURCETESTPLAN_REQUIREMENTS_ARCHITECTURES.containing_type = _SOURCETESTPLAN_REQUIREMENTS
@@ -459,12 +505,20 @@ _SOURCETESTPLAN_REQUIREMENTS.fields_by_name['chromeos_config'].message_type = _S
 _SOURCETESTPLAN_REQUIREMENTS.fields_by_name['firmware_ro_versions'].message_type = _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS
 _SOURCETESTPLAN_REQUIREMENTS.containing_type = _SOURCETESTPLAN
 _SOURCETESTPLAN.fields_by_name['enabled_test_environments'].enum_type = _SOURCETESTPLAN_TESTENVIRONMENT
+_SOURCETESTPLAN.fields_by_name['test_plan_starlark_files'].message_type = _SOURCETESTPLAN_TESTPLANSTARLARKFILE
 _SOURCETESTPLAN.fields_by_name['requirements'].message_type = _SOURCETESTPLAN_REQUIREMENTS
 _SOURCETESTPLAN_TESTENVIRONMENT.containing_type = _SOURCETESTPLAN
 DESCRIPTOR.message_types_by_name['SourceTestPlan'] = _SOURCETESTPLAN
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 SourceTestPlan = _reflection.GeneratedProtocolMessageType('SourceTestPlan', (_message.Message,), {
+
+  'TestPlanStarlarkFile' : _reflection.GeneratedProtocolMessageType('TestPlanStarlarkFile', (_message.Message,), {
+    'DESCRIPTOR' : _SOURCETESTPLAN_TESTPLANSTARLARKFILE,
+    '__module__' : 'chromiumos.test.plan.source_test_plan_pb2'
+    # @@protoc_insertion_point(class_scope:chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile)
+    })
+  ,
 
   'Requirements' : _reflection.GeneratedProtocolMessageType('Requirements', (_message.Message,), {
 
@@ -540,6 +594,7 @@ SourceTestPlan = _reflection.GeneratedProtocolMessageType('SourceTestPlan', (_me
   # @@protoc_insertion_point(class_scope:chromiumos.test.plan.SourceTestPlan)
   })
 _sym_db.RegisterMessage(SourceTestPlan)
+_sym_db.RegisterMessage(SourceTestPlan.TestPlanStarlarkFile)
 _sym_db.RegisterMessage(SourceTestPlan.Requirements)
 _sym_db.RegisterMessage(SourceTestPlan.Requirements.KernelVersions)
 _sym_db.RegisterMessage(SourceTestPlan.Requirements.SocFamilies)
@@ -554,4 +609,8 @@ _sym_db.RegisterMessage(SourceTestPlan.Requirements.FirmwareROVersions.ProgramTo
 
 DESCRIPTOR._options = None
 _SOURCETESTPLAN_REQUIREMENTS_FIRMWAREROVERSIONS_PROGRAMTOMILESTONEENTRY._options = None
+_SOURCETESTPLAN.fields_by_name['enabled_test_environments']._options = None
+_SOURCETESTPLAN.fields_by_name['test_tags']._options = None
+_SOURCETESTPLAN.fields_by_name['test_tag_excludes']._options = None
+_SOURCETESTPLAN.fields_by_name['requirements']._options = None
 # @@protoc_insertion_point(module_scope)
