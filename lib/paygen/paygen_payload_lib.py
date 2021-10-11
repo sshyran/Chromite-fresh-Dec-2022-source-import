@@ -395,8 +395,8 @@ class PaygenPayload(object):
       # _GetPlatformImageParams() documentation for more info.
       if self.payload.src_image:
         self._appid, self._minor_version = (
-          self._GetPlatformImageParams(self.src_image_file))
-      else :
+            self._GetPlatformImageParams(self.src_image_file))
+      else:
         # Full payloads do not need the minor version and should use the target
         # image.
         self._appid, _ = self._GetPlatformImageParams(self.tgt_image_file)
@@ -651,14 +651,17 @@ class PaygenPayload(object):
       List of lists which contain each signed hash (as bytes).
       [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
     """
+    keysets = self.PAYLOAD_SIGNATURE_KEYSETS
     logging.info('Signing payload hashes with %s.',
-                 ', '.join(self.PAYLOAD_SIGNATURE_KEYSETS))
+                 ', '.join(keysets))
 
     # Results look like:
     #  [[hash_1_sig_1, hash_1_sig_2], [hash_2_sig_1, hash_2_sig_2]]
     hashes_sigs = self.signer.GetHashSignatures(
         hashes,
-        keysets=self.PAYLOAD_SIGNATURE_KEYSETS)
+        keysets=keysets)
+    logging.info('Signatures for hashes=%s and keysets=%s is %s',
+                 hashes, keysets, hashes_sigs)
 
     if hashes_sigs is None:
       self._GenerateSignerResultsError('Signing of hashes failed')
