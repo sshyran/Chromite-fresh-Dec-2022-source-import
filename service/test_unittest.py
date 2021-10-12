@@ -1,7 +1,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """The test service unit tests."""
 
 import contextlib
@@ -96,8 +95,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testBlocklist(self):
     """Test the blocklist argument."""
     blocklist = ['foo/bar', 'cat/pkg']
-    test.BuildTargetUnitTest(self.build_target, self.chroot,
-                             blocklist=blocklist)
+    test.BuildTargetUnitTest(
+        self.build_target, self.chroot, blocklist=blocklist)
     self.assertCommandContains(['--skip-packages', 'foo/bar cat/pkg'])
 
   def testTestablePackagesOptional(self):
@@ -116,8 +115,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test non-zero return code and failed package handling."""
     packages = ['foo/bar', 'cat/pkg']
     pkgs = [package_info.parse(p) for p in packages]
-    self.PatchObject(portage_util, 'ParseDieHookStatusFile',
-                     return_value=pkgs)
+    self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=pkgs)
     expected_rc = 1
     self.rc.SetDefaultCmdResult(returncode=expected_rc)
 
@@ -129,8 +127,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testCodeCoverage(self):
     """Test adding use flags for coverage when requested."""
-    result = test.BuildTargetUnitTest(self.build_target, self.chroot,
-                                      code_coverage=True)
+    result = test.BuildTargetUnitTest(
+        self.build_target, self.chroot, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'coverage'))
@@ -139,8 +137,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testCodeCoverageExistingFlags(self):
     """Test adding use flags for coverage when existing flags."""
     chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'foo bar'})
-    result = test.BuildTargetUnitTest(self.build_target, chroot,
-                                      code_coverage=True)
+    result = test.BuildTargetUnitTest(
+        self.build_target, chroot, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'foo bar coverage'))
@@ -149,8 +147,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testCodeCoverageExistingCoverageFlag(self):
     """Test adding use flags for coverage when already has coverage flag."""
     chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'coverage bar'})
-    result = test.BuildTargetUnitTest(self.build_target, chroot,
-                                      code_coverage=True)
+    result = test.BuildTargetUnitTest(
+        self.build_target, chroot, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'coverage bar'))
@@ -205,8 +203,8 @@ class DebugInfoTestTest(cros_test_lib.RunCommandTestCase):
   def testSuccess(self):
     """Test command success."""
     self.assertTrue(test.DebugInfoTest('/sysroot/path'))
-    self.assertCommandContains(['debug_info_test',
-                                '/sysroot/path/usr/lib/debug'])
+    self.assertCommandContains(
+        ['debug_info_test', '/sysroot/path/usr/lib/debug'])
 
   def testFailure(self):
     """Test command failure."""
@@ -249,16 +247,19 @@ class CreateMoblabVmTest(MoblabVmTestCase):
     vms = test.CreateMoblabVm(self.tempdir, self.chroot.path, self.image_dir)
     self.assertEqual(vms.workspace, self.tempdir)
     self.assertEqual(vms.chroot, self.chroot.path)
-    self.assertEqual(
-        self.mock_vm_create.call_args_list,
-        [mock.call(self.image_dir, dut_image_dir=self.image_dir,
-                   create_vm_images=False)])
+    self.assertEqual(self.mock_vm_create.call_args_list, [
+        mock.call(
+            self.image_dir,
+            dut_image_dir=self.image_dir,
+            create_vm_images=False)
+    ])
 
 
 class PrepareMoblabVmImageCacheTest(MoblabVmTestCase):
   """Unit tests for PrepareMoblabVmImageCache."""
 
   def setUp(self):
+
     @contextlib.contextmanager
     def MountedMoblabDiskContextMock(*_args, **_kwargs):
       yield self.tempdir
@@ -269,8 +270,9 @@ class PrepareMoblabVmImageCacheTest(MoblabVmTestCase):
     self.payload_file_name = 'payload.bin'
     self.payload_file = os.path.join(self.payload_dir, self.payload_file_name)
     self.payload_file_content = 'A Lannister always pays his debts.'
-    osutils.WriteFile(os.path.join(self.payload_dir, self.payload_file_name),
-                      self.payload_file_content)
+    osutils.WriteFile(
+        os.path.join(self.payload_dir, self.payload_file_name),
+        self.payload_file_content)
 
   def testBasic(self):
     """PrepareMoblabVmImageCache loads all payloads into the vm."""
@@ -283,8 +285,8 @@ class PrepareMoblabVmImageCacheTest(MoblabVmTestCase):
     copied_payload_file = os.path.join(self.tempdir, expected_cache_dir,
                                        self.payload_file_name)
     self.assertExists(copied_payload_file)
-    self.assertEqual(osutils.ReadFile(copied_payload_file),
-                     self.payload_file_content)
+    self.assertEqual(
+        osutils.ReadFile(copied_payload_file), self.payload_file_content)
 
 
 class RunMoblabVmTestTest(MoblabVmTestCase):
@@ -300,18 +302,23 @@ class RunMoblabVmTestTest(MoblabVmTestCase):
     test.RunMoblabVmTest(self.chroot, self.vms, self.builder,
                          self.image_cache_dir, self.results_dir)
     self.assertCommandContains([
-        'test_that', '--no-quickmerge',
-        '--results_dir', self.results_dir,
-        '-b', 'moblab-generic-vm',
+        'test_that',
+        '--no-quickmerge',
+        '--results_dir',
+        self.results_dir,
+        '-b',
+        'moblab-generic-vm',
         'moblab_DummyServerNoSspSuite',
         '--args',
         'services_init_timeout_m=10 '
         'target_build="%s" '
         'test_timeout_hint_m=90 '
         'clear_devserver_cache=False '
-        'image_storage_server="%s"' % (self.builder,
-                                       self.image_cache_dir + '/'),
-    ], enter_chroot=True, chroot_args=self.chroot.get_enter_args())
+        'image_storage_server="%s"' %
+        (self.builder, self.image_cache_dir + '/'),
+    ],
+                               enter_chroot=True,
+                               chroot_args=self.chroot.get_enter_args())
 
 
 class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
@@ -337,8 +344,8 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
     goma_test_dir = os.path.join(self.tempdir, 'goma_test_dir')
     goma_test_json_string = os.path.join(self.tempdir, 'goma_json_string.txt')
     chromeos_goma_dir = os.path.join(self.tempdir, 'chromeos_goma_dir')
-    goma_config = common_pb2.GomaConfig(goma_dir=goma_test_dir,
-                                        goma_client_json=goma_test_json_string)
+    goma_config = common_pb2.GomaConfig(
+        goma_dir=goma_test_dir, goma_client_json=goma_test_json_string)
     osutils.SafeMakedirs(goma_test_dir)
     osutils.SafeMakedirs(chromeos_goma_dir)
     osutils.Touch(goma_test_json_string)
@@ -359,8 +366,8 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
     self.PatchObject(os.path, 'exists', return_value=True)
 
-    ninja_cmd = self.PatchObject(commands.ChromeSDK, 'GetNinjaCommand',
-                                 return_value='ninja command')
+    ninja_cmd = self.PatchObject(
+        commands.ChromeSDK, 'GetNinjaCommand', return_value='ninja command')
 
     test.SimpleChromeWorkflowTest(self.sysroot_path, self.build_target,
                                   self.chrome_root, goma)
@@ -374,11 +381,12 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
     self.chrome_sdk_run_mock.assert_any_call(['gclient', 'runhooks'])
     self.chrome_sdk_run_mock.assert_any_call(['true'])
-    self.chrome_sdk_run_mock.assert_any_call(
-        ['bash', '-c', ('%s gen "%s" --args="$GN_ARGS"'
-                        % (gn_dir, board_out_dir))])
-    self.chrome_sdk_run_mock.assert_any_call(
-        ['env', '--null'], run_args=mock.ANY)
+    self.chrome_sdk_run_mock.assert_any_call([
+        'bash', '-c',
+        ('%s gen "%s" --args="$GN_ARGS"' % (gn_dir, board_out_dir))
+    ])
+    self.chrome_sdk_run_mock.assert_any_call(['env', '--null'],
+                                             run_args=mock.ANY)
     self.chrome_sdk_run_mock.assert_any_call('ninja command', run_args=mock.ANY)
 
     # Create expected paths from constants so that the tests work inside or
@@ -389,13 +397,14 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
     image_dir_symlink = image_lib.GetLatestImageLink(self.build_target)
     image_path = os.path.join(image_dir_symlink, constants.VM_IMAGE_BIN)
 
-    self.chrome_sdk_run_mock.assert_any_call(
-        [deploy_chrome_path, '--build-dir', board_out_dir, '--staging-only',
-         '--staging-dir', mock.ANY])
-    self.chrome_sdk_run_mock.assert_any_call(
-        ['cros_run_test', '--copy-on-write', '--deploy', '--board=board',
-         ('--image-path=%s' % (image_path)),
-         '--build-dir=out_board/Release'])
+    self.chrome_sdk_run_mock.assert_any_call([
+        deploy_chrome_path, '--build-dir', board_out_dir, '--staging-only',
+        '--staging-dir', mock.ANY
+    ])
+    self.chrome_sdk_run_mock.assert_any_call([
+        'cros_run_test', '--copy-on-write', '--deploy', '--board=board',
+        ('--image-path=%s' % (image_path)), '--build-dir=out_board/Release'
+    ])
 
     # Verify goma mock was started and stopped.
     # TODO(crbug/1065172): Invalid assertions that had previously been mocked.
@@ -418,14 +427,14 @@ class ValidateMoblabVmTestTest(MoblabVmTestCase):
 
   def testValidateMoblabVmTestNoLogs(self):
     """ValidateMoblabVmTest dies when test_that logs not present."""
-    self.assertRaises(failures_lib.TestFailure,
-                      test.ValidateMoblabVmTest, self.results_dir)
+    self.assertRaises(failures_lib.TestFailure, test.ValidateMoblabVmTest,
+                      self.results_dir)
 
   def testValidateMoblabVmTestFailure(self):
     """ValidateMoblabVmTest dies when tests failed."""
     osutils.WriteFile(self.logs_file, 'dummy_PassServer [FAILED]')
-    self.assertRaises(failures_lib.TestFailure,
-                      test.ValidateMoblabVmTest, self.results_dir)
+    self.assertRaises(failures_lib.TestFailure, test.ValidateMoblabVmTest,
+                      self.results_dir)
 
 
 class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
@@ -447,7 +456,7 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
   def testGatherCodeCoverageLlvmJsonFileIsCalled1Time(self):
     """Verify GatherCodeCoverageLlvmJsonFile is called on each file."""
     GatherCodeCoverageLlvmJsonFile_mock = self.PatchObject(
-      test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
+        test, 'GatherCodeCoverageLlvmJsonFile', return_value=None)
 
     test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
     GatherCodeCoverageLlvmJsonFile_mock.assert_called_once()
@@ -463,12 +472,12 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
   def testCreateTarballIsCalled1Time(self):
     """Test that CreateTarball is called once."""
     gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
-    self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile',
-      return_value=gather_result)
+    self.PatchObject(
+        test, 'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
 
     create_tarball_result = cros_build_lib.CommandResult(returncode=1)
-    CreateTarball_mock = self.PatchObject(cros_build_lib, 'CreateTarball',
-                                          return_value=create_tarball_result)
+    CreateTarball_mock = self.PatchObject(
+        cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
     test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot, self.output_dir)
     CreateTarball_mock.assert_called_once()
@@ -476,12 +485,12 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
   def testShouldReturnNoneWhenCreateTarballFails(self):
     """Test that None is returned when CreateTarball fails."""
     gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
-    self.PatchObject(test,
-      'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
+    self.PatchObject(
+        test, 'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
 
     create_tarball_result = cros_build_lib.CommandResult(returncode=1)
-    self.PatchObject(cros_build_lib, 'CreateTarball',
-      return_value=create_tarball_result)
+    self.PatchObject(
+        cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
     result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
                                              self.output_dir)
@@ -490,32 +499,34 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
   def testShouldReturnPathToTarballOnSuccess(self):
     """Test that the path to the tarball is returned on success."""
     gather_result = GatherCodeCoverageLlvmJsonFileResult('coverage.json')
-    self.PatchObject(test, 'GatherCodeCoverageLlvmJsonFile',
-      return_value=gather_result)
+    self.PatchObject(
+        test, 'GatherCodeCoverageLlvmJsonFile', return_value=gather_result)
 
     create_tarball_result = cros_build_lib.CommandResult(returncode=0)
-    self.PatchObject(cros_build_lib, 'CreateTarball',
-      return_value=create_tarball_result)
+    self.PatchObject(
+        cros_build_lib, 'CreateTarball', return_value=create_tarball_result)
 
     result = test.BundleCodeCoverageLlvmJson(self.chroot, self.sysroot,
                                              self.output_dir)
     self.assertEqual(
-      os.path.join(self.output_dir,
-                   constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR), result)
+        os.path.join(self.output_dir,
+                     constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR), result)
 
 
 class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
   """GatherCodeCoverageLlvmJsonFile Tests."""
 
-  def getCodeCoverageLlvmContents(self, filenames: List[str], version='1',
-      file_type='llvm.coverage.json.export') -> str:
+  def getCodeCoverageLlvmContents(self,
+                                  filenames: List[str],
+                                  version='1',
+                                  file_type='llvm.coverage.json.export') -> str:
     """Helper for generating the contents of an llvm code coverage file."""
     return json.dumps({
-        'data': [
-            {
-                'files': [{'filename': x} for x in filenames ]
-            }
-        ],
+        'data': [{
+            'files': [{
+                'filename': x
+            } for x in filenames]
+        }],
         'version': version,
         'type': file_type
     })
@@ -536,7 +547,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/coverage.json'))
     self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/d/coverage.json'))
     self.writeCodeCoverageLlvm(
-      os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
+        os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
 
     result = test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
     self.assertEqual(len(result.joined_file_paths), 4)
@@ -544,7 +555,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
   def testCallsGetLlvmJsonCoverageDataIfValidForEachFile(self):
     """Test that GetLlvmJsonCoverageDataIfValid is called on each file."""
     get_llvm_json_coverage_data_if_valid_mock = self.PatchObject(
-      code_coverage_util, 'GetLlvmJsonCoverageDataIfValid', return_value=None)
+        code_coverage_util, 'GetLlvmJsonCoverageDataIfValid', return_value=None)
 
     output_dir = os.path.join(self.tempdir, 'output')
     input_dir = os.path.join(self.tempdir, 'input')
@@ -553,7 +564,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/coverage.json'))
     self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/b/c/d/coverage.json'))
     self.writeCodeCoverageLlvm(
-      os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
+        os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
 
     test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
     self.assertEqual(get_llvm_json_coverage_data_if_valid_mock.call_count, 4)
@@ -563,29 +574,29 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     output_dir = os.path.join(self.tempdir, 'output')
     input_dir = os.path.join(self.tempdir, 'input')
     osutils.SafeMakedirs(output_dir)
-    self.writeCodeCoverageLlvm(os.path.join(input_dir, 'a/src2/coverage.json'),
-                               self.getCodeCoverageLlvmContents(
-                                   ['/src2/a.txt', '/src2/b.txt']))
     self.writeCodeCoverageLlvm(
-      os.path.join(input_dir, 'a/firmware/coverage.json'),
-      self.getCodeCoverageLlvmContents(['/firmware/c.txt']))
+        os.path.join(input_dir, 'a/src2/coverage.json'),
+        self.getCodeCoverageLlvmContents(['/src2/a.txt', '/src2/b.txt']))
     self.writeCodeCoverageLlvm(
-      os.path.join(input_dir, 'a/invalid/invalid.json'), 'INVALID')
+        os.path.join(input_dir, 'a/firmware/coverage.json'),
+        self.getCodeCoverageLlvmContents(['/firmware/c.txt']))
+    self.writeCodeCoverageLlvm(
+        os.path.join(input_dir, 'a/invalid/invalid.json'), 'INVALID')
 
     test.GatherCodeCoverageLlvmJsonFile(output_dir, [input_dir])
 
     # Verify the contents of each valid file appear in the output.
     file_obj = json.loads(
-      self.ReadTempFile(os.path.join(output_dir, 'coverage.json')))
+        self.ReadTempFile(os.path.join(output_dir, 'coverage.json')))
     all_files = file_obj['data'][0]['files']
 
     self.assertEqual(3, len(all_files))
-    self.assertEqual(1,
-      len([x for x in all_files if x['filename'] == '/src2/a.txt']))
-    self.assertEqual(1,
-      len([x for x in all_files if x['filename'] == '/src2/b.txt']))
-    self.assertEqual(1,
-      len([x for x in all_files if x['filename'] == '/firmware/c.txt']))
+    self.assertEqual(
+        1, len([x for x in all_files if x['filename'] == '/src2/a.txt']))
+    self.assertEqual(
+        1, len([x for x in all_files if x['filename'] == '/src2/b.txt']))
+    self.assertEqual(
+        1, len([x for x in all_files if x['filename'] == '/firmware/c.txt']))
 
 
 class FindMetadataTestCase(cros_test_lib.MockTestCase):
@@ -598,11 +609,11 @@ class FindMetadataTestCase(cros_test_lib.MockTestCase):
   expected_autotest_metadata_file = (
       '/usr/chroot/build/coral/usr/local/build/autotest/autotest_metadata.pb')
   expected_tast_local_metadata_file = (
-        '/usr/chroot/build/coral/usr/share/tast/metadata/local/cros.pb')
+      '/usr/chroot/build/coral/usr/share/tast/metadata/local/cros.pb')
   expected_tast_local_private_metadata_file = (
-        '/usr/chroot/build/coral/build/share/tast/metadata/local/crosint.pb')
+      '/usr/chroot/build/coral/build/share/tast/metadata/local/crosint.pb')
   expected_tast_remote_metadata_file = (
-        '/usr/chroot/usr/share/tast/metadata/remote/cros.pb')
+      '/usr/chroot/usr/share/tast/metadata/remote/cros.pb')
 
   def setUp(self):
     self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
@@ -638,36 +649,37 @@ class BundleHwqualTarballTest(cros_test_lib.MockTempDirTestCase):
 
   def testNoArchiveDir(self):
     """Test a run when the archive dir does not exist."""
-    self.assertIsNone(test.BundleHwqualTarball('foo', 'bar', self.chroot,
-      self.sysroot, self.output_dir))
+    self.assertIsNone(
+        test.BundleHwqualTarball('foo', 'bar', self.chroot, self.sysroot,
+                                 self.output_dir))
 
   def testAutotestUtilFailure(self):
     """Test a run when autotest_util fails to bundle autotest."""
     archive_dir = self.chroot.full_path(self.sysroot.path,
-                                     constants.AUTOTEST_BUILD_PATH)
+                                        constants.AUTOTEST_BUILD_PATH)
     osutils.SafeMakedirs(archive_dir)
 
-    self.PatchObject(autotest_util, 'AutotestTarballBuilder',
-                     return_value=None)
-    self.assertIsNone(test.BundleHwqualTarball('foo', 'bar', self.chroot,
-      self.sysroot, self.output_dir))
+    self.PatchObject(autotest_util, 'AutotestTarballBuilder', return_value=None)
+    self.assertIsNone(
+        test.BundleHwqualTarball('foo', 'bar', self.chroot, self.sysroot,
+                                 self.output_dir))
 
   def testSuccess(self):
     """Test a successful multiple version run."""
     archive_dir = self.chroot.full_path(self.sysroot.path,
-                                     constants.AUTOTEST_BUILD_PATH)
+                                        constants.AUTOTEST_BUILD_PATH)
     osutils.SafeMakedirs(archive_dir)
 
     bundle_tmp_path = 'tmp/path/'
     self.PatchObject(osutils.TempDir, '__enter__', return_value=bundle_tmp_path)
-    self.PatchObject(autotest_util, 'AutotestTarballBuilder',
-                     return_value=bundle_tmp_path)
+    self.PatchObject(
+        autotest_util, 'AutotestTarballBuilder', return_value=bundle_tmp_path)
 
     image_dir = 'path/to/image/'
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value=image_dir)
 
     script_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
-      'crostestutils')
+                              'crostestutils')
     ssh_private_key = os.path.join(image_dir, constants.TEST_KEY_PRIVATE)
 
     run_mock = self.PatchObject(cros_build_lib, 'run')
@@ -675,13 +687,11 @@ class BundleHwqualTarballTest(cros_test_lib.MockTempDirTestCase):
     env_file = os.path.join(self.output_dir, 'chromeos-hwqual-foo-bar.tar.bz2')
     osutils.Touch(env_file)
 
-    created = test.BundleHwqualTarball('foo', 'bar', self.chroot,
-      self.sysroot, self.output_dir)
-    run_mock.assert_called_with(
-      [os.path.join(script_dir, 'archive_hwqual'),
-      '--from', bundle_tmp_path,
-      '--to', self.output_dir,
-      '--image_dir', image_dir, '--ssh_private_key', ssh_private_key,
-      '--output_tag', 'chromeos-hwqual-foo-bar'],
-    )
+    created = test.BundleHwqualTarball('foo', 'bar', self.chroot, self.sysroot,
+                                       self.output_dir)
+    run_mock.assert_called_with([
+        os.path.join(script_dir, 'archive_hwqual'), '--from', bundle_tmp_path,
+        '--to', self.output_dir, '--image_dir', image_dir, '--ssh_private_key',
+        ssh_private_key, '--output_tag', 'chromeos-hwqual-foo-bar'
+    ],)
     self.assertStartsWith(created, self.output_dir)

@@ -1,7 +1,6 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Test service.
 
 Handles test related functionality.
@@ -77,7 +76,7 @@ def BuildTargetUnitTest(build_target,
     was_built (bool): Whether packages were built.
     code_coverage (bool): Whether to produce code coverage data.
     testable_packages_optional (bool): Whether to allow no testable packages to
-    be found.
+      be found.
     filter_only_cros_workon (bool): Whether to filter out non-cros_workon
       packages from input package list.
 
@@ -115,10 +114,12 @@ def BuildTargetUnitTest(build_target,
   with chroot.tempdir() as tempdir:
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = chroot.chroot_path(tempdir)
 
-    result = cros_build_lib.run(cmd, enter_chroot=True,
-                                extra_env=extra_env,
-                                chroot_args=chroot.get_enter_args(),
-                                check=False)
+    result = cros_build_lib.run(
+        cmd,
+        enter_chroot=True,
+        extra_env=extra_env,
+        chroot_args=chroot.get_enter_args(),
+        check=False)
 
     failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
 
@@ -141,9 +142,12 @@ def BuildTargetUnitTestTarball(chroot, sysroot, result_path):
   if not os.path.exists(cwd):
     return None
 
-  result = cros_build_lib.CreateTarball(tarball_path, cwd, chroot=chroot.path,
-                                        compression=cros_build_lib.COMP_NONE,
-                                        check=False)
+  result = cros_build_lib.CreateTarball(
+      tarball_path,
+      cwd,
+      chroot=chroot.path,
+      compression=cros_build_lib.COMP_NONE,
+      check=False)
 
   return tarball_path if result.returncode == 0 else None
 
@@ -185,12 +189,12 @@ def BundleHwqualTarball(board, version, chroot, sysroot, result_path):
     output_tag = 'chromeos-hwqual-%s-%s' % (board, version)
 
     script_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'platform',
-      'crostestutils')
-    cmd = [os.path.join(script_dir, 'archive_hwqual'),
-      '--from', autotest_bundle_dir,
-      '--to', result_path,
-      '--image_dir', image_dir, '--ssh_private_key', ssh_private_key,
-      '--output_tag', output_tag]
+                              'crostestutils')
+    cmd = [
+        os.path.join(script_dir, 'archive_hwqual'), '--from',
+        autotest_bundle_dir, '--to', result_path, '--image_dir', image_dir,
+        '--ssh_private_key', ssh_private_key, '--output_tag', output_tag
+    ]
 
     cros_build_lib.run(cmd)
 
@@ -299,11 +303,14 @@ def RunMoblabVmTest(chroot, vms, builder, image_cache_dir, results_dir):
         [
             'test_that',
             '--no-quickmerge',
-            '--results_dir', results_dir,
-            '-b', 'moblab-generic-vm',
+            '--results_dir',
+            results_dir,
+            '-b',
+            'moblab-generic-vm',
             'localhost:%s' % vms.moblab_ssh_port,
             'moblab_DummyServerNoSspSuite',
-            '--args', ' '.join(test_args),
+            '--args',
+            ' '.join(test_args),
         ],
         enter_chroot=True,
         chroot_args=chroot.get_enter_args(),
@@ -356,8 +363,12 @@ def _InitSimpleChromeSDK(tempdir, build_target_name, sysroot_path, chrome_root,
   cache_dir = os.path.join(tempdir, 'cache')
 
   sdk_cmd = commands.ChromeSDK(
-      constants.SOURCE_ROOT, build_target_name, chrome_src=chrome_root,
-      goma=use_goma, extra_args=extra_args, cache_dir=cache_dir)
+      constants.SOURCE_ROOT,
+      build_target_name,
+      chrome_src=chrome_root,
+      goma=use_goma,
+      extra_args=extra_args,
+      cache_dir=cache_dir)
   return sdk_cmd
 
 
@@ -401,12 +412,14 @@ def _BuildChrome(sdk_cmd, chrome_root, out_board_dir, goma):
     extra_env = goma.GetExtraEnv()
     ninja_env_path = os.path.join(goma.goma_log_dir, 'ninja_env')
     sdk_cmd.Run(['env', '--null'],
-                run_args={'extra_env': extra_env,
-                          'stdout': ninja_env_path})
-    osutils.WriteFile(os.path.join(goma.goma_log_dir, 'ninja_cwd'),
-                      sdk_cmd.cwd)
-    osutils.WriteFile(os.path.join(goma.goma_log_dir, 'ninja_command'),
-                      cros_build_lib.CmdToStr(sdk_cmd.GetNinjaCommand()))
+                run_args={
+                    'extra_env': extra_env,
+                    'stdout': ninja_env_path
+                })
+    osutils.WriteFile(os.path.join(goma.goma_log_dir, 'ninja_cwd'), sdk_cmd.cwd)
+    osutils.WriteFile(
+        os.path.join(goma.goma_log_dir, 'ninja_command'),
+        cros_build_lib.CmdToStr(sdk_cmd.GetNinjaCommand()))
   else:
     extra_env = None
 
@@ -420,14 +433,14 @@ def _BuildChrome(sdk_cmd, chrome_root, out_board_dir, goma):
     # uploaded to the goma's server in a later stage.
     if goma:
       goma.Stop()
-      ninja_log_path = os.path.join(chrome_root,
-                                    sdk_cmd.GetNinjaLogPath())
+      ninja_log_path = os.path.join(chrome_root, sdk_cmd.GetNinjaLogPath())
       if os.path.exists(ninja_log_path):
-        shutil.copy2(ninja_log_path,
-                     os.path.join(goma.goma_log_dir, 'ninja_log'))
+        shutil.copy2(ninja_log_path, os.path.join(goma.goma_log_dir,
+                                                  'ninja_log'))
       if result:
-        osutils.WriteFile(os.path.join(goma.goma_log_dir, 'ninja_exit'),
-                          str(result.returncode))
+        osutils.WriteFile(
+            os.path.join(goma.goma_log_dir, 'ninja_exit'),
+            str(result.returncode))
 
 
 def _TestDeployChrome(sdk_cmd, out_board_dir):
@@ -439,10 +452,12 @@ def _TestDeployChrome(sdk_cmd, out_board_dir):
   """
   with osutils.TempDir(prefix='chrome-sdk-stage') as tempdir:
     # Use the TOT deploy_chrome.
-    script_path = os.path.join(
-        constants.SOURCE_ROOT, constants.CHROMITE_BIN_SUBDIR, 'deploy_chrome')
-    sdk_cmd.Run([script_path, '--build-dir', out_board_dir,
-                 '--staging-only', '--staging-dir', tempdir])
+    script_path = os.path.join(constants.SOURCE_ROOT,
+                               constants.CHROMITE_BIN_SUBDIR, 'deploy_chrome')
+    sdk_cmd.Run([
+        script_path, '--build-dir', out_board_dir, '--staging-only',
+        '--staging-dir', tempdir
+    ])
     # Verify chrome is deployed.
     chromepath = os.path.join(tempdir, 'chrome')
     if not os.path.exists(chromepath):
@@ -453,8 +468,7 @@ def _TestDeployChrome(sdk_cmd, out_board_dir):
 def _VMTestChrome(board, sdk_cmd):
   """Run cros_run_test."""
   image_dir_symlink = image_lib.GetLatestImageLink(board)
-  image_path = os.path.join(image_dir_symlink,
-                            constants.VM_IMAGE_BIN)
+  image_path = os.path.join(image_dir_symlink, constants.VM_IMAGE_BIN)
 
   # Run VM test for boards where we've built a VM.
   if image_path and os.path.exists(image_path):
@@ -499,8 +513,8 @@ def BundleCodeCoverageLlvmJson(chroot: chroot_lib.Chroot,
 
     with chroot.tempdir() as dest_tmpdir:
       coverage_dir = os.path.join(base_path, 'build/coverage_data')
-      coverage_file = GatherCodeCoverageLlvmJsonFile(destdir=dest_tmpdir,
-                                                     paths=[coverage_dir])
+      coverage_file = GatherCodeCoverageLlvmJsonFile(
+          destdir=dest_tmpdir, paths=[coverage_dir])
       if coverage_file is None:
         logging.warning('No coverage files found in %s.', coverage_dir)
         return None
@@ -560,7 +574,7 @@ def GatherCodeCoverageLlvmJsonFile(
         # Make sure the file contents match the llvm json format.
         path_to_file = os.path.join(root, f)
         file_data = code_coverage_util.GetLlvmJsonCoverageDataIfValid(
-          path_to_file)
+            path_to_file)
         if file_data is None:
           continue
 
@@ -577,17 +591,18 @@ def GatherCodeCoverageLlvmJsonFile(
     return None
 
   # Write out the file
-  osutils.WriteFile(os.path.join(destdir, output_file_name), json.dumps({
-      'data': [{
-          'files': coverage_data
-      }],
-      'type': coverage_type,
-      'version': coverage_version
-  }))
+  osutils.WriteFile(
+      os.path.join(destdir, output_file_name),
+      json.dumps({
+          'data': [{
+              'files': coverage_data
+          }],
+          'type': coverage_type,
+          'version': coverage_version
+      }))
 
   return GatherCodeCoverageLlvmJsonFileResult(
-      joined_file_paths=joined_file_paths
-  )
+      joined_file_paths=joined_file_paths)
 
 
 def FindAllMetadataFiles(chroot: chroot_lib.Chroot,
@@ -610,9 +625,8 @@ def _FindAutotestMetadataFile(chroot: chroot_lib.Chroot,
 
   This file is installed during the chromeos-base/autotest ebuild.
   """
-  return chroot.full_path(sysroot.Path('usr', 'local', 'build', 'autotest',
-      'autotest_metadata.pb'
-  ))
+  return chroot.full_path(
+      sysroot.Path('usr', 'local', 'build', 'autotest', 'autotest_metadata.pb'))
 
 
 def _FindTastLocalMetadataFile(chroot: chroot_lib.Chroot,
@@ -621,9 +635,8 @@ def _FindTastLocalMetadataFile(chroot: chroot_lib.Chroot,
 
   This file is installed during the tast-bundle eclass.
   """
-  return chroot.full_path(sysroot.Path('usr', 'share', 'tast', 'metadata',
-      'local', 'cros.pb'
-  ))
+  return chroot.full_path(
+      sysroot.Path('usr', 'share', 'tast', 'metadata', 'local', 'cros.pb'))
 
 
 def _FindTastLocalPrivateMetadataFile(chroot: chroot_lib.Chroot,
@@ -632,9 +645,8 @@ def _FindTastLocalPrivateMetadataFile(chroot: chroot_lib.Chroot,
 
   This file is installed during the tast-bundle eclass.
   """
-  return chroot.full_path(sysroot.Path('build', 'share', 'tast', 'metadata',
-      'local', 'crosint.pb'
-  ))
+  return chroot.full_path(
+      sysroot.Path('build', 'share', 'tast', 'metadata', 'local', 'crosint.pb'))
 
 
 def _FindTastRemoteMetadataFile(chroot: chroot_lib.Chroot) -> str:
@@ -643,4 +655,4 @@ def _FindTastRemoteMetadataFile(chroot: chroot_lib.Chroot) -> str:
   This file is installed during the tast-bundle eclass.
   """
   return chroot.full_path('usr', 'share', 'tast', 'metadata', 'remote',
-      'cros.pb')
+                          'cros.pb')
