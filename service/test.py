@@ -85,7 +85,12 @@ def BuildTargetUnitTest(build_target,
   """
   # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
-  cmd = ['cros_run_unit_tests', '--board', build_target.name]
+  cmd = ['cros_run_unit_tests']
+
+  if build_target.name == 'host':
+    cmd.extend(['--host'])
+  else:
+    cmd.extend(['--board', build_target.name])
 
   if packages:
     cmd.extend(['--packages', ' '.join(packages)])
