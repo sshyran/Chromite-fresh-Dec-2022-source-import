@@ -14,10 +14,16 @@ SERVO_CCD_CR50 = 'ccd_cr50'
 SERVO_CCD_TI50 = 'ccd_ti50'
 SERVO_MICRO = 'servo_micro'
 SERVO_V2 = 'servo_v2'
+SERVO_V4_C2D2 = 'servo_v4_with_c2d2'
 SERVO_V4_CCD = 'servo_v4_with_ccd'
 SERVO_V4_CCD_CR50 = 'servo_v4_with_ccd_cr50'
 SERVO_V4_CCD_TI50 = 'servo_v4_with_ccd_ti50'
 SERVO_V4_MICRO = 'servo_v4_with_servo_micro'
+SERVO_V4P1_C2D2 = 'servo_v4p1_with_c2d2'
+SERVO_V4P1_CCD = 'servo_v4p1_with_ccd'
+SERVO_V4P1_CCD_CR50 = 'servo_v4p1_with_ccd_cr50'
+SERVO_V4P1_CCD_TI50 = 'servo_v4p1_with_ccd_ti50'
+SERVO_V4P1_MICRO = 'servo_v4p1_with_servo_micro'
 
 VALID_SERVOS = (
     SERVO_C2D2,
@@ -25,17 +31,34 @@ VALID_SERVOS = (
     SERVO_CCD_TI50,
     SERVO_MICRO,
     SERVO_V2,
+    SERVO_V4_C2D2,
     SERVO_V4_CCD,
     SERVO_V4_CCD_CR50,
     SERVO_V4_CCD_TI50,
     SERVO_V4_MICRO,
+    SERVO_V4P1_C2D2,
+    SERVO_V4P1_CCD,
+    SERVO_V4P1_CCD_CR50,
+    SERVO_V4P1_CCD_TI50,
+    SERVO_V4P1_MICRO,
 )
 
-CCD_SERVOS = (SERVO_CCD_CR50, SERVO_CCD_TI50, SERVO_V4_CCD, SERVO_V4_CCD_CR50,
-              SERVO_V4_CCD_TI50)
-MICRO_SERVOS = (SERVO_MICRO, SERVO_V4_MICRO)
+CCD_SERVOS = (
+    SERVO_CCD_CR50,
+    SERVO_CCD_TI50,
+    SERVO_V4_CCD,
+    SERVO_V4_CCD_CR50,
+    SERVO_V4_CCD_TI50,
+    SERVO_V4P1_CCD,
+    SERVO_V4P1_CCD_CR50,
+    SERVO_V4P1_CCD_TI50,
+)
+MICRO_SERVOS = (SERVO_MICRO, SERVO_V4_MICRO, SERVO_V4P1_MICRO)
 V2_SERVOS = (SERVO_V2,)
-V4_SERVOS = (SERVO_V4_CCD, SERVO_V4_CCD_CR50, SERVO_V4_MICRO, SERVO_V4_CCD_TI50)
+V4_SERVOS = (SERVO_V4_C2D2, SERVO_V4_CCD, SERVO_V4_CCD_CR50, SERVO_V4_MICRO,
+             SERVO_V4_CCD_TI50, SERVO_V4P1_C2D2, SERVO_V4P1_CCD,
+             SERVO_V4P1_CCD_CR50, SERVO_V4P1_CCD_TI50, SERVO_V4P1_MICRO)
+C2D2_SERVOS = (SERVO_C2D2, SERVO_V4_C2D2, SERVO_V4P1_C2D2)
 
 _SERIAL_NUMBER_OPTION = 'serialname'
 _SERIAL_NUMBER_OPTION_OVERRIDE = {
@@ -43,6 +66,10 @@ _SERIAL_NUMBER_OPTION_OVERRIDE = {
     SERVO_V4_CCD_CR50: 'ccd_serialname',
     SERVO_V4_CCD_TI50: 'ccd_serialname',
     SERVO_V4_MICRO: 'servo_micro_serialname',
+    SERVO_V4P1_CCD: 'ccd_serialname',
+    SERVO_V4P1_CCD_CR50: 'ccd_serialname',
+    SERVO_V4P1_CCD_TI50: 'ccd_serialname',
+    SERVO_V4P1_MICRO: 'servo_micro_serialname',
 }
 
 
@@ -140,7 +167,7 @@ class Servo(object):
 
   @property
   def is_c2d2(self):
-    return self.version == SERVO_C2D2
+    return self.version in C2D2_SERVOS
 
   @property
   def is_micro(self):
