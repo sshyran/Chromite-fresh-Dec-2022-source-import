@@ -22,8 +22,11 @@ from chromite.utils import pformat
 
 
 DLC_BUILD_DIR = 'build/rootfs/dlc'
+DLC_FACTORY_INSTALL_DIR = 'unencrypted/dlc-factory-images'
+DLC_GID = 20118
 DLC_IMAGE = 'dlc.img'
 DLC_META_DIR = 'opt/google/dlc'
+DLC_UID = 20118
 DLC_TMP_META_DIR = 'meta'
 EBUILD_PARAMETERS = 'ebuild_parameters.json'
 IMAGELOADER_JSON = 'imageloader.json'
@@ -674,8 +677,9 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
       # Factory install DLCs.
       if (stateful and factory_install and
           IsFactoryInstallAllowed(d_id, dlc_build_dir)):
+        install_stateful_root = os.path.join(stateful, DLC_FACTORY_INSTALL_DIR)
         install_stateful_dir = os.path.join(
-            stateful, 'unencrypted/dlc-factory-images', d_id, d_package)
+            install_stateful_root, d_id, d_package)
         osutils.SafeMakedirs(install_stateful_dir, mode=0o755, sudo=True)
         source_dlc_dir = os.path.join(dlc_build_dir, d_id, d_package)
         for filepath in (os.path.join(source_dlc_dir, fname)
@@ -685,6 +689,13 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
                        filepath, install_stateful_dir)
           cros_build_lib.sudo_run(['cp', filepath, install_stateful_dir],
                                   print_cmd=False, stderr=True)
+
+        # Change the owner + group of factory install directory.
+        # Refer to
+        # http://cs/chromeos_public/src/third_party/eclass-overlay or
+        # DLC/dlcservice related uid + gid.
+        cros_build_lib.sudo_run(['chown', '-R', '%d:%d' % (DLC_UID, DLC_GID),
+                                 install_stateful_root])
 
       # Create metadata directory in rootfs.
       if rootfs:
