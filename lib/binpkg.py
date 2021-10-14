@@ -10,6 +10,7 @@
 
 import collections
 import io
+import logging
 import math
 import operator
 import os
@@ -19,14 +20,13 @@ import urllib.error
 import urllib.request
 
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import sysroot_lib
-
 
 TWO_WEEKS = 60 * 60 * 24 * 7 * 2
 HTTP_FORBIDDEN_CODES = (401, 403)
@@ -423,7 +423,7 @@ def GrabRemotePackageIndex(binhost_url, **kwargs):
       f = _RetryUrlOpen(url)
     except urllib.error.HTTPError as e:
       if e.code in HTTP_FORBIDDEN_CODES:
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         logging.error('Cannot GET %s: %s', url, e)
         return None
       # Not found errors are normal if old prebuilts were cleaned out.
@@ -435,7 +435,7 @@ def GrabRemotePackageIndex(binhost_url, **kwargs):
       gs_context = gs.GSContext()
       output = gs_context.Cat(url, encoding='utf-8', **kwargs)
     except (cros_build_lib.RunCommandError, gs.GSNoSuchKey) as e:
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.error('Cannot GET %s: %s', url, e)
       return None
     f = io.StringIO(output)

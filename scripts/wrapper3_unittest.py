@@ -33,17 +33,20 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
     #     api -> <real chromite>/api/
     #     lib -> <real chromite>/lib/
     #     utils -> <real chromite>/utils/
-    #     __init__.py     # Marker file for Python module import.
+    #     __init__.py -> <real chromite>/__init__.py
     #     PRESUBMIT.cfg   # Marker file for our wrapper to find chromite.
     self.chromite_dir = self.tempdir / 'chromite'
     self.bindir = self.chromite_dir / 'bin'
     self.bindir.mkdir(parents=True)
     self.scripts_dir = self.chromite_dir / 'scripts'
     self.scripts_dir.mkdir()
-    for subdir in ('api', 'lib', 'third_party', 'utils'):
+    for subdir in ('api', 'cbuildbot', 'lib', 'third_party', 'utils'):
       (self.chromite_dir / subdir).symlink_to(
           Path(constants.CHROMITE_DIR) / subdir)
-    for subfile in ('__init__.py', 'PRESUBMIT.cfg'):
+    for subfile in ('__init__.py',):
+      (self.chromite_dir / subfile).symlink_to(
+          Path(constants.CHROMITE_DIR) / subfile)
+    for subfile in ('PRESUBMIT.cfg',):
       (self.chromite_dir / subfile).touch()
     self.wrapper = self.scripts_dir / WRAPPER.name
     # Copy over the wrapper.  We can't just symlink it because the code also

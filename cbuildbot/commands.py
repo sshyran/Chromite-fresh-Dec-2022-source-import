@@ -10,6 +10,7 @@ import datetime
 import fnmatch
 import glob
 import json
+import logging
 import multiprocessing
 import os
 import re
@@ -21,17 +22,15 @@ import tempfile
 from chromite.third_party.google.protobuf import json_format
 
 from chromite.api.gen.chromite.api import android_pb2
-
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import swarming_lib
 from chromite.cbuildbot import topology
-
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cipd
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gob_util
 from chromite.lib import gs
@@ -40,23 +39,27 @@ from chromite.lib import metrics
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import sysroot_lib
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
 from chromite.lib.paygen import filelib
-
 from chromite.scripts import pushimage
 from chromite.service import artifacts as artifacts_service
+from chromite.utils import pformat
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'
-CHROME_KEYWORDS_FILE = ('/build/%(board)s/etc/portage/package.keywords/chrome')
-CHROME_UNMASK_FILE = ('/build/%(board)s/etc/portage/package.unmask/chrome')
+CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s'
+                        '/build/%(board)s/etc/portage/package.keywords/chrome')
+CHROME_UNMASK_FILE = ('%(buildroot)s/%(chroot)s'
+                      '/build/%(board)s/etc/portage/package.unmask/chrome')
 _CROS_ARCHIVE_URL = 'CROS_ARCHIVE_URL'
 _FACTORY_SHIM = 'factory_shim'
+FACTORY_PACKAGE_PATH = '%(buildroot)s/chroot/build/%(board)s/usr/local/factory'
+# Filename for tarball containing factory project specific files.
+FACTORY_PROJECT_PACKAGE = 'factory_project_toolkits.tar.gz'
 _AUTOTEST_RPC_CLIENT = ('/b/build_internal/scripts/slave-internal/autotest_rpc/'
                         'autotest_rpc_client.py')
 _AUTOTEST_RPC_HOSTNAME = 'master2'
@@ -1131,6 +1134,7 @@ def _GetSkylabCreateSuiteArgs(build,
                               board,
                               pool,
                               model=None,
+                              extra_dims=None,
                               priority=None,
                               timeout_mins=None,
                               max_retries=None,
@@ -1147,6 +1151,7 @@ def _GetSkylabCreateSuiteArgs(build,
     board: board name to run suite for
     pool: pool to run the suite in
     model: (optional) model name to run suite for
+    extra_dims: (optional) list of additional scheduling dimensions
     priority: (optional) integer priority for the suite. Higher number is a
         lower priority
     timeout_mins: (optional) suite timeout
@@ -1167,6 +1172,10 @@ def _GetSkylabCreateSuiteArgs(build,
 
   if pool is not None:
     args += ['-pool', pool]
+
+  if extra_dims is not None:
+    for dim in extra_dims:
+      args += ['-dim', dim]
 
   if priority is not None:
     args += ['-priority', str(priority)]
@@ -1220,6 +1229,7 @@ def RunSkylabHWTestSuite(
     model=None,
     # TODO(akeshet): Make this required argument a positional arg.
     pool=None,
+    extra_dims=None,
     wait_for_results=False,
     priority=None,
     timeout_mins=120,
@@ -1267,6 +1277,7 @@ def RunSkylabHWTestSuite(
       board,
       pool,
       model=model,
+      extra_dims=extra_dims,
       priority=priority,
       timeout_mins=timeout_mins,
       max_retries=max_retries,
@@ -1282,7 +1293,7 @@ def RunSkylabHWTestSuite(
     task_url = report['task_url']
 
     logging.info('Launched suite task %s', task_url)
-    logging.PrintBuildbotLink('Suite task: %s' % suite, task_url)
+    cbuildbot_alerts.PrintBuildbotLink('Suite task: %s' % suite, task_url)
     if not wait_for_results:
       return HWTestSuiteResult(None, None)
 
@@ -1395,7 +1406,7 @@ def RunSkylabHWTestPlan(test_plan=None,
       task_url = report.get('task_url')
 
       logging.info('Launched test plan task %s', task_url)
-      logging.PrintBuildbotLink('Test plan task', task_url)
+      cbuildbot_alerts.PrintBuildbotLink('Test plan task', task_url)
 
     except ValueError:
       logging.warning('Unable to parse output:\n%s', result.output)
@@ -1860,7 +1871,7 @@ def GenerateStackTraces(buildroot, board, test_results_dir, archive_dir,
         if not asan_log_signaled:
           asan_log_signaled = True
           logging.error('Asan crash occurred. See asan_logs in Artifacts.')
-          logging.PrintBuildbotStepFailure()
+          cbuildbot_alerts.PrintBuildbotStepFailure()
 
       # Append the processed file to archive.
       filename = ArchiveFile(processed_file_path, archive_dir)
@@ -1902,7 +1913,7 @@ class AndroidIsPinnedUprevError(failures_lib.InfrastructureFailure):
     assert new_android_atom
     msg = ('Failed up uprev to Android version %s as Android was pinned.' %
            new_android_atom)
-    super(AndroidIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_android_atom = new_android_atom
 
 
@@ -1918,7 +1929,7 @@ class ChromeIsPinnedUprevError(failures_lib.InfrastructureFailure):
     """
     msg = ('Failed up uprev to chrome version %s as chrome was pinned.' %
            new_chrome_atom)
-    super(ChromeIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_chrome_atom = new_chrome_atom
 
 
@@ -2010,7 +2021,11 @@ def MarkChromeAsStable(buildroot,
         data += f'={package}-{atom.vr}\n'
 
       for cfg_file in (CHROME_KEYWORDS_FILE, CHROME_UNMASK_FILE):
-        cfg_file %= {'board': board}
+        cfg_file %= {
+            'buildroot': buildroot,
+            'chroot': constants.DEFAULT_CHROOT_DIR,
+            'board': board,
+        }
         osutils.WriteFile(cfg_file, data, makedirs=True, sudo=True)
 
     # Sanity check: We should always be able to merge the version of
@@ -2032,10 +2047,12 @@ def MarkChromeAsStable(buildroot,
 def CleanupChromeKeywordsFile(boards, buildroot):
   """Cleans chrome uprev artifact if it exists."""
   for board in boards:
-    keywords_path_in_chroot = CHROME_KEYWORDS_FILE % {'board': board}
-    keywords_file = '%s/chroot%s' % (buildroot, keywords_path_in_chroot)
-    if os.path.exists(keywords_file):
-      cros_build_lib.sudo_run(['rm', '-f', keywords_file])
+    keywords_file = CHROME_KEYWORDS_FILE % {
+        'buildroot': buildroot,
+        'chroot': constants.DEFAULT_CHROOT_DIR,
+        'board': board,
+    }
+    osutils.SafeUnlink(keywords_file, sudo=True)
 
 
 def UprevPackages(buildroot, boards, overlay_type, workspace=None):
@@ -2699,7 +2716,7 @@ def PushImages(board,
         dry_run=dryrun,
         buildroot=buildroot)
   except pushimage.PushError as e:
-    logging.PrintBuildbotStepFailure()
+    cbuildbot_alerts.PrintBuildbotStepFailure()
     return e.args[1]
 
 
@@ -3196,7 +3213,7 @@ def BuildStrippedPackagesTarball(buildroot, board, package_globs, archive_dir):
                              'Failed to find stripped files at %s.' %
                              (cpv.cpf, os.path.join(stripped_pkg_dir, cpv.cpf)))
       if len(files) > 1:
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         logging.warning('Expected one stripped package for %s, found %d',
                         cpv.cpf, len(files))
 
@@ -3390,8 +3407,8 @@ def BuildFactoryZip(buildroot,
 
   # Everything in /usr/local/factory/bundle gets overlaid into the
   # bundle.
-  bundle_src_dir = os.path.join(buildroot, 'chroot', 'build', board, 'usr',
-                                'local', 'factory', 'bundle')
+  bundle_src_dir = os.path.join(
+      FACTORY_PACKAGE_PATH % {'buildroot': buildroot, 'board': board}, 'bundle')
   if os.path.exists(bundle_src_dir):
     cros_build_lib.run(cmd + ['-y', '.'], cwd=bundle_src_dir,
                        capture_output=True)
@@ -3444,19 +3461,6 @@ def CreateTestRoot(build_root):
   return os.path.sep + os.path.relpath(test_root, start=chroot)
 
 
-def GenerateQuickProvisionPayloads(target_image_path, archive_dir):
-  """Generates payloads needed for quick_provision script.
-
-  Args:
-    target_image_path: The path to the image to extract the partitions.
-    archive_dir: Where to store partitions when generated.
-  """
-  # TODO(saklein): Remove this function entirely in favor of a combined call to
-  #   the endpoint with GeneratePayloads when its arguments have been added to
-  #   the API.
-  artifacts_service.GenerateQuickProvisionPayloads(target_image_path,
-                                                   archive_dir)
-
 def GeneratePayloads(target_image_path,
                      archive_dir,
                      full=False,
@@ -3473,12 +3477,11 @@ def GeneratePayloads(target_image_path,
     stateful: Generate stateful payload.
     dlc: Generate sample-dlc payloads.
   """
-  # TODO(saklein): Change to a combined call to the endpoint with
-  #   GenerateQuickProvisionPayloads after the payload type arguments have been
-  #   added.
   artifacts_service.GenerateTestPayloads(target_image_path, archive_dir,
                                          full=full, delta=delta,
                                          stateful=stateful, dlc=dlc)
+  artifacts_service.GenerateQuickProvisionPayloads(target_image_path,
+                                                   archive_dir)
 
 
 def GetChromeLKGM(revision):

@@ -13,16 +13,16 @@ this script only works with octopus, grunt, wilco, and hatch devices but will
 be extended to support more in the future.
 """
 
-import importlib
+import logging
 import os
 import shutil
 import tempfile
 import time
-from typing import Optional
+from typing import Iterable, Optional
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
 
 
@@ -39,7 +39,7 @@ class MissingBuildTargetCommandsError(Error):
 
 
 def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
-                          verbose):
+                          verbose, passthrough_args: Iterable[str] = tuple()):
   """Helper function to build commands for flashing over ssh
 
   Args:
@@ -53,6 +53,7 @@ def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
     fast (bool): if True pass through --fast (-n for flashrom) to
       flashing command.
     verbose (bool): if True set -v flag in flash command.
+    passthrough_args: List of additional options passed to flashrom or futility.
 
   Returns:
     scp_cmd ([string]):
@@ -87,11 +88,14 @@ def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
       flash_cmd += ['-n']
     if verbose:
       flash_cmd += ['-V']
+  if passthrough_args:
+    flash_cmd.extend(passthrough_args)
   flash_cmd += ['&& reboot']
   return scp_cmd, flash_cmd
 
 
-def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
+def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun,
+               passthrough_args: Iterable[str] = tuple()):
   """This function flashes AP firmware over ssh.
 
   Tries to ssh to ip address once. If the ssh connection is successful the
@@ -110,6 +114,7 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
       flashing command.
     dryrun (bool): Whether to actually execute the commands or just print
       the commands that would have been run.
+    passthrough_args: List of additional options passed to flashrom or futility.
 
   Returns:
     bool: True on success, False on failure.
@@ -120,7 +125,8 @@ def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun):
   shutil.copyfile(id_filename, tmpfile.name)
 
   scp_cmd, flash_cmd = _build_flash_ssh_cmds(futility, ip, port, path,
-                                             tmpfile.name, fast, verbose)
+                                             tmpfile.name, fast, verbose,
+                                             passthrough_args)
   try:
     cros_build_lib.run(scp_cmd, print_cmd=verbose, check=True, dryrun=dryrun)
   except cros_build_lib.CalledProcessError:
@@ -267,7 +273,8 @@ def deploy(build_target,
            port=None,
            verbose=False,
            dryrun=False,
-           flash_contents: Optional[str] = None):
+           flash_contents: Optional[str] = None,
+           passthrough_args: Iterable[str] = tuple()):
   """Deploy an AP FW image to a device.
 
   Args:
@@ -281,6 +288,7 @@ def deploy(build_target,
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
+    passthrough_args: List of additional options passed to flashrom or futility.
   """
   ip = None
   if device:
@@ -291,20 +299,14 @@ def deploy(build_target,
   else:
     ip = os.getenv('IP')
 
-  module_name = ('chromite.lib.firmware.ap_firmware_config.%s' %
-                 build_target.name)
-  try:
-    module = importlib.import_module(module_name)
-  except ImportError:
-    raise MissingBuildTargetCommandsError(
-        '%s not valid or supported. Please verify the build target name and '
-        'try again.' % build_target.name)
+  module = ap_firmware.get_config_module(build_target.name)
 
   if ip:
-    _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun)
+    _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun,
+                passthrough_args)
   else:
     _deploy_servo(image, module, flashrom, fast, verbose, port, dryrun,
-                  flash_contents)
+                  flash_contents, passthrough_args)
 
 
 def _deploy_servo(image,
@@ -314,7 +316,8 @@ def _deploy_servo(image,
                   verbose,
                   port,
                   dryrun,
-                  flash_contents: Optional[str] = None):
+                  flash_contents: Optional[str] = None,
+                  passthrough_args: Iterable[str] = tuple()):
   """Deploy to a servo connection.
 
   Args:
@@ -327,6 +330,7 @@ def _deploy_servo(image,
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
+    passthrough_args: Additional options passed to flashrom or futility.
   """
   logging.notice('Attempting to flash via servo.')
   dut_ctl = servo_lib.DutControl(port)
@@ -361,6 +365,9 @@ def _deploy_servo(image,
     futility_cmd += ['-v']
   if flash_contents is not None:
     flashrom_cmd += ['--flash-contents', flash_contents]
+  if passthrough_args:
+    flashrom_cmd.extend(passthrough_args)
+    futility_cmd.extend(passthrough_args)
   flash_cmd = flashrom_cmd if flashrom else futility_cmd
   if servo_run(dut_ctl, ap_config.dut_control_on, ap_config.dut_control_off,
                flash_cmd, verbose, dryrun):
@@ -370,7 +377,8 @@ def _deploy_servo(image,
                   'is correct and servod is running in the background.')
 
 
-def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun):
+def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun,
+                passthrough_args: Iterable[str] = tuple()):
   """Deploy to a servo connection.
 
   Args:
@@ -383,6 +391,7 @@ def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun):
     port (int): The port to ssh to.
     dryrun (bool): Whether to execute the deployment or just print the
       commands that would have been executed.
+    passthrough_args: List of additional options passed to flashrom or futility.
   """
   logging.notice('Attempting to flash via ssh.')
   # TODO(b/143241417): Can't use flashrom over ssh on wilco.
@@ -391,7 +400,8 @@ def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun):
     logging.warning('Flashing with flashrom over ssh on this device fails '
                     'consistently, flashing with futility instead.')
     flashrom = False
-  if _ssh_flash(not flashrom, image, verbose, ip, port, fast, dryrun):
+  if _ssh_flash(not flashrom, image, verbose, ip, port, fast, dryrun,
+                passthrough_args):
     logging.notice('ssh flash successful. Exiting flash_ap')
   else:
     raise DeployFailed('ssh failed, try using a servo connection instead.')

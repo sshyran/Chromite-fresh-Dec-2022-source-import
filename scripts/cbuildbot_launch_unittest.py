@@ -73,7 +73,7 @@ class CbuildbotLaunchTest(cros_test_lib.MockTestCase):
 
     self.assertEqual(mock_repo.mock_calls, [
         mock.call.PreLoad('/preload/chromeos'),
-        mock.call.Sync(detach=True, downgrade_repo=False),
+        mock.call.Sync(jobs=32, detach=True, downgrade_repo=False),
     ])
 
   def testConfigureGlobalEnvironment(self):
@@ -172,7 +172,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
     # Ensure we clean, as expected.
     self.assertEqual(mock_clean.mock_calls, [
         mock.call('/root', mock_repo, '/root/repository/.cache',
-                  expected_build_state)])
+                  expected_build_state, False)])
 
     # Ensure we checkout, as expected.
     self.assertEqual(mock_checkout.mock_calls,
@@ -263,7 +263,7 @@ class RunTests(cros_test_lib.RunCommandTestCase):
                       status=mock.ANY,
                       branch='branch',
                       buildroot_layout=2
-                  ))])
+                  ), False)])
 
     # Ensure we checkout, as expected.
     self.assertEqual(mock_checkout.mock_calls,

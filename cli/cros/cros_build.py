@@ -4,6 +4,7 @@
 
 """cros build: Build the requested packages."""
 
+import logging
 import subprocess
 
 from chromite.cli import command
@@ -11,7 +12,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import chroot_util
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import parallel
 from chromite.lib import workon_helper
@@ -41,7 +41,7 @@ To just build a single package:
 """
 
   def __init__(self, options):
-    super(BuildCommand, self).__init__(options)
+    super().__init__(options)
     self.chroot_update = options.chroot_update and options.deps
     if options.chroot_update and not options.deps:
       logging.debug('Skipping chroot update due to --nodeps')

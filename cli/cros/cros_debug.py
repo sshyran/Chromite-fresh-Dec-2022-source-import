@@ -4,12 +4,12 @@
 
 """cros debug: Debug the applications on the target device."""
 
+import logging
 import os
 
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 
 
@@ -38,7 +38,7 @@ To debug a process by its pid:
 
   def __init__(self, options):
     """Initialize DebugCommand."""
-    super(DebugCommand, self).__init__(options)
+    super().__init__(options)
     # SSH connection settings.
     self.ssh_hostname = None
     self.ssh_port = None

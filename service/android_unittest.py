@@ -4,10 +4,10 @@
 
 """Android service unittests."""
 
+import logging
 import os
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest

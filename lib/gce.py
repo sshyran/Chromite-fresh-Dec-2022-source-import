@@ -8,13 +8,15 @@ Public methods in class GceContext raise HttpError when the underlining call to
 Google API fails, or gce.Error on other failures.
 """
 
-from chromite.lib import cros_logging as logging
-from chromite.lib import timeout_util
+import logging
+
 from chromite.third_party import httplib2
 from chromite.third_party.googleapiclient.discovery import build
 from chromite.third_party.googleapiclient.errors import HttpError
 from chromite.third_party.googleapiclient.http import HttpRequest
 from chromite.third_party.oauth2client.client import GoogleCredentials
+
+from chromite.lib import timeout_util
 
 
 class Error(Exception):
@@ -31,7 +33,7 @@ class RetryOnServerErrorHttpRequest(HttpRequest):
   def __init__(self, num_retries, *args, **kwargs):
     """Constructor for RetryOnServerErrorHttpRequest."""
     self.num_retries = num_retries
-    super(RetryOnServerErrorHttpRequest, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def execute(self, http=None, num_retries=None):
     """Excutes a RetryOnServerErrorHttpRequest.
@@ -49,7 +51,7 @@ class RetryOnServerErrorHttpRequest(HttpRequest):
       A deserialized object model of the response body as determined
           by the postproc. See HttpRequest.execute().
     """
-    return super(RetryOnServerErrorHttpRequest, self).execute(
+    return super().execute(
         http=http, num_retries=num_retries or self.num_retries)
 
 

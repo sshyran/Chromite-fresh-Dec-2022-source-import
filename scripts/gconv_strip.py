@@ -6,15 +6,16 @@
 
 import functools
 import glob
+import logging
 import operator
 import os
 import stat
 
+from chromite.third_party import lddtree
+
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-from chromite.third_party import lddtree
 
 
 try:

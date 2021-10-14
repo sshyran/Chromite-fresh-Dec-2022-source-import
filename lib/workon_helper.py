@@ -6,17 +6,23 @@
 
 import collections
 import glob
+import logging
 import os
+from pathlib import Path
 import re
+from typing import Iterable
 
+from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import dependency_graph
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 
+if cros_build_lib.IsInsideChroot():
+  from chromite.lib import depgraph
 
 # A package is a canonical CP atom.
 # A package may have 0 or more repositories, given as strings.
@@ -211,6 +217,7 @@ class WorkonHelper(object):
     self._src_root = src_root
     self._cached_overlays = None
     self._cached_arch = None
+    self._depgraph = None
 
     profile = os.path.join(self._sysroot, 'etc', 'portage')
     self._unmasked_symlink = os.path.join(
@@ -325,44 +332,63 @@ class WorkonHelper(object):
 
     return ebuilds
 
-  def _GetCanonicalAtom(self, package, find_stale=False):
-    """Transform a package name or name fragment to the canonical atom.
+  def _GetCanonicalAtom(self, package_fragment: str, find_stale=False):
+    """Transform a package source path or name fragment to the canonical atom.
 
-    If there are multiple atoms that a package name fragment could map to,
+    If there are multiple atoms that a package fragment could map to,
     picks an arbitrary one and prints a warning.
 
     Args:
-      package: string package name or fragment of a name.
+      package_fragment: Package source path or name fragment.
       find_stale: if True, allow stale (missing) worked on package.
 
     Returns:
       string canonical atom name (e.g. 'sys-apps/dbus')
     """
     # Attempt to not hit portage if at all possible for speed.
-    if package in self._GetWorkedOnAtoms():
-      return package
+    if package_fragment in self._GetWorkedOnAtoms():
+      return package_fragment
 
     # Ask portage directly what it thinks about that package.
-    ebuild_path = self._FindEbuildForPackage(package)
+    ebuild_path = self._FindEbuildForPackage(package_fragment)
 
     # If portage didn't know about that package, try and autocomplete it.
     if ebuild_path is None:
       possible_ebuilds = set()
       for ebuild in (portage_util.EbuildToCP(ebuild) for ebuild in
                      self._GetWorkonEbuilds(filter_on_arch=False)):
-        if package in ebuild:
+        if package_fragment in ebuild:
           possible_ebuilds.add(ebuild)
 
       # Also autocomplete from the worked-on list, in case the ebuild was
       # deleted.
       if find_stale:
         for ebuild in self._GetWorkedOnAtoms():
-          if package in ebuild:
+          if package_fragment in ebuild:
             possible_ebuilds.add(ebuild)
 
       if not possible_ebuilds:
-        logging.warning('Could not find canonical package for "%s"', package)
-        return None
+        # Try finding the packages affected by a given path.
+        path_atoms = sorted(self._GetPathAtoms(package_fragment))
+        if not path_atoms:
+          logging.warning('Could not find canonical package for "%s"',
+                          package_fragment)
+          return None
+
+        if len(path_atoms) > 1:
+          logging.warning('Multiple affected packages found for %s:',
+                          package_fragment)
+          for p in path_atoms:
+            logging.warning('  %s', p)
+          logging.warning('Using %s', path_atoms[0])
+          logging.notice(
+              'cros workon start command for the rest of the packages:')
+          logging.notice(
+              f'cros workon -b {self._system} start {" ".join(path_atoms[1:])}')
+
+        logging.notice('Package %s found for path %s', path_atoms[0],
+                       package_fragment)
+        return path_atoms[0]
 
       # We want some consistent order for making our selection below.
       possible_ebuilds = sorted(possible_ebuilds)
@@ -373,11 +399,11 @@ class WorkonHelper(object):
           logging.warning('  %s', possible_ebuild)
       autocompleted_package = portage_util.EbuildToCP(possible_ebuilds[0])
       # Sanity check to avoid infinite loop.
-      if package == autocompleted_package:
-        logging.error('Resolved %s to itself', package)
+      if package_fragment == autocompleted_package:
+        logging.error('Resolved %s to itself', package_fragment)
         return None
       logging.info('Autocompleted "%s" to: "%s"',
-                   package, autocompleted_package)
+                   package_fragment, autocompleted_package)
 
       return self._GetCanonicalAtom(autocompleted_package)
 
@@ -395,30 +421,85 @@ class WorkonHelper(object):
 
     return portage_util.EbuildToCP(ebuild_path)
 
-  def _GetCanonicalAtoms(self, packages, find_stale=False):
+  def _GetCanonicalAtoms(self,
+                         package_fragments: Iterable[str],
+                         find_stale=False):
     """Transforms a list of package name fragments into a list of CP atoms.
 
     Args:
-      packages: list of package name fragments.
+      package_fragments: list of package source paths and/or name fragments.
       find_stale: if True, allow stale (missing) worked on package.
 
     Returns:
       list of canonical portage atoms corresponding to the given fragments.
     """
-    if not packages:
+    if not package_fragments:
       raise WorkonError('No packages specified')
-    if len(packages) == 1 and packages[0] == '.':
-      raise WorkonError('Working on the current package is no longer '
-                        'supported.')
 
     atoms = []
-    for package_fragment in packages:
+    for package_fragment in package_fragments:
       atom = self._GetCanonicalAtom(package_fragment, find_stale=find_stale)
       if atom is None:
         raise WorkonError('Error parsing package list')
       atoms.append(atom)
 
     return atoms
+
+  def _GetDepGraph(self):
+    """Get the dependency graph."""
+    if self._depgraph:
+      return self._depgraph
+
+    try:
+      # Get the graph for our target.
+      if self._sysroot == build_target_lib.get_default_sysroot_path():
+        self._depgraph = depgraph.get_sdk_dependency_graph(with_src_paths=True)
+      else:
+        self._depgraph = depgraph.get_build_target_dependency_graph(
+            self._sysroot, with_src_paths=True)
+    except dependency_graph.Error as e:
+      logging.error(e)
+      raise WorkonError('Error generating dependency graph.')
+
+    return self._depgraph
+
+  def _GetPathAtoms(self, raw_path) -> Iterable:
+    """Get workon atoms affected by the current path."""
+    # Make sure we're in a source path.
+    path = Path(raw_path).resolve()
+    if not path.exists():
+      # The path doesn't exist. To avoid the long lookup when the dev misspells
+      # a package name, lets just assume it's that and return no packages.
+      logging.warning('%s (%s) does not exist. Is it a misspelled package?',
+                      path, raw_path)
+      return []
+
+    try:
+      path = path.relative_to(constants.SOURCE_ROOT)
+    except ValueError as e:
+      logging.error(e)
+      raise WorkonError(
+          f'Current path not in the source root: '
+          f'{path} not in {constants.SOURCE_ROOT}'
+      )
+
+    graph = self._GetDepGraph()
+    # Get the relevant packages from the dep graph.
+    logging.debug('Getting packages relevant to %s', path)
+    relevant_atoms = set(x.atom for x in graph.get_relevant_nodes([path]))
+
+    if not relevant_atoms:
+      return []
+
+    logging.debug('Found relevant packages: %s', relevant_atoms)
+
+    # Filter out any non-cros-workon packages.
+    canonical = [self._GetCanonicalAtom(x) for x in relevant_atoms]
+    workon_atoms = [x for x in canonical if x]
+
+    logging.debug('Found relevant workon packages: %s', workon_atoms)
+
+    return workon_atoms
 
   def _GetWorkedOnAtoms(self):
     """Returns a list of CP atoms that we're currently working on."""
@@ -543,8 +624,11 @@ class WorkonHelper(object):
 
     return sorted(packages)
 
-  def StartWorkingOnPackages(self, packages, use_all=False,
-                             use_workon_only=False):
+  def StartWorkingOnPackages(self,
+                             packages,
+                             use_all: bool = False,
+                             use_workon_only: bool = False,
+                             quiet: bool = False):
     """Mark a list of packages as being worked on locally.
 
     Args:
@@ -557,6 +641,8 @@ class WorkonHelper(object):
       use_workon_only: True iff we should ignore the package list, and instead
           consider all possible atoms for the system in question that define
           only the -9999 ebuild.
+      quiet: Does not log the started atoms when True. Used to avoid confusion
+          in cases where the list must be toggled to compute the new packages.
     """
     if not os.path.exists(self._sysroot):
       raise WorkonError('Sysroot %s is not setup.' % self._sysroot)
@@ -587,13 +673,17 @@ class WorkonHelper(object):
 
     self._AddProjectsToPartialManifests(new_atoms)
 
-    # Legacy scripts used single quotes in their output, and we carry on this
-    # honorable tradition.
-    logging.info("Started working on '%s' for '%s'",
-                 ' '.join(new_atoms), self._system)
+    if not quiet:
+      # Legacy scripts used single quotes in their output, and we carry on this
+      # honorable tradition.
+      logging.info("Started working on '%s' for '%s'",
+                   ' '.join(new_atoms), self._system)
 
-  def StopWorkingOnPackages(self, packages, use_all=False,
-                            use_workon_only=False):
+  def StopWorkingOnPackages(self,
+                            packages,
+                            use_all: bool = False,
+                            use_workon_only: bool = False,
+                            quiet: bool = False):
     """Stop working on a list of packages currently marked as locally worked on.
 
     Args:
@@ -606,6 +696,8 @@ class WorkonHelper(object):
       use_workon_only: True iff instead of the provided package list, we should
           stop working on all currently worked on atoms that define only a
           -9999 ebuild.
+      quiet: Does not log the started atoms when True. Used to avoid confusion
+          in cases where the list must be toggled to compute the new packages.
     """
     if use_all or use_workon_only:
       atoms = self._GetLiveAtoms(filter_workon=use_workon_only)
@@ -624,7 +716,7 @@ class WorkonHelper(object):
 
     self._SetWorkedOnAtoms(current_atoms)
 
-    if stopped_atoms:
+    if stopped_atoms and not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
       logging.info("Stopped working on '%s' for '%s'",
@@ -728,3 +820,119 @@ class WorkonHelper(object):
       installed_cp.add('%s/%s' % (pkg.category, pkg.package))
 
     return set(a for a in self.ListAtoms(use_all=True) if a in installed_cp)
+
+
+class WorkonScope:
+  """Context manager to assist managing workon status for packages."""
+
+  def __init__(self, build_target: build_target_lib.BuildTarget,
+               pkgs: Iterable[str] = tuple()):
+    """Construct an instance.
+
+    Args:
+      build_target: The build target (board) being built.
+      pkgs: The workon packages to be used in the context manager dunder
+            methods.
+    """
+    self.helper = WorkonHelper(build_target.root, build_target.name)
+    self.pkgs = pkgs
+    self.target = build_target
+    self.stop_packages = []
+    self.start_packages = []
+    self.before_workon = self.helper.ListAtoms()
+
+  def __enter__(self: 'WorkonScope') -> 'WorkonScope':
+    """Commence context manager tasks for starting and stopping packages.
+
+    Returns:
+      The initialized WorkonScope context manager.
+    """
+    self.start(self.pkgs)
+    after_workon = self.helper.ListAtoms()
+
+    # Stop = the set we actually started. Preserves workon started status for
+    # any in the packages that were already worked on.
+    self.stop_packages = sorted(set(after_workon) - set(self.before_workon))
+    return self
+
+  def __exit__(self, exc_type, exc_val, tb):
+    """Clean up context manager tasks for starting and stopping packages.
+
+    Args:
+      exc_type: The exception type passed when the runtime context raises an
+        exception.
+      exc_val: The exception value raised by the runtime context.
+      tb: The exception traceback raised by the runtime context.
+
+    Raises:
+      Any exception raised in the runtime context will be raised here after
+      cleanup. Beyond that, all WorkonHelper methods are expected to be safe
+      operations.
+    """
+    # Reset the environment.
+    logging.notice('Restoring cros_workon status.')
+    if self.stop_packages:
+      # Stop the packages we started.
+      logging.info('Stopping workon packages previously started.')
+      try:
+        self.stop(self.stop_packages)
+      except WorkonError:
+        to_stop = sorted(set(self.stop_packages) -
+                         set(self.helper.ListAtoms()))
+        logging.critical('Unable to stop started packages. Please stop the '
+                         'following packages: %s', ' '.join(to_stop))
+    else:
+      logging.info('No packages needed to be stopped.')
+    if self.start_packages:
+      # Stop the packages we started.
+      logging.info('Restarting workon packages previously stopped.')
+      try:
+        self._start_packages(self.start_packages)
+      except WorkonError:
+        to_start = sorted(set(self.start_packages) -
+                          set(self.helper.ListAtoms()))
+        logging.critical('Unable to start stopped packages. Please start the '
+                         'following packages: %s', ' '.join(to_start))
+    else:
+      logging.info('No packages needed to be restarted.')
+
+  def _start_packages(self, pkgs: Iterable[str]):
+    """Wrapper for self.WorkonHelper.StartWorkingOnPackages."""
+    self.helper.StartWorkingOnPackages(pkgs)
+
+  def _stop_packages(self, pkgs: Iterable[str]):
+    self.helper.StopWorkingOnPackages(pkgs)
+
+  def start(self, pkgs: Iterable[str]):
+    """Helper method to allow the context manager to explicitly start packages.
+
+    Invocations of this method will track started packages and stop them when
+    __exit__ is invoked, even when explicitly called by a client in a runtime
+    context.
+
+    Args:
+      pkgs: A list of package name fragments.
+    """
+    if pkgs:
+      logging.debug('cros-workon-%s start %s', self.target.name,
+                    ' '.join(pkgs))
+      self._start_packages(pkgs)
+      after_workon = self.helper.ListAtoms()
+      self.stop_packages = sorted(set(after_workon) - set(self.before_workon))
+
+
+  def stop(self, pkgs: Iterable[str]):
+    """Helper method to allow the context manager to explicitly stop packages.
+
+    If a package is stopped that was marked as workon before entering the
+    runtime context, that package will be restarted on exit.
+
+    Args:
+      pkgs: A list of package name fragments.
+    """
+    if pkgs:
+      logging.debug('cros-workon-%s stop %s', self.target.name,
+                    ' '.join(pkgs))
+      self._stop_packages(pkgs)
+      to_restart = set(pkgs) & set(self.before_workon)
+      self.start_packages = sorted(to_restart | set(self.start_packages))

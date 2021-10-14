@@ -8,25 +8,26 @@ import datetime
 import glob
 import itertools
 import json
+import logging
 import multiprocessing
-import re
 import os
+import re
 import shutil
 
 from chromite.cbuildbot import commands
-from chromite.lib import failures_lib
-from chromite.lib import config_lib
-from chromite.lib import constants
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
+from chromite.utils import pformat
+
 
 _FULL_BINHOST = 'FULL_BINHOST'
 _PORTAGE_BINHOST = 'PORTAGE_BINHOST'
@@ -42,7 +43,7 @@ class NothingToArchiveException(Exception):
   # We duplicate __init__ to specify a default for message.
   # pylint: disable=useless-super-delegation
   def __init__(self, message='No images found to archive.'):
-    super(NothingToArchiveException, self).__init__(message)
+    super().__init__(message)
 
 
 class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
@@ -66,7 +67,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                board,
                chrome_version=None,
                **kwargs):
-    super(ArchiveStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
     self.chrome_version = chrome_version
 
     # TODO(mtennant): Places that use this release_tag attribute should
@@ -129,6 +130,12 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                             'output': image + '.tbz',
                             'archive': 'tar',
                             'compress': 'bz2'})
+      if self._run.config.gce_image:
+        for image in (constants.BASE_IMAGE_GCE_TAR,
+                      constants.TEST_IMAGE_GCE_TAR):
+          if os.path.exists(os.path.join(image_dir, image)):
+            artifacts.append({'input': [image],
+                              'output': image})
       # We add the dlc folder (if exists) as artifact so we can copy all DLC
       # artifacts as is.
       if os.path.isdir(os.path.join(image_dir, 'dlc')):
@@ -222,6 +229,17 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
                                             self._run.attrs.release_tag)
         self._release_upload_queue.put([filename])
 
+      # Upload project toolkits tarball if needed.
+      toolkits_src_path = os.path.join(
+          commands.FACTORY_PACKAGE_PATH % {
+              'buildroot': buildroot,
+              'board': board},
+          'project_toolkits',
+          commands.FACTORY_PROJECT_PACKAGE)
+      if os.path.exists(toolkits_src_path):
+        shutil.copy(toolkits_src_path, archive_path)
+        self._release_upload_queue.put([commands.FACTORY_PROJECT_PACKAGE])
+
     def ArchiveStandaloneArtifact(artifact_info):
       """Build and upload a single archive."""
       if artifact_info['paths']:
@@ -314,9 +332,16 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
       # For recovery image to be generated correctly, BuildRecoveryImage must
       # run before BuildAndArchiveFactoryImages.
       if 'recovery' in config.images:
-        assert os.path.isfile(os.path.join(image_dir, constants.BASE_IMAGE_BIN))
-        logging.info('Running commands.BuildRecoveryImage')
-        commands.BuildRecoveryImage(buildroot, board, image_dir, extra_env)
+        base_image_path = os.path.join(image_dir, constants.BASE_IMAGE_BIN)
+        assert os.path.isfile(base_image_path)
+        if config.base_is_recovery:
+          recovery_image_path = os.path.join(image_dir,
+                                             constants.RECOVERY_IMAGE_BIN)
+          logging.info('Copying the base image to: %s',  recovery_image_path)
+          shutil.copyfile(base_image_path, recovery_image_path)
+        else:
+          logging.info('Running commands.BuildRecoveryImage')
+          commands.BuildRecoveryImage(buildroot, board, image_dir, extra_env)
         self._recovery_image_status_queue.put(True)
         recovery_image = constants.RECOVERY_IMAGE_BIN
         if not self.IsArchivedFile(recovery_image):
@@ -404,7 +429,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
   def HandleSkip(self):
     """Tell other stages to not wait on us if we are skipped."""
     self.board_runattrs.SetParallel('autotest_tarball_generated', True)
-    return super(ArchiveStage, self).HandleSkip()
+    return super().HandleSkip()
 
   def _HandleStageException(self, exc_info):
     # Tell the HWTestStage not to wait for artifacts to be uploaded
@@ -412,7 +437,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
     self._recovery_image_status_queue.put(False)
     self.board_runattrs.SetParallel('instruction_urls_per_channel', None)
     self.board_runattrs.SetParallel('autotest_tarball_generated', True)
-    return super(ArchiveStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
 
 class CPEExportStage(generic_stages.BoardSpecificBuilderStage,
@@ -597,7 +622,7 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
     """Tell other stages to not wait on us if we are skipped."""
     self._SymbolsNotGenerated()
     self.board_runattrs.SetParallel('debug_symbols_completed', True)
-    return super(DebugSymbolsStage, self).HandleSkip()
+    return super().HandleSkip()
 
   def _HandleStageException(self, exc_info):
     """Tell other stages to not wait on us if we die for some reason."""
@@ -611,7 +636,7 @@ class DebugSymbolsStage(generic_stages.BoardSpecificBuilderStage,
          e.MatchesFailureType(DebugSymbolsUploadException))):
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(DebugSymbolsStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
 
 class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
@@ -623,8 +648,7 @@ class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
 
   def __init__(self, builder_run, buildstore, board, version=None, **kwargs):
     self.prebuilts_version = version
-    super(UploadPrebuiltsStage, self).__init__(builder_run, buildstore, board,
-                                               **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def GenerateCommonArgs(self, inc_chrome_ver=True):
     """Generate common prebuilt arguments."""
@@ -789,8 +813,6 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
         image_path = os.path.join(self.GetImageDirSymlink(), image_name)
         logging.info('Running commands.GeneratePayloads')
         commands.GeneratePayloads(image_path, tempdir, **kwargs)
-        logging.info('Running commands.GenerateQuickProvisionPayloads')
-        commands.GenerateQuickProvisionPayloads(image_path, tempdir)
         for payload in os.listdir(tempdir):
           queue.put([os.path.join(tempdir, payload)])
 
@@ -841,12 +863,12 @@ class UploadTestArtifactsStage(generic_stages.BoardSpecificBuilderStage,
     # UploadTestArtifacts throws an exception.
     self.board_runattrs.SetParallel('test_artifacts_uploaded', False)
 
-    return super(UploadTestArtifactsStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def HandleSkip(self):
     """Launch DebugSymbolsStage if UnitTestStage is skipped."""
     self.board_runattrs.SetParallel('test_artifacts_uploaded', False)
-    return super(UploadTestArtifactsStage, self).HandleSkip()
+    return super().HandleSkip()
 
 
 # TODO(mtennant): This class continues to exist only for subclasses that still
@@ -864,8 +886,7 @@ class ArchivingStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, board, archive_stage, **kwargs):
-    super(ArchivingStage, self).__init__(builder_run, buildstore, board,
-                                         **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
     self.archive_stage = archive_stage
 
 
@@ -878,7 +899,7 @@ class GenerateSysrootStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(GenerateSysrootStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
 
   def _GenerateSysroot(self):
@@ -917,7 +938,7 @@ class GenerateTidyWarningsStage(generic_stages.BoardSpecificBuilderStage,
   GS_URL = 'gs://chromeos-clang-tidy-artifacts/clang-tidy-1'
 
   def __init__(self, *args, **kwargs):
-    super(GenerateTidyWarningsStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
 
   def _UploadTidyWarnings(self, path, tar_file):
@@ -975,7 +996,7 @@ class CollectPGOProfilesStage(generic_stages.BoardSpecificBuilderStage,
   PROFDATA = 'llvm.profdata'
 
   def __init__(self, *args, **kwargs):
-    super(CollectPGOProfilesStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
     self._merge_cmd = ''
 

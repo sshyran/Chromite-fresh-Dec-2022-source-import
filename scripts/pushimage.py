@@ -11,14 +11,14 @@ artifacts for signing (which a signing process will look for).
 import configparser
 import getpass
 import io
+import logging
 import os
 import re
 import textwrap
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import signing
@@ -419,6 +419,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
         ('dlc', None, None),
         (constants.QUICK_PROVISION_PAYLOAD_KERNEL, None, None),
         (constants.QUICK_PROVISION_PAYLOAD_ROOTFS, None, None),
+        (constants.QUICK_PROVISION_PAYLOAD_MINIOS, None, None),
     )
 
     # The following build artifacts, if present, are always copied.

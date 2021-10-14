@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 """Utility functions that are useful for controllers."""
+import logging
 
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -10,8 +11,8 @@ from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib.parser import package_info
-from chromite.lib.chroot_lib import Chroot
-from chromite.lib.sysroot_lib import Sysroot
+from chromite.lib import chroot_lib
+from chromite.lib import sysroot_lib
 
 class Error(Exception):
   """Base error class for the module."""
@@ -53,7 +54,7 @@ def ParseChroot(chroot_message):
   if features:
     env['FEATURES'] = ' '.join(features)
 
-  chroot = Chroot(
+  chroot = chroot_lib.Chroot(
       path=path, cache_dir=cache_dir, chrome_root=chrome_root, env=env)
 
   return chroot
@@ -73,7 +74,7 @@ def ParseSysroot(sysroot_message):
   """
   assert isinstance(sysroot_message, sysroot_pb2.Sysroot)
 
-  return Sysroot(sysroot_message.path)
+  return sysroot_lib.Sysroot(sysroot_message.path)
 
 
 def ParseGomaConfig(goma_message, chroot_path):
@@ -145,17 +146,16 @@ def ParseBuildTargets(repeated_build_target_field):
   return [ParseBuildTarget(target) for target in repeated_build_target_field]
 
 
-def CPVToPackageInfo(cpv, package_info_msg):
-  """Helper to translate CPVs into a PackageInfo message."""
-  package_info_msg.package_name = cpv.package
-  if cpv.category:
-    package_info_msg.category = cpv.category
-  if cpv.version:
-    package_info_msg.version = cpv.version
-
-
-def serialize_package_info(pkg_info: 'package_info.PackageInfo', pkg_info_msg):
+def serialize_package_info(pkg_info: package_info.PackageInfo,
+                           pkg_info_msg: common_pb2.PackageInfo):
   """Serialize a PackageInfo object to a PackageInfo proto."""
+  if not isinstance(pkg_info, package_info.PackageInfo):
+    # Allows us to swap everything to serialize_package_info, and search the
+    # logs for usages that aren't passing though a PackageInfo yet.
+    logging.warning(
+        'serialize_package_info: Got a %s instead of a PackageInfo.',
+        type(pkg_info))
+    pkg_info = package_info.parse(pkg_info)
   pkg_info_msg.package_name = pkg_info.package
   if pkg_info.category:
     pkg_info_msg.category = pkg_info.category

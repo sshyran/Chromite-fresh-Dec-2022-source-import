@@ -10,6 +10,7 @@ import contextlib
 import datetime
 import glob
 import json
+import logging
 import os
 from pathlib import Path
 import queue
@@ -17,21 +18,21 @@ import re
 import textwrap
 import threading
 
+from chromite.third_party.gn_helpers import gn_helpers
+
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gclient
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
-from chromite.third_party.gn_helpers import gn_helpers
 from chromite.utils import memoize
+from chromite.utils import pformat
 
 
 COMMAND_NAME = 'chrome-sdk'
@@ -67,7 +68,7 @@ class MissingSDK(Exception):
 
   def _ConstructLegolandURL(self, config):
     """Returns a link to the given board's release builder."""
-    return ('https://https://dashboards.corp.google.com/chromeos_ci_release?'
+    return ('https://dashboards.corp.google.com/chromeos_ci_release?'
             'f=cbb_config:in:%s' % config)
 
   def __init__(self, config, version=None):
@@ -344,7 +345,7 @@ class SDKFetcher(object):
     return None
 
   @classmethod
-  def ClearOldItems(cls, cache_dir, max_age_days=28):
+  def ClearOldItems(cls, cache_dir, max_age_days=14):
     """Removes old items from the tarball cache older than max_age_days.
 
     Inspects the entire cache, not just a single board's items.
@@ -984,7 +985,7 @@ class ChromeSDKCommand(command.CliCommand):
              '2014/04/%%(target)s-2014.04.23.220740.tar.xz')
 
   def __init__(self, options):
-    super(ChromeSDKCommand, self).__init__(options)
+    super().__init__(options)
     self.board = options.board
     # Lazy initialized.
     self.sdk = None
@@ -1168,16 +1169,8 @@ class ChromeSDKCommand(command.CliCommand):
       Absolute path to the wrapper script to be used as --gomacc-path.
     """
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-    tc_tarball_path = None
-    # Since we want a path to tarball extraction not a path to clang in
-    # symlink directory, we cannot find the path with
-    # sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].
-    # That is why we search like this.
-    for key, value in sdk_ctx.key_map.items():
-      if isinstance(key, tuple) and key[0].startswith('target_toolchain/'):
-        assert tc_tarball_path is None
-        tc_tarball_path = value.path
-
+    tc_tarball_path = os.path.realpath(
+        sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path)
     linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
                                   'reclient_cfgs', 'rewrapper_linux.cfg')
     linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
@@ -1359,6 +1352,11 @@ class ChromeSDKCommand(command.CliCommand):
       gn_args['goma_dir'] = goma_dir
 
     gn_args.pop('internal_khronos_glcts_tests', None)  # crbug.com/588080
+
+    # The ebuild sets dcheck_always_on to false to avoid a default value of
+    # true for bots. But we'd like developers using DCHECKs when possible, so
+    # we let dcheck_always_on use the default value for Simple Chrome.
+    gn_args.pop('dcheck_always_on', None)
 
     # Disable ThinLTO and CFI for simplechrome. Tryjob machines do not have
     # enough file descriptors to use. crbug.com/789607

@@ -90,11 +90,11 @@ class ChromiumOSDeviceHandlerFake(object):
 class BrilloDeployOperationFake(deploy.BrilloDeployOperation):
   """Fake for deploy.BrilloDeployOperation."""
   def __init__(self, emerge, queue):
-    super(BrilloDeployOperationFake, self).__init__(emerge)
+    super().__init__(emerge)
     self._queue = queue
 
   def ParseOutput(self, output=None):
-    super(BrilloDeployOperationFake, self).ParseOutput(output)
+    super().ParseOutput(output)
     self._queue.put('advance')
 
 

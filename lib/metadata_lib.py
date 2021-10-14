@@ -6,12 +6,12 @@
 
 import datetime
 import json
+import logging
 import math
 
-from chromite.lib import results_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import results_lib
 
 
 class _DummyLock(object):
@@ -42,7 +42,7 @@ class CBuildbotMetadata(object):
                             multiprocess containers so that its state
                             is correctly synced across processes.
     """
-    super(CBuildbotMetadata, self).__init__()
+    super().__init__()
     if multiprocess_manager:
       self._metadata_dict = multiprocess_manager.dict()
       self._cl_action_list = multiprocess_manager.list()

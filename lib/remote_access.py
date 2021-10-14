@@ -6,6 +6,7 @@
 
 import functools
 import glob
+import logging
 import os
 import re
 import shutil
@@ -17,7 +18,6 @@ import time
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import timeout_util
@@ -216,7 +216,7 @@ def CompileSSHConnectSettings(**kwargs):
     A list of arguments to pass to SSH.
   """
   settings = {
-      'ConnectTimeout': 30,
+      'ConnectTimeout': 60,
       'ConnectionAttempts': 4,
       'NumberOfPasswordPrompts': 0,
       'Protocol': 2,
@@ -542,7 +542,7 @@ class RemoteAccess(object):
 
   def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
             recursive=True, inplace=False, verbose=False, sudo=False,
-            remote_sudo=False, compress=True, **kwargs):
+            remote_sudo=False, compress=True, files_from=None, **kwargs):
     """Rsync a path to the remote device.
 
     Rsync a path to the remote device. If |to_local| is set True, it
@@ -561,6 +561,8 @@ class RemoteAccess(object):
       sudo: If set, invoke the command via sudo.
       remote_sudo: If set, run the command in remote shell with sudo.
       compress: If set, compress file data during the transfer.
+      files_from: If set, read paths from this file (plus some other changes to
+        behaviour per rsync's --files-from).
       **kwargs: See cros_build_lib.run documentation.
     """
     kwargs.setdefault('debug_level', self.debug_level)
@@ -569,6 +571,8 @@ class RemoteAccess(object):
     rsync_cmd = ['rsync', '--perms', '--verbose', '--times',
                  '--omit-dir-times', '--exclude', '.svn']
     rsync_cmd.append('--copy-links' if follow_symlinks else '--links')
+    if files_from:
+      rsync_cmd.extend(['--files-from', files_from])
     rsync_sudo = 'sudo' if (
         remote_sudo and self.username != ROOT_ACCOUNT) else ''
     rsync_cmd += ['--rsync-path',
@@ -1291,7 +1295,7 @@ class ChromiumOSDevice(RemoteDevice):
       include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all commands.
       kwargs: Args to pass to the parent constructor.
     """
-    super(ChromiumOSDevice, self).__init__(hostname, **kwargs)
+    super().__init__(hostname, **kwargs)
     self._orig_path = None
     self._path = None
     self._include_dev_paths = include_dev_paths
@@ -1444,4 +1448,4 @@ class ChromiumOSDevice(RemoteDevice):
       extra_env = kwargs.pop('extra_env', {})
       extra_env.setdefault('PATH', self.path)
       kwargs['extra_env'] = extra_env
-    return super(ChromiumOSDevice, self).run(cmd, **kwargs)
+    return super().run(cmd, **kwargs)

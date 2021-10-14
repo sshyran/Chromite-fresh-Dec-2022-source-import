@@ -9,17 +9,16 @@ This produces JSON output for other tools to process.
 
 from __future__ import absolute_import
 
+import logging
 import sys
-
-from chromite.lib.depgraph import DepGraphGenerator
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
-from chromite.lib import pformat
 from chromite.lib import sysroot_lib
+from chromite.lib.depgraph import DepGraphGenerator
 from chromite.lib.parser import package_info
+from chromite.utils import pformat
 
 
 def FlattenDepTree(deptree, pkgtable=None, parentcpv=None, get_cpe=False):

@@ -5,11 +5,13 @@
 """Module containing the sync stages."""
 
 import contextlib
+import logging
 import os
 import sys
-from xml.etree import ElementTree
 from xml.dom import minidom
+from xml.etree import ElementTree
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import lkgm_manager
 from chromite.cbuildbot import manifest_version
@@ -17,11 +19,10 @@ from chromite.cbuildbot import patch_series
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import buildbucket_v2
+from chromite.lib import commandline
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import osutils
@@ -45,7 +46,7 @@ class PatchChangesStage(generic_stages.BuilderStage):
       patch_pool: A TrybotPatchPool object containing the different types of
                   patches to apply.
     """
-    super(PatchChangesStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.patch_pool = patch_pool
 
   @staticmethod
@@ -103,9 +104,9 @@ class PatchChangesStage(generic_stages.BuilderStage):
 
       def ApplyChange(self, change):
         if isinstance(change, cros_patch.GerritPatch):
-          logging.PrintBuildbotLink(str(change), change.url)
+          cbuildbot_alerts.PrintBuildbotLink(str(change), change.url)
         elif isinstance(change, cros_patch.UploadedLocalPatch):
-          logging.PrintBuildbotStepText(str(change))
+          cbuildbot_alerts.PrintBuildbotStepText(str(change))
 
         return patch_series.PatchSeries.ApplyChange(self, change)
 
@@ -133,9 +134,9 @@ class BootstrapStage(PatchChangesStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, patch_pool, **kwargs):
-    super(BootstrapStage, self).__init__(builder_run, buildstore,
-                                         trybot_patch_pool.TrybotPatchPool(),
-                                         **kwargs)
+    super().__init__(builder_run, buildstore,
+                     trybot_patch_pool.TrybotPatchPool(),
+                     **kwargs)
 
     self.patch_pool = patch_pool
     self.returncode = None
@@ -298,7 +299,7 @@ class SyncStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(SyncStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.repo = None
     self.skip_sync = False
 
@@ -376,7 +377,7 @@ class SyncStage(generic_stages.BuilderStage):
 
       # Print the blamelist.
       if fresh_sync:
-        logging.PrintBuildbotStepText('(From scratch)')
+        cbuildbot_alerts.PrintBuildbotStepText('(From scratch)')
 
 
 class ManifestVersionedSyncStage(SyncStage):
@@ -388,8 +389,7 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def __init__(self, builder_run, buildstore, **kwargs):
     # Perform the sync at the end of the stage to the given manifest.
-    super(ManifestVersionedSyncStage, self).__init__(builder_run, buildstore,
-                                                     **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.repo = None
     self.manifest_manager = None
 
@@ -408,14 +408,14 @@ class ManifestVersionedSyncStage(SyncStage):
 
   def HandleSkip(self):
     """Initializes a manifest manager to the specified version if skipped."""
-    super(ManifestVersionedSyncStage, self).HandleSkip()
+    super().HandleSkip()
     if self._run.options.force_version:
       self.Initialize()
       self.ForceVersion(self._run.options.force_version)
 
   def ForceVersion(self, version):
     """Creates a manifest manager from given version and returns manifest."""
-    logging.PrintBuildbotStepText(version)
+    cbuildbot_alerts.PrintBuildbotStepText(version)
     return self.manifest_manager.BootstrapFromVersion(version)
 
   def VersionIncrementType(self):
@@ -518,13 +518,13 @@ class ManifestVersionedSyncStage(SyncStage):
     # Print the Blamelist here.
     url_prefix = 'https://crosland.corp.google.com/log/'
     url = url_prefix + '%s..%s' % (previous_version, target_version)
-    logging.PrintBuildbotLink('Blamelist', url)
+    cbuildbot_alerts.PrintBuildbotLink('Blamelist', url)
     # The testManifestVersionedSyncOnePartBranch interacts badly with this
     # function.  It doesn't fully initialize self.manifest_manager which
     # causes target_version to be None.  Since there isn't a clean fix in
     # either direction, just throw this through str().  In the normal case,
     # it's already a string anyways.
-    logging.PrintBuildbotStepText(str(target_version))
+    cbuildbot_alerts.PrintBuildbotStepText(str(target_version))
 
     return to_return
 
@@ -651,8 +651,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(MasterSlaveLKGMSyncStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     # lkgm_manager deals with making sure we're synced to whatever manifest
     # we get back in GetNextManifest so syncing again is redundant.
     self._android_version = None
@@ -693,7 +692,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
           False)
 
   def ForceVersion(self, version):
-    manifest = super(MasterSlaveLKGMSyncStage, self).ForceVersion(version)
+    manifest = super().ForceVersion(version)
     if MasterSlaveLKGMSyncStage.external_manager:
       MasterSlaveLKGMSyncStage.external_manager.BootstrapFromVersion(version)
 
@@ -701,7 +700,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
 
   def _VerifyMasterId(self, master_id):
     """Verify that our master id is current and valid."""
-    super(MasterSlaveLKGMSyncStage, self)._VerifyMasterId(master_id)
+    super()._VerifyMasterId(master_id)
     if not self._run.config.master and not master_id:
       raise failures_lib.StepFailure(
           'Cannot start build without a master_build_id. Did you hit force '
@@ -747,7 +746,7 @@ class MasterSlaveLKGMSyncStage(ManifestVersionedSyncStage):
     if self._android_rev and self._run.config.master:
       self._android_version = self.GetLatestAndroidVersion()
       logging.info('Latest Android version is: %s', self._android_version)
-      logging.PrintKitchenSetBuildProperty('android_version',
+      cbuildbot_alerts.PrintKitchenSetBuildProperty('android_version',
                                            self._android_version)
 
     if (self._chrome_rev == constants.CHROME_REV_LATEST and

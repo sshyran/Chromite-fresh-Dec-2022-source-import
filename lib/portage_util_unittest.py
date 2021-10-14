@@ -491,7 +491,7 @@ class StubEBuild(portage_util.EBuild):
   """Test helper to StubEBuild."""
 
   def __init__(self, path, subdir_support):
-    super(StubEBuild, self).__init__(path, subdir_support)
+    super().__init__(path, subdir_support)
     self.is_workon = True
     self.is_stable = True
 
@@ -1462,11 +1462,12 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
 
   def testValidPackage(self):
     """Test valid outputs."""
-    result = cros_build_lib.CommandResult(output='cat/pkg-1.0', returncode=0)
+    expected = package_info.PackageInfo('cat', 'pkg', '1.0')
+    result = cros_build_lib.CommandResult(output=expected.cpvr, returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
-    self.assertIsInstance(portage_util.PortageqBestVisible('cat/pkg'),
-                          package_info.CPV)
+    result = portage_util.PortageqBestVisible('cat/pkg')
+    self.assertEqual(expected, result)
 
 
 class PortageqEnvvarTest(cros_test_lib.MockTestCase):
@@ -1574,12 +1575,14 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
       portage_util.PortageqMatch('*/*')
 
   def testValidPackage(self):
-    """Test valid package produces a CPV."""
-    result = cros_build_lib.CommandResult(returncode=0, output='cat/pkg-1.0-r1')
+    """Test valid package produces the corresponding PackageInfo."""
+    cpvr = 'cat/pkg-1.0-r1'
+    result = cros_build_lib.CommandResult(returncode=0, output=cpvr)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
-    self.assertIsInstance(portage_util.PortageqMatch('cat/pkg'),
-                          package_info.CPV)
+    pkg = portage_util.PortageqMatch('cat/pkg')
+    self.assertIsInstance(pkg, package_info.PackageInfo)
+    assert pkg == cpvr
 
 
 class FindEbuildTest(cros_test_lib.RunCommandTestCase):

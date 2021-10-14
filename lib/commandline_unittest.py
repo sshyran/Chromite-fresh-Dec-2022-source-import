@@ -5,15 +5,16 @@
 """Test the commandline module."""
 
 import argparse
+import logging
+import os
 import pickle
 import signal
-import os
 import sys
+from typing import Optional
 
 from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import path_util
@@ -122,18 +123,24 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
                   commandline.DEVICE_SCHEME_SSH,
                   commandline.DEVICE_SCHEME_USB)
 
-  def _CheckDeviceParse(self, device_input, scheme, username=None,
-                        hostname=None, port=None, path=None, serial=None):
+  def _CheckDeviceParse(self,
+                        device_input: str,
+                        scheme: str,
+                        username: Optional[str] = None,
+                        hostname: Optional[str] = None,
+                        port: Optional[int] = None,
+                        path: Optional[str] = None,
+                        serial: Optional[str] = None):
     """Checks that parsing a device input gives the expected result.
 
     Args:
-      device_input (str): Input specifying a device.
-      scheme (str): Expected scheme.
-      username (str|None): Expected username.
-      hostname (str|None): Expected hostname.
-      port (int|None): Expected port.
-      path (str|None): Expected path.
-      serial (str|None): Expected serial number.
+      device_input: Input specifying a device.
+      scheme: Expected scheme.
+      username: Expected username.
+      hostname: Expected hostname.
+      port: Expected port.
+      path: Expected path.
+      serial: Expected serial number.
     """
     parser = commandline.ArgumentParser()
     parser.add_argument('device', type=commandline.DeviceParser(scheme))
@@ -660,6 +667,13 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
     self.cmd = command.CliCommand(argparse.Namespace())
     self.cmd.options.log_level = 'info'
 
+    def _inside_args_patch(*_args):
+      argv = sys.argv[:]
+      if argv[-1] == 'arg3':
+        argv[-1] = 'newarg3'
+      return argv
+    self.PatchObject(self.cmd, 'TranslateToChrootArgv', _inside_args_patch)
+
   def teardown(self):
     sys.argv = self.orig_argv
 
@@ -715,6 +729,12 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
 
     # Since we are in the chroot, it should return, doing nothing.
     commandline.RunInsideChroot(self.cmd)
+
+  def testTranslateToChrootArgv(self):
+    """Test we can restart inside the chroot."""
+    self.mock_inside_chroot.return_value = False
+    sys.argv.append('arg3')
+    self._VerifyRunInsideChroot(['/inside/cmd', 'arg1', 'arg2', 'newarg3'])
 
 
 class DeprecatedActionTest(cros_test_lib.MockTestCase):

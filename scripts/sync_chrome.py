@@ -4,12 +4,12 @@
 
 """Sync the Chrome source code used by Chrome OS to the specified directory."""
 
+import logging
 import os
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gclient
 from chromite.lib import osutils
 

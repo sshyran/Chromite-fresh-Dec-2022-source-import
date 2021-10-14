@@ -20,6 +20,7 @@ class AutotestTarballBuilder(object):
   _PACKAGES_ARCHIVE = 'autotest_packages.tar'
   _TEST_SUITES_ARCHIVE = 'test_suites.tar.bz2'
   _SERVER_PACKAGE_ARCHIVE = 'autotest_server_package.tar.bz2'
+  _AUTOTEST_ARCHIVE = 'autotest.tar.bz2'
 
   # Directory within _SERVER_PACKAGE_ARCHIVE where Tast files needed to run
   # with Server-Side Packaging are stored.
@@ -39,13 +40,13 @@ class AutotestTarballBuilder(object):
       'src/platform/tast/tools/run_tast.sh',  # Helper script to run SSP tast.
   ]
 
-  def __init__(self, archive_basedir, output_directory):
+  def __init__(self, archive_basedir: str, output_directory: str) -> None:
     """Init function.
 
     Args:
-      archive_basedir (str): The base directory from which the archives will be
+      archive_basedir: The base directory from which the archives will be
         created. This path should contain the `autotest` directory.
-      output_directory (str): The directory where the archives will be written.
+      output_directory: The directory where the archives will be written.
     """
     self.archive_basedir = archive_basedir
     self.output_directory = output_directory
@@ -108,6 +109,20 @@ class AutotestTarballBuilder(object):
     tarball = os.path.join(self.output_directory, self._SERVER_PACKAGE_ARCHIVE)
     if self._BuildTarball(autotest_files + tast_files, tarball,
                           extra_args=transforms, check=False):
+      return tarball
+    else:
+      return None
+
+  def BuildAutotestTarball(self):
+    """Tar up the full autotest directory.
+
+    Returns:
+      str|None - The path of the autotest tarball if created.
+    """
+
+    input_list = ['autotest/']
+    tarball = os.path.join(self.output_directory, self._AUTOTEST_ARCHIVE)
+    if self._BuildTarball(input_list, tarball):
       return tarball
     else:
       return None

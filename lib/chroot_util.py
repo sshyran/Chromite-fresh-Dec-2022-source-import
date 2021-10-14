@@ -5,15 +5,16 @@
 """Utilities for updating and building in the chroot environment."""
 
 import contextlib
+import logging
 import os
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import sysroot_lib
+
 
 if cros_build_lib.IsInsideChroot():
   # These import libraries outside chromite. See brbug.com/472.

@@ -8,6 +8,7 @@ import collections
 import enum
 import filecmp
 import functools
+import logging
 import os
 import re
 from typing import Iterable, List, Optional, Tuple, Union
@@ -15,7 +16,6 @@ from typing import Iterable, List, Optional, Tuple, Union
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -120,7 +120,35 @@ def best_chrome_ebuild(ebuilds):
   return best
 
 
-def find_chrome_ebuilds(package_dir):
+def get_stable_chrome_version() -> str:
+  """Get the chrome version from the latest, stable chrome ebuild."""
+  return _get_best_stable_chrome_ebuild().chrome_version
+
+
+def _get_best_stable_chrome_ebuild() -> ChromeEBuild:
+  """Find the stable chrome ebuild with the highest version."""
+  package_dir = os.path.join(_CHROME_OVERLAY_PATH, constants.CHROME_CP)
+  _unstable_ebuild, stable_ebuilds = find_chrome_ebuilds(package_dir)
+  return _get_best_stable_chrome_ebuild_from_ebuilds(stable_ebuilds)
+
+
+def _get_best_stable_chrome_ebuild_from_ebuilds(
+    stable_ebuilds: List[ChromeEBuild]) -> ChromeEBuild:
+  """Get the highest versioned chrome ebuild from a list of stable ebuilds."""
+  candidates = []
+  # This is an artifact from the old process.
+  chrome_branch_re = re.compile(r'%s.*_rc.*' % CHROME_VERSION_REGEX)
+  for ebuild in stable_ebuilds:
+    if chrome_branch_re.search(ebuild.version):
+      candidates.append(ebuild)
+
+  if not candidates:
+    return None
+
+  return best_chrome_ebuild(candidates)
+
+
+def find_chrome_ebuilds(package_dir) -> (ChromeEBuild, List[ChromeEBuild]):
   """Return a tuple of chrome's unstable ebuild and stable ebuilds.
 
   Args:
@@ -206,12 +234,39 @@ class UprevResult(object):
     self.changed_files = list(changed_files or [])
 
   def __bool__(self):
-    """Returns True only if this Result indicates that a file was modified."""
-    return self.outcome in (
-        Outcome.REVISION_BUMP,
-        Outcome.VERSION_BUMP,
-        Outcome.NEW_EBUILD_CREATED,
-    )
+    """Returns True if a file was modified (uprev or revbump)."""
+    return self.new_ebuild_created or self.revision_bump or self.version_bump
+
+  # Properties corresponding directly to a specific outcome check.
+  @property
+  def new_ebuild_created(self):
+    """True when the result was a new ebuild created."""
+    return self.outcome is Outcome.NEW_EBUILD_CREATED
+
+  @property
+  def newer_version_exists(self):
+    """True when the existing stable version is newer than the given version."""
+    return self.outcome is Outcome.NEWER_VERSION_EXISTS
+
+  @property
+  def revision_bump(self):
+    """True when the result was a revbump."""
+    return self.outcome is Outcome.REVISION_BUMP
+
+  @property
+  def same_version_exists(self):
+    return self.outcome is Outcome.SAME_VERSION_EXISTS
+
+  @property
+  def version_bump(self):
+    """True when the result was a version bump."""
+    return self.outcome is Outcome.VERSION_BUMP
+
+  # Composite properties to simplify checks.
+  @property
+  def stable_version(self):
+    """True when the supplied and stable version matched."""
+    return self.revision_bump or self.same_version_exists
 
 
 class UprevChromeManager(object):
@@ -252,6 +307,8 @@ class UprevChromeManager(object):
       return result
 
     self._new_ebuild_files.extend(result.changed_files)
+    logging.debug('Modified ebuild(s) for %s: %s', package,
+                  result.changed_files)
     if candidate and not candidate.IsSticky():
       osutils.SafeUnlink(candidate.ebuild_path)
       self._removed_ebuild_files.append(candidate.ebuild_path)
@@ -273,17 +330,9 @@ class UprevChromeManager(object):
       best_stable_candidate: The highest version stable ebuild that exists, or
           None if no stable ebuilds exist.
     """
-    candidates = []
-    # This is an artifact from the old process.
-    chrome_branch_re = re.compile(r'%s.*_rc.*' % CHROME_VERSION_REGEX)
-    for ebuild in stable_ebuilds:
-      if chrome_branch_re.search(ebuild.version):
-        candidates.append(ebuild)
-
-    if not candidates:
-      return (True, None)
-
-    candidate = best_chrome_ebuild(candidates)
+    candidate = _get_best_stable_chrome_ebuild_from_ebuilds(stable_ebuilds)
+    if not candidate:
+      return True, None
 
     # A candidate is only a valid uprev candidate if its chrome version
     # is no better than the target version. We can uprev equal versions
@@ -424,6 +473,10 @@ class UprevOverlayManager(object):
     else:
       return []
 
+  @property
+  def revved_packages(self):
+    return self._revved_packages or []
+
   def uprev(self, package_list=None, force=False):
     """Uprev ebuilds.
 
@@ -522,7 +575,7 @@ class UprevOverlayManager(object):
         osutils.SafeUnlink(ebuild_path_to_remove)
         self._removed_ebuild_files.append(ebuild_path_to_remove)
 
-      self._revved_packages.append(ebuild.package)
+      self._revved_packages.append(new_package)
       self._new_package_atoms.append('=%s' % new_package)
 
   def _populate_overlay_ebuilds(self,
@@ -624,6 +677,9 @@ class UprevVersionedPackageResult(object):
 
   def __init__(self):
     self.modified = []
+
+  def __bool__(self):
+    return self.uprevved
 
   def add_result(self, new_version, modified_files):
     """Adds version/ebuilds tuple to result.

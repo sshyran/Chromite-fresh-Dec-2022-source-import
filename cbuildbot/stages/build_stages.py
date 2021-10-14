@@ -6,8 +6,13 @@
 
 import base64
 import glob
+import logging
 import os
 
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
@@ -18,7 +23,6 @@ from chromite.lib import buildbucket_v2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import failures_lib
 from chromite.lib import git
@@ -28,8 +32,6 @@ from chromite.lib import portage_util
 from chromite.lib import request_build
 from chromite.lib.parser import package_info
 from chromite.service import image as image_service
-from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
 
 
 class CleanUpStage(generic_stages.BuilderStage):
@@ -203,25 +205,25 @@ class CleanUpStage(generic_stages.BuilderStage):
     # Find the 3 most recent master buildbucket ids in active buckets.
     for bucket in constants.ACTIVE_BUCKETS:
       for status in [
-        constants.BUILDBUCKET_BUILDER_STATUS_CANCELED,
-        constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS,
+          constants.BUILDBUCKET_BUILDER_STATUS_CANCELED,
+          constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS,
       ]:
         build_predicate = builds_service_pb2.BuildPredicate(
-          builder=builder_pb2.BuilderID(
-            project='chromeos',
-            bucket=bucket),
-          status=status,
-          tags=[common_pb2.StringPair(key='cbb_config',
-                                    value=self._run.config.name),
-              common_pb2.StringPair(key='cbb_branch',
-                                    value=self._run.manifest_branch)],
+            builder=builder_pb2.BuilderID(
+                project='chromeos',
+                bucket=bucket),
+            status=status,
+            tags=[common_pb2.StringPair(key='cbb_config',
+                                        value=self._run.config.name),
+                  common_pb2.StringPair(key='cbb_branch',
+                                        value=self._run.manifest_branch)],
         )
         main_search.append(builds_service_pb2.SearchBuildsRequest(
-              predicate=build_predicate,
-              fields=field_mask_pb2.FieldMask(paths=['builds.*.id']),
-              page_size=3))
+            predicate=build_predicate,
+            fields=field_mask_pb2.FieldMask(paths=['builds.*.id']),
+            page_size=3))
     main_builds = buildbucket_client.BatchSearchBuilds(
-      search_requests=main_search
+        search_requests=main_search
     )
     main_ids = []
     for br in main_builds.responses:
@@ -236,27 +238,27 @@ class CleanUpStage(generic_stages.BuilderStage):
           constants.BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
           constants.BUILDBUCKET_BUILDER_STATUS_STARTED]:
         child_predicate = builds_service_pb2.BuildPredicate(
-          builder=builder_pb2.BuilderID(
-            project='chromeos',
-            bucket=bucket),
-          status=status,
-          tags=[common_pb2.StringPair(
-            key='buildset',
-            value=request_build.ChildBuildSet(main_id))],
+            builder=builder_pb2.BuilderID(
+                project='chromeos',
+                bucket=bucket),
+            status=status,
+            tags=[common_pb2.StringPair(
+                key='buildset',
+                value=request_build.ChildBuildSet(main_id))],
         )
         batch_search.append(builds_service_pb2.SearchBuildsRequest(
-          predicate=child_predicate))
+            predicate=child_predicate))
     builds = buildbucket_client.BatchSearchBuilds(
-      search_requests=batch_search)
+        search_requests=batch_search)
     cancel_nodes = []
     for cr in builds.responses:
       for cb in cr.search_builds.builds:
         logging.info(
-          'Found build %s in status %s from previous orchestrator.',
-          str(cb.id), common_pb2.Status.Name(cb.status))
+            'Found build %s in status %s from previous orchestrator.',
+            str(cb.id), common_pb2.Status.Name(cb.status))
         cancel_nodes.append(cb.id)
-    buildbucket_client.BatchCancelBuilds(cancel_nodes,
-      'Canceling builds from a previous orchestrator.')
+    buildbucket_client.BatchCancelBuilds(
+        cancel_nodes, 'Canceling builds from a previous orchestrator.')
 
   def CanReuseChroot(self, chroot_path):
     """Determine if the chroot can be reused.
@@ -373,7 +375,9 @@ class CleanUpStage(generic_stages.BuilderStage):
     # Clean mount points first to be safe about deleting.
     chroot_path = os.path.join(self._build_root, constants.DEFAULT_CHROOT_DIR)
     cros_sdk_lib.CleanupChrootMount(chroot=chroot_path)
-    osutils.UmountTree(self._build_root)
+    logging.info('Build root path: %s', self._build_root)
+    if not os.path.ismount(self._build_root):
+      osutils.UmountTree(self._build_root)
 
     if not delete_chroot:
       delete_chroot = not self.CanReuseChroot(chroot_path)
@@ -445,7 +449,7 @@ class InitSDKStage(generic_stages.BuilderStage):
       buildstore: BuildStore instance to make DB calls with.
       chroot_replace: If True, force the chroot to be replaced.
     """
-    super(InitSDKStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.force_chroot_replace = chroot_replace
 
   def PerformStage(self):
@@ -458,8 +462,8 @@ class InitSDKStage(generic_stages.BuilderStage):
       # Make sure the chroot has a valid version before we update it.
       pre_ver = cros_sdk_lib.GetChrootVersion(chroot_path)
       if pre_ver is None:
-        logging.PrintBuildbotStepText('Replacing broken chroot')
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepText('Replacing broken chroot')
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         replace = True
 
     if not chroot_exists or replace:
@@ -476,9 +480,9 @@ class InitSDKStage(generic_stages.BuilderStage):
 
     post_ver = cros_sdk_lib.GetChrootVersion(chroot_path)
     if pre_ver is not None and pre_ver != post_ver:
-      logging.PrintBuildbotStepText('%s->%s' % (pre_ver, post_ver))
+      cbuildbot_alerts.PrintBuildbotStepText('%s->%s' % (pre_ver, post_ver))
     else:
-      logging.PrintBuildbotStepText(post_ver)
+      cbuildbot_alerts.PrintBuildbotStepText(post_ver)
 
 
 class UpdateSDKStage(generic_stages.BuilderStage):
@@ -584,7 +588,7 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
                **kwargs):
     if not afdo_use:
       suffix = self.UpdateSuffix('-' + constants.USE_AFDO_USE, suffix)
-    super(BuildPackagesStage, self).__init__(
+    super().__init__(
         builder_run, buildstore, board, suffix=suffix, **kwargs)
     self._afdo_generate_min = afdo_generate_min
     self._update_metadata = update_metadata
@@ -700,7 +704,7 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
         self._run.config.build_type == constants.TOOLCHAIN_TYPE)
 
     # Set property to specify bisection builder job to run for Findit.
-    logging.PrintKitchenSetBuildProperty(
+    cbuildbot_alerts.PrintKitchenSetBuildProperty(
         'BISECT_BUILDER', self._current_board + '-postsubmit-tryjob')
     try:
       commands.Build(
@@ -728,7 +732,8 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
           os.path.basename(failures_filename),
           text_to_display='BuildCompileFailureOutput')
       gs_url = os.path.join(self.upload_url, 'BuildCompileFailureOutput.json')
-      logging.PrintKitchenSetBuildProperty('BuildCompileFailureOutput', gs_url)
+      cbuildbot_alerts.PrintKitchenSetBuildProperty('BuildCompileFailureOutput',
+                                                    gs_url)
       raise
 
     if self._update_metadata:
@@ -858,7 +863,7 @@ class BuildImageStage(BuildPackagesStage):
     compute images create" command. This will convert them into images that can
     be used to create GCE VM instances.
     """
-    if self._run.config.gce_tests:
+    if self._run.config.gce_tests or self._run.config.gce_image:
       image_bins = []
       if 'base' in self._run.config['images']:
         image_bins.append(constants.IMAGE_TYPE_TO_NAME['base'])
@@ -912,7 +917,7 @@ class BuildImageStage(BuildPackagesStage):
   def _HandleStageException(self, exc_info):
     """Tell other stages to not wait on us if we die for some reason."""
     self.board_runattrs.SetParallelDefault('images_generated', False)
-    return super(BuildImageStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def PerformStage(self):
     self._BuildImages()
@@ -927,7 +932,7 @@ class UprevStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, boards=None, **kwargs):
-    super(UprevStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     if boards is not None:
       self._boards = boards
 

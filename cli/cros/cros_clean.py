@@ -13,12 +13,12 @@ If unsure, just use the --safe flag to clean out various objects.
 
 import errno
 import glob
+import logging
 import os
 
-from chromite.lib import constants
 from chromite.cli import command
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 

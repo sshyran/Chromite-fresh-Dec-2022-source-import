@@ -17,7 +17,7 @@ class SpanTest(cros_test_lib.MockTestCase):
     """Tests that Span instances can be turned into dicts."""
     traceId = 'deadbeefdeadbeefdeadbeefdeadbeef'
     span = cloud_trace.Span(spanId='1234', traceId=traceId, name='Test span')
-    self.assertEqual(span.ToDict(), {
+    self.assertEqual(dict(span), {
         'labels': {},
         'spanId': '1234',
         'name': 'Test span'

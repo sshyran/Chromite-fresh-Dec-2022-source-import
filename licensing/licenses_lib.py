@@ -10,17 +10,18 @@ Documentation on this script is also available here:
 
 import codecs
 import html
+import logging
 import os
 import re
 from typing import List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
+
 
 # We are imported by src/repohooks/pre-upload.py in a non chroot environment
 # where yaml may not be there, so we don't error on that since it's not needed

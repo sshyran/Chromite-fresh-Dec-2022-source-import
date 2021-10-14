@@ -7,14 +7,14 @@
 import ast
 import functools
 import glob
+import logging
 import os
 import re
 import shlex
 import shutil
 
-from chromite.lib import failures_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import osutils
 
 
@@ -367,8 +367,10 @@ _COPY_PATHS_CHROME = (
     Path('chrome-wrapper'),
     Path('chrome_100_percent.pak'),
     Path('chrome_200_percent.pak', cond=C.StagingFlagSet(_HIGHDPI_FLAG)),
-    # TODO(jperaza): make the handler required when  Crashpad is enabled.
+    # TODO(crbug.com/1233008): remove crashpad_handler and make
+    # chrome_crashpad_handler required.
     Path('crashpad_handler', exe=True, optional=True),
+    Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('dbus/', optional=True),
     Path('keyboard_resources.pak'),
     Path('libassistant.so', exe=True, optional=True),
@@ -444,6 +446,7 @@ _COPY_PATHS_LACROS = (
     Path('snapshot_blob.bin', optional=True),
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
+    Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('WidevineCdm/', optional=True),
 )
 
@@ -587,7 +590,6 @@ def GetChromeTestCopyPaths(build_dir, test_target):
       re.compile(r'.*build/cros_cache.*'),
       re.compile(r'.*testing/(?!buildbot/filters).*'),
       re.compile(r'.*third_party/chromite.*'),
-      re.compile(r'.*tools/swarming_client.*'),
   ]
 
   src_dir = os.path.dirname(os.path.dirname(build_dir))

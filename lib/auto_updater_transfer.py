@@ -37,11 +37,11 @@ from __future__ import absolute_import
 from __future__ import division
 
 import abc
+import logging
 import os
 import urllib.parse
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import nebraska_wrapper
 from chromite.lib import osutils
 from chromite.lib import retry_util
@@ -184,7 +184,7 @@ class LocalTransfer(Transfer):
       **kwargs: Any keyword arguments to be passed. See Base class for a
           complete list of accepted keyword arguments.
     """
-    super(LocalTransfer, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def CheckPayloads(self):
     """Verify that all required payloads are in |self.payload_dir|."""
@@ -259,7 +259,7 @@ class LabEndToEndPayloadTransfer(Transfer):
           complete list of accepted keyword arguments.
     """
     self._staging_server = staging_server
-    super(LabEndToEndPayloadTransfer, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
   def _RemoteDevserverCall(self, cmd, stdout=False):
     """Runs a command on a remote devserver by sshing into it.

@@ -4,17 +4,22 @@
 
 """Utilities for managing the toolchains in the chroot."""
 
+import logging
 import os
 import subprocess
+from typing import List, Optional, TYPE_CHECKING, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain_list
 from chromite.utils import key_value_store
+
+
+if TYPE_CHECKING:
+  from chromite.lib.parser import package_info
 
 if cros_build_lib.IsInsideChroot():
   # Only import portage after we've checked that we're inside the chroot.
@@ -35,16 +40,18 @@ class UnknownToolchainError(Error):
 class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
   """An error when installing a toolchain."""
 
-  def __init__(self, msg, result, exception=None, tc_info=None):
+  def __init__(self, msg: str, result: cros_build_lib.CommandResult,
+               exception: Optional[Exception] = None,
+               tc_info: Optional[List['package_info.PackageInfo']] = None):
     """ToolchainInstallError init.
 
     Args:
-      msg (str): Error message.
-      result (cros_build_lib.CommandResult): The command result.
-      exception (Exception): The original exception.
-      tc_info (list): A list of the failed packages' package_info.CPVs.
+      msg: Error message.
+      result: The command result.
+      exception: The original exception.
+      tc_info: A list of the failed packages' package_info.PackageInfo.
     """
-    super(ToolchainInstallError, self).__init__(msg, result, exception)
+    super().__init__(msg, result, exception)
     self.failed_toolchain_info = tc_info
 
 
@@ -252,7 +259,7 @@ class ToolchainInstaller(object):
         cros_build_lib.sudo_run(cmd)
       except cros_build_lib.RunCommandError as e:
         raise ToolchainInstallError(str(e), e.result, exception=e,
-                                    tc_info=[tc_info.libc_cpv])
+                                    tc_info=[tc_info.libc_pkg_info])
     else:
       # They do not match, install appropriate cross-toolchain variant package.
       # See ToolchainInfo for alternate package name build outs.
@@ -266,7 +273,7 @@ class ToolchainInstaller(object):
       try:
         self._ExtractLibc(sysroot, tc_info.target, libc_path)
       except ToolchainInstallError as e:
-        e.failed_toolchain_info = [tc_info.libc_cpv]
+        e.failed_toolchain_info = [tc_info.libc_pkg_info]
         raise e
 
   def _ExtractLibc(self, sysroot, board_chost, libc_path):
@@ -354,26 +361,26 @@ class ToolchainInfo(object):
     """
     self.target = target
     self.cbuild = cbuild
-    self._cpvs = {}
+    self._pkgs = {}
 
   @property
-  def libc_version(self):
+  def libc_version(self) -> str:
     return self._GetVersion(self._PKG_LIBC)
 
   @property
-  def libc_cpf(self):
+  def libc_cpf(self) -> str:
     return self._GetCPF(self._PKG_LIBC)
 
   @property
-  def libc_cpv(self):
-    return self._GetCPVObj(self._PKG_LIBC)
+  def libc_pkg_info(self) -> 'package_info.PackageInfo':
+    return self._get_pkg(self._PKG_LIBC)
 
   @property
-  def gcc_version(self):
+  def gcc_version(self) -> str:
     return self._GetVersion(self._PKG_GCC)
 
   @property
-  def gcc_cpf(self):
+  def gcc_cpf(self) -> str:
     return self._GetCPF(self._PKG_GCC)
 
   @property
@@ -408,17 +415,16 @@ class ToolchainInfo(object):
 
     return cpfs
 
-  def _GetCPVObj(self, pkg):
-    """Return CPV object for the package."""
-    if pkg not in self._cpvs:
-      self._cpvs[pkg] = portage_util.PortageqMatch(self._GetCP(pkg))
+  def _get_pkg(self, pkg: str) -> Union['package_info.PackageInfo', None]:
+    """Return PackageInfo object for the package."""
+    if pkg not in self._pkgs:
+      self._pkgs[pkg] = portage_util.PortageqMatch(self._GetCP(pkg))
 
-    return self._cpvs[pkg]
+    return self._pkgs[pkg]
 
   def _GetVersion(self, pkg):
     """Get version for the package."""
-    cpv = self._GetCPVObj(pkg)
-    return cpv.version if cpv else None
+    return getattr(self._get_pkg(pkg), 'vr', None)
 
   def _GetCP(self, pkg):
     """Returns the appropriate 'category/package' for the toolchain."""
@@ -427,8 +433,7 @@ class ToolchainInfo(object):
 
   def _GetCPF(self, pkg):
     """Get the full 'category/package-version-revision'."""
-    cpv = self._GetCPVObj(pkg)
-    return cpv.cpf if cpv else None
+    return getattr(self._get_pkg(pkg), 'cpvr', None)
 
   def LibcVersionsMatch(self, sysroot):
     """Check if the two libc package versions match.

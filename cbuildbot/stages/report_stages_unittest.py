@@ -10,6 +10,7 @@ from unittest import mock
 
 import pytest  # pylint: disable=import-error
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -23,7 +24,6 @@ from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failure_message_lib_unittest
 from chromite.lib import fake_cidb
 from chromite.lib import gs_unittest
@@ -102,7 +102,7 @@ class SlaveFailureSummaryStageTest(
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, **kwargs):  # pylint: disable=arguments-differ
     """Prepare stage with config['master']=True."""
-    super(SlaveFailureSummaryStageTest, self)._Prepare(**kwargs)
+    super()._Prepare(**kwargs)
     self._run.config['master'] = True
 
   def ConstructStage(self):
@@ -122,9 +122,9 @@ class SlaveFailureSummaryStageTest(
             build_status=constants.BUILDER_STATUS_FAILED))
     self.PatchObject(self.buildstore, 'GetBuildsFailures',
                      return_value=[fake_failure])
-    self.PatchObject(logging, 'PrintBuildbotLink')
+    self.PatchObject(cbuildbot_alerts, 'PrintBuildbotLink')
     self.RunStage()
-    self.assertEqual(logging.PrintBuildbotLink.call_count, 1)
+    self.assertEqual(cbuildbot_alerts.PrintBuildbotLink.call_count, 1)
 
 
 @pytest.mark.usefixtures('singleton_manager')

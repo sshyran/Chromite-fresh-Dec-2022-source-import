@@ -7,6 +7,12 @@
 import collections
 
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
+from chromite.lib import path_util
+
+
+# MiniOS partition type GUID
+MINIOS_TYPE_GUID = '09845860-705F-4BB5-B16C-8A8A099CAF52'
 
 
 class Error(Exception):
@@ -42,8 +48,14 @@ class Disk(object):
       RunCommandError: if error running cgpt command
       CgptError: if error parsing out output of cgpt command
     """
+    # If 'cgpt' binary doesn't exist in path, try within chroot.
+    enter_chroot = osutils.Which('cpgt') is None
+    if enter_chroot:
+      image_file = path_util.ToChrootPath(image_file)
     cmd_result = cros_build_lib.run(['cgpt', 'show', '-n', image_file],
-                                    capture_output=True, encoding='utf-8')
+                                    enter_chroot=enter_chroot,
+                                    capture_output=True,
+                                    encoding='utf-8')
 
     # Covert output to a file for processing via readline().
     cgpt_result = iter(cmd_result.output.splitlines())
@@ -116,3 +128,16 @@ class Disk(object):
       raise KeyError(label)
 
     return part
+
+  def GetPartitionByTypeGuid(self, type_guid):
+    """Returns Partitions with the given |type_guid|.
+
+    Raises:
+      KeyError: if the type GUID is not found
+    """
+    parts = [x for x in self.partitions.values() if x.part_type == type_guid]
+
+    if not parts:
+      raise KeyError(type_guid)
+
+    return parts

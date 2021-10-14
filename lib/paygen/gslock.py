@@ -28,9 +28,9 @@ the creating server.
 """
 
 import datetime
+import logging
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
@@ -48,6 +48,8 @@ class Lock(object):
   This class can be used in conjuction with a "with" clause to ensure
   the lock is released, or directly.
 
+  Method 1:
+    # USE when not looping to acquire the same lock repeatedly.
     try:
       with gslock.Lock("gs://chromoes-releases/lock-file"):
         # Protected code
@@ -56,15 +58,25 @@ class Lock(object):
       # Error handling
       ...
 
+  Method 2:
+    # USE when looping to acquire the same lock repeatedly.
+    lock = gslock.Lock("gs://chromoes-releases/lock-file")
+    while True:
+      with lock:
+        # Protected code
+        ...
+      except LockNotAcquired:
+        # Error handling
+        ...
+
+  Method 3:
     lock = gslock.Lock("gs://chromoes-releases/lock-file")
     try:
       lock.Acquire()
     except LockNotAcquired:
       # Error handling
-
     # Protected code
     ...
-
     lock.Release()
 
     Locking is strictly atomic, except when timeouts are involved.

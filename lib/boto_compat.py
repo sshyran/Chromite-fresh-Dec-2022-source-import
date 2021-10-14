@@ -12,11 +12,11 @@ NOTE: This should eventually be removed as part of crbug.com/845304.
 
 import configparser
 import contextlib
+import logging
 import os
 import tempfile
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

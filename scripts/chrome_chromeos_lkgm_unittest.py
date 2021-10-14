@@ -5,6 +5,8 @@
 """Unit tests for the chrome_chromeos_lkgm program."""
 
 import os
+from unittest import mock
+import urllib.parse
 
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
@@ -92,9 +94,38 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
 
   def testCommitMsg(self):
     """Tests format of the commit message."""
-    self.committer._lkgm = '12345.0.0'
     self.committer._PRESUBMIT_BOTS = ['bot1', 'bot2']
+    self.committer._buildbucket_id = 'some-build-id'
     commit_msg_lines = self.committer.ComposeCommitMsg().splitlines()
-    self.assertIn('LKGM 12345.0.0 for chromeos.', commit_msg_lines)
+    self.assertIn('LKGM 1001.0.0 for chromeos.', commit_msg_lines)
+    self.assertIn(
+        'Uploaded by https://ci.chromium.org/b/some-build-id', commit_msg_lines)
     self.assertIn('CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot1', commit_msg_lines)
     self.assertIn('CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot2', commit_msg_lines)
+
+  def testFindAlreadyOpenLKGMRoll(self):
+    already_open_issues = [123456]
+    self.committer._commit_msg_header = 'A message with spaces'
+    with mock.patch.object(
+        self.committer._gerrit_helper, 'Query',
+        return_value=already_open_issues) as mock_query:
+      self.assertEqual(
+          self.committer.FindAlreadyOpenLKGMRoll(),
+          already_open_issues[0])
+      escaped_quotes = urllib.parse.quote('"')
+      message = mock_query.call_args.kwargs['message']
+      self.assertEqual(message.count(escaped_quotes), 2)
+      self.assertTrue(message.startswith(escaped_quotes))
+      self.assertTrue(message.endswith(escaped_quotes))
+    already_open_issues = [123456, 654321]
+    with mock.patch.object(
+        self.committer._gerrit_helper, 'Query',
+        return_value=already_open_issues):
+      self.assertRaises(
+          chrome_chromeos_lkgm.LKGMNotValid,
+          self.committer.FindAlreadyOpenLKGMRoll)
+
+  def testSubmitToCQ(self):
+    already_open_issue = 123456
+    with mock.patch.object(self.committer._gerrit_helper, 'SetReview'):
+      self.committer.SubmitToCQ(already_open_issue)

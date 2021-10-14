@@ -6,62 +6,64 @@
 
 from chromite.lib import cgpt
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
+from chromite.lib import path_util
 
 
-CGPT_SHOW_OUTPUT = """       start        size    part  contents
-   0           1          PMBR (Boot GUID: A3707625-23E2-2140-B798-94F309618569)
+CGPT_SHOW_OUTPUT = """start        size    part  contents
+           0           1          PMBR (Boot GUID: E32D9819-048F-8E41-B743-2A8102897F1B)
            1           1          Pri GPT header
            2          32          Pri GPT table
-     5234688     4194304       1  Label: "STATE"
-                                  Type: EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
-                                  UUID: 9B03635E-BD25-6E4F-91BE-141B60600DC6
+     5455872     8401017       1  Label: "STATE"
+                                  Type: 0FC63DAF-8483-4772-8E79-3D69D8477DE4
+                                  UUID: 31CD4A3B-C504-354B-AC37-0852D2E0A44C
                                   Attr: [0]
-       20480       32768       2  Label: "KERN-A"
+      405504       65536       2  Label: "KERN-A"
                                   Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
-                                  UUID: 3A975D8F-7D4D-F047-B9A5-8D8C0745798E
+                                  UUID: 1F94CE4D-7EF3-AE4C-A0F3-03FBB81699B8
                                   Attr: [1ff]
-      319488     4915200       3  Label: "ROOT-A"
+      471040     4915200       3  Label: "ROOT-A"
                                   Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
-                                  UUID: 3E167F70-198B-E947-8924-6812593E9BD9
+                                  UUID: FC606456-D6E0-C64D-A82E-BA7B027D2B20
                                   Attr: [0]
-       53248       32768       4  Label: "KERN-B"
+     5386240       65536       4  Label: "KERN-B"
                                   Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
-                                  UUID: 15ADD9BD-05BE-434A-BB2D-3CB2D344F033
+                                  UUID: 2B2D493A-22B8-0742-A56A-D31944B15271
                                   Attr: [0]
-      315392        4096       5  Label: "ROOT-B"
+     5451776        4096       5  Label: "ROOT-B"
                                   Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
-                                  UUID: 453443DB-E022-CA4F-A3A6-A92EC82A5EEE
+                                  UUID: D3B939D0-01DB-C84E-8E3B-7DCF861F2321
                                   Attr: [0]
-       16448           1       6  Label: "KERN-C"
+      262208           1       6  Label: "KERN-C"
                                   Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
-                                  UUID: 75BD5787-A268-FD42-BFA4-33BB7406723A
+                                  UUID: AA93D568-6AF0-0B4E-88E8-FBF3B0E54F0F
                                   Attr: [0]
-       16449           1       7  Label: "ROOT-C"
+      262209           1       7  Label: "ROOT-C"
                                   Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
-                                  UUID: C4FBFA62-7AB2-144D-84A1-604EF03D5B4A
+                                  UUID: A5DFEF3B-58F0-0F48-B326-5BF6DAE2E503
                                   Attr: [0]
-       86016       32768       8  Label: "OEM"
-                                  Type: EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
-                                  UUID: BF7488C0-C6B0-D446-B3D1-7A5D1A8DDB90
+      266240        8192       8  Label: "OEM"
+                                  Type: 0FC63DAF-8483-4772-8E79-3D69D8477DE4
+                                  UUID: 18A64E9D-FF35-A248-B6D4-AE943A93386D
                                   Attr: [0]
-       16450           1       9  Label: "reserved"
+          64      262144       9  Label: "MINIOS-A"
+                                  Type: 09845860-705F-4BB5-B16C-8A8A099CAF52
+                                  UUID: 0A379155-6C27-1A45-AC83-EF96F0588734
+                                  Attr: [0]
+    13856889        4096      10  Label: "reserved"
+                                  Type: 2E0A753D-9E48-43B0-8337-B15192CB1B5E
+                                  UUID: F31ACAD0-CDA0-4041-91FD-663C0F9693CF
+                                  Attr: [0]
+    13856889        4096      11  Label: "reserved"
                                   Type: 2E0A753D-9E48-43B0-8337-B15192CB1B5E
                                   UUID: 2697A3F2-37A1-1348-8A90-52B83C812B69
                                   Attr: [0]
-       16451           1      10  Label: "reserved"
-                                  Type: 2E0A753D-9E48-43B0-8337-B15192CB1B5E
-                                  UUID: D711DDF7-0456-BB41-8C74-B166151A3B45
-                                  Attr: [0]
-          64       16384      11  Label: "RWFW"
-                                  Type: CAB6E88E-ABF3-4102-A07A-D4BB9BE3C1D3
-                                  UUID: 27313CD1-E158-9D41-AD82-F13D2468C44C
-                                  Attr: [0]
-      249856       65536      12  Label: "EFI-SYSTEM"
+      274432      131072      12  Label: "EFI-SYSTEM"
                                   Type: C12A7328-F81F-11D2-BA4B-00A0C93EC93B
-                                  UUID: A3707625-23E2-2140-B798-94F309618569
+                                  UUID: E32D9819-048F-8E41-B743-2A8102897F1B
                                   Attr: [0]
-     9428992          32          Sec GPT table
-     9429024           1          Sec GPT header"""
+    13861000          32          Sec GPT table
+    13861032           1          Sec GPT header"""
 
 
 class TestDisk(cros_test_lib.RunCommandTestCase):
@@ -79,9 +81,12 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
 
   def testDiskFromImage(self):
     """Test ReadGpt with mock cgpt output."""
+    which_mock = self.PatchObject(osutils, 'Which', return_value='/path/foo')
     disk = self.getMockDisk()
 
-    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'], capture_output=True,
+    which_mock.assert_called_once()
+    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'],
+                             enter_chroot=False, capture_output=True,
                              encoding='utf-8')
 
     self.assertEqual(len(disk.partitions), 12)
@@ -89,11 +94,36 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
     self.assertEqual(disk.partitions[3],
                      cgpt.Partition(part_num=3,
                                     label='ROOT-A',
-                                    start=319488,
+                                    start=471040,
                                     size=4915200,
                                     part_type='3CB8E202-3B7E-47DD-'
                                               '8A3C-7FF2A13CFCEC',
-                                    uuid='3E167F70-198B-E947-8924-6812593E9BD9',
+                                    uuid='FC606456-D6E0-C64D-A82E-BA7B027D2B20',
+                                    attr='[0]'))
+
+  def testDiskFromImageCgptMissing(self):
+    """Test ReadGpt with mock cgpt output when cpgt is missing."""
+    which_mock = self.PatchObject(osutils, 'Which', return_value=None)
+    to_chroot_path_mock = self.PatchObject(path_util, 'ToChrootPath',
+                                           return_value='foo')
+    disk = self.getMockDisk()
+
+    which_mock.assert_called_once()
+    to_chroot_path_mock.assert_called_once()
+
+    self.assertCommandCalled(['cgpt', 'show', '-n', 'foo'], enter_chroot=True,
+                             capture_output=True, encoding='utf-8')
+
+    self.assertEqual(len(disk.partitions), 12)
+
+    self.assertEqual(disk.partitions[3],
+                     cgpt.Partition(part_num=3,
+                                    label='ROOT-A',
+                                    start=471040,
+                                    size=4915200,
+                                    part_type='3CB8E202-3B7E-47DD-'
+                                              '8A3C-7FF2A13CFCEC',
+                                    uuid='FC606456-D6E0-C64D-A82E-BA7B027D2B20',
                                     attr='[0]'))
 
   def testGetPartitionByLabel(self):
@@ -108,7 +138,7 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
                             ('KERN-C', 6),
                             ('ROOT-C', 7),
                             ('OEM', 8),
-                            ('RWFW', 11),
+                            ('MINIOS-A', 9),
                             ('EFI-SYSTEM', 12)):
       self.assertEqual(disk.GetPartitionByLabel(label).part_num, part_num)
 
@@ -125,3 +155,17 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
 
     with self.assertRaises(KeyError):
       disk.GetPartitionByLabel('bar')
+
+  def testGetPartitionsByTypeGuid(self):
+    """Test that mocked disk has all expected partitions."""
+    disk = self.getMockDisk()
+
+    self.assertEqual([p.part_num for p in disk.GetPartitionByTypeGuid(
+        '09845860-705F-4BB5-B16C-8A8A099CAF52')], [9])
+
+  def testGetPartitionsByTypeGuidMulti(self):
+    """Test that mocked disk has all expected partitions."""
+    disk = self.getMockDisk()
+
+    self.assertEqual([p.part_num for p in disk.GetPartitionByTypeGuid(
+        '2E0A753D-9E48-43B0-8337-B15192CB1B5E')], [10, 11])

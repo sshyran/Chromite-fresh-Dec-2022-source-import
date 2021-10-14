@@ -6,6 +6,7 @@
 
 import functools
 import os
+from typing import List, TYPE_CHECKING
 
 from chromite.lib import binpkg
 from chromite.lib import constants
@@ -15,6 +16,10 @@ from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.utils import key_value_store
 
+if TYPE_CHECKING:
+  from chromite.lib import build_target_lib
+  from chromite.lib import chroot_lib
+  from chromite.lib import sysroot_lib
 
 # The name of the ACL argument file.
 _GOOGLESTORAGE_GSUTIL_FILE = 'googlestorage_acl.txt'
@@ -59,9 +64,8 @@ def _ValidateBinhostConf(path, key):
     raise ValueError(
         'Found empty .conf file %s when a non-empty one was expected.' % path)
   elif len(kvs) > 1:
-    raise ValueError(
-        'Conf file %s must define exactly 1 variable. '
-        'Instead found: %r' % (path, kvs))
+    raise ValueError('Conf file %s must define exactly 1 variable. '
+                     'Instead found: %r' % (path, kvs))
   elif key not in kvs:
     raise KeyError('Did not find key %s in %s' % (key, path))
 
@@ -101,13 +105,15 @@ def _ValidatePrebuiltsRoot(target, prebuilts_root):
         'Did %s build successfully?' % (target, prebuilts_root, target))
 
 
-def GetPrebuiltsRoot(chroot, sysroot, build_target):
+def GetPrebuiltsRoot(chroot: 'chroot_lib.Chroot',
+                     sysroot: 'sysroot_lib.Sysroot',
+                     build_target: 'build_target_lib.BuildTarget') -> str:
   """Find the root directory with binary prebuilts for the given sysroot.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot where the sysroot lives.
-    sysroot (sysroot_lib.Sysroot): The sysroot.
-    build_target (build_target_lib.BuildTarget): The build target.
+    chroot: The chroot where the sysroot lives.
+    sysroot: The sysroot.
+    build_target: The build target.
 
   Returns:
     Absolute path to the root directory with the target's prebuilt archives.
@@ -117,7 +123,7 @@ def GetPrebuiltsRoot(chroot, sysroot, build_target):
   return root
 
 
-def GetPrebuiltsFiles(prebuilts_root):
+def GetPrebuiltsFiles(prebuilts_root: str) -> List[str]:
   """Find paths to prebuilts at the given root directory.
 
   Assumes the root contains a Portage package index named Packages.
@@ -151,7 +157,10 @@ def GetPrebuiltsFiles(prebuilts_root):
   return prebuilt_paths
 
 
-def UpdatePackageIndex(prebuilts_root, upload_uri, upload_path, sudo=False):
+def UpdatePackageIndex(prebuilts_root: str,
+                       upload_uri: str,
+                       upload_path: str,
+                       sudo: bool = False) -> str:
   """Update package index with information about where it will be uploaded.
 
   This causes the existing Packages file to be overwritten.
@@ -160,7 +169,7 @@ def UpdatePackageIndex(prebuilts_root, upload_uri, upload_path, sudo=False):
     prebuilts_root: Absolute path to root directory containing binary prebuilts.
     upload_uri: The URI (typically GS bucket) where prebuilts will be uploaded.
     upload_path: The path at the URI for the prebuilts.
-    sudo (bool): Whether to write the file as the root user.
+    sudo: Whether to write the file as the root user.
 
   Returns:
     Path to the new Package index.
@@ -174,7 +183,7 @@ def UpdatePackageIndex(prebuilts_root, upload_uri, upload_path, sudo=False):
   return package_index_path
 
 
-def SetBinhost(target, key, uri, private=True):
+def SetBinhost(target: str, key: str, uri: str, private: bool = True) -> str:
   """Set binhost configuration for the given build target.
 
   A binhost is effectively a key (Portage env variable) pointing to a URL
@@ -193,9 +202,8 @@ def SetBinhost(target, key, uri, private=True):
     Path to the updated .conf file.
   """
   conf_root = os.path.join(
-      constants.SOURCE_ROOT,
-      constants.PRIVATE_BINHOST_CONF_DIR if private else
-      constants.PUBLIC_BINHOST_CONF_DIR, 'target')
+      constants.SOURCE_ROOT, constants.PRIVATE_BINHOST_CONF_DIR
+      if private else constants.PUBLIC_BINHOST_CONF_DIR, 'target')
   conf_file = '%s-%s.conf' % (target, key)
   conf_path = os.path.join(conf_root, conf_file)
   _ValidateBinhostConf(conf_path, key)
@@ -203,15 +211,16 @@ def SetBinhost(target, key, uri, private=True):
   return conf_path
 
 
-def RegenBuildCache(chroot, overlay_type):
+def RegenBuildCache(chroot: 'chroot_lib.Chroot',
+                    overlay_type: str) -> List[str]:
   """Regenerate the Build Cache for the given target.
 
   Args:
-    chroot (chroot_lib): The chroot where the regen command will be run.
+    chroot: The chroot where the regen command will be run.
     overlay_type: one of "private", "public", or "both".
 
   Returns:
-    list[str]: The overlays with updated caches.
+    The overlays with updated caches.
   """
   overlays = portage_util.FindOverlays(overlay_type)
 
@@ -224,18 +233,19 @@ def RegenBuildCache(chroot, overlay_type):
   return [overlay_dir for overlay_dir in results if overlay_dir]
 
 
-def GetPrebuiltAclArgs(build_target):
+def GetPrebuiltAclArgs(
+    build_target: 'build_target_lib.BuildTarget') -> List[List[str]]:
   """Read and parse the GS ACL file from the private overlays.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    list[list[str]]: A list containing all of the [arg, value] pairs. E.g.
+    A list containing all of the [arg, value] pairs. E.g.
       [['-g', 'group_id:READ'], ['-u', 'user:FULL_CONTROL']]
   """
-  acl_file = portage_util.FindOverlayFile(_GOOGLESTORAGE_GSUTIL_FILE,
-                                          board=build_target.name)
+  acl_file = portage_util.FindOverlayFile(
+      _GOOGLESTORAGE_GSUTIL_FILE, board=build_target.name)
 
   if not acl_file:
     raise NoAclFileFound('No ACL file found for %s.' % build_target.name)
@@ -249,51 +259,53 @@ def GetPrebuiltAclArgs(build_target):
   return [line.split() for line in lines]
 
 
-def GetBinhosts(build_target):
+def GetBinhosts(build_target: 'build_target_lib.BuildTarget') -> List[str]:
   """Get the binhosts for the build target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    list[str]: The build target's binhosts.
+    The build target's binhosts.
   """
-  binhosts = portage_util.PortageqEnvvar('PORTAGE_BINHOST',
-                                         board=build_target.name,
-                                         allow_undefined=True)
+  binhosts = portage_util.PortageqEnvvar(
+      'PORTAGE_BINHOST', board=build_target.name, allow_undefined=True)
   return binhosts.split() if binhosts else []
 
 
-def ReadDevInstallPackageFile(filename):
+def ReadDevInstallPackageFile(filename: str) -> List[str]:
   """Parse the dev-install package file.
 
   Args:
-    filename (str): The full path to the dev-install package list.
+    filename: The full path to the dev-install package list.
 
   Returns:
-    list[str]: The packages in the package list file.
+    The packages in the package list file.
   """
   with open(filename) as f:
     return [line.strip() for line in f]
 
 
-def ReadDevInstallFilesToCreatePackageIndex(chroot, sysroot, package_index_path,
-                                            upload_uri, upload_path):
+def ReadDevInstallFilesToCreatePackageIndex(chroot: 'chroot_lib.Chroot',
+                                            sysroot: 'sysroot_lib.Sysroot',
+                                            package_index_path: str,
+                                            upload_uri: str,
+                                            upload_path: str) -> List[str]:
   """Create dev-install Package index specified by package_index_path
 
   The current Packages file is read and a new Packages file is created based
   on the subset of packages in the _DEV_INSTALL_PACKAGES_FILE.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot where the sysroot lives.
-    sysroot (sysroot_lib.Sysroot): The sysroot.
-    package_index_path (str): Path to the Packages file to be created.
+    chroot: The chroot where the sysroot lives.
+    sysroot: The sysroot.
+    package_index_path: Path to the Packages file to be created.
     upload_uri: The URI (typically GS bucket) where prebuilts will be uploaded.
     upload_path: The path at the URI for the prebuilts.
 
   Returns:
-    list[str]: The list of packages contained in package_index_path,
-      where each package string is a category/file.
+    The list of packages contained in package_index_path, where each package
+    string is a category/file.
   """
   # Read the dev-install binhost package file
   devinstall_binhost_filename = chroot.full_path(sysroot.path,
@@ -304,19 +316,21 @@ def ReadDevInstallFilesToCreatePackageIndex(chroot, sysroot, package_index_path,
   # Read the Packages file, remove packages not in package_list
   package_path = chroot.full_path(sysroot.path, 'packages')
   CreateFilteredPackageIndex(package_path, devinstall_package_list,
-                             package_index_path,
-                             upload_uri, upload_path)
+                             package_index_path, upload_uri, upload_path)
 
   # We have the list of packages, create full path and verify each one.
-  upload_targets_list = GetPrebuiltsForPackages(
-      package_path, devinstall_package_list)
+  upload_targets_list = GetPrebuiltsForPackages(package_path,
+                                                devinstall_package_list)
 
   return upload_targets_list
 
 
-def CreateFilteredPackageIndex(package_path, devinstall_package_list,
-                               package_index_path,
-                               upload_uri, upload_path, sudo=False):
+def CreateFilteredPackageIndex(package_path: str,
+                               devinstall_package_list: List[str],
+                               package_index_path: str,
+                               upload_uri: str,
+                               upload_path: str,
+                               sudo: bool = False):
   """Create Package file for dev-install process.
 
   The created package file (package_index_path) contains only the
@@ -325,14 +339,13 @@ def CreateFilteredPackageIndex(package_path, devinstall_package_list,
   for upload_uri and upload_path.
 
   Args:
-    package_path (str): Absolute path to the standard Packages file.
-    devinstall_package_list (list[str]): Packages from packages.installable
-    package_index_path (str): Absolute path for new Packages file.
-    upload_uri (str): The URI where prebuilts will be uploaded.
-    upload_path (str): The path at the URI for the prebuilts.
-    sudo (bool): Whether to write the file as the root user.
+    package_path: Absolute path to the standard Packages file.
+    devinstall_package_list: Packages from packages.installable
+    package_index_path: Absolute path for new Packages file.
+    upload_uri: The URI where prebuilts will be uploaded.
+    upload_path: The path at the URI for the prebuilts.
+    sudo: Whether to write the file as the root user.
   """
-
 
   def ShouldFilterPackage(package):
     """Local func to filter packages not in the devinstall_package_list
@@ -357,12 +370,13 @@ def CreateFilteredPackageIndex(package_path, devinstall_package_list,
   package_index.WriteFile(package_index_path, sudo=sudo)
 
 
-def GetPrebuiltsForPackages(package_root, package_list):
+def GetPrebuiltsForPackages(package_root: str,
+                            package_list: List[str]) -> List[str]:
   """Create list of file paths for the package list and validate they exist.
 
   Args:
-    package_root (str): Path to 'packages' directory.
-    package_list (list[str]): List of packages.
+    package_root: Path to 'packages' directory.
+    package_list: List of packages.
 
   Returns:
     List of validated targets.

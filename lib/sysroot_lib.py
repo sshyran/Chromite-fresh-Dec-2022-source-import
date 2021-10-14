@@ -5,14 +5,15 @@
 """Utilities to create sysroots."""
 
 import glob
+import logging
 import multiprocessing
 import os
-from typing import Iterable, Union
+from pathlib import Path
+from typing import Iterable, List, Optional, Union
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 from chromite.lib import portage_util
@@ -24,11 +25,14 @@ class ConfigurationError(Exception):
   """Raised when an invalid configuration is found."""
 
 
+CACHED_FIELD_PROFILE_OVERRIDE = 'PROFILE_OVERRIDE'
 STANDARD_FIELD_PORTDIR_OVERLAY = 'PORTDIR_OVERLAY'
 STANDARD_FIELD_CHOST = 'CHOST'
 STANDARD_FIELD_BOARD_OVERLAY = 'BOARD_OVERLAY'
 STANDARD_FIELD_BOARD_USE = 'BOARD_USE'
 STANDARD_FIELD_ARCH = 'ARCH'
+
+DEFAULT_PROFILE = 'base'
 
 _PORTAGE_WRAPPER_TEMPLATE = """#!/bin/sh
 
@@ -130,16 +134,20 @@ class Error(Exception):
 class PackageInstallError(Error, cros_build_lib.RunCommandError):
   """An error installing packages."""
 
-  def __init__(self, msg, result, exception=None, packages=None):
+  def __init__(self,
+               msg,
+               result,
+               exception=None,
+               packages: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      packages (list[package_info.CPV]): The list of failed packages.
+      packages: The list of failed packages.
     """
-    super(PackageInstallError, self).__init__(msg, result, exception)
+    super().__init__(msg, result, exception)
     self.failed_packages = packages
     self.args = (self.args, packages)
 
@@ -149,7 +157,7 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
     See:
       cros_build_lib.RunCommandError.Stringify
     """
-    items = [super(PackageInstallError, self).Stringify(stdout, stderr)]
+    items = [super().Stringify(stdout, stderr)]
 
     pkgs = []
     for cpv in self.failed_packages:
@@ -173,17 +181,20 @@ class ToolchainInstallError(PackageInstallError):
   reflect that the packages are toolchain packages.
   """
 
-  def __init__(self, msg, result, exception=None, tc_info=None):
+  def __init__(self,
+               msg,
+               result,
+               exception=None,
+               tc_info: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
       msg (str): The message.
       result (cros_build_lib.CommandResult): The command result.
       exception (BaseException|None): An origin exception.
-      tc_info (list[package_info.CPV]): The list of failed toolchain packages.
+      tc_info: The list of failed toolchain packages.
     """
-    super(ToolchainInstallError, self).__init__(msg, result, exception,
-                                                packages=tc_info)
+    super().__init__(msg, result, exception, packages=tc_info)
 
   @property
   def failed_toolchain_info(self):
@@ -263,8 +274,8 @@ class Sysroot(object):
 
   def __init__(self, path):
     self.path = path
-    self._config_file = self._Path(_CONFIGURATION_PATH)
-    self._cache_file = self._Path(_CACHE_PATH)
+    self._config_file = self.Path(_CONFIGURATION_PATH)
+    self._cache_file = self.Path(_CACHE_PATH)
     self._cache_file_lock = self._cache_file + '.lock'
 
   def __eq__(self, other):
@@ -286,7 +297,7 @@ class Sysroot(object):
 
     return os.path.exists(self.path)
 
-  def _Path(self, *args):
+  def Path(self, *args):
     """Helper to build out a path within the sysroot.
 
     Pass args as if calling os.path.join().
@@ -356,6 +367,66 @@ class Sysroot(object):
         lines.append('%s="%s"' % (field, value))
       osutils.WriteFile(self._cache_file, '\n'.join(lines), sudo=True)
 
+  @property
+  def build_target_name(self) -> str:
+    """Get the name of the build target this sysroot was created for."""
+    return self.GetStandardField(STANDARD_FIELD_BOARD_USE)
+
+  @property
+  def profile_name(self) -> str:
+    """Get the name of the sysroot's profile."""
+    return self.GetCachedField(CACHED_FIELD_PROFILE_OVERRIDE) or DEFAULT_PROFILE
+
+  @property
+  def build_target_overlays(self) -> List[str]:
+    """The BOARD_OVERLAY standard field as a list.
+
+    The BOARD_OVERLAY field is set on creation, and stores the list of overlays
+    more directly associated with the build target itself. In an ideal world,
+    this would be the single, top level overlay for the build target (e.g.
+    overlay-eve-private) and everything else could be derived from that. In
+    practice, this is currently every available overlay that is not in
+    src/third_party.
+    """
+    return self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY).split()
+
+  @property
+  def overlays(self) -> List[str]:
+    """The PORTDIR_OVERLAY field as a list.
+
+    The PORTDIR_OVERLAY field is set on creation, and stores the list of all
+    overlays available to the sysroot.
+    """
+    return self.GetStandardField(STANDARD_FIELD_PORTDIR_OVERLAY).split()
+
+  @property
+  def use_flags(self):
+    return portage_util.PortageqEnvvar('USE', sysroot=self.path)
+
+  def get_overlays(self,
+                   build_target_only: bool = False,
+                   relative: bool = False) -> List[Path]:
+    """Get a list of the overlays available to the sysroot.
+
+    Note: The overlay paths are always inside the SDK. If the outside the SDK
+    paths are needed, we should add an option to transform them here.
+
+    Args:
+      build_target_only: Only fetch the overlays more relevant to the build
+        target. By default, fetch all overlays available to the sysroot.
+      relative: Get the overlay paths relative to the source root rather than
+        as absolute paths.
+    """
+    overlays = (
+        self.build_target_overlays if build_target_only else self.overlays)
+    overlay_paths = [Path(x) for x in overlays]
+    if relative:
+      return [
+          x.relative_to(constants.CHROOT_SOURCE_ROOT) for x in overlay_paths
+      ]
+
+    return overlay_paths
+
   def _WrapperPath(self, command, friendly_name=None):
     """Returns the path to the wrapper for |command|.
 
@@ -366,7 +437,7 @@ class Sysroot(object):
     """
     if friendly_name:
       return os.path.join(_wrapper_dir, '%s-%s' % (command, friendly_name))
-    return self._Path('build', 'bin', command)
+    return self.Path('build', 'bin', command)
 
   def CreateAllWrappers(self, friendly_name=None):
     """Creates all the wrappers.
@@ -420,7 +491,7 @@ class Sysroot(object):
     # Create a link to the debug symbols in the chroot so that gdb can detect
     # them.
     debug_symlink = os.path.join('/usr/lib/debug', self.path.lstrip('/'))
-    sysroot_debug = self._Path('usr/lib/debug')
+    sysroot_debug = self.Path('usr/lib/debug')
     osutils.SafeMakedirs(os.path.dirname(debug_symlink), sudo=True)
     osutils.SafeMakedirs(os.path.dirname(sysroot_debug), sudo=True)
 
@@ -429,7 +500,7 @@ class Sysroot(object):
   def InstallMakeConf(self):
     """Make sure the make.conf file exists and is up to date."""
     config_file = _GetMakeConfGenericPath()
-    osutils.SafeSymlink(config_file, self._Path(_MAKE_CONF), sudo=True)
+    osutils.SafeSymlink(config_file, self.Path(_MAKE_CONF), sudo=True)
 
   def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False,
                            package_indexes=None,
@@ -446,7 +517,7 @@ class Sysroot(object):
         attempt to improve binhost hit rates.
     """
     board_conf = self.GenerateBoardMakeConf(accepted_licenses=accepted_licenses)
-    make_conf_path = self._Path(_MAKE_CONF_BOARD)
+    make_conf_path = self.Path(_MAKE_CONF_BOARD)
     osutils.WriteFile(make_conf_path, board_conf, sudo=True)
 
     # Once make.conf.board has been generated, generate the binhost config.
@@ -465,7 +536,7 @@ class Sysroot(object):
     Args:
       board (str): The name of the board being setup in the sysroot.
     """
-    osutils.WriteFile(self._Path(_MAKE_CONF_BOARD_SETUP),
+    osutils.WriteFile(self.Path(_MAKE_CONF_BOARD_SETUP),
                       self.GenerateBoardSetupConfig(board), sudo=True)
 
   def InstallMakeConfUser(self):
@@ -476,7 +547,7 @@ class Sysroot(object):
     Only works inside the chroot.
     """
     make_user = _GetChrootMakeConfUserPath()
-    link_path = self._Path(_MAKE_CONF_USER)
+    link_path = self.Path(_MAKE_CONF_USER)
     if not os.path.exists(link_path):
       osutils.SafeSymlink(make_user, link_path, sudo=True)
 
@@ -577,8 +648,10 @@ class Sysroot(object):
                                    'gs_fetch_binpkg')
     gsutil_cmd = '%s \\"${URI}\\" \\"${DISTDIR}/${FILE}\\"' % gs_fetch_binpkg
     config.append('BOTO_CONFIG="%s"' % boto_config)
-    config.append('FETCHCOMMAND_GS="bash -c \'BOTO_CONFIG=%s %s\'"'
-                  % (boto_config, gsutil_cmd))
+    # Retry the fetch if it fails
+    config.append('FETCHCOMMAND_GS="bash -c \''
+                  'export BOTO_CONFIG=%s; %s || %s\'"'
+                  % (boto_config, gsutil_cmd, gsutil_cmd))
     config.append('RESUMECOMMAND_GS="$FETCHCOMMAND_GS"')
 
     if accepted_licenses:
@@ -700,8 +773,8 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
   def CreateSkeleton(self):
     """Creates a sysroot skeleton."""
     needed_dirs = [
-        self._Path('etc', 'portage', 'hooks'),
-        self._Path('etc', 'portage', 'profile'),
+        self.Path('etc', 'portage', 'hooks'),
+        self.Path('etc', 'portage', 'profile'),
         '/usr/local/bin',
     ]
     for d in needed_dirs:
@@ -710,7 +783,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     # Create links for portage hooks.
     hook_glob = os.path.join(constants.CROSUTILS_DIR, 'hooks', '*')
     for filename in glob.glob(hook_glob):
-      linkpath = self._Path('etc', 'portage', 'hooks',
+      linkpath = self.Path('etc', 'portage', 'hooks',
                             os.path.basename(filename))
       osutils.SafeSymlink(filename, linkpath, sudo=True)
 
@@ -729,7 +802,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       toolchain.InstallToolchain(self)
     except toolchain.ToolchainInstallError as e:
       raise ToolchainInstallError(str(e), e.result, exception=e.exception,
-                                  tc_info=e.failed_toolchain_info)
+                                  tc_info=e.failed_toolchain_info) from e
 
     if not self.IsToolchainInstalled():
       # Emerge the implicit dependencies.
@@ -782,7 +855,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       # Make the temporary directory in the same folder as the sysroot were
       # deleting to avoid crossing disks, mounts, etc. that'd cause us to
       # synchronously copy the entire thing before we delete it.
-      cwd = os.path.normpath(self._Path('..'))
+      cwd = os.path.normpath(self.Path('..'))
       try:
         result = cros_build_lib.sudo_run(['mktemp', '-d', '-p', cwd],
                                          print_cmd=False, encoding='utf-8',
@@ -811,14 +884,13 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
   def get_sdk_provided_packages(self) -> Iterable[package_info.PackageInfo]:
     """Find all packages provided by the SDK (i.e. package.provided)."""
     # Look at packages in package.provided.
-    sdk_file_path = self._Path('etc', 'portage', 'profile', 'package.provided')
+    sdk_file_path = self.Path('etc', 'portage', 'profile', 'package.provided')
     for line in osutils.ReadFile(sdk_file_path).splitlines():
       # Skip comments and empty lines.
       line = line.split('#', 1)[0].strip()
       if not line:
         continue
       yield package_info.parse(line)
-
 
 def get_sdk_provided_packages(
     sysroot_path: str) -> Iterable[package_info.PackageInfo]:

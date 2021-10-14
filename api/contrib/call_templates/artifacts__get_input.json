@@ -1,20 +1,23 @@
 {
   "sysroot": {
-    "path": "/build/eve"
+    "path": "/build/%(build_target)s",
+    "build_target": {
+      "name": "%(build_target)s"
+    }
   },
   "chroot": {
-    "path": "/usr/local/google/home/jaquesc/workplace/chromiumos/chroot"
+    "path": "/usr/local/google/home/davidwelling/chromiumos/chroot"
   },
   "result_path": {
     "path": {
-      "path": "/tmp/dlc_out"
+      "path": "/tmp/cc_out"
     }
   },
   "artifact_info": {
-    "image": {
+    "test": {
       "output_artifacts": [
         {"artifact_types": [
-          34
+          39
         ]}
       ]
     }

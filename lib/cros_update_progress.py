@@ -20,10 +20,10 @@ the progress of the CrOS auto-update process.
 
 import datetime
 import glob
+import logging
 import os
 import re
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib.xbuddy import cherrypy_log_util
 

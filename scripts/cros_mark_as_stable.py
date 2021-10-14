@@ -4,19 +4,19 @@
 
 """This module uprevs a given package's ebuild to the next revision."""
 
+import logging
 import os
 
-from chromite.lib import constants
+from chromite.cbuildbot import manifest_version
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib import repo_util
-
-from chromite.cbuildbot import manifest_version
+from chromite.lib import retry_util
 
 
 # Commit message subject for uprevving Portage packages.
@@ -165,8 +165,26 @@ def PushChange(stable_branch, tracking_branch, dryrun, cwd,
   git.RunGit(cwd, ['merge', '--squash', stable_branch])
   git.RunGit(cwd, ['commit', '-m', description])
   git.RunGit(cwd, ['config', 'push.default', 'tracking'])
-  git.PushBranch(constants.MERGE_BRANCH, cwd, dryrun=dryrun,
-                 staging_branch=staging_branch)
+
+  # Run git.PushBranch and retry up to 5 times.
+  # retry_util.RetryCommand will only retry on RunCommandErrors,
+  # which would be thrown by git.PushBranch when it gets to
+  # cros_build_lib.run()'ning the actual git command,
+  # which may fail with a transient HTTP 429 Too Many Requests error,
+  # and we need to retry on that.
+  # Do not retry if it fails to setup before cros_build_lib.run
+  # or upon other errors, like getting SIGINT.
+  max_retries = 5
+  retry_util.RetryCommand(
+      git.PushBranch,
+      max_retries,
+      constants.MERGE_BRANCH,
+      cwd,
+      dryrun=dryrun,
+      staging_branch=staging_branch,
+      sleep=15,
+      log_retries=True,
+  )
 
 
 class GitBranch(object):

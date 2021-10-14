@@ -4,21 +4,21 @@
 
 """cros tryjob: Schedule a tryjob."""
 
+import logging
 import os
 import time
 
 from chromite.third_party.google.protobuf import json_format
 
-from chromite.lib import constants
+from chromite.cbuildbot import trybot_patch_pool
 from chromite.cli import command
 from chromite.lib import config_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
-from chromite.lib import pformat
 from chromite.lib import request_build
-
-from chromite.cbuildbot import trybot_patch_pool
+from chromite.scripts import cbuildbot as cbuildbot_lib
+from chromite.utils import pformat
 
 
 REMOTE = 'remote'
@@ -132,6 +132,10 @@ def CbuildbotArgs(options):
 
   for g in options.gerrit_patches:
     args.extend(('-g', g))
+
+  if options.hwtest_dut_dimensions:
+    args.extend(('--hwtest_dut_dimensions',
+                 ' '.join(options.hwtest_dut_dimensions)))
 
   if options.passthrough:
     args.extend(options.passthrough)
@@ -452,6 +456,20 @@ def VerifyOptions(options, site_config):
     if options.json:
       cros_build_lib.Die('--json can only be used for remote tryjobs.')
 
+  if options.hwtest_dut_dimensions:
+    has_board = has_model = has_pool = False
+    for dim in options.hwtest_dut_dimensions:
+      if dim.startswith(cbuildbot_lib.BOARD_DIM_LABEL):
+        has_board = True
+      elif dim.startswith(cbuildbot_lib.MODEL_DIM_LABEL):
+        has_model = True
+      elif dim.startswith(cbuildbot_lib.POOL_DIM_LABEL):
+        has_pool = True
+
+    if not (has_board and has_model and has_pool):
+      cros_build_lib.Die('HWTest DUT dimensions must include board, model, and '
+                         'pool (given %s).' % options.hwtest_dut_dimensions)
+
 
 @command.CommandDecorator('tryjob')
 class TryjobCommand(command.CliCommand):
@@ -611,6 +629,13 @@ List Examples:
     test_group.add_argument(
         '--hwtest', dest='passthrough', action='append_option',
         help='Enable hwlab testing. Default false.')
+    test_group.add_argument(
+      '--hwtest_dut_dimensions', action='split_extend', default=None,
+      help='Space-separated list of key:val Swarming bot '
+           'dimensions to run each builders SkylabHWTest '
+           'stages against (this overrides the configured '
+           'DUT dimensions for each test). Requires at least '
+           '"label-board", "label-model", and "label-pool".')
     test_group.add_argument(
         '--notests', dest='passthrough', action='append_option',
         help='Override values from buildconfig, run no '

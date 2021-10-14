@@ -8,18 +8,19 @@ import errno
 import glob
 import hashlib
 import json
+import logging
 import os
 import re
 import shutil
 
+from chromite.third_party import lddtree
+
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import toolchain
-from chromite.third_party import lddtree
 from chromite.utils import key_value_store
 
 
@@ -104,9 +105,9 @@ TARGET_LLVM_PKGS_ENABLED = (
 )
 
 LLVM_PKGS_TABLE = {
+    'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
     'ex_libcxxabi' : ['--ex-pkg', 'sys-libs/libcxxabi'],
     'ex_libcxx' : ['--ex-pkg', 'sys-libs/libcxx'],
-    'ex_llvm-libunwind' : ['--ex-pkg', 'sys-libs/llvm-libunwind'],
 }
 
 class Crossdev(object):
@@ -119,10 +120,10 @@ class Crossdev(object):
   MANUAL_PKGS = {
       'rust': 'dev-lang',
       'llvm': 'sys-devel',
+      'llvm-libunwind': 'sys-libs',
       'libcxxabi': 'sys-libs',
       'libcxx': 'sys-libs',
       'elfutils': 'dev-libs',
-      'llvm-libunwind': 'sys-libs',
   }
 
   @classmethod
@@ -1158,6 +1159,17 @@ def _ProcessSysrootWrappers(_target, output_dir, srcpath):
     shutil.copy(sysroot_wrapper[:-6] + 'noccache.elf', sysroot_wrapper + '.elf')
 
 
+def _ProcessClangWrappers(target, output_dir):
+  """Remove chroot-specific things from our sysroot wrappers"""
+  clang_bin_path = '/usr/bin'
+  # Disable ccache from clang wrappers.
+  _ProcessSysrootWrappers(target, output_dir, clang_bin_path)
+  GeneratePathWrapper(output_dir, f'/bin/{target}-clang',
+                      f'/usr/bin/{target}-clang')
+  GeneratePathWrapper(output_dir, f'/bin/{target}-clang++',
+                      f'/usr/bin/{target}-clang++')
+
+
 def _CreateMainLibDir(target, output_dir):
   """Create some lib dirs so that compiler can get the right Gcc paths"""
   osutils.SafeMakedirs(os.path.join(output_dir, 'usr', target, 'lib'))
@@ -1174,6 +1186,7 @@ def _ProcessDistroCleanups(target, output_dir):
   _ProcessBinutilsConfig(target, output_dir)
   gcc_path = _ProcessGccConfig(target, output_dir)
   _ProcessSysrootWrappers(target, output_dir, gcc_path)
+  _ProcessClangWrappers(target, output_dir)
   _CreateMainLibDir(target, output_dir)
 
   osutils.RmDir(os.path.join(output_dir, 'etc'))
@@ -1202,8 +1215,9 @@ def CreatePackagableRoot(target, output_dir, ldpaths, root='/'):
     Note we do not apply this to clang or rust - there is correlation between
     clang's search path for libraries / inclusion and its installation path.
     """
+    NO_MOVE_PATTERNS = ('clang', 'rust', 'cargo', 'sysroot_wrapper')
     if (path.startswith('/usr/bin/') and
-        not any(x in path for x in ('clang', 'rust', 'cargo'))):
+        not any(x in path for x in NO_MOVE_PATTERNS)):
       return path[4:]
     return path
   _BuildInitialPackageRoot(output_dir, paths, elfs, ldpaths,

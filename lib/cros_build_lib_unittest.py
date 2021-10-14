@@ -10,6 +10,7 @@ import datetime
 import difflib
 import functools
 import itertools
+import logging
 import os
 from pathlib import Path
 import signal
@@ -20,7 +21,6 @@ from unittest import mock
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import signals as cros_signals
@@ -1189,6 +1189,16 @@ class TarballTests(cros_test_lib.TempDirTestCase):
                       ("tar's stderr is missing from the exception.\n%s" %
                        e.args[0]))
 
+  def test_IsTarball(self):
+    """Test IsTarball helper function."""
+    self.assertTrue(cros_build_lib.IsTarball('file.tar'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.bz2'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tar.gz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.tbz'))
+    self.assertTrue(cros_build_lib.IsTarball('file.txz'))
+    self.assertFalse(cros_build_lib.IsTarball('file.txt'))
+    self.assertFalse(cros_build_lib.IsTarball('file.tart'))
+    self.assertFalse(cros_build_lib.IsTarball('file.bz2'))
 
 # Tests for tar exceptions.
 class FailedCreateTarballExceptionTests(cros_test_lib.TempDirTestCase,
@@ -1282,41 +1292,3 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.mockRun.call_count, 3)
     self.assertEqual(cm.exception.args[1].returncode, 1)
-
-
-class OpenTests(cros_test_lib.TempDirTestCase):
-  """Tests for cros_build_lib.Open."""
-
-  def testFile(self):
-    """Read/write a file by path."""
-    path = os.path.join(self.tempdir, 'test.txt')
-    with cros_build_lib.Open(path, mode='w') as fp:
-      fp.write('foo')
-    with cros_build_lib.Open(path, mode='r') as fp:
-      self.assertEqual('foo', fp.read())
-
-  def testHandle(self):
-    """Read/write a file by an open handle."""
-    path = os.path.join(self.tempdir, 'test.txt')
-    with open(path, mode='w') as fp:
-      with cros_build_lib.Open(fp) as fp2:
-        fp2.write('foo')
-    with open(path, mode='r') as fp:
-      with cros_build_lib.Open(fp) as fp2:
-        self.assertEqual('foo', fp2.read())
-
-  def testPath(self):
-    """Read/write a file by Path."""
-    path = Path(self.tempdir) / 'test.txt'
-    with cros_build_lib.Open(path, mode='w') as fp:
-      fp.write('foo')
-    with cros_build_lib.Open(path, mode='r') as fp:
-      self.assertEqual('foo', fp.read())
-    self.assertEqual('foo', path.read_text())
-
-  def testEncoding(self):
-    """Verify we pass kwargs down."""
-    path = os.path.join(self.tempdir, 'test.txt')
-    with cros_build_lib.Open(path, mode='w', encoding='utf-8') as fp:
-      fp.write(u'ßomß')
-    self.assertEqual(u'ßomß', osutils.ReadFile(path))

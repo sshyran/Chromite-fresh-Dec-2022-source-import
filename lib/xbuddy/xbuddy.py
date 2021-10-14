@@ -7,18 +7,18 @@
 import configparser
 import datetime
 import distutils.version  # pylint: disable=import-error,no-name-in-module
+import logging
 import operator
 import os
 import re
 import shutil
 import sys
-import time
 import threading
+import time
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.lib import image_lib
 from chromite.lib import gs
+from chromite.lib import image_lib
 from chromite.lib import path_util
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import build_artifact
@@ -179,7 +179,7 @@ class XBuddy(object):
   _staging_thread_count_lock = threading.Lock()
 
   def __init__(self, manage_builds=False, board=None, version=None,
-               images_dir=None, static_dir=DEFAULT_STATIC_DIR):
+               images_dir=None, static_dir=DEFAULT_STATIC_DIR, gsutil_bin=None):
 
     self.config = self._ReadConfig()
     self._manage_builds = manage_builds or self._ManageBuilds()
@@ -192,7 +192,7 @@ class XBuddy(object):
                                                  'src/build/images')
 
     cache_user = 'chronos' if common_util.IsRunningOnMoblab() else None
-    self._ctx = gs.GSContext(cache_user=cache_user)
+    self._ctx = gs.GSContext(cache_user=cache_user, gsutil_bin=gsutil_bin)
 
     common_util.MkDirP(self._timestamp_folder)
 

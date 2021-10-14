@@ -197,7 +197,7 @@ class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
   # We duplicate __init__ to specify a default for bot_id.
   # pylint: disable=arguments-differ,useless-super-delegation
   def _Prepare(self, bot_id=BOT_ID, **kwargs):
-    super(CanaryCompletionStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
   def setUp(self):
     self.build_type = constants.CANARY_TYPE
@@ -229,7 +229,7 @@ class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
 class PublishUprevChangesStageTest(
     generic_stages_unittest.AbstractStageTestCase):
   """Tests for the PublishUprevChanges stage."""
-  BOT_ID = 'master-vmmst-android-pfq'
+  BOT_ID = 'master-vmt-android-pfq'
 
   def setUp(self):
     self.PatchObject(completion_stages.PublishUprevChangesStage,

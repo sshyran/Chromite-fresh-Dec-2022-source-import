@@ -18,9 +18,11 @@ Also, the initial sync will usually take about 40 minutes, so performance should
 be considered carefully.
 """
 
+import logging
 import os
 import re
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import manifest_version
@@ -31,7 +33,6 @@ from chromite.lib import buildbucket_v2
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import failures_lib
 from chromite.lib import gs
@@ -90,9 +91,7 @@ class WorkspaceStageBase(generic_stages.BuilderStage):
       buildstore: BuildStore instance to make DB calls with.
       build_root: Fully qualified path to use as a string.
     """
-    super(WorkspaceStageBase, self).__init__(
-        builder_run, buildstore, build_root=build_root,
-        **kwargs)
+    super().__init__(builder_run, buildstore, build_root=build_root, **kwargs)
 
     self._orig_root = builder_run.buildroot
 
@@ -189,8 +188,7 @@ class SyncStage(WorkspaceStageBase):
       patch_pool: None or a list of lib.patch.GerritPatch objects.
       copy_repo: None, or the copy of a repo to seed the sync from.
     """
-    super(SyncStage, self).__init__(
-        builder_run, buildstore, build_root=build_root, **kwargs)
+    super().__init__(builder_run, buildstore, build_root=build_root, **kwargs)
 
     self.external = external
     self.branch = branch
@@ -216,13 +214,13 @@ class SyncStage(WorkspaceStageBase):
       cmd += ['--branch', self.branch]
 
     if self.version:
-      logging.PrintBuildbotStepText('Version: %s' % self.version)
+      cbuildbot_alerts.PrintBuildbotStepText('Version: %s' % self.version)
       cmd += ['--version', self.version]
 
     if self.patch_pool:
       patch_options = []
       for patch in self.patch_pool:
-        logging.PrintBuildbotLink(str(patch), patch.url)
+        cbuildbot_alerts.PrintBuildbotLink(str(patch), patch.url)
         patch_options += ['--gerrit-patches', patch.gerrit_number_str]
 
       cmd += patch_options
@@ -284,16 +282,16 @@ class WorkspaceSyncChromeStage(WorkspaceStageBase):
   SYNC_CHROME_TIMEOUT = 12 * 60 * 60
 
   def DetermineChromeVersion(self):
-    cpv = portage_util.PortageqBestVisible(constants.CHROME_CP,
-                                           cwd=self._build_root)
-    return cpv.version_no_rev.partition('_')[0]
+    pkg_info = portage_util.PortageqBestVisible(
+        constants.CHROME_CP, cwd=self._build_root)
+    return pkg_info.version.partition('_')[0]
 
 
   @failures_lib.SetFailureType(failures_lib.InfrastructureFailure)
   def PerformStage(self):
     chrome_version = self.DetermineChromeVersion()
 
-    logging.PrintBuildbotStepText('tag %s' % chrome_version)
+    cbuildbot_alerts.PrintBuildbotStepText('tag %s' % chrome_version)
 
     git_cache_dir = (
         self._run.options.chrome_preload_dir or self._run.options.git_cache_dir)
@@ -315,9 +313,7 @@ class WorkspaceUprevStage(WorkspaceStageBase):
   config_name = 'uprev'
 
   def __init__(self, builder_run, buildstore, boards=None, **kwargs):
-    super(WorkspaceUprevStage, self).__init__(builder_run,
-                                              buildstore,
-                                              **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     if boards is not None:
       self._boards = boards
 
@@ -366,7 +362,7 @@ class WorkspacePublishBuildspecStage(WorkspaceStageBase):
     else:
       msg = 'Defined: %s' % build_spec_path
 
-    logging.PrintBuildbotStepText(msg)
+    cbuildbot_alerts.PrintBuildbotStepText(msg)
 
 
 class WorkspaceScheduleChildrenStage(WorkspaceStageBase):
@@ -410,7 +406,7 @@ class WorkspaceScheduleChildrenStage(WorkspaceStageBase):
       logging.info(
           'Build_name %s buildbucket_id %s created_timestamp %s',
           child_name, result.id, result.create_time.ToJsonString())
-      logging.PrintBuildbotLink(child_name,
+      cbuildbot_alerts.PrintBuildbotLink(child_name,
                                 '{}{}'.format(constants.CHROMEOS_MILO_HOST,
                                               result.id))
 
@@ -431,7 +427,7 @@ class WorkspaceInitSDKStage(WorkspaceStageBase):
                             extra_env=self._portage_extra_env)
 
     post_ver = cros_sdk_lib.GetChrootVersion(chroot_path)
-    logging.PrintBuildbotStepText(post_ver)
+    cbuildbot_alerts.PrintBuildbotStepText(post_ver)
 
 
 class WorkspaceUpdateSDKStage(WorkspaceStageBase):
@@ -530,7 +526,7 @@ class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
     """Decide if we should run the unittest stage."""
     # See crbug.com/937328.
     if not self.AfterLimit(CROS_RUN_UNITTESTS):
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('cros_run_unit_tests does not exist on this branch.')
       return False
 
@@ -551,7 +547,7 @@ class WorkspaceUnitTestStage(generic_stages.BoardSpecificBuilderStage,
             chroot_args=ChrootArgs(self._run.options),
             extra_env=extra_env)
       except failures_lib.BuildScriptFailure:
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         logging.warning('Unittests failed. Ignored crbug.com/936123.')
 
 
@@ -646,7 +642,7 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
           raise
 
         # For older branches, we only process them on a best effort basis.
-        logging.PrintBuildbotStepWarnings()
+        cbuildbot_alerts.PrintBuildbotStepWarnings()
         logging.warning('Preparing Android symbols failed, ignoring..')
 
     # Upload them.

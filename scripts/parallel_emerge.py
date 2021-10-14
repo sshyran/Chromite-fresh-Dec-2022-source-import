@@ -13,12 +13,14 @@ arguments as well as setting reasonable defaults for parallelism.
 """
 
 import argparse
+import logging
 import multiprocessing
 import os
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 
 
 class LookupBoardSysroot(argparse.Action):
@@ -88,6 +90,16 @@ def ParallelEmergeArgParser():
       default=multiprocessing.cpu_count(),
       metavar='PARALLEL_JOBCOUNT',
   )
+  parser.add_argument(
+      '-n',
+      '--dryrun',
+      '--dry-run',
+      dest='dry_run',
+      action='store_true',
+      default=False,
+      help='Print the emerge command that would have been run instead of '
+           'actually running it.',
+  )
 
   parser.add_argument(
       '--retries',
@@ -149,4 +161,11 @@ def main(argv):
   for pkg in constants.OTHER_CHROME_PACKAGES:
     emerge_args.append('--rebuild-exclude=%s' % pkg)
 
-  os.execvp('emerge', ['emerge'] + emerge_args)
+  cmd = ['emerge'] + emerge_args
+  cmd_str = cros_build_lib.CmdToStr(cmd)
+  if parsed_args.get('dry_run'):
+    logging.notice('Would have run: %s', cmd_str)
+    return
+
+  logging.info('Running: %s', cmd_str)
+  os.execvp('emerge', cmd)

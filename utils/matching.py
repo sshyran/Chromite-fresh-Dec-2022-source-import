@@ -7,7 +7,7 @@
 import difflib
 import fnmatch
 import os
-from typing import Any, Callable, List
+from typing import Any, Callable, Iterable, List
 
 
 def GetMostLikelyMatchedObject(
@@ -35,7 +35,7 @@ def GetMostLikelyMatchedObject(
 
 
 def FindFilesMatching(pattern: str, target: str = './', cwd: str = os.curdir,
-                      exclude_dirs: List[str] = ()) -> List[str]:
+                      exclude_dirs: Iterable[str] = ()) -> List[str]:
   """Search the root directory recursively for matching filenames.
 
   The |target| and |cwd| args allow manipulating how the found paths are

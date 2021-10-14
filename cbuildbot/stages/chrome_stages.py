@@ -5,10 +5,12 @@
 """Module containing the Chrome stages."""
 
 import glob
+import logging
 import multiprocessing
 import os
 import shutil
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import manifest_version
@@ -18,13 +20,13 @@ from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib import results_lib
+
 
 MASK_CHANGES_ERROR_SNIPPET = 'The following mask changes are necessary'
 CHROMEPIN_MASK_PATH = os.path.join(constants.SOURCE_ROOT,
@@ -40,7 +42,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, builder_run, buildstore, **kwargs):
-    super(SyncChromeStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     # PerformStage() will fill this out for us.
     # TODO(mtennant): Replace with a run param.
     self.chrome_version = None
@@ -51,7 +53,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
     logging.debug('Existing chrome version is %s.',
                   self._run.attrs.chrome_version)
     self._WriteChromeVersionToMetadata()
-    super(SyncChromeStage, self).HandleSkip()
+    super().HandleSkip()
 
   def _GetChromeVersionFromMetadata(self):
     """Return the Chrome version from metadata; None if is does not exist."""
@@ -86,7 +88,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
         chrome_atom_to_build = e.new_chrome_atom
         if chrome_atom_to_build:
           results_lib.Results.Record(self.name, e)
-          logging.PrintBuildbotStepFailure()
+          cbuildbot_alerts.PrintBuildbotStepFailure()
           logging.error('Chrome is pinned. Unpinning chrome and continuing '
                         'build for chrome atom %s. This stage will be marked '
                         'as failed to prevent an uprev.',
@@ -100,13 +102,13 @@ class SyncChromeStage(generic_stages.BuilderStage,
     kwargs = {}
     if self._chrome_rev == constants.CHROME_REV_SPEC:
       kwargs['revision'] = self.chrome_version
-      logging.PrintBuildbotStepText('revision %s' % kwargs['revision'])
+      cbuildbot_alerts.PrintBuildbotStepText('revision %s' % kwargs['revision'])
     else:
       if not self.chrome_version:
         self.chrome_version = self._run.DetermineChromeVersion()
 
       kwargs['tag'] = self.chrome_version
-      logging.PrintBuildbotStepText('tag %s' % kwargs['tag'])
+      cbuildbot_alerts.PrintBuildbotStepText('tag %s' % kwargs['tag'])
 
     useflags = self._run.config.useflags
     git_cache_dir = (
@@ -130,7 +132,7 @@ class SyncChromeStage(generic_stages.BuilderStage,
     # means something.  In other words, this stage tried to run.
     self._run.attrs.chrome_version = self.chrome_version
     self._WriteChromeVersionToMetadata()
-    super(SyncChromeStage, self).Finish()
+    super().Finish()
 
 
 class SimpleChromeArtifactsStage(generic_stages.BoardSpecificBuilderStage,
@@ -142,7 +144,7 @@ class SimpleChromeArtifactsStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(SimpleChromeArtifactsStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self._upload_queue = multiprocessing.Queue()
     self._pkg_dir = os.path.join(
         self._build_root, constants.DEFAULT_CHROOT_DIR,
@@ -168,7 +170,7 @@ class SimpleChromeArtifactsStage(generic_stages.BoardSpecificBuilderStage,
       raise artifact_stages.NothingToArchiveException(
           'Failed to find package %s' % constants.CHROME_CP)
     if len(files) > 1:
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('Expected one package for %s, found %d',
                       constants.CHROME_CP, len(files))
 
@@ -209,7 +211,7 @@ class TestSimpleChromeWorkflowStage(generic_stages.BoardSpecificBuilderStage,
   category = constants.PRODUCT_CHROME_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(TestSimpleChromeWorkflowStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     if self._run.options.chrome_root:
       self.chrome_src = os.path.join(self._run.options.chrome_root, 'src')
       board_dir = 'out_%s' % self._current_board

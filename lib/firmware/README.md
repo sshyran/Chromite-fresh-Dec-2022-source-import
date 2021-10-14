@@ -20,6 +20,10 @@ To flash your volteer DUT via SERVO on the default port (9999):
 To flash your volteer DUT via SERVO on port 1234:
   cros ap flash -d servo:port:1234 -b volteer -i /path/to/image.bin
 
+To pass additional options to futility or flashrom, provide them after `--`,
+e.g.:
+  cros ap flash -b zork -i /path/to/image.bin -d ssh://1.1.1.1 -- --force
+
 ## Reading
 To read image of device.cros via SSH:
   cros ap read -b volteer -o /tmp/volteer-image.bin -d ssh://device.cros
@@ -39,7 +43,7 @@ To dump AP config of all boards into /tmp/cros-read-ap-config.json
   cros ap dump-config -o /tmp/cros-read-ap-config.json
 
 To dump AP config of drallion and dedede boards:
-  cros ap dump-config -o /tmp/cros-read-ap-config.json -b drallion,dedede
+  cros ap dump-config -o /tmp/cros-read-ap-config.json -b "drallion dedede"
 
 ## Add support for new board
 Create ${BOARD}.py in chromite/lib/firmware/ap_firmware_config.

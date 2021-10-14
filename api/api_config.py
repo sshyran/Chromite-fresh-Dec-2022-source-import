@@ -88,16 +88,16 @@ class ApiConfig(object):
     return (not self.validate_only and not self.mock_call and
             not self.mock_error and not self.mock_invalid)
 
-  def get_proto(self, for_inside_execution=True):
+  def get_proto(
+      self,
+      for_inside_execution: bool = True
+  ) -> build_api_config_pb2.BuildApiConfig:
     """Get the config as a proto.
 
     Args:
-      for_inside_execution (bool): Allows avoiding propagating configs that are
+      for_inside_execution: Allows avoiding propagating configs that are
         irrelevant for the build api process executed inside the chroot.
         Enabled by default.
-
-    Returns:
-      build_api_config_pb2.BuildApiConfig
     """
     config = build_api_config_pb2.BuildApiConfig()
     config.call_type = self.ENUM_TYPE_MAP[self._call_type]
@@ -109,22 +109,20 @@ class ApiConfig(object):
     return config
 
 
-def build_config_from_proto(config_proto):
+def build_config_from_proto(
+    config_proto: build_api_config_pb2.BuildApiConfig) -> ApiConfig:
   """Build an ApiConfig instance from a BuildApiConfig message.
 
   Args:
-    config_proto (build_api_config_pb2.BuildApiConfig): The proto config.
-
-  Returns:
-    ApiConfig
+    config_proto: The proto config.
   """
-  assert isinstance(config_proto, build_api_config_pb2.BuildApiConfig)
 
   if config_proto.call_type not in ApiConfig.TYPE_ENUM_MAP:
     raise UnknownCallTypeEnumValue('The given protobuf call_type value is not '
                                    'configured in api_config.')
-  return ApiConfig(call_type=ApiConfig.TYPE_ENUM_MAP[config_proto.call_type],
-                   log_path=config_proto.log_path)
+  return ApiConfig(
+      call_type=ApiConfig.TYPE_ENUM_MAP[config_proto.call_type],
+      log_path=config_proto.log_path)
 
 
 class ApiConfigMixin(object):

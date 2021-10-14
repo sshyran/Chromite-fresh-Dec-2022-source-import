@@ -65,6 +65,7 @@ class CrosFlashTest(cros_test_lib.MockTempDirTestCase,
     expected_kwargs = {
         'board': None,
         'version': 'latest',
+        'no_minios_update': True,
         'no_rootfs_update': False,
         'no_stateful_update': False,
         'clobber_stateful': False,

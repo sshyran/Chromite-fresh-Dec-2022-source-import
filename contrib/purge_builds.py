@@ -16,13 +16,13 @@ See go/cros-gs-cleanup-design for an overview.
 """
 
 import datetime
+import logging
 import multiprocessing
 import re
 import urllib.parse
 
 from chromite.lib import commandline
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import parallel
@@ -444,7 +444,8 @@ def main(argv):
   options.Freeze()
 
   ctx = gs.GSContext()
-  ctx.GetDefaultGSUtilBin()  # To force caching of gsutil pre-forking.
+  # To force caching of gsutil pre-forking.
+  ctx.InitializeCache()
 
   now = datetime.datetime.now()
   expired_cutoff = now - BUILD_CLEANUP

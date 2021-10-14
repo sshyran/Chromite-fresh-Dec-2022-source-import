@@ -5,9 +5,11 @@
 """Module containing the report stages."""
 
 import datetime
+import logging
 import os
 import sys
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import goma_util
@@ -18,7 +20,6 @@ from chromite.lib import cidb
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import metadata_lib
@@ -184,7 +185,7 @@ def _UploadAndLinkGomaLogIfNecessary(
   goma_urls = goma.UploadLogs(cbb_config_name)
   if goma_urls:
     for label, url in goma_urls:
-      logging.PrintBuildbotLink('%s %s' % (stage_name, label), url)
+      cbuildbot_alerts.PrintBuildbotLink('%s %s' % (stage_name, label), url)
 
 
 class BuildStartStage(generic_stages.BuilderStage):
@@ -214,7 +215,7 @@ class BuildStartStage(generic_stages.BuilderStage):
   @failures_lib.SetFailureType(failures_lib.InfrastructureFailure)
   def PerformStage(self):
     if self._run.config['doc']:
-      logging.PrintBuildbotLink('Builder documentation',
+      cbuildbot_alerts.PrintBuildbotLink('Builder documentation',
                                 self._run.config['doc'])
 
     WriteBasicMetadata(self._run)
@@ -272,7 +273,7 @@ class BuildStartStage(generic_stages.BuilderStage):
            'db_type': db_type})
       logging.info('Inserted build_id %s into cidb database type %s.',
                    build_id, db_type)
-      logging.PrintBuildbotStepText('database: %s, build_id: %s' %
+      cbuildbot_alerts.PrintBuildbotStepText('database: %s, build_id: %s' %
                                     (db_type, build_id))
 
       master_build_id = d['master_build_id']
@@ -288,11 +289,11 @@ class BuildStartStage(generic_stages.BuilderStage):
               master_build_status['waterfall'],
               master_build_status['builder_name'],
               master_build_status['build_number'])
-        logging.PrintBuildbotLink('Link to master build', master_url)
+        cbuildbot_alerts.PrintBuildbotLink('Link to master build', master_url)
 
     # Set annealing snapshot revision build property for Findit integration.
     if self._run.options.cbb_snapshot_revision:
-      logging.PrintKitchenSetBuildProperty(
+      cbuildbot_alerts.PrintKitchenSetBuildProperty(
           'GOT_REVISION',
           self._run.options.cbb_snapshot_revision)
 
@@ -341,7 +342,7 @@ class SlaveFailureSummaryStage(generic_stages.BuilderStage):
         continue
       slave_stage_url = uri_lib.ConstructMiloBuildUri(
           failure.buildbucket_id)
-      logging.PrintBuildbotLink('%s %s' % (failure.build_config,
+      cbuildbot_alerts.PrintBuildbotLink('%s %s' % (failure.build_config,
                                            failure.stage_name),
                                 slave_stage_url)
 
@@ -409,7 +410,7 @@ class BuildReexecutionFinishedStage(generic_stages.BuilderStage,
     logging.info('Build re-executions have finished. Chromite source '
                  'will not be modified for remainder of run.')
     logging.info("config['important']=%s", config['important'])
-    logging.PrintBuildbotStepText(
+    cbuildbot_alerts.PrintBuildbotStepText(
         "config['important']=%s" % config['important'])
 
     # Flat list of all child config boards. Since child configs
@@ -543,7 +544,7 @@ class ReportStage(generic_stages.BuilderStage,
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, completion_instance, **kwargs):
-    super(ReportStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
     # TODO(mtennant): All these should be retrieved from builder_run instead.
     # Or, more correctly, the info currently retrieved from these stages should
@@ -638,7 +639,8 @@ class ReportStage(generic_stages.BuilderStage,
                    builder_run.config.name, board_names)
       return
 
-    logging.PrintKitchenSetBuildProperty('artifact_link', archive.upload_url)
+    cbuildbot_alerts.PrintKitchenSetBuildProperty('artifact_link',
+                                                  archive.upload_url)
 
     uploaded_json = 'uploaded.json'
     commands.GenerateUploadJSON(os.path.join(archive_path, uploaded_json),
@@ -684,8 +686,8 @@ class ReportStage(generic_stages.BuilderStage,
 
     links_build_description = '%s/%s' % (builder_run.config.name,
                                          archive.version)
-    logging.PrintBuildbotLink('Artifacts[%s]' % links_build_description,
-                              artifacts_url)
+    cbuildbot_alerts.PrintBuildbotLink(
+        'Artifacts[%s]' % links_build_description, artifacts_url)
 
   def _UploadBuildStagesTimeline(self, builder_run, buildbucket_id):
     """Upload an HTML timeline for the build stages at remote archive location.
@@ -843,15 +845,15 @@ class ReportStage(generic_stages.BuilderStage,
     for builder_run in self._run.GetUngroupedBuilderRuns():
       if db is not None:
         timeline = self._UploadBuildStagesTimeline(builder_run, buildbucket_id)
-        logging.PrintBuildbotLink('Build stages timeline', timeline)
+        cbuildbot_alerts.PrintBuildbotLink('Build stages timeline', timeline)
 
         timeline = self._UploadSlavesTimeline(builder_run, build_identifier)
         if timeline is not None:
-          logging.PrintBuildbotLink('Slaves timeline', timeline)
+          cbuildbot_alerts.PrintBuildbotLink('Slaves timeline', timeline)
 
       if build_id is not None:
         details_link = uri_lib.ConstructViceroyBuildDetailsUri(build_id)
-        logging.PrintBuildbotLink('Build details', details_link)
+        cbuildbot_alerts.PrintBuildbotLink('Build details', details_link)
 
       # Generate links to archived artifacts if there are any.  All the
       # archived artifacts for one run/config are in one location, so the link
@@ -1024,4 +1026,4 @@ class ReportStage(generic_stages.BuilderStage,
       # results.
       return self._HandleExceptionAsWarning(exc_info)
 
-    return super(ReportStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)

@@ -6,6 +6,7 @@
 
 import os
 
+from chromite.lib import cgpt
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
@@ -138,3 +139,15 @@ Block count: %d
 
     is_ext4.return_value = False
     self.assertIsNone(partition_lib.LookupImageType(image))
+
+  def testHasMiniOSPartitions(self):
+    """Tests we correctly identify miniOS supported images."""
+    image = '/foo/image'
+
+    self.PatchObject(cgpt.Disk, 'FromImage', return_value=cgpt.Disk(''))
+    self.PatchObject(cgpt.Disk, 'GetPartitionByTypeGuid',
+                     side_effect=KeyError())
+    self.assertFalse(partition_lib.HasMiniOSPartitions(image))
+
+    self.PatchObject(cgpt.Disk, 'GetPartitionByTypeGuid')
+    self.assertTrue(partition_lib.HasMiniOSPartitions(image))

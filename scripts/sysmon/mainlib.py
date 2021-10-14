@@ -6,10 +6,12 @@
 
 from __future__ import absolute_import
 
+import logging
 import time
 
+from chromite.third_party.infra_libs.ts_mon.common import interface
+
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import metrics
 from chromite.lib import ts_mon_config
 from chromite.scripts.sysmon import git_metrics
@@ -19,7 +21,6 @@ from chromite.scripts.sysmon import osinfo_metrics
 from chromite.scripts.sysmon import proc_metrics
 from chromite.scripts.sysmon import puppet_metrics
 from chromite.scripts.sysmon import system_metrics
-from chromite.third_party.infra_libs.ts_mon.common import interface
 
 
 logger = logging.getLogger(__name__)

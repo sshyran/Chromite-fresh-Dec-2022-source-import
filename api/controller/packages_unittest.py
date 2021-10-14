@@ -78,11 +78,12 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     targets = ['foo', 'bar']
     output_dir = '/tmp/uprev_output_dir'
     changed = ['/ebuild-1.0-r1.ebuild', '/ebuild-1.0-r2.ebuild']
+    revved_packages = ['cat1/pkg1-1.11', 'cat2/pkg2-1.12']
     expected_type = constants.BOTH_OVERLAYS
     request = self._GetRequest(targets=targets, overlay_type=self._BOTH,
                                output_dir=output_dir)
     uprev_patch = self.PatchObject(packages_service, 'uprev_build_targets',
-                                   return_value=changed)
+                                   return_value=(changed, revved_packages))
 
     packages_controller.Uprev(request, self.response, self.api_config)
 
@@ -97,6 +98,11 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
       self.assertIn(ebuild.path, changed)
       changed.remove(ebuild.path)
     self.assertFalse(changed)
+
+    for pkg in self.response.packages:
+      self.assertTrue(pkg.category.startswith('cat'))
+      self.assertTrue(pkg.package_name.startswith('pkg'))
+      self.assertTrue(pkg.version.startswith('1.1'))
 
 
 class UprevVersionedPackageTest(cros_test_lib.MockTestCase, ApiConfigMixin):
@@ -201,22 +207,6 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         atom=atom,
     )
 
-  def _MakeCpv(self, category, package, version):
-    unused = {
-        'cp': None,
-        'cpv': None,
-        'cpf': None,
-        'pv': None,
-        'version_no_rev': None,
-        'rev': None,
-    }
-    return package_info.CPV(
-        category=category,
-        package=package,
-        version=version,
-        **unused
-    )
-
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
     patch = self.PatchObject(packages_service, 'get_best_visible')
@@ -247,17 +237,17 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
 
   def testSuccess(self):
     """Test overall success, argument handling, result forwarding."""
-    cpv = self._MakeCpv('category', 'package', 'version')
-    self.PatchObject(packages_service, 'get_best_visible', return_value=cpv)
+    pkg = package_info.PackageInfo('category', 'package', '1.2.3.4', 5)
+    self.PatchObject(packages_service, 'get_best_visible', return_value=pkg)
 
-    request = self._GetRequest(atom='chromeos-chrome')
+    request = self._GetRequest(atom='category/package')
 
     packages_controller.GetBestVisible(request, self.response, self.api_config)
 
     package_info_msg = self.response.package_info
-    self.assertEqual(package_info_msg.category, cpv.category)
-    self.assertEqual(package_info_msg.package_name, cpv.package)
-    self.assertEqual(package_info_msg.version, cpv.version)
+    self.assertEqual(package_info_msg.category, pkg.category)
+    self.assertEqual(package_info_msg.package_name, pkg.package)
+    self.assertEqual(package_info_msg.version, pkg.vr)
 
 
 class GetChromeVersion(cros_test_lib.MockTestCase, ApiConfigMixin):
@@ -838,6 +828,61 @@ class BuildsChromeTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     patch.assert_called_once_with(constants.CHROME_CP,
                                   build_target_lib.BuildTarget('foo'),
                                   [controller_util.PackageInfoToCPV(package)])
+
+
+class NeedsChromeSourceTest(cros_test_lib.MockTempDirTestCase, ApiConfigMixin):
+  """NeedsChromeSource tests."""
+
+  def setUp(self):
+    self.response = packages_pb2.NeedsChromeSourceResponse()
+
+    self.board = 'board'
+    self.sysroot = self.tempdir
+
+  def _GetRequest(self, compile_source=False):
+    """Helper to build a request."""
+    request = packages_pb2.NeedsChromeSourceRequest()
+
+    request.install_request.sysroot.path = self.sysroot
+    request.install_request.sysroot.build_target.name = self.board
+    request.install_request.flags.compile_source = compile_source
+
+    return request
+
+  def testAll(self):
+    """Reason translation test."""
+    result = packages_service.NeedsChromeSourceResult(
+        needs_chrome_source=True,
+        builds_chrome=True,
+        packages=[package_info.parse('cat/pkg')],
+        missing_chrome_prebuilt=True,
+        missing_follower_prebuilt=True,
+        local_uprev=True,
+    )
+    self.PatchObject(packages_service, 'needs_chrome_source',
+                     return_value=result)
+
+    packages_controller.NeedsChromeSource(self._GetRequest(compile_source=True),
+                                          self.response,
+                                          self.api_config)
+
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.LOCAL_UPREV,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.NO_PREBUILT,
+                  self.response.reasons)
+    self.assertIn(
+        packages_pb2.NeedsChromeSourceResponse.FOLLOWER_LACKS_PREBUILT,
+        self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+    self.assertIn(packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE,
+                  self.response.reasons)
+
+    self.assertEqual(1, len(self.response.packages))
+    self.assertEqual(('cat', 'pkg'), (self.response.packages[0].category,
+                                      self.response.packages[0].package_name))
 
 
 class GetAndroidMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):

@@ -13,7 +13,7 @@ In this tutorial, we'll be adding mock calls in our endpoint using `faux`
 decorators.
 
 
-### WTF(aux)
+### Why?
 
 The `faux` module implements the mock call functionality for the Build API.
 Our goal is to provide Build API consumers a quick and easy way to validate

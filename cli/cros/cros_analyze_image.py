@@ -22,6 +22,7 @@ $ cros analyze-image --image=/tmp/cros-analyze-coral-m86.bin
 """
 
 import csv
+import logging
 import shutil
 import sys
 import typing
@@ -30,11 +31,11 @@ from chromite.cli import command
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import pformat
+from chromite.utils import file_util
+from chromite.utils import pformat
 
 
 IMAGE_NAME = 'chromiumos_base_image'
@@ -179,7 +180,7 @@ def write_sizes(sizes: dict, required_paths: list, human_readable: bool,
     for path, size in sorted(sizes.items()):
       output.append({'path': path, 'size': size_string(sizes[path])})
 
-  with cros_build_lib.Open(output_path, mode='w') as f:
+  with file_util.Open(output_path, mode='w') as f:
     if output_format == 'csv':
       writer = csv.DictWriter(f, ['path', 'size'])
       writer.writeheader()
@@ -194,7 +195,7 @@ class AnalyzeImageCommand(command.CliCommand):
   """Analyze cros images listing large directory and file sizes."""
 
   def __init__(self, options: commandline.ArgumentNamespace):
-    super(AnalyzeImageCommand, self).__init__(options)
+    super().__init__(options)
 
     if self.options.image:
       return

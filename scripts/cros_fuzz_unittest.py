@@ -4,9 +4,9 @@
 
 """Unit tests for cros_fuzz."""
 
+import logging
 import os
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_fuzz
 

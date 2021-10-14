@@ -4,15 +4,14 @@
 
 """A set of utilities to build the Chrome OS kernel."""
 
+import logging
 import os
 import pathlib
-
 from typing import List, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import kernel_cmdline
 
 
@@ -41,16 +40,19 @@ class Builder:
 
     self._board_root = build_target_lib.get_default_sysroot_path(board)
 
-  def CreateCustomKernel(self, kernel_flags: List[str]):
+  def CreateCustomKernel(self, kernel_flags: List[str],
+                         use_flags_override: Optional[List[str]] = None):
     """Builds a custom kernel and initramfs.
 
     Args:
       kernel_flags: A list of USE flags for building the kernel.
+      use_flags_override: A list of USE flags to override the default env USE
+                          variable.
     """
     pkgdir = self._work_dir / 'packages'
     logging.info('Using PKGDIR: %s', pkgdir)
     try:
-      self._CreateCustomKernel(kernel_flags, str(pkgdir))
+      self._CreateCustomKernel(str(pkgdir), kernel_flags, use_flags_override)
     finally:
       # The reason we need to specifically remove the pkgdir is that some of the
       # content of this directory will be read-only by non-root and tools like
@@ -63,18 +65,21 @@ class Builder:
         # For whatever reason it failed but, for now we just ignore it. It is
         # probably going to fail at the end anyway.
 
-  def _CreateCustomKernel(self, kernel_flags: List[str], pkgdir: str):
+  def _CreateCustomKernel(self, pkgdir: str, kernel_flags: List[str],
+                          use_flags_override: Optional[List[str]] = None):
     """Internal function for CreateCustomKernel()
 
     This code is mainly borrowed from src/scripts/build_library/build_common.sh.
 
     Args:
-      kernel_flags: See CreateCustomkernel().
       pkgdir: The path to a working dir for installing packages.
+      kernel_flags: See CreateCustomKernel().
+      use_flags_override: See CreateCustomKernel().
     """
     logging.info('Building custom kernel.')
     # Clean up any leftover state in custom directories.
-    use_flags = os.environ.get('USE', '').split() + kernel_flags
+    use_flags = use_flags_override or os.environ.get('USE', '').split()
+    use_flags += kernel_flags
     logging.debug('Using USE flags: %s', use_flags)
     extra_env = {'PKGDIR': pkgdir, 'USE': ' '.join(use_flags)}
     build_target = build_target_lib.BuildTarget(self._board)

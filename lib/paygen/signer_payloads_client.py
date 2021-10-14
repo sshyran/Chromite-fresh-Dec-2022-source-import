@@ -4,22 +4,21 @@
 
 """This library manages the interfaces to the signer for update payloads."""
 
+import logging
 import os
 import re
 import shutil
 import subprocess
 import tempfile
-import time
 import threading
+import time
 
 from chromite.lib import chroot_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-
 from chromite.lib.paygen import filelib
 from chromite.lib.paygen import gslock
 from chromite.lib.paygen import gspaths
@@ -90,12 +89,12 @@ class SignerPayloadsClientGoogleStorage(object):
 
     end_time = time.time() + timeout
 
+    lock = gslock.Lock(request_uri + '.lock')
     while True:
       try:
-        with gslock.Lock(request_uri + '.lock'):
+        with lock:
           for path in paths:
             self._ctx.Remove(path, ignore_missing=True)
-
           return
       except gslock.LockNotAcquired:
         # If we have timed out.
@@ -408,8 +407,7 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
 
     self._private_key = private_key
 
-    super(UnofficialSignerPayloadsClient, self).__init__(gspaths.Build(),
-                                                         work_dir)
+    super().__init__(gspaths.Build(), work_dir)
 
   def ExtractPublicKey(self, public_key):
     """Extracts the public key from the private key.

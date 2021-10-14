@@ -5,10 +5,10 @@
 """cros shell: Open a remote shell on the target device."""
 
 import argparse
+import logging
 
 from chromite.cli import command
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 
 
@@ -50,7 +50,7 @@ Quoting can be tricky; the rules are the same as with ssh:
 
   def __init__(self, options):
     """Initializes ShellCommand."""
-    super(ShellCommand, self).__init__(options)
+    super().__init__(options)
     # ChromiumOSDevice to connect to.
     self.device = None
     # SSH connection settings.

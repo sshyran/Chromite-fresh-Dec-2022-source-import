@@ -8,6 +8,7 @@ import collections
 import contextlib
 import errno
 import functools
+import logging
 import multiprocessing
 from multiprocessing.managers import SyncManager
 import os
@@ -17,11 +18,11 @@ import sys
 import time
 import traceback
 
-from chromite.lib import failures_lib
-from chromite.lib import results_lib
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import osutils
+from chromite.lib import results_lib
 from chromite.lib import signals
 from chromite.lib import timeout_util
 from chromite.utils import prctl
@@ -368,7 +369,7 @@ class _BackgroundTask(multiprocessing.Process):
 
           # Print error messages if anything exceptional occurred.
           if run_errors:
-            logging.PrintBuildbotStepFailure()
+            cbuildbot_alerts.PrintBuildbotStepFailure()
             traceback.print_stack()
             logging.warning('\n'.join(x.str for x in run_errors if x))
             logging.info('\n'.join(x.str for x in task_errors if x))
@@ -439,13 +440,8 @@ class _BackgroundTask(multiprocessing.Process):
       # Replace std{out,err} with unbuffered file objects.
       os.dup2(output.fileno(), sys.__stdout__.fileno())
       os.dup2(output.fileno(), sys.__stderr__.fileno())
-      # The API of these funcs changed between versions.
-      if sys.version_info.major < 3:
-        sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', 0)
-        sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', 0)
-      else:
-        sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', closefd=False)
-        sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', closefd=False)
+      sys.stdout = os.fdopen(sys.__stdout__.fileno(), 'w', closefd=False)
+      sys.stderr = os.fdopen(sys.__stderr__.fileno(), 'w', closefd=False)
 
       try:
         self._started.set()

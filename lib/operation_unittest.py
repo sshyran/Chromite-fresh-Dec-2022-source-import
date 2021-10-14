@@ -4,11 +4,11 @@
 
 """Unittest for operation"""
 
+import logging
 import multiprocessing
 import os
 import sys
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import operation
 from chromite.lib import parallel
@@ -24,11 +24,11 @@ class TestWrapperProgressBarOperation(operation.ProgressBarOperation):
 class FakeParallelEmergeOperation(operation.ParallelEmergeOperation):
   """Fake for operation.ParallelEmergeOperation."""
   def __init__(self, queue):
-    super(FakeParallelEmergeOperation, self).__init__()
+    super().__init__()
     self._queue = queue
 
   def ParseOutput(self, output=None):
-    super(FakeParallelEmergeOperation, self).ParseOutput()
+    super().ParseOutput()
     self._queue.put('advance')
 
 

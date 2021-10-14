@@ -6,9 +6,9 @@
 
 import collections
 import json
+import logging
 import re
 
-from chromite.lib import cros_logging as logging
 
 # Currently, an exception is reported to CIDB failureTabe using the exception
 # class name as the exception_type. failure_message_lib.FailureMessageManager
@@ -208,12 +208,12 @@ class CompoundFailureMessage(StageFailureMessage):
       stage_failure: An instance of StageFailure.
       kwargs: Extra message information to pass to StageFailureMessage.
     """
-    super(CompoundFailureMessage, self).__init__(stage_failure, **kwargs)
+    super().__init__(stage_failure, **kwargs)
 
     self.inner_failures = []
 
   def __str__(self):
-    msg_str = super(CompoundFailureMessage, self).__str__()
+    msg_str = super().__str__()
 
     for failure in self.inner_failures:
       msg_str += ('(Inner Stage Failure Message) %s' % str(failure))

@@ -5,23 +5,24 @@
 """Configuration options for various cbuildbot tests."""
 
 import copy
+import logging
 
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 
 
 vmtest_boards = frozenset([
     # Full VMTest support on ChromeOS is currently limited to devices derived
     # from betty & co.
     'amd64-generic', # Has kernel 4.4, used with public Chromium.
+    'amd64-generic-vm', # amd64-generic with optimization for VMs.
     'betty',         # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
     'betty-kernelnext', # Like betty but on the next kernel version.
     'betty-pi-arc',  # Like betty but P version of ARC++.
     'betty-arc-r',  # Like betty but R version of ARC++.
     'novato',        # Like betty but with GMSCore but not the Play Store
     'novato-arc64',  # 64 bit x86_64 ARC++ ABI
-    'reven',         # CloudReady VM board.
+    'reven-vmtest',  # Like betty, but based on reven.
 ])
 
 
@@ -304,7 +305,7 @@ def EnsureVmTestsOnVmTestBoards(site_config, boards_dict, _gs_build_config):
   """Make sure VMTests are only enabled on boards that support them.
 
   Args:
-    sIte_config: config_lib.SiteConfig containing builds to have their
+    site_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
     boards_dict: A dict mapping board types to board name collections.
     ge_build_config: Dictionary containing the decoded GE configuration file.
@@ -328,7 +329,6 @@ def ApplyCustomOverrides(site_config):
     site_config: config_lib.SiteConfig containing builds to have their
                  waterfall values updated.
   """
-
   overwritten_configs = {
       'guado_labstation-release': {
           'hw_tests': [],
@@ -353,11 +353,11 @@ def ApplyCustomOverrides(site_config):
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
+      'amd64-generic-vm-full': site_config.templates.tast_vm_canary_tests,
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
-      # b/189483630: Temporarily disable camera tasts for reven.
-      'reven-release': site_config.templates.tast_vm_reven_tests,
+      'reven-vmtest-release': site_config.templates.tast_vm_canary_tests,
   }
 
   for config_name, overrides in overwritten_configs.items():
@@ -458,20 +458,6 @@ def GeneralTemplates(site_config, ge_build_config):
       image_test=False,
   )
 
-  # b/189483630: Temporarily disable camera tasts for reven.
-  reven_tast_pattern = [(
-     '("group:mainline" && '
-     '!"group:camera-libcamera" && '
-     '!informational)')]
-  site_config.AddTemplate(
-     'tast_vm_reven_tests',
-     tast_vm_tests=[
-            config_lib.TastVMTestConfig(
-                'tast_vm_reven', reven_tast_pattern),
-     ],
-  )
-
-
   site_config.templates.full.apply(
       site_config.templates.default_hw_tests_override,
       image_test=True,
@@ -506,12 +492,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.no_hwtest_builder,
   )
   # END Factory
-
-  # BEGIN Firmware
-  site_config.templates.firmwarebranch.apply(
-      site_config.templates.no_vmtest_builder,
-  )
-  # END Firmware
 
   # BEGIN Loonix
   site_config.templates.loonix.apply(

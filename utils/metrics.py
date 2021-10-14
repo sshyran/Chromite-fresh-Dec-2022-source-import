@@ -11,12 +11,12 @@ module will be creating.
 import collections
 import contextlib
 import functools
+import logging
 import os
 import tempfile
 import time
 import uuid
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 
 

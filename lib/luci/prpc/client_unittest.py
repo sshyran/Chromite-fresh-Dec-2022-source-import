@@ -111,7 +111,7 @@ class PRPCClientTestCase(test_case.TestCase):
         status_code=404,
         response=b'not found',
         headers={
-            'X-Prpc-Grpc-Code': str(codes.StatusCode.NOT_FOUND[0]),
+            'x-prpc-grpc-code': str(codes.StatusCode.NOT_FOUND[0]),
         },
     )
     with self.assertRaises(prpc_client.RpcError) as cm:

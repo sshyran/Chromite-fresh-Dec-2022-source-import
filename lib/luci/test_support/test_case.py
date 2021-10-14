@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This file is heavily based off of LUCI test_support/test_case.py.
+"""This file is heavily based off of LUCI test_support/test_case.py."""
 
 import datetime
 
@@ -30,10 +30,10 @@ class TestCase(auto_stub.TestCase):
     the ones known to be required. Test cases requiring more stubs can enable
     them in their setUp() function.
     """
-    super(TestCase, self).setUp()
+    super().setUp()
 
   def tear_down(self):
-    super(TestCase, self).tearDown()
+    super().tearDown()
 
   def mock_now(self, now, seconds=0):
     return mock_now(self, now, seconds)

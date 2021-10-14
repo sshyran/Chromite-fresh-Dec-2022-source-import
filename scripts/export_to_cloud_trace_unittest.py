@@ -64,7 +64,7 @@ class ExportToCloudTraceTest(cros_test_lib.MockTempDirTestCase):
   def testSendBatches(self):
     """Test that the script waits for a larger batch before sending."""
     self.PatchObject(export_to_cloud_trace, 'MIN_BATCH_SIZE', 2)
-    error_log = self.PatchObject(export_to_cloud_trace.log, 'error')
+    error_log = self.PatchObject(export_to_cloud_trace.logging, 'error')
     self._PatchDirWatcher(spans=[
         [_SPAN, _SPAN], [_SPAN, _SPAN, _SPAN]
     ])

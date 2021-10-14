@@ -15,9 +15,11 @@ branch, but not on TOT.
 
 import base64
 import functools
+import logging
 import os
 import time
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import boto_compat
@@ -25,7 +27,6 @@ from chromite.lib import build_summary
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import metrics
 from chromite.lib import osutils
@@ -67,14 +68,14 @@ def StageDecorator(functor):
   @functools.wraps(functor)
   def wrapped_functor(*args, **kwargs):
     try:
-      logging.PrintBuildbotStepName(functor.__name__)
+      cbuildbot_alerts.PrintBuildbotStepName(functor.__name__)
       result = functor(*args, **kwargs)
     except Exception:
-      logging.PrintBuildbotStepFailure()
+      cbuildbot_alerts.PrintBuildbotStepFailure()
       raise
 
     if result:
-      logging.PrintBuildbotStepFailure()
+      cbuildbot_alerts.PrintBuildbotStepFailure()
     return result
 
   return wrapped_functor
@@ -254,7 +255,7 @@ def SanitizeCacheDir(cache_dir):
 
 
 @StageDecorator
-def CleanBuildRoot(root, repo, cache_dir, build_state):
+def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
   """Some kinds of branch transitions break builds.
 
   This method ensures that cbuildbot's buildroot is a clean checkout on the
@@ -268,6 +269,7 @@ def CleanBuildRoot(root, repo, cache_dir, build_state):
     build_state: BuildSummary object containing the current build state that
         will be saved into the cleaned root.  The distfiles_ts property will
         be updated if the distfiles cache is cleaned.
+    source_cache: Bool whether to use source cache mounts.
   """
   previous_state = GetLastBuildState(root)
   SetLastBuildState(root, build_state)
@@ -275,37 +277,41 @@ def CleanBuildRoot(root, repo, cache_dir, build_state):
   build_state.distfiles_ts = _MaybeCleanDistfiles(
       cache_dir, previous_state.distfiles_ts)
 
-  if previous_state.buildroot_layout != BUILDROOT_BUILDROOT_LAYOUT:
-    logging.PrintBuildbotStepText('Unknown layout: Wiping buildroot.')
-    metrics.Counter(METRIC_CLOBBER).increment(
-        fields=field({}, reason='layout_change'))
-    chroot_dir = os.path.join(root, constants.DEFAULT_CHROOT_DIR)
-    if os.path.exists(chroot_dir) or os.path.exists(chroot_dir + '.img'):
-      cros_sdk_lib.CleanupChrootMount(chroot_dir, delete=True)
-    osutils.RmDir(root, ignore_missing=True, sudo=True)
-    osutils.RmDir(cache_dir, ignore_missing=True, sudo=True)
-  else:
-    if previous_state.branch != repo.branch:
-      logging.PrintBuildbotStepText('Branch change: Cleaning buildroot.')
-      logging.info('Unmatched branch: %s -> %s', previous_state.branch,
-                   repo.branch)
-      metrics.Counter(METRIC_BRANCH_CLEANUP).increment(
-          fields=field({}, old_branch=previous_state.branch))
-
-      logging.info('Remove Chroot.')
-      chroot_dir = os.path.join(repo.directory, constants.DEFAULT_CHROOT_DIR)
+  if not source_cache:
+    if previous_state.buildroot_layout != BUILDROOT_BUILDROOT_LAYOUT:
+      cbuildbot_alerts.PrintBuildbotStepText(
+          'Unknown layout: Wiping buildroot.')
+      metrics.Counter(METRIC_CLOBBER).increment(
+          fields=field({}, reason='layout_change'))
+      chroot_dir = os.path.join(root, constants.DEFAULT_CHROOT_DIR)
       if os.path.exists(chroot_dir) or os.path.exists(chroot_dir + '.img'):
         cros_sdk_lib.CleanupChrootMount(chroot_dir, delete=True)
+      osutils.RmDir(root, ignore_missing=True, sudo=True)
+      osutils.RmDir(cache_dir, ignore_missing=True, sudo=True)
+    else:
+      if previous_state.branch != repo.branch:
+        cbuildbot_alerts.PrintBuildbotStepText(
+            'Branch change: Cleaning buildroot.')
+        logging.info('Unmatched branch: %s -> %s', previous_state.branch,
+                     repo.branch)
+        metrics.Counter(METRIC_BRANCH_CLEANUP).increment(
+            fields=field({}, old_branch=previous_state.branch))
 
-      logging.info('Remove Chrome checkout.')
-      osutils.RmDir(os.path.join(repo.directory, '.cache', 'distfiles'),
-                    ignore_missing=True, sudo=True)
+        logging.info('Remove Chroot.')
+        chroot_dir = os.path.join(repo.directory, constants.DEFAULT_CHROOT_DIR)
+        if os.path.exists(chroot_dir) or os.path.exists(chroot_dir + '.img'):
+          cros_sdk_lib.CleanupChrootMount(chroot_dir, delete=True)
+
+        logging.info('Remove Chrome checkout.')
+        osutils.RmDir(os.path.join(repo.directory, '.cache', 'distfiles'),
+                      ignore_missing=True, sudo=True)
 
   try:
     # If there is any failure doing the cleanup, wipe everything.
     # The previous run might have been killed in the middle leaving stale git
     # locks. Clean those up, first.
-    repo.PreLoad()
+    if not source_cache:
+      repo.PreLoad()
 
     # If the previous build didn't exit normally, run an expensive step to
     # cleanup abandoned git locks.
@@ -313,15 +319,17 @@ def CleanBuildRoot(root, repo, cache_dir, build_state):
                                      constants.BUILDER_STATUS_PASSED):
       repo.CleanStaleLocks()
 
-    repo.BuildRootGitCleanup(prune_all=True)
+    if not source_cache:
+      repo.BuildRootGitCleanup(prune_all=True)
   except Exception:
     logging.info('Checkout cleanup failed, wiping buildroot:', exc_info=True)
     metrics.Counter(METRIC_CLOBBER).increment(
         fields=field({}, reason='repo_cleanup_failure'))
     repository.ClearBuildRoot(repo.directory)
 
-  # Ensure buildroot exists. Save the state we are prepped for.
-  osutils.SafeMakedirs(repo.directory)
+  if not source_cache:
+    # Ensure buildroot exists. Save the state we are prepped for.
+    osutils.SafeMakedirs(repo.directory)
   SetLastBuildState(root, build_state)
 
 
@@ -342,11 +350,13 @@ def InitialCheckout(repo, options):
     repo: repository.RepoRepository instance.
     options: A parsed options object from a cbuildbot parser.
   """
-  logging.PrintBuildbotStepText('Branch: %s' % repo.branch)
-  logging.info('Bootstrap script starting initial sync on branch: %s',
-               repo.branch)
-  repo.PreLoad('/preload/chromeos')
-  repo.Sync(detach=True,
+  cbuildbot_alerts.PrintBuildbotStepText('Branch: %s' % repo.branch)
+  if not options.source_cache:
+    logging.info('Bootstrap script starting initial sync on branch: %s',
+                 repo.branch)
+    repo.PreLoad('/preload/chromeos')
+  repo.Sync(jobs=32,
+            detach=True,
             downgrade_repo=_ShouldDowngradeRepo(options))
 
 
@@ -420,6 +430,13 @@ def Cbuildbot(buildroot, depot_tools_path, argv):
     if arg in ('-r', '--buildroot'):
       argv[i + 1] = buildroot
 
+  # Source_cache flag is only used to indicate a transition to cache disks
+  # and doesn't need to be passed back to Cbuildbot.
+  if '--source_cache' in argv:
+    argv.remove('--source_cache')
+
+  logging.info('Cbuildbot Args: %s', argv)
+
   # This filters out command line arguments not supported by older versions
   # of cbuildbot.
   parser = cbuildbot.CreateParser()
@@ -465,12 +482,12 @@ def CleanupChroot(buildroot):
       logging.warning('Assuming the bot is going to reboot, so ignoring this '
                       'failure; see https://crbug.com/1000034')
 
-   # NB: We ignore errors at this point because this stage runs last.  If the
-   # chroot failed to unmount, we're going to reboot the system once we're done,
-   # and that will implicitly take care of cleaning things up.  If the bots stop
-   # rebooting after every run, we'll need to make this fatal all the time.
-   #
-   # TODO(crbug.com/1000034): This should be fatal all the time.
+  # NB: We ignore errors at this point because this stage runs last.  If the
+  # chroot failed to unmount, we're going to reboot the system once we're done,
+  # and that will implicitly take care of cleaning things up.  If the bots stop
+  # rebooting after every run, we'll need to make this fatal all the time.
+  #
+  # TODO(crbug.com/1000034): This should be fatal all the time.
 
 
 def ConfigureGlobalEnvironment():
@@ -505,6 +522,10 @@ def _main(options, argv):
   root = options.buildroot
   buildroot = os.path.join(root, 'repository')
   workspace = os.path.join(root, 'workspace')
+  if options.source_cache:
+    buildroot = options.buildroot
+    if options.workspace:
+      workspace = options.workspace
   depot_tools_path = os.path.join(buildroot, constants.DEPOT_TOOLS_SUBPATH)
 
   # Does the entire build pass or fail.
@@ -514,7 +535,7 @@ def _main(options, argv):
     # Preliminary set, mostly command line parsing.
     with metrics.SuccessCounter(METRIC_INVOKED):
       if options.enable_buildbot_tags:
-        logging.EnableBuildbotMarkers()
+        cbuildbot_alerts.EnableBuildbotMarkers()
       ConfigureGlobalEnvironment()
 
     # Prepare the buildroot with source for the build.
@@ -528,7 +549,8 @@ def _main(options, argv):
       # Clean up the buildroot to a safe state.
       with metrics.SecondsTimer(METRIC_CLEAN):
         build_state = GetCurrentBuildState(options, branchname)
-        CleanBuildRoot(root, repo, options.cache_dir, build_state)
+        CleanBuildRoot(root, repo, options.cache_dir, build_state,
+                       options.source_cache)
 
       # Get a checkout close enough to the branch that cbuildbot can handle it.
       if options.sync:

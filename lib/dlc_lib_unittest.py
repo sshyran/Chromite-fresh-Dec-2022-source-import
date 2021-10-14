@@ -70,6 +70,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         'pre_allocated_blocks': _PRE_ALLOCATED_BLOCKS * 2,
         'version': f'{_VERSION}_new',
         'preload': True,
+        'factory_install': False,
         'used_by': dlc_lib.USED_BY_USER,
         'days_to_purge': _DAYS_TO_PURGE,
         'mount_file_required': True,
@@ -94,6 +95,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                   pre_allocated_blocks=_PRE_ALLOCATED_BLOCKS,
                   version=_VERSION,
                   preload=False,
+                  factory_install=False,
                   used_by=dlc_lib.USED_BY_SYSTEM,
                   days_to_purge=_DAYS_TO_PURGE,
                   mount_file_required=False,
@@ -108,6 +110,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                           'name': name,
                           'description': description,
                           'preload': preload,
+                          'factory_install': factory_install,
                           'used_by': used_by,
                           'days_to_purge': days_to_purge,
                           'mount_file_required': mount_file_required,
@@ -123,6 +126,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
                      pre_allocated_blocks=_PRE_ALLOCATED_BLOCKS,
                      version=_VERSION,
                      preload=False,
+                     factory_install=False,
                      used_by=dlc_lib.USED_BY_SYSTEM,
                      days_to_purge=_DAYS_TO_PURGE,
                      mount_file_required=False,
@@ -137,6 +141,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         pre_allocated_blocks=pre_allocated_blocks,
         version=version,
         preload=preload,
+        factory_install=factory_install,
         used_by=used_by,
         days_to_purge=days_to_purge,
         mount_file_required=mount_file_required,
@@ -215,6 +220,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
         pre_allocated_blocks=_PRE_ALLOCATED_BLOCKS,
         version=_VERSION,
         preload=False,
+        factory_install=False,
         used_by=dlc_lib.USED_BY_SYSTEM,
         days_to_purge=_DAYS_TO_PURGE,
         mount_file_required=False,
@@ -255,10 +261,31 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
 
   def testCreateSquashfsImage(self):
     """Test that creating squashfs commands are run with correct parameters."""
+    self.PatchObject(
+        os.path,
+        'getsize',
+        return_value=(_BLOCK_SIZE * 2))
     copy_dir_mock = self.PatchObject(osutils, 'CopyDirContents')
 
     self.GetDlcGenerator().CreateSquashfsImage()
     self.assertCommandContains(['mksquashfs', '-4k-align', '-noappend'])
+    copy_dir_mock.assert_called_once_with(
+        partial_mock.HasString('src'),
+        partial_mock.HasString('root'),
+        symlinks=True)
+
+  def testCreateSquashfsImagePageAlignment(self):
+    """Test that creating squashfs commands are run with page alignment."""
+    self.PatchObject(
+        os.path,
+        'getsize',
+        return_value=(_BLOCK_SIZE * 1))
+    truncate_mock = self.PatchObject(os, 'truncate')
+    copy_dir_mock = self.PatchObject(osutils, 'CopyDirContents')
+
+    self.GetDlcGenerator().CreateSquashfsImage()
+    self.assertCommandContains(['mksquashfs', '-4k-align', '-noappend'])
+    truncate_mock.asset_called()
     copy_dir_mock.assert_called_once_with(
         partial_mock.HasString('src'),
         partial_mock.HasString('root'),
@@ -316,6 +343,7 @@ class DlcGeneratorTest(cros_test_lib.LoggingTestCase,
             'manifest-version': 1,
             'mount-file-required': False,
             'preload-allowed': False,
+            'factory-install': False,
             'used-by': dlc_lib.USED_BY_SYSTEM,
             'days-to-purge': _DAYS_TO_PURGE,
         })

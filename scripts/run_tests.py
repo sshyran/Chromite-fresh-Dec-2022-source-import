@@ -6,8 +6,21 @@
 
 Run the specified tests.  If none are specified, we'll scan the
 tree looking for tests to run and then only run the semi-fast ones.
+
+https://docs.pytest.org/en/latest/how-to/usage.html#specifying-tests-selecting-tests
+
+Examples:
+# Run all tests in a module.
+$ ./run_tests lib/osutils_unittest.py
+# Run a class of tests in a module.
+$ ./run_tests lib/osutils_unittest.py::TestOsutils
+# Run a single test.
+$ ./run_tests lib/osutils_unittest.py::TestOsutils::testIsSubPath
+# List all tests that'd be run.
+$ ./run_tests -- --collect-only
 """
 
+import logging
 import os
 import sys
 
@@ -17,7 +30,6 @@ from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
-from chromite.lib import cros_logging as logging
 from chromite.lib import namespaces
 
 
@@ -43,7 +55,7 @@ def main(argv):
 
   # This is a cheesy hack to make sure gsutil is populated in the cache before
   # we run tests. This is a partial workaround for crbug.com/468838.
-  gs.GSContext.GetDefaultGSUtilBin()
+  gs.GSContext.InitializeCache()
 
   if opts.quick:
     logging.info('Skipping test namespacing due to --quickstart.')

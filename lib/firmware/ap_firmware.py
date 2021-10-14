@@ -6,16 +6,22 @@
 
 import collections
 import importlib
-from typing import Optional
+import logging
+import os
+from typing import Iterable, Optional
 
+from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import workon_helper
 from chromite.lib.firmware import flash_ap
+from chromite.service import sysroot
 
 _BUILD_TARGET_CONFIG_MODULE = 'chromite.lib.firmware.ap_firmware_config.%s'
 _CONFIG_BUILD_WORKON_PACKAGES = 'BUILD_WORKON_PACKAGES'
 _CONFIG_BUILD_PACKAGES = 'BUILD_PACKAGES'
+_GENERIC_CONFIG_NAME = 'generic'
 
 # The build configs. The workon and build fields both contain tuples of
 # packages.
@@ -46,6 +52,10 @@ class InvalidConfigError(Error):
   """The config does not contain the required information for the operation."""
 
 
+class CleanError(Error):
+  """Failure in the clean command."""
+
+
 def build(build_target, fw_name=None, dry_run=False):
   """Build the AP Firmware.
 
@@ -57,62 +67,45 @@ def build(build_target, fw_name=None, dry_run=False):
   """
   logging.notice('Building AP Firmware.')
 
-  workon = workon_helper.WorkonHelper(build_target.root, build_target.name)
+  if not os.path.exists(build_target.root):
+    logging.warning('Sysroot for target %s is not available. Attempting '
+                    'to configure sysroot via default setup_board command.',
+                    build_target.name)
+    try:
+      sysroot.SetupBoard(build_target)
+    except (portage_util.MissingOverlayError, sysroot.Error):
+      cros_build_lib.Die('setup_board with default specifications failed. '
+                         "Please configure the board's sysroot separately.")
+
   config = _get_build_config(build_target)
 
-  # Workon the required packages. Also calculate the list of packages that need
-  # to be stopped to clean up after ourselves when we're done.
-  if config.workon:
-    before_workon = workon.ListAtoms()
-    logging.info('cros_workon starting packages.')
-    logging.debug('cros_workon-%s start %s', build_target.name,
-                  ' '.join(config.workon))
-
-    if dry_run:
-      # Pretend it worked: after = before U workon.
-      after_workon = set(before_workon) & set(config.workon)
-    else:
-      workon.StartWorkingOnPackages(config.workon)
-      after_workon = workon.ListAtoms()
-
-    # Stop = the set we actually started. Preserves workon started status for
-    # any in the config.workon packages that were already worked on.
-    stop_packages = list(set(after_workon) - set(before_workon))
-  else:
-    stop_packages = []
-
-  extra_env = {'FW_NAME': fw_name} if fw_name else None
-  # Run the emerge command to build the packages. Don't raise an exception here
-  # if it fails so we can cros workon stop afterwords.
-  logging.info('Building the AP firmware packages.')
-  # Print command with --debug.
-  print_cmd = logging.getLogger(__name__).getEffectiveLevel() == logging.DEBUG
-  result = cros_build_lib.run(
-      [build_target.get_command('emerge')] + list(config.build),
-      print_cmd=print_cmd,
-      check=False,
-      debug_level=logging.DEBUG,
-      dryrun=dry_run,
-      extra_env=extra_env)
-
-  # Reset the environment.
-  logging.notice('Restoring cros_workon status.')
-  if stop_packages:
-    # Stop the packages we started.
-    logging.info('Stopping workon packages previously started.')
-    logging.debug('cros_workon-%s stop %s', build_target.name,
-                  ' '.join(stop_packages))
-    if not dry_run:
-      workon.StopWorkingOnPackages(stop_packages)
-  else:
-    logging.info('No packages needed to be stopped.')
+  with workon_helper.WorkonScope(build_target, config.workon):
+    extra_env = {'FW_NAME': fw_name} if fw_name else None
+    # Run the emerge command to build the packages. Don't raise an exception
+    # here if it fails so we can cros workon stop afterwords.
+    logging.info('Building the AP firmware packages.')
+    # Print command with --debug.
+    print_cmd = logging.getLogger(__name__).getEffectiveLevel() == logging.DEBUG
+    default_build_flags = [
+        '--deep', '--update', '--newuse', '--newrepo', '--jobs', '--verbose'
+    ]
+    result = cros_build_lib.run(
+        [build_target.get_command('emerge')] + default_build_flags +
+        list(config.build),
+        print_cmd=print_cmd,
+        check=False,
+        debug_level=logging.DEBUG,
+        dryrun=dry_run,
+        extra_env=extra_env)
 
   if result.returncode:
     # Now raise the emerge failure since we're done cleaning up.
     raise BuildError('The emerge command failed. Run with --verbose or --debug '
                      'to see the emerge output for details.')
 
-  logging.notice('Done! AP firmware successfully built.')
+  logging.notice('AP firmware image for device %s was built successfully '
+                 'and is available at %s.',
+                 build_target.name, build_target.full_path())
 
 
 def deploy(build_target,
@@ -122,7 +115,8 @@ def deploy(build_target,
            fast=False,
            verbose=False,
            dryrun=False,
-           flash_contents: Optional[str] = None):
+           flash_contents: Optional[str] = None,
+           passthrough_args: Iterable[str] = tuple()):
   """Deploy a firmware image to a device.
 
   Args:
@@ -135,6 +129,7 @@ def deploy(build_target,
     dryrun (bool): Whether to actually execute the deployment or just print the
       operations that would have been performed.
     flash_contents: Path to the file that contains the existing contents.
+    passthrough_args: List of additional options passed to flashrom or futility.
   """
   try:
     flash_ap.deploy(
@@ -145,7 +140,8 @@ def deploy(build_target,
         fast=fast,
         verbose=verbose,
         dryrun=dryrun,
-        flash_contents=flash_contents)
+        flash_contents=flash_contents,
+        passthrough_args=passthrough_args)
   except flash_ap.Error as e:
     # Reraise as a DeployError for future compatibility.
     raise DeployError(str(e))
@@ -268,10 +264,7 @@ def _get_build_config(build_target):
   build_pkgs = getattr(module, _CONFIG_BUILD_PACKAGES, None)
 
   if not build_pkgs:
-    raise InvalidConfigError(
-        'No packages specified to build in the configs for %s. Check the '
-        'configs in chromite/lib/firmware/ap_firmware_config/%s.py.' %
-        (build_target.name, build_target.name))
+    build_pkgs = ('chromeos-bootimage',)
 
   return BuildConfig(workon=workon_pkgs, build=build_pkgs)
 
@@ -304,11 +297,13 @@ def _get_deploy_config(build_target):
       ssh_force_command=ssh_force)
 
 
-def get_config_module(build_target_name):
+def get_config_module(build_target_name, disable_fallback=False):
   """Return configuration module for a given build target.
 
   Args:
     build_target_name: Name of the build target, e.g. 'dedede'.
+    disable_fallback: Disables falling back to generic config if the config for
+                      build_target_name is not found.
 
   Returns:
     module: Python configuration module for a given build target.
@@ -317,5 +312,80 @@ def get_config_module(build_target_name):
   try:
     return importlib.import_module(name)
   except ImportError:
-    raise BuildTargetNotConfiguredError(
-        'Could not find a config module for %s.' % build_target_name)
+    name_path = name.replace('.', '/') + '.py'
+    if disable_fallback:
+      raise BuildTargetNotConfiguredError(
+          f'Could not find a config module for {build_target_name}. '
+          f'Fill in the config in {name_path}.')
+  # Failling back to generic config.
+  logging.notice(
+      'Did not find a dedicated config module for %s at %s. '
+      'Using default config.', build_target_name, name_path)
+  name = _BUILD_TARGET_CONFIG_MODULE % _GENERIC_CONFIG_NAME
+  try:
+    return importlib.import_module(name)
+  except ImportError:
+    name_path = name.replace('.', '/') + '.py'
+    if disable_fallback:
+      raise BuildTargetNotConfiguredError(
+          f'Could not find a generic config module at {name_path}. '
+          'Is your checkout broken?')
+
+
+def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
+  """Cleans packages and dependencies related to a specified target.
+
+  After running the command, the user's environment should be able to
+  successfully build packages for a target board.
+
+  Args:
+    build_target: Target board to be cleaned
+    dry_run: Indicates that packages and system files should not be modified
+  """
+  pkgs = []
+  try:
+    qfile_pkgs = cros_build_lib.run([build_target.get_command('qfile'),
+                                     '/firmware'], capture_output=True,
+                                    check=False, dryrun=dry_run).stdout
+    pkgs = [l.split()[0] for l in qfile_pkgs.decode().splitlines()]
+  except cros_build_lib.RunCommandError as e:
+    raise CleanError('qfile for target board %s is not present; board may '
+                     'not have been set up.' % build_target.name)
+
+  try:
+    config = _get_build_config(build_target)
+    pkgs = set(pkgs).union(config.build)
+  except InvalidConfigError:
+    pass
+  pkgs = sorted(set(pkgs).union(['coreboot-private-files',
+                                 'chromeos-config-bsp']))
+
+  err = []
+  try:
+    cros_build_lib.run([build_target.get_command('emerge'), '--rage-clean',
+                        *pkgs], capture_output=True, dryrun=dry_run)
+  except cros_build_lib.RunCommandError as e:
+    err.append(e)
+
+  try:
+    if dry_run:
+      logging.notice('rm -rf -- /build/%s/firmware/*', build_target.name)
+    else:
+      osutils.RmDir('/build/%s/firmware/*' % build_target.name, sudo=True,
+                    ignore_missing=True)
+  except (EnvironmentError, cros_build_lib.RunCommandError) as e:
+    err.append(e)
+
+  if err:
+    logging.warning('All processes for %s have completed, but some were '
+                    'completed with errors.', build_target.name)
+    for e in err:
+      logging.error(e)
+    raise CleanError("`cros ap clean -b %s' did not complete successfully."
+                     % build_target.name)
+
+  logging.notice('AP firmware image for device %s was successfully cleaned.'
+                 '\nThe following packages were unmerged: %s'
+                 '\nThe following build target directory was removed: '
+                 '/build/%s/firmware', build_target.name, ' '.join(pkgs),
+                 build_target.name)

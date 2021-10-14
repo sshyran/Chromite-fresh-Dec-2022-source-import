@@ -13,6 +13,7 @@ from __future__ import division
 import collections
 import contextlib
 import fcntl
+import logging
 import multiprocessing
 import os
 import pty
@@ -22,7 +23,6 @@ import struct
 import sys
 import termios
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.terminal import Color
@@ -231,7 +231,7 @@ class ParallelEmergeOperation(ProgressBarOperation):
   """ProgressBarOperation specific for scripts/parallel_emerge.py."""
 
   def __init__(self):
-    super(ParallelEmergeOperation, self).__init__()
+    super().__init__()
     self._total = None
     self._completed = 0
     self._printed_no_packages = False

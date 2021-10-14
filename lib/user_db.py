@@ -5,9 +5,9 @@
 """Logic to read the set of users and groups installed on a system."""
 
 import collections
+import logging
 import os
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import locking
 from chromite.lib import osutils
 

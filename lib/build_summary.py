@@ -5,10 +5,10 @@
 """Module to manage local build state."""
 
 import json
+import logging
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 class BuildSummary(object):

@@ -5,16 +5,15 @@
 """An implementation of the ReplicationConfig proto interface."""
 
 import json
+import logging
 import os
 import shutil
 
 from chromite.api.gen.config import replication_config_pb2
-
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-from chromite.lib import pformat
 from chromite.utils import field_mask_util
+from chromite.utils import pformat
 
 
 def _ValidateFileReplicationRule(rule):

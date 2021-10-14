@@ -13,14 +13,27 @@ from chromite.api import controller
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
+from chromite.api.gen.chromiumos.build.api import system_image_pb2
+from chromite.api.gen.chromiumos.build.api import portage_pb2
+from chromite.api.gen.chromiumos.config.payload import flat_config_pb2
+from chromite.api.gen.chromiumos.config.api import design_pb2
+from chromite.api.gen.chromiumos.config.api import design_id_pb2
+from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
+from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
+from chromite.api.gen.chromiumos.test.api import test_suite_pb2
+from chromite.api.gen.chromiumos.test.plan import source_test_plan_pb2
+from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
+from chromite.third_party.google.protobuf import json_format
 from chromite.utils import key_value_store
 
 
@@ -120,7 +133,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
         chroot={'path': chroot_path, 'cache_dir': cache_dir},
         flags={'empty_sysroot': empty_sysroot},
         packages=formatted_packages,
-        package_blacklist=formatted_blocklist,
+        package_blocklist=formatted_blocklist,
     )
 
   def _GetOutput(self):
@@ -209,7 +222,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     expected = [('cat', 'pkg'), ('foo', 'bar')]
 
     result = test_service.BuildTargetUnitTestResult(1, None)
-    result.failed_cpvs = [package_info.SplitCPV(p, strict=False) for p in pkgs]
+    result.failed_pkgs = [package_info.parse(p) for p in pkgs]
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
     input_msg = self._GetInput(board='board', result_path=self.tempdir)
@@ -266,33 +279,119 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                      os.path.join(input_msg.result_path, 'unit_tests.tar'))
 
 
-class BuildTestServiceContainers(cros_test_lib.MockTestCase,
-                           api_config.ApiConfigMixin):
+class DockerConstraintsTest(cros_test_lib.MockTestCase):
+  """Tests for Docker argument constraints."""
+
+  def assertValid(self, output):
+    return output is None
+
+  def assertInvalid(self, output):
+    return not self.assertValid(output)
+
+  def testValidDockerTag(self):
+    """Check logic for validating docker tag format."""
+    # pylint: disable=protected-access
+
+    invalid_tags = [
+        '.invalid-tag',
+        '-invalid-tag',
+        'invalid-tag;',
+        'invalid'*100,
+    ]
+
+    for tag in invalid_tags:
+      self.assertInvalid(test_controller._ValidDockerTag(tag))
+
+    valid_tags = [
+        'valid-tag',
+        'valid-tag-',
+        'valid.tag.',
+    ]
+
+    for tag in valid_tags:
+      self.assertValid(test_controller._ValidDockerTag(tag))
+
+
+  def testValidDockerLabelKey(self):
+    """Check logic for validating docker label key format."""
+    # pylint: disable=protected-access
+
+    invalid_keys = [
+        'Invalid-keY',
+        'Invalid-key',
+        'invalid-keY',
+        'iNVALID-KEy',
+        'invalid_key',
+        'invalid-key;',
+    ]
+
+    for key in invalid_keys:
+      self.assertInvalid(test_controller._ValidDockerLabelKey(key))
+
+    valid_keys = [
+        'chromeos.valid-key',
+        'chromeos.valid-key-2',
+    ]
+
+    for key in valid_keys:
+      self.assertValid(test_controller._ValidDockerLabelKey(key))
+
+
+class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
+                                 api_config.ApiConfigMixin):
   """Tests for the BuildTestServiceContainers function."""
 
   def setUp(self):
     self.request = test_pb2.BuildTestServiceContainersRequest(
         chroot={'path': '/path/to/chroot'},
         build_target={'name': 'build_target'},
-        version = 'R93-14033.0.0',
+        version='R93-14033.0.0',
     )
-
 
   def testSuccess(self):
     """Check passing case with mocked cros_build_lib.run."""
-    patch = self.PatchObject(
-        cros_build_lib, 'run',
-        return_value=cros_build_lib.CommandResult(returncode=0))
+
+    def ContainerMetadata():
+      """Return mocked ContainerImageInfo proto"""
+      metadata = container_metadata_pb2.ContainerImageInfo()
+      metadata.repository.hostname = 'gcr.io'
+      metadata.repository.project = 'chromeos-bot'
+      metadata.name = 'random-container-name'
+      metadata.digest = (
+          '09b730f8b6a862f9c2705cb3acf3554563325f5fca5c784bf5c98beb2e56f6db')
+      metadata.tags[:] = [
+          'staging-cq-amd64-generic.R96-1.2.3',
+          '8834106026340379089',
+      ]
+      return metadata
+
+    def WriteContainerMetadata(path):
+      """Write json formatted metadata to the given file."""
+      osutils.WriteFile(
+          path,
+          json_format.MessageToJson(ContainerMetadata()),
+      )
+
+    # Write out mocked container metadata to a temporary file.
+    output_path = os.path.join(self.tempdir, 'metadata.jsonpb')
+    self.rc.SetDefaultCmdResult(
+        returncode=0,
+        side_effect=lambda *_, **__: WriteContainerMetadata(output_path)
+    )
+
+    # Patch TempDir so that we always use this test's directory.
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
 
     response = test_pb2.BuildTestServiceContainersResponse()
     test_controller.BuildTestServiceContainers(
         self.request,
         response,
         self.api_config)
-    patch.assert_called()
+
+    self.assertTrue(self.rc.called)
     for result in response.results:
       self.assertEqual(result.WhichOneof('result'), 'success')
-
+      self.assertEqual(result.success.image_info, ContainerMetadata())
 
   def testFailure(self):
     """Check failure case with mocked cros_build_lib.run."""
@@ -419,7 +518,10 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTestCase,
   def _Output():
     return test_pb2.SimpleChromeWorkflowTestResponse()
 
-  def _Input(self, sysroot_path=None, build_target=None, chrome_root=None,
+  def _Input(self,
+             sysroot_path=None,
+             build_target=None,
+             chrome_root=None,
              goma_config=None):
     proto = test_pb2.SimpleChromeWorkflowTestRequest()
     if sysroot_path:
@@ -687,3 +789,194 @@ class MoblabVmTestTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.MoblabVmTest(request, response, self.api_config)
+
+
+class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
+  """Test GetArtifacts."""
+
+  CODE_COVERAGE_LLVM_ARTIFACT_TYPE = (
+      common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
+  )
+  UNIT_TEST_ARTIFACT_TYPE = (
+      common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
+  )
+
+  def setUp(self):
+    """Set up the class for tests."""
+    chroot_dir = os.path.join(self.tempdir, 'chroot')
+    osutils.SafeMakedirs(chroot_dir)
+    osutils.SafeMakedirs(os.path.join(chroot_dir, 'tmp'))
+    self.chroot = chroot_lib.Chroot(chroot_dir)
+
+    sysroot_path = os.path.join(chroot_dir, 'build', 'board')
+    osutils.SafeMakedirs(sysroot_path)
+    self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+
+    self.build_target = build_target_lib.BuildTarget('board')
+
+  def testReturnsEmptyListWhenNoOutputArtifactsProvided(self):
+    """Test empty list is returned when there are no output_artifacts."""
+    result = test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[]),
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
+
+    self.assertEqual(len(result), 0)
+
+  def testShouldCallBundleCodeCoverageLlvmJsonForEachValidArtifact(self):
+    """Test BundleCodeCoverageLlvmJson is called on each valid artifact."""
+    BundleCodeCoverageLlvmJson_mock = (
+        self.PatchObject(
+            test_service,
+            'BundleCodeCoverageLlvmJson',
+            return_value='test'))
+
+    test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[
+            # Valid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
+                ]
+            ),
+
+            # Invalid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    common_pb2.ArtifactsByService.Test.ArtifactType.UNIT_TESTS
+                ]
+            ),
+        ]),
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
+
+    BundleCodeCoverageLlvmJson_mock.assert_called_once()
+
+  def testShouldReturnValidResult(self):
+    """Test result contains paths and code_coverage_llvm_json type."""
+    self.PatchObject(test_service, 'BundleCodeCoverageLlvmJson',
+                     return_value='test')
+    self.PatchObject(test_service, 'BuildTargetUnitTestTarball',
+                     return_value='unit_tests.tar')
+
+    result = test_controller.GetArtifacts(
+        common_pb2.ArtifactsByService.Test(output_artifacts=[
+            # Valid
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.UNIT_TEST_ARTIFACT_TYPE
+                ]
+            ),
+            common_pb2.ArtifactsByService.Test.ArtifactInfo(
+                artifact_types=[
+                    self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE
+                ]
+            ),
+        ]),
+        self.chroot, self.sysroot, self.build_target, self.tempdir)
+
+    self.assertEqual(result[0]['paths'], ['unit_tests.tar'])
+    self.assertEqual(result[0]['type'], self.UNIT_TEST_ARTIFACT_TYPE)
+    self.assertEqual(result[1]['paths'], ['test'])
+    self.assertEqual(result[1]['type'], self.CODE_COVERAGE_LLVM_ARTIFACT_TYPE)
+
+
+class GetCoverageRulesTest(cros_test_lib.RunCommandTempDirTestCase,
+                           api_config.ApiConfigMixin):
+  """Tests for GetCoverageRules."""
+
+  def _Input(self):
+    """Returns a sample GetCoverageRulesRequest for testing."""
+    build_metadata_list_path = os.path.join(self.tempdir,
+                                            'build_metadata_list.jsonproto')
+    build_metadata_list = system_image_pb2.SystemImage.BuildMetadataList(
+        values=[
+            system_image_pb2.SystemImage.BuildMetadata(
+                build_target=system_image_pb2.SystemImage.BuildTarget(
+                    portage_build_target=portage_pb2.Portage.BuildTarget(
+                        overlay_name='overlayA')),
+                package_summary=system_image_pb2.SystemImage.BuildMetadata
+                .PackageSummary(
+                    kernel=system_image_pb2.SystemImage.BuildMetadata.Kernel(
+                        version='4.4')))
+        ])
+    osutils.WriteFile(build_metadata_list_path,
+                      json_format.MessageToJson(build_metadata_list))
+
+    dut_attribute_list_path = os.path.join(self.tempdir,
+                                           'dut_attribute_list.jsonproto')
+    dut_attribute_list = dut_attribute_pb2.DutAttributeList(dut_attributes=[
+        dut_attribute_pb2.DutAttribute(
+            id=dut_attribute_pb2.DutAttribute.Id(value='system_build_target'))
+    ])
+    osutils.WriteFile(dut_attribute_list_path,
+                      json_format.MessageToJson(dut_attribute_list))
+
+    flat_config_list_path = os.path.join(self.tempdir,
+                                         'flat_config_list.jsonproto')
+    flat_config_list = flat_config_pb2.FlatConfigList(values=[
+        flat_config_pb2.FlatConfig(
+            hw_design=design_pb2.Design(
+                id=design_id_pb2.DesignId(value='design1')
+            )
+        )
+    ])
+    osutils.WriteFile(flat_config_list_path,
+                      json_format.MessageToJson(flat_config_list))
+
+    return test_pb2.GetCoverageRulesRequest(
+        source_test_plans=[
+            source_test_plan_pb2.SourceTestPlan(
+                requirements=source_test_plan_pb2.SourceTestPlan.Requirements(
+                    kernel_versions=source_test_plan_pb2.SourceTestPlan
+                    .Requirements.KernelVersions()),
+                test_tags=['kernel']),
+        ],
+        build_metadata_list=common_pb2.Path(
+            path=build_metadata_list_path, location=common_pb2.Path.OUTSIDE),
+        dut_attribute_list=common_pb2.Path(
+            path=dut_attribute_list_path, location=common_pb2.Path.OUTSIDE),
+        flat_config_list=common_pb2.Path(
+            path=flat_config_list_path, location=common_pb2.Path.OUTSIDE),
+    )
+
+  @staticmethod
+  def _Output():
+    """Returns a sample GetCoverageRulesResponse for testing."""
+    return test_pb2.GetCoverageRulesResponse(coverage_rules=[
+        coverage_rule_pb2.CoverageRule(
+            name='kernel:4.4',
+            test_suites=[
+                test_suite_pb2.TestSuite(
+                    test_case_tag_criteria=test_suite_pb2.TestSuite
+                    .TestCaseTagCriteria(tags=['kernel']))
+            ],
+            dut_criteria=[
+                dut_attribute_pb2.DutCriterion(
+                    attribute_id=dut_attribute_pb2.DutAttribute.Id(
+                        value='system_build_target'),
+                    values=['overlayA'],
+                )
+            ])
+    ])
+
+  @staticmethod
+  def _write_coverage_rules(path, coverage_rules):
+    """Write a list of CoverageRules in the same format as testplan."""
+    osutils.WriteFile(
+        path, '\n'.join(
+            json_format.MessageToJson(rule).replace('\n', '')
+            for rule in coverage_rules))
+
+  def testWritesInputsAndReturnsCoverageRules(self):
+    """Test inputs are written, and output of testplan is parsed."""
+    output_proto = test_pb2.GetCoverageRulesResponse()
+
+    self.rc.SetDefaultCmdResult(
+        side_effect=lambda _: self._write_coverage_rules(
+            os.path.join(self.tempdir, 'out.jsonpb'),
+            self._Output().coverage_rules))
+    self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
+
+    test_controller.GetCoverageRules(self._Input(), output_proto,
+                                     self.api_config)
+
+    self.assertEqual(output_proto, self._Output())

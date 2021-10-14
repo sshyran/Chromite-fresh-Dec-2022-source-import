@@ -4,12 +4,12 @@
 
 """Provides utility for performing Android uprev."""
 
+import logging
 import os
 import re
 import time
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 
@@ -35,13 +35,6 @@ ARTIFACTS_TO_COPY = {
         'sdk_cheets_x86-userdebug': r'\.zip$',
         'sdk_cheets_x86_64-userdebug': r'\.zip$',
     },
-    constants.ANDROID_VMMST_BUILD_BRANCH: {
-        # For XkbToKcmConverter, see the comment in pi-arc targets.
-        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
-        # installed on the board, but not into the VM.
-        'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
-                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
-    },
     constants.ANDROID_VMRVC_BUILD_BRANCH: {
         # For XkbToKcmConverter, see the comment in pi-arc targets.
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
@@ -62,6 +55,13 @@ ARTIFACTS_TO_COPY = {
         # installed on the board, but not into the VM.
         'bertha_arm64-userdebug': (r'(\.zip|/XkbToKcmConverter'
                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
+        'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
+                                    r'|/org.chromium.arc.cts.helpers.apk)$'),
+    },
+    constants.ANDROID_VMT_BUILD_BRANCH: {
+        # For XkbToKcmConverter, see the comment in pi-arc targets.
+        # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
+        # installed on the board, but not into the VM.
         'bertha_x86_64-userdebug': (r'(\.zip|/XkbToKcmConverter'
                                     r'|/org.chromium.arc.cts.helpers.apk)$'),
     },
@@ -92,7 +92,7 @@ def GetAndroidBranchForPackage(android_package):
       constants.ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
       constants.ANDROID_VMRVC_PACKAGE: constants.ANDROID_VMRVC_BUILD_BRANCH,
       constants.ANDROID_VMSC_PACKAGE: constants.ANDROID_VMSC_BUILD_BRANCH,
-      constants.ANDROID_VMMST_PACKAGE: constants.ANDROID_VMMST_BUILD_BRANCH,
+      constants.ANDROID_VMT_PACKAGE: constants.ANDROID_VMT_BUILD_BRANCH,
   }
   try:
     return mapping[android_package]

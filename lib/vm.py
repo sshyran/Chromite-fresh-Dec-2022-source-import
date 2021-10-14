@@ -8,6 +8,7 @@ import distutils.version  # pylint: disable=import-error,no-name-in-module
 import errno
 import fcntl
 import glob
+import logging
 import multiprocessing
 import os
 import re
@@ -18,7 +19,6 @@ import time
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import device
 from chromite.lib import image_lib
 from chromite.lib import osutils
@@ -86,8 +86,7 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
   if not exists:
     # No existing VM image that we can reuse. Create a new VM image.
     logging.info('Creating %s', dest_path)
-    cmd = [os.path.join(constants.CROSUTILS_DIR, 'image_to_vm.sh'),
-           '--test_image']
+    cmd = ['./image_to_vm.sh', '--test_image']
 
     if image:
       cmd.append('--from=%s' % path_util.ToChrootPath(image_dir))
@@ -114,7 +113,8 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
 
     msg = 'Failed to create the VM image'
     try:
-      cros_build_lib.run(cmd, enter_chroot=True, cwd=constants.SOURCE_ROOT)
+      # When enter_chroot is true the cwd needs to be src/scripts.
+      cros_build_lib.run(cmd, enter_chroot=True, cwd=constants.CROSUTILS_DIR)
     except cros_build_lib.RunCommandError as e:
       logging.error('%s: %s', msg, e)
       if tempdir:
@@ -155,7 +155,7 @@ class VM(device.Device):
     Args:
       opts: command line options.
     """
-    super(VM, self).__init__(opts)
+    super().__init__(opts)
 
     self.qemu_path = opts.qemu_path
     self.qemu_img_path = opts.qemu_img_path
@@ -723,7 +723,7 @@ class VM(device.Device):
     if not os.path.exists(self.vm_dir):
       self.Start()
 
-    super(VM, self).WaitForBoot(sleep=sleep, max_retry=max_retry)
+    super().WaitForBoot(sleep=sleep, max_retry=max_retry)
 
     # XXX: this seems to be chromeos-secific, WaitForProcs waits for chrome
     # Chrome can take a while to start with software emulation.

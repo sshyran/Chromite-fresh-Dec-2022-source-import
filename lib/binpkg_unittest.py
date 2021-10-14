@@ -14,7 +14,6 @@ from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 
-
 PACKAGES_CONTENT = """USE: test
 
 CPV: chromeos-base/shill-0.0.1-r1
@@ -22,6 +21,7 @@ CPV: chromeos-base/shill-0.0.1-r1
 CPV: chromeos-base/test-0.0.1-r1
 DEBUG_SYMBOLS: yes
 """
+
 
 class FetchTarballsTest(cros_test_lib.MockTempDirTestCase):
   """Tests for GSContext that go over the network."""
@@ -53,11 +53,11 @@ class DebugSymbolsTest(cros_test_lib.TempDirTestCase):
 
   def testDebugSymbolsDetected(self):
     """When generating the Packages file, DEBUG_SYMBOLS is updated."""
-    osutils.WriteFile(os.path.join(self.tempdir,
-                                   'chromeos-base/shill-0.0.1-r1.debug.tbz2'),
-                      'hello', makedirs=True)
-    osutils.WriteFile(os.path.join(self.tempdir, 'Packages'),
-                      PACKAGES_CONTENT)
+    osutils.WriteFile(
+        os.path.join(self.tempdir, 'chromeos-base/shill-0.0.1-r1.debug.tbz2'),
+        'hello',
+        makedirs=True)
+    osutils.WriteFile(os.path.join(self.tempdir, 'Packages'), PACKAGES_CONTENT)
 
     index = binpkg.GrabLocalPackageIndex(self.tempdir)
     self.assertEqual(index.packages[0]['CPV'], 'chromeos-base/shill-0.0.1-r1')
@@ -77,10 +77,14 @@ class PackageIndexTest(cros_test_lib.TempDirTestCase):
     pkg_index = binpkg.PackageIndex()
     pkg_index.header['A'] = 'B'
     pkg_index.packages = [
-        {'CPV': 'foo/bar',
-         'KEY': 'value'},
-        {'CPV': 'cat/pkg',
-         'KEY': 'also_value'},
+        {
+            'CPV': 'foo/bar',
+            'KEY': 'value',
+        },
+        {
+            'CPV': 'cat/pkg',
+            'KEY': 'also_value',
+        },
     ]
 
     # Write the package index files using each writing method.
@@ -105,13 +109,15 @@ class PackageIndexTest(cros_test_lib.TempDirTestCase):
     self.assertDictEqual(pkg_index.header, read_index.header)
     self.assertCountEqual(pkg_index.packages, read_index.packages)
 
+
 class PackageIndexInfoTest(cros_test_lib.TempDirTestCase):
   """Package index info tests."""
 
   def _make_instance(self, sha, number, board, profile_name, location):
     """Return a binpkg.PackageIndexInfo instance."""
     return binpkg.PackageIndexInfo(
-        snapshot_sha=sha, snapshot_number=number,
+        snapshot_sha=sha,
+        snapshot_number=number,
         build_target=build_target_lib.BuildTarget(
             name=board) if board else None,
         profile=sysroot_lib.Profile(

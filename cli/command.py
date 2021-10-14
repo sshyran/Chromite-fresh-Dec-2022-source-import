@@ -14,12 +14,13 @@ ListCommands() function.
 """
 
 import importlib
+import logging
 import os
+import sys
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 
 
 # Paths for finding and importing subcommand modules.
@@ -166,3 +167,12 @@ class CliCommand(object):
   def Run(self):
     """The command to run."""
     raise NotImplementedError()
+
+  def TranslateToChrootArgv(self):
+    """Hook to get the argv for reexecution inside the chroot.
+
+    By default, return the same args used to execute it in the first place.
+    Hook allows commands to translate specific arguments, i.e. change paths to
+    chroot paths.
+    """
+    return sys.argv[:]

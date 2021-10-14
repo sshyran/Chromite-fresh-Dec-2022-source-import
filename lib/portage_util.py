@@ -9,6 +9,7 @@ import errno
 import glob
 import itertools
 import json
+import logging
 import multiprocessing
 import os
 import re
@@ -17,9 +18,8 @@ from typing import Dict, List, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -80,12 +80,20 @@ class EbuildVersionError(Error):
   """Error for when an invalid version is generated for an ebuild."""
 
 
+class InvalidUprevSourceError(Error):
+  """Error for when an uprev source is invalid."""
+
+
 class MissingOverlayError(Error):
   """This exception indicates that a needed overlay is missing."""
 
 
-class InvalidUprevSourceError(Error):
-  """Error for when an uprev source is invalid."""
+class NoVisiblePackageError(Error):
+  """Error when there is no package matching an atom."""
+
+
+class SourceDirectoryDoesNotExistError(Error, FileNotFoundError):
+  """Error when at least one of an ebuild's sources does not exist."""
 
 
 def GetOverlayRoot(path):
@@ -324,7 +332,7 @@ class EBuildVersionFormatError(Error):
     self.filename = filename
     message = ('Ebuild file name %s '
                'does not match expected format.' % filename)
-    super(EBuildVersionFormatError, self).__init__(message)
+    super().__init__(message)
 
 
 class EbuildFormatIncorrectError(Error):
@@ -332,7 +340,7 @@ class EbuildFormatIncorrectError(Error):
 
   def __init__(self, filename, message):
     message = 'Ebuild %s has invalid format: %s ' % (filename, message)
-    super(EbuildFormatIncorrectError, self).__init__(message)
+    super().__init__(message)
 
 
 # Container for Classify return values.
@@ -862,10 +870,6 @@ class EBuild(object):
         if self.subdir_support and subdir:
           subdir_path = os.path.join(subdir_path, subdir)
 
-        if not os.path.isdir(subdir_path):
-          raise Error('Source repository %s '
-                      'for project %s does not exist.' % (subdir_path,
-                                                          self.pkgname))
         # Verify that we're grabbing the commit id from the right project name.
         real_project = manifest.FindCheckoutFromPath(subdir_path)['name']
         if project != real_project:
@@ -900,6 +904,10 @@ class EBuild(object):
     Raises:
       raise Error if git fails to return the HEAD commit id.
     """
+    if not os.path.exists(srcdir):
+      raise SourceDirectoryDoesNotExistError(
+          'Source repository %s for project %s does not exist.' %
+          (srcdir, self.pkgname))
     output = self._RunGit(srcdir, ['rev-parse', '%s^{commit}' % ref])
     if not output:
       raise Error('Cannot determine %s commit for %s' % (ref, srcdir))
@@ -1825,8 +1833,10 @@ def _EqueryList(
       check=False, encoding='utf-8')
 
 
-def FindPackageNameMatches(pkg_str, board=None,
-                           buildroot=constants.SOURCE_ROOT):
+def FindPackageNameMatches(
+    pkg_str: str,
+    board: Optional[str] = None,
+    buildroot: str = constants.SOURCE_ROOT) -> List[package_info.PackageInfo]:
   """Finds a list of installed packages matching |pkg_str|.
 
   Args:
@@ -1835,13 +1845,13 @@ def FindPackageNameMatches(pkg_str, board=None,
     buildroot: Source root to find overlays.
 
   Returns:
-    A list of matched CPV objects.
+    An iterable of matched PackageInfo objects.
   """
   result = _EqueryList(pkg_str, board, buildroot)
 
   matches = []
   if result.returncode == 0:
-    matches = [package_info.SplitCPV(x) for x in result.output.splitlines()]
+    matches = [package_info.parse(x) for x in result.output.splitlines()]
 
   return matches
 
@@ -1922,7 +1932,7 @@ def FindEbuildsForPackages(packages_list, sysroot, include_masked=False,
   mismatches = []
   ret = dict(zip(packages_list, ebuilds_results))
   for full_package_name, ebuild_path in ret.items():
-    cpv = package_info.SplitCPV(full_package_name, strict=False)
+    cpv = package_info.parse(full_package_name)
     path_category, path_package_name, _ = SplitEbuildPath(ebuild_path)
     if not ((cpv.category is None or path_category == cpv.category) and
             cpv.package.startswith(path_package_name)):
@@ -2284,7 +2294,7 @@ def ParseDieHookStatusFile(metrics_dir):
     failed_pkgs = []
     for line in failed_pkgs_file:
       cpv, _phase = line.strip().split()
-      failed_pkgs.append(package_info.SplitCPV(cpv, strict=False))
+      failed_pkgs.append(package_info.parse(cpv))
     return failed_pkgs
 
 
@@ -2363,8 +2373,12 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
   return cros_build_lib.run([_GetPortageq(board, sysroot)] + command, **kwargs)
 
 
-def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
-                        cwd=None):
+def PortageqBestVisible(
+    atom: str,
+    board: Optional[str] = None,
+    sysroot: Optional[str] = None,
+    pkg_type: str = 'ebuild',
+    cwd: str = None) -> package_info.PackageInfo:
   """Get the best visible ebuild CPV for the given atom.
 
   Args:
@@ -2375,13 +2389,22 @@ def PortageqBestVisible(atom, board=None, sysroot=None, pkg_type='ebuild',
     cwd: Path to use for the working directory for run.
 
   Returns:
-    A package_info.CPV object.
+    The parsed package information, which may be empty.
+
+  Raises:
+    NoVisiblePackageError when no version of the package can be found.
   """
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   cmd = ['best_visible', sysroot, pkg_type, atom]
-  result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
-  return package_info.SplitCPV(result.output.strip())
+  try:
+    result = _Portageq(cmd, board=board, sysroot=sysroot, cwd=cwd)
+  except cros_build_lib.RunCommandError as e:
+    logging.error(e)
+    raise NoVisiblePackageError(
+        f'No best visible package for "{atom}" could be found.') from e
+
+  return package_info.parse(result.output.strip())
 
 
 def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
@@ -2491,12 +2514,12 @@ def PortageqMatch(atom, board=None, sysroot=None):
     sysroot: The sysroot to query.
 
   Returns:
-    package_info.CPV|None
+    package_info.PackageInfo|None
   """
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
-  return package_info.SplitCPV(result.output.strip()) if result.output else None
+  return package_info.parse(result.output.strip()) if result.output else None
 
 
 class PackageNotFoundError(Error):

@@ -9,6 +9,7 @@ import datetime
 import errno
 import fnmatch
 import hashlib
+import logging
 import os
 import re
 import string
@@ -17,8 +18,8 @@ from xml import sax
 
 from chromite.lib import config_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
+from chromite.utils import file_util
 
 
 class GitException(Exception):
@@ -349,7 +350,7 @@ class Manifest(object):
     # opened file as the parameter to parser.parse, whereas Python 3
     # seems to expect a URL (as a string) or opened file. Make it
     # compatible with both by opening files first.
-    with cros_build_lib.Open(source) as f:
+    with file_util.Open(source) as f:
       parser.parse(f)
 
     if finalize:

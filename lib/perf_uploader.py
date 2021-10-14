@@ -20,6 +20,7 @@ from __future__ import division
 import collections
 import http.client
 import json
+import logging
 import math
 import os
 import re
@@ -28,7 +29,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import retry_util
 
@@ -59,11 +59,11 @@ class PerfUploadingError(Exception):
   """
 
   def __init__(self, value, orig_exc=None):
-    super(PerfUploadingError, self).__init__(value)
+    super().__init__(value)
     self.orig_exc = orig_exc
 
   def __str__(self):
-    r = super(PerfUploadingError, self).__str__()
+    r = super().__str__()
     if self.orig_exc:
       r += '\ncaused by: %s' % str(self.orig_exc)
     return r

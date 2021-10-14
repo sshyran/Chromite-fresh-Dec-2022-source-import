@@ -117,40 +117,6 @@ class ParseBuildTargetsTest(cros_test_lib.TestCase):
       controller_util.ParseBuildTargets(message.env.use_flags)
 
 
-class CPVToPackageInfoTest(cros_test_lib.TestCase):
-  """CPVToPackageInfo tests."""
-
-  def testAllFields(self):
-    """Test handling when all fields present."""
-    pi = common_pb2.PackageInfo()
-    cpv = package_info.SplitCPV('cat/pkg-2.0.0', strict=False)
-
-    controller_util.CPVToPackageInfo(cpv, pi)
-    self.assertEqual('cat', pi.category)
-    self.assertEqual('pkg', pi.package_name)
-    self.assertEqual('2.0.0', pi.version)
-
-  def testNoVersion(self):
-    """Test handling when no version given."""
-    pi = common_pb2.PackageInfo()
-    cpv = package_info.SplitCPV('cat/pkg', strict=False)
-
-    controller_util.CPVToPackageInfo(cpv, pi)
-    self.assertEqual('cat', pi.category)
-    self.assertEqual('pkg', pi.package_name)
-    self.assertEqual('', pi.version)
-
-  def testPackageOnly(self):
-    """Test handling when only given the package name."""
-    pi = common_pb2.PackageInfo()
-    cpv = package_info.SplitCPV('pkg', strict=False)
-
-    controller_util.CPVToPackageInfo(cpv, pi)
-    self.assertEqual('', pi.category)
-    self.assertEqual('pkg', pi.package_name)
-    self.assertEqual('', pi.version)
-
-
 class PackageInfoToCPVTest(cros_test_lib.TestCase):
   """PackageInfoToCPV tests."""
 

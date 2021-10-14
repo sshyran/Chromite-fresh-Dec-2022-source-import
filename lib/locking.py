@@ -5,14 +5,14 @@
 """Basic locking functionality."""
 
 import contextlib
-import os
 import errno
 import fcntl
+import logging
+import os
 import stat
 import tempfile
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import retry_util
 from chromite.lib import timeout_util

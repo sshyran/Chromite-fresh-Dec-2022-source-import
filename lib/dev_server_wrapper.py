@@ -6,6 +6,7 @@
 """
 
 import http.client
+import logging
 import multiprocessing
 import os
 import re
@@ -18,7 +19,6 @@ import urllib.request
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import remote_access
@@ -182,7 +182,7 @@ class DevServerWrapper(multiprocessing.Process):
         generate delta payloads.
       board: Override board to pass to the devserver for xbuddy pathing.
     """
-    super(DevServerWrapper, self).__init__()
+    super().__init__()
     self.devserver_bin = 'start_devserver'
     # Set port if it is given. Otherwise, devserver will start at any
     # available port.

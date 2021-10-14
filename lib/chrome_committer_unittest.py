@@ -81,7 +81,18 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
                                 '--reviewers',
                                 'chrome-os-gardeners-reviews@google.com',
                                 '--set-bot-commit',
-                                '--send-mail', '--use-commit-queue'])
+                                '--send-mail'])
+
+  def testUploadCQ(self):
+    """Tests that we can upload a commit and submit it to the CQ."""
+    self.committer.Checkout(['OWNERS'])
+    self.committer.Commit(['OWNERS', 'chromeos/BUILD.gn'],
+                          'Modify OWNERS and BUILD.gn')
+
+    self.committer._cq = True  # pylint: disable=protected-access
+    self.committer.Upload()
+
+    self.assertCommandContains(['--use-commit-queue'])
 
   def testUploadDryRun(self):
     """Tests that we can upload a commit with dryrun."""

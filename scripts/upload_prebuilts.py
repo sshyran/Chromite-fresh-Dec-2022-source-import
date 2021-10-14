@@ -21,16 +21,17 @@ import argparse
 import datetime
 import functools
 import glob
+import logging
 import multiprocessing
 import os
 import tempfile
 
-from chromite.lib import constants
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.lib import binpkg
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gerrit
 from chromite.lib import gs
@@ -158,7 +159,7 @@ def RevGitFile(filename, data, dryrun=False):
   remote_name = git.RunGit(cwd, ['remote']).stdout.strip()
   gerrit_helper = gerrit.GetGerritHelper(remote_name)
   remote_url = git.RunGit(
-      cwd,['config', '--get', f'remote.{remote_name}.url']).stdout.strip()
+      cwd, ['config', '--get', f'remote.{remote_name}.url']).stdout.strip()
   description = '%s: updating %s' % (os.path.basename(filename),
                                      ', '.join(data.keys()))
   # UpdateLocalFile will print out the keys/values for us.
@@ -172,9 +173,10 @@ def RevGitFile(filename, data, dryrun=False):
   tracking_info = git.GetTrackingBranch(
       cwd, prebuilt_branch, for_push=True, for_checkout=False)
   gpatch = gerrit_helper.CreateGerritPatch(
-      cwd, remote_url, ref=tracking_info.ref)
-  gerrit_helper.SetReview(gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun)
-  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun)
+      cwd, remote_url, ref=tracking_info.ref, notify='NONE')
+  gerrit_helper.SetReview(
+      gpatch, labels={'Bot-Commit': 1}, dryrun=dryrun, notify='NONE')
+  gerrit_helper.SubmitChange(gpatch, dryrun=dryrun, notify='NONE')
 
 
 def GetVersion():
@@ -466,7 +468,7 @@ class PrebuiltUploader(object):
       link_name = 'Prebuilts[%s]: %s' % (self._target, self._version)
       url = '%s%s/index.html' % (gs.PUBLIC_BASE_HTTPS_URL,
                                  remote_location[len(gs.BASE_GS_URL):])
-      logging.PrintBuildbotLink(link_name, url)
+      cbuildbot_alerts.PrintBuildbotLink(link_name, url)
 
   def _UploadSdkTarball(self, board_path, url_suffix, prepackaged,
                         toolchains_overlay_tarballs,

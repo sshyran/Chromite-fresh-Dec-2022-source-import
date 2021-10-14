@@ -10,8 +10,10 @@ import ctypes
 import ctypes.util
 import datetime
 import errno
+import getpass
 import glob
 import hashlib
+import logging
 import os
 from pathlib import Path
 import pwd
@@ -23,7 +25,6 @@ import tempfile
 from typing import Optional, Union
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.utils import key_value_store
 
@@ -46,7 +47,10 @@ def GetNonRootUser():
   if uid == 0:
     user = os.environ.get('PORTAGE_USERNAME', os.environ.get('SUDO_USER'))
   else:
-    user = pwd.getpwuid(os.getuid()).pw_name
+    try:
+      user = pwd.getpwuid(os.getuid()).pw_name
+    except KeyError:
+      user = getpass.getuser()
 
   if user == 'root':
     return None

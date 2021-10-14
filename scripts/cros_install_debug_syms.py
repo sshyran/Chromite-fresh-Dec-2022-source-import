@@ -14,6 +14,7 @@ are part of the prebuilt package.
 
 import argparse
 import functools
+import logging
 import multiprocessing
 import os
 import pickle
@@ -26,11 +27,11 @@ from chromite.lib import cache
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import gs
 from chromite.utils import outcap
+
 
 if cros_build_lib.IsInsideChroot():
   # pylint: disable=import-error

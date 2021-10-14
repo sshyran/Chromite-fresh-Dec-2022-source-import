@@ -4,11 +4,11 @@
 
 """cros cidbcreds: get the cidb credentials from gs."""
 
+import logging
 import os
 import shutil
 
 from chromite.cli import command
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import locking
 from chromite.lib import path_util

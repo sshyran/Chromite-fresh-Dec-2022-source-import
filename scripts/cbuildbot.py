@@ -8,28 +8,30 @@ Used by Chromium OS buildbot configuration for all Chromium OS builds including
 full and pre-flight-queue builds.
 """
 
-import distutils.version # pylint: disable=import-error,no-name-in-module
+import distutils.version  # pylint: disable=import-error,no-name-in-module
 import glob
 import json
+import logging
 import optparse  # pylint: disable=deprecated-module
 import os
 import pickle
 import sys
 
 from chromite.cbuildbot import builders
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import repository
 from chromite.cbuildbot import topology
 from chromite.cbuildbot.stages import completion_stages
+from chromite.cbuildbot.stages import test_stages
 from chromite.lib import builder_status_lib
-from chromite.lib import cidb
 from chromite.lib import cgroups
+from chromite.lib import cidb
 from chromite.lib import cleanup
 from chromite.lib import commandline
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import git
 from chromite.lib import gob_util
@@ -49,6 +51,9 @@ _DEFAULT_EXT_BUILDROOT = 'trybot'
 _DEFAULT_INT_BUILDROOT = 'trybot-internal'
 _BUILDBOT_REQUIRED_BINARIES = ('pbzip2',)
 _API_VERSION_ATTR = 'api_version'
+BOARD_DIM_LABEL = 'label-board'
+MODEL_DIM_LABEL = 'label-model'
+POOL_DIM_LABEL = 'label-pool'
 
 
 def _BackupPreviousLog(log_file, backup_limit=25):
@@ -311,6 +316,13 @@ def _CreateParser():
       'Options used to configure tryjob behavior.')
   group.add_remote_option('--hwtest', action='store_true', default=False,
                           help='Run the HWTest stage (tests on real hardware)')
+  group.add_option('--hwtest_dut_dimensions', type='string',
+                   action='split_extend', default=None,
+                   help='Space-separated list of key:val Swarming bot '
+                        'dimensions to run each builders SkylabHWTest '
+                        'stages against (this overrides the configured '
+                        'DUT dimensions for each test). Requires at least '
+                        '"label-board", "label-model", and "label-pool".')
   group.add_remote_option('--channel', action='split_extend', dest='channels',
                           default=[],
                           help='Specify a channel for a payloads trybot. Can '
@@ -458,6 +470,8 @@ def _CreateParser():
                                'servers. When both this argument and '
                                '--git-cache-dir are provided this value will '
                                'be preferred for the chrome source cache.')
+  group.add_remote_option('--source_cache', action='store_true', default=False,
+                          help='Whether to utilize cache snapshot mounts.')
   group.add_remote_option('--debug-cidb', action='store_true', default=False,
                           help='Force Debug CIDB to be used.')
   # cbuildbot ChromeOS Findit options
@@ -622,6 +636,36 @@ def _FinishParsing(options):
   options.debug_forced = options.debug
   # We force --debug to be set for builds that are not 'official'.
   options.debug = options.debug or not options.buildbot
+
+  options.hwtest_dut_override = ParseHWTestDUTDims(
+    options.hwtest_dut_dimensions)
+
+def ParseHWTestDUTDims(dims):
+  """Parse HWTest DUT dimensions into a valid HWTestDUTOverride object.
+
+  Raises an error if any of board, model, or pool is missing.
+  """
+  if not dims:
+    return None
+  board = model = pool = None
+  extra_dims = []
+  for dim in dims:
+    if dim.startswith(BOARD_DIM_LABEL):
+      # Remove one extra character to account for the ":" or "=" symbol
+      # separating the label from the dimension itself.
+      board = dim[len(BOARD_DIM_LABEL)+1:]
+    elif dim.startswith(MODEL_DIM_LABEL):
+      model = dim[len(MODEL_DIM_LABEL)+1:]
+    elif dim.startswith(POOL_DIM_LABEL):
+      pool = dim[len(POOL_DIM_LABEL)+1:]
+    else:
+      extra_dims.append(dim)
+
+  if not (board and model and pool):
+    cros_build_lib.Die('HWTest DUT dimensions must include board, model, and '
+                       'pool (given %s).' % dims)
+
+  return test_stages.HWTestDUTOverride(board, model, pool, extra_dims)
 
 
 # pylint: disable=unused-argument
@@ -817,7 +861,7 @@ def main(argv):
   cros_build_lib.AssertOutsideChroot()
 
   if options.enable_buildbot_tags:
-    logging.EnableBuildbotMarkers()
+    cbuildbot_alerts.EnableBuildbotMarkers()
 
   if (options.buildbot and
       not options.debug and

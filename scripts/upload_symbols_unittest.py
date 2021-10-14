@@ -45,7 +45,7 @@ while True:
     break
 del third_party
 
-from chromite.lib import cros_logging as logging
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -339,7 +339,8 @@ class AdjustSymbolFileSizeTest(SymbolsTestBase):
     self.slim = self.createSymbolFile('slim.sym', self.SLIM_CONTENT)
     self.fat = self.createSymbolFile('fat.sym', self.FAT_CONTENT)
 
-    self.warn_mock = self.PatchObject(logging, 'PrintBuildbotStepWarnings')
+    self.warn_mock = self.PatchObject(cbuildbot_alerts,
+                                      'PrintBuildbotStepWarnings')
 
   def _testNotStripped(self, symbol, size=None, content=None):
     start_file = symbol.file_name

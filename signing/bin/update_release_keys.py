@@ -5,12 +5,12 @@
 """Import keys from legacy signer config."""
 
 import configparser
+import logging
 import os
 
-import yaml # pylint: disable=import-error
+import yaml  # pylint: disable=import-error
 
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.signing.lib import keys
 
@@ -116,6 +116,7 @@ class KeyringData(object):
       logging.warning('Bad keyset setname %s', setname)
       group = 'bad-keysets'
     self.keysets.setdefault(group, []).append(setname)
+    self.keysets[group].sort()
     return self._WriteConfig(config_file, set_config)
 
 

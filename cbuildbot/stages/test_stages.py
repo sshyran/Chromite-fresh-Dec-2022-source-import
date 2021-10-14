@@ -5,9 +5,11 @@
 """Module containing the test stages."""
 
 import collections
+import logging
 import os
 
 from chromite.cbuildbot import afdo
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
@@ -15,7 +17,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import image_test_lib
@@ -74,6 +75,15 @@ class UnitTestStage(generic_stages.BoardSpecificBuilderStage,
     self.UploadArtifact(tarball, archive=False)
 
 
+class HWTestDUTOverride:
+  """Parameters to override the DUT dimensions configured for all HWTests."""
+  def __init__(self, board, model, pool, extra_dims=None):
+    self.board = board
+    self.model = model
+    self.pool = pool
+    self.extra_dims = extra_dims or []
+
+
 class HWTestStage(generic_stages.BoardSpecificBuilderStage,
                   generic_stages.ArchivingStageMixin):
   """Stage that runs tests in the Autotest lab."""
@@ -105,8 +115,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       suffix += ' [DISABLED]'
 
     suffix = self.UpdateSuffix(suite_config.suite, suffix)
-    super(HWTestStage, self).__init__(
-        builder_run, buildstore, board, suffix=suffix, **kwargs)
+    super().__init__(builder_run, buildstore, board, suffix=suffix, **kwargs)
     if not self._run.IsToTBuild():
       self._SetBranchedSuiteConfig(suite_config)
 
@@ -115,6 +124,13 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
 
     self._model = model
     self._board_name = lab_board_name or board
+
+    self._pool = suite_config.pool
+    self._extra_dims = []
+    dut_dims_override = self._run.options.hwtest_dut_override
+    if dut_dims_override:
+      self._pool = dut_dims_override.pool
+      self._extra_dims = dut_dims_override.extra_dims
 
   def _SetBranchedSuiteConfig(self, suite_config):
     suite_config.SetBranchedValues()
@@ -130,7 +146,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       return self._HandleExceptionAsWarning(exc_info)
 
     if self.suite_config.critical:
-      return super(HWTestStage, self)._HandleStageException(exc_info)
+      return super()._HandleStageException(exc_info)
 
     if issubclass(exc_type, failures_lib.TestWarning):
       # HWTest passed with warning. All builders should pass.
@@ -144,14 +160,14 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
                      'available in the lab yet')
         return self._HandleExceptionAsSuccess(exc_info)
 
-    return super(HWTestStage, self)._HandleStageException(exc_info)
+    return super()._HandleStageException(exc_info)
 
   def WaitUntilReady(self):
     """Wait until payloads and test artifacts are ready or not."""
     # Wait for UploadHWTestArtifacts to generate and upload the artifacts.
     if not self.GetParallel(
         'test_artifacts_uploaded', pretty_name='payloads and test artifacts'):
-      logging.PrintBuildbotStepWarnings()
+      cbuildbot_alerts.PrintBuildbotStepWarnings()
       logging.warning('missing test artifacts')
       logging.warning(
           'Cannot run %s because UploadTestArtifacts failed. '
@@ -171,18 +187,18 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
   def PerformStage(self):
     if self.suite_config.suite == constants.HWTEST_AFDO_SUITE:
       arch = self._GetPortageEnvVar('ARCH', self._current_board)
-      cpv = portage_util.PortageqBestVisible(
+      pkg_info = portage_util.PortageqBestVisible(
           constants.CHROME_CP, cwd=self._build_root)
       # For async AFDO builders, need to skip this check because it's checking
       # a different bucket for PFQ AFDO. Also for async AFDO builders, no need
       # to check here because there's an earlier check to avoid generating
       # AFDO for the same version.
       if (not self._run.config.afdo_generate_async and
-          afdo.CheckAFDOPerfData(cpv, arch, gs.GSContext())):
+          afdo.CheckAFDOPerfData(pkg_info, arch, gs.GSContext())):
         logging.info(
             'AFDO profile already generated for arch %s '
             'and Chrome %s. Not generating it again', arch,
-            cpv.version_no_rev.split('_')[0])
+            pkg_info.version.split('_')[0])
         return
 
     build = '/'.join([self._bot_id, self.version])
@@ -196,7 +212,7 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
         self.suite_config.suite,
         self._board_name,
         model=self._model,
-        pool=self.suite_config.pool,
+        pool=self._pool,
         file_bugs=self.suite_config.file_bugs,
         wait_for_results=self.wait_for_results,
         priority=self.suite_config.priority,
@@ -237,7 +253,8 @@ class SkylabHWTestStage(HWTestStage):
         self.suite_config.suite,
         self._board_name,
         model=self._model,
-        pool=self.suite_config.pool,
+        extra_dims=self._extra_dims,
+        pool=self._pool,
         wait_for_results=self.wait_for_results,
         priority=self.suite_config.priority,
         timeout_mins=self.suite_config.timeout_mins,
@@ -261,7 +278,7 @@ class ASyncSkylabHWTestStage(SkylabHWTestStage,
   category = constants.TEST_INFRA_STAGE
 
   def __init__(self, *args, **kwargs):
-    super(ASyncSkylabHWTestStage, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.wait_for_results = False
 
 
@@ -358,8 +375,7 @@ class CbuildbotLaunchTestBuildStage(generic_stages.BuilderStage):
       build_config: Name of build config to build.
       expect_success: Is the test build expected to pass?
     """
-    super(CbuildbotLaunchTestBuildStage, self).__init__(builder_run, buildstore,
-                                                        **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
 
     self.build_config = build_config
     self.tryjob_buildroot = tryjob_buildroot
@@ -392,8 +408,7 @@ class CbuildbotLaunchTestStage(generic_stages.BuilderStage):
       builder_run: See builder_run on ArchiveStage
       buildstore: BuildStore instance to make DB calls with.
     """
-    super(CbuildbotLaunchTestStage, self).__init__(builder_run, buildstore,
-                                                   **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.tryjob_buildroot = None
 
   def RunCbuildbotLauncher(self, suffix, branch, build_config, expect_success):
@@ -469,6 +484,19 @@ class DebugInfoTestStage(generic_stages.BoardSpecificBuilderStage,
 class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
   """Stage that constructs test plans."""
 
+  def ModelsToTest(self):
+    """All models to run tests against."""
+    if self._run.options.hwtest_dut_override:
+      return [config_lib.ModelTestConfig(
+        self._run.options.hwtest_dut_override.model, None)]
+
+    if self._run.config.models:
+      return self._run.config.models
+
+    return [config_lib.ModelTestConfig(
+      None, config_lib.GetNonUniBuildLabBoardName(self._current_board))]
+
+
   def WaitUntilReady(self):
     config = self._run.config
     return bool('hw_tests' in config and config.hw_tests)
@@ -483,11 +511,7 @@ class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
                       'option in the builder config is set to True.')
       return
 
-
-    models = [config_lib.ModelTestConfig(
-        None, config_lib.GetNonUniBuildLabBoardName(board))]
-    if builder_run.config.models:
-      models = builder_run.config.models
+    models = self.ModelsToTest()
 
     logging.info('Suites defined for the board: %s', str(
         [x.suite for x in builder_run.config.hw_tests]))

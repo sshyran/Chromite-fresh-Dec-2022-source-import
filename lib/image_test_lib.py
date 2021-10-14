@@ -4,10 +4,10 @@
 
 """Functions related to image tests."""
 
+import logging
 import os
 import unittest
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import perf_uploader
 
 
@@ -125,7 +125,7 @@ class ImageTestSuite(unittest.TestSuite, _BoardAndDirectoryMixin):
     for t in self._tests:
       t.SetResultDir(self._result_dir)
       t.SetBoard(self._board)
-    return super(ImageTestSuite, self).run(result)
+    return super().run(result)
 
 
 class ImageTestRunner(unittest.TextTestRunner, _BoardAndDirectoryMixin):
@@ -134,4 +134,4 @@ class ImageTestRunner(unittest.TextTestRunner, _BoardAndDirectoryMixin):
   def run(self, test):
     test.SetResultDir(self._result_dir)
     test.SetBoard(self._board)
-    return super(ImageTestRunner, self).run(test)
+    return super().run(test)

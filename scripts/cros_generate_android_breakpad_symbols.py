@@ -8,6 +8,7 @@ This script takes expanded crash symbols published by the Android build, and
 converts them to breakpad format.
 """
 
+import logging
 import multiprocessing
 import os
 import re
@@ -15,7 +16,6 @@ import zipfile
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.scripts import cros_generate_breakpad_symbols

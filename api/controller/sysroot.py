@@ -4,25 +4,26 @@
 
 """Sysroot controller."""
 
+import logging
 import os
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import sysroot
 from chromite.utils import metrics
+
 
 _ACCEPTED_LICENSES = '@CHROMEOS'
 
@@ -32,6 +33,14 @@ def ExampleGetResponse():
   uabs = common_pb2.UploadedArtifactsByService
   cabs = common_pb2.ArtifactsByService
   return uabs.Sysroot(artifacts=[
+     uabs.Sysroot.ArtifactPaths(
+          artifact_type=cabs.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT,
+          paths=[
+              common_pb2.Path(
+                  path='/tmp/sysroot_chromeos-base_chromeos-chrome.tar.xz',
+                  location=common_pb2.Path.OUTSIDE)
+          ],
+      ),
       uabs.Sysroot.ArtifactPaths(
           artifact_type=cabs.Sysroot.ArtifactType.DEBUG_SYMBOLS,
           paths=[
@@ -68,26 +77,25 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
     A list of dictionary mappings of ArtifactType to list of paths.
   """
   generated = []
-  for output_artifact in in_proto.output_artifacts:
-    if (in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS
-        in output_artifact.artifact_types):
-      result_path = sysroot.BundleBreakpadSymbols(chroot, sysroot_class,
-                                                  build_target, output_dir)
-      if result_path:
-        generated.append({
-            'paths': [result_path],
-            'type': in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS,
-        })
-    if in_proto.ArtifactType.DEBUG_SYMBOLS in output_artifact.artifact_types:
-      result_path = sysroot.BundleDebugSymbols(chroot, sysroot_class,
-                                               build_target, output_dir)
-      if result_path:
-        generated.append({
-            'paths': [result_path],
-            'type': in_proto.ArtifactType.DEBUG_SYMBOLS,
-        })
-  return generated
+  artifact_types = {
+    in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
+        sysroot.CreateSimpleChromeSysroot,
+    in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
+    in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
+    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+  }
 
+  for output_artifact in in_proto.output_artifacts:
+    for artifact_type, func in artifact_types.items():
+      if artifact_type in output_artifact.artifact_types:
+        result = func(chroot, sysroot_class, build_target, output_dir)
+        if result:
+          generated.append({
+              'paths': [result] if isinstance(result, str) else result,
+              'type': artifact_type,
+          })
+
+  return generated
 
 
 @faux.all_empty
@@ -116,24 +124,6 @@ def Create(input_proto, output_proto, _config):
 
   output_proto.sysroot.path = created.path
   output_proto.sysroot.build_target.name = build_target.name
-
-  return controller.RETURN_CODE_SUCCESS
-
-
-@faux.all_empty
-@validate.require('build_target.name')
-@validate.validation_complete
-def CreateSimpleChromeSysroot(input_proto, output_proto, _config):
-  """Create a sysroot for SimpleChrome to use."""
-  build_target_name = input_proto.build_target.name
-  use_flags = input_proto.use_flags
-
-  sysroot_tar_path = sysroot.CreateSimpleChromeSysroot(build_target_name,
-                                                       use_flags)
-  # By assigning this Path variable to the tar path, the tar file will be
-  # copied out to the input_proto's ResultPath location.
-  output_proto.sysroot_archive.path = sysroot_tar_path
-  output_proto.sysroot_archive.location = common_pb2.Path.INSIDE
 
   return controller.RETURN_CODE_SUCCESS
 
@@ -196,9 +186,9 @@ def InstallToolchain(input_proto, output_proto, _config):
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
     # Error installing - populate the failed package info.
-    for package in e.failed_toolchain_info:
-      package_info = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(package, package_info)
+    for pkg_info in e.failed_toolchain_info:
+      package_info_msg = output_proto.failed_packages.add()
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -262,9 +252,9 @@ def InstallPackages(input_proto, output_proto, _config):
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
     # We need to report the failed packages.
-    for package in e.failed_packages:
-      package_info = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(package, package_info)
+    for pkg_info in e.failed_packages:
+      package_info_msg = output_proto.failed_packages.add()
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 

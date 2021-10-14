@@ -7,6 +7,7 @@ from __future__ import division
 
 import hashlib
 import json
+import logging
 import math
 import os
 import re
@@ -14,12 +15,10 @@ import shutil
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-from chromite.lib import pformat
-
 from chromite.licensing import licenses_lib
 from chromite.scripts import cros_set_lsb_release
+from chromite.utils import pformat
 
 
 DLC_BUILD_DIR = 'build/rootfs/dlc'
@@ -97,6 +96,7 @@ class EbuildParams(object):
     name: (str) DLC name.
     description: (str) DLC description.
     preload: (bool) allow for preloading DLC.
+    factory_install: (bool) allow factory installing the DLC.
     mount_file_required: (bool) allow for mount file generation for DLC.
     used_by: (str) The user of this DLC, e.g. "system" or "user"
     days_to_purge: (int) The number of days to keep a DLC after uninstall and
@@ -106,7 +106,8 @@ class EbuildParams(object):
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
                version, name, description, preload, used_by,
-               mount_file_required, fullnamerev, days_to_purge=0):
+               mount_file_required, fullnamerev, days_to_purge=0,
+               factory_install=False):
     """Initializes the object.
 
     When adding a new variable in here, always set a default value. The reason
@@ -122,6 +123,7 @@ class EbuildParams(object):
     self.name = name
     self.description = description
     self.preload = preload
+    self.factory_install = factory_install
     self.used_by = used_by
     self.mount_file_required = mount_file_required
     self.fullnamerev = fullnamerev
@@ -302,6 +304,13 @@ class DlcGenerator(object):
       ],
                          capture_output=True)
 
+      # Verity cannot create hashes for device images which are less than two
+      # pages in size. So fix this squashfs image if it's too small.
+      # Check out b/187725419 for details.
+      if os.path.getsize(self.dest_image) < self._BLOCK_SIZE * 2:
+        logging.warning('Increasing DLC image size to at least two pages.')
+        os.truncate(self.dest_image, self._BLOCK_SIZE * 2)
+
       # We changed the ownership and permissions of the squashfs_root
       # directory. Now we need to remove it manually.
       osutils.RmDir(squashfs_root, sudo=True)
@@ -465,6 +474,7 @@ class DlcGenerator(object):
         'table-sha256-hash': table_hash,
         'version': self.ebuild_params.version,
         'preload-allowed': self.ebuild_params.preload,
+        'factory-install': self.ebuild_params.factory_install,
         'used-by': self.ebuild_params.used_by,
         'days-to-purge': self.ebuild_params.days_to_purge,
         'mount-file-required': self.ebuild_params.mount_file_required,
@@ -525,42 +535,53 @@ class DlcGenerator(object):
     osutils.SafeUnlink(ebuild_params_path, sudo=True)
 
 
-def IsDlcPreloadingAllowed(dlc_id, dlc_build_dir):
-  """Validates that DLC and it's packages all were built with DLC_PRELOAD=true.
+def IsFieldAllowed(dlc_id: str, dlc_build_dir: str, field: str):
+  """Checks if a field is allowed.
 
   Args:
-    dlc_id: (str) DLC ID.
-    dlc_build_dir: (str) the root path where DLC build files reside.
+    dlc_id: TheDLC ID.
+    dlc_build_dir: The root path where DLC build files reside.
+    field: The field name in the metadata json.
   """
-
-  dlc_id_meta_dir = os.path.join(dlc_build_dir, dlc_id)
-  if not os.path.exists(dlc_id_meta_dir):
-    logging.error('DLC build directory (%s) does not exist for preloading '
-                  'check, will not preload', dlc_id_meta_dir)
+  dlc_id_dir = os.path.join(dlc_build_dir, dlc_id)
+  if not os.path.exists(dlc_id_dir):
     return False
 
-  packages = os.listdir(dlc_id_meta_dir)
-  if not packages:
-    logging.error('DLC ID build directory (%s) does not have any '
-                  'packages, will not preload.', dlc_id_meta_dir)
-    return False
-
-  for package in packages:
-    image_loader_json = os.path.join(dlc_id_meta_dir, package, DLC_TMP_META_DIR,
+  for package in os.listdir(dlc_id_dir):
+    image_loader_json = os.path.join(dlc_id_dir, package, DLC_TMP_META_DIR,
                                      IMAGELOADER_JSON)
     if not os.path.exists(image_loader_json):
-      logging.error('DLC metadata file (%s) does not exist, will not preload.',
-                    image_loader_json)
       return False
     if not GetValueInJsonFile(json_path=image_loader_json,
-                              key='preload-allowed', default_value=False):
+                              key=field, default_value=False):
       return False
-  # All packages support preload.
+
   return True
 
 
+def IsDlcPreloadingAllowed(dlc_id: str, dlc_build_dir: str):
+  """Validates that DLC is built with DLC_PRELOAD=true.
+
+  Args:
+    dlc_id: The DLC ID.
+    dlc_build_dir: The root path where DLC build files reside.
+  """
+  return IsFieldAllowed(dlc_id, dlc_build_dir, 'preload-allowed')
+
+
+def IsFactoryInstallAllowed(dlc_id: str, dlc_build_dir: str):
+  """Validates that DLC is built with DLC_FACTORY_INSTALL=true.
+
+  Args:
+    dlc_id: The DLC ID.
+    dlc_build_dir: The root path where DLC build files reside.
+  """
+  return IsFieldAllowed(dlc_id, dlc_build_dir, 'factory-install')
+
+
 def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
-                     preload=False, rootfs=None, src_dir=None):
+                     preload=False, factory_install=False,
+                     rootfs=None, stateful=None, src_dir=None):
   """Copies all DLC image files into the images directory.
 
   Copies the DLC image files in the given build directory into the given DLC
@@ -575,7 +596,10 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
       src/build/images/<board>/<version>. If None, the image will be generated
       but will not be copied to a destination.
     preload: When true, only copies DLC(s) if built with DLC_PRELOAD=true.
+    factory_install: When true, copies DLC(s) built with
+      DLC_FACTORY_INSTALL=true.
     rootfs: (str) Path to the platform rootfs.
+    stateful: (str) Path to the platform stateful.
     src_dir: (str) Path to the DLC source root directory.
   """
   dlc_build_dir = os.path.join(sysroot, DLC_BUILD_DIR)
@@ -646,6 +670,21 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
       else:
         logging.info('install_root_dir value was not provided. Copying dlc'
                      ' image skipped.')
+
+      # Factory install DLCs.
+      if (stateful and factory_install and
+          IsFactoryInstallAllowed(d_id, dlc_build_dir)):
+        install_stateful_dir = os.path.join(
+            stateful, 'unencrypted/dlc-factory-images', d_id, d_package)
+        osutils.SafeMakedirs(install_stateful_dir, mode=0o755, sudo=True)
+        source_dlc_dir = os.path.join(dlc_build_dir, d_id, d_package)
+        for filepath in (os.path.join(source_dlc_dir, fname)
+                         for fname in os.listdir(source_dlc_dir)
+                         if fname.endswith('.img')):
+          logging.info('Factory installing DLC(%s) image from %s to %s: ', d_id,
+                       filepath, install_stateful_dir)
+          cros_build_lib.sudo_run(['cp', filepath, install_stateful_dir],
+                                  print_cmd=False, stderr=True)
 
       # Create metadata directory in rootfs.
       if rootfs:

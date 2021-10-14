@@ -7,12 +7,13 @@
 
 """Wrapper around httplib2 to call REST API with service account credentials."""
 
+import logging
 import urllib.parse
+
+from chromite.third_party import httplib2
 
 from chromite.lib import auth
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.third_party import httplib2
 
 
 def httprequest(http, **kwargs):
@@ -27,7 +28,7 @@ class Error(Exception):
   """
 
   def __init__(self, msg, status_code, response, headers=None):
-    super(Error, self).__init__(msg)
+    super().__init__(msg)
     self.status_code = status_code
     self.headers = headers
     self.response = response

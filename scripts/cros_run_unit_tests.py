@@ -5,18 +5,18 @@
 """Tool to run ebuild unittests."""
 
 import argparse
+import logging
 import multiprocessing
 import os
 
 from chromite.lib import build_target_lib
+from chromite.lib import chroot_util
 from chromite.lib import commandline
 from chromite.lib import constants
-from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-from chromite.lib import workon_helper
 from chromite.lib import portage_util
+from chromite.lib import workon_helper
 from chromite.scripts import cros_extract_deps
 
 
@@ -152,11 +152,15 @@ def main(argv):
     print('\n'.join(sorted(pkg_with_test)))
     return 0
 
-  env = None
+  env = {}
   if opts.nowithdebug:
     use_flags = os.environ.get('USE', '')
     use_flags += ' -cros-debug'
-    env = {'USE': use_flags}
+    env['USE'] = use_flags
+
+  metrics_dir = os.environ.get(constants.CROS_METRICS_DIR_ENVVAR)
+  if metrics_dir:
+    env[constants.CROS_METRICS_DIR_ENVVAR] = metrics_dir
 
   if opts.empty_sysroot:
     try:

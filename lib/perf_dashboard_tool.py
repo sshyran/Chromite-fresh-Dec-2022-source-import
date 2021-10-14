@@ -33,13 +33,13 @@ Examples:
 """
 
 import getpass
+import logging
 import os
 import tempfile
 import urllib.parse
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import perf_uploader
 
 

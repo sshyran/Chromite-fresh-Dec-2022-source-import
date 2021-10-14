@@ -9,24 +9,26 @@ import collections
 import datetime
 import glob
 import json
+import logging
 import os
 import re
 import shutil
+from typing import Iterable, Optional
 
 from chromite.cbuildbot import afdo
 from chromite.lib import alerts
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import gob_util
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
-from chromite.lib import pformat
 from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.lib.parser import package_info
+from chromite.utils import pformat
+
 
 class PrepareForBuildReturn(object):
   """Return values for PrepareForBuild call."""
@@ -456,9 +458,14 @@ def _GetBenchmarkAFDOName(buildroot, board):
   Returns:
     A string similar to: chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo
   """
-  cpv = portage_util.PortageqBestVisible(constants.CHROME_CP, cwd=buildroot)
+  pkg_info = portage_util.PortageqBestVisible(
+      constants.CHROME_CP, cwd=buildroot)
   arch = portage_util.PortageqEnvvar('ARCH', board=board, allow_undefined=True)
-  afdo_spec = {'package': cpv.package, 'arch': arch, 'version': cpv.version}
+  afdo_spec = {
+      'package': pkg_info.package,
+      'arch': arch,
+      'version': pkg_info.vr,
+  }
   afdo_file = CHROME_BENCHMARK_AFDO_FILE % afdo_spec
   try:
     _ParseBenchmarkProfileName(afdo_file)
@@ -1035,9 +1042,8 @@ def _WarnSheriffAboutKernelProfileExpiration(kver, profile):
   """
   # FIXME(tcwang): Fix the subject and email format before deployment.
   subject_msg = (
-      '[Test Async builder] Kernel AutoFDO profile too old for kernel %s' %
-      kver)
-  alert_msg = ('AutoFDO profile too old for kernel %s. Name=%s' % kver, profile)
+      f'[Test Async builder] Kernel AutoFDO profile too old for kernel {kver}')
+  alert_msg = f'AutoFDO profile too old for kernel {kver}. Name={profile}'
   alerts.SendEmailLog(
       subject_msg,
       AFDO_ALERT_RECIPIENTS,
@@ -1082,14 +1088,15 @@ class _CommonPrepareBundle(object):
     """Return the branch number for chrome."""
     pkg = constants.CHROME_PN
     info = self._ebuild_info.get(pkg, self._GetEbuildInfo(pkg))
-    return info.CPV.version_no_rev.split('.')[0]
+    return info.CPV.version.split('.')[0]
 
-  def _GetEbuildInfo(self, package, category=None):
+  def _GetEbuildInfo(self, package: str,
+                     category: Optional[str] = None) -> _EbuildInfo:
     """Get the ebuild info for a cataegory/package in chromiumos-overlay.
 
     Args:
-      package (str): package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
-      category (str): category (e.g. chromeos-base, or sys-kernel)
+      package: package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
+      category: category (e.g. chromeos-base, or sys-kernel)
 
     Returns:
       _EbuildInfo for the stable ebuild.
@@ -1108,8 +1115,7 @@ class _CommonPrepareBundle(object):
         os.path.join(_CHROMIUMOS_OVERLAY, category, package, '*-*.*.ebuild'))
     if len(paths) == 1:
       PV = os.path.splitext(os.path.split(paths[0])[1])[0]
-      info = _EbuildInfo(paths[0],
-                         package_info.SplitCPV('%s/%s' % (category, PV)))
+      info = _EbuildInfo(paths[0], package_info.parse('%s/%s' % (category, PV)))
       self._ebuild_info[constants.CHROME_PN] = info
       return info
     else:
@@ -1117,8 +1123,8 @@ class _CommonPrepareBundle(object):
       candidate = None
       for p in paths:
         PV = os.path.splitext(os.path.split(p)[1])[0]
-        info = _EbuildInfo(p, package_info.SplitCPV('%s/%s' % (category, PV)))
-        if not info.CPV.rev:
+        info = _EbuildInfo(p, package_info.parse('%s/%s' % (category, PV)))
+        if not info.CPV.revision:
           # Ignore versions without a rev
           continue
         version_re = re.compile(
@@ -1137,12 +1143,12 @@ class _CommonPrepareBundle(object):
 
   def _GetBenchmarkAFDOName(self, template=CHROME_BENCHMARK_AFDO_FILE):
     """Get the name of the benchmark AFDO file from the Chrome ebuild."""
-    cpv = self._GetEbuildInfo(constants.CHROME_PN).CPV
+    pkg = self._GetEbuildInfo(constants.CHROME_PN).CPV
     afdo_spec = {
         'arch': self.arch,
-        'package': cpv.package,
-        'version': cpv.version,
-        'versionnorev': cpv.version_no_rev.split('_')[0]
+        'package': pkg.package,
+        'version': pkg.vr,
+        'versionnorev': pkg.version.split('_')[0]
     }
     return template % afdo_spec
 
@@ -1163,12 +1169,12 @@ class _CommonPrepareBundle(object):
       raise ValueError('Invalid architecture %s to use in AFDO profile' % arch)
 
     chrome_info = self._GetEbuildInfo(constants.CHROME_PN)
-    rev = chrome_info.CPV.version_no_rev
-    if rev.endswith('_rc'):
-      rev = rev[:-3]
+    version = chrome_info.CPV.version
+    if version.endswith('_rc'):
+      version = version[:-3]
     profile_path = (
         'chromium/src/+/refs/tags/%s/chromeos/profiles/%s.afdo.newest.txt'
-        '?format=text' % (rev, arch))
+        '?format=text' % (version, arch))
 
     contents = gob_util.FetchUrl(constants.EXTERNAL_GOB_HOST, profile_path)
     if not contents:
@@ -1298,14 +1304,14 @@ class _CommonPrepareBundle(object):
     logging.info('Latest AFDO artifact is %s', name)
     return name
 
-  def _AfdoTmpPath(self, path=''):
+  def _AfdoTmpPath(self, path: str = '') -> str:
     """Return the directory for benchmark-afdo-generate artifacts.
 
     Args:
-      path (str): path relative to the directory.
+      path: path relative to the directory.
 
     Returns:
-      string, path to the directory.
+      Path to the directory.
     """
     gen_dir = '/tmp/benchmark-afdo-generate'
     if path:
@@ -1313,12 +1319,12 @@ class _CommonPrepareBundle(object):
     else:
       return gen_dir
 
-  def _FindArtifact(self, name, gs_urls):
+  def _FindArtifact(self, name: str, gs_urls: Iterable[str]) -> Optional[str]:
     """Find an artifact |name|, from a list of |gs_urls|.
 
     Args:
-      name (string): The name of the artifact.
-      gs_urls (list[string]): List of full gs:// directory paths to check.
+      name: The name of the artifact.
+      gs_urls: List of full gs:// directory paths to check.
 
     Returns:
       The url of the located artifact, or None.
@@ -1338,10 +1344,10 @@ class _CommonPrepareBundle(object):
     """
     info = self._GetEbuildInfo(package)
     self._PatchEbuild(info, update_rules, uprev=True)
-    CPV_9999 = '%s/%s-9999' % (info.CPV.category, info.CPV.package)
+    package_9999 = info.CPV.with_version('9999')
     ebuild_9999 = os.path.join(
-        os.path.dirname(info.path), '%s-9999.ebuild' % package)
-    info_9999 = _EbuildInfo(ebuild_9999, package_info.SplitCPV(CPV_9999))
+        os.path.dirname(info.path), package_9999.ebuild)
+    info_9999 = _EbuildInfo(ebuild_9999, package_9999)
     self._PatchEbuild(info_9999, update_rules, uprev=False)
 
   def _PatchEbuild(self, info, rules, uprev):
@@ -1385,9 +1391,8 @@ class _CommonPrepareBundle(object):
     CPV = info.CPV
     if uprev:
       assert CPV.version != '9999'
-      new_rev = 'r%d' % (int(CPV.rev[1:]) + 1) if CPV.rev else 'r1'
-      new_CPV = '%s/%s-%s-%s' % (CPV.category, CPV.package, CPV.version_no_rev,
-                                 new_rev)
+      new_CPV = (
+          f'{CPV.category}/{CPV.package}-{CPV.version}-r{CPV.revision + 1}')
       new_path = os.path.join(
           os.path.dirname(info.path), '%s.ebuild' % os.path.basename(new_CPV))
       os.rename(new_name, new_path)
@@ -1803,7 +1808,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
 
   def __init__(self, artifact_name, chroot, sysroot_path, build_target,
                input_artifacts, profile_info):
-    super(PrepareForBuildHandler, self).__init__(
+    super().__init__(
         artifact_name,
         chroot,
         sysroot_path,
@@ -2108,7 +2113,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
 
   def __init__(self, artifact_name, chroot, sysroot_path, build_target,
                output_dir, profile_info):
-    super(BundleArtifactHandler, self).__init__(
+    super().__init__(
         artifact_name,
         chroot,
         sysroot_path,
@@ -2188,8 +2193,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
 
   def _BundleUnverifiedLlvmPgoFile(self):
     """Bundle the unverified PGO profile for llvm."""
-    # What is the CPV for the compiler?
-    llvm_cpv = portage_util.FindPackageNameMatches('sys-devel/llvm')[0]
+    # What is the PackageInfo for the compiler?
+    llvm_pkg = portage_util.FindPackageNameMatches('sys-devel/llvm')[0]
 
     files = []
     # Find all of the raw profile data.
@@ -2213,7 +2218,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
       raise BundleArtifactsHandlerError(
           "Can't recognize the version string %s" % clang_version_str)
     head_sha = match.group(1)
-    profdata_base = '%s-%s' % (llvm_cpv.pv, head_sha)
+    profdata_base = '%s-%s' % (llvm_pkg.pvr, head_sha)
     metadata_path = os.path.join(self.output_dir,
                                  profdata_base + '.llvm_metadata.json')
     pformat.json({'head_sha': head_sha}, fp=metadata_path, compact=True)
@@ -2575,11 +2580,11 @@ class GetUpdatedFilesHandler(object):
     json_file = os.path.join(TOOLCHAIN_UTILS_PATH, 'afdo_metadata',
                              f'kernel_afdo_{kernel_version}.json')
     assert os.path.exists(json_file), (
-      f'Metadata for {kernel_version} does not exist')
+        f'Metadata for {kernel_version} does not exist')
     afdo_versions = json.loads(osutils.ReadFile(json_file))
     kernel_name = f'chromeos-kernel-{kernel_version}'
     assert kernel_name in afdo_versions, (
-      f'To update {kernel_name}, the entry should be in kernel_afdo.json')
+        f'To update {kernel_name}, the entry should be in kernel_afdo.json')
     old_value = afdo_versions[kernel_name]['name']
     update_to_newer_profile = _RankValidCWPProfiles(
         old_value) < _RankValidCWPProfiles(profile_version)
@@ -2756,7 +2761,7 @@ class GenerateBenchmarkAFDOProfile(object):
     self.chroot_path = chroot_path
     self.chroot_args = chroot_args
     self.buildroot = os.path.join(chroot_path, '..')
-    self.chrome_cpv = portage_util.PortageqBestVisible(
+    self.chrome_pkg = portage_util.PortageqBestVisible(
         constants.CHROME_CP, cwd=self.buildroot)
     self.arch = portage_util.PortageqEnvvar(
         'ARCH', board=board, allow_undefined=True)
@@ -2787,9 +2792,9 @@ class GenerateBenchmarkAFDOProfile(object):
     # The test case that produces it does not know anything about the
     # revision number.
     # TODO(llozano): perf data filename should include the revision number.
-    version_number = self.chrome_cpv.version_no_rev.split('_')[0]
+    version_number = self.chrome_pkg.version.split('_')[0]
     chrome_spec = {
-        'package': self.chrome_cpv.package,
+        'package': self.chrome_pkg.package,
         'arch': self.arch,
         'versionnorev': version_number
     }
@@ -2890,9 +2895,9 @@ class GenerateBenchmarkAFDOProfile(object):
     """
 
     afdo_spec = {
-        'package': self.chrome_cpv.package,
+        'package': self.chrome_pkg.package,
         'arch': self.arch,
-        'version': self.chrome_cpv.version
+        'version': self.chrome_pkg.vr
     }
     debug_bin_full_path = os.path.join(
         self.output_dir,

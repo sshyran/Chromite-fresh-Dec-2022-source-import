@@ -719,7 +719,7 @@ class ContainChildren(cros_build_lib.MasterPidContextManager):
   """
 
   def __init__(self, node, pool_name=None, sigterm_timeout=10):
-    super(ContainChildren, self).__init__()
+    super().__init__()
     self.node = node
     self.child = None
     self.pid = None

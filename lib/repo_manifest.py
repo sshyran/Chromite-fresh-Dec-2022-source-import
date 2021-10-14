@@ -225,13 +225,13 @@ class _ManifestElement(object):
 
   def __setattr__(self, name, value):
     if name.startswith('_'):
-      super(_ManifestElement, self).__setattr__(name, value)
+      super().__setattr__(name, value)
     else:
       self._el.set(self._XMLAttrName(name), value)
 
   def __delattr__(self, name):
     if name.startswith('_'):
-      super(_ManifestElement, self).__delattr__(name)
+      super().__delattr__(name)
     else:
       self._el.attrib.pop(self._XMLAttrName(name))
 

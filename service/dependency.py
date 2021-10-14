@@ -5,15 +5,15 @@
 """Deps analysis service."""
 
 import functools
+import itertools
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Mapping, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dependency_lib
-from chromite.lib import git
 from chromite.lib import portage_util
 from chromite.scripts import cros_extract_deps
 
@@ -25,20 +25,10 @@ class Error(Exception):
   """Base error class for the module."""
 
 
-def NormalizeSourcePaths(source_paths):
-  """Return the "normalized" form of a list of source paths.
-
-  Normalizing includes:
-    * Sorting the source paths in alphabetical order.
-    * Remove paths that are sub-path of others in the source paths.
-    * Ensure all the directory path strings are ended with the trailing '/'.
-    * Convert all the path from absolute paths to relative path (relative to
-      the chroot source root).
-  """
-  return dependency_lib.normalize_source_paths(source_paths)
-
-
-def GenerateSourcePathMapping(packages, sysroot_path, board):
+def GenerateSourcePathMapping(packages: List[str],
+                              sysroot_path: Optional[str] = None,
+                              board: Optional[str] = None,
+                              sdk: bool = False) -> Mapping[str, List[str]]:
   """Returns a map from each package to the source paths it depends on.
 
   A source path is considered dependency of a package if modifying files in that
@@ -49,7 +39,7 @@ def GenerateSourcePathMapping(packages, sysroot_path, board):
        i.e: for a given package X, some of its dependency source paths may
        contain files which doesn't affect the content of X.
 
-       On the other hands, any missing dependency source paths for package X is
+       On the other hand, any missing dependency source paths for package X is
        considered a bug.
     2) This only outputs the direct dependency source paths for a given package
        and does not takes include the dependency source paths of dependency
@@ -60,10 +50,14 @@ def GenerateSourcePathMapping(packages, sysroot_path, board):
 
   Args:
     packages: The list of packages CPV names (str)
-    sysroot_path (str): The path to the sysroot.  If the packages are board
-      agnostic, then this should be '/'.
-    board (str): The name of the board if packages are dependency of board. If
-      the packages are board agnostic, then this should be None.
+    sysroot_path: The path to the sysroot. Optional if |board| set and using
+      default sysroot. If the packages are board agnostic, you can set |sdk|
+      instead. Must not be set when using |sdk|.
+    board: The name of the board. Optional if |sysroot| is set and in the
+      default location. If the packages are board agnostic, you can set |sdk|
+      instead. Must not be set when using |sdk|.
+    sdk: Use the SDK's overlays instead of a board's overlays to find packages.
+      This is effectively the set of shared, public overlays.
 
   Returns:
     Map from each package to the source path (relative to the repo checkout
@@ -71,6 +65,22 @@ def GenerateSourcePathMapping(packages, sysroot_path, board):
     For each source path which is a directory, the string is ended with a
       trailing '/'.
   """
+  assert not sdk or (board is None and sysroot_path is None), (
+      'Cannot specify |board| or |sysroot_path| when setting |sdk|.')
+
+  if sdk:
+    # Use the SDK info.
+    sysroot_path = build_target_lib.get_sdk_sysroot_path()
+  elif not sysroot_path:
+    # Get the default sysroot for the board.
+    sysroot_path = build_target_lib.get_default_sysroot_path(board)
+  elif (sysroot_path and not board and
+        sysroot_path != build_target_lib.get_sdk_sysroot_path()):
+    # Get the board name from the sysroot path unless it's the SDK's sysroot.
+    board = os.path.basename(sysroot_path)
+
+  # We should definitely have a sysroot at this point.
+  assert sysroot_path
   return dependency_lib.get_source_path_mapping(packages, sysroot_path, board)
 
 
@@ -103,7 +113,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
       'source_path_mapping': {},
   }
 
-  sdk_sysroot = build_target_lib.get_default_sysroot_path(None)
+  sdk_sysroot = build_target_lib.get_sdk_sysroot_path()
   sdk_results = {
       'sysroot_path': sdk_sysroot,
       'target_board': 'sdk',
@@ -144,7 +154,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
   indep_deps, _ = cros_extract_deps.ExtractDeps(
       sysroot=sdk_results['sysroot_path'], package_list=indep_packages)
 
-  indep_map = GenerateSourcePathMapping(list(indep_deps), sdk_sysroot, None)
+  indep_map = GenerateSourcePathMapping(list(indep_deps), sdk=True)
   results['package_deps'].update(indep_deps)
   results['source_path_mapping'].update(indep_map)
 
@@ -152,7 +162,7 @@ def GetBuildDependency(sysroot_path, board=None, packages=None):
   sdk_results['source_path_mapping'].update(indep_map)
 
   if sysroot_path != sdk_sysroot:
-    bdep_map = GenerateSourcePathMapping(list(board_bdeps), sdk_sysroot, None)
+    bdep_map = GenerateSourcePathMapping(list(board_bdeps), sdk=True)
     board_map = GenerateSourcePathMapping(list(board_deps), sysroot_path, board)
     results['source_path_mapping'].update(bdep_map)
     results['source_path_mapping'].update(board_map)
@@ -238,28 +248,13 @@ def DetermineToolchainSourcePaths():
   source_paths = set()
   toolchain_pkgs = portage_util.GetFlattenedDepsForPackage(
       'virtual/toolchain-packages', depth=1)
-  toolchain_pkg_ebuilds = portage_util.FindEbuildsForPackages(
-      toolchain_pkgs, sysroot='/', check=True)
+  mapping = dependency_lib.get_source_path_mapping(
+      toolchain_pkgs,
+      build_target_lib.get_sdk_sysroot_path(),
+      None,
+      include_eclass=False,
+      include_overlay=False)
 
-  # Include the entire directory containing the toolchain ebuild, as the
-  # package's FILESDIR and patches also live there.
-  source_paths.update(
-      os.path.dirname(ebuild_path)
-      for ebuild_path in toolchain_pkg_ebuilds.values())
+  source_paths.update(itertools.chain.from_iterable(mapping.values()))
 
-  # Source paths which are cros workon source paths.
-  buildroot = os.path.join(constants.CHROOT_SOURCE_ROOT, 'src')
-  manifest = git.ManifestCheckout.Cached(buildroot)
-  for ebuild_path in toolchain_pkg_ebuilds.values():
-    attrs = portage_util.EBuild.Classify(ebuild_path)
-    if (not attrs.is_workon or
-        # Manually uprevved ebuild is pinned to a specific git sha1, so change
-        # in that repo does not matter to the ebuild.
-        attrs.is_manually_uprevved):
-      continue
-    ebuild = portage_util.EBuild(ebuild_path)
-    workon_subtrees = ebuild.GetSourceInfo(buildroot, manifest).subtrees
-    for path in workon_subtrees:
-      source_paths.add(path)
-
-  return NormalizeSourcePaths(list(source_paths))
+  return list(source_paths)

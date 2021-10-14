@@ -8,15 +8,15 @@ This service houses the high level business logic for all created artifacts.
 """
 
 import collections
-import fnmatch
 import glob
+import logging
 import os
 import shutil
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from chromite.lib import autotest_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import toolchain_util
@@ -24,6 +24,10 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 
+if TYPE_CHECKING:
+  from chromite.lib import chroot_lib
+  from chromite.lib import sysroot_lib
+  from chromite.lib import build_target_lib
 
 # Archive type constants.
 ARCHIVE_CONTROL_FILES = 'control'
@@ -69,17 +73,18 @@ class NoFilesError(Error):
   """When there are no files to archive."""
 
 
-def BuildFirmwareArchive(chroot, sysroot, output_directory):
+def BuildFirmwareArchive(chroot: 'chroot_lib.Chroot',
+                         sysroot: 'sysroot_lib.Sysroot',
+                         output_directory: str) -> Optional[str]:
   """Build firmware_from_source.tar.bz2 in chroot's sysroot firmware directory.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot to be used.
-    sysroot (sysroot_lib.Sysroot): The sysroot whose artifacts are being
-      archived.
-    output_directory (str): The path were the completed archives should be put.
+    chroot: The chroot to be used.
+    sysroot: The sysroot whose artifacts are being archived.
+    output_directory: The path were the completed archives should be put.
 
   Returns:
-    str|None - The archive file path if created, None otherwise.
+    The archive file path if created, None otherwise.
   """
   firmware_root = os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
                                'firmware')
@@ -109,17 +114,18 @@ def BuildFirmwareArchive(chroot, sysroot, output_directory):
 
   return archive_file
 
-def BundleFpmcuUnittests(chroot, sysroot, output_directory):
+def BundleFpmcuUnittests(chroot: 'chroot_lib.Chroot',
+                         sysroot: 'sysroot_lib.Sysroot',
+                         output_directory: 'str') -> Optional[str]:
   """Create artifact tarball for fingerprint MCU on-device unittests.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot containing the sysroot.
-    sysroot (sysroot_lib.Sysroot): The sysroot whose artifacts are being
-      archived.
-    output_directory (str): The path were the completed archives should be put.
+    chroot: The chroot containing the sysroot.
+    sysroot: The sysroot whose artifacts are being archived.
+    output_directory: The path were the completed archives should be put.
 
   Returns:
-    str|None - The archive file path if created, None otherwise.
+    The archive file path if created, None otherwise.
   """
   fpmcu_unittests_root = os.path.join(chroot.path, sysroot.path.lstrip(os.sep),
                                       'firmware', 'chromeos-fpmcu-unittests')
@@ -136,17 +142,19 @@ def BundleFpmcuUnittests(chroot, sysroot, output_directory):
 
   return archive_file
 
-def BundleAutotestFiles(chroot, sysroot, output_directory):
+
+def BundleAutotestFiles(chroot: 'chroot_lib.Chroot',
+                        sysroot: 'sysroot_lib.Sysroot',
+                        output_directory: str) -> Dict[str, str]:
   """Create the Autotest Hardware Test archives.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot containing the sysroot.
-    sysroot (sysroot_lib.Sysroot): The sysroot whose artifacts are being
-      archived.
-    output_directory (str): The path were the completed archives should be put.
+    chroot: The chroot containing the sysroot.
+    sysroot: The sysroot whose artifacts are being archived.
+    output_directory: The path were the completed archives should be put.
 
   Returns:
-    dict - The paths of the files created in |output_directory| by their type.
+    The paths of the files created in |output_directory| by their type.
   """
   assert sysroot.Exists(chroot=chroot)
   assert output_directory
@@ -175,12 +183,14 @@ def BundleAutotestFiles(chroot, sysroot, output_directory):
   return {k: v for k, v in results.items() if v}
 
 
-def BundleEBuildLogsTarball(chroot, sysroot, archive_dir):
+def BundleEBuildLogsTarball(chroot: 'chroot_lib.Chroot',
+                            sysroot: 'sysroot_lib.Sysroot',
+                            archive_dir: str) -> Optional[str]:
   """Builds a tarball containing ebuild logs.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot to be used.
-    sysroot (sysroot_lib.Sysroot): Sysroot whose images are being fetched.
+    chroot: The chroot to be used.
+    sysroot: Sysroot whose images are being fetched.
     archive_dir: The directory to drop the tarball in.
 
   Returns:
@@ -207,12 +217,14 @@ def BundleEBuildLogsTarball(chroot, sysroot, archive_dir):
   return os.path.basename(tarball_output)
 
 
-def BundleChromeOSConfig(chroot, sysroot, archive_dir):
+def BundleChromeOSConfig(chroot: 'chroot_lib.Chroot',
+                         sysroot: 'sysroot_lib.Sysroot',
+                         archive_dir: str) -> Optional[str]:
   """Outputs the ChromeOS Config payload.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot to be used.
-    sysroot (sysroot_lib.Sysroot): Sysroot whose config is being fetched.
+    chroot: The chroot to be used.
+    sysroot: Sysroot whose config is being fetched.
     archive_dir: The directory to drop the config in.
 
   Returns:
@@ -229,14 +241,17 @@ def BundleChromeOSConfig(chroot, sysroot, archive_dir):
   return os.path.basename(config_output)
 
 
-def BundleSimpleChromeArtifacts(chroot, sysroot, build_target, output_dir):
+def BundleSimpleChromeArtifacts(chroot: 'chroot_lib.Chroot',
+                                sysroot: 'sysroot_lib.Sysroot',
+                                build_target: 'build_target_lib.BuildTarget',
+                                output_dir: str) -> List[str]:
   """Gather all of the simple chrome artifacts.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot to be used.
-    sysroot (sysroot_lib.Sysroot): The sysroot.
-    build_target (build_target_lib.BuildTarget): The sysroot's build target.
-    output_dir (str): Where all result files should be stored.
+    chroot: The chroot to be used.
+    sysroot: The sysroot.
+    build_target: The sysroot's build target.
+    output_dir: Where all result files should be stored.
   """
   files = []
   files.extend(CreateChromeRoot(chroot, build_target, output_dir))
@@ -245,13 +260,14 @@ def BundleSimpleChromeArtifacts(chroot, sysroot, build_target, output_dir):
   return files
 
 
-def BundleVmFiles(chroot, test_results_dir, output_dir):
+def BundleVmFiles(chroot: 'chroot_lib.Chroot', test_results_dir: str,
+                  output_dir: str) -> List[str]:
   """Gather all of the VM files.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot to be used.
-    test_results_dir (str): Test directory relative to chroot.
-    output_dir (str): Where all result files should be stored.
+    chroot: The chroot to be used.
+    test_results_dir: Test directory relative to chroot.
+    output_dir: Where all result files should be stored.
   """
   image_dir = chroot.full_path(test_results_dir)
   archives = ArchiveFilesFromImageDir(image_dir, output_dir)
@@ -260,26 +276,20 @@ def BundleVmFiles(chroot, test_results_dir, output_dir):
 
 # TODO(mmortensen): Refactor ArchiveFilesFromImageDir to be part of a library
 # module. I tried moving it to lib/vm.py but this causes a circular dependency.
-def ArchiveFilesFromImageDir(images_dir, archive_path):
+def ArchiveFilesFromImageDir(images_dir: str, archive_path: str) -> List[str]:
   """Archives the files into tarballs if they match a prefix from prefix_list.
 
   Create and return a list of tarballs from the images_dir of files that match
   VM disk and memory prefixes.
 
   Args:
-    images_dir (str): The directory containing the images to archive.
-    archive_path (str): The directory where the archives should be created.
+    images_dir: The directory containing the images to archive.
+    archive_path: The directory where the archives should be created.
 
   Returns:
-    list[str] - The paths to the tarballs.
+    The paths to the tarballs.
   """
   images = []
-  for prefix in [constants.VM_DISK_PREFIX, constants.VM_MEM_PREFIX]:
-    for path, _, filenames in os.walk(images_dir):
-      images.extend([
-          os.path.join(path, filename)
-          for filename in fnmatch.filter(filenames, prefix + '*')
-      ])
 
   tar_files = []
   for image_path in images:
@@ -300,16 +310,16 @@ def ArchiveFilesFromImageDir(images_dir, archive_path):
   return tar_files
 
 
-def ArchiveChromeEbuildEnv(sysroot, output_dir):
+def ArchiveChromeEbuildEnv(sysroot: 'sysroot_lib.Sysroot',
+                           output_dir: str) -> str:
   """Generate Chrome ebuild environment.
 
   Args:
-    sysroot (sysroot_lib.Sysroot): The sysroot where the original environment
-      archive can be found.
-    output_dir (str): Where the result should be stored.
+    sysroot: The sysroot where the original environment archive can be found.
+    output_dir: Where the result should be stored.
 
   Returns:
-    str: The path to the archive.
+    The path to the archive.
 
   Raises:
     NoFilesException: When the package cannot be found.
@@ -338,15 +348,15 @@ def ArchiveChromeEbuildEnv(sysroot, output_dir):
   return result_path
 
 
-def ArchiveImages(image_dir, output_dir):
+def ArchiveImages(image_dir: str, output_dir: str) -> List[str]:
   """Create a .tar.xz archive for each image that has been created.
 
   Args:
-    image_dir (str): The directory where the images are located.
-    output_dir (str): The location where the archives should be created.
+    image_dir: The directory where the images are located.
+    output_dir: The location where the archives should be created.
 
   Returns:
-    list[str]: The list of created file names.
+    The list of created file names.
   """
   files = os.listdir(image_dir)
 
@@ -362,13 +372,13 @@ def ArchiveImages(image_dir, output_dir):
   return archives
 
 
-def BundleImageZip(output_dir, image_dir):
+def BundleImageZip(output_dir: str, image_dir: str) -> str:
   """Bundle image.zip.
 
   Args:
-    output_dir (str): The location outside the chroot where the files should be
+    output_dir: The location outside the chroot where the files should be
       stored.
-    image_dir (str): The directory containing the image.
+    image_dir: The directory containing the image.
   """
 
   filename = 'image.zip'
@@ -378,17 +388,19 @@ def BundleImageZip(output_dir, image_dir):
   return filename
 
 
-def CreateChromeRoot(chroot, build_target, output_dir):
+def CreateChromeRoot(chroot: 'chroot_lib.Chroot',
+                     build_target: 'build_target_lib.BuildTarget',
+                     output_dir: str) -> List[str]:
   """Create the chrome sysroot.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot in which the sysroot should be built.
-    build_target (build_target_lib.BuildTarget): The build target.
-    output_dir (str): The location outside the chroot where the files should be
+    chroot: The chroot in which the sysroot should be built.
+    build_target: The build target.
+    output_dir: The location outside the chroot where the files should be
       stored.
 
   Returns:
-    list[str]: The list of created files.
+    The list of created files.
 
   Raises:
     CrosGenerateSysrootError: When cros_generate_sysroot does not complete
@@ -419,15 +431,15 @@ def CreateChromeRoot(chroot, build_target, output_dir):
     return files
 
 
-def BundleTestUpdatePayloads(image_path, output_dir):
+def BundleTestUpdatePayloads(image_path: str, output_dir: str) -> List[str]:
   """Generate the test update payloads.
 
   Args:
-    image_path (str): The full path to an image file.
-    output_dir (str): The path where the payloads should be generated.
+    image_path: The full path to an image file.
+    output_dir: The path where the payloads should be generated.
 
   Returns:
-    list[str] - The list of generated payloads.
+    The list of generated payloads.
   """
   payloads = GenerateTestPayloads(image_path, output_dir, full=True,
                                   stateful=True, delta=True, dlc=True)
@@ -436,20 +448,24 @@ def BundleTestUpdatePayloads(image_path, output_dir):
   return payloads
 
 
-def GenerateTestPayloads(target_image_path, archive_dir, full=False,
-                         delta=False, stateful=False, dlc=False):
+def GenerateTestPayloads(target_image_path: str,
+                         archive_dir: str,
+                         full: bool = False,
+                         delta: bool = False,
+                         stateful: bool = False,
+                         dlc: bool = False) -> List[str]:
   """Generates the payloads for hw testing.
 
   Args:
-    target_image_path (str): The path to the image to generate payloads to.
-    archive_dir (str): Where to store payloads we generated.
-    full (bool): Generate full payloads.
-    delta (bool): Generate delta payloads.
-    stateful (bool): Generate stateful payload.
-    dlc (bool): Generate sample-dlc payload if available.
+    target_image_path: The path to the image to generate payloads to.
+    archive_dir: Where to store payloads we generated.
+    full: Generate full payloads.
+    delta: Generate delta payloads.
+    stateful: Generate stateful payload.
+    dlc: Generate sample-dlc payload if available.
 
   Returns:
-    list[str] - The list of payloads that were generated.
+    The list of payloads that were generated.
   """
   real_target = os.path.realpath(target_image_path)
   # The path to the target should look something like this:
@@ -512,15 +528,16 @@ def GenerateTestPayloads(target_image_path, archive_dir, full=False,
   return generated
 
 
-def GenerateQuickProvisionPayloads(target_image_path, archive_dir):
+def GenerateQuickProvisionPayloads(target_image_path: str,
+                                   archive_dir: str) -> List[str]:
   """Generates payloads needed for quick_provision script.
 
   Args:
-    target_image_path (str): The path to the image to extract the partitions.
-    archive_dir (str): Where to store partitions when generated.
+    target_image_path: The path to the image to extract the partitions.
+    archive_dir: Where to store partitions when generated.
 
   Returns:
-    list[str]: The artifacts that were produced.
+    The artifacts that were produced.
   """
   payloads = []
   with osutils.TempDir() as temp_dir:
@@ -532,9 +549,20 @@ def GenerateQuickProvisionPayloads(target_image_path, archive_dir):
     partition_lib.ExtractRoot(target_image_path,
                               os.path.join(temp_dir, rootfs_part),
                               truncate=False)
-    for partition, payload in {
+
+    # Partition to payload mapping.
+    mapping = {
         kernel_part: constants.QUICK_PROVISION_PAYLOAD_KERNEL,
-        rootfs_part: constants.QUICK_PROVISION_PAYLOAD_ROOTFS}.items():
+        rootfs_part: constants.QUICK_PROVISION_PAYLOAD_ROOTFS,
+    }
+
+    if partition_lib.HasMiniOSPartitions(target_image_path):
+      minios_part = 'minios.bin'
+      partition_lib.ExtractMiniOS(
+          target_image_path, os.path.join(temp_dir, minios_part))
+      mapping[minios_part] = constants.QUICK_PROVISION_PAYLOAD_MINIOS
+
+    for partition, payload in mapping.items():
       source = os.path.join(temp_dir, partition)
       dest = os.path.join(archive_dir, payload)
       cros_build_lib.CompressFile(source, dest)
@@ -543,21 +571,22 @@ def GenerateQuickProvisionPayloads(target_image_path, archive_dir):
   return payloads
 
 
-def BundleAFDOGenerationArtifacts(is_orderfile, chroot, chrome_root,
-                                  build_target, output_dir):
+def BundleAFDOGenerationArtifacts(is_orderfile: bool,
+                                  chroot: 'chroot_lib.Chroot', chrome_root: str,
+                                  build_target: 'build_target_lib.BuildTarget',
+                                  output_dir: str) -> List[str]:
   """Generate artifacts for toolchain-related AFDO artifacts.
 
   Args:
-    is_orderfile (boolean): The generation is for orderfile (True) or
-    for AFDO (False).
-    chroot (chroot_lib.Chroot): The chroot in which the sysroot should be built.
-    chrome_root (str): Path to Chrome root.
-    build_target (build_target_lib.BuildTarget): The build target.
-    output_dir (str): The location outside the chroot where the files should be
+    is_orderfile: The generation is for orderfile (True) or for AFDO (False).
+    chroot: The chroot in which the sysroot should be built.
+    chrome_root: Path to Chrome root.
+    build_target: The build target.
+    output_dir: The location outside the chroot where the files should be
       stored.
 
   Returns:
-    list[str]: The list of tarballs of artifacts.
+    The list of tarballs of artifacts.
   """
   chroot_args = chroot.get_enter_args()
   with chroot.tempdir() as tempdir:
@@ -589,12 +618,13 @@ def BundleAFDOGenerationArtifacts(is_orderfile, chroot, chrome_root,
     return files
 
 
-def BundleTastFiles(chroot, sysroot, output_dir):
+def BundleTastFiles(chroot: 'chroot_lib.Chroot', sysroot: 'sysroot_lib.Sysroot',
+                    output_dir: str) -> Optional[str]:
   """Tar up the Tast private test bundles.
 
   Args:
-    chroot (chroot_lib.Chroot): Chroot containing the sysroot.
-    sysroot (sysroot_lib.Sysroot): Sysroot whose files are being archived.
+    chroot: Chroot containing the sysroot.
+    sysroot: Sysroot whose files are being archived.
     output_dir: Location for storing the result tarball.
 
   Returns:
@@ -615,15 +645,15 @@ def BundleTastFiles(chroot, sysroot, output_dir):
 
   return tarball
 
-
-def GenerateCpeReport(chroot, sysroot, output_dir):
+def GenerateCpeReport(chroot: 'chroot_lib.Chroot',
+                      sysroot: 'sysroot_lib.Sysroot',
+                      output_dir: str) -> CpeResult:
   """Generate CPE export.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot where the command is being run.
-    sysroot (sysroot_lib.Sysroot): The sysroot whose dependencies are being
-        reported.
-    output_dir (str): The path where the output files should be written.
+    chroot: The chroot where the command is being run.
+    sysroot: The sysroot whose dependencies are being reported.
+    output_dir: The path where the output files should be written.
 
   Returns:
     CpeResult: The CPE result instance with the full paths to the report and
@@ -659,13 +689,13 @@ def GenerateCpeReport(chroot, sysroot, output_dir):
 
   return CpeResult(report=report_path, warnings=warnings_path)
 
-def BundleGceTarball(output_dir, image_dir):
+def BundleGceTarball(output_dir: str, image_dir: str) -> str:
   """Bundle the test image into a tarball suitable for importing into GCE.
 
   Args:
-    output_dir (str): The location outside the chroot where the files should be
+    output_dir: The location outside the chroot where the files should be
       stored.
-    image_dir (str): The directory containing the image.
+    image_dir: The directory containing the image.
 
   Returns:
     Path to the generated tarball.

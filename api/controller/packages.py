@@ -4,6 +4,8 @@
 
 """Package related functionality."""
 
+import logging
+
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
@@ -12,10 +14,9 @@ from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import portage_util
-from chromite.lib.uprev_lib import GitRef
 from chromite.lib.parser import package_info
+from chromite.lib.uprev_lib import GitRef
 from chromite.service import packages
 
 
@@ -43,15 +44,20 @@ def Uprev(input_proto, output_proto, _config):
   output_dir = input_proto.output_dir or None
 
   try:
-    uprevved = packages.uprev_build_targets(build_targets, overlay_type, chroot,
-                                            output_dir)
+    modified_ebuilds, revved_packages = (
+        packages.uprev_build_targets(build_targets, overlay_type, chroot,
+                                     output_dir))
   except packages.Error as e:
     # Handle module errors nicely, let everything else bubble up.
     cros_build_lib.Die(e)
 
-  for path in uprevved:
+  for path in modified_ebuilds:
     output_proto.modified_ebuilds.add().path = path
 
+  for package in revved_packages:
+    pkg_info = package_info.parse(package)
+    pkg_proto = output_proto.packages.add()
+    controller_util.serialize_package_info(pkg_info, pkg_proto)
 
 def _UprevVersionedPackageResponse(_input_proto, output_proto, _config):
   """Add fake paths to a successful uprev versioned package response."""
@@ -114,10 +120,8 @@ def GetBestVisible(input_proto, output_proto, _config):
   if input_proto.build_target.name:
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
 
-  cpv = packages.get_best_visible(input_proto.atom, build_target=build_target)
-  pkg_info_msg = common_pb2.PackageInfo()
-  controller_util.CPVToPackageInfo(cpv, pkg_info_msg)
-  output_proto.package_info.CopyFrom(pkg_info_msg)
+  best = packages.get_best_visible(input_proto.atom, build_target=build_target)
+  controller_util.serialize_package_info(best, output_proto.package_info)
 
 
 def _ChromeVersionResponse(_input_proto, output_proto, _config):
@@ -371,6 +375,11 @@ def NeedsChromeSource(input_proto, output_proto, _config):
   if compile_source:
     output_proto.reasons.append(
         packages_pb2.NeedsChromeSourceResponse.COMPILE_SOURCE)
+
+  # Local uprev reason.
+  if result.local_uprev:
+    output_proto.reasons.append(
+        packages_pb2.NeedsChromeSourceResponse.LOCAL_UPREV)
 
   # No chrome prebuilt reason.
   if result.missing_chrome_prebuilt:

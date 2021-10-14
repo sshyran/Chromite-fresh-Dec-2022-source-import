@@ -9,10 +9,11 @@ from distutils.version import LooseVersion
 import fileinput
 import functools
 import json
+import logging
 import os
 import re
 import sys
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -20,7 +21,6 @@ from chromite.api.gen.config import replication_config_pb2
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import image_lib
 from chromite.lib import osutils
@@ -28,6 +28,9 @@ from chromite.lib import portage_util
 from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
+
+if TYPE_CHECKING:
+  from chromite.lib import build_target_lib
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
@@ -74,7 +77,7 @@ class AndroidIsPinnedUprevError(UprevError):
     assert new_android_atom
     msg = ('Failed up uprev to Android version %s as Android was pinned.' %
            new_android_atom)
-    super(AndroidIsPinnedUprevError, self).__init__(msg)
+    super().__init__(msg)
     self.new_android_atom = new_android_atom
 
 
@@ -84,7 +87,7 @@ class GeneratedCrosConfigFilesError(Error):
   def __init__(self, expected_files, found_files):
     msg = ('Expected to find generated C files: %s. Actually found: %s' %
            (expected_files, found_files))
-    super(GeneratedCrosConfigFilesError, self).__init__(msg)
+    super().__init__(msg)
 
 
 NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (
@@ -93,6 +96,7 @@ NeedsChromeSourceResult = collections.namedtuple('NeedsChromeSourceResult', (
     'packages',
     'missing_chrome_prebuilt',
     'missing_follower_prebuilt',
+    'local_uprev',
 ))
 
 
@@ -243,7 +247,7 @@ def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
       output_dir=output_dir)
   uprev_manager.uprev()
 
-  return uprev_manager.modified_ebuilds
+  return uprev_manager.modified_ebuilds, uprev_manager.revved_packages
 
 
 def uprev_versioned_package(package, build_targets, refs, chroot):
@@ -399,13 +403,13 @@ def uprev_kernel_afdo(*_args, **_kwargs):
     versions = json.load(f)
 
   result = uprev_lib.UprevVersionedPackageResult()
-  for version, version_info in versions.items():
-    path = os.path.join('src', 'third_party', 'chromiumos-overlay',
-                        'sys-kernel', version)
+  for kernel_pkg, version_info in versions.items():
+    path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                        'sys-kernel', kernel_pkg)
     ebuild_path = os.path.join(constants.SOURCE_ROOT, path,
-                               '%s-9999.ebuild' % version)
+                               '%s-9999.ebuild' % kernel_pkg)
     chroot_ebuild_path = os.path.join(constants.CHROOT_SOURCE_ROOT, path,
-                                      '%s-9999.ebuild' % version)
+                                      '%s-9999.ebuild' % kernel_pkg)
     afdo_profile_version = version_info['name']
     patch_ebuild_vars(ebuild_path,
                       dict(AFDO_PROFILE_VERSION=afdo_profile_version))
@@ -445,14 +449,26 @@ def uprev_termina_dlc(_build_targets, _refs, chroot):
 def uprev_lacros(_build_targets, refs, chroot):
   """Updates lacros ebuilds.
 
-  Information used is gathered from the QA qualified version tracking file
-  stored in chromium/src.
+  Version to uprev to is gathered from the QA qualified version tracking file
+  stored in chromium/src/chrome/LACROS_QA_QUALIFIED_VERSION. Uprev is triggered
+  on modification of this file across all chromium/src branches.
 
   See: uprev_versioned_package.
   """
+  result = uprev_lib.UprevVersionedPackageResult()
   path = os.path.join(
-      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base','chromeos-lacros')
-  return uprev_lib.uprev_ebuild_from_pin(path, refs[0].revision, chroot)
+      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base', 'chromeos-lacros')
+  lacros_version = refs[0].revision
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
+                                                          lacros_version,
+                                                          chroot,
+                                                          allow_downrev=False)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(lacros_version, uprev_result.changed_files)
+  return result
 
 
 @uprevs_versioned_package('app-emulation/parallels-desktop')
@@ -522,7 +538,7 @@ def _get_version_pin_src_path(package_path):
 
 
 @uprevs_versioned_package(constants.CHROME_CP)
-def uprev_chrome(build_targets, refs, chroot):
+def uprev_chrome_from_ref(build_targets, refs, chroot):
   """Uprev chrome and its related packages.
 
   See: uprev_versioned_package.
@@ -532,11 +548,32 @@ def uprev_chrome(build_targets, refs, chroot):
   chrome_version = uprev_lib.get_chrome_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
+  return uprev_chrome(build_targets, chrome_version, chroot)
+
+
+def revbump_chrome(
+    build_targets: List['build_target_lib.BuildTarget'],
+    chroot: Optional['chroot_lib.Chroot'] = None
+) -> uprev_lib.UprevVersionedPackageResult:
+  """Attempt to revbump chrome.
+
+  Revbumps are done by executing an uprev using the current stable version.
+  E.g. if chrome is on 1.2.3.4 and has a 1.2.3.4_rc-r2.ebuild, performing an
+  uprev on version 1.2.3.4 when there are applicable changes (e.g. to the 9999
+  ebuild) will result in a revbump to 1.2.3.4_rc-r3.ebuild.
+  """
+  chrome_version = uprev_lib.get_stable_chrome_version()
+  return uprev_chrome(build_targets, chrome_version, chroot)
+
+
+def uprev_chrome(
+    build_targets: List['build_target_lib.BuildTarget'], chrome_version: str,
+    chroot: Union['chroot_lib.Chroot', None]
+) -> uprev_lib.UprevVersionedPackageResult:
+  """Attempt to uprev chrome and its related packages to the given version."""
   uprev_manager = uprev_lib.UprevChromeManager(
       chrome_version, build_targets=build_targets, chroot=chroot)
   result = uprev_lib.UprevVersionedPackageResult()
-  # Start with chrome itself, as we can't do anything else unless chrome
-  # uprevs successfully.
   # TODO(crbug.com/1080429): Handle all possible outcomes of a Chrome uprev
   #     attempt. The expected behavior is documented in the following table:
   #
@@ -549,14 +586,25 @@ def uprev_chrome(build_targets, refs, chroot):
   #     VERSION_BUMP or NEW_EBUILD_CREATED:
   #       Uprev followers
   #       Assert that Chrome & followers are at same package version
-  if not uprev_manager.uprev(constants.CHROME_CP):
+
+  # Start with chrome itself so we can proceed accordingly.
+  chrome_result = uprev_manager.uprev(constants.CHROME_CP)
+  if chrome_result.newer_version_exists:
+    # Cannot use the given version (newer version already exists).
     return result
 
-  # With a successful chrome rev, also uprev related packages.
+  # Also uprev related packages.
   for package in constants.OTHER_CHROME_PACKAGES:
-    uprev_manager.uprev(package)
+    follower_result = uprev_manager.uprev(package)
+    if chrome_result.stable_version and follower_result.version_bump:
+      logging.warning('%s had a version bump, but no more than a revision bump '
+                      'should have been possible.', package)
 
-  return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
+  if uprev_manager.modified_ebuilds:
+    # Record changes when we have them.
+    return result.add_result(chrome_version, uprev_manager.modified_ebuilds)
+
+  return result
 
 
 def _get_latest_version_from_refs(refs_prefix: str,
@@ -727,21 +775,68 @@ def replicate_private_config(_build_targets, refs, chroot):
       new_private_version, modified_files)
 
 
-def get_best_visible(atom, build_target=None):
+@uprevs_versioned_package('chromeos-base/crosvm')
+def uprev_crosvm(_build_targets, refs, _chroot):
+  """Updates crosvm ebuilds to latest revision
+
+  crosvm is not versioned. We are updating to the latest commit on the main
+  branch.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result of updating crosvm ebuilds.
+  """
+  overlay = os.path.join(constants.SOURCE_ROOT,
+                         constants.CHROMIUMOS_OVERLAY_DIR)
+  repo_path = os.path.join(constants.SOURCE_ROOT, 'src', 'crosvm')
+  manifest = git.ManifestCheckout.Cached(repo_path)
+
+  uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
+  uprev_manager.uprev(
+      package_list=[
+          'chromeos-base/crosvm',
+          'dev-rust/assertions',
+          'dev-rust/cros_async',
+          'dev-rust/cros_fuzz',
+          'dev-rust/data_model',
+          'dev-rust/enumn',
+          'dev-rust/io_uring',
+          'dev-rust/p9',
+          'dev-rust/sync',
+          'dev-rust/sys_util',
+          'dev-rust/tempfile',
+          'media-sound/audio_streams',
+      ],
+      force=True
+  )
+
+  updated_files = uprev_manager.modified_ebuilds
+  result = uprev_lib.UprevVersionedPackageResult()
+  result.add_result(refs[0].revision, updated_files)
+  return result
+
+
+def get_best_visible(
+    atom: str,
+    build_target: Optional['build_target_lib.BuildTarget'] = None
+) -> package_info.PackageInfo:
   """Returns the best visible CPV for the given atom.
 
   Args:
-    atom (str): The atom to look up.
-    build_target (build_target_lib.BuildTarget): The build target whose
-        sysroot should be searched, or the SDK if not provided.
+    atom: The atom to look up.
+    build_target: The build target whose sysroot should be searched, or the SDK
+      if not provided.
 
   Returns:
-    package_info.CPV|None: The best visible package.
+    The best visible package, or None if none are visible.
   """
   assert atom
 
-  board = build_target.name if build_target else None
-  return portage_util.PortageqBestVisible(atom, board=board)
+  return portage_util.PortageqBestVisible(
+      atom,
+      board=build_target.name if build_target else None,
+      sysroot=build_target.root if build_target else None)
 
 
 def has_prebuilt(atom, build_target=None, useflags=None):
@@ -804,6 +899,8 @@ def needs_chrome_source(
       pkg: pkg in graph for pkg in constants.OTHER_CHROME_PACKAGES
   }
 
+  local_uprev = builds_chrome and revbump_chrome([build_target])
+
   # When we are compiling source set False since we do not use prebuilts.
   # When not compiling from source, start with True, i.e. we have every prebuilt
   # we've checked for up to this point.
@@ -842,7 +939,9 @@ def needs_chrome_source(
       builds_chrome=builds_chrome,
       packages=[package_info.parse(p) for p in pkgs_needing_prebuilts],
       missing_chrome_prebuilt=not has_chrome_prebuilt,
-      missing_follower_prebuilt=not has_follower_prebuilts)
+      missing_follower_prebuilt=not has_follower_prebuilts,
+      local_uprev=local_uprev,
+  )
 
 
 def determine_chrome_version(build_target):
@@ -858,7 +957,7 @@ def determine_chrome_version(build_target):
   # the builds function above only returns True for chrome when
   # determine_chrome_version will succeed.
   try:
-    cpv = portage_util.PortageqBestVisible(
+    pkg_info = portage_util.PortageqBestVisible(
         constants.CHROME_CP, build_target.name, cwd=constants.SOURCE_ROOT)
   except cros_build_lib.RunCommandError as e:
     # Return None because portage failed when trying to determine the chrome
@@ -866,7 +965,7 @@ def determine_chrome_version(build_target):
     logging.warning('Caught exception in determine_chrome_package: %s', e)
     return None
   # Something like 78.0.3877.4_rc -> 78.0.3877.4
-  return cpv.version_no_rev.partition('_')[0]
+  return pkg_info.version.partition('_')[0]
 
 
 def determine_android_package(board):

@@ -11,6 +11,7 @@ archiving results and VM images in case of failure.
 """
 
 import datetime
+import logging
 import os
 import re
 import shutil
@@ -20,7 +21,6 @@ from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import cgroups
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cts_helper
 from chromite.lib import failures_lib
 from chromite.lib import moblab_vm
@@ -28,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
 from chromite.service import artifacts as artifacts_svc
+
 
 _GCE_TEST_RESULTS = 'gce_test_results_%(attempt)s'
 _VM_TEST_RESULTS = 'vm_test_results_%(attempt)s'
@@ -90,9 +91,8 @@ class VMTestStage(generic_stages.BoardSpecificBuilderStage,
     self._vm_tests = vm_tests
     self._ssh_port = ssh_port
     self._test_basename = test_basename
-    self._stage_exception_handler = super(VMTestStage,
-                                          self)._HandleStageException
-    super(VMTestStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    self._stage_exception_handler = super()._HandleStageException
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def _PrintFailedTests(self, results_path, test_basename):
     """Print links to failed tests.
@@ -348,7 +348,7 @@ class GCETestStage(VMTestStage):
                 builder_run.config.gce_tests instead.
     """
     self._gce_tests = gce_tests
-    super(GCETestStage, self).__init__(builder_run, buildstore, board, **kwargs)
+    super().__init__(builder_run, buildstore, board, **kwargs)
 
   def _RunTest(self, test_config, test_results_dir):
     """Run a GCE test.
@@ -607,8 +607,6 @@ class MoblabVMTestStage(generic_stages.BoardSpecificBuilderStage,
                                 archive_dir=payloads_dir,
                                 full=True, delta=False, stateful=True,
                                 dlc=False)
-      commands.GenerateQuickProvisionPayloads(
-          target_image_path=target_image_path, archive_dir=payloads_dir)
       cwd = os.path.abspath(
           os.path.join(self._build_root, 'chroot', 'build', self._current_board,
                        constants.AUTOTEST_BUILD_PATH, '..'))

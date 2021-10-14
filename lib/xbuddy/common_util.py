@@ -8,6 +8,7 @@ import ast
 import base64
 import distutils.version  # pylint: disable=no-name-in-module,import-error
 import hashlib
+import logging
 import os
 import re
 import shutil
@@ -16,7 +17,6 @@ import threading
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 

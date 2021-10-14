@@ -538,7 +538,7 @@ class FakeBuildStore(object):
   """Fake BuildStore class to be used only in unittests."""
 
   def __init__(self, fake_cidb_conn=None):
-    super(FakeBuildStore, self).__init__()
+    super().__init__()
     if fake_cidb_conn:
       self.fake_cidb = fake_cidb_conn
     else:

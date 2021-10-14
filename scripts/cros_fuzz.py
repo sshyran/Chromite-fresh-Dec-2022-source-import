@@ -40,19 +40,20 @@ log-level to debug ("--log-level debug"). Otherwise it will print commands that
 fail.
 """
 
+import logging
 import os
 import shutil
+
+from chromite.third_party import lddtree
+from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
-from chromite.third_party import lddtree
-from chromite.third_party.pyelftools.elftools.elf.elffile import ELFFile
 
 
 # Directory in sysroot's /tmp directory that this script will use for files it

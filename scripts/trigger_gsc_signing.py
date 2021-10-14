@@ -9,13 +9,13 @@ Causes signing to occur for a given artifact.
 
 import argparse
 import json
+import logging
 import re
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos import sign_image_pb2
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 
 

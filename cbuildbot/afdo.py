@@ -11,13 +11,22 @@ import collections
 import datetime
 import glob
 import json
+import logging
 import os
 import re
+from typing import TYPE_CHECKING
 
-from chromite.lib import constants, cros_build_lib
-from chromite.lib import cros_logging as logging
-from chromite.lib import (failures_lib, git, gs, osutils, path_util,
-                          timeout_util)
+from chromite.lib import constants
+from chromite.lib import cros_build_lib
+from chromite.lib import failures_lib
+from chromite.lib import git
+from chromite.lib import gs
+from chromite.lib import osutils
+from chromite.lib import path_util
+from chromite.lib import timeout_util
+
+if TYPE_CHECKING:
+  from chromite.lib.parser import package_info
 
 
 # AFDO-specific constants.
@@ -205,13 +214,13 @@ def GSUploadIfNotPresent(gs_context, src, dest):
     return True
 
 
-def GetAFDOPerfDataURL(cpv, arch):
+def GetAFDOPerfDataURL(chrome_pkg: 'package_info.PackageInfo', arch):
   """Return the location URL for the AFDO per data file.
 
   Build the URL for the 'perf' data file given the release and architecture.
 
   Args:
-    cpv: The package_info.CPV object for chromeos-chrome.
+    chrome_pkg: Chrome package information.
     arch: architecture we're going to build Chrome for.
 
   Returns:
@@ -222,30 +231,29 @@ def GetAFDOPerfDataURL(cpv, arch):
   # The test case that produces it does not know anything about the
   # revision number.
   # TODO(llozano): perf data filename should include the revision number.
-  version_number = cpv.version_no_rev.split('_')[0]
   chrome_spec = {
-      'package': cpv.package,
+      'package': chrome_pkg.package,
       'arch': arch,
-      'version': version_number
+      'version': chrome_pkg.version,
   }
   return GSURL_CHROME_PERF % chrome_spec
 
 
-def CheckAFDOPerfData(cpv, arch, gs_context):
+def CheckAFDOPerfData(chrome_pkg: 'package_info.PackageInfo', arch, gs_context):
   """Check whether AFDO perf data exists for the given architecture.
 
   Check if 'perf' data file for this architecture and release is available
   in GS.
 
   Args:
-    cpv: The package_info.CPV object for chromeos-chrome.
+    chrome_pkg: Chrome package information.
     arch: architecture we're going to build Chrome for.
     gs_context: GS context to retrieve data.
 
   Returns:
     True if AFDO perf data is available. False otherwise.
   """
-  url = GetAFDOPerfDataURL(cpv, arch)
+  url = GetAFDOPerfDataURL(chrome_pkg, arch)
   if not gs_context.Exists(url):
     logging.info('Could not find AFDO perf data at %s', url)
     return False
@@ -254,7 +262,7 @@ def CheckAFDOPerfData(cpv, arch, gs_context):
   return True
 
 
-def WaitForAFDOPerfData(cpv,
+def WaitForAFDOPerfData(chrome_pkg: 'package_info.PackageInfo',
                         arch,
                         buildroot,
                         gs_context,
@@ -266,7 +274,7 @@ def WaitForAFDOPerfData(cpv,
 
   Args:
     arch: architecture we're going to build Chrome for.
-    cpv: CPV object for Chrome.
+    chrome_pkg: Chrome package information.
     buildroot: buildroot where AFDO data should be stored.
     gs_context: GS context to retrieve data.
     timeout: How long to wait total, in seconds.
@@ -278,14 +286,14 @@ def WaitForAFDOPerfData(cpv,
   try:
     timeout_util.WaitForReturnTrue(
         CheckAFDOPerfData,
-        func_args=(cpv, arch, gs_context),
+        func_args=(chrome_pkg, arch, gs_context),
         timeout=timeout,
         period=constants.SLEEP_TIMEOUT)
   except timeout_util.TimeoutError:
     logging.info('Could not find AFDO perf data before timeout')
     return False
 
-  url = GetAFDOPerfDataURL(cpv, arch)
+  url = GetAFDOPerfDataURL(chrome_pkg, arch)
   dest_dir = AFDO_BUILDROOT_LOCAL % {'build_root': buildroot}
   dest_path = os.path.join(dest_dir, url.rsplit('/', 1)[1])
   gs_context.Copy(url, dest_path)
@@ -903,7 +911,8 @@ def VerifyLatestAFDOFile(afdo_release_spec, buildroot, gs_context):
   return cand, False
 
 
-def GetBenchmarkProfile(cpv, _source, buildroot, gs_context):
+def GetBenchmarkProfile(chrome_pkg: 'package_info.PackageInfo', _source,
+                        buildroot, gs_context):
   """Try to find the latest suitable AFDO profile file.
 
   Try to find the latest AFDO profile generated for current release
@@ -911,8 +920,8 @@ def GetBenchmarkProfile(cpv, _source, buildroot, gs_context):
   in case we have just branched).
 
   Args:
-    cpv: cpv object for Chrome.
-    source: benchmark source for which we are looking
+    chrome_pkg: Chrome package information.
+    _source: benchmark source for which we are looking
     buildroot: buildroot where AFDO data should be stored.
     gs_context: GS context to retrieve data.
 
@@ -923,11 +932,11 @@ def GetBenchmarkProfile(cpv, _source, buildroot, gs_context):
 
   # Currently, benchmark based profiles can only be generated on amd64.
   arch = 'amd64'
-  version_numbers = cpv.version.split('.')
+  version_numbers = chrome_pkg.vr.split('.')
   current_release = version_numbers[0]
   current_build = version_numbers[2]
   afdo_release_spec = {
-      'package': cpv.package,
+      'package': chrome_pkg.package,
       'arch': arch,
       'release': current_release,
       'build': current_build
@@ -946,7 +955,7 @@ def GetBenchmarkProfile(cpv, _source, buildroot, gs_context):
   # Let's see if there is one from the previous release.
   previous_release = str(int(current_release) - 1)
   prev_release_spec = {
-      'package': cpv.package,
+      'package': chrome_pkg.package,
       'arch': arch,
       'release': previous_release,
       'build': current_build
@@ -958,11 +967,12 @@ def GetBenchmarkProfile(cpv, _source, buildroot, gs_context):
   return afdo_file
 
 
-def UpdateLatestAFDOProfileInGS(cpv, arch, buildroot, profile_name, gs_context):
+def UpdateLatestAFDOProfileInGS(chrome_pkg: 'package_info.PackageInfo', arch,
+                                buildroot, profile_name, gs_context):
   """Updates our 'latest profile' file in GS to point to `profile_name`.
 
   Args:
-    cpv: cpv object for Chrome.
+    chrome_pkg: Chrome package information.
     arch: architecture for which we are looking for AFDO profile.
     buildroot: buildroot where AFDO data should be stored.
     profile_name: Name of the profile to point the 'latest profile' file at.
@@ -972,9 +982,9 @@ def UpdateLatestAFDOProfileInGS(cpv, arch, buildroot, profile_name, gs_context):
 
   # Create latest-chrome-<arch>-<release>.afdo pointing to the name
   # of the AFDO profile file and upload to GS.
-  current_release = cpv.version.split('.')[0]
+  current_release = chrome_pkg.vr.split('.')[0]
   afdo_release_spec = {
-      'package': cpv.package,
+      'package': chrome_pkg.package,
       'arch': arch,
       'release': current_release
   }
@@ -987,7 +997,8 @@ def UpdateLatestAFDOProfileInGS(cpv, arch, buildroot, profile_name, gs_context):
       acl='public-read')
 
 
-def GenerateAFDOData(cpv, arch, board, buildroot, gs_context):
+def GenerateAFDOData(chrome_pkg: 'package_info.PackageInfo', arch, board,
+                     buildroot, gs_context):
   """Generate AFDO profile data from 'perf' data.
 
   Given the 'perf' profile, generate an AFDO profile using create_llvm_prof.
@@ -1001,7 +1012,7 @@ def GenerateAFDOData(cpv, arch, board, buildroot, gs_context):
   the previous contents of the data.
 
   Args:
-    cpv: cpv object for Chrome.
+    chrome_pkg: Chrome package information.
     arch: architecture for which we are looking for AFDO profile.
     board: board we are building for.
     buildroot: buildroot where AFDO data should be stored.
@@ -1013,8 +1024,11 @@ def GenerateAFDOData(cpv, arch, board, buildroot, gs_context):
   """
   CHROME_UNSTRIPPED_NAME = 'chrome.unstripped'
 
-  version_number = cpv.version
-  afdo_spec = {'package': cpv.package, 'arch': arch, 'version': version_number}
+  afdo_spec = {
+      'package': chrome_pkg.package,
+      'arch': arch,
+      'version': chrome_pkg.vr,
+  }
   chroot_root, local_dir, in_chroot_local_dir = _BuildrootToWorkDirs(buildroot)
 
   # Upload compressed chrome debug binary to GS for triaging purposes.
@@ -1040,9 +1054,9 @@ def GenerateAFDOData(cpv, arch, board, buildroot, gs_context):
   # The name of the 'perf' file is based only on the version of chrome. The
   # revision number is not included.
   afdo_spec_no_rev = {
-      'package': cpv.package,
+      'package': chrome_pkg.package,
       'arch': arch,
-      'version': cpv.version_no_rev.split('_')[0]
+      'version': chrome_pkg.version.split('_')[0],
   }
   perf_afdo_file = CHROME_PERF_AFDO_FILE % afdo_spec_no_rev
   perf_afdo_path = os.path.join(in_chroot_local_dir, perf_afdo_file)
@@ -1117,16 +1131,17 @@ def CWPProfileToVersionTuple(url):
   return [int(x) for x in re.match(fn_mat, os.path.basename(url)).groups()]
 
 
-def GetCWPProfile(cpv, source, _buildroot, gs_context):
+def GetCWPProfile(chrome_pkg: 'package_info.PackageInfo', source, _buildroot,
+                  gs_context):
   """Try to find the latest suitable AFDO profile file for cwp.
 
   Try to find the latest AFDO profile generated for current release
   and architecture.
 
   Args:
-    cpv: cpv object for Chrome.
+    chrome_pkg: Chrome package information.
     source: profile source
-    buildroot: buildroot where AFDO data should be stored.
+    _buildroot: buildroot where AFDO data should be stored.
     gs_context: GS context to retrieve data.
 
   Returns:
@@ -1134,7 +1149,7 @@ def GetCWPProfile(cpv, source, _buildroot, gs_context):
     None otherwise.
   """
   ver_mat = r'([0-9]+)\.[0-9]+\.([0-9]+)\.([0-9]+)_rc-r[0-9]+'
-  target = [int(x) for x in re.match(ver_mat, cpv.version).groups()]
+  target = [int(x) for x in re.match(ver_mat, chrome_pkg.vr).groups()]
 
   # Check 2 most recent milestones.
   #
@@ -1165,7 +1180,7 @@ def GetCWPProfile(cpv, source, _buildroot, gs_context):
       pass
 
   if not versions:
-    logging.info('profile not found for: %s', cpv.version)
+    logging.info('profile not found for: %s', chrome_pkg.vr)
     return None
 
   # crbug.com/984153: Sort the CWP profiles only by (milestone, timestamp)

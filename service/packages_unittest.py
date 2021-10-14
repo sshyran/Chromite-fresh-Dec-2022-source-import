@@ -8,9 +8,10 @@ import json
 import os
 import re
 
+import pytest
+
 from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
-import pytest
 
 import chromite as cr
 from chromite.api.gen.config.replication_config_pb2 import (
@@ -524,10 +525,11 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
           _build_targets=None, refs=refs, chroot=None)
 
 
-class GetBestVisibleTest(cros_test_lib.TestCase):
+class GetBestVisibleTest(cros_test_lib.MockTestCase):
   """get_best_visible tests."""
 
   def test_empty_atom_fails(self):
+    """Test empty atom raises an error."""
     with self.assertRaises(AssertionError):
       packages.get_best_visible('')
 
@@ -984,40 +986,57 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
 # These test cases cover both CHROME & FOLLOWER ebuilds being identically
 # higher, lower, or the same versions, with no modified ebuilds.
 UPREV_VERSION_CASES = (
+    # Uprev.
     pytest.param(
         '80.0.8080.0',
         '81.0.8181.0',
         # One added and one deleted for chrome and each "other" package.
         2 * (1 + len(constants.OTHER_CHROME_PACKAGES)),
+        False,
         id='newer_chrome_version',
+    ),
+    # Revbump.
+    pytest.param(
+        '80.0.8080.0',
+        '80.0.8080.0',
+        2,
+        True,
+        id='chrome_revbump',
     ),
     # No files should be changed in these cases.
     pytest.param(
         '80.0.8080.0',
         '80.0.8080.0',
         0,
+        False,
         id='same_chrome_version',
     ),
     pytest.param(
         '80.0.8080.0',
         '79.0.7979.0',
         0,
+        False,
         id='older_chrome_version',
     ),
 )
 
 
-@pytest.mark.parametrize('old_version, new_version, expected_count',
-                         UPREV_VERSION_CASES)
+@pytest.mark.parametrize(
+    'old_version, new_version, expected_count, modify_unstable',
+    UPREV_VERSION_CASES)
 def test_uprev_chrome_all_files_already_exist(old_version, new_version,
-                                              expected_count, monkeypatch,
-                                              overlay_stack):
+                                              expected_count, modify_unstable,
+                                              monkeypatch, overlay_stack):
   """Test Chrome uprevs work as expected when all packages already exist."""
   overlay, = overlay_stack(1)
   monkeypatch.setattr(uprev_lib, '_CHROME_OVERLAY_PATH', overlay.path)
 
   unstable_chrome = cr.test.Package(
       'chromeos-base', 'chromeos-chrome', version='9999', keywords='~*')
+  if modify_unstable:
+    # Add some field not set in stable.
+    unstable_chrome.depend = 'foo/bar'
+
   stable_chrome = cr.test.Package(
       'chromeos-base', 'chromeos-chrome', version=f'{old_version}_rc-r1')
 
@@ -1038,7 +1057,8 @@ def test_uprev_chrome_all_files_already_exist(old_version, new_version,
       GitRef(
           path='/foo', ref=f'refs/tags/{new_version}', revision='dummycommit')
   ]
-  res = packages.uprev_chrome(build_targets=None, refs=git_refs, chroot=None)
+  res = packages.uprev_chrome_from_ref(build_targets=None, refs=git_refs,
+                                       chroot=None)
 
   modified_file_count = sum(len(m.files) for m in res.modified)
   assert modified_file_count == expected_count
@@ -1146,6 +1166,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1158,6 +1182,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      len(constants.OTHER_CHROME_PACKAGES) + 1)
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_none(self):
     """Verify not building any of the chrome packages prevents needing it."""
@@ -1165,6 +1190,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1175,6 +1204,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.assertFalse(result.packages)
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_chrome_only(self):
     """Verify only chrome triggers needs chrome source."""
@@ -1182,6 +1212,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1194,6 +1228,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      {constants.CHROME_CP})
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_needs_followers_only(self):
     """Verify only chrome followers triggers needs chrome source."""
@@ -1201,6 +1236,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=False)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1213,6 +1252,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      set(constants.OTHER_CHROME_PACKAGES))
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_has_prebuilts(self):
     """Test prebuilts prevent us from needing chrome source."""
@@ -1220,6 +1260,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1230,6 +1274,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.assertFalse(result.packages)
     self.assertFalse(result.missing_chrome_prebuilt)
     self.assertFalse(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
 
   def test_compile_source(self):
     """Test compile source ignores prebuilts."""
@@ -1237,6 +1282,10 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
     self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
                      return_value=graph)
     self.PatchObject(packages, 'has_prebuilt', return_value=True)
+    self.PatchObject(
+        packages,
+        'uprev_chrome',
+        return_value=uprev_lib.UprevVersionedPackageResult())
 
     build_target = build_target_lib.BuildTarget('build_target')
 
@@ -1249,6 +1298,31 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
                      len(constants.OTHER_CHROME_PACKAGES) + 1)
     self.assertTrue(result.missing_chrome_prebuilt)
     self.assertTrue(result.missing_follower_prebuilt)
+    self.assertFalse(result.local_uprev)
+
+  def test_local_uprev(self):
+    """Test compile source ignores prebuilts."""
+    graph = self._build_graph(with_chrome=True, with_followers=True)
+    self.PatchObject(depgraph, 'get_sysroot_dependency_graph',
+                     return_value=graph)
+    self.PatchObject(packages, 'has_prebuilt', return_value=False)
+
+    uprev_result = uprev_lib.UprevVersionedPackageResult()
+    uprev_result.add_result('1.2.3.4', ['/tmp/foo'])
+    self.PatchObject(packages, 'uprev_chrome', return_value=uprev_result)
+
+    build_target = build_target_lib.BuildTarget('build_target')
+
+    result = packages.needs_chrome_source(build_target, compile_source=True)
+
+    self.assertTrue(result.needs_chrome_source)
+    self.assertTrue(result.builds_chrome)
+    self.assertTrue(result.packages)
+    self.assertEqual(len(result.packages),
+                     len(constants.OTHER_CHROME_PACKAGES) + 1)
+    self.assertTrue(result.missing_chrome_prebuilt)
+    self.assertTrue(result.missing_follower_prebuilt)
+    self.assertTrue(result.local_uprev)
 
 
 class UprevDrivefsTest(cros_test_lib.MockTestCase):
@@ -1437,6 +1511,14 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
   def majorBumpOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
 
+  def newerVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(
+        uprev_lib.Outcome.NEWER_VERSION_EXISTS, [ebuild_path])
+
+  def sameVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(
+        uprev_lib.Outcome.SAME_VERSION_EXISTS, [ebuild_path])
+
   def newEbuildCreatedOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(
         uprev_lib.Outcome.NEW_EBUILD_CREATED, [ebuild_path])
@@ -1444,7 +1526,7 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
   def test_lacros_uprev_fails(self):
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[None]
     )
     with self.assertRaises(IndexError):
@@ -1454,28 +1536,48 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     lacros_outcome = self.revisionBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.REVISION_BUMP)
+    self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_version_bump(self):
     lacros_outcome = self.majorBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.VERSION_BUMP)
+    self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_new_ebuild_created(self):
     lacros_outcome = self.newEbuildCreatedOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
       uprev_lib,
-      'uprev_ebuild_from_pin',
+      'uprev_workon_ebuild_to_version',
       side_effect=[lacros_outcome]
     )
     output = packages.uprev_lacros(None, self.refs, None)
-    self.assertEqual(output.outcome, uprev_lib.Outcome.NEW_EBUILD_CREATED)
+    self.assertTrue(output.uprevved)
+
+  def test_lacros_uprev_newer_version_exist(self):
+    lacros_outcome = self.newerVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_workon_ebuild_to_version',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_lacros_uprev_same_version_exist(self):
+    lacros_outcome = self.sameVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+      uprev_lib,
+      'uprev_workon_ebuild_to_version',
+      side_effect=[lacros_outcome]
+    )
+    output = packages.uprev_lacros(None, self.refs, None)
+    self.assertFalse(output.uprevved)

@@ -7,11 +7,11 @@
 import collections
 import datetime
 import glob
+import logging
 import os
 import re
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import factory
 from chromite.lib import failure_message_lib
 from chromite.lib import osutils
@@ -22,9 +22,9 @@ from chromite.utils import memoize
 sqlalchemy_imported = False
 try:
   import sqlalchemy
+  from sqlalchemy import MetaData
   import sqlalchemy.exc
   import sqlalchemy.interfaces
-  from sqlalchemy import MetaData
   sqlalchemy_imported = True
 except ImportError:
   pass
@@ -646,7 +646,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
 
   def __init__(self, db_credentials_dir, for_service=False,
                query_retry_args=SqlConnectionRetryArgs(8, 4, 2)):
-    super(CIDBConnection, self).__init__(
+    super().__init__(
         'cidb', CIDB_MIGRATIONS_DIR, db_credentials_dir,
         for_service=for_service, query_retry_args=query_retry_args)
 
@@ -1311,7 +1311,7 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
     return False
 
   def __init__(self):
-    super(CIDBConnectionFactoryClass, self).__init__(
+    super().__init__(
         'cidb connection', self._CIDB_CONNECTION_TYPES,
         self._allowed_cidb_transition)
 

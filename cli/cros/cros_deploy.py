@@ -4,10 +4,11 @@
 
 """cros deploy: Deploy the packages onto the target device."""
 
+import logging
+
 from chromite.cli import command
 from chromite.cli import deploy
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 
 
 @command.CommandDecorator('deploy')

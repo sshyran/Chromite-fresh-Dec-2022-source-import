@@ -58,7 +58,7 @@ class KeysetMock(keys.Keyset):
 
     # This will create the Keyset without root_of_trust-specific keys, since
     # that is determined by having loem.ini which does not exist yet.
-    super(KeysetMock, self).__init__(key_dir)
+    super().__init__(key_dir)
     # Save key.versions.
     self._versions.Save()
 

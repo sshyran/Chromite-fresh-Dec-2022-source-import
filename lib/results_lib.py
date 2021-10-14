@@ -6,13 +6,15 @@
 
 import collections
 import datetime
+import logging
 import math
 import os
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
+from chromite.lib import failures_lib
+
 
 def _GetCheckpointFile(buildroot):
   return os.path.join(buildroot, '.completed_stages')
@@ -304,7 +306,7 @@ class _Results(object):
         out.write('\n')
 
     if warnings:
-      logging.PrintBuildbotStepWarnings(out)
+      cbuildbot_alerts.PrintBuildbotStepWarnings(out)
 
 
 Results = _Results()

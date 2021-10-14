@@ -4,15 +4,16 @@
 
 """Install/copy the image to the device."""
 
+import logging
+
 from chromite.cli import command
 from chromite.cli import flash
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 @command.CommandDecorator('flash')
@@ -121,6 +122,11 @@ Examples:
         '--no-rootfs-update', action='store_true',
         help='Do not update the rootfs partition on the device. '
         'Default is always update.')
+    # TODO(b/190631159, b/196056723): Remove default + update help description.
+    update.add_argument(
+        '--minios-update', action='store_true', default=False,
+        help='Do update the minios partition on the device. '
+        'Default is to always not update.')
     update.add_argument(
         '--src-image-to-delta', type='path',
         help='Local path to an image to be used as the base to generate '
@@ -192,6 +198,7 @@ Examples:
             version=self._GetDefaultVersion(),
             no_rootfs_update=self.options.no_rootfs_update,
             no_stateful_update=self.options.no_stateful_update,
+            no_minios_update=not self.options.minios_update,
             clobber_stateful=self.options.clobber_stateful,
             clear_tpm_owner=self.options.clear_tpm_owner,
             reboot=self.options.reboot,

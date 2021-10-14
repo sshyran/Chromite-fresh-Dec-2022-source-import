@@ -9,12 +9,12 @@ import datetime
 import getpass
 import glob
 import json
+import logging
 import os
 import shlex
 import tempfile
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -283,9 +283,8 @@ class Goma(object):
 
   def _RunGomaCtl(self, command):
     goma_ctl = os.path.join(self.linux_goma_dir, 'goma_ctl.py')
-    # TODO(crbug.com/1007384): Stop forcing Python 2.
     cros_build_lib.run(
-        ['python2', goma_ctl, command], extra_env=self.GetExtraEnv())
+        ['python3', goma_ctl, command], extra_env=self.GetExtraEnv())
 
   def Start(self):
     """Starts goma compiler proxy."""

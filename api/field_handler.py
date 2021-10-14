@@ -10,6 +10,7 @@ action for a specific field type for the build_api script.
 
 import contextlib
 import functools
+import logging
 import os
 import shutil
 
@@ -17,7 +18,6 @@ from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

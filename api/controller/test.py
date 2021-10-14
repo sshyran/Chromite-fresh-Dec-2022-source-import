@@ -7,7 +7,10 @@
 Handles all testing related functionality, it is not itself a test.
 """
 
+import functools
 import os
+import string
+import subprocess
 
 from chromite.api import controller
 from chromite.api import faux
@@ -15,8 +18,14 @@ from chromite.api import validate
 from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos import common_pb2
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
+from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
+from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
+from chromite.api.gen.chromiumos.test.api import test_suite_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
@@ -24,7 +33,10 @@ from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
+from chromite.service import packages as packages_service
 from chromite.service import test
+from chromite.third_party.google.protobuf import json_format
+from chromite.third_party.google.protobuf import text_format
 from chromite.utils import key_value_store
 from chromite.utils import metrics
 
@@ -97,9 +109,7 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
     packages.append(cpv.cp)
 
   # Skipped tests.
-  # TODO: Remove blacklist when we fully switch to blocklist.
-  blocklisted_package_info = (
-      input_proto.package_blacklist or input_proto.package_blocklist)
+  blocklisted_package_info = input_proto.package_blocklist
   blocklist = []
   for package_info_msg in blocklisted_package_info:
     blocklist.append(controller_util.PackageInfoToString(package_info_msg))
@@ -128,10 +138,10 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   if not result.success:
     # Failed to run tests or some tests failed.
     # Record all failed packages.
-    for cpv in result.failed_cpvs:
+    for pkg_info in result.failed_pkgs:
       package_info_msg = output_proto.failed_packages.add()
-      controller_util.CPVToPackageInfo(cpv, package_info_msg)
-    if result.failed_cpvs:
+      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
@@ -144,18 +154,26 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
 
 SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
-TEST_SERVICE_DIR = os.path.join(SRC_DIR, 'platform/dev/src/chromiumos/test')
-TEST_CONTAINER_BUILD_SCRIPTS = [
-    os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
-    os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
-]
+PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
+TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
+TEST_CONTAINER_BUILD_SCRIPTS = {
+    'cros-provision':
+        os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
+    'cros-dut':
+        os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
+    'cros-test':
+        os.path.join(
+            PLATFORM_DEV_DIR,
+            'test/container/utils/build-dockerimage.sh'
+        ),
+}
 
 
 def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
   """Fake success response"""
   # pylint: disable=unused-argument
   output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-      success = test_pb2.TestServiceContainerBuildResult.Success()
+      success=test_pb2.TestServiceContainerBuildResult.Success()
   ))
 
 
@@ -165,38 +183,111 @@ def _BuildTestServiceContainersFailedResponse(
 
   # pylint: disable=unused-argument
   output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-      failure = test_pb2.TestServiceContainerBuildResult.Failure(
+      failure=test_pb2.TestServiceContainerBuildResult.Failure(
           error_message='fake error'
       )
   ))
+
+
+@validate.constraint('valid docker tag')
+def _ValidDockerTag(tag):
+  """Check that a string meets requirements for Docker tag naming."""
+  # Tags can't start with period or dash
+  if tag[0] in '.-':
+    return "tag can't begin with '.' or '-'"
+
+  # Tags can only consist of [a-zA-Z0-9-_.]
+  allowed_chars = set(string.ascii_letters+string.digits+'-_.')
+  invalid_chars = set(tag) - allowed_chars
+  if invalid_chars:
+    return 'saw one or more invalid characters: [{}]'.format(
+        ''.join(invalid_chars),
+    )
+
+  # Finally, max tag length is 128 characters
+  if len(tag) > 128:
+    return 'maximum tag length is 128 characters'
+
+
+@validate.constraint('valid docker label key')
+def _ValidDockerLabelKey(key):
+  """Check that a string meets requirements for Docker tag naming."""
+
+  # Label keys should start and end with a lowercase letter
+  lowercase = set(string.ascii_lowercase)
+  if not (key[0] in lowercase and key[-1] in lowercase):
+    return "label key doesn't start and end with lowercase letter"
+
+  # Label keys can have lower-case alphanumeric characters, period and dash
+  allowed_chars = set(string.ascii_lowercase+string.digits+'-.')
+  invalid_chars = set(key) - allowed_chars
+  if invalid_chars:
+    return 'saw one or more invalid characters: [{}]'.format(
+        ''.join(invalid_chars),
+    )
+
+  # Repeated . and - aren't allowed
+  for char in '.-':
+    if char*2 in key:
+      return "'{}' can\'t be repeated in label key".format(char)
 
 
 @faux.success(_BuildTestServiceContainersResponse)
 @faux.error(_BuildTestServiceContainersFailedResponse)
 @validate.require('build_target.name')
 @validate.require('chroot.path')
-@validate.require('version')
+@validate.check_constraint('tags', _ValidDockerTag)
+@validate.check_constraint('labels', _ValidDockerLabelKey)
 @validate.validation_complete
-def BuildTestServiceContainers(input_proto, output_proto, _config):
+def BuildTestServiceContainers(
+    input_proto: test_pb2.BuildTestServiceContainersRequest,
+    output_proto: test_pb2.BuildTestServiceContainersResponse, _config):
   """Builds docker containers for all test services and pushes them to gcr.io"""
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  version = input_proto.version
   sysroot = sysroot_lib.Sysroot(build_target.root)
 
-  for build_script in TEST_CONTAINER_BUILD_SCRIPTS:
-    cmd = [build_script, chroot.path, version, sysroot.path]
-    cmd_result = cros_build_lib.run(cmd, check=False)
-    if cmd_result.returncode == 0:
-      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          success = test_pb2.TestServiceContainerBuildResult.Success()
-      ))
-    else:
-      output_proto.results.append(test_pb2.TestServiceContainerBuildResult(
-          failure = test_pb2.TestServiceContainerBuildResult.Failure(
-              error_message = cmd_result.stderr
-          )
-      ))
+  tags = ','.join(input_proto.tags)
+  labels = (
+      '{}={}'.format(key, value) for key, value in input_proto.labels.items()
+  )
+
+  for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():
+    with osutils.TempDir(prefix='test_container') as tempdir:
+      output_path = os.path.join(tempdir, 'metadata.jsonpb')
+
+      # Note that we use an output file instead of stdout to avoid any issues
+      # with maintaining stdout hygiene.  Stdout and stderr are combined to
+      # form the error log in response to any errors.
+      cmd = [build_script, chroot.path, sysroot.path]
+      cmd += ['--tags', tags]
+      cmd += ['--output', output_path]
+      cmd += labels
+
+      result = test_pb2.TestServiceContainerBuildResult()
+      result.name = human_name
+
+      cmd_result = cros_build_lib.run(cmd, check=False,
+                                      stderr=subprocess.STDOUT,
+                                      stdout=True)
+      if cmd_result.returncode == 0:
+        # Read the ContainerImageInfo message produced by the container build.
+        image_info = container_metadata_pb2.ContainerImageInfo()
+        json_format.Parse(osutils.ReadFile(output_path), image_info)
+
+        result.success.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Success(
+                image_info=image_info
+            )
+        )
+      else:
+        result.failure.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Failure(
+                error_message=cmd_result.stdout
+            )
+        )
+
+      output_proto.results.append(result)
 
 
 @faux.empty_success
@@ -323,3 +414,111 @@ def CrosSigningTest(_input_proto, _output_proto, _config):
   result = cros_build_lib.run([test_runner], check=False)
 
   return result.returncode
+
+
+def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
+                 chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+                 build_target: build_target_lib.BuildTarget,
+                 output_dir: str) -> list:
+  """Builds and copies test artifacts to specified output_dir.
+
+  Copies test artifacts to output_dir, returning a list of (output_dir: str)
+  paths to the desired files.
+
+  Args:
+    in_proto: Proto request defining reqs.
+    chroot: The chroot class used for these artifacts.
+    sysroot_class: The sysroot class used for these artifacts.
+    build_target: The build target used for these artifacts.
+    output_dir: The path to write artifacts to.
+
+  Returns:
+    A list of dictionary mappings of ArtifactType to list of paths.
+  """
+  generated = []
+
+  artifact_types = {
+      in_proto.ArtifactType.UNIT_TESTS: test.BuildTargetUnitTestTarball,
+      in_proto.ArtifactType.CODE_COVERAGE_LLVM_JSON:
+          test.BundleCodeCoverageLlvmJson,
+      in_proto.ArtifactType.HWQUAL: functools.partial(
+          test.BundleHwqualTarball,
+          build_target.name, packages_service.determine_full_version()),
+  }
+
+  for output_artifact in in_proto.output_artifacts:
+    for artifact_type, func in artifact_types.items():
+      if artifact_type in output_artifact.artifact_types:
+        paths = func(chroot, sysroot_class, output_dir)
+        if paths:
+          generated.append({
+              'paths': [paths] if isinstance(paths, str) else paths,
+              'type': artifact_type,
+          })
+
+  return generated
+
+
+def _GetCoverageRulesResponseSuccess(
+    _input_proto, output_proto: test_pb2.GetCoverageRulesResponse, _config):
+  output_proto.coverage_rules.append(
+      coverage_rule_pb2.CoverageRule(
+          name='kernel:4.4',
+          test_suites=[
+              test_suite_pb2.TestSuite(
+                  test_case_tag_criteria=test_suite_pb2.TestSuite
+                  .TestCaseTagCriteria(tags=['kernel']))
+          ],
+          dut_criteria=[
+              dut_attribute_pb2.DutCriterion(
+                  attribute_id=dut_attribute_pb2.DutAttribute.Id(
+                      value='system_build_target'),
+                  values=['overlayA'],
+              )
+          ],
+      ),)
+
+
+@faux.success(_GetCoverageRulesResponseSuccess)
+@faux.empty_error
+@validate.require('source_test_plans')
+@validate.exists('dut_attribute_list.path', 'build_metadata_list.path',
+                 'flat_config_list.path')
+@validate.validation_complete
+def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
+                     output_proto: test_pb2.GetCoverageRulesResponse, _config):
+  """Call the testplan tool to generate CoverageRules."""
+  source_test_plans = input_proto.source_test_plans
+  dut_attribute_list = input_proto.dut_attribute_list
+  build_metadata_list = input_proto.build_metadata_list
+  flat_config_list = input_proto.flat_config_list
+
+  cmd = [
+      'testplan', 'generate', '-dutattributes', dut_attribute_list.path,
+      '-buildmetadata', build_metadata_list.path, '-flatconfiglist',
+      flat_config_list.path, '-logtostderr', '-v', '2'
+  ]
+
+  with osutils.TempDir(prefix='get_coverage_rules_input') as tempdir:
+    # Write all input files required by testplan, and read the output file
+    # containing CoverageRules.
+    for i, plan in enumerate(source_test_plans):
+      plan_path = os.path.join(tempdir, 'source_test_plan_%d.textpb' % i)
+      osutils.WriteFile(plan_path, text_format.MessageToString(plan))
+      cmd.extend(['-plan', plan_path])
+
+    out_path = os.path.join(tempdir, 'out.jsonpb')
+    cmd.extend(['-out', out_path])
+
+    cros_build_lib.run(cmd)
+
+    out_text = osutils.ReadFile(out_path)
+
+  # The output file contains CoverageRules as jsonpb, separated by newlines.
+  coverage_rules = []
+  for out_line in out_text.splitlines():
+    coverage_rule = coverage_rule_pb2.CoverageRule()
+    json_format.Parse(out_line, coverage_rule)
+    coverage_rules.append(coverage_rule)
+
+  output_proto.coverage_rules.extend(coverage_rules)

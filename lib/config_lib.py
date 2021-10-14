@@ -19,7 +19,6 @@ GS_PATH_DEFAULT = 'default'  # Means gs://chromeos-image-archive/ + bot_id
 # Contains the valid build config suffixes.
 CONFIG_TYPE_RELEASE = 'release'
 CONFIG_TYPE_FULL = 'full'
-CONFIG_TYPE_FIRMWARE = 'firmware'
 CONFIG_TYPE_FACTORY = 'factory'
 CONFIG_TYPE_TOOLCHAIN = 'toolchain'
 
@@ -33,13 +32,12 @@ DISPLAY_LABEL_INFORMATIONAL = 'informational'
 DISPLAY_LABEL_RELEASE = 'release'
 DISPLAY_LABEL_CHROME_PFQ = 'chrome_pfq'
 DISPLAY_LABEL_MST_ANDROID_PFQ = 'mst_android_pfq'
-DISPLAY_LABEL_VMMST_ANDROID_PFQ = 'vmmst_android_pfq'
 DISPLAY_LABEL_PI_ANDROID_PFQ = 'pi_android_pfq'
 DISPLAY_LABEL_QT_ANDROID_PFQ = 'qt_android_pfq'
 DISPLAY_LABEL_RVC_ANDROID_PFQ = 'rvc_android_pfq'
 DISPLAY_LABEL_VMRVC_ANDROID_PFQ = 'vmrvc_android_pfq'
 DISPLAY_LABEL_VMSC_ANDROID_PFQ = 'vmsc_android_pfq'
-DISPLAY_LABEL_FIRMWARE = 'firmware'
+DISPLAY_LABEL_VMT_ANDROID_PFQ = 'vmt_android_pfq'
 DISPLAY_LABEL_FACTORY = 'factory'
 DISPLAY_LABEL_TOOLCHAIN = 'toolchain'
 DISPLAY_LABEL_UTILITY = 'utility'
@@ -55,13 +53,12 @@ ALL_DISPLAY_LABEL = {
     DISPLAY_LABEL_RELEASE,
     DISPLAY_LABEL_CHROME_PFQ,
     DISPLAY_LABEL_MST_ANDROID_PFQ,
-    DISPLAY_LABEL_VMMST_ANDROID_PFQ,
     DISPLAY_LABEL_PI_ANDROID_PFQ,
     DISPLAY_LABEL_QT_ANDROID_PFQ,
     DISPLAY_LABEL_RVC_ANDROID_PFQ,
     DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
     DISPLAY_LABEL_VMSC_ANDROID_PFQ,
-    DISPLAY_LABEL_FIRMWARE,
+    DISPLAY_LABEL_VMT_ANDROID_PFQ,
     DISPLAY_LABEL_FACTORY,
     DISPLAY_LABEL_TOOLCHAIN,
     DISPLAY_LABEL_UTILITY,
@@ -100,17 +97,17 @@ ALL_LUCI_BUILDER = {
 }
 
 GOLDENEYE_IGNORED_BOARDS = [
-  'capri',
-  'capri-zfpga',
-  'cobblepot',
-  'gonzo',
-  'lakitu',
-  'lasilla-ground',
-  'lasilla-sky',
-  'macchiato-ground',
-  'octavius',
-  'romer',
-  'wooten',
+    'capri',
+    'capri-zfpga',
+    'cobblepot',
+    'gonzo',
+    'lakitu',
+    'lasilla-ground',
+    'lasilla-sky',
+    'macchiato-ground',
+    'octavius',
+    'romer',
+    'wooten',
 ]
 
 
@@ -208,7 +205,7 @@ class AttrDict(dict):
       return self[name]
 
     # Super class (dict) has no __getattr__ method, so use __getattribute__.
-    return super(AttrDict, self).__getattribute__(name)
+    return super().__getattribute__(name)
 
 
 class BuildConfig(AttrDict):
@@ -968,6 +965,21 @@ def DefaultSettings():
       # Whether to convert the image into a guest VM image.
       guest_vm_image=False,
 
+      # Whether to build GCE images suitable for passing directly to
+      # "gcloud compute images create".
+      gce_image=False,
+
+      # b/186631313: On reven the base image has a graphical installer enabled,
+      # which is used to recover the device. Recovery images in the traditional
+      # sense can not be booted on reven devices, which run legacy BIOS or UEFI
+      # firmware.
+      #
+      # When base_is_recovery is set to True, we:
+      #   * Validate that the images list contains a base image.
+      #   * Copy the base image to recovery_image.bin instead of running
+      #     mod_image_for_recovery.sh.
+      base_is_recovery=False,
+
       # Image from which we will build update payloads.  Must either be None
       # or name one of the images in the 'images' list, above.
       payload_image=None,
@@ -1323,7 +1335,7 @@ class SiteConfig(dict):
                  other BuildConfigs can be based on. Mostly used to reduce
                  verbosity of the config dump file format.
     """
-    super(SiteConfig, self).__init__()
+    super().__init__()
     self._defaults = DefaultSettings()
     if defaults:
       self._defaults.update(defaults)
@@ -1366,7 +1378,14 @@ class SiteConfig(dict):
     int_cfgs = []
 
     for name, c in self.items():
-      if c['boards'] and (board is None or board in c['boards']):
+      possible_names = []
+      if board:
+        possible_names = [
+            board + '-' + CONFIG_TYPE_RELEASE,
+            board + '-' + CONFIG_TYPE_FULL,
+        ]
+      if c['boards'] and (board is None or board in c['boards'] or
+                          name in possible_names):
         if name.endswith('-%s' % CONFIG_TYPE_RELEASE) and c['internal']:
           int_cfgs.append(c.deepcopy())
         elif name.endswith('-%s' % CONFIG_TYPE_FULL) and not c['internal']:
@@ -1895,7 +1914,7 @@ def GetNonUniBuildLabBoardName(board):
       '-arc-s',  #
       '-arcnext',  #
       '-arcvm',  #
-      '-blueznext',  #
+      '-connectivitynext',  #
       '-borealis',  #
       '-campfire',  #
       '-cfm',  #

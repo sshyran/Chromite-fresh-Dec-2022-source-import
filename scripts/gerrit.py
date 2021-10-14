@@ -15,25 +15,25 @@ import configparser
 import functools
 import inspect
 import json
+import logging
 from pathlib import Path
 import re
 import shlex
 import sys
 
 from chromite.lib import chromite_config
+from chromite.lib import commandline
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import gob_util
 from chromite.lib import parallel
-from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import terminal
 from chromite.lib import uri_lib
 from chromite.utils import memoize
+from chromite.utils import pformat
 
 
 class Config:
@@ -557,6 +557,13 @@ class ActionLabelCommitQueue(_ActionLabeler):
   COMMAND = 'label-cq'
   LABEL = 'Commit-Queue'
   VALUES = ('0', '1', '2')
+
+class ActionLabelOwnersOverride(_ActionLabeler):
+  """Change the Owners-Override label (1=Override)"""
+
+  COMMAND = 'label-oo'
+  LABEL = 'Owners-Override'
+  VALUES = ('0', '1')
 
 
 class _ActionSimpleParallelCLs(UserAction):

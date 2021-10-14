@@ -5,12 +5,12 @@
 """Device-related helper functions/classes."""
 
 import argparse
+import logging
 import os
 import subprocess
 
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
-from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 from chromite.lib import retry_util
 
@@ -19,7 +19,7 @@ class DeviceError(Exception):
   """Exception for Device failures."""
 
   def __init__(self, message):
-    super(DeviceError, self).__init__()
+    super().__init__()
     logging.error(message)
 
 

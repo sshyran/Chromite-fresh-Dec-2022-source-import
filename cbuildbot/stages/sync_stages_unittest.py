@@ -15,6 +15,7 @@ from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
 from chromite.lib import cidb
+from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import fake_cidb
@@ -120,7 +121,7 @@ class ManifestVersionedSyncStageTest(
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(ManifestVersionedSyncStageTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.config['manifest_version'] = self.manifest_version_url
     self.sync_stage = sync_stages.ManifestVersionedSyncStage(
@@ -182,7 +183,7 @@ class MockPatch(mock.MagicMock):
   mock_diff_status = {}
 
   def __init__(self, *args, **kwargs):
-    super(MockPatch, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
 
     # Flags can vary per-patch.
     self.flags = {
@@ -224,17 +225,20 @@ class MockPatch(mock.MagicMock):
 class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
   """Unit tests for MasterSlaveLKGMSyncStage"""
 
-  BOT_ID = constants.VMMST_ANDROID_PFQ_MASTER
+  BOT_ID = constants.VMT_ANDROID_PFQ_MASTER
 
   def setUp(self):
     """Setup"""
     self.source_repo = 'ssh://source/repo'
     self.manifest_version_url = 'fake manifest url'
     self.branch = 'master'
-    self.build_name = 'master-vmmst-android-pfq'
+    self.build_name = 'master-vmt-android-pfq'
     self.incr_type = 'branch'
     self.next_version = 'next_version'
     self.sync_stage = None
+    self.android_package = 'android-package'
+    self.config = config_lib.BuildConfig(android_package=self.android_package,
+                                         master=True)
 
     self.repo = repository.RepoRepository(self.source_repo, self.tempdir,
                                           self.branch)
@@ -252,6 +256,7 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
         incr_type=self.incr_type,
         force=False,
         branch=self.branch,
+        config=self.config,
         buildstore=self.buildstore,
         dry_run=True)
 
@@ -259,7 +264,7 @@ class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
 
   # Our API here is not great when it comes to kwargs passing.
   def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super(MasterSlaveLKGMSyncTest, self)._Prepare(bot_id, **kwargs)
+    super()._Prepare(bot_id, **kwargs)
 
     self._run.config['manifest_version'] = self.manifest_version_url
     self.sync_stage = sync_stages.MasterSlaveLKGMSyncStage(

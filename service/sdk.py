@@ -4,15 +4,14 @@
 
 """Operations to work with the SDK chroot."""
 
+import logging
 import os
 import uuid
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
-
 
 
 class Error(Exception):
@@ -23,7 +22,7 @@ class UnmountError(Error):
   """An error raised when unmount fails."""
 
   def __init__(self, path, cmd_error=None, fs_debug=None):
-    super(UnmountError, self).__init__(path, cmd_error, fs_debug)
+    super().__init__(path, cmd_error, fs_debug)
     self.path = path
     self.cmd_error = cmd_error
     self.fs_debug = fs_debug

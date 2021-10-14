@@ -4,6 +4,7 @@
 
 """Stage a custom image on a Moblab device or in Google Storage."""
 
+import logging
 import os
 import re
 
@@ -11,7 +12,6 @@ from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper
 from chromite.lib import gs
 from chromite.lib import osutils
@@ -110,7 +110,7 @@ NOTES:
 
   def __init__(self, options):
     """Initializes cros stage."""
-    super(StageCommand, self).__init__(options)
+    super().__init__(options)
     self.board = self.options.board
     self.staged_image_name = self.options.staged_image_name
     # Determine if we are staging a local custom image or an official image.

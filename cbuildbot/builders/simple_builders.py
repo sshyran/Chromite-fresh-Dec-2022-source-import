@@ -5,6 +5,7 @@
 """Module containing the simple builders."""
 
 import collections
+import logging
 import traceback
 
 from chromite.cbuildbot import afdo
@@ -26,7 +27,6 @@ from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import parallel
 from chromite.lib import results_lib
@@ -43,7 +43,7 @@ class SimpleBuilder(generic_builders.Builder):
   """Builder that performs basic vetting operations."""
 
   def __init__(self, *args, **kwargs):
-    super(SimpleBuilder, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.sync_stage = None
 
   def GetSyncInstance(self):
@@ -265,10 +265,21 @@ class SimpleBuilder(generic_builders.Builder):
     # http://crbug/932644
     self._RunVMTests(builder_run, board)
 
+  def BoardsForSimpleBuilder(self, builder_run):
+    """All boards for this builder.
+
+    Defaults to builder_run.config.boards, but can be overridden if a
+    HWTestDUTOverride was specified for this run.
+    """
+    if self._run.options.hwtest_dut_override:
+      return [self._run.options.hwtest_dut_override.board]
+
+    return builder_run.config.boards
+
   def RunSetupBoard(self):
     """Run the SetupBoard stage for all child configs and boards."""
     for builder_run in self._run.GetUngroupedBuilderRuns():
-      for board in builder_run.config.boards:
+      for board in self.BoardsForSimpleBuilder(builder_run):
         self._RunStage(build_stages.SetupBoardStage, board,
                        builder_run=builder_run)
 
@@ -309,7 +320,7 @@ class SimpleBuilder(generic_builders.Builder):
       # Prepare a local archive directory for each "run".
       builder_run.GetArchive().SetupArchivePath()
 
-      for board in builder_run.config.boards:
+      for board in self.BoardsForSimpleBuilder(builder_run):
         archive_stage = self._GetStageInstance(
             artifact_stages.ArchiveStage, board, builder_run=builder_run,
             chrome_version=self._run.attrs.chrome_version)
@@ -441,7 +452,7 @@ class DistributedBuilder(SimpleBuilder):
       completion_stage_class:  Stage used to complete a build.  Set in the Sync
         stage.
     """
-    super(DistributedBuilder, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.completion_stage_class = None
     self.sync_stage = None
     self._completion_stage = None
@@ -529,7 +540,9 @@ class DistributedBuilder(SimpleBuilder):
       if self._run.config.master:
         self._RunStage(report_stages.SlaveFailureSummaryStage)
 
-      if config_lib.IsCanaryMaster(self._run):
+      if (config_lib.IsCanaryMaster(self._run) or
+          (self._run.config.master and
+           self._run.config.build_type == constants.FULL_TYPE)):
         if build_finished and not self._run.config.basic_builder:
           self._RunStage(completion_stages.UpdateChromeosLKGMStage)
         else:
@@ -559,7 +572,7 @@ class DistributedBuilder(SimpleBuilder):
     was_build_successful = False
     build_finished = False
     try:
-      super(DistributedBuilder, self).RunStages()
+      super().RunStages()
       build_identifier, _ = self._run.GetCIDBHandle()
       buildbucket_id = build_identifier.buildbucket_id
       was_build_successful = results_lib.Results.BuildSucceededSoFar(

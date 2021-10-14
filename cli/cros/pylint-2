@@ -34,7 +34,7 @@
 # >
 # wheel: <
 #   name: "infra/python/wheels/wrapt/${vpython_platform}"
-#   version: "version:1.10.11"
+#   version: "version:1.12.1"
 # >
 # wheel: <
 #   name: "infra/python/wheels/lazy-object-proxy/${vpython_platform}"

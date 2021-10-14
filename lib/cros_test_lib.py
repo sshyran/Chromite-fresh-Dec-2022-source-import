@@ -7,6 +7,7 @@
 import collections
 import contextlib
 import io
+import logging
 import os
 import re
 import sys
@@ -18,7 +19,6 @@ from chromite.lib import cache
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import operation
 from chromite.lib import osutils
 from chromite.lib import partial_mock
@@ -536,12 +536,25 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     # be configured per-user.
     os.environ['NOCOLOR'] = 'no'
 
+    self.__global_config_patchers__ = [
+        mock.patch.object(cros_build_lib, 'GetDefaultBoard', return_value=None)
+    ]
+    for p in self.__global_config_patchers__:
+      p.start()
+
   def tearDown(self):
     self._CheckTestEnv('%s.tearDown' % (self.id(),))
 
     osutils.SetEnvironment(self.__saved_env__)
     os.chdir(self.__saved_cwd__)
     os.umask(self.__saved_umask__)
+
+    try:
+      cros_build_lib.SafeRun([p.stop for p in self.__global_config_patchers__] +
+                             [mock.patch.stopall])
+    except RuntimeError:
+      # "stop called on unstarted patcher".
+      pass
 
   def id(self):
     """Return a name that can be passed in via the command line."""
@@ -1285,7 +1298,7 @@ class TestProgram(unittest.TestProgram):
     self.default_log_level = kwargs.pop('level', 'critical')
     self._leaked_tempdir = None
 
-    super(TestProgram, self).__init__(**kwargs)
+    super().__init__(**kwargs)
 
   def parseArgs(self, argv):
     """Parse the command line for the test"""
@@ -1433,7 +1446,7 @@ class TestProgram(unittest.TestProgram):
       sys.modules['chromite.lib.cidb'].CIDBConnectionFactory.SetupMockCidb()
 
     try:
-      super(TestProgram, self).runTests()
+      super().runTests()
     finally:
       if self._leaked_tempdir is not None:
         logging.info('Working directory %s left behind. Please cleanup later.',
@@ -1484,7 +1497,16 @@ class RunCommandMock(partial_mock.PartialCmdMock):
   ATTRS = ('run',)
   DEFAULT_ATTR = 'run'
 
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self._called = False
+
+  @property
+  def called(self):
+    return self._called
+
   def run(self, cmd, *args, **kwargs):
+    self._called = True
     result = self._results['run'].LookupResult(
         (cmd,), kwargs=kwargs, hook_args=(cmd,) + args, hook_kwargs=kwargs)
 
@@ -1509,7 +1531,7 @@ class RunCommandTestCase(MockTestCase):
 
     # These ENV variables affect run behavior, hide them.
     self._old_envs = {e: os.environ.pop(e) for e in constants.ENV_PASSTHRU
-                      if e in os.environ}
+                         if e in os.environ}
 
   def tearDown(self):
     # Restore hidden ENVs.

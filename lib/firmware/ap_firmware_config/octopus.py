@@ -17,7 +17,7 @@ BUILD_WORKON_PACKAGES = (
 BUILD_PACKAGES = BUILD_WORKON_PACKAGES + ('chromeos-bootimage',)
 
 
-def is_fast_required(use_futility, servo):
+def is_fast_required(use_futility: bool, servo: servo_lib.Servo) -> bool:
   """Returns true if --fast is necessary to flash successfully.
 
   The configurations in this function consistently fail on the verify step,
@@ -25,8 +25,8 @@ def is_fast_required(use_futility, servo):
   flash properly. Meant to be a temporary hack until b/143240576 is fixed.
 
   Args:
-    use_futility (bool): True if futility is to be used, False if flashrom.
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    use_futility: True if futility is to be used, False if flashrom.
+    servo: The servo connected to the target DUT.
 
   Returns:
     bool: True if fast is necessary, False otherwise.
@@ -34,7 +34,7 @@ def is_fast_required(use_futility, servo):
   return use_futility and servo.version == servo_lib.SERVO_V4_CCD
 
 
-def get_config(servo):
+def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   """Get specific flash config for octopus.
 
   Each board needs specific config including the voltage for Vref, to turn
@@ -43,7 +43,7 @@ def get_config(servo):
   The voltage for this board needs to be set to 1.8 V.
 
   Args:
-    servo (servo_lib.Servo): The servo connected to the target DUT.
+    servo: The servo connected to the target DUT.
 
   Returns:
     servo_lib.FirmwareConfig:

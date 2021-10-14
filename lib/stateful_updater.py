@@ -11,12 +11,12 @@ ask this module to reset a stateful partition by preparing it to be clobbered on
 reboot.
 """
 
+import logging
 import os
 import tempfile
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

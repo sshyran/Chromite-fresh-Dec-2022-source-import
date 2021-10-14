@@ -6,14 +6,13 @@
 
 import collections
 import glob
+import logging
 import os
 import re
-
-from typing import Union
+from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import retry_util
@@ -321,19 +320,22 @@ def WriteLsbRelease(sysroot, fields):
       'u:object_r:cros_conf_file:s0', path])
 
 
-def GetLatestImageLink(board, force_chroot=False, pointer='latest'):
+def GetLatestImageLink(board: str,
+                       force_chroot: bool = False,
+                       pointer: Optional[str] = None):
   """Get the path for the `latest` image symlink for the given board.
 
   Args:
-    board (str): The name of the board.
-    force_chroot (bool): Get the path as if we are inside the chroot, whether
+    board: The name of the board.
+    force_chroot: Get the path as if we are inside the chroot, whether
       or not we actually are.
-    pointer (str): Symlink name for image dir.
+    pointer: Symlink name for image dir.
 
   Returns:
     str - The `latest` image symlink path.
   """
   base = constants.CHROOT_SOURCE_ROOT if force_chroot else constants.SOURCE_ROOT
+  pointer = pointer or 'latest'
   return os.path.join(base, 'src/build/images', board, pointer)
 
 

@@ -4,14 +4,16 @@
 
 """Tests for net.py."""
 
+import logging
 import sys
 import unittest
 
-from chromite.lib import auth
-from chromite.lib import cros_logging as logging
-from chromite.lib.luci import net
-from chromite.lib.luci.test_support import test_case, test_env
 from chromite.third_party import httplib2
+
+from chromite.lib import auth
+from chromite.lib.luci import net
+from chromite.lib.luci.test_support import test_case
+from chromite.lib.luci.test_support import test_env
 
 
 test_env.setup_test_env()
@@ -21,7 +23,7 @@ class NetTest(test_case.TestCase):
   """Tests for Net."""
 
   def setUp(self):
-    super(NetTest, self).setUp()
+    super().setUp()
 
     def GetAccessToken(service_account_json): # pylint: disable=unused-argument
       return 'token'

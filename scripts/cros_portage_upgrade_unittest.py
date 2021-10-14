@@ -5,6 +5,7 @@
 """Unit tests for cros_portage_upgrade.py."""
 
 import filecmp
+import logging
 import os
 import re
 import subprocess
@@ -14,7 +15,6 @@ from unittest import mock
 import pytest  # pylint: disable=import-error
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import depgraph
 from chromite.lib import osutils

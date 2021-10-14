@@ -28,6 +28,7 @@ import pylint.checkers
 from pylint.config import ConfigurationMixIn
 import pylint.interfaces
 
+from chromite.third_party.pylint import format_checkers
 from chromite.utils import memoize
 
 
@@ -578,7 +579,7 @@ class Py3kCompatChecker(pylint.checkers.BaseChecker):
   options = ()
 
   def __init__(self, *args, **kwargs):
-    super(Py3kCompatChecker, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.seen_print_func = False
     self.saw_imports = False
 
@@ -778,3 +779,10 @@ def register(linter):
       continue
     cls = getattr(this_module, member)
     linter.register_checker(cls(linter))
+
+  cfg = _PylintrcConfig(
+      linter.config_file, 'format', (
+          ('indent-string', {'default': '    ', 'type': 'string'}),
+          ('indent-after-paren', {'default': 4, 'type': 'int'}),
+      ))
+  format_checkers.register(linter, cfg)

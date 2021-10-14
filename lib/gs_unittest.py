@@ -10,6 +10,7 @@ import functools
 import numbers
 import os
 import string
+import sys
 from unittest import mock
 
 from chromite.lib import constants
@@ -29,9 +30,9 @@ def PatchGS(*args, **kwargs):
 class GSContextMock(partial_mock.PartialCmdMock):
   """Used to mock out the GSContext class."""
   TARGET = 'chromite.lib.gs.GSContext'
-  ATTRS = ('GetDefaultGSUtilBin', 'DoCommand', 'DEFAULT_SLEEP_TIME',
-           'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE', 'DEFAULT_GSUTIL_BIN',
-           'DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
+  ATTRS = ('InitializeCache', 'DoCommand', '_CRCMOD_METHOD',
+           'DEFAULT_SLEEP_TIME', 'DEFAULT_RETRIES', 'DEFAULT_BOTO_FILE',
+           '_DEFAULT_GSUTIL_BIN', '_DEFAULT_GSUTIL_BUILDER_BIN', 'GSUTIL_URL')
   DEFAULT_ATTR = 'DoCommand'
 
   GSResponsePreconditionFailed = """\
@@ -44,8 +45,9 @@ PreconditionException: 412 Precondition Failed"""
   DEFAULT_RETRIES = 2
   TMP_ROOT = '/tmp/cros_unittest'
   DEFAULT_BOTO_FILE = '%s/boto_file' % TMP_ROOT
-  DEFAULT_GSUTIL_BIN = '%s/gsutil_bin' % TMP_ROOT
-  DEFAULT_GSUTIL_BUILDER_BIN = DEFAULT_GSUTIL_BIN
+  _DEFAULT_GSUTIL_BIN = '%s/gsutil_bin' % TMP_ROOT
+  _DEFAULT_GSUTIL_BUILDER_BIN = _DEFAULT_GSUTIL_BIN
+  _CRCMOD_METHOD = 'missing'
   GSUTIL_URL = None
 
   def __init__(self):
@@ -68,9 +70,8 @@ PreconditionException: 412 Precondition Failed"""
     # TODO(rcui): Change this when this is fixed in PartialMock.
     self._SetGSUtilUrl()
 
-  @staticmethod
-  def GetDefaultGSUtilBin(*_args, **_kwargs):
-    return 'gsutil'
+  def InitializeCache(self, *_args, **_kwargs):
+    self._DEFAULT_GSUTIL_BIN = 'gsutil'
 
   def DoCommand(self, inst, gsutil_cmd, **kwargs):
     result = self._results['DoCommand'].LookupResult(
@@ -746,13 +747,23 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
     for f in file_list:
       setattr(self, f, os.path.join(self.tempdir, f))
     self.StartPatcher(PatchGS('DEFAULT_BOTO_FILE', new=self.boto_file))
-    self.StartPatcher(PatchGS('DEFAULT_GSUTIL_BIN', new=self.gsutil_bin))
+    self.StartPatcher(PatchGS('_DEFAULT_GSUTIL_BIN', new=self.gsutil_bin))
 
   def testInitGsutilBin(self):
     """Test we use the given gsutil binary, erroring where appropriate."""
-    self.assertEqual(gs.GSContext().gsutil_bin, self.gsutil_bin)
+    # pylint: disable=protected-access
+    gs.GSContext._CRCMOD_METHOD = 'missing'
+    self.assertEqual(gs.GSContext()._gsutil_bin,
+                     [sys.executable, self.gsutil_bin])
+
+    gs.GSContext._CRCMOD_METHOD = 'vpython'
+    self.assertEqual(gs.GSContext()._gsutil_bin,
+                     ['vpython3', self.gsutil_bin])
+
     self.assertRaises(gs.GSContextException,
                       gs.GSContext, gsutil_bin=self.bad_path)
+
+    gs.GSContext._CRCMOD_METHOD = None
 
   def testBadGSUtilBin(self):
     """Test exception thrown for bad gsutil paths."""
@@ -761,6 +772,7 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
 
   def testInitBotoFileEnv(self):
     """Test boto file environment is set correctly."""
+    # We use gsutil_bin as a file that already exists and is not the default.
     os.environ['BOTO_CONFIG'] = self.gsutil_bin
     self.assertTrue(gs.GSContext().boto_file, self.gsutil_bin)
     self.assertEqual(gs.GSContext(boto_file=self.acl_file).boto_file,
@@ -857,7 +869,8 @@ class GSDoCommandTest(cros_test_lib.TestCase):
     with mock.patch.object(retry_stats, 'RetryWithStats', autospec=True,
                            return_value=result):
       ctx.Copy('/blah', 'gs://foon', version=version, recursive=recursive)
-      cmd = [self.ctx.gsutil_bin] + self.ctx.gsutil_flags + list(headers)
+      # pylint: disable=protected-access
+      cmd = self.ctx._gsutil_bin + self.ctx.gsutil_flags + list(headers)
       cmd += ['cp', '-v']
       if recursive:
         cmd += ['-r', '-e']

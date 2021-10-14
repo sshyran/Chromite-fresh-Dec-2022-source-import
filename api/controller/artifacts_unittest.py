@@ -5,12 +5,15 @@
 """Unittests for Artifacts operations."""
 
 import os
+import pathlib
 from unittest import mock
 
 from chromite.api import api_config
 from chromite.api.controller import artifacts
+from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -96,7 +99,7 @@ class BundleImageArchivesTest(BundleTestCase):
   """BundleImageArchives tests."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'ArchiveImages')
     artifacts.BundleImageArchives(self.target_request, self.response,
                                   self.validate_only_config)
@@ -149,7 +152,7 @@ class BundleImageZipTest(BundleTestCase):
   """Unittests for BundleImageZip."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(commands, 'BuildImageZip')
     artifacts.BundleImageZip(self.target_request, self.response,
                              self.validate_only_config)
@@ -193,7 +196,7 @@ class BundleAutotestFilesTest(BundleTestCase):
   """Unittests for BundleAutotestFiles."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleAutotestFiles')
     artifacts.BundleAutotestFiles(self.target_request, self.response,
                                   self.validate_only_config)
@@ -279,7 +282,7 @@ class BundleTastFilesTest(BundleTestCase):
   """Unittests for BundleTastFiles."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleTastFiles')
     artifacts.BundleTastFiles(self.target_request, self.response,
                               self.validate_only_config)
@@ -353,7 +356,7 @@ class BundleFirmwareTest(BundleTestCase):
   """Unittests for BundleFirmware."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleTastFiles')
     artifacts.BundleFirmware(self.sysroot_request, self.response,
                              self.validate_only_config)
@@ -394,7 +397,7 @@ class BundleFpmcuUnittestsTest(BundleTestCase):
   """Unittests for BundleFpmcuUnittests."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleFpmcuUnittests')
     artifacts.BundleFpmcuUnittests(self.sysroot_request, self.response,
                                    self.validate_only_config)
@@ -436,7 +439,7 @@ class BundleEbuildLogsTest(BundleTestCase):
   """Unittests for BundleEbuildLogs."""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(commands, 'BuildEbuildLogsTarball')
     artifacts.BundleEbuildLogs(self.target_request, self.response,
                                self.validate_only_config)
@@ -490,7 +493,7 @@ class BundleChromeOSConfigTest(BundleTestCase):
   """Unittests for BundleChromeOSConfig"""
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleChromeOSConfig')
     artifacts.BundleChromeOSConfig(self.target_request, self.response,
                                    self.validate_only_config)
@@ -574,7 +577,7 @@ class BundleTestUpdatePayloadsTest(cros_test_lib.MockTempDirTestCase,
         artifacts_svc, 'BundleTestUpdatePayloads', side_effect=MockPayloads)
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleTestUpdatePayloads')
     artifacts.BundleTestUpdatePayloads(self.input_proto, self.output_proto,
                                        self.validate_only_config)
@@ -658,7 +661,7 @@ class BundleSimpleChromeArtifactsTest(cros_test_lib.MockTempDirTestCase,
         chroot={'path': chroot}, output_dir=output_dir)
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleSimpleChromeArtifacts')
     request = self._GetRequest(chroot=self.chroot_dir,
                                sysroot=self.sysroot_path,
@@ -768,7 +771,7 @@ class BundleVmFilesTest(cros_test_lib.MockTempDirTestCase,
     )
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleVmFiles')
     in_proto = self._GetInput(chroot='/chroot/dir', sysroot='/build/board',
                               test_results_dir='/test/results',
@@ -892,7 +895,7 @@ class BundleAFDOGenerationArtifactsTestCase(
     )
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc,
                              'BundleAFDOGenerationArtifacts')
     request = self._GetRequest(chroot=self.chroot_dir,
@@ -1030,7 +1033,7 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
     self.response = artifacts_pb2.BundleResponse()
 
   def testValidateOnly(self):
-    """Sanity check validate only calls don't execute."""
+    """Quick check validate only calls don't execute."""
     patch = self.PatchObject(artifacts_svc, 'GenerateCpeReport')
 
     request = artifacts_pb2.BundleRequest()
@@ -1126,3 +1129,71 @@ class BundleGceTarballTest(BundleTestCase):
     with self.assertRaises(cros_build_lib.DieSystemExit):
       artifacts.BundleGceTarball(self.target_request, self.response,
                                  self.api_config)
+
+class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
+                            api_config.ApiConfigMixin):
+  """Unittests for FetchMetadata."""
+
+  sysroot_path = '/build/coral'
+  chroot_name = 'chroot'
+
+  def setUp(self):
+    self.chroot_path = os.path.join(self.tempdir, 'chroot')
+    pathlib.Path(self.chroot_path).touch()
+    self.expected_filepaths = [os.path.join(self.chroot_path, fp) for fp in (
+        'build/coral/usr/local/build/autotest/autotest_metadata.pb',
+        'build/coral/usr/share/tast/metadata/local/cros.pb',
+        'build/coral/build/share/tast/metadata/local/crosint.pb',
+        'usr/share/tast/metadata/remote/cros.pb',
+    )]
+    self.PatchObject(cros_build_lib, 'AssertOutsideChroot')
+
+  def createFetchMetadataRequest(self, use_sysroot_path=True, use_chroot=True):
+    """Construct a FetchMetadataRequest for use in test cases."""
+    request = artifacts_pb2.FetchMetadataRequest()
+    if use_sysroot_path:
+      request.sysroot.path = self.sysroot_path
+    if use_chroot:
+      request.chroot.path = self.chroot_path
+    return request
+
+  def testValidateOnly(self):
+    """Check that a validate only call does not execute any logic."""
+    patch = self.PatchObject(controller_util, 'ParseSysroot')
+    request = self.createFetchMetadataRequest()
+    response = artifacts_pb2.FetchMetadataResponse()
+    artifacts.FetchMetadata(request, response, self.validate_only_config)
+    patch.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    patch = self.PatchObject(controller_util, 'ParseSysroot')
+    request = self.createFetchMetadataRequest()
+    response = artifacts_pb2.FetchMetadataResponse()
+    artifacts.FetchMetadata(request, response, self.mock_call_config)
+    patch.assert_not_called()
+    self.assertGreater(len(response.filepaths), 0)
+
+  def testNoSysrootPath(self):
+    """Check that a request with no sysroot.path results in failure."""
+    request = self.createFetchMetadataRequest(use_sysroot_path=False)
+    response = artifacts_pb2.FetchMetadataResponse()
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      artifacts.FetchMetadata(request, response, self.api_config)
+
+  def testNoChroot(self):
+    """Check that a request with no chroot results in failure."""
+    request = self.createFetchMetadataRequest(use_chroot=False)
+    response = artifacts_pb2.FetchMetadataResponse()
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      artifacts.FetchMetadata(request, response, self.api_config)
+
+  def testSuccess(self):
+    """Check that a well-formed request yields the expected results."""
+    request = self.createFetchMetadataRequest(use_chroot=True)
+    response = artifacts_pb2.FetchMetadataResponse()
+    artifacts.FetchMetadata(request, response, self.api_config)
+    actual_filepaths = [fp.path.path for fp in response.filepaths]
+    self.assertEqual(sorted(actual_filepaths), sorted(self.expected_filepaths))
+    self.assertTrue(all([fp.path.location == common_pb2.Path.OUTSIDE
+        for fp in response.filepaths]))

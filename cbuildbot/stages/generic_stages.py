@@ -8,6 +8,7 @@ import contextlib
 import copy
 import fnmatch
 import json
+import logging
 import os
 import re
 import sys
@@ -15,6 +16,7 @@ import tempfile
 import time
 import traceback
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import repository
 from chromite.cbuildbot import topology
@@ -22,9 +24,8 @@ from chromite.lib import buildbucket_v2
 from chromite.lib import builder_status_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
-from chromite.lib import failures_lib
 from chromite.lib import failure_message_lib
+from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import metrics
 from chromite.lib import osutils
@@ -552,7 +553,7 @@ class BuilderStage(object):
     waterfall_name = self.name
     if tag is not None:
       waterfall_name += tag
-    logging.PrintBuildbotStepName(waterfall_name)
+    cbuildbot_alerts.PrintBuildbotStepName(waterfall_name)
 
     self._PrintLoudly(
         'Start Stage %s - %s\n\n%s' %
@@ -614,7 +615,7 @@ class BuilderStage(object):
     warnings instead of stage failures.
     """
     description = cls._StringifyException(exc_info)
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
     logging.warning(description)
     return (results_lib.Results.FORGIVEN, description, retrying)
 
@@ -633,7 +634,7 @@ class BuilderStage(object):
     # Tell the user about the exception, and record it.
     retrying = False
     description = cls._StringifyException(exc_info)
-    logging.PrintBuildbotStepFailure()
+    cbuildbot_alerts.PrintBuildbotStepFailure()
     logging.error(description)
     return (exc_info[1], description, retrying)
 
@@ -805,7 +806,7 @@ class NonHaltingBuilderStage(BuilderStage):
 
   def Run(self):
     try:
-      super(NonHaltingBuilderStage, self).Run()
+      super().Run()
     except failures_lib.StepFailure:
       name = self.__class__.__name__
       logging.error('Ignoring StepFailure in %s', name)
@@ -944,13 +945,12 @@ class BoardSpecificBuilderStage(BuilderStage):
     if len(builder_run.config.boards) > 1 or builder_run.config.grouped:
       suffix = self.UpdateSuffix(board, suffix)
 
-    super(BoardSpecificBuilderStage, self).__init__(
-        builder_run, buildstore, suffix=suffix, **kwargs)
+    super().__init__(builder_run, buildstore, suffix=suffix, **kwargs)
 
   def _RecordResult(self, *args, **kwargs):
     """Record a successful or failed result."""
     kwargs.setdefault('board', self._current_board)
-    super(BoardSpecificBuilderStage, self)._RecordResult(*args, **kwargs)
+    super()._RecordResult(*args, **kwargs)
 
   def _InsertBuildStageInCIDB(self,
                               name,
@@ -959,8 +959,7 @@ class BoardSpecificBuilderStage(BuilderStage):
     """Insert a build stage in cidb."""
     if not board:
       board = self._current_board
-    super(BoardSpecificBuilderStage, self)._InsertBuildStageInCIDB(
-        name, board, status)
+    super()._InsertBuildStageInCIDB(name, board, status)
 
   def GetListOfPackagesToBuild(self):
     """Returns a list of packages to build."""
@@ -1124,7 +1123,7 @@ class ArchivingStageMixin(object):
     url = '%s/%s' % (self.download_url.rstrip('/'), filename)
     if not text_to_display:
       text_to_display = '%s%s' % (prefix, filename)
-    logging.PrintBuildbotLink(text_to_display, url)
+    cbuildbot_alerts.PrintBuildbotLink(text_to_display, url)
     return url
 
   def _IsInUploadBlacklist(self, filename):
@@ -1153,21 +1152,15 @@ class ArchivingStageMixin(object):
     """
     bot_filter_list = ['paladin', 'trybot', 'pfq', 'pre-cq', 'tryjob',
                        'postsubmit']
-    # Certain partners are using the moblab buckets as a general
+    # Jetstream are using the moblab buckets as a general
     # build distribution system, not related to moblab.
-    # This allow list ensures that these accounts are left in the
+    # This code ensutes that jetstream is left in the
     # prior behavior, where moblab users now use an on demand
     # copy via an API vs the "copy everything" approach.
-    account_allow_list = ['chromeos-moblab-intel',
-                          'chromeos-moblab-jetstream',
-                          'chromeos-moblab-parallels',
-                          'chromeos-moblab-cienet']
-    if 'moblab' in url:
-      if any(bot_filter in bot_id for bot_filter in bot_filter_list):
-        return True
-      if any(account in url for account in account_allow_list):
-        return False
+    if 'chromeos-moblab-jetstream' in url:
+      return any(bot_filter in bot_id for bot_filter in bot_filter_list)
     return True
+
 
   def _GetUploadUrls(self, filename, builder_run=None, prefix=None):
     """Returns a list of all urls for which to upload filename to.
@@ -1230,7 +1223,7 @@ class ArchivingStageMixin(object):
           update_list=True,
           acl=self.acl)
     except failures_lib.GSUploadFailure as e:
-      logging.PrintBuildbotStepText('Upload failed')
+      cbuildbot_alerts.PrintBuildbotStepText('Upload failed')
       if e.HasFatalFailure(
           whitelist=[gs.GSContextException, timeout_util.TimeoutError]):
         raise

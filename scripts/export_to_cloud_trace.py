@@ -7,20 +7,20 @@
 import errno
 import itertools
 import json
+import logging
 import os
 import pprint
 import time
 
-import inotify_simple  # pylint: disable=import-error
-
-from chromite.lib import commandline
-from chromite.lib import cros_logging as log
-from chromite.lib import metrics
-from chromite.lib import ts_mon_config
 from chromite.third_party.google.protobuf import timestamp_pb2
 from chromite.third_party.googleapiclient import discovery
 from chromite.third_party.infra_libs import ts_mon
 from chromite.third_party.oauth2client.client import GoogleCredentials
+import inotify_simple  # pylint: disable=import-error
+
+from chromite.lib import commandline
+from chromite.lib import metrics
+from chromite.lib import ts_mon_config
 
 
 BATCH_PATIENCE = 10 * 60
@@ -92,7 +92,7 @@ class _DirWatcher(object):
       lines = tuple(_ReadBatch(files))
       _CleanupBatch(files)
       if files:
-        log.debug('Found changes in %s', pprint.pformat(files))
+        logging.debug('Found changes in %s', pprint.pformat(files))
       yield lines
 
 
@@ -119,7 +119,7 @@ def _CleanupBatch(files):
       os.remove(path)
     except OSError as error:
       if error.errno == errno.ENOENT:
-        log.exception(
+        logging.exception(
             'warning: could not find %s while attempting to remove it.', path)
       else:
         raise
@@ -137,7 +137,7 @@ def _MapIgnoringErrors(f, sequence, exception_type=Exception):
     try:
       yield f(item)
     except exception_type as e:
-      log.exception('Ignoring error while mapping: %s.', e)
+      logging.exception('Ignoring error while mapping: %s.', e)
 
 
 def _ImpatientlyRebatched(batch_sequence, ideal_size, patience):
@@ -227,7 +227,7 @@ def _ReadAndDeletePreexisting(log_dir):
   """
   preexisting_files = [os.path.join(log_dir, f)
                        for f in os.listdir(SPAN_LOG_DIR)]
-  log.info('Processing pre-existing logs: %s',
+  logging.info('Processing pre-existing logs: %s',
            pprint.pformat(preexisting_files))
   preexisting_lines = tuple(_ReadBatch(preexisting_files))
   _CleanupBatch(preexisting_files)
@@ -256,7 +256,7 @@ def _RecordDurationMetric(batches):
                       _ParseDatetime(span['startTime']))
         m.add(time_delta.total_seconds(), fields={'name': span['name']})
       except KeyError:
-        log.error("Span %s did not have required fields 'endTime', "
+        logging.error("Span %s did not have required fields 'endTime', "
                   "'startTime', and 'name'.", json.dumps(span))
 
     yield batch

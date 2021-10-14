@@ -8,6 +8,7 @@ import os
 import re
 from unittest import mock
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages_unittest
@@ -15,7 +16,6 @@ from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import cgroups
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import cros_logging
 from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
 from chromite.lib import gs
@@ -287,10 +287,8 @@ class MoblabVMTestStageTestCase(
     mock_gs_context = mock.create_autospec(gs.GSContext)
     self.PatchObject(
         gs, 'GSContext', autospec=True, return_value=mock_gs_context)
-    mock_buildbot_link = self.PatchObject(cros_logging, 'PrintBuildbotLink')
+    mock_buildbot_link = self.PatchObject(cbuildbot_alerts, 'PrintBuildbotLink')
     mock_generate_payloads = self.PatchObject(commands, 'GeneratePayloads')
-    mock_qp_payloads = self.PatchObject(commands,
-                                        'GenerateQuickProvisionPayloads')
     self.PatchObject(commands, 'BuildAutotestTarballsForHWTest')
     # self.PatchObject(vm_test_stages, 'StageArtifactsOnMoblab', autospec=True)
     mock_run_moblab_tests = self.PatchObject(
@@ -358,16 +356,10 @@ class MoblabVMTestStageTestCase(
     mock_moblab_vm.Create.assert_called_once_with(mock.ANY, mock.ANY)
     self.assertEqual(mock_moblab_vm.Start.call_count, 1)
     self.assertEqual(mock_generate_payloads.call_count, 1)
-    self.assertEqual(mock_qp_payloads.call_count, 1)
     generate_payloads_kwargs = mock_generate_payloads.call_args_list[0][1]
     self.assertTrue(os.path.isdir(generate_payloads_kwargs['archive_dir']))
     self.assertTrue(
         os.path.isfile(generate_payloads_kwargs['target_image_path']))
-    mock_qp_kwargs = mock_qp_payloads.call_args_list[0][1]
-    print(mock_qp_kwargs)
-    self.assertTrue(
-        os.path.isfile(mock_qp_kwargs['target_image_path']))
-    self.assertTrue(os.path.isdir(mock_qp_kwargs['archive_dir']))
     self.assertEqual(mock_run_moblab_tests.call_count, 1)
     run_moblab_tests_kwargs = mock_run_moblab_tests.call_args_list[0][1]
     self.assertEqual(run_moblab_tests_kwargs['moblab_board'],
@@ -596,14 +588,12 @@ Some random stuff.
     image_dir = os.path.join(test_buildroot, 'chroot', 'testResultsDir')
     test_path_archive_output = os.path.join(self.tempdir, 'testResultsDir')
     os.makedirs(test_path_archive_output)
-    vm_files = ['abc.txt', 'chromiumos_qemu_mem.bin']
+    vm_files = ['abc.txt']
     cros_test_lib.CreateOnDiskHierarchy(image_dir, vm_files)
     result = vm_test_stages.ArchiveVMFiles(test_buildroot, 'testResultsDir',
                                            test_path_archive_output)
     # The expected output is the test_path_archive_output with the one file that
     # matches the constants VM pattern prefix, which will be converted to a
     # .bin.tar file.
-    expected_result = [
-        os.path.join(test_path_archive_output, 'chromiumos_qemu_mem.bin.tar')
-    ]
+    expected_result = []
     self.assertEqual(result, expected_result)

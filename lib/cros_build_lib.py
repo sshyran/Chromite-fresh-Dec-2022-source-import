@@ -12,6 +12,7 @@ import errno
 import functools
 import getpass
 import inspect
+import logging
 import operator
 import os
 from pathlib import Path
@@ -22,11 +23,11 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import List, Optional, TextIO, Union
+from typing import List, Optional, Union
 
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
 from chromite.lib import cros_collections
-from chromite.lib import cros_logging as logging
 from chromite.lib import signals
 
 
@@ -217,7 +218,7 @@ class CompletedProcess(getattr(subprocess, 'CompletedProcess', object)):
       self.stderr = stderr
       self.returncode = returncode
     else:
-      super(CompletedProcess, self).__init__(
+      super().__init__(
           args=args, returncode=returncode, stdout=stdout, stderr=stderr)
 
   @property
@@ -266,8 +267,8 @@ class CommandResult(CompletedProcess):
     elif error is not None:
       raise TypeError('Only specify |stderr|, not |error|')
 
-    super(CommandResult, self).__init__(args=args, stdout=stdout, stderr=stderr,
-                                        returncode=returncode)
+    super().__init__(args=args, stdout=stdout, stderr=stderr,
+                     returncode=returncode)
 
   @property
   def output(self):
@@ -299,7 +300,7 @@ class CalledProcessError(subprocess.CalledProcessError):
       raise TypeError('exception must be an exception instance; got %r'
                       % (exception,))
 
-    super(CalledProcessError, self).__init__(returncode, cmd, stdout)
+    super().__init__(returncode, cmd, stdout)
     # The parent class will set |output|, so delete it.
     del self.output
     # TODO(vapier): When we're Python 3-only, delete this assignment as the
@@ -390,7 +391,7 @@ class RunCommandError(CalledProcessError):
 
     self.args = (msg, result, exception)
     self.result = result
-    super(RunCommandError, self).__init__(
+    super().__init__(
         returncode=result.returncode, cmd=result.args, stdout=result.stdout,
         stderr=result.stderr, msg=msg, exception=exception)
 
@@ -1277,7 +1278,7 @@ def CreateTarball(
     time.sleep(timeout * (try_count + 1))
     logging.warning('CreateTarball: tar: source modification time changed '
                     '(see crbug.com/547055), retrying')
-    logging.PrintBuildbotStepWarnings()
+    cbuildbot_alerts.PrintBuildbotStepWarnings()
 
 
 def ExtractTarball(tarball_path: Union[Path, str],
@@ -1644,18 +1645,6 @@ def iflatten_instance(iterable,
     else:
       for subitem in iflatten_instance(item, terminate_on_kls):
         yield subitem
-
-
-@contextlib.contextmanager
-def Open(obj: Union[str, os.PathLike, TextIO], mode: str = 'r', **kwargs):
-  """Convenience ctx that accepts a file path or an already open file object."""
-  if isinstance(obj, str):
-    with open(obj, mode=mode, **kwargs) as f:
-      yield f
-  elif isinstance(obj, Path):
-    yield obj.open(mode=mode, **kwargs)
-  else:
-    yield obj
 
 
 def SafeRun(functors, combine_exceptions=False):

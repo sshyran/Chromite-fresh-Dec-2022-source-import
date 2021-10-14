@@ -4,6 +4,7 @@
 
 """Implements ArtifactService."""
 
+import logging
 import os
 from typing import Any, NamedTuple
 
@@ -13,15 +14,16 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.controller import image as image_controller
 from chromite.api.controller import sysroot as sysroot_controller
+from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import sysroot_lib
 from chromite.service import artifacts
+from chromite.service import test
 
 
 class RegisteredGet(NamedTuple):
@@ -60,6 +62,11 @@ def Get(input_proto, output_proto, _config):
   output_dir = input_proto.result_path.path.path
 
   sysroot = controller_util.ParseSysroot(input_proto.sysroot)
+  # This endpoint does not currently support any artifacts that are built
+  # without a sysroot being present.
+  if not sysroot.path:
+    return controller.RETURN_CODE_SUCCESS
+
   chroot = controller_util.ParseChroot(input_proto.chroot)
   build_target = controller_util.ParseBuildTarget(
       input_proto.sysroot.build_target)
@@ -75,7 +82,12 @@ def Get(input_proto, output_proto, _config):
           output_proto.artifacts.sysroot,
           sysroot_controller.GetArtifacts(
               input_proto.artifact_info.sysroot, chroot, sysroot, build_target,
-              output_dir))
+              output_dir)),
+      RegisteredGet(
+          output_proto.artifacts.test,
+          test_controller.GetArtifacts(
+              input_proto.artifact_info.test, chroot, sysroot, build_target,
+              output_dir)),
   ]
 
   for get_res in get_res_list:
@@ -354,6 +366,37 @@ def BundlePinnedGuestImages(_input_proto, _output_proto, _config):
 def FetchPinnedGuestImageUris(_input_proto, _output_proto, _config):
   # TODO(crbug/1034529): Remove this endpoint
   pass
+
+
+def _FetchMetadataResponse(_input_proto, output_proto, _config):
+  """Populate the output_proto with sample data."""
+  for fp in ('/metadata/foo.txt', '/metadata/bar.jsonproto'):
+    output_proto.filepaths.add(path=common_pb2.Path(
+        path=fp, location=common_pb2.Path.OUTSIDE))
+  return controller.RETURN_CODE_SUCCESS
+
+
+@faux.success(_FetchMetadataResponse)
+@faux.empty_error
+@validate.exists('chroot.path')
+@validate.require('sysroot.path')
+@validate.validation_complete
+def FetchMetadata(input_proto, output_proto, _config):
+  """FetchMetadata returns the paths to all build/test metadata files.
+
+  This implements ArtifactsService.FetchMetadata.
+
+  Args:
+    input_proto (FetchMetadataRequest): The input proto.
+    output_proto (FetchMetadataResponse): The output proto.
+    config (api_config.ApiConfig): The API call config.
+  """
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  sysroot = controller_util.ParseSysroot(input_proto.sysroot)
+  for path in test.FindAllMetadataFiles(chroot, sysroot):
+    output_proto.filepaths.add(
+        path=common_pb2.Path(path=path, location=common_pb2.Path.OUTSIDE))
+  return controller.RETURN_CODE_SUCCESS
 
 
 def _BundleFirmwareResponse(input_proto, output_proto, _config):

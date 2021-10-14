@@ -4,17 +4,19 @@
 
 """Module containing the scheduler stages."""
 
+import logging
 import time
 
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import build_requests
 from chromite.lib import buildbucket_v2
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import request_build
-from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
 
 
 class ScheduleSlavesStage(generic_stages.BuilderStage):
@@ -23,7 +25,7 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
   category = constants.CI_INFRA_STAGE
 
   def __init__(self, builder_run, buildstore, sync_stage, **kwargs):
-    super(ScheduleSlavesStage, self).__init__(builder_run, buildstore, **kwargs)
+    super().__init__(builder_run, buildstore, **kwargs)
     self.sync_stage = sync_stage
     self.buildbucket_client = buildbucket_v2.BuildbucketV2()
 
@@ -141,7 +143,7 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
     logging.info('Build_name %s buildbucket_id %s created_timestamp %s',
                  build_name, result.id,
                  result.create_time.ToJsonString())
-    logging.PrintBuildbotLink(build_name,
+    cbuildbot_alerts.PrintBuildbotLink(build_name,
                              '{}{}'.format(constants.CHROMEOS_MILO_HOST,
                                            result.id))
 

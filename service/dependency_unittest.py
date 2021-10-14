@@ -4,9 +4,12 @@
 
 """Unittests for the dependency.py module."""
 
+import pytest
+
 from chromite.lib import cros_test_lib
 from chromite.lib import depgraph
 from chromite.lib import dependency_graph
+from chromite.lib import dependency_lib
 from chromite.lib.parser import package_info
 from chromite.service import dependency
 
@@ -159,3 +162,80 @@ class DependencyTests(cros_test_lib.MockTestCase):
     revdep = package_info.parse('virtual/target-foo-1.2.3')
     dep = package_info.parse('cat/dep-1.0.0-r1')
     self.assertCountEqual([dep, revdep], actual_deps)
+
+
+def test_generate_source_path_mapping_sdk(monkeypatch):
+  """Test GenerateSourcePathMapping sdk argument."""
+
+  def gspm_patch(_packages, sysroot_path, board, *_args, **_kwargs):
+    assert sysroot_path == '/'
+    assert board is None
+
+  monkeypatch.setattr(dependency_lib, 'get_source_path_mapping', gspm_patch)
+  dependency.GenerateSourcePathMapping(['cat/pkg'], sdk=True)
+
+
+def test_generate_source_path_mapping_sdk_only():
+  """Test GenerateSourcePathMapping raises errors when sdk not only argument."""
+  # Board.
+  with pytest.raises(AssertionError):
+    dependency.GenerateSourcePathMapping(['cat/pkg'],
+                                         sdk=True,
+                                         board='board')
+  # Sysroot.
+  with pytest.raises(AssertionError):
+    dependency.GenerateSourcePathMapping(['cat/pkg'],
+                                         sdk=True,
+                                         sysroot_path='/build/board')
+  # Board and sysroot.
+  with pytest.raises(AssertionError):
+    dependency.GenerateSourcePathMapping(['cat/pkg'],
+                                         sdk=True,
+                                         board='board',
+                                         sysroot_path='/build/board')
+
+
+def test_generate_source_path_mapping_sdk_sysroot(monkeypatch):
+  """Test GenerateSourcePathMapping with the sdk's sysroot."""
+
+  def gspm_patch(_packages, sysroot_path, board, *_args, **_kwargs):
+    assert sysroot_path == '/'
+    assert board is None
+
+  monkeypatch.setattr(dependency_lib, 'get_source_path_mapping', gspm_patch)
+  dependency.GenerateSourcePathMapping(['cat/pkg'], sysroot_path='/')
+
+
+def test_generate_source_path_mapping_board_sysroot(monkeypatch):
+  """Test GenerateSourcePathMapping with a board's sysroot."""
+
+  def gspm_patch(_packages, sysroot_path, board, *_args, **_kwargs):
+    assert sysroot_path == '/build/board'
+    assert board == 'board'
+
+  monkeypatch.setattr(dependency_lib, 'get_source_path_mapping', gspm_patch)
+  dependency.GenerateSourcePathMapping(['cat/pkg'], sysroot_path='/build/board')
+
+
+def test_generate_source_path_mapping_board(monkeypatch):
+  """Test GenerateSourcePathMapping with a board."""
+
+  def gspm_patch(_packages, sysroot_path, board, *_args, **_kwargs):
+    assert sysroot_path == '/build/board'
+    assert board == 'board'
+
+  monkeypatch.setattr(dependency_lib, 'get_source_path_mapping', gspm_patch)
+  dependency.GenerateSourcePathMapping(['cat/pkg'], board='board')
+
+
+def test_generate_source_path_mapping_board_and_sysroot(monkeypatch):
+  """Test GenerateSourcePathMapping with a board and custom sysroot."""
+
+  def gspm_patch(_packages, sysroot_path, board, *_args, **_kwargs):
+    assert sysroot_path == '/some/sysroot'
+    assert board == 'board'
+
+  monkeypatch.setattr(dependency_lib, 'get_source_path_mapping', gspm_patch)
+  dependency.GenerateSourcePathMapping(['cat/pkg'],
+                                       board='board',
+                                       sysroot_path='/some/sysroot')

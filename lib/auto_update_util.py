@@ -4,9 +4,8 @@
 
 """This file contains util functions for the auto-update lib."""
 
+import logging
 import re
-
-from chromite.lib import cros_logging as logging
 
 
 def GetChromeosBuildInfo(lsb_release_content=None, regex=None):

@@ -5,11 +5,11 @@
 """Helpers for interacting with gcloud datastore."""
 
 import json
+import logging
 
 import google.api_core.exceptions  # pylint: disable=import-error
 from google.cloud import datastore  # pylint: disable=import-error
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import iter_utils
 
 

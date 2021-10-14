@@ -5,12 +5,15 @@
 """Image API unittests."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import constants
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import sysroot_lib
 from chromite.service import image
 
 
@@ -25,37 +28,33 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
   def testInsideChrootCommand(self):
     """Test the build_image command when called from inside the chroot."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    image.Build(board='board')
+    image.Build('board', [constants.IMAGE_TYPE_BASE])
     self.assertCommandContains(
         [os.path.join(constants.CROSUTILS_DIR, 'build_image')])
 
   def testOutsideChrootCommand(self):
     """Test the build_image command when called from outside the chroot."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    image.Build(board='board')
+    image.Build('board', [constants.IMAGE_TYPE_BASE])
     self.assertCommandContains(['./build_image'])
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
-    # No board and no default should raise an error.
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
+    # No board should raise an error.
     with self.assertRaises(image.InvalidArgumentError):
-      image.Build()
+      image.Build(None, [constants.IMAGE_TYPE_BASE])
 
-    # Falls back to default when no board provided.
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value='default')
-    image.Build()
-    self.assertCommandContains(['--board', 'default'])
+    with self.assertRaises(image.InvalidArgumentError):
+      image.Build('', [constants.IMAGE_TYPE_BASE])
 
-    # Should be using the passed board before the default.
-    image.Build('board')
+    # Should be using the passed board.
+    image.Build('board', [constants.IMAGE_TYPE_BASE])
     self.assertCommandContains(['--board', 'board'])
 
   def testBuildImageTypes(self):
     """Test the image type handling."""
-    # Should default to building the base image.
-    image.Build('board')
-    self.assertCommandContains([constants.IMAGE_TYPE_BASE])
+    result = image.Build('board', [])
+    assert result.all_built and not result.build_run
 
     # Should be using the argument when passed.
     image.Build('board', [constants.IMAGE_TYPE_DEV])
@@ -154,7 +153,6 @@ class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
 
   def testNoBoardFails(self):
     """Should fail when not given a valid board-ish value."""
-    self.PatchObject(cros_build_lib, 'GetDefaultBoard', return_value=None)
     with self.assertRaises(image.InvalidArgumentError):
       image.BuildRecoveryImage('')
 
@@ -229,3 +227,57 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains(['--board', self.board,
                                 '--test_results_root', self.outside_result_dir,
                                 mocked_dir])
+
+class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
+  """Unittests for create_factory_image_zip."""
+
+  def setUp(self):
+    # Create a chroot_path.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.sysroot_path = os.path.join(self.chroot_path, 'build', 'target')
+    self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
+
+    # Create appropriate sysroot structure.
+    osutils.SafeMakedirs(self.sysroot_path)
+    factory_bundle_path = self.chroot.full_path(self.sysroot.path, 'usr',
+      'local','factory', 'bundle')
+    osutils.SafeMakedirs(factory_bundle_path)
+    osutils.Touch(os.path.join(factory_bundle_path, 'bundle_foo'))
+
+    # Create factory shim directory.
+    self.factory_shim_path = os.path.join(self.tempdir, 'factory_shim_dir')
+    osutils.SafeMakedirs(self.factory_shim_path)
+    osutils.Touch(os.path.join(self.factory_shim_path, 'factory_install.bin'))
+    osutils.Touch(os.path.join(self.factory_shim_path, 'partition'))
+    osutils.SafeMakedirs(os.path.join(self.factory_shim_path, 'netboot'))
+    osutils.Touch(os.path.join(self.factory_shim_path, 'netboot', 'bar'))
+
+    # Create output dir.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+  def test(self):
+    """create_factory_image_zip calls cbuildbot/commands with correct args."""
+    version = '1.2.3.4'
+    output_file = image.create_factory_image_zip(self.chroot, self.sysroot,
+      Path(self.factory_shim_path), version, self.output_dir)
+
+    # Check that all expected files are present.
+    zip_contents = cros_build_lib.run(['zipinfo', '-1', output_file],
+                                      cwd=self.output_dir,  stdout=True)
+    zip_files = sorted(zip_contents.output.decode('UTF-8').strip().split('\n'))
+    expected_files = sorted([
+      'factory_shim_dir/netboot/',
+      'factory_shim_dir/netboot/bar',
+      'factory_shim_dir/factory_install.bin',
+      'factory_shim_dir/partition',
+      'bundle_foo',
+      'BUILD_VERSION',
+    ])
+    self.assertListEqual(zip_files, expected_files)
+
+    # Check contents of BUILD_VERSION.
+    cmd = ['unzip', '-p', output_file, 'BUILD_VERSION']
+    version_file = cros_build_lib.run(cmd, cwd=self.output_dir,  stdout=True)
+    self.assertEqual(version_file.output.decode('UTF-8').strip(), version)

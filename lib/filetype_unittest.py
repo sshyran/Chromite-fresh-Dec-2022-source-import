@@ -12,8 +12,6 @@ from chromite.lib import osutils
 from chromite.lib import filetype
 from chromite.lib import unittest_lib
 
-pytestmark = cros_test_lib.pytestmark_inside_only
-
 
 class SplitShebangTest(cros_test_lib.TestCase):
   """Test the SplitShebang function."""

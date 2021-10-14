@@ -78,34 +78,43 @@ class ChromeVersionTest(cros_test_lib.TestCase):
       uprev_lib.get_chrome_version_from_refs([])
 
 
-class BestChromeEbuildTests(cros_test_lib.TempDirTestCase):
-  """Test for best_chrome_ebuild."""
+class ChromeEbuildVersionTest(cros_test_lib.MockTempDirTestCase):
+  """Tests for best_chrome_ebuild and get_stable_chrome_version."""
 
   def setUp(self):
     # Setup some ebuilds to test against.
-    ebuild = os.path.join(self.tempdir, 'chromeos-chrome-%s-r12.ebuild')
-    # The best version we'll be expecting.
+    pkg_dir = os.path.join(self.tempdir, constants.CHROME_CP)
+    osutils.SafeMakedirs(pkg_dir)
+    ebuild = os.path.join(pkg_dir, 'chromeos-chrome-%s_rc-r%s.ebuild')
+    unstable_ebuild = os.path.join(pkg_dir, 'chromeos-chrome-9999.ebuild')
+
     best_version = '4.3.2.1'
-    best_ebuild_path = ebuild % best_version
+    rest_versions = ['1.2.3.4', '4.3.2.0']
+
+    best_revs = [2, 12]
+    rest_revs = best_revs + [21]
 
     # Other versions to set up to compare against.
-    versions = ['1.2.3.4', '4.3.2.0']
-    ebuild_paths = [ebuild % version for version in versions]
-
-    # Create a separate ebuild with the same chrome version as the best ebuild.
-    rev_tiebreak_ebuild_path = best_ebuild_path.replace('-r12', '-r2')
-    ebuild_paths.append(rev_tiebreak_ebuild_path)
+    ebuild_paths = [
+        ebuild % (best_version, rev) for rev in best_revs
+    ]
+    ebuild_paths += [
+        ebuild % (ver, rev) for ver in rest_versions for rev in rest_revs
+    ]
+    best_ebuild_path = ebuild % (best_version, max(best_revs))
 
     # Write stable ebuild data.
     stable_data = 'KEYWORDS=*'
     osutils.WriteFile(best_ebuild_path, stable_data)
     for path in ebuild_paths:
       osutils.WriteFile(path, stable_data)
+    # Write the unstable ebuild.
+    unstable_data = 'KEYWORDS=~*'
+    osutils.WriteFile(unstable_ebuild, unstable_data)
 
     # Create the ebuilds.
-    ebuilds = [uprev_lib.ChromeEBuild(path) for path in ebuild_paths]
+    self.ebuilds = [uprev_lib.ChromeEBuild(path) for path in ebuild_paths]
     self.best_ebuild = uprev_lib.ChromeEBuild(best_ebuild_path)
-    self.ebuilds = ebuilds + [self.best_ebuild]
 
   def test_no_ebuilds(self):
     """Test error on no ebuilds provided."""
@@ -122,9 +131,15 @@ class BestChromeEbuildTests(cros_test_lib.TempDirTestCase):
     best = uprev_lib.best_chrome_ebuild(self.ebuilds)
     self.assertEqual(self.best_ebuild.ebuild_path, best.ebuild_path)
 
+  def test_get_stable_version(self):
+    """Test fetching latest stable version from ebuilds."""
+    self.PatchObject(uprev_lib, '_CHROME_OVERLAY_PATH', new=self.tempdir)
+    version = uprev_lib.get_stable_chrome_version()
+    self.assertEqual(self.best_ebuild.chrome_version, version)
+
 
 class FindChromeEbuildsTest(cros_test_lib.TempDirTestCase):
-  """find_chrome_ebuild tests."""
+  """find_chrome_ebuilds tests."""
 
   def setUp(self):
     ebuild = os.path.join(self.tempdir, 'chromeos-chrome-%s.ebuild')

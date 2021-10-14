@@ -7,11 +7,13 @@
 from unittest import mock
 
 from chromite.lib import build_target_lib
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib import workon_helper
 from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
-
+from chromite.service import sysroot
 
 class BuildTest(cros_test_lib.RunCommandTestCase):
   """Tests for building ap firmware."""
@@ -44,17 +46,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     self.assertFalse(build_config.workon)
     self.assertEqual(('pkg3', 'pkg4'), build_config.build)
 
-  def test_invalid_build_config(self):
-    """Test invalid build configs."""
-    module = mock.MagicMock(
-        BUILD_WORKON_PACKAGES=('pkg1', 'pkg2'), BUILD_PACKAGES=tuple())
-
-    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
-
-    with self.assertRaises(ap_firmware.InvalidConfigError):
-      # pylint: disable=protected-access
-      ap_firmware._get_build_config(build_target_lib.BuildTarget('board'))
-
   def test_build(self):
     """Sanity checks the workon and command building functions properly."""
     # Note: The workon helper handles looking up full category/package atom
@@ -64,8 +55,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
     # Inconsequential pkgs + 1 we need.
     existing_workons = ['cat/pkg1', 'cat/pkg2', 'cat/workon1']
     existing_and_required = existing_workons + ['cat/workon2']
-    # Should only stop the ones that weren't previously worked on.
-    expected_workon_stop = ['cat/workon2']
 
     build_config = ap_firmware.BuildConfig(workon=workon_pkgs, build=build_pkgs)
     build_target = build_target_lib.BuildTarget('board')
@@ -77,10 +66,11 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
         'ListAtoms',
         side_effect=[existing_workons, existing_and_required])
     # Start and stop workon patches for verifying calls.
-    start_patch = self.PatchObject(workon_helper.WorkonHelper,
-                                   'StartWorkingOnPackages')
-    stop_patch = self.PatchObject(workon_helper.WorkonHelper,
-                                  'StopWorkingOnPackages')
+    self.PatchObject(workon_helper.WorkonScope, '__enter__')
+    self.PatchObject(workon_helper.WorkonScope, '__exit__')
+
+    # Patch the SetupBoard command.
+    self.PatchObject(sysroot, 'SetupBoard')
 
     # Patch in the build config.
     self.PatchObject(
@@ -88,10 +78,6 @@ class BuildTest(cros_test_lib.RunCommandTestCase):
 
     ap_firmware.build(build_target, 'board-variant')
 
-    # Verify the workon packages. Should be starting all the required workon
-    # packages, but only stopping the ones that we started in the command.
-    start_patch.assert_called_once_with(workon_pkgs)
-    stop_patch.assert_called_once_with(expected_workon_stop)
     # Verify we try to build all the build packages, and that the FW_NAME envvar
     # has been set.
     self.rc.assertCommandContains(
@@ -228,3 +214,41 @@ class DeployConfigTest(cros_test_lib.TestCase):
 
     commands = config.get_servo_commands(self.servo, self.image, verbose=True)
     self._assert_command(commands.flash, flashrom=False, fast_verbose=True)
+
+class CleanTest(cros_test_lib.RunCommandTestCase):
+  """Tests for cleaning up firmware artifacts and dependencies."""
+
+  def setUp(self):
+    self.pkgs = ['pkg1', 'pkg2', 'coreboot-private-files',
+                 'chromeos-config-bsp']
+
+  def test_clean(self):
+    """Sanity check for the clean command (ideal case)."""
+    module = mock.MagicMock(
+        BUILD_WORKON_PACKAGES=None, BUILD_PACKAGES=('pkg3', 'pkg4'))
+
+    self.PatchObject(ap_firmware, 'get_config_module', return_value=module)
+
+    pkgs = [*self.pkgs, *module.BUILD_PACKAGES]
+
+    def run_side_effect(*args, **kwargs):
+      if args[0][0].startswith('qfile'):
+        if kwargs.get('capture_output'):
+          return mock.MagicMock(stdout='\n'.join(pkgs).encode())
+        return mock.MagicMock(stdout=''.encode())
+      elif args[0][0].startswith('emerge'):
+        return mock.MagicMock(returncode=0)
+
+    run_mock = self.PatchObject(cros_build_lib, 'run',
+                                side_effect=run_side_effect)
+    self.PatchObject(osutils, 'RmDir')
+    ap_firmware.clean(build_target_lib.BuildTarget('boardname'))
+    run_mock.assert_any_call([mock.ANY, mock.ANY, *sorted(pkgs)],
+                             capture_output=mock.ANY, dryrun=False)
+
+  def test_nonexistent_board_clean(self):
+    """Verifies exception thrown when target board was not configured."""
+    se = cros_build_lib.RunCommandError('nonexistent board')
+    self.PatchObject(cros_build_lib, 'run', side_effect=se)
+    with self.assertRaisesRegex(ap_firmware.CleanError, 'qfile'):
+      ap_firmware.clean(build_target_lib.BuildTarget('schrodinger'))

@@ -10,12 +10,12 @@ commits that aren't already reachable from the upstream tracking branch, push
 refs to the remotes so that this snapshot can be reproduced remotely.
 """
 
+import logging
 import os
 import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import parallel
 from chromite.lib import repo_util

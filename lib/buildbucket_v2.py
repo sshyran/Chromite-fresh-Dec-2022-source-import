@@ -12,19 +12,21 @@ client out of lib/luci/prpc and third_party/infra_libs/buildbucket.
 import ast
 import collections
 import http.client
+import logging
 import socket
 from ssl import SSLError
+from typing import Callable, Optional
 
+from chromite.third_party.google.protobuf import field_mask_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    builder_pb2, builds_service_pb2, builds_service_prpc_pb2, common_pb2)
+
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
 from chromite.lib import retry_util
 from chromite.lib.luci import utils
 from chromite.lib.luci.prpc.client import Client
 from chromite.lib.luci.prpc.client import ProtocolError
-from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import (builder_pb2, builds_service_pb2, builds_service_prpc_pb2,
-                                                               common_pb2)
-
 
 BBV2_URL_ENDPOINT_PROD = (
     'cr-buildbucket.appspot.com'
@@ -219,9 +221,9 @@ def UpdateSelfBuildPropertiesNonBlocking(key, value):
     value: value of the property.
   """
   if key == 'email_notify':
-    logging.PrintKitchenSetEmailNotifyProperty(key, value)
+    cbuildbot_alerts.PrintKitchenSetEmailNotifyProperty(key, value)
   else:
-    logging.PrintKitchenSetBuildProperty(key, value)
+    cbuildbot_alerts.PrintKitchenSetBuildProperty(key, value)
 
 
 def UpdateSelfCommonBuildProperties(critical=None,
@@ -404,11 +406,13 @@ def GetBotId(build):
 class BuildbucketV2(object):
   """Connection to Buildbucket V2 database."""
 
-  def __init__(self, test_env=False):
+  def __init__(self, test_env=False,
+               access_token_retriever: Optional[Callable[[], str]]=None):
     """Constructor for Buildbucket V2 Build client.
 
     Args:
       test_env: Whether to have the client connect to test URL endpoint on GAE.
+      access_token_retriever: An optional callable that returns an access token.
     """
     if test_env:
       self.client = Client(BBV2_URL_ENDPOINT_TEST,
@@ -416,6 +420,8 @@ class BuildbucketV2(object):
     else:
       self.client = Client(BBV2_URL_ENDPOINT_PROD,
                            builds_service_prpc_pb2.BuildsServiceDescription)
+
+    self._access_token_retriever = access_token_retriever
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -453,7 +459,7 @@ class BuildbucketV2(object):
         )
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=batch_requests))
+      requests=batch_requests), **self._client_kwargs)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -485,7 +491,7 @@ class BuildbucketV2(object):
         )
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=batch_requests))
+      requests=batch_requests), **self._client_kwargs)
 
   def BatchSearchBuilds(self, search_requests):
     """SearchBuild RPC call wrapping function.
@@ -503,7 +509,7 @@ class BuildbucketV2(object):
         builds_service_pb2.BatchRequest.Request(search_builds=request)
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=requests))
+      requests=requests), **self._client_kwargs)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -528,7 +534,7 @@ class BuildbucketV2(object):
          fields=(field_mask_pb2.FieldMask(paths=[properties])
                  if properties else None)
     )
-    return self.client.CancelBuild(cancel_build_request)
+    return self.client.CancelBuild(cancel_build_request, **self._client_kwargs)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -556,7 +562,7 @@ class BuildbucketV2(object):
         fields=(field_mask_pb2.FieldMask(paths=field_mask)
                 if field_mask else None)
     )
-    return self.client.GetBuild(get_build_request)
+    return self.client.GetBuild(get_build_request, **self._client_kwargs)
 
 # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -594,7 +600,8 @@ class BuildbucketV2(object):
         dimensions=dimensions if dimensions else None,
         fields=field_mask_pb2.FieldMask(paths=[fields]) if fields else None,
         critical=common_pb2.YES if critical else common_pb2.NO)
-    return self.client.ScheduleBuild(schedule_build_request)
+    return self.client.ScheduleBuild(schedule_build_request,
+                                     **self._client_kwargs)
 
 # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -619,7 +626,7 @@ class BuildbucketV2(object):
         fields=(field_mask_pb2.FieldMask(paths=[properties])
                 if properties else None)
     )
-    return self.client.UpdateBuild(update_build_request)
+    return self.client.UpdateBuild(update_build_request, **self._client_kwargs)
 
   def GetKilledChildBuilds(self, buildbucket_id):
     """Get IDs of all the builds killed by self-destructed master build.
@@ -788,7 +795,7 @@ class BuildbucketV2(object):
       search_build_request = builds_service_pb2.SearchBuildsRequest(
           predicate=build_predicate, fields=fields, page_size=page_size)
 
-    return self.client.SearchBuilds(search_build_request)
+    return self.client.SearchBuilds(search_build_request, **self._client_kwargs)
 
   def GetBuildHistory(self, build_config, num_results, ignore_build_id=None,
                       start_date=None, end_date=None, branch=None,
@@ -894,3 +901,19 @@ class BuildbucketV2(object):
         stage_failures.append(failed_stage_info)
 
     return stage_failures
+
+  @property
+  def _client_kwargs(self):
+    """Returns kwargs to be added to every rpc in the client.
+
+    The client accepts the following arguments to its requests:
+    timeout: int
+    metadata: Dict[str, Any]
+    credentials: Callable[[luci.prpc.client.Request], luci.prpc.client.Request]
+    """
+    kwargs = {}
+    if self._access_token_retriever is not None:
+      token = self._access_token_retriever()
+      kwargs['metadata'] = dict(Authorization=f'Bearer {token}')
+      kwargs['credentials'] = lambda req: req._replace(include_auth=False)
+    return kwargs

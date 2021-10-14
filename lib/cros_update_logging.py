@@ -11,9 +11,8 @@
 4. Add file handler to record all logs above level 'DEBUG' into file.
 """
 
+import logging
 import sys
-
-from chromite.lib import cros_logging as logging
 
 
 class loggingConfig(object):

@@ -6,14 +6,14 @@
 
 import itertools
 import json
+import logging
 import os
 
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
-from chromite.lib import pformat
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
+from chromite.utils import pformat
 
 
 # Location of swarming_client.py that is used to send swarming requests
@@ -202,7 +202,7 @@ class SwarmingCommandResult(cros_build_lib.CommandResult):
       task_summary_json: A dictionary, loaded from the json file output by
           swarming client. It cantains all details about the swarming task.
     """
-    super(SwarmingCommandResult, self).__init__(*args, **kwargs)
+    super().__init__(*args, **kwargs)
     self.task_summary_json = task_summary_json
 
   @staticmethod

@@ -14,11 +14,10 @@ from __future__ import division
 import collections
 import contextlib
 from functools import wraps
+import logging
 import queue as Queue
 import ssl
 import time
-
-from chromite.lib import cros_logging as logging
 
 
 try:

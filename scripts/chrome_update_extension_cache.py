@@ -20,16 +20,16 @@ $ ebuild chromeos-default-apps-1.0.0.ebuild manifest --force
 """
 
 import json
+import logging
 import os
 import urllib.request
 import xml.dom.minidom
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gs
 from chromite.lib import osutils
-from chromite.lib import pformat
+from chromite.utils import pformat
 
 
 UPLOAD_URL_BASE = 'gs://chromeos-localmirror-private/distfiles'
@@ -39,7 +39,7 @@ def DownloadCrx(ext, extension, crxdir):
   """Download .crx file from WebStore and update entry."""
   logging.info('Extension "%s"(%s)...', extension['name'], ext)
 
-  update_url = ('%s?x=prodversion%%3D35.1.1.1%%26id%%3D%s%%26uc' %
+  update_url = ('%s?prodversion=90.1.1.1&acceptformat=crx3&x=id%%3D%s%%26uc' %
                 (extension['external_update_url'], ext))
   response = urllib.request.urlopen(update_url)
   if response.getcode() != 200:

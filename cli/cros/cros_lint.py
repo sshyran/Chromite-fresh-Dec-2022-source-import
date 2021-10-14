@@ -6,16 +6,16 @@
 
 import functools
 import json
+import logging
 import multiprocessing
 import os
 import re
 import sys
 import urllib.parse
 
-from chromite.lib import constants
 from chromite.cli import command
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -320,6 +320,14 @@ def _GentooShellLintFile(path, output_format, debug):
   return _ShellLintFile(path, output_format, debug, gentoo_format=True)
 
 
+def _SeccompPolicyLintFile(path, _output_format, debug):
+  """Run the seccomp policy linter."""
+  return _LinterRunCommand(
+      [os.path.join(constants.SOURCE_ROOT, 'src', 'aosp', 'external',
+                    'minijail', 'tools', 'seccomp_policy_lint.py'), path],
+      debug)
+
+
 def _BreakoutDataByLinter(map_to_return, path):
   """Maps a linter method to the content of the |path|."""
   # Detect by content of the file itself.
@@ -360,6 +368,7 @@ _EXT_TO_LINTER_MAP = {
     frozenset({'.sh'}): _ShellLintFile,
     frozenset({'.ebuild', '.eclass', '.bashrc'}): _GentooShellLintFile,
     frozenset({'.md'}): _MarkdownLintFile,
+    frozenset({'.policy'}): _SeccompPolicyLintFile,
 }
 
 

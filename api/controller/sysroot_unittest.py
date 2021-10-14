@@ -155,64 +155,6 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.assertEqual(sysroot_path, out_proto.sysroot.path)
 
 
-class CreateSimpleChromeSysrootTest(cros_test_lib.MockTempDirTestCase,
-                                    api_config.ApiConfigMixin):
-  """CreateSimpleChromeSysroot function tests."""
-
-  def _InputProto(self, build_target=None, use_flags=None):
-    """Helper to build and input proto instance."""
-    proto = sysroot_pb2.CreateSimpleChromeSysrootRequest()
-    if build_target:
-      proto.build_target.name = build_target
-    if use_flags:
-      proto.use_flags = use_flags
-    return proto
-
-  def _OutputProto(self):
-    """Helper to build output proto instance."""
-    return sysroot_pb2.CreateSimpleChromeSysrootResponse()
-
-  def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    patch = self.PatchObject(sysroot_service, 'CreateSimpleChromeSysroot')
-
-    board = 'board'
-    in_proto = self._InputProto(build_target=board, use_flags=[])
-    sysroot_controller.CreateSimpleChromeSysroot(in_proto, self._OutputProto(),
-                                                 self.validate_only_config)
-    patch.assert_not_called()
-
-  def testMockCall(self):
-    """Sanity check that a mock call does not execute any logic."""
-    patch = self.PatchObject(sysroot_service, 'CreateSimpleChromeSysroot')
-
-    board = 'board'
-    in_proto = self._InputProto(build_target=board, use_flags=[])
-    rc = sysroot_controller.CreateSimpleChromeSysroot(in_proto,
-                                                      self._OutputProto(),
-                                                      self.mock_call_config)
-    self.assertEqual(controller.RETURN_CODE_SUCCESS, rc)
-    patch.assert_not_called()
-
-  def testArgumentValidation(self):
-    """Test the input argument validation."""
-    # Error when no build target provided.
-    in_proto = self._InputProto()
-    out_proto = self._OutputProto()
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      sysroot_controller.CreateSimpleChromeSysroot(in_proto, out_proto,
-                                                   self.api_config)
-
-    # Valid when board is specified.
-    patch = self.PatchObject(sysroot_service, 'CreateSimpleChromeSysroot',
-                             return_value='/path/to/sysroot/tar.bz')
-    in_proto = self._InputProto(build_target='board')
-    out_proto = self._OutputProto()
-    sysroot_controller.CreateSimpleChromeSysroot(in_proto, out_proto,
-                                                 self.api_config)
-    patch.assert_called_once()
-
-
 class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase,
                           api_config.ApiConfigMixin):
   """GenerateArchive function tests."""
@@ -403,7 +345,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
                                 sysroot_path=self.sysroot)
 
     err_pkgs = ['cat/pkg', 'cat2/pkg2']
-    err_cpvs = [package_info.SplitCPV(pkg, strict=False) for pkg in err_pkgs]
+    err_cpvs = [package_info.parse(pkg) for pkg in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
     err = sysroot_lib.ToolchainInstallError('Error',
                                             cros_build_lib.CommandResult(),
@@ -462,9 +404,9 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       instance.package_indexes.extend(package_indexes)
     if packages:
       for pkg in packages:
-        pkg_info = instance.packages.add()
-        cpv = package_info.SplitCPV(pkg, strict=False)
-        controller_util.CPVToPackageInfo(cpv, pkg_info)
+        pkg_info = package_info.parse(pkg)
+        pkg_info_msg = instance.packages.add()
+        controller_util.serialize_package_info(pkg_info, pkg_info_msg)
     return instance
 
   def _OutputProto(self):

@@ -4,13 +4,14 @@
 
 """CTS/GTS-related helper functions/classes."""
 
-import os
 import glob
 import gzip
+import logging
+import os
 import shutil
 
 from chromite.lib import constants
-from chromite.lib import cros_logging as logging
+
 
 # TODO(pwang): Move CTS upload logic from autotest to here for consistency.
 

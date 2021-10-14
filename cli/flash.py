@@ -6,16 +6,15 @@
 
 from __future__ import division
 
+import logging
 import os
 import re
 import shutil
 
 from chromite.cli import device_imager
 from chromite.cli.cros import cros_chrome_sdk
-
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import dev_server_wrapper as ds_wrapper
 from chromite.lib import operation
 from chromite.lib import osutils
@@ -38,7 +37,7 @@ class UsbImagerOperation(operation.ProgressBarOperation):
   """Progress bar for flashing image to operation."""
 
   def __init__(self, image):
-    super(UsbImagerOperation, self).__init__()
+    super().__init__()
     self._size = os.path.getsize(image)
     self._transferred = 0
     self._bytes = re.compile(r'(\d+) bytes')
@@ -307,11 +306,13 @@ class FileImager(USBImager):
       logging.error('Failed to copy image %s to %s', image_path, self.device)
 
 
+# TODO(b/190631159, b/196056723): Change default of no_minios_update to |False|.
 def Flash(device, image, board=None, version=None,
           no_rootfs_update=False, no_stateful_update=False,
-          clobber_stateful=False, reboot=True, ssh_private_key=None, ping=True,
-          disable_rootfs_verification=False, clear_cache=False, yes=False,
-          force=False, debug=False, clear_tpm_owner=False):
+          no_minios_update=True, clobber_stateful=False, reboot=True,
+          ssh_private_key=None, ping=True, disable_rootfs_verification=False,
+          clear_cache=False, yes=False, force=False, debug=False,
+          clear_tpm_owner=False):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -326,6 +327,7 @@ def Flash(device, image, board=None, version=None,
     no_rootfs_update: Don't update rootfs partition; SSH |device| scheme only.
     no_stateful_update: Don't update stateful partition; SSH |device| scheme
         only.
+    no_minios_update: Don't update miniOS partition; SSH |device| scheme only.
     clobber_stateful: Clobber stateful partition; SSH |device| scheme only.
     clear_tpm_owner: Clear the TPM owner on reboot; SSH |device| scheme only.
     reboot: Reboot device after update; SSH |device| scheme only.
@@ -368,6 +370,7 @@ def Flash(device, image, board=None, version=None,
           version=version,
           no_rootfs_update=no_rootfs_update,
           no_stateful_update=no_stateful_update,
+          no_minios_update=no_minios_update,
           no_reboot=not reboot,
           disable_verification=disable_rootfs_verification,
           clobber_stateful=clobber_stateful,

@@ -5,8 +5,8 @@
 """Chrome OS dump_image_config unittests"""
 
 from chromite.lib import cros_test_lib
-from chromite.signing.image_signing import imagefile
 from chromite.signing.bin import dump_image_config
+from chromite.signing.image_signing import imagefile
 
 
 class TestMain(cros_test_lib.RunCommandTestCase):

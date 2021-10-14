@@ -5,12 +5,12 @@
 """Choose the profile for a board that has been or is being setup."""
 
 import functools
+import logging
 import os
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 

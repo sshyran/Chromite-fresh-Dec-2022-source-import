@@ -40,7 +40,7 @@ class BuilderRunMock(partial_mock.PartialMock):
   ATTRS = ('GetVersionInfo', 'DetermineChromeVersion',)
 
   def __init__(self, verinfo):
-    super(BuilderRunMock, self).__init__()
+    super().__init__()
     self._version_info = verinfo
 
   def GetVersionInfo(self, _inst):

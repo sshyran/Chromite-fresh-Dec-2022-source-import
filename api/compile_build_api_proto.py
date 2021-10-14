@@ -8,13 +8,13 @@ Install proto using CIPD to ensure a consistent protoc version.
 """
 
 import enum
+import logging
 import os
 import tempfile
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 
@@ -90,7 +90,7 @@ def _InstallProtoc(protoc_version: ProtocVersion):
     cros_build_lib.run(cmd, cwd=constants.CHROMITE_DIR, print_cmd=False)
 
 
-def _CleanTargetDirectory(directory):
+def _CleanTargetDirectory(directory: str):
   """Remove any existing generated files in the directory.
 
   This clean only removes the generated files to avoid accidentally destroying
@@ -100,7 +100,7 @@ def _CleanTargetDirectory(directory):
   diagnosing accidental __init__.py changes.
 
   Args:
-    directory (str): Path to be cleaned up.
+    directory: Path to be cleaned up.
   """
   logging.info('Cleaning old files from %s.', directory)
   for dirpath, _dirnames, filenames in os.walk(directory):
@@ -128,22 +128,6 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
 
   targets = []
 
-  # Only compile the subset we need for the API.
-  subdirs = [
-      os.path.join(source, 'chromite'),
-      os.path.join(source, 'chromiumos'),
-      os.path.join(source, 'client'),
-      os.path.join(source, 'config'),
-      os.path.join(source, 'test_platform'),
-      os.path.join(source, 'device')
-  ]
-  for basedir in subdirs:
-    for dirpath, _dirnames, filenames in os.walk(basedir):
-      for filename in filenames:
-        if filename.endswith('.proto'):
-          # We have a match, add the file.
-          targets.append(os.path.join(dirpath, filename))
-
   chromeos_config_path = os.path.realpath(
       os.path.join(constants.SOURCE_ROOT, 'src/config'))
 
@@ -156,6 +140,23 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
                 '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
                 depth=1
       )
+
+    # Only compile the subset we need for the API.
+    subdirs = [
+        os.path.join(source, 'chromite'),
+        os.path.join(source, 'chromiumos'),
+        os.path.join(source, 'client'),
+        os.path.join(source, 'config'),
+        os.path.join(source, 'test_platform'),
+        os.path.join(source, 'device'),
+        os.path.join(chromeos_config_path, 'proto/chromiumos'),
+    ]
+    for basedir in subdirs:
+      for dirpath, _dirnames, filenames in os.walk(basedir):
+        for filename in filenames:
+          if filename.endswith('.proto'):
+            # We have a match, add the file.
+            targets.append(os.path.join(dirpath, filename))
 
     cmd = [
         _get_protoc_command(protoc_version),

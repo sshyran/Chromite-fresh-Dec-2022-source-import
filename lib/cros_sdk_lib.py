@@ -5,14 +5,18 @@
 """Utilities for setting up and cleaning up the chroot environment."""
 
 import collections
+import grp
+import logging
 import os
 from pathlib import Path
+import pwd
 import re
+import shutil
 import time
+from typing import List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import timeout_util
@@ -50,7 +54,7 @@ class ChrootDeprecatedError(Error):
            'Your chroot is so old that some updates have been deprecated and'
            'it will need to be recreated. A fresh chroot can be built with:\n'
            '    cros_sdk --replace\n')
-    super(ChrootDeprecatedError, self).__init__(msg, *args, **kwargs)
+    super().__init__(msg, *args, **kwargs)
 
 
 class ChrootUpdateError(Error):
@@ -160,6 +164,53 @@ def IsChrootReady(chroot):
   """
   version = GetChrootVersion(chroot)
   return version is not None and version > 0
+
+
+def MountChrootPaths(path: Union[Path, str]):
+  """Setup all the mounts for |path|.
+
+  NB: This assumes running in a unique mount namespace.  If it is running in the
+  root mount namespace, then it will probably change settings for the worse.
+  """
+  KNOWN_FILESYSTEMS = set(
+      x.split()[-1] for x in osutils.ReadFile('/proc/filesystems').splitlines())
+
+  path = Path(path).resolve()
+
+  logging.debug('Mounting chroot paths at %s', path)
+
+  # Mark all existing mounts as slave mounts: that means changes made to mounts
+  # in the parent mount namespace will propagate down (like unmounts).
+  osutils.Mount(None, '/', None, osutils.MS_REC | osutils.MS_SLAVE)
+
+  # If the mount path is already mounted, make it private so we can make changes
+  # without it propagating back out.
+  for info in osutils.IterateMountPoints():
+    if info.destination == str(path):
+      osutils.Mount(None, path, None, osutils.MS_REC | osutils.MS_PRIVATE)
+      break
+
+  # The source checkout must be mounted first.  We'll be mounting paths into the
+  # chroot, and that chroot lives inside SOURCE_ROOT, so if we did the recursive
+  # bind at the end, we'd double bind things.
+  osutils.Mount(
+      constants.SOURCE_ROOT, path / constants.CHROOT_SOURCE_ROOT[1:],
+      '~/chromiumos', osutils.MS_BIND | osutils.MS_REC)
+
+  defflags = (osutils.MS_NOSUID | osutils.MS_NODEV | osutils.MS_NOEXEC |
+              osutils.MS_RELATIME)
+  osutils.Mount('proc', path / 'proc', 'proc', defflags)
+  osutils.Mount('sysfs', path / 'sys', 'sysfs', defflags)
+
+  if 'binfmt_misc' in KNOWN_FILESYSTEMS:
+    osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
+                  'binfmt_misc', defflags)
+
+  if 'configfs' in KNOWN_FILESYSTEMS:
+    osutils.Mount('configfs', path / 'sys/kernel/config', 'configfs', defflags)
+
+  # We expose /dev so we can access loopback & USB drives for flashing.
+  osutils.Mount('/dev', path / 'dev', '/dev', osutils.MS_BIND | osutils.MS_REC)
 
 
 def FindVolumeGroupForDevice(chroot_path, chroot_dev):
@@ -739,6 +790,17 @@ class ChrootCreator:
   # If the host timezone isn't set, we'll use this inside the SDK.
   DEFAULT_TZ = 'usr/share/zoneinfo/PST8PDT'
 
+  # Groups to add the user to inside the chroot.
+  # This group list is a bit dated and probably contains a number of items that
+  # no longer make sense.
+  # TODO(crbug.com/762445): Remove "adm".
+  # TODO(build): Remove cdrom & floppy.
+  # TODO(build): See if audio is still needed.  Host distros might use diff
+  # "audio" group, so we wouldn't get access to /dev/snd/ nodes directly.
+  # TODO(build): See if video is still needed.  Host distros might use diff
+  # "video" group, so we wouldn't get access to /dev/dri/ nodes directly.
+  DEFGROUPS = {'adm', 'cdrom', 'floppy', 'audio', 'video', 'portage'}
+
   def __init__(self, chroot_path: Path, sdk_tarball: Path, cache_dir: Path,
                usepkg: bool = True):
     """Initialize.
@@ -777,13 +839,206 @@ class ChrootCreator:
     host_tz = '/' / tz_path
     chroot_tz = self.chroot_path / tz_path
     # Nuke it in case it's a broken symlink.
-    chroot_tz.unlink(missing_ok=True)
+    osutils.SafeUnlink(chroot_tz)
     if host_tz.exists():
       logging.debug('%s: copying from %s', chroot_tz, host_tz)
       chroot_tz.write_bytes(host_tz.read_bytes())
     else:
       logging.debug('%s: symlinking to %s', chroot_tz, self.DEFAULT_TZ)
       chroot_tz.symlink_to(self.DEFAULT_TZ)
+
+  def init_user(self,
+                user: Optional[str] = None,
+                uid: Optional[int] = None,
+                gid: Optional[int] = None):
+    """Setup the current user inside the chroot.
+
+    The user account name & id are synced with the active account outside of the
+    SDK.  This helps facilitate copying of files in & out of the SDK without the
+    need of sudo.
+
+    The user account must not already exist inside the SDK (as a pre-existing
+    reserved name) otherwise we can't create it with the right uid.
+
+    Args:
+      user: The username to create.
+      uid: The new account's userid.
+      gid: The new account's groupid.
+    """
+    if not user:
+      user = os.getenv('SUDO_USER')
+    if uid is None:
+      uid = int(os.getenv('SUDO_UID'))
+    if gid is None:
+      gid = pwd.getpwnam(user).pw_gid
+
+    path = self.chroot_path / 'etc' / 'passwd'
+    lines = path.read_text().splitlines()
+
+    # Make sure the user isn't one the existing reserved ones.
+    for line in lines:
+      existing_user = line.split(':', 1)[0]
+      if existing_user == user:
+        cros_build_lib.Die(f'{user}: this account cannot be used to build CrOS')
+
+    # Create the account.
+    home = f'/home/{user}'
+    line = f'{user}:x:{uid}:{gid}:ChromeOS Developer:{home}:/bin/bash'
+    logging.debug('%s: adding user: %s', path, line)
+    lines.insert(0, line)
+    path.write_text('\n'.join(lines) + '\n')
+
+    home = self.chroot_path / home[1:]
+    self.init_user_home(home, uid, gid)
+
+  def init_group(self,
+                 user: Optional[str] = None,
+                 groups: Optional[List[str]] = None,
+                 group: Optional[str] = None,
+                 gid: Optional[int] = None):
+    """Setup the current user's groups inside the chroot.
+
+    This will create the user's primary group and add them to a bunch of
+    supplemental groups.  The primary group is synced with the active account
+    outside of the SDK to help facilitate accessing of files & resources (e.g.
+    any /dev nodes).
+
+    The primary group must not already exist inside the SDK (as a pre-existing
+    reserved name) otherwise we can't create it with the right gid.
+
+    Args:
+      user: The username to add to groups.
+      groups: The account's supplemental groups.
+      group: The account's primary group (to be created).
+      gid: The primary group's gid.
+    """
+    if not user:
+      user = os.getenv('SUDO_USER')
+    if groups is None:
+      groups = self.DEFGROUPS
+    if gid is None:
+      gid = pwd.getpwnam(user).pw_gid
+    if group is None:
+      group = grp.getgrgid(gid).gr_name
+
+    path = self.chroot_path / 'etc' / 'group'
+    lines = path.read_text().splitlines()
+
+    # Make sure the group isn't one the existing reserved ones.
+    # Add the user to all the existing ones too.
+    for i, line in enumerate(lines):
+      entry = line.split(':')
+      if entry[0] == group:
+        # If the group exists with the same gid, no need to add a new one.
+        # This often comes up with e.g. the "users" group.
+        if entry[2] == str(gid):
+          return
+        cros_build_lib.Die(f'{group}: this group cannot be used to build CrOS')
+      if entry[0] in groups:
+        if entry[-1]:
+          entry[-1] += ','
+        entry[-1] += user
+        lines[i] = ':'.join(entry)
+
+    line = f'{group}:x:{gid}:{user}'
+    logging.debug('%s: adding group: %s', path, line)
+    lines.insert(0, line)
+    path.write_text('\n'.join(lines) + '\n')
+
+  def init_user_home(self, home: Path, uid: int, gid: int):
+    """Initialize the user's /home dir."""
+    shutil.copytree(self.chroot_path / 'etc/skel', home)
+
+    # TODO(build): Delete this leftover from SVN someday.
+    (home / 'trunk').symlink_to(constants.CHROOT_SOURCE_ROOT)
+    (home / 'chromiumos').symlink_to(constants.CHROOT_SOURCE_ROOT)
+    (home / 'depot_tools').symlink_to('/mnt/host/depot_tools')
+
+    # Automatically change to scripts directory.
+    bash_profile = home / '.bash_profile'
+    osutils.Touch(bash_profile)
+    data = bash_profile.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    data += (
+        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n'
+    )
+    bash_profile.write_text(data)
+
+    # Enable bash completion.
+    bashrc = home / '.bashrc'
+    osutils.Touch(bashrc)
+    data = bashrc.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    data += (
+        '# Set up bash autocompletion.\n'
+        '. ~/chromiumos/src/scripts/bash_completion\n'
+    )
+    bashrc.write_text(data)
+
+    osutils.Chown(home, user=uid, group=gid, recursive=True)
+
+  def init_filesystem_basic(self):
+    """Create various dirs & simple config files."""
+    # Create random empty dirs.
+    for path in (
+        constants.CHROOT_SOURCE_ROOT,
+        '/mnt/host/depot_tools',
+        '/run',
+    ):
+      (self.chroot_path / path[1:]).mkdir(
+          mode=0o755, parents=True, exist_ok=True)
+
+  def init_etc(self, user: str = None):
+    """Setup the /etc paths."""
+    if user is None:
+      user = os.getenv('SUDO_USER')
+
+    etc_dir = self.chroot_path / 'etc'
+
+    # Setup some symlinks.
+    mtab = etc_dir / 'mtab'
+    if not mtab.is_symlink():
+      osutils.SafeUnlink(mtab)
+      mtab.symlink_to('/proc/mounts')
+
+    # Copy config from outside chroot into chroot.
+    for path in ('hosts', 'resolve.conf'):
+      host_path = Path('/etc') / path
+      chroot_path = etc_dir / path
+      if host_path.exists():
+        chroot_path.write_bytes(host_path.read_bytes())
+        chroot_path.chmod(0o644)
+
+    # Add chromite/bin and depot_tools into the path globally; note that the
+    # chromite wrapper itself might also be found in depot_tools.
+    # We rely on 'env-update' getting called below.
+    env_d = etc_dir / 'env.d' / '99chromiumos'
+    env_d.write_text(f"""\
+PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/bin:/mnt/host/depot_tools"
+CROS_WORKON_SRCROOT="{constants.CHROOT_SOURCE_ROOT}"
+PORTAGE_USERNAME="{user}"
+""")
+
+    profile_d = etc_dir / 'profile.d'
+    profile_d.mkdir(mode=0o755, parents=True, exist_ok=True)
+    (profile_d / '50-chromiumos-niceties.sh').symlink_to(
+        f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/profile.d/'
+        '50-chromiumos-niceties.sh')
+
+    # Select a small set of locales for the user if they haven't done so
+    # already.  This makes glibc upgrades cheap by only generating a small
+    # set of locales.  The ones listed here are basically for the buildbots
+    # which always assume these are available.  This works in conjunction
+    # with `cros_sdk --enter`.
+    # http://crosbug.com/20378
+    localegen = etc_dir / 'locale.gen'
+    osutils.Touch(localegen)
+    data = localegen.read_text().rstrip()
+    if data:
+      data += '\n\n'
+    localegen.write_text(data + 'en_US.UTF-8 UTF-8\n')
 
   def print_success_summary(self):
     """Show a summary of the chroot to the user."""
@@ -800,8 +1055,17 @@ you may end up deleting your source tree too.  To unmount & delete cleanly, use:
 $ cros_sdk --delete%s
 """, chroot_opt, chroot_opt)
 
-  def run(self):
-    """Create the chroot."""
+  def run(self,
+          user: str = None, uid: int = None,
+          group: str = None, gid: int = None):
+    """Create the chroot.
+
+    Args:
+      user: The user account to use (e.g. for testing).
+      uid: The user id to use (e.g. for testing).
+      group: The group account to use (e.g. for testing).
+      gid: The group id to use (e.g. for testing).
+    """
     logging.notice('Creating chroot. This may take a few minutes...')
 
     # Unpack the chroot & reset the version.
@@ -811,6 +1075,12 @@ $ cros_sdk --delete%s
     updater.SetVersion(0)
 
     self.init_timezone()
+    self.init_user(user=user, uid=uid, gid=gid)
+    self.init_group(user=user, group=group, gid=gid)
+    self.init_filesystem_basic()
+    self.init_etc(user=user)
+
+    MountChrootPaths(self.chroot_path)
 
     self._make_chroot()
 

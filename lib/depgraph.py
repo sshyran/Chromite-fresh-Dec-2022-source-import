@@ -6,23 +6,14 @@
 
 import collections
 import copy
+import logging
 import os
 import sys
 import time
 from typing import List, Optional, Union
 
-from chromite.lib import build_target_lib
-from chromite.lib import constants
-from chromite.lib import cros_logging as logging
-from chromite.lib import cros_test_lib
-from chromite.lib import dependency_graph
-from chromite.lib import dependency_lib
-from chromite.lib.parser import package_info
-
-pytestmark = [cros_test_lib.pytestmark_inside_only]
-
 # These aren't available outside the SDK.
-# pylint: disable=import-error,wrong-import-order,wrong-import-position
+# pylint: disable=import-error
 from _emerge.actions import adjust_configs
 from _emerge.actions import load_emerge_config
 from _emerge.create_depgraph_params import create_depgraph_params
@@ -30,15 +21,17 @@ from _emerge.depgraph import backtrack_depgraph
 from _emerge.main import parse_opts
 from _emerge.Package import Package
 from _emerge.stdout_spinner import stdout_spinner
-from portage._global_updates import _global_updates
 import portage
-# pylint: enable=import-error
+from portage._global_updates import _global_updates
 
-# pylint: disable=ungrouped-imports
+# pylint: enable=import-error
+from chromite.lib import build_target_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_event
-
-# pylint: enable=wrong-import-order,wrong-import-position,ungrouped-imports
+from chromite.lib import dependency_graph
+from chromite.lib import dependency_lib
+from chromite.lib.parser import package_info
 
 
 class DepGraphGenerator(object):
@@ -928,7 +921,7 @@ def _get_raw_sdk_depgraph(
   The SDK deps will contain the packages installed to a fresh SDK.
   The bdeps will always be empty since everything is installed to the SDK.
   """
-  sysroot_path = build_target_lib.get_default_sysroot_path(None)
+  sysroot_path = build_target_lib.get_sdk_sysroot_path()
   packages = packages or [constants.TARGET_SDK]
   lib_argv = _get_emerge_args(sysroot_path, packages, include_bdeps=True)
 
@@ -994,7 +987,7 @@ def get_sdk_dependency_graph(
   """Get the DependencyGraph for the SDK itself."""
   result = _get_raw_sdk_depgraph(packages=pkgs)
   return _create_graph_from_deps(
-      result.deps, build_target_lib.get_default_sysroot_path(None),
+      result.deps, build_target_lib.get_sdk_sysroot_path(),
       result.packages, with_src_paths)
 
 

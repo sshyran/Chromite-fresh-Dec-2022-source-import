@@ -6,6 +6,7 @@
 
 import os
 import re
+from typing import Optional
 
 from chromite.api.gen.chromiumos import common_pb2
 
@@ -21,13 +22,16 @@ class InvalidNameError(Error):
 class BuildTarget(object):
   """Class to handle the build target information."""
 
-  def __init__(self, name, profile=None, build_root=None):
+  def __init__(self,
+               name: str,
+               profile: Optional[str] = None,
+               build_root: Optional[str] = None):
     """Build Target init.
 
     Args:
-      name (str): The full name of the target.
-      profile (str): The profile name.
-      build_root (str): The path to the buildroot.
+      name: The full name of the target.
+      profile: The profile name.
+      build_root: The path to the buildroot.
     """
     if not name:
       raise InvalidNameError('Name is required.')
@@ -74,7 +78,7 @@ class BuildTarget(object):
     """Turn a sysroot-relative path into an absolute path."""
     return os.path.join(self.root, *[part.lstrip(os.sep) for part in args])
 
-  def get_command(self, base_command):
+  def get_command(self, base_command: str) -> str:
     """Get the build target's variant of the given base command.
 
     We create wrappers for many scripts that handle the build target's
@@ -84,10 +88,10 @@ class BuildTarget(object):
     TODO: Add optional validation the command exists.
 
     Args:
-      base_command (str): The wrapped command.
+      base_command: The wrapped command.
 
     Returns:
-      str: The build target's command wrapper.
+      The build target's command wrapper.
     """
     return '%s-%s' % (base_command, self.name)
 
@@ -97,6 +101,15 @@ def get_default_sysroot_path(build_target_name=None):
   if build_target_name is None:
     return '/'
   return os.path.join('/build', build_target_name)
+
+
+def get_sdk_sysroot_path() -> str:
+  """Get the SDK's sysroot path.
+
+  Convenience/clarification wrapper for get_default_sysroot_path for use when
+  explicitly fetching the SDK's sysroot path.
+  """
+  return get_default_sysroot_path()
 
 
 def is_valid_name(build_target_name):

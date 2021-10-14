@@ -8,10 +8,11 @@ This module contains the basic functionalities for setting up a VM and testing
 the CLI commands.
 """
 
+import logging
+
 from chromite.cli import deploy
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import remote_access
 from chromite.lib import vm
 from chromite.utils import outcap

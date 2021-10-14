@@ -20,6 +20,7 @@ import collections
 import contextlib
 import functools
 import glob
+import logging
 import multiprocessing
 import os
 import re
@@ -27,12 +28,13 @@ import shlex
 import shutil
 import time
 
+from chromite.third_party.gn_helpers import gn_helpers
+
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
@@ -40,7 +42,6 @@ from chromite.lib import parallel
 from chromite.lib import remote_access as remote
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
-from chromite.third_party.gn_helpers import gn_helpers
 
 
 KERNEL_A_PARTITION = 2

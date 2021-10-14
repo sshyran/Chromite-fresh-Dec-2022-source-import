@@ -45,7 +45,7 @@ class _NamedAnnotation(Annotation, metaclass=abc.ABCMeta):
   """
 
   def __init__(self, *args):
-    super(_NamedAnnotation, self).__init__(self.ANNOTATION_NAME, args)
+    super().__init__(self.ANNOTATION_NAME, args)
 
   @abc.abstractproperty
   def ANNOTATION_NAME(self):
@@ -60,7 +60,7 @@ class StepLink(_NamedAnnotation):
   # so the API is a bit cleaner/more obvious.
   # pylint: disable=useless-super-delegation
   def __init__(self, text, url):
-    super(StepLink, self).__init__(text, url)
+    super().__init__(text, url)
 
 
 class StepText(_NamedAnnotation):
@@ -88,7 +88,7 @@ class SetBuildProperty(_NamedAnnotation):
   ANNOTATION_NAME = 'SET_BUILD_PROPERTY'
 
   def __init__(self, name, value):
-    super(SetBuildProperty, self).__init__(name, json.dumps(value))
+    super().__init__(name, json.dumps(value))
 
 
 class SetEmailNotifyProperty(_NamedAnnotation):
@@ -96,7 +96,7 @@ class SetEmailNotifyProperty(_NamedAnnotation):
   ANNOTATION_NAME = 'SET_BUILD_PROPERTY'
 
   def __init__(self, name, value):
-    super(SetEmailNotifyProperty, self).__init__(name, json.dumps(value))
+    super().__init__(name, json.dumps(value))
 
   def __str__(self):
     inner_text = '@'.join(

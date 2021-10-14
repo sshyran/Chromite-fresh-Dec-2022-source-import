@@ -6,10 +6,10 @@
 
 import contextlib
 import functools
+import logging
 import sys
 
 from chromite.lib import config_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import parallel

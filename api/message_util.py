@@ -12,11 +12,11 @@ a file containing serialized data into a protobuf message instance, and
 writing serialized data from a message instance out to a file.
 """
 
+import logging
 import os
 
 from chromite.third_party.google.protobuf import json_format
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import osutils
 
 

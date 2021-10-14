@@ -5,6 +5,7 @@
 """Unittests for parallel library."""
 
 import contextlib
+import logging
 import multiprocessing
 import numbers
 import os
@@ -18,7 +19,6 @@ import time
 import unittest
 from unittest import mock
 
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -208,13 +208,8 @@ class TestUnicodeContinuation(TestBackgroundWrapper):
 
   def _WriteMessageToStdout(self):
     """Write binary message to stdout."""
-    if sys.version_info > (3,0):
-      # Python3 has sys.stdout.buffer to handle binary output.
-      sys.stdout.buffer.write(_BINARY_GREETING_START)
-    else:
-      # Python2 does not have sys.stdout.buffer, but sys.stdout.write can handle
-      # binary strings.
-      sys.stdout.write(_BINARY_GREETING_START)
+    # Python3 has sys.stdout.buffer to handle binary output.
+    sys.stdout.buffer.write(_BINARY_GREETING_START)
     sys.stdout.flush()
     sys.stdout.seek(0)
     self.printed_message.set()
@@ -224,11 +219,7 @@ class TestUnicodeContinuation(TestBackgroundWrapper):
     # continuation character, to be sure that rewritten output is not read
     # twice and that the continuation(0x80) is handled.
     time.sleep(parallel._BackgroundTask.PRINT_INTERVAL * 10)
-    # Like above, handle writing binary in Python2 or Python3.
-    if sys.version_info > (3,0):
-      sys.stdout.buffer.write(_BINARY_GREETING)
-    else:
-      sys.stdout.write(_BINARY_GREETING)
+    sys.stdout.buffer.write(_BINARY_GREETING)
     sys.stdout.flush()
 
   def _ParallelWriteMessage(self):

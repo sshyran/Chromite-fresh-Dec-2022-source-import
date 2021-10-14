@@ -18,7 +18,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util
-
+from chromite.lib.parser import package_info
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
@@ -350,12 +350,10 @@ class WorkspaceSyncChromeStageTest(WorkspaceStageBase):
   """Test the WorkspaceSyncChromeStage."""
 
   def setUp(self):
-    # Fake package_info.CPV with the only field we need set.
-    fake_cpv = mock.Mock()
-    fake_cpv.version_no_rev = '0.0.1'
+    pkg_info = package_info.PackageInfo(version='0.0.1')
     self.mock_best_visible = self.PatchObject(
         portage_util, 'PortageqBestVisible',
-        return_value=fake_cpv)
+        return_value=pkg_info)
 
   def ConstructStage(self):
     self._run.options.chrome_preload_dir = '/preload/chrome_cache'
@@ -405,7 +403,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
   def testInitSDK(self):
     """Test InitSDK old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
 
@@ -419,7 +417,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
             '--cache-dir', '/cache',
         ],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
         },
         cwd=self.workspace,
     )
@@ -427,7 +425,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
   def testInitSDKWithChrome(self):
     """Test InitSDK old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'])
 
@@ -442,7 +440,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
             '--chrome_root', '/chrome',
         ],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -459,7 +457,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
   def testUpdateSDK(self):
     """Test UpdateSDK old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
 
@@ -471,7 +469,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
             'FEATURES': ' -separatedebug splitdebug',
         },
         cwd=self.workspace,
@@ -480,7 +478,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
   def testUpdateSDKWithChrome(self):
     """Test UpdateSDK old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'])
 
@@ -494,7 +492,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         extra_env={
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
             'FEATURES': ' -separatedebug splitdebug',
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
         },
         cwd=self.workspace,
     )
@@ -518,7 +516,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
   def testSetupBoard(self):
     """Test setup_board old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
 
@@ -536,7 +534,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
         },
         cwd=self.workspace,
     )
@@ -544,7 +542,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
   def testSetupBoardModern(self):
     """Test setup_board modern workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
 
@@ -563,7 +561,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
         },
         cwd=self.workspace,
     )
@@ -571,7 +569,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
   def testSetupBoardWithChrome(self):
     """Test setup_board old workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'])
 
@@ -590,7 +588,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -599,7 +597,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
   def testSetupBoardWithChromeModern(self):
     """Test setup_board modern workspace version."""
     self._Prepare(
-        'test-firmwarebranch',
+        'test-factorybranch',
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'])
 
@@ -618,7 +616,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
-            'USE': '-cros-debug chrome_internal chromeless_tty',
+            'USE': '-cros-debug chrome_internal',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -631,63 +629,6 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
   def ConstructStage(self):
     return workspace_stages.WorkspaceBuildPackagesStage(
         self._run, self.buildstore, build_root=self.workspace, board='board')
-
-  def testFirmwareBuildPackagesOld(self):
-    """Test building firmware for an old workspace version."""
-    self._Prepare(
-        'test-firmwarebranch',
-        site_config=workspace_builders_unittest.CreateMockSiteConfig(),
-        extra_cmd_args=['--cache-dir', '/cache'])
-
-    self.RunStage()
-
-    self.assertEqual(self.rc.call_count, 1)
-    self.rc.assertCommandCalled(
-        [
-            './build_packages',
-            '--board=board',
-            '--accept_licenses=@CHROMEOS',
-            '--skip_chroot_upgrade',
-            '--nousepkg',
-            'virtual/chromeos-firmware',
-        ],
-        enter_chroot=True,
-        chroot_args=['--cache-dir', '/cache'],
-        extra_env={
-            'USE': u'-cros-debug chrome_internal chromeless_tty',
-        },
-        cwd=self.workspace,
-    )
-
-  def testFirmwareBuildPackagesModern(self):
-    """Test building firmware for a modern workspace version."""
-    self.SetWorkspaceVersion(self.MODERN_VERSION)
-
-    self._Prepare(
-        'test-firmwarebranch',
-        site_config=workspace_builders_unittest.CreateMockSiteConfig(),
-        extra_cmd_args=['--cache-dir', '/cache'])
-
-    self.RunStage()
-
-    self.assertEqual(self.rc.call_count, 1)
-    self.rc.assertCommandCalled(
-        [
-            './build_packages',
-            '--board=board',
-            '--accept_licenses=@CHROMEOS',
-            '--skip_chroot_upgrade',
-            '--withdebugsymbols',
-            '--nousepkg',
-            'virtual/chromeos-firmware',
-        ],
-        enter_chroot=True,
-        chroot_args=['--cache-dir', '/cache'],
-        extra_env={
-            'USE': u'-cros-debug chrome_internal chromeless_tty',
-        },
-        cwd=self.workspace,
-    )
 
   def testFactoryBuildPackages(self):
     """Test building factory for an old workspace version."""

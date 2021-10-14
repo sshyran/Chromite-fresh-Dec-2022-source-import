@@ -77,7 +77,7 @@ HOME_DIRECTORY = os.path.expanduser('~')
 CIDB_PROD_BOT_CREDS = os.path.join(HOME_DIRECTORY, '.cidb_creds',
                                    'prod_cidb_bot')
 CIDB_DEBUG_BOT_CREDS = os.path.join(HOME_DIRECTORY, '.cidb_creds',
-                                   'debug_cidb_bot')
+                                    'debug_cidb_bot')
 
 # Crash Server upload API key.
 CRASH_API_KEY = os.path.join('/', 'creds', 'api_keys',
@@ -264,19 +264,20 @@ DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 ANDROID_PI_PACKAGE = 'android-container-pi'
 ANDROID_VMRVC_PACKAGE = 'android-vm-rvc'
 ANDROID_VMSC_PACKAGE = 'android-vm-sc'
-ANDROID_VMMST_PACKAGE = 'android-vm-master'
+# T uses master until the T branch is cut.
+ANDROID_VMT_PACKAGE = 'android-vm-master'
 
 ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
                                   ANDROID_VMRVC_PACKAGE,
                                   ANDROID_VMSC_PACKAGE,
-                                  ANDROID_VMMST_PACKAGE])
+                                  ANDROID_VMT_PACKAGE])
 
 # List of supported Android branches. When adding/removing branches make sure
 # the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
-ANDROID_VMMST_BUILD_BRANCH = 'git_master-arc-dev'
+ANDROID_VMT_BUILD_BRANCH = 'git_master-arc-dev'
 
 # Supported Android build targets for each branch. Maps from *_TARGET variables
 # in Android ebuilds to Android build targets. Used during Android uprev to fill
@@ -297,9 +298,6 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
         'SDK_GOOGLE_X86_USERDEBUG_TARGET': 'sdk_cheets_x86-userdebug',
         'SDK_GOOGLE_X86_64_USERDEBUG_TARGET': 'sdk_cheets_x86_64-userdebug',
     },
-    ANDROID_VMMST_BUILD_BRANCH: {
-        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
-    },
     ANDROID_VMRVC_BUILD_BRANCH: {
         'APPS_TARGET': 'apps',
         'ARM64_TARGET': 'bertha_arm64-user',
@@ -309,6 +307,9 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
     },
     ANDROID_VMSC_BUILD_BRANCH: {
         'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMT_BUILD_BRANCH: {
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
 }
@@ -771,6 +772,10 @@ TEST_KEY_PUBLIC = 'id_rsa.pub'
 BREAKPAD_DEBUG_SYMBOLS_NAME = 'debug_breakpad'
 BREAKPAD_DEBUG_SYMBOLS_TAR = '%s.tar.xz' % BREAKPAD_DEBUG_SYMBOLS_NAME
 
+CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME = 'code_coverage'
+CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR = ('%s.tar.xz'
+                                       % CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME)
+
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
 
@@ -781,12 +786,18 @@ RECOVERY_IMAGE_NAME = 'recovery_image'
 RECOVERY_IMAGE_BIN = '%s.bin' % RECOVERY_IMAGE_NAME
 RECOVERY_IMAGE_TAR = '%s.tar.xz' % RECOVERY_IMAGE_NAME
 
+FACTORY_IMAGE_NAME = 'factory_install_shim'
+FACTORY_IMAGE_BIN = f'{FACTORY_IMAGE_NAME}.bin'
+
 # Image type constants.
 IMAGE_TYPE_BASE = 'base'
 IMAGE_TYPE_DEV = 'dev'
 IMAGE_TYPE_TEST = 'test'
 IMAGE_TYPE_RECOVERY = 'recovery'
+# This is the image type used by legacy CBB configs.
 IMAGE_TYPE_FACTORY = 'factory'
+# This is the image type mapping to the factory image type in build_image.
+IMAGE_TYPE_FACTORY_SHIM = 'factory_install'
 IMAGE_TYPE_FIRMWARE = 'firmware'
 # USB PD accessory microcontroller firmware (e.g. power brick, display dongle).
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
@@ -802,6 +813,7 @@ IMAGE_TYPE_TO_NAME = {
     IMAGE_TYPE_DEV: DEV_IMAGE_BIN,
     IMAGE_TYPE_RECOVERY: RECOVERY_IMAGE_BIN,
     IMAGE_TYPE_TEST: TEST_IMAGE_BIN,
+    IMAGE_TYPE_FACTORY_SHIM: FACTORY_IMAGE_BIN,
 }
 IMAGE_NAME_TO_TYPE = dict((v, k) for k, v in IMAGE_TYPE_TO_NAME.items())
 
@@ -831,10 +843,10 @@ CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 # Useful config targets.
 CANARY_MASTER = 'master-release'
 PFQ_MASTER = 'master-chromium-pfq'
-VMMST_ANDROID_PFQ_MASTER = 'master-vmmst-android-pfq'
 PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
 VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
 VMSC_ANDROID_PFQ_MASTER = 'master-vmsc-android-pfq'
+VMT_ANDROID_PFQ_MASTER = 'master-vmt-android-pfq'
 TOOLCHAIN_MASTTER = 'master-toolchain'
 
 
@@ -920,12 +932,16 @@ PART_KERN_A = 'KERN-A'
 PART_KERN_B = 'KERN-B'
 PART_MINIOS_A = 'MINIOS-A'
 
+# Crossystem related constants.
+MINIOS_PRIORITY = 'minios_priority'
+
 # Quick provision payloads. These file names should never be changed, otherwise
 # very bad things can happen :). The reason is we have already uploaded these
 # files with these names for all boards. So if the name changes, all scripts
 # that have been using this need to handle both cases to be backward compatible.
 QUICK_PROVISION_PAYLOAD_KERNEL = 'full_dev_part_KERN.bin.gz'
 QUICK_PROVISION_PAYLOAD_ROOTFS = 'full_dev_part_ROOT.bin.gz'
+QUICK_PROVISION_PAYLOAD_MINIOS = 'full_dev_part_MINIOS.bin.gz'
 
 # Mock build and stage IDs.
 MOCK_STAGE_ID = 313377
@@ -958,3 +974,5 @@ KERNEL_KEYBLOCK = 'kernel.keyblock'
 RECOVERY_PUBLIC_KEY = 'recovery_key.vbpubk'
 RECOVERY_DATA_PRIVATE_KEY = 'recovery_kernel_data_key.vbprivk'
 RECOVERY_KEYBLOCK = 'recovery_kernel.keyblock'
+MINIOS_DATA_PRIVATE_KEY = 'minios_kernel_data_key.vbprivk'
+MINIOS_KEYBLOCK = 'minios_kernel.keyblock'

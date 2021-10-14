@@ -13,6 +13,7 @@ If given args those are passed to the chroot environment, and executed.
 
 import argparse
 import glob
+import logging
 import os
 from pathlib import Path
 import pwd
@@ -23,10 +24,10 @@ import subprocess
 import sys
 import urllib.parse
 
-from chromite.lib import constants
+from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import cros_sdk_lib
 from chromite.lib import locking
 from chromite.lib import namespaces
@@ -1109,7 +1110,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
   else:
     sdk_version = options.sdk_version
   if options.buildbot_log_version:
-    logging.PrintBuildbotStepText(sdk_version)
+    cbuildbot_alerts.PrintBuildbotStepText(sdk_version)
 
   # Based on selections, determine the tarball to fetch.
   if options.download:
@@ -1156,6 +1157,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       sdk_tarball = FetchRemoteTarballs(
           sdk_cache, urls, 'stage3' if options.bootstrap else 'SDK')
 
+    mounted = False
     if options.create:
       lock.write_lock()
       # Recheck if the chroot is set up here before creating to make sure we
@@ -1169,9 +1171,12 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
             Path(sdk_tarball),
             Path(options.cache_dir),
             usepkg=not options.bootstrap and not options.nousepkg)
+        mounted = True
 
     if options.enter:
       lock.read_lock()
+      if not mounted:
+        cros_sdk_lib.MountChrootPaths(options.chroot)
       EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
                   options.chrome_root_mount, options.goma_dir,
                   options.goma_client_json, options.working_dir,

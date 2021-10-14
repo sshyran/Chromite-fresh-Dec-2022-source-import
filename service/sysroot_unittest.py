@@ -171,20 +171,114 @@ class CreateSimpleChromeSysrootTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(self.source_root)
     self.PatchObject(constants, 'SOURCE_ROOT', new=self.source_root)
 
-  def testCreateSimpleChromeSysroot(self):
-    # A board for which we will create a simple chrome sysroot.
-    target = 'board'
-    use_flags = ['cros-debug', 'chrome_internal']
+    # Create a chroot_path that also includes a chroot tmp dir.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    osutils.SafeMakedirs(os.path.join(self.chroot_path, 'tmp'))
 
+    # Create output dir.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+    # Create chroot and build_target objs.
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.build_target = build_target_lib.BuildTarget('target')
+
+
+
+  def testCreateSimpleChromeSysroot(self):
+    # Mock the artifact copy.
+    tar_dest = os.path.join(self.output_dir, constants.CHROME_SYSROOT_TAR)
+    self.PatchObject(shutil, 'copy', return_value=tar_dest)
     # Call service, verify arguments passed to run.
-    sysroot.CreateSimpleChromeSysroot(target, use_flags)
+    sysroot.CreateSimpleChromeSysroot(self.chroot, None,
+                                      self.build_target, self.output_dir)
+
     self.run_mock.assert_called_with(
-        ['cros_generate_sysroot', '--out-dir', mock.ANY, '--board', target,
-         '--deps-only', '--package', 'chromeos-base/chromeos-chrome'],
-        extra_env={'USE': 'cros-debug chrome_internal'},
-        enter_chroot=True,
-        cwd=self.source_root
+        ['cros_generate_sysroot', '--out-dir', mock.ANY, '--board',
+         self.build_target.name, '--deps-only', '--package',
+         'chromeos-base/chromeos-chrome'], enter_chroot=True,
+         cwd=self.source_root, chroot_args=mock.ANY, extra_env=mock.ANY
     )
+
+
+
+class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
+  """ArchiveChromeEbuildEnv tests."""
+
+  def setUp(self):
+    # Create the chroot and sysroot instances.
+    self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
+    self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+    self.sysroot_path = os.path.join(self.chroot_path, 'sysroot_dir')
+    self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+
+    # Create the output directory.
+    self.output_dir = os.path.join(self.tempdir, 'output_dir')
+    osutils.SafeMakedirs(self.output_dir)
+
+    # The sysroot's /var/db/pkg prefix for the chrome package directories.
+    var_db_pkg = self.chroot.full_path(self.sysroot_path, portage_util.VDB_PATH)
+    # Create the var/db/pkg dir so we have that much for no-chrome tests.
+    osutils.SafeMakedirs(var_db_pkg)
+
+    # Two versions of chrome to test the multiple version checks/handling.
+    chrome_v1 = '%s-1.0.0-r1' % constants.CHROME_PN
+    chrome_v2 = '%s-2.0.0-r1' % constants.CHROME_PN
+
+    # Build the two chrome version paths.
+    chrome_cat_dir = os.path.join(var_db_pkg, constants.CHROME_CN)
+    self.chrome_v1_dir = os.path.join(chrome_cat_dir, chrome_v1)
+    self.chrome_v2_dir = os.path.join(chrome_cat_dir, chrome_v2)
+
+    # Directory tuple for verifying the result archive contents.
+    self.expected_archive_contents = cros_test_lib.Directory('./',
+                                                             'environment')
+
+    # Create a environment.bz2 file to put into folders.
+    env_file = os.path.join(self.tempdir, 'environment')
+    osutils.Touch(env_file)
+    cros_build_lib.run(['bzip2', env_file])
+    self.env_bz2 = '%s.bz2' % env_file
+
+  def _CreateChromeDir(self, path, populate=True):
+    """Setup a chrome package directory.
+
+    Args:
+      path (str): The full chrome package path.
+      populate (bool): Whether to include the environment bz2.
+    """
+    osutils.SafeMakedirs(path)
+    if populate:
+      shutil.copy(self.env_bz2, path)
+
+  def testSingleChromeVersion(self):
+    """Test a successful single-version run."""
+    self._CreateChromeDir(self.chrome_v1_dir)
+
+    created = sysroot.CreateChromeEbuildEnv(
+      self.chroot, self.sysroot, None, self.output_dir)
+
+    self.assertStartsWith(created, self.output_dir)
+    cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
+
+  def testMultipleChromeVersions(self):
+    """Test a successful multiple version run."""
+    # Create both directories, but don't populate the v1 dir so it'll hit an
+    # error if the wrong one is used.
+    self._CreateChromeDir(self.chrome_v1_dir, populate=False)
+    self._CreateChromeDir(self.chrome_v2_dir)
+
+    created = sysroot.CreateChromeEbuildEnv(
+      self.chroot, self.sysroot, None, self.output_dir)
+
+    self.assertStartsWith(created, self.output_dir)
+    cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
+
+  def testNoChrome(self):
+    """Test no version of chrome present."""
+    self.assertIsNone(
+      sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
+        self.output_dir))
 
 
 class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase):
@@ -624,17 +718,6 @@ STACK CFI 1234
     # Verify that only a_file.sym is in the output_dir.
     files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
     self.assertEqual(files_in_output_dir, ['a_file.sym'])
-
-  def test_IsTarball(self):
-    """Test IsTarball helper function."""
-    self.assertTrue(cros_build_lib.IsTarball('file.tar'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tar.bz2'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tar.gz'))
-    self.assertTrue(cros_build_lib.IsTarball('file.tbz'))
-    self.assertTrue(cros_build_lib.IsTarball('file.txz'))
-    self.assertFalse(cros_build_lib.IsTarball('file.txt'))
-    self.assertFalse(cros_build_lib.IsTarball('file.tart'))
-    self.assertFalse(cros_build_lib.IsTarball('file.bz2'))
 
   def getFilesWithRelativeDir(self, dest_dir):
     """Find all files below dest_dir using dir relative to dest_dir."""

@@ -4,18 +4,17 @@
 
 """Simplified cros_mark_as_stable script."""
 
+import logging
 import os
 
-from chromite.lib import constants
+from chromite.cbuildbot import manifest_version
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_logging as logging
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
-
-from chromite.cbuildbot import manifest_version
 
 
 # Commit message subject for uprevving Portage packages.

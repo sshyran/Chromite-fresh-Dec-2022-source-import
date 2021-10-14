@@ -9,6 +9,7 @@ import re
 import sys
 
 from chromite.lib import cros_build_lib
+from chromite.utils import file_util
 
 
 class Table(object):
@@ -91,7 +92,7 @@ class Table(object):
   def LoadFromCSV(csv_file, name=None):
     """Create a new Table object by loading contents of |csv_file|."""
     table = None
-    with cros_build_lib.Open(csv_file) as f:
+    with file_util.Open(csv_file) as f:
       for line in f:
         if line[-1] == '\n':
           line = line[0:-1]
