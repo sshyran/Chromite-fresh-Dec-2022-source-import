@@ -31,6 +31,7 @@ from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
 from chromite.lib.xbuddy import devserver_constants
 from chromite.lib.xbuddy import xbuddy
+from chromite.utils import timer
 
 
 class Error(Exception):
@@ -501,13 +502,13 @@ class PartitionUpdaterBase(object):
 
   def Run(self):
     """The main function that does the partition update job."""
-    with cros_build_lib.TimedSection() as timer:
+    with timer.Timer() as t:
       try:
         self._Run()
       finally:
         self._finished = True
 
-    logging.debug('Completed %s in %s', self.__class__.__name__, timer.delta)
+    logging.debug('Completed %s in %s', self.__class__.__name__, t)
 
   @abc.abstractmethod
   def _Run(self):
