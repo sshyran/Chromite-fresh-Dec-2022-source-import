@@ -848,23 +848,6 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     self.assertEqual(output, log_output)
 
 
-class TestTimedSection(cros_test_lib.TestCase):
-  """Tests for TimedSection context manager."""
-
-  def testTimerValues(self):
-    """Make sure simple stuff works."""
-    with cros_build_lib.TimedSection() as timer:
-      # While running, we have access to the start time.
-      self.assertIsInstance(timer.start, datetime.datetime)
-      self.assertIsNone(timer.finish)
-      self.assertIsNone(timer.delta)
-
-    # After finishing, all values should be set.
-    self.assertIsInstance(timer.start, datetime.datetime)
-    self.assertIsInstance(timer.finish, datetime.datetime)
-    self.assertIsInstance(timer.delta, datetime.timedelta)
-
-
 class HelperMethodSimpleTests(cros_test_lib.OutputTestCase):
   """Tests for various helper methods without using mocks."""
 

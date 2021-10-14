@@ -5,7 +5,6 @@
 """Common python commands used by various build scripts."""
 
 import base64
-import contextlib
 from datetime import datetime
 import email.utils
 import errno
@@ -27,7 +26,6 @@ from typing import List, Optional, Union
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
-from chromite.lib import cros_collections
 from chromite.lib import osutils
 from chromite.lib import signals
 
@@ -1854,36 +1852,6 @@ def GetBoard(device_board, override_board=None, force=False, strict=False):
     logging.warning(msg)
 
   return board
-
-
-# Structure to hold the values produced by TimedSection.
-#
-#  Attributes:
-#    start: The absolute start time as a datetime.
-#    finish: The absolute finish time as a datetime, or None if in progress.
-#    delta: The runtime as a timedelta, or None if in progress.
-TimedResults = cros_collections.Collection(
-    'TimedResults', start=None, finish=None, delta=None)
-
-
-@contextlib.contextmanager
-def TimedSection():
-  """Context manager to time how long a code block takes.
-
-  Examples:
-    with cros_build_lib.TimedSection() as timer:
-      DoWork()
-    logging.info('DoWork took %s', timer.delta)
-
-  Context manager value will be a TimedResults instance.
-  """
-  # Create our context manager value.
-  times = TimedResults(start=datetime.now())
-  try:
-    yield times
-  finally:
-    times.finish = datetime.now()
-    times.delta = times.finish - times.start
 
 
 def GetRandomString():
