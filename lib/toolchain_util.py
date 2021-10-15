@@ -506,6 +506,8 @@ def _CompressAFDOFiles(targets, input_dir, output_dir, suffix):
       raise RuntimeError('file %s to compress does not exist' % input_path)
     output_path = os.path.join(output_dir, compressed)
     cros_build_lib.CompressFile(input_path, output_path)
+    logging.info('_CompressAFDOFiles produced %s, size %.1fMB',
+                 output_path, os.path.getsize(output_path) / (1024 * 1024))
     ret.append(output_path)
   return ret
 
@@ -1578,6 +1580,9 @@ class _CommonPrepareBundle(object):
       reduce_functions: Remove the cold functions in the profile until the
         given number is met.
       compbinary: Whether to convert the final profile into compbinary type.
+
+    Raises:
+      BundleArtifactsHandlerError: If the output profile is empty.
     """
     profdata_command_base = ['llvm-profdata', 'merge', '-sample']
     # Convert the compbinary profiles to text profiles.
@@ -1643,6 +1648,17 @@ class _CommonPrepareBundle(object):
       # compilation, since it allows profiles to be lazily loaded.
       cmd_to_binary.append('-compbinary')
     cros_build_lib.run(cmd_to_binary, enter_chroot=True, print_cmd=True)
+
+    profile_size = os.path.getsize(output_path)
+    logging.info('_ProcessAFDOProfile produced AFDO profile %s, size %.1fMB',
+                 output_path, profile_size / (1024 * 1024))
+    # Verify the profile size.
+    # Empty profiles in a binary format can have a non-zero size
+    # because of the header but they won't exceed the page size.
+    # Normal profiles are usually >1MB.
+    if profile_size < 4096:
+      raise BundleArtifactsHandlerError(
+          f'_ProcessAFDOProfile produced empty AFDO profile, {profile_size}')
 
   def _CreateAndUploadMergedAFDOProfile(self,
                                         unmerged_profile,
@@ -2272,6 +2288,11 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     return [bin_path]
 
   def _BundleUnverifiedChromeBenchmarkAfdoFile(self):
+    """Bundle a benchmark Chrome AFDO profile.
+
+    Raises:
+      BundleArtifactsHandlerError: If the output profile is empty.
+    """
     files = []
     # If the name of the provided binary is not 'chrome.unstripped', then
     # create_llvm_prof demands it exactly matches the name of the unstripped
@@ -2298,7 +2319,16 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         ],
         enter_chroot=True,
         print_cmd=True)
-    logging.info('Generated %s AFDO profile %s', self.arch, afdo_name)
+    profile_size = os.path.getsize(afdo_path_inside)
+    # Check if the profile is empty.
+    # Empty profiles in a binary format can have a non-zero size
+    # because of the header but they won't exceed the page size.
+    # Normal profiles are usually >1MB.
+    if profile_size < 4096:
+      raise BundleArtifactsHandlerError(
+          f'AFDO profile size has invalid size, {profile_size}')
+    logging.info('Generated %s AFDO profile %s, size %.1fMB',
+                 self.arch, afdo_name, profile_size / (1024 * 1024))
 
     # Compress and deliver the profile.
     afdo_path = os.path.join(self.output_dir,
@@ -2842,7 +2872,9 @@ class GenerateBenchmarkAFDOProfile(object):
     gs_context.Copy(url, dest_path)
 
     self._DecompressAFDOFile(dest_path)
-    logging.info('Retrieved AFDO perf data to %s', dest_path)
+    profile_size = os.path.getsize(dest_path)
+    logging.info('Retrieved AFDO perf data into %s, size %.1fMB',
+                 dest_path, profile_size / (1024 * 1024))
     return True
 
   def _CreateAFDOFromPerfData(self):
@@ -2883,7 +2915,9 @@ class GenerateBenchmarkAFDOProfile(object):
         print_cmd=True,
         chroot_args=self.chroot_args)
 
-    logging.info('Generated %s AFDO profile %s', self.arch, afdo_name)
+    profile_size = os.path.getsize(os.path.join(self.working_dir, afdo_name))
+    logging.info('Generated %s AFDO profile %s, size %.1fMB',
+                 self.arch, afdo_name, profile_size / (1024 * 1024))
     return afdo_name
 
   def _UploadArtifacts(self, debug_bin, afdo_name):

@@ -153,6 +153,8 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
         os.path.join(input_dir, targets[0]))
     # Should pass
     self.PatchObject(os.path, 'exists', return_value=True)
+    # Return ~1MB profile size.
+    self.PatchObject(os.path, 'getsize', return_value=100000)
     toolchain_util._CompressAFDOFiles(targets, input_dir, output_dir, suffix)
     compressed_names = [os.path.basename(x) for x in targets]
     inputs = [os.path.join(input_dir, n) for n in compressed_names]
@@ -673,6 +675,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
             path=self.chrome_ebuild, CPV=self.chrome_pkg))
     run_command = self.PatchObject(cros_build_lib, 'run')
     sym_link_command = self.PatchObject(osutils, 'SafeSymlink')
+    # Return ~1MB profile size.
+    self.PatchObject(os.path, 'getsize', return_value=100000)
     mock_file_obj = io.StringIO()
     mock_open.return_value = mock_file_obj
 
@@ -703,6 +707,24 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                   print_cmd=True)
     ]
     run_command.assert_has_calls(mock_calls)
+
+  @mock.patch.object(builtins, 'open')
+  def testBundleUnverifiedChromeBenchmarkAfdoFileRaisesError(self, mock_open):
+    self.SetUpBundle('UnverifiedChromeBenchmarkAfdoFile')
+    self.PatchObject(
+        self.obj,
+        '_GetEbuildInfo',
+        return_value=toolchain_util._EbuildInfo(
+            path=self.chrome_ebuild, CPV=self.chrome_pkg))
+    self.PatchObject(cros_build_lib, 'run')
+    self.PatchObject(osutils, 'SafeSymlink')
+    # Return invalid size of the profile.
+    self.PatchObject(os.path, 'getsize', return_value=100)
+    mock_file_obj = io.StringIO()
+    mock_open.return_value = mock_file_obj
+
+    with self.assertRaises(toolchain_util.BundleArtifactsHandlerError):
+      self.obj.Bundle()
 
   def testBundleChromeAFDOProfileForAndroidLinuxFailWhenNoBenchmark(self):
     self.SetUpBundle('ChromeAFDOProfileForAndroidLinux')
@@ -942,6 +964,8 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
       input_path = os.path.join(self.tempdir, 'input.afdo')
     if not output_path:
       output_path = os.path.join(self.tempdir, 'output.afdo')
+    # Return ~1MB profile size.
+    self.PatchObject(os.path, 'getsize', return_value=100000)
     self.obj._ProcessAFDOProfile(input_path, output_path, *args, **kwargs)
 
     self.run_command.assert_has_calls(expected_commands)
@@ -1008,6 +1032,14 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         output_path=output_path,
         remove=True,
         reduce_functions=reduce_functions)
+
+  def testProcessAFDOProfileRaisesError(self):
+    input_path = os.path.join(self.tempdir, 'input.afdo')
+    output_path = os.path.join(self.tempdir, 'output.afdo')
+    # Return invalid size of the profile.
+    self.PatchObject(os.path, 'getsize', return_value=100)
+    with self.assertRaises(toolchain_util.BundleArtifactsHandlerError):
+      self.obj._ProcessAFDOProfile(input_path, output_path)
 
   @mock.patch.object(builtins, 'open')
   def testProcessAFDOProfileForChromeOSReleaseProfile(self, mock_open):
@@ -2257,6 +2289,8 @@ class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):
     mock_decompress = self.PatchObject(
         toolchain_util.GenerateBenchmarkAFDOProfile, '_DecompressAFDOFile')
     mock_copy = self.PatchObject(gs.GSContext, 'Copy')
+    # Return ~1MB profile size.
+    self.PatchObject(os.path, 'getsize', return_value=100000)
     self.test_obj._WaitForAFDOPerfData()
     mock_wait.assert_called_once_with(
         self.test_obj._CheckAFDOPerfDataStatus,
@@ -2289,6 +2323,8 @@ class GenerateBenchmarkAFDOProfile(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         toolchain_util, '_GetBenchmarkAFDOName', return_value=afdo_name)
     mock_command = self.PatchObject(cros_build_lib, 'run')
+    # Return ~1MB profile size.
+    self.PatchObject(os.path, 'getsize', return_value=100000)
     self.test_obj._CreateAFDOFromPerfData()
     afdo_cmd = [
         toolchain_util._AFDO_GENERATE_LLVM_PROF,
