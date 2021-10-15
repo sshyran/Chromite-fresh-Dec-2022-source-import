@@ -114,6 +114,9 @@ def deploy_into_remote_dlc(device: commandline.Device, transfers: List[FileSet],
 
     logging.notice('Transferring files')
     for transfer in transfers:
+      if not transfer.files:
+        # If we don't have any files don't call rsync
+        continue
       logging.info('Deploying the following files to the %s image: %s',
                    transfer.destination_image, ', '.join(transfer.files))
       with tempfile.TemporaryDirectory() as d:
