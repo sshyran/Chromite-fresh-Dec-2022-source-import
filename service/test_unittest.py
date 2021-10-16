@@ -86,14 +86,6 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board])
     self.assertTrue(result.success)
 
-  def testHost(self):
-    """Test host target."""
-    host_build_target = build_target_lib.BuildTarget('host')
-    result = test.BuildTargetUnitTest(host_build_target, self.chroot)
-
-    self.assertCommandContains(['cros_run_unit_tests', '--host'])
-    self.assertTrue(result.success)
-
   def testPackages(self):
     """Test the packages argument."""
     packages = ['foo/bar', 'cat/pkg']
