@@ -263,8 +263,7 @@ class WorkonHelper(object):
       sysroot = sysroot_lib.Sysroot(self._sysroot)
       portdir_overlay = sysroot.GetStandardField('PORTDIR_OVERLAY')
       if portdir_overlay:
-        self._cached_overlays = [
-            x.strip() for x in portdir_overlay.splitlines()]
+        self._cached_overlays = portdir_overlay.strip().splitlines()
       else:
         # This command is exceptionally slow, and we don't expect the list of
         # overlays to change during the lifetime of WorkonHelper.

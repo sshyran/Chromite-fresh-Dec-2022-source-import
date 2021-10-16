@@ -24,7 +24,6 @@ BOARD_VIRTUAL_PACKAGES = (constants.TARGET_OS_PKG,
                           constants.TARGET_OS_DEV_PKG,
                           constants.TARGET_OS_TEST_PKG,
                           constants.TARGET_OS_FACTORY_PKG)
-SDK_VIRTUAL_PACKAGES = (constants.TARGET_SDK,)
 IMPLICIT_TEST_DEPS = ('virtual/implicit-system',)
 
 
@@ -39,8 +38,6 @@ def ParseArgs(argv):
   target = parser.add_mutually_exclusive_group(required=True)
   target.add_argument('--sysroot', type='path', help='Path to the sysroot.')
   target.add_argument('--board', help='Board name.')
-  target.add_argument('--host', action='store_true',
-                      help='Run tests for the host SDK.')
 
   parser.add_argument('--pretend', default=False, action='store_true',
                       help='Show the list of packages to be tested and return.')
@@ -92,7 +89,7 @@ def ParseArgs(argv):
   return options
 
 
-def determine_packages(sysroot, virtual_packages):
+def determine_board_packages(sysroot, virtual_packages):
   """Returns a set of the dependencies for the given packages"""
   deps, _bdeps = cros_extract_deps.ExtractDeps(
       sysroot, virtual_packages, include_bdepend=False)
@@ -105,8 +102,8 @@ def main(argv):
 
   cros_build_lib.AssertInsideChroot()
 
-  sysroot = (opts.sysroot or '/' if opts.host
-             else build_target_lib.get_default_sysroot_path(opts.board))
+  sysroot = (opts.sysroot or
+             build_target_lib.get_default_sysroot_path(opts.board))
   skipped_packages = set()
   if opts.skip_packages:
     skipped_packages |= set(opts.skip_packages.split())
@@ -128,8 +125,7 @@ def main(argv):
                 else set(workon.ListAtoms(use_all=True)))
 
   if opts.empty_sysroot:
-    packages |= determine_packages(sysroot, SDK_VIRTUAL_PACKAGES if opts.host
-                                   else BOARD_VIRTUAL_PACKAGES)
+    packages |= determine_board_packages(sysroot, BOARD_VIRTUAL_PACKAGES)
     workon = workon_helper.WorkonHelper(sysroot)
     workon_packages = set(workon.ListAtoms(use_all=True))
     packages &= workon_packages
