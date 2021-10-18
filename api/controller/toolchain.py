@@ -6,6 +6,7 @@
 
 import collections
 import logging
+from pathlib import Path
 
 from chromite.api import controller
 from chromite.api import faux
@@ -192,7 +193,7 @@ def PrepareForBuild(input_proto, output_proto, _config):
 @validate.exists('output_dir')
 @validate.validation_complete
 def BundleArtifacts(input_proto, output_proto, _config):
-  """Bundle toolchain artifacts.
+  """Bundle valid toolchain artifacts.
 
   The handlers (from _TOOLCHAIN_ARTIFACT_HANDLERS above) are called with:
       artifact_name (str): name of the artifact type
@@ -217,20 +218,45 @@ def BundleArtifacts(input_proto, output_proto, _config):
 
   profile_info = _GetProfileInfoDict(input_proto.profile_info)
 
+  output_path = Path(input_proto.output_dir)
+
   for artifact_type in input_proto.artifact_types:
     if artifact_type not in _TOOLCHAIN_ARTIFACT_HANDLERS:
       logging.error('%s not understood', artifact_type)
       return controller.RETURN_CODE_UNRECOVERABLE
+
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
-    if handler and handler.bundle:
-      artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
-                                 input_proto.sysroot.build_target.name,
-                                 input_proto.output_dir, profile_info)
-      if artifacts:
-        art_info = output_proto.artifacts_info.add()
-        art_info.artifact_type = artifact_type
-        for artifact in artifacts:
-          art_info.artifacts.add().path = artifact
+    if not handler or not handler.bundle:
+      logging.warning('%s does not have a handler with a bundle function.',
+                      artifact_type)
+      continue
+
+    artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
+                               input_proto.sysroot.build_target.name,
+                               input_proto.output_dir, profile_info)
+    if not artifacts:
+      continue
+
+    # Filter out artifacts that do not exist or are empty.
+    usable_artifacts = []
+    for artifact in artifacts:
+      artifact_path = output_path / artifact
+      if not artifact_path.exists():
+        logging.warning('%s is not in the output directory.', artifact)
+      elif not artifact_path.stat().st_size:
+        logging.warning('%s is empty.', artifact)
+      else:
+        usable_artifacts.append(artifact)
+
+    if not usable_artifacts:
+      logging.warning('No usable artifacts for artifact type %s', artifact_type)
+      continue
+
+    # Add all usable artifacts.
+    art_info = output_proto.artifacts_info.add()
+    art_info.artifact_type = artifact_type
+    for artifact in usable_artifacts:
+      art_info.artifacts.add().path = artifact
 
 
 def _GetUpdatedFilesResponse(_input_proto, output_proto, _config):

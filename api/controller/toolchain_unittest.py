@@ -4,6 +4,8 @@
 
 """Unittests for Toolchain-related operations."""
 
+import os
+
 from chromite.api import api_config
 from chromite.api import controller
 from chromite.api.controller import toolchain
@@ -15,6 +17,7 @@ from chromite.api.gen.chromiumos import common_pb2
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib import toolchain_util
 
 # pylint: disable=protected-access
@@ -244,11 +247,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ],
         profile_info=common_pb2.ArtifactProfileInfo(
@@ -268,11 +271,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ],
         profile_info=common_pb2.ArtifactProfileInfo(
@@ -297,11 +300,11 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
         chroot=None, sysroot=None, input_artifacts=[
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path1', 'path2']),
             BuilderConfig.Artifacts.InputArtifactInfo(
                 input_artifact_type=
-                    BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE,
                 input_artifact_gs_locations=['path3']),
         ])
     toolchain.PrepareForBuild(request, self.response, self.api_config)
@@ -330,6 +333,8 @@ class BundleToolchainTest(cros_test_lib.MockTempDirTestCase,
                 toolchain._Handlers('UnverifiedChromeLlvmOrderfile', self.prep,
                                     self.bundle),
         })
+    osutils.WriteFile(os.path.join(self.tempdir, 'artifact.txt'), 'test')
+    osutils.Touch(os.path.join(self.tempdir, 'empty'))
 
   def _GetRequest(self, artifact_types=None):
     chroot = common_pb2.Chroot(path=self.tempdir)
@@ -358,7 +363,7 @@ class BundleToolchainTest(cros_test_lib.MockTempDirTestCase,
   def testSetsArtifactsInfo(self):
     request = self._GetRequest(
         [BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE])
-    self.bundle.return_value = ['artifact.xz']
+    self.bundle.return_value = ['artifact.txt', 'empty', 'does_not_exist']
     toolchain.BundleArtifacts(request, self.response, self.api_config)
     self.assertEqual(1, len(self.response.artifacts_info))
     self.assertEqual(
