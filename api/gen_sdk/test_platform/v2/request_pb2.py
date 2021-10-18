@@ -12,19 +12,17 @@ _sym_db = _symbol_database.Default()
 
 
 from chromite.api.gen_sdk.chromiumos import common_pb2 as chromiumos_dot_common__pb2
-from chromite.api.gen_sdk.chromiumos.test.api import coverage_rule_pb2 as chromiumos_dot_test_dot_api_dot_coverage__rule__pb2
-from chromite.api.gen_sdk.chromiumos.test.api import plan_pb2 as chromiumos_dot_test_dot_api_dot_plan__pb2
-from chromite.api.gen_sdk.chromiumos.test.api import provision_state_pb2 as chromiumos_dot_test_dot_api_dot_provision__state__pb2
+from chromite.api.gen_sdk.chromiumos.test.api.v1 import plan_pb2 as chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='test_platform/v2/request.proto',
   package='test_platform.v2',
   syntax='proto3',
-  serialized_options=b'Z:go.chromium.org/chromiumos/infra/proto/go/test_platform/v2',
-  serialized_pb=b'\n\x1etest_platform/v2/request.proto\x12\x10test_platform.v2\x1a\x17\x63hromiumos/common.proto\x1a\'chromiumos/test/api/coverage_rule.proto\x1a\x1e\x63hromiumos/test/api/plan.proto\x1a)chromiumos/test/api/provision_state.proto\"y\n\x08TestSpec\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12\x37\n\x0chw_test_plan\x18\x02 \x01(\x0b\x32\x1f.chromiumos.test.api.HWTestPlanH\x00\x42\x06\n\x04spec\"\xe7\x01\n\x07Request\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12.\n\ntest_specs\x18\x02 \x03(\x0b\x32\x1a.test_platform.v2.TestSpec\x12G\n\x12scheduler_settings\x18\x03 \x01(\x0b\x32+.test_platform.v2.Request.SchedulerSettings\x1a\x35\n\x11SchedulerSettings\x12\x0c\n\x04pool\x18\x01 \x01(\t\x12\x12\n\nqs_account\x18\x02 \x01(\tB<Z:go.chromium.org/chromiumos/infra/proto/go/test_platform/v2b\x06proto3'
+  serialized_options=b'ZHgo.chromium.org/chromiumos/infra/proto/go/test_platform/v2;test_platform',
+  serialized_pb=b'\n\x1etest_platform/v2/request.proto\x12\x10test_platform.v2\x1a\x17\x63hromiumos/common.proto\x1a!chromiumos/test/api/v1/plan.proto\"\x7f\n\x08TestSpec\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12=\n\x0fhw_test_plan_v1\x18\x02 \x01(\x0b\x32\".chromiumos.test.api.v1.HWTestPlanH\x00\x42\x06\n\x04spec\"\xe7\x01\n\x07Request\x12,\n\x0f\x62uild_directory\x18\x01 \x01(\x0b\x32\x13.chromiumos.GcsPath\x12.\n\ntest_specs\x18\x02 \x03(\x0b\x32\x1a.test_platform.v2.TestSpec\x12G\n\x12scheduler_settings\x18\x03 \x01(\x0b\x32+.test_platform.v2.Request.SchedulerSettings\x1a\x35\n\x11SchedulerSettings\x12\x0c\n\x04pool\x18\x01 \x01(\t\x12\x12\n\nqs_account\x18\x02 \x01(\tBJZHgo.chromium.org/chromiumos/infra/proto/go/test_platform/v2;test_platformb\x06proto3'
   ,
-  dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_coverage__rule__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_plan__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2.DESCRIPTOR,])
 
 
 
@@ -44,7 +42,7 @@ _TESTSPEC = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='hw_test_plan', full_name='test_platform.v2.TestSpec.hw_test_plan', index=1,
+      name='hw_test_plan_v1', full_name='test_platform.v2.TestSpec.hw_test_plan_v1', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -65,8 +63,8 @@ _TESTSPEC = _descriptor.Descriptor(
       name='spec', full_name='test_platform.v2.TestSpec.spec',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=193,
-  serialized_end=314,
+  serialized_start=112,
+  serialized_end=239,
 )
 
 
@@ -103,8 +101,8 @@ _REQUEST_SCHEDULERSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=495,
-  serialized_end=548,
+  serialized_start=420,
+  serialized_end=473,
 )
 
 _REQUEST = _descriptor.Descriptor(
@@ -147,15 +145,15 @@ _REQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=317,
-  serialized_end=548,
+  serialized_start=242,
+  serialized_end=473,
 )
 
 _TESTSPEC.fields_by_name['build_directory'].message_type = chromiumos_dot_common__pb2._GCSPATH
-_TESTSPEC.fields_by_name['hw_test_plan'].message_type = chromiumos_dot_test_dot_api_dot_plan__pb2._HWTESTPLAN
+_TESTSPEC.fields_by_name['hw_test_plan_v1'].message_type = chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2._HWTESTPLAN
 _TESTSPEC.oneofs_by_name['spec'].fields.append(
-  _TESTSPEC.fields_by_name['hw_test_plan'])
-_TESTSPEC.fields_by_name['hw_test_plan'].containing_oneof = _TESTSPEC.oneofs_by_name['spec']
+  _TESTSPEC.fields_by_name['hw_test_plan_v1'])
+_TESTSPEC.fields_by_name['hw_test_plan_v1'].containing_oneof = _TESTSPEC.oneofs_by_name['spec']
 _REQUEST_SCHEDULERSETTINGS.containing_type = _REQUEST
 _REQUEST.fields_by_name['build_directory'].message_type = chromiumos_dot_common__pb2._GCSPATH
 _REQUEST.fields_by_name['test_specs'].message_type = _TESTSPEC
