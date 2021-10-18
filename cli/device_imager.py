@@ -269,13 +269,19 @@ class DeviceImager(object):
                                       None))
 
     if not self._no_minios_update:
-      # Reference disk_layout_v3 for partition numbering.
-      _, inactive_minios_state = self._GetMiniOSState(
-          9 if self._device.run(
-              ['crossystem', constants.MINIOS_PRIORITY]).output == 'A' else 10)
-      target_minios = prefix + str(inactive_minios_state[Partition.MINIOS])
-      updaters.append(MiniOSUpdater(self._device, self._image, self._image_type,
-                                    target_minios, self._compression))
+      minios_priority = self._device.run(
+          ['crossystem', constants.MINIOS_PRIORITY]).stdout
+      if minios_priority not in ['A', 'B']:
+        logging.warning('Skipping miniOS flash due to missing priority.')
+      else:
+        # Reference disk_layout_v3 for partition numbering.
+        _, inactive_minios_state = self._GetMiniOSState(
+            9 if minios_priority == 'A' else 10)
+        target_minios = prefix + str(inactive_minios_state[Partition.MINIOS])
+        minios_updater = MiniOSUpdater(self._device, self._image,
+                                       self._image_type, target_minios,
+                                       self._compression)
+        updaters.append(minios_updater)
 
     # Retry the partitions updates that failed, in case a transient error (like
     # SSH drop, etc) caused the error.
@@ -748,17 +754,29 @@ class MiniOSUpdater(RawPartitionUpdater):
 
   def _GetRemotePartitionName(self):
     """See RawPartitionUpdater._GetRemotePartitionName()."""
-    # TODO(b/190631159, b/196056723): Allow fetching once miniOS payloads exist.
-    raise NotImplementedError("MiniOS payloads aren't uploaded yet.")
+    return constants.QUICK_PROVISION_PAYLOAD_MINIOS
 
   def _Run(self):
     """The function that does the job of rootfs partition update."""
-    if self._image_type in [ImageType.FULL, ImageType.REMOTE_DIRECTORY]:
-      if self._MiniOSPartitionExists():
-        logging.info('Updating miniOS partition.')
+    if self._image_type == ImageType.FULL:
+      if self._MiniOSPartitionsExistInImage():
+        logging.info('Updating miniOS partition from local.')
         super()._Run()
       else:
-        logging.info('Not updating miniOS partition as it does not exist.')
+        logging.warning('Not updating miniOS partition as it does not exist.')
+        return
+    elif self._image_type == ImageType.REMOTE_DIRECTORY:
+      if not gs.GSContext().Exists(
+          os.path.join(self._image,
+                       constants.QUICK_PROVISION_PAYLOAD_MINIOS)):
+        logging.warning('Not updating miniOS, missing remote files.')
+        return
+      elif not self._MiniOSPartitionsExist():
+        logging.warning('Not updating miniOS, missing partitions.')
+        return
+      else:
+        logging.info('Updating miniOS partition from remote.')
+        super()._Run()
     else:
       # Let super() handle this error.
       super()._Run()
@@ -787,18 +805,21 @@ class MiniOSUpdater(RawPartitionUpdater):
     logging.info('Setting miniOS priority to %s', inactive_minios_priority)
     self._SetMiniOSPriority(inactive_minios_priority)
 
-  def _MiniOSPartitionExists(self):
-    """Checks if miniOS partition exists."""
-    if self._image_type == ImageType.FULL:
-      d = cgpt.Disk.FromImage(self._image)
-      try:
-        d.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
-        return True
-      except KeyError:
-        return False
-    elif self._image_type == ImageType.REMOTE_DIRECTORY:
-      # TODO(b/190631159, b/196056723): Check miniOS payload in remote.
+  def _MiniOSPartitionsExistInImage(self):
+    """Checks if miniOS partition exists in the image."""
+    d = cgpt.Disk.FromImage(self._image)
+    try:
+      d.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+      return True
+    except KeyError:
       return False
+
+  def _MiniOSPartitionsExist(self):
+    """Checks if the device has miniOS partitions."""
+    run = lambda x: self._device.run(x).stdout.strip()
+    device_drive = run(['rootdev', '-s', '-d'])
+    cmd = ['cgpt', 'show', '-t', device_drive, '-i']
+    return all((run(cmd + [p]) == cgpt.MINIOS_TYPE_GUID) for p in ('9', '10'))
 
 
 class StatefulPayloadGenerator(ReaderBase):
