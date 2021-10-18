@@ -365,6 +365,8 @@ class GSContext(object):
       b'socket.error: [Errno 104] Connection reset by peer',
       b'Received bad request from server',
       b"can't start new thread",
+      # See: b/197574857.
+      b'OSError: None',
   )
 
   @classmethod
