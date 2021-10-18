@@ -1197,9 +1197,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _pi_hwtest_boards = _frozen_ge_set(
       ge_build_config,
       [
-          # TODO(b/172889735): Temporary disable eve because DUTs are reserved
-          # due to crbug/1141713. Instead, adding rammus to cover x86_64.
-          # 'eve',
           'coral',
           'grunt',
           'kevin',
@@ -1209,7 +1206,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _pi_hwtest_skylab_boards = _frozen_ge_set(
       ge_build_config,
       [
-          # 'eve', TODO(b/172889735): See above.
           'coral',
           'grunt',
           'kevin',
@@ -1231,7 +1227,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'eve-arc-r',
+      'eve',
       'grunt-arc-r',
       'hatch',
       'kukui-arc-r',

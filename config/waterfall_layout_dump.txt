@@ -351,7 +351,7 @@
 
 == vmrvc_android_pfq ==
   master-vmrvc-android-pfq
-    eve-arc-r-vmrvc-android-pfq
+    eve-vmrvc-android-pfq
     grunt-arc-r-vmrvc-android-pfq
     hatch-vmrvc-android-pfq
     kukui-arc-r-vmrvc-android-pfq
@@ -733,7 +733,6 @@
   eve-arc-r-payloads-tryjob
   eve-arc-r-release-tryjob
   eve-arc-r-unittest-stress
-  eve-arc-r-vmrvc-android-pfq-tryjob
   eve-arm64-full-tryjob
   eve-arm64-llvm-next-toolchain-tryjob
   eve-arm64-llvm-toolchain-tryjob
@@ -768,6 +767,7 @@
   eve-userdebug-payloads-tryjob
   eve-userdebug-release-tryjob
   eve-userdebug-unittest-stress
+  eve-vmrvc-android-pfq-tryjob
   excelsior-factory-excelsior-12812.B-factorybranch-tryjob
   excelsior-full-tryjob
   excelsior-llvm-next-toolchain-tryjob
@@ -1441,7 +1441,7 @@
     zork-minios-release-tryjob
     zork-release-tryjob
   master-vmrvc-android-pfq-tryjob
-    eve-arc-r-vmrvc-android-pfq-tryjob
+    eve-vmrvc-android-pfq-tryjob
     grunt-arc-r-vmrvc-android-pfq-tryjob
     hatch-vmrvc-android-pfq-tryjob
     kukui-arc-r-vmrvc-android-pfq-tryjob
