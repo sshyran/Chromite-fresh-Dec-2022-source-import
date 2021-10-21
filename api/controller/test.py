@@ -260,6 +260,11 @@ def BuildTestServiceContainers(
       # with maintaining stdout hygiene.  Stdout and stderr are combined to
       # form the error log in response to any errors.
       cmd = [build_script, chroot.path, sysroot.path]
+
+      if input_proto.HasField('repository'):
+        cmd += ['--host', input_proto.repository.hostname]
+        cmd += ['--project', input_proto.repository.project]
+
       cmd += ['--tags', tags]
       cmd += ['--output', output_path]
       cmd += labels
