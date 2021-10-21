@@ -22,19 +22,28 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
+def get_fw_loc(fw_loc):
+  """Get firmware_builder.py location.
+
+  Args:
+    fw_loc (enum): FwLocation enum.
+
+  Returns:
+    (str): path to firmware_builder.py for valid fw_loc.
+  """
+  return {
+      common_pb2.PLATFORM_EC: 'src/platform/ec/',
+      common_pb2.PLATFORM_ZEPHYR: 'src/platform/ec/zephyr/',
+      common_pb2.PLATFORM_TI50: 'src/platform/ti50/common/',
+      common_pb2.PLATFORM_CR50: 'src/platform/cr50/'
+  }.get(fw_loc, '')
+
 
 def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
   """Calls into firmware_builder.py with the specified subcmd."""
 
-  if fw_loc == common_pb2.PLATFORM_EC:
-    fw_path = 'src/platform/ec/'
-  elif fw_loc == common_pb2.PLATFORM_ZEPHYR:
-    fw_path = 'src/platform/ec/zephyr/'
-  elif fw_loc == common_pb2.PLATFORM_TI50:
-    fw_path = 'src/platform/ti50/common/'
-  elif fw_loc == common_pb2.PLATFORM_CR50:
-    fw_path = 'src/platform/cr50/'
-  else:
+  fw_path = get_fw_loc(fw_loc)
+  if not fw_path:
     cros_build_lib.Die(f'Unknown firmware location {fw_loc}.')
 
   entry_point = os.path.join(constants.SOURCE_ROOT, fw_path,
