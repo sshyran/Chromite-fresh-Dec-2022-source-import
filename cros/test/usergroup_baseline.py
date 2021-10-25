@@ -197,7 +197,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
     GroupEntry(group='chronos-access', gid=1001,
                users={'root', 'vpn', 'chronos',
                       'cros-disks', 'imageloaderd', 'crash', 'dlp',
-                      'image-burner'}),
+                      'image-burner', 'spaced'}),
 
     GroupEntry(group='user-containers', gid=10000, users={'user-containers'}),
 
