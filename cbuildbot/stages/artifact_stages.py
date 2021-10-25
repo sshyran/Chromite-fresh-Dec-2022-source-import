@@ -337,7 +337,7 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
         if config.base_is_recovery:
           recovery_image_path = os.path.join(image_dir,
                                              constants.RECOVERY_IMAGE_BIN)
-          logging.info('Copying the base image to: %s',  recovery_image_path)
+          logging.info('Copying the base image to: %s', recovery_image_path)
           shutil.copyfile(base_image_path, recovery_image_path)
         else:
           logging.info('Running commands.BuildRecoveryImage')
@@ -356,8 +356,11 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
         self._recovery_image_status_queue.put(False)
 
       if config['images']:
-        steps = [
-            BuildAndArchiveFactoryImages,
+        if self._run.HasUseFlag(board, 'no_factory_flow'):
+          steps = []
+        else:
+          steps = [BuildAndArchiveFactoryImages]
+        steps += [
             ArchiveLicenseFile,
             ArchiveHWQual,
             ArchiveStandaloneArtifacts,
