@@ -715,6 +715,12 @@ def UpdateToolchains(usepkg, deleteold, hostonly, reconfig,
     # work on bare systems where this is useful.
     targets = ExpandTargets(targets_wanted)
 
+    # Filter out toolchains that don't (yet) have a binpkg available.
+    if usepkg:
+      for target in list(targets.keys()):
+        if not targets[target]['have-binpkg']:
+          del targets[target]
+
     # Now re-add any targets that might be from this board. This is to
     # allow unofficial boards to declare their own toolchains.
     for board in boards_wanted:

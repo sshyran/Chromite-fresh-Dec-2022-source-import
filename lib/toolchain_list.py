@@ -121,6 +121,7 @@ class ToolchainList(object):
           'sdk': True,
           'crossdev': '',
           'default': False,
+          'have-binpkg': True,
       }
       settings.update(targets[target])
       targets[target] = settings

@@ -36,9 +36,14 @@ EXPECTED_TOOLCHAINS = {
         'default': False,
         'a setting': 'bonus value',
         'stable': True,
+        'have-binpkg': True,
     },
-    'extra-toolchain': {'sdk': True, 'crossdev': '', 'default': True},
-    'base-target-name': {'sdk': True, 'crossdev': '', 'default': False},
+    'extra-toolchain': {
+        'sdk': True, 'crossdev': '', 'default': True, 'have-binpkg': True,
+    },
+    'base-target-name': {
+        'sdk': True, 'crossdev': '', 'default': False, 'have-binpkg': True,
+    },
 }
 
 
