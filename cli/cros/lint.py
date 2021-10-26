@@ -24,6 +24,7 @@ import os
 import re
 import sys
 
+import astroid
 import pylint.checkers
 from pylint.config import ConfigurationMixIn
 import pylint.interfaces
@@ -716,6 +717,35 @@ class CommentChecker(pylint.checkers.BaseTokenChecker):
     for (tok_type, token, (start_row, _), _, _) in tokens:
       if tok_type == tokenize.COMMENT:
         self._visit_comment(start_row, token)
+
+
+class FormatStringChecker(pylint.checkers.BaseChecker):
+  """Check string formatting."""
+
+  __implements__ = pylint.interfaces.IAstroidChecker
+
+  # pylint: disable=class-missing-docstring,multiple-statements
+  class _MessageR9100(object): pass
+  # pylint: enable=class-missing-docstring,multiple-statements
+
+  name = 'format_string_checker'
+  priority = -1
+  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
+  msgs = {
+      'R9100': ('Use f-strings or % interpolation, never .format()',
+                ('banned-string-format-function'), _MessageR9100),
+  }
+  options = ()
+
+  def visit_const(self, node: astroid.nodes.Const) -> None:
+    """Process a constant string node."""
+    if (node.pytype() == 'builtins.str' and
+        not isinstance(node.parent, astroid.nodes.JoinedStr) and
+        isinstance(node.parent, astroid.nodes.Attribute) and
+        node.parent.attrname == 'format' and
+        isinstance(node.parent.parent, astroid.nodes.Call)):
+      self.add_message('R9100', node=node, line=node.lineno,
+                       col_offset=node.col_offset)
 
 
 def register(linter):
