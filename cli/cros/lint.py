@@ -560,58 +560,6 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       self.add_message('C9011', node=node, line=node.fromlineno, args=margs)
 
 
-class Py3kCompatChecker(pylint.checkers.BaseChecker):
-  """Make sure we enforce py3k compatible features"""
-
-  __implements__ = pylint.interfaces.IAstroidChecker
-
-  # pylint: disable=class-missing-docstring,multiple-statements
-  class _MessageR9100(object): pass
-  # pylint: enable=class-missing-docstring,multiple-statements
-
-  name = 'py3k_compat_checker'
-  priority = -1
-  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
-  msgs = {
-      'R9100': ('Missing "from __future__ import print_function" line',
-                ('missing-print-function'), _MessageR9100),
-  }
-  options = ()
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.seen_print_func = False
-    self.saw_imports = False
-
-  def close(self):
-    """Called when done processing module"""
-    if not self.seen_print_func:
-      # Only enforce this on Python 2 files.
-      if sys.version_info.major >= 3:
-        return
-
-      # Do not warn if moduler doesn't import anything at all (like
-      # empty __init__.py files).
-      if self.saw_imports:
-        self.add_message('R9100')
-
-  def _check_print_function(self, node):
-    """Verify print_function is imported"""
-    if node.modname == '__future__':
-      for name, _ in node.names:
-        if name == 'print_function':
-          self.seen_print_func = True
-
-  def visit_importfrom(self, node):
-    """Process 'from' statements"""
-    self.saw_imports = True
-    self._check_print_function(node)
-
-  def visit_import(self, _node):
-    """Process 'import' statements"""
-    self.saw_imports = True
-
-
 class SourceChecker(pylint.checkers.BaseChecker):
   """Make sure we enforce rules on the source."""
 
