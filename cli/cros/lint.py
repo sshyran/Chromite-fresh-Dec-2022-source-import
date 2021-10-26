@@ -31,14 +31,8 @@ import pylint.interfaces
 
 from chromite.third_party.pylint import format_checkers
 from chromite.utils import memoize
-
-
-_THIRD_PARTY = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '..', '..', 'third_party')
-_PYLINT_QUOTES = os.path.join(_THIRD_PARTY, 'pylint-quotes')
-sys.path.insert(0, _PYLINT_QUOTES)
-# pylint: disable=unused-import,wrong-import-position
-from pylint_quotes.checker import StringQuoteChecker
+# pylint: disable=unused-import
+from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
 
 
 # pylint: disable=too-few-public-methods
