@@ -266,6 +266,10 @@ class CleanCommand(command.CliCommand):
       for d in glob.glob(
           os.path.join(chroot_dir, 'build', '*', 'var', 'cache', 'portage')):
         Empty(d)
+      for d in glob.glob(
+          os.path.join(chroot_dir, 'var', 'cache', 'chromeos-chrome', '*',
+                       'src', 'out_*')):
+        Clean(d)
 
     if self.options.logs:
       logging.debug('Clean log files.')
