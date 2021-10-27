@@ -17,6 +17,7 @@ from chromite.utils import memoize
 
 
 PIXZ_DISABLE_VAR = 'FOR_TEST_XZ_AUTO_NO_PIXZ'
+XZ_DISABLE_VAR = 'FOR_TEST_XZ_AUTO_NO_XZ_DECOMPRESSION'
 
 
 @memoize.Memoize
@@ -83,6 +84,16 @@ def ExecCompressCommand(stdout, argv):
   cmd = ['pixz']
   raw_flag_list, compressed_file_name, output_file = ParsePixzArgs(argv)
 
+  # Pixz treats tarballs specially: if it detects that a tarball has been
+  # passed to it, it'll also write a small index in the output file that
+  # makes operations like listing the tar faster. If this tar autodetection
+  # is enabled and pixz is asked to compress an empty file, it breaks. In
+  # addition, these indices have no apparent impact on decompression
+  # parallelism, so they're not super useful to us. Disable the feature
+  # wholesale.
+  if '-t' not in raw_flag_list:
+    raw_flag_list.append('-t')
+
   autodelete_input_file = False
   if not compressed_file_name:
     assert not output_file
@@ -110,30 +121,57 @@ def ExecCompressCommand(stdout, argv):
   sys.exit(return_code)
 
 
-def ExecDecompressCommand(stdout, argv):
-  """Execs decompression command."""
-  if HasPixz():
-    cmd = ['pixz']
-    cmd.append('-d')
-
-    _, compressed_file_name, _ = ParsePixzArgs(argv)
-    if stdout:
-      # Explicitly tell pixz the file is the input, so it will dump the output
-      # to stdout, instead of automatically choosing an output name.
-      cmd.append('-i')
-      if not compressed_file_name:
-        cmd.append('/dev/stdin')
-    elif not compressed_file_name:
-      cmd += ['-i', '/dev/stdin']
-    cmd += argv
-    Execvp(cmd)
-
+def ExecXzDecompressCommand(stdout, argv):
+  """Executes `xz` with the given params."""
   cmd = ['xz']
   if stdout:
     cmd.append('-dc')
   else:
     cmd.append('-d')
   cmd += argv
+  Execvp(cmd)
+
+
+def ExecDecompressCommand(stdout, argv):
+  """Execs decompression command."""
+  if not HasPixz():
+    ExecXzDecompressCommand(stdout, argv)
+
+  cmd = ['pixz', '-d']
+  raw_flag_list, compressed_file_name, output_file_name = ParsePixzArgs(argv)
+  cmd += raw_flag_list
+
+  assert compressed_file_name or not output_file_name
+  if not compressed_file_name:
+    Execvp(cmd)
+
+  # HACK: When passed a file, pixz will jump around it and try to find the
+  # file's index. If the file we originally compressed was empty and we
+  # requested no index, pixz will error out because lzma will report no
+  # entries to it, and pixz doesn't handle that well.
+  #
+  # Since we need to support files with indices and without, we can't pass
+  # `-t`. If we do, that causes pixz to error out occasionally on tar files
+  # with indices. :(
+  #
+  # In any case, at the time I checked, empty xz files are 32 bytes, so just
+  # opt to use xz for anything under 4KB. pixz archives are xz-compatible
+  # anyway.
+  if (XZ_DISABLE_VAR not in os.environ and
+      os.path.isfile(compressed_file_name) and
+      os.path.getsize(compressed_file_name) <= 4 * 1024):
+    ExecXzDecompressCommand(stdout, argv)
+
+  cmd.append(compressed_file_name)
+
+  # Explicitly tell pixz the file is the input, so it will dump the output
+  # to stdout, instead of automatically choosing an output name.
+  if stdout:
+    output_file_name = '/dev/stdout'
+
+  if output_file_name:
+    cmd.append(output_file_name)
+
   Execvp(cmd)
 
 

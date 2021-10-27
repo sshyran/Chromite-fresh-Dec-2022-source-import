@@ -26,6 +26,8 @@ def FindXzAutoLocation():
 class XzAutoTests(cros_test_lib.MockTempDirTestCase):
   """Various tests for xz_auto."""
 
+  TEST_FILE_CONTENTS = (b'', b'some random file contents')
+
   def DisablePixzForCurrentTest(self):
     """Disables the use of pixz for the current test."""
     # This will be cleaned up by cros_test_lib, so no need to addCleanup.
@@ -75,104 +77,115 @@ class XzAutoTests(cros_test_lib.MockTempDirTestCase):
     with self.assertRaises(ExecvpStopError):
       xz_auto.ExecDecompressCommand(stdout=False, argv=[])
 
-  def _TestFileCompressionImpl(self):
+  def _TestFileCompressionImpl(self, test_empty_file=True):
     """Tests that compressing a file with xz_auto WAI."""
-    file_contents = b'some random file contents'
-    file_location = os.path.join(self.tempdir, 'file.txt')
-    osutils.WriteFile(file_location, file_contents, mode='wb')
-
     xz_auto_script = str(FindXzAutoLocation())
-    cros_build_lib.run(
-        [
-            xz_auto_script,
-            file_location,
-        ],
-        check=True,
-    )
 
-    xz_location = file_location + '.xz'
-    self.assertExists(xz_location)
-    self.assertNotExists(file_location)
-    cros_build_lib.run([
-        xz_auto_script,
-        '--decompress',
-        xz_location,
-    ])
-    self.assertNotExists(xz_location)
-    self.assertExists(file_location)
-    self.assertEqual(
-        osutils.ReadFile(file_location, mode='rb'),
-        file_contents,
-    )
+    test_file_contents = self.TEST_FILE_CONTENTS
+    if not test_empty_file:
+      test_file_contents = (x for x in test_file_contents if x)
+
+    for file_contents in test_file_contents:
+      file_location = os.path.join(self.tempdir, 'file.txt')
+      osutils.WriteFile(file_location, file_contents, mode='wb')
+
+      cros_build_lib.run(
+          [
+              xz_auto_script,
+              file_location,
+          ],
+      )
+
+      xz_location = file_location + '.xz'
+      self.assertExists(xz_location)
+      self.assertNotExists(file_location)
+      cros_build_lib.run([
+          xz_auto_script,
+          '--decompress',
+          xz_location,
+      ])
+      self.assertNotExists(xz_location)
+      self.assertExists(file_location)
+      self.assertEqual(
+          osutils.ReadFile(file_location, mode='rb'),
+          file_contents,
+      )
 
   def _TestStdoutCompressionImpl(self):
     """Tests that compressing stdstreams with xz_auto WAI."""
-    file_contents = b'some random file contents'
     xz_auto_script = str(FindXzAutoLocation())
+    for file_contents in self.TEST_FILE_CONTENTS:
+      run_result = cros_build_lib.run(
+          [
+              xz_auto_script,
+              '-c',
+          ],
+          capture_output=True,
+          input=file_contents,
+      )
 
-    run_result = cros_build_lib.run(
-        [
-            xz_auto_script,
-            '-c',
-        ],
-        capture_output=True,
-        input=file_contents,
-    )
+      compressed_file = run_result.stdout
+      self.assertNotEqual(compressed_file, file_contents)
 
-    compressed_file = run_result.stdout
-    self.assertNotEqual(compressed_file, file_contents)
-
-    run_result = cros_build_lib.run(
-        [
-            xz_auto_script,
-            '--decompress',
-            '-c',
-        ],
-        input=compressed_file,
-        capture_output=True,
-    )
-    uncompressed_file = run_result.stdout
-    self.assertEqual(file_contents, uncompressed_file)
+      run_result = cros_build_lib.run(
+          [
+              xz_auto_script,
+              '--decompress',
+              '-c',
+          ],
+          input=compressed_file,
+          capture_output=True,
+      )
+      uncompressed_file = run_result.stdout
+      self.assertEqual(file_contents, uncompressed_file)
 
   def _TestStdoutCompressionFromFileImpl(self):
     """Tests that compression of a file & outputting to stdout works.
 
     Pixz has some semi-weird behavior here (b/202735786).
     """
-    file_contents = b'some random file contents'
     xz_auto_script = str(FindXzAutoLocation())
-    file_location = os.path.join(self.tempdir, 'file.txt')
-    osutils.WriteFile(file_location, file_contents, mode='wb')
+    for file_contents in self.TEST_FILE_CONTENTS:
+      file_location = os.path.join(self.tempdir, 'file.txt')
+      osutils.WriteFile(file_location, file_contents, mode='wb')
 
-    run_result = cros_build_lib.run(
-        [
-            xz_auto_script,
-            '-c',
-            file_location,
-        ],
-        capture_output=True,
-    )
+      run_result = cros_build_lib.run(
+          [
+              xz_auto_script,
+              '-c',
+              file_location,
+          ],
+          capture_output=True,
+      )
 
-    compressed_file = run_result.stdout
-    self.assertExists(file_location)
-    self.assertNotEqual(compressed_file, file_contents)
+      compressed_file = run_result.stdout
+      self.assertExists(file_location)
+      self.assertNotEqual(compressed_file, file_contents)
 
-    run_result = cros_build_lib.run(
-        [
-            xz_auto_script,
-            '--decompress',
-            '-c',
-        ],
-        capture_output=True,
-        input=compressed_file,
-    )
-    uncompressed_file = run_result.stdout
-    self.assertEqual(file_contents, uncompressed_file)
+      run_result = cros_build_lib.run(
+          [
+              xz_auto_script,
+              '--decompress',
+              '-c',
+          ],
+          capture_output=True,
+          input=compressed_file,
+      )
+      uncompressed_file = run_result.stdout
+      self.assertEqual(file_contents, uncompressed_file)
 
   @unittest.skipIf(not xz_auto.HasPixz(), 'need pixz for this test')
   def testFileCompressionWithPixzWorks(self):
     """Tests that compressing a file with pixz WAI."""
     self._TestFileCompressionImpl()
+
+    # We fall back to `xz` with small files. Make sure we actually cover the
+    # pixz case, too. We disable testing of empty inputs, since pixz breaks
+    # with those.
+    #
+    # cros_test_lib will clean this var up at the end of the test.
+    os.environ[xz_auto.XZ_DISABLE_VAR] = '1'
+    self._TestFileCompressionImpl(test_empty_file=False)
 
   @unittest.skipIf(not xz_auto.HasPixz(), 'need pixz for this test')
   def testStdoutCompressionWithPixzWorks(self):
