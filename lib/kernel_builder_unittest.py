@@ -29,21 +29,21 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
 
     emerge_board = 'emerge-foo-board'
     extra_env = {
-      'PKGDIR': os.path.join('foo-tmp', 'packages'),
-      'USE': 'z x y'
+        'PKGDIR': os.path.join('foo-tmp', 'packages'),
+        'USE': 'z x y'
     }
     self.assertCommandCalled(
-      [emerge_board, 'chromeos-base/chromeos-initramfs'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, 'chromeos-base/chromeos-initramfs'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--onlydeps', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--onlydeps', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--buildpkgonly', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--buildpkgonly', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
 
   def testCreateCustomKernelOverrideUseFlag(self):
     """Tests CreateCustomKernel()."""
@@ -55,21 +55,21 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
 
     emerge_board = 'emerge-foo-board'
     extra_env = {
-      'PKGDIR': os.path.join('foo-tmp', 'packages'),
-      'USE': 'foo x y'
+        'PKGDIR': os.path.join('foo-tmp', 'packages'),
+        'USE': 'foo x y'
     }
     self.assertCommandCalled(
-      [emerge_board, 'chromeos-base/chromeos-initramfs'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, 'chromeos-base/chromeos-initramfs'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--onlydeps', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--onlydeps', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--buildpkgonly', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--buildpkgonly', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
     self.assertCommandCalled(
-      [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
-      enter_chroot=True, extra_env=extra_env)
+        [emerge_board, '--usepkgonly', '--root=foo-root', 'kernel'],
+        enter_chroot=True, extra_env=extra_env)
 
   def testCreateKernelImageDefaultArgs(self):
     """Tests CreateKernelImage() with default arguments."""
