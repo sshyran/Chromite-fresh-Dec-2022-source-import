@@ -120,6 +120,6 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
         f'--private={constants.RECOVERY_DATA_PRIVATE_KEY}',
         f'--keyblock={constants.RECOVERY_KEYBLOCK}',
         '--noenable_rootfs_verification',
-        '--boot_args="x y=foo"',
+        '--boot_args=x y=foo',
         '--enable_serial=ttyfoo',
     ], enter_chroot=True)
