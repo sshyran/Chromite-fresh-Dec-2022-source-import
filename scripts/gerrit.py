@@ -684,6 +684,48 @@ class ActionReviewers(UserAction):
                           dryrun=opts.dryrun, notify=opts.notify)
 
 
+class ActionAttentionSet(UserAction):
+  """Add/remove emails from the attention set (prepend with '~' to remove)"""
+
+  COMMAND = 'attention'
+
+  @staticmethod
+  def init_subparser(parser):
+    """Add arguments to this action's subparser."""
+    parser.add_argument('-m', '--msg', '--message', metavar='MESSAGE',
+                        help='Optional message to include',
+                        default='gerrit CLI')
+    parser.add_argument('cl', metavar='CL',
+                        help='The CL to update')
+    parser.add_argument('users', nargs='+',
+                        help='The users to add/remove from attention set')
+
+  @staticmethod
+  def __call__(opts):
+    """Implement the action."""
+    # Allow for optional leading '~'.
+    email_validator = re.compile(r'^[~]?%s$' % constants.EMAIL_REGEX)
+    add_list, remove_list, invalid_list = [], [], []
+
+    for email in opts.users:
+      if not email_validator.match(email):
+        invalid_list.append(email)
+      elif email[0] == '~':
+        remove_list.append(email[1:])
+      else:
+        add_list.append(email)
+
+    if invalid_list:
+      cros_build_lib.Die(
+          'Invalid email address(es): %s' % ', '.join(invalid_list))
+
+    if add_list or remove_list:
+      helper, cl = GetGerrit(opts, opts.cl)
+      helper.SetAttentionSet(cl, add=add_list, remove=remove_list,
+                             dryrun=opts.dryrun, notify=opts.notify,
+                             message=opts.msg)
+
+
 class ActionMessage(_ActionSimpleParallelCLs):
   """Add a message to a CL"""
 
@@ -1139,8 +1181,8 @@ Actions:
                      help='Query internal Chrome Gerrit instance')
   group.add_argument('-g', '--gob',
                      default=site_params.EXTERNAL_GOB_INSTANCE,
-                     help='Gerrit (on borg) instance to query (default: %s)' %
-                          (site_params.EXTERNAL_GOB_INSTANCE))
+                     help=('Gerrit (on borg) instance to query '
+                           '(default: %(default)s)'))
 
   group = parser.add_argument_group('CL options')
   _AddCommonOptions(parser, group)

@@ -434,6 +434,28 @@ class GerritHelperTest(GerritTestCase):
     self.assertGreaterEqual(len(ret), 2)
     return ret
 
+  def testSetAttentionSet(self):
+    """Verify that we can set the attention set on a CL."""
+    project = self.createProject('testProject')
+    clone_path = self.cloneProject(project)
+    gpatch = self.createPatch(clone_path, project)
+    emails = self._ChooseReviewers()
+    helper = self._GetHelper()
+    helper.SetReviewers(gpatch.gerrit_number, add=(
+        emails[0], emails[1]))
+    helper.SetAttentionSet(gpatch.gerrit_number, add=(
+        emails[0], emails[1]))
+    attention = gob_util.GetAttentionSet(helper.host, gpatch.gerrit_number)
+    self.assertEqual(len(attention), 2)
+    self.assertCountEqual(
+        [r['account']['email'] for r in attention],
+        [emails[0], emails[1]])
+    helper.SetAttentionSet(gpatch.gerrit_number,
+                           remove=(emails[0],))
+    attention = gob_util.GetAttentionSet(helper.host, gpatch.gerrit_number)
+    self.assertEqual(len(attention), 1)
+    self.assertEqual(attention[0]['account']['email'], emails[1])
+
   def testSetReviewers(self):
     """Verify that we can set reviewers on a CL."""
     project = self.createProject('testProject')

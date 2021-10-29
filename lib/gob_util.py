@@ -17,6 +17,7 @@ import os
 import re
 import socket
 import sys
+from typing import Any, Dict, Optional, Tuple
 import urllib.parse
 import warnings
 
@@ -674,6 +675,57 @@ def MarkReadyForReview(host, change, msg=''):
   path = '%s/ready' % _GetChangePath(change)
   body = {'message': msg}
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+
+
+def GetAttentionSet(host: str, change: str) -> Optional[Dict[str, Any]]:
+  """Get information about the attention set of a change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: The Gerrit change ID.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/attention' % _GetChangePath(change)
+  return FetchUrlJson(host, path)
+
+
+def AddAttentionSet(host: str, change: str, add: Tuple[str, ...], reason: str,
+                    notify: str = '') -> Optional[Dict[str, Any]]:
+  """Add users to the attention set of a change."""
+  if not add:
+    return
+  body = {}
+  body['reason'] = reason
+  if notify:
+    body['notify'] = notify
+  path = '%s/attention' % _GetChangePath(change)
+  for r in add:
+    body['user'] = r
+    jmsg = FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+  # Return the last response. We've run through at least one request if we got
+  # here.
+  return jmsg
+
+
+def RemoveAttentionSet(host: str, change: str, remove: Tuple[str, ...],
+                       reason: str, notify: str = ''):
+  """Remove users from the attention set of a change."""
+  if not remove:
+    return
+  body = {}
+  body['reason'] = reason
+  if notify:
+    body['notify'] = notify
+  for r in remove:
+    path = '%s/attention/%s/delete' % (_GetChangePath(change), r)
+    try:
+      FetchUrl(host, path, reqtype='POST', body=body, ignore_204=True)
+    except GOBError as e:
+      # On success, gerrit returns status 204; anything else is an error.
+      if e.http_status != 204:
+        raise
 
 
 def GetReviewers(host, change):
