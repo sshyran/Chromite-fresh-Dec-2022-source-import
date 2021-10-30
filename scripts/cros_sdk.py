@@ -206,14 +206,7 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     logging.notice(
         'Raising vm.max_map_count from %s to %s', max_map_count, file_limit)
     open('/proc/sys/vm/max_map_count', 'w').write(f'{file_limit}\n')
-  ret = cros_build_lib.dbg_run(cmd, check=False)
-  # If we were in interactive mode, ignore the exit code; it'll be whatever
-  # they last ran w/in the chroot and won't matter to us one way or another.
-  # Note this does allow chroot entrance to fail and be ignored during
-  # interactive; this is however a rare case and the user will immediately
-  # see it (nor will they be checking the exit code manually).
-  if ret.returncode != 0 and additional_args:
-    raise SystemExit(ret.returncode)
+  return cros_build_lib.dbg_run(cmd, check=False)
 
 
 def _ImageFileForChroot(chroot):
@@ -1177,7 +1170,8 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       lock.read_lock()
       if not mounted:
         cros_sdk_lib.MountChrootPaths(options.chroot)
-      EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
-                  options.chrome_root_mount, options.goma_dir,
-                  options.goma_client_json, options.working_dir,
-                  chroot_command)
+      ret = EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
+                        options.chrome_root_mount, options.goma_dir,
+                        options.goma_client_json, options.working_dir,
+                        chroot_command)
+      sys.exit(ret.returncode)
