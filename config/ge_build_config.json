@@ -134,18 +134,6 @@
       ]
     },
     {
-      "name": "brask",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "bubs",
       "configs": [
         {
@@ -1209,6 +1197,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7184,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "brask",
+      "reference_board_name": "brask",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "brask",
+          "name": "brask",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7196,
           "is_active": true
         }
       ]
