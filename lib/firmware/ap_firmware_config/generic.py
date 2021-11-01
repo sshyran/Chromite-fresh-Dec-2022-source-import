@@ -30,7 +30,6 @@ from chromite.lib.firmware import servo_lib
 # DEPLOY_SERVO_FORCE_FLASHROM = False
 
 
-# pylint: disable=unused-argument
 def deploy_extra_flags_futility(servo: Optional[servo_lib.Servo]) -> List[str]:
   """Returns extra flags for flashing with futility.
 
@@ -43,11 +42,14 @@ def deploy_extra_flags_futility(servo: Optional[servo_lib.Servo]) -> List[str]:
   if not servo:
     # extra flags for flashing with futility directly over ssh
     return []
+  if servo.is_ccd:
+    # when flashing over CCD, skip verify step
+    return ['--fast']
   return []
 
 
 def deploy_extra_flags_flashrom(servo: Optional[servo_lib.Servo]) -> List[str]:
-  """Returns extra flags for flashing with flashrom
+  """Returns extra flags for flashing with flashrom.
 
   Args:
     servo: The servo connected to the target DUT. Return flags for ssh if None.
@@ -58,6 +60,9 @@ def deploy_extra_flags_flashrom(servo: Optional[servo_lib.Servo]) -> List[str]:
   if not servo:
     # extra flags for flashing with flashrom directly over ssh
     return []
+  if servo.is_ccd:
+    # when flashing over CCD, skip verify step
+    return ['-n']
   return []
 
 
