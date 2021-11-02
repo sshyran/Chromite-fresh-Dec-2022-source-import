@@ -1110,7 +1110,8 @@ def AndroidTemplates(site_config):
       luci_builder=config_lib.LUCI_BUILDER_PFQ,
       # Raise Android PFQ timeout to 8 hours to allow for longer runs to
       # complete successfully.
-      build_timeout=8 * 60 * 60,
+      # TODO(b/204714886): Increase timeout temporarily until it's fixed.
+      build_timeout=15 * 60 * 60,
   )
 
   # Template for Android Pi.
@@ -1188,7 +1189,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       constants.PI_ANDROID_PFQ_MASTER,
       site_config.templates.pi_android_pfq,
       site_config.templates.master_android_pfq_mixin,
-      build_timeout=10 * 60 * 60,
       schedule='with 60m interval',
   )
 
