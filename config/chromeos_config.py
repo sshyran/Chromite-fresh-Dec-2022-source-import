@@ -357,10 +357,7 @@ def GeneralTemplates(site_config):
       # fixed.
       images=['base', 'test'],
       chrome_sdk=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-      ],
+      vm_tests=[],
       vm_tests_override=None,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
       'TOC-ASAN',
@@ -373,10 +370,7 @@ def GeneralTemplates(site_config):
       disk_layout='16gb-rootfs',
       images=['base', 'test'],
       chrome_sdk=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-      ],
+      vm_tests=[],
       vm_tests_override=None,
       doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
       'TOC-ASAN',
@@ -483,20 +477,8 @@ def GeneralTemplates(site_config):
       'chromeos-dev-installer',
       dev_installer_prebuilts=True,
       git_sync=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
-          config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
-      ],
-      # Some release builders disable VMTests to be able to build on GCE, but
-      # still want VMTests enabled on trybot builders.
-      vm_tests_override=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
-          config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
-      ],
+      vm_tests=[],
+      vm_tests_override=[],
       paygen=True,
       signer_tests=True,
       hwqual=True,
@@ -983,10 +965,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
   site_config.Add(
       'eve-llvm-tot-toolchain',
       site_config.templates.llvm_tot_toolchain,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)
-      ],
+      vm_tests=[],
       vm_tests_override=TRADITIONAL_VM_TESTS_SUPPORTED,
       boards=['eve'],
   )
@@ -1309,20 +1288,14 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _pi_vmtest_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
+          vm_tests=[],
       ) + site_config.AddForBoards(
           'pi-android-pfq',
           _pi_vmtest_experimental_boards,
           board_configs,
           site_config.templates.pi_android_pfq,
           important=False,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
+          vm_tests=[],
       ))
 
   # Android VMRVC slaves.
@@ -1358,10 +1331,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _vmrvc_vmtest_boards,
           board_configs,
           site_config.templates.vmrvc_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
+          vm_tests=[],
       ))
 
   # Android VMSC slaves.
@@ -1397,10 +1367,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _vmsc_vmtest_boards,
           board_configs,
           site_config.templates.vmsc_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
+          vm_tests=[],
       ))
 
   # Android VMT slaves.
@@ -1436,10 +1403,7 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _vmt_vmtest_boards,
           board_configs,
           site_config.templates.vmt_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
+          vm_tests=[],
       ))
 
 

@@ -164,9 +164,7 @@
             "profile": "asan",
             "rootfs_verification": false,
             "usepkg_build_packages": false,
-            "vm_tests": [
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
-            ]
+            "vm_tests": []
         },
         "benchmark_afdo_generate": {
             "_template": "benchmark_afdo_generate",
@@ -680,16 +678,8 @@
                 "chrome_internal"
             ],
             "usepkg_build_packages": false,
-            "vm_tests": [
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}",
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": null,\n    \"test_type\": \"dev_mode_test\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}",
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": null,\n    \"test_type\": \"cros_vm_test\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
-            ],
-            "vm_tests_override": [
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}",
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": null,\n    \"test_type\": \"dev_mode_test\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}",
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": null,\n    \"test_type\": \"cros_vm_test\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
-            ]
+            "vm_tests": [],
+            "vm_tests_override": []
         },
         "release_afdo_verify": {
             "_template": "release_afdo_verify",
@@ -799,9 +789,7 @@
                 "test"
             ],
             "profile": "ubsan",
-            "vm_tests": [
-                "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
-            ]
+            "vm_tests": []
         },
         "unittest_stress": {
             "_template": "unittest_stress",
@@ -984,7 +972,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlrvp\",\n    \"name\": \"adlrvp_extec\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlrvp\",\n    \"name\": \"adlrvp_m_extec\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "adlrvp-release-tryjob": {
@@ -1013,7 +1000,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "adlrvp-unittest-stress": {
@@ -1147,7 +1133,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"ambassador\",\n    \"name\": \"moonbuggy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"ambassador\",\n    \"name\": \"scout\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "ambassador-release-tryjob": {
@@ -1177,7 +1162,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "ambassador-unittest-stress": {
@@ -1492,8 +1476,7 @@
         "hw_tests_override": [],
         "luci_builder": "Informational",
         "schedule": "0 */3 * * *",
-        "uprev": false,
-        "vm_tests": []
+        "uprev": false
     },
     "amd64-generic-ubsan-fuzzer": {
         "_template": "fuzzer",
@@ -1536,8 +1519,7 @@
         "display_label": "tryjob",
         "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
         "hw_tests_override": null,
-        "luci_builder": "Try",
-        "vm_tests": []
+        "luci_builder": "Try"
     },
     "amd64-generic-unittest-stress": {
         "_template": "unittest_stress",
@@ -1689,7 +1671,6 @@
         "hw_tests_disabled_bug": "https://b/140317527",
         "hw_tests_override": [],
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "arkham-release-tryjob": {
@@ -1709,7 +1690,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "arkham-unittest-stress": {
@@ -2096,7 +2076,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "enable_skylab_hw_tests": true,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asuka-release-tryjob": {
@@ -2122,7 +2101,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asuka-unittest-stress": {
@@ -2235,7 +2213,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"spherion\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-connectivitynext-release-tryjob": {
@@ -2264,7 +2241,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-connectivitynext-unittest-stress": {
@@ -2396,7 +2372,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"hayato\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada\",\n    \"name\": \"spherion\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-release-tryjob": {
@@ -2425,7 +2400,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-unittest-stress": {
@@ -2535,7 +2509,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"asurada-zephyr\",\n    \"name\": \"hayato\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-zephyr-release-tryjob": {
@@ -2562,7 +2535,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "asurada-zephyr-unittest-stress": {
@@ -2673,7 +2645,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas-blueznext\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-blueznext-release-tryjob": {
@@ -2700,7 +2671,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-blueznext-unittest-stress": {
@@ -2811,7 +2781,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-connectivitynext-release-tryjob": {
@@ -2838,7 +2807,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-connectivitynext-unittest-stress": {
@@ -3006,7 +2974,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-kernelnext-release-tryjob": {
@@ -3033,7 +3000,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-kernelnext-unittest-stress": {
@@ -3126,7 +3092,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"atlas\",\n    \"name\": \"atlas\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-release-basic": {
@@ -3176,7 +3141,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "atlas-unittest-stress": {
@@ -3377,7 +3341,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"aurora\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"aurora\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "aurora-borealis-release-tryjob": {
@@ -3414,7 +3377,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "aurora-borealis-unittest-stress": {
@@ -3542,7 +3504,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "aurora-release-tryjob": {
@@ -3576,7 +3537,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "aurora-unittest-stress": {
@@ -3764,7 +3724,6 @@
             "banon"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "banon-release-tryjob": {
@@ -3789,7 +3748,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "banon-unittest-stress": {
@@ -3974,7 +3932,6 @@
         "rootfs_verification": false,
         "signer_tests": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "beaglebone-release-tryjob": {
@@ -4001,7 +3958,6 @@
         "signer_tests": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "beaglebone-unittest-stress": {
@@ -4152,7 +4108,6 @@
         "rootfs_verification": false,
         "signer_tests": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "beaglebone_servo-release-tryjob": {
@@ -4179,7 +4134,6 @@
         "signer_tests": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "beaglebone_servo-unittest-stress": {
@@ -4307,9 +4261,7 @@
         "hw_tests": [],
         "hw_tests_disabled_bug": "https://crbug.com/998427",
         "hw_tests_override": [],
-        "important": false,
-        "vm_tests": [],
-        "vm_tests_override": []
+        "important": false
     },
     "betty-arc-r-release-tryjob": {
         "_template": "release",
@@ -4326,7 +4278,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "betty-arc-r-unittest-stress": {
@@ -4435,7 +4386,6 @@
         ],
         "gce_image": true,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "betty-arc-s-release-tryjob": {
@@ -4460,7 +4410,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "betty-arc-s-unittest-stress": {
@@ -4596,7 +4545,6 @@
         "hw_tests_disabled_bug": "https://crbug.com/998427",
         "hw_tests_override": [],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "betty-arc-t-release-tryjob": {
@@ -4614,7 +4562,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "betty-arc-t-unittest-stress": {
@@ -4672,8 +4619,7 @@
         "luci_builder": "Informational",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
         "overlays": "both",
-        "uprev": false,
-        "vm_tests": []
+        "uprev": false
     },
     "betty-asan-tryjob": {
         "_template": "asan",
@@ -4690,8 +4636,7 @@
         "internal": true,
         "luci_builder": "Try",
         "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "vm_tests": []
+        "overlays": "both"
     },
     "betty-full": {
         "_template": "full",
@@ -5048,9 +4993,6 @@
         ],
         "useflags": [
             "chrome_internal"
-        ],
-        "vm_tests": [
-            "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
         ]
     },
     "betty-pi-arc-pi-android-pfq-tryjob": {
@@ -5078,9 +5020,6 @@
         "uprev": true,
         "useflags": [
             "chrome_internal"
-        ],
-        "vm_tests": [
-            "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"smoke\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 5400,\n    \"use_ctest\": true,\n    \"warn_only\": false\n}"
         ]
     },
     "betty-pi-arc-release": {
@@ -5325,7 +5264,6 @@
             "bob"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "bob-release-tryjob": {
@@ -5350,7 +5288,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "bob-unittest-stress": {
@@ -5461,7 +5398,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brask\",\n    \"name\": \"brask\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brask-release-tryjob": {
@@ -5488,7 +5424,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brask-unittest-stress": {
@@ -5675,7 +5610,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"redrix\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taeko\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brya-manatee-release-tryjob": {
@@ -5709,7 +5643,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brya-manatee-unittest-stress": {
@@ -5764,7 +5697,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brya-release-tryjob": {
@@ -5795,7 +5727,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "brya-unittest-stress": {
@@ -5903,7 +5834,6 @@
             "bubs"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "bubs-release-tryjob": {
@@ -5927,7 +5857,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "bubs-unittest-stress": {
@@ -6156,7 +6085,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-arc64-release-tryjob": {
@@ -6181,7 +6109,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-arc64-unittest-stress": {
@@ -6367,7 +6294,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-kernelnext-release-tryjob": {
@@ -6392,7 +6318,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-kernelnext-unittest-stress": {
@@ -6536,7 +6461,6 @@
         "hw_tests_disabled_bug": "http://crbug.com/1091053",
         "hw_tests_override": [],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-ndktranslation-release-tryjob": {
@@ -6554,7 +6478,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-ndktranslation-unittest-stress": {
@@ -6593,7 +6516,6 @@
             "caroline"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-release-tryjob": {
@@ -6618,7 +6540,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-unittest-stress": {
@@ -6727,7 +6648,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-userdebug-release-tryjob": {
@@ -6752,7 +6672,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "caroline-userdebug-unittest-stress": {
@@ -6900,7 +6819,6 @@
             "cave"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cave-release-tryjob": {
@@ -6925,7 +6843,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cave-unittest-stress": {
@@ -7073,7 +6990,6 @@
             "celes"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "celes-release-tryjob": {
@@ -7098,7 +7014,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "celes-unittest-stress": {
@@ -7353,7 +7268,6 @@
         "boards": [
             "chell"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "chell-release-tryjob": {
@@ -7377,7 +7291,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "chell-unittest-stress": {
@@ -7488,7 +7401,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"cherry\",\n    \"name\": \"cherry\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"cherry\",\n    \"name\": \"tomato\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cherry-release-tryjob": {
@@ -7516,7 +7428,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cherry-unittest-stress": {
@@ -7964,7 +7875,6 @@
             "coral-kernelnext"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "coral-kernelnext-release-tryjob": {
@@ -7988,7 +7898,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "coral-kernelnext-unittest-stress": {
@@ -8139,7 +8048,6 @@
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"santa\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": false,\n    \"lab_board_name\": \"coral\",\n    \"name\": \"whitetip\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "coral-release-tryjob": {
@@ -8183,7 +8091,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "coral-unittest-stress": {
@@ -8330,7 +8237,6 @@
         "boards": [
             "cyan"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cyan-release-tryjob": {
@@ -8354,7 +8260,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "cyan-unittest-stress": {
@@ -8528,7 +8433,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "dedede-release-tryjob": {
@@ -8596,7 +8500,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "dedede-unittest-stress": {
@@ -8703,7 +8606,6 @@
         "boards": [
             "deltaur"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "deltaur-release-tryjob": {
@@ -8727,7 +8629,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "deltaur-unittest-stress": {
@@ -8884,7 +8785,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "drallion-release-tryjob": {
@@ -8918,7 +8818,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "drallion-unittest-stress": {
@@ -9066,7 +8965,6 @@
             "edgar"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "edgar-release-tryjob": {
@@ -9091,7 +8989,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "edgar-unittest-stress": {
@@ -9202,7 +9099,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"elm\",\n    \"name\": \"elm\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-arc64-release-tryjob": {
@@ -9229,7 +9125,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-arc64-unittest-stress": {
@@ -9340,7 +9235,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"elm\",\n    \"name\": \"elm\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-connectivitynext-release-tryjob": {
@@ -9367,7 +9261,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-connectivitynext-unittest-stress": {
@@ -9535,7 +9428,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"elm\",\n    \"name\": \"elm\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-kernelnext-release-tryjob": {
@@ -9562,7 +9454,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-kernelnext-unittest-stress": {
@@ -9635,7 +9526,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"elm\",\n    \"name\": \"elm\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-release-tryjob": {
@@ -9662,7 +9552,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "elm-unittest-stress": {
@@ -9793,7 +9682,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"endeavour\",\n    \"name\": \"endeavour\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "endeavour-release-tryjob": {
@@ -9820,7 +9708,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "endeavour-unittest-stress": {
@@ -10014,7 +9901,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-arc-r-release-tryjob": {
@@ -10034,7 +9920,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-arc-r-unittest-stress": {
@@ -10145,7 +10030,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve-arm64\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-arm64-release-tryjob": {
@@ -10172,7 +10056,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-arm64-unittest-stress": {
@@ -10342,7 +10225,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-kernelnext-release-tryjob": {
@@ -10369,7 +10251,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-kernelnext-unittest-stress": {
@@ -10483,7 +10364,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-kvm-release-tryjob": {
@@ -10503,7 +10383,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-kvm-unittest-stress": {
@@ -10612,7 +10491,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-release-basic": {
@@ -10662,7 +10540,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-unittest-stress": {
@@ -10776,7 +10653,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"eve\",\n    \"name\": \"eve\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-userdebug-release-tryjob": {
@@ -10796,7 +10672,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "eve-userdebug-unittest-stress": {
@@ -10965,7 +10840,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"excelsior\",\n    \"name\": \"excelsior\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "excelsior-release-tryjob": {
@@ -10992,7 +10866,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "excelsior-unittest-stress": {
@@ -12211,7 +12084,6 @@
         "boards": [
             "falco_li"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "falco_li-release-tryjob": {
@@ -12235,7 +12107,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "falco_li-unittest-stress": {
@@ -12369,7 +12240,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"teemo\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"wukong\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-cfm-release-tryjob": {
@@ -12400,7 +12270,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-cfm-unittest-stress": {
@@ -12577,7 +12446,6 @@
         ],
         "paygen": false,
         "signer_tests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-labstation-release-tryjob": {
@@ -12611,7 +12479,6 @@
         "push_image": false,
         "signer_tests": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-labstation-unittest-stress": {
@@ -12792,7 +12659,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz-moblab\",\n    \"name\": \"wukong\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"au\",\n        \"bvt-cq\"\n    ]\n}"
         ],
         "signer_tests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-moblab-release-tryjob": {
@@ -12820,7 +12686,6 @@
         "push_image": false,
         "signer_tests": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-moblab-unittest-stress": {
@@ -12865,7 +12730,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"teemo\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"wukong\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-release-tryjob": {
@@ -12896,7 +12760,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "fizz-unittest-stress": {
@@ -13059,7 +12922,6 @@
         "hw_tests_override": [],
         "paygen_skip_testing": true,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "gale-release-tryjob": {
@@ -13079,7 +12941,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "gale-test-ap": {
@@ -13332,7 +13193,6 @@
         "boards": [
             "glados"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "glados-release-tryjob": {
@@ -13356,7 +13216,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "glados-unittest-stress": {
@@ -13505,7 +13364,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "goroh-release-tryjob": {
@@ -13530,7 +13388,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "goroh-unittest-stress": {
@@ -13678,7 +13535,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": []\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-arc-r-release-tryjob": {
@@ -13716,7 +13572,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-arc-r-unittest-stress": {
@@ -13957,7 +13812,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-kernelnext-release-tryjob": {
@@ -13995,7 +13849,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-kernelnext-unittest-stress": {
@@ -14127,7 +13980,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"grunt\",\n    \"name\": \"treeya360\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-release-basic": {
@@ -14211,7 +14063,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "grunt-unittest-stress": {
@@ -14366,7 +14217,6 @@
         ],
         "image_test": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guado-macrophage-release-tryjob": {
@@ -14391,7 +14241,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guado-macrophage-unittest-stress": {
@@ -14508,7 +14357,6 @@
         "important": false,
         "paygen": false,
         "signer_tests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guado_labstation-release-tryjob": {
@@ -14539,7 +14387,6 @@
         "push_image": false,
         "signer_tests": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guado_labstation-unittest-stress": {
@@ -14662,7 +14509,6 @@
             "factory"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guybrush-release-tryjob": {
@@ -14696,7 +14542,6 @@
         ],
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "guybrush-unittest-stress": {
@@ -14804,7 +14649,6 @@
             "hana-arc64"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-arc64-release-tryjob": {
@@ -14828,7 +14672,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-arc64-unittest-stress": {
@@ -14995,7 +14838,6 @@
             "hana-kernelnext"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-kernelnext-release-tryjob": {
@@ -15019,7 +14861,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-kernelnext-unittest-stress": {
@@ -15090,7 +14931,6 @@
             "hana"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-release-tryjob": {
@@ -15115,7 +14955,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hana-unittest-stress": {
@@ -15264,7 +15103,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-ack\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-arc-r-ack\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-ack-release-tryjob": {
@@ -15301,7 +15139,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-ack-unittest-stress": {
@@ -15450,7 +15287,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"kohaku\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-release-tryjob": {
@@ -15487,7 +15323,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-unittest-stress": {
@@ -15608,7 +15443,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-userdebug-release-tryjob": {
@@ -15645,7 +15479,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-r-userdebug-unittest-stress": {
@@ -15766,7 +15599,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-s-release-tryjob": {
@@ -15803,7 +15635,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-arc-s-unittest-stress": {
@@ -15948,7 +15779,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-blueznext\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-blueznext\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-blueznext-release-tryjob": {
@@ -15985,7 +15815,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-blueznext-unittest-stress": {
@@ -16119,7 +15948,6 @@
         "notification_configs": [
             "{\n    \"email\": \"borealis-release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 2\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-borealis-release-tryjob": {
@@ -16157,7 +15985,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-borealis-unittest-stress": {
@@ -16280,7 +16107,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"unprovisioned_dratini\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"unprovisioned_jinlon\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-connectivitynext-release-tryjob": {
@@ -16319,7 +16145,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-connectivitynext-unittest-stress": {
@@ -16441,7 +16266,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-diskswap\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch-diskswap\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-diskswap-release-tryjob": {
@@ -16479,7 +16303,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-diskswap-unittest-stress": {
@@ -16657,7 +16480,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"kohaku\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"nightfury\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-kernelnext-release-tryjob": {
@@ -16694,7 +16516,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-kernelnext-unittest-stress": {
@@ -16847,7 +16668,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"kohaku\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"hatch\",\n    \"name\": \"nightfury\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-manatee-release-tryjob": {
@@ -16884,7 +16704,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-manatee-unittest-stress": {
@@ -16940,7 +16759,6 @@
             "factory",
             "accessory_rwsig"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-release-tryjob": {
@@ -16982,7 +16800,6 @@
             "accessory_rwsig"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "hatch-unittest-stress": {
@@ -17167,7 +16984,6 @@
         "boards": [
             "herobrine"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "herobrine-release-tryjob": {
@@ -17191,7 +17007,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "herobrine-unittest-stress": {
@@ -17373,7 +17188,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"jacuzzi\",\n    \"name\": \"stern\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"jacuzzi\",\n    \"name\": \"willow\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jacuzzi-kernelnext-release-tryjob": {
@@ -17414,7 +17228,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jacuzzi-kernelnext-unittest-stress": {
@@ -17505,7 +17318,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jacuzzi-release-tryjob": {
@@ -17550,7 +17362,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jacuzzi-unittest-stress": {
@@ -17657,7 +17468,6 @@
         "boards": [
             "jecht"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jecht-release-tryjob": {
@@ -17681,7 +17491,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "jecht-unittest-stress": {
@@ -17792,7 +17601,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kalista\",\n    \"name\": \"karma\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kalista-cfm-release-tryjob": {
@@ -17819,7 +17627,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kalista-cfm-unittest-stress": {
@@ -17949,7 +17756,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kalista\",\n    \"name\": \"karma\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kalista-release-tryjob": {
@@ -17976,7 +17782,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kalista-unittest-stress": {
@@ -18119,7 +17924,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "keeby-release-tryjob": {
@@ -18149,7 +17953,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "keeby-unittest-stress": {
@@ -18297,7 +18100,6 @@
             "kefka"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kefka-release-tryjob": {
@@ -18322,7 +18124,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kefka-unittest-stress": {
@@ -18588,7 +18389,6 @@
         "boards": [
             "kevin-kernelnext"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-kernelnext-release-tryjob": {
@@ -18612,7 +18412,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-kernelnext-unittest-stress": {
@@ -18740,7 +18539,6 @@
             "kevin"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-release-tryjob": {
@@ -18765,7 +18563,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-unittest-stress": {
@@ -18873,7 +18670,6 @@
             "kevin-userdebug"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-userdebug-release-tryjob": {
@@ -18897,7 +18693,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin-userdebug-unittest-stress": {
@@ -19009,7 +18804,6 @@
             "kevin64"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin64-release-tryjob": {
@@ -19033,7 +18827,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kevin64-unittest-stress": {
@@ -19228,7 +19021,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kukui\",\n    \"name\": \"krane\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kukui\",\n    \"name\": \"kukui\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-arc-r-release-tryjob": {
@@ -19259,7 +19051,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-arc-r-unittest-stress": {
@@ -19469,7 +19260,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kukui\",\n    \"name\": \"krane\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"kukui\",\n    \"name\": \"kukui\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-kernelnext-release-tryjob": {
@@ -19500,7 +19290,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-kernelnext-unittest-stress": {
@@ -19580,7 +19369,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-release-tryjob": {
@@ -19614,7 +19402,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "kukui-unittest-stress": {
@@ -19800,7 +19587,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "lars-kernelnext-release-tryjob": {
@@ -19825,7 +19611,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "lars-kernelnext-unittest-stress": {
@@ -19895,7 +19680,6 @@
         "boards": [
             "lars"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "lars-release-tryjob": {
@@ -19919,7 +19703,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "lars-unittest-stress": {
@@ -20099,7 +19882,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "littlejoe-release": {
@@ -20124,7 +19906,6 @@
         "signer_tests": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "littlejoe-release-tryjob": {
@@ -20154,7 +19935,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "littlejoe-unittest-stress": {
@@ -20361,7 +20141,6 @@
         ],
         "important": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "majolica-release-tryjob": {
@@ -20386,7 +20165,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "majolica-unittest-stress": {
@@ -20500,7 +20278,6 @@
             "mancomb"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mancomb-release-tryjob": {
@@ -20525,7 +20302,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mancomb-unittest-stress": {
@@ -21373,7 +21149,6 @@
         "important": false,
         "paygen_skip_testing": true,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mistral-release-tryjob": {
@@ -21393,7 +21168,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mistral-unittest-stress": {
@@ -21595,7 +21369,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mushu-release-tryjob": {
@@ -21619,7 +21392,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "mushu-unittest-stress": {
@@ -21795,7 +21567,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nami\",\n    \"name\": \"syndra\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nami\",\n    \"name\": \"vayne\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nami-kernelnext-release-tryjob": {
@@ -21830,7 +21601,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nami-kernelnext-unittest-stress": {
@@ -21911,7 +21681,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nami\",\n    \"name\": \"syndra\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nami\",\n    \"name\": \"vayne\",\n    \"test_suites\": [\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nami-release-tryjob": {
@@ -21946,7 +21715,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nami-unittest-stress": {
@@ -22077,7 +21845,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nautilus\",\n    \"name\": \"nautilus\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nautilus\",\n    \"name\": \"nautiluslte\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nautilus-release-tryjob": {
@@ -22105,7 +21872,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nautilus-unittest-stress": {
@@ -22252,7 +22018,6 @@
         "boards": [
             "nissa"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nissa-release-tryjob": {
@@ -22276,7 +22041,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nissa-unittest-stress": {
@@ -22444,7 +22208,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"nocturne\",\n    \"name\": \"nocturne\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nocturne-kernelnext-release-tryjob": {
@@ -22471,7 +22234,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nocturne-kernelnext-unittest-stress": {
@@ -22549,7 +22311,6 @@
             "chrome_internal",
             "goma_thinlto"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nocturne-release-tryjob": {
@@ -22581,7 +22342,6 @@
             "chrome_internal",
             "goma_thinlto"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nocturne-unittest-stress": {
@@ -22932,7 +22692,6 @@
         "boards": [
             "nyan_big"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nyan_big-release-tryjob": {
@@ -22956,7 +22715,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nyan_big-unittest-stress": {
@@ -23063,7 +22821,6 @@
         "boards": [
             "nyan_blaze"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nyan_blaze-release-tryjob": {
@@ -23087,7 +22844,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "nyan_blaze-unittest-stress": {
@@ -23242,7 +22998,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"vortininja\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"yorp\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-arc-r-release-tryjob": {
@@ -23313,7 +23068,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-arc-r-unittest-stress": {
@@ -23514,7 +23268,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"vortininja\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"yorp\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-kernelnext-release-tryjob": {
@@ -23574,7 +23327,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-kernelnext-unittest-stress": {
@@ -23702,7 +23454,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"vortininja\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"octopus\",\n    \"name\": \"yorp\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-release-tryjob": {
@@ -23764,7 +23515,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "octopus-unittest-stress": {
@@ -23957,7 +23707,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"palkia\",\n    \"name\": \"kohaku\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"palkia\",\n    \"name\": \"palkia\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "palkia-release-tryjob": {
@@ -23994,7 +23743,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "palkia-unittest-stress": {
@@ -24101,7 +23849,6 @@
         "boards": [
             "poppy"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "poppy-release-tryjob": {
@@ -24125,7 +23872,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "poppy-unittest-stress": {
@@ -24257,7 +24003,6 @@
         "notification_configs": [
             "{\n    \"email\": \"borealis-release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 2\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-borealis-release-tryjob": {
@@ -24293,7 +24038,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-borealis-unittest-stress": {
@@ -24528,7 +24272,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-macrophage\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-macrophage-release-tryjob": {
@@ -24564,7 +24307,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-macrophage-unittest-stress": {
@@ -24692,7 +24434,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
         "signer_tests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-moblab-release-tryjob": {
@@ -24721,7 +24462,6 @@
         "push_image": false,
         "signer_tests": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-moblab-unittest-stress": {
@@ -24773,7 +24513,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-release-tryjob": {
@@ -24811,7 +24550,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "puff-unittest-stress": {
@@ -24941,7 +24679,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"pyro\",\n    \"name\": \"pyro\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "pyro-release-tryjob": {
@@ -24968,7 +24705,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "pyro-unittest-stress": {
@@ -25080,7 +24816,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"leona\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"shyvana\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-arc-r-release-tryjob": {
@@ -25108,7 +24843,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-arc-r-unittest-stress": {
@@ -25220,7 +24954,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"leona\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"shyvana\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-arc-r-userdebug-release-tryjob": {
@@ -25248,7 +24981,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-arc-r-userdebug-unittest-stress": {
@@ -25478,7 +25210,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"leona\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"rammus\",\n    \"name\": \"shyvana\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-release-tryjob": {
@@ -25506,7 +25237,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rammus-unittest-stress": {
@@ -25638,7 +25368,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"reef\",\n    \"name\": \"basking\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"reef\",\n    \"name\": \"electro\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reef-release-tryjob": {
@@ -25667,7 +25396,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reef-unittest-stress": {
@@ -25815,7 +25543,6 @@
             "reks"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reks-release-tryjob": {
@@ -25840,7 +25567,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reks-unittest-stress": {
@@ -26004,7 +25730,6 @@
             "relm"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "relm-release-tryjob": {
@@ -26029,7 +25754,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "relm-unittest-stress": {
@@ -26178,7 +25902,6 @@
             "test"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reven-release-tryjob": {
@@ -26205,7 +25928,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "reven-unittest-stress": {
@@ -26495,7 +26217,6 @@
             "rex"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rex-release-tryjob": {
@@ -26519,7 +26240,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "rex-unittest-stress": {
@@ -26689,7 +26409,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"sand\",\n    \"name\": \"sand\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sand-release-tryjob": {
@@ -26716,7 +26435,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sand-unittest-stress": {
@@ -26887,7 +26605,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"sarien\",\n    \"name\": \"sarien\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"sarien\",\n    \"name\": \"sarien_signed\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sarien-kernelnext-release-tryjob": {
@@ -26917,7 +26634,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sarien-kernelnext-unittest-stress": {
@@ -27017,7 +26733,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sarien-release-tryjob": {
@@ -27051,7 +26766,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sarien-unittest-stress": {
@@ -27183,7 +26897,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"druwl\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"dumo\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "scarlet-release-tryjob": {
@@ -27212,7 +26925,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "scarlet-unittest-stress": {
@@ -27320,7 +27032,6 @@
             "senor"
         ],
         "important": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "senor-release-tryjob": {
@@ -27344,7 +27055,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "senor-unittest-stress": {
@@ -27492,7 +27202,6 @@
             "sentry"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sentry-release-tryjob": {
@@ -27517,7 +27226,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sentry-unittest-stress": {
@@ -27668,7 +27376,6 @@
         "hw_tests": [],
         "hw_tests_disabled_bug": "https://crbug.com/1092947",
         "hw_tests_override": [],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "setzer-release-tryjob": {
@@ -27686,7 +27393,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "setzer-unittest-stress": {
@@ -27801,7 +27507,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "shadowkeep-release-tryjob": {
@@ -27822,7 +27527,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "shadowkeep-unittest-stress": {
@@ -28066,7 +27770,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sludge-release-tryjob": {
@@ -28107,7 +27810,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "sludge-unittest-stress": {
@@ -28296,7 +27998,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"snappy\",\n    \"name\": \"bigdaddy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"snappy\",\n    \"name\": \"snappy\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "snappy-kernelnext-release-tryjob": {
@@ -28325,7 +28026,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "snappy-kernelnext-unittest-stress": {
@@ -28400,7 +28100,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"snappy\",\n    \"name\": \"bigdaddy\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"snappy\",\n    \"name\": \"snappy\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "snappy-release-tryjob": {
@@ -28429,7 +28128,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "snappy-unittest-stress": {
@@ -28597,7 +28295,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"soraka\",\n    \"name\": \"soraka\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "soraka-libcamera-release-tryjob": {
@@ -28624,7 +28321,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "soraka-libcamera-unittest-stress": {
@@ -28697,7 +28393,6 @@
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"soraka\",\n    \"name\": \"soraka\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "soraka-release-tryjob": {
@@ -28724,7 +28419,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "soraka-unittest-stress": {
@@ -28881,7 +28575,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "strongbad-release-tryjob": {
@@ -28915,7 +28608,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "strongbad-unittest-stress": {
@@ -29271,7 +28963,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "tael-release-tryjob": {
@@ -29313,7 +29004,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "tael-unittest-stress": {
@@ -29582,7 +29272,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "tatl-release-tryjob": {
@@ -29624,7 +29313,6 @@
         "upload_stripped_packages": [
             "sys-kernel/*kernel*"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "tatl-unittest-stress": {
@@ -29792,7 +29480,6 @@
         ],
         "chrome_sdk_build_chrome": false,
         "enable_skylab_cts_hw_tests": true,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "terra-release-tryjob": {
@@ -29818,7 +29505,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "terra-unittest-stress": {
@@ -30036,7 +29722,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"pompom\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"trogdor\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-arc-r-release-tryjob": {
@@ -30067,7 +29752,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-arc-r-unittest-stress": {
@@ -30182,7 +29866,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"pompom\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"trogdor\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-connectivitynext-release-tryjob": {
@@ -30213,7 +29896,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-connectivitynext-unittest-stress": {
@@ -30405,7 +30087,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"pompom\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor\",\n    \"name\": \"trogdor\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-kernelnext-release-tryjob": {
@@ -30436,7 +30117,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-kernelnext-unittest-stress": {
@@ -30517,7 +30197,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-release-tryjob": {
@@ -30552,7 +30231,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-unittest-stress": {
@@ -30664,7 +30342,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor-zephyr\",\n    \"name\": \"lazor\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"trogdor-zephyr\",\n    \"name\": \"limozeen\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-zephyr-release-tryjob": {
@@ -30692,7 +30369,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor-zephyr-unittest-stress": {
@@ -30811,7 +30487,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor64-release-tryjob": {
@@ -30846,7 +30521,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "trogdor64-unittest-stress": {
@@ -30994,7 +30668,6 @@
             "ultima"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "ultima-release-tryjob": {
@@ -31019,7 +30692,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "ultima-unittest-stress": {
@@ -31167,7 +30839,6 @@
             "veyron_fievel"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_fievel-release-tryjob": {
@@ -31192,7 +30863,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_fievel-unittest-stress": {
@@ -31299,7 +30969,6 @@
         "boards": [
             "veyron_mighty"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_mighty-release-tryjob": {
@@ -31323,7 +30992,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_mighty-unittest-stress": {
@@ -31430,7 +31098,6 @@
         "boards": [
             "veyron_minnie"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_minnie-release-tryjob": {
@@ -31454,7 +31121,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_minnie-unittest-stress": {
@@ -31605,7 +31271,6 @@
         "hw_tests": [],
         "hw_tests_disabled_bug": "https://b/141387161",
         "hw_tests_override": [],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_rialto-release-tryjob": {
@@ -31623,7 +31288,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_rialto-unittest-stress": {
@@ -31730,7 +31394,6 @@
         "boards": [
             "veyron_speedy"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_speedy-release-tryjob": {
@@ -31754,7 +31417,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_speedy-unittest-stress": {
@@ -31902,7 +31564,6 @@
             "veyron_tiger"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_tiger-release-tryjob": {
@@ -31927,7 +31588,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "veyron_tiger-unittest-stress": {
@@ -32240,7 +31900,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-poc2-release": {
@@ -32265,7 +31924,6 @@
         "signer_tests": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-poc2-release-tryjob": {
@@ -32295,7 +31953,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-poc2-unittest-stress": {
@@ -32347,7 +32004,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-release": {
@@ -32372,7 +32028,6 @@
         "signer_tests": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-release-tryjob": {
@@ -32402,7 +32057,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "viking-unittest-stress": {
@@ -32549,7 +32203,6 @@
         "notification_configs": [
             "{\n    \"email\": \"borealis-release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 2\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-borealis-release-tryjob": {
@@ -32595,7 +32248,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-borealis-unittest-stress": {
@@ -32786,7 +32438,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"volteer_tcpmv1\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"voxel\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-kernelnext-release-tryjob": {
@@ -32836,7 +32487,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-kernelnext-unittest-stress": {
@@ -32998,7 +32648,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"volteer2\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer\",\n    \"name\": \"voxel\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-manatee-release-tryjob": {
@@ -33044,7 +32693,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-manatee-unittest-stress": {
@@ -33112,7 +32760,6 @@
             "recovery",
             "factory"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-release-tryjob": {
@@ -33166,7 +32813,6 @@
             "factory"
         ],
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-unittest-stress": {
@@ -33279,7 +32925,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer-zephyr\",\n    \"name\": \"volteer2\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"volteer-zephyr\",\n    \"name\": \"volteer2_ti50\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-zephyr-release-tryjob": {
@@ -33308,7 +32953,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "volteer-zephyr-unittest-stress": {
@@ -33451,7 +33095,6 @@
         "hw_tests_override": [],
         "paygen_skip_testing": true,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "whirlwind-release-tryjob": {
@@ -33471,7 +33114,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "sync_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "whirlwind-test-ap": {
@@ -33685,7 +33327,6 @@
             "wizpig"
         ],
         "chrome_sdk_build_chrome": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "wizpig-release-tryjob": {
@@ -33710,7 +33351,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "wizpig-unittest-stress": {
@@ -33896,7 +33536,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "wristpin-release": {
@@ -33922,7 +33561,6 @@
         "signer_tests": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "wristpin-release-tryjob": {
@@ -33953,7 +33591,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "wristpin-unittest-stress": {
@@ -34205,7 +33842,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-arc-r-release-tryjob": {
@@ -34246,7 +33882,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-arc-r-unittest-stress": {
@@ -34429,7 +34064,6 @@
             "{\n    \"email\": \"borealis-release-builder-alerts@google.com\",\n    \"template\": \"legacy_release\",\n    \"threshold\": 2\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-borealis-release-tryjob": {
@@ -34470,7 +34104,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-borealis-unittest-stress": {
@@ -34595,7 +34228,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-connectivitynext-release-tryjob": {
@@ -34636,7 +34268,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-connectivitynext-unittest-stress": {
@@ -34800,7 +34431,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-floss\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-floss\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-floss-release-tryjob": {
@@ -34840,7 +34470,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-floss-unittest-stress": {
@@ -35003,7 +34632,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"vilboz360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-kernelnext-release-tryjob": {
@@ -35043,7 +34671,6 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-kernelnext-unittest-stress": {
@@ -35204,7 +34831,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"zork-minios\",\n    \"name\": \"woomax\",\n    \"test_suites\": []\n}"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-minios-release-tryjob": {
@@ -35245,7 +34871,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-minios-unittest-stress": {
@@ -35305,7 +34930,6 @@
             "accessory_rwsig"
         ],
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-release-tryjob": {
@@ -35351,7 +34975,6 @@
         ],
         "suite_scheduling": false,
         "unittests": false,
-        "vm_tests": [],
         "vm_tests_override": null
     },
     "zork-unittest-stress": {
