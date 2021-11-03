@@ -30,12 +30,14 @@ class Chroot(object):
                cache_dir=None,
                chrome_root=None,
                env=None,
-               goma=None):
+               goma=None,
+               remoteexec=None):
     # Strip trailing / if present for consistency.
     self._path = (path or constants.DEFAULT_CHROOT_PATH).rstrip('/')
     self._is_default_path = not bool(path)
     self._env = env
     self.goma = goma
+    self.remoteexec = remoteexec
     # String in proto are '' when not set, but testing and comparing is much
     # easier when the "unset" value is consistent, so do an explicit "or None".
     self.cache_dir = cache_dir or None
@@ -100,6 +102,11 @@ class Chroot(object):
           '--goma_dir', self.goma.linux_goma_dir,
           '--goma_client_json', self.goma.goma_client_json,
       ])
+    if self.remoteexec:
+      args.extend([
+          '--reclient-dir', self.remoteexec.reclient_dir,
+          '--reproxy-cfg-file', self.remoteexec.reproxy_cfg_file,
+      ])
 
     return args
 
@@ -108,5 +115,7 @@ class Chroot(object):
     env = self._env.copy() if self._env else {}
     if self.goma:
       env.update(self.goma.GetChrootExtraEnv())
+    if self.remoteexec:
+      env.update(self.remoteexec.GetChrootExtraEnv())
 
     return env

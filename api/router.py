@@ -331,6 +331,9 @@ class Router(object):
       # Parse goma.
       chroot.goma = field_handler.handle_goma(input_msg, chroot.path)
 
+      # Parse remoteexec.
+      chroot.remoteexec = field_handler.handle_remoteexec(input_msg)
+
       # Build inside-chroot paths for the input, output, and config messages.
       new_input = os.path.join(tempdir, self.REEXEC_INPUT_FILE)
       chroot_input = '/%s' % os.path.relpath(new_input, chroot.path)

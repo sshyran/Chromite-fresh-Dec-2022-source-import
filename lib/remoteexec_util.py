@@ -31,6 +31,12 @@ class Remoteexec(object):
     self.reclient_dir = reclient_dir
     self.reproxy_cfg_file = reproxy_cfg_file
 
+  def __eq__(self, other):
+    if self.__class__ is other.__class__:
+      return (self.reclient_dir == other.reclient_dir
+              and self.reproxy_cfg_file == other.reproxy_cfg_file)
+    return NotImplemented
+
   def GetChrootExtraEnv(self):
     """Extra env vars set to do remoteexec inside chroot."""
     reclient_dir = os.path.join('/home', getpass.getuser(), 'reclient')
