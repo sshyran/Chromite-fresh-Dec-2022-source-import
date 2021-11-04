@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import sys
-from typing import List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, TYPE_CHECKING, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -191,19 +191,20 @@ def uprev_android(android_package,
   return android_atom
 
 
-def uprev_build_targets(build_targets,
-                        overlay_type,
-                        chroot=None,
-                        output_dir=None):
+def uprev_build_targets(
+    build_targets: Optional[List['build_target_lib.BuildTarget']],
+    overlay_type: str,
+    chroot: 'chroot_lib.Chroot' = None,
+    output_dir: Optional[str] = None):
   """Uprev the set provided build targets, or all if not specified.
 
   Args:
-    build_targets (list[build_target_lib.BuildTarget]|None): The build targets
+    build_targets: The build targets
       whose overlays should be uprevved, empty or None for all.
-    overlay_type (str): One of the valid overlay types except None (see
+    overlay_type: One of the valid overlay types except None (see
       constants.VALID_OVERLAYS).
-    chroot (chroot_lib.Chroot|None): The chroot to clean, if desired.
-    output_dir (str|None): The path to optionally dump result files.
+    chroot: The chroot to clean, if desired.
+    output_dir: The path to optionally dump result files.
   """
   # Need a valid overlay, but exclude None.
   assert overlay_type and overlay_type in constants.VALID_OVERLAYS
@@ -221,20 +222,24 @@ def uprev_build_targets(build_targets,
       output_dir=output_dir)
 
 
-def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
+def uprev_overlays(
+    overlays: List[str],
+    build_targets: Optional[List['build_target_lib.BuildTarget']] = None,
+    chroot: Optional['chroot_lib.Chroot'] = None,
+    output_dir: Optional[str] = None) -> List[str]:
   """Uprev the given overlays.
 
   Args:
-    overlays (list[str]): The list of overlay paths.
-    build_targets (list[build_target_lib.BuildTarget]|None): The build targets
+    overlays: The list of overlay paths.
+    build_targets: The build targets
       to clean in |chroot|, if desired. No effect unless |chroot| is provided.
-    chroot (chroot_lib.Chroot|None): The chroot to clean, if desired.
-    output_dir (str|None): The path to optionally dump result files.
+    chroot: The chroot to clean, if desired.
+    output_dir: The path to optionally dump result files.
 
   Returns:
-    list[str] - The paths to all of the modified ebuild files. This includes the
-      new files that were added (i.e. the new versions) and all of the removed
-      files (i.e. the old versions).
+    The paths to all of the modified ebuild files. This includes the new files
+      that were added (i.e. the new versions) and all of the removed files
+      (i.e. the old versions).
   """
   assert overlays
 
@@ -251,18 +256,21 @@ def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
   return uprev_manager.modified_ebuilds, uprev_manager.revved_packages
 
 
-def uprev_versioned_package(package, build_targets, refs, chroot):
+def uprev_versioned_package(
+    package: package_info.CPV,
+    build_targets: List['build_target_lib.BuildTarget'],
+    refs: List[uprev_lib.GitRef],
+    chroot: 'chroot_lib.Chroot') -> 'uprev_lib.UprevVersionedPackageResult':
   """Call registered uprev handler function for the package.
 
   Args:
-    package (package_info.CPV): The package being uprevved.
-    build_targets (list[build_target_lib.BuildTarget]): The build targets to
-        clean on a successful uprev.
-    refs (list[uprev_lib.GitRef]):
-    chroot (chroot_lib.Chroot): The chroot to enter for cleaning.
+    package: The package being uprevved.
+    build_targets: The build targets to clean on a successful uprev.
+    refs:
+    chroot: The chroot to enter for cleaning.
 
   Returns:
-    UprevVersionedPackageResult: The result.
+    The result.
   """
   assert package
 
@@ -653,15 +661,16 @@ def _get_latest_version_from_refs(refs_prefix: str,
   return target_version_ref.replace(refs_prefix, '')
 
 
-def _generate_platform_c_files(replication_config, chroot):
+def _generate_platform_c_files(
+    replication_config: replication_config_pb2.ReplicationConfig,
+    chroot: 'chroot_lib.Chroot') -> List[str]:
   """Generates platform C files from a platform JSON payload.
 
   Args:
-    replication_config (replication_config_pb2.ReplicationConfig): A
-      ReplicationConfig that has already been run. If it produced a
-      build_config.json file, that file will be used to generate platform C
-      files. Otherwise, nothing will be generated.
-    chroot (chroot_lib.Chroot): The chroot to use to generate.
+    replication_config: A ReplicationConfig that has already been run. If it
+      produced a build_config.json file, that file will be used to generate
+      platform C files. Otherwise, nothing will be generated.
+    chroot: The chroot to use to generate.
 
   Returns:
     A list of generated files.
@@ -720,12 +729,12 @@ def _generate_platform_c_files(replication_config, chroot):
   return generated_files
 
 
-def _get_private_overlay_package_root(ref, package):
+def _get_private_overlay_package_root(ref: uprev_lib.GitRef, package: str):
   """Returns the absolute path to the root of a given private overlay.
 
   Args:
-    ref (uprev_lib.GitRef): GitRef for the private overlay.
-    package (str): Path to the package in the overlay.
+    ref: GitRef for the private overlay.
+    package: Path to the package in the overlay.
   """
   # There might be a cleaner way to map from package -> path within the source
   # tree. For now, just use string patterns.
@@ -856,18 +865,21 @@ def get_best_visible(
       sysroot=build_target.root if build_target else None)
 
 
-def has_prebuilt(atom, build_target=None, useflags=None):
+def has_prebuilt(
+    atom: str,
+    build_target: 'build_target_lib.BuildTarget' = None,
+    useflags: Union[Iterable[str], str] = None) -> bool:
   """Check if a prebuilt exists.
 
   Args:
-    atom (str): The package whose prebuilt is being queried.
-    build_target (build_target_lib.BuildTarget): The build target whose
-        sysroot should be searched, or the SDK if not provided.
+    atom: The package whose prebuilt is being queried.
+    build_target: The build target whose sysroot should be searched, or the
+        SDK if not provided.
     useflags: Any additional USE flags that should be set. May be a string
         of properly formatted USE flags, or an iterable of individual flags.
 
   Returns:
-    bool: True iff there is an available prebuilt, False otherwise.
+    True if there is an available prebuilt, False otherwise.
   """
   assert atom
 
@@ -961,14 +973,15 @@ def needs_chrome_source(
   )
 
 
-def determine_chrome_version(build_target):
+def determine_chrome_version(
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns the current Chrome version for the board (or in buildroot).
 
   Args:
-    build_target (build_target_lib.BuildTarget): The board build target.
+    build_target: The board build target.
 
   Returns:
-    str|None: The chrome version if available.
+    The chrome version if available.
   """
   # TODO(crbug/1019770): Long term we should not need the try/catch here once
   # the builds function above only returns True for chrome when
@@ -985,14 +998,14 @@ def determine_chrome_version(build_target):
   return pkg_info.version.partition('_')[0]
 
 
-def determine_android_package(board):
+def determine_android_package(board: str) -> Optional[str]:
   """Returns the active Android container package in use by the board.
 
   Args:
     board: The board name this is specific to.
 
   Returns:
-    str|None: The android package string if there is one.
+    The android package string if there is one.
   """
   try:
     packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
@@ -1010,7 +1023,7 @@ def determine_android_package(board):
   return None
 
 
-def determine_android_version(board, package=None):
+def determine_android_version(board: str, package: str = None):
   """Determine the current Android version in buildroot now and return it.
 
   This uses the typical portage logic to determine which version of Android
@@ -1096,14 +1109,15 @@ def determine_full_version():
   return full_version
 
 
-def find_fingerprints(build_target):
+def find_fingerprints(
+    build_target: 'build_target_lib.BuildTarget') -> List[str]:
   """Returns a list of fingerprints for this build.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    list[str] - List of fingerprint strings.
+    List of fingerprint strings.
   """
   cros_build_lib.AssertInsideChroot()
   fp_file = 'cheets-fingerprint.txt'
@@ -1118,11 +1132,11 @@ def find_fingerprints(build_target):
   return fingerprints
 
 
-def get_all_firmware_versions(build_target):
+def get_all_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Extract firmware version for all models present.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     A dict of FirmwareVersions namedtuple instances by model.
@@ -1148,11 +1162,11 @@ FirmwareVersions = collections.namedtuple(
     'FirmwareVersions', ['model', 'main', 'main_rw', 'ec', 'ec_rw'])
 
 
-def get_firmware_versions(build_target):
+def get_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Extract version information from the firmware updater, if one exists.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     A FirmwareVersions namedtuple instance.
@@ -1167,11 +1181,12 @@ def get_firmware_versions(build_target):
     return FirmwareVersions(None, None, None, None, None)
 
 
-def _get_firmware_version_cmd_result(build_target):
+def _get_firmware_version_cmd_result(
+    build_target: 'build_target_lib.BuildTarget'):
   """Gets the raw result output of the firmware updater version command.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     Command execution result.
@@ -1235,11 +1250,11 @@ def _find_firmware_versions(cmd_output):
 MainEcFirmwareVersions = collections.namedtuple(
     'MainEcFirmwareVersions', ['main_fw_version', 'ec_fw_version'])
 
-def determine_firmware_versions(build_target):
+def determine_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Returns a namedtuple with main and ec firmware versions.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     MainEcFirmwareVersions namedtuple with results.
@@ -1250,14 +1265,15 @@ def determine_firmware_versions(build_target):
 
   return MainEcFirmwareVersions(main_fw_version, ec_fw_version)
 
-def determine_kernel_version(build_target):
+def determine_kernel_version(
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns a string containing the kernel version for this build target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    (str) The kernel versions, or None.
+    The kernel versions, or None.
   """
   try:
     packages = portage_util.GetPackageDependencies(build_target.name,
@@ -1273,14 +1289,16 @@ def determine_kernel_version(build_target):
   return None
 
 
-def get_models(build_target, log_output=True):
+def get_models(
+    build_target: 'build_target_lib.BuildTarget',
+    log_output: bool = True) -> Optional[List[str]]:
   """Obtain a list of models supported by a unified board.
 
   This ignored whitelabel models since GoldenEye has no specific support for
   these at present.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
     log_output: Whether to log the output of the cros_config_host invocation.
 
   Returns:
@@ -1291,15 +1309,17 @@ def get_models(build_target, log_output=True):
                                log_output=log_output)
 
 
-def get_key_id(build_target, model):
+def get_key_id(
+    build_target: 'build_target_lib.BuildTarget',
+    model: str) -> Optional[str]:
   """Obtain the key_id for a model within the build_target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
-    model (str): The model name
+    build_target: The build target.
+    model: The model name
 
   Returns:
-    A key_id (str) or None.
+    A key_id or None.
   """
   model_arg = '--model=' + model
   key_id_list = _run_cros_config_host(
@@ -1311,11 +1331,14 @@ def get_key_id(build_target, model):
   return key_id
 
 
-def _run_cros_config_host(build_target, args, log_output=True):
+def _run_cros_config_host(
+    build_target: 'build_target_lib.BuildTarget',
+    args: List[str],
+    log_output: bool = True) -> Optional[List[str]]:
   """Run the cros_config_host tool.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
     args: List of arguments to pass.
     log_output: Whether to log the output of the cros_config_host.
 
