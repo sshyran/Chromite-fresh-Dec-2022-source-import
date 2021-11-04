@@ -203,8 +203,14 @@ def MountChrootPaths(path: Union[Path, str]):
   osutils.Mount('sysfs', path / 'sys', 'sysfs', defflags)
 
   if 'binfmt_misc' in KNOWN_FILESYSTEMS:
-    osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
-                  'binfmt_misc', defflags)
+    try:
+      osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
+                    'binfmt_misc', defflags)
+    except PermissionError:
+      # We're in an environment where we can't mount binfmt_misc (e.g. a
+      # container), so ignore it for now.  We need it for unittests via qemu,
+      # but nothing else currently.
+      pass
 
   if 'configfs' in KNOWN_FILESYSTEMS:
     osutils.Mount('configfs', path / 'sys/kernel/config', 'configfs', defflags)
