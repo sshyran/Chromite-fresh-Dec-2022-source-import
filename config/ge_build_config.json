@@ -261,7 +261,7 @@
           "experimental": false,
           "leader_board": true,
           "board_group": "corsola",
-          "arch": "X86_INTERNAL"
+          "arch": "ARM_INTERNAL"
         }
       ]
     },
