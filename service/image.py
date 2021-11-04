@@ -473,12 +473,11 @@ def Test(board, result_directory, image_dir=None):
 
   return result.returncode == 0
 
-def create_factory_image_zip(
-  chroot: chroot_lib.Chroot,
-  sysroot_class: sysroot_lib.Sysroot,
-  factory_shim_dir: Path,
-  version: str,
-  output_dir: str) -> Union[str, None]:
+def create_factory_image_zip(chroot: chroot_lib.Chroot,
+                             sysroot_class: sysroot_lib.Sysroot,
+                             factory_shim_dir: Path,
+                             version: str,
+                             output_dir: str) -> Union[str, None]:
   """Build factory_image.zip in archive_dir.
 
   Args:
@@ -501,14 +500,14 @@ def create_factory_image_zip(
     logging.error('create_factory_image_zip: %s not found', factory_shim_dir)
     return None
   files = ['*factory_install*.bin', '*partition*',
-            os.path.join('netboot', '*')]
+           os.path.join('netboot', '*')]
   cmd_files = []
   for file in files:
     cmd_files.extend(['--include', os.path.join(factory_shim_dir.name, file)])
   # factory_shim_dir may be a symlink. We can not use '-y' here.
   cros_build_lib.run(cmd + [factory_shim_dir.name] + cmd_files,
-                      cwd=factory_shim_dir.parent,
-                      capture_output=True)
+                     cwd=factory_shim_dir.parent,
+                     capture_output=True)
 
   # Everything in /usr/local/factory/bundle gets overlaid into the
   # bundle.
