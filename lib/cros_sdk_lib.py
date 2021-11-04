@@ -973,7 +973,8 @@ class ChrootCreator:
       data += '\n\n'
     data += (
         '# Set up bash autocompletion.\n'
-        '. ~/chromiumos/src/scripts/bash_completion\n'
+        f'. {constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d/'
+        'cros\n'
     )
     bashrc.write_text(data)
 
