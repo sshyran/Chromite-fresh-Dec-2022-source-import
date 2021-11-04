@@ -82,9 +82,6 @@ class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.fake_json_data = {}
     osutils.SafeMakedirs(self.fake_chroot)
     osutils.Touch(os.path.join(self.fake_chroot, 'file'))
-    fake_board_setup = os.path.join(self.fake_chroot,
-                                    'etc/make.conf.board_setup')
-    osutils.Touch(fake_board_setup, makedirs=True)
     for package, v in self.fake_packages:
       cpv = package_info.SplitCPV('%s-%s' % (package, v))
       self.fake_json_data.setdefault(cpv.cp, []).append([v, {}])
