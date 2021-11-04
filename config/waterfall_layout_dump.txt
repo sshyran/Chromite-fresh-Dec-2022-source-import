@@ -302,6 +302,7 @@
     sand-release
     sarien-kernelnext-release
     sarien-release
+    scarlet-kernelnext-release
     scarlet-release
     senor-release
     sentry-release
@@ -1412,6 +1413,7 @@
     sand-release-tryjob
     sarien-kernelnext-release-tryjob
     sarien-release-tryjob
+    scarlet-kernelnext-release-tryjob
     scarlet-release-tryjob
     senor-release-tryjob
     sentry-release-tryjob
@@ -1696,6 +1698,12 @@
   sarien-unittest-stress
   scarlet-factory-scarlet-10211.B-factorybranch-tryjob
   scarlet-full-tryjob
+  scarlet-kernelnext-full-tryjob
+  scarlet-kernelnext-llvm-next-toolchain-tryjob
+  scarlet-kernelnext-llvm-toolchain-tryjob
+  scarlet-kernelnext-payloads-tryjob
+  scarlet-kernelnext-release-tryjob
+  scarlet-kernelnext-unittest-stress
   scarlet-llvm-next-toolchain-tryjob
   scarlet-llvm-toolchain-tryjob
   scarlet-payloads-tryjob
