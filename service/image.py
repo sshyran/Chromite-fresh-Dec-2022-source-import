@@ -323,17 +323,20 @@ def CreateVm(board: str,
   return os.path.realpath(vm_path)
 
 
-def CreateGuestVm(board, is_test=False, chroot=None, image_dir=None):
+def CreateGuestVm(board: str,
+                  is_test: bool = False,
+                  chroot: chroot_lib.Chroot = None,
+                  image_dir: str = None) -> str:
   """Convert an existing image into a guest VM image.
 
   Args:
-    board (str): The name of the board to convert.
-    is_test (bool): Flag to create a test guest VM image.
-    chroot (chroot_lib.Chroot): The chroot where the cros image lives.
+    board: The name of the board to convert.
+    is_test: Flag to create a test guest VM image.
+    chroot: The chroot where the cros image lives.
     image_dir: The directory containing the built images.
 
   Returns:
-    str: Path to the created guest VM folder.
+    Path to the created guest VM folder.
   """
   assert board
 
@@ -432,20 +435,22 @@ def copy_license_credits(board: str,
   return license_credits_dest_path
 
 
-def Test(board, result_directory, image_dir=None):
+def Test(board: str,
+         result_directory: str,
+         image_dir: str = None) -> bool:
   """Run tests on an already built image.
 
   Currently this is just running test_image.
 
   Args:
-    board (str): The board name.
-    result_directory (str): Root directory where the results should be stored
+    board: The board name.
+    result_directory: Root directory where the results should be stored
       relative to the chroot.
-    image_dir (str): The path to the image. Uses the board's default image
+    image_dir: The path to the image. Uses the board's default image
       build path when not provided.
 
   Returns:
-    bool - True if all tests passed, False otherwise.
+    True if all tests passed, False otherwise.
   """
   if not board:
     raise InvalidArgumentError('Board is required.')
@@ -482,8 +487,8 @@ def create_factory_image_zip(chroot: chroot_lib.Chroot,
 
   Args:
     chroot: The chroot class used for these artifacts.
-    sysroot_class (sysroot_lib.Sysroot): The sysroot where the original
-      environment archive can be found.
+    sysroot_class: The sysroot where the original environment archive
+      can be found.
     factory_shim_dir: Directory containing factory shim.
     version: if not None, version to include in factory_image.zip
     output_dir: Directory to store factory_image.zip.
