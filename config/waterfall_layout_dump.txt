@@ -211,6 +211,7 @@
     cherry-release
     coral-kernelnext-release
     coral-release
+    corsola-release
     cyan-release
     dedede-release
     drallion-release
@@ -658,6 +659,12 @@
   coral-pi-android-pfq-tryjob
   coral-release-tryjob
   coral-unittest-stress
+  corsola-full-tryjob
+  corsola-llvm-next-toolchain-tryjob
+  corsola-llvm-toolchain-tryjob
+  corsola-payloads-tryjob
+  corsola-release-tryjob
+  corsola-unittest-stress
   cyan-factory-strago-7458.B-factorybranch-tryjob
   cyan-full-tryjob
   cyan-llvm-next-toolchain-tryjob
@@ -1314,6 +1321,7 @@
     cherry-release-tryjob
     coral-kernelnext-release-tryjob
     coral-release-tryjob
+    corsola-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
     drallion-release-tryjob

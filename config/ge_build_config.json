@@ -254,6 +254,18 @@
       ]
     },
     {
+      "name": "corsola",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": false,
+          "leader_board": true,
+          "board_group": "corsola",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "cyan",
       "configs": [
         {
