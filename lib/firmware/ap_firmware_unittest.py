@@ -15,6 +15,7 @@ from chromite.lib.firmware import ap_firmware
 from chromite.lib.firmware import servo_lib
 from chromite.service import sysroot
 
+
 class BuildTest(cros_test_lib.RunCommandTestCase):
   """Tests for building ap firmware."""
 
@@ -215,12 +216,14 @@ class DeployConfigTest(cros_test_lib.TestCase):
     commands = config.get_servo_commands(self.servo, self.image, verbose=True)
     self._assert_command(commands.flash, flashrom=False, fast_verbose=True)
 
+
 class CleanTest(cros_test_lib.RunCommandTestCase):
   """Tests for cleaning up firmware artifacts and dependencies."""
 
   def setUp(self):
-    self.pkgs = ['pkg1', 'pkg2', 'coreboot-private-files',
-                 'chromeos-config-bsp']
+    self.pkgs = [
+        'pkg1', 'pkg2', 'coreboot-private-files', 'chromeos-config-bsp'
+    ]
 
   def test_clean(self):
     """Sanity check for the clean command (ideal case)."""
@@ -239,12 +242,13 @@ class CleanTest(cros_test_lib.RunCommandTestCase):
       elif args[0][0].startswith('emerge'):
         return mock.MagicMock(returncode=0)
 
-    run_mock = self.PatchObject(cros_build_lib, 'run',
-                                side_effect=run_side_effect)
+    run_mock = self.PatchObject(
+        cros_build_lib, 'run', side_effect=run_side_effect)
     self.PatchObject(osutils, 'RmDir')
     ap_firmware.clean(build_target_lib.BuildTarget('boardname'))
     run_mock.assert_any_call([mock.ANY, mock.ANY, *sorted(pkgs)],
-                             capture_output=mock.ANY, dryrun=False)
+                             capture_output=mock.ANY,
+                             dryrun=False)
 
   def test_nonexistent_board_clean(self):
     """Verifies exception thrown when target board was not configured."""

@@ -38,8 +38,14 @@ class MissingBuildTargetCommandsError(Error):
   """Error thrown when board-specific functionality can't be imported."""
 
 
-def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
-                          verbose, passthrough_args: Iterable[str] = tuple()):
+def _build_flash_ssh_cmds(futility,
+                          ip,
+                          port,
+                          path,
+                          tmp_file_name,
+                          fast,
+                          verbose,
+                          passthrough_args: Iterable[str] = tuple()):
   """Helper function to build commands for flashing over ssh
 
   Args:
@@ -94,7 +100,13 @@ def _build_flash_ssh_cmds(futility, ip, port, path, tmp_file_name, fast,
   return scp_cmd, flash_cmd
 
 
-def _ssh_flash(futility, path, verbose, ip, port, fast, dryrun,
+def _ssh_flash(futility,
+               path,
+               verbose,
+               ip,
+               port,
+               fast,
+               dryrun,
                passthrough_args: Iterable[str] = tuple()):
   """This function flashes AP firmware over ssh.
 
@@ -377,7 +389,14 @@ def _deploy_servo(image,
                   'is correct and servod is running in the background.')
 
 
-def _deploy_ssh(image, module, flashrom, fast, verbose, ip, port, dryrun,
+def _deploy_ssh(image,
+                module,
+                flashrom,
+                fast,
+                verbose,
+                ip,
+                port,
+                dryrun,
                 passthrough_args: Iterable[str] = tuple()):
   """Deploy to a servo connection.
 

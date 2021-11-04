@@ -68,9 +68,10 @@ def build(build_target, fw_name=None, dry_run=False):
   logging.notice('Building AP Firmware.')
 
   if not os.path.exists(build_target.root):
-    logging.warning('Sysroot for target %s is not available. Attempting '
-                    'to configure sysroot via default setup_board command.',
-                    build_target.name)
+    logging.warning(
+        'Sysroot for target %s is not available. Attempting '
+        'to configure sysroot via default setup_board command.',
+        build_target.name)
     try:
       sysroot.SetupBoard(build_target)
     except (portage_util.MissingOverlayError, sysroot.Error):
@@ -103,9 +104,9 @@ def build(build_target, fw_name=None, dry_run=False):
     raise BuildError('The emerge command failed. Run with --verbose or --debug '
                      'to see the emerge output for details.')
 
-  logging.notice('AP firmware image for device %s was built successfully '
-                 'and is available at %s.',
-                 build_target.name, build_target.full_path())
+  logging.notice(
+      'AP firmware image for device %s was built successfully '
+      'and is available at %s.', build_target.name, build_target.full_path())
 
 
 def deploy(build_target,
@@ -344,9 +345,11 @@ def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
   """
   pkgs = []
   try:
-    qfile_pkgs = cros_build_lib.run([build_target.get_command('qfile'),
-                                     '/firmware'], capture_output=True,
-                                    check=False, dryrun=dry_run).stdout
+    qfile_pkgs = cros_build_lib.run(
+        [build_target.get_command('qfile'), '/firmware'],
+        capture_output=True,
+        check=False,
+        dryrun=dry_run).stdout
     pkgs = [l.split()[0] for l in qfile_pkgs.decode().splitlines()]
   except cros_build_lib.RunCommandError as e:
     raise CleanError('qfile for target board %s is not present; board may '
@@ -357,13 +360,15 @@ def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
     pkgs = set(pkgs).union(config.build)
   except InvalidConfigError:
     pass
-  pkgs = sorted(set(pkgs).union(['coreboot-private-files',
-                                 'chromeos-config-bsp']))
+  pkgs = sorted(
+      set(pkgs).union(['coreboot-private-files', 'chromeos-config-bsp']))
 
   err = []
   try:
-    cros_build_lib.run([build_target.get_command('emerge'), '--rage-clean',
-                        *pkgs], capture_output=True, dryrun=dry_run)
+    cros_build_lib.run(
+        [build_target.get_command('emerge'), '--rage-clean', *pkgs],
+        capture_output=True,
+        dryrun=dry_run)
   except cros_build_lib.RunCommandError as e:
     err.append(e)
 
@@ -371,21 +376,25 @@ def clean(build_target: build_target_lib.BuildTarget, dry_run=False):
     if dry_run:
       logging.notice('rm -rf -- /build/%s/firmware/*', build_target.name)
     else:
-      osutils.RmDir('/build/%s/firmware/*' % build_target.name, sudo=True,
-                    ignore_missing=True)
+      osutils.RmDir(
+          '/build/%s/firmware/*' % build_target.name,
+          sudo=True,
+          ignore_missing=True)
   except (EnvironmentError, cros_build_lib.RunCommandError) as e:
     err.append(e)
 
   if err:
-    logging.warning('All processes for %s have completed, but some were '
-                    'completed with errors.', build_target.name)
+    logging.warning(
+        'All processes for %s have completed, but some were '
+        'completed with errors.', build_target.name)
     for e in err:
       logging.error(e)
-    raise CleanError("`cros ap clean -b %s' did not complete successfully."
-                     % build_target.name)
+    raise CleanError("`cros ap clean -b %s' did not complete successfully." %
+                     build_target.name)
 
-  logging.notice('AP firmware image for device %s was successfully cleaned.'
-                 '\nThe following packages were unmerged: %s'
-                 '\nThe following build target directory was removed: '
-                 '/build/%s/firmware', build_target.name, ' '.join(pkgs),
-                 build_target.name)
+  logging.notice(
+      'AP firmware image for device %s was successfully cleaned.'
+      '\nThe following packages were unmerged: %s'
+      '\nThe following build target directory was removed: '
+      '/build/%s/firmware', build_target.name, ' '.join(pkgs),
+      build_target.name)

@@ -21,7 +21,6 @@ from chromite.lib.firmware import servo_lib
 from chromite.utils import file_util
 from chromite.utils import pformat
 
-
 COMMAND_DUMP_CONFIG = 'dump-config'
 COMMAND_BUILD = 'build'
 COMMAND_FLASH = 'flash'
@@ -60,9 +59,10 @@ class APCommand(command.CliCommand):
                                 'Read the AP Firmware from a device.')
     ReadSubcommand.AddParser(read_parser)
 
-    clean_parser = _AddSubparser(parser, subparsers, COMMAND_CLEAN,
-                                 'Clean up dependencies and artifacts '
-                                 'for a given build target.')
+    clean_parser = _AddSubparser(
+        parser, subparsers, COMMAND_CLEAN,
+        'Clean up dependencies and artifacts '
+        'for a given build target.')
     CleanSubcommand.AddParser(clean_parser)
 
   def Run(self):
@@ -275,10 +275,10 @@ class ReadSubcommand(command.CliCommand):
         dest='build_target',
         help='The name of the build target.')
     parser.add_argument('-r'
-                           '--region',
-                           dest='region',
-                           type=str,
-                           help='Region to read.')
+                        '--region',
+                        dest='region',
+                        type=str,
+                        help='Region to read.')
     parser.add_argument(
         '-o', '--output', type='path', required=True, help='Output file.')
     parser.add_argument(

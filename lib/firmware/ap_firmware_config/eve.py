@@ -7,15 +7,16 @@
 from chromite.lib.firmware import servo_lib
 
 BUILD_WORKON_PACKAGES = (
-  'chromeos-mrc',
-  'coreboot',
+    'chromeos-mrc',
+    'coreboot',
 )
 
 BUILD_PACKAGES = BUILD_WORKON_PACKAGES + (
-  'coreboot-private-files-eve',
-  'depthcharge',
-  'chromeos-bootimage',
+    'coreboot-private-files-eve',
+    'depthcharge',
+    'chromeos-bootimage',
 )
+
 
 def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
   """Get specific flash config for eve.

@@ -15,8 +15,7 @@ _COMMON_PACKAGES = (
 )
 
 BUILD_WORKON_PACKAGES = _COMMON_PACKAGES + (
-    'coreboot-private-files-baseboard-dedede',
-)
+    'coreboot-private-files-baseboard-dedede',)
 
 BUILD_PACKAGES = _COMMON_PACKAGES + (
     'chromeos-bootimage',
