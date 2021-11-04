@@ -344,7 +344,9 @@ class GerritHelperTest(GerritTestCase):
       A GerritPatch object.
     """
     (revision, changeid) = self.createCommit(clone_path, **kwargs)
-    gpatch = self.CreateGerritPatch(clone_path, remote, project=project)
+    helper = self._GetHelper(remote)
+    gpatch = helper.CreateGerritPatch(clone_path, remote, 'main',
+                                      project=project)
     self.assertEqual(gpatch.change_id, changeid)
     self.assertEqual(gpatch.revision, revision)
     return gpatch
@@ -602,22 +604,23 @@ class GerritParserTest(cros_test_lib.TestCase):
   def testGetChangeFromStdoutPass(self):
     """Test that the proper change number is returned from the git stdout."""
     stdout = ('remote:\nremote:\nremote:   '
-    'https://example.com/c/some/project/repo/+/123 gerrit: test')
+              'https://example.com/c/some/project/repo/+/123 gerrit: test')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:\nremote:   '
-    'https://example.com/c/some/project3/repo/+/123 gerrit: test')
+              'https://example.com/c/some/project3/repo/+/123 gerrit: test')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:   '
-    'https://example.com/c/some/project/repo/+/123 gerrit: test 456')
+              'https://example.com/c/some/project/repo/+/123 gerrit: test 456')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:   '
-    'https://example.com/c/some/project/repo/+/123 handle /+/124 in URI')
+              'https://example.com/c/some/project/repo/+/123 '
+              'handle /+/124 in URI')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
