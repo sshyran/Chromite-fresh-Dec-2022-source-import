@@ -565,7 +565,7 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
 
   # If we didn't find a mounted VG before but we did find a loopback device,
   # re-check for a VG attached to the loopback.
-  if not vg_name:
+  if not vg_name and chroot_dev:
     vg_name = FindVolumeGroupForDevice(chroot, chroot_dev)
     if vg_name:
       cmd = ['vgs', vg_name]

@@ -646,7 +646,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
           self.chroot_path, None, proc_mounts=proc_mounts)
 
     m.assert_called_with(self.chroot_path)
-    m2.assert_called_with(self.chroot_path, None)
+    m2.assert_not_called()
 
   def testNothingCleanupWithDelete(self):
     m = self.PatchObject(osutils, 'UmountTree')
@@ -668,7 +668,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
           self.chroot_path, None, delete=True, proc_mounts=proc_mounts)
 
     m.assert_called_with(self.chroot_path)
-    m2.assert_called_with(self.chroot_path, None)
+    m2.assert_not_called()
     m3.assert_called_with(self.chroot_img)
     m4.assert_called_with(self.chroot_path, ignore_missing=True, sudo=True)
 
