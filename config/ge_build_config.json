@@ -590,18 +590,6 @@
       ]
     },
     {
-      "name": "scarlet-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "senor",
       "configs": [
         {
@@ -8500,6 +8488,39 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 297,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "scarlet-kernelnext",
+      "reference_board_name": "scarlet-kernelnext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "scarlet-kernelnext",
+          "name": "dru",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7212,
+          "is_active": true
+        },
+        {
+          "board_name": "scarlet-kernelnext",
+          "name": "druwl",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7212,
+          "is_active": true
+        },
+        {
+          "board_name": "scarlet-kernelnext",
+          "name": "dumo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7212,
           "is_active": true
         }
       ]

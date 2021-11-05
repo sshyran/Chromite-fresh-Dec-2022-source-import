@@ -27067,6 +27067,11 @@
             "scarlet-kernelnext"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"dru\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"druwl\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"dumo\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "scarlet-kernelnext-release-tryjob": {
@@ -27087,6 +27092,11 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"dru\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"druwl\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"scarlet\",\n    \"name\": \"dumo\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
