@@ -400,8 +400,14 @@ class Sysroot(object):
     return self.GetStandardField(STANDARD_FIELD_PORTDIR_OVERLAY).split()
 
   @property
-  def use_flags(self):
-    return portage_util.PortageqEnvvar('USE', sysroot=self.path)
+  def use_flags(self) -> List[str]:
+    """Get all USE flags for the sysroot."""
+    return portage_util.PortageqEnvvar('USE', sysroot=self.path).split()
+
+  @property
+  def features(self) -> List[str]:
+    """Get all FEATURES for the sysroot."""
+    return portage_util.PortageqEnvvar('FEATURES', sysroot=self.path).split()
 
   def get_overlays(self,
                    build_target_only: bool = False,
@@ -784,7 +790,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     hook_glob = os.path.join(constants.CROSUTILS_DIR, 'hooks', '*')
     for filename in glob.glob(hook_glob):
       linkpath = self.Path('etc', 'portage', 'hooks',
-                            os.path.basename(filename))
+                           os.path.basename(filename))
       osutils.SafeSymlink(filename, linkpath, sudo=True)
 
   def UpdateToolchain(self, board, local_init=True):
