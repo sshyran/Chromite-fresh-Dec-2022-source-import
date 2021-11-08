@@ -581,6 +581,11 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
     }
     self.PatchObject(osutils, 'SourceEnvironment', return_value=FakeEnvironment)
 
+    # Clear the LRU cache for the function. We mock the function that provides
+    # the data this function processes to produce its result, so we need to
+    # clear it manually.
+    packages.determine_android_package.cache_clear()
+
   def test_determine_android_version(self):
     """Tests that a valid android version is returned."""
     version = packages.determine_android_version(self.board)

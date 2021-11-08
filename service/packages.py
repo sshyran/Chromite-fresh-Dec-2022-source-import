@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import sys
-from typing import Iterable, List, Optional, TYPE_CHECKING, Union
+from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -973,6 +973,52 @@ def needs_chrome_source(
   )
 
 
+class TargetVersions(NamedTuple):
+  """Data class for the info that makes up the "target versions"."""
+  android_version: str
+  android_branch: str
+  android_target: str
+  chrome_version: str
+  platform_version: str
+  milestone_version: str
+  full_version: str
+
+
+def get_target_versions(
+    build_target: 'build_target_lib.BuildTarget',
+    packages: List[package_info.PackageInfo] = None
+) -> TargetVersions:
+  """Aggregate version info for a few key packages and the OS as a whole."""
+  # Android version.
+  android_version = determine_android_version(build_target.name)
+  logging.info('Found android version: %s', android_version)
+  # Android branch version.
+  android_branch = determine_android_branch(build_target.name)
+  logging.info('Found android branch version: %s', android_branch)
+  # Android target version.
+  android_target = determine_android_target(build_target.name)
+  logging.info('Found android target version: %s', android_target)
+
+  # TODO(crbug/1019770): Investigate cases where builds_chrome is true but
+  # chrome_version is None.
+
+  builds_chrome = builds(constants.CHROME_CP, build_target, packages=packages)
+  chrome_version = None
+  if builds_chrome:
+    # Chrome version fetch.
+    chrome_version = determine_chrome_version(build_target)
+    logging.info('Found chrome version: %s', chrome_version)
+
+  # The ChromeOS version info.
+  platform_version = determine_platform_version()
+  milestone_version = determine_milestone_version()
+  full_version = determine_full_version()
+
+  return TargetVersions(android_version, android_branch, android_target,
+                        chrome_version, platform_version, milestone_version,
+                        full_version)
+
+
 def determine_chrome_version(
     build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns the current Chrome version for the board (or in buildroot).
@@ -998,6 +1044,7 @@ def determine_chrome_version(
   return pkg_info.version.partition('_')[0]
 
 
+@functools.lru_cache()
 def determine_android_package(board: str) -> Optional[str]:
   """Returns the active Android container package in use by the board.
 
