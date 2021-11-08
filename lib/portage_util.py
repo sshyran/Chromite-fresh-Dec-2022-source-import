@@ -1855,11 +1855,11 @@ def _EqueryList(
   Returns:
     A cros_build_lib.CommandResult object.
   """
-  cmd = ['equery']
-  if board:
-    cmd = ['equery-%s' % board]
-
+  cmd = [f'equery-{board}' if board else 'equery']
+  # Simplify output.
+  cmd += ['-Cq']
   cmd += ['list', pkg_str]
+
   return cros_build_lib.run(
       cmd,
       cwd=buildroot,
@@ -1892,10 +1892,11 @@ def FindPackageNameMatches(
   return matches
 
 
-def FindEbuildForBoardPackage(pkg_str, board, buildroot=constants.SOURCE_ROOT):
+def FindEbuildForBoardPackage(pkg_str: str,
+                              board: str,
+                              buildroot: str = constants.SOURCE_ROOT):
   """Returns a path to an ebuild for a particular board."""
-  equery = 'equery-%s' % board
-  cmd = [equery, 'which', pkg_str]
+  cmd = [f'equery-{board}', 'which', pkg_str]
   return cros_build_lib.run(
       cmd,
       cwd=buildroot,
@@ -2086,24 +2087,24 @@ def _ParseDepTreeOutput(equery_output):
 
 
 def _Qlist(
-    pkg_str: str,
+    args: List[str],
     board: Optional[str] = None,
     buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
-  """Use qlist to get USE flags for installed packages matching |pkg_str|.
+  """Run qlist with the given args.
 
   Args:
-    pkg_str: The package name with optional category, version, and slot.
+    args: The qlist arguments.
     board: The board to inspect.
     buildroot: Source root to find overlays.
 
   Returns:
-    result (cros_build_lib.CommandResult)
+    The command result
   """
-  cmd = ['qlist']
-  if board:
-    cmd = ['qlist-%s' % board]
+  cmd = [f'qlist-{board}' if board else 'qlist']
+  # Simplify output.
+  cmd += ['-Cq']
+  cmd += args
 
-  cmd += ['-CqU', pkg_str]
   return cros_build_lib.run(
       cmd,
       enter_chroot=True,
@@ -2127,7 +2128,7 @@ def GetInstalledPackageUseFlags(pkg_str,
     A dictionary with the key being a package CP and the value being the list
     of USE flags for that package.
   """
-  result = _Qlist(pkg_str, board, buildroot)
+  result = _Qlist(['-U', pkg_str], board, buildroot)
   use_flags = {}
   if result.returncode == 0:
     for line in result.output.splitlines():
