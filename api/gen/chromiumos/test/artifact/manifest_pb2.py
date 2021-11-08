@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z2go.chromium.org/chromiumos/config/go/test/artifact',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\'chromiumos/test/artifact/manifest.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\"R\n\x08Manifest\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x35\n\tartifacts\x18\x02 \x03(\x0b\x32\".chromiumos.test.artifact.Artifact\"\xca\x01\n\x08\x41rtifact\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.chromiumos.test.artifact.Artifact.ArtifactType\x12-\n\x0cstorage_path\x18\x02 \x01(\x0b\x32\x17.chromiumos.StoragePath\"P\n\x0c\x41rtifactType\x12\x1d\n\x19\x41RTIFACT_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n\x0bTEST_RESULT\x10\x01\x12\x10\n\x0c\x44UT_METADATA\x10\x02\x42\x34Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
+  serialized_pb=b'\n\'chromiumos/test/artifact/manifest.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\"R\n\x08Manifest\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x35\n\tartifacts\x18\x02 \x03(\x0b\x32\".chromiumos.test.artifact.Artifact\"\xd9\x01\n\x08\x41rtifact\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.chromiumos.test.artifact.Artifact.ArtifactType\x12-\n\x0cstorage_path\x18\x02 \x01(\x0b\x32\x17.chromiumos.StoragePath\"_\n\x0c\x41rtifactType\x12\x1d\n\x19\x41RTIFACT_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n\x0bTEST_RESULT\x10\x01\x12\x10\n\x0c\x44UT_METADATA\x10\x02\x12\r\n\tTEST_PLAN\x10\x03\x42\x34Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
   ,
   dependencies=[chromiumos_dot_storage__path__pb2.DESCRIPTOR,])
 
@@ -48,11 +48,16 @@ _ARTIFACT_ARTIFACTTYPE = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_PLAN', index=3, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=307,
-  serialized_end=387,
+  serialized_end=402,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_ARTIFACTTYPE)
 
@@ -132,7 +137,7 @@ _ARTIFACT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=185,
-  serialized_end=387,
+  serialized_end=402,
 )
 
 _MANIFEST.fields_by_name['artifacts'].message_type = _ARTIFACT
