@@ -41,6 +41,10 @@ CHROOT_THINPOOL_NAME = 'thinpool'
 _MAX_LVM_RETRIES = 3
 
 
+# Bash completion directory.
+_BASH_COMPLETION_DIR = (
+    f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d')
+
 class Error(Exception):
   """Base cros sdk error class."""
 
@@ -960,14 +964,19 @@ class ChrootCreator:
     (home / 'chromiumos').symlink_to(constants.CHROOT_SOURCE_ROOT)
     (home / 'depot_tools').symlink_to('/mnt/host/depot_tools')
 
-    # Automatically change to scripts directory.
     bash_profile = home / '.bash_profile'
     osutils.Touch(bash_profile)
     data = bash_profile.read_text().rstrip()
     if data:
       data += '\n\n'
+    # Automatically change to scripts directory.
     data += (
-        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n'
+        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
+    )
+    # Install global completion script for Python argcomplete.
+    data += (
+        f'activate-global-python-argcomplete --dest={_BASH_COMPLETION_DIR} '
+        '>/dev/null\n'
     )
     bash_profile.write_text(data)
 
@@ -1024,12 +1033,7 @@ PORTAGE_USERNAME="{user}"
     # Enable bash completion.
     bash_completion_d = etc_dir / 'bash_completion.d'
     bash_completion_d.mkdir(mode=0o755, parents=True, exist_ok=True)
-    chromite_bash_completion_d = (
-        Path(constants.CHROMITE_DIR) / 'sdk/etc/bash_completion.d')
-    for bashcomp in chromite_bash_completion_d.iterdir():
-      (bash_completion_d / bashcomp.name).symlink_to(
-          f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d/'
-          f'{bashcomp.name}')
+    (bash_completion_d / 'cros').symlink_to(f'{_BASH_COMPLETION_DIR}/cros')
 
     # Select a small set of locales for the user if they haven't done so
     # already.  This makes glibc upgrades cheap by only generating a small

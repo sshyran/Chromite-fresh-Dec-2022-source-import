@@ -290,6 +290,13 @@ for board in $_boardlist; do
   complete -o bashdefault -o default -F _complete_equery equery-$board
 done
 
+# Source additional bash completion scripts.
+for f in /mnt/host/source/chromite/sdk/etc/bash_completion.d/*.sh; do
+  if [[ -f "${f}" ]]; then
+    source "$f"
+  fi
+done
+
 ###  Local Variables:
 ###  mode: shell-script
 ###  End:
