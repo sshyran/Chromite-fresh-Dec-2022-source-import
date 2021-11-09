@@ -862,6 +862,8 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.assertExists(etc / 'mtab')
     self.assertIn(f'PORTAGE_USERNAME="{TEST_USER}"',
                   (etc / 'env.d' / '99chromiumos').read_text())
+    self.assertEqual('/mnt/host/source/chromite/sdk/etc/bash_completion.d/cros',
+                     os.readlink(etc / 'bash_completion.d' / 'cros'))
     self.assertIn('en_US.UTF-8 UTF-8', (etc / 'locale.gen').read_text())
 
   def testExistingCompatGroup(self):

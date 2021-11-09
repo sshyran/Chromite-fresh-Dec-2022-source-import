@@ -971,19 +971,6 @@ class ChrootCreator:
     )
     bash_profile.write_text(data)
 
-    # Enable bash completion.
-    bashrc = home / '.bashrc'
-    osutils.Touch(bashrc)
-    data = bashrc.read_text().rstrip()
-    if data:
-      data += '\n\n'
-    data += (
-        '# Set up bash autocompletion.\n'
-        f'. {constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d/'
-        'cros\n'
-    )
-    bashrc.write_text(data)
-
     osutils.Chown(home, user=uid, group=gid, recursive=True)
 
   def init_filesystem_basic(self):
@@ -1033,6 +1020,16 @@ PORTAGE_USERNAME="{user}"
     (profile_d / '50-chromiumos-niceties.sh').symlink_to(
         f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/profile.d/'
         '50-chromiumos-niceties.sh')
+
+    # Enable bash completion.
+    bash_completion_d = etc_dir / 'bash_completion.d'
+    bash_completion_d.mkdir(mode=0o755, parents=True, exist_ok=True)
+    chromite_bash_completion_d = (
+        Path(constants.CHROMITE_DIR) / 'sdk/etc/bash_completion.d')
+    for bashcomp in chromite_bash_completion_d.iterdir():
+      (bash_completion_d / bashcomp.name).symlink_to(
+          f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d/'
+          f'{bashcomp.name}')
 
     # Select a small set of locales for the user if they haven't done so
     # already.  This makes glibc upgrades cheap by only generating a small
