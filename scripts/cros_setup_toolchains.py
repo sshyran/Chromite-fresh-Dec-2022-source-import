@@ -100,6 +100,7 @@ TARGET_LLVM_PKGS_ENABLED = (
     'armv7a-cros-linux-gnueabi',
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
+    'i686-cros-linux-gnu',
     'i686-pc-linux-gnu',
     'x86_64-cros-linux-gnu',
 )
@@ -364,7 +365,7 @@ def GetStablePackageVersion(atom, installed, root='/'):
   """Extracts the current stable version for a given package.
 
   Args:
-    atom: The target/package to operate on eg. i686-pc-linux-gnu,gcc
+    atom: The target/package to operate on e.g. i686-cros-linux-gnu/gcc
     installed: Whether we want installed packages or ebuilds
     root: The root to use when querying packages.
 
@@ -382,7 +383,7 @@ def VersionListToNumeric(target, package, versions, installed, root='/'):
   Resolving means replacing PACKAGE_STABLE with the actual number.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
     package: The target/package to operate on (e.g. gcc)
     versions: List of versions to resolve
     installed: Query installed packages
@@ -415,7 +416,7 @@ def GetDesiredPackageVersions(target, package):
   mean 'unstable' in most cases.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
     package: The target/package to operate on (e.g. gcc)
 
   Returns:
@@ -435,7 +436,7 @@ def TargetIsInitialized(target):
   preferred, because all packages can be updated in a single pass.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
 
   Returns:
     True if |target| is completely initialized, else False
@@ -460,7 +461,7 @@ def RemovePackageMask(target):
   The pre-existing package.mask files can mess with the keywords.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
   """
   maskfile = os.path.join('/etc/portage/package.mask', 'cross-' + target)
   osutils.SafeUnlink(maskfile)
