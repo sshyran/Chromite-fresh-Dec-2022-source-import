@@ -51,8 +51,8 @@ from chromite.utils import pformat
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'
-CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s'
-                        '/build/%(board)s/etc/portage/package.keywords/chrome')
+CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s/build/%(board)s'
+                        '/etc/portage/package.accept_keywords/chrome')
 CHROME_UNMASK_FILE = ('%(buildroot)s/%(chroot)s'
                       '/build/%(board)s/etc/portage/package.unmask/chrome')
 _CROS_ARCHIVE_URL = 'CROS_ARCHIVE_URL'

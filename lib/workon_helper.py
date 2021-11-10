@@ -223,7 +223,7 @@ class WorkonHelper(object):
     self._unmasked_symlink = os.path.join(
         profile, 'package.unmask', 'cros-workon')
     self._keywords_symlink = os.path.join(
-        profile, 'package.keywords', 'cros-workon')
+        profile, 'package.accept_keywords', 'cros-workon')
     self._masked_symlink = os.path.join(
         profile, 'package.mask', 'cros-workon')
 
