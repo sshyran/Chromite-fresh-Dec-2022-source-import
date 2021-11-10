@@ -1352,6 +1352,7 @@ class InstalledPackage(object):
                            'format.' % self.pf)
     self.package = split_pv.package
     self.version = split_pv.vr
+    self._pkg_info = None
 
   def _ReadField(self, field_name):
     """Reads the contents of the file in the installed package directory.
@@ -1397,6 +1398,13 @@ class InstalledPackage(object):
   @property
   def size(self):
     return self._ReadField('SIZE')
+
+  @property
+  def package_info(self):
+    if not self._pkg_info:
+      self._pkg_info = package_info.parse(f'{self.category}/{self.pf}')
+
+    return self._pkg_info
 
   def ListContents(self):
     """List of files and directories installed by this package.

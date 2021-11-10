@@ -1391,6 +1391,13 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
     fake_files = [(f[0], f[1].lstrip('/')) for f in fake_files]
     self.assertEqual(fake_files, lst)
 
+  def testPackageInfo(self):
+    """Verify construction and self consistency of the PackageInfo."""
+    portage_db = portage_util.PortageDB(self.fake_chroot)
+    for pkg in portage_db.InstalledPackages():
+      self.assertEqual(pkg.category, pkg.package_info.category)
+      self.assertEqual(pkg.pf, pkg.package_info.pvr)
+
 
 class InstalledPackageTest(cros_test_lib.TempDirTestCase):
   """InstalledPackage class tests outside a PortageDB."""
