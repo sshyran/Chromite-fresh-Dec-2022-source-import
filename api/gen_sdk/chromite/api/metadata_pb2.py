@@ -12,6 +12,7 @@ _sym_db = _symbol_database.Default()
 
 
 from chromite.api.gen_sdk.chromite.api import build_api_pb2 as chromite_dot_api_dot_build__api__pb2
+from chromite.api.gen_sdk.chromite.api import sysroot_pb2 as chromite_dot_api_dot_sysroot__pb2
 from chromite.api.gen_sdk.chromiumos import common_pb2 as chromiumos_dot_common__pb2
 from chromite.api.gen_sdk.chromiumos.build.api import system_image_pb2 as chromiumos_dot_build_dot_api_dot_system__image__pb2
 
@@ -21,9 +22,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x1b\x63hromite/api/metadata.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\x1a\'chromiumos/build/api/system_image.proto\"@\n\x1aSystemImageMetadataRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"V\n\x1bSystemImageMetadataResponse\x12\x37\n\x0csystem_image\x18\x01 \x01(\x0b\x32!.chromiumos.build.api.SystemImage2\x91\x01\n\x0fMetadataService\x12j\n\x13SystemImageMetadata\x12(.chromite.api.SystemImageMetadataRequest\x1a).chromite.api.SystemImageMetadataResponse\x1a\x12\xc2\xed\x1a\x0e\n\x08metadata\x10\x01\x18\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1b\x63hromite/api/metadata.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\x1a\'chromiumos/build/api/system_image.proto\"h\n\x1aSystemImageMetadataRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\"V\n\x1bSystemImageMetadataResponse\x12\x37\n\x0csystem_image\x18\x01 \x01(\x0b\x32!.chromiumos.build.api.SystemImage2\x8f\x01\n\x0fMetadataService\x12j\n\x13SystemImageMetadata\x12(.chromite.api.SystemImageMetadataRequest\x1a).chromite.api.SystemImageMetadataResponse\x1a\x10\xc2\xed\x1a\x0c\n\x08metadata\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
-  dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_build_dot_api_dot_system__image__pb2.DESCRIPTOR,])
+  dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,chromiumos_dot_build_dot_api_dot_system__image__pb2.DESCRIPTOR,])
 
 
 
@@ -42,6 +43,13 @@ _SYSTEMIMAGEMETADATAREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sysroot', full_name='chromite.api.SystemImageMetadataRequest.sysroot', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -54,8 +62,8 @@ _SYSTEMIMAGEMETADATAREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=141,
-  serialized_end=205,
+  serialized_start=169,
+  serialized_end=273,
 )
 
 
@@ -85,11 +93,12 @@ _SYSTEMIMAGEMETADATARESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=207,
-  serialized_end=293,
+  serialized_start=275,
+  serialized_end=361,
 )
 
 _SYSTEMIMAGEMETADATAREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
+_SYSTEMIMAGEMETADATAREQUEST.fields_by_name['sysroot'].message_type = chromite_dot_api_dot_sysroot__pb2._SYSROOT
 _SYSTEMIMAGEMETADATARESPONSE.fields_by_name['system_image'].message_type = chromiumos_dot_build_dot_api_dot_system__image__pb2._SYSTEMIMAGE
 DESCRIPTOR.message_types_by_name['SystemImageMetadataRequest'] = _SYSTEMIMAGEMETADATAREQUEST
 DESCRIPTOR.message_types_by_name['SystemImageMetadataResponse'] = _SYSTEMIMAGEMETADATARESPONSE
@@ -117,9 +126,9 @@ _METADATASERVICE = _descriptor.ServiceDescriptor(
   full_name='chromite.api.MetadataService',
   file=DESCRIPTOR,
   index=0,
-  serialized_options=b'\302\355\032\016\n\010metadata\020\001\030\002',
-  serialized_start=296,
-  serialized_end=441,
+  serialized_options=b'\302\355\032\014\n\010metadata\020\001',
+  serialized_start=364,
+  serialized_end=507,
   methods=[
   _descriptor.MethodDescriptor(
     name='SystemImageMetadata',
