@@ -4,6 +4,7 @@
 
 """Utility functions that are useful for controllers."""
 import logging
+from typing import TYPE_CHECKING, Union
 
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -13,6 +14,9 @@ from chromite.lib import constants
 from chromite.lib.parser import package_info
 from chromite.lib import chroot_lib
 from chromite.lib import sysroot_lib
+
+if TYPE_CHECKING:
+  from chromite.api.gen.chromiumos.build.api import portage_pb2
 
 class Error(Exception):
   """Base error class for the module."""
@@ -147,7 +151,8 @@ def ParseBuildTargets(repeated_build_target_field):
 
 
 def serialize_package_info(pkg_info: package_info.PackageInfo,
-                           pkg_info_msg: common_pb2.PackageInfo):
+                           pkg_info_msg: Union[common_pb2.PackageInfo,
+                                               'portage_pb2.Portage.Package']):
   """Serialize a PackageInfo object to a PackageInfo proto."""
   if not isinstance(pkg_info, package_info.PackageInfo):
     # Allows us to swap everything to serialize_package_info, and search the
