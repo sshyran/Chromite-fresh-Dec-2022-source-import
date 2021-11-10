@@ -977,23 +977,6 @@ class Upgrader(object):
       # Update profiles/categories.
       self._UpdateCategories(pinfo)
 
-      # Regenerate the cache.  In theory, this might glob too much, but
-      # in practice, this should be fine for now ...
-      cache_files = 'metadata/md5-cache/%s-[0-9]*' % pinfo.package
-      self._RunGit(self._stable_repo, ['rm', '--ignore-unmatch', '-q', '-f',
-                                       cache_files])
-      cmd = ['egencache', '--update', '--repo=portage-stable', pinfo.package]
-      egen_result = cros_build_lib.run(cmd, print_cmd=False,
-                                       stdout=True,
-                                       stderr=subprocess.STDOUT,
-                                       encoding='utf-8')
-      if egen_result.returncode != 0:
-        raise RuntimeError('Failed to regenerate md5-cache for %r.\n'
-                           'Output of %r:\n%s' %
-                           (pinfo.package, ' '.join(cmd), egen_result.output))
-
-      self._RunGit(self._stable_repo, ['add', cache_files])
-
     return bool(pinfo.upgraded_cpv)
 
   def _UpdateCategories(self, pinfo):

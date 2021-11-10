@@ -1922,12 +1922,6 @@ class UpgradePackageTest(CpuTestBase):
       cmdargs.append('--force')
     mocked_upgrader = self._MockUpgrader(cmdargs=cmdargs)
 
-    # Add test-specific mocks/stubs.
-    run_result = cros_build_lib.CommandResult(returncode=0)
-    run_mock = self.PatchObject(cros_build_lib, 'run',
-                                return_value=run_result)
-    run_calls = []
-
     # Replay script.
     def FindUpstreamCPV(pkg, unstable_ok=False):
       self.assertEqual(pinfo.package, pkg)
@@ -1950,23 +1944,13 @@ class UpgradePackageTest(CpuTestBase):
           ebuild_path = cpu.Upgrader._GetEbuildPathFromCpv(upstream_cpv)
           ebuild_path = os.path.join(mocked_upgrader._stable_repo,
                                      ebuild_path)
-          cache_files = 'metadata/md5-cache/%s-[0-9]*' % pinfo.package
           git_calls += [
               mock.call(mocked_upgrader._stable_repo, ['add', pinfo.package]),
-              mock.call(mocked_upgrader._stable_repo,
-                        ['rm', '--ignore-unmatch', '-q', '-f', cache_files]),
-              mock.call(mocked_upgrader._stable_repo, ['add', cache_files]),
           ]
-          cmd = ['egencache', '--update', '--repo=portage-stable',
-                 pinfo.package]
-          run_calls.append(mock.call(cmd, print_cmd=False, stdout=True,
-                                     stderr=subprocess.STDOUT,
-                                     encoding='utf-8'))
 
     # Verify.
     result = cpu.Upgrader._UpgradePackage(mocked_upgrader, pinfo)
 
-    run_mock.assert_has_calls(run_calls)
     mocked_upgrader._RunGit.assert_has_calls(git_calls)
 
     if upstream_cpv:
