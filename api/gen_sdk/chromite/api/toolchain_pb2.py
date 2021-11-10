@@ -24,7 +24,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x1c\x63hromite/api/toolchain.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/artifacts.proto\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x1f\x63hromiumos/builder_config.proto\x1a\x17\x63hromiumos/common.proto\"\x83\x01\n\x0c\x41rtifactInfo\x12H\n\rartifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12)\n\tartifacts\x18\x02 \x03(\x0b\x32\x16.chromite.api.Artifact\"\x83\x03\n\x1fPrepareForToolchainBuildRequest\x12I\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x03 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12N\n\x0finput_artifacts\x18\x04 \x03(\x0b\x32\x35.chromiumos.BuilderConfig.Artifacts.InputArtifactInfo\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x05 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x12\x35\n\x0cprofile_info\x18\x06 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"q\n PrepareForToolchainBuildResponse\x12M\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32\x34.chromite.api.PrepareForBuildResponse.BuildRelevance\"\xbe\x02\n\x16\x42undleToolchainRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x12\n\noutput_dir\x18\x03 \x01(\t\x12I\n\x0e\x61rtifact_types\x18\x04 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x05 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x12\x35\n\x0cprofile_info\x18\x06 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"S\n\x17\x42undleToolchainResponse\x12\x32\n\x0e\x61rtifacts_info\x18\x02 \x03(\x0b\x32\x1a.chromite.api.ArtifactInfoJ\x04\x08\x01\x10\x02\"\xeb\x01\n\x16GetUpdatedFilesRequest\x12R\n\x12uploaded_artifacts\x18\x01 \x03(\x0b\x32\x36.chromite.api.GetUpdatedFilesRequest.UploadedArtifacts\x1a}\n\x11UploadedArtifacts\x12\x31\n\rartifact_info\x18\x01 \x01(\x0b\x32\x1a.chromite.api.ArtifactInfo\x12\x35\n\x0cprofile_info\x18\x02 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"\xf4\x03\n\x17GetUpdatedFilesResponse\x12H\n\rupdated_files\x18\x01 \x03(\x0b\x32\x31.chromite.api.GetUpdatedFilesResponse.UpdatedFile\x12\x16\n\x0e\x63ommit_message\x18\x02 \x01(\t\x12I\n\rcommit_footer\x18\x03 \x03(\x0b\x32\x32.chromite.api.GetUpdatedFilesResponse.CommitFooter\x1a\x1b\n\x0bUpdatedFile\x12\x0c\n\x04path\x18\x01 \x01(\t\x1a\x41\n\x0e\x43qDependFooter\x12/\n\rgerrit_change\x18\x01 \x03(\x0b\x32\x18.chromiumos.GerritChange\x1a\x1c\n\rCqClTagFooter\x12\x0b\n\x03tag\x18\x01 \x01(\t\x1a\xad\x01\n\x0c\x43ommitFooter\x12I\n\tcq_depend\x18\x01 \x01(\x0b\x32\x34.chromite.api.GetUpdatedFilesResponse.CqDependFooterH\x00\x12H\n\tcq_cl_tag\x18\x02 \x01(\x0b\x32\x33.chromite.api.GetUpdatedFilesResponse.CqClTagFooterH\x00\x42\x08\n\x06\x66ooter\"\x80\x01\n\x1aVerifyAFDOArtifactsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x33\n\rartifact_type\x18\x02 \x01(\x0e\x32\x1c.chromiumos.AFDOArtifactType\"-\n\x1bVerifyAFDOArtifactsResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\"X\n\rLinterFinding\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x36\n\tlocations\x18\x02 \x03(\x0b\x32#.chromite.api.LinterFindingLocation\"O\n\x15LinterFindingLocation\x12\x10\n\x08\x66ilepath\x18\x01 \x01(\t\x12\x12\n\nline_start\x18\x02 \x01(\x05\x12\x10\n\x08line_end\x18\x03 \x01(\x05\"\x86\x01\n\rLinterRequest\x12)\n\x08packages\x18\x01 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\"?\n\x0eLinterResponse\x12-\n\x08\x66indings\x18\x01 \x03(\x0b\x32\x1b.chromite.api.LinterFinding*f\n\x10\x41\x46\x44OArtifactType\x12\r\n\tNONE_TYPE\x10\x00\x12\r\n\tORDERFILE\x10\x01\x12\x12\n\x0e\x42\x45NCHMARK_AFDO\x10\x02\x12\x0f\n\x0bKERNEL_AFDO\x10\x03\x12\x0f\n\x0b\x43HROME_AFDO\x10\x04\x32\xa4\x05\n\x10ToolchainService\x12|\n\x1dUpdateEbuildWithAFDOArtifacts\x12(.chromite.api.VerifyAFDOArtifactsRequest\x1a).chromite.api.VerifyAFDOArtifactsResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12x\n\x19UploadVettedAFDOArtifacts\x12(.chromite.api.VerifyAFDOArtifactsRequest\x1a).chromite.api.VerifyAFDOArtifactsResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12p\n\x0fPrepareForBuild\x12-.chromite.api.PrepareForToolchainBuildRequest\x1a..chromite.api.PrepareForToolchainBuildResponse\x12^\n\x0f\x42undleArtifacts\x12$.chromite.api.BundleToolchainRequest\x1a%.chromite.api.BundleToolchainResponse\x12^\n\x0fGetUpdatedFiles\x12$.chromite.api.GetUpdatedFilesRequest\x1a%.chromite.api.GetUpdatedFilesResponse\x12S\n\x0eGetClippyLints\x12\x1b.chromite.api.LinterRequest\x1a\x1c.chromite.api.LinterResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x1a\x11\xc2\xed\x1a\r\n\ttoolchain\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1c\x63hromite/api/toolchain.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/artifacts.proto\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x1f\x63hromiumos/builder_config.proto\x1a\x17\x63hromiumos/common.proto\"\x83\x01\n\x0c\x41rtifactInfo\x12H\n\rartifact_type\x18\x01 \x01(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12)\n\tartifacts\x18\x02 \x03(\x0b\x32\x16.chromite.api.Artifact\"\x83\x03\n\x1fPrepareForToolchainBuildRequest\x12I\n\x0e\x61rtifact_types\x18\x01 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x03 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12N\n\x0finput_artifacts\x18\x04 \x03(\x0b\x32\x35.chromiumos.BuilderConfig.Artifacts.InputArtifactInfo\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x05 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x12\x35\n\x0cprofile_info\x18\x06 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"q\n PrepareForToolchainBuildResponse\x12M\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32\x34.chromite.api.PrepareForBuildResponse.BuildRelevance\"\xbe\x02\n\x16\x42undleToolchainRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x12\n\noutput_dir\x18\x03 \x01(\t\x12I\n\x0e\x61rtifact_types\x18\x04 \x03(\x0e\x32\x31.chromiumos.BuilderConfig.Artifacts.ArtifactTypes\x12\x42\n\x0f\x61\x64\x64itional_args\x18\x05 \x01(\x0b\x32).chromiumos.PrepareForBuildAdditionalArgs\x12\x35\n\x0cprofile_info\x18\x06 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"S\n\x17\x42undleToolchainResponse\x12\x32\n\x0e\x61rtifacts_info\x18\x02 \x03(\x0b\x32\x1a.chromite.api.ArtifactInfoJ\x04\x08\x01\x10\x02\"\xeb\x01\n\x16GetUpdatedFilesRequest\x12R\n\x12uploaded_artifacts\x18\x01 \x03(\x0b\x32\x36.chromite.api.GetUpdatedFilesRequest.UploadedArtifacts\x1a}\n\x11UploadedArtifacts\x12\x31\n\rartifact_info\x18\x01 \x01(\x0b\x32\x1a.chromite.api.ArtifactInfo\x12\x35\n\x0cprofile_info\x18\x02 \x01(\x0b\x32\x1f.chromiumos.ArtifactProfileInfo\"\xf4\x03\n\x17GetUpdatedFilesResponse\x12H\n\rupdated_files\x18\x01 \x03(\x0b\x32\x31.chromite.api.GetUpdatedFilesResponse.UpdatedFile\x12\x16\n\x0e\x63ommit_message\x18\x02 \x01(\t\x12I\n\rcommit_footer\x18\x03 \x03(\x0b\x32\x32.chromite.api.GetUpdatedFilesResponse.CommitFooter\x1a\x1b\n\x0bUpdatedFile\x12\x0c\n\x04path\x18\x01 \x01(\t\x1a\x41\n\x0e\x43qDependFooter\x12/\n\rgerrit_change\x18\x01 \x03(\x0b\x32\x18.chromiumos.GerritChange\x1a\x1c\n\rCqClTagFooter\x12\x0b\n\x03tag\x18\x01 \x01(\t\x1a\xad\x01\n\x0c\x43ommitFooter\x12I\n\tcq_depend\x18\x01 \x01(\x0b\x32\x34.chromite.api.GetUpdatedFilesResponse.CqDependFooterH\x00\x12H\n\tcq_cl_tag\x18\x02 \x01(\x0b\x32\x33.chromite.api.GetUpdatedFilesResponse.CqClTagFooterH\x00\x42\x08\n\x06\x66ooter\"\x80\x01\n\x1aVerifyAFDOArtifactsRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x33\n\rartifact_type\x18\x02 \x01(\x0e\x32\x1c.chromiumos.AFDOArtifactType\"-\n\x1bVerifyAFDOArtifactsResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\"\xd2\x01\n\rLinterFinding\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x36\n\tlocations\x18\x02 \x03(\x0b\x32#.chromite.api.LinterFindingLocation\x12\x33\n\x06linter\x18\x03 \x01(\x0e\x32#.chromite.api.LinterFinding.Linters\"C\n\x07Linters\x12\x16\n\x12LINTER_UNSPECIFIED\x10\x00\x12\x0e\n\nCLANG_TIDY\x10\x01\x12\x10\n\x0c\x43\x41RGO_CLIPPY\x10\x02\"O\n\x15LinterFindingLocation\x12\x10\n\x08\x66ilepath\x18\x01 \x01(\t\x12\x12\n\nline_start\x18\x02 \x01(\x05\x12\x10\n\x08line_end\x18\x03 \x01(\x05\"\x86\x01\n\rLinterRequest\x12)\n\x08packages\x18\x01 \x03(\x0b\x32\x17.chromiumos.PackageInfo\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\"?\n\x0eLinterResponse\x12-\n\x08\x66indings\x18\x01 \x03(\x0b\x32\x1b.chromite.api.LinterFinding*f\n\x10\x41\x46\x44OArtifactType\x12\r\n\tNONE_TYPE\x10\x00\x12\r\n\tORDERFILE\x10\x01\x12\x12\n\x0e\x42\x45NCHMARK_AFDO\x10\x02\x12\x0f\n\x0bKERNEL_AFDO\x10\x03\x12\x0f\n\x0b\x43HROME_AFDO\x10\x04\x32\xfc\x05\n\x10ToolchainService\x12|\n\x1dUpdateEbuildWithAFDOArtifacts\x12(.chromite.api.VerifyAFDOArtifactsRequest\x1a).chromite.api.VerifyAFDOArtifactsResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12x\n\x19UploadVettedAFDOArtifacts\x12(.chromite.api.VerifyAFDOArtifactsRequest\x1a).chromite.api.VerifyAFDOArtifactsResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12p\n\x0fPrepareForBuild\x12-.chromite.api.PrepareForToolchainBuildRequest\x1a..chromite.api.PrepareForToolchainBuildResponse\x12^\n\x0f\x42undleArtifacts\x12$.chromite.api.BundleToolchainRequest\x1a%.chromite.api.BundleToolchainResponse\x12^\n\x0fGetUpdatedFiles\x12$.chromite.api.GetUpdatedFilesRequest\x1a%.chromite.api.GetUpdatedFilesResponse\x12V\n\x11\x45mergeWithLinting\x12\x1b.chromite.api.LinterRequest\x1a\x1c.chromite.api.LinterResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12S\n\x0eGetClippyLints\x12\x1b.chromite.api.LinterRequest\x1a\x1c.chromite.api.LinterResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x1a\x11\xc2\xed\x1a\r\n\ttoolchain\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_artifacts__pb2.DESCRIPTOR,chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_builder__config__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -57,8 +57,8 @@ _AFDOARTIFACTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2529,
-  serialized_end=2631,
+  serialized_start=2652,
+  serialized_end=2754,
 )
 _sym_db.RegisterEnumDescriptor(_AFDOARTIFACTTYPE)
 
@@ -69,6 +69,32 @@ BENCHMARK_AFDO = 2
 KERNEL_AFDO = 3
 CHROME_AFDO = 4
 
+
+_LINTERFINDING_LINTERS = _descriptor.EnumDescriptor(
+  name='Linters',
+  full_name='chromite.api.LinterFinding.Linters',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='LINTER_UNSPECIFIED', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CLANG_TIDY', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CARGO_CLIPPY', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=2300,
+  serialized_end=2367,
+)
+_sym_db.RegisterEnumDescriptor(_LINTERFINDING_LINTERS)
 
 
 _ARTIFACTINFO = _descriptor.Descriptor(
@@ -636,11 +662,19 @@ _LINTERFINDING = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='linter', full_name='chromite.api.LinterFinding.linter', index=2,
+      number=3, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
+    _LINTERFINDING_LINTERS,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -648,8 +682,8 @@ _LINTERFINDING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2156,
-  serialized_end=2244,
+  serialized_start=2157,
+  serialized_end=2367,
 )
 
 
@@ -693,8 +727,8 @@ _LINTERFINDINGLOCATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2246,
-  serialized_end=2325,
+  serialized_start=2369,
+  serialized_end=2448,
 )
 
 
@@ -738,8 +772,8 @@ _LINTERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2328,
-  serialized_end=2462,
+  serialized_start=2451,
+  serialized_end=2585,
 )
 
 
@@ -769,8 +803,8 @@ _LINTERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2464,
-  serialized_end=2527,
+  serialized_start=2587,
+  serialized_end=2650,
 )
 
 _ARTIFACTINFO.fields_by_name['artifact_type'].enum_type = chromiumos_dot_builder__config__pb2._BUILDERCONFIG_ARTIFACTS_ARTIFACTTYPES
@@ -810,6 +844,8 @@ _GETUPDATEDFILESRESPONSE.fields_by_name['commit_footer'].message_type = _GETUPDA
 _VERIFYAFDOARTIFACTSREQUEST.fields_by_name['build_target'].message_type = chromiumos_dot_common__pb2._BUILDTARGET
 _VERIFYAFDOARTIFACTSREQUEST.fields_by_name['artifact_type'].enum_type = chromiumos_dot_common__pb2._AFDOARTIFACTTYPE
 _LINTERFINDING.fields_by_name['locations'].message_type = _LINTERFINDINGLOCATION
+_LINTERFINDING.fields_by_name['linter'].enum_type = _LINTERFINDING_LINTERS
+_LINTERFINDING_LINTERS.containing_type = _LINTERFINDING
 _LINTERREQUEST.fields_by_name['packages'].message_type = chromiumos_dot_common__pb2._PACKAGEINFO
 _LINTERREQUEST.fields_by_name['sysroot'].message_type = chromite_dot_api_dot_sysroot__pb2._SYSROOT
 _LINTERREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
@@ -970,8 +1006,8 @@ _TOOLCHAINSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=b'\302\355\032\r\n\ttoolchain\020\002',
-  serialized_start=2634,
-  serialized_end=3310,
+  serialized_start=2757,
+  serialized_end=3521,
   methods=[
   _descriptor.MethodDescriptor(
     name='UpdateEbuildWithAFDOArtifacts',
@@ -1019,9 +1055,18 @@ _TOOLCHAINSERVICE = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='EmergeWithLinting',
+    full_name='chromite.api.ToolchainService.EmergeWithLinting',
+    index=5,
+    containing_service=None,
+    input_type=_LINTERREQUEST,
+    output_type=_LINTERRESPONSE,
+    serialized_options=b'\302\355\032\002\020\001',
+  ),
+  _descriptor.MethodDescriptor(
     name='GetClippyLints',
     full_name='chromite.api.ToolchainService.GetClippyLints',
-    index=5,
+    index=6,
     containing_service=None,
     input_type=_LINTERREQUEST,
     output_type=_LINTERRESPONSE,

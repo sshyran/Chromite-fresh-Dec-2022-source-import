@@ -376,6 +376,33 @@ def UploadVettedAFDOArtifacts(input_proto, output_proto, _config):
   output_proto.status = toolchain_util.UploadAndPublishVettedAFDOArtifacts(
       artifact_type, board)
 
+@faux.all_empty
+@validate.exists('sysroot.path')
+@validate.require('packages')
+@validate.validation_complete
+def EmergeWithLinting(input_proto, output_proto, _config):
+  """Emerge packages with linter features enabled and retrieves all findings.
+
+  Args:
+    input_proto (LinterRequest): The nput proto with package and sysroot info.
+    output_proto (LinterResponse): The output proto where findings are stored.
+    _config (api_config.ApiConfig): The API call config (unused).
+  """
+  packages = [
+      f'{package.category}/{package.package_name}'
+      for package in input_proto.packages]
+  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
+  cros_build_lib.sudo_run(
+      emerge_cmd + packages,
+      preserve_env=True,
+      extra_env={
+          'ENABLE_RUST_CLIPPY': 1,
+          'WITH_TIDY': 'tricium'
+      }
+  )
+
+  output_proto.findings.extend(_fetch_clippy_lints())
+
 
 def _fetch_clippy_lints():
   """Get lints created by Cargo Clippy during emerge."""
@@ -406,6 +433,12 @@ def _fetch_clippy_lints():
   return findings_protos
 
 
+# FIXME(b/187790543): remove this endpoint oboleted by "EmergeWithLinting".
+# This refactor has the following dependency chain:
+# 1) Create EmergeWithLinting endpoint
+# 2) Let Recipe Roller update the Build API for recipes
+# 3) Update the recipe to use EmergeWithLinting
+# 4) Delete GetClippyLints endpoint
 @validate.exists('sysroot.path')
 @validate.require('packages')
 @validate.validation_complete
