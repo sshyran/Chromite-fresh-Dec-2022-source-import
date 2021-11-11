@@ -475,5 +475,7 @@ class HWTestPlanStageTest(cros_test_lib.MockTempDirTestCase):
     stage = test_stages.TestPlanStage(builder_run, self.buildstore, 'octopus')
     models_to_test = stage.ModelsToTest()
     # Too many models to list them all; just check a subset
-    self.assertEqual([model.name for model in models_to_test[29:32]],
-                     ['phaser', 'phaser360', 'sparky'])
+    model_names = [m.name for m in models_to_test]
+    known_models = ['phaser', 'phaser360', 'sparky']
+    for model in known_models:
+      self.assertIn(model, model_names)
