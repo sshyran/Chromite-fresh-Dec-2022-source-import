@@ -166,6 +166,11 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
             PLATFORM_DEV_DIR,
             'test/container/utils/build-dockerimage.sh'
         ),
+    'cros-test-finder':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'test_finder/docker/build-dockerimage.sh',
+        ),
 }
 
 
