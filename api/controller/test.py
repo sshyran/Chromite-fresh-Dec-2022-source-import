@@ -200,9 +200,7 @@ def _ValidDockerTag(tag):
   allowed_chars = set(string.ascii_letters+string.digits+'-_.')
   invalid_chars = set(tag) - allowed_chars
   if invalid_chars:
-    return 'saw one or more invalid characters: [{}]'.format(
-        ''.join(invalid_chars),
-    )
+    return f'saw one or more invalid characters: {"".join(invalid_chars)}'
 
   # Finally, max tag length is 128 characters
   if len(tag) > 128:
@@ -222,14 +220,12 @@ def _ValidDockerLabelKey(key):
   allowed_chars = set(string.ascii_lowercase+string.digits+'-.')
   invalid_chars = set(key) - allowed_chars
   if invalid_chars:
-    return 'saw one or more invalid characters: [{}]'.format(
-        ''.join(invalid_chars),
-    )
+    return f'saw one or more invalid characters: {"".join(invalid_chars)}'
 
   # Repeated . and - aren't allowed
   for char in '.-':
     if char*2 in key:
-      return "'{}' can\'t be repeated in label key".format(char)
+      return f'"{char}" can\'t be repeated in label key'
 
 
 @faux.success(_BuildTestServiceContainersResponse)
@@ -249,7 +245,7 @@ def BuildTestServiceContainers(
 
   tags = ','.join(input_proto.tags)
   labels = (
-      '{}={}'.format(key, value) for key, value in input_proto.labels.items()
+      f'{key}={value}' for key, value in input_proto.labels.items()
   )
 
   for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():

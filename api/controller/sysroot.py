@@ -33,7 +33,7 @@ def ExampleGetResponse():
   uabs = common_pb2.UploadedArtifactsByService
   cabs = common_pb2.ArtifactsByService
   return uabs.Sysroot(artifacts=[
-     uabs.Sysroot.ArtifactPaths(
+      uabs.Sysroot.ArtifactPaths(
           artifact_type=cabs.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT,
           paths=[
               common_pb2.Path(
@@ -59,8 +59,9 @@ def ExampleGetResponse():
 
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
-        chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-        build_target: build_target_lib.BuildTarget, output_dir: str) -> list:
+                 chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+                 build_target: build_target_lib.BuildTarget, output_dir: str
+                 ) -> list:
   """Builds and copies sysroot artifacts to specified output_dir.
 
   Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
@@ -78,11 +79,12 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   """
   generated = []
   artifact_types = {
-    in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
-        sysroot.CreateSimpleChromeSysroot,
-    in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
-    in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
-    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+      in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
+          sysroot.CreateSimpleChromeSysroot,
+      in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
+      in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS:
+          sysroot.BundleBreakpadSymbols,
+      in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
   }
 
   for output_artifact in in_proto.output_artifacts:

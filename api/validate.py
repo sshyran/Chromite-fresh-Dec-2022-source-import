@@ -197,11 +197,11 @@ def check_constraint(field: str, checkfunc: Callable):
             failed.append((val, msg))
 
         if failed:
-          msg = '{}.[all] one or more values failed check "{}"\n'.format(
-              field, constraint_description)
+          msg = f'{field}.[all] one or more values failed check ' \
+                f'"{constraint_description}"\n'
 
           for value, msg in failed:
-            msg += '  {}: {}\n'.format(value, msg)
+            msg += '  %s: %s\n' % (value, msg)
           cros_build_lib.Die(msg)
 
       return func(input_proto, output_proto, config, *args, **kwargs)
