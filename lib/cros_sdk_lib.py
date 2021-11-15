@@ -973,11 +973,6 @@ class ChrootCreator:
     data += (
         'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
     )
-    # Install global completion script for Python argcomplete.
-    data += (
-        f'activate-global-python-argcomplete --dest={_BASH_COMPLETION_DIR} '
-        '>/dev/null\n'
-    )
     bash_profile.write_text(data)
 
     osutils.Chown(home, user=uid, group=gid, recursive=True)
