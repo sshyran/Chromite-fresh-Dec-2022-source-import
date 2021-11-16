@@ -10,7 +10,7 @@ import logging
 import os
 import sys
 import time
-from typing import List, Optional, Union
+from typing import Collection, List, Optional, TYPE_CHECKING, Union
 
 # These aren't available outside the SDK.
 # pylint: disable=import-error
@@ -32,6 +32,12 @@ from chromite.lib import cros_event
 from chromite.lib import dependency_graph
 from chromite.lib import dependency_lib
 from chromite.lib.parser import package_info
+
+
+if TYPE_CHECKING:
+  from chromite.lib import sysroot_lib
+
+PackageCollection = Union[Collection[str], Collection[package_info.PackageInfo]]
 
 
 class DepGraphGenerator(object):
@@ -863,8 +869,7 @@ DepgraphResult = collections.namedtuple('DepgraphResult',
                                         ('deps', 'bdeps', 'packages'))
 
 
-def _get_emerge_args(sysroot_path: str,
-                     packages: Union[List[str], List[package_info.PackageInfo]],
+def _get_emerge_args(sysroot_path: str, packages: PackageCollection,
                      include_bdeps: bool) -> List[str]:
   """Get the default emerge arguments for building a depgraph."""
   # Pretend: Don't actually install anything.
@@ -914,8 +919,7 @@ def _get_sysroot_path(
 
 
 def _get_raw_sdk_depgraph(
-    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
-) -> DepgraphResult:
+    packages: Optional[PackageCollection] = None) -> DepgraphResult:
   """Get the depgraph for the SDK itself.
 
   The SDK deps will contain the packages installed to a fresh SDK.
@@ -935,8 +939,7 @@ def _get_raw_sdk_depgraph(
 def _get_raw_sysroot_depgraph(
     sysroot: Optional['sysroot_lib.Sysroot'] = None,
     build_target: Optional['build_target_lib.BuildTarget'] = None,
-    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
-) -> DepgraphResult:
+    packages: Optional[PackageCollection] = None) -> DepgraphResult:
   """Get the sysroot depgraph for a build target.
 
   The sysroot deps are the packages installed to a sysroot -- effectively
@@ -959,8 +962,7 @@ def _get_raw_sysroot_depgraph(
 def _get_raw_build_target_depgraph(
     sysroot: Optional['sysroot_lib.Sysroot'] = None,
     build_target: Optional['build_target_lib.BuildTarget'] = None,
-    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None
-) -> DepgraphResult:
+    packages: Optional[PackageCollection] = None) -> DepgraphResult:
   """Get the full depgraph for a build target - its sysroot and bdepends.
 
   The build target deps contains the [r]depends packages installed
@@ -981,21 +983,19 @@ def _get_raw_build_target_depgraph(
 
 
 def get_sdk_dependency_graph(
-    pkgs: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
-    with_src_paths: bool = False
-) -> dependency_graph.DependencyGraph:
+    pkgs: Optional[PackageCollection] = None,
+    with_src_paths: bool = False) -> dependency_graph.DependencyGraph:
   """Get the DependencyGraph for the SDK itself."""
   result = _get_raw_sdk_depgraph(packages=pkgs)
-  return _create_graph_from_deps(
-      result.deps, build_target_lib.get_sdk_sysroot_path(),
-      result.packages, with_src_paths)
+  return _create_graph_from_deps(result.deps,
+                                 build_target_lib.get_sdk_sysroot_path(),
+                                 result.packages, with_src_paths)
 
 
 def get_sysroot_dependency_graph(
     sysroot: Union[str, 'sysroot_lib.Sysroot'],
-    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
-    with_src_paths: bool = False
-) -> dependency_graph.DependencyGraph:
+    packages: Optional[PackageCollection] = None,
+    with_src_paths: bool = False) -> dependency_graph.DependencyGraph:
   """Get the DependencyGraph for the sysroot only."""
   result = _get_raw_sysroot_depgraph(sysroot, packages=packages)
   return _create_graph_from_deps(result.deps, sysroot, result.packages,
@@ -1004,9 +1004,8 @@ def get_sysroot_dependency_graph(
 
 def get_build_target_dependency_graph(
     sysroot: Union[str, 'sysroot_lib.Sysroot'],
-    packages: Optional[Union[List[str], List[package_info.PackageInfo]]] = None,
-    with_src_paths: bool = False
-) -> dependency_graph.DependencyGraph:
+    packages: Optional[PackageCollection] = None,
+    with_src_paths: bool = False) -> dependency_graph.DependencyGraph:
   """Get the DependencyGraph for the sysroot and its bdeps."""
   result = _get_raw_build_target_depgraph(sysroot, packages=packages)
   return _create_graph_from_deps(result.deps, sysroot, result.packages,
@@ -1015,9 +1014,8 @@ def get_build_target_dependency_graph(
 
 def _create_graph_from_deps(
     deps: dict, sysroot: Union[str, 'sysroot_lib.Sysroot'],
-    packages: Union[List[str], List[package_info.PackageInfo]],
-    with_src_paths: bool
-) -> dependency_graph.DependencyGraph:
+    packages: PackageCollection,
+    with_src_paths: bool) -> dependency_graph.DependencyGraph:
   """Create DependencyGraph from the raw DepGraphGenerator deps.
 
   Translate the raw DepGraphGenerator deps into PackageNodes for a
