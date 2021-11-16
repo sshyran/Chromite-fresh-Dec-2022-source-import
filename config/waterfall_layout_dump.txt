@@ -197,6 +197,7 @@
     betty-release
     bob-release
     brask-release
+    brya-lvm-stateful-release
     brya-manatee-release
     brya-release
     bubs-release
@@ -559,6 +560,12 @@
   brya-full-tryjob
   brya-llvm-next-toolchain-tryjob
   brya-llvm-toolchain-tryjob
+  brya-lvm-stateful-full-tryjob
+  brya-lvm-stateful-llvm-next-toolchain-tryjob
+  brya-lvm-stateful-llvm-toolchain-tryjob
+  brya-lvm-stateful-payloads-tryjob
+  brya-lvm-stateful-release-tryjob
+  brya-lvm-stateful-unittest-stress
   brya-manatee-full-tryjob
   brya-manatee-llvm-next-toolchain-tryjob
   brya-manatee-llvm-toolchain-tryjob
@@ -1308,6 +1315,7 @@
     betty-release-tryjob
     bob-release-tryjob
     brask-release-tryjob
+    brya-lvm-stateful-release-tryjob
     brya-manatee-release-tryjob
     brya-release-tryjob
     bubs-release-tryjob
