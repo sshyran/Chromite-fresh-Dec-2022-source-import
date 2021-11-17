@@ -184,11 +184,18 @@ class CrOSTest(object):
         device_name,
         xbuddy_path,
         '--board', self._device.board,
-        '--disable-rootfs-verification',
         '--clobber-stateful',
         '--clear-tpm-owner',
     ]
     cros_build_lib.run(flash_cmd, dryrun=self.dryrun)
+
+    # TODO(b/206260036): Flashes to recent images are having trouble sticking
+    # after the device reboots. You can avoid the rollback to the DUT's
+    # original version by flashing to the new version twice. So simply re-run
+    # the flash.
+    logging.info('Running flash again due to b/206260036.')
+    cros_build_lib.run(
+        flash_cmd + ['--disable-rootfs-verification'], dryrun=self.dryrun)
 
   def _Deploy(self):
     """Deploy binary files to device."""
