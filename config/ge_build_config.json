@@ -134,18 +134,6 @@
       ]
     },
     {
-      "name": "brya-lvm-stateful",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "bubs",
       "configs": [
         {
@@ -1385,6 +1373,79 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 459,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "brya-lvm-stateful",
+      "reference_board_name": "brya-lvm-stateful",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "anahera",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "brya",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "felwinter",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "gimble",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "primus",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "redrix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "taeko",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
           "is_active": true
         }
       ]
