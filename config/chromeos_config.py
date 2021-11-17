@@ -1209,11 +1209,12 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       'eve',
       'grunt-arc-r',
       'hatch',
-      'kukui-arc-r',
       'rammus-arc-r',
       'zork-arc-r',
   ])
-  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
+  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [
+      'kukui-arc-r',  # TODO(b/206734202): Move back to non-experimental.
+  ])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
