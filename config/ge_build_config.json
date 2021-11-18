@@ -9158,6 +9158,14 @@
       "models": [
         {
           "board_name": "trogdor-connectivitynext",
+          "name": "kingoftown",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7203,
+          "is_active": true
+        },
+        {
+          "board_name": "trogdor-connectivitynext",
           "name": "lazor",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -9205,6 +9213,14 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "trogdor-kernelnext",
+          "name": "kingoftown",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7159,
+          "is_active": true
+        },
         {
           "board_name": "trogdor-kernelnext",
           "name": "lazor",
@@ -9298,6 +9314,14 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "trogdor64",
+          "name": "kingoftown",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 462,
+          "is_active": true
+        },
         {
           "board_name": "trogdor64",
           "name": "lazor",
