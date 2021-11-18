@@ -612,6 +612,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         ],
         use_flags=[],
         use_goma=False,
+        use_remoteexec=False,
         incremental_build=False,
         setup_board=False,
         dryrun=False)

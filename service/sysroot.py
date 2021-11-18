@@ -115,6 +115,7 @@ class BuildPackagesRunConfig(object):
                packages=None,
                use_flags=None,
                use_goma=False,
+               use_remoteexec: bool = False,
                incremental_build=True,
                package_indexes=None,
                expanded_binhosts: bool = False,
@@ -131,6 +132,7 @@ class BuildPackagesRunConfig(object):
         install all packages for the target.
       use_flags (list[str]|None): A list of use flags to set.
       use_goma (bool): Whether to enable goma.
+      use_remoteexec: Whether to use RBE for remoteexec.
       incremental_build (bool): Whether to treat the build as an incremental
         build or a fresh build. Always treating it as an incremental build is
         safe, but certain operations can be faster when we know we are doing
@@ -147,6 +149,7 @@ class BuildPackagesRunConfig(object):
     self.packages = packages
     self.use_flags = use_flags
     self.use_goma = use_goma
+    self.use_remoteexec = use_remoteexec
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
     self.expanded_binhosts = expanded_binhosts
@@ -173,6 +176,9 @@ class BuildPackagesRunConfig(object):
 
     if self.use_goma:
       args.append('--run_goma')
+
+    if self.use_remoteexec:
+      args.append('--run_remoteexec')
 
     if not self.is_incremental:
       args.append('--nowithrevdeps')
@@ -220,6 +226,9 @@ class BuildPackagesRunConfig(object):
 
     if self.use_goma:
       env['USE_GOMA'] = 'true'
+
+    if self.use_remoteexec:
+      env['USE_REMOTEEXEC'] = 'true'
 
     if self.package_indexes:
       env['PORTAGE_BINHOST'] = ' '.join(
@@ -752,7 +761,7 @@ def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
   return result
 
 
-def GatherSymbolFiles(tempdir:str, destdir:str,
+def GatherSymbolFiles(tempdir: str, destdir: str,
                       paths: List[str]) -> List[SymbolFileTuple]:
   """Locate symbol files in |paths|
 

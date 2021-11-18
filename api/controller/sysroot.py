@@ -240,8 +240,12 @@ def InstallPackages(input_proto, output_proto, _config):
   """Install packages into a sysroot, building as necessary and permitted."""
   compile_source = (
       input_proto.flags.compile_source or input_proto.flags.toolchain_changed)
+
+  # TODO(crbug.com/1256966): Check if input_proto.remoteexec_config exists.
+  use_remoteexec = False
+
   # Testing if Goma will support unknown compilers now.
-  use_goma = input_proto.flags.use_goma
+  use_goma = input_proto.flags.use_goma and not use_remoteexec
 
   target_sysroot = sysroot_lib.Sysroot(input_proto.sysroot.path)
   build_target = controller_util.ParseBuildTarget(
@@ -273,6 +277,7 @@ def InstallPackages(input_proto, output_proto, _config):
       package_indexes=package_indexes,
       use_flags=use_flags,
       use_goma=use_goma,
+      use_remoteexec=use_remoteexec,
       incremental_build=False,
       setup_board=False,
       dryrun=dryrun)

@@ -173,7 +173,8 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
 
 
 def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
-                goma_dir, goma_client_json, working_dir, additional_args):
+                goma_dir, goma_client_json, reclient_dir, reproxy_cfg_file,
+                working_dir, additional_args):
   """Enters an existing SDK chroot"""
   st = os.statvfs(os.path.join(chroot_path, 'usr', 'bin', 'sudo'))
   if st.f_flag & os.ST_NOSUID:
@@ -188,6 +189,10 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     cmd.extend(['--goma_dir', goma_dir])
   if goma_client_json:
     cmd.extend(['--goma_client_json', goma_client_json])
+  if reclient_dir:
+    cmd.extend(['--reclient_dir', reclient_dir])
+  if reproxy_cfg_file:
+    cmd.extend(['--reproxy_cfg_file', reproxy_cfg_file])
   if working_dir is not None:
     cmd.extend(['--working_dir', working_dir])
 
@@ -696,6 +701,14 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       type='path',
       help='Service account json file to use goma on bot. '
       'Mounted into the chroot.')
+  parser.add_argument(
+      '--reclient-dir',
+      type='path',
+      help='Reclient installed directory to mount into the chroot.')
+  parser.add_argument(
+      '--reproxy-cfg-file',
+      type='path',
+      help="Config file for re-client's reproxy used for remoteexec.")
 
   # Use type=str instead of type='path' to prevent the given path from being
   # transfered to absolute path automatically.
@@ -1172,6 +1185,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
         cros_sdk_lib.MountChrootPaths(options.chroot)
       ret = EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
                         options.chrome_root_mount, options.goma_dir,
-                        options.goma_client_json, options.working_dir,
+                        options.goma_client_json, options.reclient_dir,
+                        options.reproxy_cfg_file, options.working_dir,
                         chroot_command)
       sys.exit(ret.returncode)
