@@ -101,6 +101,14 @@ CPPLINT_OUTPUT_FORMAT_MAP = {
     'parseable': 'emacs',
 }
 
+# Default category filters to pass to cpplint.py when invoked via `cros lint`.
+#
+# `-foo/bar` means "don't show any lints from category foo/bar".
+# See `cpplint.py --help` for more explanation of category filters.
+CPPLINT_DEFAULT_FILTERS = (
+    '-runtime/references',
+)
+
 
 # The mapping between the "cros lint" --output-format flag and shellcheck
 # flags.
@@ -155,6 +163,7 @@ def _WhiteSpaceLintData(path, data):
 def _CpplintFile(path, output_format, debug):
   """Returns result of running cpplint on |path|."""
   cmd = [os.path.join(constants.DEPOT_TOOLS_DIR, 'cpplint.py')]
+  cmd.append('--filter=%s' % ','.join(CPPLINT_DEFAULT_FILTERS))
   if output_format != 'default':
     cmd.append('--output=%s' % CPPLINT_OUTPUT_FORMAT_MAP[output_format])
   cmd.append(path)
