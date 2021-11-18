@@ -230,7 +230,7 @@ def _ValidDockerLabelKey(key):
   # Repeated . and - aren't allowed
   for char in '.-':
     if char * 2 in key:
-      return f"'{char}' can\'t be repeated in label key" % char
+      return f"'{char}' can\'t be repeated in label key"
 
 
 @faux.success(_BuildTestServiceContainersResponse)
