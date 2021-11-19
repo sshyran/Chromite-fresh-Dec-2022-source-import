@@ -4,6 +4,7 @@
 
 """Run lint checks on the specified files."""
 
+import fnmatch
 import functools
 import json
 import logging
@@ -341,6 +342,13 @@ def _SeccompPolicyLintFile(path, _output_format, debug):
       debug)
 
 
+def _DirMdLintFile(path, _output_format, debug):
+  """Run the dirmd linter."""
+  return _LinterRunCommand(
+      [os.path.join(constants.DEPOT_TOOLS_DIR, 'dirmd'), 'validate', path],
+      debug, capture_output=not debug)
+
+
 def _BreakoutDataByLinter(map_to_return, path):
   """Maps a linter method to the content of the |path|."""
   # Detect by content of the file itself.
@@ -384,6 +392,11 @@ _EXT_TO_LINTER_MAP = {
     frozenset({'.policy'}): _SeccompPolicyLintFile,
 }
 
+# Map known filenames to a linter function.
+_FILENAME_PATTERNS_TO_LINTER_MAP = {
+    frozenset({'DIR_METADATA'}): _DirMdLintFile,
+}
+
 
 def _BreakoutFilesByLinter(files):
   """Maps a linter method to the list of files to lint."""
@@ -392,12 +405,17 @@ def _BreakoutFilesByLinter(files):
     extension = os.path.splitext(f)[1]
     for extensions, linter in _EXT_TO_LINTER_MAP.items():
       if extension in extensions:
-        todo = map_to_return.setdefault(linter, [])
-        todo.append(f)
+        map_to_return.setdefault(linter, []).append(f)
         break
     else:
-      if os.path.isfile(f):
-        _BreakoutDataByLinter(map_to_return, f)
+      name = os.path.basename(f)
+      for patterns, linter in _FILENAME_PATTERNS_TO_LINTER_MAP.items():
+        if any(fnmatch.fnmatch(name, x) for x in patterns):
+          map_to_return.setdefault(linter, []).append(f)
+          break
+      else:
+        if os.path.isfile(f):
+          _BreakoutDataByLinter(map_to_return, f)
 
   return map_to_return
 
