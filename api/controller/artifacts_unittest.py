@@ -389,9 +389,9 @@ class BundleFirmwareTest(BundleTestCase):
   def testBundleFirmwareNoLogs(self):
     """BundleFirmware dies when no firmware found."""
     self.PatchObject(commands, 'BuildFirmwareArchive', return_value=None)
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleFirmware(self.sysroot_request, self.response,
-                               self.api_config)
+    artifacts.BundleFirmware(self.sysroot_request, self.response,
+                             self.api_config)
+    self.assertEqual(len(self.response.artifacts), 0)
 
 
 class BundleFpmcuUnittestsTest(BundleTestCase):

@@ -459,9 +459,10 @@ def BundleFirmware(
   archive = artifacts.BuildFirmwareArchive(chroot, sysroot, output_dir)
 
   if archive is None:
-    cros_build_lib.Die(
+    logging.warning(
         'Could not create firmware archive. No firmware found for %s.',
         sysroot_path)
+    return
 
   output_proto.artifacts.add().path = archive
 
