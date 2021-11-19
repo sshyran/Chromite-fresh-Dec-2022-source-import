@@ -2877,7 +2877,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
   for board in frozenset.union(chromeos_boards.dustbuster_boards,
                                chromeos_boards.wshwos_boards):
     site_config.Add(
-        '{}-rapid'.format(board),
+        f'{board}-rapid',
         site_config.templates.release,
         site_config.templates.loonix,
         display_label=config_lib.DISPLAY_LABEL_UTILITY,
