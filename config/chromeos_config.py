@@ -2450,6 +2450,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/167721012',
       },
+      'brya-lvm-stateful-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Brya has no DUTs in the lab (b/167721012).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/167721012',
+      },
       'keeby-release': {
           'sign_types': ['recovery', 'factory'],
           # Keeby has no DUTs in the lab. (b/185377942)
