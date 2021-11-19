@@ -36,7 +36,6 @@ class PayloadConfig(object):
                src_image=None,
                dest_bucket=None,
                verify=True,
-               keyset=None,
                upload=True,
                cache_dir=None):
     """Init method, sets up all the paths and configuration.
@@ -48,7 +47,6 @@ class PayloadConfig(object):
           Proto for source image.
       dest_bucket (str): Destination bucket to place the final artifacts in.
       verify (bool): If delta is made, verify the integrity of the payload.
-      keyset (str): The key to sign the image with.
       upload (bool): Whether the payload generation results should be uploaded.
       cache_dir (str): The cache dir for paygen to use or None for default.
     """
@@ -59,7 +57,6 @@ class PayloadConfig(object):
     self.src_image = src_image
     self.dest_bucket = dest_bucket
     self.verify = verify
-    self.keyset = keyset
     self.upload = upload
     self.delta_type = 'delta' if self.src_image else 'full'
     self.image_type = _ImageTypeToStr(tgt_image.image_type)
@@ -67,10 +64,12 @@ class PayloadConfig(object):
 
     # This block ensures that we have paths to the correct perm of images.
     src_image_path = None
+    tgt_key = None
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
       tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
       tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
+      tgt_key = self.tgt_image.key
     elif isinstance(self.tgt_image, payload_pb2.DLCImage):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
@@ -81,7 +80,6 @@ class PayloadConfig(object):
       elif isinstance(self.tgt_image, payload_pb2.DLCImage):
         src_image_path = _GenDLCImageGSPath(self.src_image)
 
-
     # Set your output location.
     if self.upload:
       payload_build = deepcopy(tgt_image_path.build)
@@ -89,7 +87,7 @@ class PayloadConfig(object):
       payload_output_uri = gspaths.ChromeosReleases.PayloadUri(
           build=payload_build,
           random_str=None,
-          key=self.keyset,
+          key=tgt_key,
           src_version=src_image_path.build.version if src_image else None,
       )
     else:
@@ -110,8 +108,6 @@ class PayloadConfig(object):
           The remote location that the payload was uploaded or None.
             (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
     """
-    should_sign = self.keyset != ''
-
     # Leave the generated artifact local. This is ok because if we're testing
     # it's likely we want the artifact anyway, and in production this is ran on
     # single shot bots in the context of an overlayfs and will get cleaned up
@@ -120,7 +116,7 @@ class PayloadConfig(object):
       self.paygen = paygen_payload_lib.PaygenPayload(
           self.payload,
           temp_dir,
-          sign=should_sign,
+          sign=True,
           verify=self.verify,
           upload=self.upload,
           cache_dir=self.cache_dir)

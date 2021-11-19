@@ -41,7 +41,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=src_image,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
@@ -60,7 +59,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=src_image,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
@@ -77,17 +75,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=None,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
-
-# TODO(crbug/1155212): Fix aliased enum value.
-# class PayloadUtilitiesTest(cros_test_lib.TestCase):
-#   """Test utilities related to payloads."""
-#
-#   def testImageType(self):
-#     """Test _ImageTypeToStr works."""
-#     # pylint: disable=protected-access
-#     self.assertEqual('image_type_base', payload._ImageTypeToStr(1))
-#     # pylint: enable=protected-access

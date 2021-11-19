@@ -66,18 +66,11 @@ def GeneratePayload(input_proto, output_proto, config):
   # Find the value of bucket or default to 'chromeos-releases'.
   destination_bucket = input_proto.bucket or 'chromeos-releases'
 
-  if input_proto.dryrun:
-    keyset = ''
-    upload = False
-  else:
-    keyset = input_proto.keyset
-    upload = True
-
   # There's a potential that some paygen_lib library might raise here, but since
   # we're still involved in config we'll keep it before the validate_only.
   payload_config = payload.PayloadConfig(tgt_image, src_image,
                                          destination_bucket, input_proto.verify,
-                                         keyset, upload,
+                                         upload=not input_proto.dryrun,
                                          cache_dir=_DEFAULT_PAYGEN_CACHE_DIR)
 
   # If configured for validation only we're done here.
@@ -88,7 +81,7 @@ def GeneratePayload(input_proto, output_proto, config):
   local_path, remote_uri = payload_config.GeneratePayload()
   _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
 
-  if remote_uri or not upload and local_path:
+  if remote_uri or input_proto.dryrun and local_path:
     return controller.RETURN_CODE_SUCCESS
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
