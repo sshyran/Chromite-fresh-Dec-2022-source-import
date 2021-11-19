@@ -378,7 +378,7 @@ class Sysroot(object):
     return self.GetCachedField(CACHED_FIELD_PROFILE_OVERRIDE) or DEFAULT_PROFILE
 
   @property
-  def build_target_overlays(self) -> List[str]:
+  def board_overlay(self) -> List[str]:
     """The BOARD_OVERLAY standard field as a list.
 
     The BOARD_OVERLAY field is set on creation, and stores the list of overlays
@@ -391,7 +391,43 @@ class Sysroot(object):
     return self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY).split()
 
   @property
-  def overlays(self) -> List[str]:
+  def _build_target_overlays(self) -> List[Path]:
+    """Overlays for the build target itself."""
+    prefix = f'overlay-{self.build_target_name}'
+    return [x for x in self.get_overlays() if x.name.startswith(prefix)]
+
+  @property
+  def build_target_overlay(self) -> Optional[Path]:
+    """The most specific build target overlay for the sysroot."""
+    # Choose the longest as a proxy for the most specific. This should only ever
+    # be choosing between overlay-x and overlay-x-private, but we'll need better
+    # logic here if we have any cases with more than that.
+    overlays = self._build_target_overlays
+    overlay = max(overlays, key=lambda x: len(x.name)) if overlays else None
+    return overlay
+
+  @property
+  def chipset(self) -> Optional[str]:
+    """The chipset for the sysroot's build target."""
+    overlays = [x for x in self.get_overlays() if x.name.startswith('chipset-')]
+    if not overlays:
+      return None
+
+    # Choose the longest as a proxy for the most specific. This should at most
+    # be choosing between chipset-x and chipset-x-private, but we'll need better
+    # logic here if we have any cases with more than that.
+    overlay = max(overlays, key=lambda x: len(x.name))
+    chipset = overlay.name
+
+    # TODO(python 3.9): string.removeprefix & string.removesuffix instead.
+    if chipset.startswith('chipset-'):
+      chipset = chipset[len('chipset-'):]
+    if chipset.endswith('-private'):
+      chipset = chipset[:-len('-private')]
+    return chipset
+
+  @property
+  def portdir_overlay(self) -> List[str]:
     """The PORTDIR_OVERLAY field as a list.
 
     The PORTDIR_OVERLAY field is set on creation, and stores the list of all
@@ -429,7 +465,7 @@ class Sysroot(object):
         as absolute paths.
     """
     overlays = (
-        self.build_target_overlays if build_target_only else self.overlays)
+        self.board_overlay if build_target_only else self.portdir_overlay)
     overlay_paths = [Path(x) for x in overlays]
     if relative:
       return [

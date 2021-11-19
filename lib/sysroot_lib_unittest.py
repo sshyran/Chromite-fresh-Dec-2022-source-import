@@ -5,6 +5,7 @@
 """Tests for the sysroot library."""
 
 import os
+from typing import Iterable, List, Optional, Tuple
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
@@ -30,13 +31,19 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
     self.relative_sysroot = sysroot_lib.Sysroot('sysroot')
 
-  def _writeOverlays(self, board_overlays=None, portdir_overlays=None):
+  def _writeOverlays(self,
+                     board_overlays: Optional[Iterable[str]] = None,
+                     portdir_overlays: Optional[Iterable[str]] = None,
+                     board: str = None) -> Tuple[List[str], List[str]]:
     """Helper function to write board and portdir overlays for the sysroot.
 
     By default uses one fake board overlay, and the chromiumos and portage
     stable overlays. Set the arguments to an empty list to set no values for
     that field. When not explicitly set, |portdir_overlays| includes all values
     in |board_overlays|.
+
+    Returns:
+      The board overlays, and the portdir overlays.
     """
     if board_overlays is None:
       board_overlays = ['overlay/board']
@@ -45,8 +52,9 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
           constants.CHROMIUMOS_OVERLAY_DIR, constants.PORTAGE_STABLE_OVERLAY_DIR
       ] + board_overlays
 
-    board_field = sysroot_lib.STANDARD_FIELD_BOARD_OVERLAY
+    board_overlays_field = sysroot_lib.STANDARD_FIELD_BOARD_OVERLAY
     portdir_field = sysroot_lib.STANDARD_FIELD_PORTDIR_OVERLAY
+    board_field = sysroot_lib.STANDARD_FIELD_BOARD_USE
 
     board_values = [
         f'{constants.CHROOT_SOURCE_ROOT}/{x}' for x in board_overlays
@@ -60,9 +68,11 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
 
     config_values = {}
     if board_values:
-      config_values[board_field] = board_value
+      config_values[board_overlays_field] = board_value
     if portdir_values:
       config_values[portdir_field] = portdir_value
+    if board:
+      config_values[board_field] = board
 
     config = '\n'.join(f'{k}="{v}"' for k, v in config_values.items())
     self.sysroot.WriteConfig(config)
@@ -155,13 +165,52 @@ baz
     """Test the board_overlay property."""
     board_overlays, _portdir_overlays = self._writeOverlays()
 
-    self.assertEqual(board_overlays, self.sysroot.build_target_overlays)
+    self.assertEqual(sorted(board_overlays), sorted(self.sysroot.board_overlay))
+
+  def testBuildTargetOverlays(self):
+    """Tests for populated _build_target_overlay[s]."""
+    private = '/path/to/overlay-x-private'
+    expected = ['/path/to/overlay-x', private]
+    overlays = expected + ['/path/to/chromeos-overlay']
+    self._writeOverlays(overlays, board='x')
+
+    # pylint: disable=protected-access
+    results = [str(x) for x in self.sysroot._build_target_overlays]
+    self.assertEqual(len(expected), len(results))
+    for current in expected:
+      self.assertTrue(any(result.endswith(current) for result in results))
+
+    self.assertTrue(str(self.sysroot.build_target_overlay).endswith(private))
+
+  def testNoBuildTargetOverlay(self):
+    """Test for no standard build target overlay."""
+    self._writeOverlays(['/path/to/chromeos-overlay', '/path/to/chipset-x'])
+
+    # pylint: disable=protected-access
+    self.assertEqual(0, len(self.sysroot._build_target_overlays))
+    self.assertIsNone(self.sysroot.build_target_overlay)
+
+  def testChipset(self):
+    """Test for extracting a valid chipset."""
+    expected = 'foo'
+    chipsets = [
+        f'/path/to/chipset-{expected}', f'/path/to/chipset-{expected}-private'
+    ]
+    all_overlays = chipsets + ['/path/to/chromeos-overlay']
+    self._writeOverlays(all_overlays)
+
+    self.assertEqual(expected, self.sysroot.chipset)
+
+  def testNoChipset(self):
+    """Test for handling no retrievable chipset value."""
+    self._writeOverlays(['/path/to/chromeos-overlay', '/path/to/overlay-board'])
+    self.assertIsNone(self.sysroot.chipset)
 
   def testOverlays(self):
     """Test the overlays property."""
     _board_overlays, portdir_overlays = self._writeOverlays()
 
-    self.assertEqual(portdir_overlays, self.sysroot.overlays)
+    self.assertEqual(portdir_overlays, self.sysroot.portdir_overlay)
 
   def testGetOverlays(self):
     """Test the get_overlays function."""
