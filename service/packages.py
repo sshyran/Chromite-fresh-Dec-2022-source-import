@@ -140,13 +140,36 @@ def uprevs_versioned_package(package):
   return register
 
 
-def uprev_android(android_package,
-                  chroot,
-                  build_targets=None,
-                  android_build_branch=None,
-                  android_version=None,
-                  skip_commit=False):
-  """Returns the portage atom for the revved Android ebuild - see man emerge."""
+class UprevAndroidResult(NamedTuple):
+  """Results of an Android uprev."""
+  revved: bool
+  android_atom: str = None
+
+
+def uprev_android(
+    android_package: str,
+    chroot: 'chroot_lib.Chroot',
+    build_targets: Optional[List['build_target_lib.BuildTarget']] = None,
+    android_build_branch: Optional[str] = None,
+    android_version: Optional[str] = None,
+    skip_commit: bool = False) -> UprevAndroidResult:
+  """Performs an Android uprev by calling cros_mark_android_as_stable.
+
+  Args:
+    android_package: The Android package to uprev.
+    chroot: The chroot to enter.
+    build_targets: List of build targets to cleanup after uprev.
+    android_build_branch: Override the default Android branch corresponding to
+        the package.
+    android_version: Uprev to the particular version. By default the latest
+        available version is used.
+    skip_commit: Whether to skip committing the change after a successful uprev.
+
+  Returns:
+    The uprev result containing:
+      revved: Whether an uprev happened.
+      android_atom: If revved, the portage atom for the revved Android ebuild.
+  """
   command = [
       'cros_mark_android_as_stable',
       f'--android_package={android_package}',
@@ -167,13 +190,13 @@ def uprev_android(android_package,
       encoding='utf-8',
       chroot_args=chroot.get_enter_args())
 
-  portage_atom_string = result.stdout.strip()
-  android_atom = None
-  if portage_atom_string:
-    android_atom = portage_atom_string.splitlines()[-1].partition('=')[-1]
-  if not android_atom:
+  output = result.stdout.strip()
+  if not output:
     logging.info('Found nothing to rev.')
-    return None
+    return UprevAndroidResult(revved=False)
+
+  output = json.loads(output)
+  android_atom = output['android_atom']
 
   for target in build_targets or []:
     # Sanity check: We should always be able to merge the version of
@@ -188,7 +211,8 @@ def uprev_android(android_package,
           'version?', target, android_atom)
       raise AndroidIsPinnedUprevError(android_atom)
 
-  return android_atom
+  return UprevAndroidResult(revved=True,
+                            android_atom=android_atom)
 
 
 def uprev_build_targets(

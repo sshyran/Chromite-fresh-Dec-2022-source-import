@@ -4,15 +4,15 @@
 
 """This module uprevs Android for cbuildbot.
 
-After calling, it prints outs ANDROID_VERSION_ATOM=(version atom string).  A
-caller could then use this atom with emerge to build the newly uprevved version
-of Android e.g.
+After calling, it prints out a JSON representing the result, with the new
+Android version atom string included. A caller could then use this atom with
+emerge to build the newly uprevved version of Android e.g.
 
 ./cros_mark_android_as_stable \
     --android_build_branch=git_pi-arc \
     --android_package=android-container-pi
 
-Returns chromeos-base/android-container-pi-6417892-r1
+Returns {"android_atom": "chromeos-base/android-container-pi-6417892-r1"}
 
 emerge-eve =chromeos-base/android-container-pi-6417892-r1
 """
@@ -276,8 +276,8 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
     msg = 'Previous ebuild with same version found and ebuild is redundant.'
     logging.info(msg)
     cbuildbot_alerts.PrintBuildbotStepText('%s %s not revved'
-                                  % (stable_candidate.pkgname,
-                                     stable_candidate.version))
+                                           % (stable_candidate.pkgname,
+                                              stable_candidate.version))
     osutils.SafeUnlink(new_ebuild_path)
     return None
 
@@ -398,7 +398,7 @@ def main(argv):
       options.arc_bucket_url, options.runtime_artifacts_bucket_url)
 
   if revved:
-    android_version_atom, files_to_add, files_to_remove = revved
+    android_atom, files_to_add, files_to_remove = revved
     if not options.skip_commit:
       _CommitChange(
           _GIT_COMMIT_MESSAGE % {'android_package': options.android_package,
@@ -410,7 +410,10 @@ def main(argv):
     if options.boards:
       cros_mark_as_stable.CleanStalePackages(options.srcroot,
                                              options.boards.split(':'),
-                                             [android_version_atom])
+                                             [android_atom])
 
     # Explicit print to communicate to caller.
-    print('ANDROID_VERSION_ATOM=%s' % android_version_atom)
+    output = dict(
+        android_atom=android_atom,
+    )
+    print(json.dumps(output, indent=2))

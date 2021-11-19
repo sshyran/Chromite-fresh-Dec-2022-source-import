@@ -130,7 +130,9 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
   def testCallsCommandCorrectly(self):
     """Test that commands.MarkAndroidAsStable is called correctly."""
-    self.uprev.return_value = 'cat/android-1.2.3'
+    self.uprev.return_value = packages.UprevAndroidResult(
+        revved=True,
+        android_atom='cat/android-1.2.3')
     atom = common_pb2.PackageInfo()
     atom.category = 'cat'
     atom.package_name = 'android'
@@ -150,7 +152,7 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
   def testHandlesEarlyExit(self):
     """Test that early exit is handled correctly."""
-    self.uprev.return_value = ''
+    self.uprev.return_value = packages.UprevAndroidResult(revved=False)
     android.MarkStable(self.input_proto, self.response, self.api_config)
     self.uprev.assert_called_once_with(
         android_package=self.input_proto.package_name,

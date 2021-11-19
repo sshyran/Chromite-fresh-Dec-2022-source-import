@@ -81,8 +81,9 @@ def MarkStable(input_proto: android_pb2.MarkStableRequest,
   output_proto.status = android_pb2.MARK_STABLE_STATUS_SUCCESS
   # TODO(crbug/904939): This should move to service/android.py and the port
   # should be finished.
+  android_atom_to_build = None
   try:
-    android_atom_to_build = packages.uprev_android(
+    result = packages.uprev_android(
         android_package=package_name,
         chroot=chroot,
         build_targets=build_targets,
@@ -90,6 +91,8 @@ def MarkStable(input_proto: android_pb2.MarkStableRequest,
         android_version=android_version,
         skip_commit=skip_commit,
     )
+    if result.revved:
+      android_atom_to_build = result.android_atom
   except packages.AndroidIsPinnedUprevError as e:
     # If the uprev failed due to a pin, CI needs to unpin and retry.
     android_atom_to_build = e.new_android_atom
