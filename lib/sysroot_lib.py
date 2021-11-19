@@ -409,6 +409,11 @@ class Sysroot(object):
     """Get all FEATURES for the sysroot."""
     return portage_util.PortageqEnvvar('FEATURES', sysroot=self.path).split()
 
+  @property
+  def portage_logdir(self) -> str:
+    """Get the PORTAGE_LOGDIR property for this sysroot."""
+    return portage_util.PortageqEnvvar('PORTAGE_LOGDIR', sysroot=self.path)
+
   def get_overlays(self,
                    build_target_only: bool = False,
                    relative: bool = False) -> List[Path]:

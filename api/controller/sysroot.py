@@ -213,7 +213,7 @@ def InstallToolchain(input_proto, output_proto, _config):
       # /build/${BOARD}/tmp/portage/logs/$CATEGORY:$PF:$TIMESTAMP.log
       failed_pkg_data_msg = output_proto.failed_package_data.add()
       controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
-      glob_path = os.path.join(target_sysroot.path, 'tmp', 'portage', 'logs',
+      glob_path = os.path.join(target_sysroot.portage_logdir,
                                f'{pkg_info.category}:{pkg_info.package}:*.log')
       log_files = glob.glob(glob_path)
       log_files.sort(reverse=True)
@@ -295,7 +295,7 @@ def InstallPackages(input_proto, output_proto, _config):
       # /build/${BOARD}/tmp/portage/logs/$CATEGORY:$PF:$TIMESTAMP.log
       failed_pkg_data_msg = output_proto.failed_package_data.add()
       controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
-      glob_path = os.path.join(target_sysroot.path, 'tmp', 'portage', 'logs',
+      glob_path = os.path.join(target_sysroot.portage_logdir,
                                f'{pkg_info.category}:{pkg_info.package}:*.log')
       log_files = glob.glob(glob_path)
       log_files.sort(reverse=True)

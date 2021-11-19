@@ -248,7 +248,8 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     self.invalid_sysroot = os.path.join(self.tempdir, 'invalid', 'sysroot')
     osutils.SafeMakedirs(self.sysroot)
     # Set up portage log directory.
-    self.portage_dir = os.path.join(self.sysroot, 'tmp', 'portage', 'logs')
+    self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
+    self.portage_dir = self.target_sysroot.portage_logdir
     osutils.SafeMakedirs(self.portage_dir)
 
   def _InputProto(self, build_target=None, sysroot_path=None,
@@ -268,15 +269,15 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     """Helper to build output proto instance."""
     return sysroot_pb2.InstallToolchainResponse()
 
-  def _CreatePortageLogFile(self, root, pkg_info, timestamp):
+  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      root (pathlike): the sysroot path
+      log_path (pathlike): the PORTAGE_LOGDIR path
       pkg_info (PackageInfo): name components for log file.
       timestamp (datetime): timestamp used to name the file.
     """
-    path = os.path.join(root, 'tmp', 'portage', 'logs',
+    path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.package}:' \
                         f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
     osutils.WriteFile(path,
@@ -369,9 +370,9 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
 
     new_logs = {}
     for i, pkg in enumerate(err_pkgs):
-      self._CreatePortageLogFile(self.sysroot, err_cpvs[i],
+      self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
                                  datetime.datetime(2021, 6, 9, 13, 37, 0))
-      new_logs[pkg] = self._CreatePortageLogFile(self.sysroot, err_cpvs[i],
+      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
                                                  datetime.datetime(2021, 6, 9,
                                                                    16, 20, 0)
                                                  )
@@ -412,7 +413,8 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     self.sysroot = os.path.join(self.tempdir, 'build', 'board')
     osutils.SafeMakedirs(self.sysroot)
     # Set up portage log directory.
-    self.portage_dir = os.path.join(self.sysroot, 'tmp', 'portage', 'logs')
+    self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
+    self.portage_dir = self.target_sysroot.portage_logdir
     osutils.SafeMakedirs(self.portage_dir)
     # Set up goma directories.
     self.goma_dir = os.path.join(self.tempdir, 'goma_dir')
@@ -470,15 +472,15 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         path,
         timestamp.strftime('Goma log file created at: %Y/%m/%d %H:%M:%S'))
 
-  def _CreatePortageLogFile(self, root, pkg_info, timestamp):
+  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      root (pathlike): the root path, taken from a BuildTarget object.
+      log_path (pathlike): the PORTAGE_LOGDIR path
       pkg_info (PackageInfo): name components for log file.
       timestamp (datetime): timestamp used to name the file.
     """
-    path = os.path.join(root, 'tmp', 'portage', 'logs',
+    path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.package}:' \
                         f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
     osutils.WriteFile(path, f'Test log file for package {pkg_info.category}/'
@@ -747,9 +749,9 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
 
     new_logs = {}
     for i, pkg in enumerate(err_pkgs):
-      self._CreatePortageLogFile(self.sysroot, err_cpvs[i],
+      self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
                                  datetime.datetime(2021, 6, 9, 13, 37, 0))
-      new_logs[pkg] = self._CreatePortageLogFile(self.sysroot, err_cpvs[i],
+      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
                                                  datetime.datetime(2021, 6, 9,
                                                                    16, 20, 0)
                                                  )
