@@ -2443,6 +2443,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/159934902',
       },
+      'brask-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Brask has no DUTs in the lab (b/207095933).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/207095933',
+      },
       'brya-release': {
           'sign_types': ['recovery', 'factory'],
           # Brya has no DUTs in the lab (b/167721012).
