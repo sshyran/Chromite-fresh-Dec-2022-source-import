@@ -378,11 +378,12 @@ def GeneralTemplates(site_config):
 
   site_config.AddTemplate(
       'fuzzer',
-      site_config.templates.full,
+      site_config.templates.internal,
       site_config.templates.informational,
       profile='fuzzer',
       chrome_sdk=False,
       sync_chrome=True,
+      usepkg_build_packages=False,
       # Run fuzzer builder specific stages.
       builder_class_name='fuzzer_builders.FuzzerBuilder',
       # Need larger rootfs since fuzzing also enables asan.

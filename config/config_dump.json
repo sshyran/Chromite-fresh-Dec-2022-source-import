@@ -288,20 +288,18 @@
         },
         "fuzzer": {
             "_template": "fuzzer",
-            "archive_build_debug": true,
-            "build_timeout": 43200,
-            "build_type": "full",
             "builder_class_name": "fuzzer_builders.FuzzerBuilder",
             "description": "Informational Builds",
             "disk_layout": "2gb-rootfs",
             "display_label": "informational",
-            "doc": "https://dev.chromium.org/chromium-os/build/builder-overview#TOC-Continuous",
-            "git_sync": true,
             "gs_path": "gs://chromeos-fuzzing-artifacts/libfuzzer-asan-buganizer",
             "hw_tests_override": [],
             "image_test": true,
             "images": [],
+            "internal": true,
             "luci_builder": "Informational",
+            "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
+            "overlays": "both",
             "packages": [
                 "virtual/target-fuzzers"
             ],
