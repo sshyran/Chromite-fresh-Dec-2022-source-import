@@ -34,6 +34,16 @@ class DutControl():
   def get_servo(self) -> servo_lib.Servo:
     """Get the Servo instance the given dut_control command is using."""
     servo_type = self.get_value('servo_type')
+
+    if '_and_' in servo_type:
+      # If servod is working with multiple interfaces then servo_type will be
+      # along the lines of "servo_v4p1_with_servo_micro_and_ccd_cr50".
+      # We need to pick an interface, so grab everything before "_and_".
+      first_servo_type = servo_type.split('_and_')[0]
+      logging.warning('Dual-mode servo detected. Treating %s as %s',
+                      servo_type, first_servo_type)
+      servo_type = first_servo_type
+
     if servo_type not in servo_lib.VALID_SERVOS:
       raise InvalidServoVersionError('Unrecognized servo version: %s' %
                                      servo_type)
