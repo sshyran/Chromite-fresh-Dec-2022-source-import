@@ -20,6 +20,7 @@ import tempfile
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dlc_lib
 from chromite.lib import operation
@@ -898,7 +899,8 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
   if strip:
     try:
       cros_build_lib.run(
-          ['strip_package', '--sysroot', sysroot] +
+          [os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'),
+           '--sysroot', sysroot] +
           [cpv.cpf for cpv in cpvs])
       packages_dir = _STRIPPED_PACKAGES_DIR
     except cros_build_lib.RunCommandError:
