@@ -210,12 +210,12 @@
     celes-release
     chell-release
     cherry-release
+    cherry64-release
     coral-kernelnext-release
     coral-release
     corsola-release
     cyan-release
     dedede-release
-    draco-release
     drallion-release
     edgar-release
     elm-arc64-release
@@ -646,6 +646,12 @@
   cherry-payloads-tryjob
   cherry-release-tryjob
   cherry-unittest-stress
+  cherry64-full-tryjob
+  cherry64-llvm-next-toolchain-tryjob
+  cherry64-llvm-toolchain-tryjob
+  cherry64-payloads-tryjob
+  cherry64-release-tryjob
+  cherry64-unittest-stress
   chrome-airmont-release-afdo-verify-tryjob
   chrome-broadwell-release-afdo-verify-tryjob
   chrome-silvermont-release-afdo-verify-tryjob
@@ -694,12 +700,6 @@
   deltaur-payloads-tryjob
   deltaur-release-tryjob
   deltaur-unittest-stress
-  draco-full-tryjob
-  draco-llvm-next-toolchain-tryjob
-  draco-llvm-toolchain-tryjob
-  draco-payloads-tryjob
-  draco-release-tryjob
-  draco-unittest-stress
   drallion-factory-drallion-13080.B-factorybranch-tryjob
   drallion-full-tryjob
   drallion-llvm-next-toolchain-tryjob
@@ -1335,12 +1335,12 @@
     celes-release-tryjob
     chell-release-tryjob
     cherry-release-tryjob
+    cherry64-release-tryjob
     coral-kernelnext-release-tryjob
     coral-release-tryjob
     corsola-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
-    draco-release-tryjob
     drallion-release-tryjob
     edgar-release-tryjob
     elm-arc64-release-tryjob
