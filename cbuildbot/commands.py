@@ -3200,11 +3200,13 @@ def BuildStrippedPackagesTarball(buildroot, board, package_globs, archive_dir):
   board_path = os.path.join(chroot_path, 'build', board)
   stripped_pkg_dir = os.path.join(board_path, 'stripped-packages')
   tarball_paths = []
+  strip_package_path = path_util.ToChrootPath(
+      os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'))
   for pattern in package_globs:
     packages = portage_util.FindPackageNameMatches(
         pattern, board, buildroot=buildroot)
     for cpv in packages:
-      cmd = ['strip_package', '--board', board, cpv.cpf]
+      cmd = [strip_package_path, '--board', board, cpv.cpf]
       cros_build_lib.run(cmd, cwd=buildroot, enter_chroot=True)
       # Find the stripped package.
       files = glob.glob(os.path.join(stripped_pkg_dir, cpv.cpf) + '.*')
