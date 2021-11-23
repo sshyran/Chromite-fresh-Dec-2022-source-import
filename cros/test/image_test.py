@@ -695,10 +695,6 @@ class SymlinkTest(image_test_lib.ImageTestCase):
       '/etc/machine-id': {'/var/lib/dbus/machine-id'},
       '/etc/mtab': {'/proc/mounts'},
 
-      # The kip board has a broken/dangling symlink.  Allow it until we can
-      # rewrite the code.  Or kip goes EOL.
-      '/lib/firmware/elan_i2c.bin': {'/opt/google/touch/firmware/*'},
-
       # Some boards don't set this up properly.  It's not a big deal.
       '/usr/libexec/editor': {'/usr/bin/*'},
 
