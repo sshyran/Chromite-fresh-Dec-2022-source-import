@@ -216,6 +216,7 @@
     corsola-release
     cyan-release
     dedede-release
+    draco-release
     drallion-release
     edgar-release
     elm-arc64-release
@@ -700,6 +701,12 @@
   deltaur-payloads-tryjob
   deltaur-release-tryjob
   deltaur-unittest-stress
+  draco-full-tryjob
+  draco-llvm-next-toolchain-tryjob
+  draco-llvm-toolchain-tryjob
+  draco-payloads-tryjob
+  draco-release-tryjob
+  draco-unittest-stress
   drallion-factory-drallion-13080.B-factorybranch-tryjob
   drallion-full-tryjob
   drallion-llvm-next-toolchain-tryjob
@@ -1341,6 +1348,7 @@
     corsola-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
+    draco-release-tryjob
     drallion-release-tryjob
     edgar-release-tryjob
     elm-arc64-release-tryjob
