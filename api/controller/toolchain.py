@@ -6,7 +6,9 @@
 
 import collections
 import logging
+import os
 from pathlib import Path
+import re
 
 from chromite.api import controller
 from chromite.api import faux
@@ -17,8 +19,12 @@ from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import toolchain_util
-from chromite.scripts import tricium_cargo_clippy
+
+if cros_build_lib.IsInsideChroot():
+  # Only used for linting in chroot and requires yaml which is only in chroot
+  from chromite.scripts import tricium_cargo_clippy, tricium_clang_tidy
 
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
@@ -85,6 +91,8 @@ _TOOLCHAIN_COMMIT_HANDLERS = {
     BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE:
         'VerifiedKernelCwpAfdoFile'
 }
+
+TIDY_BASE_DIR = Path('/tmp/linting_output/clang-tidy')
 
 
 def _GetProfileInfoDict(profile_info):
@@ -322,26 +330,90 @@ def EmergeWithLinting(input_proto, output_proto, _config):
   packages = [
       f'{package.category}/{package.package_name}'
       for package in input_proto.packages]
+
+  # rm any existing lints from clang tidy
+  osutils.RmDir(TIDY_BASE_DIR, ignore_missing=True, sudo=True)
+  osutils.SafeMakedirs(TIDY_BASE_DIR, 0o777, sudo=True)
+
   emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
   cros_build_lib.sudo_run(
       emerge_cmd + packages,
       preserve_env=True,
       extra_env={
           'ENABLE_RUST_CLIPPY': 1,
-          'WITH_TIDY': 'tricium'
+          'WITH_TIDY': 'tricium',
+          'FEATURES': 'noclean'
       }
   )
 
-  output_proto.findings.extend(_fetch_clippy_lints())
-
-
-def _fetch_clippy_lints():
-  """Get lints created by Cargo Clippy during emerge."""
-  lints_dir = '/tmp/cargo_clippy'
   # FIXME(b/195056381): default git-repo should be replaced with logic in
   # build_linters recipe to detect the repo path for applied patches.
-  # As of 07-29-21 only platform2 is supported so this value works temporarily.
-  git_repo_path = '/mnt/host/source/src/platform2'
+  # As of 01-05-21 only platform2 is supported so this value works temporarily.
+  git_repo_path = '/mnt/host/source/src/platform2/'
+
+  linter_findings = _fetch_clippy_lints(git_repo_path)
+  linter_findings.extend(_fetch_tidy_lints(git_repo_path))
+  linter_findings = _filter_linter_findings(linter_findings, git_repo_path)
+  output_proto.findings.extend(linter_findings)
+
+
+LINTER_CODES = {
+    'clang_tidy': toolchain_pb2.LinterFinding.CLANG_TIDY,
+    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY
+}
+
+
+def _filter_linter_findings(findings, git_repo_path):
+  """Filters a findings to keep only those concerning modified lines."""
+  new_findings = []
+  new_lines = _get_added_lines({git_repo_path: 'HEAD'})
+  for finding in findings:
+    for loc in finding.locations:
+      for (addition_start, addition_end) in new_lines.get(loc.filepath, set()):
+        if addition_start <= loc.line_start < addition_end:
+          new_findings.append(finding)
+  return new_findings
+
+
+def _get_added_lines(git_repos):
+  """Parses the lines with additions from fit diff for the provided repos.
+
+  Args:
+    git_repos: a dictionary mapping repo paths to hashes for `git diff`
+
+  Returns:
+    A dictionary mapping modified filepaths to sets of tuples where each
+    tuple is a (start_line, end_line) pair noting which lines were modified.
+    Note that start_line is inclusive, and end_line is exclusive.
+  """
+  new_lines = {}
+  file_path_pattern = re.compile(r'^\+\+\+ b/(?P<file_path>.*)$')
+  position_pattern = re.compile(
+      r'^@@ -\d+(?:,\d+)? \+(?P<line_num>\d+)(?:,(?P<lines_added>\d+))? @@')
+  for git_repo, git_hash in git_repos.items():
+    cmd = f'git -C {git_repo} diff -U0 {git_hash}^...{git_hash}'
+    diff = cros_build_lib.run(cmd, capture_output=True, shell=True,
+                              encoding='utf-8').output
+    current_file = ''
+    for line in diff.splitlines():
+      file_path_match = re.match(file_path_pattern, str(line))
+      if file_path_match:
+        current_file = file_path_match.group('file_path')
+        continue
+      position_match = re.match(position_pattern, str(line))
+      if position_match:
+        if current_file not in new_lines:
+          new_lines[current_file] = set()
+        line_num = int(position_match.group('line_num'))
+        line_count = position_match.group('lines_added')
+        line_count = int(line_count) if line_count is not None else 1
+        new_lines[current_file].add((line_num, line_num + line_count))
+  return new_lines
+
+
+def _fetch_clippy_lints(git_repo_path):
+  """Get lints created by Cargo Clippy during emerge."""
+  lints_dir = '/tmp/cargo_clippy'
   findings = tricium_cargo_clippy.parse_files(lints_dir, git_repo_path)
   findings = tricium_cargo_clippy.filter_diagnostics(findings)
   findings_protos = []
@@ -358,30 +430,46 @@ def _fetch_clippy_lints():
     findings_protos.append(
         toolchain_pb2.LinterFinding(
             message=finding.message,
-            locations=location_protos
+            locations=location_protos,
+            linter=LINTER_CODES['cargo_clippy']
         )
     )
   return findings_protos
 
 
-# FIXME(b/187790543): remove this endpoint oboleted by "EmergeWithLinting".
-# This refactor has the following dependency chain:
-# 1) Create EmergeWithLinting endpoint
-# 2) Let Recipe Roller update the Build API for recipes
-# 3) Update the recipe to use EmergeWithLinting
-# 4) Delete GetClippyLints endpoint
-@validate.exists('sysroot.path')
-@validate.require('packages')
-@validate.validation_complete
-def GetClippyLints(input_proto, output_proto, _config):
-  """Emerges the given packages and retrieves any findings from Cargo Clippy."""
-  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
-  packages = [
-      f'{package.category}/{package.package_name}'
-      for package in input_proto.packages]
-  cros_build_lib.sudo_run(
-      emerge_cmd + packages,
-      preserve_env=True,
-      extra_env={'ENABLE_RUST_CLIPPY': 1}
-  )
-  output_proto.findings.extend(_fetch_clippy_lints())
+def _fetch_tidy_lints(git_repo_path):
+  """Get lints created by Clang Tidy during emerge."""
+
+  def resolve_file_path(file_path):
+    # Remove git repo from prefix
+    file_path = re.sub('^' + git_repo_path, '/', str(file_path))
+    # Remove ebuild work directories from prefix
+    # Such as: "**/<package>-9999/work/<package>-9999/"
+    #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
+    return re.sub(r'(.*/)?([^/]+)-[^/]+/work/[^/]+/+', '', file_path)
+
+  lints = set()
+  for filename in os.listdir(TIDY_BASE_DIR):
+    if filename.endswith('.json'):
+      invocation_result = tricium_clang_tidy.parse_tidy_invocation(
+          TIDY_BASE_DIR / filename)
+      meta, complaints = invocation_result
+      assert not meta.exit_code, (
+          f'Invoking clang-tidy on {meta.lint_target} with flags '
+          f'{meta.invocation} exited with code {meta.exit_code}; '
+          f'output:\n{meta.stdstreams}')
+      lints.update(complaints)
+  return [
+      toolchain_pb2.LinterFinding(
+          message=lint.message,
+          locations=[
+              toolchain_pb2.LinterFindingLocation(
+                  filepath=resolve_file_path(lint.file_path),
+                  line_start=lint.line_number,
+                  line_end=lint.line_number
+              )
+          ],
+          linter=LINTER_CODES['clang_tidy']
+      )
+      for lint in tricium_clang_tidy.filter_tidy_lints(None, None, lints)
+  ]
