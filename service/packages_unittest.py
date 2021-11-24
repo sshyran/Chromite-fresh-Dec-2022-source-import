@@ -31,6 +31,7 @@ from chromite.lib import uprev_lib
 from chromite.lib.chroot_lib import Chroot
 from chromite.lib.parser import package_info
 from chromite.lib.uprev_lib import GitRef
+from chromite.service import android
 from chromite.service import packages
 
 D = cros_test_lib.Directory
@@ -41,7 +42,8 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
 
   def _mock_successful_uprev(self):
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
-                         stdout='{"android_atom": "android/android-1.0"}')
+                         stdout="""{"android_atom": "android/android-1.0",
+                                    "modified_files": ["file1", "file2"]}""")
 
   def test_success(self):
     """Test successful run handling."""
@@ -59,6 +61,7 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
 
     self.assertTrue(result.revved)
     self.assertEqual(result.android_atom, 'android/android-1.0')
+    self.assertListEqual(result.modified_files, ['file1', 'file2'])
 
   def test_android_build_branch(self):
     """Test specifying android_build_branch option."""
@@ -108,6 +111,50 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
     self.assertCommandContains(['emerge-bar'], expected=False)
 
     self.assertFalse(result.revved)
+
+
+class UprevAndroidLKGBTest(cros_test_lib.MockTestCase):
+  """Tests for uprevving Android with LKGB."""
+
+  def test_registered_handlers(self):
+    """Test that each Android package has an uprev handler registered."""
+    mock_handler = self.PatchObject(packages, 'uprev_android_lkgb')
+
+    for android_package in constants.ANDROID_ALL_PACKAGES:
+      cpv = package_info.SplitCPV('chromeos-base/' + android_package,
+                                  strict=False)
+      build_targets = [build_target_lib.BuildTarget('foo')]
+      chroot = Chroot()
+
+      packages.uprev_versioned_package(cpv, build_targets, [], chroot)
+
+      mock_handler.assert_called_once_with(android_package, build_targets,
+                                           chroot)
+      mock_handler.reset_mock()
+
+  def test_success(self):
+    """Test a successful uprev."""
+    self.PatchObject(android, 'ReadLKGB', return_value='android-lkgb')
+    self.PatchObject(packages, 'uprev_android',
+                     return_value=packages.UprevAndroidResult(
+                         revved=True, android_atom='android-atom',
+                         modified_files=['file1', 'file2']))
+
+    result = packages.uprev_android_lkgb('android-package', [], Chroot())
+
+    self.assertListEqual(result.modified,
+                         [uprev_lib.UprevVersionedPackageModifications(
+                             'android-lkgb', ['file1', 'file2'])])
+
+  def test_no_rev(self):
+    """Test when nothing revved."""
+    self.PatchObject(android, 'ReadLKGB', return_value='android-lkgb')
+    self.PatchObject(packages, 'uprev_android',
+                     return_value=packages.UprevAndroidResult(revved=False))
+
+    result = packages.uprev_android_lkgb('android-package', [], Chroot())
+
+    self.assertListEqual(result.modified, [])
 
 
 class UprevBuildTargetsTest(cros_test_lib.RunCommandTestCase):

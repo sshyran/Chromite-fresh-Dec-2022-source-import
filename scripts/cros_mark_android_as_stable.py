@@ -415,5 +415,6 @@ def main(argv):
     # Explicit print to communicate to caller.
     output = dict(
         android_atom=android_atom,
+        modified_files=files_to_add + files_to_remove,
     )
     print(json.dumps(output, indent=2))

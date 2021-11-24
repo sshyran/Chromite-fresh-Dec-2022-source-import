@@ -28,6 +28,7 @@ from chromite.lib import portage_util
 from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
+from chromite.service import android
 
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
@@ -144,6 +145,7 @@ class UprevAndroidResult(NamedTuple):
   """Results of an Android uprev."""
   revved: bool
   android_atom: str = None
+  modified_files: List[str] = None
 
 
 def uprev_android(
@@ -169,6 +171,7 @@ def uprev_android(
     The uprev result containing:
       revved: Whether an uprev happened.
       android_atom: If revved, the portage atom for the revved Android ebuild.
+      modified_files: If revved, list of files being modified.
   """
   command = [
       'cros_mark_android_as_stable',
@@ -212,7 +215,66 @@ def uprev_android(
       raise AndroidIsPinnedUprevError(android_atom)
 
   return UprevAndroidResult(revved=True,
-                            android_atom=android_atom)
+                            android_atom=android_atom,
+                            modified_files=output['modified_files'])
+
+
+def uprev_android_lkgb(android_package: str,
+                       build_targets: List['build_target_lib.BuildTarget'],
+                       chroot: 'chroot_lib.Chroot'
+                       ) -> uprev_lib.UprevVersionedPackageResult:
+  """Uprevs an Android package to the version specified in the LKGB file.
+
+  This is the PUpr handler for Android packages, triggered whenever the
+  corresponding LKGB file is being updated.
+
+  PUpr for Android does not test the uprev change in CQ; instead we run separate
+  jobs to test new Android versions, and we write the latest vetted version to
+  the LKGB file. Find the design at go/android-uprev-recipes.
+
+  Args:
+    android_package: The Android package to uprev.
+    build_targets: List of build targets to cleanup after uprev.
+    chroot: The chroot to enter.
+
+  Returns:
+    An uprev_lib.UprevVersionedPackageResult containing the new version and a
+    list of modified files.
+  """
+  android_package_dir = os.path.join(constants.SOURCE_ROOT, 'src',
+                                     'private-overlays',
+                                     'project-cheets-private', 'chromeos-base',
+                                     android_package)
+  android_version = android.ReadLKGB(android_package_dir)
+
+  result = uprev_lib.UprevVersionedPackageResult()
+  uprev_result = uprev_android(android_package, chroot,
+                               build_targets=build_targets,
+                               android_version=android_version,
+                               skip_commit=True)
+  if not uprev_result.revved:
+    return result
+
+  result.add_result(android_version, uprev_result.modified_files)
+  return result
+
+
+def define_uprev_android_lkgb_handlers():
+  """Dynamically define uprev handlers for each Android package"""
+
+  def define_handler(android_package):
+    """Defines the uprev handler for an Android package."""
+    full_package_name = 'chromeos-base/' + android_package
+
+    @uprevs_versioned_package(full_package_name)
+    def _handler(build_targets, _refs, chroot):
+      return uprev_android_lkgb(android_package, build_targets, chroot)
+
+  for android_package in constants.ANDROID_ALL_PACKAGES:
+    define_handler(android_package)
+
+
+define_uprev_android_lkgb_handlers()
 
 
 def uprev_build_targets(

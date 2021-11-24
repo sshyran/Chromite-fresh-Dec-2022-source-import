@@ -326,7 +326,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(subpaths['cheets_x86-user'], 'cheets_x86-user100')
     self.assertEqual(subpaths['cheets_x86_64-user'], 'cheets_x86_64-user100')
     self.assertEqual(subpaths['cheets_arm-userdebug'],
-                    'cheets_arm-userdebug100')
+                     'cheets_arm-userdebug100')
     self.assertEqual(subpaths['cheets_arm64-userdebug'],
                      'cheets_arm64-userdebug100')
     self.assertEqual(subpaths['cheets_x86-userdebug'],
@@ -343,3 +343,14 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     android.CopyToArcBucket(self.bucket_url, self.build_branch,
                             self.new_version, self.new_subpaths,
                             self.arc_bucket_url, self.mock_android_dir)
+
+
+class LKGBTest(cros_test_lib.TempDirTestCase):
+  """Tests ReadLKGB/WriteLKGB."""
+
+  def testWriteReadLGKB(self):
+    android_package_dir = self.tempdir
+    build_id = 'build-id'
+
+    android.WriteLKGB(android_package_dir, build_id)
+    self.assertEqual(android.ReadLKGB(android_package_dir), build_id)

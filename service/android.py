@@ -4,6 +4,7 @@
 
 """Provides utility for performing Android uprev."""
 
+import json
 import logging
 import os
 import re
@@ -326,3 +327,35 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
                   arc_bucket_url, package_dir)
 
   return version
+
+
+_LKGB_JSON = 'LKGB.json'
+
+
+def WriteLKGB(android_package_dir, build_id):
+  """Writes the LKGB file under the given Android package directory.
+
+  Args:
+    android_package_dir (str): The Android package directory.
+    build_id (str): The last known good Android build ID.
+  """
+  lkgb = {'build_id': build_id}
+  with open(os.path.join(android_package_dir, _LKGB_JSON), 'w') as f:
+    json.dump(lkgb, f, indent=2)
+    f.write('\n')
+
+
+def ReadLKGB(android_package_dir):
+  """Reads the LKGB file under the given Android package directory.
+
+  Args:
+    android_package_dir (str): The Android package directory.
+
+  Returns:
+    str: The last known good Android build ID as described in the file.
+  """
+  with open(os.path.join(android_package_dir, _LKGB_JSON), 'r') as f:
+    lkgb = json.load(f)
+  if 'build_id' not in lkgb:
+    raise Exception('build_id not found in LKGB file')
+  return lkgb['build_id']
