@@ -397,6 +397,8 @@ def main(argv):
       version_to_uprev, android_package_dir, android_build_branch,
       options.arc_bucket_url, options.runtime_artifacts_bucket_url)
 
+  output = dict(revved=revved)
+
   if revved:
     android_atom, files_to_add, files_to_remove = revved
     if not options.skip_commit:
@@ -412,9 +414,11 @@ def main(argv):
                                              options.boards.split(':'),
                                              [android_atom])
 
-    # Explicit print to communicate to caller.
-    output = dict(
-        android_atom=android_atom,
-        modified_files=files_to_add + files_to_remove,
-    )
-    print(json.dumps(output, indent=2))
+    output['android_atom'] = android_atom
+    output['modified_files'] = files_to_add + files_to_remove
+
+  # The output is being parsed by service.packages.uprev_android and has to be
+  # in its own single line. When invoked from chromite API endpoints, entering
+  # chroot can generate junk messages on stdout, so we prefix our output with a
+  # line break to further ensure that.
+  print('\n' + json.dumps(output))

@@ -42,8 +42,9 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
 
   def _mock_successful_uprev(self):
     self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
-                         stdout="""{"android_atom": "android/android-1.0",
-                                    "modified_files": ["file1", "file2"]}""")
+                         stdout=('{"revved": true,'
+                                 ' "android_atom": "android/android-1.0",'
+                                 ' "modified_files": ["file1", "file2"]}'))
 
   def test_success(self):
     """Test successful run handling."""
@@ -99,8 +100,8 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
 
   def test_no_uprev(self):
     """Test no uprev handling."""
-    self.rc.AddCmdResult(
-        partial_mock.In('cros_mark_android_as_stable'), stdout='')
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='{"revved": false}')
     build_targets = [build_target_lib.BuildTarget(t) for t in ['foo', 'bar']]
     result = packages.uprev_android(
         'android/package', Chroot(), build_targets=build_targets)
@@ -109,6 +110,14 @@ class UprevAndroidTest(cros_test_lib.RunCommandTestCase):
         ['cros_mark_android_as_stable', '--boards=foo:bar'])
     self.assertCommandContains(['emerge-foo'], expected=False)
     self.assertCommandContains(['emerge-bar'], expected=False)
+
+    self.assertFalse(result.revved)
+
+  def test_ignore_junk_in_stdout(self):
+    """Test when stdout contains junk messages."""
+    self.rc.AddCmdResult(partial_mock.In('cros_mark_android_as_stable'),
+                         stdout='foo\nbar\n{"revved": false}\n')
+    result = packages.uprev_android('android/package', Chroot())
 
     self.assertFalse(result.revved)
 

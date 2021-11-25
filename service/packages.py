@@ -193,12 +193,16 @@ def uprev_android(
       encoding='utf-8',
       chroot_args=chroot.get_enter_args())
 
-  output = result.stdout.strip()
-  if not output:
+  # cros_mark_android_as_stable prints the uprev result to stdout as JSON in a
+  # single line. We only take the last line from stdout to make sure no junk
+  # output is included (e.g. messages from bashrc scripts that run upon entering
+  # the chroot.)
+  output = json.loads(result.stdout.strip().splitlines()[-1])
+
+  if not output['revved']:
     logging.info('Found nothing to rev.')
     return UprevAndroidResult(revved=False)
 
-  output = json.loads(output)
   android_atom = output['android_atom']
 
   for target in build_targets or []:
