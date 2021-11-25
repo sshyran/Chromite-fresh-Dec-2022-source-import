@@ -242,18 +242,6 @@
       ]
     },
     {
-      "name": "cherry64",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "cherry",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "corsola",
       "configs": [
         {
@@ -1575,6 +1563,31 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7163,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "cherry64",
+      "reference_board_name": "cherry64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "cherry64",
+          "name": "cherry",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7216,
+          "is_active": true
+        },
+        {
+          "board_name": "cherry64",
+          "name": "tomato",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7216,
           "is_active": true
         }
       ]
