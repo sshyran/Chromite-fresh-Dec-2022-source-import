@@ -119,7 +119,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         '%s-%s-r1' % (
             portage_util.GetFullAndroidPortagePackageName(self.android_package),
             self.new_version))
-    self.assertEqual(files_to_add, [self.new, 'Manifest'])
+    self.assertEqual(files_to_add,
+                     [self.new, os.path.join(package_dir, 'Manifest')])
     self.assertEqual(files_to_remove, [])
 
   def testUpdateDataCollectorArtifacts(self):

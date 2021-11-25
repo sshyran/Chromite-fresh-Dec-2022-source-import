@@ -294,7 +294,7 @@ def MarkAndroidEBuildAsStable(stable_candidate, unstable_ebuild,
   # Update ebuild manifest and git add it.
   gen_manifest_cmd = ['ebuild', new_ebuild_path, 'manifest', '--force']
   cros_build_lib.run(gen_manifest_cmd, extra_env=None, print_cmd=True)
-  files_to_add.append('Manifest')
+  files_to_add.append(os.path.join(package_dir, 'Manifest'))
 
   return (
       f'{new_ebuild.package}-{new_ebuild.version}',
