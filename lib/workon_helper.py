@@ -676,8 +676,8 @@ class WorkonHelper(object):
     if not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
-      logging.info("Started working on '%s' for '%s'",
-                   ' '.join(new_atoms), self._system)
+      logging.notice("Started working on '%s' for '%s'", ' '.join(new_atoms),
+                     self._system)
 
   def StopWorkingOnPackages(self,
                             packages,
@@ -719,8 +719,8 @@ class WorkonHelper(object):
     if stopped_atoms and not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
-      logging.info("Stopped working on '%s' for '%s'",
-                   ' '.join(stopped_atoms), self._system)
+      logging.notice("Stopped working on '%s' for '%s'",
+                     ' '.join(stopped_atoms), self._system)
 
   def GetPackageInfo(self, packages, use_all=False, use_workon_only=False):
     """Get information about packages.
