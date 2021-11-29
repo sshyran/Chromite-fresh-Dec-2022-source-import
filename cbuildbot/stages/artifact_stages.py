@@ -378,7 +378,8 @@ class ArchiveStage(generic_stages.BoardSpecificBuilderStage,
 
     def PushImage():
       # This helper script is only available on internal manifests currently.
-      if not config['internal']:
+      # Must produce an image.
+      if not config['internal'] or not config['images']:
         return
 
       self.GetParallel('debug_tarball_generated', pretty_name='debug tarball')
