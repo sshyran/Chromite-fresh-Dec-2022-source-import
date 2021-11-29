@@ -12,7 +12,6 @@ from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import depgraph
 from chromite.lib import dependency_graph
-from chromite.lib import git
 from chromite.lib.parser import package_info
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
@@ -119,9 +118,11 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(
         portage_util.PortageDB, 'InstalledPackages',
         return_value=[InstalledPackageMock('sys-apps', 'versioned-package')])
-    # This basically turns off behavior related to adding repositories to
-    # minilayouts.
-    self.PatchObject(git.ManifestCheckout, 'IsFullManifest', return_value=True)
+    # Turn off behavior related to adding repositories to minilayouts.
+    # TODO(b/208444115): Add tests for the full workflow. Ideally will be able
+    #  to create a manifest and ebuilds usable with `ebuild info`.
+    self.PatchObject(workon_helper.WorkonHelper,
+                     '_AddProjectsToPartialManifests')
     self.PatchObject(
         portage_util, 'GetRepositoryForEbuild', return_value=(
             portage_util.RepositoryInfoTuple(srcdir=self._mock_srcdir,

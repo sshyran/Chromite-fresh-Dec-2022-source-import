@@ -584,16 +584,16 @@ class WorkonHelper(object):
     Args:
       atoms: iterable of atoms to ensure are in the manifest.
     """
-    if git.ManifestCheckout.IsFullManifest(self._src_root):
-      # If we're a full manifest, there is nothing to do.
-      return
+    manifest = git.ManifestCheckout.Cached(self._src_root)
 
     should_repo_sync = False
-    for ebuild_path in self._AtomsToEbuilds(atoms):
+    ebuilds = portage_util.FindEbuildsForPackages(atoms, self._sysroot)
+    for ebuild_path in ebuilds.values():
       infos = portage_util.GetRepositoryForEbuild(ebuild_path, self._sysroot)
       for info in infos:
-        if not info.project:
+        if not info.project or manifest.FindCheckouts(info.project):
           continue
+
         cmd = ['loman', 'add', '--workon', info.project]
         cros_build_lib.run(cmd, print_cmd=False)
         should_repo_sync = True
