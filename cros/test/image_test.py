@@ -433,12 +433,19 @@ class SymbolsTest(image_test_lib.ImageTestCase):
         # imports that will appear to be unsatisfied.
         'libmojo_core_arc32.so',
         'libmojo_core_arc64.so',
+        # The camera shared libraries these libraries need are mounted at
+        # runtime.
+        'libcros_camera.so',
+        'camera_hal/intel-ipu6.so',
+        'camera_hal/usb.so',
     ])
 
     failures = []
     for full_name, imported in importeds.items():
-      file_name = os.path.basename(full_name)
-      if file_name in excluded_files:
+      parts = full_name.split('/')
+      file_name = parts[-1]
+      dir_file_name = '/'.join(parts[-2:])
+      if file_name in excluded_files or dir_file_name in excluded_files:
         continue
       missing = imported - exported - known_unsatisfieds.get(file_name, set())
       if missing:
