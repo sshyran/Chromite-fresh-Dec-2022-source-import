@@ -143,6 +143,8 @@ class UprevAndroidLKGBTest(cros_test_lib.MockTestCase):
 
   def test_success(self):
     """Test a successful uprev."""
+    overlay_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'private-overlays',
+                               'project-cheets-private')
     self.PatchObject(android, 'ReadLKGB', return_value='android-lkgb')
     self.PatchObject(packages, 'uprev_android',
                      return_value=packages.UprevAndroidResult(
@@ -153,7 +155,9 @@ class UprevAndroidLKGBTest(cros_test_lib.MockTestCase):
 
     self.assertListEqual(result.modified,
                          [uprev_lib.UprevVersionedPackageModifications(
-                             'android-lkgb', ['file1', 'file2'])])
+                             'android-lkgb',
+                             [os.path.join(overlay_dir, 'file1'),
+                              os.path.join(overlay_dir, 'file2')])])
 
   def test_no_rev(self):
     """Test when nothing revved."""

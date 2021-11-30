@@ -415,7 +415,12 @@ def main(argv):
                                              [android_atom])
 
     output['android_atom'] = android_atom
-    output['modified_files'] = files_to_add + files_to_remove
+    # This field is read by the PUpr uprev handler for creating CLs. We cannot
+    # return absolute paths because this script runs inside chroot but the uprev
+    # handler runs outside.
+    # Here we return paths relative to |overlay_dir|.
+    output['modified_files'] = [os.path.relpath(f, overlay_dir)
+                                for f in files_to_add + files_to_remove]
 
   # The output is being parsed by service.packages.uprev_android and has to be
   # in its own single line. When invoked from chromite API endpoints, entering
