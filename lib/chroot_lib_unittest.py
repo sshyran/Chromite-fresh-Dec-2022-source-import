@@ -63,7 +63,7 @@ class ChrootTest(cros_test_lib.TempDirTestCase):
 
     chroot = chroot_lib.Chroot(remoteexec=remoteexec)
     self.assertEndsWith(chroot.env['RECLIENT_DIR'], '/reclient')
-    self.assertEndsWith(chroot.env['REPROXY_CFG_FILE'], '/reproxy_chroot.cfg')
+    self.assertEndsWith(chroot.env['REPROXY_CFG'], '/reproxy_chroot.cfg')
 
   def testTempdir(self):
     """Test the tempdir functionality."""

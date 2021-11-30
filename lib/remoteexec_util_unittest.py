@@ -1,4 +1,3 @@
-
 # Copyright 2021 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -7,9 +6,9 @@
 
 import os
 
-from chromite.lib import remoteexec_util
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import remoteexec_util
 
 
 class TestRemoteexecUtil(cros_test_lib.MockTempDirTestCase):
@@ -23,8 +22,9 @@ class TestRemoteexecUtil(cros_test_lib.MockTempDirTestCase):
 
     osutils.SafeMakedirs(reclient_dir)
     osutils.SafeMakedirs(reproxy_cfg_file)
+
     remote = remoteexec_util.Remoteexec(reclient_dir, reproxy_cfg_file)
 
     chroot_env = remote.GetChrootExtraEnv()
     self.assertEndsWith(chroot_env['RECLIENT_DIR'], '/reclient')
-    self.assertEndsWith(chroot_env['REPROXY_CFG_FILE'], '/reproxy_chroot.cfg')
+    self.assertEndsWith(chroot_env['REPROXY_CFG'], '/reproxy_chroot.cfg')
