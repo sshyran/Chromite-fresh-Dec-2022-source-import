@@ -4,6 +4,7 @@
 
 """Unit tests for cros_mark_android_as_stable.py."""
 
+import builtins
 import os
 
 from chromite.lib import constants
@@ -14,6 +15,7 @@ from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
+from chromite.service import android
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 
@@ -40,7 +42,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     """Setup vars and create mock dir."""
     self.android_package = constants.ANDROID_PI_PACKAGE
 
-    self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
+    self.tmp_overlay = os.path.join(self.tempdir, 'private-overlays',
+                                    'project-cheets-private')
     self.mock_android_dir = os.path.join(
         self.tmp_overlay,
         portage_util.GetFullAndroidPortagePackageName(self.android_package))
@@ -49,9 +52,9 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                           self.android_package + '-%s.ebuild')
     self.unstable = ebuild % '9999'
     self.old_version = '25'
-    self.old = ebuild % self.old_version
+    self.old = ebuild % ('%s-r1' % self.old_version)
     self.old2_version = '50'
-    self.old2 = ebuild % self.old2_version
+    self.old2 = ebuild % ('%s-r1' % self.old2_version)
     self.new_version = '100'
     self.new = ebuild % ('%s-r1' % self.new_version)
 
@@ -121,7 +124,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
             self.new_version))
     self.assertEqual(files_to_add,
                      [self.new, os.path.join(package_dir, 'Manifest')])
-    self.assertEqual(files_to_remove, [])
+    self.assertEqual(files_to_remove, [self.old2])
 
   def testUpdateDataCollectorArtifacts(self):
     android_version = 100
@@ -190,3 +193,69 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
         'X86_64_USER_UREADAHEAD_PACK': expectation1,
         'ARM_USERDEBUG_GMS_CORE_CACHE': expectation2,
     }, variables)
+
+  def testMainRevved(self):
+    android_version = self.new_version
+
+    self.PatchObject(cros_build_lib, 'run')
+    self.PatchObject(portage_util.EBuild, 'GetCrosWorkonVars',
+                     return_value=None)
+    self.setupMockRuntimeDataBuild(android_version)
+    mock_mirror_artifacts = self.PatchObject(android, 'MirrorArtifacts',
+                                             return_value=android_version)
+    mock_print = self.PatchObject(builtins, 'print')
+    android_bucket_url = 'gs://ab'
+
+    cros_mark_android_as_stable.main([
+        '--android_bucket_url', android_bucket_url,
+        '--android_build_branch', self.build_branch,
+        '--android_package', self.android_package,
+        '--arc_bucket_url', self.arc_bucket_url,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--runtime_artifacts_bucket_url', self.runtime_artifacts_bucket_url,
+        '--skip_commit',
+    ])
+
+    mock_mirror_artifacts.assert_called_once_with(android_bucket_url,
+                                                  self.build_branch,
+                                                  self.arc_bucket_url,
+                                                  self.mock_android_dir,
+                                                  android_version)
+    # pylint: disable=line-too-long
+    mock_print.assert_called_once_with('\n{"android_atom": "chromeos-base/android-container-pi-100-r1", "modified_files": ["chromeos-base/android-container-pi/android-container-pi-100-r1.ebuild", "chromeos-base/android-container-pi/Manifest", "chromeos-base/android-container-pi/android-container-pi-50-r1.ebuild"], "revved": true}')
+
+  def testMainNotRevved(self):
+    android_version = self.old2_version
+
+    # Mock to create a stable ebuild identical to the original.
+    def MockMarkAsStable(_unstable_path, new_stable_path, _vars, **_kwargs):
+      osutils.WriteFile(new_stable_path, self.stable_data)
+
+    self.PatchObject(portage_util.EBuild, 'GetCrosWorkonVars',
+                     return_value=None)
+    self.PatchObject(portage_util.EBuild, 'MarkAsStable',
+                     side_effect=MockMarkAsStable)
+    self.setupMockRuntimeDataBuild(android_version)
+    mock_mirror_artifacts = self.PatchObject(android, 'MirrorArtifacts',
+                                             return_value=android_version)
+    mock_print = self.PatchObject(builtins, 'print')
+    android_bucket_url = 'gs://ab'
+
+    cros_mark_android_as_stable.main([
+        '--android_bucket_url', android_bucket_url,
+        '--android_build_branch', self.build_branch,
+        '--android_package', self.android_package,
+        '--arc_bucket_url', self.arc_bucket_url,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--runtime_artifacts_bucket_url', self.runtime_artifacts_bucket_url,
+        '--skip_commit',
+    ])
+
+    mock_mirror_artifacts.assert_called_once_with(android_bucket_url,
+                                                  self.build_branch,
+                                                  self.arc_bucket_url,
+                                                  self.mock_android_dir,
+                                                  android_version)
+    mock_print.assert_called_once_with('\n{"revved": false}')

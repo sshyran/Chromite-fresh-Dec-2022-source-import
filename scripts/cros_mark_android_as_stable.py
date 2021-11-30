@@ -397,7 +397,7 @@ def main(argv):
       version_to_uprev, android_package_dir, android_build_branch,
       options.arc_bucket_url, options.runtime_artifacts_bucket_url)
 
-  output = dict(revved=revved)
+  output = dict(revved=bool(revved))
 
   if revved:
     android_atom, files_to_add, files_to_remove = revved
@@ -426,4 +426,4 @@ def main(argv):
   # in its own single line. When invoked from chromite API endpoints, entering
   # chroot can generate junk messages on stdout, so we prefix our output with a
   # line break to further ensure that.
-  print('\n' + json.dumps(output))
+  print('\n' + json.dumps(output, sort_keys=True))
