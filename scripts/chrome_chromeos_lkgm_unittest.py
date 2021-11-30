@@ -126,6 +126,10 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
           self.committer.FindAlreadyOpenLKGMRoll)
 
   def testSubmitToCQ(self):
+    self.committer._buildbucket_id = 'some-build-id'
     already_open_issue = 123456
-    with mock.patch.object(self.committer._gerrit_helper, 'SetReview'):
+    with mock.patch.object(
+        self.committer._gerrit_helper, 'SetReview') as mock_review:
       self.committer.SubmitToCQ(already_open_issue)
+    self.assertIn(
+        self.committer._buildbucket_id, mock_review.call_args[1]['msg'])

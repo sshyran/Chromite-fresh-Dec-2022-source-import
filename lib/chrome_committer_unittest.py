@@ -70,7 +70,7 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
     self.committer.Commit(['OWNERS', 'chromeos/BUILD.gn'],
                           'Modify OWNERS and BUILD.gn')
 
-    self.committer.Upload()
+    self.committer.Upload(publish=False)
 
     self.assertCommandContains(['git',
                                 '-c', 'user.email=user@test.org',
@@ -80,8 +80,11 @@ class ChromeCommitterTester(cros_test_lib.RunCommandTestCase,
                                 '--bypass-hooks', '-f',
                                 '--reviewers',
                                 'chrome-os-gardeners-reviews@google.com',
-                                '--set-bot-commit',
-                                '--send-mail'])
+                                '--set-bot-commit'])
+    self.assertCommandContains(['--send-mail'], expected=False)
+
+    self.committer.Upload(publish=True)
+    self.assertCommandContains(['--send-mail'])
 
   def testUploadCQ(self):
     """Tests that we can upload a commit and submit it to the CQ."""

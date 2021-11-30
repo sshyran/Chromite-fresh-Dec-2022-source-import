@@ -85,8 +85,13 @@ class ChromeCommitter(object):
     except cros_build_lib.RunCommandError as e:
       raise CommitError('Could not create git commit: %r' % e)
 
-  def Upload(self):
-    """Uploads the change to gerrit."""
+  def Upload(self, publish=True):
+    """Uploads the change to gerrit.
+
+    Args:
+      publish: If True, will publish the CL after uploading and notify the
+          reviewers. Stays in WIP mode otherwise.
+    """
     logging.info('Uploading commit.')
 
     try:
@@ -96,8 +101,9 @@ class ChromeCommitter(object):
           'cl', 'upload', '-v', '-m', self._commit_msg, '--bypass-hooks', '-f',
           '--reviewers', constants.CHROME_GARDENER_REVIEW_EMAIL,
           '--set-bot-commit']
-      # Marks CL as ready.
-      upload_args += ['--send-mail']
+      if publish:
+        # Marks CL as ready.
+        upload_args += ['--send-mail']
       if self._cq:
         upload_args += ['--use-commit-queue']
       elif self._dryrun:

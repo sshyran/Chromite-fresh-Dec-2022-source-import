@@ -81,7 +81,7 @@ class ChromeLKGMCommitter(object):
       self._committer.Checkout(self._NEEDED_FILES)
       self.UpdateLKGM()
       self.CommitNewLKGM()
-      self._committer.Upload()
+      self._committer.Upload(publish=False)
 
   def CheckoutChrome(self):
     """Checks out chrome into tmp checkout_dir."""
@@ -165,7 +165,11 @@ class ChromeLKGMCommitter(object):
       logging.info('Would have applied CQ+2 to %s', already_open_lkgm_cl)
     else:
       logging.info('Applying CQ+2 to %s', already_open_lkgm_cl)
-      self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels)
+      msg = None
+      if self._buildbucket_id:
+        msg = 'Applying CQ+2 from build %s' % self._buildbucket_id
+      self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels,
+                                    msg=msg, ready=True)
 
   def UpdateLKGM(self):
     """Updates the LKGM file with the new version."""
@@ -190,6 +194,9 @@ class ChromeLKGMCommitter(object):
     commit_msg_template = (
         '%(header)s\n'
         '%(build_link)s'
+        '\nThis build will remain in WIP until both master-full and '
+        'master-release\nbuilds for this version are finished. This CL '
+        'should not be submitted\nto the CQ until that happens.\n'
         '\n%(cq_includes)s')
     cq_includes = ''
     for bot in self._PRESUBMIT_BOTS:
