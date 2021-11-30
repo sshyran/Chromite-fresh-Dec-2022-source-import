@@ -570,8 +570,10 @@ class GerritHelper(object):
 
   def _get_changenumber_from_stdout(self, stdout):
     """Retrieve the change number written in the URL of the git stdout."""
-    match = re.search(r'^remote:\s+[^\s]+/\+/(?P<changenum>[0-9]+)',
-                      stdout, flags=re.MULTILINE)
+    url = git.GetUrlFromRemoteOutput(stdout)
+    if not url:
+      return None
+    match = re.search(r'(?P<changenum>[0-9]+)$', url)
     if match:
       return match['changenum']
     return None

@@ -1517,7 +1517,7 @@ def DeleteStaleLocks(git_repo):
   corruption. Only use this if you are sure that no other git process is
   accessing the repo (such as at the beginning of a fresh build).
 
-  Args"
+  Args:
     git_repo: Directory of git repository.
   """
   git_gitdir = GetGitGitdir(git_repo)
@@ -1529,3 +1529,21 @@ def DeleteStaleLocks(git_repo):
       p = os.path.join(root, filename)
       logging.info('Found stale git lock, removing: %s', p)
       os.remove(p)
+
+
+def GetUrlFromRemoteOutput(remote_output: str) -> str:
+  """Retrieve the change URL from the git remote output.
+
+  The URL must begin with https://.
+
+  Args:
+    remote_output: The git remote output.
+
+  Returns:
+    URL in remote git output, or None if a URL couldn't be found.
+  """
+  match = re.search(
+      r'^remote:\s+(?P<url>https://[^\s]+)', remote_output, flags=re.MULTILINE)
+  if match:
+    return match['url']
+  return None
