@@ -72,6 +72,11 @@ def get_config(build_target_name: str,
   if servo:
     dut_control_on, dut_control_off, programmer = module.get_config(servo)
     force_flashrom = getattr(module, 'DEPLOY_SERVO_FORCE_FLASHROM', False)
+    # Some servo variables are set to a different value by other programs.
+    # Reset them to the default and then append with variables from the
+    # config to avoid overriding config.
+    reset_dut_control_on = [['ec_uart_timeout:10']]
+    dut_control_on = reset_dut_control_on + dut_control_on
   else:
     dut_control_on = []
     dut_control_off = []
