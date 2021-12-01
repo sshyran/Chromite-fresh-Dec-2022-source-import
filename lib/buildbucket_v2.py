@@ -397,7 +397,7 @@ def GetBotId(build):
   # I don't think there can ever be more than one entry in the list, but
   # could be zero.
   bot_id = GetStringPairValue(build, ['infra', 'swarming', 'botDimensions'],
-                             'id')
+                              'id')
   if not bot_id:
     return None
 
@@ -447,19 +447,19 @@ class BuildbucketV2(object):
       if isinstance(buildbucket_id, str):
         buildbucket_id = int(buildbucket_id)
       batch_requests.append(
-        builds_service_pb2.BatchRequest.Request(
-          cancel_build=(
-            builds_service_pb2.CancelBuildRequest(
-              id=buildbucket_id,
-              summary_markdown=summary_markdown,
-              fields=(field_mask_pb2.FieldMask(paths=[properties])
-                      if properties else None)
-            )
+          builds_service_pb2.BatchRequest.Request(
+              cancel_build=(
+                  builds_service_pb2.CancelBuildRequest(
+                      id=buildbucket_id,
+                      summary_markdown=summary_markdown,
+                      fields=(field_mask_pb2.FieldMask(paths=[properties])
+                              if properties else None)
+                  )
+              )
           )
-        )
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=batch_requests), **self._client_kwargs)
+        requests=batch_requests), **self._client_kwargs)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -480,19 +480,25 @@ class BuildbucketV2(object):
     batch_requests = []
     for buildbucket_id in buildbucket_ids:
       batch_requests.append(
-        builds_service_pb2.BatchRequest.Request(
-          get_build=(
-            builds_service_pb2.GetBuildRequest(
-              id=buildbucket_id,
-              fields=(field_mask_pb2.FieldMask(paths=[properties])
-                      if properties else None)
-            )
+          builds_service_pb2.BatchRequest.Request(
+              get_build=(
+                  builds_service_pb2.GetBuildRequest(
+                      id=buildbucket_id,
+                      fields=(field_mask_pb2.FieldMask(paths=[properties])
+                              if properties else None)
+                  )
+              )
           )
-        )
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=batch_requests), **self._client_kwargs)
+        requests=batch_requests), **self._client_kwargs)
 
+  # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
+  @retry_util.WithRetry(max_retry=5, sleep=60.0, exception=SSLError)
+  @retry_util.WithRetry(max_retry=5, sleep=60.0, exception=socket.error)
+  @retry_util.WithRetry(max_retry=5, sleep=60.0, exception=socket.timeout)
+  @retry_util.WithRetry(max_retry=5, sleep=60.0,
+                        exception=http.client.ResponseNotReady)
   def BatchSearchBuilds(self, search_requests):
     """SearchBuild RPC call wrapping function.
 
@@ -506,10 +512,10 @@ class BuildbucketV2(object):
     requests = []
     for request in search_requests:
       requests.append(
-        builds_service_pb2.BatchRequest.Request(search_builds=request)
+          builds_service_pb2.BatchRequest.Request(search_builds=request)
       )
     return self.client.Batch(builds_service_pb2.BatchRequest(
-      requests=requests), **self._client_kwargs)
+        requests=requests), **self._client_kwargs)
 
   # TODO(crbug/1006818): Need to handle ResponseNotReady given by luci prpc.
   @retry_util.WithRetry(max_retry=5, sleep=20.0, exception=SSLError)
@@ -529,10 +535,10 @@ class BuildbucketV2(object):
       https://chromium.googlesource.com/infra/luci/luci-go/+/HEAD/buildbucket/proto/build.proto
     """
     cancel_build_request = builds_service_pb2.CancelBuildRequest(
-         id=buildbucket_id,
-         summary_markdown=summary_markdown,
-         fields=(field_mask_pb2.FieldMask(paths=[properties])
-                 if properties else None)
+        id=buildbucket_id,
+        summary_markdown=summary_markdown,
+        fields=(field_mask_pb2.FieldMask(paths=[properties])
+                if properties else None)
     )
     return self.client.CancelBuild(cancel_build_request, **self._client_kwargs)
 
