@@ -8,7 +8,6 @@ import os
 
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-from chromite.lib import sysroot_lib
 
 
 class BuildELFError(Exception):
@@ -80,19 +79,3 @@ int main() {
     raise BuildELFError('%s\n%s' % (e, e.result.error))
   finally:
     os.unlink(source_fn)
-
-
-def create_stub_make_conf(sysroot: os.PathLike):
-  """Creates a stub sysroot_lib._MAKE_CONF for tests to correctly read configs.
-
-  sysroot_lib expects sysroot_lib._MAKE_CONF (etc/make.conf) to exist and to
-  source sysroot_lib._MAKE_CONF_BOARD_SETUP (etc/make.conf.board_setup) to read
-  the config.  For tests to read their expected config, a stub _MAKE_CONF needs
-  to be created if they are using sysroot_lib.WriteConfig().
-
-  Args:
-    sysroot: The path to the sysroot
-  """
-  # pylint: disable=protected-access
-  osutils.WriteFile(os.path.join(sysroot, sysroot_lib._MAKE_CONF),
-                    'source make.conf.board_setup', makedirs=True)

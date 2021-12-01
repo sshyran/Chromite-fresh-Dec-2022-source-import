@@ -9,7 +9,6 @@ import os
 from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import unittest_lib
 from chromite.scripts import cros_choose_profile
 
 
@@ -127,9 +126,6 @@ class ProfileTest(cros_test_lib.TempDirTestCase):
 
     for filepath, contents in path_contents.items():
       osutils.WriteFile(self._TempdirPath(filepath), contents)
-
-    # make.conf needs to exist to correctly read back config.
-    unittest_lib.create_stub_make_conf(self._TempdirPath(b1_build_root))
 
     # Mapping between profile argument and the expected parent contents.
     self.profile_expected_parent = {

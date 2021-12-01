@@ -95,6 +95,8 @@ _MAKE_CONF_BOARD = 'etc/make.conf.board'
 _MAKE_CONF_USER = 'etc/make.conf.user'
 _MAKE_CONF_HOST_SETUP = 'etc/make.conf.host_setup'
 
+_CONFIGURATION_PATH = _MAKE_CONF_BOARD_SETUP
+
 _CACHE_PATH = 'var/cache/edb/chromeos'
 
 _CHROMIUMOS_OVERLAY = '/usr/local/portage/chromiumos'
@@ -272,13 +274,7 @@ class Sysroot(object):
 
   def __init__(self, path):
     self.path = path
-
-    # Read config from _MAKE_CONF which also pulls in config from
-    # _MAKE_CONF_BOARD_SETUP, but only write any config overrides directly to
-    # _MAKE_CONF_BOARD_SETUP.
-    self._config_file_read = self.Path(_MAKE_CONF)
-    self._config_file_write = self.Path(_MAKE_CONF_BOARD_SETUP)
-
+    self._config_file = self.Path(_CONFIGURATION_PATH)
     self._cache_file = self.Path(_CACHE_PATH)
     self._cache_file_lock = self._cache_file + '.lock'
 
@@ -321,11 +317,8 @@ class Sysroot(object):
       field: Field from the standard configuration file to get.
         One of STANDARD_FIELD_* from above.
     """
-    # We want to source from within the config's directory as the config
-    # itself may source other scripts using a relative path.
-    with osutils.ChdirContext(Path(self._config_file_read).parent):
-      return osutils.SourceEnvironment(self._config_file_read,
-                                       [field], multiline=True).get(field)
+    return osutils.SourceEnvironment(self._config_file,
+                                     [field], multiline=True).get(field)
 
   def GetCachedField(self, field):
     """Returns the value of |field| in the sysroot cache file.
@@ -554,7 +547,8 @@ class Sysroot(object):
     Args:
       board (str): The name of the board being setup in the sysroot.
     """
-    self.WriteConfig(self.GenerateBoardSetupConfig(board))
+    osutils.WriteFile(self.Path(_MAKE_CONF_BOARD_SETUP),
+                      self.GenerateBoardSetupConfig(board), sudo=True)
 
   def InstallMakeConfUser(self):
     """Make sure the sysroot has the make.conf.user file.
@@ -627,7 +621,7 @@ class Sysroot(object):
     Args:
       config: configuration to use.
     """
-    osutils.WriteFile(self._config_file_write, config, makedirs=True, sudo=True)
+    osutils.WriteFile(self._config_file, config, makedirs=True, sudo=True)
 
   def GenerateBoardMakeConf(self, accepted_licenses=None):
     """Generates the board specific make.conf.
