@@ -109,7 +109,7 @@ class SDKFetcher(object):
   def __init__(self, cache_dir, board, clear_cache=False, chrome_src=None,
                sdk_path=None, toolchain_path=None, silent=False,
                use_external_config=None,
-               fallback_versions=VERSIONS_TO_CONSIDER):
+               fallback_versions=VERSIONS_TO_CONSIDER, is_lacros=False):
     """Initialize the class.
 
     Args:
@@ -127,6 +127,7 @@ class SDKFetcher(object):
         force usage of the external configuration if both external and internal
         are available.
       fallback_versions: The number of versions to consider.
+      is_lacros: whether it's Lacros-Chrome build or not.
     """
     site_config = config_lib.GetConfig()
 
@@ -150,6 +151,7 @@ class SDKFetcher(object):
     self.toolchain_path = toolchain_path
     self.fallback_versions = fallback_versions
     self.silent = silent
+    self.is_lacros = is_lacros
 
     # For external configs, there is no need to run 'gsutil config', because
     # the necessary files are all accessible to anonymous users.
@@ -235,7 +237,7 @@ class SDKFetcher(object):
 
   @staticmethod
   def GetChromeLKGM(chrome_src_dir=None):
-    """Get ChromeOS LKGM checked into the Chrome tree.
+    """Get the CHROMEOS LKGM checked into the Chrome tree.
 
     Args:
       chrome_src_dir: chrome source directory.
@@ -966,6 +968,12 @@ class ChromeSDKCommand(command.CliCommand):
     parser.add_argument(
         '--cfi', action='store_true', default=False,
         help='Enable CFI in build.')
+    parser.add_argument(
+        '--is-lacros', action='store_true', default=False,
+        help='Whether it is Lacros-Chrome build or not. This is temporarily '
+             'added to work around a Lacros CrOS toolchain bug due to version '
+             'skew, and should be removed once Lacros is swiched to use '
+             'Chromium toolchain: crbug.com/1275386.')
 
     parser.caching_group.add_argument(
         '--clear-sdk-cache', action='store_true',
@@ -1024,9 +1032,10 @@ class ChromeSDKCommand(command.CliCommand):
   def _SaveSharedGnArgs(self, gn_args, board):
     """Saves the new gn args data to the shared location."""
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-
-    file_path = os.path.join(shared_dir, board + '.gni')
-    osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+    if not self.options.is_lacros:
+      file_path = os.path.join(shared_dir, board + '.gni')
+      osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+      return
 
     # If the board is a generic family, generate -crostoolchain.gni files,
     # too, which is used by Lacros build.
@@ -1278,7 +1287,15 @@ class ChromeSDKCommand(command.CliCommand):
     # Add board and sdk version as gn args so that tests can bind them in
     # test wrappers generated at compile time.
     gn_args['cros_board'] = board
-    gn_args['cros_sdk_version'] = sdk_ctx.version
+
+    if options.is_lacros:
+      # The 'cros_sdk_version' is used by the chromium BUILD files to decide
+      # the runtime dependencies to isolate for swarming based testing, and
+      # given that Lacros uses CHROMEOS_LKGM for testing regardless of the
+      # version used for compilation, so always set the value as CHROME_LKGM.
+      gn_args['cros_sdk_version'] = SDKFetcher.GetChromeLKGM(options.chrome_src)
+    else:
+      gn_args['cros_sdk_version'] = sdk_ctx.version
 
     # Export the board/version info in a more accessible way, so developers can
     # reference them in their chrome_sdk.bashrc files, as well as within the
@@ -1553,6 +1570,11 @@ class ChromeSDKCommand(command.CliCommand):
       cros_build_lib.Die(
           'Must specify --no-shell when preparing multiple boards.')
 
+    if self.options.is_lacros and not self.options.version:
+      cros_build_lib.Die(
+          'Must specify --version for --is-lacros because Lacros-Chrome build '
+          'does not use the CHROMEOS_LKGM version for compilation')
+
     if os.environ.get(SDKFetcher.SDK_VERSION_ENV) is not None:
       cros_build_lib.Die('Already in an SDK shell.')
 
@@ -1627,7 +1649,8 @@ class ChromeSDKCommand(command.CliCommand):
         toolchain_path=self.options.toolchain_path,
         silent=self.silent,
         use_external_config=self.options.use_external_config,
-        fallback_versions=self.options.fallback_versions
+        fallback_versions=self.options.fallback_versions,
+        is_lacros=self.options.is_lacros
     )
 
     prepare_version = self.options.version

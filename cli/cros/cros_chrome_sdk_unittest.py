@@ -301,7 +301,29 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       board_crostoolchain_arg_file = os.path.join(
           self.chrome_src_dir,
           'build/args/chromeos/%s-crostoolchain.gni' % board)
+      self.assertNotExists(board_crostoolchain_arg_file)
+
+  def testManyBoardsLacros(self):
+    """Test a runthrough when multiple boards are specified via --boards."""
+    self.SetupCommandMock(many_boards=True,
+                          extra_args=['--is-lacros', '--version=1234.0.0'])
+    lkgm_file = os.path.join(self.chrome_src_dir, constants.PATH_TO_CHROME_LKGM)
+    osutils.Touch(lkgm_file, makedirs=True)
+    osutils.WriteFile(lkgm_file, '5678.0.0')
+
+    self.cmd_mock.inst.Run()
+    for board in SDKFetcherMock.BOARDS:
+      board_arg_file = os.path.join(
+          self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
+      self.assertNotExists(board_arg_file)
+      # Because board is either amd64-generic or arm-generic,
+      # it is a target to create -crostoolchain.gni files, too.
+      board_crostoolchain_arg_file = os.path.join(
+          self.chrome_src_dir,
+          'build/args/chromeos/%s-crostoolchain.gni' % board)
       self.assertExists(board_crostoolchain_arg_file)
+      with open(board_crostoolchain_arg_file) as f:
+        self.assertIn('cros_sdk_version = "5678.0.0"', f.read())
 
   def testManyBoardsBrokenArgs(self):
     """Tests that malformed args.gn files will be fixed in --boards."""
@@ -714,6 +736,7 @@ class VersionTest(cros_test_lib.MockTempDirTestCase,
     lkgm_file = os.path.join(gclient_root, 'src', constants.PATH_TO_CHROME_LKGM)
     osutils.Touch(lkgm_file, makedirs=True)
     osutils.WriteFile(lkgm_file, self.VERSION)
+
     self.sdk_mock.UnMockAttr('UpdateDefaultVersion')
     self.sdk.UpdateDefaultVersion()
     self.assertEqual(self.sdk.GetDefaultVersion(),
