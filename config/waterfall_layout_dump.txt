@@ -315,6 +315,7 @@
     snappy-release
     soraka-libcamera-release
     soraka-release
+    strongbad-kernelnext-release
     strongbad-release
     tael-release
     tatl-release
@@ -1447,6 +1448,7 @@
     snappy-release-tryjob
     soraka-libcamera-release-tryjob
     soraka-release-tryjob
+    strongbad-kernelnext-release-tryjob
     strongbad-release-tryjob
     tael-release-tryjob
     tatl-release-tryjob
@@ -1793,6 +1795,12 @@
   strongbad-factory-strongbad-13963.B-factorybranch-tryjob
   strongbad-factory-trogdor-13443.B-factorybranch-tryjob
   strongbad-full-tryjob
+  strongbad-kernelnext-full-tryjob
+  strongbad-kernelnext-llvm-next-toolchain-tryjob
+  strongbad-kernelnext-llvm-toolchain-tryjob
+  strongbad-kernelnext-payloads-tryjob
+  strongbad-kernelnext-release-tryjob
+  strongbad-kernelnext-unittest-stress
   strongbad-llvm-next-toolchain-tryjob
   strongbad-llvm-toolchain-tryjob
   strongbad-payloads-tryjob
