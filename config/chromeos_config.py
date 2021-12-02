@@ -343,40 +343,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'asan',
-      site_config.templates.full,
-      profile='asan',
-      # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
-      # re-enable it. It used to work till late 2019.
-      rootfs_verification=False,
-      # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
-      disk_layout='16gb-rootfs',
-      # TODO(deymo): ASan builders generate bigger files, in particular a bigger
-      # Chrome binary, that update_engine can't handle in delta payloads due to
-      # memory limits. Remove the following lines once crbug.com/329248 is
-      # fixed.
-      images=['base', 'test'],
-      chrome_sdk=False,
-      vm_tests=[],
-      vm_tests_override=None,
-      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-      'TOC-ASAN',
-  )
-
-  site_config.AddTemplate(
-      'ubsan',
-      profile='ubsan',
-      # Need larger rootfs for ubsan builds.
-      disk_layout='16gb-rootfs',
-      images=['base', 'test'],
-      chrome_sdk=False,
-      vm_tests=[],
-      vm_tests_override=None,
-      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-      'TOC-ASAN',
-  )
-
-  site_config.AddTemplate(
       'fuzzer',
       site_config.templates.internal,
       site_config.templates.informational,
@@ -638,6 +604,15 @@ def GeneralTemplates(site_config):
               timeout=2 * 60 * 60),
       ],
   )
+  site_config.AddTemplate(
+      'tast_vm_asan_tests',
+      tast_vm_tests=[
+          config_lib.TastVMTestConfig(
+              'tast_vm_asan_critical',
+              ['("group:asan" && !informational)'],
+              timeout=2 * 60 * 60),
+      ],
+  )
 
   site_config.AddTemplate(
       'moblab_vm_tests',
@@ -667,6 +642,42 @@ def GeneralTemplates(site_config):
       site_config.templates.full,
       profile='vm-optimized',
   )
+
+  site_config.AddTemplate(
+      'asan',
+      site_config.templates.full,
+      site_config.templates.tast_vm_asan_tests,
+      profile='asan',
+      # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
+      # re-enable it. It used to work till late 2019.
+      rootfs_verification=False,
+      # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
+      disk_layout='16gb-rootfs',
+      # TODO(deymo): ASan builders generate bigger files, in particular a bigger
+      # Chrome binary, that update_engine can't handle in delta payloads due to
+      # memory limits. Remove the following lines once crbug.com/329248 is
+      # fixed.
+      images=['base', 'test'],
+      chrome_sdk=False,
+      vm_tests=[],
+      vm_tests_override=None,
+      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
+      'TOC-ASAN',
+  )
+
+  site_config.AddTemplate(
+      'ubsan',
+      profile='ubsan',
+      # Need larger rootfs for ubsan builds.
+      disk_layout='16gb-rootfs',
+      images=['base', 'test'],
+      chrome_sdk=False,
+      vm_tests=[],
+      vm_tests_override=None,
+      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
+      'TOC-ASAN',
+  )
+
 
 
 def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
