@@ -235,7 +235,6 @@
     fizz-labstation-release
     fizz-moblab-release
     fizz-release
-    gale-release
     goroh-release
     grunt-arc-r-release
     grunt-kernelnext-release
@@ -1368,7 +1367,6 @@
     fizz-labstation-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
-    gale-release-tryjob
     goroh-release-tryjob
     grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob

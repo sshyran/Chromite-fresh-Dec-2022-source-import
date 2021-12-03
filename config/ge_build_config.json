@@ -290,18 +290,6 @@
       ]
     },
     {
-      "name": "gale",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "gale",
-          "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
       "name": "goroh",
       "configs": [
         {
