@@ -1582,12 +1582,14 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
                                  [ebuild_path])
 
   def test_lacros_uprev_fails(self):
+    """Test a lacros package uprev with no triggers"""
     self.PatchObject(
         uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None])
     with self.assertRaises(IndexError):
       packages.uprev_lacros(None, [], None)
 
   def test_lacros_uprev_revision_bump(self):
+    """Test lacros package uprev."""
     lacros_outcome = self.revisionBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
@@ -1597,6 +1599,7 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_version_bump(self):
+    """Test lacros package uprev."""
     lacros_outcome = self.majorBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
@@ -1606,6 +1609,7 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_new_ebuild_created(self):
+    """Test lacros package uprev."""
     lacros_outcome = self.newEbuildCreatedOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
@@ -1615,6 +1619,7 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     self.assertTrue(output.uprevved)
 
   def test_lacros_uprev_newer_version_exist(self):
+    """Test the newer version exists uprev should not happen."""
     lacros_outcome = self.newerVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
@@ -1624,10 +1629,96 @@ class UprevLacrosTest(cros_test_lib.MockTestCase):
     self.assertFalse(output.uprevved)
 
   def test_lacros_uprev_same_version_exist(self):
+    """Test the same version exists uprev should not happen."""
     lacros_outcome = self.sameVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
         'uprev_workon_ebuild_to_version',
         side_effect=[lacros_outcome])
     output = packages.uprev_lacros(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+
+class UprevLacrosInParallelTest(cros_test_lib.MockTestCase):
+  """Tests for uprev_lacros"""
+
+  def setUp(self):
+    self.refs = [
+        GitRef(path='/lacros', revision='abc123', ref='refs/tags/123.456.789.0')
+    ]
+    self.MOCK_LACROS_EBUILD_PATH = 'chromeos-lacros-123.456.789.0-r1.ebuild'
+
+  def revisionBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
+
+  def majorBumpOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.VERSION_BUMP, [ebuild_path])
+
+  def newerVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.NEWER_VERSION_EXISTS,
+                                 [ebuild_path])
+
+  def sameVersionOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.SAME_VERSION_EXISTS,
+                                 [ebuild_path])
+
+  def newEbuildCreatedOutcome(self, ebuild_path):
+    return uprev_lib.UprevResult(uprev_lib.Outcome.NEW_EBUILD_CREATED,
+                                 [ebuild_path])
+
+  def test_lacros_uprev_fails(self):
+    """Test a lacros package uprev with no triggers"""
+    self.PatchObject(
+        uprev_lib, 'uprev_workon_ebuild_to_version', side_effect=[None])
+    with self.assertRaises(TypeError):
+      packages.uprev_lacros_in_parallel(None, [], None)
+
+  def test_lacros_uprev_revision_bump(self):
+    """Test lacros package uprev."""
+    lacros_outcome = self.revisionBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[lacros_outcome])
+    output = packages.uprev_lacros_in_parallel(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_lacros_uprev_version_bump(self):
+    """Test lacros package uprev."""
+    lacros_outcome = self.majorBumpOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[lacros_outcome])
+    output = packages.uprev_lacros_in_parallel(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_lacros_uprev_new_ebuild_created(self):
+    """Test lacros package uprev."""
+    lacros_outcome = self.newEbuildCreatedOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[lacros_outcome])
+    output = packages.uprev_lacros_in_parallel(None, self.refs, None)
+    self.assertTrue(output.uprevved)
+
+  def test_lacros_uprev_newer_version_exist(self):
+    """Test the newer version exists uprev should not happen."""
+    lacros_outcome = self.newerVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[lacros_outcome])
+    output = packages.uprev_lacros_in_parallel(None, self.refs, None)
+    self.assertFalse(output.uprevved)
+
+  def test_lacros_uprev_same_version_exist(self):
+    """Test the same version exists uprev should not happen."""
+    lacros_outcome = self.sameVersionOutcome(self.MOCK_LACROS_EBUILD_PATH)
+    self.PatchObject(
+        uprev_lib,
+        'uprev_workon_ebuild_to_version',
+        side_effect=[lacros_outcome])
+    output = packages.uprev_lacros_in_parallel(None, self.refs, None)
     self.assertFalse(output.uprevved)

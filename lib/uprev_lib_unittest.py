@@ -24,7 +24,7 @@ from chromite.lib.parser import package_info
 
 
 class ChromeVersionTest(cros_test_lib.TestCase):
-  """Tests for best_chrome_version and get_chrome_version_from_refs."""
+  """Tests for best_version and get_version_from_refs."""
 
   def setUp(self):
     # The tag ref template.
@@ -41,41 +41,41 @@ class ChromeVersionTest(cros_test_lib.TestCase):
 
   def test_single_version(self):
     """Test a single version."""
-    self.assertEqual(self.best, uprev_lib.best_chrome_version([self.best]))
+    self.assertEqual(self.best, uprev_lib.best_version([self.best]))
 
   def test_multiple_versions(self):
     """Test a single version."""
-    self.assertEqual(self.best, uprev_lib.best_chrome_version(self.versions))
+    self.assertEqual(self.best, uprev_lib.best_version(self.versions))
 
   def test_no_versions_fail(self):
     """Test no versions given."""
-    with self.assertRaises(AssertionError):
-      uprev_lib.best_chrome_version([])
+    with self.assertRaises(TypeError):
+      uprev_lib.best_version([])
 
   def test_unstable_only(self):
     """Test the unstable version."""
     self.assertEqual(self.unstable,
-                     uprev_lib.best_chrome_version([self.unstable]))
+                     uprev_lib.best_version([self.unstable]))
 
   def test_unstable_multiple(self):
     """Test unstable alongside multiple other versions."""
     self.assertEqual(self.unstable,
-                     uprev_lib.best_chrome_version(self.unstable_versions))
+                     uprev_lib.best_version(self.unstable_versions))
 
   def test_single_ref(self):
     """Test a single ref."""
     self.assertEqual(self.best,
-                     uprev_lib.get_chrome_version_from_refs([self.best_ref]))
+                     uprev_lib.get_version_from_refs([self.best_ref]))
 
   def test_multiple_refs(self):
     """Test multiple refs."""
     self.assertEqual(self.best,
-                     uprev_lib.get_chrome_version_from_refs(self.refs))
+                     uprev_lib.get_version_from_refs(self.refs))
 
   def test_no_refs_fail(self):
     """Test no versions given."""
-    with self.assertRaises(AssertionError):
-      uprev_lib.get_chrome_version_from_refs([])
+    with self.assertRaises(TypeError):
+      uprev_lib.get_version_from_refs([])
 
 
 class ChromeEbuildVersionTest(cros_test_lib.MockTempDirTestCase):
@@ -118,7 +118,7 @@ class ChromeEbuildVersionTest(cros_test_lib.MockTempDirTestCase):
 
   def test_no_ebuilds(self):
     """Test error on no ebuilds provided."""
-    with self.assertRaises(AssertionError):
+    with self.assertRaises(TypeError):
       uprev_lib.best_chrome_ebuild([])
 
   def test_single_ebuild(self):

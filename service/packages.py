@@ -572,6 +572,39 @@ def uprev_lacros(_build_targets, refs, chroot):
   return result
 
 
+@uprevs_versioned_package('chromeos-base/chromeos-lacros-parallel')
+def uprev_lacros_in_parallel(
+    _build_targets: Optional[List['build_target_lib.BuildTarget']],
+    refs: List[uprev_lib.GitRef],
+    chroot: 'chroot_lib.Chroot') -> 'uprev_lib.UprevVersionedPackageResult':
+  """Updates lacros ebuilds in parallel with ash-chrome.
+
+  This handler is going to be used temporarily while lacros transitions to being
+  uprevved atomically with ash-chrome. Unlike a standalone lacros uprev, this
+  handler will not need to look at the QA qualified file. Rather, it will
+  function identical to ash-chrome using git tags.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result.
+  """
+  result = uprev_lib.UprevVersionedPackageResult()
+  path = os.path.join(
+      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base', 'chromeos-lacros')
+  lacros_version = uprev_lib.get_version_from_refs(refs)
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
+                                                          lacros_version,
+                                                          chroot,
+                                                          allow_downrev=False)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(lacros_version, uprev_result.changed_files)
+  return result
+
+
 @uprevs_versioned_package('app-emulation/parallels-desktop')
 def uprev_parallels_desktop(_build_targets, _refs, chroot):
   """Updates Parallels Desktop ebuild - app-emulation/parallels-desktop.
@@ -661,7 +694,7 @@ def uprev_chrome_from_ref(build_targets, refs, chroot):
   """
   # Determine the version from the refs (tags), i.e. the chrome versions are the
   # tag names.
-  chrome_version = uprev_lib.get_chrome_version_from_refs(refs)
+  chrome_version = uprev_lib.get_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
   return uprev_chrome(chrome_version, build_targets, chroot)
