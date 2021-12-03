@@ -338,11 +338,16 @@ def WriteLKGB(android_package_dir, build_id):
   Args:
     android_package_dir (str): The Android package directory.
     build_id (str): The last known good Android build ID.
+
+  Returns:
+    str: Path to the updated file.
   """
+  path = os.path.join(android_package_dir, _LKGB_JSON)
   lkgb = {'build_id': build_id}
-  with open(os.path.join(android_package_dir, _LKGB_JSON), 'w') as f:
+  with open(path, 'w') as f:
     json.dump(lkgb, f, indent=2)
     f.write('\n')
+  return path
 
 
 def ReadLKGB(android_package_dir):

@@ -259,3 +259,80 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                                                   self.mock_android_dir,
                                                   android_version)
     mock_print.assert_called_once_with('\n{"revved": false}')
+
+  def testMainUpdateLKGB(self):
+    """Tests a successful LKGB update without an actual uprev."""
+    android_version = 'android-version'
+    old_version = 'old-version'
+
+    self.PatchObject(cros_mark_android_as_stable, '_PrepareGitBranch')
+    mock_commit = self.PatchObject(cros_mark_android_as_stable, '_CommitChange')
+    self.PatchObject(android, 'ReadLKGB', return_value=old_version)
+    mock_write_lkgb = self.PatchObject(android, 'WriteLKGB')
+    mock_mirror_artifacts = self.PatchObject(android, 'MirrorArtifacts')
+    mock_mark_as_stable = self.PatchObject(portage_util.EBuild, 'MarkAsStable')
+
+    cros_mark_android_as_stable.main([
+        '--android_package', self.android_package,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--update_lkgb',
+    ])
+
+    mock_write_lkgb.assert_called_once_with(self.mock_android_dir,
+                                            android_version)
+    mock_commit.assert_called_once()
+    mock_mirror_artifacts.assert_not_called()
+    mock_mark_as_stable.assert_not_called()
+
+  def testMainUpdateLKGBNoUpdate(self):
+    """Tests if nothing happens when LKGB is left unchanged."""
+    android_version = 'old-version'
+    old_version = 'old-version'
+
+    self.PatchObject(cros_mark_android_as_stable, '_PrepareGitBranch')
+    mock_commit = self.PatchObject(cros_mark_android_as_stable, '_CommitChange')
+    self.PatchObject(android, 'ReadLKGB', return_value=old_version)
+    mock_write_lkgb = self.PatchObject(android, 'WriteLKGB')
+
+    cros_mark_android_as_stable.main([
+        '--android_package', self.android_package,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--update_lkgb',
+    ])
+
+    mock_write_lkgb.assert_not_called()
+    mock_commit.assert_not_called()
+
+  def testMainUpdateLKGBWithoutVersion(self):
+    """Tests when --force_version flag is missing during LKGB update."""
+    self.PatchObject(cros_mark_android_as_stable, '_PrepareGitBranch')
+
+    with self.assertRaises(Exception):
+      cros_mark_android_as_stable.main([
+          '--android_package', self.android_package,
+          '--srcroot', self.tempdir,
+          '--update_lkgb',
+      ])
+
+  def testMainUpdateLKGBSkipCommit(self):
+    """Tests when --skip_commit is set during LKGB update."""
+    android_version = 'android-version'
+    old_version = 'old-version'
+
+    mock_commit = self.PatchObject(cros_mark_android_as_stable, '_CommitChange')
+    self.PatchObject(android, 'ReadLKGB', return_value=old_version)
+    mock_write_lkgb = self.PatchObject(android, 'WriteLKGB')
+
+    cros_mark_android_as_stable.main([
+        '--android_package', self.android_package,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--skip_commit',
+        '--update_lkgb',
+    ])
+
+    mock_write_lkgb.assert_called_once_with(self.mock_android_dir,
+                                            android_version)
+    mock_commit.assert_not_called()
