@@ -12047,6 +12047,30 @@
         ],
         "workspace_branch": "factory-kukui-12587.B"
     },
+    "factory-kukui-14374.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 24h interval",
+        "slave_configs": [
+            "jacuzzi-factory-kukui-14374.B-factorybranch",
+            "kukui-factory-kukui-14374.B-factorybranch"
+        ],
+        "workspace_branch": "factory-kukui-14374.B"
+    },
+    "factory-kukui-14374.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "jacuzzi-factory-kukui-14374.B-factorybranch-tryjob",
+            "kukui-factory-kukui-14374.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-kukui-14374.B"
+    },
     "factory-mistral-12361.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -17650,6 +17674,26 @@
         "suite_scheduling": false,
         "workspace_branch": "factory-kukui-12587.B"
     },
+    "jacuzzi-factory-kukui-14374.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "jacuzzi"
+        ],
+        "workspace_branch": "factory-kukui-14374.B"
+    },
+    "jacuzzi-factory-kukui-14374.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "jacuzzi"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-kukui-14374.B"
+    },
     "jacuzzi-full": {
         "_template": "full",
         "boards": [
@@ -19736,6 +19780,26 @@
         "push_image": false,
         "suite_scheduling": false,
         "workspace_branch": "factory-kukui-12587.B"
+    },
+    "kukui-factory-kukui-14374.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "kukui"
+        ],
+        "workspace_branch": "factory-kukui-14374.B"
+    },
+    "kukui-factory-kukui-14374.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "kukui"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-kukui-14374.B"
     },
     "kukui-full": {
         "_template": "full",

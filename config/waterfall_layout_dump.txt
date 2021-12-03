@@ -60,6 +60,9 @@
   factory-kukui-12587.B-buildspec
     jacuzzi-factory-kukui-12587.B-factorybranch
     kukui-factory-kukui-12587.B-factorybranch
+  factory-kukui-14374.B-buildspec
+    jacuzzi-factory-kukui-14374.B-factorybranch
+    kukui-factory-kukui-14374.B-factorybranch
   factory-mistral-12361.B-buildspec
     mistral-factory-mistral-12361.B-factorybranch
   factory-nami-10715.B-buildspec
@@ -866,6 +869,9 @@
   factory-kukui-12587.B-buildspec-tryjob
     jacuzzi-factory-kukui-12587.B-factorybranch-tryjob
     kukui-factory-kukui-12587.B-factorybranch-tryjob
+  factory-kukui-14374.B-buildspec-tryjob
+    jacuzzi-factory-kukui-14374.B-factorybranch-tryjob
+    kukui-factory-kukui-14374.B-factorybranch-tryjob
   factory-mistral-12361.B-buildspec-tryjob
     mistral-factory-mistral-12361.B-factorybranch-tryjob
   factory-nami-10715.B-buildspec-tryjob
@@ -1139,6 +1145,7 @@
   herobrine-release-tryjob
   herobrine-unittest-stress
   jacuzzi-factory-kukui-12587.B-factorybranch-tryjob
+  jacuzzi-factory-kukui-14374.B-factorybranch-tryjob
   jacuzzi-full-tryjob
   jacuzzi-kernelnext-full-tryjob
   jacuzzi-kernelnext-llvm-next-toolchain-tryjob
@@ -1226,6 +1233,7 @@
   kukui-arc-r-unittest-stress
   kukui-arc-r-vmrvc-android-pfq-tryjob
   kukui-factory-kukui-12587.B-factorybranch-tryjob
+  kukui-factory-kukui-14374.B-factorybranch-tryjob
   kukui-full-tryjob
   kukui-kernelnext-full-tryjob
   kukui-kernelnext-llvm-next-toolchain-tryjob
