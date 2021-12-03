@@ -1240,8 +1240,7 @@ def RunSkylabHWTestSuite(
     suite_args=None,
     job_keyvals=None,
     quota_account=None,
-    upload_crashes=False,
-  ):
+    upload_crashes=False):
   """Run the test suite in the Autotest lab using Skylab.
 
   Args:
@@ -1975,6 +1974,23 @@ def MarkAndroidAsStable(buildroot,
     raise AndroidIsPinnedUprevError(android_atom)
 
   return android_atom
+
+
+def MarkAndroidLKGB(buildroot, android_package, android_version):
+  """Marks the given Android version as LKGB.
+
+  This is to implement Phase 2 migration of go/android-uprev-recipes. The
+  Android PFQ calls this function to update the LKGB file instead of committing
+  uprevs directly.
+  """
+  cmd = [
+      'cros_mark_android_as_stable',
+      '--update_lkgb',
+      '--android_package=%s' % android_package,
+      '--force_version=%s' % android_version,
+  ]
+
+  RunBuildScript(buildroot, cmd, chromite_cmd=True)
 
 
 def MarkChromeAsStable(buildroot,

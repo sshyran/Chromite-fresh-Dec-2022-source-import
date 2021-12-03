@@ -10,6 +10,7 @@
         "android_import_branch": null,
         "android_package": null,
         "android_rev": null,
+        "android_update_lkgb": false,
         "archive": true,
         "archive_build_debug": false,
         "base_is_recovery": false,
