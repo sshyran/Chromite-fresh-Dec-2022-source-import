@@ -638,18 +638,6 @@
       ]
     },
     {
-      "name": "strongbad-kernelnext",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "tael",
       "configs": [
         {
@@ -9115,6 +9103,55 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 461,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "strongbad-kernelnext",
+      "reference_board_name": "strongbad-kernelnext",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "strongbad-kernelnext",
+          "name": "coachz",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7213,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-kernelnext",
+          "name": "homestar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7213,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-kernelnext",
+          "name": "mrbland",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7213,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-kernelnext",
+          "name": "quackingstick",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7213,
+          "is_active": true
+        },
+        {
+          "board_name": "strongbad-kernelnext",
+          "name": "wormdingler",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7213,
           "is_active": true
         }
       ]

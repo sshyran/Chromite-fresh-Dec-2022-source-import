@@ -29372,6 +29372,13 @@
             "strongbad-kernelnext"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"mrbland\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"quackingstick\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"wormdingler\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "strongbad-kernelnext-release-tryjob": {
@@ -29392,6 +29399,13 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"mrbland\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"quackingstick\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"wormdingler\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
