@@ -21760,6 +21760,7 @@
     },
     "master-vmsc-android-pfq": {
         "_template": "vmsc_android_pfq",
+        "android_update_lkgb": true,
         "boards": [],
         "master": true,
         "push_overlays": "both",
@@ -21771,6 +21772,7 @@
     },
     "master-vmsc-android-pfq-tryjob": {
         "_template": "vmsc_android_pfq",
+        "android_update_lkgb": true,
         "boards": [],
         "debug": true,
         "debug_cidb": true,
