@@ -41,6 +41,7 @@ class ChromeLKGMCommitter(object):
       'chromeos-betty-pi-arc-chrome',
       'chromeos-eve-chrome',
       'chromeos-kevin-chrome',
+      'chromeos-octopus-chrome'
       'lacros-amd64-generic-chrome',
   ]
   # Files needed in a local checkout to successfully update the LKGM. The OWNERS
