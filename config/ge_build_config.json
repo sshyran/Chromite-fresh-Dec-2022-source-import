@@ -134,6 +134,18 @@
       ]
     },
     {
+      "name": "brya-zephyr",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "zephyr-poc",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
       "name": "bubs",
       "configs": [
         {
