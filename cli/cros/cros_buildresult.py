@@ -150,7 +150,7 @@ Output can be json formatted with:
   cros buildresult --buildbucket-id 1234567890123 --report json
 
 Note:
-  This tool does NOT work for master-*-tryjob, precq-launcher-try, or
+  This tool does NOT work for main-*-tryjob, precq-launcher-try, or
   builds on branches older than CL:942097.
 
 Note:

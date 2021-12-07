@@ -493,7 +493,7 @@ class UprevOverlayManager(object):
 
     Args:
       package_list (list[str]): A list of packages to uprev.
-      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+      force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # Use all found packages if an explicit package_list is not given.
     use_all = not bool(package_list)
@@ -601,7 +601,7 @@ class UprevOverlayManager(object):
         of whether they are in our set of packages.
       package_list (list[str]): A set of the packages we want to gather. If
       use_all is True, this argument is ignored, and should be None.
-      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+      force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # See crrev.com/c/1257944 for origins of this.
     root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)

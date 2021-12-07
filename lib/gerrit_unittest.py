@@ -277,23 +277,23 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     return (sha1, change_id)
 
   @staticmethod
-  def _UploadChange(clone_path, branch='master', remote='origin'):
+  def _UploadChange(clone_path, branch='main', remote='origin'):
     cros_build_lib.run(
         ['git', 'push', remote, 'HEAD:refs/for/%s' % branch], cwd=clone_path,
         quiet=True)
 
-  def uploadChange(self, clone_path, branch='master', remote='origin'):
+  def uploadChange(self, clone_path, branch='main', remote='origin'):
     """Create a gerrit CL from the HEAD of a git checkout."""
     clone_path = os.path.join(self.tempdir, clone_path)
     self._UploadChange(clone_path, branch, remote)
 
   @staticmethod
-  def _PushBranch(clone_path, branch='master'):
+  def _PushBranch(clone_path, branch='main'):
     cros_build_lib.run(
         ['git', 'push', 'origin', 'HEAD:refs/heads/%s' % branch],
         cwd=clone_path, quiet=True)
 
-  def pushBranch(self, clone_path, branch='master'):
+  def pushBranch(self, clone_path, branch='main'):
     """Push a branch directly to gerrit, bypassing code review."""
     clone_path = os.path.join(self.tempdir, clone_path)
     self._PushBranch(clone_path, branch)
@@ -414,15 +414,15 @@ class GerritHelperTest(GerritTestCase):
     project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     for _ in range(5):
-      (master_sha1, _) = self.createCommit(clone_path)
-    self.pushBranch(clone_path, 'master')
+      (main_sha1, _) = self.createCommit(clone_path)
+    self.pushBranch(clone_path, 'main')
     for _ in range(5):
       (testbranch_sha1, _) = self.createCommit(clone_path)
     self.pushBranch(clone_path, 'testbranch')
     helper = self._GetHelper()
     self.assertEqual(
-        helper.GetLatestSHA1ForBranch(project, 'master'),
-        master_sha1)
+        helper.GetLatestSHA1ForBranch(project, 'main'),
+        main_sha1)
     self.assertEqual(
         helper.GetLatestSHA1ForBranch(project, 'testbranch'),
         testbranch_sha1)
@@ -496,7 +496,7 @@ class GerritHelperTest(GerritTestCase):
     clone_path = self.cloneProject(project)
     (sha1, _) = self.createCommit(clone_path)
     (_, changeid) = self.createCommit(clone_path)
-    self.uploadChange(clone_path, 'master')
+    self.uploadChange(clone_path, 'main')
     cros_build_lib.run(
         ['git', 'checkout', sha1], cwd=clone_path, quiet=True)
     self.createCommit(clone_path)
@@ -544,7 +544,7 @@ class GerritHelperTest(GerritTestCase):
 
     # Query to external server by gerrit number and change-id which refer to
     # the same change should return one result.
-    fq_changeid = '~'.join((gpatch.project, 'master', gpatch.change_id))
+    fq_changeid = '~'.join((gpatch.project, 'main', gpatch.change_id))
     patch_info = gerrit.GetGerritPatchInfo([gpatch.gerrit_number, fq_changeid])
     self.assertEqual(len(patch_info), 1)
     self.assertEqual(patch_info[0].gerrit_number, gpatch.gerrit_number)
@@ -609,7 +609,7 @@ class GerritHelperTest(GerritTestCase):
         ['git', 'commit', '--amend', '-m', new_msg], cwd=clone_path, quiet=True)
     self.uploadChange(clone_path)
     gpatch2 = self._GetHelper().QuerySingleRecord(
-        change=gpatch.change_id, project=gpatch.project, branch='master')
+        change=gpatch.change_id, project=gpatch.project, branch='main')
     self.assertNotEqual(gpatch2.approval_timestamp, 0)
     self.assertNotEqual(gpatch2.commit_timestamp, 0)
     self.assertEqual(gpatch2.approval_timestamp, gpatch2.commit_timestamp)

@@ -116,7 +116,7 @@ def _GetGclientURLs(internal, rev):
     Tuple of (name, url, deps_file).
   """
   if rev is None or git.IsSHA1(rev) or rev == 'HEAD':
-    # Regular chromium checkout; src may float to origin/master or be pinned.
+    # Regular chromium checkout; src may float to origin/main or be pinned.
     url = constants.CHROMIUM_GOB_URL
 
     if rev:

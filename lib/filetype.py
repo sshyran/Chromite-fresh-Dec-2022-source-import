@@ -74,7 +74,7 @@ class FileTypeDecoder(object):
   shared between several calls to that method.
   """
 
-  # Whitelist of mime types and their mapping to file type.
+  # Allowlist of mime types and their mapping to file type.
   MIME_TYPE_MAPPING = {
       'application/x-gzip': 'binary/compressed/gzip',
       'application/x-bzip2': 'binary/compressed/bzip2',
@@ -203,7 +203,7 @@ class FileTypeDecoder(object):
           first_kib.startswith(b'TZif3' + b'\0' * 15)):
         return 'binary/tzfile'
 
-      # Whitelist some binary mime types.
+      # Allowlist some binary mime types.
       fobj.seek(0)
       # _mime.descriptor() will close the passed file descriptor.
       mime_type = self._mime.descriptor(os.dup(fobj.fileno()))

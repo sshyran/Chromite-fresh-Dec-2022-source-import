@@ -12,16 +12,16 @@ from chromite.lib import cros_build_lib
 class UprevChromeCommand(command.CliCommand):
   """cros uprevchrome: Uprev chrome to a new valid version
 
-  When a chrome PFQ failure happens, master_chrome_pfq automatically checks the
+  When a chrome PFQ failure happens, primary_chrome_pfq automatically checks the
   status of certain stages and then uploads the ebuild/binhost_mapping
   updates to a staging branch in remote git repository. This tool provides a way
   to fetch the updates from the remote staging branch, generate CLs to manually
   uprev chrome and upload the CLs to Gerrit for review.
 
-  Users need to provide a failed master_chrome_pfq build_id, the bug id to track
-  this manual uprev. This tool first verifies if the build_id is valid and if
-  the staging branches exist, then fetches the changes into local branches,
-  updates commit messages, adds CQ-DEPEND, rebases based on master and uploads
+  Users need to provide a failed primary_chrome_pfq build_id, the bug id to
+  track this manual uprev. This tool first verifies if the build_id is valid and
+  if the staging branches exist, then fetches the changes into local branches,
+  updates commit messages, adds CQ-DEPEND, rebases based on main and uploads
   CLs to Gerrit.
 
   Examples:
@@ -33,7 +33,7 @@ class UprevChromeCommand(command.CliCommand):
   https://chrome-internal-review.googlesource.com/
 
   Note:
-  A master Chrome PFQ build id argument is required. It must satisfy the
+  A primary Chrome PFQ build id argument is required. It must satisfy the
   following requirements:
     * If you are a gardener trying to uprev Chrome please verify if the Chrome
       version you are trying to uprev to is stable and not crashy. Please
@@ -60,7 +60,7 @@ class UprevChromeCommand(command.CliCommand):
     super(cls, UprevChromeCommand).AddParser(parser)
     parser.add_argument('--pfq-build', action='store',
                         metavar='PFQ_BUILD',
-                        help='The buildbucket_id of the master chrome pfq'
+                        help='The buildbucket_id of the primary chrome pfq'
                         ' build. Note this is a 19 digit ID that can be found'
                         'in the Milo or GoldenEye URL for the build.')
     parser.add_argument('--fake-buildstore', action='store', default=False,
