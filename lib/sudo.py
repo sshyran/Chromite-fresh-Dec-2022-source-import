@@ -14,7 +14,7 @@ import sys
 from chromite.lib import cros_build_lib
 
 
-class SudoKeepAlive(cros_build_lib.MasterPidContextManager):
+class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
   """Keep sudo auth cookie fresh.
 
   This refreshes the sudo auth cookie; this is implemented this
@@ -30,7 +30,7 @@ class SudoKeepAlive(cros_build_lib.MasterPidContextManager):
       ttyless_sudo: Whether to update the tty-less cookie.
       repeat_interval: In minutes, the frequency to run the update.
     """
-    cros_build_lib.MasterPidContextManager.__init__(self)
+    cros_build_lib.PrimaryPidContextManager.__init__(self)
     self._ttyless_sudo = ttyless_sudo
     self._repeat_interval = repeat_interval
     self._proc = None

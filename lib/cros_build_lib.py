@@ -1503,13 +1503,13 @@ def BooleanShellValue(sval, default, msg=None):
 
 
 # Suppress whacked complaints about abstract class being unused.
-class MasterPidContextManager(object):
+class PrimaryPidContextManager(object):
   """Allow context managers to restrict their exit to within the same PID."""
 
   # In certain cases we actually want this ran outside
   # of the main pid- specifically in backup processes
   # doing cleanup.
-  ALTERNATE_MASTER_PID = None
+  ALTERNATE_PRIMARY_PID = None
 
   def __init__(self):
     self._invoking_pid = None
@@ -1520,7 +1520,7 @@ class MasterPidContextManager(object):
 
   def __exit__(self, exc_type, exc, exc_tb):
     curpid = os.getpid()
-    if curpid == self.ALTERNATE_MASTER_PID:
+    if curpid == self.ALTERNATE_PRIMARY_PID:
       self._invoking_pid = curpid
     if curpid == self._invoking_pid:
       return self._exit(exc_type, exc, exc_tb)
