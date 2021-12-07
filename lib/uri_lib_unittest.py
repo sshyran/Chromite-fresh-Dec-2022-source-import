@@ -139,8 +139,8 @@ class ConstructUrlTests(cros_test_lib.TestCase):
 
   def testConstructDashboardUrl(self):
     """Test generating dashboard URIs."""
-    actual = uri_lib.ConstructDashboardUri('master', 'builder', 123)
-    expected = 'https://luci-milo.appspot.com/buildbot/master/builder/123'
+    actual = uri_lib.ConstructDashboardUri('main', 'builder', 123)
+    expected = 'https://luci-milo.appspot.com/buildbot/main/builder/123'
     self.assertEqual(actual, expected)
 
   def testConstructLogDogUri(self):

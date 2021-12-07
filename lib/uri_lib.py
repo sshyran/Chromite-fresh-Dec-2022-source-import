@@ -265,11 +265,11 @@ def ConstructMiloBuildUri(buildbucket_id):
   return _MILO_BUILD_URL % {'buildbucket_id': buildbucket_id}
 
 
-def ConstructDashboardUri(buildbot_master_name, builder_name, build_number):
+def ConstructDashboardUri(buildbot_primary_name, builder_name, build_number):
   """Return the dashboard (luci-milo) URL for this run
 
   Args:
-    buildbot_master_name: Name of buildbot master, e.g. chromeos
+    buildbot_primary_name: Name of buildbot primary, e.g. chromeos
     builder_name: Builder name on buildbot dashboard.
     build_number: Build number for this validation attempt.
 
@@ -279,7 +279,7 @@ def ConstructDashboardUri(buildbot_master_name, builder_name, build_number):
   url_suffix = '%s/%s' % (builder_name, str(build_number))
   url_suffix = urllib.parse.quote(url_suffix)
   return os.path.join(
-      _LUCI_MILO_BUILDBOT_URL, buildbot_master_name, url_suffix)
+      _LUCI_MILO_BUILDBOT_URL, buildbot_primary_name, url_suffix)
 
 
 def ConstructLogDogUri(build_number, stage):
@@ -299,7 +299,7 @@ def ConstructViceroyBuildDetailsUri(build_id):
   """Return the dashboard (viceroy) URL for this run.
 
   Args:
-    build_id: CIDB id for the master build.
+    build_id: CIDB id for the primary build.
 
   Returns:
     The fully formed URI.
