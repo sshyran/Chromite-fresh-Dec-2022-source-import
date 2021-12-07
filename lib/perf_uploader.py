@@ -221,7 +221,7 @@ def _ComputeAvgStddev(perf_data):
 
 PresentationInfo = collections.namedtuple(
     'PresentationInfo',
-    'master_name test_name')
+    'main_name test_name')
 
 
 def _GetPresentationInfo(test_name):
@@ -240,7 +240,7 @@ def _GetPresentationInfo(test_name):
       try:
         return PresentationInfo(**info)
       except:
-        raise PerfUploadingError('No master found for %s' % test_name)
+        raise PerfUploadingError('No main found for %s' % test_name)
 
   raise PerfUploadingError('No presentation config found for %s' % test_name)
 
@@ -254,7 +254,7 @@ def _FormatForUpload(perf_data, platform_name, presentation_info, revision=None,
   specially-formatted JSON string.  In particular, the JSON object must be a
   dictionary with key "data", and value being a list of dictionaries where
   each dictionary contains all the information associated with a single
-  measured perf value: master name, bot name, test name, perf value, units,
+  measured perf value: main name, bot name, test name, perf value, units,
   and build version numbers.
 
   See also google3/googleclient/chrome/speed/dashboard/add_point.py for the
@@ -305,7 +305,7 @@ def _FormatForUpload(perf_data, platform_name, presentation_info, revision=None,
       supp_cols['r_chrome_version'] = chrome_version
 
     new_dash_entry = {
-        'master': presentation_info.master_name,
+        'main': presentation_info.main_name,
         'bot': platform_prefix + platform_name,
         'test': test_path,
         'value': data['value'],
@@ -433,7 +433,7 @@ def _RetryIfServerError(perf_exc):
 
 def UploadPerfValues(perf_values, platform_name, test_name, revision=None,
                      cros_version=None, chrome_version=None,
-                     dashboard=DASHBOARD_URL, master_name=None,
+                     dashboard=DASHBOARD_URL, main_name=None,
                      test_prefix=None, platform_prefix=None, dry_run=False):
   """Uploads any perf data associated with a test to the perf dashboard.
 
@@ -451,7 +451,7 @@ def UploadPerfValues(perf_values, platform_name, test_name, revision=None,
     cros_version: A string identifying Chrome OS version e.g. '6052.0.0'.
     chrome_version: A string identifying Chrome version e.g. '38.0.2091.2'.
     dashboard: The dashboard to upload data to.
-    master_name: The "master" field to use; by default it is looked up in the
+    main_name: The "main" field to use; by default it is looked up in the
       perf_dashboard_config.json database.
     test_prefix: Arbitrary string to automatically prefix to the test name.
       If None, then 'cbuildbot.' is used to guarantee namespacing.
@@ -477,10 +477,10 @@ def UploadPerfValues(perf_values, platform_name, test_name, revision=None,
     cros_version = chrome_version[:chrome_version.find('.') + 1] + cros_version
     revision = _ComputeRevisionFromVersions(chrome_version, cros_version)
   try:
-    if master_name is None:
+    if main_name is None:
       presentation_info = _GetPresentationInfo(test_name)
     else:
-      presentation_info = PresentationInfo(master_name, test_name)
+      presentation_info = PresentationInfo(main_name, test_name)
     formatted_data = _FormatForUpload(perf_data, platform_name,
                                       presentation_info,
                                       revision=revision,
