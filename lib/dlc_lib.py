@@ -385,9 +385,14 @@ class DlcGenerator(object):
     licensing.LoadPackageInfo()
     licensing.ProcessPackageLicenses()
     license_path = os.path.join(dlc_dir, LICENSE)
+    licenses = licensing.GenerateLicenseText()
     # The first (and only) item contains the values for |self.fullnamerev|.
-    _, license_txt = next(iter(licensing.GenerateLicenseText().items()))
-    osutils.WriteFile(license_path, license_txt)
+    if licenses:
+      _, license_txt = next(iter(licenses.items()))
+      osutils.WriteFile(license_path, license_txt)
+    else:
+      logging.info('LICENSE text is empty. Skipping LICENSE file creation.')
+
 
   def CollectExtraResources(self, dlc_dir):
     """Collect the extra resources needed by the DLC module.
