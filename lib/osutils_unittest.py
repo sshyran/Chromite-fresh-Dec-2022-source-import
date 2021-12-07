@@ -837,7 +837,7 @@ class FindInPathParentsTest(cros_test_lib.TempDirTestCase):
 class SourceEnvironmentTest(cros_test_lib.TempDirTestCase):
   """Test osutil's environmental variable related methods."""
 
-  ENV_WHITELIST = {
+  ENV_ALLOWLIST = {
       'ENV1': 'monkeys like bananas',
       'ENV3': 'merci',
       'ENV6': '',
@@ -868,10 +868,10 @@ mechant"
     osutils.WriteFile(self.env_file, self.ENV)
     osutils.WriteFile(self.env_file_multiline, self.ENV_MULTILINE)
 
-  def testWhiteList(self):
+  def testAllowList(self):
     env_dict = osutils.SourceEnvironment(
         self.env_file, ('ENV1', 'ENV3', 'ENV5', 'ENV6'))
-    self.assertEqual(env_dict, self.ENV_WHITELIST)
+    self.assertEqual(env_dict, self.ENV_ALLOWLIST)
 
   def testArrays(self):
     env_dict = osutils.SourceEnvironment(self.env_file, ('ENVA',))

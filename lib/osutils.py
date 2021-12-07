@@ -393,7 +393,7 @@ def SafeSymlink(source: Union[Path, str],
 
 
 def SafeUnlink(path: Union[Path, str],
-              sudo: bool = False):
+               sudo: bool = False):
   """Unlink a file from disk, ignoring if it doesn't exist.
 
   Returns:
@@ -963,6 +963,7 @@ def TempFileDecorator(func):
 
 
 # Flags synced from sys/mount.h.  See mount(2) for details.
+# COIL(b/187793358): keeping values synced with Linux utility constants.
 MS_RDONLY = 1
 MS_NOSUID = 2
 MS_NODEV = 4
@@ -1153,7 +1154,7 @@ def SetEnvironment(env):
   os.environ.update(env)
 
 
-def SourceEnvironment(script, whitelist, ifs=',', env=None, multiline=False):
+def SourceEnvironment(script, allowlist, ifs=',', env=None, multiline=False):
   """Returns the environment exported by a shell script.
 
   Note that the script is actually executed (sourced), so do not use this on
@@ -1162,19 +1163,19 @@ def SourceEnvironment(script, whitelist, ifs=',', env=None, multiline=False):
 
   Args:
     script: The shell script to 'source'.
-    whitelist: An iterable of environment variables to retrieve values for.
+    allowlist: An iterable of environment variables to retrieve values for.
     ifs: When showing arrays, what separator to use.
     env: A dict of the initial env to pass down.  You can also pass it None
          (to clear the env) or True (to preserve the current env).
     multiline: Allow a variable to span multiple lines.
 
   Returns:
-    A dictionary containing the values of the whitelisted environment
+    A dictionary containing the values of the allowlisted environment
     variables that are set.
   """
   dump_script = ['source "%s" >/dev/null' % script,
                  'IFS="%s"' % ifs]
-  for var in whitelist:
+  for var in allowlist:
     # Note: If we want to get more exact results out of bash, we should switch
     # to using `declare -p "${var}"`.  It would require writing a custom parser
     # here, but it would be more robust.

@@ -277,7 +277,7 @@ inherit() {
   with cros_build_lib.UnbufferedNamedTemporaryFile() as f:
     osutils.WriteFile(f.name, ebuild_env_tmpl % tmpl_env)
     env = osutils.SourceEnvironment(
-        f.name, whitelist=['LICENSE'], ifs=' ', multiline=True)
+        f.name, allowlist=['LICENSE'], ifs=' ', multiline=True)
 
   if not env.get('LICENSE'):
     raise ValueError('No LICENSE found in the ebuild.')
@@ -1453,11 +1453,11 @@ after fixing the license.""" % (license_name, '\n'.join(set(stock + custom))))
     file_template = ReadUnknownEncodedFile(output_template)
     tainted_warning = ''
     if self.tainted_pkgs:
+      tained_pkg_lis = '\n'.join(f'  <li>{x}</li>' for x in self.tainted_pkgs)
       tainted_warning = (TAINTED_COMMENT_TAG + '\n' +
-            '<h1>Image is TAINTED due to the following packages:</h1>\n' +
-            '<ul style="font-size:large">\n' +
-            '\n'.join(f'  <li>{x}</li>' for x in self.tainted_pkgs) +
-            '\n</ul>\n')
+                         '<h1>Image is TAINTED due to the following ' +
+                         'packages:</h1>\n<ul style="font-size:large">\n' +
+                         tained_pkg_lis + '\n</ul>\n')
       for tainted_pkg in self.tainted_pkgs:
         logging.warning('Package %s is tainted', tainted_pkg)
       logging.warning('Image is tainted. See licensing docs to fix this: '
