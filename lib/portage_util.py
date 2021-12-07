@@ -14,7 +14,8 @@ import multiprocessing
 import os
 import re
 import shutil
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional, Union
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
@@ -2017,6 +2018,20 @@ def FindEbuildForPackage(pkg_str,
   if not ebuilds_map:
     return None
   return ebuilds_map[pkg_str]
+
+
+def FindEbuildsForOverlays(
+    overlays: List[Union[str, os.PathLike]]) -> Iterator[Path]:
+  """Get paths to ebuilds using the given overlay paths.
+
+  Args:
+    overlays: A list of overlay paths to get ebuilds for.
+
+  Returns:
+    A generator of paths to ebuild files.
+  """
+  return itertools.chain.from_iterable(
+      Path(x).rglob('*.ebuild') for x in overlays)
 
 
 def _EqueryDepgraph(pkg_str: str,
