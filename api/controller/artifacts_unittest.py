@@ -538,12 +538,12 @@ class BundleChromeOSConfigTest(BundleTestCase):
                      [mock.call(mock.ANY, self.sysroot, self.output_dir)])
 
   def testBundleChromeOSConfigNoConfigFound(self):
-    """An error is raised if the config payload isn't found."""
+    """Empty results when the config payload isn't found."""
     self.PatchObject(artifacts_svc, 'BundleChromeOSConfig', return_value=None)
 
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
-                                     self.api_config)
+    artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
+                                   self.api_config)
+    self.assertFalse(self.response.artifacts)
 
 
 class BundleTestUpdatePayloadsTest(cros_test_lib.MockTempDirTestCase,

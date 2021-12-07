@@ -591,10 +591,9 @@ def BundleChromeOSConfig(
 
   sysroot = sysroot_lib.Sysroot(sysroot_path)
   chromeos_config = artifacts.BundleChromeOSConfig(chroot, sysroot, output_dir)
-  if chromeos_config is None:
-    cros_build_lib.Die(
-        'Could not create ChromeOS Config payload. No config found for %s.',
-        sysroot.path)
+  if not chromeos_config:
+    return
+
   output_proto.artifacts.add().path = os.path.join(output_dir, chromeos_config)
 
 
