@@ -6000,8 +6000,11 @@
         "boards": [
             "brya-zephyr"
         ],
-        "chrome_sdk_build_chrome": false,
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-zephyr\",\n    \"name\": \"brya\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-zephyr\",\n    \"name\": \"bryati50\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "brya-zephyr-release-tryjob": {
@@ -6009,7 +6012,6 @@
         "boards": [
             "brya-zephyr"
         ],
-        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [
@@ -6023,6 +6025,10 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-zephyr\",\n    \"name\": \"brya\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-zephyr\",\n    \"name\": \"bryati50\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
@@ -29569,8 +29575,8 @@
         ],
         "important": false,
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"mrbland\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"quackingstick\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"wormdingler\",\n    \"test_suites\": []\n}"
@@ -29596,8 +29602,8 @@
         "hw_tests_override": null,
         "luci_builder": "Try",
         "models": [
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": []\n}",
-            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"coachz\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"homestar\",\n    \"test_suites\": [\n        \"sanity\",\n        \"bvt-inline\",\n        \"bvt-tast-cq\",\n        \"bvt-installer\",\n        \"bvt-arc\",\n        \"au\",\n        \"bvt-cq\",\n        \"bvt-perbuild\",\n        \"bvt-tast-informational\"\n    ]\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"mrbland\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"quackingstick\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"strongbad\",\n    \"name\": \"wormdingler\",\n    \"test_suites\": []\n}"
