@@ -8,6 +8,7 @@ import collections
 import json
 import sys
 import traceback
+from typing import List
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -286,7 +287,8 @@ class BuildScriptFailure(StepFailure):
 class PackageBuildFailure(BuildScriptFailure):
   """This exception is thrown when packages fail to build."""
 
-  def __init__(self, exception, shortname, failed_packages):
+  def __init__(self, exception: cros_build_lib.RunCommandError, shortname: str,
+               failed_packages: List[str]):
     """Construct a PackageBuildFailure object.
 
     Args:

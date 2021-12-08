@@ -1663,7 +1663,7 @@ def GetOverlayEBuilds(overlay,
 def _Egencache(repo_name: str,
                overlay: str,
                repos_config: str,
-               chroot_args: List[str] = None,
+               chroot_args: Optional[List[str]] = None,
                log_output: bool = True) -> cros_build_lib.CompletedProcess:
   """Execute egencache for repo_name inside the chroot.
 
@@ -2512,7 +2512,7 @@ def _CheckHasTest(cp, sysroot, require_workon: bool = False):
     path = FindEbuildForPackage(cp, sysroot, check=True)
   except cros_build_lib.RunCommandError as e:
     logging.error('FindEbuildForPackage error %s', e)
-    raise failures_lib.PackageBuildFailure(e, 'equery', cp)
+    raise failures_lib.PackageBuildFailure(e, 'equery', [cp])
   ebuild = EBuild(path, False)
   if require_workon and not ebuild.is_workon:
     return None
@@ -2627,7 +2627,7 @@ def PortageqBestVisible(atom: str,
                         board: Optional[str] = None,
                         sysroot: Optional[str] = None,
                         pkg_type: str = 'ebuild',
-                        cwd: str = None) -> package_info.PackageInfo:
+                        cwd: Optional[str] = None) -> package_info.PackageInfo:
   """Get the best visible ebuild CPV for the given atom.
 
   Args:

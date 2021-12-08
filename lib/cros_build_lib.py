@@ -5,7 +5,7 @@
 """Common python commands used by various build scripts."""
 
 import base64
-from datetime import datetime
+import datetime
 import email.utils
 import errno
 import functools
@@ -1690,7 +1690,7 @@ def UserDateTimeFormat(timeval=None):
   Returns:
     A string format such as 'Wed, 20 Feb 2013 15:25:15 -0500 (EST)'
   """
-  if isinstance(timeval, datetime):
+  if isinstance(timeval, datetime.datetime):
     timeval = time.mktime(timeval.timetuple())
   return '%s (%s)' % (email.utils.formatdate(timeval=timeval, localtime=True),
                       time.strftime('%Z', time.localtime(timeval)))
