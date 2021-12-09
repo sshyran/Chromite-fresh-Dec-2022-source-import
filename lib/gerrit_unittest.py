@@ -427,6 +427,24 @@ class GerritHelperTest(GerritTestCase):
         helper.GetLatestSHA1ForBranch(project, 'testbranch'),
         testbranch_sha1)
 
+  def testChangeEdit(self):
+    """Verifies that CreateChange & ChangeEdit can create CLs with changes."""
+    project = self.createProject('testProject')
+    # Gerrit returns "Destination branch does not exist" errors if we don't push
+    # something onto the new project's branch.
+    clone_path = self.cloneProject(project)
+    self.createCommit(clone_path)
+    self.pushBranch(clone_path, 'main')
+    helper = self._GetHelper()
+    # There should be no changes in our project that touch some_file.
+    file_path = 'some_file'
+    self.assertEqual(len(helper.Query(project=project, path=file_path)), 0)
+    change = helper.CreateChange(project, 'main', 'Test Change', True)
+    helper.ChangeEdit(change.gerrit_number, file_path, 'some file contents')
+    # After creating the change and adding a file modification, there should be
+    # a single change that touches some_file in our project.
+    self.assertEqual(len(helper.Query(project=project, path=file_path)), 1)
+
   def _ChooseReviewers(self):
     # TODO(b/210507794): register some test accounts on test server. This fixed
     # list of real IDs has a few problems, not limited to the following:

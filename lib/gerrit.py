@@ -410,6 +410,38 @@ class GerritHelper(object):
 
     return change
 
+  def CreateChange(self, project: str, branch: str, message: str,
+                   publish: bool) -> cros_patch.GerritPatch:
+    """Creates an empty change.
+
+    The change will be empty of any file modifications. Use ChangeEdit below
+    to add file modifications to the change.
+
+    Args:
+      project: The name of the gerrit project for the change.
+      branch: Branch for the change.
+      message: Initial commit message for the change.
+      publish: If True, will publish the CL after uploading. Stays in WIP mode
+          otherwise.
+
+    Returns:
+      A cros_patch.GerritChange for the created change.
+    """
+    resp = gob_util.CreateChange(self.host, project, branch, message, publish)
+    patch_dict = cros_patch.GerritPatch.ConvertQueryResults(resp, self.host)
+    return cros_patch.GerritPatch(patch_dict, self.remote, '')
+
+  def ChangeEdit(self, change: str, path: str, contents: str) -> None:
+    """Attaches file modifications to an open change.
+
+    Args:
+      change: A gerrit change number.
+      path: Path of the file in the repo to modify.
+      contents: New contents of the file.
+    """
+    gob_util.ChangeEdit(self.host, change, path, contents)
+    gob_util.PublishChangeEdit(self.host, change)
+
   def SetReview(self, change, msg=None, labels=None, notify='ALL',
                 reviewers=None, cc=None, ready=None, wip=None, dryrun=False):
     """Update the review labels on a gerrit change.
@@ -581,6 +613,9 @@ class GerritHelper(object):
   def CreateGerritPatch(self, cwd, remote, ref, dryrun=False, notify='ALL',
                         **kwargs):
     """Upload a change and retrieve a GerritPatch describing it.
+
+    This requires a copy of the project checked out locally. To create a
+    GerritPatch without a local checkout, use CreateChange() below.
 
     Args:
       cwd: The repository that we are working on.

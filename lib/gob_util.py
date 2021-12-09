@@ -7,6 +7,7 @@
 https://gerrit-review.googlesource.com/Documentation/rest-api.html
 """
 
+import base64
 import datetime
 import html.parser
 import http.client
@@ -286,7 +287,7 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
       raise GOBError(http_status=response.status, reason=response.reason)
     if response.status == 404 and ignore_404:
       return b''
-    elif response.status == 200:
+    elif response.status in (200, 201):
       return response_body
 
     # Bad responses.
@@ -500,6 +501,76 @@ def GetChangeReviewers(host, change):
   """
   warnings.warn('GetChangeReviewers is deprecated; use GetReviewers instead.')
   GetReviewers(host, change)
+
+
+def CreateChange(host: str, project: str, branch: str, subject: str,
+                 publish: bool) -> Dict[str, Any]:
+  """Creates an empty change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    project: The name of the Gerrit project for the change.
+    branch: Branch for the change.
+    subject: Initial commit message for the change.
+    publish: If True, will publish the CL after uploading. Stays in WIP mode
+        otherwise.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = 'changes/'
+  body = {'project': project, 'branch': branch, 'subject': subject}
+  if not publish:
+    body['work_in_progress'] = 'true'
+    body['notify'] = 'NONE'
+  return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_404=False)
+
+
+def ChangeEdit(host: str, change: str, filepath: str,
+               contents: str) -> Dict[str, Any]:
+  """Attaches file modifications to an open change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: A Gerrit change number.
+    filepath: Path of the file in the repo to modify.
+    contents: New contents of the file.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/edit/%s' % (
+      _GetChangePath(change), urllib.parse.quote(filepath, ''))
+  contents = contents.encode('utf-8')  # string -> bytes
+  contents = base64.b64encode(contents)  # bytes -> bytes
+  contents = contents.decode('utf-8')  # bytes -> string
+  body = {
+      'binary_content': 'data:text/plain;base64,%s' % contents
+  }
+  try:
+    return FetchUrlJson(host, path, body=body, reqtype='PUT', ignore_204=True)
+  except GOBError as e:
+    if e.http_status != 204:
+      raise
+
+
+def PublishChangeEdit(host: str, change: str) -> Dict[str, Any]:
+  """Publishes any open edits in a change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: A Gerrit change number.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/edit:publish' % _GetChangePath(change)
+  body = {'notify': 'NONE'}
+  try:
+    return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_204=True)
+  except GOBError as e:
+    if e.http_status != 204:
+      raise
 
 
 def ReviewedChange(host, change):
@@ -896,6 +967,25 @@ def GetTipOfTrunkRevision(git_url):
     msg = ('The json returned by https://%s%s has an unfamiliar structure:\n'
            '%s\n' % (parsed_url[1], path, j))
     raise GOBError(reason=msg)
+
+
+def GetFileContentsOnHead(git_url: str, filepath: str) -> str:
+  """Returns the current contents of a file on the default branch.
+
+  Retrieves the contents from Gitiles via its API, not Gerrit's.
+
+  Args:
+    git_url: URL for the repository to get the file contents from.
+    filepath: Path of the file in the repository.
+
+  Returns:
+    The contents of the file as a string.
+  """
+  parsed_url = urllib.parse.urlparse(git_url)
+  path = parsed_url[2].rstrip('/') + f'/+/HEAD/{filepath}?format=TEXT'
+  contents = FetchUrl(parsed_url[1], path, ignore_404=False)
+  contents = base64.b64decode(contents)
+  return contents.decode('utf-8')
 
 
 def GetCommitDate(git_url, commit):

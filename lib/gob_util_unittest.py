@@ -4,7 +4,9 @@
 
 """Unittests for gob_util.py"""
 
+import base64
 import http.client
+import json
 import tempfile
 import time
 
@@ -123,6 +125,32 @@ Too bad..."""
     ep.feed(html_data)
     ep.close()
     self.assertEqual(expected_parsed_data, ep.ParsedDiv())
+
+  def testCreateChange(self):
+    body = json.dumps({'change_num': 123456}).encode()
+    xss_protection_prefix = b")]}'\n"
+    body = xss_protection_prefix + body
+    self.conn.return_value = FakeHTTPConnection(body=body, status=200)
+    change_json = gob_util.CreateChange(
+        'some.git.url', 'project', 'branch', 'subject', True)
+    self.assertEqual(change_json['change_num'], 123456)
+
+  def testChangeEdit(self):
+    self.conn.return_value = FakeHTTPConnection(body={}, status=204)
+    gob_util.ChangeEdit('some.git.url', 123456, 'some/file/path',
+                        'some file contents')
+
+  def testPublishChangeEdit(self):
+    self.conn.return_value = FakeHTTPConnection(body={}, status=204)
+    gob_util.PublishChangeEdit('some.git.url', 123456)
+
+  def testGetFileContents(self):
+    expected_contents = 'some file contents'
+    body = base64.b64encode(expected_contents.encode())
+    self.conn.return_value = FakeHTTPConnection(body=body, status=200)
+    contents = gob_util.GetFileContentsOnHead('some.git.url',
+                                              'some/file/path')
+    self.assertEqual(contents, expected_contents)
 
 
 class GetCookieTests(cros_test_lib.TestCase):
