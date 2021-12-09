@@ -19,7 +19,7 @@ def overlay_stack(tmp_path_factory):
   """Factory for stacked Portage overlays.
 
   The factory function takes an integer argument and returns an iterator of
-  that many overlays, each of which has all prior overlays as masters.
+  that many overlays, each of which has all prior overlays as parents.
   """
 
   def make_overlay_stack(height):
@@ -36,7 +36,7 @@ def overlay_stack(tmp_path_factory):
               root_path=tmp_path_factory.mktemp(
                   'overlay-' + cr.test.Overlay.HIERARCHY_NAMES[i]),
               name=cr.test.Overlay.HIERARCHY_NAMES[i],
-              masters=overlays))
+              parent_overlays=overlays))
       yield overlays[i]
 
   return make_overlay_stack

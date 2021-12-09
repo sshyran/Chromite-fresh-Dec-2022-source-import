@@ -16,14 +16,14 @@ _OVERLAY_STACK_PARAMS = list(range(1, len(cr.test.Overlay.HIERARCHY_NAMES) + 1))
 
 
 @pytest.mark.parametrize('height', _OVERLAY_STACK_PARAMS)
-def test_overlay_stack_masters(height, overlay_stack):
-  """Test that overlays have the correct masters set."""
+def test_overlay_stack_parents(height, overlay_stack):
+  """Test that overlays have the correct parents set."""
   overlays = list(overlay_stack(height))
 
-  assert overlays[0].masters is None
+  assert overlays[0].parent_overlays is None
 
   for x in range(1, height):
-    assert overlays[x].masters == tuple(overlays[:x])
+    assert overlays[x].parent_overlays == tuple(overlays[:x])
 
 
 @pytest.mark.parametrize('height', _OVERLAY_STACK_PARAMS)
