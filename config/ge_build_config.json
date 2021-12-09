@@ -9125,7 +9125,7 @@
       "reference_board_name": "strongbad-kernelnext",
       "arch": "ARM_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "strongbad-kernelnext",
@@ -9196,7 +9196,7 @@
       "reference_board_name": "trogdor",
       "arch": "ARM_INTERNAL",
       "builder": "RELEASE",
-      "experimental": false,
+      "experimental": true,
       "models": [
         {
           "board_name": "trogdor",
@@ -9421,7 +9421,7 @@
       "reference_board_name": "trogdor-kernelnext",
       "arch": "ARM_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "trogdor-kernelnext",
