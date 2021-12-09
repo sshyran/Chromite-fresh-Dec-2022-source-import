@@ -419,10 +419,10 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
 def _SudoCommand():
   """Get the 'sudo' command, along with all needed environment variables."""
 
-  # Pass in the ENVIRONMENT_WHITELIST and ENV_PASSTHRU variables so that
+  # Pass in the ENVIRONMENT_ALLOWLIST and ENV_PASSTHRU variables so that
   # scripts in the chroot know what variables to pass through.
   cmd = ['sudo']
-  for key in constants.CHROOT_ENVIRONMENT_WHITELIST + constants.ENV_PASSTHRU:
+  for key in constants.CHROOT_ENVIRONMENT_ALLOWLIST + constants.ENV_PASSTHRU:
     value = os.environ.get(key)
     if value is not None:
       cmd += ['%s=%s' % (key, value)]

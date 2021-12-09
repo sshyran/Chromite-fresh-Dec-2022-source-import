@@ -685,7 +685,7 @@ ENV_PASSTHRU = ('CROS_SUDO_KEEP_ALIVE', SHARED_CACHE_ENVVAR,
 # have sudo export if existent. Anytime this list is modified, a new
 # chroot_version_hooks.d upgrade script that symlinks to 153_rewrite_sudoers.d
 # should be created.
-CHROOT_ENVIRONMENT_WHITELIST = (
+CHROOT_ENVIRONMENT_ALLOWLIST = (
     'CHROMEOS_OFFICIAL',
     'CHROMEOS_VERSION_AUSERVER',
     'CHROMEOS_VERSION_DEVSERVER',
