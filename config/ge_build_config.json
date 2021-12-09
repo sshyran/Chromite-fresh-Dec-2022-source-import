@@ -677,18 +677,6 @@
       "name": "unknown"
     },
     {
-      "name": "veyron_fievel",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "veyron_rialto",
       "configs": [
         {
@@ -697,18 +685,6 @@
           "leader_board": false,
           "board_group": "veyron",
           "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "veyron_tiger",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "veyron",
-          "arch": "ARM_INTERNAL"
         }
       ]
     },
