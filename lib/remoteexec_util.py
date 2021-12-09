@@ -49,6 +49,9 @@ class Remoteexec(object):
 
   def GetChrootExtraEnv(self):
     """Extra env vars set to do remoteexec inside chroot."""
+    # These paths should match the paths in chroot that the
+    # reclient directory and reproxy config file get mapped to
+    # in sdk_lib/enter_chroot.sh
     reclient_dir = os.path.join('/home', getpass.getuser(), 'reclient')
     reproxy_cfg_file = os.path.join('/home', getpass.getuser(),
                                     'reclient_cfgs', 'reproxy_chroot.cfg')

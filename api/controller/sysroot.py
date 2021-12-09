@@ -241,8 +241,8 @@ def InstallPackages(input_proto, output_proto, _config):
   compile_source = (
       input_proto.flags.compile_source or input_proto.flags.toolchain_changed)
 
-  # TODO(crbug.com/1256966): Check if input_proto.remoteexec_config exists.
-  use_remoteexec = False
+  use_remoteexec = bool(input_proto.remoteexec_config.reproxy_cfg_file and
+                        input_proto.remoteexec_config.reclient_dir)
 
   # Testing if Goma will support unknown compilers now.
   use_goma = input_proto.flags.use_goma and not use_remoteexec
