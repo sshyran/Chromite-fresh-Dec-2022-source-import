@@ -2446,6 +2446,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/159934902',
       },
+      'draco-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Draco has no DUTs in the lab (b/204940128).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/204940128',
+      },
       'brask-release': {
           'sign_types': ['recovery', 'factory'],
           # Brask has no DUTs in the lab (b/207095933).
