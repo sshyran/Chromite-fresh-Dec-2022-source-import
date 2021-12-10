@@ -354,3 +354,25 @@ class LKGBTest(cros_test_lib.TempDirTestCase):
 
     android.WriteLKGB(android_package_dir, build_id)
     self.assertEqual(android.ReadLKGB(android_package_dir), build_id)
+
+  def testReadLKGBMissing(self):
+    android_package_dir = self.tempdir
+
+    with self.assertRaises(android.MissingLKGBError):
+      android.ReadLKGB(android_package_dir)
+
+  def testReadLKGBNotJSON(self):
+    android_package_dir = self.tempdir
+    with open(os.path.join(android_package_dir, 'LKGB.json'), 'w') as f:
+      f.write('not-a-json-file')
+
+    with self.assertRaises(android.InvalidLKGBError):
+      android.ReadLKGB(android_package_dir)
+
+  def testReadLKGBMissingBuildID(self):
+    android_package_dir = self.tempdir
+    with open(os.path.join(android_package_dir, 'LKGB.json'), 'w') as f:
+      f.write('{"not_build_id": "foo"}')
+
+    with self.assertRaises(android.InvalidLKGBError):
+      android.ReadLKGB(android_package_dir)

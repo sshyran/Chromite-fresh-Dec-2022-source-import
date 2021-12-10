@@ -394,8 +394,16 @@ def main(argv):
     if not options.force_version:
       raise Exception('--force_version is required with --update_lkgb')
 
+    # Attempt to read current LKGB, if available.
+    current_lkgb = None
+    try:
+      current_lkgb = android.ReadLKGB(android_package_dir)
+    except android.MissingLKGBError:
+      logging.info('LKGB file is missing, creating a new one.')
+    except android.InvalidLKGBError:
+      logging.warning('Current LKGB file is invalid, overwriting.')
+
     # Do nothing if LKGB is already set to the requested version.
-    current_lkgb = android.ReadLKGB(android_package_dir)
     if current_lkgb == options.force_version:
       logging.warning('LKGB of %s is already %s, doing nothing.',
                       options.android_package, options.force_version)

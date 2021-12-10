@@ -332,6 +332,14 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
 _LKGB_JSON = 'LKGB.json'
 
 
+class MissingLKGBError(Exception):
+  """LKGB file for the given Android package is missing."""
+
+
+class InvalidLKGBError(Exception):
+  """LKGB file for the given Android package contains invalid content."""
+
+
 def WriteLKGB(android_package_dir, build_id):
   """Writes the LKGB file under the given Android package directory.
 
@@ -358,9 +366,20 @@ def ReadLKGB(android_package_dir):
 
   Returns:
     str: The last known good Android build ID as described in the file.
+
+  Raises:
+    MissingLKGBError: If the LKGB file is not found under android_package_dir.
+    InvalidLKGBError: If the LKGB file contains invalid content.
   """
-  with open(os.path.join(android_package_dir, _LKGB_JSON), 'r') as f:
-    lkgb = json.load(f)
-  if 'build_id' not in lkgb:
-    raise Exception('build_id not found in LKGB file')
-  return lkgb['build_id']
+  path = os.path.join(android_package_dir, _LKGB_JSON)
+  if not os.path.exists(path):
+    raise MissingLKGBError(path)
+
+  try:
+    with open(path, 'r') as f:
+      lkgb = json.load(f)
+    return lkgb['build_id']
+  except json.JSONDecodeError as e:
+    raise InvalidLKGBError('Error decoding LKGB file as JSON: ' + str(e))
+  except KeyError:
+    raise InvalidLKGBError('Field build_id not found in LKGB file')

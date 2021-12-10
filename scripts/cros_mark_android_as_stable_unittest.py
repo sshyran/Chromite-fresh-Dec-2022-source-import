@@ -285,6 +285,48 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     mock_mirror_artifacts.assert_not_called()
     mock_mark_as_stable.assert_not_called()
 
+  def testMainUpdateLKGBMissingLKGB(self):
+    """Tests LKGB update when LKGB file is currently missing."""
+    android_version = 'android-version'
+
+    self.PatchObject(cros_mark_android_as_stable, '_PrepareGitBranch')
+    mock_commit = self.PatchObject(cros_mark_android_as_stable, '_CommitChange')
+    self.PatchObject(android, 'ReadLKGB',
+                     side_effect=android.MissingLKGBError())
+    mock_write_lkgb = self.PatchObject(android, 'WriteLKGB')
+
+    cros_mark_android_as_stable.main([
+        '--android_package', self.android_package,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--update_lkgb',
+    ])
+
+    mock_write_lkgb.assert_called_once_with(self.mock_android_dir,
+                                            android_version)
+    mock_commit.assert_called_once()
+
+  def testMainUpdateLKGBInvalidLKGB(self):
+    """Tests LKGB update when current LKGB file is invalid."""
+    android_version = 'android-version'
+
+    self.PatchObject(cros_mark_android_as_stable, '_PrepareGitBranch')
+    mock_commit = self.PatchObject(cros_mark_android_as_stable, '_CommitChange')
+    self.PatchObject(android, 'ReadLKGB',
+                     side_effect=android.InvalidLKGBError())
+    mock_write_lkgb = self.PatchObject(android, 'WriteLKGB')
+
+    cros_mark_android_as_stable.main([
+        '--android_package', self.android_package,
+        '--force_version', android_version,
+        '--srcroot', self.tempdir,
+        '--update_lkgb',
+    ])
+
+    mock_write_lkgb.assert_called_once_with(self.mock_android_dir,
+                                            android_version)
+    mock_commit.assert_called_once()
+
   def testMainUpdateLKGBNoUpdate(self):
     """Tests if nothing happens when LKGB is left unchanged."""
     android_version = 'old-version'
