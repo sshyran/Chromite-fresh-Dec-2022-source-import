@@ -2,7 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unittests for GerritHelper."""
+"""Unittests for GerritHelper.
+
+Most of the tests in this file reach out to a staging/test Gerrit server. By
+default, this server is t3st-chr0m3-review.googlesource.com. These tests will
+be skipped unless run_tests is passed the '--network' arg:
+$ ./run_tests --network -- lib/gerrit_unittest.py
+"""
 
 import collections
 import http.client
@@ -102,6 +108,10 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
         ['git', 'config', '--global', 'http.cookiefile', gi.cookies_path],
         quiet=True)
 
+    # If you're seeing "does not look like a Netscape format cookies file"
+    # errors here, make sure the first line in your gitcookies file is:
+    # "# HTTP Cookie File"
+    # TODO(b/210490942): Detect and handle this automatically.
     jar = http.cookiejar.MozillaCookieJar(gi.cookies_path)
     jar.load(ignore_expires=True)
 
