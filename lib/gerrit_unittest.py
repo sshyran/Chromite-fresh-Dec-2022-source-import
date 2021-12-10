@@ -5,7 +5,6 @@
 """Unittests for GerritHelper."""
 
 import collections
-import getpass
 import http.client
 import http.cookiejar
 import io
@@ -161,6 +160,7 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     body = {
         'description': description,
         'submit_type': submit_type,
+        'branches': ['main'],
     }
     if owners is not None:
       body['owners'] = owners
@@ -344,7 +344,7 @@ class GerritHelperTest(GerritTestCase):
       A GerritPatch object.
     """
     (revision, changeid) = self.createCommit(clone_path, **kwargs)
-    helper = self._GetHelper(remote)
+    helper = self._GetHelper()
     gpatch = helper.CreateGerritPatch(clone_path, remote, 'main',
                                       project=project)
     self.assertEqual(gpatch.change_id, changeid)
@@ -428,11 +428,12 @@ class GerritHelperTest(GerritTestCase):
         testbranch_sha1)
 
   def _ChooseReviewers(self):
-    all_reviewers = set(['dborowitz@google.com', 'sop@google.com',
-                         'jrn@google.com'])
-    ret = list(all_reviewers.difference(['%s@google.com' % getpass.getuser()]))
-    self.assertGreaterEqual(len(ret), 2)
-    return ret
+    # TODO(b/210507794): register some test accounts on test server. This fixed
+    # list of real IDs has a few problems, not limited to the following:
+    #  * Some functions behave differently if the account is inactive;
+    #  * Gerrit doesn't let you add yourself as a reviewer. So these accounts
+    #    can't run the tests correctly. ;)
+    return ['dborowitz@google.com', 'jrn@google.com']
 
   def testSetAttentionSet(self):
     """Verify that we can set the attention set on a CL."""
