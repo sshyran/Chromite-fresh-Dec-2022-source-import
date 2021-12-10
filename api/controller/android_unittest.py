@@ -213,3 +213,115 @@ class UnpinVersionTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     android.UnpinVersion(None, None, self.mock_call_config)
     safeunlink.assert_not_called()
     # android.UnpinVersion does not modify the response.
+
+
+class WriteLKGBTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+  """Unittests for WriteLKGB."""
+
+  def setUp(self):
+    self._output_proto = android_pb2.WriteLKGBResponse()
+
+  def testValidateOnly(self):
+    """Test that a validate only call does not execute any logic."""
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.validate_only_config)
+
+    mock_write_lkgb.assert_not_called()
+
+  def testMockCall(self):
+    """Test that a mock call does not execute logic, returns mocked value."""
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.mock_call_config)
+
+    mock_write_lkgb.assert_not_called()
+    self.assertSequenceEqual(self._output_proto.modified_files, ['fake_file'])
+
+  def testFailsIfAndroidPackageMissing(self):
+    """Fails if android_package is missing."""
+    req = android_pb2.WriteLKGBRequest(android_version='android-version')
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      android.WriteLKGB(req, self._output_proto, self.api_config)
+
+  def testFailsIfAndroidVersionMissing(self):
+    """Fails if android_version is missing."""
+    req = android_pb2.WriteLKGBRequest(android_package='android-package')
+    with self.assertRaises(cros_build_lib.DieSystemExit):
+      android.WriteLKGB(req, self._output_proto, self.api_config)
+
+  def testSuccess(self):
+    """Successful request."""
+    mock_read_lkgb = self.PatchObject(service_android, 'ReadLKGB',
+                                      return_value='old-version')
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB',
+                                       return_value='mock_file')
+    self.PatchObject(service_android, 'GetAndroidPackageDir',
+                     return_value='android-package-dir')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.api_config)
+
+    mock_read_lkgb.assert_called_once_with('android-package-dir')
+    mock_write_lkgb.assert_called_once_with('android-package-dir',
+                                            'android-version')
+    self.assertSequenceEqual(self._output_proto.modified_files, ['mock_file'])
+
+  def testSameVersion(self):
+    """Nothing is modified if LKGB is already the same version."""
+    mock_read_lkgb = self.PatchObject(service_android, 'ReadLKGB',
+                                      return_value='android-version')
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB')
+    self.PatchObject(service_android, 'GetAndroidPackageDir',
+                     return_value='android-package-dir')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.api_config)
+
+    mock_read_lkgb.assert_called_once_with('android-package-dir')
+    mock_write_lkgb.assert_not_called()
+    self.assertSequenceEqual(self._output_proto.modified_files, [])
+
+  def testMissingLKGB(self):
+    """Proceed if LKGB file is currently missing."""
+    mock_read_lkgb = self.PatchObject(
+        service_android, 'ReadLKGB',
+        side_effect=service_android.MissingLKGBError())
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB',
+                                       return_value='mock_file')
+    self.PatchObject(service_android, 'GetAndroidPackageDir',
+                     return_value='android-package-dir')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.api_config)
+
+    mock_read_lkgb.assert_called_once_with('android-package-dir')
+    mock_write_lkgb.assert_called_once_with('android-package-dir',
+                                            'android-version')
+    self.assertSequenceEqual(self._output_proto.modified_files, ['mock_file'])
+
+  def testInvalidLKGB(self):
+    """Proceed if LKGB file currently contains invalid content."""
+    mock_read_lkgb = self.PatchObject(
+        service_android, 'ReadLKGB',
+        side_effect=service_android.InvalidLKGBError())
+    mock_write_lkgb = self.PatchObject(service_android, 'WriteLKGB',
+                                       return_value='mock_file')
+    self.PatchObject(service_android, 'GetAndroidPackageDir',
+                     return_value='android-package-dir')
+
+    req = android_pb2.WriteLKGBRequest(android_package='android-package',
+                                       android_version='android-version')
+    android.WriteLKGB(req, self._output_proto, self.api_config)
+
+    mock_read_lkgb.assert_called_once_with('android-package-dir')
+    mock_write_lkgb.assert_called_once_with('android-package-dir',
+                                            'android-version')
+    self.assertSequenceEqual(self._output_proto.modified_files, ['mock_file'])

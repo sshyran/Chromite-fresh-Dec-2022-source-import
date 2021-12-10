@@ -4,6 +4,7 @@
 
 """Android operations."""
 
+import logging
 import os
 from typing import TYPE_CHECKING
 
@@ -121,3 +122,37 @@ def UnpinVersion(_input_proto: android_pb2.UnpinVersionRequest,
     _config: The call config.
   """
   osutils.SafeUnlink(ANDROIDPIN_MASK_PATH)
+
+
+def _WriteLKGBResponse(_input_proto, output_proto, _config):
+  """Fake WriteLKGB response."""
+  output_proto.modified_files.append('fake_file')
+
+
+@faux.success(_WriteLKGBResponse)
+@faux.empty_error
+@validate.require('android_package', 'android_version')
+@validate.validation_complete
+def WriteLKGB(input_proto, output_proto, _config):
+  android_package = input_proto.android_package
+  android_version = input_proto.android_version
+  android_package_dir = android.GetAndroidPackageDir(android_package)
+
+  # Attempt to read current LKGB, if available.
+  current_lkgb = None
+  try:
+    current_lkgb = android.ReadLKGB(android_package_dir)
+  except android.MissingLKGBError:
+    logging.info('LKGB file is missing, creating a new one.')
+  except android.InvalidLKGBError:
+    logging.warning('Current LKGB file is invalid, overwriting.')
+
+  # Do nothing if LKGB is already set to the requested version.
+  if current_lkgb == android_version:
+    logging.warning('LKGB of %s is already %s, doing nothing.',
+                    android_package, android_version)
+    return
+
+  # Actually update LKGB.
+  lkgb = android.WriteLKGB(android_package_dir, android_version)
+  output_proto.modified_files.append(lkgb)
