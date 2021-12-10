@@ -314,6 +314,7 @@
     sentry-release
     setzer-release
     shadowkeep-release
+    skyrim-release
     snappy-kernelnext-release
     snappy-release
     soraka-libcamera-release
@@ -1456,6 +1457,7 @@
     sentry-release-tryjob
     setzer-release-tryjob
     shadowkeep-release-tryjob
+    skyrim-release-tryjob
     snappy-kernelnext-release-tryjob
     snappy-release-tryjob
     soraka-libcamera-release-tryjob
@@ -1771,6 +1773,12 @@
   shadowkeep-payloads-tryjob
   shadowkeep-release-tryjob
   shadowkeep-unittest-stress
+  skyrim-full-tryjob
+  skyrim-llvm-next-toolchain-tryjob
+  skyrim-llvm-toolchain-tryjob
+  skyrim-payloads-tryjob
+  skyrim-release-tryjob
+  skyrim-unittest-stress
   sludge-full-tryjob
   sludge-llvm-next-toolchain-tryjob
   sludge-llvm-toolchain-tryjob
