@@ -1224,7 +1224,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.vmsc_android_pfq,
       site_config.templates.master_android_pfq_mixin,
       schedule='with 60m interval',
-      android_update_lkgb=True,
   )
 
   _vmsc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
