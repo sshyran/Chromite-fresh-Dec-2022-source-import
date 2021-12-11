@@ -143,7 +143,6 @@ class VM(device.Device):
   IMAGE_FORMAT = 'raw'
   # kvm_* should match kvm_intel, kvm_amd, etc.
   NESTED_KVM_GLOB = '/sys/module/kvm_*/parameters/nested'
-  FLASH_SIZE = 64*1024*1024
 
   # Target architecture
   ARCH_X86_64 = 'x86_64'
@@ -246,12 +245,18 @@ class VM(device.Device):
     Returns:
       Nothing
     """
-    standard_uefi_paths = [
-        '/usr/share/qemu/edk2-aarch64-code.fd',
-        '/usr/share/qemu-efi-aarch64/QEMU_EFI.fd',
-    ]
+    standard_uefi_paths = {
+        VM.ARCH_X86_64: [
+            '/usr/share/qemu/edk2-x86_64-code.fd',
+            '/usr/share/OVMF/OVMF_CODE_4M.fd',
+        ],
+        VM.ARCH_AARCH64: [
+            '/usr/share/qemu/edk2-aarch64-code.fd',
+            '/usr/share/qemu-efi-aarch64/QEMU_EFI.fd',
+        ],
+    }
     uefi_path = None
-    for p in standard_uefi_paths:
+    for p in standard_uefi_paths[self.qemu_arch]:
       if os.path.exists(p):
         uefi_path = p
         break
@@ -259,14 +264,26 @@ class VM(device.Device):
     if not uefi_path:
       raise VMError('EDK2 QEMU firmware not found.')
 
-    cros_build_lib.run(
-        ['dd', 'if=%s' % uefi_path, 'of=%s' % self.flash0_file,
-        'count=1', 'bs=%dM' % (VM.FLASH_SIZE / (1024*1024)), 'conv=sync',
-        ], dryrun=self.dryrun)
+    if self.qemu_arch == VM.ARCH_AARCH64:
+      # UEFI firmware for ARM64 has 64Mb pflash size hardcoded
+      flash_size = 64
+      cros_build_lib.run(
+          ['dd', 'if=%s' % uefi_path, 'of=%s' % self.flash0_file,
+           'count=1', 'bs=%dM' % (flash_size), 'conv=sync',
+          ], dryrun=self.dryrun)
+    elif self.qemu_arch == VM.ARCH_X86_64:
+      # X86 UEFI firmware allows up to 8Mb code + vars size combined
+      flash_size = 4
+      # X86 UEFI also sensitive to the pflash image size and shouldn't
+      # be padded to a larger boundary.
+      cros_build_lib.run(
+          ['dd', 'if=%s' % uefi_path, 'of=%s' % self.flash0_file,
+           'bs=4K', 'conv=sync',
+          ], dryrun=self.dryrun)
     logging.info('flash0 image created at %s.', self.flash0_file)
 
     with open(self.flash1_file, 'wb+') as f:
-      f.truncate(VM.FLASH_SIZE)
+      f.truncate(flash_size * 1024 * 1024)
     logging.info('flash1 image created at %s.', self.flash1_file)
 
   def _CreateQcow2Image(self):
@@ -506,8 +523,12 @@ class VM(device.Device):
     ]
     if self.qemu_arch == VM.ARCH_X86_64:
       qemu_args += [
-        '-vga', 'virtio',
-        '-usb', '-device', 'usb-tablet',
+          '-vga', 'virtio',
+          '-usb', '-device', 'usb-tablet',
+          '-drive', 'file=%s,if=pflash,format=raw,unit=0,readonly=on'
+          % self.flash0_file,
+          '-drive', 'file=%s,if=pflash,format=raw,unit=1'
+          % self.flash1_file,
       ]
     if self.qemu_arch == VM.ARCH_AARCH64:
       qemu_args += [
@@ -516,7 +537,7 @@ class VM(device.Device):
           '-pflash', self.flash1_file,
       ]
     if self.qemu_cpu:
-      qemu_args += [ '-cpu', self.qemu_cpu ]
+      qemu_args += ['-cpu', self.qemu_cpu]
     # netdev args, including hostfwds.
     netdev_args = ('user,id=eth0,net=10.0.2.0/27,hostfwd=tcp:%s:%d-:%d'
                    % (remote_access.LOCALHOST_IP, self.ssh_port,
@@ -555,8 +576,7 @@ class VM(device.Device):
       logging.debug('Start VM, attempt #%d', attempt)
 
       self._CreateVMDir()
-      if self.qemu_arch == VM.ARCH_AARCH64:
-        self._CreatePflashFiles()
+      self._CreatePflashFiles()
 
       image_path = self.image_path
       image_format = self.image_format
