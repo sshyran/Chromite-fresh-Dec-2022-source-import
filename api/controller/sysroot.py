@@ -311,31 +311,31 @@ def InstallPackages(input_proto, output_proto, _config):
       failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
+  finally:
+    # Copy goma logs to specified directory if there is a goma_config and
+    # it contains a log_dir to store artifacts.
+    if input_proto.goma_config.log_dir.dir:
+      # Get the goma log directory based on the GLOG_log_dir env variable.
+      # TODO(crbug.com/1045001): Replace environment variable with query to
+      # goma object after goma refactoring allows this.
+      log_source_dir = os.getenv('GLOG_log_dir')
+      if not log_source_dir:
+        cros_build_lib.Die('GLOG_log_dir must be defined.')
+      archiver = goma_lib.LogsArchiver(
+          log_source_dir,
+          dest_dir=input_proto.goma_config.log_dir.dir,
+          stats_file=input_proto.goma_config.stats_file,
+          counterz_file=input_proto.goma_config.counterz_file)
+      archiver_tuple = archiver.Archive()
+      if archiver_tuple.stats_file:
+        output_proto.goma_artifacts.stats_file = archiver_tuple.stats_file
+      if archiver_tuple.counterz_file:
+        output_proto.goma_artifacts.counterz_file = archiver_tuple.counterz_file
+      output_proto.goma_artifacts.log_files[:] = archiver_tuple.log_files
 
   # Return without populating the response if it is a dryrun.
   if dryrun:
     return controller.RETURN_CODE_SUCCESS
-
-  # Copy goma logs to specified directory if there is a goma_config and
-  # it contains a log_dir to store artifacts.
-  if input_proto.goma_config.log_dir.dir:
-    # Get the goma log directory based on the GLOG_log_dir env variable.
-    # TODO(crbug.com/1045001): Replace environment variable with query to
-    # goma object after goma refactoring allows this.
-    log_source_dir = os.getenv('GLOG_log_dir')
-    if not log_source_dir:
-      cros_build_lib.Die('GLOG_log_dir must be defined.')
-    archiver = goma_lib.LogsArchiver(
-        log_source_dir,
-        dest_dir=input_proto.goma_config.log_dir.dir,
-        stats_file=input_proto.goma_config.stats_file,
-        counterz_file=input_proto.goma_config.counterz_file)
-    archiver_tuple = archiver.Archive()
-    if archiver_tuple.stats_file:
-      output_proto.goma_artifacts.stats_file = archiver_tuple.stats_file
-    if archiver_tuple.counterz_file:
-      output_proto.goma_artifacts.counterz_file = archiver_tuple.counterz_file
-    output_proto.goma_artifacts.log_files[:] = archiver_tuple.log_files
 
   # Read metric events log and pipe them into output_proto.events.
   deserialize_metrics_log(output_proto.events, prefix=build_target.name)
