@@ -214,11 +214,13 @@ def InstallToolchain(input_proto, output_proto, _config):
       failed_pkg_data_msg = output_proto.failed_package_data.add()
       controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
       glob_path = os.path.join(target_sysroot.portage_logdir,
-                               f'{pkg_info.category}:{pkg_info.package}:*.log')
+                               f'{pkg_info.category}:{pkg_info.pvr}:*.log')
       log_files = glob.glob(glob_path)
       log_files.sort(reverse=True)
       # Omit path if files don't exist for some reason
       if not log_files:
+        logging.warning('Log file for %s was not found. Search path: %s',
+                        pkg_info.cpvr, glob_path)
         continue
       failed_pkg_data_msg.log_path.path = log_files[0]
       failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE
@@ -301,11 +303,13 @@ def InstallPackages(input_proto, output_proto, _config):
       failed_pkg_data_msg = output_proto.failed_package_data.add()
       controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
       glob_path = os.path.join(target_sysroot.portage_logdir,
-                               f'{pkg_info.category}:{pkg_info.package}:*.log')
+                               f'{pkg_info.category}:{pkg_info.pvr}:*.log')
       log_files = glob.glob(glob_path)
       log_files.sort(reverse=True)
       # Omit path if files don't exist for some reason
       if not log_files:
+        logging.warning('Log file for %s was not found. Search path: %s',
+                        pkg_info.cpvr, glob_path)
         continue
       failed_pkg_data_msg.log_path.path = log_files[0]
       failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE

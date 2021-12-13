@@ -278,7 +278,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
       timestamp (datetime): timestamp used to name the file.
     """
     path = os.path.join(log_path,
-                        f'{pkg_info.category}:{pkg_info.package}:' \
+                        f'{pkg_info.category}:{pkg_info.pvr}:' \
                         f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
     osutils.WriteFile(path,
                       f'Test log file for package {pkg_info.category}/'
@@ -364,7 +364,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     in_proto = self._InputProto(build_target=self.board,
                                 sysroot_path=self.sysroot)
 
-    err_pkgs = ['cat/pkg', 'cat2/pkg2']
+    err_pkgs = ['cat/pkg-1.0-r1', 'cat2/pkg2-1.0-r1']
     err_cpvs = [package_info.parse(pkg) for pkg in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
 
@@ -393,7 +393,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
       package = controller_util.deserialize_package_info(data.name)
       cat_pkg = (data.name.category, data.name.package_name)
       self.assertIn(cat_pkg, expected)
-      self.assertEqual(data.log_path.path, new_logs[package.atom])
+      self.assertEqual(data.log_path.path, new_logs[package.cpvr])
 
     # TODO(b/206514844): remove when field is deleted
     for package in out_proto.failed_packages:
@@ -481,7 +481,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       timestamp (datetime): timestamp used to name the file.
     """
     path = os.path.join(log_path,
-                        f'{pkg_info.category}:{pkg_info.package}:' \
+                        f'{pkg_info.category}:{pkg_info.pvr}:' \
                         f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
     osutils.WriteFile(path, f'Test log file for package {pkg_info.category}/'
                       f'{pkg_info.package} written to {path}')
@@ -744,7 +744,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     out_proto = self._OutputProto()
 
     # Failed package info and expected list for verification.
-    err_pkgs = ['cat/pkg', 'cat2/pkg2']
+    err_pkgs = ['cat/pkg-1.0-r3', 'cat2/pkg2-1.0-r1']
     err_cpvs = [package_info.parse(cpv) for cpv in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
 
@@ -770,7 +770,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       package = controller_util.deserialize_package_info(data.name)
       cat_pkg = (data.name.category, data.name.package_name)
       self.assertIn(cat_pkg, expected)
-      self.assertEqual(data.log_path.path, new_logs[package.atom])
+      self.assertEqual(data.log_path.path, new_logs[package.cpvr])
 
     # TODO(b/206514844): remove when field is deleted
     for package in out_proto.failed_packages:
