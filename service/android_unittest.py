@@ -12,7 +12,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.service import android
 
 
@@ -69,9 +68,8 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.android_package = constants.ANDROID_PI_PACKAGE
 
     self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
-    self.mock_android_dir = os.path.join(
-        self.tmp_overlay,
-        portage_util.GetFullAndroidPortagePackageName(self.android_package))
+    self.mock_android_dir = android.GetAndroidPackageDir(
+        self.android_package, overlay_dir=self.tmp_overlay)
 
     self.old_version = '25'
     self.old2_version = '50'

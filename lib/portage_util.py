@@ -2213,18 +2213,6 @@ def GetPackageDependencies(board, package, buildroot=constants.SOURCE_ROOT):
   return packages
 
 
-def GetFullAndroidPortagePackageName(android_package_name):
-  """Returns the full portage package name for the given android package.
-
-  Args:
-    android_package_name: Android package name. E.g. android-container.
-
-  Returns:
-    Full portage package name. E.g. chromeos-base/android-container.
-  """
-  return '%s/%s' % (constants.CHROMEOS_BASE, android_package_name)
-
-
 def GetRepositoryFromEbuildInfo(info):
   """Parse output of the result of `ebuild <ebuild_path> info`
 

@@ -245,10 +245,7 @@ def uprev_android_lkgb(android_package: str,
     An uprev_lib.UprevVersionedPackageResult containing the new version and a
     list of modified files.
   """
-  overlay_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'private-overlays',
-                             'project-cheets-private')
-  android_package_dir = os.path.join(overlay_dir, 'chromeos-base',
-                                     android_package)
+  android_package_dir = android.GetAndroidPackageDir(android_package)
   android_version = android.ReadLKGB(android_package_dir)
 
   result = uprev_lib.UprevVersionedPackageResult()
@@ -259,9 +256,10 @@ def uprev_android_lkgb(android_package: str,
   if not uprev_result.revved:
     return result
 
-  # cros_mark_android_as_stable returns paths relative to |overlay_dir|.
-  result.add_result(android_version, [os.path.join(overlay_dir, f)
-                                      for f in uprev_result.modified_files])
+  # cros_mark_android_as_stable returns paths relative to |android.OVERLAY_DIR|.
+  result.add_result(android_version,
+                    [os.path.join(android.OVERLAY_DIR, f)
+                     for f in uprev_result.modified_files])
   return result
 
 

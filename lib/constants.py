@@ -390,12 +390,8 @@ ALL_TARGET_PACKAGES = (
     TARGET_OS_FACTORY_SHIM_PKG,
 )
 
-# Constants for uprevving Chrome
-
-CHROMEOS_BASE = 'chromeos-base'
-
 # Portage category and package name for Chrome.
-CHROME_CN = CHROMEOS_BASE
+CHROME_CN = 'chromeos-base'
 CHROME_PN = 'chromeos-chrome'
 CHROME_CP = '%s/%s' % (CHROME_CN, CHROME_PN)
 

@@ -80,6 +80,21 @@ ARC_BUCKET_ACL_X86 = 'googlestorage_acl_x86.txt'
 ARC_BUCKET_ACL_PUBLIC = 'googlestorage_acl_public.txt'
 
 
+# The overlay that hosts Android packages.
+OVERLAY_DIR = os.path.join(constants.SOURCE_ROOT, 'src', 'private-overlays',
+                           'project-cheets-private')
+
+
+def GetAndroidPackageDir(android_package, overlay_dir=OVERLAY_DIR):
+  """Returns the Portage package directory of the given Android package.
+
+  Args:
+    android_package (str): the Android package name e.g. 'android-vm-rvc'
+    overlay_dir (str, optional): specify to override the default overlay.
+  """
+  return os.path.join(overlay_dir, 'chromeos-base', android_package)
+
+
 def GetAndroidBranchForPackage(android_package):
   """Returns the corresponding Android branch of given Android package.
 

@@ -383,9 +383,8 @@ def main(argv):
   options.Freeze()
 
   overlay_dir = os.path.abspath(_OVERLAY_DIR % {'srcroot': options.srcroot})
-  android_package_dir = os.path.join(
-      overlay_dir,
-      portage_util.GetFullAndroidPortagePackageName(options.android_package))
+  android_package_dir = android.GetAndroidPackageDir(options.android_package,
+                                                     overlay_dir=overlay_dir)
 
   if not options.skip_commit:
     _PrepareGitBranch(overlay_dir)

@@ -44,9 +44,8 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
     self.tmp_overlay = os.path.join(self.tempdir, 'private-overlays',
                                     'project-cheets-private')
-    self.mock_android_dir = os.path.join(
-        self.tmp_overlay,
-        portage_util.GetFullAndroidPortagePackageName(self.android_package))
+    self.mock_android_dir = android.GetAndroidPackageDir(
+        self.android_package, overlay_dir=self.tmp_overlay)
 
     ebuild = os.path.join(self.mock_android_dir,
                           self.android_package + '-%s.ebuild')
@@ -119,9 +118,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
     version_atom, files_to_add, files_to_remove = revved
     self.assertEqual(
         version_atom,
-        '%s-%s-r1' % (
-            portage_util.GetFullAndroidPortagePackageName(self.android_package),
-            self.new_version))
+        f'chromeos-base/{self.android_package}-{self.new_version}-r1')
     self.assertEqual(files_to_add,
                      [self.new, os.path.join(package_dir, 'Manifest')])
     self.assertEqual(files_to_remove, [self.old2])
