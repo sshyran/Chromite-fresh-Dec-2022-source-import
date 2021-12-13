@@ -166,6 +166,11 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
             TEST_SERVICE_DIR,
             'test_finder/docker/build-dockerimage.sh',
         ),
+    'cros-testplan':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'plan/docker/build-dockerimage.sh',
+        ),
 }
 
 
