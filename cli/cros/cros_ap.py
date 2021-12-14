@@ -17,11 +17,26 @@ from chromite.lib.firmware import dut
 from chromite.lib.firmware import firmware_config
 from chromite.lib.firmware import firmware_lib
 
-COMMAND_DUMP_CONFIG = 'dump-config'
-COMMAND_BUILD = 'build'
-COMMAND_FLASH = 'flash'
-COMMAND_READ = 'read'
-COMMAND_CLEAN = 'clean'
+
+# All known ap subcommands.
+SUBCOMMANDS = {}
+
+
+def subcommand_decorator(name):
+  """Decorator that validates and registers subcommands."""
+
+  def inner_decorator(original_class):
+    """Inner decorator that actually wraps the class."""
+    assert hasattr(original_class, '__doc__'), f'{name}: missing docstring'
+
+    assert issubclass(original_class, command.CliCommand), (
+        f'{original_class}: subcommands must derive from CliCommand')
+
+    SUBCOMMANDS[name] = original_class
+
+    return original_class
+
+  return inner_decorator
 
 
 @command.CommandDecorator('ap')
@@ -38,68 +53,23 @@ class APCommand(command.CliCommand):
         title='AP subcommands', dest='ap_command')
     subparsers.required = True
 
-    dump_config_parser = _AddSubparser(parser, subparsers, COMMAND_DUMP_CONFIG,
-                                       'Dump the AP Config to a file.')
-    DumpConfigSubcommand.AddParser(dump_config_parser)
-
-    build_parser = _AddSubparser(
-        parser, subparsers, COMMAND_BUILD,
-        'Build the AP Firmware for the requested build target.')
-    BuildSubcommand.AddParser(build_parser)
-
-    flash_parser = _AddSubparser(parser, subparsers, COMMAND_FLASH,
-                                 'Update the AP Firmware on a device.')
-    FlashSubcommand.AddParser(flash_parser)
-
-    read_parser = _AddSubparser(parser, subparsers, COMMAND_READ,
-                                'Read the AP Firmware from a device.')
-    ReadSubcommand.AddParser(read_parser)
-
-    clean_parser = _AddSubparser(
-        parser, subparsers, COMMAND_CLEAN,
-        'Clean up dependencies and artifacts '
-        'for a given build target.')
-    CleanSubcommand.AddParser(clean_parser)
+    for name, subcommand_class in SUBCOMMANDS.items():
+      sub_parser = subparsers.add_parser(
+          name,
+          description=subcommand_class.__doc__,
+          caching=parser.caching,
+          help=subcommand_class.__doc__,
+          formatter_class=parser.formatter_class)
+      subcommand_class.AddParser(sub_parser)
 
   def Run(self):
     """The main handler of this CLI."""
-    if self.options.ap_command == COMMAND_DUMP_CONFIG:
-      subcmd = DumpConfigSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_BUILD:
-      subcmd = BuildSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_FLASH:
-      subcmd = FlashSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_READ:
-      subcmd = ReadSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_CLEAN:
-      subcmd = CleanSubcommand(self.options)
-    subcmd.Run()
+    cls = SUBCOMMANDS[self.options.ap_command]
+    subcmd = cls(self.options)
+    return subcmd.Run()
 
 
-def _AddSubparser(parser, subparsers, name, description):
-  """Adds a subparser to the given parser, with common options.
-
-  Forwards some options from the parser to the new subparser to ensure
-  consistent formatting of output etc.
-
-  Args:
-    parser: The parent parser for this subparser.
-    subparsers: The subparsers group to add this subparser to.
-    name: Name of the new sub-command.
-    description: Description to be used for the sub-command.
-
-  Returns:
-    The new subparser.
-  """
-  return subparsers.add_parser(
-      name,
-      description=description,
-      caching=parser.caching,
-      help=description,
-      formatter_class=parser.formatter_class,
-  )
-
-
+@subcommand_decorator('dump-config')
 class DumpConfigSubcommand(command.CliCommand):
   """Dump the AP Config to a file."""
 
@@ -145,6 +115,7 @@ To dump AP config of drallion and dedede boards:
                                           self.options.serial)
 
 
+@subcommand_decorator('build')
 class BuildSubcommand(command.CliCommand):
   """Build the AP Firmware for the requested build target."""
 
@@ -196,6 +167,7 @@ To build the AP Firmware only for foo-variant:
       cros_build_lib.Die(e)
 
 
+@subcommand_decorator('read')
 class ReadSubcommand(command.CliCommand):
   """Read the AP Firmware from a device."""
 
@@ -291,6 +263,7 @@ To read a specific region from DUT via SERVO on default port(9999):
                       'is correct and servod is running in the background.')
 
 
+@subcommand_decorator('flash')
 class FlashSubcommand(command.CliCommand):
   """Update the AP Firmware on a device."""
 
@@ -389,8 +362,9 @@ e.g.:
       cros_build_lib.Die(e)
 
 
+@subcommand_decorator('clean')
 class CleanSubcommand(command.CliCommand):
-  """Clean packages and artifacts for the requested build target."""
+  """Clean up dependencies and artifacts for the requested build target."""
 
   def __init__(self, options):
     super().__init__(options)
