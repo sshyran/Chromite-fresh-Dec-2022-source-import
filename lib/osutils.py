@@ -1038,7 +1038,8 @@ def Mount(source: Union[None, Path, str, bytes, int],
                 _MaybeEncode(fstype), ctypes.c_int(flags),
                 _MaybeEncode(data)) != 0:
     e = ctypes.get_errno()
-    raise OSError(e, os.strerror(e))
+    raise OSError(e, 'Could not mount "%s" to "%s": %s' %
+                  (source, target, os.strerror(e)))
 
 
 def MountDir(src_path, dst_path, fs_type=None, sudo=True, makedirs=True,
