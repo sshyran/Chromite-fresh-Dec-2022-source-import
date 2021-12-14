@@ -1949,7 +1949,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
       'grunt-kernelnext-release',
       'zork-connectivitynext-release',
       'zork-minios-release',
-      'skyrim'
+      'skyrim-release',
   ]
 
   def _get_skylab_settings(board_name):
