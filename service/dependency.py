@@ -91,18 +91,17 @@ def GenerateSourcePathMapping(packages: List[str],
 
 @functools.lru_cache()
 def GetBuildDependency(
-    sysroot_path: str,
+    sysroot_path: Optional[str],
     board: Optional[str] = None,
     packages: Optional[Collection['PackageInfo']] = None) -> Tuple[dict, dict]:
   """Return the build dependency and package -> source path map for |board|.
 
   Args:
-    sysroot_path (str): The path to the sysroot, or None if no sysroot is being
-        used.
-    board (str): The name of the board whose artifacts are being created, or
-        None if no sysroot is being used.
-    packages (tuple[CPV]): The packages that need to be built, or empty / None
-        to use the default list.
+    sysroot_path: The path to the sysroot, or None if no sysroot is being used.
+    board: The name of the board whose artifacts are being created, or None if
+        no sysroot is being used.
+    packages: The packages that need to be built, or empty / None to use the
+        default list.
 
   Returns:
     JSON build dependencies report for the given board which includes:
@@ -251,7 +250,7 @@ def DetermineToolchainSourcePaths() -> List[str]:
   Returned paths are relative to the root of the project checkout.
 
   Returns:
-    List[str]: A list of paths considered relevant to toolchain packages.
+    A list of paths considered relevant to toolchain packages.
   """
   source_paths = set()
   toolchain_pkgs = portage_util.GetFlattenedDepsForPackage(
