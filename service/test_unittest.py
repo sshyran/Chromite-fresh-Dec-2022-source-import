@@ -215,14 +215,14 @@ class DebugInfoTestTest(cros_test_lib.RunCommandTestCase):
 class MoblabVmTestCase(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for the SetupBoardRunConfig class."""
 
-  def MockDirectory(self, path):
+  def MockDirectory(self, path: str) -> str:
     """Create an empty directory.
 
     Args:
-      path (str): Relative path for the directory.
+      path: Relative path for the directory.
 
     Returns:
-      str: Path to the directory.
+      Path to the directory.
     """
     path = os.path.join(self.tempdir, path)
     osutils.SafeMakedirs(path)
