@@ -992,6 +992,29 @@ class ChromeSDKCommand(command.CliCommand):
         help='Override toolchain url format pattern, e.g. '
              '2014/04/%%(target)s-2014.04.23.220740.tar.xz')
 
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if bool(options.board) == bool(options.boards):
+      parser.error('Must specify either one of --board or --boards.')
+
+    if options.boards and options.use_shell:
+      parser.error('Must specify --no-shell when preparing multiple boards.')
+
+    if options.is_lacros and not options.version:
+      parser.error(
+          'Must specify --version for --is-lacros because Lacros-Chrome build '
+          'does not use the CHROMEOS_LKGM version for compilation')
+
+    src_path = options.chrome_src or os.getcwd()
+    checkout = path_util.DetermineCheckout(src_path)
+    if not checkout.chrome_src_dir:
+      parser.error(f'Chrome checkout not found at {src_path}')
+    options.chrome_src = checkout.chrome_src_dir
+
+    if options.boards:
+      options.boards = options.boards.split(':')
+
   def __init__(self, options):
     super().__init__(options)
     self.board = options.board
@@ -1563,18 +1586,6 @@ class ChromeSDKCommand(command.CliCommand):
 
   def Run(self):
     """Perform the command."""
-    if bool(self.options.board) == bool(self.options.boards):
-      cros_build_lib.Die('Must specify either one of --board or --boards.')
-
-    if self.options.boards and self.options.use_shell:
-      cros_build_lib.Die(
-          'Must specify --no-shell when preparing multiple boards.')
-
-    if self.options.is_lacros and not self.options.version:
-      cros_build_lib.Die(
-          'Must specify --version for --is-lacros because Lacros-Chrome build '
-          'does not use the CHROMEOS_LKGM version for compilation')
-
     if os.environ.get(SDKFetcher.SDK_VERSION_ENV) is not None:
       cros_build_lib.Die('Already in an SDK shell.')
 
@@ -1587,12 +1598,6 @@ class ChromeSDKCommand(command.CliCommand):
         old_config.parent.rmdir()
       except OSError:
         pass
-
-    src_path = self.options.chrome_src or os.getcwd()
-    checkout = path_util.DetermineCheckout(src_path)
-    if not checkout.chrome_src_dir:
-      cros_build_lib.Die('Chrome checkout not found at %s', src_path)
-    self.options.chrome_src = checkout.chrome_src_dir
 
     if self.options.chrome_branding or self.options.internal:
       gclient_path = gclient.FindGclientFile(self.options.chrome_src)
@@ -1625,7 +1630,6 @@ class ChromeSDKCommand(command.CliCommand):
     if self.options.board:
       return self._RunOnceForBoard(self.options.board)
     else:
-      self.options.boards = self.options.boards.split(':')
       for board in self.options.boards:
         start = datetime.datetime.now()
         self._RunOnceForBoard(board)

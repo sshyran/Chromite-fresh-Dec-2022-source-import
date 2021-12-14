@@ -130,6 +130,12 @@ class CliCommand(object):
     parser.set_defaults(command_class=cls)
 
   @classmethod
+  def ProcessOptions(cls,
+                     parser: commandline.ArgumentParser,
+                     options: commandline.ArgumentNamespace) -> None:
+    """Validate & post-process options before freezing."""
+
+  @classmethod
   def AddDeviceArgument(cls, parser, schemes=commandline.DEVICE_SCHEME_SSH,
                         positional=False):
     """Add a device argument to the parser.

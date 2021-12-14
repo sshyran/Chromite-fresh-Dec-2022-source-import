@@ -135,42 +135,45 @@ class CleanCommand(command.CliCommand):
     """Initializes cros clean."""
     command.CliCommand.__init__(self, options)
 
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    # If no option is set, default to "--safe".
+    if not (options.autotest or
+            options.board or
+            options.cache or
+            options.chromite or
+            options.chroot or
+            options.chroot_tmp or
+            options.clobber or
+            options.deploy or
+            options.flash or
+            options.images or
+            options.incrementals or
+            options.logs or
+            options.safe or
+            options.sysroots or
+            options.workdirs):
+      options.safe = True
+
+    if options.clobber:
+      options.chroot = True
+      options.autotest = True
+      options.safe = True
+
+    if options.safe:
+      options.cache = True
+      options.chromite = True
+      options.chroot_tmp = True
+      options.deploy = True
+      options.flash = True
+      options.images = True
+      options.incrementals = True
+      options.logs = True
+      options.workdirs = True
+
   def Run(self):
     """Perform the cros clean command."""
-    # If no option is set, default to "--safe"
-    if not (self.options.autotest or
-            self.options.board or
-            self.options.cache or
-            self.options.chromite or
-            self.options.chroot or
-            self.options.chroot_tmp or
-            self.options.clobber or
-            self.options.deploy or
-            self.options.flash or
-            self.options.images or
-            self.options.incrementals or
-            self.options.logs or
-            self.options.safe or
-            self.options.sysroots or
-            self.options.workdirs):
-      self.options.safe = True
-
-    if self.options.clobber:
-      self.options.chroot = True
-      self.options.autotest = True
-      self.options.safe = True
-
-    if self.options.safe:
-      self.options.cache = True
-      self.options.chromite = True
-      self.options.chroot_tmp = True
-      self.options.deploy = True
-      self.options.flash = True
-      self.options.images = True
-      self.options.incrementals = True
-      self.options.logs = True
-      self.options.workdirs = True
-
     self.options.Freeze()
 
     chroot_dir = self.options.sdk_path

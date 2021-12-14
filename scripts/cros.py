@@ -85,6 +85,7 @@ def main(argv):
     # import the single subcommand.
     parser = GetOptions(namespace.subcommand)
     namespace = parser.parse_args(argv)
+    namespace.command_class.ProcessOptions(parser, namespace)
     subcommand = namespace.command_class(namespace)
     try:
       code = _RunSubCommand(subcommand)

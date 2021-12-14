@@ -129,13 +129,16 @@ Examples:
 
     return parser
 
-  def Run(self):
-    if self.options.build_target_name:
-      self.options.build_target = build_target_lib.BuildTarget(
-          self.options.build_target_name)
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.build_target_name:
+      options.build_target = build_target_lib.BuildTarget(
+          options.build_target_name)
     else:
-      self.options.build_target = None
+      options.build_target = None
 
+  def Run(self):
     self.options.Freeze()
 
     has_target = self.options.host or self.options.build_target

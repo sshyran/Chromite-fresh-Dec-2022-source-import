@@ -291,6 +291,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
   def testManyBoards(self):
     """Test a runthrough when multiple boards are specified via --boards."""
     self.SetupCommandMock(many_boards=True)
+    self.cmd_mock.inst.ProcessOptions(
+        self.cmd_mock.parser, self.cmd_mock.inst.options)
     self.cmd_mock.inst.Run()
     for board in SDKFetcherMock.BOARDS:
       board_arg_file = os.path.join(
@@ -311,6 +313,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     osutils.Touch(lkgm_file, makedirs=True)
     osutils.WriteFile(lkgm_file, '5678.0.0')
 
+    self.cmd_mock.inst.ProcessOptions(
+        self.cmd_mock.parser, self.cmd_mock.inst.options)
     self.cmd_mock.inst.Run()
     for board in SDKFetcherMock.BOARDS:
       board_arg_file = os.path.join(
@@ -333,6 +337,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
           self.chrome_src_dir, 'out_%s' % board, 'Release', 'args.gn')
       osutils.WriteFile(gn_args_file, 'foo\nbar', makedirs=True)
 
+    self.cmd_mock.inst.ProcessOptions(
+        self.cmd_mock.parser, self.cmd_mock.inst.options)
     self.cmd_mock.inst.Run()
 
     for board in SDKFetcherMock.BOARDS:

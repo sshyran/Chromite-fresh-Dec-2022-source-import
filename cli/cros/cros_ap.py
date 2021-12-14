@@ -62,6 +62,12 @@ class APCommand(command.CliCommand):
           formatter_class=parser.formatter_class)
       subcommand_class.AddParser(sub_parser)
 
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    sub_class = SUBCOMMANDS[options.ap_command]
+    sub_class.ProcessOptions(parser, options)
+
   def Run(self):
     """The main handler of this CLI."""
     cls = SUBCOMMANDS[self.options.ap_command]
@@ -73,11 +79,11 @@ class APCommand(command.CliCommand):
 class DumpConfigSubcommand(command.CliCommand):
   """Dump the AP Config to a file."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if self.options.output:
-      self.options.output = Path(self.options.output)
-    self.options.Freeze()
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.output:
+      options.output = Path(options.output)
 
   @classmethod
   def AddParser(cls, parser):
@@ -107,6 +113,8 @@ To dump AP config of drallion and dedede boards:
 
   def Run(self):
     """Perform the cros ap dump-config command."""
+    self.options.Freeze()
+
     boards = None
     if self.options.boards:
       boards = self.options.boards
@@ -171,12 +179,12 @@ To build the AP Firmware only for foo-variant:
 class ReadSubcommand(command.CliCommand):
   """Read the AP Firmware from a device."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if self.options.device is None:
-      cros_build_lib.Die('Specify device using --device argument.')
-    self.options.output_path = Path(self.options.output)
-    self.options.Freeze()
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.device is None:
+      parser.error('Specify device using --device argument.')
+    options.output_path = Path(options.output)
 
   @classmethod
   def AddParser(cls, parser):
@@ -221,6 +229,7 @@ To read a specific region from DUT via SERVO on default port(9999):
 """
 
   def Run(self):
+    self.options.Freeze()
     if not cros_build_lib.IsInsideChroot():
       logging.notice('Command will run in chroot, '
                      'and the output file path will be inside.')
@@ -267,18 +276,18 @@ To read a specific region from DUT via SERVO on default port(9999):
 class FlashSubcommand(command.CliCommand):
   """Update the AP Firmware on a device."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if not os.path.exists(self.options.image):
-      cros_build_lib.Die(
-          '%s does not exist, verify the path of your build and try '
-          'again.', self.options.image)
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if not os.path.exists(options.image):
+      parser.error(
+          f'{options.image} does not exist, verify the path of your build and '
+          'try again.')
     if options.fast:
-      cros_build_lib.Die(
+      parser.error(
           'Flags such as --fast must be passed directly after --\n'
           'For futility use: cros ap flash ${OTHER_ARGS} -- --fast\n'
           'For flashrom use: cros ap flash --flashrom ${OTHER_ARGS} -- -n')
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):
@@ -341,6 +350,7 @@ e.g.:
 """
 
   def Run(self):
+    self.options.Freeze()
     commandline.RunInsideChroot(self)
 
     passthrough_args = self.options.extra_options

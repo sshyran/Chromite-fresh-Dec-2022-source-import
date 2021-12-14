@@ -74,6 +74,18 @@ To debug a process by its pid:
         '-p', '--pid', type=int,
         help='The pid of the process on the target device.')
 
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if not (options.pid or options.exe):
+      parser.error('Must use --exe or --pid to specify the process to debug.')
+
+    if options.pid and (options.list or options.exe):
+      parser.error('--list and --exe are disallowed when --pid is used.')
+
+    if not options.exe.startswith('/'):
+      parser.error('--exe must have a full pathname.')
+
   def _ListProcesses(self, device, pids):
     """Provided with a list of pids, print out information of the processes."""
     if not pids:
@@ -140,19 +152,10 @@ To debug a process by its pid:
       if self.ssh_port:
         self.gdb_cmd.extend(['--ssh_port', str(self.ssh_port)])
 
-      if not (self.pid or self.exe):
-        cros_build_lib.Die(
-            'Must use --exe or --pid to specify the process to debug.')
-
       if self.pid:
-        if self.list or self.exe:
-          cros_build_lib.Die(
-              '--list and --exe are disallowed when --pid is used.')
         self._DebugRunningProcess(self.pid)
         return
 
-      if not self.exe.startswith('/'):
-        cros_build_lib.Die('--exe must have a full pathname.')
       logging.debug('Executable path is %s', self.exe)
       if not device.IsFileExecutable(self.exe):
         cros_build_lib.Die(

@@ -81,7 +81,7 @@ class MockCommand(partial_mock.PartialMock):
     self.args = args
     self.rc_mock = cros_test_lib.RunCommandMock()
     self.rc_mock.SetDefaultCmdResult()
-    parser = commandline.ArgumentParser(caching=True)
+    self.parser = parser = commandline.ArgumentParser(caching=True)
     subparsers = parser.add_subparsers()
     subparser = subparsers.add_parser(self.COMMAND, caching=True)
     self.TARGET_CLASS.AddParser(subparser)
