@@ -150,7 +150,7 @@ def get_source_path_mapping(
 
   Returns:
     Map from each package to the source path (relative to the repo checkout
-      root, i.e: ~/trunk/ in your cros_sdk) it depends on.
+      root, i.e: ~/chromiumos/ in your cros_sdk) it depends on.
     For each source path which is a directory, the string is ended with a
       trailing '/'.
   """

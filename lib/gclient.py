@@ -206,7 +206,7 @@ def WriteConfigFile(gclient, cwd, internal, rev, template=None,
   """Initialize the specified directory as a gclient checkout.
 
   For gclient documentation, see:
-    http://src.chromium.org/svn/trunk/tools/depot_tools/README.gclient
+    https://chromium.googlesource.com/chromium/tools/depot_tools/+/HEAD/README.gclient.md
 
   Args:
     gclient: Path to gclient.

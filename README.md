@@ -150,7 +150,7 @@ It's the same as `scripts/run_tests`, but in an easier-to-find location.
 Every Python file in Chromite is accompanied by a corresponding `*_unittest.py`
 file. Running a particular file's unit tests is best done via
 ```shell
-~/trunk/chromite $ ./run_tests example_file_unittest.py
+chromite $ ./run_tests example_file_unittest.py
 ```
 
 This script initializes a Python 3 virtualenv with necessary test dependencies

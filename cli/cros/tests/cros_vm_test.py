@@ -10,7 +10,7 @@ To run this command, first build a test image. e.g.
 (sdk)$ ./build_image --board=betty test
 (sdk)$ cd ../../chromite/cli/cros/tests/
 (sdk)$ ./cros_vm_test --board=betty --image_path \
-~/trunk/src/build/images/betty/latest/chromiumos_test_image.bin
+~/chromiumos/src/build/images/betty/latest/chromiumos_test_image.bin
 """
 
 from chromite.cli import command_vm_test

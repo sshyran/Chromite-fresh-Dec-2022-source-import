@@ -630,7 +630,7 @@ class Upgrader(object):
     # Expecting emerge_output to have lines like this:
     #  The following mask changes are necessary to proceed:
     # #required by ... =somecategory/somepackage (some reason)
-    # # /home/mtennant/trunk/src/third_party/chromiumos-overlay/profiles\
+    # # /.../chromiumos/src/third_party/chromiumos-overlay/profiles\
     # /targets/chromeos/package.mask:
     # >=upgraded_cp
     package_mask = None
@@ -1787,7 +1787,7 @@ def _CreateParser():
   parser.add_argument('--rdeps', action='store_true', default=False,
                       help='Use runtime dependencies only')
   parser.add_argument('--srcroot', type='path',
-                      default='%s/trunk/src' % os.environ['HOME'],
+                      default=os.path.join(constants.SOURCE_ROOT, 'src'),
                       help='Path to root src directory [default: %(default)s]')
   parser.add_argument('--to-csv', dest='csv_file', type='path',
                       default=None, help='File to store csv-formatted results')

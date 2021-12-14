@@ -265,10 +265,9 @@ past.
 For this, instead of downloading a moblab image from a builder, build the image
 yourself.
 ```
-pprabhu@pprabhu:chromiumos$ cros_sdk
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ ./build_packages --board moblab-generic-vm
+~/chromiumos/src/scripts $ ./build_packages --board moblab-generic-vm
 ...
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ ./build_image --board moblab-generic-vm --noenable_rootfs_verification test
+~/chromiumos/src/scripts $ ./build_image --board moblab-generic-vm --noenable_rootfs_verification test
 ...
 ```
 
@@ -280,13 +279,13 @@ the moblab VM.
 Continuing the example above, if you were working on autotest infrastructure
 code:
 ```
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ cros_workon --board moblab-generic-vm start chromeos-base/autotest-server
+(inside) $ cros_workon --board moblab-generic-vm start chromeos-base/autotest-server
 11:13:26: INFO: Started working on 'chromeos-base/autotest-server' for 'moblab-generic-vm'
 ```
 Make changes to autotest as needed, then deploy the changes to moblab.
 ```
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ emerge-moblab-generic-vm chromeos-base/autotest-server
-pprabhu@pprabhu:~$ cros deploy localhost:16482 chromeos-base/autotest-server
+(inside) $ emerge-moblab-generic-vm chromeos-base/autotest-server
+$ cros deploy localhost:16482 chromeos-base/autotest-server
 ```
 Finally, restart any services on moblab that may have been affected. You can
 find relevant services by running `ls /etc/init | grep moblab`.
@@ -298,10 +297,12 @@ Your changes are now live!
 
 If you're working on devserver instead, you want:
 ```
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ cros_workon --board moblab-generic-vm start chromeos-base/devserver
-(cr) ((8e3381b52...)) pprabhu@pprabhu ~/trunk/src/scripts $ emerge-moblab-generic-vm chromeos-base/devserver
-pprabhu@pprabhu:~$ cros deploy localhost:16482 chromeos-base/devserver
+(inside)
+$ cros_workon --board moblab-generic-vm start chromeos-base/devserver
+$ emerge-moblab-generic-vm chromeos-base/devserver
+$ cros deploy localhost:16482 chromeos-base/devserver
 ```
+
 # Troubleshooting
 
 For most errors, the first thing to do is to rerun with `--debug`. This may make

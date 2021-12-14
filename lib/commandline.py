@@ -992,7 +992,7 @@ def ScriptWrapperMain(find_target_func, argv=None,
   Args:
     find_target_func: a function, which, when given the absolute
       pathway the script was invoked via (for example,
-      /home/ferringb/cros/trunk/chromite/bin/cros_sdk; note that any
+      /home/ferringb/chromiumos/chromite/bin/cros_sdk; note that any
       trailing .py from the path name will be removed),
       will return the main function to invoke (that functor will take
       a single arg- a list of arguments, and shall return either None

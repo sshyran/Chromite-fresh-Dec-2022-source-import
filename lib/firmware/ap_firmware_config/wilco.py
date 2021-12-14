@@ -48,7 +48,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
   drallion uses. If you see an error about “4 byte addressing” run the
   following commands to get a useable flashrom
 
-  cd ~/trunk/src/third_party/flashrom/
+  cd ~/chromiumos/src/third_party/flashrom/
   git co ff7778ab25d0b343e781cffc0e45f329ee69a5a8~1
   cros_workon --host start flashrom
   sudo emerge flashrom

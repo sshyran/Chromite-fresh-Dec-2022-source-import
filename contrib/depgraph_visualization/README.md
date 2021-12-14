@@ -7,7 +7,7 @@ requirements and this module itself. Then just activate your virtualenv.
 
 ```bash
 cros_sdk --enter
-cd ~/trunk/chromite/contrib/depgraph_visualization
+cd ~/chromiumos/chromite/contrib/depgraph_visualization
 ./install.sh
 source my_visualizations/bin/activate
 cd my_visualizations

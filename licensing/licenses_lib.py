@@ -430,7 +430,7 @@ class PackageInfo(object):
                     file_path)
       if os.path.exists(file_path):
         # Turn
-        # /../merlin/trunk/src/third_party/chromiumos-overlay/../dev-util/bsdiff
+        # /.../chromiumos/src/third_party/chromiumos-overlay/../dev-util/bsdiff
         # into
         # chromiumos-overlay/../dev-util/bsdiff
         short_dir_path = os.path.join(*file_path.rsplit(os.path.sep, 5)[1:])
