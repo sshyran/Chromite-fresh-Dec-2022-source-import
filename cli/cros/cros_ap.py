@@ -113,8 +113,6 @@ To dump AP config of drallion and dedede boards:
 
   def Run(self):
     """Perform the cros ap dump-config command."""
-    self.options.Freeze()
-
     boards = None
     if self.options.boards:
       boards = self.options.boards
@@ -130,7 +128,6 @@ class BuildSubcommand(command.CliCommand):
   def __init__(self, options):
     super().__init__(options)
     self.build_target = build_target_lib.BuildTarget(self.options.build_target)
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):
@@ -229,7 +226,6 @@ To read a specific region from DUT via SERVO on default port(9999):
 """
 
   def Run(self):
-    self.options.Freeze()
     if not cros_build_lib.IsInsideChroot():
       logging.notice('Command will run in chroot, '
                      'and the output file path will be inside.')
@@ -350,7 +346,6 @@ e.g.:
 """
 
   def Run(self):
-    self.options.Freeze()
     commandline.RunInsideChroot(self)
 
     passthrough_args = self.options.extra_options
@@ -379,7 +374,6 @@ class CleanSubcommand(command.CliCommand):
   def __init__(self, options):
     super().__init__(options)
     self.build_target = build_target_lib.BuildTarget(self.options.build_target)
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):

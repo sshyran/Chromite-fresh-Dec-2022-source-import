@@ -68,7 +68,6 @@ class CidbCredsCommand(command.CliCommand):
 
   def Run(self):
     """Run cros cidbcreds."""
-    self.options.Freeze()
     cidb_dir = CheckAndGetCIDBCreds(force_update=self.options.force_update,
                                     folder=self.options.folder)
     logging.notice('CIDB credentials at: %s', cidb_dir)

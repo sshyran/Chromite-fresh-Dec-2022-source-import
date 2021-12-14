@@ -187,8 +187,6 @@ Examples:
 
   def Run(self):
     """Perform the cros flash command."""
-    self.options.Freeze()
-
     try:
       with cros_build_lib.TimedSection() as timer:
         flash.Flash(

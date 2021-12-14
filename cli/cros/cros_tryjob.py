@@ -666,7 +666,6 @@ List Examples:
     """Runs `cros tryjob`."""
     site_config = config_lib.GetConfig()
 
-    self.options.Freeze()
     VerifyOptions(self.options, site_config)
 
     logging.info('Verifying patches...')

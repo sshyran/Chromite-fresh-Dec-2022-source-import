@@ -134,7 +134,6 @@ To debug a process by its pid:
   def Run(self):
     """Run cros debug."""
     commandline.RunInsideChroot(self)
-    self.options.Freeze()
     self._ReadOptions()
     with remote_access.ChromiumOSDeviceHandler(
         self.ssh_hostname, port=self.ssh_port, username=self.ssh_username,

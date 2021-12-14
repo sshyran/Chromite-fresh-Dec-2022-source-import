@@ -139,8 +139,6 @@ Examples:
       options.build_target = None
 
   def Run(self):
-    self.options.Freeze()
-
     has_target = self.options.host or self.options.build_target
     needs_target = self.options.action != 'list-all'
     if needs_target and not has_target:

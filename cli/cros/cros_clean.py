@@ -174,8 +174,6 @@ class CleanCommand(command.CliCommand):
 
   def Run(self):
     """Perform the cros clean command."""
-    self.options.Freeze()
-
     chroot_dir = self.options.sdk_path
 
     cros_build_lib.AssertOutsideChroot()

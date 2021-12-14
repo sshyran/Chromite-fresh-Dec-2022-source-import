@@ -87,6 +87,7 @@ def main(argv):
     namespace = parser.parse_args(argv)
     namespace.command_class.ProcessOptions(parser, namespace)
     subcommand = namespace.command_class(namespace)
+    namespace.Freeze()
     try:
       code = _RunSubCommand(subcommand)
     except (commandline.ChrootRequiredError, commandline.ExecRequiredError):

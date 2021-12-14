@@ -165,7 +165,6 @@ Quoting can be tricky; the rules are the same as with ssh:
 
   def Run(self):
     """Runs `cros shell`."""
-    self.options.Freeze()
     self._ReadOptions()
     try:
       return self._StartSsh()

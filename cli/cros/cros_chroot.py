@@ -46,7 +46,6 @@ class ChrootCommand(command.CliCommand):
 
   def Run(self):
     """Runs `cros chroot`."""
-    self.options.Freeze()
     cmd = self.options.command
 
     # If -- was used to separate out the command from arguments, ignore it.

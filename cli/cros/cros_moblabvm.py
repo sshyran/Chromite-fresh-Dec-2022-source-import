@@ -111,7 +111,6 @@ A typical moblabvm session looks so:
 
   def Run(self):
     """The main handler of this CLI."""
-    self.options.Freeze()
     cmd = self.options.moblabvm_command
     if cmd == 'create':
       # Allow the workspace to not exist. This makes the CLI uniform across the

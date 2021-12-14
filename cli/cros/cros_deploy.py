@@ -97,7 +97,6 @@ For more information of cros build usage:
   def Run(self):
     """Run cros deploy."""
     commandline.RunInsideChroot(self)
-    self.options.Freeze()
     deploy.Deploy(
         self.options.device,
         self.options.packages,

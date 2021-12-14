@@ -193,8 +193,6 @@ Note:
 
   def Run(self):
     """Run cros buildresult."""
-    self.options.Freeze()
-
     commandline.RunInsideChroot(self)
 
     buildstore = BuildStore(_write_to_cidb=False)
