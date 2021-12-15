@@ -19,7 +19,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
-from chromite.lib import toolchain_util
 from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
@@ -569,53 +568,6 @@ def GenerateQuickProvisionPayloads(target_image_path: str,
       payloads.append(dest)
 
   return payloads
-
-
-def BundleAFDOGenerationArtifacts(is_orderfile: bool,
-                                  chroot: 'chroot_lib.Chroot', chrome_root: str,
-                                  build_target: 'build_target_lib.BuildTarget',
-                                  output_dir: str) -> List[str]:
-  """Generate artifacts for toolchain-related AFDO artifacts.
-
-  Args:
-    is_orderfile: The generation is for orderfile (True) or for AFDO (False).
-    chroot: The chroot in which the sysroot should be built.
-    chrome_root: Path to Chrome root.
-    build_target: The build target.
-    output_dir: The location outside the chroot where the files should be
-      stored.
-
-  Returns:
-    The list of tarballs of artifacts.
-  """
-  chroot_args = chroot.get_enter_args()
-  with chroot.tempdir() as tempdir:
-    if is_orderfile:
-      generate_orderfile = toolchain_util.GenerateChromeOrderfile(
-          board=build_target.name,
-          output_dir=tempdir,
-          chrome_root=chrome_root,
-          chroot_path=chroot.path,
-          chroot_args=chroot_args)
-
-      generate_orderfile.Perform()
-    else:
-      generate_afdo = toolchain_util.GenerateBenchmarkAFDOProfile(
-          board=build_target.name,
-          output_dir=tempdir,
-          chroot_path=chroot.path,
-          chroot_args=chroot_args)
-
-      generate_afdo.Perform()
-
-    files = []
-    for path in osutils.DirectoryIterator(tempdir):
-      if os.path.isfile(path):
-        rel_path = os.path.relpath(path, tempdir)
-        files.append(os.path.join(output_dir, rel_path))
-    osutils.CopyDirContents(tempdir, output_dir, allow_nonempty=True)
-
-    return files
 
 
 def BundleTastFiles(chroot: 'chroot_lib.Chroot', sysroot: 'sysroot_lib.Sysroot',

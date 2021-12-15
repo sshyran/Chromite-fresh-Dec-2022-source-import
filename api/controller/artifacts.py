@@ -16,7 +16,6 @@ from chromite.api.controller import image as image_controller
 from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
-from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -666,52 +665,6 @@ def BundleVmFiles(
       chroot, test_results_dir, output_dir)
   for archive in archives:
     output_proto.artifacts.add().path = archive
-
-def _BundleAFDOGenerationArtifactsResponse(input_proto, output_proto, _config):
-  """Add test tarball AFDO file to a successful response."""
-  output_proto.artifacts.add().path = os.path.join(
-      input_proto.output_dir, 'artifact1')
-
-
-_VALID_ARTIFACT_TYPES = [toolchain_pb2.BENCHMARK_AFDO,
-                         toolchain_pb2.ORDERFILE]
-@faux.success(_BundleAFDOGenerationArtifactsResponse)
-@faux.empty_error
-@validate.require('build_target.name', 'output_dir')
-@validate.is_in('artifact_type', _VALID_ARTIFACT_TYPES)
-@validate.exists('output_dir')
-@validate.exists('chroot.chrome_dir')
-@validate.validation_complete
-def BundleAFDOGenerationArtifacts(
-    input_proto: artifacts_pb2.BundleChromeAFDORequest,
-    output_proto: artifacts_pb2.BundleResponse,
-    _config: 'api_config.ApiConfig'):
-  """Generic function for creating tarballs of both AFDO and orderfile.
-
-  Args:
-    input_proto: The input proto.
-    output_proto: The output proto.
-    _config: The API call config.
-  """
-  chrome_root = input_proto.chroot.chrome_dir
-  output_dir = input_proto.output_dir
-  artifact_type = input_proto.artifact_type
-
-  build_target = controller_util.ParseBuildTarget(input_proto.build_target)
-  chroot = controller_util.ParseChroot(input_proto.chroot)
-
-  try:
-    is_orderfile = bool(artifact_type is toolchain_pb2.ORDERFILE)
-    results = artifacts.BundleAFDOGenerationArtifacts(
-        is_orderfile, chroot, chrome_root,
-        build_target, output_dir)
-  except artifacts.Error as e:
-    cros_build_lib.Die('Error %s raised in BundleSimpleChromeArtifacts: %s',
-                       type(e), e)
-
-  for file_name in results:
-    output_proto.artifacts.add().path = file_name
-
 
 def _ExportCpeReportResponse(input_proto, output_proto, _config):
   """Add test cpe results to a successful response."""

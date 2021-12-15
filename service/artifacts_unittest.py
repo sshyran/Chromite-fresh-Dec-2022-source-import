@@ -20,7 +20,6 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
-from chromite.lib import toolchain_util
 from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
 from chromite.lib.paygen import paygen_stateful_payload_lib
@@ -433,78 +432,6 @@ class BundleFpmcuUnittestsTest(cros_test_lib.TempDirTestCase):
     cros_test_lib.VerifyTarball(
         tarball,
         unittest_files + ('bloonchipper/', 'dartmonkey/'))
-
-class BundleAFDOGenerationArtifacts(cros_test_lib.MockTempDirTestCase):
-  """BundleAFDOGenerationArtifacts tests."""
-
-  def setUp(self):
-    # Create the build target.
-    self.build_target = build_target_lib.BuildTarget('board')
-
-    # Create the chroot.
-    self.chroot_dir = os.path.join(self.tempdir, 'chroot')
-    self.chroot_tmp = os.path.join(self.chroot_dir, 'tmp')
-    osutils.SafeMakedirs(self.chroot_tmp)
-    self.chroot = chroot_lib.Chroot(path=self.chroot_dir)
-
-    # Create the output directory.
-    self.output_dir = os.path.join(self.tempdir, 'output_dir')
-    osutils.SafeMakedirs(self.output_dir)
-
-    self.chrome_root = os.path.join(self.tempdir, 'chrome_root')
-
-  def testRunSuccess(self):
-    """Generic function for testing success cases for different types."""
-
-    # Separate tempdir for the method itself.
-    call_tempdir = os.path.join(self.chroot_tmp, 'call_tempdir')
-    osutils.SafeMakedirs(call_tempdir)
-    self.PatchObject(osutils.TempDir, '__enter__', return_value=call_tempdir)
-
-    mock_orderfile_generate = self.PatchObject(
-        toolchain_util, 'GenerateChromeOrderfile',
-        autospec=True)
-
-    mock_afdo_generate = self.PatchObject(
-        toolchain_util, 'GenerateBenchmarkAFDOProfile',
-        autospec=True)
-
-    # Test both orderfile and AFDO.
-    for is_orderfile in [False, True]:
-      # Set up files in the tempdir since the command isn't being called to
-      # generate anything for it to handle.
-      files = ['artifact1', 'artifact2']
-      expected_files = [os.path.join(self.output_dir, f) for f in files]
-      for f in files:
-        osutils.Touch(os.path.join(call_tempdir, f))
-
-      created = artifacts.BundleAFDOGenerationArtifacts(
-          is_orderfile, self.chroot, self.chrome_root,
-          self.build_target, self.output_dir)
-
-      # Test right class is called with right arguments
-      if is_orderfile:
-        mock_orderfile_generate.assert_called_once_with(
-            board=self.build_target.name,
-            chrome_root=self.chrome_root,
-            output_dir=call_tempdir,
-            chroot_path=self.chroot.path,
-            chroot_args=self.chroot.get_enter_args()
-        )
-      else:
-        mock_afdo_generate.assert_called_once_with(
-            board=self.build_target.name,
-            output_dir=call_tempdir,
-            chroot_path=self.chroot.path,
-            chroot_args=self.chroot.get_enter_args(),
-        )
-
-      # Make sure we get all the expected files
-      self.assertCountEqual(expected_files, created)
-      for f in created:
-        self.assertExists(f)
-        os.remove(f)
-
 
 class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
   """Test cases for the payload generation functions."""
