@@ -23,7 +23,7 @@ from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 
 
-@command.CommandDecorator('clean')
+@command.command_decorator('clean')
 class CleanCommand(command.CliCommand):
   """Clean up working files from the build."""
 

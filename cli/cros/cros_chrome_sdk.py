@@ -791,7 +791,7 @@ class GomaError(Exception):
   """Indicates error with setting up Goma."""
 
 
-@command.CommandDecorator(COMMAND_NAME)
+@command.command_decorator(COMMAND_NAME)
 class ChromeSDKCommand(command.CliCommand):
   """Set up an environment for building Chrome on Chrome OS.
 

@@ -42,7 +42,7 @@ def _PrintCommandLog(command, content):
                  command, content.rstrip(), command)
 
 
-def TestCommandDecorator(command_name):
+def test_command_decorator(command_name):
   """Decorator that runs the command test function."""
 
   def Decorator(test_function):
@@ -69,7 +69,7 @@ class CommandVMTest(object):
 
   This class provides the abstract interface for testing CLI commands on a VM.
   The sub-class must define the BuildCommand method in order to be usable. And
-  the test functions must use the TestCommandDecorator decorator.
+  the test functions must use the test_command_decorator decorator.
   """
 
   def __init__(self, board, image_path):
@@ -114,7 +114,7 @@ class CommandVMTest(object):
                        cwd=constants.CHROMITE_BIN_DIR,
                        check=False)
 
-  @TestCommandDecorator('shell')
+  @test_command_decorator('shell')
   def TestShell(self):
     """Tests the shell command."""
     # The path and content of a temporary file for testing shell command.
@@ -148,7 +148,7 @@ class CommandVMTest(object):
       logging.error('Failed to remove the file on the VM device.')
       raise CommandError(result.error)
 
-  @TestCommandDecorator('debug')
+  @test_command_decorator('debug')
   def TestDebug(self):
     """Tests the debug command."""
     logging.info('Test to start and debug a new process on the VM device.')
@@ -178,7 +178,7 @@ class CommandVMTest(object):
         logging.error('Failed to attach a running process on the VM device.')
         raise CommandError(result.error)
 
-  @TestCommandDecorator('flash')
+  @test_command_decorator('flash')
   def TestFlash(self):
     """Tests the flash command."""
     # We explicitly disable reboot after the update because VMs sometimes do
@@ -194,7 +194,7 @@ class CommandVMTest(object):
       logging.error('Failed to flash the VM device.')
       raise CommandError(result.error)
 
-  @TestCommandDecorator('deploy')
+  @test_command_decorator('deploy')
   def TestDeploy(self):
     """Tests the deploy command."""
     packages = ['dev-python/cherrypy', 'app-portage/portage-utils']

@@ -13,7 +13,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import remote_access
 
 
-@command.CommandDecorator('debug')
+@command.command_decorator('debug')
 class DebugCommand(command.CliCommand):
   """Use GDB to debug a process running on the target device.
 

@@ -471,7 +471,7 @@ def VerifyOptions(options, site_config):
                          'pool (given %s).' % options.hwtest_dut_dimensions)
 
 
-@command.CommandDecorator('tryjob')
+@command.command_decorator('tryjob')
 class TryjobCommand(command.CliCommand):
   """Schedule a tryjob."""
 

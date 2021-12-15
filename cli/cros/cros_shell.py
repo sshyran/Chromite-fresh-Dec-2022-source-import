@@ -12,7 +12,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import remote_access
 
 
-@command.CommandDecorator('shell')
+@command.command_decorator('shell')
 class ShellCommand(command.CliCommand):
   """Opens a remote shell over SSH on the target device.
 

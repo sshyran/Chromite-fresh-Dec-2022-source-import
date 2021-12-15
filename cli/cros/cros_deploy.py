@@ -11,7 +11,7 @@ from chromite.cli import deploy
 from chromite.lib import commandline
 
 
-@command.CommandDecorator('deploy')
+@command.command_decorator('deploy')
 class DeployCommand(command.CliCommand):
   """Deploy the requested packages to the target device.
 

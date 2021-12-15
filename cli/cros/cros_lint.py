@@ -428,7 +428,7 @@ def _Dispatcher(errors, output_format, debug, linter, path):
       errors.value += 1
 
 
-@command.CommandDecorator('lint')
+@command.command_decorator('lint')
 class LintCommand(command.CliCommand):
   """Run lint checks on the specified files."""
 

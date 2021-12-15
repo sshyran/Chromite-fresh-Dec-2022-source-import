@@ -26,7 +26,7 @@ class BrilloBuildOperation(operation.ParallelEmergeOperation):
   """
 
 
-@command.CommandDecorator('build')
+@command.command_decorator('build')
 class BuildCommand(command.CliCommand):
   """Build the requested packages."""
 

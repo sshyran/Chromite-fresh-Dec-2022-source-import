@@ -132,7 +132,7 @@ def ReportJson(build_statuses):
   return json.dumps(report)
 
 
-@command.CommandDecorator('buildresult')
+@command.command_decorator('buildresult')
 class BuildResultCommand(command.CliCommand):
   """Script that looks up results of finished builds."""
 

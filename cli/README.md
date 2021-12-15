@@ -11,7 +11,7 @@ the `cros_{command_name}.py` format where the command can live.
 
 The command class's implementation _must_:
 *   Be a subclass of `cli.command.Command`
-*   Have a `@command.CommandDecorator('command-name')` decorator on the class
+*   Have a `@command.command_decorator('command-name')` decorator on the class
 *   Define an `EPILOG` class constant
 *   Implement the `@classmethod` `AddParser(cls, parser)`
 *   Implement `Run(self)`

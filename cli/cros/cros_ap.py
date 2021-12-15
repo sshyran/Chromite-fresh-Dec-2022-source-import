@@ -39,7 +39,7 @@ def subcommand_decorator(name):
   return inner_decorator
 
 
-@command.CommandDecorator('ap')
+@command.command_decorator('ap')
 class APCommand(command.CliCommand):
   """Execute an AP-related command."""
 

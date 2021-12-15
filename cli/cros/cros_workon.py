@@ -39,7 +39,7 @@ _action_epilog = '\n'.join(
     '  %s%s' % (a[0].ljust(_fill, ' '), a[1]) for a in _ACTIONS)
 
 
-@command.CommandDecorator('workon')
+@command.command_decorator('workon')
 class WorkonCommand(command.CliCommand):
   """Forces rebuilds of worked on packages from the local source."""
 

@@ -16,7 +16,7 @@ from chromite.lib import path_util
 from chromite.utils import pformat
 
 
-@command.CommandDecorator('flash')
+@command.command_decorator('flash')
 class FlashCommand(command.CliCommand):
   """Update the device with an image.
 

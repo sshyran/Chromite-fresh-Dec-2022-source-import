@@ -25,7 +25,7 @@ from chromite.lib import moblab_vm
 from chromite.lib import osutils
 
 
-@command.CommandDecorator('moblabvm')
+@command.command_decorator('moblabvm')
 class MoblabvmCommand(command.CliCommand):
   """Manage a moblab VM setup."""
 
