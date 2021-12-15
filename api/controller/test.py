@@ -171,11 +171,6 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
             TEST_SERVICE_DIR,
             'test_finder/docker/build-dockerimage.sh',
         ),
-    'cros-callbox':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'callbox/docker/build-dockerimage.sh',
-        ),
 }
 
 
