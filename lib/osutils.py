@@ -1375,8 +1375,19 @@ def UmountDir(path, lazy=True, sudo=True, cleanup=True):
         retry_util.GenericRetry(_retry, 60, RmDir, path, sudo=sudo, sleep=1)
 
 
-def UmountTree(path):
-    """Unmounts |path| and any submounts under it."""
+def UmountTree(
+    path: Union[str, os.PathLike],
+    lazy: bool = False,
+    cleanup: bool = False,
+) -> None:
+    """Unmounts |path| and any submounts under it.
+
+    Args:
+        path: Directory to unmount.
+        lazy: Whether to do a lazy unmount.
+        cleanup: Whether to delete the |path| after unmounting.
+            Note: Does not work when |lazy| is set.
+    """
     # Scrape it from /proc/mounts since it's easily accessible;
     # additionally, unmount in reverse order of what's listed there
     # rather than trying a reverse sorting; it's possible for
@@ -1392,7 +1403,7 @@ def UmountTree(path):
     ]
 
     for mount_pt in reversed(mounts):
-        UmountDir(mount_pt, lazy=False, cleanup=False)
+        UmountDir(mount_pt, lazy=lazy, cleanup=cleanup)
 
 
 def SetEnvironment(env):
