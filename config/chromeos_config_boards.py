@@ -148,4 +148,5 @@ builder_incompatible_binaries_boards = frozenset([
     'zork',
     'zork-arc-r',
     'zork-borealis',
+    'skyrim',
 ])

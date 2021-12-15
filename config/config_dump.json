@@ -28570,6 +28570,7 @@
         ],
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28595,6 +28596,7 @@
         "luci_builder": "Try",
         "prebuilts": "public",
         "run_cpeexport": true,
+        "unittests": false,
         "useflags": [
             "-chrome_internal"
         ],
@@ -28604,7 +28606,8 @@
         "_template": "llvm_next_toolchain",
         "boards": [
             "skyrim"
-        ]
+        ],
+        "unittests": false
     },
     "skyrim-llvm-next-toolchain-tryjob": {
         "_template": "llvm_next_toolchain",
@@ -28614,13 +28617,15 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "skyrim-llvm-toolchain": {
         "_template": "llvm_toolchain",
         "boards": [
             "skyrim"
-        ]
+        ],
+        "unittests": false
     },
     "skyrim-llvm-toolchain-tryjob": {
         "_template": "llvm_toolchain",
@@ -28630,7 +28635,8 @@
         "debug": true,
         "display_label": "tryjob",
         "hw_tests_override": null,
-        "luci_builder": "Try"
+        "luci_builder": "Try",
+        "unittests": false
     },
     "skyrim-payloads": {
         "_template": "payloads",
@@ -28653,6 +28659,7 @@
             "skyrim"
         ],
         "important": false,
+        "unittests": false,
         "vm_tests_override": null
     },
     "skyrim-release-tryjob": {
@@ -28676,6 +28683,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "unittests": false,
         "vm_tests_override": null
     },
     "skyrim-unittest-stress": {
