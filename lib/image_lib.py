@@ -47,7 +47,8 @@ class LoopbackPartitions(object):
   In either case, the same arguments should be passed to init.
   """
 
-  def __init__(self, path, destination=None, part_ids=None, mount_opts=('ro',)):
+  def __init__(self, path, destination=None, part_ids=None, mount_opts=('ro',),
+               delete: bool = True):
     """Initialize.
 
     Args:
@@ -58,12 +59,14 @@ class LoopbackPartitions(object):
           used during initialization of the context manager.
       mount_opts: Use these mount_opts for mounting |part_ids|.  This is only
           used during initialization of the context manager.
+      delete: Whether to automatically tear down the loopback device.
     """
     self.path = path
     self.destination = destination
     self.dev = None
     self.part_ids = part_ids
     self.mount_opts = mount_opts
+    self.delete = delete
     self.parts = {}
     self._destination_created = False
     self._gpt_table = {}
@@ -303,10 +306,12 @@ class LoopbackPartitions(object):
     return self
 
   def __exit__(self, exc_type, exc, tb):
-    self.close()
+    if self.delete:
+      self.close()
 
   def __del__(self):
-    self.close()
+    if self.delete:
+      self.close()
 
 
 def WriteLsbRelease(sysroot, fields):
