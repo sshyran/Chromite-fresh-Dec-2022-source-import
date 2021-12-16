@@ -132,7 +132,8 @@ class UpdateArguments(object):
 def Clean(chroot: Optional['chroot_lib.Chroot'],
           images: bool = False,
           sysroots: bool = False,
-          tmp: bool = False) -> None:
+          tmp: bool = False,
+          safe: bool = False) -> None:
   """Clean the chroot.
 
   See:
@@ -143,13 +144,16 @@ def Clean(chroot: Optional['chroot_lib.Chroot'],
     images: Remove all built images.
     sysroots: Remove all of the sysroots.
     tmp: Clean the tmp/ directory.
+    safe: Clean all produced artifacts.
   """
-  if not images and not sysroots and not tmp:
+  if not images and not sysroots and not tmp and not safe:
     return
 
   cmd = ['cros', 'clean']
   if chroot:
     cmd.extend(['--sdk-path', chroot.path])
+  if safe:
+    cmd.append('--safe')
   if images:
     cmd.append('--images')
   if sysroots:
