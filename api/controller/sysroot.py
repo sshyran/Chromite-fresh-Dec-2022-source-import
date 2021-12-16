@@ -28,6 +28,26 @@ from chromite.utils import metrics
 _ACCEPTED_LICENSES = '@CHROMEOS'
 
 
+def _GetGomaLogDirectory():
+  """Get goma's log directory based on the env variables.
+
+  Returns:
+    a string of a directory name where goma's log may exist, or None if no
+    potential directories exist.
+  """
+  # TODO(crbug.com/1045001): Replace environment variable with query to
+  # goma object after goma refactoring allows this.
+  candidates = [
+      'GLOG_log_dir', 'GOOGLE_LOG_DIR', 'TEST_TMPDIR', 'TMPDIR', 'TMP']
+  for candidate in candidates:
+    value = os.environ.get(candidate)
+    if value and os.path.isdir(value):
+      return value
+
+  # "/tmp" will always exist.
+  return '/tmp'
+
+
 def ExampleGetResponse():
   """Give an example response to assemble upstream in caller artifacts."""
   uabs = common_pb2.UploadedArtifactsByService
@@ -279,12 +299,7 @@ def InstallPackages(input_proto, output_proto, _config):
     # Copy goma logs to specified directory if there is a goma_config and
     # it contains a log_dir to store artifacts.
     if input_proto.goma_config.log_dir.dir:
-      # Get the goma log directory based on the GLOG_log_dir env variable.
-      # TODO(crbug.com/1045001): Replace environment variable with query to
-      # goma object after goma refactoring allows this.
-      log_source_dir = os.getenv('GLOG_log_dir')
-      if not log_source_dir:
-        cros_build_lib.Die('GLOG_log_dir must be defined.')
+      log_source_dir = _GetGomaLogDirectory()
       archiver = goma_lib.LogsArchiver(
           log_source_dir,
           dest_dir=input_proto.goma_config.log_dir.dir,
