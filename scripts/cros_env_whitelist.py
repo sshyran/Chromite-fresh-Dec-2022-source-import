@@ -4,8 +4,12 @@
 
 """Print the environment whitelist."""
 
+import sys
+
 from chromite.lib import constants
 
 
-def main(_argv):
+def main(argv):
+  if argv:
+    sys.exit(f'{sys.argv[0]}: {__doc__}')
   print(' '.join(constants.CHROOT_ENVIRONMENT_WHITELIST))
