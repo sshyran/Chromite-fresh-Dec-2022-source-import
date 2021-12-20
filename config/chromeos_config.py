@@ -1086,6 +1086,7 @@ def AndroidTemplates(site_config):
       manifest_version=True,
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
+      unittests=False,
       description='Preflight Android Uprev & Build (internal)',
       luci_builder=config_lib.LUCI_BUILDER_PFQ,
       # Raise Android PFQ timeout to 8 hours to allow for longer runs to
