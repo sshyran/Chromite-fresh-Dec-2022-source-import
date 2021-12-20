@@ -60,16 +60,18 @@ class Timer(object):
   def __add__(self, other):
     if not isinstance(other, Timer):
       raise NotImplementedError(f'Cannot add {type(other)} to Timer')
-    result = Timer(self.name, self.output)
+    result = Timer(self.name)
     result.delta = self.delta + other.delta
+    result.output = self.output
 
     return result
 
   def __truediv__(self, other):
     if not isinstance(other, int):
       raise NotImplementedError(f'Only int is supported, given {type(other)}')
-    result = Timer(self.name, self.output)
+    result = Timer(self.name)
     result.delta = self.delta / other
+    result.output = self.output
 
     return result
 
