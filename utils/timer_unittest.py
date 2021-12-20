@@ -6,6 +6,7 @@
 
 import time
 
+from chromite.utils import pformat
 from chromite.utils import timer
 
 
@@ -20,7 +21,7 @@ def test_timer_delta(monkeypatch):
 
   monkeypatch.setattr(time, 'perf_counter', time_mock)
 
-  with timer.Timer() as t:
+  with timer.timer() as t:
     pass
 
   assert t.delta == 1.0
@@ -45,3 +46,32 @@ def test_timer_average(monkeypatch):
 
   assert sum(timers, start=timer.Timer()).delta == 10.0
   assert (sum(timers, start=timer.Timer()) / len(timers)).delta == 1.0
+
+
+def test_timer_decorator(monkeypatch):
+  """Test the timed decorator."""
+  delta = '1s'
+  name = 'name'
+  output_fn_called = False
+
+  # monkeypatch the timedelta formatter to return the expected delta.
+  def timedelta_mock(*_args, **_kwargs):
+    return delta
+
+  monkeypatch.setattr(pformat, 'timedelta', timedelta_mock)
+
+  # Output function to check the value.
+  def output_fn(value):
+    nonlocal output_fn_called
+    output_fn_called = True
+    assert value == f'{name}: {delta}'
+
+  # The decorated function.
+  @timer.timed(name, output_fn)
+  def timed_fn():
+    pass
+
+  # Run the function to trigger the test.
+  timed_fn()
+
+  assert output_fn_called
