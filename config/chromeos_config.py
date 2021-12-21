@@ -2404,10 +2404,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       },
       'keeby-release': {
           'sign_types': ['recovery', 'factory'],
-          # Keeby has no DUTs in the lab. (b/185377942)
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'b/185377942',
       },
       'aurora-release': {
           'sign_types': ['recovery', 'factory'],
