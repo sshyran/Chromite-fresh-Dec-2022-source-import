@@ -1775,7 +1775,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-trogdor-13443.B', ['trogdor', 'strongbad']),
       (DAILY, 'factory-strongbad-13963.B', ['trogdor', 'strongbad']),
       (WEEKLY, 'factory-volteer-13600.B', ['volteer']),
-      (DAILY, 'factory-dedede-13683.B', ['dedede']),
+      (WEEKLY, 'factory-dedede-13683.B', ['dedede']),
       (DAILY, 'factory-keeby-14162.B', ['keeby']),
       (WEEKLY, 'factory-zork-13700.B', ['zork']),
       (WEEKLY, 'factory-puff-13813.B', ['puff']),
