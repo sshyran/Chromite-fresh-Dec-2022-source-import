@@ -1352,7 +1352,7 @@ def get_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
 
 
 def _get_firmware_version_cmd_result(
-    build_target: 'build_target_lib.BuildTarget'):
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Gets the raw result output of the firmware updater version command.
 
   Args:
@@ -1365,9 +1365,13 @@ def _get_firmware_version_cmd_result(
                          'usr/sbin/chromeos-firmwareupdate')
   logging.info('Calling updater %s', updater)
   # Call the updater using the chroot-based path.
-  return cros_build_lib.run([updater, '-V'],
-                            capture_output=True, log_output=True,
-                            encoding='utf-8').stdout
+  try:
+    return cros_build_lib.run([updater, '-V'],
+                              capture_output=True, log_output=True,
+                              encoding='utf-8').stdout
+  except cros_build_lib.RunCommandError:
+    # Updater probably doesn't exist (e.g. betty).
+    return None
 
 
 def _find_firmware_versions(cmd_output):
