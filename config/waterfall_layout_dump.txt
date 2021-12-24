@@ -314,6 +314,7 @@
     sentry-release
     setzer-release
     shadowkeep-release
+    skyrim-chausie-release
     skyrim-release
     snappy-kernelnext-release
     snappy-release
@@ -1457,6 +1458,7 @@
     sentry-release-tryjob
     setzer-release-tryjob
     shadowkeep-release-tryjob
+    skyrim-chausie-release-tryjob
     skyrim-release-tryjob
     snappy-kernelnext-release-tryjob
     snappy-release-tryjob
@@ -1773,6 +1775,12 @@
   shadowkeep-payloads-tryjob
   shadowkeep-release-tryjob
   shadowkeep-unittest-stress
+  skyrim-chausie-full-tryjob
+  skyrim-chausie-llvm-next-toolchain-tryjob
+  skyrim-chausie-llvm-toolchain-tryjob
+  skyrim-chausie-payloads-tryjob
+  skyrim-chausie-release-tryjob
+  skyrim-chausie-unittest-stress
   skyrim-full-tryjob
   skyrim-llvm-next-toolchain-tryjob
   skyrim-llvm-toolchain-tryjob
