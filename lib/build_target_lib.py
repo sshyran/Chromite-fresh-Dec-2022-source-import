@@ -15,15 +15,11 @@ class Error(Exception):
   """Base module error class."""
 
 
-class InvalidNameError(Error):
-  """Error for invalid target name argument."""
-
-
 class BuildTarget(object):
   """Class to handle the build target information."""
 
   def __init__(self,
-               name: str,
+               name: Optional[str],
                profile: Optional[str] = None,
                build_root: Optional[str] = None):
     """Build Target init.
@@ -33,11 +29,7 @@ class BuildTarget(object):
       profile: The profile name.
       build_root: The path to the buildroot.
     """
-    if not name:
-      raise InvalidNameError('Name is required.')
-
-    self._name = name
-    self.board, _, self.variant = name.partition('_')
+    self._name = name or None
     self.profile = profile
 
     if build_root:
@@ -64,7 +56,7 @@ class BuildTarget(object):
 
   @property
   def as_protobuf(self):
-    return common_pb2.BuildTarget(name=self.name)
+    return common_pb2.BuildTarget(name=self.name or '')
 
   @classmethod
   def from_protobuf(cls, message):
@@ -93,7 +85,14 @@ class BuildTarget(object):
     Returns:
       The build target's command wrapper.
     """
+    if self.is_host():
+      return base_command
+
     return '%s-%s' % (base_command, self.name)
+
+  def is_host(self) -> bool:
+    """Check if the build target refers to the host."""
+    return not self.name
 
 
 def get_default_sysroot_path(build_target_name=None):

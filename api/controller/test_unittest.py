@@ -185,14 +185,6 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
       test_controller.BuildTargetUnitTest(input_msg, output_msg,
                                           self.api_config)
 
-  def testNoBuildTargetFails(self):
-    """Test missing build target name fails."""
-    input_msg = self._GetInput(result_path=self.tempdir)
-    output_msg = self._GetOutput()
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      test_controller.BuildTargetUnitTest(input_msg, output_msg,
-                                          self.api_config)
-
   def testNoResultPathFails(self):
     """Test missing result path fails."""
     # Missing result_path.

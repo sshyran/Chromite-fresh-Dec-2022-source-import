@@ -89,7 +89,7 @@ def BuildTargetUnitTest(
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
   cmd = ['cros_run_unit_tests']
 
-  if build_target.name == 'host':
+  if build_target.is_host():
     cmd.extend(['--host'])
   else:
     cmd.extend(['--board', build_target.name])

@@ -88,7 +88,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testHost(self):
     """Test host target."""
-    host_build_target = build_target_lib.BuildTarget('host')
+    host_build_target = build_target_lib.BuildTarget('')
     result = test.BuildTargetUnitTest(host_build_target, self.chroot)
 
     self.assertCommandContains(['cros_run_unit_tests', '--host'])

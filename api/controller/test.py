@@ -86,7 +86,6 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
 
 @faux.success(_BuildTargetUnitTestResponse)
 @faux.error(_BuildTargetUnitTestFailedResponse)
-@validate.require('build_target.name')
 @validate.exists('result_path')
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
