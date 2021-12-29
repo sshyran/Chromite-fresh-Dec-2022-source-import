@@ -251,14 +251,16 @@ class WorkspaceSyncStage(WorkspaceStageBase):
     branch_pool = patch_pool.FilterFn(trybot_patch_pool.ChromiteFilter,
                                       negate=True)
 
+    infra_branch = self._run.manifest_branch
+
     SyncStage(
         self._run,
         self.buildstore,
         build_root=self._orig_root,
         external=True,
-        branch='master',
+        branch=infra_branch,
         patch_pool=infra_pool,
-        suffix=' [Infra]').Run()
+        suffix=' [Infra %s]' % infra_branch).Run()
 
     branch = self._run.config.workspace_branch
 
@@ -345,7 +347,7 @@ class WorkspacePublishBuildspecStage(WorkspaceStageBase):
     repo = self.GetWorkspaceRepo()
 
     # TODO: Add 'patch' support somehow,
-    if repo.branch == 'master':
+    if repo.branch in ('main', 'master'):
       incr_type = 'build'
     else:
       incr_type = 'branch'
@@ -384,31 +386,34 @@ class WorkspaceScheduleChildrenStage(WorkspaceStageBase):
       extra_args.append('--debug')
 
     for child_name in self._run.config.slave_configs:
-      request = request_build.RequestBuild(
+      raw_request = request_build.RequestBuild(
           build_config=child_name,
+          branch=self._run.manifest_branch,
           # See crbug.com/940969. These id's get children killed during
           # multiple quick builds.
           # master_cidb_id=build_id,
           # master_buildbucket_id=master_buildbucket_id,
           extra_args=extra_args,
-      ).CreateBuildRequest()
+      )
+      request = raw_request.CreateBuildRequest()
       buildbucket_client = buildbucket_v2.BuildbucketV2()
 
       if self._run.options.debug:
+        logging.info(
+            'Build_name %s request_branch %s', child_name, raw_request.branch)
         continue
       result = buildbucket_client.ScheduleBuild(
-        request_id=str(request['request_id']),
-        builder=request['builder'],
-        properties=request['properties'],
-        tags=request['tags'],
-        dimensions=request['dimensions'])
+          request_id=str(request['request_id']),
+          builder=request['builder'],
+          properties=request['properties'],
+          tags=request['tags'],
+          dimensions=request['dimensions'])
 
       logging.info(
           'Build_name %s buildbucket_id %s created_timestamp %s',
           child_name, result.id, result.create_time.ToJsonString())
-      cbuildbot_alerts.PrintBuildbotLink(child_name,
-                                '{}{}'.format(constants.CHROMEOS_MILO_HOST,
-                                              result.id))
+      cbuildbot_alerts.PrintBuildbotLink(
+          child_name, f'{constants.CHROMEOS_MILO_HOST}{result.id}')
 
 
 class WorkspaceInitSDKStage(WorkspaceStageBase):

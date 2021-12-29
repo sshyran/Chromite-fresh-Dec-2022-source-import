@@ -280,9 +280,9 @@ class WorkspaceSyncStageTest(WorkspaceStageBase):
     self.assertEqual(self.sync_stage_mock.call_args_list, [
         mock.call(self._run, self.buildstore,
                   patch_pool=mock.ANY,
-                  suffix=' [Infra]',
+                  suffix=' [Infra ooga_booga]',
                   external=True,
-                  branch='master',
+                  branch='ooga_booga',
                   build_root=self.build_root),
 
         mock.call(self._run, self.buildstore,
