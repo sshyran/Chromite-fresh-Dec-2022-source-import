@@ -1490,83 +1490,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
   master_config.AddSlave(vm_config)
 
 
-def IncrementalBuilders(site_config, boards_dict, ge_build_config):
-  """Create all incremental build configs.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-    boards_dict: A dict mapping board types to board name collections.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
-  """
-  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
-                                             ge_build_config)
-
-  site_config.AddTemplate(
-      'incremental_affinity',
-      build_affinity=True,
-      luci_builder=config_lib.LUCI_BUILDER_INCREMENTAL,
-  )
-
-  master_config = site_config.Add(
-      'master-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      boards=[],
-      master=True,
-      manifest_version=True,
-      slave_configs=[],
-      schedule='with 10m interval',
-  )
-
-  # Build external source, for an internal board.
-  master_config.AddSlave(
-      site_config.Add(
-          'amd64-generic-incremental',
-          site_config.templates.incremental,
-          site_config.templates.incremental_affinity,
-          board_configs['amd64-generic'],
-          manifest_version=True,
-      ))
-
-  master_config.AddSlave(
-      site_config.Add(
-          'betty-incremental',
-          site_config.templates.incremental,
-          site_config.templates.internal_incremental,
-          site_config.templates.incremental_affinity,
-          boards=['betty'],
-          manifest_version=True,
-      ))
-
-  master_config.AddSlave(
-      site_config.Add(
-          'chell-incremental',
-          site_config.templates.incremental,
-          site_config.templates.internal_incremental,
-          site_config.templates.incremental_affinity,
-          boards=['chell'],
-          manifest_version=True,
-      ))
-
-  #
-  # Available, but not regularly scheduled.
-  #
-  site_config.Add(
-      'x32-generic-incremental',
-      site_config.templates.incremental,
-      board_configs['x32-generic'],
-  )
-
-  site_config.Add(
-      'beaglebone-incremental',
-      site_config.templates.incremental,
-      site_config.templates.beaglebone,
-      boards=['beaglebone'],
-      description='Incremental Beaglebone Builder',
-  )
-
-
 def InformationalBuilders(site_config, boards_dict, ge_build_config):
   """Create all informational builders.
 
@@ -3242,8 +3165,6 @@ def GetConfig():
   PayloadBuilders(site_config, boards_dict)
 
   SpecialtyBuilders(site_config, boards_dict, ge_build_config)
-
-  IncrementalBuilders(site_config, boards_dict, ge_build_config)
 
   InformationalBuilders(site_config, boards_dict, ge_build_config)
 

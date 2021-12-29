@@ -152,12 +152,6 @@
     tael-full
     tatl-full
 
-== incremental ==
-  master-incremental
-    amd64-generic-incremental
-    betty-incremental
-    chell-incremental
-
 == informational ==
   amd64-generic-asan
   amd64-generic-fuzzer
@@ -395,7 +389,6 @@
   amd64-generic-full-tryjob
   amd64-generic-fuzzer-tryjob
   amd64-generic-fwupd-upstream-tryjob
-  amd64-generic-incremental-tryjob
   amd64-generic-llvm-next-toolchain-tryjob
   amd64-generic-llvm-toolchain-tryjob
   amd64-generic-msan-fuzzer-tryjob
@@ -497,7 +490,6 @@
   banon-release-tryjob
   banon-unittest-stress
   beaglebone-full-tryjob
-  beaglebone-incremental-tryjob
   beaglebone-llvm-next-toolchain-tryjob
   beaglebone-llvm-toolchain-tryjob
   beaglebone-release-tryjob
@@ -530,7 +522,6 @@
   betty-arc-t-vmt-android-pfq-tryjob
   betty-asan-tryjob
   betty-full-tryjob
-  betty-incremental-tryjob
   betty-kernelnext-full-tryjob
   betty-kernelnext-llvm-next-toolchain-tryjob
   betty-kernelnext-llvm-toolchain-tryjob
@@ -645,7 +636,6 @@
   chell-factory-glados-7657.B-factorybranch-tryjob
   chell-factory-glados-7828.B-factorybranch-tryjob
   chell-full-tryjob
-  chell-incremental-tryjob
   chell-llvm-next-toolchain-tryjob
   chell-llvm-toolchain-tryjob
   chell-payloads-tryjob
@@ -1306,10 +1296,6 @@
     kevin64-full-tryjob
     tael-full-tryjob
     tatl-full-tryjob
-  master-incremental-tryjob
-    amd64-generic-incremental-tryjob
-    betty-incremental-tryjob
-    chell-incremental-tryjob
   master-pi-android-pfq-tryjob
     betty-pi-arc-pi-android-pfq-tryjob
     coral-pi-android-pfq-tryjob
@@ -1992,7 +1978,6 @@
   wristpin-release-tryjob
   wristpin-unittest-stress
   x32-generic-full-tryjob
-  x32-generic-incremental-tryjob
   x32-generic-llvm-next-toolchain-tryjob
   x32-generic-llvm-toolchain-tryjob
   x32-generic-unittest-stress

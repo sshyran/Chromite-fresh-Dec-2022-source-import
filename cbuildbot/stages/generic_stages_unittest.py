@@ -665,7 +665,7 @@ class RunCommandAbstractStageTestCase(
   # pylint: disable=abstract-method
 
   FULL_BOT_ID = 'amd64-generic-full'
-  BIN_BOT_ID = 'amd64-generic-incremental'
+  BIN_BOT_ID = 'amd64-generic-asan'
 
   def _PrepareFull(self, **kwargs):
     self._Prepare(self.FULL_BOT_ID, **kwargs)

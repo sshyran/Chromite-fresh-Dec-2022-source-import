@@ -372,30 +372,6 @@ def ApplyCustomOverrides(site_config):
       logging.warning('ignoring overrides for missing config %s', config_name)
 
 
-
-def IncrementalBuilders(site_config):
-  """Create all incremental test configs.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-  """
-
-  # incremental
-  site_config['amd64-generic-incremental'].apply(
-      site_config.templates.no_vmtest_builder,
-  )
-
-  site_config['betty-incremental'].apply(
-      vm_tests=getInfoVMTest(),
-      vm_tests_override=getInfoVMTest(),
-  )
-
-  site_config['x32-generic-incremental'].apply(
-      site_config.templates.no_vmtest_builder,
-  )
-
-
 def PostsubmitBuilders(site_config):
   """Create all postsubmit test configs.
 
@@ -474,16 +450,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.default_hw_tests_override,
   )
   # END asan
-
-  # BEGIN Incremental
-  site_config.templates.incremental.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-  site_config.templates.internal_incremental.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-  # END Incremental
 
   # BEGIN Factory
   site_config.templates.factory.apply(
@@ -602,8 +568,6 @@ def ApplyConfig(site_config, boards_dict, ge_build_config):
   # Insert default HwTests for tryjobs.
   for build in site_config.values():
     InsertHwTestsOverrideDefaults(build)
-
-  IncrementalBuilders(site_config)
 
   PostsubmitBuilders(site_config)
 
