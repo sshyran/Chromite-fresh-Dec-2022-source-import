@@ -18,8 +18,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
 
   def setUp(self):
     """Common set up method for all tests."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-        'user@test.org', '1001.0.0')
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1001.0.0')
     self.old_lkgm = None
 
   @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
@@ -51,8 +50,7 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
   @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
   def testVersionWithChromeBranch(self, mock_get_file):
     """Tests passing a version with a chrome branch strips the branch."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-        'user@test.org', '1003.0.0-rc2')
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1003.0.0-rc2')
     mock_get_file.return_value = '1002.0.0'
 
     with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:

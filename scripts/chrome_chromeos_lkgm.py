@@ -15,18 +15,18 @@ import logging
 import urllib.parse
 
 from chromite.cbuildbot import manifest_version
-from chromite.lib import chrome_committer
 from chromite.lib import commandline
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import gerrit
 from chromite.lib import gob_util
 
 
-class LKGMNotValid(chrome_committer.CommitError):
+class LKGMNotValid(Exception):
   """Raised if the LKGM version is unset or not newer than the current value."""
 
 
-class LKGMFileNotFound(chrome_committer.CommitError):
+class LKGMFileNotFound(Exception):
   """Raised if the LKGM file is not found."""
 
 
@@ -55,11 +55,18 @@ class ChromeLKGMCommitter(object):
   # First line of the commit message for all LKGM CLs.
   _COMMIT_MSG_HEADER = 'Automated Commit: LKGM %(lkgm)s for chromeos.'
 
-  def __init__(self, user_email, lkgm, dryrun=False, buildbucket_id=None):
+  def __init__(self, lkgm, dryrun=False, buildbucket_id=None):
     self._dryrun = dryrun
     self._buildbucket_id = buildbucket_id
     self._gerrit_helper = gerrit.GetCrosExternal()
-    self._user_email = user_email
+
+    # We need to use the account used by the builder to upload git CLs when
+    # generating CLs.
+    self._user_email = None
+    if cros_build_lib.HostIsCIBuilder(golo_only=True):
+      self._user_email = 'chromeos-commit-bot@chromium.org'
+    elif cros_build_lib.HostIsCIBuilder(gce_only=True):
+      self._user_email = '3su6n15k.default@developer.gserviceaccount.com'
 
     # Strip any chrome branch from the lkgm version.
     self._lkgm = manifest_version.VersionInfo(lkgm).VersionString()
@@ -220,10 +227,9 @@ def GetOpts(argv):
   Returns:
     Dictionary of parsed options.
   """
-  committer_parser = chrome_committer.ChromeCommitter.GetParser()
-  parser = commandline.ArgumentParser(description=__doc__,
-                                      parents=[committer_parser],
-                                      add_help=False, logging=False)
+  parser = commandline.ArgumentParser(description=__doc__, add_help=False)
+  parser.add_argument('--dryrun', action='store_true', default=False,
+                      help="Don't commit changes or send out emails.")
   parser.add_argument('--lkgm', required=True,
                       help='LKGM version to update to.')
   parser.add_argument('--buildbucket-id',
@@ -231,9 +237,9 @@ def GetOpts(argv):
                            'Will be linked in the commit message if specified.')
   return parser.parse_args(argv)
 
+
 def main(argv):
   opts = GetOpts(argv)
-  committer = ChromeLKGMCommitter(opts.user_email, opts.lkgm, opts.dryrun,
-                                  opts.buildbucket_id)
+  committer = ChromeLKGMCommitter(opts.lkgm, opts.dryrun, opts.buildbucket_id)
   committer.Run()
   return 0
