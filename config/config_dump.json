@@ -23224,7 +23224,10 @@
         ],
         "hw_tests": [],
         "hw_tests_disabled_bug": "https://crbug.com/1000717",
-        "hw_tests_override": []
+        "hw_tests_override": [],
+        "tast_vm_tests": [
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 7200\n}"
+        ]
     },
     "novato-release-tryjob": {
         "_template": "release",
@@ -23240,6 +23243,9 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "tast_vm_tests": [
+            "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 7200\n}"
+        ],
         "vm_tests_override": null
     },
     "novato-unittest-stress": {

@@ -357,6 +357,7 @@ def ApplyCustomOverrides(site_config):
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
+      'novato-release': site_config.templates.tast_vm_canary_tests,
       'reven-vmtest-release': site_config.templates.tast_vm_canary_tests,
   }
 
