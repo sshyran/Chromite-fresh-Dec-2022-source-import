@@ -4,7 +4,6 @@
 
 """Sysroot controller."""
 
-import glob
 import logging
 import os
 
@@ -202,28 +201,7 @@ def InstallToolchain(input_proto, output_proto, _config):
   try:
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
-    # Error installing - populate the failed package info.
-    for pkg_info in e.failed_toolchain_info:
-      # TODO(b/206514844): remove when field is deleted
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
-      # Grab the paths to the log files for each failed package from the
-      # sysroot.
-      # Logs currently exist within the sysroot in the form of:
-      # /build/${BOARD}/tmp/portage/logs/$CATEGORY:$PF:$TIMESTAMP.log
-      failed_pkg_data_msg = output_proto.failed_package_data.add()
-      controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
-      glob_path = os.path.join(target_sysroot.portage_logdir,
-                               f'{pkg_info.category}:{pkg_info.pvr}:*.log')
-      log_files = glob.glob(glob_path)
-      log_files.sort(reverse=True)
-      # Omit path if files don't exist for some reason
-      if not log_files:
-        logging.warning('Log file for %s was not found. Search path: %s',
-                        pkg_info.cpvr, glob_path)
-        continue
-      failed_pkg_data_msg.log_path.path = log_files[0]
-      failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE
+    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -291,28 +269,7 @@ def InstallPackages(input_proto, output_proto, _config):
       # No packages to report, so just exit with an error code.
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-    # We need to report the failed packages.
-    for pkg_info in e.failed_packages:
-      # TODO(b/206514844): remove when field is deleted
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
-      # Grab the paths to the log files for each failed package from the
-      # sysroot.
-      # Logs currently exist within the sysroot in the form of:
-      # /build/${BOARD}/tmp/portage/logs/$CATEGORY:$PF:$TIMESTAMP.log
-      failed_pkg_data_msg = output_proto.failed_package_data.add()
-      controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
-      glob_path = os.path.join(target_sysroot.portage_logdir,
-                               f'{pkg_info.category}:{pkg_info.pvr}:*.log')
-      log_files = glob.glob(glob_path)
-      log_files.sort(reverse=True)
-      # Omit path if files don't exist for some reason
-      if not log_files:
-        logging.warning('Log file for %s was not found. Search path: %s',
-                        pkg_info.cpvr, glob_path)
-        continue
-      failed_pkg_data_msg.log_path.path = log_files[0]
-      failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE
+    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
   finally:

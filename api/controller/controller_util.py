@@ -3,7 +3,10 @@
 # found in the LICENSE file.
 
 """Utility functions that are useful for controllers."""
+
+import glob
 import logging
+import os
 from typing import TYPE_CHECKING, Union
 
 from chromite.api.gen.chromite.api import sysroot_pb2
@@ -184,6 +187,42 @@ def serialize_package_info(pkg_info: package_info.PackageInfo,
 def deserialize_package_info(pkg_info_msg):
   """Deserialize a PackageInfo message to a PackageInfo object."""
   return package_info.parse(PackageInfoToString(pkg_info_msg))
+
+
+def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
+                               output_proto: Union[
+                                   sysroot_pb2.InstallPackagesResponse,
+                                   sysroot_pb2.InstallToolchainResponse],
+                               target_sysroot: sysroot_lib.Sysroot) -> None:
+  """Get the path to the log file for each package that failed to build.
+
+  Args:
+    error: The error message produced by the build step.
+    output_proto: The Response message for a given API call. This response proto
+      must contain a failed_package_data field.
+    target_sysroot: The sysroot used by the build step.
+  """
+  for pkg_info in error.failed_packages:
+    # TODO(b/206514844): remove when field is deleted
+    package_info_msg = output_proto.failed_packages.add()
+    serialize_package_info(pkg_info, package_info_msg)
+    # Grab the paths to the log files for each failed package from the
+    # sysroot.
+    # Logs currently exist within the sysroot in the form of:
+    # /build/${BOARD}/tmp/portage/logs/$CATEGORY:$PF:$TIMESTAMP.log
+    failed_pkg_data_msg = output_proto.failed_package_data.add()
+    serialize_package_info(pkg_info, failed_pkg_data_msg.name)
+    glob_path = os.path.join(target_sysroot.portage_logdir,
+                             f'{pkg_info.category}:{pkg_info.pvr}:*.log')
+    log_files = glob.glob(glob_path)
+    log_files.sort(reverse=True)
+    # Omit path if files don't exist for some reason.
+    if not log_files:
+      logging.warning('Log file for %s was not found. Search path: %s',
+                      pkg_info.cpvr, glob_path)
+      continue
+    failed_pkg_data_msg.log_path.path = log_files[0]
+    failed_pkg_data_msg.log_path.location = common_pb2.Path.INSIDE
 
 
 def PackageInfoToCPV(package_info_msg):
