@@ -249,7 +249,9 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     osutils.SafeMakedirs(self.sysroot)
     # Set up portage log directory.
     self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
-    self.portage_dir = self.target_sysroot.portage_logdir
+    self.portage_dir = os.path.join(self.tempdir, 'portage_logdir')
+    self.PatchObject(
+        sysroot_lib.Sysroot, 'portage_logdir', new=self.portage_dir)
     osutils.SafeMakedirs(self.portage_dir)
 
   def _InputProto(self, build_target=None, sysroot_path=None,
@@ -414,7 +416,9 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     osutils.SafeMakedirs(self.sysroot)
     # Set up portage log directory.
     self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
-    self.portage_dir = self.target_sysroot.portage_logdir
+    self.portage_dir = os.path.join(self.tempdir, 'portage_logdir')
+    self.PatchObject(
+        sysroot_lib.Sysroot, 'portage_logdir', new=self.portage_dir)
     osutils.SafeMakedirs(self.portage_dir)
     # Set up goma directories.
     self.goma_dir = os.path.join(self.tempdir, 'goma_dir')
