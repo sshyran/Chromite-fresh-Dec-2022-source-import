@@ -149,7 +149,7 @@ def Clean(chroot: Optional['chroot_lib.Chroot'],
   if not images and not sysroots and not tmp and not safe:
     return
 
-  cmd = ['cros', 'clean']
+  cmd = ['cros', 'clean', '--debug']
   if chroot:
     cmd.extend(['--sdk-path', chroot.path])
   if safe:
