@@ -1127,8 +1127,7 @@ def test_uprev_chrome_all_files_already_exist(old_version, new_version,
       GitRef(
           path='/foo', ref=f'refs/tags/{new_version}', revision='dummycommit')
   ]
-  res = packages.uprev_chrome_from_ref(
-      build_targets=None, refs=git_refs, chroot=None)
+  res = packages.uprev_chrome_from_ref(None, git_refs, None)
 
   modified_file_count = sum(len(m.files) for m in res.modified)
   assert modified_file_count == expected_count

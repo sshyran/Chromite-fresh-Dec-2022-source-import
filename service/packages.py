@@ -686,7 +686,7 @@ def _get_version_pin_src_path(package_path):
 
 
 @uprevs_versioned_package(constants.CHROME_CP)
-def uprev_chrome_from_ref(build_targets, refs, chroot):
+def uprev_chrome_from_ref(build_targets, refs, _chroot):
   """Uprev chrome and its related packages.
 
   See: uprev_versioned_package.
@@ -696,7 +696,7 @@ def uprev_chrome_from_ref(build_targets, refs, chroot):
   chrome_version = uprev_lib.get_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
-  return uprev_chrome(chrome_version, build_targets, chroot)
+  return uprev_chrome(chrome_version, build_targets, None)
 
 
 def revbump_chrome(
