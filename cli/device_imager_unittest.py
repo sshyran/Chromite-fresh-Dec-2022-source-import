@@ -11,7 +11,6 @@ from unittest import mock
 
 from chromite.cli import device_imager
 from chromite.lib import constants
-from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import image_lib
@@ -190,7 +189,7 @@ class PartialFileReaderTest(cros_test_lib.RunCommandTestCase):
   def testRun(self):
     """Tests the main run() function."""
     with device_imager.PartialFileReader(
-        '/foo', 512 * 2, 512, cros_build_lib.COMP_GZIP) as pfr:
+        '/foo', 512 * 2, 512, ['/usr/bin/pigz']) as pfr:
       pass
 
     self.assertCommandCalled(
@@ -220,20 +219,20 @@ class PartitionUpdaterBaseTest(cros_test_lib.TestCase):
   def testRunNotImplemented(self):
     """Tests running the main Run() function is not implemented."""
     # We just want to make sure the _Run() function is not implemented here.
-    pub = device_imager.PartitionUpdaterBase(None, None, None, None, None)
+    pub = device_imager.PartitionUpdaterBase(None, None, None, None)
     with self.assertRaises(NotImplementedError):
       pub.Run()
 
   def testRevertNotImplemented(self):
     """Tests running the Revert() function is not implemented."""
-    pub = device_imager.PartitionUpdaterBase(None, None, None, None, None)
+    pub = device_imager.PartitionUpdaterBase(None, None, None, None)
     with self.assertRaises(NotImplementedError):
       pub.Revert()
 
   @mock.patch.object(device_imager.PartitionUpdaterBase, '_Run')
   def testIsFinished(self, _):
     """Tests IsFinished() function."""
-    pub = device_imager.PartitionUpdaterBase(None, None, None, None, None)
+    pub = device_imager.PartitionUpdaterBase(None, None, None, None)
     self.assertFalse(pub.IsFinished())
     pub.Run()
     self.assertTrue(pub.IsFinished())
@@ -270,7 +269,7 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
 
       device_imager.RawPartitionUpdater(
           device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p2', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p2').Run()
       run_mock.assert_called()
       close_mock.assert_called()
       name_mock.assert_called()
@@ -292,7 +291,7 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
 
       device_imager.KernelUpdater(
           device, self.tempdir, device_imager.ImageType.REMOTE_DIRECTORY,
-          '/dev/mmcblk0p2', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p2').Run()
 
 
 class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
@@ -300,12 +299,12 @@ class KernelUpdaterTest(cros_test_lib.MockTempDirTestCase):
 
   def test_GetPartitionName(self):
     """Tests the name of the partitions."""
-    ku = device_imager.KernelUpdater(None, None, None, None, None)
+    ku = device_imager.KernelUpdater(None, None, None, None)
     self.assertEqual(constants.PART_KERN_B, ku._GetPartitionName())
 
   def test_GetRemotePartitionName(self):
     """Tests the name of the partitions."""
-    ku = device_imager.KernelUpdater(None, None, None, None, None)
+    ku = device_imager.KernelUpdater(None, None, None, None)
     self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_KERNEL,
                      ku._GetRemotePartitionName())
 
@@ -315,12 +314,12 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
 
   def test_GetPartitionName(self):
     """Tests the name of the partitions."""
-    u = device_imager.MiniOSUpdater(*([None] * 5))
+    u = device_imager.MiniOSUpdater(*([None] * 4))
     self.assertEqual(constants.PART_MINIOS_A, u._GetPartitionName())
 
   def test_GetRemotePartitionName(self):
     """Tests the name of the partitions."""
-    u = device_imager.MiniOSUpdater(*([None] * 5))
+    u = device_imager.MiniOSUpdater(*([None] * 4))
     self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_MINIOS,
                      u._GetRemotePartitionName())
 
@@ -333,7 +332,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p10').Run()
 
       copy_mock.assert_called_with(constants.PART_MINIOS_A)
       partitions_exist_mock.assert_called_with()
@@ -347,7 +346,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p10').Run()
 
       copy_mock.assert_not_called()
       partitions_exist_mock.assert_called_with()
@@ -363,7 +362,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.REMOTE_DIRECTORY,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p10').Run()
 
       post_install_mock.assert_not_called()
       redirect_mock.assert_not_called()
@@ -382,7 +381,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.REMOTE_DIRECTORY,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p10').Run()
 
       post_install_mock.assert_not_called()
       redirect_mock.assert_not_called()
@@ -400,7 +399,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.REMOTE_DIRECTORY,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p10').Run()
 
       post_install_mock.assert_called()
       redirect_mock.assert_called()
@@ -413,7 +412,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.MiniOSUpdater(
           device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)._RunPostInstall()
+          '/dev/mmcblk0p10')._RunPostInstall()
 
       flip_mock.assert_called_with()
 
@@ -422,7 +421,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     """Test Revert() function."""
     u = device_imager.MiniOSUpdater(
         None, 'foo-image', device_imager.ImageType.FULL,
-        '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)
+        '/dev/mmcblk0p10')
 
     # Before PostInstall runs.
     u.Revert()
@@ -440,7 +439,7 @@ class MiniOSUpdaterTest(cros_test_lib.MockTempDirTestCase):
     """Test _FlipMiniOSPriority() function."""
     device_imager.MiniOSUpdater(
         None, 'foo-image', device_imager.ImageType.FULL,
-        '/dev/mmcblk0p10', cros_build_lib.COMP_GZIP)._FlipMiniOSPriority()
+        '/dev/mmcblk0p10')._FlipMiniOSPriority()
 
     get_mock.assert_called_with()
     set_mock.assert_called_with('B')
@@ -457,12 +456,12 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
 
   def test_GetPartitionName(self):
     """Tests the name of the partitions."""
-    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+    ru = device_imager.RootfsUpdater(None, None, None, None, None)
     self.assertEqual(constants.PART_ROOT_A, ru._GetPartitionName())
 
   def test_GetRemotePartitionName(self):
     """Tests the name of the partitions."""
-    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+    ru = device_imager.RootfsUpdater(None, None, None, None, None)
     self.assertEqual(constants.QUICK_PROVISION_PAYLOAD_ROOTFS,
                      ru._GetRemotePartitionName())
 
@@ -478,7 +477,7 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.RootfsUpdater(
           '/dev/mmcblk0p5', device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p3', cros_build_lib.COMP_GZIP).Run()
+          '/dev/mmcblk0p3').Run()
 
       copy_mock.assert_called_with(constants.PART_ROOT_A)
       postinst_mock.assert_called_with()
@@ -501,7 +500,7 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
 
       device_imager.RootfsUpdater(
           '/dev/mmcblk0p5', device, 'foo-image', device_imager.ImageType.FULL,
-          target, cros_build_lib.COMP_GZIP)._RunPostInst()
+          target)._RunPostInst()
 
   def test_RunPostInstOnCurrentRoot(self):
     """Test _RunPostInst() on current root (used for reverting an update)."""
@@ -511,13 +510,13 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.RootfsUpdater(
           root_dev, device, 'foo-image', device_imager.ImageType.FULL,
-          '/dev/mmcblk0p3', cros_build_lib.COMP_GZIP)._RunPostInst(
+          '/dev/mmcblk0p3')._RunPostInst(
               on_target=False)
 
   @mock.patch.object(device_imager.RootfsUpdater, '_RunPostInst')
   def testRevert(self, postinst_mock):
     """Tests Revert() function."""
-    ru = device_imager.RootfsUpdater(None, None, None, None, None, None)
+    ru = device_imager.RootfsUpdater(None, None, None, None, None)
 
     ru.Revert()
     postinst_mock.assert_not_called()
@@ -547,8 +546,7 @@ class StatefulUpdaterTest(cros_test_lib.TestCase):
     """Test main Run() function for full image."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.StatefulUpdater(False, device, 'foo-image',
-                                    device_imager.ImageType.FULL, None,
-                                    None).Run()
+                                    device_imager.ImageType.FULL, None).Run()
       update_mock.assert_called_with(mock.ANY,
                                      is_payload_on_device=False,
                                      update_type=None)
@@ -561,7 +559,7 @@ class StatefulUpdaterTest(cros_test_lib.TestCase):
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       device_imager.StatefulUpdater(False, device, 'gs://foo-image',
                                     device_imager.ImageType.REMOTE_DIRECTORY,
-                                    None, None).Run()
+                                    None).Run()
       copy_mock.assert_called_with('gs://foo-image/stateful.tgz', mock.ANY)
       update_mock.assert_called_with(mock.ANY, is_payload_on_device=False,
                                      update_type=None)
@@ -569,7 +567,7 @@ class StatefulUpdaterTest(cros_test_lib.TestCase):
   @mock.patch.object(stateful_updater.StatefulUpdater, 'Reset')
   def testRevert(self, reset_mock):
     """Tests Revert() function."""
-    su = device_imager.StatefulUpdater(False, None, None, None, None, None)
+    su = device_imager.StatefulUpdater(False, None, None, None, None)
 
     su.Revert()
     reset_mock.assert_called()
