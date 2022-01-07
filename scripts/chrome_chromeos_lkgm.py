@@ -159,8 +159,10 @@ class ChromeLKGMCommitter(object):
       msg = None
       if self._buildbucket_id:
         msg = 'Applying CQ+2 from build %s' % self._buildbucket_id
-      self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels,
-                                    msg=msg, ready=True)
+      self._gerrit_helper.SetReview(
+          already_open_lkgm_cl, labels=labels,
+          reviewers=[constants.CHROME_GARDENER_REVIEW_EMAIL],
+          msg=msg, ready=True)
 
   def UpdateLKGM(self):
     """Updates the LKGM file with the new version."""
@@ -180,6 +182,13 @@ class ChromeLKGMCommitter(object):
         'chromium/src', 'main', self.ComposeCommitMsg(), False)
     self._gerrit_helper.ChangeEdit(
         change.gerrit_number, 'chromeos/CHROMEOS_LKGM', self._lkgm)
+
+    # Apply Bot-Commit here to minimise the gap between uploading the
+    # CL and approving it.
+    labels = {'Bot-Commit': 1}
+    logging.info('Applying Bot-Commit+1')
+    self._gerrit_helper.SetReview(change.gerrit_number, labels=labels,
+                                  notify='NONE')
 
   def ComposeCommitMsg(self):
     """Constructs and returns the commit message for the LKGM update."""

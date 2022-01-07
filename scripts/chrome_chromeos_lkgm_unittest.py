@@ -29,8 +29,13 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
     with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
       cg.return_value = mock.MagicMock(gerrit_number=123456)
       with mock.patch.object(self.committer._gerrit_helper, 'ChangeEdit') as ce:
-        self.committer.UpdateLKGM()
-        ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM', '1001.0.0')
+        with mock.patch.object(
+            self.committer._gerrit_helper, 'SetReview') as bc:
+          self.committer.UpdateLKGM()
+          ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM',
+                                     '1001.0.0')
+          bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
+                                     notify='NONE')
 
   @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
   def testOlderLKGMFails(self, mock_get_file):
@@ -53,9 +58,14 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
     with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
       cg.return_value = mock.MagicMock(gerrit_number=123456)
       with mock.patch.object(self.committer._gerrit_helper, 'ChangeEdit') as ce:
-        # Check the file was actually written out correctly.
-        self.committer.UpdateLKGM()
-        ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM', '1003.0.0')
+        with mock.patch.object(
+            self.committer._gerrit_helper, 'SetReview') as bc:
+          # Check the file was actually written out correctly.
+          self.committer.UpdateLKGM()
+          ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM',
+                                     '1003.0.0')
+          bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
+                                     notify='NONE')
 
   def testCommitMsg(self):
     """Tests format of the commit message."""
