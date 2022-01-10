@@ -1423,6 +1423,7 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       'hana',
       'kevin',
       'kevin64',
+      'octopus',
       'tael',
       'tatl',
   ], ('amd64-generic', 'arm-generic', 'arm64-generic'))

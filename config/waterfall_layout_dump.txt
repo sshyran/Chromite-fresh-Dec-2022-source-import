@@ -149,6 +149,7 @@
     hana-full
     kevin-full
     kevin64-full
+    octopus-full
     tael-full
     tatl-full
 
@@ -1294,6 +1295,7 @@
     hana-full-tryjob
     kevin-full-tryjob
     kevin64-full-tryjob
+    octopus-full-tryjob
     tael-full-tryjob
     tatl-full-tryjob
   master-pi-android-pfq-tryjob
