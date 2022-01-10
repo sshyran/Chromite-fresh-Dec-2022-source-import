@@ -19,6 +19,7 @@ import os
 from chromite.cli import command
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import cros_sdk_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 from chromite.utils import timer
@@ -127,8 +128,7 @@ class CleanCommand(command.CliCommand):
     group.add_argument(
         '--sdk-path',
         type='path',
-        default=os.path.join(constants.SOURCE_ROOT,
-                             constants.DEFAULT_CHROOT_DIR),
+        default=constants.DEFAULT_CHROOT_PATH,
         help='The sdk (chroot) path. This only needs to be provided if your '
              'chroot is not in the default location.')
 
@@ -258,7 +258,7 @@ class CleanCommand(command.CliCommand):
           for d in glob.glob(os.path.join(chroot_dir, 'build', '*', subdir)):
             Clean(d)
 
-    if self.options.flash:
+    if self.options.flash and cros_sdk_lib.IsChrootReady(chroot_dir):
       if self.options.dry_run:
         _LogClean(dev_server_wrapper.DEFAULT_STATIC_DIR)
       else:
