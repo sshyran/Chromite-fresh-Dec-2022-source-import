@@ -670,8 +670,9 @@ def uprev_borealis_dlc(_build_targets, _refs, chroot):
 
   See: uprev_versioned_package.
   """
-  package_path = os.path.join('src', 'private-overlays', 'chromeos-overlay',
-                              'chromeos-base', 'borealis-dlc')
+  package_path = os.path.join('src', 'private-overlays',
+                              'chromeos-partner-overlay', 'chromeos-base',
+                              'borealis-dlc')
 
   version_pin_src_path = _get_version_pin_src_path(package_path)
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
