@@ -1328,8 +1328,17 @@ def get_all_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   return result
 
 
-FirmwareVersions = collections.namedtuple(
-    'FirmwareVersions', ['model', 'main', 'main_rw', 'ec', 'ec_rw'])
+class FirmwareVersions(NamedTuple):
+  """Tuple to hold firmware versions, with truthiness."""
+  model: Optional[str]
+  main: Optional[str]
+  main_rw: Optional[str]
+  ec: Optional[str]
+  ec_rw: Optional[str]
+
+  def __bool__(self):
+    return bool(
+        self.model or self.main or self.main_rw or self.ec or self.ec_rw)
 
 
 def get_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
@@ -1421,8 +1430,14 @@ def _find_firmware_versions(cmd_output):
   return FirmwareVersions(model, main, main_rw, ec, ec_rw)
 
 
-MainEcFirmwareVersions = collections.namedtuple(
-    'MainEcFirmwareVersions', ['main_fw_version', 'ec_fw_version'])
+class MainEcFirmwareVersions(NamedTuple):
+  """Tuple to hold main and ec firmware versions, with truthiness."""
+  main_fw_version: Optional[str]
+  ec_fw_version: Optional[str]
+
+  def __bool__(self):
+    return bool(self.main_fw_version or self.ec_fw_version)
+
 
 def determine_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Returns a namedtuple with main and ec firmware versions.
@@ -1438,6 +1453,7 @@ def determine_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   ec_fw_version = fw_versions.ec_rw or fw_versions.ec
 
   return MainEcFirmwareVersions(main_fw_version, ec_fw_version)
+
 
 def determine_kernel_version(
     build_target: 'build_target_lib.BuildTarget') -> Optional[str]:

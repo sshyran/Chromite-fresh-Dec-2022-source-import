@@ -223,8 +223,10 @@ def GetBuilderMetadata(input_proto, output_proto, _config):
       build_target.name)
 
   fw_versions = packages.determine_firmware_versions(build_target)
-  build_target_metadata.main_firmware_version = fw_versions.main_fw_version
-  build_target_metadata.ec_firmware_version = fw_versions.ec_fw_version
+  if fw_versions:
+    build_target_metadata.main_firmware_version = fw_versions.main_fw_version
+    build_target_metadata.ec_firmware_version = fw_versions.ec_fw_version
+
   build_target_metadata.kernel_version = packages.determine_kernel_version(
       build_target)
   fingerprints = packages.find_fingerprints(build_target)
