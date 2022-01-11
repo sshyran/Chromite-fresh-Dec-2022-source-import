@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromiumos',
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
-  serialized_pb=b'\n\x1d\x63hromiumos/build_report.proto\x12\nchromiumos\x1a\x17\x63hromiumos/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"_\n\tTimeframe\x12)\n\x05\x62\x65gin\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\'\n\x03\x65nd\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\")\n\x07\x42uildId\x12\x18\n\x0e\x62uildbucket_id\x18\x01 \x01(\x03H\x00\x42\x04\n\x02id\"\x99\x16\n\x0f\x42uildReportBeta\x12\x18\n\x0e\x62uildbucket_id\x18\x01 \x01(\x03H\x00\x12\r\n\x05\x63ount\x18\x08 \x01(\x03\x12#\n\x06parent\x18\t \x01(\x0b\x32\x13.chromiumos.BuildId\x12%\n\x08\x63hildren\x18\n \x03(\x0b\x32\x13.chromiumos.BuildId\x12\x33\n\x04type\x18\x02 \x01(\x0e\x32%.chromiumos.BuildReportBeta.BuildType\x12\x37\n\x06status\x18\x03 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.BuildStatus\x12\x37\n\x06\x63onfig\x18\x04 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.BuildConfig\x12\x36\n\x05steps\x18\x05 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.StepDetails\x12<\n\tartifacts\x18\x07 \x03(\x0b\x32).chromiumos.BuildReportBeta.BuildArtifact\x1a\xf0\x01\n\x0b\x42uildStatus\x12=\n\x05value\x18\x01 \x01(\x0e\x32..chromiumos.BuildReportBeta.BuildStatus.Status\"\xa1\x01\n\x06Status\x12\r\n\tUNDEFINED\x10\x00\x12\x11\n\rKIND_TERMINAL\x10\x01\x12\x10\n\x0cKIND_RUNNING\x10\x02\x12\x0b\n\x07SUCCESS\x10\x64\x12\x0b\n\x07\x46\x41ILURE\x10\x65\x12\x11\n\rINFRA_FAILURE\x10\x66\x12\x0c\n\x08WATCHDOG\x10g\x12\x0c\n\x08\x43\x41NCELED\x10h\x12\x0c\n\x07RUNNING\x10\xc8\x01\x12\x0c\n\x07WAITING\x10\xc9\x01\x1a\xfe\x04\n\x0b\x42uildConfig\x12>\n\x06\x62ranch\x18\x01 \x01(\x0b\x32..chromiumos.BuildReportBeta.BuildConfig.Branch\x12@\n\x07release\x18\x02 \x01(\x0b\x32/.chromiumos.BuildReportBeta.BuildConfig.Release\x12\x41\n\x08versions\x18\x03 \x03(\x0b\x32/.chromiumos.BuildReportBeta.BuildConfig.Version\x12=\n\x06models\x18\x04 \x03(\x0b\x32-.chromiumos.BuildReportBeta.BuildConfig.Model\x1a\x15\n\x05Model\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a\x30\n\x07Release\x12%\n\x08\x63hannels\x18\x01 \x03(\x0e\x32\x13.chromiumos.Channel\x1a\x16\n\x06\x42ranch\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a[\n\x07Version\x12\x41\n\x04kind\x18\x01 \x01(\x0e\x32\x33.chromiumos.BuildReportBeta.BuildConfig.VersionKind\x12\r\n\x05value\x18\x02 \x01(\t\"\xac\x01\n\x0bVersionKind\x12\x1a\n\x16VERSION_KIND_UNDEFINED\x10\x00\x12\x1b\n\x17VERSION_KIND_ASH_CHROME\x10\x01\x12\x17\n\x13VERSION_KIND_CHROME\x10\x02\x12\x14\n\x10VERSION_KIND_ARC\x10\x03\x12\x19\n\x15VERSION_KIND_PLATFORM\x10\x04\x12\x1a\n\x16VERSION_KIND_MILESTONE\x10\x05\x1a\xef\x04\n\rBuildArtifact\x12<\n\x04type\x18\x01 \x01(\x0e\x32..chromiumos.BuildReportBeta.BuildArtifact.Type\x12:\n\x03uri\x18\x02 \x01(\x0b\x32-.chromiumos.BuildReportBeta.BuildArtifact.URI\x12\x0e\n\x06sha256\x18\x03 \x01(\t\x12+\n\x07\x63reated\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1a\x1b\n\x03URI\x12\r\n\x03gcs\x18\x01 \x01(\tH\x00\x42\x05\n\x03uri\"\x89\x03\n\x04Type\x12\r\n\tUNDEFINED\x10\x00\x12\x0f\n\x0bIMAGE_TYPES\x10\x01\x12\x12\n\x0e\x46IRMWARE_TYPES\x10\x02\x12\x0e\n\nAFDO_TYPES\x10\x03\x12\x11\n\rPAYLOAD_TYPES\x10\x04\x12\x11\n\rRELEASE_IMAGE\x10\x64\x12\x12\n\x0eRECOVERY_IMAGE\x10\x65\x12\r\n\tDLC_IMAGE\x10\x66\x12\x16\n\x12\x44\x45\x42UG_SYMBOL_IMAGE\x10g\x12\x10\n\x0cHWQUAL_IMAGE\x10h\x12\x0e\n\nTEST_IMAGE\x10i\x12\x15\n\x10\x46IRMWARE_TARBALL\x10\xc8\x01\x12\x1a\n\x15\x46IRMWARE_TARBALL_INFO\x10\xc9\x01\x12\x12\n\rFIRMWARE_LCOV\x10\xca\x01\x12\x13\n\x0e\x41\x46\x44O_ORDERFILE\x10\xac\x02\x12\x13\n\x0e\x41\x46\x44O_BENCHMARK\x10\xad\x02\x12\x10\n\x0b\x41\x46\x44O_KERNEL\x10\xae\x02\x12\x10\n\x0b\x41\x46\x44O_CHROME\x10\xaf\x02\x12\x11\n\x0cPAYLOAD_FULL\x10\x90\x03\x12\x12\n\rPAYLOAD_DELTA\x10\x91\x03\x1a\x97\x06\n\x0bStepDetails\x12\x41\n\x07\x63urrent\x18\x01 \x01(\x0e\x32\x30.chromiumos.BuildReportBeta.StepDetails.StepName\x12?\n\x04info\x18\x02 \x03(\x0b\x32\x31.chromiumos.BuildReportBeta.StepDetails.InfoEntry\x1a\x81\x01\n\x08StepInfo\x12\r\n\x05order\x18\x01 \x01(\x05\x12>\n\x06status\x18\x02 \x01(\x0e\x32..chromiumos.BuildReportBeta.StepDetails.Status\x12&\n\x07runtime\x18\x03 \x01(\x0b\x32\x15.chromiumos.Timeframe\x1a]\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12?\n\x05value\x18\x02 \x01(\x0b\x32\x30.chromiumos.BuildReportBeta.StepDetails.StepInfo:\x02\x38\x01\"\xc9\x01\n\x06Status\x12\x19\n\x15STEP_STATUS_UNDEFINED\x10\x00\x12\x11\n\rKIND_TERMINAL\x10\x01\x12\x10\n\x0cKIND_RUNNING\x10\x02\x12\x12\n\x0eSTATUS_SUCCESS\x10\x64\x12\x12\n\x0eSTATUS_FAILURE\x10\x65\x12\x18\n\x14STATUS_INFRA_FAILURE\x10\x66\x12\x13\n\x0fSTATUS_WATCHDOG\x10g\x12\x13\n\x0fSTATUS_CANCELED\x10h\x12\x13\n\x0eSTATUS_RUNNING\x10\xc8\x01\"\xd4\x01\n\x08StepName\x12\x12\n\x0eSTEP_UNDEFINED\x10\x00\x12\x10\n\x0cSTEP_OVERALL\x10\x64\x12\x0e\n\tSTEP_SYNC\x10\xc8\x01\x12\x15\n\x10STEP_SYNC_CHROME\x10\xc9\x01\x12\r\n\x08STEP_SDK\x10\xac\x02\x12\x12\n\rSTEP_SDK_INIT\x10\xad\x02\x12\x14\n\x0fSTEP_SDK_UPDATE\x10\xae\x02\x12\x0f\n\nSTEP_BUILD\x10\x90\x03\x12\x17\n\x12STEP_BUILD_SYSROOT\x10\x91\x03\x12\x18\n\x13STEP_BUILD_PACKAGES\x10\x92\x03\"n\n\tBuildType\x12\x18\n\x14\x42UILD_TYPE_UNDEFINED\x10\x00\x12\x16\n\x12\x42UILD_TYPE_RELEASE\x10\x01\x12\x17\n\x13\x42UILD_TYPE_FIRMWARE\x10\x02\x12\x16\n\x12\x42UILD_TYPE_FACTORY\x10\x03\x42\x04\n\x02idBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1d\x63hromiumos/build_report.proto\x12\nchromiumos\x1a\x17\x63hromiumos/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"_\n\tTimeframe\x12)\n\x05\x62\x65gin\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\'\n\x03\x65nd\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\")\n\x07\x42uildId\x12\x18\n\x0e\x62uildbucket_id\x18\x01 \x01(\x03H\x00\x42\x04\n\x02id\"\xd2\x1c\n\x0f\x42uildReportBeta\x12\x18\n\x0e\x62uildbucket_id\x18\x01 \x01(\x03H\x00\x12\r\n\x05\x63ount\x18\x08 \x01(\x03\x12#\n\x06parent\x18\t \x01(\x0b\x32\x13.chromiumos.BuildId\x12%\n\x08\x63hildren\x18\n \x03(\x0b\x32\x13.chromiumos.BuildId\x12\x33\n\x04type\x18\x02 \x01(\x0e\x32%.chromiumos.BuildReportBeta.BuildType\x12\x37\n\x06status\x18\x03 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.BuildStatus\x12\x37\n\x06\x63onfig\x18\x04 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.BuildConfig\x12\x36\n\x05steps\x18\x05 \x01(\x0b\x32\'.chromiumos.BuildReportBeta.StepDetails\x12<\n\tartifacts\x18\x07 \x03(\x0b\x32).chromiumos.BuildReportBeta.BuildArtifact\x1a\xf0\x01\n\x0b\x42uildStatus\x12=\n\x05value\x18\x01 \x01(\x0e\x32..chromiumos.BuildReportBeta.BuildStatus.Status\"\xa1\x01\n\x06Status\x12\r\n\tUNDEFINED\x10\x00\x12\x11\n\rKIND_TERMINAL\x10\x01\x12\x10\n\x0cKIND_RUNNING\x10\x02\x12\x0b\n\x07SUCCESS\x10\x64\x12\x0b\n\x07\x46\x41ILURE\x10\x65\x12\x11\n\rINFRA_FAILURE\x10\x66\x12\x0c\n\x08WATCHDOG\x10g\x12\x0c\n\x08\x43\x41NCELED\x10h\x12\x0c\n\x07RUNNING\x10\xc8\x01\x12\x0c\n\x07WAITING\x10\xc9\x01\x1a\xb7\x0b\n\x0b\x42uildConfig\x12>\n\x06\x62ranch\x18\x01 \x01(\x0b\x32..chromiumos.BuildReportBeta.BuildConfig.Branch\x12P\n\x18\x61ndroid_container_branch\x18\x02 \x01(\x0b\x32..chromiumos.BuildReportBeta.BuildConfig.Branch\x12>\n\x06target\x18\x03 \x01(\x0b\x32..chromiumos.BuildReportBeta.BuildConfig.Target\x12P\n\x18\x61ndroid_container_target\x18\x04 \x01(\x0b\x32..chromiumos.BuildReportBeta.BuildConfig.Target\x12@\n\x07release\x18\x05 \x01(\x0b\x32/.chromiumos.BuildReportBeta.BuildConfig.Release\x12\x41\n\x08versions\x18\x06 \x03(\x0b\x32/.chromiumos.BuildReportBeta.BuildConfig.Version\x12\x13\n\x0b\x61rc_use_set\x18\x07 \x01(\x08\x12=\n\x06models\x18\x08 \x03(\x0b\x32-.chromiumos.BuildReportBeta.BuildConfig.Model\x1a\xa3\x03\n\x05Model\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x0f\x66irmware_key_id\x18\x02 \x01(\t\x12L\n\x08versions\x18\x03 \x03(\x0b\x32:.chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersion\x1ak\n\x0cModelVersion\x12L\n\x04kind\x18\x01 \x01(\x0e\x32>.chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersionKind\x12\r\n\x05value\x18\x02 \x01(\t\"\xb7\x01\n\x10ModelVersionKind\x12 \n\x1cMODEL_VERSION_KIND_UNDEFINED\x10\x00\x12\"\n\x1eMODEL_VERSION_KIND_EC_FIRMWARE\x10\x01\x12-\n)MODEL_VERSION_KIND_MAIN_READONLY_FIRMWARE\x10\x02\x12.\n*MODEL_VERSION_KIND_MAIN_READWRITE_FIRMWARE\x10\x03\x1a\x30\n\x07Release\x12%\n\x08\x63hannels\x18\x01 \x03(\x0e\x32\x13.chromiumos.Channel\x1a\x16\n\x06\x42ranch\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a[\n\x07Version\x12\x41\n\x04kind\x18\x01 \x01(\x0e\x32\x33.chromiumos.BuildReportBeta.BuildConfig.VersionKind\x12\r\n\x05value\x18\x02 \x01(\t\x1a\x16\n\x06Target\x12\x0c\n\x04name\x18\x01 \x01(\t\"\xc5\x02\n\x0bVersionKind\x12\x1a\n\x16VERSION_KIND_UNDEFINED\x10\x00\x12\x1b\n\x17VERSION_KIND_ASH_CHROME\x10\x01\x12\x17\n\x13VERSION_KIND_CHROME\x10\x02\x12\x14\n\x10VERSION_KIND_ARC\x10\x03\x12\x19\n\x15VERSION_KIND_PLATFORM\x10\x04\x12\x1a\n\x16VERSION_KIND_MILESTONE\x10\x05\x12\"\n\x1eVERSION_KIND_ANDROID_CONTAINER\x10\x06\x12\x1c\n\x18VERSION_KIND_EC_FIRMWARE\x10\x07\x12\x1c\n\x18VERSION_KIND_FINGERPRINT\x10\x08\x12\x17\n\x13VERSION_KIND_KERNEL\x10\t\x12\x1e\n\x1aVERSION_KIND_MAIN_FIRMWARE\x10\n\x1a\xef\x04\n\rBuildArtifact\x12<\n\x04type\x18\x01 \x01(\x0e\x32..chromiumos.BuildReportBeta.BuildArtifact.Type\x12:\n\x03uri\x18\x02 \x01(\x0b\x32-.chromiumos.BuildReportBeta.BuildArtifact.URI\x12\x0e\n\x06sha256\x18\x03 \x01(\t\x12+\n\x07\x63reated\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1a\x1b\n\x03URI\x12\r\n\x03gcs\x18\x01 \x01(\tH\x00\x42\x05\n\x03uri\"\x89\x03\n\x04Type\x12\r\n\tUNDEFINED\x10\x00\x12\x0f\n\x0bIMAGE_TYPES\x10\x01\x12\x12\n\x0e\x46IRMWARE_TYPES\x10\x02\x12\x0e\n\nAFDO_TYPES\x10\x03\x12\x11\n\rPAYLOAD_TYPES\x10\x04\x12\x11\n\rRELEASE_IMAGE\x10\x64\x12\x12\n\x0eRECOVERY_IMAGE\x10\x65\x12\r\n\tDLC_IMAGE\x10\x66\x12\x16\n\x12\x44\x45\x42UG_SYMBOL_IMAGE\x10g\x12\x10\n\x0cHWQUAL_IMAGE\x10h\x12\x0e\n\nTEST_IMAGE\x10i\x12\x15\n\x10\x46IRMWARE_TARBALL\x10\xc8\x01\x12\x1a\n\x15\x46IRMWARE_TARBALL_INFO\x10\xc9\x01\x12\x12\n\rFIRMWARE_LCOV\x10\xca\x01\x12\x13\n\x0e\x41\x46\x44O_ORDERFILE\x10\xac\x02\x12\x13\n\x0e\x41\x46\x44O_BENCHMARK\x10\xad\x02\x12\x10\n\x0b\x41\x46\x44O_KERNEL\x10\xae\x02\x12\x10\n\x0b\x41\x46\x44O_CHROME\x10\xaf\x02\x12\x11\n\x0cPAYLOAD_FULL\x10\x90\x03\x12\x12\n\rPAYLOAD_DELTA\x10\x91\x03\x1a\x97\x06\n\x0bStepDetails\x12\x41\n\x07\x63urrent\x18\x01 \x01(\x0e\x32\x30.chromiumos.BuildReportBeta.StepDetails.StepName\x12?\n\x04info\x18\x02 \x03(\x0b\x32\x31.chromiumos.BuildReportBeta.StepDetails.InfoEntry\x1a\x81\x01\n\x08StepInfo\x12\r\n\x05order\x18\x01 \x01(\x05\x12>\n\x06status\x18\x02 \x01(\x0e\x32..chromiumos.BuildReportBeta.StepDetails.Status\x12&\n\x07runtime\x18\x03 \x01(\x0b\x32\x15.chromiumos.Timeframe\x1a]\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12?\n\x05value\x18\x02 \x01(\x0b\x32\x30.chromiumos.BuildReportBeta.StepDetails.StepInfo:\x02\x38\x01\"\xc9\x01\n\x06Status\x12\x19\n\x15STEP_STATUS_UNDEFINED\x10\x00\x12\x11\n\rKIND_TERMINAL\x10\x01\x12\x10\n\x0cKIND_RUNNING\x10\x02\x12\x12\n\x0eSTATUS_SUCCESS\x10\x64\x12\x12\n\x0eSTATUS_FAILURE\x10\x65\x12\x18\n\x14STATUS_INFRA_FAILURE\x10\x66\x12\x13\n\x0fSTATUS_WATCHDOG\x10g\x12\x13\n\x0fSTATUS_CANCELED\x10h\x12\x13\n\x0eSTATUS_RUNNING\x10\xc8\x01\"\xd4\x01\n\x08StepName\x12\x12\n\x0eSTEP_UNDEFINED\x10\x00\x12\x10\n\x0cSTEP_OVERALL\x10\x64\x12\x0e\n\tSTEP_SYNC\x10\xc8\x01\x12\x15\n\x10STEP_SYNC_CHROME\x10\xc9\x01\x12\r\n\x08STEP_SDK\x10\xac\x02\x12\x12\n\rSTEP_SDK_INIT\x10\xad\x02\x12\x14\n\x0fSTEP_SDK_UPDATE\x10\xae\x02\x12\x0f\n\nSTEP_BUILD\x10\x90\x03\x12\x17\n\x12STEP_BUILD_SYSROOT\x10\x91\x03\x12\x18\n\x13STEP_BUILD_PACKAGES\x10\x92\x03\"n\n\tBuildType\x12\x18\n\x14\x42UILD_TYPE_UNDEFINED\x10\x00\x12\x16\n\x12\x42UILD_TYPE_RELEASE\x10\x01\x12\x17\n\x13\x42UILD_TYPE_FIRMWARE\x10\x02\x12\x16\n\x12\x42UILD_TYPE_FACTORY\x10\x03\x42\x04\n\x02id\"E\n\x0f\x42uildReportList\x12\x32\n\rbuild_reports\x18\x01 \x03(\x0b\x32\x1b.chromiumos.BuildReportBetaBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[chromiumos_dot_common__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -80,6 +80,36 @@ _BUILDREPORTBETA_BUILDSTATUS_STATUS = _descriptor.EnumDescriptor(
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_BUILDSTATUS_STATUS)
 
+_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSIONKIND = _descriptor.EnumDescriptor(
+  name='ModelVersionKind',
+  full_name='chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersionKind',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='MODEL_VERSION_KIND_UNDEFINED', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MODEL_VERSION_KIND_EC_FIRMWARE', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MODEL_VERSION_KIND_MAIN_READONLY_FIRMWARE', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='MODEL_VERSION_KIND_MAIN_READWRITE_FIRMWARE', index=3, number=3,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=1670,
+  serialized_end=1853,
+)
+_sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSIONKIND)
+
 _BUILDREPORTBETA_BUILDCONFIG_VERSIONKIND = _descriptor.EnumDescriptor(
   name='VersionKind',
   full_name='chromiumos.BuildReportBeta.BuildConfig.VersionKind',
@@ -110,11 +140,31 @@ _BUILDREPORTBETA_BUILDCONFIG_VERSIONKIND = _descriptor.EnumDescriptor(
       name='VERSION_KIND_MILESTONE', index=5, number=5,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VERSION_KIND_ANDROID_CONTAINER', index=6, number=6,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VERSION_KIND_EC_FIRMWARE', index=7, number=7,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VERSION_KIND_FINGERPRINT', index=8, number=8,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VERSION_KIND_KERNEL', index=9, number=9,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VERSION_KIND_MAIN_FIRMWARE', index=10, number=10,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1375,
-  serialized_end=1547,
+  serialized_start=2047,
+  serialized_end=2372,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_BUILDCONFIG_VERSIONKIND)
 
@@ -207,8 +257,8 @@ _BUILDREPORTBETA_BUILDARTIFACT_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1780,
-  serialized_end=2173,
+  serialized_start=2605,
+  serialized_end=2998,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_BUILDARTIFACT_TYPE)
 
@@ -257,8 +307,8 @@ _BUILDREPORTBETA_STEPDETAILS_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2551,
-  serialized_end=2752,
+  serialized_start=3376,
+  serialized_end=3577,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_STEPDETAILS_STATUS)
 
@@ -311,8 +361,8 @@ _BUILDREPORTBETA_STEPDETAILS_STEPNAME = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2755,
-  serialized_end=2967,
+  serialized_start=3580,
+  serialized_end=3792,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_STEPDETAILS_STEPNAME)
 
@@ -341,8 +391,8 @@ _BUILDREPORTBETA_BUILDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2969,
-  serialized_end=3079,
+  serialized_start=3794,
+  serialized_end=3904,
 )
 _sym_db.RegisterEnumDescriptor(_BUILDREPORTBETA_BUILDTYPE)
 
@@ -450,16 +500,23 @@ _BUILDREPORTBETA_BUILDSTATUS = _descriptor.Descriptor(
   serialized_end=906,
 )
 
-_BUILDREPORTBETA_BUILDCONFIG_MODEL = _descriptor.Descriptor(
-  name='Model',
-  full_name='chromiumos.BuildReportBeta.BuildConfig.Model',
+_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION = _descriptor.Descriptor(
+  name='ModelVersion',
+  full_name='chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersion',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='kind', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersion.kind', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersion.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -476,8 +533,53 @@ _BUILDREPORTBETA_BUILDCONFIG_MODEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1184,
-  serialized_end=1205,
+  serialized_start=1560,
+  serialized_end=1667,
+)
+
+_BUILDREPORTBETA_BUILDCONFIG_MODEL = _descriptor.Descriptor(
+  name='Model',
+  full_name='chromiumos.BuildReportBeta.BuildConfig.Model',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='firmware_key_id', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.firmware_key_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='versions', full_name='chromiumos.BuildReportBeta.BuildConfig.Model.versions', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION, ],
+  enum_types=[
+    _BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSIONKIND,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1434,
+  serialized_end=1853,
 )
 
 _BUILDREPORTBETA_BUILDCONFIG_RELEASE = _descriptor.Descriptor(
@@ -506,8 +608,8 @@ _BUILDREPORTBETA_BUILDCONFIG_RELEASE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1207,
-  serialized_end=1255,
+  serialized_start=1855,
+  serialized_end=1903,
 )
 
 _BUILDREPORTBETA_BUILDCONFIG_BRANCH = _descriptor.Descriptor(
@@ -536,8 +638,8 @@ _BUILDREPORTBETA_BUILDCONFIG_BRANCH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1257,
-  serialized_end=1279,
+  serialized_start=1905,
+  serialized_end=1927,
 )
 
 _BUILDREPORTBETA_BUILDCONFIG_VERSION = _descriptor.Descriptor(
@@ -573,8 +675,38 @@ _BUILDREPORTBETA_BUILDCONFIG_VERSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1281,
-  serialized_end=1372,
+  serialized_start=1929,
+  serialized_end=2020,
+)
+
+_BUILDREPORTBETA_BUILDCONFIG_TARGET = _descriptor.Descriptor(
+  name='Target',
+  full_name='chromiumos.BuildReportBeta.BuildConfig.Target',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='chromiumos.BuildReportBeta.BuildConfig.Target.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2022,
+  serialized_end=2044,
 )
 
 _BUILDREPORTBETA_BUILDCONFIG = _descriptor.Descriptor(
@@ -592,22 +724,50 @@ _BUILDREPORTBETA_BUILDCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='release', full_name='chromiumos.BuildReportBeta.BuildConfig.release', index=1,
+      name='android_container_branch', full_name='chromiumos.BuildReportBeta.BuildConfig.android_container_branch', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='versions', full_name='chromiumos.BuildReportBeta.BuildConfig.versions', index=2,
-      number=3, type=11, cpp_type=10, label=3,
+      name='target', full_name='chromiumos.BuildReportBeta.BuildConfig.target', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='android_container_target', full_name='chromiumos.BuildReportBeta.BuildConfig.android_container_target', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='release', full_name='chromiumos.BuildReportBeta.BuildConfig.release', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='versions', full_name='chromiumos.BuildReportBeta.BuildConfig.versions', index=5,
+      number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='models', full_name='chromiumos.BuildReportBeta.BuildConfig.models', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='arc_use_set', full_name='chromiumos.BuildReportBeta.BuildConfig.arc_use_set', index=6,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='models', full_name='chromiumos.BuildReportBeta.BuildConfig.models', index=7,
+      number=8, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -615,7 +775,7 @@ _BUILDREPORTBETA_BUILDCONFIG = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_BUILDREPORTBETA_BUILDCONFIG_MODEL, _BUILDREPORTBETA_BUILDCONFIG_RELEASE, _BUILDREPORTBETA_BUILDCONFIG_BRANCH, _BUILDREPORTBETA_BUILDCONFIG_VERSION, ],
+  nested_types=[_BUILDREPORTBETA_BUILDCONFIG_MODEL, _BUILDREPORTBETA_BUILDCONFIG_RELEASE, _BUILDREPORTBETA_BUILDCONFIG_BRANCH, _BUILDREPORTBETA_BUILDCONFIG_VERSION, _BUILDREPORTBETA_BUILDCONFIG_TARGET, ],
   enum_types=[
     _BUILDREPORTBETA_BUILDCONFIG_VERSIONKIND,
   ],
@@ -626,7 +786,7 @@ _BUILDREPORTBETA_BUILDCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=909,
-  serialized_end=1547,
+  serialized_end=2372,
 )
 
 _BUILDREPORTBETA_BUILDARTIFACT_URI = _descriptor.Descriptor(
@@ -658,8 +818,8 @@ _BUILDREPORTBETA_BUILDARTIFACT_URI = _descriptor.Descriptor(
       name='uri', full_name='chromiumos.BuildReportBeta.BuildArtifact.URI.uri',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1750,
-  serialized_end=1777,
+  serialized_start=2575,
+  serialized_end=2602,
 )
 
 _BUILDREPORTBETA_BUILDARTIFACT = _descriptor.Descriptor(
@@ -710,8 +870,8 @@ _BUILDREPORTBETA_BUILDARTIFACT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1550,
-  serialized_end=2173,
+  serialized_start=2375,
+  serialized_end=2998,
 )
 
 _BUILDREPORTBETA_STEPDETAILS_STEPINFO = _descriptor.Descriptor(
@@ -754,8 +914,8 @@ _BUILDREPORTBETA_STEPDETAILS_STEPINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2324,
-  serialized_end=2453,
+  serialized_start=3149,
+  serialized_end=3278,
 )
 
 _BUILDREPORTBETA_STEPDETAILS_INFOENTRY = _descriptor.Descriptor(
@@ -791,8 +951,8 @@ _BUILDREPORTBETA_STEPDETAILS_INFOENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2455,
-  serialized_end=2548,
+  serialized_start=3280,
+  serialized_end=3373,
 )
 
 _BUILDREPORTBETA_STEPDETAILS = _descriptor.Descriptor(
@@ -830,8 +990,8 @@ _BUILDREPORTBETA_STEPDETAILS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2176,
-  serialized_end=2967,
+  serialized_start=3001,
+  serialized_end=3792,
 )
 
 _BUILDREPORTBETA = _descriptor.Descriptor(
@@ -921,7 +1081,38 @@ _BUILDREPORTBETA = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=244,
-  serialized_end=3085,
+  serialized_end=3910,
+)
+
+
+_BUILDREPORTLIST = _descriptor.Descriptor(
+  name='BuildReportList',
+  full_name='chromiumos.BuildReportList',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='build_reports', full_name='chromiumos.BuildReportList.build_reports', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3912,
+  serialized_end=3981,
 )
 
 _TIMEFRAME.fields_by_name['begin'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
@@ -932,13 +1123,21 @@ _BUILDID.fields_by_name['buildbucket_id'].containing_oneof = _BUILDID.oneofs_by_
 _BUILDREPORTBETA_BUILDSTATUS.fields_by_name['value'].enum_type = _BUILDREPORTBETA_BUILDSTATUS_STATUS
 _BUILDREPORTBETA_BUILDSTATUS.containing_type = _BUILDREPORTBETA
 _BUILDREPORTBETA_BUILDSTATUS_STATUS.containing_type = _BUILDREPORTBETA_BUILDSTATUS
+_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION.fields_by_name['kind'].enum_type = _BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSIONKIND
+_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION.containing_type = _BUILDREPORTBETA_BUILDCONFIG_MODEL
+_BUILDREPORTBETA_BUILDCONFIG_MODEL.fields_by_name['versions'].message_type = _BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION
 _BUILDREPORTBETA_BUILDCONFIG_MODEL.containing_type = _BUILDREPORTBETA_BUILDCONFIG
+_BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSIONKIND.containing_type = _BUILDREPORTBETA_BUILDCONFIG_MODEL
 _BUILDREPORTBETA_BUILDCONFIG_RELEASE.fields_by_name['channels'].enum_type = chromiumos_dot_common__pb2._CHANNEL
 _BUILDREPORTBETA_BUILDCONFIG_RELEASE.containing_type = _BUILDREPORTBETA_BUILDCONFIG
 _BUILDREPORTBETA_BUILDCONFIG_BRANCH.containing_type = _BUILDREPORTBETA_BUILDCONFIG
 _BUILDREPORTBETA_BUILDCONFIG_VERSION.fields_by_name['kind'].enum_type = _BUILDREPORTBETA_BUILDCONFIG_VERSIONKIND
 _BUILDREPORTBETA_BUILDCONFIG_VERSION.containing_type = _BUILDREPORTBETA_BUILDCONFIG
+_BUILDREPORTBETA_BUILDCONFIG_TARGET.containing_type = _BUILDREPORTBETA_BUILDCONFIG
 _BUILDREPORTBETA_BUILDCONFIG.fields_by_name['branch'].message_type = _BUILDREPORTBETA_BUILDCONFIG_BRANCH
+_BUILDREPORTBETA_BUILDCONFIG.fields_by_name['android_container_branch'].message_type = _BUILDREPORTBETA_BUILDCONFIG_BRANCH
+_BUILDREPORTBETA_BUILDCONFIG.fields_by_name['target'].message_type = _BUILDREPORTBETA_BUILDCONFIG_TARGET
+_BUILDREPORTBETA_BUILDCONFIG.fields_by_name['android_container_target'].message_type = _BUILDREPORTBETA_BUILDCONFIG_TARGET
 _BUILDREPORTBETA_BUILDCONFIG.fields_by_name['release'].message_type = _BUILDREPORTBETA_BUILDCONFIG_RELEASE
 _BUILDREPORTBETA_BUILDCONFIG.fields_by_name['versions'].message_type = _BUILDREPORTBETA_BUILDCONFIG_VERSION
 _BUILDREPORTBETA_BUILDCONFIG.fields_by_name['models'].message_type = _BUILDREPORTBETA_BUILDCONFIG_MODEL
@@ -974,9 +1173,11 @@ _BUILDREPORTBETA_BUILDTYPE.containing_type = _BUILDREPORTBETA
 _BUILDREPORTBETA.oneofs_by_name['id'].fields.append(
   _BUILDREPORTBETA.fields_by_name['buildbucket_id'])
 _BUILDREPORTBETA.fields_by_name['buildbucket_id'].containing_oneof = _BUILDREPORTBETA.oneofs_by_name['id']
+_BUILDREPORTLIST.fields_by_name['build_reports'].message_type = _BUILDREPORTBETA
 DESCRIPTOR.message_types_by_name['Timeframe'] = _TIMEFRAME
 DESCRIPTOR.message_types_by_name['BuildId'] = _BUILDID
 DESCRIPTOR.message_types_by_name['BuildReportBeta'] = _BUILDREPORTBETA
+DESCRIPTOR.message_types_by_name['BuildReportList'] = _BUILDREPORTLIST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Timeframe = _reflection.GeneratedProtocolMessageType('Timeframe', (_message.Message,), {
@@ -1005,6 +1206,13 @@ BuildReportBeta = _reflection.GeneratedProtocolMessageType('BuildReportBeta', (_
   'BuildConfig' : _reflection.GeneratedProtocolMessageType('BuildConfig', (_message.Message,), {
 
     'Model' : _reflection.GeneratedProtocolMessageType('Model', (_message.Message,), {
+
+      'ModelVersion' : _reflection.GeneratedProtocolMessageType('ModelVersion', (_message.Message,), {
+        'DESCRIPTOR' : _BUILDREPORTBETA_BUILDCONFIG_MODEL_MODELVERSION,
+        '__module__' : 'chromiumos.build_report_pb2'
+        # @@protoc_insertion_point(class_scope:chromiumos.BuildReportBeta.BuildConfig.Model.ModelVersion)
+        })
+      ,
       'DESCRIPTOR' : _BUILDREPORTBETA_BUILDCONFIG_MODEL,
       '__module__' : 'chromiumos.build_report_pb2'
       # @@protoc_insertion_point(class_scope:chromiumos.BuildReportBeta.BuildConfig.Model)
@@ -1029,6 +1237,13 @@ BuildReportBeta = _reflection.GeneratedProtocolMessageType('BuildReportBeta', (_
       'DESCRIPTOR' : _BUILDREPORTBETA_BUILDCONFIG_VERSION,
       '__module__' : 'chromiumos.build_report_pb2'
       # @@protoc_insertion_point(class_scope:chromiumos.BuildReportBeta.BuildConfig.Version)
+      })
+    ,
+
+    'Target' : _reflection.GeneratedProtocolMessageType('Target', (_message.Message,), {
+      'DESCRIPTOR' : _BUILDREPORTBETA_BUILDCONFIG_TARGET,
+      '__module__' : 'chromiumos.build_report_pb2'
+      # @@protoc_insertion_point(class_scope:chromiumos.BuildReportBeta.BuildConfig.Target)
       })
     ,
     'DESCRIPTOR' : _BUILDREPORTBETA_BUILDCONFIG,
@@ -1079,14 +1294,23 @@ _sym_db.RegisterMessage(BuildReportBeta)
 _sym_db.RegisterMessage(BuildReportBeta.BuildStatus)
 _sym_db.RegisterMessage(BuildReportBeta.BuildConfig)
 _sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Model)
+_sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Model.ModelVersion)
 _sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Release)
 _sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Branch)
 _sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Version)
+_sym_db.RegisterMessage(BuildReportBeta.BuildConfig.Target)
 _sym_db.RegisterMessage(BuildReportBeta.BuildArtifact)
 _sym_db.RegisterMessage(BuildReportBeta.BuildArtifact.URI)
 _sym_db.RegisterMessage(BuildReportBeta.StepDetails)
 _sym_db.RegisterMessage(BuildReportBeta.StepDetails.StepInfo)
 _sym_db.RegisterMessage(BuildReportBeta.StepDetails.InfoEntry)
+
+BuildReportList = _reflection.GeneratedProtocolMessageType('BuildReportList', (_message.Message,), {
+  'DESCRIPTOR' : _BUILDREPORTLIST,
+  '__module__' : 'chromiumos.build_report_pb2'
+  # @@protoc_insertion_point(class_scope:chromiumos.BuildReportList)
+  })
+_sym_db.RegisterMessage(BuildReportList)
 
 
 DESCRIPTOR._options = None
