@@ -272,7 +272,6 @@
     lars-kernelnext-release
     lars-release
     majolica-release
-    mistral-release
     mushu-release
     nami-kernelnext-release
     nami-release
@@ -1409,7 +1408,6 @@
     lars-kernelnext-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
-    mistral-release-tryjob
     mushu-release-tryjob
     nami-kernelnext-release-tryjob
     nami-release-tryjob
@@ -1491,13 +1489,7 @@
   master-vmt-android-pfq-tryjob
     betty-arc-t-vmt-android-pfq-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
-  mistral-full-tryjob
-  mistral-llvm-next-toolchain-tryjob
-  mistral-llvm-toolchain-tryjob
   mistral-master-factorybranch-tryjob
-  mistral-payloads-tryjob
-  mistral-release-tryjob
-  mistral-unittest-stress
   moblab-generic-vm-full-tryjob
   moblab-generic-vm-llvm-next-toolchain-tryjob
   moblab-generic-vm-llvm-toolchain-tryjob
