@@ -2453,6 +2453,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1145306',
       },
 
+      'cherry-release': {
+          'sign_types': ['recovery', 'factory'],
+      },
+
       # --- end from here ---
 
       # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
