@@ -878,6 +878,17 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
                                   'reef_v1.1.5900-ab1ee51',
                                   'reef_v1.1.5909-bd1f0c9'))
 
+  def test_get_firmware_versions_error(self):
+    """Tests get_firmware_versions with no output."""
+    # Throw an exception when running the command.
+    self.PatchObject(
+        cros_build_lib,
+        'run',
+        side_effect=cros_build_lib.RunCommandError('error'))
+    build_target = build_target_lib.BuildTarget(self.board)
+    result = packages.get_all_firmware_versions(build_target)
+    self.assertEqual(result, {})
+
 
 class GetFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for get_firmware_versions."""

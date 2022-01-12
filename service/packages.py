@@ -1320,12 +1320,13 @@ def get_all_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   # in the packages_unittest.py for testing get_all_firmware_versions.
   cmd_result = _get_firmware_version_cmd_result(build_target)
 
-  # There is a blank line between the version info for each model.
-  firmware_version_payloads = cmd_result.split('\n\n')
-  for firmware_version_payload in firmware_version_payloads:
-    if 'BIOS' in firmware_version_payload:
-      firmware_version = _find_firmware_versions(firmware_version_payload)
-      result[firmware_version.model] = firmware_version
+  if cmd_result:
+    # There is a blank line between the version info for each model.
+    firmware_version_payloads = cmd_result.split('\n\n')
+    for firmware_version_payload in firmware_version_payloads:
+      if 'BIOS' in firmware_version_payload:
+        firmware_version = _find_firmware_versions(firmware_version_payload)
+        result[firmware_version.model] = firmware_version
   return result
 
 
