@@ -253,7 +253,6 @@
     hatch-connectivitynext-release
     hatch-diskswap-release
     hatch-kernelnext-release
-    hatch-manatee-release
     hatch-release
     herobrine-release
     jacuzzi-kernelnext-release
@@ -1124,12 +1123,6 @@
   hatch-kernelnext-unittest-stress
   hatch-llvm-next-toolchain-tryjob
   hatch-llvm-toolchain-tryjob
-  hatch-manatee-full-tryjob
-  hatch-manatee-llvm-next-toolchain-tryjob
-  hatch-manatee-llvm-toolchain-tryjob
-  hatch-manatee-payloads-tryjob
-  hatch-manatee-release-tryjob
-  hatch-manatee-unittest-stress
   hatch-payloads-tryjob
   hatch-release-tryjob
   hatch-unittest-stress
@@ -1389,7 +1382,6 @@
     hatch-connectivitynext-release-tryjob
     hatch-diskswap-release-tryjob
     hatch-kernelnext-release-tryjob
-    hatch-manatee-release-tryjob
     hatch-release-tryjob
     herobrine-release-tryjob
     jacuzzi-kernelnext-release-tryjob
