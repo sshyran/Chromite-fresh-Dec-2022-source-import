@@ -939,6 +939,15 @@ QUICK_PROVISION_PAYLOAD_KERNEL = 'full_dev_part_KERN.bin.gz'
 QUICK_PROVISION_PAYLOAD_ROOTFS = 'full_dev_part_ROOT.bin.gz'
 QUICK_PROVISION_PAYLOAD_MINIOS = 'full_dev_part_MINIOS.bin.gz'
 
+# Provenance bundle name. This file name should never be changed, since the
+# signer needs to know where to look for provenance.
+# This is generated via the generate_attestations function in build_menu.
+# This archive contains one JSON file per artifact of interest: image,
+# update payload, etc. It ends up in the expected location because
+# the provenance generation function parses the build_api response to ensure
+# that if they exist, the manifests will be uploaded to GCS.
+ARTIFACT_PROVENANCE_MANIFESTS = 'artifact_provenance_manifests.tar'
+
 # Mock build and stage IDs.
 MOCK_STAGE_ID = 313377
 MOCK_BUILD_ID = 31337
