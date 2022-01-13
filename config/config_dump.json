@@ -253,7 +253,8 @@
             "upload_hw_test_artifacts": false,
             "useflags": [
                 "-cros-debug",
-                "chrome_internal"
+                "chrome_internal",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": []
@@ -493,7 +494,8 @@
                 "-cros-debug",
                 "-orderfile_use",
                 "chrome_internal",
-                "orderfile_generate"
+                "orderfile_generate",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": []
@@ -523,7 +525,8 @@
                 "-reorder_text_sections",
                 "chrome_internal",
                 "orderfile_verify",
-                "strict_toolchain_checks"
+                "strict_toolchain_checks",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": []
@@ -655,7 +658,8 @@
             "upload_symbols": true,
             "useflags": [
                 "-cros-debug",
-                "chrome_internal"
+                "chrome_internal",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": [],
@@ -682,7 +686,8 @@
             "overlays": "both",
             "useflags": [
                 "-cros-debug",
-                "chrome_internal"
+                "chrome_internal",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": []
@@ -726,7 +731,8 @@
             "upload_stripped_packages": [],
             "useflags": [
                 "-cros-debug",
-                "chrome_internal"
+                "chrome_internal",
+                "thinlto"
             ],
             "usepkg_build_packages": false,
             "vm_tests": []
@@ -7779,7 +7785,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chrome-airmont-release-afdo-verify-tryjob": {
@@ -7796,7 +7803,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chrome-broadwell-release-afdo-verify": {
@@ -7809,7 +7817,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chrome-broadwell-release-afdo-verify-tryjob": {
@@ -7826,7 +7835,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chrome-silvermont-release-afdo-verify": {
@@ -7839,7 +7849,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chrome-silvermont-release-afdo-verify-tryjob": {
@@ -7856,7 +7867,8 @@
         "useflags": [
             "-cros-debug",
             "afdo_verify",
-            "chrome_internal"
+            "chrome_internal",
+            "thinlto"
         ]
     },
     "chromeos-infra-go": {
@@ -22661,7 +22673,8 @@
         "useflags": [
             "-cros-debug",
             "chrome_internal",
-            "goma_thinlto"
+            "goma_thinlto",
+            "thinlto"
         ],
         "vm_tests_override": null
     },
@@ -22692,7 +22705,8 @@
         "useflags": [
             "-cros-debug",
             "chrome_internal",
-            "goma_thinlto"
+            "goma_thinlto",
+            "thinlto"
         ],
         "vm_tests_override": null
     },

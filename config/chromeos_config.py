@@ -463,7 +463,7 @@ def GeneralTemplates(site_config):
       # Because release builders never use prebuilts, they need the
       # longer timeout.  See crbug.com/938958.
       build_timeout=12 * 60 * 60,
-      useflags=config_lib.append_useflags(['-cros-debug']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto']),
       manifest=constants.OFFICIAL_MANIFEST,
       manifest_version=True,
       images=['base', 'recovery', 'test', 'factory_install'],
@@ -870,7 +870,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       chrome_sdk=False,
       paygen=False,
       signer_tests=False,
-      useflags=config_lib.append_useflags(['-cros-debug']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto']),
       display_label=config_lib.DISPLAY_LABEL_TOOLCHAIN,
   )
 
@@ -1726,7 +1726,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       uprev=True,
       overlays=constants.BOTH_OVERLAYS,
       push_overlays=constants.BOTH_OVERLAYS,
-      useflags=config_lib.append_useflags(['-cros-debug', 'chrome_internal']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto', 'chrome_internal']),
       builder_class_name='workspace_builders.FactoryBranchBuilder',
       build_timeout=_FACTORYBRANCH_TIMEOUT,
       description='TOT builder to build a factory branch.',

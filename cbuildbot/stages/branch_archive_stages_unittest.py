@@ -103,7 +103,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             self.workspace,
             'board',
             extra_env={
-                'USE': '-cros-debug chrome_internal',
+                'USE': '-cros-debug chrome_internal thinlto',
             }),
     ])
 
@@ -216,7 +216,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             self.workspace,
             'board',
             extra_env={
-                'USE': '-cros-debug chrome_internal',
+                'USE': '-cros-debug chrome_internal thinlto',
             }),
     ])
 
