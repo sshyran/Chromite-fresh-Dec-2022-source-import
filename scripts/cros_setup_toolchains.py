@@ -1200,6 +1200,31 @@ def _CreateMainLibDir(target, output_dir):
   osutils.SafeMakedirs(os.path.join(output_dir, 'usr', target, 'usr/lib'))
 
 
+def _CreateRemoteToolchainFile(output_dir):
+  """Create a remote_toolchain_inputs file for reclient/RBE"""
+  # The inputs file lists all files/shared libraries needed to run clang.
+  # All inputs are relative to location of clang binary and one input
+  # location per line of file e.g.
+  # clang-13.elf
+  # clang++-13.elf
+  # relative/path/to/clang/resource/directory
+
+  clang_path = os.path.join(output_dir, 'usr/bin')
+  # Add needed shared libraries and internal files e.g. allowlists.
+  toolchain_inputs = ['../../lib']
+  clang_shared_dirs = glob.glob(
+      os.path.join(output_dir, 'usr/lib64/clang/*/share'))
+  for clang_dir in clang_shared_dirs:
+    toolchain_inputs.append(os.path.relpath(clang_dir, clang_path))
+
+  # Add actual clang binaries/wrappers.
+  for clang_files in glob.glob(os.path.join(clang_path, 'clang*-[0-9]*')):
+    toolchain_inputs.append(os.path.basename(clang_files))
+
+  with open(os.path.join(clang_path, 'remote_toolchain_inputs'), 'w') as f:
+    f.writelines('%s\n' % line for line in toolchain_inputs)
+
+
 def _ProcessDistroCleanups(target, output_dir):
   """Clean up the tree and remove all distro-specific requirements
 
@@ -1212,6 +1237,7 @@ def _ProcessDistroCleanups(target, output_dir):
   _ProcessSysrootWrappers(target, output_dir, gcc_path)
   _ProcessClangWrappers(target, output_dir)
   _CreateMainLibDir(target, output_dir)
+  _CreateRemoteToolchainFile(output_dir)
 
   osutils.RmDir(os.path.join(output_dir, 'etc'))
 
