@@ -165,9 +165,8 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     if owners is not None:
       body['owners'] = owners
     path = 'projects/%s' % urllib.parse.quote(name, '')
-    conn = gob_util.CreateHttpConn(
+    response = gob_util.CreateHttpConn(
         self.gerrit_instance.gerrit_host, path, reqtype='PUT', body=body)
-    response = conn.getresponse()
     self.assertEqual(201, response.status,
                      'Expected 201, got %s' % response.status)
     s = io.BytesIO(response.read())
@@ -314,9 +313,8 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
       if isinstance(groups, str):
         groups = [groups]
       body['groups'] = groups
-    conn = gob_util.CreateHttpConn(
+    response = gob_util.CreateHttpConn(
         self.gerrit_instance.gerrit_host, path, reqtype='PUT', body=body)
-    response = conn.getresponse()
     self.assertEqual(201, response.status)
     s = io.BytesIO(response.read())
     self.assertEqual(b")]}'", s.readline().rstrip())
