@@ -1831,7 +1831,7 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'b/207095933',
       },
       'brya-release': {
-          'sign_types': ['recovery', 'factory'],
+          'sign_types': ['recovery', 'factory', 'hps_firmware'],
       },
       'brya-lvm-stateful-release': {
           'sign_types': ['recovery', 'factory'],
