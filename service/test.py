@@ -127,37 +127,6 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
   return BuildTargetUnitTestResult(result.returncode, failed_pkgs)
 
 
-def BuildTargetUnitTestTarball(chroot: 'chroot_lib.Chroot',
-                               sysroot: 'sysroot_lib.Sysroot',
-                               result_path: str) -> Optional[str]:
-  """Build the unittest tarball.
-
-  Args:
-    chroot: Chroot where the tests were run.
-    sysroot: The sysroot where the tests were run.
-    result_path: The directory where the archive should be created.
-
-  Returns:
-    The tarball path or None.
-  """
-  tarball = 'unit_tests.tar'
-  tarball_path = os.path.join(result_path, tarball)
-
-  cwd = chroot.full_path(sysroot.path, constants.UNITTEST_PKG_PATH)
-
-  if not os.path.exists(cwd):
-    return None
-
-  result = cros_build_lib.CreateTarball(
-      tarball_path,
-      cwd,
-      chroot=chroot.path,
-      compression=cros_build_lib.COMP_NONE,
-      check=False)
-
-  return tarball_path if result.returncode == 0 else None
-
-
 def BundleHwqualTarball(board: str, version: str, chroot: 'chroot_lib.Chroot',
                         sysroot: 'sysroot_lib.Sysroot',
                         result_path: str) -> Optional[str]:

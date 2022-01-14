@@ -152,49 +152,6 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertTrue(result.success)
 
 
-class BuildTargetUnitTestTarballTest(cros_test_lib.MockTempDirTestCase):
-  """BuildTargetUnitTestTarball tests."""
-
-  def setUp(self):
-    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    self.chroot = chroot_lib.Chroot(
-        path=os.path.join(self.tempdir, 'chroot/path'))
-    self.sysroot = sysroot_lib.Sysroot('/sysroot/path')
-
-    test_dir = os.path.join(
-        self.chroot.full_path(self.sysroot.path, constants.UNITTEST_PKG_PATH))
-    osutils.SafeMakedirs(test_dir)
-
-    self.result_path = os.path.join(self.tempdir, 'result')
-
-  def testSuccess(self):
-    """Test success handling."""
-    result = cros_build_lib.CommandResult(returncode=0)
-    self.PatchObject(cros_build_lib, 'CreateTarball', return_value=result)
-    self.PatchObject(os.path, 'exists', return_value=True)
-
-    path = test.BuildTargetUnitTestTarball(self.chroot, self.sysroot,
-                                           self.result_path)
-
-    self.assertStartsWith(path, self.result_path)
-
-  def testNotExists(self):
-    """Test creating the tarball for a path that doesn't exist."""
-    path = test.BuildTargetUnitTestTarball(
-        self.chroot, sysroot_lib.Sysroot('/invalid/sysroot'), self.result_path)
-    self.assertIsNone(path)
-
-  def testFailure(self):
-    """Test failure creating tarball."""
-    result = cros_build_lib.CommandResult(returncode=1)
-    self.PatchObject(cros_build_lib, 'CreateTarball', return_value=result)
-
-    path = test.BuildTargetUnitTestTarball(self.chroot, self.sysroot,
-                                           self.result_path)
-
-    self.assertIsNone(path)
-
-
 class DebugInfoTestTest(cros_test_lib.RunCommandTestCase):
   """DebugInfoTest tests."""
 
