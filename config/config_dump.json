@@ -5482,6 +5482,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"redrix4es\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taeko\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taeko4es\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taniks\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"vell\",\n    \"test_suites\": []\n}"
         ],
         "sign_types": [
@@ -5523,6 +5524,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"redrix4es\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taeko\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taeko4es\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"taniks\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya-lvm-stateful\",\n    \"name\": \"vell\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,
@@ -5655,6 +5657,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"redrix4es\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taeko\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taeko4es\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taniks\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"vell\",\n    \"test_suites\": []\n}"
         ],
         "vm_tests_override": null
@@ -5693,6 +5696,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"redrix4es\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taeko\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taeko4es\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"taniks\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"brya\",\n    \"name\": \"vell\",\n    \"test_suites\": []\n}"
         ],
         "paygen": false,

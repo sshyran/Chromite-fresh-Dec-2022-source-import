@@ -1629,6 +1629,14 @@
         },
         {
           "board_name": "brya-lvm-stateful",
+          "name": "taniks",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
           "name": "vell",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1759,6 +1767,14 @@
         {
           "board_name": "brya-manatee",
           "name": "taeko4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "taniks",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
