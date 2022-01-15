@@ -6052,7 +6052,6 @@
         "boards": [
             "bubs"
         ],
-        "important": false,
         "vm_tests_override": null
     },
     "bubs-release-tryjob": {
@@ -27532,7 +27531,6 @@
         "boards": [
             "senor"
         ],
-        "important": false,
         "vm_tests_override": null
     },
     "senor-release-tryjob": {
