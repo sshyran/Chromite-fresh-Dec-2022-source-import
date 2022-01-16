@@ -9235,6 +9235,9 @@
         "hw_tests_disabled_bug": "b/204940128",
         "hw_tests_override": [],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"draco\",\n    \"name\": \"draco\",\n    \"test_suites\": []\n}"
+        ],
         "sign_types": [
             "recovery",
             "factory"
@@ -9252,6 +9255,9 @@
         "hw_tests_disabled_bug": "b/204940128",
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"draco\",\n    \"name\": \"draco\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "sign_types": [

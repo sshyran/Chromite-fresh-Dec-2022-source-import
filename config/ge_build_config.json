@@ -266,18 +266,6 @@
       ]
     },
     {
-      "name": "draco",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "edgar",
       "configs": [
         {
@@ -3192,6 +3180,23 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 419,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "draco",
+      "reference_board_name": "draco",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "draco",
+          "name": "draco",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7215,
           "is_active": true
         }
       ]
