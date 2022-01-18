@@ -153,11 +153,12 @@ def IsBuildIdValid(build_branch: str,
           'Directory [%s] does not contain any subpath, ignoring it.',
           build_id_path)
       return None
+    # b/215041592: Sometimes there can be multiple subpaths which presumably
+    # contain the exact same artifacts.
     if len(subpaths) > 1:
       logging.warning(
-          'Directory [%s] contains more than one subpath, ignoring it.',
+          'Directory [%s] contains more than one subpath, using the first one.',
           build_id_path)
-      return None
 
     subpath_dir = subpaths[0].url.rstrip('/')
     subpath_name = os.path.basename(subpath_dir)
