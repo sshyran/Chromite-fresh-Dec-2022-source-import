@@ -220,10 +220,12 @@ class CleanCommand(command.CliCommand):
       except OSError as e:
         if e.errno != errno.ENOENT:
           raise
-    with timer.timer('Clean Sysroots', logging.debug):
-      for b in boards:
-        logging.debug('Clean up the %s sysroot.', b)
-        Clean(os.path.join(chroot_dir, 'build', b))
+    if boards:
+      with timer.timer('Clean Sysroots', logging.debug):
+        for b in boards:
+          logging.debug('Clean up the %s sysroot.', b)
+          with timer.timer(f'Clean up the {b} sysroot.', logging.debug):
+            Clean(os.path.join(chroot_dir, 'build', b))
 
     if self.options.chroot_tmp:
       logging.debug('Empty chroot tmp directory.')
