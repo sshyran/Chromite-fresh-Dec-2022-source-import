@@ -227,7 +227,7 @@ def CreateHttpConn(
     ))
 
   if body:
-    body = json.JSONEncoder().encode(body)
+    body = json.JSONEncoder().encode(body).encode('utf-8')
     headers.setdefault('Content-Type', 'application/json')
   if logging.getLogger().isEnabledFor(logging.DEBUG):
     logging.debug('%s https://%s%s', reqtype, host, path)
