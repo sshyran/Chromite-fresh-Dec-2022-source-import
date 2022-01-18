@@ -700,6 +700,8 @@ class ChrootUpdater(object):
       except ValueError:
         raise InvalidChrootVersionError(
             'Invalid chroot version in %s: %s' % (self._version_file, version))
+      else:
+        logging.debug('Found chroot version %s', self._version)
 
     return self._version
 
