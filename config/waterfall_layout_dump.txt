@@ -16,6 +16,8 @@
     guado-factory-auron-6772.B-factorybranch
     rikku-factory-auron-6772.B-factorybranch
     tidus-factory-auron-6772.B-factorybranch
+  factory-cherry-14455.B-buildspec
+    cherry-factory-cherry-14455.B-factorybranch
   factory-coral-10122.B-buildspec
     coral-factory-coral-10122.B-factorybranch
   factory-dedede-13683.B-buildspec
@@ -641,6 +643,7 @@
   chell-payloads-tryjob
   chell-release-tryjob
   chell-unittest-stress
+  cherry-factory-cherry-14455.B-factorybranch-tryjob
   cherry-full-tryjob
   cherry-llvm-next-toolchain-tryjob
   cherry-llvm-toolchain-tryjob
@@ -822,6 +825,8 @@
     guado-factory-auron-6772.B-factorybranch-tryjob
     rikku-factory-auron-6772.B-factorybranch-tryjob
     tidus-factory-auron-6772.B-factorybranch-tryjob
+  factory-cherry-14455.B-buildspec-tryjob
+    cherry-factory-cherry-14455.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
     coral-factory-coral-10122.B-factorybranch-tryjob
   factory-dedede-13683.B-buildspec-tryjob
