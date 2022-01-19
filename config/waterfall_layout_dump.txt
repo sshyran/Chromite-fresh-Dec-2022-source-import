@@ -1667,7 +1667,6 @@
   reks-payloads-tryjob
   reks-release-tryjob
   reks-unittest-stress
-  release-afdo-profile-generate-tryjob
   relm-factory-strago-7458.B-factorybranch-tryjob
   relm-full-tryjob
   relm-llvm-next-toolchain-tryjob

@@ -26016,22 +26016,6 @@
             "chrome_internal"
         ]
     },
-    "release-afdo-profile-generate": {
-        "boards": [],
-        "build_type": "toolchain",
-        "builder_class_name": "release_profile_builders.ReleaseProfileMergeBuilder",
-        "description": "Generates merged AFDO profiles for select Chrome releases",
-        "display_label": "toolchain"
-    },
-    "release-afdo-profile-generate-tryjob": {
-        "boards": [],
-        "build_type": "toolchain",
-        "builder_class_name": "release_profile_builders.ReleaseProfileMergeBuilder",
-        "debug": true,
-        "description": "Generates merged AFDO profiles for select Chrome releases",
-        "display_label": "tryjob",
-        "luci_builder": "Try"
-    },
     "relm-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [

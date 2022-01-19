@@ -8,7 +8,6 @@ import collections
 import logging
 import os
 
-from chromite.cbuildbot import afdo
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
@@ -18,12 +17,10 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
-from chromite.lib import gs
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import perf_uploader
-from chromite.lib import portage_util
 from chromite.lib import timeout_util
 
 
@@ -181,22 +178,6 @@ class HWTestStage(generic_stages.BoardSpecificBuilderStage,
       return not builder_run.options.debug
 
   def PerformStage(self):
-    if self.suite_config.suite == constants.HWTEST_AFDO_SUITE:
-      arch = self._GetPortageEnvVar('ARCH', self._current_board)
-      pkg_info = portage_util.PortageqBestVisible(
-          constants.CHROME_CP, cwd=self._build_root)
-      # For async AFDO builders, need to skip this check because it's checking
-      # a different bucket for PFQ AFDO. Also for async AFDO builders, no need
-      # to check here because there's an earlier check to avoid generating
-      # AFDO for the same version.
-      if (not self._run.config.afdo_generate_async and
-          afdo.CheckAFDOPerfData(pkg_info, arch, gs.GSContext())):
-        logging.info(
-            'AFDO profile already generated for arch %s '
-            'and Chrome %s. Not generating it again', arch,
-            pkg_info.version.split('_')[0])
-        return
-
     build = '/'.join([self._bot_id, self.version])
 
     skip_duts_check = False
@@ -484,13 +465,13 @@ class TestPlanStage(generic_stages.BoardSpecificBuilderStage):
     """All models to run tests against."""
     if self._run.options.hwtest_dut_override:
       return [config_lib.ModelTestConfig(
-        self._run.options.hwtest_dut_override.model, None)]
+          self._run.options.hwtest_dut_override.model, None)]
 
     if self._run.config.models:
       return self._run.config.models
 
     return [config_lib.ModelTestConfig(
-      None, config_lib.GetNonUniBuildLabBoardName(self._current_board))]
+        None, config_lib.GetNonUniBuildLabBoardName(self._current_board))]
 
 
   def WaitUntilReady(self):
