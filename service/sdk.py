@@ -133,7 +133,10 @@ def Clean(chroot: Optional['chroot_lib.Chroot'],
           images: bool = False,
           sysroots: bool = False,
           tmp: bool = False,
-          safe: bool = False) -> None:
+          safe: bool = False,
+          cache: bool = False,
+          logs: bool = False,
+          workdirs: bool = False) -> None:
   """Clean the chroot.
 
   See:
@@ -145,8 +148,12 @@ def Clean(chroot: Optional['chroot_lib.Chroot'],
     sysroots: Remove all of the sysroots.
     tmp: Clean the tmp/ directory.
     safe: Clean all produced artifacts.
+    cache: Clean the shared cache.
+    logs: Clean up various logs.
+    workdirs: Clean out various package build work directories.
   """
-  if not images and not sysroots and not tmp and not safe:
+  if not (images or sysroots or tmp or safe or cache or logs or workdirs):
+    # Nothing specified to clean.
     return
 
   cmd = ['cros', 'clean', '--debug']
@@ -160,6 +167,12 @@ def Clean(chroot: Optional['chroot_lib.Chroot'],
     cmd.append('--sysroots')
   if tmp:
     cmd.append('--chroot-tmp')
+  if cache:
+    cmd.append('--cache')
+  if logs:
+    cmd.append('--logs')
+  if workdirs:
+    cmd.append('--workdirs')
 
   cros_build_lib.run(cmd)
 

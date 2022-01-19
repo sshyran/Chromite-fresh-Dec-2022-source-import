@@ -119,7 +119,14 @@ def UnmountPath(input_proto, _output_proto, _config):
 def Clean(input_proto, _output_proto, _config):
   """Clean unneeded files from a chroot."""
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  sdk.Clean(chroot, safe=True, sysroots=True)
+  sdk.Clean(
+      chroot,
+      images=True,
+      sysroots=True,
+      tmp=True,
+      cache=True,
+      logs=True,
+      workdirs=True)
 
 
 @faux.all_empty
