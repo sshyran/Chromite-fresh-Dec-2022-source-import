@@ -1,4 +1,4 @@
- # Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -54,7 +54,7 @@ _SLEEP_TIME = 60
 # be something big.
 _BINPKG_TTL = 60 * 60 * 24 * 365
 
-_HOST_PACKAGES_PATH = 'chroot/var/lib/portage/pkgs'
+_HOST_PACKAGES_PATH = 'var/lib/portage/pkgs'
 _CATEGORIES_PATH = 'chroot/etc/portage/categories'
 _PYM_PATH = 'chroot/usr/lib/portage/pym'
 _HOST_ARCH = 'amd64'
@@ -370,7 +370,7 @@ class PrebuiltUploader(object):
 
   def __init__(self, upload_location, acl, binhost_base_url, pkg_indexes,
                build_path, packages, skip_upload, binhost_conf_dir, dryrun,
-               target, slave_targets, version):
+               target, slave_targets, version, chroot=None):
     """Constructor for prebuilt uploader object.
 
     This object can upload host or prebuilt files to Google Storage.
@@ -394,6 +394,7 @@ class PrebuiltUploader(object):
       slave_targets: List of BuildTargets managed by slave builders.
       version: A unique string, intended to be included in the upload path,
           which identifies the version number of the uploaded prebuilts.
+      chroot: Path to the chroot containing the prebuilts.
     """
     self._upload_location = upload_location
     self._acl = acl
@@ -408,6 +409,8 @@ class PrebuiltUploader(object):
     self._target = target
     self._slave_targets = slave_targets
     self._version = version
+    self._chroot = chroot or os.path.join(build_path,
+                                          constants.DEFAULT_CHROOT_DIR)
     self._gs_context = gs.GSContext(retries=_RETRIES, sleep=_SLEEP_TIME,
                                     dry_run=self._dryrun)
 
@@ -562,7 +565,7 @@ class PrebuiltUploader(object):
 
       if self._target == target and not self._skip_upload:
         # Upload prebuilts.
-        package_path = os.path.join(self._build_path, _HOST_PACKAGES_PATH)
+        package_path = os.path.join(self._chroot, _HOST_PACKAGES_PATH)
         self._UploadPrebuilt(package_path, packages_url_suffix)
 
       # Record URL where prebuilts were uploaded.
@@ -722,6 +725,9 @@ def ParseOptions(argv):
                            'Applies to previous slave board.')
   parser.add_argument('-p', '--build-path', required=True,
                       help='Path to the directory containing the chroot')
+  parser.add_argument('--chroot',
+                      help='Path where the chroot is located. '
+                           '(Default: {build_path}/chroot)')
   parser.add_argument('--packages', action='append', default=[],
                       help='Only include the specified packages. '
                            '(Default is to include all packages.)')
@@ -858,7 +864,8 @@ def main(argv):
                               pkg_indexes, options.build_path,
                               options.packages, options.skip_upload,
                               binhost_conf_dir, options.dryrun,
-                              target, options.slave_targets, version)
+                              target, options.slave_targets, version,
+                              options.chroot)
 
   if options.sync_host:
     uploader.SyncHostPrebuilts(options.key, options.git_sync,

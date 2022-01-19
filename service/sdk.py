@@ -417,3 +417,45 @@ def _EnsureSnapshottableState(chroot: Optional['chroot_lib.Chroot'] = None,
     return
   else:
     res.check_returncode()
+
+
+def BuildPrebuilts(chroot: 'chroot_lib.Chroot'):
+  """Builds the binary packages that comprise the Chromium OS SDK.
+
+  Args:
+    chroot: The chroot in which to run the build.
+  """
+  cros_build_lib.run(
+      ['./build_sdk_board'],
+      enter_chroot=True,
+      extra_env=chroot.env,
+      chroot_args=chroot.get_enter_args(),
+      check=True)
+
+
+def UploadPrebuiltPackages(chroot: 'chroot_lib.Chroot',
+                           prepend_version: str,
+                           version: str,
+                           upload_location: str):
+  """Uploads prebuilt packages (such as built by BuildSdkPrebuilts).
+
+  Args:
+    chroot: The chroot that contains the packages to upload.
+    build_path: Location of the sources.
+    prepend_version: String to prepend to version.
+    version: The SDK version string.
+    upload_location: prefix of the upload path (e.g. 'gs://bucket')
+  """
+  cros_build_lib.run(
+      [os.path.join(constants.CHROMITE_BIN_DIR, 'upload_prebuilts'),
+       '--sync-host',
+       '--build-path', constants.SOURCE_ROOT,
+       '--chroot', chroot.path,
+       '--board', 'amd64-host',
+       '--set-version', version,
+       '--prepend-version', prepend_version,
+       '--upload', upload_location,
+       '--binhost-conf-dir',
+       os.path.join(constants.SOURCE_ROOT,
+                    'src/third_party/chromiumos-overlay/chromeos/binhost')],
+      check=True)

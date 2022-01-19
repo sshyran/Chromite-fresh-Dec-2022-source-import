@@ -342,12 +342,16 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     self.upload_mock = self.PatchObject(prebuilt.PrebuiltUploader,
                                         '_UploadPrebuilt', return_value=True)
 
-  def testSyncHostPrebuilts(self):
+  def _testSyncHostPrebuilts(self, chroot):
     board = 'x86-foo'
     target = prebuilt.BuildTarget(board, 'aura')
     slave_targets = [prebuilt.BuildTarget('x86-bar', 'aura')]
-    package_path = os.path.join(self.build_path,
-                                prebuilt._HOST_PACKAGES_PATH)
+    if chroot is None:
+      package_path = os.path.join(self.build_path,
+                                  'chroot',
+                                  prebuilt._HOST_PACKAGES_PATH)
+    else:
+      package_path = os.path.join(chroot, prebuilt._HOST_PACKAGES_PATH)
     url_suffix = prebuilt._REL_HOST_PATH % {
         'version': self.version,
         'host_arch': prebuilt._HOST_ARCH,
@@ -361,13 +365,19 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     uploader = prebuilt.PrebuiltUploader(
         self.upload_location, 'public-read', self.binhost, [],
         self.build_path, [], False, 'foo', False, target, slave_targets,
-        self.version)
+        self.version, chroot=chroot)
     uploader.SyncHostPrebuilts(self.key, True, True)
     self.upload_mock.assert_called_once_with(package_path, packages_url_suffix)
     self.rev_mock.assert_called_once_with(
         mock.ANY, {self.key: binhost}, dryrun=False)
     self.update_binhost_mock.assert_called_once_with(
         mock.ANY, self.key, binhost)
+
+  def testSyncHostPrebuilts(self):
+    self._testSyncHostPrebuilts(chroot=None)
+
+  def testSyncHostPrebuiltsWithChroot(self):
+    self._testSyncHostPrebuilts('/test/chroot')
 
   def testSyncBoardPrebuilts(self):
     board = 'x86-foo'
@@ -422,6 +432,7 @@ class TestMain(cros_test_lib.MockTestCase):
     options.profile = None
     target = prebuilt.BuildTarget(options.board, options.profile)
     options.build_path = '/trunk'
+    options.chroot = None
     options.dryrun = False
     options.private = True
     options.packages = []
@@ -464,7 +475,7 @@ class TestMain(cros_test_lib.MockTestCase):
                                       options.build_path, options.packages,
                                       False, None, False,
                                       target, options.slave_targets,
-                                      mock.ANY)
+                                      mock.ANY, None)
     board_mock.assert_called_once_with(
         options.key, options.git_sync,
         options.sync_binhost_conf, options.upload_board_tarball, None,

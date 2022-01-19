@@ -140,3 +140,22 @@ def RestoreSnapshot(input_proto, _output_proto, _config):
   chroot = controller_util.ParseChroot(input_proto.chroot)
   token = input_proto.snapshot_token.value
   sdk.RestoreSnapshot(token, chroot)
+
+
+@faux.all_empty
+@validate.validation_complete
+def BuildPrebuilts(input_proto, _output_proto, _config):
+  """Builds the binary packages that comprise the Chromium OS SDK."""
+  chroot = controller_util.ParseChroot(input_proto.chroot)
+  sdk.BuildPrebuilts(chroot)
+
+
+@faux.all_empty
+@validate.require('prepend_version', 'version', 'upload_location')
+@validate.validation_complete
+def UploadPrebuiltPackages(input_proto, _output_proto, _config):
+  """Uploads prebuilt packages."""
+  sdk.UploadPrebuiltPackages(controller_util.ParseChroot(input_proto.chroot),
+                             input_proto.prepend_version,
+                             input_proto.version,
+                             input_proto.upload_location)
