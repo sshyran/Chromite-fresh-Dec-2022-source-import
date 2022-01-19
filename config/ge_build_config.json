@@ -246,7 +246,7 @@
       "configs": [
         {
           "builder": "RELEASE",
-          "experimental": true,
+          "experimental": false,
           "leader_board": true,
           "board_group": "corsola",
           "arch": "ARM_INTERNAL"

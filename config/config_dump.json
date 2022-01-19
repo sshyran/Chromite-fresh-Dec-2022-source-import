@@ -8573,7 +8573,6 @@
         "boards": [
             "corsola"
         ],
-        "important": false,
         "vm_tests_override": null
     },
     "corsola-release-tryjob": {
