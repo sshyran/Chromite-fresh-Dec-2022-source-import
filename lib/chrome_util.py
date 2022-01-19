@@ -448,6 +448,8 @@ _COPY_PATHS_LACROS = (
     Path('crashpad_handler', exe=True, optional=True),
     Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('WidevineCdm/', optional=True),
+    Path('libEGL.so', exe=True, optional=True),
+    Path('libGLESv2.so', exe=True, optional=True),
 )
 
 
