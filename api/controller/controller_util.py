@@ -9,7 +9,7 @@ import logging
 import os
 from typing import TYPE_CHECKING, Union
 
-from chromite.api.gen.chromite.api import sysroot_pb2
+from chromite.api.gen.chromite.api import sysroot_pb2, test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
@@ -192,7 +192,9 @@ def deserialize_package_info(pkg_info_msg):
 def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
                                output_proto: Union[
                                    sysroot_pb2.InstallPackagesResponse,
-                                   sysroot_pb2.InstallToolchainResponse],
+                                   sysroot_pb2.InstallToolchainResponse,
+                                   test_pb2.BuildTargetUnitTestResponse
+                               ],
                                target_sysroot: sysroot_lib.Sysroot) -> None:
   """Get the path to the log file for each package that failed to build.
 

@@ -78,6 +78,9 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
     pkg_info = package_info.parse(pkg)
     pkg_info_msg = output_proto.failed_packages.add()
     controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+    failed_pkg_data_msg = output_proto.failed_package_data.add()
+    controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
+    failed_pkg_data_msg.log_path.path = '/path/to/%s/log' % pkg
 
 
 @faux.success(_BuildTargetUnitTestResponse)
@@ -120,6 +123,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   code_coverage = input_proto.flags.code_coverage
 
+  sysroot = sysroot_lib.Sysroot(build_target.root)
+
   result = test.BuildTargetUnitTest(
       build_target,
       chroot,
@@ -131,17 +136,17 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       filter_only_cros_workon=filter_only_cros_workon)
 
   if not result.success:
-    # Failed to run tests or some tests failed.
-    # Record all failed packages.
-    for pkg_info in result.failed_pkgs:
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    # Record all failed packages and retrieve log locations.
+    controller_util.retrieve_package_log_paths(
+        sysroot_lib.PackageInstallError('error installing packages',
+                                        cros_build_lib.CommandResult(),
+                                        packages=result.failed_pkgs),
+        output_proto, sysroot)
     if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-  sysroot = sysroot_lib.Sysroot(build_target.root)
   tarball = test.BuildTargetUnitTestTarball(chroot, sysroot, result_path)
   if tarball:
     output_proto.tarball_path = tarball

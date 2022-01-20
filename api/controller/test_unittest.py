@@ -5,11 +5,13 @@
 """The test controller tests."""
 
 import contextlib
+import datetime
 import os
 from unittest import mock
 
 from chromite.api import api_config
 from chromite.api import controller
+from chromite.api.controller import controller_util
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
@@ -99,6 +101,16 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                               api_config.ApiConfigMixin):
   """Tests for the UnitTest function."""
 
+  def setUp(self):
+    # Set up portage log directory.
+    self.sysroot = os.path.join(self.tempdir, 'build', 'board')
+    osutils.SafeMakedirs(self.sysroot)
+    self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
+    self.portage_dir = os.path.join(self.tempdir, 'portage_logdir')
+    self.PatchObject(
+        sysroot_lib.Sysroot, 'portage_logdir', new=self.portage_dir)
+    osutils.SafeMakedirs(self.portage_dir)
+
   def _GetInput(self,
                 board=None,
                 result_path=None,
@@ -130,6 +142,22 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
   def _GetOutput(self):
     """Helper to get an empty output message instance."""
     return test_pb2.BuildTargetUnitTestResponse()
+
+  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+    """Creates a log file for testing for individual packages built by Portage.
+
+    Args:
+      log_path (pathlike): the PORTAGE_LOGDIR path
+      pkg_info (PackageInfo): name components for log file.
+      timestamp (datetime): timestamp used to name the file.
+    """
+    path = os.path.join(log_path,
+                        f'{pkg_info.category}:{pkg_info.pvr}:' \
+                        f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
+    osutils.WriteFile(path,
+                      f'Test log file for package {pkg_info.category}/'
+                      f'{pkg_info.package} written to {path}')
+    return path
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
@@ -201,8 +229,16 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     tempdir = osutils.TempDir(base_dir=self.tempdir)
     self.PatchObject(osutils, 'TempDir', return_value=tempdir)
 
-    pkgs = ['cat/pkg', 'foo/bar']
+    pkgs = ['cat/pkg-1.0-r1', 'foo/bar-2.0-r1']
+    cpvrs = [package_info.parse(pkg) for pkg in pkgs]
     expected = [('cat', 'pkg'), ('foo', 'bar')]
+    new_logs = {}
+    for i, pkg in enumerate(pkgs):
+      self._CreatePortageLogFile(self.portage_dir, cpvrs[i],
+                                 datetime.datetime(2021, 6, 9, 13, 37, 0))
+      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, cpvrs[i],
+                                                 datetime.datetime(2021, 6, 9,
+                                                                   16, 20, 0))
 
     result = test_service.BuildTargetUnitTestResult(1, None)
     result.failed_pkgs = [package_info.parse(p) for p in pkgs]
@@ -216,10 +252,20 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
     self.assertTrue(output_msg.failed_packages)
+    self.assertTrue(output_msg.failed_package_data)
+    # TODO(b/206514844): remove when field is deleted
     failed = []
     for pi in output_msg.failed_packages:
       failed.append((pi.category, pi.package_name))
     self.assertCountEqual(expected, failed)
+
+    failed_with_logs = []
+    for data in output_msg.failed_package_data:
+      failed_with_logs.append((data.name.category, data.name.package_name))
+      package = controller_util.deserialize_package_info(data.name)
+      self.assertEqual(data.log_path.path, new_logs[package.cpvr])
+    self.assertCountEqual(expected, failed_with_logs)
+
 
   def testOtherBuildScriptFailure(self):
     """Test build script failure due to non-package emerge error."""
