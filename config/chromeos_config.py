@@ -826,20 +826,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       description='Toolchain Builds (internal)',
   )
   site_config.AddTemplate(
-      'gcc_toolchain',
-      site_config.templates.toolchain,
-      description='Full release build with next minor GCC toolchain revision',
-      useflags=config_lib.append_useflags(['next_gcc']),
-      hw_tests=hw_test_list.ToolchainTestFull(
-          constants.HWTEST_QUOTA_POOL,
-          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
-      ),
-      hw_tests_override=hw_test_list.ToolchainTestFull(
-          constants.HWTEST_QUOTA_POOL,
-          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
-      ),
-  )
-  site_config.AddTemplate(
       'llvm_toolchain',
       site_config.templates.toolchain,
       description='Full release build with LLVM toolchain',
@@ -866,90 +852,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       'this uses internal sources, it should only be used with LLVM revisions '
       'that have been reviewed manually somehow',
   )
-
-  site_config.AddTemplate(
-      'afdo_toolchain',
-      site_config.templates.full,
-      site_config.templates.official,
-      site_config.templates.internal,
-      site_config.templates.no_vmtest_builder,
-      site_config.templates.no_hwtest_builder,
-      git_sync=False,
-      images=[],
-      unittests=False,
-      image_test=False,
-      chrome_sdk=False,
-      paygen=False,
-      signer_tests=False,
-      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto']),
-      display_label=config_lib.DISPLAY_LABEL_TOOLCHAIN,
-  )
-
-  site_config.AddTemplate(
-      'afdo_verify',
-      site_config.templates.afdo_toolchain,
-      images=['base', 'test'],
-      image_test=True,
-      unittests=True,
-  )
-  # This build config is dedicated to improve code layout of Chrome. It adopts
-  # the Call-Chain Clustering (C3) approach and other techniques to improve
-  # the code layout. It builds Chrome and generates an orderfile as a result.
-  # The orderfile will be uploaded so Chrome in the future production will use
-  # the orderfile to improve code layout.
-  #
-  # This builder is not a toolchain builder, i.e. it won't build all the
-  # toolchain. Instead, it's a release builder. It's put here because it
-  # belongs to the toolchain team.
-
-  site_config.AddTemplate(
-      'orderfile_generate_toolchain',
-      site_config.templates.afdo_toolchain,
-      orderfile_generate=True,
-      useflags=config_lib.append_useflags(
-          ['orderfile_generate', '-orderfile_use']),
-      description='Build Chrome and generate an orderfile for better layout',
-  )
-
-  site_config.AddTemplate(
-      'orderfile_verify_toolchain',
-      site_config.templates.afdo_verify,
-      orderfile_verify=True,
-      useflags=config_lib.append_useflags([
-          'orderfile_verify', '-reorder_text_sections',
-          'strict_toolchain_checks'
-      ]),
-      description='Verify the most recent orderfile is building correctly',
-  )
-
-  # This build config is used to asynchronously generate benchmark
-  # AFDO profile. It inherites from afdo_toolchain template, i.e.
-  # it is essentially a release builder but doesn't run hwtests, etc.
-  # But it should run a special HWTest "AFDOGenerate" to collect
-  # profiling data on a device. So this template needs to build image.
-  site_config.AddTemplate(
-      'benchmark_afdo_generate',
-      site_config.templates.afdo_toolchain,
-      images=['test'],
-      hw_tests=[hw_test_list.AFDORecordTest()],
-      hw_tests_override=[hw_test_list.AFDORecordTest()],
-      afdo_generate_async=True,
-      # FIXME(tcwang): Might need to revisit this later.
-      # For now, use the same useflags as PFQ AFDO generator:
-      # In other words, it turns off afdo_use, thinlto, cfi compared to
-      # release images.
-      afdo_use=False,
-      useflags=config_lib.append_useflags(
-          ['-transparent_hugepage', '-debug_fission', '-thinlto', '-cfi']),
-      description='Generate AFDO profile based on benchmarks.')
-
-  # This build config is used to verify merged and redacted AFDO profile,
-  # aka. profiles for release, can build packages without any problems.
-  site_config.AddTemplate(
-      'release_afdo_verify',
-      site_config.templates.afdo_verify,
-      description='Verify the most recent AFDO profile for release can '
-      'build Chrome images correctly.')
 
   #
   # Create toolchain tryjob builders.
@@ -986,78 +888,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.llvm_tot_toolchain,
       site_config.templates.no_vmtest_builder,
       boards=['kevin'],
-  )
-
-  site_config.Add(
-      'benchmark-afdo-generate',
-      site_config.templates.benchmark_afdo_generate,
-      boards=['chell'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-  )
-
-  def ChromeAFDOPublishBuilders(name, board):
-    site_config.Add(
-        'chrome-' + name + '-release-afdo-verify',
-        site_config.templates.release_afdo_verify,
-        boards=[board],
-        chrome_afdo_verify=True,
-        afdo_use=False,
-        useflags=config_lib.append_useflags(['afdo_verify']),
-        # These builders are now running under recipes.
-        # TODO(crbug/1019868): remove this builder from legacy.
-        # schedule=schedule,
-    )
-
-  # Start at 7 hours after benchmark-afdo-generate, to
-  # give the builder enough time to finish.
-  # Since these builders upload different profiles, we can start
-  # them at the same time, as soon as we might get a new benchmark
-  # profile.
-  ChromeAFDOPublishBuilders('silvermont', 'chell')
-  ChromeAFDOPublishBuilders('airmont', 'snappy')
-  ChromeAFDOPublishBuilders('broadwell', 'eve')
-
-  def KernelAFDOPublishBuilders(name, board, _schedule):
-    site_config.Add(
-        name + '-release-afdo-verify',
-        site_config.templates.release_afdo_verify,
-        boards=[board],
-        kernel_afdo_verify=True,
-        # These builders are now running under recipes.
-        # TODO(crbug/1019868): remove this builder from legacy.
-        # schedule=schedule,
-    )
-
-  # Start at the same time every day. The kernel profiles are
-  # rolled every Monday, but we run these builders daily (instead of
-  # weekly), in case the Monday profile drop is red, or in case
-  # the tree is red for unrelated reasons on Monday.
-  # Schedule these tryjobs 6 hours apart from each other.
-  KernelAFDOPublishBuilders('kernel-3_18', 'chell', '0 17 * * *')
-  KernelAFDOPublishBuilders('kernel-4_4', 'eve', '0 23 * * *')
-  KernelAFDOPublishBuilders('kernel-4_14', 'octopus', '0 5 * * *')
-  KernelAFDOPublishBuilders('kernel-4_19', 'banon', '0 11 * * *')
-
-  site_config.Add(
-      'orderfile-generate-toolchain',
-      site_config.templates.orderfile_generate_toolchain,
-      # The board should not matter much, since we are not running
-      # anything on the board.
-      boards=['terra'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-      # schedule='0 10/12 * * *',
-  )
-
-  site_config.Add(
-      'orderfile-verify-toolchain',
-      site_config.templates.orderfile_verify_toolchain,
-      # Only test on X86 for now.
-      boards=['eve'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-      # schedule='0 2/12 * * *',
   )
 
 

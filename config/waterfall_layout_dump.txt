@@ -501,7 +501,6 @@
   beaglebone_servo-llvm-toolchain-tryjob
   beaglebone_servo-release-tryjob
   beaglebone_servo-unittest-stress
-  benchmark-afdo-generate-tryjob
   betty-arc-r-full-tryjob
   betty-arc-r-llvm-next-toolchain-tryjob
   betty-arc-r-llvm-toolchain-tryjob
@@ -656,9 +655,6 @@
   cherry64-payloads-tryjob
   cherry64-release-tryjob
   cherry64-unittest-stress
-  chrome-airmont-release-afdo-verify-tryjob
-  chrome-broadwell-release-afdo-verify-tryjob
-  chrome-silvermont-release-afdo-verify-tryjob
   chromeos-infra-go-tryjob
   chromiumos-sdk-llvm-next-tryjob
   chromiumos-sdk-tryjob
@@ -1187,10 +1183,6 @@
   kefka-payloads-tryjob
   kefka-release-tryjob
   kefka-unittest-stress
-  kernel-3_18-release-afdo-verify-tryjob
-  kernel-4_14-release-afdo-verify-tryjob
-  kernel-4_19-release-afdo-verify-tryjob
-  kernel-4_4-release-afdo-verify-tryjob
   kevin-android-pi-pre-flight-branch-tryjob
   kevin-factory-gru-8652.B-factorybranch-tryjob
   kevin-full-tryjob
@@ -1584,8 +1576,6 @@
   octopus-release-tryjob
   octopus-unittest-stress
   orco-factory-rambi-6420.B-factorybranch-tryjob
-  orderfile-generate-toolchain-tryjob
-  orderfile-verify-toolchain-tryjob
   palkia-full-tryjob
   palkia-llvm-next-toolchain-tryjob
   palkia-llvm-toolchain-tryjob
