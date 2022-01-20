@@ -433,10 +433,12 @@ class CrOSTesterTast(CrOSTesterBase):
     self._tester.results_dir = '/tmp/results'
     self._tester.tast_total_shards = 2
     self._tester.tast_shard_index = 1
+    self._tester.tast_extra_use_flags = ['some_flag1', 'some_flag2']
     self._tester.Run()
     check_inside_chroot_mock.assert_called()
     self.assertCommandContains(['tast', '-verbose', 'run', '-build=false',
                                 '-waituntilready', '-timeout=100',
+                                '-extrauseflags=some_flag1,some_flag2',
                                 '-resultsdir', '/tmp/results', '-totalshards=2',
                                 '-shardindex=1', '100.90.29.199',
                                 'ui.ChromeLogin'])

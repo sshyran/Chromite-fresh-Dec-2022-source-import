@@ -54,6 +54,9 @@ class CrOSTest(object):
     self.tast_vars = opts.tast_vars
     self.tast_total_shards = opts.tast_total_shards
     self.tast_shard_index = opts.tast_shard_index
+    self.tast_extra_use_flags = []
+    if opts.tast_extra_use_flags:
+      self.tast_extra_use_flags = opts.tast_extra_use_flags.split(',')
     self.results_dir = opts.results_dir
     self.test_that_args = opts.test_that_args
     self.test_timeout = opts.test_timeout
@@ -350,12 +353,15 @@ class CrOSTest(object):
 
     if self._device.log_level == 'debug':
       cmd += ['-verbose']
-    cmd += ['run', '-build=false', '-waituntilready',
-      # Skip tests depending on private runtime variables.
-      # 'gs://chromeos-prebuilt/board/amd64-host/.../chromeos-base/tast-vars*'
-      # doesn't contain runtime variable files in the tast-tests-private
-      # repository.
-      r'-maybemissingvars=.+\..+',
+    cmd += [
+        'run',
+        '-build=false',
+        '-waituntilready',
+        # Skip tests depending on private runtime variables.
+        # 'gs://chromeos-prebuilt/board/amd64-host/.../chromeos-base/tast-vars*'
+        # doesn't contain runtime variable files in the tast-tests-private
+        # repository.
+        r'-maybemissingvars=.+\..+',
     ]
     # If the tests are not informational, then fail on test failure.
     # TODO(dhanyaganesh@): Make this less hack-y crbug.com/1034403.
@@ -393,12 +399,16 @@ class CrOSTest(object):
 
     if self.test_timeout > 0:
       cmd += ['-timeout=%d' % self.test_timeout]
-    # This flag is needed when running Tast tests on VMs. Note that this check
-    # is only true if we're handling VM start-up/tear-down ourselves for the
-    # duration of the test. If the caller has already launched a VM themselves
-    # and has pointed the '--device' arg at it, this check will be false.
-    if self._device.should_start_vm:
-      cmd += ['-extrauseflags=tast_vm']
+    if (self._device.should_start_vm and
+        'tast_vm' not in self.tast_extra_use_flags):
+      # The 'tast_vm' flag is needed when running Tast tests on VMs. Note that
+      # this check is only true if we're handling VM start-up/tear-down
+      # ourselves for the duration of the test. If the caller has already
+      # launched a VM themselves and has pointed the '--device' arg at it, this
+      # check will be false.
+      self.tast_extra_use_flags.append('tast_vm')
+    if self.tast_extra_use_flags:
+      cmd += ['-extrauseflags=%s' % ','.join(self.tast_extra_use_flags)]
     if self.results_dir:
       results_dir = self.results_dir
       if need_chroot:
@@ -600,6 +610,9 @@ def ParseCommandLine(argv):
                       help='Shard index to use when running Tast tests.')
   parser.add_argument('--tast-total-shards', type=int, default=0,
                       help='Total number of shards when running Tast tests.')
+  parser.add_argument('--tast-extra-use-flags',
+                      help='Comma-separated list of extra USE flags to pass to '
+                      'Tast when running tests.')
   parser.add_argument('--chrome-test', action='store_true', default=False,
                       help='Run chrome test on device. The first arg in the '
                       'remote command should be the test binary name, such as '
