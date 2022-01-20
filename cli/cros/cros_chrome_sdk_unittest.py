@@ -230,10 +230,6 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       cmd_args += ['--board', SDKFetcherMock.BOARD]
     if extra_args:
       cmd_args.extend(extra_args)
-    # rewrapper_linux.cfg is used as a reference. The file must exist.
-    osutils.Touch(os.path.join(self.chrome_root, 'src', 'buildtools',
-                               'reclient_cfgs', 'rewrapper_linux.cfg'),
-                  makedirs=True)
     # --no-shell drops gni files in //build/args/chromeos/.
     # reclient configs are also dropped here regardless of --no-shell or not.
     osutils.SafeMakedirs(

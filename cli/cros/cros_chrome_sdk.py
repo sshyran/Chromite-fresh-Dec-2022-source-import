@@ -1181,16 +1181,12 @@ class ChromeSDKCommand(command.CliCommand):
       return os.path.join(tc_path, 'bin', binary)
     return binary
 
-  def _GenerateReclientConfig(self, sdk_ctx, board):
-    """Generate a config and a wrapper for reclient.
+  def _GenerateReclientWrapper(self, sdk_ctx, board):
+    """Generate a wrapper for reclient.
 
-    This function generates a configuration to be used by rewrapper
-    (rewrapper_<board>.cfg) and a wrapper script for the rewrapper to make it
+    This function generates a wrapper script for the rewrapper to make it
     passed with --gomacc-path (rewrapper_<board>).
-    The configuration is based on the linux configuration, which has already
-    been installed in Chromium repository, and this function adds a flag to
-    preserve symlink and updates inputs so that the configuration can be used
-    for compiling with ChromeOS clang.
+    The wrapper adds a flag to preserve symlinks which are used by CrOS clang.
 
     Args:
       sdk_ctx: An SDKFetcher.SDKContext namedtuple object for getting toolchain
@@ -1201,54 +1197,16 @@ class ChromeSDKCommand(command.CliCommand):
       Absolute path to the wrapper script to be used as --gomacc-path.
     """
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-    tc_tarball_path = os.path.realpath(
-        sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path)
-    linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
-                                  'reclient_cfgs', 'rewrapper_linux.cfg')
-    linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
-
-    # TODO(b:190794287): remove code for inputs.  It will eventually be
-    #                    provided by the file in the toolchain tarball.
-    inputs = [
-        'usr/bin/clang',
-        'usr/bin/clang++',
-        'usr/bin/clang++-13',
-        'usr/bin/clang-13',
-        'usr/bin/clang-13.elf',
-        'usr/bin/clang++-13.elf',
-        'lib/ld-linux-x86-64.so.2',
-        'lib/libc++abi.so.1',
-        'lib/libc++.so.1',
-        'lib/libc.so.6',
-        'lib/libdl.so.2',
-        'lib/libgcc_s.so.1',
-        'lib/libm.so.6',
-        'lib/libpthread.so.0',
-        'lib/libtinfo.so.5',
-        'lib/libz.so.1',
-    ]
-    rel_tc_tarball_path = os.path.relpath(tc_tarball_path,
-                                          self.options.chrome_src)
-    inputs = [os.path.join(rel_tc_tarball_path, i) for i in inputs]
-    cros_cfg = ['preserve_symlink=true']
-    for line in linux_cfg:
-      if line.startswith('inputs='):
-        line = 'inputs=%s' % ','.join(inputs)
-      cros_cfg.append(line)
-    cros_cfg_path = os.path.join(shared_dir, f'rewrapper_{board}.cfg')
-    osutils.WriteFile(cros_cfg_path, '\n'.join(cros_cfg))
-    Log('generated rewrapper_cfg %s', cros_cfg_path, silent=self.silent)
 
     # TODO(b:190741226): remove the wrapper if the compiler wrapper supports
     #                    flags for reclient.
     wrapper_path = os.path.join(shared_dir, 'rewrapper_%s' % board)
     wrapper_content = [
         '#!/bin/sh\n',
-        '%(rewrapper_dir)s/rewrapper -cfg="%(cros_cfg_path)s" '
+        '%(rewrapper_dir)s/rewrapper -preserve_symlink=true '
         '-exec_root="%(chrome_src)s" "$@"\n' % {
             'rewrapper_dir': os.path.join(
                 self.options.chrome_src, 'buildtools', 'reclient'),
-            'cros_cfg_path': cros_cfg_path,
             'chrome_src': self.options.chrome_src},
     ]
     osutils.WriteFile(wrapper_path, wrapper_content, chmod=0o755)
@@ -1435,7 +1393,7 @@ class ChromeSDKCommand(command.CliCommand):
                    '--gn-extra-args to specify a non default value.',
                    symbol_level)
 
-    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientConfig(
+    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientWrapper(
         sdk_ctx, board)
 
     if options.gn_extra_args:
