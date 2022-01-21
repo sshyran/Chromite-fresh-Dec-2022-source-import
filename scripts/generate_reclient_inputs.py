@@ -24,6 +24,7 @@ from typing import List, Optional, Set
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.third_party import lddtree
 
 
@@ -81,8 +82,10 @@ def _GenerateRemoteInputsFile(out_file: str, clang_path: Path) -> None:
   paths.add(Path('/etc/env.d/gcc'))
 
   # Write the files relative to clang binary location.
-  with (clang_dir / out_file).open('w', encoding='utf-8') as f:
-    f.writelines(os.path.relpath(x, clang_dir) + '\n' for x in sorted(paths))
+  osutils.WriteFile(
+      clang_dir / out_file,
+      [os.path.relpath(x, clang_dir) + '\n' for x in sorted(paths)],
+      sudo=True)
 
 
 def ParseArgs(argv: Optional[List[str]]) -> commandline.argparse.Namespace:
