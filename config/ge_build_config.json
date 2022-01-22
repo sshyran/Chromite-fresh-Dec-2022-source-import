@@ -314,6 +314,18 @@
       ]
     },
     {
+      "name": "guybrush-kernelnext",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "UNKNOWN"
+        }
+      ]
+    },
+    {
       "name": "hana",
       "configs": [
         {
@@ -615,6 +627,18 @@
     },
     {
       "name": "skyrim-chausie",
+      "configs": [
+        {
+          "builder": "RELEASE",
+          "experimental": true,
+          "leader_board": false,
+          "board_group": "",
+          "arch": "X86_INTERNAL"
+        }
+      ]
+    },
+    {
+      "name": "skyrim-kernelnext",
       "configs": [
         {
           "builder": "RELEASE",
