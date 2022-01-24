@@ -44,8 +44,6 @@ class UnitTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   def setUp(self):
     self.rununittests_mock = self.PatchObject(commands, 'RunUnitTests')
-    self.buildunittests_mock = self.PatchObject(
-        commands, 'BuildUnitTestTarball', return_value='unit_tests.tar')
     self.uploadartifact_mock = self.PatchObject(
         generic_stages.ArchivingStageMixin, 'UploadArtifact')
     self.image_dir = os.path.join(
@@ -74,11 +72,6 @@ class UnitTestStageTest(generic_stages_unittest.AbstractStageTestCase,
         blacklist=[],
         extra_env=mock.ANY,
         build_stage=True)
-    self.buildunittests_mock.assert_called_once_with(
-        self.build_root, self._current_board,
-        self._run.GetArchive().archive_path)
-    self.uploadartifact_mock.assert_called_once_with(
-        'unit_tests.tar', archive=False)
 
 
 class HWTestStageTest(generic_stages_unittest.AbstractStageTestCase,

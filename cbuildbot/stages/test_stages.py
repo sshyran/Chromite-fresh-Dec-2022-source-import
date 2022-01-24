@@ -69,10 +69,6 @@ class UnitTestStage(generic_stages.BoardSpecificBuilderStage,
           blacklist=self._run.config.unittest_blacklist,
           extra_env=extra_env,
           build_stage=self._run.config.build_packages)
-    # Package UnitTest binaries.
-    tarball = commands.BuildUnitTestTarball(
-        self._build_root, self._current_board, self.archive_path)
-    self.UploadArtifact(tarball, archive=False)
 
 
 class HWTestDUTOverride:
