@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromiumos.test.plan',
   syntax='proto3',
   serialized_options=b'Z.go.chromium.org/chromiumos/config/go/test/plan',
-  serialized_pb=b'\n+chromiumos/test/plan/source_test_plan.proto\x12\x14\x63hromiumos.test.plan\"\xf2\x01\n\x0eSourceTestPlan\x12\x14\n\x0cpath_regexps\x18\x02 \x03(\t\x12\x1c\n\x14path_regexp_excludes\x18\x03 \x03(\t\x12[\n\x18test_plan_starlark_files\x18\x0f \x03(\x0b\x32\x39.chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile\x1a\x43\n\x14TestPlanStarlarkFile\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0f\n\x07project\x18\x02 \x01(\t\x12\x0c\n\x04path\x18\x03 \x01(\tJ\x04\x08\x01\x10\x02J\x04\x08\x04\x10\x0f\x42\x30Z.go.chromium.org/chromiumos/config/go/test/planb\x06proto3'
+  serialized_pb=b'\n+chromiumos/test/plan/source_test_plan.proto\x12\x14\x63hromiumos.test.plan\"\xe1\x01\n\x0eSourceTestPlan\x12\x14\n\x0cpath_regexps\x18\x02 \x03(\t\x12\x1c\n\x14path_regexp_excludes\x18\x03 \x03(\t\x12[\n\x18test_plan_starlark_files\x18\x0f \x03(\x0b\x32\x39.chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile\x1a\x32\n\x14TestPlanStarlarkFile\x12\x0c\n\x04repo\x18\x01 \x01(\t\x12\x0c\n\x04path\x18\x02 \x01(\tJ\x04\x08\x01\x10\x02J\x04\x08\x04\x10\x0f\x42\x30Z.go.chromium.org/chromiumos/config/go/test/planb\x06proto3'
 )
 
 
@@ -32,22 +32,15 @@ _SOURCETESTPLAN_TESTPLANSTARLARKFILE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='host', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.host', index=0,
+      name='repo', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.repo', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='project', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.project', index=1,
+      name='path', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.path', index=1,
       number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='path', full_name='chromiumos.test.plan.SourceTestPlan.TestPlanStarlarkFile.path', index=2,
-      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -65,7 +58,7 @@ _SOURCETESTPLAN_TESTPLANSTARLARKFILE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=233,
-  serialized_end=300,
+  serialized_end=283,
 )
 
 _SOURCETESTPLAN = _descriptor.Descriptor(
@@ -109,7 +102,7 @@ _SOURCETESTPLAN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=70,
-  serialized_end=312,
+  serialized_end=295,
 )
 
 _SOURCETESTPLAN_TESTPLANSTARLARKFILE.containing_type = _SOURCETESTPLAN

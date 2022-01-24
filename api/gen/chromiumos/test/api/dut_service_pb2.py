@@ -14,6 +14,7 @@ _sym_db = _symbol_database.Default()
 
 from chromite.api.gen.chromiumos.config.api import device_config_id_pb2 as chromiumos_dot_config_dot_api_dot_device__config__id__pb2
 from chromite.api.gen.chromiumos.longrunning import operations_pb2 as chromiumos_dot_longrunning_dot_operations__pb2
+from chromite.api.gen.chromiumos import storage_path_pb2 as chromiumos_dot_storage__path__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -22,9 +23,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z-go.chromium.org/chromiumos/config/go/test/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n%chromiumos/test/api/dut_service.proto\x12\x13\x63hromiumos.test.api\x1a,chromiumos/config/api/device_config_id.proto\x1a\'chromiumos/longrunning/operations.proto\"\xaa\x01\n\x12\x45xecCommandRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\r\n\x05stdin\x18\x04 \x01(\x0c\x12+\n\x06stdout\x18\x05 \x01(\x0e\x32\x1b.chromiumos.test.api.Output\x12+\n\x06stderr\x18\x06 \x01(\x0e\x32\x1b.chromiumos.test.api.Output\"\xd1\x01\n\x13\x45xecCommandResponse\x12\x44\n\texit_info\x18\x01 \x01(\x0b\x32\x31.chromiumos.test.api.ExecCommandResponse.ExitInfo\x12\x0e\n\x06stdout\x18\x02 \x01(\x0c\x12\x0e\n\x06stderr\x18\x03 \x01(\x0c\x1aT\n\x08\x45xitInfo\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x10\n\x08signaled\x18\x02 \x01(\x08\x12\x0f\n\x07started\x18\x03 \x01(\x08\x12\x15\n\rerror_message\x18\x04 \x01(\t\"/\n\x13\x46\x65tchCrashesRequest\x12\x12\n\nfetch_core\x18\x02 \x01(\x08J\x04\x08\x01\x10\x02\"\xa1\x01\n\x14\x46\x65tchCrashesResponse\x12\x10\n\x08\x63rash_id\x18\x01 \x01(\x03\x12/\n\x05\x63rash\x18\x02 \x01(\x0b\x32\x1e.chromiumos.test.api.CrashInfoH\x00\x12.\n\x04\x62lob\x18\x03 \x01(\x0b\x32\x1e.chromiumos.test.api.CrashBlobH\x00\x12\x0e\n\x04\x63ore\x18\x04 \x01(\x0cH\x00\x42\x06\n\x04\x64\x61ta\"\xb3\x01\n\tCrashInfo\x12\x11\n\texec_name\x18\x01 \x01(\t\x12\x0c\n\x04prod\x18\x02 \x01(\t\x12\x0b\n\x03ver\x18\x03 \x01(\t\x12\x0b\n\x03sig\x18\x04 \x01(\t\x12$\n\x1cin_progress_integration_test\x18\x05 \x01(\t\x12\x11\n\tcollector\x18\x06 \x01(\t\x12\x32\n\x06\x66ields\x18\x07 \x03(\x0b\x32\".chromiumos.test.api.CrashMetadata\"*\n\rCrashMetadata\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"8\n\tCrashBlob\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04\x62lob\x18\x02 \x01(\x0c\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\"\x1e\n\x0eRestartRequest\x12\x0c\n\x04\x61rgs\x18\x01 \x03(\t\"!\n\x0fRestartResponse\x12\x0e\n\x06output\x18\x01 \x01(\t\"\x11\n\x0fRestartMetadata\"\x8e\x04\n\x0c\x43\x61\x63heRequest\x12;\n\x04\x66ile\x18\x01 \x01(\x0b\x32+.chromiumos.test.api.CacheRequest.LocalFileH\x00\x12\x36\n\x04pipe\x18\x02 \x01(\x0b\x32&.chromiumos.test.api.CacheRequest.PipeH\x00\x12;\n\x07gs_file\x18\x03 \x01(\x0b\x32(.chromiumos.test.api.CacheRequest.GSFileH\x01\x12\x42\n\x0bgs_zip_file\x18\x04 \x01(\x0b\x32+.chromiumos.test.api.CacheRequest.GSZipFileH\x01\x12\x42\n\x0bgs_tar_file\x18\x05 \x01(\x0b\x32+.chromiumos.test.api.CacheRequest.GSTARFileH\x01\x1a\x19\n\tLocalFile\x12\x0c\n\x04path\x18\x01 \x01(\t\x1a\x18\n\x04Pipe\x12\x10\n\x08\x63ommands\x18\x01 \x01(\t\x1a\x1d\n\x06GSFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x1a \n\tGSZipFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x1a\x35\n\tGSTARFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x12\x13\n\x0bsource_file\x18\x02 \x01(\tB\r\n\x0b\x64\x65stinationB\x08\n\x06source\"\xc4\x01\n\rCacheResponse\x12=\n\x07success\x18\x01 \x01(\x0b\x32*.chromiumos.test.api.CacheResponse.SuccessH\x00\x12=\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32*.chromiumos.test.api.CacheResponse.FailureH\x00\x1a\t\n\x07Success\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x0f\n\rCacheMetadata\"\x17\n\x15\x46orceReconnectRequest\"\xdf\x01\n\x16\x46orceReconnectResponse\x12\x46\n\x07success\x18\x01 \x01(\x0b\x32\x33.chromiumos.test.api.ForceReconnectResponse.SuccessH\x00\x12\x46\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32\x33.chromiumos.test.api.ForceReconnectResponse.FailureH\x00\x1a\t\n\x07Success\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x18\n\x16\x46orceReconnectMetadata\"\x1d\n\x1b\x44\x65tectDeviceConfigIdRequest\"\xc1\x02\n\x1c\x44\x65tectDeviceConfigIdResponse\x12L\n\x07success\x18\x01 \x01(\x0b\x32\x39.chromiumos.test.api.DetectDeviceConfigIdResponse.SuccessH\x00\x12L\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32\x39.chromiumos.test.api.DetectDeviceConfigIdResponse.FailureH\x00\x1aY\n\x07Success\x12N\n\x14\x64\x65tected_scan_config\x18\x01 \x01(\x0b\x32\x30.chromiumos.config.api.DeviceConfigId.ScanConfig\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result*,\n\x06Output\x12\x0f\n\x0bOUTPUT_PIPE\x10\x00\x12\x11\n\rOUTPUT_STDOUT\x10\x01\x32\xd9\x05\n\nDutService\x12\x62\n\x0b\x45xecCommand\x12\'.chromiumos.test.api.ExecCommandRequest\x1a(.chromiumos.test.api.ExecCommandResponse0\x01\x12\x65\n\x0c\x46\x65tchCrashes\x12(.chromiumos.test.api.FetchCrashesRequest\x1a).chromiumos.test.api.FetchCrashesResponse0\x01\x12x\n\x07Restart\x12#.chromiumos.test.api.RestartRequest\x1a!.chromiumos.longrunning.Operation\"%\xd2\x41\"\n\x0fRestartResponse\x12\x0fRestartMetadata\x12}\n\x14\x44\x65tectDeviceConfigId\x12\x30.chromiumos.test.api.DetectDeviceConfigIdRequest\x1a\x31.chromiumos.test.api.DetectDeviceConfigIdResponse0\x01\x12p\n\x05\x43\x61\x63he\x12!.chromiumos.test.api.CacheRequest\x1a!.chromiumos.longrunning.Operation\"!\xd2\x41\x1e\n\rCacheResponse\x12\rCacheMetadata\x12\x94\x01\n\x0e\x46orceReconnect\x12*.chromiumos.test.api.ForceReconnectRequest\x1a!.chromiumos.longrunning.Operation\"3\xd2\x41\x30\n\x16\x46orceReconnectResponse\x12\x16\x46orceReconnectMetadataB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
+  serialized_pb=b'\n%chromiumos/test/api/dut_service.proto\x12\x13\x63hromiumos.test.api\x1a,chromiumos/config/api/device_config_id.proto\x1a\'chromiumos/longrunning/operations.proto\x1a\x1d\x63hromiumos/storage_path.proto\"\xaa\x01\n\x12\x45xecCommandRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\r\n\x05stdin\x18\x04 \x01(\x0c\x12+\n\x06stdout\x18\x05 \x01(\x0e\x32\x1b.chromiumos.test.api.Output\x12+\n\x06stderr\x18\x06 \x01(\x0e\x32\x1b.chromiumos.test.api.Output\"\xd1\x01\n\x13\x45xecCommandResponse\x12\x44\n\texit_info\x18\x01 \x01(\x0b\x32\x31.chromiumos.test.api.ExecCommandResponse.ExitInfo\x12\x0e\n\x06stdout\x18\x02 \x01(\x0c\x12\x0e\n\x06stderr\x18\x03 \x01(\x0c\x1aT\n\x08\x45xitInfo\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x10\n\x08signaled\x18\x02 \x01(\x08\x12\x0f\n\x07started\x18\x03 \x01(\x08\x12\x15\n\rerror_message\x18\x04 \x01(\t\"/\n\x13\x46\x65tchCrashesRequest\x12\x12\n\nfetch_core\x18\x02 \x01(\x08J\x04\x08\x01\x10\x02\"\xa1\x01\n\x14\x46\x65tchCrashesResponse\x12\x10\n\x08\x63rash_id\x18\x01 \x01(\x03\x12/\n\x05\x63rash\x18\x02 \x01(\x0b\x32\x1e.chromiumos.test.api.CrashInfoH\x00\x12.\n\x04\x62lob\x18\x03 \x01(\x0b\x32\x1e.chromiumos.test.api.CrashBlobH\x00\x12\x0e\n\x04\x63ore\x18\x04 \x01(\x0cH\x00\x42\x06\n\x04\x64\x61ta\"\xb3\x01\n\tCrashInfo\x12\x11\n\texec_name\x18\x01 \x01(\t\x12\x0c\n\x04prod\x18\x02 \x01(\t\x12\x0b\n\x03ver\x18\x03 \x01(\t\x12\x0b\n\x03sig\x18\x04 \x01(\t\x12$\n\x1cin_progress_integration_test\x18\x05 \x01(\t\x12\x11\n\tcollector\x18\x06 \x01(\t\x12\x32\n\x06\x66ields\x18\x07 \x03(\x0b\x32\".chromiumos.test.api.CrashMetadata\"*\n\rCrashMetadata\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\"8\n\tCrashBlob\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0c\n\x04\x62lob\x18\x02 \x01(\x0c\x12\x10\n\x08\x66ilename\x18\x03 \x01(\t\"\x1e\n\x0eRestartRequest\x12\x0c\n\x04\x61rgs\x18\x01 \x03(\t\"!\n\x0fRestartResponse\x12\x0e\n\x06output\x18\x01 \x01(\t\"\x11\n\x0fRestartMetadata\"\xef\x02\n\x0c\x43\x61\x63heRequest\x12\x18\n\x10\x64\x65stination_path\x18\x01 \x01(\t\x12;\n\x07gs_file\x18\x02 \x01(\x0b\x32(.chromiumos.test.api.CacheRequest.GSFileH\x00\x12\x42\n\x0bgs_zip_file\x18\x03 \x01(\x0b\x32+.chromiumos.test.api.CacheRequest.GSZipFileH\x00\x12\x42\n\x0bgs_tar_file\x18\x04 \x01(\x0b\x32+.chromiumos.test.api.CacheRequest.GSTARFileH\x00\x1a\x1d\n\x06GSFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x1a \n\tGSZipFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x1a\x35\n\tGSTARFile\x12\x13\n\x0bsource_path\x18\x01 \x01(\t\x12\x13\n\x0bsource_file\x18\x02 \x01(\tB\x08\n\x06source\"\xc4\x01\n\rCacheResponse\x12=\n\x07success\x18\x01 \x01(\x0b\x32*.chromiumos.test.api.CacheResponse.SuccessH\x00\x12=\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32*.chromiumos.test.api.CacheResponse.FailureH\x00\x1a\t\n\x07Success\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x0f\n\rCacheMetadata\"\x17\n\x15\x46orceReconnectRequest\"\xdf\x01\n\x16\x46orceReconnectResponse\x12\x46\n\x07success\x18\x01 \x01(\x0b\x32\x33.chromiumos.test.api.ForceReconnectResponse.SuccessH\x00\x12\x46\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32\x33.chromiumos.test.api.ForceReconnectResponse.FailureH\x00\x1a\t\n\x07Success\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result\"\x18\n\x16\x46orceReconnectMetadata\"\x1d\n\x1b\x44\x65tectDeviceConfigIdRequest\"\xc1\x02\n\x1c\x44\x65tectDeviceConfigIdResponse\x12L\n\x07success\x18\x01 \x01(\x0b\x32\x39.chromiumos.test.api.DetectDeviceConfigIdResponse.SuccessH\x00\x12L\n\x07\x66\x61ilure\x18\x02 \x01(\x0b\x32\x39.chromiumos.test.api.DetectDeviceConfigIdResponse.FailureH\x00\x1aY\n\x07Success\x12N\n\x14\x64\x65tected_scan_config\x18\x01 \x01(\x0b\x32\x30.chromiumos.config.api.DeviceConfigId.ScanConfig\x1a \n\x07\x46\x61ilure\x12\x15\n\rerror_message\x18\x01 \x01(\tB\x08\n\x06result*,\n\x06Output\x12\x0f\n\x0bOUTPUT_PIPE\x10\x00\x12\x11\n\rOUTPUT_STDOUT\x10\x01\x32\xd9\x05\n\nDutService\x12\x62\n\x0b\x45xecCommand\x12\'.chromiumos.test.api.ExecCommandRequest\x1a(.chromiumos.test.api.ExecCommandResponse0\x01\x12\x65\n\x0c\x46\x65tchCrashes\x12(.chromiumos.test.api.FetchCrashesRequest\x1a).chromiumos.test.api.FetchCrashesResponse0\x01\x12x\n\x07Restart\x12#.chromiumos.test.api.RestartRequest\x1a!.chromiumos.longrunning.Operation\"%\xd2\x41\"\n\x0fRestartResponse\x12\x0fRestartMetadata\x12}\n\x14\x44\x65tectDeviceConfigId\x12\x30.chromiumos.test.api.DetectDeviceConfigIdRequest\x1a\x31.chromiumos.test.api.DetectDeviceConfigIdResponse0\x01\x12p\n\x05\x43\x61\x63he\x12!.chromiumos.test.api.CacheRequest\x1a!.chromiumos.longrunning.Operation\"!\xd2\x41\x1e\n\rCacheResponse\x12\rCacheMetadata\x12\x94\x01\n\x0e\x46orceReconnect\x12*.chromiumos.test.api.ForceReconnectRequest\x1a!.chromiumos.longrunning.Operation\"3\xd2\x41\x30\n\x16\x46orceReconnectResponse\x12\x16\x46orceReconnectMetadataB/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3'
   ,
-  dependencies=[chromiumos_dot_config_dot_api_dot_device__config__id__pb2.DESCRIPTOR,chromiumos_dot_longrunning_dot_operations__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_config_dot_api_dot_device__config__id__pb2.DESCRIPTOR,chromiumos_dot_longrunning_dot_operations__pb2.DESCRIPTOR,chromiumos_dot_storage__path__pb2.DESCRIPTOR,])
 
 _OUTPUT = _descriptor.EnumDescriptor(
   name='Output',
@@ -46,8 +47,8 @@ _OUTPUT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2494,
-  serialized_end=2538,
+  serialized_start=2366,
+  serialized_end=2410,
 )
 _sym_db.RegisterEnumDescriptor(_OUTPUT)
 
@@ -119,8 +120,8 @@ _EXECCOMMANDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=150,
-  serialized_end=320,
+  serialized_start=181,
+  serialized_end=351,
 )
 
 
@@ -172,8 +173,8 @@ _EXECCOMMANDRESPONSE_EXITINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=448,
-  serialized_end=532,
+  serialized_start=479,
+  serialized_end=563,
 )
 
 _EXECCOMMANDRESPONSE = _descriptor.Descriptor(
@@ -217,8 +218,8 @@ _EXECCOMMANDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=323,
-  serialized_end=532,
+  serialized_start=354,
+  serialized_end=563,
 )
 
 
@@ -249,8 +250,8 @@ _FETCHCRASHESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=534,
-  serialized_end=581,
+  serialized_start=565,
+  serialized_end=612,
 )
 
 
@@ -307,8 +308,8 @@ _FETCHCRASHESRESPONSE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=584,
-  serialized_end=745,
+  serialized_start=615,
+  serialized_end=776,
 )
 
 
@@ -381,8 +382,8 @@ _CRASHINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=748,
-  serialized_end=927,
+  serialized_start=779,
+  serialized_end=958,
 )
 
 
@@ -420,8 +421,8 @@ _CRASHMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=929,
-  serialized_end=971,
+  serialized_start=960,
+  serialized_end=1002,
 )
 
 
@@ -466,8 +467,8 @@ _CRASHBLOB = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=973,
-  serialized_end=1029,
+  serialized_start=1004,
+  serialized_end=1060,
 )
 
 
@@ -498,8 +499,8 @@ _RESTARTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1031,
-  serialized_end=1061,
+  serialized_start=1062,
+  serialized_end=1092,
 )
 
 
@@ -530,8 +531,8 @@ _RESTARTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1063,
-  serialized_end=1096,
+  serialized_start=1094,
+  serialized_end=1127,
 )
 
 
@@ -555,72 +556,10 @@ _RESTARTMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1098,
-  serialized_end=1115,
+  serialized_start=1129,
+  serialized_end=1146,
 )
 
-
-_CACHEREQUEST_LOCALFILE = _descriptor.Descriptor(
-  name='LocalFile',
-  full_name='chromiumos.test.api.CacheRequest.LocalFile',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='path', full_name='chromiumos.test.api.CacheRequest.LocalFile.path', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1448,
-  serialized_end=1473,
-)
-
-_CACHEREQUEST_PIPE = _descriptor.Descriptor(
-  name='Pipe',
-  full_name='chromiumos.test.api.CacheRequest.Pipe',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='commands', full_name='chromiumos.test.api.CacheRequest.Pipe.commands', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1475,
-  serialized_end=1499,
-)
 
 _CACHEREQUEST_GSFILE = _descriptor.Descriptor(
   name='GSFile',
@@ -649,8 +588,8 @@ _CACHEREQUEST_GSFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1501,
-  serialized_end=1530,
+  serialized_start=1388,
+  serialized_end=1417,
 )
 
 _CACHEREQUEST_GSZIPFILE = _descriptor.Descriptor(
@@ -680,8 +619,8 @@ _CACHEREQUEST_GSZIPFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1532,
-  serialized_end=1564,
+  serialized_start=1419,
+  serialized_end=1451,
 )
 
 _CACHEREQUEST_GSTARFILE = _descriptor.Descriptor(
@@ -718,8 +657,8 @@ _CACHEREQUEST_GSTARFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1566,
-  serialized_end=1619,
+  serialized_start=1453,
+  serialized_end=1506,
 )
 
 _CACHEREQUEST = _descriptor.Descriptor(
@@ -731,36 +670,29 @@ _CACHEREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='file', full_name='chromiumos.test.api.CacheRequest.file', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='destination_path', full_name='chromiumos.test.api.CacheRequest.destination_path', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='pipe', full_name='chromiumos.test.api.CacheRequest.pipe', index=1,
+      name='gs_file', full_name='chromiumos.test.api.CacheRequest.gs_file', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gs_file', full_name='chromiumos.test.api.CacheRequest.gs_file', index=2,
+      name='gs_zip_file', full_name='chromiumos.test.api.CacheRequest.gs_zip_file', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gs_zip_file', full_name='chromiumos.test.api.CacheRequest.gs_zip_file', index=3,
+      name='gs_tar_file', full_name='chromiumos.test.api.CacheRequest.gs_tar_file', index=3,
       number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='gs_tar_file', full_name='chromiumos.test.api.CacheRequest.gs_tar_file', index=4,
-      number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -768,7 +700,7 @@ _CACHEREQUEST = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_CACHEREQUEST_LOCALFILE, _CACHEREQUEST_PIPE, _CACHEREQUEST_GSFILE, _CACHEREQUEST_GSZIPFILE, _CACHEREQUEST_GSTARFILE, ],
+  nested_types=[_CACHEREQUEST_GSFILE, _CACHEREQUEST_GSZIPFILE, _CACHEREQUEST_GSTARFILE, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -777,18 +709,13 @@ _CACHEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='destination', full_name='chromiumos.test.api.CacheRequest.destination',
+      name='source', full_name='chromiumos.test.api.CacheRequest.source',
       index=0, containing_type=None,
       create_key=_descriptor._internal_create_key,
     fields=[]),
-    _descriptor.OneofDescriptor(
-      name='source', full_name='chromiumos.test.api.CacheRequest.source',
-      index=1, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
   ],
-  serialized_start=1118,
-  serialized_end=1644,
+  serialized_start=1149,
+  serialized_end=1516,
 )
 
 
@@ -812,8 +739,8 @@ _CACHERESPONSE_SUCCESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1790,
-  serialized_end=1799,
+  serialized_start=1662,
+  serialized_end=1671,
 )
 
 _CACHERESPONSE_FAILURE = _descriptor.Descriptor(
@@ -843,8 +770,8 @@ _CACHERESPONSE_FAILURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1801,
-  serialized_end=1833,
+  serialized_start=1673,
+  serialized_end=1705,
 )
 
 _CACHERESPONSE = _descriptor.Descriptor(
@@ -886,8 +813,8 @@ _CACHERESPONSE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1647,
-  serialized_end=1843,
+  serialized_start=1519,
+  serialized_end=1715,
 )
 
 
@@ -911,8 +838,8 @@ _CACHEMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1845,
-  serialized_end=1860,
+  serialized_start=1717,
+  serialized_end=1732,
 )
 
 
@@ -936,8 +863,8 @@ _FORCERECONNECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1862,
-  serialized_end=1885,
+  serialized_start=1734,
+  serialized_end=1757,
 )
 
 
@@ -961,8 +888,8 @@ _FORCERECONNECTRESPONSE_SUCCESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1790,
-  serialized_end=1799,
+  serialized_start=1662,
+  serialized_end=1671,
 )
 
 _FORCERECONNECTRESPONSE_FAILURE = _descriptor.Descriptor(
@@ -992,8 +919,8 @@ _FORCERECONNECTRESPONSE_FAILURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1801,
-  serialized_end=1833,
+  serialized_start=1673,
+  serialized_end=1705,
 )
 
 _FORCERECONNECTRESPONSE = _descriptor.Descriptor(
@@ -1035,8 +962,8 @@ _FORCERECONNECTRESPONSE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=1888,
-  serialized_end=2111,
+  serialized_start=1760,
+  serialized_end=1983,
 )
 
 
@@ -1060,8 +987,8 @@ _FORCERECONNECTMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2113,
-  serialized_end=2137,
+  serialized_start=1985,
+  serialized_end=2009,
 )
 
 
@@ -1085,8 +1012,8 @@ _DETECTDEVICECONFIGIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2139,
-  serialized_end=2168,
+  serialized_start=2011,
+  serialized_end=2040,
 )
 
 
@@ -1117,8 +1044,8 @@ _DETECTDEVICECONFIGIDRESPONSE_SUCCESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2359,
-  serialized_end=2448,
+  serialized_start=2231,
+  serialized_end=2320,
 )
 
 _DETECTDEVICECONFIGIDRESPONSE_FAILURE = _descriptor.Descriptor(
@@ -1148,8 +1075,8 @@ _DETECTDEVICECONFIGIDRESPONSE_FAILURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1801,
-  serialized_end=1833,
+  serialized_start=1673,
+  serialized_end=1705,
 )
 
 _DETECTDEVICECONFIGIDRESPONSE = _descriptor.Descriptor(
@@ -1191,8 +1118,8 @@ _DETECTDEVICECONFIGIDRESPONSE = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=2171,
-  serialized_end=2492,
+  serialized_start=2043,
+  serialized_end=2364,
 )
 
 _EXECCOMMANDREQUEST.fields_by_name['stdout'].enum_type = _OUTPUT
@@ -1211,22 +1138,12 @@ _FETCHCRASHESRESPONSE.oneofs_by_name['data'].fields.append(
   _FETCHCRASHESRESPONSE.fields_by_name['core'])
 _FETCHCRASHESRESPONSE.fields_by_name['core'].containing_oneof = _FETCHCRASHESRESPONSE.oneofs_by_name['data']
 _CRASHINFO.fields_by_name['fields'].message_type = _CRASHMETADATA
-_CACHEREQUEST_LOCALFILE.containing_type = _CACHEREQUEST
-_CACHEREQUEST_PIPE.containing_type = _CACHEREQUEST
 _CACHEREQUEST_GSFILE.containing_type = _CACHEREQUEST
 _CACHEREQUEST_GSZIPFILE.containing_type = _CACHEREQUEST
 _CACHEREQUEST_GSTARFILE.containing_type = _CACHEREQUEST
-_CACHEREQUEST.fields_by_name['file'].message_type = _CACHEREQUEST_LOCALFILE
-_CACHEREQUEST.fields_by_name['pipe'].message_type = _CACHEREQUEST_PIPE
 _CACHEREQUEST.fields_by_name['gs_file'].message_type = _CACHEREQUEST_GSFILE
 _CACHEREQUEST.fields_by_name['gs_zip_file'].message_type = _CACHEREQUEST_GSZIPFILE
 _CACHEREQUEST.fields_by_name['gs_tar_file'].message_type = _CACHEREQUEST_GSTARFILE
-_CACHEREQUEST.oneofs_by_name['destination'].fields.append(
-  _CACHEREQUEST.fields_by_name['file'])
-_CACHEREQUEST.fields_by_name['file'].containing_oneof = _CACHEREQUEST.oneofs_by_name['destination']
-_CACHEREQUEST.oneofs_by_name['destination'].fields.append(
-  _CACHEREQUEST.fields_by_name['pipe'])
-_CACHEREQUEST.fields_by_name['pipe'].containing_oneof = _CACHEREQUEST.oneofs_by_name['destination']
 _CACHEREQUEST.oneofs_by_name['source'].fields.append(
   _CACHEREQUEST.fields_by_name['gs_file'])
 _CACHEREQUEST.fields_by_name['gs_file'].containing_oneof = _CACHEREQUEST.oneofs_by_name['source']
@@ -1368,20 +1285,6 @@ _sym_db.RegisterMessage(RestartMetadata)
 
 CacheRequest = _reflection.GeneratedProtocolMessageType('CacheRequest', (_message.Message,), {
 
-  'LocalFile' : _reflection.GeneratedProtocolMessageType('LocalFile', (_message.Message,), {
-    'DESCRIPTOR' : _CACHEREQUEST_LOCALFILE,
-    '__module__' : 'chromiumos.test.api.dut_service_pb2'
-    # @@protoc_insertion_point(class_scope:chromiumos.test.api.CacheRequest.LocalFile)
-    })
-  ,
-
-  'Pipe' : _reflection.GeneratedProtocolMessageType('Pipe', (_message.Message,), {
-    'DESCRIPTOR' : _CACHEREQUEST_PIPE,
-    '__module__' : 'chromiumos.test.api.dut_service_pb2'
-    # @@protoc_insertion_point(class_scope:chromiumos.test.api.CacheRequest.Pipe)
-    })
-  ,
-
   'GSFile' : _reflection.GeneratedProtocolMessageType('GSFile', (_message.Message,), {
     'DESCRIPTOR' : _CACHEREQUEST_GSFILE,
     '__module__' : 'chromiumos.test.api.dut_service_pb2'
@@ -1407,8 +1310,6 @@ CacheRequest = _reflection.GeneratedProtocolMessageType('CacheRequest', (_messag
   # @@protoc_insertion_point(class_scope:chromiumos.test.api.CacheRequest)
   })
 _sym_db.RegisterMessage(CacheRequest)
-_sym_db.RegisterMessage(CacheRequest.LocalFile)
-_sym_db.RegisterMessage(CacheRequest.Pipe)
 _sym_db.RegisterMessage(CacheRequest.GSFile)
 _sym_db.RegisterMessage(CacheRequest.GSZipFile)
 _sym_db.RegisterMessage(CacheRequest.GSTARFile)
@@ -1520,8 +1421,8 @@ _DUTSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2541,
-  serialized_end=3270,
+  serialized_start=2413,
+  serialized_end=3142,
   methods=[
   _descriptor.MethodDescriptor(
     name='ExecCommand',

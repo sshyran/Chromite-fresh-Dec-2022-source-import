@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromite.api',
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
-  serialized_pb=b'\n\x1c\x63hromite/api/artifacts.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\"\x18\n\x08\x41rtifact\x12\x0c\n\x04path\x18\x01 \x01(\t\"W\n\x0b\x44ockerBuild\x12\x12\n\nimage_name\x18\x01 \x01(\t\x12\x18\n\x10\x64ocker_file_path\x18\x02 \x01(\t\x12\x1a\n\x12\x62uild_context_path\x18\x03 \x01(\t\"\xb3\x01\n\x17PrepareForBuildResponse\x12M\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32\x34.chromite.api.PrepareForBuildResponse.BuildRelevance\"I\n\x0e\x42uildRelevance\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06NEEDED\x10\x01\x12\x0b\n\x07UNKNOWN\x10\x02\x12\r\n\tPOINTLESS\x10\x03\"\xb6\x01\n\x11\x42uildSetupRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12\x1e\n\x16\x66orced_build_relevance\x18\x04 \x01(\x08\"\xa9\x01\n\x12\x42uildSetupResponse\x12H\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32/.chromite.api.BuildSetupResponse.BuildRelevance\"I\n\x0e\x42uildRelevance\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06NEEDED\x10\x01\x12\x0b\n\x07UNKNOWN\x10\x02\x12\r\n\tPOINTLESS\x10\x03\"\xbc\x01\n\nGetRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12+\n\x0bresult_path\x18\x04 \x01(\x0b\x32\x16.chromiumos.ResultPath\"H\n\x0bGetResponse\x12\x39\n\tartifacts\x18\x01 \x01(\x0b\x32&.chromiumos.UploadedArtifactsByService\"\xdc\x01\n\x16\x42undleArtifactsRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12\x12\n\noutput_dir\x18\x04 \x01(\t\x12+\n\x0bresult_path\x18\x05 \x01(\x0b\x32\x16.chromiumos.ResultPath\"T\n\x17\x42undleArtifactsResponse\x12\x39\n\tartifacts\x18\x01 \x01(\x0b\x32&.chromiumos.UploadedArtifactsByService\"\x9e\x01\n\rBundleRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x12\n\noutput_dir\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\"m\n\x0e\x42undleResponse\x12)\n\tartifacts\x18\x01 \x03(\x0b\x32\x16.chromite.api.Artifact\x12\x30\n\rdocker_builds\x18\x02 \x03(\x0b\x32\x19.chromite.api.DockerBuild\"\x90\x01\n\x14\x42undleVmFilesRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x12\n\noutput_dir\x18\x04 \x01(\t\"h\n\x1aPinnedGuestImageUriRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\"\xa3\x01\n\x1bPinnedGuestImageUriResponse\x12Q\n\rpinned_images\x18\x01 \x03(\x0b\x32:.chromite.api.PinnedGuestImageUriResponse.PinnedGuestImage\x1a\x31\n\x10PinnedGuestImage\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0b\n\x03uri\x18\x02 \x01(\t\"b\n\x14\x46\x65tchMetadataRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\"B\n\x15\x46\x65tchMetadataResponse\x12)\n\tfilepaths\x18\x01 \x03(\x0b\x32\x16.chromiumos.ResultPath2\xc7\x0c\n\x10\x41rtifactsService\x12O\n\nBuildSetup\x12\x1f.chromite.api.BuildSetupRequest\x1a .chromite.api.BuildSetupResponse\x12:\n\x03Get\x12\x18.chromite.api.GetRequest\x1a\x19.chromite.api.GetResponse\x12p\n\x19\x46\x65tchPinnedGuestImageUris\x12(.chromite.api.PinnedGuestImageUriRequest\x1a).chromite.api.PinnedGuestImageUriResponse\x12X\n\rFetchMetadata\x12\".chromite.api.FetchMetadataRequest\x1a#.chromite.api.FetchMetadataResponse\x12P\n\x13\x42undleAutotestFiles\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\x14\x42undleChromeOSConfig\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12O\n\x12\x42undleDebugSymbols\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12M\n\x10\x42undleEbuildLogs\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12K\n\x0e\x42undleFirmware\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12P\n\x13\x42undleImageArchives\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12K\n\x0e\x42undleImageZip\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12T\n\x17\x42undlePinnedGuestImages\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12X\n\x1b\x42undleSimpleChromeArtifacts\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12L\n\x0f\x42undleTastFiles\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12U\n\x18\x42undleTestUpdatePayloads\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\rBundleVmFiles\x12\".chromite.api.BundleVmFilesRequest\x1a\x1c.chromite.api.BundleResponse\x12L\n\x0f\x45xportCpeReport\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\x14\x42undleFpmcuUnittests\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12M\n\x10\x42undleGceTarball\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x1a\x11\xc2\xed\x1a\r\n\tartifacts\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1c\x63hromite/api/artifacts.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromiumos/common.proto\"\x18\n\x08\x41rtifact\x12\x0c\n\x04path\x18\x01 \x01(\t\"W\n\x0b\x44ockerBuild\x12\x12\n\nimage_name\x18\x01 \x01(\t\x12\x18\n\x10\x64ocker_file_path\x18\x02 \x01(\t\x12\x1a\n\x12\x62uild_context_path\x18\x03 \x01(\t\"\xb3\x01\n\x17PrepareForBuildResponse\x12M\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32\x34.chromite.api.PrepareForBuildResponse.BuildRelevance\"I\n\x0e\x42uildRelevance\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06NEEDED\x10\x01\x12\x0b\n\x07UNKNOWN\x10\x02\x12\r\n\tPOINTLESS\x10\x03\"\xb6\x01\n\x11\x42uildSetupRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12\x1e\n\x16\x66orced_build_relevance\x18\x04 \x01(\x08\"\xa9\x01\n\x12\x42uildSetupResponse\x12H\n\x0f\x62uild_relevance\x18\x01 \x01(\x0e\x32/.chromite.api.BuildSetupResponse.BuildRelevance\"I\n\x0e\x42uildRelevance\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\n\n\x06NEEDED\x10\x01\x12\x0b\n\x07UNKNOWN\x10\x02\x12\r\n\tPOINTLESS\x10\x03\"\xbc\x01\n\nGetRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12+\n\x0bresult_path\x18\x04 \x01(\x0b\x32\x16.chromiumos.ResultPath\"H\n\x0bGetResponse\x12\x39\n\tartifacts\x18\x01 \x01(\x0b\x32&.chromiumos.UploadedArtifactsByService\"\xdc\x01\n\x16\x42undleArtifactsRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x35\n\rartifact_info\x18\x03 \x01(\x0b\x32\x1e.chromiumos.ArtifactsByService\x12\x12\n\noutput_dir\x18\x04 \x01(\t\x12+\n\x0bresult_path\x18\x05 \x01(\x0b\x32\x16.chromiumos.ResultPath\"T\n\x17\x42undleArtifactsResponse\x12\x39\n\tartifacts\x18\x01 \x01(\x0b\x32&.chromiumos.UploadedArtifactsByService\"\x9e\x01\n\rBundleRequest\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x12\n\noutput_dir\x18\x02 \x01(\t\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x04 \x01(\x0b\x32\x15.chromite.api.Sysroot\"m\n\x0e\x42undleResponse\x12)\n\tartifacts\x18\x01 \x03(\x0b\x32\x16.chromite.api.Artifact\x12\x30\n\rdocker_builds\x18\x02 \x03(\x0b\x32\x19.chromite.api.DockerBuild\"\x90\x01\n\x14\x42undleVmFilesRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x12\n\noutput_dir\x18\x04 \x01(\t\"\xb5\x01\n\x17\x42undleChromeAFDORequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12-\n\x0c\x62uild_target\x18\x02 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x12\n\noutput_dir\x18\x03 \x01(\t\x12\x33\n\rartifact_type\x18\x04 \x01(\x0e\x32\x1c.chromiumos.AFDOArtifactType\"h\n\x1aPinnedGuestImageUriRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\"\xa3\x01\n\x1bPinnedGuestImageUriResponse\x12Q\n\rpinned_images\x18\x01 \x03(\x0b\x32:.chromite.api.PinnedGuestImageUriResponse.PinnedGuestImage\x1a\x31\n\x10PinnedGuestImage\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0b\n\x03uri\x18\x02 \x01(\t\"b\n\x14\x46\x65tchMetadataRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\x07sysroot\x18\x02 \x01(\x0b\x32\x15.chromite.api.Sysroot\"B\n\x15\x46\x65tchMetadataResponse\x12)\n\tfilepaths\x18\x01 \x03(\x0b\x32\x16.chromiumos.ResultPath2\xad\r\n\x10\x41rtifactsService\x12O\n\nBuildSetup\x12\x1f.chromite.api.BuildSetupRequest\x1a .chromite.api.BuildSetupResponse\x12:\n\x03Get\x12\x18.chromite.api.GetRequest\x1a\x19.chromite.api.GetResponse\x12p\n\x19\x46\x65tchPinnedGuestImageUris\x12(.chromite.api.PinnedGuestImageUriRequest\x1a).chromite.api.PinnedGuestImageUriResponse\x12X\n\rFetchMetadata\x12\".chromite.api.FetchMetadataRequest\x1a#.chromite.api.FetchMetadataResponse\x12P\n\x13\x42undleAutotestFiles\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\x14\x42undleChromeOSConfig\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12O\n\x12\x42undleDebugSymbols\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12M\n\x10\x42undleEbuildLogs\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12K\n\x0e\x42undleFirmware\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12P\n\x13\x42undleImageArchives\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12K\n\x0e\x42undleImageZip\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12\x64\n\x1d\x42undleAFDOGenerationArtifacts\x12%.chromite.api.BundleChromeAFDORequest\x1a\x1c.chromite.api.BundleResponse\x12T\n\x17\x42undlePinnedGuestImages\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12X\n\x1b\x42undleSimpleChromeArtifacts\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12L\n\x0f\x42undleTastFiles\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12U\n\x18\x42undleTestUpdatePayloads\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\rBundleVmFiles\x12\".chromite.api.BundleVmFilesRequest\x1a\x1c.chromite.api.BundleResponse\x12L\n\x0f\x45xportCpeReport\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12Q\n\x14\x42undleFpmcuUnittests\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x12M\n\x10\x42undleGceTarball\x12\x1b.chromite.api.BundleRequest\x1a\x1c.chromite.api.BundleResponse\x1a\x11\xc2\xed\x1a\r\n\tartifacts\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -595,6 +595,58 @@ _BUNDLEVMFILESREQUEST = _descriptor.Descriptor(
 )
 
 
+_BUNDLECHROMEAFDOREQUEST = _descriptor.Descriptor(
+  name='BundleChromeAFDORequest',
+  full_name='chromite.api.BundleChromeAFDORequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='chroot', full_name='chromite.api.BundleChromeAFDORequest.chroot', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='build_target', full_name='chromite.api.BundleChromeAFDORequest.build_target', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='output_dir', full_name='chromite.api.BundleChromeAFDORequest.output_dir', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='artifact_type', full_name='chromite.api.BundleChromeAFDORequest.artifact_type', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1777,
+  serialized_end=1958,
+)
+
+
 _PINNEDGUESTIMAGEURIREQUEST = _descriptor.Descriptor(
   name='PinnedGuestImageUriRequest',
   full_name='chromite.api.PinnedGuestImageUriRequest',
@@ -628,8 +680,8 @@ _PINNEDGUESTIMAGEURIREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1776,
-  serialized_end=1880,
+  serialized_start=1960,
+  serialized_end=2064,
 )
 
 
@@ -666,8 +718,8 @@ _PINNEDGUESTIMAGEURIRESPONSE_PINNEDGUESTIMAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1997,
-  serialized_end=2046,
+  serialized_start=2181,
+  serialized_end=2230,
 )
 
 _PINNEDGUESTIMAGEURIRESPONSE = _descriptor.Descriptor(
@@ -696,8 +748,8 @@ _PINNEDGUESTIMAGEURIRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1883,
-  serialized_end=2046,
+  serialized_start=2067,
+  serialized_end=2230,
 )
 
 
@@ -734,8 +786,8 @@ _FETCHMETADATAREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2048,
-  serialized_end=2146,
+  serialized_start=2232,
+  serialized_end=2330,
 )
 
 
@@ -765,8 +817,8 @@ _FETCHMETADATARESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2148,
-  serialized_end=2214,
+  serialized_start=2332,
+  serialized_end=2398,
 )
 
 _PREPAREFORBUILDRESPONSE.fields_by_name['build_relevance'].enum_type = _PREPAREFORBUILDRESPONSE_BUILDRELEVANCE
@@ -793,6 +845,9 @@ _BUNDLERESPONSE.fields_by_name['artifacts'].message_type = _ARTIFACT
 _BUNDLERESPONSE.fields_by_name['docker_builds'].message_type = _DOCKERBUILD
 _BUNDLEVMFILESREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _BUNDLEVMFILESREQUEST.fields_by_name['sysroot'].message_type = chromite_dot_api_dot_sysroot__pb2._SYSROOT
+_BUNDLECHROMEAFDOREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
+_BUNDLECHROMEAFDOREQUEST.fields_by_name['build_target'].message_type = chromiumos_dot_common__pb2._BUILDTARGET
+_BUNDLECHROMEAFDOREQUEST.fields_by_name['artifact_type'].enum_type = chromiumos_dot_common__pb2._AFDOARTIFACTTYPE
 _PINNEDGUESTIMAGEURIREQUEST.fields_by_name['chroot'].message_type = chromiumos_dot_common__pb2._CHROOT
 _PINNEDGUESTIMAGEURIREQUEST.fields_by_name['sysroot'].message_type = chromite_dot_api_dot_sysroot__pb2._SYSROOT
 _PINNEDGUESTIMAGEURIRESPONSE_PINNEDGUESTIMAGE.containing_type = _PINNEDGUESTIMAGEURIRESPONSE
@@ -812,6 +867,7 @@ DESCRIPTOR.message_types_by_name['BundleArtifactsResponse'] = _BUNDLEARTIFACTSRE
 DESCRIPTOR.message_types_by_name['BundleRequest'] = _BUNDLEREQUEST
 DESCRIPTOR.message_types_by_name['BundleResponse'] = _BUNDLERESPONSE
 DESCRIPTOR.message_types_by_name['BundleVmFilesRequest'] = _BUNDLEVMFILESREQUEST
+DESCRIPTOR.message_types_by_name['BundleChromeAFDORequest'] = _BUNDLECHROMEAFDOREQUEST
 DESCRIPTOR.message_types_by_name['PinnedGuestImageUriRequest'] = _PINNEDGUESTIMAGEURIREQUEST
 DESCRIPTOR.message_types_by_name['PinnedGuestImageUriResponse'] = _PINNEDGUESTIMAGEURIRESPONSE
 DESCRIPTOR.message_types_by_name['FetchMetadataRequest'] = _FETCHMETADATAREQUEST
@@ -902,6 +958,13 @@ BundleVmFilesRequest = _reflection.GeneratedProtocolMessageType('BundleVmFilesRe
   })
 _sym_db.RegisterMessage(BundleVmFilesRequest)
 
+BundleChromeAFDORequest = _reflection.GeneratedProtocolMessageType('BundleChromeAFDORequest', (_message.Message,), {
+  'DESCRIPTOR' : _BUNDLECHROMEAFDOREQUEST,
+  '__module__' : 'chromite.api.artifacts_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.BundleChromeAFDORequest)
+  })
+_sym_db.RegisterMessage(BundleChromeAFDORequest)
+
 PinnedGuestImageUriRequest = _reflection.GeneratedProtocolMessageType('PinnedGuestImageUriRequest', (_message.Message,), {
   'DESCRIPTOR' : _PINNEDGUESTIMAGEURIREQUEST,
   '__module__' : 'chromite.api.artifacts_pb2'
@@ -947,8 +1010,8 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=b'\302\355\032\r\n\tartifacts\020\002',
-  serialized_start=2217,
-  serialized_end=3824,
+  serialized_start=2401,
+  serialized_end=4110,
   methods=[
   _descriptor.MethodDescriptor(
     name='BuildSetup',
@@ -1050,9 +1113,18 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='BundleAFDOGenerationArtifacts',
+    full_name='chromite.api.ArtifactsService.BundleAFDOGenerationArtifacts',
+    index=11,
+    containing_service=None,
+    input_type=_BUNDLECHROMEAFDOREQUEST,
+    output_type=_BUNDLERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
     name='BundlePinnedGuestImages',
     full_name='chromite.api.ArtifactsService.BundlePinnedGuestImages',
-    index=11,
+    index=12,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1061,7 +1133,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleSimpleChromeArtifacts',
     full_name='chromite.api.ArtifactsService.BundleSimpleChromeArtifacts',
-    index=12,
+    index=13,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1070,7 +1142,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleTastFiles',
     full_name='chromite.api.ArtifactsService.BundleTastFiles',
-    index=13,
+    index=14,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1079,7 +1151,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleTestUpdatePayloads',
     full_name='chromite.api.ArtifactsService.BundleTestUpdatePayloads',
-    index=14,
+    index=15,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1088,7 +1160,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleVmFiles',
     full_name='chromite.api.ArtifactsService.BundleVmFiles',
-    index=15,
+    index=16,
     containing_service=None,
     input_type=_BUNDLEVMFILESREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1097,7 +1169,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='ExportCpeReport',
     full_name='chromite.api.ArtifactsService.ExportCpeReport',
-    index=16,
+    index=17,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1106,7 +1178,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleFpmcuUnittests',
     full_name='chromite.api.ArtifactsService.BundleFpmcuUnittests',
-    index=17,
+    index=18,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
@@ -1115,7 +1187,7 @@ _ARTIFACTSSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='BundleGceTarball',
     full_name='chromite.api.ArtifactsService.BundleGceTarball',
-    index=18,
+    index=19,
     containing_service=None,
     input_type=_BUNDLEREQUEST,
     output_type=_BUNDLERESPONSE,
