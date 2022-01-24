@@ -3078,23 +3078,6 @@ def BuildFullAutotestTarball(buildroot, board, tarball_dir):
   return tarball
 
 
-def BuildUnitTestTarball(buildroot, board, tarball_dir):
-  """Tar up the UnitTest binaries."""
-  tarball = 'unit_tests.tar'
-  tarball_path = os.path.join(tarball_dir, tarball)
-  cwd = os.path.abspath(
-      os.path.join(buildroot, 'chroot', 'build', board,
-                   constants.UNITTEST_PKG_PATH))
-  # UnitTest binaries are already compressed so just create a tar file.
-  BuildTarball(
-      buildroot, ['.'],
-      tarball_path,
-      cwd=cwd,
-      compressed=False,
-      check=False)
-  return tarball
-
-
 def BuildImageZip(archive_dir, image_dir):
   """Build image.zip in archive_dir from contents of image_dir.
 
