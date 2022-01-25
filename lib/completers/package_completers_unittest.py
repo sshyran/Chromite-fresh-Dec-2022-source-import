@@ -81,7 +81,7 @@ def test_package_atom(monkeypatch, get_ebuilds, simple_parser):
   monkeypatch.setattr(portage_util, 'FindEbuildsForOverlays', get_ebuilds)
   expected_packages = ['package1/bar1', 'package2/bar2']
 
-  packages = package_completers.package_atom(None, None, None,
-                                             simple_parser.parse_args())
+  packages = package_completers.package_atom(
+      None, None, None, simple_parser.parse_args(['--foo', 'bar']))
 
   assert packages == expected_packages
