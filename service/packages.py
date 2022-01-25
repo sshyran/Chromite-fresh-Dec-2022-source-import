@@ -514,20 +514,32 @@ def uprev_kernel_afdo(*_args, **_kwargs):
 
 
 @uprevs_versioned_package('chromeos-base/termina-dlc')
-def uprev_termina_dlc(_build_targets, _refs, chroot):
-  """Updates shared termina-dlc ebuild - chromeos-base/termina-dlc.
+@uprevs_versioned_package('chromeos-base/termina-tools-dlc')
+def uprev_termina_dlcs(_build_targets, _refs, chroot):
+  """Updates shared termina-dlc and termina-tools-dlc ebuilds.
+
+  termina-dlc - chromeos-base/termina-dlc
+  termina-tools-dlc - chromeos-base/termina-tools-dlc
 
   See: uprev_versioned_package.
   """
-  package = 'termina-dlc'
-  package_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base',
-                              package)
+  termina_dlc_pkg = 'termina-dlc'
+  termina_dlc_pkg_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                                      'chromeos-base', termina_dlc_pkg)
+  tools_dlc_pkg = 'termina-tools-dlc'
+  tools_dlc_pkg_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                                    'chromeos-base', tools_dlc_pkg)
 
-  version_pin_src_path = _get_version_pin_src_path(package_path)
+  # termina-dlc and termina-tools-dlc are pinned to the same version.
+  version_pin_src_path = _get_version_pin_src_path(termina_dlc_pkg_path)
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
-  return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+  result = uprev_lib.uprev_ebuild_from_pin(termina_dlc_pkg_path, version_no_rev,
+                                           chroot)
+  result += uprev_lib.uprev_ebuild_from_pin(tools_dlc_pkg_path, version_no_rev,
+                                            chroot)
 
+  return result
 
 @uprevs_versioned_package('chromeos-base/chromeos-lacros')
 def uprev_lacros(_build_targets, refs, chroot):

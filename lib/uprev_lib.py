@@ -700,6 +700,21 @@ class UprevVersionedPackageResult(object):
     self.modified.append(result)
     return self
 
+  def extend(self, other: 'UprevVersionedPackageResult'):
+    """Adds another result from an existing result."""
+    self.modified.extend(other.modified)
+
+  def __iadd__(self, other: 'UprevVersionedPackageResult'
+               ) -> 'UprevVersionedPackageResult':
+    """Adds another result from an existing result."""
+    self.extend(other)
+    return self
+
+  def __add__(self, other: 'UprevVersionedPackageResult'
+              ) -> 'UprevVersionedPackageResult':
+    """Adds two result objects to create a new one."""
+    return UprevVersionedPackageResult().extend(self).extend(other)
+
   @property
   def uprevved(self):
     return bool(self.modified)
