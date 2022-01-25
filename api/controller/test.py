@@ -20,9 +20,6 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
-from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
-from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
-from chromite.api.gen.chromiumos.test.api import test_suite_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -36,7 +33,6 @@ from chromite.scripts import cros_set_lsb_release
 from chromite.service import packages as packages_service
 from chromite.service import test
 from chromite.third_party.google.protobuf import json_format
-from chromite.third_party.google.protobuf import text_format
 from chromite.utils import key_value_store
 from chromite.utils import metrics
 
@@ -462,68 +458,3 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
           })
 
   return generated
-
-
-def _GetCoverageRulesResponseSuccess(
-    _input_proto, output_proto: test_pb2.GetCoverageRulesResponse, _config):
-  output_proto.coverage_rules.append(
-      coverage_rule_pb2.CoverageRule(
-          name='kernel:4.4',
-          test_suites=[
-              test_suite_pb2.TestSuite(
-                  test_case_tag_criteria=test_suite_pb2.TestSuite
-                  .TestCaseTagCriteria(tags=['kernel']))
-          ],
-          dut_criteria=[
-              dut_attribute_pb2.DutCriterion(
-                  attribute_id=dut_attribute_pb2.DutAttribute.Id(
-                      value='system_build_target'),
-                  values=['overlayA'],
-              )
-          ],
-      ),)
-
-
-@faux.success(_GetCoverageRulesResponseSuccess)
-@faux.empty_error
-@validate.require('source_test_plans')
-@validate.exists('dut_attribute_list.path', 'build_metadata_list.path',
-                 'flat_config_list.path')
-@validate.validation_complete
-def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
-                     output_proto: test_pb2.GetCoverageRulesResponse, _config):
-  """Call the testplan tool to generate CoverageRules."""
-  source_test_plans = input_proto.source_test_plans
-  dut_attribute_list = input_proto.dut_attribute_list
-  build_metadata_list = input_proto.build_metadata_list
-  flat_config_list = input_proto.flat_config_list
-
-  cmd = [
-      'testplan', 'generate', '-dutattributes', dut_attribute_list.path,
-      '-buildmetadata', build_metadata_list.path, '-flatconfiglist',
-      flat_config_list.path, '-logtostderr', '-v', '2'
-  ]
-
-  with osutils.TempDir(prefix='get_coverage_rules_input') as tempdir:
-    # Write all input files required by testplan, and read the output file
-    # containing CoverageRules.
-    for i, plan in enumerate(source_test_plans):
-      plan_path = os.path.join(tempdir, 'source_test_plan_%d.textpb' % i)
-      osutils.WriteFile(plan_path, text_format.MessageToString(plan))
-      cmd.extend(['-plan', plan_path])
-
-    out_path = os.path.join(tempdir, 'out.jsonpb')
-    cmd.extend(['-out', out_path])
-
-    cros_build_lib.run(cmd)
-
-    out_text = osutils.ReadFile(out_path)
-
-  # The output file contains CoverageRules as jsonpb, separated by newlines.
-  coverage_rules = []
-  for out_line in out_text.splitlines():
-    coverage_rule = coverage_rule_pb2.CoverageRule()
-    json_format.Parse(out_line, coverage_rule)
-    coverage_rules.append(coverage_rule)
-
-  output_proto.coverage_rules.extend(coverage_rules)
