@@ -1727,7 +1727,8 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       uprev=True,
       overlays=constants.BOTH_OVERLAYS,
       push_overlays=constants.BOTH_OVERLAYS,
-      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto', 'chrome_internal']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto',
+                                           'chrome_internal']),
       builder_class_name='workspace_builders.FactoryBranchBuilder',
       build_timeout=_FACTORYBRANCH_TIMEOUT,
       description='TOT builder to build a factory branch.',
@@ -3040,7 +3041,7 @@ def BranchScheduleConfig():
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       # BOT-TAG:NO_PRUNE
-      ('release-R90-13816.B', [
+      ('release-R96-14268.B', [
           'kevin-android-pi-pre-flight-branch',
           'hatch-android-rvc-pre-flight-branch'
       ], 'chell-chrome-no-afdo-uprev-pre-flight-branch',
