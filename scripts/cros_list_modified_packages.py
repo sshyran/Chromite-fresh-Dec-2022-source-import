@@ -126,7 +126,7 @@ def ListWorkonPackagesInfo(sysroot):
   if sysroot.path == '/':
     overlays = portage_util.FindOverlays(constants.BOTH_OVERLAYS, None)
   else:
-    overlays = sysroot.GetStandardField('PORTDIR_OVERLAY').splitlines()
+    overlays = sysroot.portdir_overlay
 
   vdb_path = os.path.join(sysroot.path, portage_util.VDB_PATH)
 
