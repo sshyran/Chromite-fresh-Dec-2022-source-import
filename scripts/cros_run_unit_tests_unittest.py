@@ -4,6 +4,8 @@
 
 """Unit tests for cros_run_unit_tests.py."""
 
+import os
+
 from chromite.lib import cros_test_lib
 from chromite.scripts import cros_run_unit_tests
 
@@ -11,10 +13,16 @@ from chromite.scripts import cros_run_unit_tests
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 
-class DetermineBoardPackagesTest(cros_test_lib.TestCase):
-  """Tests that package determination returns a non-empty set"""
+class CrosRunUnitTestsTest(cros_test_lib.MockTestCase):
+  """Tests for cros_run_unit_tests functions."""
 
   def testNonEmptyPackageSet(self):
     """Asserts that the deps of a known package are non-empty"""
     self.assertTrue(cros_run_unit_tests.determine_packages(
         '/', ('virtual/implicit-system',)))
+
+  def testGetKeepGoing(self):
+    """Tests set keep_going option based on env virables"""
+    self.PatchObject(os, 'environ', new={'USE': 'chrome_internal coverage'})
+    keep_going = cros_run_unit_tests.get_keep_going()
+    self.assertEqual(keep_going, True)

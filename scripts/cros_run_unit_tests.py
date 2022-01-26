@@ -99,6 +99,14 @@ def determine_packages(sysroot, virtual_packages):
   return set(
       '%s/%s' % (atom['category'], atom['name']) for atom in deps.values())
 
+def get_keep_going():
+  """Check if should enable keep_going parameter.
+
+  If the 'USE' environment contains 'coverage' then enable keep_going option
+  to prevent certain package failure from breaking the whole coverage
+  generation workflow, otherwise leave it to default settings
+  """
+  return 'coverage' in os.environ.get('USE', '')
 
 def main(argv):
   opts = ParseArgs(argv)
@@ -162,6 +170,8 @@ def main(argv):
     use_flags += ' -cros-debug'
     env['USE'] = use_flags
 
+  keep_going = get_keep_going()
+
   metrics_dir = os.environ.get(constants.CROS_METRICS_DIR_ENVVAR)
   if metrics_dir:
     env[constants.CROS_METRICS_DIR_ENVVAR] = metrics_dir
@@ -177,8 +187,8 @@ def main(argv):
       return 1
 
   try:
-    chroot_util.RunUnittests(
-        sysroot, pkg_with_test, extra_env=env, jobs=opts.jobs)
+    chroot_util.RunUnittests(sysroot, pkg_with_test, extra_env=env,
+                             keep_going=keep_going, jobs=opts.jobs)
   except cros_build_lib.RunCommandError:
     logging.error('Unittests failed.')
     return 1
