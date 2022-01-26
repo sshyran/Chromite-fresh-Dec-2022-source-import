@@ -7,7 +7,16 @@
 from pathlib import Path
 
 
-DIR = Path('~/.config/chromite').expanduser()
+# Respect the various XDG settings if the xdg module is available.  Otherwise
+# be lazy and hardcode the most common answer.
+try:
+  import xdg.BaseDirectory
+  XDG_CONFIG_HOME = Path(xdg.BaseDirectory.xdg_config_home)
+except ImportError:
+  XDG_CONFIG_HOME = Path('~/.config').expanduser()
+
+
+DIR = XDG_CONFIG_HOME / 'chromite'
 
 # List of configs that we might use.  Normally this would be declared in the
 # respective modules that actually use the config file, but having the list be
