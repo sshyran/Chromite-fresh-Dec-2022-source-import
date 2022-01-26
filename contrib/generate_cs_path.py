@@ -21,12 +21,24 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 
+# HEAD is the ref for the codesearch repo, not the project itself.
+_PUBLIC_CS_BASE = (
+    'https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:')
+
 
 def GetParser():
   """Build the argument parser."""
   parser = commandline.ArgumentParser(description=__doc__)
 
   parser.add_argument('-l', '--line', type=int, help='Line number.')
+
+  parser.add_argument(
+      '--open',
+      action='store_true',
+      default=False,
+      help='Open the link in a browser rather than copying it to the clipboard.'
+  )
+
   parser.add_argument('path', type='path', help='Path to a file.')
 
   return parser
@@ -61,7 +73,10 @@ def main(argv):
 
   line = f';l={opts.line}' if opts.line else ''
 
-  # HEAD is the ref for the codesearch repo, not the project itself.
-  cs_str = ('source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:'
-            f'{checkout_path}/{relative_path}{line}')
-  cros_build_lib.run(['xclip', '-selection', 'clipboard'], input=cs_str)
+  cs_str = f'{_PUBLIC_CS_BASE}{checkout_path}/{relative_path}{line}'
+
+  if opts.open:
+    cmd = ['xdg-open', cs_str]
+    os.execvp(cmd[0], cmd)
+  else:
+    cros_build_lib.run(['xclip', '-selection', 'clipboard'], input=cs_str)
