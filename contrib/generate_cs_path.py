@@ -6,11 +6,19 @@
 
 Currently only works locally and if using X11.
 
+IDE integration instructions. Please add your IDE if it's not listed, or update
+the instructions if they're vague or out of date!
+
 For Intellij:
 Create a new External Tool (Settings > Tools > External Tools).
 Tool Settings:
   Program: ~/chromiumos/chromite/contrib/generate_cs_path
   Arguments: $FilePath$ -l $LineNumber$
+
+For VSCode:
+Create a custom task (code.visualstudio.com/docs/editor/tasks#_custom-tasks)
+with the command:
+  ~/chromiumos/chromite/contrib/generate_cs_path ${file} -l ${lineNumber}
 """
 
 import os
