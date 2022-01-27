@@ -6,6 +6,10 @@
 
 Currently only works locally and if using X11.
 
+To allow use over SSH, enable X11 forwarding.
+Client side: -X, or add "X11Forwarding yes" to your ~/.ssh/config.
+Server side: "X11Forwarding yes" must be in /etc/ssh/sshd_config.
+
 IDE integration instructions. Please add your IDE if it's not listed, or update
 the instructions if they're vague or out of date!
 
