@@ -1411,7 +1411,6 @@ class UprevDrivefsTest(cros_test_lib.MockTestCase):
             revision='123')
     ]
     self.MOCK_DRIVEFS_EBUILD_PATH = 'drivefs.45.0.2-r1.ebuild'
-    self.MOCK_DRIVEFS_IPC_EBUILD_PATH = 'drivefs-ipc.45.0.2-r1.ebuild'
 
   def revisionBumpOutcome(self, ebuild_path):
     return uprev_lib.UprevResult(uprev_lib.Outcome.REVISION_BUMP, [ebuild_path])
@@ -1437,55 +1436,30 @@ class UprevDrivefsTest(cros_test_lib.MockTestCase):
   def test_same_version_exists(self):
     """Test the same version exists uprev should not happen."""
     drivefs_outcome = self.sameVersionOutcome()
-    drivefs_ipc_outcome = self.sameVersionOutcome()
     self.PatchObject(
         uprev_lib,
         'uprev_workon_ebuild_to_version',
-        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
-    output = packages.uprev_drivefs(None, self.refs, None)
-    self.assertFalse(output.uprevved)
-
-  def test_revision_bump_just_drivefs_package(self):
-    """Test drivefs package uprevs not drivefs-ipc, should not uprev."""
-    drivefs_outcome = self.revisionBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
-    self.PatchObject(
-        uprev_lib,
-        'uprev_workon_ebuild_to_version',
-        side_effect=[drivefs_outcome, None])
+        side_effect=[drivefs_outcome])
     output = packages.uprev_drivefs(None, self.refs, None)
     self.assertFalse(output.uprevved)
 
   def test_revision_bump_both_packages(self):
     """Test both packages uprev, should succeed."""
     drivefs_outcome = self.revisionBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
-    drivefs_ipc_outcome = self.revisionBumpOutcome(
-        self.MOCK_DRIVEFS_IPC_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
         'uprev_workon_ebuild_to_version',
-        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
+        side_effect=[drivefs_outcome])
     output = packages.uprev_drivefs(None, self.refs, None)
     self.assertTrue(output.uprevved)
-
-  def test_major_bump_only_drivefs_packages(self):
-    """Test drivefs package uprevs not drivefs-ipc, should not uprev."""
-    drivefs_outcome = self.majorBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
-    self.PatchObject(
-        uprev_lib,
-        'uprev_workon_ebuild_to_version',
-        side_effect=[drivefs_outcome, None])
-    output = packages.uprev_drivefs(None, self.refs, None)
-    self.assertFalse(output.uprevved)
 
   def test_major_bump_both_packages(self):
     """Test both packages uprev, should succeed."""
     drivefs_outcome = self.majorBumpOutcome(self.MOCK_DRIVEFS_EBUILD_PATH)
-    drivefs_ipc_outcome = self.majorBumpOutcome(
-        self.MOCK_DRIVEFS_IPC_EBUILD_PATH)
     self.PatchObject(
         uprev_lib,
         'uprev_workon_ebuild_to_version',
-        side_effect=[drivefs_outcome, drivefs_ipc_outcome])
+        side_effect=[drivefs_outcome])
     output = packages.uprev_drivefs(None, self.refs, None)
     self.assertTrue(output.uprevved)
 

@@ -430,21 +430,6 @@ def uprev_drivefs(_build_targets, refs, chroot):
   if not uprev_result:
     return result
   all_changed_files.extend(uprev_result.changed_files)
-
-  # Attempt to uprev drivefs-ipc package.
-  pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
-  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
-                                                          drivefs_version,
-                                                          chroot,
-                                                          allow_downrev=False)
-
-  if not uprev_result:
-    logging.warning(
-        'drivefs package has changed files %s but drivefs-ipc does not',
-        all_changed_files)
-    return result
-
-  all_changed_files.extend(uprev_result.changed_files)
   result.add_result(drivefs_version, all_changed_files)
 
   return result
