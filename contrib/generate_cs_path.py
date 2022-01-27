@@ -27,6 +27,7 @@ with the command:
 
 import os
 from pathlib import Path
+import sys
 
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -87,8 +88,11 @@ def main(argv):
 
   cs_str = f'{_PUBLIC_CS_BASE}{checkout_path}/{relative_path}{line}'
 
+  is_mac_os = sys.platform.startswith('darwin')
+
   if opts.open:
-    cmd = ['xdg-open', cs_str]
+    cmd = ['open' if is_mac_os else 'xdg-open', cs_str]
     os.execvp(cmd[0], cmd)
   else:
-    cros_build_lib.run(['xclip', '-selection', 'clipboard'], input=cs_str)
+    cmd = ['pbcopy'] if is_mac_os else ['xclip', '-selection', 'clipboard']
+    cros_build_lib.run(cmd, input=cs_str)
