@@ -17403,6 +17403,7 @@
         "boards": [
             "jacuzzi"
         ],
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "useflags": [
@@ -17428,6 +17429,7 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "useflags": [
@@ -20679,11 +20681,13 @@
             "arm64-generic-full",
             "eve-full",
             "hana-full",
+            "jacuzzi-full",
             "kevin-full",
             "kevin64-full",
             "octopus-full",
             "tael-full",
-            "tatl-full"
+            "tatl-full",
+            "zork-full"
         ],
         "useflags": [
             "-chrome_internal"
@@ -20718,11 +20722,13 @@
             "arm64-generic-full-tryjob",
             "eve-full-tryjob",
             "hana-full-tryjob",
+            "jacuzzi-full-tryjob",
             "kevin-full-tryjob",
             "kevin64-full-tryjob",
             "octopus-full-tryjob",
             "tael-full-tryjob",
-            "tatl-full-tryjob"
+            "tatl-full-tryjob",
+            "zork-full-tryjob"
         ],
         "useflags": [
             "-chrome_internal"
@@ -34979,6 +34985,7 @@
         "boards": [
             "zork"
         ],
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "unittests": false,
@@ -35005,6 +35012,7 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "manifest_version": true,
         "prebuilts": "public",
         "run_cpeexport": true,
         "unittests": false,

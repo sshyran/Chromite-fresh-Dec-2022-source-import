@@ -1244,11 +1244,13 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
   active_builders = _frozen_ge_set(ge_build_config, [
       'eve',
       'hana',
+      'jacuzzi',
       'kevin',
       'kevin64',
       'octopus',
       'tael',
       'tatl',
+      'zork',
   ], ('amd64-generic', 'arm-generic', 'arm64-generic'))
 
   # Move the following builders to active_builders once they are consistently

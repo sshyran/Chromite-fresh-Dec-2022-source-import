@@ -149,11 +149,13 @@
     arm64-generic-full
     eve-full
     hana-full
+    jacuzzi-full
     kevin-full
     kevin64-full
     octopus-full
     tael-full
     tatl-full
+    zork-full
 
 == informational ==
   amd64-generic-asan
@@ -1283,11 +1285,13 @@
     arm64-generic-full-tryjob
     eve-full-tryjob
     hana-full-tryjob
+    jacuzzi-full-tryjob
     kevin-full-tryjob
     kevin64-full-tryjob
     octopus-full-tryjob
     tael-full-tryjob
     tatl-full-tryjob
+    zork-full-tryjob
   master-pi-android-pfq-tryjob
     betty-pi-arc-pi-android-pfq-tryjob
     coral-pi-android-pfq-tryjob
