@@ -345,11 +345,8 @@ class ImageTestTest(cros_test_lib.MockTempDirTestCase,
     self.assertFalse(output_proto.success)
 
 
-class PushImageTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+class PushImageTest(api_config.ApiConfigMixin):
   """Push image test."""
-
-  def setUp(self):
-    self.response = image_pb2.PushImageResponse()
 
   def _GetRequest(
       self,
@@ -368,76 +365,72 @@ class PushImageTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         dryrun=dryrun,
         channels=channels)
 
-  def testValidateOnly(self):
-    """Check that a validate only call does not execute any logic."""
-    patch = self.PatchObject(pushimage, 'PushImage')
+  def _GetResponse(self):
+    return image_pb2.PushImageRequest()
 
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testValidateOnly(self, MockPushImage):
+    """Check that a validate only call does not execute any logic."""
     req = self._GetRequest(sign_types=[
         common_pb2.IMAGE_TYPE_RECOVERY, common_pb2.IMAGE_TYPE_FACTORY,
         common_pb2.IMAGE_TYPE_FIRMWARE, common_pb2.IMAGE_TYPE_ACCESSORY_USBPD,
         common_pb2.IMAGE_TYPE_ACCESSORY_RWSIG, common_pb2.IMAGE_TYPE_BASE,
         common_pb2.IMAGE_TYPE_GSC_FIRMWARE
     ])
-    res = image_controller.PushImage(req, self.response,
-                                     self.validate_only_config)
-    patch.assert_not_called()
-    self.assertEqual(res, controller.RETURN_CODE_VALID_INPUT)
+    rc = image_controller.PushImage(req, self.NewResponse(),
+                                    self.validate_only_config)
+    MockPushImage.assert_not_called()
+    self.assertEqual(rc, controller.RETURN_CODE_VALID_INPUT)
 
-  def testValidateOnlyInvalid(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testValidateOnlyInvalid(self, MockPushImage):
     """Check that validate call rejects invalid sign types."""
-    patch = self.PatchObject(pushimage, 'PushImage')
-
     # Pass unsupported image type.
     req = self._GetRequest(sign_types=[common_pb2.IMAGE_TYPE_DLC])
-    res = image_controller.PushImage(req, self.response,
-                                     self.validate_only_config)
-    patch.assert_not_called()
-    self.assertEqual(res, controller.RETURN_CODE_INVALID_INPUT)
+    rc = image_controller.PushImage(req, self._GetResponse(),
+                                    self.validate_only_config)
+    MockPushImage.assert_not_called()
+    self.assertEqual(rc, controller.RETURN_CODE_INVALID_INPUT)
 
-  def testMockCall(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testMockCall(self, MockPushImage):
     """Test that mock call does not execute any logic, returns mocked value."""
-    patch = self.PatchObject(pushimage, 'PushImage')
-
-    rc = image_controller.PushImage(self._GetRequest(), self.response,
+    rc = image_controller.PushImage(self._GetRequest(), self._GetResponse(),
                                     self.mock_call_config)
-    patch.assert_not_called()
+    MockPushImage.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_SUCCESS, rc)
 
-  def testMockError(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testMockError(self, MockPushImage):
     """Test that mock call does not execute any logic, returns error."""
-    patch = self.PatchObject(pushimage, 'PushImage')
-
-    rc = image_controller.PushImage(self._GetRequest(), self.response,
+    rc = image_controller.PushImage(self._GetRequest(), self._GetResponse(),
                                     self.mock_error_config)
-    patch.assert_not_called()
+    MockPushImage.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY, rc)
 
-  def testNoBuildTarget(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testNoBuildTarget(self, _):
     """Test no build target given fails."""
     request = self._GetRequest(build_target_name='')
-
-    # No build target should cause it to fail.
     with self.assertRaises(cros_build_lib.DieSystemExit):
-      image_controller.PushImage(request, self.response, self.api_config)
+      image_controller.PushImage(request, self._GetResponse(), self.api_config)
 
-  def testNoGsImageDir(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testNoGsImageDir(self, _):
     """Test no image dir given fails."""
     request = self._GetRequest(gs_image_dir='')
-
-    # No image dir should cause it to fail.
     with self.assertRaises(cros_build_lib.DieSystemExit):
-      image_controller.PushImage(request, self.response, self.api_config)
+      image_controller.PushImage(request, self._GetResponse(), self.api_config)
 
-  def testCallCorrect(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={})
+  def testCallCorrect(self, MockPushImage):
     """Check that a call is called with the correct parameters."""
-    patch = self.PatchObject(pushimage, 'PushImage')
-
     request = self._GetRequest(
         dryrun=False, profile='', sign_types=[common_pb2.IMAGE_TYPE_RECOVERY],
         channels=[common_pb2.CHANNEL_DEV, common_pb2.CHANNEL_CANARY])
     request.dest_bucket = 'gs://foo'
-    image_controller.PushImage(request, self.response, self.api_config)
-    patch.assert_called_with(
+    image_controller.PushImage(request, self._GetResponse(), self.api_config)
+    MockPushImage.assert_called_with(
         request.gs_image_dir,
         request.sysroot.build_target.name,
         dry_run=request.dryrun,
@@ -445,14 +438,32 @@ class PushImageTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         dest_bucket=request.dest_bucket,
         force_channels=['dev', 'canary'])
 
-  def testCallSucceeds(self):
+  @mock.patch.object(pushimage, 'PushImage', return_value={
+      'dev': ['gs://dev/instr1', 'gs://dev/instr2'],
+      'canary': ['gs://canary/instr1']})
+  def testOutput(self, _):
+    """Check that a call populates the response object."""
+    request = self._GetRequest(
+        profile='', sign_types=[common_pb2.IMAGE_TYPE_RECOVERY],
+        channels=[common_pb2.CHANNEL_DEV, common_pb2.CHANNEL_CANARY])
+    request.dest_bucket = 'gs://foo'
+    response = self._GetResponse()
+    image_controller.PushImage(request, response, self.api_config)
+    self.assertEqual(
+        sorted([i.instructions_file_path for i in response.instructions]),
+        sorted(['gs://dev/instr1', 'gs://dev/instr2', 'gs://canary/instr1']))
+
+  def testCallSucceeds(self, _):
     """Check that a (dry run) call is made successfully."""
     request = self._GetRequest(sign_types=[common_pb2.IMAGE_TYPE_RECOVERY])
-    res = image_controller.PushImage(request, self.response, self.api_config)
-    self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
+    rc = image_controller.PushImage(
+        request,
+        self._GetResponse(),
+        self.api_config)
+    self.assertEqual(rc, controller.RETURN_CODE_SUCCESS)
 
   def testCallFailsWithBadImageDir(self):
     """Check that a (dry run) call fails when given a bad gs_image_dir."""
     request = self._GetRequest(gs_image_dir='foo')
-    res = image_controller.PushImage(request, self.response, self.api_config)
-    self.assertEqual(res, controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY)
+    rc = image_controller.PushImage(request, self._GetResponse, self.api_config)
+    self.assertEqual(rc, controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY)
