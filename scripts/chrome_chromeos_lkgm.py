@@ -196,6 +196,7 @@ class ChromeLKGMCommitter(object):
     logging.info('Applying Bot-Commit+1')
     self._gerrit_helper.SetReview(change.gerrit_number, labels=labels,
                                   notify='NONE')
+    self._gerrit_helper.SetHashtags(change.gerrit_number, ['chrome-lkgm'], [])
 
   def ComposeCommitMsg(self):
     """Constructs and returns the commit message for the LKGM update."""
