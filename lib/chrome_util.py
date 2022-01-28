@@ -414,6 +414,11 @@ _COPY_PATHS_CHROME = (
     Path('resources.pak'),
     # TODO(crbug.com/1182258): remove once swiftshader is handled as DLC.
     Path('swiftshader/*.so', dest='swiftshader/', optional=True),
+    # Text file containing a seed for the chrome_variations_tast_tests target.
+    # This is not a chrome build artifact, just some variable test data that
+    # will be used by a Tast test that is too large to pass on the command
+    # line from a swarming task.
+    Path('variations_seed.txt', optional=True),
     Path('xdg-settings'),
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
