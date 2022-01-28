@@ -4,8 +4,9 @@
 
 """Use with an IDE to copy a link to the current file/line to your clipboard.
 
-Private repos are currently not supported. The links still generate, but it
-will not be usable.
+Public and private repos are supported. The internal/public arguments are only
+used if the repo is public, private repos always link to the internal code
+search.
 
 By default always generates a link to the public code search, but can also
 generate links to the internal code search.
@@ -44,20 +45,23 @@ from chromite.lib import git
 _PUBLIC_CS_BASE = (
     'https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:')
 _INTERNAL_CS_BASE = 'http://cs/chromeos_public/'
+_INTERNAL_CS_PRIVATE_BASE = 'http://cs/chromeos_internal/'
 
 
 def GetParser():
   """Build the argument parser."""
   parser = commandline.ArgumentParser(description=__doc__)
 
-  parser.add_argument(
+  # Public/internal code search selection arguments.
+  type_group = parser.add_mutually_exclusive_group()
+  type_group.add_argument(
       '-p',
       '--public',
       dest='public_link',
       action='store_true',
       default=True,
       help='Generate a link to the public code search.')
-  parser.add_argument(
+  type_group.add_argument(
       '-i',
       '--internal',
       dest='public_link',
@@ -67,6 +71,7 @@ def GetParser():
   parser.add_argument('-l', '--line', type=int, help='Line number.')
 
   parser.add_argument(
+      '-o',
       '--open',
       action='store_true',
       default=False,
@@ -94,20 +99,31 @@ def main(argv):
 
   checkout = git.ManifestCheckout.Cached(opts.path)
 
+  # Find the project.
   checkout_path = None
-  for checkout_path in checkout.checkouts_by_path:
+  private_repo = False
+  for checkout_path, attrs in checkout.checkouts_by_path.items():
     try:
       relative_path = opts.path.relative_to(checkout_path)
     except ValueError:
       continue
     else:
+      # Public/private determination.
+      private_repo = attrs.get('remote_alias') == 'cros-internal'
       break
   else:
     cros_build_lib.Die('No project found for %s.', opts.path)
 
   line = f';l={opts.line}' if opts.line else ''
 
-  base = _PUBLIC_CS_BASE if opts.public_link else _INTERNAL_CS_BASE
+  if private_repo:
+    # Private repos not on public CS, so force internal private.
+    base = _INTERNAL_CS_PRIVATE_BASE
+  elif opts.public_link:
+    base = _PUBLIC_CS_BASE
+  else:
+    base = _INTERNAL_CS_BASE
+
   cs_str = f'{base}{checkout_path}/{relative_path}{line}'
 
   is_mac_os = sys.platform.startswith('darwin')
