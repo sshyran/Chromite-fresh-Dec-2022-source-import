@@ -4,6 +4,12 @@
 
 """Use with an IDE to copy a link to the current file/line to your clipboard.
 
+Private repos are currently not supported. The links still generate, but it
+will not be usable.
+
+By default always generates a link to the public code search, but can also
+generate links to the internal code search.
+
 Currently only works locally and if using X11.
 
 To allow use over SSH, enable X11 forwarding.
@@ -37,11 +43,26 @@ from chromite.lib import git
 # HEAD is the ref for the codesearch repo, not the project itself.
 _PUBLIC_CS_BASE = (
     'https://source.chromium.org/chromiumos/chromiumos/codesearch/+/HEAD:')
+_INTERNAL_CS_BASE = 'http://cs/chromeos_public/'
 
 
 def GetParser():
   """Build the argument parser."""
   parser = commandline.ArgumentParser(description=__doc__)
+
+  parser.add_argument(
+      '-p',
+      '--public',
+      dest='public_link',
+      action='store_true',
+      default=True,
+      help='Generate a link to the public code search.')
+  parser.add_argument(
+      '-i',
+      '--internal',
+      dest='public_link',
+      action='store_false',
+      help='Generate a link to the internal code search.')
 
   parser.add_argument('-l', '--line', type=int, help='Line number.')
 
@@ -86,7 +107,8 @@ def main(argv):
 
   line = f';l={opts.line}' if opts.line else ''
 
-  cs_str = f'{_PUBLIC_CS_BASE}{checkout_path}/{relative_path}{line}'
+  base = _PUBLIC_CS_BASE if opts.public_link else _INTERNAL_CS_BASE
+  cs_str = f'{base}{checkout_path}/{relative_path}{line}'
 
   is_mac_os = sys.platform.startswith('darwin')
 
@@ -94,5 +116,5 @@ def main(argv):
     cmd = ['open' if is_mac_os else 'xdg-open', cs_str]
     os.execvp(cmd[0], cmd)
   else:
-    cmd = ['pbcopy'] if is_mac_os else ['xclip', '-selection', 'clipboard']
+    cmd = ['pbcopy'] if is_mac_os else ['xclip', '-selection', 'clip-board']
     cros_build_lib.run(cmd, input=cs_str)
