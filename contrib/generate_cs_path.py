@@ -116,5 +116,5 @@ def main(argv):
     cmd = ['open' if is_mac_os else 'xdg-open', cs_str]
     os.execvp(cmd[0], cmd)
   else:
-    cmd = ['pbcopy'] if is_mac_os else ['xclip', '-selection', 'clip-board']
+    cmd = ['pbcopy'] if is_mac_os else ['xsel', '--clipboard', '--input']
     cros_build_lib.run(cmd, input=cs_str)
