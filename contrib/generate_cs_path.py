@@ -67,6 +67,13 @@ def GetParser():
       dest='public_link',
       action='store_false',
       help='Generate a link to the internal code search.')
+  type_group.add_argument(
+      '-g',
+      '--gitiles',
+      action='store_true',
+      default=False,
+      help='Generate a gitiles link rather than a code search link.'
+  )
 
   parser.add_argument('-l', '--line', type=int, help='Line number.')
 
@@ -101,36 +108,37 @@ def main(argv):
 
   # Find the project.
   checkout_path = None
-  private_repo = False
+  attrs = {}
   for checkout_path, attrs in checkout.checkouts_by_path.items():
     try:
       relative_path = opts.path.relative_to(checkout_path)
+      break
     except ValueError:
       continue
-    else:
-      # Public/private determination.
-      private_repo = attrs.get('remote_alias') == 'cros-internal'
-      break
   else:
     cros_build_lib.Die('No project found for %s.', opts.path)
 
-  line = f';l={opts.line}' if opts.line else ''
-
-  if private_repo:
-    # Private repos not on public CS, so force internal private.
-    base = _INTERNAL_CS_PRIVATE_BASE
-  elif opts.public_link:
-    base = _PUBLIC_CS_BASE
+  if opts.gitiles:
+    final_link = (f"{attrs.get('push_url')}/+/{attrs.get('revision')}/"
+                  f'{relative_path}#{opts.line}')
   else:
-    base = _INTERNAL_CS_BASE
+    line = f';l={opts.line}' if opts.line else ''
 
-  cs_str = f'{base}{checkout_path}/{relative_path}{line}'
+    if attrs.get('remote_alias') == 'cros-internal':
+      # Private repos not on public CS, so force internal private.
+      base = _INTERNAL_CS_PRIVATE_BASE
+    elif opts.public_link:
+      base = _PUBLIC_CS_BASE
+    else:
+      base = _INTERNAL_CS_BASE
+
+    final_link = f'{base}{checkout_path}/{relative_path}{line}'
 
   is_mac_os = sys.platform.startswith('darwin')
 
   if opts.open:
-    cmd = ['open' if is_mac_os else 'xdg-open', cs_str]
+    cmd = ['open' if is_mac_os else 'xdg-open', final_link]
     os.execvp(cmd[0], cmd)
   else:
     cmd = ['pbcopy'] if is_mac_os else ['xsel', '--clipboard', '--input']
-    cros_build_lib.run(cmd, input=cs_str)
+    cros_build_lib.run(cmd, input=final_link)
