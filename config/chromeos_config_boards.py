@@ -150,4 +150,5 @@ builder_incompatible_binaries_boards = frozenset([
     'zork-borealis',
     'skyrim',
     'skyrim-chausie',
+    'skyrim-kernelnext',
 ])
