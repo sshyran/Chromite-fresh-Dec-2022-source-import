@@ -937,16 +937,6 @@ def AndroidTemplates(site_config):
       android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
   )
 
-  # Template for Android VM Sc.
-  site_config.AddTemplate(
-      'vmsc_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMSC_ANDROID_PFQ,
-      android_package=constants.ANDROID_VMSC_PACKAGE,
-      android_import_branch=constants.ANDROID_VMSC_BUILD_BRANCH,
-  )
-
   # Template for Android T.
   site_config.AddTemplate(
       'vmt_android_pfq',
@@ -1040,25 +1030,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
   _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
   _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-
-  # Android VM SC master.
-  vmsc_master_config = site_config.Add(
-      constants.VMSC_ANDROID_PFQ_MASTER,
-      site_config.templates.vmsc_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 60m interval',
-      android_update_lkgb=True,
-  )
-
-  _vmsc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'betty-arc-s',
-      'hatch-arc-s',
-  ])
-  _vmsc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
 
   # Android VM T master
   vmt_master_config = site_config.Add(
@@ -1156,42 +1127,6 @@ def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
           _vmrvc_vmtest_boards,
           board_configs,
           site_config.templates.vmrvc_android_pfq,
-          vm_tests=[],
-      ))
-
-  # Android VMSC slaves.
-  vmsc_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_hwtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_vmtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
           vm_tests=[],
       ))
 
