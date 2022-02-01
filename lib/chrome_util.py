@@ -330,9 +330,10 @@ _COPY_PATHS_COMMON = (
     # Copying icudtl.dat has to be optional because in CROS, icudtl.dat will
     # be installed by the package "chrome-icu", and icudtl.dat in chrome is
     # deleted in the chromeos-chrome ebuild. But we can not delete this line
-    # totally because chromite/deloy_chrome is used outside of ebuild
+    # totally because chromite/deploy_chrome is used outside of ebuild
     # (see https://crbug.com/1081884).
     Path('icudtl.dat', optional=True),
+    Path('icudtl.dat.hash', optional=True),
     Path('libosmesa.so', exe=True, optional=True),
     # Do not strip the nacl_helper_bootstrap binary because the binutils
     # objcopy/strip mangles the ELF program headers.
@@ -457,6 +458,7 @@ _COPY_PATHS_LACROS = (
     Path('locales/', optional=True),
     Path('*.pak', optional=True),
     Path('icudtl.dat', optional=True),
+    Path('icudtl.dat.hash', optional=True),
     Path('snapshot_blob.bin', optional=True),
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
