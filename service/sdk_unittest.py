@@ -28,9 +28,10 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
     self.assertIn('--create', self._GetArgsList(replace=False))
 
     # Check the other flags get added when the correct argument passed.
-    self.assertListEqual(['--create', '--use-image'],
+    self.assertListEqual(['--create', '--use-image', '--sdk-version', 'foo'],
                          self._GetArgsList(
-                             replace=False, bootstrap=False, use_image=True))
+                             replace=False, bootstrap=False, use_image=True,
+                             sdk_version='foo'))
 
     self.assertListEqual(['--create', '--bootstrap', '--nouse-image'],
                          self._GetArgsList(

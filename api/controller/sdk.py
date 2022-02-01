@@ -35,6 +35,7 @@ def Create(input_proto, output_proto, config):
 
   chroot_path = input_proto.chroot.path
   cache_dir = input_proto.chroot.cache_dir
+  sdk_version = input_proto.sdk_version
 
   if chroot_path and not os.path.isabs(chroot_path):
     cros_build_lib.Die('The chroot path must be absolute.')
@@ -47,7 +48,8 @@ def Create(input_proto, output_proto, config):
       bootstrap=bootstrap,
       use_image=use_image,
       cache_dir=cache_dir,
-      chroot_path=chroot_path)
+      chroot_path=chroot_path,
+      sdk_version=sdk_version)
 
   version = sdk.Create(args)
 

@@ -24,7 +24,7 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     self.response = sdk_pb2.CreateResponse()
 
   def _GetRequest(self, no_replace=False, bootstrap=False, no_use_image=False,
-                  cache_path=None, chroot_path=None):
+                  cache_path=None, chroot_path=None, sdk_version=None):
     """Helper to build a create request message."""
     request = sdk_pb2.CreateRequest()
     request.flags.no_replace = no_replace
@@ -35,6 +35,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
       request.chroot.cache_dir = cache_path
     if chroot_path:
       request.chroot.path = chroot_path
+    if sdk_version:
+      request.sdk_version = sdk_version
 
     return request
 
@@ -82,7 +84,8 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         bootstrap=False,
         use_image=True,
         chroot_path=mock.ANY,
-        cache_dir=mock.ANY)
+        cache_dir=mock.ANY,
+        sdk_version=mock.ANY)
 
   def testTrueArguments(self):
     """Test True arguments handling."""
@@ -92,14 +95,15 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     # Test all True values in the message.
     request = self._GetRequest(no_replace=True, bootstrap=True,
-                               no_use_image=True)
+                               no_use_image=True, sdk_version='foo')
     sdk_controller.Create(request, self.response, self.api_config)
     args_patch.assert_called_with(
         replace=False,
         bootstrap=True,
         use_image=False,
         chroot_path=mock.ANY,
-        cache_dir=mock.ANY)
+        cache_dir=mock.ANY,
+        sdk_version='foo')
 
 
 class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

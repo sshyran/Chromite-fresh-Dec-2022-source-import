@@ -47,7 +47,8 @@ class CreateArguments(object):
                bootstrap: bool = False,
                use_image: bool = True,
                chroot_path: Optional[str] = None,
-               cache_dir: Optional[str] = None):
+               cache_dir: Optional[str] = None,
+               sdk_version: Optional[str] = None):
     """Create arguments init.
 
     Args:
@@ -57,12 +58,14 @@ class CreateArguments(object):
         directly in a directory.
       chroot_path: Path to where the chroot should be reside.
       cache_dir: Alternative directory to use as a cache for the chroot.
+      sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
     """
     self.replace = replace
     self.bootstrap = bootstrap
     self.use_image = use_image
     self.chroot_path = chroot_path
     self.cache_dir = cache_dir
+    self.sdk_version = sdk_version
 
   def GetArgList(self) -> List[str]:
     """Get the list of the corresponding command line arguments.
@@ -90,6 +93,9 @@ class CreateArguments(object):
 
     if self.chroot_path:
       args.extend(['--chroot', self.chroot_path])
+
+    if self.sdk_version:
+      args.extend(['--sdk-version', self.sdk_version])
 
     return args
 
