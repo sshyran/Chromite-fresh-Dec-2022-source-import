@@ -28063,6 +28063,7 @@
         "boards": [
             "skyrim-kernelnext"
         ],
+        "chrome_sdk_build_chrome": false,
         "important": false,
         "unittests": false,
         "vm_tests_override": null
@@ -28072,6 +28073,7 @@
         "boards": [
             "skyrim-kernelnext"
         ],
+        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [

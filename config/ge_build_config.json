@@ -308,7 +308,7 @@
           "builder": "RELEASE",
           "experimental": true,
           "leader_board": false,
-          "board_group": "",
+          "board_group": "guybrush",
           "arch": "UNKNOWN"
         }
       ]
@@ -596,7 +596,7 @@
           "builder": "RELEASE",
           "experimental": true,
           "leader_board": false,
-          "board_group": "",
+          "board_group": "skyrim",
           "arch": "X86_INTERNAL"
         }
       ]
