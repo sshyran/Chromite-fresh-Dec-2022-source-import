@@ -77,12 +77,20 @@ def GetParser():
 
   parser.add_argument('-l', '--line', type=int, help='Line number.')
 
-  parser.add_argument(
+  action_group = parser.add_mutually_exclusive_group()
+  action_group.add_argument(
       '-o',
       '--open',
       action='store_true',
       default=False,
       help='Open the link in a browser rather than copying it to the clipboard.'
+  )
+  action_group.add_argument(
+      '-s',
+      '--show',
+      action='store_true',
+      default=False,
+      help='Output the link to stdout rather than copying it to the clipboard.'
   )
 
   parser.add_argument('path', type='path', help='Path to a file.')
@@ -139,6 +147,8 @@ def main(argv):
   if opts.open:
     cmd = ['open' if is_mac_os else 'xdg-open', final_link]
     os.execvp(cmd[0], cmd)
+  elif opts.show:
+    print(cs_str)
   else:
     cmd = ['pbcopy'] if is_mac_os else ['xsel', '--clipboard', '--input']
     cros_build_lib.run(cmd, input=final_link)
