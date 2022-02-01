@@ -873,25 +873,33 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
                                       kill_timeout, cmd, old_sigterm))
 
     try:
-      (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
-    finally:
-      if use_signals:
-        signal.signal(signal.SIGINT, old_sigint)
-        signal.signal(signal.SIGTERM, old_sigterm)
+      try:
+        (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
+      finally:
+        if use_signals:
+          signal.signal(signal.SIGINT, old_sigint)
+          signal.signal(signal.SIGTERM, old_sigterm)
 
-      if (popen_stdout and not isinstance(popen_stdout, int) and
-          not log_stdout_to_file):
-        popen_stdout.seek(0)
-        cmd_result.stdout = popen_stdout.read()
-        popen_stdout.close()
-      elif log_stdout_to_file:
-        popen_stdout.close()
+        if (popen_stdout and not isinstance(popen_stdout, int) and
+            not log_stdout_to_file):
+          popen_stdout.seek(0)
+          cmd_result.stdout = popen_stdout.read()
+          popen_stdout.close()
+        elif log_stdout_to_file:
+          popen_stdout.close()
 
-      if (popen_stderr and not isinstance(popen_stderr, int) and
-          not log_stderr_to_file):
-        popen_stderr.seek(0)
-        cmd_result.stderr = popen_stderr.read()
-        popen_stderr.close()
+        if (popen_stderr and not isinstance(popen_stderr, int) and
+            not log_stderr_to_file):
+          popen_stderr.seek(0)
+          cmd_result.stderr = popen_stderr.read()
+          popen_stderr.close()
+    except TerminateRunCommandError as e:
+      # If we were killed by a signal (like SIGTERM in case of a timeout), don't
+      # swallow the output completely as it can be a huge help for figuring out
+      # why the command failed.
+      e.stdout = e.result.stdout = cmd_result.stdout
+      e.stderr = e.result.stderr = cmd_result.stderr
+      raise
 
     cmd_result.returncode = proc.returncode
 
