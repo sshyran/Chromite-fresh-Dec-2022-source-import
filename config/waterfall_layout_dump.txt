@@ -326,6 +326,7 @@
     trogdor-connectivitynext-release
     trogdor-kernelnext-release
     trogdor-release
+    trogdor-zephyr-release
     trogdor64-release
     ultima-release
     veyron_rialto-release
@@ -1437,6 +1438,7 @@
     trogdor-connectivitynext-release-tryjob
     trogdor-kernelnext-release-tryjob
     trogdor-release-tryjob
+    trogdor-zephyr-release-tryjob
     trogdor64-release-tryjob
     ultima-release-tryjob
     veyron_rialto-release-tryjob
@@ -1837,6 +1839,12 @@
   trogdor-payloads-tryjob
   trogdor-release-tryjob
   trogdor-unittest-stress
+  trogdor-zephyr-full-tryjob
+  trogdor-zephyr-llvm-next-toolchain-tryjob
+  trogdor-zephyr-llvm-toolchain-tryjob
+  trogdor-zephyr-payloads-tryjob
+  trogdor-zephyr-release-tryjob
+  trogdor-zephyr-unittest-stress
   trogdor64-full-tryjob
   trogdor64-llvm-next-toolchain-tryjob
   trogdor64-llvm-toolchain-tryjob
