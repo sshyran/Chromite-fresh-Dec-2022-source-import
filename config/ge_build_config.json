@@ -853,23 +853,6 @@
       ]
     },
     {
-      "name": "asurada-zephyr",
-      "reference_board_name": "asurada-zephyr",
-      "arch": "ARM_INTERNAL",
-      "builder": "RELEASE",
-      "experimental": false,
-      "models": [
-        {
-          "board_name": "asurada-zephyr",
-          "name": "hayato",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7198,
-          "is_active": true
-        }
-      ]
-    },
-    {
       "name": "atlas",
       "reference_board_name": "atlas",
       "arch": "X86_INTERNAL",
@@ -10001,31 +9984,6 @@
       ]
     },
     {
-      "name": "trogdor-zephyr",
-      "reference_board_name": "trogdor-zephyr",
-      "arch": "ARM_INTERNAL",
-      "builder": "RELEASE",
-      "experimental": true,
-      "models": [
-        {
-          "board_name": "trogdor-zephyr",
-          "name": "lazor",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7182,
-          "is_active": true
-        },
-        {
-          "board_name": "trogdor-zephyr",
-          "name": "limozeen",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7182,
-          "is_active": true
-        }
-      ]
-    },
-    {
       "name": "trogdor64",
       "reference_board_name": "trogdor64",
       "arch": "ARM_INTERNAL",
@@ -11014,39 +10972,6 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7170,
-          "is_active": true
-        }
-      ]
-    },
-    {
-      "name": "volteer-zephyr",
-      "reference_board_name": "volteer-zephyr",
-      "arch": "X86_INTERNAL",
-      "builder": "RELEASE",
-      "experimental": true,
-      "models": [
-        {
-          "board_name": "volteer-zephyr",
-          "name": "delbin",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7181,
-          "is_active": true
-        },
-        {
-          "board_name": "volteer-zephyr",
-          "name": "volteer2",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7181,
-          "is_active": true
-        },
-        {
-          "board_name": "volteer-zephyr",
-          "name": "volteer2_ti50",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7181,
           "is_active": true
         }
       ]
