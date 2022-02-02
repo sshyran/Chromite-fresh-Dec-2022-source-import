@@ -208,6 +208,7 @@ OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
 SIZE_EXEMPT_PACKAGES = [
     'net-print/fuji-xerox-printing-license',
     'net-print/konica-minolta-printing-license',
+    'net-print/nec-printing-license',
     'net-print/xerox-printing-license',
 ]
 
