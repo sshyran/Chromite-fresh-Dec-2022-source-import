@@ -31,19 +31,19 @@ class JsonTest(cros_test_lib.TempDirTestCase):
     """Verify valid json file is accepted."""
     path = os.path.join(self.tempdir, 'x.json')
     osutils.WriteFile(path, '{}\n')
-    ret = cros_lint._JsonLintFile(path, None, None)
+    ret = cros_lint._JsonLintFile(path, None, None, False)
     self.assertEqual(ret.returncode, 0)
 
   def testInvalid(self):
     """Verify invalid json file is rejected."""
     path = os.path.join(self.tempdir, 'x.json')
     osutils.WriteFile(path, '{')
-    ret = cros_lint._JsonLintFile(path, None, None)
+    ret = cros_lint._JsonLintFile(path, None, None, False)
     self.assertEqual(ret.returncode, 1)
 
   def testUnicodeBom(self):
     """Verify we skip the Unicode BOM."""
     path = os.path.join(self.tempdir, 'x.json')
     osutils.WriteFile(path, b'\xef\xbb\xbf{}\n', mode='wb')
-    ret = cros_lint._JsonLintFile(path, None, None)
+    ret = cros_lint._JsonLintFile(path, None, None, False)
     self.assertEqual(ret.returncode, 0)

@@ -10,15 +10,18 @@ import json
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import sys
 
 from chromite.cli import command
+from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lint.linters import upstart, whitespace
 
 
 # Extract a script's shebang.
@@ -127,40 +130,40 @@ def _LinterRunCommand(cmd, debug, **kwargs):
                             debug_level=logging.NOTICE, **kwargs)
 
 
-def _WhiteSpaceLintData(path, data):
-  """Run basic whitespace checks on |data|.
+def _ConfLintFile(path, output_format, debug, relaxed: bool):
+  """Determine the applicable .conf syntax and call the appropriate handler."""
+  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  if not os.path.isfile(path):
+    return ret
 
-  Args:
-    path: The name of the file (for diagnostics).
-    data: The file content to lint.
+  # .conf files are used by more than upstart, so use the parent dirname
+  # to filter them.
+  parent_name = os.path.basename(os.path.dirname(os.path.realpath(path)))
+  if parent_name in {'init', 'upstart'}:
+    return _UpstartLintFile(path, output_format, debug, relaxed)
 
-  Returns:
-    True if everything passed.
-  """
-  ret = True
+  # Check for the description and author lines present in upstart configs.
+  with open(path, 'rb') as file:
+    tokens_to_find = {b'author', b'description'}
+    for line in file:
+      try:
+        token = line.split()[0]
+      except IndexError:
+        continue
 
-  # Make sure files all have a trailing newline.
-  if not data.endswith('\n'):
-    ret = False
-    logging.warning('%s: file needs a trailing newline', path)
+      try:
+        tokens_to_find.remove(token)
+      except KeyError:
+        continue
 
-  # Disallow leading & trailing blank lines.
-  if data.startswith('\n'):
-    ret = False
-    logging.warning('%s: delete leading blank lines', path)
-  if data.endswith('\n\n'):
-    ret = False
-    logging.warning('%s: delete trailing blank lines', path)
-
-  for i, line in enumerate(data.splitlines(), start=1):
-    if line.rstrip() != line:
-      ret = False
-      logging.warning('%s:%i: trim trailing whitespace: %s', path, i, line)
-
+      if not tokens_to_find:
+        logging.warning(
+            'Found upstart .conf in a directory other than init or upstart.')
+        return _UpstartLintFile(path, output_format, debug, relaxed)
   return ret
 
 
-def _CpplintFile(path, output_format, debug):
+def _CpplintFile(path, output_format, debug, _relaxed: bool):
   """Returns result of running cpplint on |path|."""
   cmd = [os.path.join(constants.DEPOT_TOOLS_DIR, 'cpplint.py')]
   cmd.append('--filter=%s' % ','.join(CPPLINT_DEFAULT_FILTERS))
@@ -170,7 +173,7 @@ def _CpplintFile(path, output_format, debug):
   return _LinterRunCommand(cmd, debug)
 
 
-def _PylintFile(path, output_format, debug):
+def _PylintFile(path, output_format, debug, _relaxed: bool):
   """Returns result of running pylint on |path|."""
   pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
   pylintrc = _GetPylintrc(path)
@@ -184,7 +187,7 @@ def _PylintFile(path, output_format, debug):
   return _LinterRunCommand(cmd, debug, extra_env=extra_env)
 
 
-def _GolintFile(path, _, debug):
+def _GolintFile(path, _, debug, _relaxed: bool):
   """Returns result of running golint on |path|."""
   # Try using golint if it exists.
   try:
@@ -196,7 +199,7 @@ def _GolintFile(path, _, debug):
                                         returncode=0)
 
 
-def _JsonLintFile(path, _output_format, _debug):
+def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
   """Returns result of running json lint checks on |path|."""
   result = cros_build_lib.CommandResult('python -mjson.tool "%s"' % path,
                                         returncode=0)
@@ -218,13 +221,13 @@ def _JsonLintFile(path, _output_format, _debug):
     logging.notice('%s: %s', path, e)
 
   # Check whitespace.
-  if not _WhiteSpaceLintData(path, data):
+  if not whitespace.LintData(path, data):
     result.returncode = 1
 
   return result
 
 
-def _MarkdownLintFile(path, _output_format, _debug):
+def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
   """Returns result of running lint checks on |path|."""
   result = cros_build_lib.CommandResult('mdlint(internal) "%s"' % path,
                                         returncode=0)
@@ -232,13 +235,14 @@ def _MarkdownLintFile(path, _output_format, _debug):
   data = osutils.ReadFile(path)
 
   # Check whitespace.
-  if not _WhiteSpaceLintData(path, data):
+  if not whitespace.LintData(path, data):
     result.returncode = 1
 
   return result
 
 
-def _ShellLintFile(path, output_format, debug, gentoo_format=False):
+def _ShellLintFile(path, output_format, debug, _relaxed: bool,
+                   gentoo_format=False):
   """Returns result of running lint checks on |path|.
 
   Args:
@@ -295,18 +299,19 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
   lint_result = _LinterRunCommand(cmd, debug)
 
   # Check whitespace.
-  if not _WhiteSpaceLintData(path, osutils.ReadFile(path)):
+  if not whitespace.LintData(path, osutils.ReadFile(path)):
     lint_result.returncode = 1
 
   return lint_result
 
 
-def _GentooShellLintFile(path, output_format, debug):
+def _GentooShellLintFile(path, output_format, debug, relaxed: bool):
   """Run shell checks with Gentoo rules."""
-  return _ShellLintFile(path, output_format, debug, gentoo_format=True)
+  return _ShellLintFile(path, output_format, debug, relaxed,
+                        gentoo_format=True)
 
 
-def _SeccompPolicyLintFile(path, _output_format, debug):
+def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
   """Run the seccomp policy linter."""
   dangerous_syscalls = {'bpf', 'setns', 'execveat', 'ptrace', 'swapoff',
                         'swapon'}
@@ -318,7 +323,16 @@ def _SeccompPolicyLintFile(path, _output_format, debug):
       debug)
 
 
-def _DirMdLintFile(path, _output_format, debug):
+def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
+  """Run lints on upstart configs."""
+  # Skip .conf files that aren't in an init parent directory.
+  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  if not upstart.CheckInitConf(Path(path), relaxed):
+    ret.returncode = 1
+  return ret
+
+
+def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
   """Run the dirmd linter."""
   return _LinterRunCommand(
       [os.path.join(constants.DEPOT_TOOLS_DIR, 'dirmd'), 'validate', path],
@@ -359,6 +373,7 @@ _EXT_TO_LINTER_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
     frozenset({'.cc', '.cpp', '.h'}): _CpplintFile,
+    frozenset({'.conf', '.conf.in'}): _ConfLintFile,
     frozenset({'.json'}): _JsonLintFile,
     frozenset({'.py'}): _PylintFile,
     frozenset({'.go'}): _GolintFile,
@@ -396,9 +411,9 @@ def _BreakoutFilesByLinter(files):
   return map_to_return
 
 
-def _Dispatcher(errors, output_format, debug, linter, path):
+def _Dispatcher(errors, output_format, debug, relaxed: bool, linter, path):
   """Call |linter| on |path| and take care of coalescing exit codes/output."""
-  result = linter(path, output_format, debug)
+  result = linter(path, output_format, debug, relaxed)
   if result.returncode:
     with errors.get_lock():
       errors.value += 1
@@ -417,7 +432,7 @@ run other checks (e.g. pyflakes, etc.)
   OUTPUT_FORMATS = ('default', 'colorized', 'msvs', 'parseable')
 
   @classmethod
-  def AddParser(cls, parser):
+  def AddParser(cls, parser: commandline.ArgumentParser):
     super(LintCommand, cls).AddParser(parser)
     parser.add_argument('files', help='Files to lint', nargs='*')
     parser.add_argument('--output', default='default',
@@ -426,6 +441,10 @@ run other checks (e.g. pyflakes, etc.)
                         'formats are: default (no option is passed to the '
                         'linter), colorized, msvs (Visual Studio) and '
                         'parseable.')
+    parser.add_argument('--relaxed', default=False, action='store_true',
+                        help='Disable some strict checks. This is used for '
+                             'cases like builds where a more permissive '
+                             'behavior is desired.')
 
   def Run(self):
     files = self.options.files
@@ -438,7 +457,8 @@ run other checks (e.g. pyflakes, etc.)
     errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
     linter_map = _BreakoutFilesByLinter(files)
     dispatcher = functools.partial(_Dispatcher, errors,
-                                   self.options.output, self.options.debug)
+                                   self.options.output, self.options.debug,
+                                   self.options.relaxed)
 
     # Special case one file as it's common -- faster to avoid parallel startup.
     if not linter_map:
