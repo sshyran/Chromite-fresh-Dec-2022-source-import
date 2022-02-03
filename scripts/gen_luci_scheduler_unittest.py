@@ -37,7 +37,7 @@ job {
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "LegacyRelease"
     tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
@@ -125,7 +125,7 @@ job {
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "LegacyRelease"
     tags: "cbb_branch:mock_branch"
     tags: "cbb_config:amd64-generic-release"
@@ -156,7 +156,7 @@ job {
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "LegacyRelease"
     tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
@@ -189,7 +189,7 @@ job {
   schedule: "funky schedule"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "LegacyRelease"
     tags: "cbb_branch:main"
     tags: "cbb_config:amd64-generic-release"
@@ -343,7 +343,7 @@ job {
   schedule: "run once in a while"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "ReleaseBuilder"
     tags: "cbb_branch:main"
     tags: "cbb_config:build_prod"
@@ -362,7 +362,7 @@ job {
   schedule: "run daily"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "TestBuilder"
     tags: "cbb_branch:main"
     tags: "cbb_config:build_tester"
@@ -381,7 +381,7 @@ job {
   schedule: "triggered"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "ReleaseBuilder"
     tags: "cbb_branch:main"
     tags: "cbb_config:build_triggered_a"
@@ -400,7 +400,7 @@ job {
   schedule: "triggered"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "ProdBuilder"
     tags: "cbb_branch:main"
     tags: "cbb_config:build_triggered_b"
@@ -419,7 +419,7 @@ job {
   schedule: "run daily"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "TestBuilder"
     tags: "cbb_branch:test-branch"
     tags: "cbb_config:branch_tester"
@@ -438,7 +438,7 @@ job {
   schedule: "run daily"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "TestBuilder"
     tags: "cbb_branch:test-branch"
     tags: "cbb_config:branch_tester_triggered"
