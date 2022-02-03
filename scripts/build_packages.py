@@ -12,11 +12,14 @@ bootable Chrome OS image.
 
 import os
 
+from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
 
 def main(argv):
+  commandline.RunInsideChroot()
+
   cmd = [
       'bash',
       os.path.join(constants.CROSUTILS_DIR, 'build_packages.sh'),
