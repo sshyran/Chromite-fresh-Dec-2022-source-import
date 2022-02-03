@@ -404,7 +404,7 @@ class TerminateRunCommandError(RunCommandError):
   """
 
 
-def sudo_run(cmd, user='root', preserve_env=False, **kwargs):
+def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
   """Run a command via sudo.
 
   Client code must use this rather than coming up with their own run
@@ -608,7 +608,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
         check=True, int_timeout=1, kill_timeout=1,
         log_output=False, capture_output=False,
         quiet=False, encoding=None, errors=None, dryrun=False,
-        **kwargs):
+        **kwargs) -> CommandResult:
   """Runs a command.
 
   Args:
