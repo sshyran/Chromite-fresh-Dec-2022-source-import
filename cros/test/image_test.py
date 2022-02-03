@@ -27,8 +27,9 @@ import unittest
 from chromite.third_party import lddtree
 from chromite.third_party.pyelftools.elftools.common import exceptions
 from chromite.third_party.pyelftools.elftools.elf import elffile
-import magic  # pylint: disable=import-error
+import magic  # pylint: disable=import-error,wrong-import-order
 
+# pylint: disable=ungrouped-imports
 from chromite.cros.test import usergroup_baseline
 from chromite.lib import cros_build_lib
 from chromite.lib import filetype
