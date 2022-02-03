@@ -203,7 +203,7 @@ class ChromeLKGMCommitter(object):
     commit_msg_template = (
         '%(header)s\n'
         '%(build_link)s'
-        '\nThis build will remain in WIP until both master-full and '
+        '\nThis CL will remain in WIP until both master-full and '
         'master-release\nbuilds for this version are finished. This CL '
         'should not be submitted\nto the CQ until that happens.\n'
         '\n%(cq_includes)s')
