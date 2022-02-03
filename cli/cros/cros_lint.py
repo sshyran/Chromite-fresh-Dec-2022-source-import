@@ -10,6 +10,7 @@ import json
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import sys
 
@@ -19,6 +20,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lint.linters import upstart
 
 
 # Extract a script's shebang.
@@ -157,6 +159,39 @@ def _WhiteSpaceLintData(path, data):
       ret = False
       logging.warning('%s:%i: trim trailing whitespace: %s', path, i, line)
 
+  return ret
+
+
+def _ConfLintFile(path, output_format, debug):
+  """Determine the applicable .conf syntax and call the appropriate handler."""
+  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  if not os.path.isfile(path):
+    return ret
+
+  # .conf files are used by more than upstart, so use the parent dirname
+  # to filter them.
+  parent_name = os.path.basename(os.path.dirname(os.path.realpath(path)))
+  if parent_name in {'init', 'upstart'}:
+    return _UpstartLintFile(path, output_format, debug)
+
+  # Check for the description and author lines present in upstart configs.
+  with open(path, 'rb') as file:
+    tokens_to_find = {b'author', b'description'}
+    for line in file:
+      try:
+        token = line.split()[0]
+      except IndexError:
+        continue
+
+      try:
+        tokens_to_find.remove(token)
+      except KeyError:
+        continue
+
+      if not tokens_to_find:
+        logging.warning(
+            'Found upstart .conf in a directory other than init or upstart.')
+        return _UpstartLintFile(path, output_format, debug)
   return ret
 
 
@@ -318,6 +353,15 @@ def _SeccompPolicyLintFile(path, _output_format, debug):
       debug)
 
 
+def _UpstartLintFile(path, _output_format, _debug):
+  """Run lints on upstart configs."""
+  # Skip .conf files that aren't in an init parent directory.
+  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  if not upstart.CheckInitConf(Path(path)):
+    ret.returncode = 1
+  return ret
+
+
 def _DirMdLintFile(path, _output_format, debug):
   """Run the dirmd linter."""
   return _LinterRunCommand(
@@ -359,6 +403,7 @@ _EXT_TO_LINTER_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
     frozenset({'.cc', '.cpp', '.h'}): _CpplintFile,
+    frozenset({'.conf', '.conf.in'}): _ConfLintFile,
     frozenset({'.json'}): _JsonLintFile,
     frozenset({'.py'}): _PylintFile,
     frozenset({'.go'}): _GolintFile,
