@@ -251,6 +251,7 @@
     hatch-arc-r-release
     hatch-arc-r-userdebug-release
     hatch-arc-s-release
+    hatch-arc-t-release
     hatch-blueznext-release
     hatch-borealis-release
     hatch-connectivitynext-release
@@ -1078,6 +1079,12 @@
   hatch-arc-s-payloads-tryjob
   hatch-arc-s-release-tryjob
   hatch-arc-s-unittest-stress
+  hatch-arc-t-full-tryjob
+  hatch-arc-t-llvm-next-toolchain-tryjob
+  hatch-arc-t-llvm-toolchain-tryjob
+  hatch-arc-t-payloads-tryjob
+  hatch-arc-t-release-tryjob
+  hatch-arc-t-unittest-stress
   hatch-blueznext-full-tryjob
   hatch-blueznext-llvm-next-toolchain-tryjob
   hatch-blueznext-llvm-toolchain-tryjob
@@ -1363,6 +1370,7 @@
     hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-s-release-tryjob
+    hatch-arc-t-release-tryjob
     hatch-blueznext-release-tryjob
     hatch-borealis-release-tryjob
     hatch-connectivitynext-release-tryjob
