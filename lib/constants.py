@@ -969,7 +969,7 @@ TOPOLOGY_DICT = {
 }
 
 # Percentage of child builders that need to complete to update LKGM
-LKGM_THRESHOLD = 80
+LKGM_THRESHOLD = 50
 
 # Dev key related names.
 VBOOT_DEVKEYS_DIR = os.path.join('/usr/share/vboot/devkeys')
