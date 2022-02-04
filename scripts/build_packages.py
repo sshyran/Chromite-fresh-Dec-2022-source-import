@@ -27,6 +27,7 @@ def main(argv):
   ]
   cmd.extend(argv)
   try:
-    cros_build_lib.run(cmd)
+    # TODO(b/187793559): Don't pass in print_cmd once we switch to argparse
+    cros_build_lib.dbg_run(cmd, print_cmd=False)
   except cros_build_lib.RunCommandError as e:
     cros_build_lib.Die(e)
