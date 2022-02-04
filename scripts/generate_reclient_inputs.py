@@ -42,7 +42,7 @@ def _GetSymLinkPath(base_dir: Path, link_path: str) -> Path:
 def _CollectElfDeps(elfpath: Path) -> Set[Path]:
   """Returns the set of dependent files for the elf file."""
   libs = set()
-  to_process = []
+  to_process = [elfpath]
   elf = lddtree.ParseELF(elfpath, ldpaths=lddtree.LoadLdpaths())
   for _, lib_data in elf['libs'].items():
     if lib_data['path']:
@@ -68,18 +68,20 @@ def _GenerateRemoteInputsFile(out_file: str, clang_path: Path) -> None:
 
   # Clang is typically a symlink, collect actual files.
   paths.add(clang_path)
-  clang_file = clang_path
-  while clang_file.is_symlink():
-    clang_file = _GetSymLinkPath(clang_file.parent, os.readlink(clang_file))
-    paths.add(clang_file)
 
-  # Add clang resource directory and gcc config directory.
+  # Add clang resources, gcc config and glibc loader files.
   cmd = [str(clang_path), '--print-resource-dir']
   resource_dir = cros_build_lib.run(
       cmd, capture_output=True, encoding='utf-8',
       print_cmd=False).stdout.splitlines()[0]
   paths.add(Path(resource_dir) / 'share')
-  paths.add(Path('/etc/env.d/gcc'))
+  paths.update(
+      Path(x) for x in (
+          '/etc/env.d/gcc',
+          '/etc/ld.so.cache',
+          '/etc/ld.so.conf',
+          '/etc/ld.so.conf.d',
+      ))
 
   # Write the files relative to clang binary location.
   osutils.WriteFile(
