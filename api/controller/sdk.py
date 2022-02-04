@@ -161,6 +161,16 @@ def BuildPrebuilts(input_proto, _output_proto, _config):
 @faux.all_empty
 @validate.require('prepend_version', 'version', 'upload_location')
 @validate.validation_complete
+def CreateBinhostCLs(input_proto, _output_proto, _config):
+  """Create CLs to update the binhost to point at uploaded prebuilts."""
+  sdk.CreateBinhostCLs(input_proto.prepend_version,
+                       input_proto.version,
+                       input_proto.upload_location)
+
+
+@faux.all_empty
+@validate.require('prepend_version', 'version', 'upload_location')
+@validate.validation_complete
 def UploadPrebuiltPackages(input_proto, _output_proto, _config):
   """Uploads prebuilt packages."""
   sdk.UploadPrebuiltPackages(controller_util.ParseChroot(input_proto.chroot),

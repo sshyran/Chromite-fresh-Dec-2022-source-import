@@ -441,6 +441,35 @@ def BuildPrebuilts(chroot: 'chroot_lib.Chroot'):
       check=True)
 
 
+def CreateBinhostCLs(prepend_version: str,
+                     version: str,
+                     upload_location: str) -> None:
+  """Create CLs that update the binhost to point at uploaded prebuilts.
+
+  The CLs are *not* automatically submitted.
+
+  Args:
+    prepend_version: String to prepend to version.
+    version: The SDK version string.
+    upload_location: prefix of the upload path (e.g. 'gs://bucket')
+  """
+  cros_build_lib.run(
+      [os.path.join(constants.CHROMITE_BIN_DIR,
+                    'upload_prebuilts'),
+       '--skip-upload',
+       '--dry-run',
+       '--sync-host',
+       '--git-sync',
+       '--key', 'FULL_BINHOST',
+       '--build-path', constants.SOURCE_ROOT,
+       '--board', 'amd64-host',
+       '--set-version', version,
+       '--prepend-version', prepend_version,
+       '--upload', upload_location,
+       '--binhost-conf-dir', constants.PUBLIC_BINHOST_CONF_DIR],
+      check=True)
+
+
 def UploadPrebuiltPackages(chroot: 'chroot_lib.Chroot',
                            prepend_version: str,
                            version: str,
