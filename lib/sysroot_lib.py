@@ -455,7 +455,9 @@ class Sysroot(object):
   @property
   def portage_logdir(self) -> str:
     """Get the PORTAGE_LOGDIR property for this sysroot."""
-    return portage_util.PortageqEnvvar('PORTAGE_LOGDIR', sysroot=self.path)
+    return portage_util.PortageqEnvvar('PORTAGE_LOGDIR',
+                                       board=self.build_target_name,
+                                       sysroot=self.path)
 
   def get_overlays(self,
                    build_target_only: bool = False,
