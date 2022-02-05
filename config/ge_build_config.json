@@ -6107,6 +6107,14 @@
       "models": [
         {
           "board_name": "kevin",
+          "name": "kevin",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 273,
+          "is_active": true
+        },
+        {
+          "board_name": "kevin",
           "name": "kevin1",
           "test_suites": [
             "sanity",
@@ -6136,14 +6144,6 @@
         {
           "board_name": "kevin-kernelnext",
           "name": "kevin",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7199,
-          "is_active": true
-        },
-        {
-          "board_name": "kevin-kernelnext",
-          "name": "kevin1",
           "test_suites": [
             "sanity",
             "bvt-inline",
@@ -6169,6 +6169,14 @@
       "builder": "RELEASE",
       "experimental": true,
       "models": [
+        {
+          "board_name": "kevin-userdebug",
+          "name": "kevin",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7162,
+          "is_active": true
+        },
         {
           "board_name": "kevin-userdebug",
           "name": "kevin1",
