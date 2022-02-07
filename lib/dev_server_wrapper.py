@@ -269,31 +269,8 @@ class DevServerWrapper(multiprocessing.Process):
     Args:
       static_dir: path to the static directory of the devserver instance.
     """
-    cls.WipePayloadCache(static_dir=static_dir)
     logging.info('Clearing cache directory %s', static_dir)
     osutils.RmDir(static_dir, ignore_missing=True, sudo=True)
-
-  @classmethod
-  def WipePayloadCache(cls, devserver_bin='start_devserver', static_dir=None):
-    """Cleans up devserver cache of payloads.
-
-    This isn't necessary for chrome checkouts.
-
-    Args:
-      devserver_bin: path to the devserver binary.
-      static_dir: path to use as the static directory of the devserver instance.
-    """
-    if path_util.DetermineCheckout().type == path_util.CHECKOUT_TYPE_GCLIENT:
-      return
-
-    logging.info('Cleaning up previously generated payloads.')
-    cmd = [devserver_bin, '--clear_cache', '--exit']
-    if static_dir:
-      cmd.append('--static_dir=%s' % path_util.ToChrootPath(static_dir))
-
-    cros_build_lib.sudo_run(
-        cmd, enter_chroot=True, print_cmd=False, stderr=subprocess.STDOUT,
-        stdout=True, cwd=constants.SOURCE_ROOT)
 
   def _ReadPortNumber(self):
     """Read port number from file."""
