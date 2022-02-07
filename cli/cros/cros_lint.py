@@ -12,7 +12,6 @@ import multiprocessing
 import os
 import re
 import sys
-import urllib.parse
 
 from chromite.cli import command
 from chromite.lib import constants
@@ -294,29 +293,6 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
   cmd.append(path)
 
   lint_result = _LinterRunCommand(cmd, debug)
-
-  # During testing, we don't want to fail the linter for shellcheck errors,
-  # so override the return code.
-  if lint_result.returncode != 0:
-    bug_url = (
-        'https://bugs.chromium.org/p/chromium/issues/entry?' +
-        urllib.parse.urlencode({
-            'template':
-                'Defect report from Developer',
-            'summary':
-                'Bad shellcheck warnings for %s' % os.path.basename(path),
-            'components':
-                'Infra>Client>ChromeOS>Build,',
-            'cc':
-                'bmgordon@chromium.org,vapier@chromium.org',
-            'comment':
-                'Shellcheck output from file:\n%s\n\n<paste output here>\n\n'
-                "What is wrong with shellcheck's findings?\n" % path,
-        }))
-    logging.warning('Shellcheck found problems. These will eventually become '
-                    'errors.  If the shellcheck findings are not useful, '
-                    'please file a bug at:\n%s', bug_url)
-    lint_result.returncode = 0
 
   # Check whitespace.
   if not _WhiteSpaceLintData(path, osutils.ReadFile(path)):
