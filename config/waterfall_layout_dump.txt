@@ -166,14 +166,6 @@
   amd64-generic-ubsan-fuzzer
   betty-vmtest-informational
 
-== pi_android_pfq ==
-  master-pi-android-pfq
-    betty-pi-arc-pi-android-pfq
-    coral-pi-android-pfq
-    grunt-pi-android-pfq
-    kevin-pi-android-pfq
-    rammus-pi-android-pfq
-
 == release ==
   master-release
     adlrvp-release
@@ -355,19 +347,6 @@
   config-updater
   luci-scheduler-updater
 
-== vmrvc_android_pfq ==
-  master-vmrvc-android-pfq
-    eve-vmrvc-android-pfq
-    grunt-arc-r-vmrvc-android-pfq
-    hatch-vmrvc-android-pfq
-    kukui-arc-r-vmrvc-android-pfq
-    rammus-arc-r-vmrvc-android-pfq
-    zork-arc-r-vmrvc-android-pfq
-
-== vmt_android_pfq ==
-  master-vmt-android-pfq
-    betty-arc-t-vmt-android-pfq
-
 == tryjob ==
   adlrvp-full-tryjob
   adlrvp-llvm-next-toolchain-tryjob
@@ -509,7 +488,6 @@
   betty-arc-t-payloads-tryjob
   betty-arc-t-release-tryjob
   betty-arc-t-unittest-stress
-  betty-arc-t-vmt-android-pfq-tryjob
   betty-asan-tryjob
   betty-full-tryjob
   betty-kernelnext-full-tryjob
@@ -525,7 +503,6 @@
   betty-pi-arc-llvm-next-toolchain-tryjob
   betty-pi-arc-llvm-toolchain-tryjob
   betty-pi-arc-payloads-tryjob
-  betty-pi-arc-pi-android-pfq-tryjob
   betty-pi-arc-release-tryjob
   betty-pi-arc-unittest-stress
   betty-release-tryjob
@@ -660,7 +637,6 @@
   coral-llvm-toolchain-tryjob
   coral-master-factorybranch-tryjob
   coral-payloads-tryjob
-  coral-pi-android-pfq-tryjob
   coral-release-tryjob
   coral-unittest-stress
   corsola-full-tryjob
@@ -784,7 +760,6 @@
   eve-userdebug-payloads-tryjob
   eve-userdebug-release-tryjob
   eve-userdebug-unittest-stress
-  eve-vmrvc-android-pfq-tryjob
   excelsior-factory-excelsior-12812.B-factorybranch-tryjob
   excelsior-full-tryjob
   excelsior-llvm-next-toolchain-tryjob
@@ -998,7 +973,6 @@
   grunt-arc-r-payloads-tryjob
   grunt-arc-r-release-tryjob
   grunt-arc-r-unittest-stress
-  grunt-arc-r-vmrvc-android-pfq-tryjob
   grunt-factory-grunt-11164.135.B-factorybranch-tryjob
   grunt-factory-grunt-11164.B-factorybranch-tryjob
   grunt-full-tryjob
@@ -1011,7 +985,6 @@
   grunt-llvm-next-toolchain-tryjob
   grunt-llvm-toolchain-tryjob
   grunt-payloads-tryjob
-  grunt-pi-android-pfq-tryjob
   grunt-release-basic-tryjob
   grunt-release-tryjob
   grunt-unittest-stress
@@ -1122,7 +1095,6 @@
   hatch-payloads-tryjob
   hatch-release-tryjob
   hatch-unittest-stress
-  hatch-vmrvc-android-pfq-tryjob
   heli-factory-rambi-6420.B-factorybranch-tryjob
   herobrine-full-tryjob
   herobrine-llvm-next-toolchain-tryjob
@@ -1190,7 +1162,6 @@
   kevin-llvm-toolchain-tryjob
   kevin-llvm-tot-toolchain-tryjob
   kevin-payloads-tryjob
-  kevin-pi-android-pfq-tryjob
   kevin-release-tryjob
   kevin-unittest-stress
   kevin-userdebug-full-tryjob
@@ -1213,7 +1184,6 @@
   kukui-arc-r-payloads-tryjob
   kukui-arc-r-release-tryjob
   kukui-arc-r-unittest-stress
-  kukui-arc-r-vmrvc-android-pfq-tryjob
   kukui-factory-kukui-12587.B-factorybranch-tryjob
   kukui-factory-kukui-14374.B-factorybranch-tryjob
   kukui-full-tryjob
@@ -1284,12 +1254,6 @@
     tael-full-tryjob
     tatl-full-tryjob
     zork-full-tryjob
-  master-pi-android-pfq-tryjob
-    betty-pi-arc-pi-android-pfq-tryjob
-    coral-pi-android-pfq-tryjob
-    grunt-pi-android-pfq-tryjob
-    kevin-pi-android-pfq-tryjob
-    rammus-pi-android-pfq-tryjob
   master-release-basic-tryjob
     atlas-release-basic-tryjob
     eve-release-basic-tryjob
@@ -1462,15 +1426,6 @@
     zork-kernelnext-release-tryjob
     zork-minios-release-tryjob
     zork-release-tryjob
-  master-vmrvc-android-pfq-tryjob
-    eve-vmrvc-android-pfq-tryjob
-    grunt-arc-r-vmrvc-android-pfq-tryjob
-    hatch-vmrvc-android-pfq-tryjob
-    kukui-arc-r-vmrvc-android-pfq-tryjob
-    rammus-arc-r-vmrvc-android-pfq-tryjob
-    zork-arc-r-vmrvc-android-pfq-tryjob
-  master-vmt-android-pfq-tryjob
-    betty-arc-t-vmt-android-pfq-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-master-factorybranch-tryjob
   moblab-generic-vm-full-tryjob
@@ -1625,14 +1580,12 @@
   rammus-arc-r-userdebug-payloads-tryjob
   rammus-arc-r-userdebug-release-tryjob
   rammus-arc-r-userdebug-unittest-stress
-  rammus-arc-r-vmrvc-android-pfq-tryjob
   rammus-factory-rammus-11289.B-factorybranch-tryjob
   rammus-full-tryjob
   rammus-llvm-next-toolchain-tryjob
   rammus-llvm-toolchain-tryjob
   rammus-master-factorybranch-tryjob
   rammus-payloads-tryjob
-  rammus-pi-android-pfq-tryjob
   rammus-release-tryjob
   rammus-unittest-stress
   reef-factory-reef-8811.B-factorybranch-tryjob
@@ -1961,7 +1914,6 @@
   zork-arc-r-payloads-tryjob
   zork-arc-r-release-tryjob
   zork-arc-r-unittest-stress
-  zork-arc-r-vmrvc-android-pfq-tryjob
   zork-borealis-full-tryjob
   zork-borealis-llvm-next-toolchain-tryjob
   zork-borealis-llvm-toolchain-tryjob

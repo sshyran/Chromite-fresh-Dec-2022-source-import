@@ -540,22 +540,6 @@ def GeneralTemplates(site_config, ge_build_config):
   # END x30evb
 
 
-def AndroidTemplates(site_config):
-  """Apply test config to Android specific templates
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-  """
-  site_config.templates.generic_android_pfq.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-  site_config.templates.pi_android_pfq.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-
 def ApplyConfig(site_config, boards_dict, ge_build_config):
   """Apply test specific config to site_config
 
