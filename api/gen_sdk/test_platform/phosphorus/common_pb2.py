@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.phosphorus',
   syntax='proto3',
   serialized_options=b'ZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorus',
-  serialized_pb=b'\n%test_platform/phosphorus/common.proto\x12\x18test_platform.phosphorus\"&\n\x0e\x42otEnvironment\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\"|\n\x0fTaskEnvironment\x12\x13\n\x0bresults_dir\x18\x02 \x01(\t\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02R\x17synchronous_offload_dir\"\xb2\x01\n\nPrejobStep\x12R\n\x18provision_dut_experiment\x18\x01 \x01(\x0b\x32\x30.test_platform.phosphorus.ProvisionDutExperiment\x12P\n\x17\x64ut_topology_experiment\x18\x02 \x01(\x0b\x32/.test_platform.phosphorus.DutTopologyExperiment\"\xc0\x02\n\x16ProvisionDutExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12g\n\x17\x63ros_version_allow_list\x18\x02 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x12j\n\x1a\x63ros_version_disallow_list\x18\x03 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x1a\'\n\x13\x43rosVersionSelector\x12\x10\n\x08prefixes\x18\x01 \x03(\tB\x17\n\x15\x63ros_version_selector\"(\n\x15\x44utTopologyExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\"3\n\x11LogDataUploadStep\x12\x1e\n\x16max_concurrent_uploads\x18\x01 \x01(\x05\"R\n\x10\x46\x65tchCrashesStep\x12\x1f\n\x17\x63rash_server_report_url\x18\x01 \x01(\t\x12\x1d\n\x15\x63rash_server_view_url\x18\x02 \x01(\t\"\xc6\x02\n\x06\x43onfig\x12\x35\n\x03\x62ot\x18\x01 \x01(\x0b\x32(.test_platform.phosphorus.BotEnvironment\x12\x37\n\x04task\x18\x02 \x01(\x0b\x32).test_platform.phosphorus.TaskEnvironment\x12I\n\x14log_data_upload_step\x18\x03 \x01(\x0b\x32+.test_platform.phosphorus.LogDataUploadStep\x12\x46\n\x12\x66\x65tch_crashes_step\x18\x04 \x01(\x0b\x32*.test_platform.phosphorus.FetchCrashesStep\x12\x39\n\x0bprejob_step\x18\x05 \x01(\x0b\x32$.test_platform.phosphorus.PrejobStepBDZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
+  serialized_pb=b'\n%test_platform/phosphorus/common.proto\x12\x18test_platform.phosphorus\"&\n\x0e\x42otEnvironment\x12\x14\n\x0c\x61utotest_dir\x18\x01 \x01(\t\"|\n\x0fTaskEnvironment\x12\x13\n\x0bresults_dir\x18\x02 \x01(\t\x12\x18\n\x10test_results_dir\x18\x03 \x01(\t\x12\x1b\n\x13ssp_base_image_name\x18\x04 \x01(\tJ\x04\x08\x01\x10\x02R\x17synchronous_offload_dir\"\xb2\x01\n\nPrejobStep\x12R\n\x18provision_dut_experiment\x18\x01 \x01(\x0b\x32\x30.test_platform.phosphorus.ProvisionDutExperiment\x12P\n\x17\x64ut_topology_experiment\x18\x02 \x01(\x0b\x32/.test_platform.phosphorus.DutTopologyExperiment\"\xc0\x02\n\x16ProvisionDutExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12g\n\x17\x63ros_version_allow_list\x18\x02 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x12j\n\x1a\x63ros_version_disallow_list\x18\x03 \x01(\x0b\x32\x44.test_platform.phosphorus.ProvisionDutExperiment.CrosVersionSelectorH\x00\x1a\'\n\x13\x43rosVersionSelector\x12\x10\n\x08prefixes\x18\x01 \x03(\tB\x17\n\x15\x63ros_version_selector\"Y\n\x15\x44utTopologyExperiment\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12\x16\n\x0etest_allowlist\x18\x02 \x03(\t\x12\x17\n\x0fsuite_allowlist\x18\x03 \x03(\t\"3\n\x11LogDataUploadStep\x12\x1e\n\x16max_concurrent_uploads\x18\x01 \x01(\x05\"R\n\x10\x46\x65tchCrashesStep\x12\x1f\n\x17\x63rash_server_report_url\x18\x01 \x01(\t\x12\x1d\n\x15\x63rash_server_view_url\x18\x02 \x01(\t\"\xc6\x02\n\x06\x43onfig\x12\x35\n\x03\x62ot\x18\x01 \x01(\x0b\x32(.test_platform.phosphorus.BotEnvironment\x12\x37\n\x04task\x18\x02 \x01(\x0b\x32).test_platform.phosphorus.TaskEnvironment\x12I\n\x14log_data_upload_step\x18\x03 \x01(\x0b\x32+.test_platform.phosphorus.LogDataUploadStep\x12\x46\n\x12\x66\x65tch_crashes_step\x18\x04 \x01(\x0b\x32*.test_platform.phosphorus.FetchCrashesStep\x12\x39\n\x0bprejob_step\x18\x05 \x01(\x0b\x32$.test_platform.phosphorus.PrejobStepBDZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
 )
 
 
@@ -230,6 +230,20 @@ _DUTTOPOLOGYEXPERIMENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='test_allowlist', full_name='test_platform.phosphorus.DutTopologyExperiment.test_allowlist', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='suite_allowlist', full_name='test_platform.phosphorus.DutTopologyExperiment.suite_allowlist', index=2,
+      number=3, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -243,7 +257,7 @@ _DUTTOPOLOGYEXPERIMENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=737,
-  serialized_end=777,
+  serialized_end=826,
 )
 
 
@@ -273,8 +287,8 @@ _LOGDATAUPLOADSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=779,
-  serialized_end=830,
+  serialized_start=828,
+  serialized_end=879,
 )
 
 
@@ -311,8 +325,8 @@ _FETCHCRASHESSTEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=832,
-  serialized_end=914,
+  serialized_start=881,
+  serialized_end=963,
 )
 
 
@@ -370,8 +384,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=917,
-  serialized_end=1243,
+  serialized_start=966,
+  serialized_end=1292,
 )
 
 _PREJOBSTEP.fields_by_name['provision_dut_experiment'].message_type = _PROVISIONDUTEXPERIMENT
