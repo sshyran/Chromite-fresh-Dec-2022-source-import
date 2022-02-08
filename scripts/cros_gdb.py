@@ -147,7 +147,7 @@ To install the debug symbols for all available packages, run:
     return sysroot
 
   def GetSimpleChromeBinary(self):
-    """Get path to the  binary in simple chrome."""
+    """Get path to the binary in simple chrome."""
     if self.binary:
       return self.binary
 
@@ -163,7 +163,7 @@ To install the debug symbols for all available packages, run:
           else:
             raise GdbSimpleChromeBinaryError(
                 'There are multiple %s under %s. Please specify the path to '
-                'the binary via --binary'% binary_name, output_dir)
+                'the binary via --binary' % (binary_name, output_dir))
     if target_binary is None:
       raise GdbSimpleChromeBinaryError('There is no %s under %s.'
                                        % (binary_name, output_dir))
