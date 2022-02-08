@@ -3188,6 +3188,14 @@
       "models": [
         {
           "board_name": "draco",
+          "name": "agah",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7215,
+          "is_active": true
+        },
+        {
+          "board_name": "draco",
           "name": "draco",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
