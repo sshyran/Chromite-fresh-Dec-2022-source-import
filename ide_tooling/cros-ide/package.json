@@ -1,0 +1,220 @@
+{
+  "name": "cros-ide",
+  "displayName": "cros-ide",
+  "description": "Connect to Chrome OS DUTs over VNC",
+  "version": "0.0.2",
+  "publisher": "cros-velocity",
+  "repository": "https://chromium.googlesource.com/chromiumos/ide_tooling",
+  "engines": {
+    "vscode": "^1.63.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:cros-ide.addHost",
+    "onCommand:cros-ide.deleteHost",
+    "onCommand:cros-ide.connectToHostForScreen",
+    "onCommand:cros-ide.connectToHostForShell",
+    "onCommand:cros-ide.refreshCrosfleet",
+    "onCommand:cros-ide.addFleetHost",
+    "onCommand:cros-ide.codeSearchOpenCurrentFile",
+    "onCommand:cros-ide.codeSearchSearchForSelection",
+    "onCommand:cros-ide.crosWorkonStart",
+    "onCommand:cros-ide.crosWorkonStop",
+    "onView:static-devices",
+    "onView:fleet-devices",
+    "onView:boards-packages",
+    "onLanguage:cpp",
+    "onLanguage:python",
+    "onLanguage:shellscript"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cros-ide.connectToHostForScreen",
+        "title": "CrOS: Connect to Host (VNC)",
+        "icon": "$(window)"
+      },
+      {
+        "command": "cros-ide.connectToHostForShell",
+        "title": "CrOS: Connect to Host (Shell)",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "cros-ide.addHost",
+        "title": "CrOS: Add New Host",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cros-ide.deleteHost",
+        "title": "CrOS: Delete Host",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "cros-ide.refreshCrosfleet",
+        "title": "CrOS: Refresh crosfleet devices",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cros-ide.addFleetHost",
+        "title": "CrOS: Add crosfleet Host",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cros-ide.refreshBoardsPackages",
+        "title": "CrOS: Refresh Boards and Packages",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cros-ide.codeSearchOpenCurrentFile",
+        "title": "Open in Code Search"
+      },
+      {
+        "command": "cros-ide.codeSearchSearchForSelection",
+        "title": "Search for selection in Code Search"
+      },
+      {
+        "command": "cros-ide.crosWorkonStart",
+        "title": "CrOS: Start Working on a Package"
+      },
+      {
+        "command": "cros-ide.crosWorkonStop",
+        "title": "CrOS: Stop Working on a Package"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cros-devices",
+          "title": "CrOS Remote Testing",
+          "icon": "media/cros-device.svg"
+        }
+      ]
+    },
+    "views": {
+      "cros-devices": [
+        {
+          "id": "static-devices",
+          "name": "my devices"
+        },
+        {
+          "id": "fleet-devices",
+          "name": "crosfleet devices"
+        },
+        {
+          "id": "boards-packages",
+          "name": "Boards and Packages"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "cros-ide.codeSearchOpenCurrentFile"
+        },
+        {
+          "command" : "cros-ide.codeSearchSearchForSelection"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "cros-ide.addHost",
+          "when": "view == static-devices",
+          "group": "navigation"
+        },
+        {
+          "command": "cros-ide.addFleetHost",
+          "when": "view == fleet-devices",
+          "group": "navigation"
+        },
+        {
+          "command": "cros-ide.refreshCrosfleet",
+          "when": "view == fleet-devices",
+          "group": "navigation"
+        },
+        {
+          "command": "cros-ide.refreshBoardsPackages",
+          "when": "view == boards-packages",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cros-ide.connectToHostForScreen",
+          "when": "view == static-devices || view == fleet-devices",
+          "group": "inline@1"
+        },
+        {
+          "command": "cros-ide.connectToHostForShell",
+          "when": "view == static-devices || view == fleet-devices",
+          "group": "inline@2"
+        },
+        {
+          "command": "cros-ide.deleteHost",
+          "when": "view == static-devices || view == fleet-devices",
+          "group": "inline@3"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "static-devices",
+        "contents": "No host added yet.\n[Add New Host](command:cros-ide.addHost)"
+      }
+    ],
+    "configuration": {
+      "title": "Chrome OS",
+      "properties": {
+        "cros.hosts": {
+          "type": "array",
+          "scope": "machine-overridable",
+          "description": "List of devices under testing",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "shellscript",
+        "extensions": [
+          ".eclass"
+        ],
+        "aliases": [
+          "Eclass"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "publish": "./install.sh --upload"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^12.16.1",
+    "@types/vscode": "^1.63.1",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^7",
+    "eslint-config-google": "^0.14.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.1.3",
+    "ts-loader": "~9.2.6",
+    "typescript": "^4.5.5",
+    "webpack": "~5.3.2",
+    "webpack-cli": "~3.3.11"
+  }
+}
