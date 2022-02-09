@@ -34,26 +34,37 @@ class ChrootPathResolver(object):
     source_path: Value to override default source root inference.
     source_from_path_repo: Whether to infer the source root from the converted
       path's repo parent during inbound translation; overrides |source_path|.
+    chroot_path: Full path of the chroot to use. If chroot_path is specified,
+      source_path cannot be specified.
   """
 
-  # TODO(garnold) We currently infer the source root based on the path's own
-  # encapsulating repository. This is a heuristic catering to paths are being
-  # translated to be used in a chroot that's not associated with the currently
-  # executing code (for example, cbuildbot run on a build root or a foreign
-  # tree checkout). This approach might result in arbitrary repo-contained
-  # paths being translated to invalid chroot paths where they actually should
-  # not, and other valid source paths failing to translate because they are not
-  # repo-contained. Eventually we'll want to make this behavior explicit, by
-  # either passing a source_root value, or requesting to infer it from the path
-  # (source_from_path_repo=True), but otherwise defaulting to the executing
-  # code's source root in the normal case. When that happens, we'll be
-  # switching source_from_path_repo to False by default. See chromium:485746.
+  # When chroot_path is specified, it is assumed that any reference to
+  # the chroot mount point (/mnt/host/source) points back to the
+  # inferred source root determined by constants.SOURCE_ROOT. For example,
+  # assuming:
+  #   constants.SOURCE_ROOT == /workspace/checkout/
+  # and
+  #   chroot_path = /custom/chroot/path :
+  #
+  # FromChroot('/mnt/host/source/my/file') -> /workspace/checkout/my/file
+  # FromChroot('/some/other/file') -> /custom/chroot/path/some/other/file
+  # ToChroot('/workspace/checkout/file') -> /mnt/host/source/file
+  # ToChroot('/custom/checkout/chroot/this/file') -> /this/file
 
-  def __init__(self, source_path=None, source_from_path_repo=True):
+  def __init__(self, source_path=None, source_from_path_repo=True,
+               chroot_path=None):
+    if chroot_path and source_path:
+      raise AssertionError(
+          'Either source_path or chroot_path must be specified')
     self._inside_chroot = cros_build_lib.IsInsideChroot()
+    self._source_from_path_repo = source_from_path_repo
+    self._custom_chroot_path = chroot_path
     self._source_path = (constants.SOURCE_ROOT if source_path is None
                          else source_path)
-    self._source_from_path_repo = source_from_path_repo
+    if chroot_path and self._TranslatePath(chroot_path, self._source_path, ''):
+      raise AssertionError(
+          f'chroot_path {chroot_path} must not be in'
+          f'the source path {self._source_path}')
 
     # The following are only needed if outside the chroot.
     if self._inside_chroot:
@@ -61,7 +72,8 @@ class ChrootPathResolver(object):
       self._chroot_link = None
       self._chroot_to_host_roots = None
     else:
-      self._chroot_path = self._GetSourcePathChroot(self._source_path)
+      self._chroot_path = self._GetSourcePathChroot(self._source_path,
+                                                    self._custom_chroot_path)
       # The chroot link allows us to resolve paths when the chroot is symlinked
       # to the default location. This is generally not used, but it is useful
       # for CI for optimization purposes. We will trust them not to do something
@@ -81,8 +93,10 @@ class ChrootPathResolver(object):
     """Returns the cache directory."""
     return os.path.realpath(GetCacheDir())
 
-  def _GetSourcePathChroot(self, source_path):
+  def _GetSourcePathChroot(self, source_path, custom_chroot_path=None):
     """Returns path to the chroot directory of a given source root."""
+    if custom_chroot_path:
+      return custom_chroot_path
     if source_path is None:
       return None
     return os.path.join(source_path, constants.DEFAULT_CHROOT_DIR)
@@ -163,7 +177,7 @@ class ChrootPathResolver(object):
     chroot_path = self._chroot_path
     chroot_link = self._chroot_link
 
-    if self._source_from_path_repo:
+    if self._custom_chroot_path is None and self._source_from_path_repo:
       path_repo_dir = git.FindRepoDir(path)
       if path_repo_dir is not None:
         source_path = os.path.abspath(os.path.join(path_repo_dir, '..'))
@@ -333,12 +347,13 @@ def GetCacheDir():
   return os.environ.get(constants.SHARED_CACHE_ENVVAR, FindCacheDir())
 
 
-def ToChrootPath(path, source_path=None):
+def ToChrootPath(path, source_path=None, chroot_path=None):
   """Resolves current environment |path| for use in the chroot.
 
   Args:
     path: string path to translate into chroot namespace.
     source_path: string path to root of source checkout with chroot in it.
+    chroot_path: string name of the full chroot path to use.
 
   Returns:
     The same path converted to "inside chroot" namespace.
@@ -346,20 +361,23 @@ def ToChrootPath(path, source_path=None):
   Raises:
     ValueError: If the path references a location not available in the chroot.
   """
-  return ChrootPathResolver(source_path=source_path).ToChroot(path)
+  return ChrootPathResolver(source_path=source_path,
+                            chroot_path=chroot_path).ToChroot(path)
 
 
-def FromChrootPath(path, source_path=None):
+def FromChrootPath(path, source_path=None, chroot_path=None):
   """Resolves chroot |path| for use in the current environment.
 
   Args:
     path: string path to translate out of chroot namespace.
     source_path: string path to root of source checkout with chroot in it.
+    chroot_path: string name of the full chroot path to use
 
   Returns:
     The same path converted to "outside chroot" namespace.
   """
-  return ChrootPathResolver(source_path=source_path).FromChroot(path)
+  return ChrootPathResolver(source_path=source_path,
+                            chroot_path=chroot_path).FromChroot(path)
 
 
 def normalize_paths_to_source_root(

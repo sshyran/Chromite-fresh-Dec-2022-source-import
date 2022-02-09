@@ -20,7 +20,7 @@ from chromite.lib import path_util
 FAKE_SOURCE_PATH = '/path/to/source/tree'
 FAKE_REPO_PATH = '/path/to/repo'
 CUSTOM_SOURCE_PATH = '/custom/source/path'
-
+CUSTOM_CHROOT_PATH = '/custom/chroot/path'
 
 class DetermineCheckoutTest(cros_test_lib.MockTempDirTestCase):
   """Verify functionality for figuring out what checkout we're in."""
@@ -168,9 +168,23 @@ class TestPathResolver(cros_test_lib.MockTestCase):
   def FakeCwd(self, base_path):
     return os.path.join(base_path, 'somewhere/in/there')
 
-  def SetChrootPath(self, source_path):
+  def SetChrootPath(self, source_path, chroot_path=None):
     """Set and fake the chroot path."""
-    self.chroot_path = os.path.join(source_path, constants.DEFAULT_CHROOT_DIR)
+    self.chroot_path = chroot_path or os.path.join(source_path,
+                                                   constants.DEFAULT_CHROOT_DIR)
+
+  def testResolverInit(self):
+    """Test class initiation errors"""
+
+    # Case: source_path and chroot_path are mutually exclusive
+    with self.assertRaises(AssertionError):
+      path_util.ChrootPathResolver(source_path=constants.SOURCE_ROOT,
+                                   chroot_path=CUSTOM_CHROOT_PATH)
+
+    # Case: chroot_path cannot be part of inferred source root path
+    with self.assertRaises(AssertionError):
+      path_util.ChrootPathResolver(
+          chroot_path=os.path.join(constants.SOURCE_ROOT, 'dir'))
 
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=True)
   def testInsideChroot(self, _):
@@ -249,9 +263,31 @@ class TestPathResolver(cros_test_lib.MockTestCase):
         resolver.ToChroot('/some/path')
 
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testOutsideCustomChrootInbound(self, _):
+    """Tests ToChroot() calls from outside a custom chroot."""
+
+    self.SetChrootPath(constants.SOURCE_ROOT, CUSTOM_CHROOT_PATH)
+    resolver = path_util.ChrootPathResolver(chroot_path=CUSTOM_CHROOT_PATH)
+
+    # Case: path inside the chroot space.
+    self.assertEqual(
+        '/some/path',
+        resolver.ToChroot(os.path.join(self.chroot_path, 'some/path')))
+
+    # Case: path from source root
+    self.assertEqual(
+        os.path.join(constants.CHROOT_SOURCE_ROOT, 'some/path'),
+        resolver.ToChroot(os.path.join(constants.SOURCE_ROOT, 'some/path')))
+
+    # Case: not mapped to chroot
+    with self.assertRaises(ValueError):
+      resolver.ToChroot('/random/file')
+
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
   def testOutsideChrootOutbound(self, _):
     """Tests FromChroot() calls from outside the chroot."""
     self.PatchObject(os, 'getcwd', return_value=self.FakeCwd(FAKE_SOURCE_PATH))
+
     self.SetChrootPath(constants.SOURCE_ROOT)
     resolver = path_util.ChrootPathResolver()
     # These two patches are only necessary or have any affect on the test when
@@ -273,6 +309,56 @@ class TestPathResolver(cros_test_lib.MockTestCase):
     # Case: cyclic source/chroot sub-path elimination.
     self.assertEqual(
         os.path.join(constants.SOURCE_ROOT, 'some/path'),
+        resolver.FromChroot(os.path.join(
+            constants.CHROOT_SOURCE_ROOT,
+            constants.DEFAULT_CHROOT_DIR,
+            constants.CHROOT_SOURCE_ROOT.lstrip(os.path.sep),
+            constants.DEFAULT_CHROOT_DIR,
+            constants.CHROOT_SOURCE_ROOT.lstrip(os.path.sep),
+            'some/path')))
+
+    # Case: path inside the cache directory.
+    self.assertEqual(
+        os.path.join(path_util.GetCacheDir(), 'some/path'),
+        resolver.FromChroot(os.path.join(constants.CHROOT_CACHE_ROOT,
+                                         'some/path')))
+
+    # Case: non-rooted chroot paths.
+    self.assertEqual(
+        os.path.join(self.chroot_path, 'some/path'),
+        resolver.FromChroot('/some/path'))
+
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testOutsideCustomChrootOutbound(self, _):
+    """Tests FromChroot() calls from outside the chroot."""
+    self.PatchObject(os, 'getcwd', return_value=self.FakeCwd(FAKE_SOURCE_PATH))
+
+    self.SetChrootPath(constants.SOURCE_ROOT, chroot_path=CUSTOM_CHROOT_PATH)
+    resolver = path_util.ChrootPathResolver(chroot_path=CUSTOM_CHROOT_PATH)
+    # These two patches are only necessary or have any affect on the test when
+    # the test is run inside of a symlinked chroot. The _ReadChrootLink patch
+    # ensures it runs as if it is not in a symlinked chroot. The realpath
+    # patch is necessary to make it actually behave as if that's the case.
+    # In both instances the effective return value are as if it was not in a
+    # symlinked chroot.
+    # TODO(saklein) Rewrite these tests so this isn't necessary.
+    self.PatchObject(resolver, '_ReadChrootLink', return_value=None)
+    self.PatchObject(os.path, 'realpath', side_effect=lambda x: x)
+
+    # Case: source root path.
+    self.assertEqual(
+        os.path.join(constants.SOURCE_ROOT, 'some/path'),
+        resolver.FromChroot(os.path.join(constants.CHROOT_SOURCE_ROOT,
+                                         'some/path')))
+
+    # Case: cyclic source/chroot sub-path
+    self.assertEqual(
+        os.path.join(constants.SOURCE_ROOT,
+                     constants.DEFAULT_CHROOT_DIR,
+                     constants.CHROOT_SOURCE_ROOT.lstrip(os.path.sep),
+                     constants.DEFAULT_CHROOT_DIR,
+                     constants.CHROOT_SOURCE_ROOT.lstrip(os.path.sep),
+                     'some/path'),
         resolver.FromChroot(os.path.join(
             constants.CHROOT_SOURCE_ROOT,
             constants.DEFAULT_CHROOT_DIR,
