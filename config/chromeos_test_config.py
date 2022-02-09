@@ -346,9 +346,6 @@ def ApplyCustomOverrides(site_config):
           'vm_tests':[],
       },
 
-      'betty-pi-arc-pi-android-pfq':
-          site_config.templates.tast_vm_android_pfq_tests,
-
       # There's no amd64-generic-release builder, so we use amd64-generic-full
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858

@@ -559,39 +559,6 @@ def GeneralTemplates(site_config):
 
   # Tast is an alternate system for running integration tests.
 
-  # The expression specified here matches the union of the tast.critical-*
-  # Autotest server tests, which are executed by the bvt-tast-cq suite on real
-  # hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_paladin_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig('tast_vm_paladin',
-                                      ['("group:mainline" && !informational)'])
-      ],
-  )
-  # The expression specified here matches the union of the
-  # tast.critical-{android,chrome} Autotest server tests, which are executed by
-  # the bvt-tast-chrome-pfq suite on real hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_chrome_pfq_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig('tast_vm_chrome_pfq', [
-              '("group:mainline" && !informational && '
-              '("dep:android*" || "dep:chrome"))'
-          ])
-      ],
-  )
-  # The expression specified here matches the tast.critical-android Autotest
-  # server test, which is executed by the bvt-tast-android-pfq suite on real
-  # hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_android_pfq_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig(
-              'tast_vm_android_pfq',
-              ['("group:mainline" && !informational && "dep:android*")'])
-      ],
-  )
   # The expression specified here matches the union of the tast.critical-* and
   # tast.informational-* Autotest server tests, which are executed by the
   # bvt-tast-cq and bvt-tast-informational suites on real hardware in the lab.
@@ -2322,20 +2289,6 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.pre_flight_branch,
       display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
       boards=['hatch'],
-      sync_chrome=True,
-      android_rev=constants.ANDROID_REV_LATEST,
-      android_package=constants.ANDROID_VMRVC_PACKAGE,
-      android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
-      prebuilts=False,
-      unittests=False,
-  )
-
-  # TODO(b/182520025): Retire once R89 PFQ is gone.
-  site_config.Add(
-      'hatch-arc-r-android-rvc-pre-flight-branch',
-      site_config.templates.pre_flight_branch,
-      display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
-      boards=['hatch-arc-r'],
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
       android_package=constants.ANDROID_VMRVC_PACKAGE,
