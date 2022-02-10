@@ -124,6 +124,16 @@ class LtsKernelUprev():
       if kernel_element.attrib['name'] == self.KERNEL_PROJECT_NAME:
         kernel_path = self.buildroot / kernel_element.attrib['path']
         orig_kernel_version = os.path.basename(kernel_path)
+        # Check if this is a test branch (e.g. v5.10-arcvm).
+        if re.match(r'^v[0-9\.]+-[a-zA-Z]+$', orig_kernel_version):
+          logging.info('Leaving test branch unchanged: %s', orig_kernel_version)
+          replace_mapping[orig_kernel_version] = {
+              'original_revision': kernel_element.attrib['revision'],
+              'new_revision': kernel_element.attrib['revision'],
+              'original_date_str': None,
+              'new_date_str': None,
+          }
+          continue
         # Remove first 'v' from repo kernel version (e.g. v5.10) to get
         # branch-style kernel version (e.g. 5.10).
         kernel_version = orig_kernel_version.replace('v', '', 1)

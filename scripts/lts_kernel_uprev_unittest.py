@@ -27,6 +27,9 @@ SAMPLE_MANIFEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   <project path="src/third_party/kernel/v5.10"
            name="chromiumos/third_party/kernel"
            revision="refs/heads/chromeos-5.10" />
+  <project path="src/third_party/kernel/v5.10-arcvm"
+           name="chromiumos/third_party/kernel"
+           revision="refs/heads/chromeos-5.10-arcvm" />
  </manifest>"""
 
 SAMPLE_CL_UPLOAD = """remote: Processing changes: refs: 1, new: 1, done
@@ -119,6 +122,12 @@ class CrosLtsKernelUprevTests(cros_test_lib.TempDirTestCase):
                 'original_revision': 'refs/heads/chromeos-5.10',
                 'original_date_str': None,
                 'new_date_str': '2021-10-28 21:52:39 +0000',
+            },
+            'v5.10-arcvm': {
+                'new_revision': 'refs/heads/chromeos-5.10-arcvm',
+                'original_revision': 'refs/heads/chromeos-5.10-arcvm',
+                'original_date_str': None,
+                'new_date_str': None,
             },
         }, replace_mapping)
     # Test with an invalid kernel repo path in the manifest.
