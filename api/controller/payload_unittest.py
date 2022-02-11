@@ -41,13 +41,22 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         keyset='update_signer',
         dryrun=False)
 
+    self.minios_req = payload_pb2.GenerationRequest(
+        tgt_unsigned_image=tgt_image,
+        src_unsigned_image=src_image,
+        bucket='test-destination-bucket',
+        minios=True,
+        verify=True,
+        keyset='update_signer',
+        dryrun=False)
+
     self.result = payload_pb2.GenerationResponse(
         success=True,
         local_path='/tmp/aohiwdadoi/delta.bin',
         remote_uri='gs://something')
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
+    """Basic check that a validate only call does not execute any logic."""
 
     res = payload.GeneratePayload(self.req, self.result,
                                   self.validate_only_config)
@@ -78,3 +87,18 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
                                   self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_SUCCESS, res)
+
+  def testMiniOSSuccess(self):
+    """Test a miniOS paygen request."""
+    patch = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
+    patch.return_value.Run.return_value = 'gs://minios/something'
+    res = payload.GeneratePayload(self.minios_req, self.result, self.api_config)
+    self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
+
+  def testNoMiniOSPartition(self):
+    """Test a miniOS paygen request on an image with no miniOS part."""
+    patch = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
+    patch.side_effect = paygen_payload_lib.NoMiniOSPartitionException
+    payload.GeneratePayload(self.minios_req, self.result, self.api_config)
+    self.assertEqual(self.result.failure_reason,
+                     payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE)

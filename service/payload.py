@@ -40,6 +40,7 @@ class PayloadConfig(object):
                                          payload_pb2.SignedImage,
                                          payload_pb2.DLCImage]] = None,
                dest_bucket: Optional[str] = None,
+               minios: bool = False,
                verify: bool = True,
                upload: bool = True,
                cache_dir: Optional[str] = None):
@@ -49,6 +50,7 @@ class PayloadConfig(object):
       tgt_image: Proto for destination image.
       src_image: Proto for source image.
       dest_bucket: Destination bucket to place the final artifacts in.
+      minios: Whether the payload is for the image's miniOS partition.
       verify: If delta is made, verify the integrity of the payload.
       upload: Whether the payload generation results should be uploaded.
       cache_dir: The cache dir for paygen to use or None for default.
@@ -59,6 +61,7 @@ class PayloadConfig(object):
     self.tgt_image = tgt_image
     self.src_image = src_image
     self.dest_bucket = dest_bucket
+    self.minios = minios
     self.verify = verify
     self.upload = upload
     self.delta_type = 'delta' if self.src_image else 'full'
@@ -97,7 +100,7 @@ class PayloadConfig(object):
       payload_output_uri = None
 
     self.payload = gspaths.Payload(
-        tgt_image=tgt_image_path, src_image=src_image_path,
+        tgt_image=tgt_image_path, src_image=src_image_path, minios=self.minios,
         uri=payload_output_uri)
 
 
@@ -110,6 +113,10 @@ class PayloadConfig(object):
             (e.g. /tmp/wdjaio/delta.bin)
           The remote location that the payload was uploaded or None.
             (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
+
+    Raises:
+      paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
+          skipped for any reason.
     """
     # Leave the generated artifact local. This is ok because if we're testing
     # it's likely we want the artifact anyway, and in production this is ran on

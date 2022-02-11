@@ -78,3 +78,20 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         upload=True)
 
     payload_config.GeneratePayload()
+
+  def testMiniOS(self):
+    """Test the happy path on a miniOS payload."""
+
+    # Image def.
+    tgt_image = payload_pb2.UnsignedImage(
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
+
+    payload_config = payload.PayloadConfig(
+        tgt_image=tgt_image,
+        src_image=None,
+        dest_bucket='test',
+        minios=True,
+        verify=True,
+        upload=True)
+
+    payload_config.GeneratePayload()

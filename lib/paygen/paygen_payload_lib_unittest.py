@@ -455,8 +455,8 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
                                 work_dir=self.tempdir, minios=True)
     # Mock out needed functions.
     self.PatchObject(partition_lib, 'LookupImageType',
-                    return_value=partition_lib.CROS_IMAGE)
-    params_mock = self.PatchObject(gen,'_GetPlatformImageParams',
+                     return_value=partition_lib.CROS_IMAGE)
+    params_mock = self.PatchObject(gen, '_GetPlatformImageParams',
                                    return_value=('foo-appid_minios', None))
     minios_ext_mock = self.PatchObject(partition_lib, 'ExtractMiniOS')
     tgt_image_file = gen.tgt_image_file
@@ -480,7 +480,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     This test is for delta payloads only.
     """
     gen = self._GetStdGenerator(payload=self.delta_payload,
-                              work_dir=self.tempdir, minios=True)
+                                work_dir=self.tempdir, minios=True)
     # Mock out needed functions.
     self.PatchObject(partition_lib, 'LookupImageType',
                      return_value=partition_lib.CROS_IMAGE)
@@ -584,7 +584,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
                      return_value=('foo-appid_minios', '6'))
 
     # Run the test.
-    _,gen._minor_version = gen._GetPlatformImageParams(gen.tgt_image_file)
+    _, gen._minor_version = gen._GetPlatformImageParams(gen.tgt_image_file)
     gen._GenerateUnsignedPayload()
 
     # Check the expected function calls.
@@ -834,11 +834,12 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     prep_image_mock = self.PatchObject(paygen_payload_lib.PaygenPayload,
                                        '_PrepareImage')
     check_minios_mock = self.PatchObject(paygen_payload_lib.PaygenPayload,
-                                         '_ShouldSkipPayloadGeneration',
+                                         '_EitherImageIsMissingMiniOSPayload',
                                          return_value=True)
 
     # Run the test.
-    self.assertFalse(gen._Create())
+    with self.assertRaises(paygen_payload_lib.NoMiniOSPartitionException):
+      gen._Create()
 
     # Check expected calls.
     self.assertEqual(prep_image_mock.call_args_list, [
@@ -855,7 +856,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
     prep_image_mock = self.PatchObject(paygen_payload_lib.PaygenPayload,
                                        '_PrepareImage')
     check_minios_mock = self.PatchObject(paygen_payload_lib.PaygenPayload,
-                                         '_ShouldSkipPayloadGeneration',
+                                         '_EitherImageIsMissingMiniOSPayload',
                                          return_value=False)
     prep_part_mock = self.PatchObject(paygen_payload_lib.PaygenPayload,
                                       '_PreparePartitions')
@@ -868,7 +869,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
                                   '_StorePayloadJson')
 
     # Run the test.
-    self.assertTrue(gen._Create())
+    gen._Create()
 
     # Check expected calls.
     self.assertEqual(prep_image_mock.call_args_list, [
