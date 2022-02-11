@@ -167,7 +167,7 @@ def GenerateBreakpadSymbols(breakpad_dir, symbols_dir):
   osutils.SafeMakedirs(breakpad_dir)
   logging.info('generating breakpad symbols from %s', symbols_dir)
 
-  num_errors = multiprocessing.Value('i')
+  num_errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
 
   # Now start generating symbols for the discovered elfs.
   with parallel.BackgroundTaskRunner(

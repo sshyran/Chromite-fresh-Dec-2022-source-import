@@ -435,7 +435,7 @@ run other checks (e.g. pyflakes, etc.)
       # they are aware that nothing was linted.
       logging.warning('No files provided to lint.  Doing nothing.')
 
-    errors = multiprocessing.Value('i')
+    errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
     linter_map = _BreakoutFilesByLinter(files)
     dispatcher = functools.partial(_Dispatcher, errors,
                                    self.options.output, self.options.debug)

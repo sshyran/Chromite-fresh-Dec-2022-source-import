@@ -10,6 +10,8 @@ import atexit
 import json
 import multiprocessing
 
+from chromite.lib import parallel
+
 
 # Static Keys and Strings
 EVENT_ID = 'id'
@@ -29,10 +31,7 @@ EVENT_KIND_ROOT = 'Root'
 # Helper functions
 def EventIdGenerator():
   """Returns multiprocess safe iterator that  generates locally unique id"""
-  # NOTE: that is might be as issue if chromite libraries are imported.
-  #       Update to chromite.lib.parallel.Manager().Value('i') if this
-  #       becomes an issue
-  eid = multiprocessing.Value('i', 1)
+  eid = parallel.WrapMultiprocessing(multiprocessing.Value, 'i', 1)
 
   while True:
     with eid.get_lock():
