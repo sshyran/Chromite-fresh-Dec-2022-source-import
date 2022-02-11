@@ -47,10 +47,10 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
   dut_control_on.append(['sleep:5'])
 
   if servo.is_c2d2:
-    dut_control_on.append(['ap_flash_select:on'])
+    # CPLD will actually require AP_FLASH_SELECT of 0 in flashing
+    dut_control_on.append(['ap_flash_select:off'])
     dut_control_on.append(['spi2_vref:pp1800'])
     dut_control_off.append(['spi2_vref:off'])
-    dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_micro:
     # Note servo micro is only supported for dauntless daughterboard for
