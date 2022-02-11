@@ -299,9 +299,9 @@ def Create(target: 'build_target_lib.BuildTarget',
   sysroot = sysroot_lib.Sysroot(target.root)
 
   if sysroot.Exists() and not run_configs.force and not run_configs.quiet:
-    logging.warning('Board output directory already exists: %s\n'
-                    'Use --force to clobber the board root and start again.',
-                    sysroot.path)
+    logging.warning(
+        'Board output directory already exists: %s\n'
+        'Use --force to clobber the board root and start again.', sysroot.path)
 
   # Override regen_configs setting to force full setup run if the sysroot does
   # not exist.
@@ -311,8 +311,10 @@ def Create(target: 'build_target_lib.BuildTarget',
   # chroot update is explicitly disabled.
   if run_configs.update_chroot:
     logging.info('Updating chroot.')
-    update_chroot = [os.path.join(constants.CROSUTILS_DIR, 'update_chroot'),
-                     '--toolchain_boards', target.name]
+    update_chroot = [
+        os.path.join(constants.CROSUTILS_DIR, 'update_chroot'),
+        '--toolchain_boards', target.name
+    ]
     update_chroot += run_configs.GetUpdateChrootArgs()
     try:
       cros_build_lib.run(update_chroot)
@@ -369,11 +371,11 @@ def GenerateArchive(output_dir: str, build_target_name: str,
   Returns:
     Path to the sysroot tar file.
   """
-  cmd = ['cros_generate_sysroot',
-         '--out-file', constants.TARGET_SYSROOT_TAR,
-         '--out-dir', output_dir,
-         '--board', build_target_name,
-         '--package', ' '.join(pkg_list)]
+  cmd = [
+      'cros_generate_sysroot', '--out-file', constants.TARGET_SYSROOT_TAR,
+      '--out-dir', output_dir, '--board', build_target_name, '--package',
+      ' '.join(pkg_list)
+  ]
   cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT)
   return os.path.join(output_dir, constants.TARGET_SYSROOT_TAR)
 
@@ -392,10 +394,16 @@ def CreateSimpleChromeSysroot(chroot: 'chroot_lib.Chroot', _sysroot_class,
   Returns:
     Path to the sysroot tar file.
   """
-  cmd = ['cros_generate_sysroot', '--out-dir', '/tmp', '--board',
-         build_target.name, '--deps-only', '--package', constants.CHROME_CP]
-  cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT, enter_chroot=True,
-                     chroot_args=chroot.get_enter_args(), extra_env=chroot.env)
+  cmd = [
+      'cros_generate_sysroot', '--out-dir', '/tmp', '--board',
+      build_target.name, '--deps-only', '--package', constants.CHROME_CP
+  ]
+  cros_build_lib.run(
+      cmd,
+      cwd=constants.SOURCE_ROOT,
+      enter_chroot=True,
+      chroot_args=chroot.get_enter_args(),
+      extra_env=chroot.env)
 
   # Move the artifact out of the chroot.
   sysroot_tar_path = os.path.join(
@@ -435,8 +443,7 @@ def CreateChromeEbuildEnv(chroot: 'chroot_lib.Chroot',
     # Convert from bzip2 to tar format.
     bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
     tempdir_tar_path = os.path.join(tempdir, constants.CHROME_ENV_FILE)
-    cros_build_lib.run([bzip2, '-d', env_bzip, '-c'],
-                       stdout=tempdir_tar_path)
+    cros_build_lib.run([bzip2, '-d', env_bzip, '-c'], stdout=tempdir_tar_path)
 
     cros_build_lib.CreateTarball(result_path, tempdir)
 
@@ -482,8 +489,10 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   """
   cros_build_lib.AssertInsideChroot()
 
-  cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_packages'),
-         '--board', target.name, '--board_root', sysroot.path]
+  cmd = [
+      os.path.join(constants.CROSUTILS_DIR, 'build_packages'), '--board',
+      target.name, '--board_root', sysroot.path
+  ]
   cmd += run_configs.GetBuildPackagesArgs()
 
   extra_env = run_configs.GetEnv()
@@ -610,8 +619,10 @@ def _ChooseProfile(target: 'build_target_lib.BuildTarget',
     target: The build target whose profile is being chosen.
     sysroot: The sysroot for which the profile is being chosen.
   """
-  choose_profile = ['cros_choose_profile', '--board', target.name,
-                    '--board-root', sysroot.path]
+  choose_profile = [
+      'cros_choose_profile', '--board', target.name, '--board-root',
+      sysroot.path
+  ]
   if target.profile:
     # Chooses base by default, only override when we have a passed param.
     choose_profile += ['--profile', target.profile]
@@ -706,8 +717,8 @@ def BundleBreakpadSymbols(chroot: 'chroot_lib.Chroot',
     # materialize and consume all entries so that all are copied to
     # dest dir and complete list of all symbol files is returned.
     sym_file_list = list(
-        GatherSymbolFiles(tempdir=symbol_tmpdir, destdir=dest_tmpdir,
-                          paths=[breakpad_dir]))
+        GatherSymbolFiles(
+            tempdir=symbol_tmpdir, destdir=dest_tmpdir, paths=[breakpad_dir]))
 
     if not sym_file_list:
       logging.warning('No sym files found in %s.', breakpad_dir)
@@ -760,25 +771,22 @@ def GenerateBreakpadSymbols(chroot: 'chroot_lib.Chroot',
   # and that don't help with breakpad debugging (see https://crbug.com/213670).
   exclude_dirs = ['firmware']
 
-  cmd = [
-      'cros_generate_breakpad_symbols'
-  ]
+  cmd = ['cros_generate_breakpad_symbols']
   if debug:
     cmd += ['--debug']
 
   # Execute for board in parallel with half # of cpus available to avoid
   # starving other parallel processes on the same machine.
   cmd += [
-      '--board=%s' % build_target.name,
-      '--jobs', str(max(1, multiprocessing.cpu_count() // 2))
+      '--board=%s' % build_target.name, '--jobs',
+      str(max(1,
+              multiprocessing.cpu_count() // 2))
   ]
   cmd += ['--exclude-dir=%s' % x for x in exclude_dirs]
 
   logging.info('Generating breakpad symbols: %s.', cmd)
   result = cros_build_lib.run(
-      cmd,
-      enter_chroot=True,
-      chroot_args=chroot.get_enter_args())
+      cmd, enter_chroot=True, chroot_args=chroot.get_enter_args())
   return result
 
 
@@ -812,8 +820,8 @@ def GatherSymbolFiles(
   Yields:
     A SymbolFileTuple for every symbol file found in paths.
   """
-  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s',
-               tempdir, destdir, paths)
+  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s', tempdir,
+               destdir, paths)
   for p in paths:
     o = urllib.parse.urlparse(p)
     if o.scheme:
@@ -835,8 +843,8 @@ def GatherSymbolFiles(
               # path's dirname before copying.
               os.makedirs(os.path.join(destdir, os.path.dirname(relative_path)))
               shutil.copy(filename, os.path.join(destdir, relative_path))
-            yield SymbolFileTuple(relative_path=relative_path,
-                                  source_file_name=filename)
+            yield SymbolFileTuple(
+                relative_path=relative_path, source_file_name=filename)
 
     elif cros_build_lib.IsTarball(p):
       tardir = tempfile.mkdtemp(dir=tempdir)
@@ -867,7 +875,7 @@ def GatherSymbolFiles(
       # of the directory.
       if p.endswith('.sym'):
         shutil.copy(p, destdir)
-        yield SymbolFileTuple(relative_path=os.path.basename(p),
-                              source_file_name=p)
+        yield SymbolFileTuple(
+            relative_path=os.path.basename(p), source_file_name=p)
     else:
       raise ValueError('Unexpected input to GatherSymbolFiles: ', p)
