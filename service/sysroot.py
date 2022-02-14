@@ -133,7 +133,29 @@ class BuildPackagesRunConfig(object):
       package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
       expanded_binhosts: bool = False,
       setup_board: bool = True,
-      dryrun: bool = False):
+      dryrun: bool = False,
+      usepkgonly: bool = False,
+      workon: bool = True,
+      verbose: bool = False,
+      install_auto_test: bool = True,
+      autosetgov: bool = False,
+      autosetgov_sticky: bool = False,
+      use_any_chrome: bool = True,
+      internal_chrome: bool = False,
+      clean_build: bool = False,
+      eclean: bool = True,
+      rebuild_dep: bool = True,
+      accept_licenses: Optional[str] = None,
+      jobs: Optional[int] = None,
+      local_pkg: bool = False,
+      dev_image: bool = True,
+      factory_image: bool = True,
+      test_image: bool = True,
+      debug_version: bool = True,
+      # TODO(rchandrasekar): Below 2 attributes will be removed once
+      # build_packages.py starts to call setupboard directly.
+      update_toolchain: bool = True,
+      upgrade_chroot: bool = True):
     """Init method.
 
     Args:
@@ -156,6 +178,29 @@ class BuildPackagesRunConfig(object):
         inheritance feature for the sysroot.
       setup_board: Whether to run setup_board in build_packages.
       dryrun: Whether to do a dryrun and not actually build any packages.
+      usepkgonly: Only use binary packages to bootstrap; abort if any are
+        missing.
+      workon: Force-build workon packages.
+      verbose: Show all output from parallel_emerge.
+      install_auto_test: Build autotest client code.
+      autosetgov: Automatically set cpu governor to 'performance'.
+      autosetgov_sticky: Remember --autosetgov setting for future runs.
+      use_any_chrome: Use any Chrome prebuilt available, even if the prebuilt
+        doesn't match exactly.
+      internal_chrome: Build the internal version of chrome.
+      clean_build: Perform a clean build; delete sysroot if it exists before
+        building.
+      eclean: Run eclean to delete old binpkgs.
+      rebuild_dep: Rebuild dependencies.
+      accept_licenses: Licenses to append to the accepted list.
+      jobs: How many packages to build in parallel at maximum.
+      local_pkg: Bootstrap from local packages instead of remote packages.
+      dev_image: Build useful developer friendly utilities.
+      factory_image: Build factory installer.
+      test_image: Build packages required for testing.
+      debug_version: Build debug versions of Chromium-OS-specific packages.
+      update_toolchain: Update toolchain automatically.
+      upgrade_chroot: Upgrade chroot automatically.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -168,18 +213,88 @@ class BuildPackagesRunConfig(object):
     self.expanded_binhosts = expanded_binhosts
     self.setup_board = setup_board
     self.dryrun = dryrun
+    self.usepkgonly = usepkgonly
+    self.workon = workon
+    self.verbose = verbose
+    self.install_auto_test = install_auto_test
+    self.autosetgov = autosetgov
+    self.autosetgov_sticky = autosetgov_sticky
+    self.use_any_chrome = use_any_chrome
+    self.internal_chrome = internal_chrome
+    self.clean_build = clean_build
+    self.eclean = eclean
+    self.rebuild_dep = rebuild_dep
+    self.accept_licenses = accept_licenses
+    self.jobs = jobs
+    self.local_pkg = local_pkg
+    self.dev_image = dev_image
+    self.factory_image = factory_image
+    self.test_image = test_image
+    self.debug_version = debug_version
+    self.update_toolchain = update_toolchain
+    self.upgrade_chroot = upgrade_chroot
 
-  def GetBuildPackagesArgs(self) -> List[str]:
-    """Get the build_packages script arguments."""
-    # Defaults for the builder.
-    # TODO(saklein): Parametrize/rework the defaults when build_packages is
-    #   ported to chromite.
-    args = [
-        '--accept_licenses',
-        '@CHROMEOS',
-        '--skip_chroot_upgrade',
-        '--nouse_any_chrome',
-    ]
+  def GetBuildPackagesScriptArgs(self, args: List[str]) -> None:
+    """Get the arguments for build_packages script."""
+    if not self.update_toolchain:
+      args.append('--skip_toolchain_update')
+
+    if not self.upgrade_chroot:
+      args.append('--skip_chroot_upgrade')
+
+    if not self.dev_image:
+      args.append('--nowithdev')
+
+    if not self.factory_image:
+      args.append('--nowithfactory')
+
+    if not self.test_image:
+      args.append('--nowithtest')
+
+    if not self.debug_version:
+      args.append('--nowithdebug')
+
+    if self.local_pkg:
+      args.append('--reuse_pkgs_from_local_boards')
+
+    if self.jobs:
+      args.extend(['--jobs', f'{self.jobs}'])
+
+    if self.accept_licenses:
+      args.extend(['--accept_licenses', self.accept_licenses])
+
+    if self.rebuild_dep is False:
+      args.append('--norebuild')
+
+    if not self.eclean:
+      args.append('--noeclean')
+
+    if self.internal_chrome:
+      args.append('--internal')
+
+    if self.clean_build:
+      args.append('--cleanbuild')
+
+    if not self.use_any_chrome:
+      args.append('--nouse_any_chrome')
+
+    if self.autosetgov:
+      args.append('--autosetgov')
+
+    if self.autosetgov_sticky:
+      args.append('--autosetgov_sticky')
+
+    if not self.install_auto_test:
+      args.append('--nowithautotest')
+
+    if self.verbose:
+      args.append('--showoutput')
+
+    if not self.workon:
+      args.append('--noworkon')
+
+    if self.usepkgonly:
+      args.append('--usepkgonly')
 
     if not self.usepkg:
       args.append('--nousepkg')
@@ -196,9 +311,7 @@ class BuildPackagesRunConfig(object):
     if not self.is_incremental:
       args.append('--nowithrevdeps')
 
-    if self.expanded_binhosts:
-      args.append('--expandedbinhosts')
-    else:
+    if not self.expanded_binhosts:
       args.append('--noexpandedbinhosts')
 
     if not self.setup_board:
@@ -209,6 +322,22 @@ class BuildPackagesRunConfig(object):
 
     if self.dryrun:
       args.append('--pretend')
+
+  def GetBuildPackagesArgs(self) -> List[str]:
+    """Get the build_packages script and builder default arguments."""
+    # Defaults for the builder.
+    # TODO(saklein): Parametrize/rework the defaults when build_packages is
+    #   ported to chromite.
+    # TODO(b/220197678): Modify the defaults to be populated in run config,
+    #   after the build_packages script port is complete.
+    args = [
+        '--accept_licenses',
+        '@CHROMEOS',
+        '--skip_chroot_upgrade',
+        '--nouse_any_chrome',
+    ]
+
+    self.GetBuildPackagesScriptArgs(args)
 
     return args
 
