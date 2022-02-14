@@ -1908,3 +1908,17 @@ def UnbufferedNamedTemporaryFile(**kwargs):
   else:
     kwargs['buffering'] = 0
   return tempfile.NamedTemporaryFile(**kwargs)
+
+
+def ClearShadowLocks(sysroot: os.PathLike = Path('/')) -> None:
+  """Clears out stale shadow-utils locks in the given sysroot."""
+  logging.info('Clearing shadow-utils lockfiles under %s', sysroot)
+  filenames = ('passwd.lock', 'group.lock', 'shadow.lock', 'gshadow.lock')
+  etc_path = sysroot / 'etc'
+  if not etc_path.exists():
+    logging.warning(
+        'Unable to clear shadow-utils lockfiles, path does not exist: %s',
+        etc_path)
+    return
+  for f in (x for x in os.listdir(etc_path) if x.startswith(filenames)):
+    osutils.RmDir(etc_path / f, ignore_missing=True, sudo=True)

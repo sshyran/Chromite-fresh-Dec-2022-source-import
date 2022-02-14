@@ -1325,3 +1325,39 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
 
     self.assertEqual(self.mockRun.call_count, 3)
     self.assertEqual(cm.exception.args[1].returncode, 1)
+
+
+class ClearShadowLocksTests(cros_test_lib.TempDirTestCase,
+                            cros_test_lib.LoggingTestCase):
+  """Tests shadowlock files are removed from the given sysroot."""
+
+  def setUp(self):
+    D = cros_test_lib.Directory
+    file_layout = (D('etc', (
+        'test.lock',
+        'testfile.txt',
+        'passwd.lock',
+        'group.lock',
+        'shadow.lock',
+        'shadow.lockfile',
+        'gshadow.lock',
+    )),)
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
+
+  def testClearShadowLocksSuccess(self):
+    cros_build_lib.ClearShadowLocks(Path(self.tempdir))
+
+    self.assertTrue(os.path.exists(f'{self.tempdir}/etc/test.lock'))
+    self.assertTrue(os.path.exists(f'{self.tempdir}/etc/testfile.txt'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/passwd.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/group.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/shadow.lock'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/shadow.lockfile'))
+    self.assertFalse(os.path.exists(f'{self.tempdir}/etc/gshadow.lock'))
+
+  def testClearShadowLocksPathDoesNotExist(self):
+    with cros_test_lib.LoggingCapturer() as logs:
+      cros_build_lib.ClearShadowLocks(Path('fake/path/does/not/exist'))
+
+      self.AssertLogsContain(
+          logs, 'Unable to clear shadow-utils lockfiles, path does not exist')
