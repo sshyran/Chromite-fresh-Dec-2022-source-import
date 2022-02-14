@@ -132,7 +132,6 @@
     trogdor-factory-trogdor-13443.B-factorybranch
   factory-veyron-7505.B-buildspec
     veyron_fievel-factory-veyron-7505.B-factorybranch
-    veyron_rialto-factory-veyron-7505.B-factorybranch
     veyron_tiger-factory-veyron-7505.B-factorybranch
   factory-volteer-13600.B-buildspec
     volteer-factory-volteer-13600.B-factorybranch
@@ -322,7 +321,6 @@
     trogdor-zephyr-release
     trogdor64-release
     ultima-release
-    veyron_rialto-release
     volteer-borealis-release
     volteer-kernelnext-release
     volteer-manatee-release
@@ -901,7 +899,6 @@
     trogdor-factory-trogdor-13443.B-factorybranch-tryjob
   factory-veyron-7505.B-buildspec-tryjob
     veyron_fievel-factory-veyron-7505.B-factorybranch-tryjob
-    veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob
     veyron_tiger-factory-veyron-7505.B-factorybranch-tryjob
   factory-volteer-13600.B-buildspec-tryjob
     volteer-factory-volteer-13600.B-factorybranch-tryjob
@@ -1412,7 +1409,6 @@
     trogdor-zephyr-release-tryjob
     trogdor64-release-tryjob
     ultima-release-tryjob
-    veyron_rialto-release-tryjob
     volteer-borealis-release-tryjob
     volteer-kernelnext-release-tryjob
     volteer-manatee-release-tryjob
@@ -1831,13 +1827,6 @@
   veyron_minnie-payloads-tryjob
   veyron_minnie-release-tryjob
   veyron_minnie-unittest-stress
-  veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob
-  veyron_rialto-full-tryjob
-  veyron_rialto-llvm-next-toolchain-tryjob
-  veyron_rialto-llvm-toolchain-tryjob
-  veyron_rialto-payloads-tryjob
-  veyron_rialto-release-tryjob
-  veyron_rialto-unittest-stress
   veyron_speedy-full-tryjob
   veyron_speedy-llvm-next-toolchain-tryjob
   veyron_speedy-llvm-toolchain-tryjob

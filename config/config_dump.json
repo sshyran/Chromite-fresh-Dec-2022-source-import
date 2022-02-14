@@ -12027,7 +12027,6 @@
         "schedule": "with 720h interval",
         "slave_configs": [
             "veyron_fievel-factory-veyron-7505.B-factorybranch",
-            "veyron_rialto-factory-veyron-7505.B-factorybranch",
             "veyron_tiger-factory-veyron-7505.B-factorybranch"
         ],
         "workspace_branch": "factory-veyron-7505.B"
@@ -12041,7 +12040,6 @@
         "luci_builder": "Try",
         "slave_configs": [
             "veyron_fievel-factory-veyron-7505.B-factorybranch-tryjob",
-            "veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob",
             "veyron_tiger-factory-veyron-7505.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-veyron-7505.B"
@@ -20464,7 +20462,6 @@
             "trogdor-zephyr-release",
             "trogdor64-release",
             "ultima-release",
-            "veyron_rialto-release",
             "volteer-borealis-release",
             "volteer-kernelnext-release",
             "volteer-manatee-release",
@@ -20687,7 +20684,6 @@
             "trogdor-zephyr-release-tryjob",
             "trogdor64-release-tryjob",
             "ultima-release-tryjob",
-            "veyron_rialto-release-tryjob",
             "volteer-borealis-release-tryjob",
             "volteer-kernelnext-release-tryjob",
             "volteer-manatee-release-tryjob",
@@ -31154,173 +31150,6 @@
         "_template": "unittest_stress",
         "boards": [
             "veyron_minnie"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
-    "veyron_rialto-factory-veyron-7505.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "workspace_branch": "factory-veyron-7505.B"
-    },
-    "veyron_rialto-factory-veyron-7505.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test",
-            "chromeos-base/chromeos-installshim",
-            "chromeos-base/chromeos-factory",
-            "chromeos-base/chromeos-hwid",
-            "chromeos-base/autotest-factory-install",
-            "chromeos-base/autotest-all"
-        ],
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-veyron-7505.B"
-    },
-    "veyron_rialto-full": {
-        "_template": "full",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "veyron_rialto-full-tryjob": {
-        "_template": "full",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests": [
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-inline\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-arc\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": false,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"Build\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 0,\n    \"timeout\": 10800,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-tast-informational\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-installer\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-cq\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}",
-            "{\n    \"async\": true,\n    \"blocking\": false,\n    \"critical\": false,\n    \"enable_skylab\": true,\n    \"file_bugs\": false,\n    \"max_retries\": 5,\n    \"minimum_duts\": 0,\n    \"offload_failures_only\": false,\n    \"pool\": \"quota\",\n    \"priority\": \"PostBuild\",\n    \"quota_account\": \"legacypool-suites\",\n    \"retry\": true,\n    \"suite\": \"bvt-perbuild\",\n    \"suite_args\": null,\n    \"suite_min_duts\": 1,\n    \"timeout\": 15000,\n    \"warn_only\": false\n}"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "prebuilts": "public",
-        "run_cpeexport": true,
-        "useflags": [
-            "-chrome_internal"
-        ],
-        "vm_tests": []
-    },
-    "veyron_rialto-llvm-next-toolchain": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "veyron_rialto"
-        ]
-    },
-    "veyron_rialto-llvm-next-toolchain-tryjob": {
-        "_template": "llvm_next_toolchain",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "veyron_rialto-llvm-toolchain": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "veyron_rialto"
-        ]
-    },
-    "veyron_rialto-llvm-toolchain-tryjob": {
-        "_template": "llvm_toolchain",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "veyron_rialto-payloads": {
-        "_template": "payloads",
-        "boards": [
-            "veyron_rialto"
-        ]
-    },
-    "veyron_rialto-payloads-tryjob": {
-        "_template": "payloads",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "debug": true,
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "veyron_rialto-release": {
-        "_template": "release",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "chrome_sdk_build_chrome": false,
-        "hw_tests": [],
-        "hw_tests_disabled_bug": "https://b/141387161",
-        "hw_tests_override": [],
-        "vm_tests_override": null
-    },
-    "veyron_rialto-release-tryjob": {
-        "_template": "release",
-        "boards": [
-            "veyron_rialto"
-        ],
-        "chrome_sdk_build_chrome": false,
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests": [],
-        "hw_tests_disabled_bug": "https://b/141387161",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "paygen": false,
-        "push_image": false,
-        "suite_scheduling": false,
-        "vm_tests_override": null
-    },
-    "veyron_rialto-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "veyron_rialto"
         ],
         "hw_tests_override": null,
         "internal": true,

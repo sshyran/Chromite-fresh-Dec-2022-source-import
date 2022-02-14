@@ -30,7 +30,6 @@ arm_internal_release_boards = frozenset([
     'tael',
     'veyron_mighty',
     'veyron_minnie',
-    'veyron_rialto',
     'veyron_speedy',
     'viking',
     'viking-poc2',
