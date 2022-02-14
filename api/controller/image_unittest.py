@@ -375,7 +375,7 @@ class PushImageTest(api_config.ApiConfigMixin):
         common_pb2.IMAGE_TYPE_RECOVERY, common_pb2.IMAGE_TYPE_FACTORY,
         common_pb2.IMAGE_TYPE_FIRMWARE, common_pb2.IMAGE_TYPE_ACCESSORY_USBPD,
         common_pb2.IMAGE_TYPE_ACCESSORY_RWSIG, common_pb2.IMAGE_TYPE_BASE,
-        common_pb2.IMAGE_TYPE_GSC_FIRMWARE
+        common_pb2.IMAGE_TYPE_GSC_FIRMWARE, common_pb2.IMAGE_TYPE_HPS_FIRMWARE,
     ])
     rc = image_controller.PushImage(req, self.NewResponse(),
                                     self.validate_only_config)

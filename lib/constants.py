@@ -795,6 +795,8 @@ IMAGE_TYPE_FACTORY = 'factory'
 # This is the image type mapping to the factory image type in build_image.
 IMAGE_TYPE_FACTORY_SHIM = 'factory_install'
 IMAGE_TYPE_FIRMWARE = 'firmware'
+# Firmware for cros hps device src/platform/hps-firmware2.
+IMAGE_TYPE_HPS_FIRMWARE = 'hps_firmware'
 # USB PD accessory microcontroller firmware (e.g. power brick, display dongle).
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
 # Standalone accessory microcontroller firmware (e.g. wireless keyboard).
