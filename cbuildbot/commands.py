@@ -2715,7 +2715,8 @@ def PushImages(board,
     log_cmd.append('--profile=%s' % profile)
 
   if sign_types:
-    log_cmd.append('--sign-types=%s' % ' '.join(sign_types))
+    log_cmd.append('--sign-types')
+    log_cmd.extend(sign_types)
 
   if buildroot:
     log_cmd.append('--buildroot=%s' % buildroot)
