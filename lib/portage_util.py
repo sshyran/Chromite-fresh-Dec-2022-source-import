@@ -2286,10 +2286,33 @@ def GetRepositoryForEbuild(ebuild_path, sysroot):
   return GetRepositoryFromEbuildInfo(result.output)
 
 
-def CleanOutdatedBinaryPackages(sysroot):
-  """Cleans outdated binary packages from |sysroot|."""
-  return cros_build_lib.run(
-      [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean'), '-d', 'packages'])
+def CleanOutdatedBinaryPackages(
+    sysroot: str,
+    deep: bool = True,
+    exclusion_file: Optional[Union[str, os.PathLike]] = None
+) -> cros_build_lib.CommandResult:
+  """Cleans outdated binary packages from |sysroot|.
+
+  Args:
+    sysroot: The root directory being inspected.
+    deep: If set to True, keep minimal files for reinstallation by examining
+      vartree for installed packages. If set to False, use porttree, which
+      contains every ebuild in the tree, to determine which binpkgs to clean.
+    exclusion_file: Path to the exclusion file.
+
+  Returns:
+    result (cros_build_lib.CommandResult)
+  """
+  if exclusion_file:
+    exclusion_file = Path(exclusion_file)
+
+  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean')]
+  if deep:
+    cmd += ['-d']
+  if exclusion_file:
+    cmd += ['-e', str(exclusion_file)]
+  cmd += ['packages']
+  return cros_build_lib.run(cmd)
 
 
 def _CheckHasTest(cp, sysroot, require_workon: bool = False):
