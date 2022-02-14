@@ -502,6 +502,12 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
           _AddToFilesToSign(image_type, dst, suffix)
 
     logging.debug('Files to sign: %s', files_to_sign)
+    unused_sign_types = set(sign_types or []) - set(
+        x for x, _, _ in files_to_sign)
+    if unused_sign_types:
+      logging.warning('Some sign types were unused: %s',
+                      ' '.join(unused_sign_types))
+
     # Now go through the subset for signing.
     for image_type, dst_name, suffix in files_to_sign:
       try:
