@@ -8,6 +8,7 @@ import datetime
 import logging
 import os
 
+from chromite.cbuildbot import commands
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import chrome_util
 from chromite.lib import constants
@@ -394,6 +395,12 @@ class CrOSTest(object):
       # gsutil onto path during the test.
       gsutil_dir = constants.CHROMITE_SCRIPTS_DIR
       extra_env = {'PATH': os.environ.get('PATH', '') + ':' + gsutil_dir}
+
+      tast_vars_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
+          commands.AUTOTEST_SERVER_PACKAGE, self.cache_dir, self._device.board)
+      tast_vars_dir = os.path.join(tast_vars_dir, 'tast', 'vars', 'private')
+      if os.path.exists(tast_vars_dir):
+        cmd += ['-defaultvarsdir=%s' % tast_vars_dir]
     else:
       extra_env = None
 

@@ -20,6 +20,7 @@ import threading
 
 from chromite.third_party.gn_helpers import gn_helpers
 
+from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
@@ -1181,7 +1182,7 @@ class ChromeSDKCommand(command.CliCommand):
       return os.path.join(tc_path, 'bin', binary)
     return binary
 
-  def _GenerateReclientWrapper(self, sdk_ctx, board):
+  def _GenerateReclientWrapper(self, board):
     """Generate a wrapper for reclient.
 
     This function generates a wrapper script for the rewrapper to make it
@@ -1189,8 +1190,6 @@ class ChromeSDKCommand(command.CliCommand):
     The wrapper adds a flag to preserve symlinks which are used by CrOS clang.
 
     Args:
-      sdk_ctx: An SDKFetcher.SDKContext namedtuple object for getting toolchain
-               location.
       board: Target board name to be used as a config name and a wrapper name.
 
     Returns:
@@ -1393,8 +1392,7 @@ class ChromeSDKCommand(command.CliCommand):
                    '--gn-extra-args to specify a non default value.',
                    symbol_level)
 
-    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientWrapper(
-        sdk_ctx, board)
+    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientWrapper(board)
 
     if options.gn_extra_args:
       gn_args.update(gn_helpers.FromGNArgs(options.gn_extra_args))
@@ -1622,6 +1620,7 @@ class ChromeSDKCommand(command.CliCommand):
     components = [self.sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR]
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
+      components.append(commands.AUTOTEST_SERVER_PACKAGE)
     if self.options.download_vm:
       components.append(constants.TEST_IMAGE_TAR)
 
