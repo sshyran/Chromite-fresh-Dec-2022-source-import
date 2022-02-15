@@ -69,6 +69,7 @@ HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust-bootstrap',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
+    'dev-embedded/hps-sdk',
     'dev-embedded/ti50-sdk',
 )
 
