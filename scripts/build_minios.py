@@ -27,13 +27,13 @@ def GetParser():
                       help='The path to keyset.',
                       default=constants.VBOOT_DEVKEYS_DIR)
   parser.add_argument('--public-key',
-                      help='Filename to the public key whose private part '\
+                      help='Filename to the public key whose private part '
                       'signed the keyblock.',
-                      default=constants.RECOVERY_PUBLIC_KEY )
+                      default=constants.RECOVERY_PUBLIC_KEY)
   parser.add_argument('--private-key',
-                      help='Filename to the private key whose public part is '\
+                      help='Filename to the private key whose public part is '
                       'baked into the keyblock.',
-                      default=constants.MINIOS_DATA_PRIVATE_KEY )
+                      default=constants.MINIOS_DATA_PRIVATE_KEY)
   parser.add_argument('--keyblock',
                       help='Filename to the kernel keyblock.',
                       default=constants.MINIOS_KEYBLOCK)
