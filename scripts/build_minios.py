@@ -39,6 +39,12 @@ def GetParser():
                       default=constants.MINIOS_KEYBLOCK)
   parser.add_argument('--serial', type=str,
                       help='Serial port for the kernel console (e.g. printks)')
+  parser.add_argument('--mod-for-dev', action='store_true',
+                      help='Repack the MiniOS image with debug flags.')
+  parser.add_argument('--force-build', action='store_true',
+                      help='Force the kernel to be rebuilt when repacking with '
+                      'debug flags. Use with --mod-for-dev in case kernel is '
+                      'not already built or needs to be rebuilt.')
   return parser
 
 
@@ -48,8 +54,10 @@ def main(argv):
   opts.Freeze()
 
   with tempfile.TemporaryDirectory() as work_dir:
+    build_kernel = opts.force_build if opts.mod_for_dev else True
     kernel = minios.CreateMiniOsKernelImage(opts.board, opts.version, work_dir,
                                             opts.keys_dir, opts.public_key,
                                             opts.private_key, opts.keyblock,
-                                            opts.serial)
+                                            opts.serial, build_kernel,
+                                            opts.mod_for_dev)
     minios.InsertMiniOsKernelImage(opts.image, kernel)

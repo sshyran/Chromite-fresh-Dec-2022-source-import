@@ -18,7 +18,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
   """Tests Builder."""
 
   FAKE_PARTITIONS = (
-    image_lib.PartitionInfo(9, 10, 10+512*4, 512*4, 'fs', 'MINIOS-A', ''),
+      image_lib.PartitionInfo(9, 10, 10+512*4, 512*4, 'fs', 'MINIOS-A', ''),
   )
 
   def setUp(self):
@@ -43,8 +43,8 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
                                    'foo-private-key', 'foo-keyblock',
                                    'foo-tty')
     bck_mock.assert_called_once_with(
-      ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
-       'kernel_compress_xz', 'pcserial', '-kernel_afdo'], [])
+        ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
+         'kernel_compress_xz', 'pcserial', '-kernel_afdo'], [])
     bki_mock.assert_called_once_with(
         os.path.join(self.tempdir,
                      minios.MINIOS_KERNEL_IMAGE),
@@ -66,14 +66,58 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
                                    'foo-private-key', 'foo-keyblock',
                                    'foo-tty')
     bck_mock.assert_called_once_with(
-      ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
-       'kernel_compress_xz', 'pcserial', '-kernel_afdo'],
-      ['foo', 'bar'])
+        ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
+         'kernel_compress_xz', 'pcserial', '-kernel_afdo'],
+        ['foo', 'bar'])
     bki_mock.assert_called_once_with(
         os.path.join(self.tempdir,
                      minios.MINIOS_KERNEL_IMAGE),
         boot_args='noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios',
         serial='foo-tty',
+        keys_dir='foo-keys-dir', public_key='foo-public-key',
+        private_key='foo-private-key', keyblock='foo-keyblock')
+
+  def testCreateMiniOsKernelImageDeveloperMode(self):
+    """Tests CreateMiniOsKernelImage() with developer mode enabled."""
+    self.PatchObject(os.environ, 'get', return_value='')
+    bck_mock = self.PatchObject(kernel_builder.Builder,
+                                'CreateCustomKernel')
+    bki_mock = self.PatchObject(kernel_builder.Builder,
+                                'CreateKernelImage')
+
+    minios.CreateMiniOsKernelImage('foo-board', '0.0.0.0', self.tempdir,
+                                   'foo-keys-dir', 'foo-public-key',
+                                   'foo-private-key', 'foo-keyblock',
+                                   'foo-tty', developer_mode=True)
+    bck_mock.assert_called_once_with(
+        ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
+         'kernel_compress_xz', 'pcserial', '-kernel_afdo'], [])
+    bki_mock.assert_called_once_with(
+        os.path.join(self.tempdir,
+                     minios.MINIOS_KERNEL_IMAGE),
+        boot_args='noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios'
+        ' cros_debug', serial='foo-tty',
+        keys_dir='foo-keys-dir', public_key='foo-public-key',
+        private_key='foo-private-key', keyblock='foo-keyblock')
+
+  def testCreateMiniOsKernelImageBuildDisabled(self):
+    """Tests CreateMiniOsKernelImage() with kernel build disabled."""
+    self.PatchObject(os.environ, 'get', return_value='')
+    bck_mock = self.PatchObject(kernel_builder.Builder,
+                                'CreateCustomKernel')
+    bki_mock = self.PatchObject(kernel_builder.Builder,
+                                'CreateKernelImage')
+
+    minios.CreateMiniOsKernelImage('foo-board', '0.0.0.0', self.tempdir,
+                                   'foo-keys-dir', 'foo-public-key',
+                                   'foo-private-key', 'foo-keyblock',
+                                   'foo-tty', False, True)
+    bck_mock.assert_not_called()
+    bki_mock.assert_called_once_with(
+        os.path.join(self.tempdir,
+                     minios.MINIOS_KERNEL_IMAGE),
+        boot_args='noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios'
+        ' cros_debug', serial='foo-tty',
         keys_dir='foo-keys-dir', public_key='foo-public-key',
         private_key='foo-private-key', keyblock='foo-keyblock')
 

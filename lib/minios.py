@@ -13,7 +13,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import kernel_builder
 
-
+CROS_DEBUG_FLAG = 'cros_debug'
 MINIOS_KERNEL_IMAGE = 'minios_vmlinuz.image'
 KERNEL_FLAGS = ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',
                 'kernel_compress_xz', 'pcserial', '-kernel_afdo']
@@ -32,7 +32,8 @@ class MiniOsError(Error):
 def CreateMiniOsKernelImage(board: str, version: str, work_dir: str,
                             keys_dir: str, public_key: str,
                             private_key: str, keyblock: str,
-                            serial: str) -> str:
+                            serial: str, build_kernel: bool = True,
+                            developer_mode: bool = False) -> str:
   """Creates the MiniOS kernel image.
 
   And puts it in the work directory.
@@ -48,20 +49,25 @@ def CreateMiniOsKernelImage(board: str, version: str, work_dir: str,
                  the keyblock.
     keyblock: Filename to the kernel keyblock.
     serial: Serial port for the kernel console (e.g. printks).
+    build_kernel: Build a new kernel from source.
+    developer_mode: Add developer mode flags to the kernel image.
 
   Returns:
     The path to the generated kernel image.
   """
   install_root = os.path.join(
-    (build_target_lib.get_default_sysroot_path(board)), 'factory-root')
+      (build_target_lib.get_default_sysroot_path(board)), 'factory-root')
   kb = kernel_builder.Builder(board, work_dir, install_root)
-  # MiniOS ramfs cannot be built with multiple conflicting `_ramfs` flags.
-  kb.CreateCustomKernel(KERNEL_FLAGS,
-                        [x for x in os.environ.get('USE', '').split()
-                         if not x.endswith('_ramfs')])
+  if build_kernel:
+    # MiniOS ramfs cannot be built with multiple conflicting `_ramfs` flags.
+    kb.CreateCustomKernel(KERNEL_FLAGS,
+                          [x for x in os.environ.get('USE', '').split()
+                           if not x.endswith('_ramfs')])
   kernel = os.path.join(work_dir, MINIOS_KERNEL_IMAGE)
   assert ' ' not in version, f'bad version: {version}'
   boot_args = f'noinitrd panic=60 cros_minios_version={version} cros_minios'
+  if developer_mode:
+    boot_args += f' {CROS_DEBUG_FLAG}'
   kb.CreateKernelImage(kernel, boot_args=boot_args,
                        serial=serial, keys_dir=keys_dir, public_key=public_key,
                        private_key=private_key, keyblock=keyblock)

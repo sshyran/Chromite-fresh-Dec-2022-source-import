@@ -54,6 +54,8 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         constants.MINIOS_DATA_PRIVATE_KEY,
         constants.MINIOS_KEYBLOCK,
         None,
+        True,
+        False,
     )])
 
     self.assertEqual(self.insert_minios_mock.mock_calls, [mock.call(
@@ -82,6 +84,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         '--private-key', test_private_key,
         '--keyblock', test_keyblock,
         '--serial', test_serial,
+        '--force-build',
     ])
 
     self.assertEqual(self.create_minios_mock.mock_calls, [mock.call(
@@ -93,6 +96,73 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         test_private_key,
         test_keyblock,
         test_serial,
+        True,
+        False,
+    )])
+
+    self.assertEqual(self.insert_minios_mock.mock_calls, [mock.call(
+        test_image, self.create_minios_mock_return,
+    )])
+
+  def testModForDev(self):
+    """Test that default arguments of build_minios are formatted correct."""
+    test_board = 'test-board'
+    test_version = '0.0.0.0'
+    test_image = '/some/image/path'
+    build_minios.main([
+        # --board is a required argument.
+        '--board', test_board,
+        # --version is a required argument.
+        '--version', test_version,
+        # --image is a required argument.
+        '--image', test_image,
+        '--mod-for-dev',
+    ])
+
+    self.assertEqual(self.create_minios_mock.mock_calls, [mock.call(
+        test_board,
+        test_version,
+        self._tempdir,
+        constants.VBOOT_DEVKEYS_DIR,
+        constants.RECOVERY_PUBLIC_KEY,
+        constants.MINIOS_DATA_PRIVATE_KEY,
+        constants.MINIOS_KEYBLOCK,
+        None,
+        False,
+        True,
+    )])
+
+    self.assertEqual(self.insert_minios_mock.mock_calls, [mock.call(
+        test_image, self.create_minios_mock_return,
+    )])
+
+  def testModForDevWithForceBuild(self):
+    """Test that default arguments of build_minios are formatted correct."""
+    test_board = 'test-board'
+    test_version = '0.0.0.0'
+    test_image = '/some/image/path'
+    build_minios.main([
+        # --board is a required argument.
+        '--board', test_board,
+        # --version is a required argument.
+        '--version', test_version,
+        # --image is a required argument.
+        '--image', test_image,
+        '--mod-for-dev',
+        '--force-build',
+    ])
+
+    self.assertEqual(self.create_minios_mock.mock_calls, [mock.call(
+        test_board,
+        test_version,
+        self._tempdir,
+        constants.VBOOT_DEVKEYS_DIR,
+        constants.RECOVERY_PUBLIC_KEY,
+        constants.MINIOS_DATA_PRIVATE_KEY,
+        constants.MINIOS_KEYBLOCK,
+        None,
+        True,
+        True,
     )])
 
     self.assertEqual(self.insert_minios_mock.mock_calls, [mock.call(
