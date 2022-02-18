@@ -1480,6 +1480,22 @@
           "release_builder_test_pool": "bvt",
           "board_id": 459,
           "is_active": true
+        },
+        {
+          "board_name": "brya",
+          "name": "volmar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 459,
+          "is_active": true
+        },
+        {
+          "board_name": "brya",
+          "name": "zavala",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 459,
+          "is_active": true
         }
       ]
     },
@@ -1621,6 +1637,22 @@
         {
           "board_name": "brya-lvm-stateful",
           "name": "vell",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "volmar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "zavala",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7214,
@@ -1774,6 +1806,22 @@
         {
           "board_name": "brya-manatee",
           "name": "vell",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "volmar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "zavala",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
