@@ -97,9 +97,7 @@ _CHROMIUMOS_OVERLAY = os.path.join(constants.CHROMITE_DIR, '..',
                                    constants.CHROMIUMOS_OVERLAY_DIR)
 
 # RegExps
-# NOTE: These regexp are copied from cbuildbot/afdo.py. Keep two copies
-# until deployed and then remove the one in cbuildbot/afdo.py.
-AFDO_ARTIFACT_EBUILD_REGEX = r'^(?P<bef>%s=)(?P<name>("[^"]*"|.*))(?P<aft>.*)'
+AFDO_ARTIFACT_EBUILD_REGEX = r'(?P<bef>%s=)(?P<name>("[^"]*"|.*))(?P<aft>.*)'
 AFDO_ARTIFACT_EBUILD_REPL = r'\g<bef>"%s"\g<aft>'
 
 ChromeVersion = collections.namedtuple(

@@ -361,8 +361,12 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
   def setUp(self):
     self.artifact_type = 'Unspecified'
     self.input_artifacts = {}
-    self.profile_info = {}
+    self.kernel_version = '5_4'
+    self.profile_info = {
+        'kernel_version': self.kernel_version.replace('_', '.'),
+    }
     self.gsc_exists = None
+    self.patch_ebuild = mock.MagicMock()
     self.orderfile_name = (
         'chromeos-chrome-orderfile-field-78-3877.0-1567418235-'
         'benchmark-78.0.3893.0-r1.orderfile')
@@ -375,10 +379,8 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         toolchain_util._CommonPrepareBundle,
         '_FindLatestOrderfileArtifact',
         return_value=self.orderfile_name + toolchain_util.XZ_COMPRESSION_SUFFIX)
-    self.patch_ebuild = self.PatchObject(toolchain_util._CommonPrepareBundle,
-                                         '_PatchEbuild')
 
-  def SetUpPrepare(self, artifact_type, input_artifacts):
+  def SetUpPrepare(self, artifact_type, input_artifacts, mock_patch=True):
     """Set up to test _Prepare${artifactType}."""
     self.artifact_type = artifact_type
     self.input_artifacts = input_artifacts
@@ -391,6 +393,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
     self.PatchObject(self.obj, '_GetOrderfileName', return_value='orderfile')
     self.gsc_exists = self.PatchObject(
         self.gs_context, 'Exists', return_value=True)
+    if mock_patch:
+      self.patch_ebuild = self.PatchObject(
+          toolchain_util._CommonPrepareBundle, '_PatchEbuild')
 
   def testPrepareUnverifiedChromeLlvmOrderfileExists(self):
     """Test that PrepareUnverfiedChromeLlvmOrderfile works when POINTLESS."""
@@ -491,6 +496,55 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
     with self.assertRaises(Exception) as context:
       self.obj._CleanupArtifactDirectory('non/absolute/path')
     self.assertIn('needs to be an absolute path', str(context.exception))
+
+  def callPrepareVerifiedKernelCwpAfdoFile(self, ebuild_list_of_str):
+    cwp_loc = 'gs://path/to/cwp/kernel/5.4'
+    self.SetUpPrepare(
+        'VerifiedKernelCwpAfdoFile', {
+            'UnverifiedKernelCwpAfdoFile': [cwp_loc],
+            'VerifiedKernelCwpAfdoFile': [cwp_loc],
+        }, mock_patch=False)
+    cwp_old_ver = 'R99-14469.8-1644229953'
+    cwp_new_ver = 'R100-14496.0-1644834841'
+    kernel_cwp = os.path.join(cwp_loc, cwp_new_ver)
+    ebuild_info = toolchain_util._EbuildInfo(
+        path='/path/to/kernel-9999.ebuild', CPV=mock.MagicMock())
+
+    self.PatchObject(os, 'rename')
+    self.PatchObject(cros_build_lib, 'run')
+    self.PatchObject(toolchain_util, '_GetProfileAge', return_value=0)
+    self.PatchObject(self.obj, '_GetEbuildInfo', return_value=ebuild_info)
+    self.PatchObject(self.obj, '_FindLatestAFDOArtifact',
+                     return_value=kernel_cwp)
+    # The artifact is missing, build is needed.
+    self.gsc_exists.return_value = False
+    ebuild_old_str = ''.join(ebuild_list_of_str).format(
+        kernel_cwp_loc='', kernel_cwp_ver=cwp_old_ver)
+    # We are going to check how the mock_object was called.
+    mock_open = self.PatchObject(
+        builtins, 'open', mock.mock_open(read_data=(ebuild_old_str)))
+
+    self.obj.Prepare()
+
+    # Check the expected patched lines.
+    for ebuild_line in ebuild_list_of_str:
+      resolved_line = ebuild_line.format(kernel_cwp_loc=cwp_loc,
+                                         kernel_cwp_ver=cwp_new_ver)
+      self.assertIn(mock.call().write(resolved_line), mock_open.mock_calls)
+
+  def testPrepareVerifiedKernelCwpAfdoFileOldEbuild(self):
+    """Test PrepareVerifiedKernelCwpAfdoFile and patch old ebuild."""
+    ebuild_data = ('# some comment\n',
+                   'AFDO_LOCATION="{kernel_cwp_loc}"\n',
+                   'AFDO_PROFILE_VERSION="{kernel_cwp_ver}"')
+    self.callPrepareVerifiedKernelCwpAfdoFile(ebuild_data)
+
+  def testPrepareVerifiedKernelCwpAfdoFileNewEbuild(self):
+    """Test PrepareVerifiedKernelCwpAfdoFile and patch new ebuild."""
+    ebuild_data = ('# some comment\n',
+                   'export AFDO_LOCATION="{kernel_cwp_loc}"\n',
+                   'export AFDO_PROFILE_VERSION="{kernel_cwp_ver}"')
+    self.callPrepareVerifiedKernelCwpAfdoFile(ebuild_data)
 
 
 class BundleArtifactHandlerTest(PrepareBundleTest):
