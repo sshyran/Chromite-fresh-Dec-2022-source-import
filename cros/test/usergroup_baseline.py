@@ -121,7 +121,7 @@ GROUP_BASELINE = dict((e.group, e) for e in (
                                             'bootlockboxd', 'chaps',
                                             'oobe_config_restore',
                                             'oobe_config_save',
-                                            'tpm_manager', 'trunks'}),
+                                            'tpm_manager', 'trunks', 'u2f'}),
     GroupEntry(group='pkcs11', gid=208, users={'root', 'vpn', 'chronos',
                                                'chaps', 'wpa', 'attestation'}),
     GroupEntry(group='wpa', gid=219, users={'root'}),
