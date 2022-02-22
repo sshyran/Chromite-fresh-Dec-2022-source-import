@@ -183,7 +183,6 @@
     aurora-release
     banon-release
     beaglebone-release
-    beaglebone_servo-release
     betty-arc-r-release
     betty-arc-s-release
     betty-arc-t-release
@@ -198,7 +197,6 @@
     brya-zephyr-release
     bubs-release
     caroline-arc64-release
-    caroline-kernelnext-release
     caroline-ndktranslation-release
     caroline-release
     caroline-userdebug-release
@@ -222,7 +220,6 @@
     endeavour-release
     eve-arc-r-release
     eve-arm64-release
-    eve-kernelnext-release
     eve-kvm-release
     eve-release
     eve-userdebug-release
@@ -566,12 +563,6 @@
   caroline-arc64-unittest-stress
   caroline-factory-glados-7828.B-factorybranch-tryjob
   caroline-full-tryjob
-  caroline-kernelnext-full-tryjob
-  caroline-kernelnext-llvm-next-toolchain-tryjob
-  caroline-kernelnext-llvm-toolchain-tryjob
-  caroline-kernelnext-payloads-tryjob
-  caroline-kernelnext-release-tryjob
-  caroline-kernelnext-unittest-stress
   caroline-llvm-next-toolchain-tryjob
   caroline-llvm-toolchain-tryjob
   caroline-ndktranslation-full-tryjob
@@ -738,12 +729,6 @@
   eve-arm64-unittest-stress
   eve-factory-eve-9667.B-factorybranch-tryjob
   eve-full-tryjob
-  eve-kernelnext-full-tryjob
-  eve-kernelnext-llvm-next-toolchain-tryjob
-  eve-kernelnext-llvm-toolchain-tryjob
-  eve-kernelnext-payloads-tryjob
-  eve-kernelnext-release-tryjob
-  eve-kernelnext-unittest-stress
   eve-kvm-full-tryjob
   eve-kvm-llvm-next-toolchain-tryjob
   eve-kvm-llvm-toolchain-tryjob
@@ -1277,7 +1262,6 @@
     aurora-release-tryjob
     banon-release-tryjob
     beaglebone-release-tryjob
-    beaglebone_servo-release-tryjob
     betty-arc-r-release-tryjob
     betty-arc-s-release-tryjob
     betty-arc-t-release-tryjob
@@ -1292,7 +1276,6 @@
     brya-zephyr-release-tryjob
     bubs-release-tryjob
     caroline-arc64-release-tryjob
-    caroline-kernelnext-release-tryjob
     caroline-ndktranslation-release-tryjob
     caroline-release-tryjob
     caroline-userdebug-release-tryjob
@@ -1316,7 +1299,6 @@
     endeavour-release-tryjob
     eve-arc-r-release-tryjob
     eve-arm64-release-tryjob
-    eve-kernelnext-release-tryjob
     eve-kvm-release-tryjob
     eve-release-tryjob
     eve-userdebug-release-tryjob
