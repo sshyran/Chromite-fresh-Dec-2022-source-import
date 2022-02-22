@@ -764,3 +764,13 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
     branches = git.MatchBranchName(git_repo, 'release-R23-2913.B',
                                    namespace='refs/remotes/')
     self.assertEqual(branches, ['origin/release-R23-2913.B'])
+
+
+class ManifestHashTest(cros_test_lib.TestCase):
+  """Tests for _GetManifestHash functionality."""
+
+  def testGetManifestHashIgnoreMissing(self):
+    # pylint: disable=protected-access
+    hash_str = git.Manifest._GetManifestHash(
+        'absence_file', ignore_missing=True)
+    self.assertIsNone(hash_str)

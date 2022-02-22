@@ -474,6 +474,7 @@ class Manifest(object):
       except EnvironmentError as e:
         if e.errno != errno.ENOENT or not ignore_missing:
           raise
+        return None
     source.seek(0)
     md5 = hashlib.md5(source.read()).hexdigest()
     source.seek(0)
