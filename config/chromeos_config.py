@@ -1849,6 +1849,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
       },
+      'skolas-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Skolas has no DUTs in the lab (b/209282476).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/209282476',
+      },
 
       # See go/cros-fingerprint-firmware-branching-and-signing for details on
       # accessory_rwsig signing.
