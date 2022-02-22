@@ -4746,6 +4746,26 @@
             "chrome_internal"
         ]
     },
+    "brask-factory-brya-14517.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "brask"
+        ],
+        "workspace_branch": "factory-brya-14517.B"
+    },
+    "brask-factory-brya-14517.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "brask"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-brya-14517.B"
+    },
     "brask-full": {
         "_template": "full",
         "boards": [
@@ -4884,6 +4904,26 @@
         "useflags": [
             "chrome_internal"
         ]
+    },
+    "brya-factory-brya-14517.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "brya"
+        ],
+        "workspace_branch": "factory-brya-14517.B"
+    },
+    "brya-factory-brya-14517.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "brya"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-brya-14517.B"
     },
     "brya-full": {
         "_template": "full",
@@ -11135,6 +11175,30 @@
             "tidus-factory-auron-6772.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-auron-6772.B"
+    },
+    "factory-brya-14517.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 24h interval",
+        "slave_configs": [
+            "brask-factory-brya-14517.B-factorybranch",
+            "brya-factory-brya-14517.B-factorybranch"
+        ],
+        "workspace_branch": "factory-brya-14517.B"
+    },
+    "factory-brya-14517.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "brask-factory-brya-14517.B-factorybranch-tryjob",
+            "brya-factory-brya-14517.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-brya-14517.B"
     },
     "factory-cherry-14455.B-buildspec": {
         "_template": "buildspec",

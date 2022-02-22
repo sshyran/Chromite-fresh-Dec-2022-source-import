@@ -16,6 +16,9 @@
     guado-factory-auron-6772.B-factorybranch
     rikku-factory-auron-6772.B-factorybranch
     tidus-factory-auron-6772.B-factorybranch
+  factory-brya-14517.B-buildspec
+    brask-factory-brya-14517.B-factorybranch
+    brya-factory-brya-14517.B-factorybranch
   factory-cherry-14455.B-buildspec
     cherry-factory-cherry-14455.B-factorybranch
   factory-coral-10122.B-buildspec
@@ -514,12 +517,14 @@
   bob-payloads-tryjob
   bob-release-tryjob
   bob-unittest-stress
+  brask-factory-brya-14517.B-factorybranch-tryjob
   brask-full-tryjob
   brask-llvm-next-toolchain-tryjob
   brask-llvm-toolchain-tryjob
   brask-payloads-tryjob
   brask-release-tryjob
   brask-unittest-stress
+  brya-factory-brya-14517.B-factorybranch-tryjob
   brya-full-tryjob
   brya-llvm-next-toolchain-tryjob
   brya-llvm-toolchain-tryjob
@@ -784,6 +789,9 @@
     guado-factory-auron-6772.B-factorybranch-tryjob
     rikku-factory-auron-6772.B-factorybranch-tryjob
     tidus-factory-auron-6772.B-factorybranch-tryjob
+  factory-brya-14517.B-buildspec-tryjob
+    brask-factory-brya-14517.B-factorybranch-tryjob
+    brya-factory-brya-14517.B-factorybranch-tryjob
   factory-cherry-14455.B-buildspec-tryjob
     cherry-factory-cherry-14455.B-factorybranch-tryjob
   factory-coral-10122.B-buildspec-tryjob
