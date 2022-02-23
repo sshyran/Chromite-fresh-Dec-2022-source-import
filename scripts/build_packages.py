@@ -22,9 +22,10 @@ import urllib.error
 import urllib.request
 from typing import List, Optional, Tuple
 
+from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import sysroot_lib
 from chromite.service import sysroot
 
 
@@ -385,25 +386,24 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
   commandline.RunInsideChroot()
   parser, opts = parse_args(argv)
 
-  # TODO(rchandrasekar): Pass the BuildPackage run config to BuildPackage in
-  # sysroot service.
-  #
   # If the opts.board is not set, then it means user hasn't specified a default
   # board in 'src/scripts/.default_board' and didn't specify it as input
   # argument.
   if not opts.board:
     parser.error('--board is required')
 
-  cmd = [
-      'bash',
-      os.path.join(constants.CROSUTILS_DIR, 'build_packages.sh'),
-      '--script-is-run-only-by-chromite-and-not-users'
-  ]
-  cmd.extend(argv)
+  sysroot_path = opts.sysroot if opts.sysroot else f'/build/{opts.board}'
+  build_target = build_target_lib.BuildTarget(
+      opts.board, build_root=sysroot_path)
+  board_root = sysroot_lib.Sysroot(sysroot_path)
+
   try:
-    # TODO(b/187793559): Don't pass in print_cmd once we switch to argparse
-    cros_build_lib.dbg_run(cmd, print_cmd=False)
-  except cros_build_lib.RunCommandError as e:
+    # TODO(xcl): Update to conditionally call sysroot.SetupBoard here instead
+    # of having sysroot.BuildPackages call SetupBoard. Also update run_configs
+    # to remove duplicated options and refactor to have a common base set of
+    # configs.
+    sysroot.BuildPackages(build_target, board_root, opts.build_run_config)
+  except sysroot_lib.PackageInstallError as e:
     try:
       request = urllib.request.urlopen(
           'https://chromiumos-status.appspot.com/current?format=raw')

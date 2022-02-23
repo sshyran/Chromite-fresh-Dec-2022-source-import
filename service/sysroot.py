@@ -234,8 +234,10 @@ class BuildPackagesRunConfig(object):
     self.update_toolchain = update_toolchain
     self.upgrade_chroot = upgrade_chroot
 
-  def GetBuildPackagesScriptArgs(self, args: List[str]) -> None:
+  def GetBuildPackagesArgs(self) -> List[str]:
     """Get the arguments for build_packages script."""
+    args = []
+
     if not self.update_toolchain:
       args.append('--skip_toolchain_update')
 
@@ -322,22 +324,6 @@ class BuildPackagesRunConfig(object):
 
     if self.dryrun:
       args.append('--pretend')
-
-  def GetBuildPackagesArgs(self) -> List[str]:
-    """Get the build_packages script and builder default arguments."""
-    # Defaults for the builder.
-    # TODO(saklein): Parametrize/rework the defaults when build_packages is
-    #   ported to chromite.
-    # TODO(b/220197678): Modify the defaults to be populated in run config,
-    #   after the build_packages script port is complete.
-    args = [
-        '--accept_licenses',
-        '@CHROMEOS',
-        '--skip_chroot_upgrade',
-        '--nouse_any_chrome',
-    ]
-
-    self.GetBuildPackagesScriptArgs(args)
 
     return args
 
@@ -615,12 +601,17 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     target: The target whose packages are being installed.
     sysroot: The sysroot where the packages are being installed.
     run_configs: The run configs.
+
+  Raises:
+    sysroot_lib.PackageInstallError when packages fail to install.
   """
   cros_build_lib.AssertInsideChroot()
 
   cmd = [
-      os.path.join(constants.CROSUTILS_DIR, 'build_packages'), '--board',
-      target.name, '--board_root', sysroot.path
+      'bash',
+      os.path.join(constants.CROSUTILS_DIR, 'build_packages.sh'),
+      '--script-is-run-only-by-chromite-and-not-users',
+      '--board', target.name, '--board_root', sysroot.path
   ]
   cmd += run_configs.GetBuildPackagesArgs()
 

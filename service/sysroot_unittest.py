@@ -354,12 +354,6 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
 class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   """Tests for the BuildPackagesRunConfig."""
 
-  def AssertHasRequiredArgs(self, args):
-    """Tests the default/required args for the builders."""
-    self.assertIn('--accept_licenses', args)
-    self.assertIn('@CHROMEOS', args)
-    self.assertIn('--skip_chroot_upgrade', args)
-
   def testGetBuildPackagesDefaultArgs(self):
     """Test the build_packages args building for empty/false/0 values."""
     # Test False/None/0 values.
@@ -367,7 +361,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         usepkg=False, install_debug_symbols=False, packages=None)
 
     args = instance.GetBuildPackagesArgs()
-    self.AssertHasRequiredArgs(args)
     # Debug symbols not included.
     self.assertNotIn('--withdebugsymbols', args)
     # Source used.
@@ -386,7 +379,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         dryrun=True)
 
     args = instance.GetBuildPackagesArgs()
-    self.AssertHasRequiredArgs(args)
     # Local build not used.
     self.assertNotIn('--nousepkg', args)
     self.assertNotIn('--reuse_pkgs_from_local_boards', args)
@@ -443,7 +435,7 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
     self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
 
     self.build_packages = os.path.join(constants.CROSUTILS_DIR,
-                                       'build_packages')
+                                       'build_packages.sh')
     self.base_command = [
         self.build_packages, '--board', self.board, '--board_root',
         self.sysroot_path
@@ -470,18 +462,12 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
 
     result = cros_build_lib.CommandResult(cmd=command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
+    self.PatchObject(cros_build_lib, 'run', side_effect=error)
 
-    self.rc.AddCmdResult(command, side_effect=error)
-
-    try:
+    with self.assertRaises(sysroot_lib.PackageInstallError) as e:
       sysroot.BuildPackages(self.target, self.sysroot, config)
-    except sysroot_lib.PackageInstallError as e:
       self.assertEqual(cpvs, e.failed_packages)
       self.assertEqual(result, e.result)
-    except Exception as e:
-      self.fail('Unexpected exception type: %s' % type(e))
-    else:
-      self.fail('Expected an exception to be thrown.')
 
 
 class GatherSymbolFilesTest(cros_test_lib.MockTempDirTestCase):
