@@ -19,7 +19,6 @@ import os
 from chromite.cli import command
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import cros_sdk_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
 from chromite.utils import timer
@@ -260,7 +259,7 @@ class CleanCommand(command.CliCommand):
           for d in glob.glob(os.path.join(chroot_dir, 'build', '*', subdir)):
             Clean(d)
 
-    if self.options.flash and cros_sdk_lib.IsChrootReady(chroot_dir):
+    if self.options.flash:
       if self.options.dry_run:
         _LogClean(dev_server_wrapper.DEFAULT_STATIC_DIR)
       else:
