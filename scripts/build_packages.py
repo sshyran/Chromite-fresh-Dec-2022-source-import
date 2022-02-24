@@ -20,11 +20,12 @@ import logging
 import os
 import urllib.error
 import urllib.request
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.service import sysroot
 
 
 def build_shell_bool_style_args(parser: commandline.ArgumentParser,
@@ -327,27 +328,72 @@ def get_parser() -> commandline.ArgumentParser:
   return parser
 
 
-def parse_args(argv: List[str]) -> commandline.ArgumentNamespace:
+def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
+                                         commandline.ArgumentNamespace]:
   """Parse and validate CLI arguments.
 
   Args:
     argv: Arguments passed via CLI.
 
   Returns:
+    Tuple having the below two,
+    Argument Parser
     Validated argument namespace.
   """
   parser = get_parser()
   opts = parser.parse_args(argv)
+
+  if opts.chrome:
+    opts.internal_chrome = True
+    opts.use_any_chrome = False
+
+  opts.build_run_config = sysroot.BuildPackagesRunConfig(
+      usepkg=opts.usepkg,
+      install_debug_symbols=opts.withdebugsymbols,
+      packages=opts.packages,
+      use_goma=opts.run_goma,
+      use_remoteexec=opts.run_remoteexec,
+      incremental_build=opts.withrevdeps,
+      expanded_binhosts=opts.expandedbinhosts,
+      setup_board=not opts.skip_setup_board,
+      dryrun=opts.pretend,
+      usepkgonly=opts.usepkgonly,
+      workon=opts.workon,
+      verbose=opts.showoutput,
+      install_auto_test=opts.withautotest,
+      autosetgov=opts.autosetgov,
+      autosetgov_sticky=opts.autosetgov_sticky,
+      use_any_chrome=opts.use_any_chrome,
+      internal_chrome=opts.internal,
+      clean_build=opts.cleanbuild,
+      eclean=opts.eclean,
+      rebuild_dep=opts.rebuild,
+      accept_licenses=opts.accept_licenses,
+      jobs=opts.jobs,
+      local_pkg=opts.reuse_pkgs_from_local_boards,
+      dev_image=opts.withdev,
+      factory_image=opts.withfactory,
+      test_image=opts.withtest,
+      debug_version=opts.withdebug,
+      update_toolchain=not opts.skip_toolchain_update,
+      upgrade_chroot=not opts.skip_chroot_upgrade)
   opts.Freeze()
-  return opts
+  return parser, opts
 
 
 def main(argv: Optional[List[str]] = None) -> Optional[int]:
   commandline.RunInsideChroot()
-  opts = parse_args(argv)
+  parser, opts = parse_args(argv)
 
-  # TODO(rchandrasekar): Populate the BuildPackage run config based on the
-  # parsed input argument and pass them to BuildPackage in sysroot service.
+  # TODO(rchandrasekar): Pass the BuildPackage run config to BuildPackage in
+  # sysroot service.
+  #
+  # If the opts.board is not set, then it means user hasn't specified a default
+  # board in 'src/scripts/.default_board' and didn't specify it as input
+  # argument.
+  if not opts.board:
+    parser.error('--board is required')
+
   cmd = [
       'bash',
       os.path.join(constants.CROSUTILS_DIR, 'build_packages.sh'),
