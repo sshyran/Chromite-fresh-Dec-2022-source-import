@@ -4,8 +4,6 @@
 
 """controller_util unittests."""
 
-import glob
-
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
@@ -15,7 +13,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
-from chromite.lib import sysroot_lib
+from chromite.lib.sysroot_lib import Sysroot
+from chromite.lib.sysroot_lib import PackageInstallError
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):
@@ -55,7 +54,7 @@ class ParseSysrootTest(cros_test_lib.MockTestCase):
     """test successful handling case."""
     path = '/build/rare_pokemon'
     sysroot_message = sysroot_pb2.Sysroot(path=path)
-    expected = sysroot_lib.Sysroot(path=path)
+    expected = Sysroot(path=path)
     result = controller_util.ParseSysroot(sysroot_message)
     self.assertEqual(expected, result)
 
@@ -233,57 +232,15 @@ def test_deserialize_package_info():
   assert pkg_info.cpvr == 'foo/bar-1.2.3-r4'
 
 
-def test_retrieve_package_log_paths(monkeypatch):
-  class MockSysroot():
-    """Mock implementation of sysroot."""
-    def __init__(self, path):
-      pass
-    @property
-    def portage_logdir(self):
-      return '/path/to/sysroot/logdir'
-
-  old_time = '20210609-162000'
-  new_time = '20220420-131200'
-  def mock_glob(glob_path):
-    return [glob_path.replace('*', old_time),
-            glob_path.replace('*', new_time)]
-
-  monkeypatch.setattr(sysroot_lib, 'Sysroot', MockSysroot)
-  monkeypatch.setattr(glob, 'glob', mock_glob)
-  error = sysroot_lib.PackageInstallError(
+def test_retrieve_package_log_paths():
+  error = PackageInstallError(
       msg='Failed to install 3 packages',
       result=cros_build_lib.CommandResult(),
       packages=[package_info.parse('foo/bar%d-1.0-r1' % num)
                 for num in range(1, 4)])
   output_proto = sysroot_pb2.InstallPackagesResponse()
+  target_sysroot = Sysroot(path='/path/to/sysroot')
   controller_util.retrieve_package_log_paths(error,
                                              output_proto,
-                                             sysroot_lib.Sysroot('/'))
+                                             target_sysroot)
   assert len(output_proto.failed_package_data) == 3
-  for pd in output_proto.failed_package_data:
-    assert pd.log_path.path != ''
-    assert new_time in pd.log_path.path
-
-
-def test_retrieve_package_log_paths_not_found(monkeypatch):
-  class MockSysroot():
-    """Mock implementation of sysroot."""
-    def __init__(self, path):
-      pass
-    @property
-    def portage_logdir(self):
-      return '/path/to/sysroot/logdir'
-
-  monkeypatch.setattr(sysroot_lib, 'Sysroot', MockSysroot)
-  error = sysroot_lib.PackageInstallError(
-      msg='Failed to install 3 packages',
-      result=cros_build_lib.CommandResult(),
-      packages=[package_info.parse('foo/bar%d-1.0-r1' % num)
-                for num in range(1, 4)])
-  output_proto = sysroot_pb2.InstallPackagesResponse()
-  controller_util.retrieve_package_log_paths(error,
-                                             output_proto,
-                                             sysroot_lib.Sysroot('/'))
-  assert len(output_proto.failed_package_data) == 3
-  for pd in output_proto.failed_package_data:
-    assert pd.log_path.path == ''
