@@ -12,6 +12,7 @@ import subprocess
 import sys
 
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 
 
 class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
@@ -63,7 +64,7 @@ class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
     return ':'.join(needed)
 
   def _enter(self):
-    if os.getuid() == 0:
+    if osutils.IsRootUser():
       cros_build_lib.Die('This script cannot be run as root.')
 
     start_for_tty = self._DaemonNeeded()

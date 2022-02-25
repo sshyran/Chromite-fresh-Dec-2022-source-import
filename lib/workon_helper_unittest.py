@@ -145,7 +145,7 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
                      return_value=graph)
     # We do a lot of work as root. Pretend to be root so that we never have to
     # call sudo.
-    self.PatchObject(os, 'getuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
   def CreateHelper(self, host=False):
     """Creates and returns a WorkonHelper object.

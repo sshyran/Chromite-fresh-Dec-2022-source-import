@@ -212,8 +212,7 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
     self.updater = toolchain.ToolchainInstaller(False, True, 'tc', pkgdir)
 
     # Avoid sudo password prompt for _WriteConfigs.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
   def testUpdateProvided(self):
     """Test the updates to the package.provided file."""

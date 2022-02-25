@@ -347,7 +347,7 @@ def main(argv):
 
   args = ParseArguments(argv)
 
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     try:
       cros_build_lib.sudo_run([sys.executable] + sys.argv)
     except cros_build_lib.RunCommandError:

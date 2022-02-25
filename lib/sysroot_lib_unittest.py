@@ -25,8 +25,7 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     """Setup the test environment."""
     # Fake being root to avoid running all filesystem commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
     sysroot_path = os.path.join(self.tempdir, 'sysroot')
     osutils.SafeMakedirs(sysroot_path)
     self.sysroot = sysroot_lib.Sysroot(sysroot_path)
@@ -269,8 +268,7 @@ class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):
   def setUp(self):
     """Setup the test environment."""
     # Fake being root to avoid running all filesystem commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
     self.sysroot = sysroot_lib.Sysroot(self.tempdir)
     self.make_conf_generic_target = os.path.join(self.tempdir,
                                                  'make.conf.generic-target')
@@ -336,8 +334,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
   def setUp(self):
     """Setup the test environment."""
     # Fake being root to avoid running commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     self.sysroot = sysroot_lib.Sysroot(self.tempdir)
     self.emerge = os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge')

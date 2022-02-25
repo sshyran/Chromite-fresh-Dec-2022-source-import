@@ -678,8 +678,7 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
 
   def setUp(self):
     # Avoid sudo password prompt for config writing.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     self.chroot = cros_sdk_lib.ChrootUpdater(version_file=self.version_file,
                                              hooks_dir=self.hooks_dir)

@@ -322,10 +322,10 @@ class LsbUtilsTest(cros_test_lib.MockTempDirTestCase):
   """Tests the various LSB utilities."""
 
   def setUp(self):
-    # Patch os.getuid(..) to pretend running as root, so reading/writing the
-    # lsb-release file doesn't require escalated privileges and the test can
+    # Patch osutils.IsRootUser() to pretend running as root, so reading/writing
+    # the lsb-release file doesn't require escalated privileges and the test can
     # clean itself up correctly.
-    self.PatchObject(os, 'getuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
   def testWriteLsbRelease(self):
     """Tests writing out the lsb_release file using WriteLsbRelease(..)."""

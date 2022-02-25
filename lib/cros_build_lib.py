@@ -28,6 +28,7 @@ from typing import List, Optional, Union
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
 from chromite.lib import cros_collections
+from chromite.lib import osutils
 from chromite.lib import signals
 
 
@@ -433,7 +434,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
 
   strict = kwargs.pop('strict', True)
 
-  if user == 'root' and os.geteuid() == 0:
+  if user == 'root' and osutils.IsRootUser():
     return run(cmd, **kwargs)
 
   if strict and STRICT_SUDO:
@@ -1012,6 +1013,18 @@ def AssertOutsideChroot():
   """Die if we are inside the chroot"""
   if IsInsideChroot():
     Die('%s: please run outside the chroot', os.path.basename(sys.argv[0]))
+
+
+def AssertRootUser() -> None:
+  """Die if non-root user."""
+  if osutils.IsNonRootUser():
+    Die('%s: please run as root user', os.path.basename(sys.argv[0]))
+
+
+def AssertNonRootUser() -> None:
+  """Die if root user."""
+  if osutils.IsRootUser():
+    Die('%s: please run as non-root user', os.path.basename(sys.argv[0]))
 
 
 def GetHostName(fully_qualified=False):

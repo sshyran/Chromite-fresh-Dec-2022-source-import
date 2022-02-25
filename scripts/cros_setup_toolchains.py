@@ -1389,7 +1389,7 @@ def main(argv):
   else:
     cros_build_lib.AssertInsideChroot()
     # This has to be always run as root.
-    if os.geteuid() != 0:
+    if osutils.IsNonRootUser():
       cros_build_lib.Die('this script must be run as root')
 
     Crossdev.Load(options.reconfig)

@@ -152,7 +152,7 @@ To install the debug symbols for all available packages, run:
       return self.binary
 
     output_dir = os.path.join(self.chrome_path, 'src',
-                              'out_{}'.format(self.board))
+                              f'out_{self.board}')
     target_binary = None
     binary_name = os.path.basename(self.inf_cmd)
     for root, _, files in os.walk(output_dir):
@@ -547,7 +547,7 @@ def _ReExecuteIfNeeded(argv, ns_net=False, ns_pid=False):
   tests don't leak out to the normal chroot.  Also unshare the UTS namespace
   so changes to `hostname` do not impact the host.
   """
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cmd = ['sudo', '-E', '--'] + argv
     os.execvp(cmd[0], cmd)
   else:

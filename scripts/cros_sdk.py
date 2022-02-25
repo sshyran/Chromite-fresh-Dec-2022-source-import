@@ -628,7 +628,7 @@ def _ReExecuteIfNeeded(argv):
   Also unshare the mount namespace so as to ensure that processes outside
   the chroot can't mess with our mounts.
   """
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     # Make sure to preserve the active Python executable in case the version
     # we're running as is not the default one found via the (new) $PATH.
     cmd = _SudoCommand() + ['--'] + [sys.executable] + argv

@@ -297,8 +297,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
   def setUp(self):
     # These ENV variables affect run behavior, hide them.
-    self._old_envs = {e: os.environ.pop(e) for e in constants.ENV_PASSTHRU
-                      if e in os.environ}
+    self._old_envs = {
+        e: os.environ.pop(e) for e in constants.ENV_PASSTHRU if e in os.environ
+    }
 
     # Get the original value for SIGINT so our signal() mock can return the
     # correct thing.
@@ -1071,6 +1072,38 @@ class SafeRunTest(cros_test_lib.TestCase):
     f_list = [functools.partial(self._raise_exception, Exception())] * 3
     self.assertRaises(RuntimeError, cros_build_lib.SafeRun, f_list,
                       combine_exceptions=True)
+
+
+class TestAssertRootUserCheck(cros_test_lib.MockTestCase):
+  """Tests root/Non-root user functionality for a root user."""
+
+  def setUp(self):
+    self.geteuid_mock = self.PatchObject(os, 'geteuid', return_value=0)
+
+  def testAssertNonRootUserforRoot(self):
+    """Verify AssertNonRootUser raises an exception"""
+    self.assertRaises(cros_build_lib.DieSystemExit,
+                      cros_build_lib.AssertNonRootUser)
+
+  def testAssertRootUserforRoot(self):
+    """Verify AssertRootUser doesn't raise an exception"""
+    cros_build_lib.AssertRootUser()
+
+
+class TestAssertNonRootUserCheck(cros_test_lib.MockTestCase):
+  """Tests root/Non-root user functionality for a non-root user."""
+
+  def setUp(self):
+    self.geteuid_mock = self.PatchObject(os, 'geteuid', return_value=20)
+
+  def testAssertNonRootUserforNonRoot(self):
+    """Verify AssertNonRootUser doesn't raise an exception"""
+    cros_build_lib.AssertNonRootUser()
+
+  def testAssertRootUserforNonRoot(self):
+    """Verify AssertRootUser raises an exception"""
+    self.assertRaises(cros_build_lib.DieSystemExit,
+                      cros_build_lib.AssertRootUser)
 
 
 class TestGetHostname(cros_test_lib.MockTestCase):

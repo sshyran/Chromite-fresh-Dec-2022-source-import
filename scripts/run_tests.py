@@ -31,6 +31,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import namespaces
+from chromite.lib import osutils
 
 
 def main(argv):
@@ -84,7 +85,7 @@ def main(argv):
 
 def re_execute_with_namespace(argv, network=False):
   """Re-execute as root so we can unshare resources."""
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cmd = [
         'sudo',
         'HOME=%s' % os.environ['HOME'],

@@ -95,8 +95,7 @@ class CreateTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def setUp(self):
     # Avoid sudo password prompt for config writing.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
 
     # It has to be run inside the chroot.
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)

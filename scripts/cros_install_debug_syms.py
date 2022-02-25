@@ -371,7 +371,7 @@ def main(argv):
 
   cmd = [os.path.join(constants.CHROMITE_BIN_DIR,
                       'cros_install_debug_syms')] + argv
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cros_build_lib.sudo_run(cmd)
     return
 

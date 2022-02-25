@@ -43,8 +43,7 @@ def GetNonRootUser():
   of the person who ran the sudo command. If no non-root user is
   found, returns None.
   """
-  uid = os.getuid()
-  if uid == 0:
+  if IsRootUser():
     user = os.environ.get('PORTAGE_USERNAME', os.environ.get('SUDO_USER'))
   else:
     try:
@@ -190,7 +189,7 @@ def WriteFile(path: Union[Path, str],
 
   # If the file needs to be written as root and we are not root, write to a temp
   # file, move it and change the permission.
-  if sudo and os.getuid() != 0:
+  if sudo and IsNonRootUser():
     if 'a' in mode or mode.startswith('r+'):
       # Use dd to run through sudo & append the output, and write the new data
       # to it through stdin.
@@ -384,7 +383,7 @@ def SafeSymlink(source: Union[Path, str],
     dest: destination path.
     sudo: If True, create the link as root.
   """
-  if sudo and os.getuid() != 0:
+  if sudo and IsNonRootUser():
     cros_build_lib.sudo_run(['ln', '-sfT', str(source), str(dest)],
                             print_cmd=False, stderr=True)
   else:
@@ -440,7 +439,7 @@ def SafeMakedirs(path, mode=0o775, sudo=False, user='root'):
     EnvironmentError: If the makedir failed.
     RunCommandError: If using run and the command failed for any reason.
   """
-  if sudo and not (os.getuid() == 0 and user == 'root'):
+  if sudo and not (IsRootUser() and user == 'root'):
     if os.path.isdir(path):
       return False
     cros_build_lib.sudo_run(
@@ -1594,3 +1593,28 @@ def UmaskContext(mask: int) -> int:
     yield old
   finally:
     os.umask(old)
+
+
+def IsRootUser() -> bool:
+  """Returns True if the user has root privileges.
+
+  For a given process there are two ID's, that we care about. The real user ID
+  and effective user ID. The real user ID or simply referred as uid, is the ID
+  assigned for the user on whose behalf the process is running. Effective user
+  ID is used for privilege checks.
+
+  For a given process the real user ID and effective user ID can be different
+  and the access to resources are determined based on the effective user ID.
+  For example, a regular user with uid 12345, may not have access to certain
+  resources. Running with sudo privileges will make the euid to be 0 (Root)
+  (while the uid remains the same 12345) and will gain certain resource access.
+
+  Hence to check if a user has root privileges, it is best to check the euid
+  of the process.
+  """
+  return os.geteuid() == 0
+
+
+def IsNonRootUser() -> bool:
+  """Returns True if user doesn't have root privileges."""
+  return not IsRootUser()

@@ -313,8 +313,7 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase,
 
   def setUp(self):
     # Fake being root to avoid running filesystem commands with sudo_run.
-    self.PatchObject(os, 'getuid', return_value=0)
-    self.PatchObject(os, 'geteuid', return_value=0)
+    self.PatchObject(osutils, 'IsRootUser', return_value=True)
     self._sysroot = os.path.join(self.tempdir, 'sysroot')
     osutils.SafeMakedirs(self._sysroot)
     self.device = ChromiumOSDeviceHandlerFake()

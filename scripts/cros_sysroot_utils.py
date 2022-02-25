@@ -4,11 +4,11 @@
 
 """Collection of tools to create sysroots."""
 
-import os
 import sys
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 
 
@@ -65,7 +65,7 @@ def main(argv):
   if not cros_build_lib.IsInsideChroot():
     raise commandline.ChrootRequiredError(argv)
 
-  if os.geteuid() != 0:
+  if osutils.IsNonRootUser():
     cros_build_lib.sudo_run(sys.argv, print_cmd=False)
     return
 
