@@ -231,7 +231,7 @@ class LinkageTest(image_test_lib.ImageTestCase):
 
   def _IsPackageMerged(self, package_name):
     has_version = portage_util.PortageqHasVersion(
-        package_name, sysroot=image_test_lib.ROOT_A)
+        package_name, sysroot=os.path.abspath(image_test_lib.ROOT_A))
     if has_version:
       logging.info('Package is available: %s', package_name)
     else:

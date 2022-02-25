@@ -2611,10 +2611,11 @@ def PortageqHasVersion(category_package, board=None, sysroot=None):
     sysroot = build_target_lib.get_default_sysroot_path(board)
   # Exit codes 0/1+ indicate "have"/"don't have".
   # Normalize them into True/False values.
-  result = _Portageq(['has_version', sysroot, category_package],
-                     board=board,
-                     sysroot=sysroot,
-                     check=False)
+  result = _Portageq(
+      ['has_version', os.path.abspath(sysroot), category_package],
+      board=board,
+      sysroot=sysroot,
+      check=False)
   return not result.returncode
 
 
