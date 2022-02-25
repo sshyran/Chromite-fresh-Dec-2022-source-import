@@ -575,10 +575,6 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
     self.gen_order = self.PatchObject(
         toolchain_util.GenerateChromeOrderfile, 'Bundle', new=_Bundle)
     self.PatchObject(
-        toolchain_util._CommonPrepareBundle,
-        '_GetArtifactVersionInEbuild',
-        return_value=self.orderfile_name)
-    self.PatchObject(
         toolchain_util, '_GetOrderfileName', return_value=self.orderfile_name)
     self.copy2 = self.PatchObject(shutil, 'copy2')
 
@@ -618,11 +614,26 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
   def testBundleVerifiedChromeLlvmOrderfileExists(self):
     """Test that BundleVerfiedChromeLlvmOrderfile works."""
     self.SetUpBundle('VerifiedChromeLlvmOrderfile')
+    self.PatchObject(
+        toolchain_util._CommonPrepareBundle,
+        '_GetArtifactVersionInEbuild',
+        return_value=self.orderfile_name)
     artifact = os.path.join(self.outdir, '%s.xz' % self.orderfile_name)
     self.assertEqual([artifact], self.obj.Bundle())
     self.copy2.assert_called_once_with(
         os.path.join(self.chroot.path, 'build', self.board, 'opt/google/chrome',
                      '%s.xz' % self.orderfile_name), artifact)
+
+  def testBundleVerifiedChromeLlvmOrderfileRaises(self):
+    """Test that BundleVerfiedChromeLlvmOrderfile raises exception."""
+    self.SetUpBundle('VerifiedChromeLlvmOrderfile')
+    # Chrome ebuild file is missing UNVETTED_ORDERFILE.
+    self.PatchObject(
+        builtins, 'open', mock.mock_open(read_data=''))
+    with self.assertRaisesRegex(
+        toolchain_util.BundleArtifactsHandlerError,
+        f'Could not find UNVETTED_ORDERFILE version in {constants.CHROME_PN}'):
+      self.obj.Bundle()
 
   def testBundleChromeClangWarningsFile(self):
     """Test that BundleChromeClangWarningsFile works."""
@@ -779,21 +790,50 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         print_cmd=True,
     )
 
-  def testBundleVerifiedKernelCwpAfdoFile(self):
+  def callBundleVerifiedKernelCwpAfdoFile(self, ebuild_data_list):
     self.SetUpBundle('VerifiedKernelCwpAfdoFile')
-    mock_ebuild = self.PatchObject(
-        self.obj, '_GetArtifactVersionInEbuild', return_value=self.kernel_name)
+    ebuild_info = toolchain_util._EbuildInfo(
+        path='/path/to/kernel-9999.ebuild', CPV=mock.MagicMock())
+    self.PatchObject(self.obj, '_GetEbuildInfo', return_value=ebuild_info)
+    ebuild_old_str = ''.join(ebuild_data_list)
+    # We are going to check how the mock_object was called.
+    self.PatchObject(
+        builtins, 'open', mock.mock_open(read_data=(ebuild_old_str)))
+
     ret = self.obj.Bundle()
     profile_name = self.kernel_name + (
         toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX)
     verified_profile = os.path.join(self.outdir, profile_name)
     self.assertEqual([verified_profile], ret)
-    mock_ebuild.assert_called_once_with(
-        f'chromeos-kernel-{self.kernel_version}', 'AFDO_PROFILE_VERSION')
     profile_path = os.path.join(
         self.chroot.path, self.sysroot[1:], 'usr', 'lib', 'debug', 'boot',
         f'chromeos-kernel-{self.kernel_version}-{profile_name}')
     self.copy2.assert_called_once_with(profile_path, verified_profile)
+
+  def testBundleVerifiedKernelCwpAfdoFileOld(self):
+    """Test BundleVerifiedKernelCwpAfdoFile with the old ebuild."""
+    ebuild_data_list = ('# some comment\n',
+                        'AFDO_LOCATION=""\n',
+                        f'AFDO_PROFILE_VERSION="{self.kernel_name}"')
+    self.callBundleVerifiedKernelCwpAfdoFile(ebuild_data_list)
+
+  def testBundleVerifiedKernelCwpAfdoFileNew(self):
+    """Test BundleVerifiedKernelCwpAfdoFile with the new ebuild."""
+    ebuild_data_list = ('# some comment\n',
+                        'export AFDO_LOCATION=""\n',
+                        f'export AFDO_PROFILE_VERSION="{self.kernel_name}"')
+    self.callBundleVerifiedKernelCwpAfdoFile(ebuild_data_list)
+
+  def testBundleVerifiedKernelCwpAfdoFileRaises(self):
+    """Test that BundleVerifiedKernelCwpAfdoFile raises exception."""
+    # AFDO_PROFILE_VERSION is missing in the ebuild.
+    ebuild_data_list = ('# some comment\n',
+                        'AFDO_LOCATION=""')
+    with self.assertRaisesRegex(
+        toolchain_util.BundleArtifactsHandlerError,
+        'Could not find AFDO_PROFILE_VERSION in '
+        f'chromeos-kernel-{self.kernel_version}'):
+      self.callBundleVerifiedKernelCwpAfdoFile(ebuild_data_list)
 
   def runToolchainBundleTest(self, artifact_path, tarball_name, input_files,
                              expected_output_files):

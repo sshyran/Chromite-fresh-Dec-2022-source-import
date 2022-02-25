@@ -718,7 +718,7 @@ class _CommonPrepareBundle(object):
     pattern = re.compile(AFDO_ARTIFACT_EBUILD_REGEX % variable)
     with open(ebuild) as f:
       for line in f:
-        match = pattern.match(line)
+        match = pattern.search(line)
         if match:
           ret = match.group('name')
           if ret.startswith('"') and ret.endswith('"'):
@@ -1650,7 +1650,12 @@ class BundleArtifactHandler(_CommonPrepareBundle):
   def _BundleVerifiedChromeLlvmOrderfile(self):
     """Bundle vetted ordering file."""
     orderfile_name = self._GetArtifactVersionInEbuild(
-        constants.CHROME_PN, 'UNVETTED_ORDERFILE') + XZ_COMPRESSION_SUFFIX
+        constants.CHROME_PN, 'UNVETTED_ORDERFILE')
+    if not orderfile_name:
+      raise BundleArtifactsHandlerError(
+          f'Could not find UNVETTED_ORDERFILE version in {constants.CHROME_PN}')
+    orderfile_name += XZ_COMPRESSION_SUFFIX
+
     # Strip the leading / from sysroot_path.
     orderfile_path = self.chroot.full_path(self.sysroot_path,
                                            'opt/google/chrome', orderfile_name)
@@ -1875,8 +1880,12 @@ class BundleArtifactHandler(_CommonPrepareBundle):
       raise BundleArtifactsHandlerError('kernel_version not provided.')
     kernel_version = kernel_version.replace('.', '_')
     profile_name = self._GetArtifactVersionInEbuild(
-        'chromeos-kernel-%s' % kernel_version,
-        'AFDO_PROFILE_VERSION') + KERNEL_AFDO_COMPRESSION_SUFFIX
+        f'chromeos-kernel-{kernel_version}', 'AFDO_PROFILE_VERSION')
+    if not profile_name:
+      raise BundleArtifactsHandlerError(
+          'Could not find AFDO_PROFILE_VERSION in '
+          f'chromeos-kernel-{kernel_version}.')
+    profile_name += KERNEL_AFDO_COMPRESSION_SUFFIX
     # The verified profile is in the sysroot with a name similar to:
     # /usr/lib/debug/boot/chromeos-kernel-4_4-R82-12874.0-1581935639.gcov.xz
     profile_path = os.path.join(
