@@ -259,6 +259,10 @@ class LinkageTest(image_test_lib.ImageTestCase):
       elif self._IsPackageMerged('chromeos-base/chromeos-chrome'):
         binaries.append('opt/google/chrome/chrome')
 
+    if self._IsPackageMerged('net-print/hplip'):
+      binaries.append('usr/libexec/cups/filter/hpcups')
+      binaries.append('usr/libexec/cups/filter/hpps')
+
     binaries = [os.path.join(image_test_lib.ROOT_A, x) for x in binaries]
 
     # Grab all .so files
