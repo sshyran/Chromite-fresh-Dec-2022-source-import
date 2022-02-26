@@ -279,7 +279,26 @@ class LinkageTest(image_test_lib.ImageTestCase):
         else:
           to_test = os.path.join(os.path.dirname(to_test), link)
       try:
-        lddtree.ParseELF(to_test, root=image_test_lib.ROOT_A, ldpaths=ldpaths)
+        elf = lddtree.ParseELF(to_test, root=image_test_lib.ROOT_A,
+                               ldpaths=ldpaths)
+
+        if os.path.basename(to_test) in [
+            # Deps mounted from squashfs at runtime.
+            'libcros_camera.so',
+
+            # Deps mounted from squashfs at runtime.
+            'intel-ipu6.so',
+
+            # libasound_module_ctl_ipaudio.so dep outside normal search paths.
+            'libasound_module_pcm_ipaudio.so',
+        ]:
+          continue
+
+        for lib in elf['needed']:
+          if not lib in elf['libs'] or not elf['libs'][lib]['path']:
+            self.fail('Fail linkage test for /%s: unresolved library %s' % (
+                os.path.relpath(to_test, start=image_test_lib.ROOT_A), lib))
+
       except lddtree.exceptions.ELFError:
         continue
       except IOError as e:
