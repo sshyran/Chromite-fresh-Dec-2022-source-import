@@ -1703,7 +1703,8 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
     # GCE expects the tarball to be in a particular format.
     cros_test_lib.VerifyTarball(output_path, ['disk.raw'])
 
-  def testBuildEbuildLogsTarballPositive(self):
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testBuildEbuildLogsTarballPositive(self, _):
     """Verifies that the ebuild logs archiver builds correct logs"""
     # Names of log files typically found in a build directory.
     log_files = (

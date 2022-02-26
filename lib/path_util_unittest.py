@@ -173,18 +173,23 @@ class TestPathResolver(cros_test_lib.MockTestCase):
     self.chroot_path = chroot_path or os.path.join(source_path,
                                                    constants.DEFAULT_CHROOT_DIR)
 
-  def testResolverInit(self):
-    """Test class initiation errors"""
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testSourcePathInChrootInbound(self, _):
+    """Test regular behavior if chroot_path is inside source_path."""
 
-    # Case: source_path and chroot_path are mutually exclusive
-    with self.assertRaises(AssertionError):
-      path_util.ChrootPathResolver(source_path=constants.SOURCE_ROOT,
-                                   chroot_path=CUSTOM_CHROOT_PATH)
+    self.SetChrootPath(constants.SOURCE_ROOT)
+    resolver = path_util.ChrootPathResolver(
+        source_from_path_repo=False,
+        chroot_path=self.chroot_path)
 
-    # Case: chroot_path cannot be part of inferred source root path
-    with self.assertRaises(AssertionError):
-      path_util.ChrootPathResolver(
-          chroot_path=os.path.join(constants.SOURCE_ROOT, 'dir'))
+    self.assertEqual(
+        os.path.join(self.chroot_path, 'some/file'),
+        resolver.FromChroot(
+            os.path.join('/some/file')))
+
+    self.assertEqual(
+        os.path.join('/other/file'),
+        resolver.ToChroot(os.path.join(self.chroot_path, 'other/file')))
 
   @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=True)
   def testInsideChroot(self, _):

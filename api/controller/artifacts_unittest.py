@@ -66,6 +66,7 @@ class BundleTestCase(cros_test_lib.MockTempDirTestCase,
   """Basic setup for all artifacts unittests."""
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.output_dir = os.path.join(self.tempdir, 'artifacts')
     osutils.SafeMakedirs(self.output_dir)
     self.sysroot_path = '/build/target'
@@ -969,6 +970,7 @@ class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
   chroot_name = 'chroot'
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.chroot_path = os.path.join(self.tempdir, 'chroot')
     pathlib.Path(self.chroot_path).touch()
     self.expected_filepaths = [os.path.join(self.chroot_path, fp) for fp in (

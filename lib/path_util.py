@@ -62,9 +62,9 @@ class ChrootPathResolver(object):
     self._source_path = (constants.SOURCE_ROOT if source_path is None
                          else source_path)
     if chroot_path and self._TranslatePath(chroot_path, self._source_path, ''):
-      raise AssertionError(
-          f'chroot_path {chroot_path} must not be in'
-          f'the source path {self._source_path}')
+      # chroot_path is inside of source_path, so assume a non-custom
+      # chroot_path.
+      self._custom_chroot_path = None
 
     # The following are only needed if outside the chroot.
     if self._inside_chroot:

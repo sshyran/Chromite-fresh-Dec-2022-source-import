@@ -629,6 +629,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         toolchain_util.GenerateChromeOrderfile, 'Bundle', new=_Bundle)
     self.PatchObject(
         toolchain_util, '_GetOrderfileName', return_value=self.orderfile_name)
+    self.PatchObject(
+        cros_build_lib, 'IsInsideChroot', return_value=False)
     self.copy2 = self.PatchObject(shutil, 'copy2')
 
     class mock_datetime(object):

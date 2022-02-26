@@ -167,6 +167,7 @@ class BuildTargetUnitTestTarballTest(cros_test_lib.MockTempDirTestCase):
   """BuildTargetUnitTestTarball tests."""
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.chroot = chroot_lib.Chroot(
         path=os.path.join(self.tempdir, 'chroot/path'))
     self.sysroot = sysroot_lib.Sysroot('/sysroot/path')
@@ -624,6 +625,7 @@ class FindMetadataTestCase(cros_test_lib.MockTestCase):
       '/usr/chroot/usr/share/tast/metadata/remote/cros.pb')
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
     self.chroot = chroot_lib.Chroot(self.chroot_path)
     self.PatchObject(cros_build_lib, 'AssertOutsideChroot')
@@ -644,6 +646,7 @@ class BundleHwqualTarballTest(cros_test_lib.MockTempDirTestCase):
   """BundleHwqualTarball tests."""
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # Create the chroot and sysroot instances.
     self.chroot_path = os.path.join(self.tempdir, 'chroot_dir')
     self.chroot = chroot_lib.Chroot(path=self.chroot_path)

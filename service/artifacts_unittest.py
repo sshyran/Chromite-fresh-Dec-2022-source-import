@@ -30,6 +30,7 @@ class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):
   """Test the Bundle Autotest Files function."""
 
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     self.output_dir = os.path.join(self.tempdir, 'output_dir')
     self.archive_dir = os.path.join(self.tempdir, 'archive_base_dir')
 
@@ -239,7 +240,8 @@ class CreateChromeRootTest(cros_test_lib.RunCommandTempDirTestCase):
 class BundleEBuildLogsTarballTest(cros_test_lib.TempDirTestCase):
   """BundleEBuildLogsTarball tests."""
 
-  def testBundleEBuildLogsTarball(self):
+  @mock.patch('chromite.lib.cros_build_lib.IsInsideChroot', return_value=False)
+  def testBundleEBuildLogsTarball(self, _):
     """Verifies that the correct EBuild tar files are bundled."""
     board = 'samus'
     # Create chroot object and sysroot object
@@ -280,12 +282,13 @@ class BundleEBuildLogsTarballTest(cros_test_lib.TempDirTestCase):
     cros_test_lib.VerifyTarball(tarball_fullpath, tarred_files)
 
 
-class BundleChromeOSConfigTest(cros_test_lib.TempDirTestCase):
+class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
   """BundleChromeOSConfig tests."""
 
   def setUp(self):
     self.board = 'samus'
 
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # Create chroot object and sysroot object
     chroot_path = os.path.join(self.tempdir, 'chroot')
     self.chroot = chroot_lib.Chroot(path=chroot_path)

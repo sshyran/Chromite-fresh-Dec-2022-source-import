@@ -12,6 +12,7 @@ import os
 
 from chromite.lib import constants
 from chromite.lib import osutils
+from chromite.lib import path_util
 
 
 class Error(Exception):
@@ -73,13 +74,12 @@ class Chroot(object):
 
   def chroot_path(self, path):
     """Turn an absolute path into a chroot relative path."""
-    if not path.startswith(self.path + os.path.sep):
-      raise ChrootError('Path not in chroot: %s' % path)
-    return path[len(self.path):]
+    return path_util.ToChrootPath(path=path, chroot_path=self._path)
 
   def full_path(self, *args):
-    """Turn a chroot-relative path into an absolute path."""
-    return os.path.join(self.path, *[part.lstrip(os.sep) for part in args])
+    """Turn a fully expanded chrootpath into an host-absolute path."""
+    path = os.path.join(os.path.sep, *args)
+    return path_util.FromChrootPath(path=path, chroot_path=self._path)
 
   def has_path(self, *args):
     """Check if a chroot-relative path exists inside the chroot."""

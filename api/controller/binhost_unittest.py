@@ -277,6 +277,7 @@ class PrepareDevInstallerBinhostUploadsTest(cros_test_lib.MockTempDirTestCase,
                                             api_config.ApiConfigMixin):
   """Tests for the UploadDevInstallerPrebuilts stage."""
   def setUp(self):
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # target packages dir
     self.chroot_path = os.path.join(self.tempdir, 'chroot')
     self.sysroot_path = '/build/target'

@@ -24,6 +24,7 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     """Setup the test environment."""
+    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     # Fake being root to avoid running all filesystem commands with sudo_run.
     self.PatchObject(osutils, 'IsRootUser', return_value=True)
     sysroot_path = os.path.join(self.tempdir, 'sysroot')

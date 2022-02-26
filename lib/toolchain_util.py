@@ -21,7 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import gob_util
 from chromite.lib import gs
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.utils import pformat
@@ -927,7 +926,7 @@ class _CommonPrepareBundle(object):
       ebuild_prog = 'ebuild-%s' % self.build_target
       cmd = [
           ebuild_prog,
-          path_util.ToChrootPath(ebuild_file, self.chroot.path), 'manifest',
+          self.chroot.chroot_path(ebuild_file), 'manifest',
           '--force'
       ]
       cros_build_lib.run(cmd, enter_chroot=True)
