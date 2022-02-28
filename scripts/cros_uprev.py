@@ -6,6 +6,7 @@
 
 import logging
 import os
+from typing import Dict, List, Optional
 
 from chromite.cbuildbot import manifest_version
 from chromite.lib import commandline
@@ -24,7 +25,7 @@ GIT_COMMIT_SUBJECT = 'Marking set of ebuilds as stable'
 _GIT_COMMIT_MESSAGE = 'Marking 9999 ebuild for %s as stable.'
 
 
-def GetParser():
+def GetParser() -> commandline.ArgumentParser:
   """Build the argument parser."""
   parser = commandline.ArgumentParser(description=__doc__)
 
@@ -49,7 +50,7 @@ def GetParser():
   return parser
 
 
-def _ParseArguments(argv):
+def _ParseArguments(argv: List[str]) -> commandline.ArgumentNamespace:
   """Parse and validate arguments."""
   parser = GetParser()
   options = parser.parse_args(argv)
@@ -72,7 +73,7 @@ def _ParseArguments(argv):
   return options
 
 
-def main(argv):
+def main(argv: List[str]) -> None:
   options = _ParseArguments(argv)
 
   if not options.boards:
@@ -91,13 +92,14 @@ def main(argv):
   _WorkOnCommit(options, overlays, manifest, options.packages or None)
 
 
-def CleanStalePackages(boards, package_atoms, chroot):
+def CleanStalePackages(boards: List[str], package_atoms: List[str],
+                       chroot: str) -> None:
   """Cleans up stale package info from a previous build.
 
   Args:
     boards: Boards to clean the packages from.
     package_atoms: A list of package atoms to unmerge.
-    chroot (str): The chroot path.
+    chroot: The chroot path.
   """
   if package_atoms:
     logging.info('Cleaning up stale packages %s.', package_atoms)
@@ -105,7 +107,7 @@ def CleanStalePackages(boards, package_atoms, chroot):
   # First unmerge all the packages for a board, then eclean it.
   # We need these two steps to run in order (unmerge/eclean),
   # but we can let all the boards run in parallel.
-  def _CleanStalePackages(board):
+  def _CleanStalePackages(board: str):
     if board:
       suffix = '-' + board
       runcmd = cros_build_lib.run
@@ -137,7 +139,9 @@ def CleanStalePackages(boards, package_atoms, chroot):
   parallel.RunTasksInProcessPool(_CleanStalePackages, tasks)
 
 
-def _WorkOnCommit(options, overlays, manifest, package_list):
+def _WorkOnCommit(options: commandline.ArgumentNamespace, overlays: List[str],
+                  manifest: git.ManifestCheckout,
+                  package_list: Optional[List[str]]) -> None:
   """Commit uprevs of overlays belonging to different git projects in parallel.
 
   Args:
@@ -172,13 +176,15 @@ def _WorkOnCommit(options, overlays, manifest, package_list):
                         '\n'.join(removed_ebuild_files))
 
 
-def _GetOverlayToEbuildsMap(overlays, package_list, force):
+def _GetOverlayToEbuildsMap(overlays: List[str],
+                            package_list: Optional[List[str]],
+                            force: bool) -> Dict:
   """Get ebuilds for overlays.
 
   Args:
     overlays: A list of overlays to work on.
     package_list: A list of packages passed from commandline to work on.
-    force (bool): Whether to use packages even if in manual uprev list.
+    force: Whether to use packages even if in manual uprev list.
 
   Returns:
     A dict mapping each overlay to a list of ebuilds belonging to it.
@@ -199,9 +205,10 @@ def _GetOverlayToEbuildsMap(overlays, package_list, force):
   return overlay_ebuilds
 
 
-def _UprevOverlays(manifest, overlays, overlay_ebuilds,
-                   revved_packages, new_package_atoms, new_ebuild_files,
-                   removed_ebuild_files):
+def _UprevOverlays(manifest: git.ManifestCheckout, overlays: List[str],
+                   overlay_ebuilds: Dict, revved_packages: List[str],
+                   new_package_atoms: List[str], new_ebuild_files: List[str],
+                   removed_ebuild_files: List[str]) -> None:
   """Execute uprevs for overlays in sequence.
 
   Args:
@@ -232,9 +239,11 @@ def _UprevOverlays(manifest, overlays, overlay_ebuilds,
       parallel.RunTasksInProcessPool(_WorkOnEbuild, inputs)
 
 
-def _WorkOnEbuild(overlay, ebuild, manifest, new_ebuild_files,
-                  removed_ebuild_files, messages, revved_packages,
-                  new_package_atoms):
+def _WorkOnEbuild(overlay: str, ebuild: portage_util.EBuild,
+                  manifest: git.ManifestCheckout, new_ebuild_files: List[str],
+                  removed_ebuild_files: List[str], messages: List[str],
+                  revved_packages: List[str],
+                  new_package_atoms: List[str]) -> None:
   """Work on a single ebuild.
 
   Args:
