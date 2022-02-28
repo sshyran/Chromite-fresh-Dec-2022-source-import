@@ -225,6 +225,7 @@
     eve-userdebug-release
     excelsior-release
     fizz-cfm-release
+    fizz-kernelnext-release
     fizz-labstation-release
     fizz-moblab-release
     fizz-release
@@ -916,6 +917,12 @@
   fizz-cfm-unittest-stress
   fizz-factory-fizz-10167.B-factorybranch-tryjob
   fizz-full-tryjob
+  fizz-kernelnext-full-tryjob
+  fizz-kernelnext-llvm-next-toolchain-tryjob
+  fizz-kernelnext-llvm-toolchain-tryjob
+  fizz-kernelnext-payloads-tryjob
+  fizz-kernelnext-release-tryjob
+  fizz-kernelnext-unittest-stress
   fizz-labstation-full-tryjob
   fizz-labstation-llvm-next-toolchain-tryjob
   fizz-labstation-llvm-toolchain-tryjob
@@ -1304,6 +1311,7 @@
     eve-userdebug-release-tryjob
     excelsior-release-tryjob
     fizz-cfm-release-tryjob
+    fizz-kernelnext-release-tryjob
     fizz-labstation-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
