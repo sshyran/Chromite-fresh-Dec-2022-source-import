@@ -9,7 +9,7 @@ import logging
 import multiprocessing
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -20,6 +20,10 @@ from chromite.lib import portage_util
 from chromite.lib import toolchain
 from chromite.lib.parser import package_info
 
+
+if TYPE_CHECKING:
+  from chromite.lib import chroot_lib
+  from chromite.lib import toolchain_list
 
 class ConfigurationError(Exception):
   """Raised when an invalid configuration is found."""
@@ -133,23 +137,23 @@ class PackageInstallError(Error, cros_build_lib.RunCommandError):
   """An error installing packages."""
 
   def __init__(self,
-               msg,
-               result,
-               exception=None,
+               msg: str,
+               result: 'cros_build_lib.CommandResult',
+               exception: BaseException = None,
                packages: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
-      msg (str): The message.
-      result (cros_build_lib.CommandResult): The command result.
-      exception (BaseException|None): An origin exception.
+      msg: The message.
+      result: The command result.
+      exception: An origin exception.
       packages: The list of failed packages.
     """
     super().__init__(msg, result, exception)
     self.failed_packages = packages
     self.args = (self.args, packages)
 
-  def Stringify(self, stdout=True, stderr=True):
+  def Stringify(self, stdout: bool = True, stderr: bool = True) -> str:
     """Stringify override to include the failed package info.
 
     See:
@@ -180,26 +184,27 @@ class ToolchainInstallError(PackageInstallError):
   """
 
   def __init__(self,
-               msg,
-               result,
-               exception=None,
+               msg: str,
+               result: 'cros_build_lib.CommandResult',
+               exception: BaseException = None,
                tc_info: Optional[Iterable[package_info.PackageInfo]] = None):
     """Init method.
 
     Args:
-      msg (str): The message.
-      result (cros_build_lib.CommandResult): The command result.
-      exception (BaseException|None): An origin exception.
+      msg: The message.
+      result: The command result.
+      exception: An origin exception.
       tc_info: The list of failed toolchain packages.
     """
     super().__init__(msg, result, exception, packages=tc_info)
 
   @property
-  def failed_toolchain_info(self):
+  def failed_toolchain_info(
+      self) -> Optional[Iterable[package_info.PackageInfo]]:
     return self.failed_packages
 
 
-def _CreateWrapper(wrapper_path, template, **kwargs):
+def _CreateWrapper(wrapper_path: str, template: str, **kwargs: Dict) -> None:
   """Creates a wrapper from a given template.
 
   Args:
@@ -213,7 +218,7 @@ def _CreateWrapper(wrapper_path, template, **kwargs):
                           stderr=True)
 
 
-def _NotEmpty(filepath):
+def _NotEmpty(filepath: str) -> bool:
   """Returns True if |filepath| is not empty.
 
   Args:
@@ -222,7 +227,7 @@ def _NotEmpty(filepath):
   return os.path.exists(filepath) and osutils.ReadFile(filepath).strip()
 
 
-def _DictToKeyValue(dictionary):
+def _DictToKeyValue(dictionary: Dict) -> str:
   """Formats dictionary in to a key=value string.
 
   Args:
@@ -235,12 +240,12 @@ def _DictToKeyValue(dictionary):
   return '\n'.join(output)
 
 
-def _GetMakeConfGenericPath():
+def _GetMakeConfGenericPath() -> str:
   """Get the path to the make.conf.generic-target file."""
   return os.path.join(_CHROMIUMOS_CONFIG, 'make.conf.generic-target')
 
 
-def _GetChrootMakeConfUserPath():
+def _GetChrootMakeConfUserPath() -> str:
   """Get the path to the chroot's make.conf.user file."""
   return '/%s' % _MAKE_CONF_USER
 
@@ -248,11 +253,11 @@ def _GetChrootMakeConfUserPath():
 class Profile(object):
   """Class that encapsulates the profile name for a sysroot."""
 
-  def __init__(self, name=''):
+  def __init__(self, name: str = ''):
     self._name = name
 
   @property
-  def name(self):
+  def name(self) -> str:
     return self._name
 
   def __eq__(self, other):
@@ -270,7 +275,7 @@ class Profile(object):
 class Sysroot(object):
   """Class that encapsulate the interaction with sysroots."""
 
-  def __init__(self, path):
+  def __init__(self, path: str):
     self.path = path
 
     # Read config from _MAKE_CONF which also pulls in config from
@@ -286,35 +291,35 @@ class Sysroot(object):
     """Equality check."""
     return self.path == other.path
 
-  def Exists(self, chroot=None):
+  def Exists(self, chroot: 'chroot_lib.Chroot' = None) -> bool:
     """Check if the sysroot exists.
 
     Args:
-      chroot (chroot_lib.Chroot): Optionally check if the sysroot exists inside
-        the specified chroot.
+      chroot: Optionally check if the sysroot exists inside the specified
+        chroot.
 
     Returns:
-      bool
+      True if the sysroot exists.
     """
     if chroot:
       return chroot.has_path(self.path)
 
     return os.path.exists(self.path)
 
-  def Path(self, *args):
+  def Path(self, *args: List[str]) -> str:
     """Helper to build out a path within the sysroot.
 
     Pass args as if calling os.path.join().
 
     Args:
-      args (str): path components to join.
+      args: path components to join.
 
     Returns:
-      str
+      The path within the sysroot.
     """
     return os.path.join(self.path, *args)
 
-  def GetStandardField(self, field):
+  def GetStandardField(self, field: str) -> Optional[Any]:
     """Returns the value of a standard field.
 
     Args:
@@ -327,7 +332,7 @@ class Sysroot(object):
       return osutils.SourceEnvironment(self._config_file_read,
                                        [field], multiline=True).get(field)
 
-  def GetCachedField(self, field):
+  def GetCachedField(self, field: str) -> Optional[str]:
     """Returns the value of |field| in the sysroot cache file.
 
     Access to the cache is thread-safe as long as we access it through this
@@ -344,7 +349,7 @@ class Sysroot(object):
         world_writable=True).read_lock():
       return osutils.SourceEnvironment(self._cache_file, [field]).get(field)
 
-  def SetCachedField(self, field, value):
+  def SetCachedField(self, field: str, value: Optional[str]):
     """Sets |field| to |value| in the sysroot cache file.
 
     Access to the cache is thread-safe as long as we access it through this
@@ -481,7 +486,7 @@ class Sysroot(object):
 
     return overlay_paths
 
-  def _WrapperPath(self, command, friendly_name=None):
+  def _WrapperPath(self, command: str, friendly_name: str = None) -> str:
     """Returns the path to the wrapper for |command|.
 
     Args:
@@ -493,7 +498,7 @@ class Sysroot(object):
       return os.path.join(_wrapper_dir, '%s-%s' % (command, friendly_name))
     return self.Path('build', 'bin', command)
 
-  def CreateAllWrappers(self, friendly_name=None):
+  def CreateAllWrappers(self, friendly_name: str = None) -> None:
     """Creates all the wrappers.
 
     Creates all portage tools wrappers, plus wrappers for gdb, cros_workon and
@@ -551,21 +556,23 @@ class Sysroot(object):
 
     osutils.SafeSymlink(sysroot_debug, debug_symlink, sudo=True)
 
-  def InstallMakeConf(self):
+  def InstallMakeConf(self) -> None:
     """Make sure the make.conf file exists and is up to date."""
     config_file = _GetMakeConfGenericPath()
     osutils.SafeSymlink(config_file, self.Path(_MAKE_CONF), sudo=True)
 
-  def InstallMakeConfBoard(self, accepted_licenses=None, local_only=False,
-                           package_indexes=None,
-                           expanded_binhost_inheritance: bool = False):
+  def InstallMakeConfBoard(self,
+                           accepted_licenses: str = None,
+                           local_only: bool = False,
+                           package_indexes: List['PackageIndexInfo'] = None,
+                           expanded_binhost_inheritance: bool = False) -> None:
     """Make sure the make.conf.board file exists and is up to date.
 
     Args:
-      accepted_licenses (str): Any additional accepted licenses.
-      local_only (bool): Whether prebuilts can be fetched from remote sources.
-      package_indexes (list[PackageIndexInfo]): List of information about
-        available prebuilts, youngest first, or None.
+      accepted_licenses: Any additional accepted licenses.
+      local_only: Whether prebuilts can be fetched from remote sources.
+      package_indexes: List of information about available prebuilts, youngest
+        first, or None.
       expanded_binhost_inheritance: Whether to enable expanded binhost
         inheritance, which searches for additional binhosts to include to
         attempt to improve binhost hit rates.
@@ -584,15 +591,15 @@ class Sysroot(object):
     osutils.WriteFile(make_conf_path, '%s\n%s\n' % (board_conf, binhost_conf),
                       sudo=True)
 
-  def InstallMakeConfBoardSetup(self, board):
+  def InstallMakeConfBoardSetup(self, board: str) -> None:
     """Make sure the sysroot has the make.conf.board_setup file.
 
     Args:
-      board (str): The name of the board being setup in the sysroot.
+      board: The name of the board being setup in the sysroot.
     """
     self.WriteConfig(self.GenerateBoardSetupConfig(board))
 
-  def InstallMakeConfUser(self):
+  def InstallMakeConfUser(self) -> None:
     """Make sure the sysroot has the make.conf.user file.
 
     This method assumes the chroot's make.conf.user file exists.
@@ -604,8 +611,9 @@ class Sysroot(object):
     if not os.path.exists(link_path):
       osutils.SafeSymlink(make_user, link_path, sudo=True)
 
-  def _GenerateConfig(self, toolchains, board_overlays, portdir_overlays,
-                      header, **kwargs):
+  def _GenerateConfig(self, toolchains: 'toolchain_list.ToolchainList',
+                      board_overlays: List[str], portdir_overlays: List[str],
+                      header: str, **kwargs: Dict) -> str:
     """Create common config settings for boards and bricks.
 
     Args:
@@ -640,11 +648,11 @@ class Sysroot(object):
 
     return '\n'.join((header, _DictToKeyValue(config)))
 
-  def GenerateBoardSetupConfig(self, board):
+  def GenerateBoardSetupConfig(self, board: str) -> str:
     """Generates the setup configuration for a given board.
 
     Args:
-      board (str): board name to use to generate the configuration.
+      board: board name to use to generate the configuration.
     """
     toolchains = toolchain.GetToolchainsForBoard(board)
 
@@ -657,7 +665,7 @@ class Sysroot(object):
     return self._GenerateConfig(toolchains, board_overlays, portdir_overlays,
                                 header, BOARD_USE=board)
 
-  def WriteConfig(self, config):
+  def WriteConfig(self, config: str) -> None:
     """Writes the configuration.
 
     Args:
@@ -665,11 +673,11 @@ class Sysroot(object):
     """
     osutils.WriteFile(self._config_file_write, config, makedirs=True, sudo=True)
 
-  def GenerateBoardMakeConf(self, accepted_licenses=None):
+  def GenerateBoardMakeConf(self, accepted_licenses: str = None) -> str:
     """Generates the board specific make.conf.
 
     Args:
-      accepted_licenses: Licenses accepted by portage as a string.
+      accepted_licenses: Licenses accepted by portage.
 
     Returns:
       The make.conf file as a python string.
@@ -710,18 +718,20 @@ class Sysroot(object):
 
     return '\n'.join(config)
 
-  def GenerateBinhostConf(self, local_only=False, package_indexes=None,
-                          expanded_binhost_inheritance: bool = False):
+  def GenerateBinhostConf(self,
+                          local_only: bool = False,
+                          package_indexes: List['PackageIndexInfo'] = None,
+                          expanded_binhost_inheritance: bool = False) -> str:
     """Returns the binhost configuration.
 
     Args:
-      local_only (bool): If True, use binary packages from local boards only.
-      package_indexes (list[PackageIndexInfo]): List of information about
-        available prebuilts, youngest first, or None.
+      local_only: If True, use binary packages from local boards only.
+      package_indexes: List of information about available prebuilts, youngest
+        first, or None.
       expanded_binhost_inheritance: Look for additional binhosts to inherit.
 
     Returns:
-      str - The config contents.
+      The config contents.
     """
     board = self.GetStandardField(STANDARD_FIELD_BOARD_USE)
     if local_only:
@@ -777,8 +787,9 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
 
     return '\n'.join(config)
 
-  def _PostsubmitBinhosts(self, board: Union[str, None],
-                          expanded_binhost_inheritance: bool):
+  def _PostsubmitBinhosts(
+      self, board: Union[str, None], expanded_binhost_inheritance: bool
+  ) -> Tuple[Optional[str], Optional[str]]:
     """Returns the postsubmit binhost to use."""
     prefixes = []
     # The preference of picking the binhost file for a board is in the same
@@ -821,7 +832,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
 
     return external, internal
 
-  def CreateSkeleton(self):
+  def CreateSkeleton(self) -> None:
     """Creates a sysroot skeleton."""
     needed_dirs = [
         self.Path('etc', 'portage', 'hooks'),
@@ -838,16 +849,16 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
                            os.path.basename(filename))
       osutils.SafeSymlink(filename, linkpath, sudo=True)
 
-  def UpdateToolchain(self, board, local_init=True):
+  def UpdateToolchain(self, board: str, local_init: bool = True) -> None:
     """Updates the toolchain packages.
 
     This will install both the toolchains and the packages that are implicitly
     needed (gcc-libs, linux-headers).
 
     Args:
-      board (str): The name of the board.
-      local_init (bool): Whether to use local packages to bootstrap the
-        implicit dependencies.
+      board: The name of the board.
+      local_init: Whether to use local packages to bootstrap the implicit
+        dependencies.
     """
     try:
       toolchain.InstallToolchain(self)
@@ -875,7 +886,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
       # Record we've installed them so we don't call emerge each time.
       self.SetCachedField(_IMPLICIT_SYSROOT_DEPS_KEY, 'yes')
 
-  def _UpdateToolchainCommand(self, board, local_init):
+  def _UpdateToolchainCommand(self, board: str, local_init: bool) -> str:
     """Helper function to build the emerge command for UpdateToolchain."""
     emerge = [os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge'),
               '--board=%s' % board, '--root-deps=rdeps', '--select',
@@ -888,18 +899,18 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
 
     return emerge
 
-  def IsToolchainInstalled(self):
+  def IsToolchainInstalled(self) -> bool:
     """Check if the toolchain has been installed."""
     return self.GetCachedField(_IMPLICIT_SYSROOT_DEPS_KEY) == 'yes'
 
-  def Delete(self, background=False):
+  def Delete(self, background: bool = False) -> None:
     """Delete the sysroot.
 
     Optionally run asynchronously. Async delete moves the sysroot into a temp
     directory and then deletes the tempdir with a background task.
 
     Args:
-      background (bool): Whether to run the delete as a background operation.
+      background: Whether to run the delete as a background operation.
     """
     rm = ['rm', '-rf', '--one-file-system', '--']
     if background:
