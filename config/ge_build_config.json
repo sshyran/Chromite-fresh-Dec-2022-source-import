@@ -1520,6 +1520,14 @@
         },
         {
           "board_name": "brya-lvm-stateful",
+          "name": "banshee",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
           "name": "brya",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1537,6 +1545,22 @@
         {
           "board_name": "brya-lvm-stateful",
           "name": "brya4esti50",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "crota",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "crota360",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7214,
