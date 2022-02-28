@@ -11,7 +11,7 @@ import functools
 import logging
 import os
 import re
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 
 from chromite.cbuildbot import manifest_version
 from chromite.lib import constants
@@ -23,6 +23,11 @@ from chromite.lib import portage_util
 from chromite.lib.chroot_lib import Chroot
 from chromite.utils import pms
 
+
+if TYPE_CHECKING:
+  import pathlib
+
+  from chromite.lib import build_target_lib
 
 CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'
 
@@ -63,21 +68,21 @@ class ChromeEBuild(portage_util.EBuild):
     return self.ebuild_path
 
   @property
-  def is_unstable(self):
+  def is_unstable(self) -> bool:
     return not self.is_stable
 
   @property
-  def atom(self):
+  def atom(self) -> str:
     return '%s-%s' % (self.package, self.version)
 
 
-def get_version_from_refs(refs):
+def get_version_from_refs(refs: List[GitRef]) -> str:
   """Get the version to use from the list of provided tags.
 
   Version strings are of format "78.0.3876.1".
 
   Args:
-    refs (list[GitRef]): The tags to parse for the best version.
+    refs: The tags to parse for the best version.
 
   Returns:
     str: The version to use.
@@ -94,7 +99,7 @@ def get_version_from_refs(refs):
   return best_version(versions)
 
 
-def best_version(versions):
+def best_version(versions: List[str]) -> str:
   # Convert each version from a string like "78.0.3876.1" to a list of ints
   # to compare them, find the most recent (max), and then reconstruct the
   # version string.
@@ -105,7 +110,7 @@ def best_version(versions):
   return '.'.join(str(part) for part in version)
 
 
-def best_chrome_ebuild(ebuilds):
+def best_chrome_ebuild(ebuilds: List[ChromeEBuild]) -> ChromeEBuild:
   """Determine the best/newest chrome ebuild from a list of ebuilds."""
   if not ebuilds:
     raise TypeError
@@ -156,7 +161,8 @@ def _get_best_stable_chrome_ebuild_from_ebuilds(
   return best_chrome_ebuild(candidates)
 
 
-def find_chrome_ebuilds(package_dir) -> (ChromeEBuild, List[ChromeEBuild]):
+def find_chrome_ebuilds(
+    package_dir: str) -> Tuple[ChromeEBuild, List[ChromeEBuild]]:
   """Return a tuple of chrome's unstable ebuild and stable ebuilds.
 
   Args:
@@ -247,32 +253,32 @@ class UprevResult(object):
 
   # Properties corresponding directly to a specific outcome check.
   @property
-  def new_ebuild_created(self):
+  def new_ebuild_created(self) -> bool:
     """True when the result was a new ebuild created."""
     return self.outcome is Outcome.NEW_EBUILD_CREATED
 
   @property
-  def newer_version_exists(self):
+  def newer_version_exists(self) -> bool:
     """True when the existing stable version is newer than the given version."""
     return self.outcome is Outcome.NEWER_VERSION_EXISTS
 
   @property
-  def revision_bump(self):
+  def revision_bump(self) -> bool:
     """True when the result was a revbump."""
     return self.outcome is Outcome.REVISION_BUMP
 
   @property
-  def same_version_exists(self):
+  def same_version_exists(self) -> bool:
     return self.outcome is Outcome.SAME_VERSION_EXISTS
 
   @property
-  def version_bump(self):
+  def version_bump(self) -> bool:
     """True when the result was a version bump."""
     return self.outcome is Outcome.VERSION_BUMP
 
   # Composite properties to simplify checks.
   @property
-  def stable_version(self):
+  def stable_version(self) -> bool:
     """True when the supplied and stable version matched."""
     return self.revision_bump or self.same_version_exists
 
@@ -280,8 +286,11 @@ class UprevResult(object):
 class UprevChromeManager(object):
   """Class to handle uprevving chrome and its related packages."""
 
-  def __init__(self, version, build_targets=None, overlay_dir=None,
-               chroot=None):
+  def __init__(self,
+               version: str,
+               build_targets: List['build_target_lib.BuildTarget'] = None,
+               overlay_dir: str = None,
+               chroot: Chroot = None):
     self._version = version
     self._build_targets = build_targets or []
     self._new_ebuild_files = []
@@ -290,7 +299,7 @@ class UprevChromeManager(object):
     self._chroot = chroot
 
   @property
-  def modified_ebuilds(self):
+  def modified_ebuilds(self) -> List[str]:
     return self._new_ebuild_files + self._removed_ebuild_files
 
   def uprev(self, package: str) -> UprevResult:
@@ -360,8 +369,9 @@ class UprevChromeManager(object):
     logging.debug('Candidate version found: %s', candidate.chrome_version)
     return (False, candidate)
 
-  def _mark_as_stable(self, stable_candidate, unstable_ebuild, package_name,
-                      package_dir) -> UprevResult:
+  def _mark_as_stable(self, stable_candidate: Optional[ChromeEBuild],
+                      unstable_ebuild: ChromeEBuild, package_name: str,
+                      package_dir: str) -> UprevResult:
     """Uprevs the chrome ebuild specified by chrome_rev.
 
     This is the main function that uprevs the chrome_rev from a stable candidate
@@ -379,7 +389,8 @@ class UprevChromeManager(object):
       Full portage version atom (including rc's, etc) that was revved.
     """
 
-    def _is_new_ebuild_redundant(uprevved_ebuild, stable_ebuild) -> bool:
+    def _is_new_ebuild_redundant(uprevved_ebuild: ChromeEBuild,
+                                 stable_ebuild: Optional[ChromeEBuild]) -> bool:
       """Returns True if the new ebuild is redundant.
 
       This is True if there if the current stable ebuild is the exact same copy
@@ -443,18 +454,22 @@ class UprevOverlayManager(object):
     the manifest isn't required.
   """
 
-  def __init__(self, overlays, manifest, build_targets=None, chroot=None,
-               output_dir=None):
+  def __init__(self,
+               overlays: List[str],
+               manifest: git.ManifestCheckout,
+               build_targets: List['build_target_lib.BuildTarget'] = None,
+               chroot: Chroot = None,
+               output_dir: str = None):
     """Init function.
 
     Args:
-      overlays (list[str]): The overlays to search for ebuilds.
-      manifest (git.ManifestCheckout): The manifest object.
-      build_targets (list[build_target_lib.BuildTarget]|None): The build
+      overlays: The overlays to search for ebuilds.
+      manifest: The manifest object.
+      build_targets: The build
         targets to clean in |chroot|, if desired. No effect unless |chroot| is
         provided.
-      chroot (chroot_lib.Chroot|None): The chroot to clean, if desired.
-      output_dir (str|None): The path to optionally dump result files.
+      chroot: The chroot to clean, if desired.
+      output_dir: The path to optionally dump result files.
     """
     self.overlays = overlays
     self.manifest = manifest
@@ -475,24 +490,24 @@ class UprevOverlayManager(object):
     self._reject_self_repo = root_version >= no_self_repos_version
 
   @property
-  def modified_ebuilds(self):
+  def modified_ebuilds(self) -> List[str]:
     if self._new_ebuild_files is not None:
       return self._new_ebuild_files + self._removed_ebuild_files
     else:
       return []
 
   @property
-  def revved_packages(self):
+  def revved_packages(self) -> List[str]:
     return self._revved_packages or []
 
-  def uprev(self, package_list=None, force=False):
+  def uprev(self, package_list: List[str] = None, force: bool = False) -> None:
     """Uprev ebuilds.
 
     Uprev ebuilds for the packages in package_list. If package_list is not
     specified, uprevs all ebuilds for overlays in self.overlays.
 
     Args:
-      package_list (list[str]): A list of packages to uprev.
+      package_list: A list of packages to uprev.
       force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # Use all found packages if an explicit package_list is not given.
@@ -532,7 +547,7 @@ class UprevOverlayManager(object):
       osutils.WriteFile(os.path.join(self.output_dir, 'removed_ebuild_files'),
                         '\n'.join(self._removed_ebuild_files))
 
-  def _uprev_overlay(self, overlay):
+  def _uprev_overlay(self, overlay: str) -> None:
     """Execute uprevs for an overlay.
 
     Args:
@@ -549,7 +564,7 @@ class UprevOverlayManager(object):
     inputs = [[overlay, ebuild] for ebuild in ebuilds]
     parallel.RunTasksInProcessPool(self._uprev_ebuild, inputs)
 
-  def _uprev_ebuild(self, overlay, ebuild):
+  def _uprev_ebuild(self, overlay: str, ebuild: portage_util.EBuild) -> None:
     """Work on a single ebuild.
 
     Args:
@@ -587,9 +602,9 @@ class UprevOverlayManager(object):
       self._new_package_atoms.append('=%s' % new_package)
 
   def _populate_overlay_ebuilds(self,
-                                use_all=True,
-                                package_list=None,
-                                force=False):
+                                use_all: bool = True,
+                                package_list: List[str] = None,
+                                force: bool = False) -> None:
     """Populates the overlay to ebuilds mapping.
 
     Populate self._overlay_ebuilds for all overlays in self.overlays unless
@@ -599,7 +614,7 @@ class UprevOverlayManager(object):
       use_all: Whether to include all ebuilds in the specified directories.
         If true, then we gather all packages in the directories regardless
         of whether they are in our set of packages.
-      package_list (list[str]): A set of the packages we want to gather. If
+      package_list: A set of the packages we want to gather. If
       use_all is True, this argument is ignored, and should be None.
       force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
@@ -621,13 +636,15 @@ class UprevOverlayManager(object):
 
     self._overlay_ebuilds = overlay_ebuilds
 
-  def _clean_stale_packages(self):
+  def _clean_stale_packages(self) -> None:
     """Cleans up stale package info from a previous build."""
     clean_stale_packages(self._new_package_atoms, self.build_targets,
                          chroot=self.chroot)
 
 
-def clean_stale_packages(new_package_atoms, build_targets, chroot=None):
+def clean_stale_packages(new_package_atoms,
+                         build_targets: List['build_target_lib.BuildTarget'],
+                         chroot: Chroot = None) -> None:
   """Cleans up stale package info from a previous build."""
   if new_package_atoms:
     logging.info('Cleaning up stale packages %s.', new_package_atoms)
@@ -720,7 +737,8 @@ class UprevVersionedPackageResult(object):
     return bool(self.modified)
 
 
-def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
+def uprev_ebuild_from_pin(package_path: str, version_no_rev: str,
+                          chroot: Chroot) -> UprevVersionedPackageResult:
   """Changes the package ebuild's version to match the version pin file.
 
   Args:
@@ -729,10 +747,10 @@ def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
       as the package.
     version_no_rev: The version string to uprev to (excluding revision). The
       ebuild's version will be directly set to this number.
-    chroot (chroot_lib.Chroot): specify a chroot to enter.
+    chroot: specify a chroot to enter.
 
   Returns:
-    UprevVersionedPackageResult: The result.
+    The uprev result.
   """
   package = os.path.basename(package_path)
 
@@ -793,7 +811,7 @@ def uprev_ebuild_from_pin(package_path, version_no_rev, chroot):
 def uprev_workon_ebuild_to_version(
     package_path: Union[str, 'pathlib.Path'],
     target_version: str,
-    chroot: Optional['chromite.lib.chroot_lib.Chroot'] = None,
+    chroot: Optional[Chroot] = None,
     *,
     allow_downrev: bool = True,
     ref: str = 'HEAD',
