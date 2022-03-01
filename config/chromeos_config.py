@@ -1145,7 +1145,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-excelsior-12812.B', ['excelsior']),
       (WEEKLY, 'factory-drallion-13080.B', ['drallion']),
       (DAILY, 'factory-endeavour-13295.B', ['endeavour']),
-      (WEEKLY, 'factory-puff-13329.B', ['puff']),
+      (WEEKLY, 'factory-puff-13329.B', ['puff', 'puff-moblab']),
       (WEEKLY, 'factory-zork-13427.B', ['zork']),
       (WEEKLY, 'factory-trogdor-13443.B', ['trogdor', 'strongbad']),
       (DAILY, 'factory-strongbad-13963.B', ['trogdor', 'strongbad']),
@@ -1891,6 +1891,7 @@ def ApplyCustomOverrides(site_config, ge_build_config):
 
       # puff-moblab board does not exist in the lab.
       'puff-moblab-release': {
+          'sign_types': ['recovery', 'factory'],
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1145306',

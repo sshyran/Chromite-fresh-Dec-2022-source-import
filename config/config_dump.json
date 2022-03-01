@@ -11540,7 +11540,8 @@
         "display_label": "factory",
         "schedule": "with 168h interval",
         "slave_configs": [
-            "puff-factory-puff-13329.B-factorybranch"
+            "puff-factory-puff-13329.B-factorybranch",
+            "puff-moblab-factory-puff-13329.B-factorybranch"
         ],
         "workspace_branch": "factory-puff-13329.B"
     },
@@ -11552,7 +11553,8 @@
         "display_label": "tryjob",
         "luci_builder": "Try",
         "slave_configs": [
-            "puff-factory-puff-13329.B-factorybranch-tryjob"
+            "puff-factory-puff-13329.B-factorybranch-tryjob",
+            "puff-moblab-factory-puff-13329.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-puff-13329.B"
     },
@@ -23837,6 +23839,26 @@
             "chrome_internal"
         ]
     },
+    "puff-moblab-factory-puff-13329.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "puff-moblab"
+        ],
+        "workspace_branch": "factory-puff-13329.B"
+    },
+    "puff-moblab-factory-puff-13329.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "puff-moblab"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-puff-13329.B"
+    },
     "puff-moblab-full": {
         "_template": "full",
         "boards": [
@@ -23946,6 +23968,10 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
+        "sign_types": [
+            "recovery",
+            "factory"
+        ],
         "signer_tests": false,
         "vm_tests_override": null
     },
@@ -23973,6 +23999,10 @@
         ],
         "paygen": false,
         "push_image": false,
+        "sign_types": [
+            "recovery",
+            "factory"
+        ],
         "signer_tests": false,
         "suite_scheduling": false,
         "vm_tests_override": null

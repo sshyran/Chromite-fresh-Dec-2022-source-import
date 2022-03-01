@@ -84,6 +84,7 @@
     nautilus-factory-poppy-10504.B-factorybranch
   factory-puff-13329.B-buildspec
     puff-factory-puff-13329.B-factorybranch
+    puff-moblab-factory-puff-13329.B-factorybranch
   factory-puff-13813.B-buildspec
     puff-factory-puff-13813.B-factorybranch
   factory-rambi-5517.B-buildspec
@@ -843,6 +844,7 @@
     nautilus-factory-poppy-10504.B-factorybranch-tryjob
   factory-puff-13329.B-buildspec-tryjob
     puff-factory-puff-13329.B-factorybranch-tryjob
+    puff-moblab-factory-puff-13329.B-factorybranch-tryjob
   factory-puff-13813.B-buildspec-tryjob
     puff-factory-puff-13813.B-factorybranch-tryjob
   factory-rambi-5517.B-buildspec-tryjob
@@ -1547,6 +1549,7 @@
   puff-macrophage-payloads-tryjob
   puff-macrophage-release-tryjob
   puff-macrophage-unittest-stress
+  puff-moblab-factory-puff-13329.B-factorybranch-tryjob
   puff-moblab-full-tryjob
   puff-moblab-llvm-next-toolchain-tryjob
   puff-moblab-llvm-toolchain-tryjob
