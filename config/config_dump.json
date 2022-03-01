@@ -12389,6 +12389,13 @@
             "fizz-kernelnext"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"jax\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"kench\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"sion\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"teemo\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"wukong\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "fizz-kernelnext-release-tryjob": {
@@ -12409,6 +12416,13 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"jax\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"kench\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"sion\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"teemo\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"fizz\",\n    \"name\": \"wukong\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
