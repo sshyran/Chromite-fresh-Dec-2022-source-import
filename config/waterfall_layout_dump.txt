@@ -255,6 +255,7 @@
     jacuzzi-kernelnext-release
     jacuzzi-release
     kalista-cfm-release
+    kalista-kernelnext-release
     kalista-release
     keeby-release
     kefka-release
@@ -1129,6 +1130,12 @@
   kalista-cfm-unittest-stress
   kalista-factory-nami-10715.B-factorybranch-tryjob
   kalista-full-tryjob
+  kalista-kernelnext-full-tryjob
+  kalista-kernelnext-llvm-next-toolchain-tryjob
+  kalista-kernelnext-llvm-toolchain-tryjob
+  kalista-kernelnext-payloads-tryjob
+  kalista-kernelnext-release-tryjob
+  kalista-kernelnext-unittest-stress
   kalista-llvm-next-toolchain-tryjob
   kalista-llvm-toolchain-tryjob
   kalista-payloads-tryjob
@@ -1342,6 +1349,7 @@
     jacuzzi-kernelnext-release-tryjob
     jacuzzi-release-tryjob
     kalista-cfm-release-tryjob
+    kalista-kernelnext-release-tryjob
     kalista-release-tryjob
     keeby-release-tryjob
     kefka-release-tryjob
