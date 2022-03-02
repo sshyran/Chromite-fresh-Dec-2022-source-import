@@ -38,6 +38,7 @@ DEFAULT_CHROOT_DIR = 'chroot'
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
 TERMINA_TOOLS_DIR = os.path.join(
     CHROOT_SOURCE_ROOT, 'src/platform/container-guest-tools/termina')
+RULES_CROS_PATH = os.path.join(CHROOT_SOURCE_ROOT, 'src/platform/rules_cros')
 
 STATEFUL_DIR = '/mnt/stateful_partition'
 

@@ -247,6 +247,23 @@ def ChromiteUnitTest() -> bool:
   return result.returncode == 0
 
 
+def RulesCrosUnitTest() -> bool:
+  """Run rules_cros unittests.
+
+  Returns:
+    True iff all tests passed, False otherwise.
+  """
+  cmd = [
+      os.path.join(constants.RULES_CROS_PATH, 'run_tests.sh'),
+  ]
+  result = cros_build_lib.run(
+      cmd,
+      enter_chroot=True,
+      check=False)
+
+  return result.returncode == 0
+
+
 def CreateMoblabVm(workspace_dir: str, chroot_dir: str,
                    image_dir: str) -> moblab_vm.MoblabVm:
   """Create the moblab VMs.
