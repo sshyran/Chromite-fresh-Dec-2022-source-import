@@ -185,7 +185,6 @@
     banon-release
     beaglebone-release
     betty-arc-r-release
-    betty-arc-s-release
     betty-arc-t-release
     betty-kernelnext-release
     betty-pi-arc-release
@@ -243,7 +242,6 @@
     hatch-arc-r-ack-release
     hatch-arc-r-release
     hatch-arc-r-userdebug-release
-    hatch-arc-s-release
     hatch-arc-t-release
     hatch-blueznext-release
     hatch-borealis-release
@@ -478,12 +476,6 @@
   betty-arc-r-payloads-tryjob
   betty-arc-r-release-tryjob
   betty-arc-r-unittest-stress
-  betty-arc-s-full-tryjob
-  betty-arc-s-llvm-next-toolchain-tryjob
-  betty-arc-s-llvm-toolchain-tryjob
-  betty-arc-s-payloads-tryjob
-  betty-arc-s-release-tryjob
-  betty-arc-s-unittest-stress
   betty-arc-t-full-tryjob
   betty-arc-t-llvm-next-toolchain-tryjob
   betty-arc-t-llvm-toolchain-tryjob
@@ -1046,12 +1038,6 @@
   hatch-arc-r-userdebug-payloads-tryjob
   hatch-arc-r-userdebug-release-tryjob
   hatch-arc-r-userdebug-unittest-stress
-  hatch-arc-s-full-tryjob
-  hatch-arc-s-llvm-next-toolchain-tryjob
-  hatch-arc-s-llvm-toolchain-tryjob
-  hatch-arc-s-payloads-tryjob
-  hatch-arc-s-release-tryjob
-  hatch-arc-s-unittest-stress
   hatch-arc-t-full-tryjob
   hatch-arc-t-llvm-next-toolchain-tryjob
   hatch-arc-t-llvm-toolchain-tryjob
@@ -1279,7 +1265,6 @@
     banon-release-tryjob
     beaglebone-release-tryjob
     betty-arc-r-release-tryjob
-    betty-arc-s-release-tryjob
     betty-arc-t-release-tryjob
     betty-kernelnext-release-tryjob
     betty-pi-arc-release-tryjob
@@ -1337,7 +1322,6 @@
     hatch-arc-r-ack-release-tryjob
     hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
-    hatch-arc-s-release-tryjob
     hatch-arc-t-release-tryjob
     hatch-blueznext-release-tryjob
     hatch-borealis-release-tryjob
