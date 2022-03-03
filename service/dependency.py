@@ -8,7 +8,7 @@ import functools
 import itertools
 import os
 from pathlib import Path
-from typing import List, Mapping, Optional
+from typing import Collection, List, Mapping, Optional, Set, Tuple, TYPE_CHECKING
 
 from chromite.lib import build_target_lib
 from chromite.lib import constants
@@ -20,6 +20,9 @@ from chromite.scripts import cros_extract_deps
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
 
+if TYPE_CHECKING:
+  from chromite.lib.dependency_graph import PackageNode
+  from chromite.lib.parser.package_info import PackageInfo
 
 class Error(Exception):
   """Base error class for the module."""
@@ -61,7 +64,7 @@ def GenerateSourcePathMapping(packages: List[str],
 
   Returns:
     Map from each package to the source path (relative to the repo checkout
-      root, i.e: ~/trunk/ in your cros_sdk) it depends on.
+      root, i.e: ~/chromiumos/ in your cros_sdk) it depends on.
     For each source path which is a directory, the string is ended with a
       trailing '/'.
   """
@@ -83,25 +86,29 @@ def GenerateSourcePathMapping(packages: List[str],
   assert sysroot_path
   return dependency_lib.get_source_path_mapping(packages, sysroot_path, board)
 
+# TODO(b/187794810): Update this type annotation to use TypedDict once we have
+#                    Python 3.8 or newer.
 
 @functools.lru_cache()
-def GetBuildDependency(sysroot_path, board=None, packages=None):
+def GetBuildDependency(
+    sysroot_path: Optional[str],
+    board: Optional[str] = None,
+    packages: Optional[Collection['PackageInfo']] = None) -> Tuple[dict, dict]:
   """Return the build dependency and package -> source path map for |board|.
 
   Args:
-    sysroot_path (str): The path to the sysroot, or None if no sysroot is being
-        used.
-    board (str): The name of the board whose artifacts are being created, or
-        None if no sysroot is being used.
-    packages (tuple[CPV]): The packages that need to be built, or empty / None
-        to use the default list.
+    sysroot_path: The path to the sysroot, or None if no sysroot is being used.
+    board: The name of the board whose artifacts are being created, or None if
+        no sysroot is being used.
+    packages: The packages that need to be built, or empty / None to use the
+        default list.
 
   Returns:
     JSON build dependencies report for the given board which includes:
       - Package level deps graph from portage
       - Map from each package to the source path
-      (relative to the repo checkout root, i.e: ~/trunk/ in your cros_sdk) it
-      depends on
+      (relative to the repo checkout root, i.e: ~/chromiumos/ in your cros_sdk)
+      it depends on
   """
   if not sysroot_path:
     sysroot_path = build_target_lib.get_default_sysroot_path(board)
@@ -195,10 +202,11 @@ def determine_package_relevance(dep_src_paths: List[str],
   return False
 
 
-def GetDependencies(sysroot_path: str,
-                    src_paths: Optional[List[str]] = None,
-                    packages: Optional[List[str]] = None,
-                    include_rev_dependencies: bool = False) -> List[str]:
+def GetDependencies(
+    sysroot_path: str,
+    src_paths: Optional[Collection[str]] = None,
+    packages: Optional[Collection[str]] = None,
+    include_rev_dependencies: bool = False) -> Set['PackageInfo']:
   """Return the packages dependent on the given source paths for |board|.
 
   Args:
@@ -215,22 +223,21 @@ def GetDependencies(sysroot_path: str,
       src_paths.
   """
   cros_build_lib.AssertInsideChroot()
-  pkgs = tuple(packages) if packages else None
   dep_graph = depgraph.get_sysroot_dependency_graph(
-      sysroot_path, pkgs, with_src_paths=True)
+      sysroot_path, packages, with_src_paths=True)
 
   if not src_paths:
-    return [x.pkg_info for x in dep_graph.get_nodes()]
+    return set(x.pkg_info for x in dep_graph.get_nodes())
 
   dep_nodes = dep_graph.get_relevant_nodes(src_paths=src_paths)
-  rev_dep_nodes = []
+  rev_dep_nodes: List['PackageNode'] = []
   if include_rev_dependencies:
     for dep in dep_nodes:
       rev_dep_nodes.extend(dep.reverse_dependencies)
-  return list({dep.pkg_info for dep in dep_nodes + rev_dep_nodes})
+  return set(dep.pkg_info for dep in dep_nodes + rev_dep_nodes)
 
 
-def DetermineToolchainSourcePaths():
+def DetermineToolchainSourcePaths() -> List[str]:
   """Returns a list of all source paths relevant to toolchain packages.
 
   A package is a 'toolchain package' if it is listed as a direct dependency
@@ -243,7 +250,7 @@ def DetermineToolchainSourcePaths():
   Returned paths are relative to the root of the project checkout.
 
   Returns:
-    List[str]: A list of paths considered relevant to toolchain packages.
+    A list of paths considered relevant to toolchain packages.
   """
   source_paths = set()
   toolchain_pkgs = portage_util.GetFlattenedDepsForPackage(

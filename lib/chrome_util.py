@@ -330,9 +330,10 @@ _COPY_PATHS_COMMON = (
     # Copying icudtl.dat has to be optional because in CROS, icudtl.dat will
     # be installed by the package "chrome-icu", and icudtl.dat in chrome is
     # deleted in the chromeos-chrome ebuild. But we can not delete this line
-    # totally because chromite/deloy_chrome is used outside of ebuild
+    # totally because chromite/deploy_chrome is used outside of ebuild
     # (see https://crbug.com/1081884).
     Path('icudtl.dat', optional=True),
+    Path('icudtl.dat.hash', optional=True),
     Path('libosmesa.so', exe=True, optional=True),
     # Do not strip the nacl_helper_bootstrap binary because the binutils
     # objcopy/strip mangles the ELF program headers.
@@ -374,8 +375,13 @@ _COPY_PATHS_CHROME = (
     Path('dbus/', optional=True),
     Path('keyboard_resources.pak'),
     Path('libassistant.so', exe=True, optional=True),
-    Path('libondeviceassistant.so', exe=True, optional=True),
     Path('libmojo_core.so', exe=True),
+    Path('libondeviceassistant.so', exe=True, optional=True),
+    Path(
+        'liboptimization_guide_internal.so',
+        exe=True,
+        cond=C.GnSetTo(_IS_CHROME_BRANDED, True),
+        optional=True),
     Path('libEGL.so', exe=True, optional=True),
     Path('libGLESv2.so', exe=True, optional=True),
 
@@ -387,12 +393,16 @@ _COPY_PATHS_CHROME = (
     # Widevine CDM is already pre-stripped.  In addition, it doesn't
     # play well with the binutils stripping tools, so skip stripping.
     # Optional for arm64 builds (http://crbug.com/881022)
+    # TODO(crbug.com/971433): Once Chrome has been updated to use
+    # WidevineCdm/, remove reference to 'libwidevinecdm.so'.
     Path(
         'libwidevinecdm.so',
         exe=True,
         strip=False,
         cond=C.GnSetTo(_IS_CHROME_BRANDED, True),
-        optional=C.GnSetTo('target_cpu', 'arm64')),
+        optional=True),
+    Path('WidevineCdm/', optional=True),
+
     # In component build, copy so files (e.g. libbase.so) except for the
     # blacklist.
     Path(
@@ -414,6 +424,11 @@ _COPY_PATHS_CHROME = (
     Path('resources.pak'),
     # TODO(crbug.com/1182258): remove once swiftshader is handled as DLC.
     Path('swiftshader/*.so', dest='swiftshader/', optional=True),
+    # Text file containing a seed for the chrome_variations_tast_tests target.
+    # This is not a chrome build artifact, just some variable test data that
+    # will be used by a Tast test that is too large to pass on the command
+    # line from a swarming task.
+    Path('variations_seed.txt', optional=True),
     Path('xdg-settings'),
     Path('*.png'),
 ) + _COPY_PATHS_COMMON
@@ -443,11 +458,14 @@ _COPY_PATHS_LACROS = (
     Path('locales/', optional=True),
     Path('*.pak', optional=True),
     Path('icudtl.dat', optional=True),
+    Path('icudtl.dat.hash', optional=True),
     Path('snapshot_blob.bin', optional=True),
     Path('swiftshader/', optional=True),
     Path('crashpad_handler', exe=True, optional=True),
     Path('chrome_crashpad_handler', exe=True, optional=True),
     Path('WidevineCdm/', optional=True),
+    Path('libEGL.so', exe=True, optional=True),
+    Path('libGLESv2.so', exe=True, optional=True),
 )
 
 

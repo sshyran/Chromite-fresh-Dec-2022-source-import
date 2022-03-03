@@ -47,10 +47,10 @@ class Overlay(object):
   HIERARCHY_NAMES = ('stable', 'project', 'chipset', 'baseboard', 'board',
                      'board-private')
 
-  def __init__(self, root_path, name, masters=None):
+  def __init__(self, root_path, name, parent_overlays=None):
     self.path = pathlib.Path(root_path)
     self.name = str(name)
-    self.masters = tuple(masters) if masters else None
+    self.parent_overlays = tuple(parent_overlays) if parent_overlays else None
     self.packages = []
     self.profiles = dict()
     self.categories = set()
@@ -73,9 +73,9 @@ class Overlay(object):
   def _write_layout_conf(self):
     """Write out the layout.conf as part of this Overlay's initialization."""
     layout_conf_path = self.path / 'metadata' / 'layout.conf'
-    master_names = ' '.join(m.name for m in self.masters or [])
+    parent_names = ' '.join(m.name for m in self.parent_overlays or [])
     conf = {
-        'masters': 'portage-stable chromiumos eclass-overlay' + master_names,
+        'masters': 'portage-stable chromiumos eclass-overlay' + parent_names,
         'profile-formats': 'portage-2 profile-default-eapi',
         'profile_eapi_when_unspecified': '5-progress',
         'repo-name': str(self.name),

@@ -229,7 +229,7 @@ class CanaryCompletionStageTest(generic_stages_unittest.AbstractStageTestCase):
 class PublishUprevChangesStageTest(
     generic_stages_unittest.AbstractStageTestCase):
   """Tests for the PublishUprevChanges stage."""
-  BOT_ID = 'master-vmt-android-pfq'
+  BOT_ID = 'hatch-android-rvc-pre-flight-branch'
 
   def setUp(self):
     self.PatchObject(completion_stages.PublishUprevChangesStage,
@@ -317,20 +317,6 @@ class PublishUprevChangesStageTest(
 
     # No stage information for slave_c
     self.assertFalse(stage.CheckSlaveUploadPrebuiltsTest())
-
-  def testAndroidPush(self):
-    """Test values for PublishUprevChanges with Android PFQ."""
-    self._Prepare(
-        bot_id=constants.PI_ANDROID_PFQ_MASTER,
-        extra_config={'push_overlays': constants.PUBLIC_OVERLAYS},
-        extra_cmd_args=['--android_rev', constants.ANDROID_REV_LATEST])
-    self._run.options.prebuilts = True
-    self.RunStage()
-    self.push_mock.assert_called_once_with(
-        self.build_root, overlay_type='public', dryrun=False)
-    self.assertTrue(self._run.attrs.metadata.GetValue('UprevvedAndroid'))
-    metadata_dict = self._run.attrs.metadata.GetDict()
-    self.assertNotIn('UprevvedChrome', metadata_dict)
 
   def testPerformStageOnChromePFQ(self):
     """Test PerformStage on ChromePFQ."""

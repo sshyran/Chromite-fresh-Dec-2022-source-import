@@ -1,0 +1,38 @@
+// See https://go.microsoft.com/fwlink/?LinkId=733558
+// for the documentation about the tasks.json format
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "compile",
+      "problemMatcher": [
+        "$ts-webpack",
+        "$tslint-webpack"
+      ],
+      "presentation": {
+        "reveal": "never",
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "compile-tests",
+      "presentation": {
+        "reveal": "never",
+      },
+      "group": "build"
+    },
+    {
+      "label": "tasks: compile-tests",
+      "dependsOn": [
+        "npm: compile",
+        "npm: compile-tests"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

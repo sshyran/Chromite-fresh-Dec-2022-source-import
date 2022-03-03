@@ -75,6 +75,8 @@ class SDKPackageStageTest(generic_stages_unittest.AbstractStageTestCase,
     self.buildstore = FakeBuildStore()
     # Replace sudo_run, since we don't care about sudo.
     self.PatchObject(cros_build_lib, 'sudo_run', wraps=cros_build_lib.run)
+    # Don't run CleanupMakeConfBoardSetup as it needs sudo_run.
+    self.PatchObject(sdk_stages.SDKPackageStage, 'CleanupMakeConfBoardSetup')
     self.uploadartifact_mock = self.PatchObject(
         generic_stages.ArchivingStageMixin, 'UploadArtifact')
     # Prepare a fake chroot.

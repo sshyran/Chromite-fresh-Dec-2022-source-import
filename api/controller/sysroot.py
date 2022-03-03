@@ -33,7 +33,7 @@ def ExampleGetResponse():
   uabs = common_pb2.UploadedArtifactsByService
   cabs = common_pb2.ArtifactsByService
   return uabs.Sysroot(artifacts=[
-     uabs.Sysroot.ArtifactPaths(
+      uabs.Sysroot.ArtifactPaths(
           artifact_type=cabs.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT,
           paths=[
               common_pb2.Path(
@@ -59,8 +59,9 @@ def ExampleGetResponse():
 
 
 def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
-        chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
-        build_target: build_target_lib.BuildTarget, output_dir: str) -> list:
+                 chroot: chroot_lib.Chroot, sysroot_class: sysroot_lib.Sysroot,
+                 build_target: build_target_lib.BuildTarget, output_dir: str
+                 ) -> list:
   """Builds and copies sysroot artifacts to specified output_dir.
 
   Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
@@ -78,11 +79,12 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Sysroot,
   """
   generated = []
   artifact_types = {
-    in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
-        sysroot.CreateSimpleChromeSysroot,
-    in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
-    in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
-    in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
+      in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT:
+          sysroot.CreateSimpleChromeSysroot,
+      in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
+      in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS:
+          sysroot.BundleBreakpadSymbols,
+      in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
   }
 
   for output_artifact in in_proto.output_artifacts:
@@ -162,6 +164,20 @@ def _MockFailedPackagesResponse(_input_proto, output_proto, _config):
   pkg2.category = 'foo'
   pkg2.version = '3.7-r99'
 
+  fail = output_proto.failed_package_data.add()
+  fail.name.package_name = 'package'
+  fail.name.category = 'category'
+  fail.name.version = '1.0.0_rc-r1'
+  fail.log_path.path = '/path/to/package:category-1.0.0_rc-r1:20210609-1337.log'
+  fail.log_path.location = common_pb2.Path.INSIDE
+
+  fail2 = output_proto.failed_package_data.add()
+  fail2.name.package_name = 'bar'
+  fail2.name.category = 'foo'
+  fail2.name.version = '3.7-r99'
+  fail2.log_path.path = '/path/to/foo:bar-3.7-r99:20210609-1620.log'
+  fail2.log_path.location = common_pb2.Path.INSIDE
+
 
 @faux.empty_success
 @faux.error(_MockFailedPackagesResponse)
@@ -185,10 +201,7 @@ def InstallToolchain(input_proto, output_proto, _config):
   try:
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
-    # Error installing - populate the failed package info.
-    for pkg_info in e.failed_toolchain_info:
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -207,8 +220,12 @@ def InstallPackages(input_proto, output_proto, _config):
   """Install packages into a sysroot, building as necessary and permitted."""
   compile_source = (
       input_proto.flags.compile_source or input_proto.flags.toolchain_changed)
+
+  use_remoteexec = bool(input_proto.remoteexec_config.reproxy_cfg_file and
+                        input_proto.remoteexec_config.reclient_dir)
+
   # Testing if Goma will support unknown compilers now.
-  use_goma = input_proto.flags.use_goma
+  use_goma = input_proto.flags.use_goma and not use_remoteexec
 
   target_sysroot = sysroot_lib.Sysroot(input_proto.sysroot.path)
   build_target = controller_util.ParseBuildTarget(
@@ -240,6 +257,7 @@ def InstallPackages(input_proto, output_proto, _config):
       package_indexes=package_indexes,
       use_flags=use_flags,
       use_goma=use_goma,
+      use_remoteexec=use_remoteexec,
       incremental_build=False,
       setup_board=False,
       dryrun=dryrun)
@@ -251,37 +269,34 @@ def InstallPackages(input_proto, output_proto, _config):
       # No packages to report, so just exit with an error code.
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-    # We need to report the failed packages.
-    for pkg_info in e.failed_packages:
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
+  finally:
+    # Copy goma logs to specified directory if there is a goma_config and
+    # it contains a log_dir to store artifacts.
+    if input_proto.goma_config.log_dir.dir:
+      # Get the goma log directory based on the GLOG_log_dir env variable.
+      # TODO(crbug.com/1045001): Replace environment variable with query to
+      # goma object after goma refactoring allows this.
+      log_source_dir = os.getenv('GLOG_log_dir')
+      if not log_source_dir:
+        cros_build_lib.Die('GLOG_log_dir must be defined.')
+      archiver = goma_lib.LogsArchiver(
+          log_source_dir,
+          dest_dir=input_proto.goma_config.log_dir.dir,
+          stats_file=input_proto.goma_config.stats_file,
+          counterz_file=input_proto.goma_config.counterz_file)
+      archiver_tuple = archiver.Archive()
+      if archiver_tuple.stats_file:
+        output_proto.goma_artifacts.stats_file = archiver_tuple.stats_file
+      if archiver_tuple.counterz_file:
+        output_proto.goma_artifacts.counterz_file = archiver_tuple.counterz_file
+      output_proto.goma_artifacts.log_files[:] = archiver_tuple.log_files
 
   # Return without populating the response if it is a dryrun.
   if dryrun:
     return controller.RETURN_CODE_SUCCESS
-
-  # Copy goma logs to specified directory if there is a goma_config and
-  # it contains a log_dir to store artifacts.
-  if input_proto.goma_config.log_dir.dir:
-    # Get the goma log directory based on the GLOG_log_dir env variable.
-    # TODO(crbug.com/1045001): Replace environment variable with query to
-    # goma object after goma refactoring allows this.
-    log_source_dir = os.getenv('GLOG_log_dir')
-    if not log_source_dir:
-      cros_build_lib.Die('GLOG_log_dir must be defined.')
-    archiver = goma_lib.LogsArchiver(
-        log_source_dir,
-        dest_dir=input_proto.goma_config.log_dir.dir,
-        stats_file=input_proto.goma_config.stats_file,
-        counterz_file=input_proto.goma_config.counterz_file)
-    archiver_tuple = archiver.Archive()
-    if archiver_tuple.stats_file:
-      output_proto.goma_artifacts.stats_file = archiver_tuple.stats_file
-    if archiver_tuple.counterz_file:
-      output_proto.goma_artifacts.counterz_file = archiver_tuple.counterz_file
-    output_proto.goma_artifacts.log_files[:] = archiver_tuple.log_files
 
   # Read metric events log and pipe them into output_proto.events.
   deserialize_metrics_log(output_proto.events, prefix=build_target.name)

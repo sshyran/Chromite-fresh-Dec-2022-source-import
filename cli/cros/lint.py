@@ -24,20 +24,15 @@ import os
 import re
 import sys
 
+import astroid
 import pylint.checkers
 from pylint.config import ConfigurationMixIn
 import pylint.interfaces
 
 from chromite.third_party.pylint import format_checkers
 from chromite.utils import memoize
-
-
-_THIRD_PARTY = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), '..', '..', 'third_party')
-_PYLINT_QUOTES = os.path.join(_THIRD_PARTY, 'pylint-quotes')
-sys.path.insert(0, _PYLINT_QUOTES)
-# pylint: disable=unused-import,wrong-import-position
-from pylint_quotes.checker import StringQuoteChecker
+# pylint: disable=unused-import
+from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
 
 
 # pylint: disable=too-few-public-methods
@@ -560,58 +555,6 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       self.add_message('C9011', node=node, line=node.fromlineno, args=margs)
 
 
-class Py3kCompatChecker(pylint.checkers.BaseChecker):
-  """Make sure we enforce py3k compatible features"""
-
-  __implements__ = pylint.interfaces.IAstroidChecker
-
-  # pylint: disable=class-missing-docstring,multiple-statements
-  class _MessageR9100(object): pass
-  # pylint: enable=class-missing-docstring,multiple-statements
-
-  name = 'py3k_compat_checker'
-  priority = -1
-  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
-  msgs = {
-      'R9100': ('Missing "from __future__ import print_function" line',
-                ('missing-print-function'), _MessageR9100),
-  }
-  options = ()
-
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    self.seen_print_func = False
-    self.saw_imports = False
-
-  def close(self):
-    """Called when done processing module"""
-    if not self.seen_print_func:
-      # Only enforce this on Python 2 files.
-      if sys.version_info.major >= 3:
-        return
-
-      # Do not warn if moduler doesn't import anything at all (like
-      # empty __init__.py files).
-      if self.saw_imports:
-        self.add_message('R9100')
-
-  def _check_print_function(self, node):
-    """Verify print_function is imported"""
-    if node.modname == '__future__':
-      for name, _ in node.names:
-        if name == 'print_function':
-          self.seen_print_func = True
-
-  def visit_importfrom(self, node):
-    """Process 'from' statements"""
-    self.saw_imports = True
-    self._check_print_function(node)
-
-  def visit_import(self, _node):
-    """Process 'import' statements"""
-    self.saw_imports = True
-
-
 class SourceChecker(pylint.checkers.BaseChecker):
   """Make sure we enforce rules on the source."""
 
@@ -768,6 +711,35 @@ class CommentChecker(pylint.checkers.BaseTokenChecker):
     for (tok_type, token, (start_row, _), _, _) in tokens:
       if tok_type == tokenize.COMMENT:
         self._visit_comment(start_row, token)
+
+
+class FormatStringChecker(pylint.checkers.BaseChecker):
+  """Check string formatting."""
+
+  __implements__ = pylint.interfaces.IAstroidChecker
+
+  # pylint: disable=class-missing-docstring,multiple-statements
+  class _MessageR9100(object): pass
+  # pylint: enable=class-missing-docstring,multiple-statements
+
+  name = 'format_string_checker'
+  priority = -1
+  MSG_ARGS = 'offset:%(offset)i: {%(line)s}'
+  msgs = {
+      'R9100': ('Use f-strings or % interpolation, never .format()',
+                ('banned-string-format-function'), _MessageR9100),
+  }
+  options = ()
+
+  def visit_const(self, node: astroid.nodes.Const) -> None:
+    """Process a constant string node."""
+    if (node.pytype() == 'builtins.str' and
+        not isinstance(node.parent, astroid.nodes.JoinedStr) and
+        isinstance(node.parent, astroid.nodes.Attribute) and
+        node.parent.attrname == 'format' and
+        isinstance(node.parent.parent, astroid.nodes.Call)):
+      self.add_message('R9100', node=node, line=node.lineno,
+                       col_offset=node.col_offset)
 
 
 def register(linter):

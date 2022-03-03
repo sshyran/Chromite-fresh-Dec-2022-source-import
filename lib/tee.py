@@ -183,12 +183,12 @@ class _TeeProcess(multiprocessing.Process):
       os._exit(0)
 
 
-class Tee(cros_build_lib.MasterPidContextManager):
+class Tee(cros_build_lib.PrimaryPidContextManager):
   """Class that handles tee-ing output to a file."""
 
   def __init__(self, output_file):
     """Initializes object with path to log file."""
-    cros_build_lib.MasterPidContextManager.__init__(self)
+    cros_build_lib.PrimaryPidContextManager.__init__(self)
     self._file = output_file
     self._old_stdout = None
     self._old_stderr = None

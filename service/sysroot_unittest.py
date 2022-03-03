@@ -28,8 +28,8 @@ class SetupBoardRunConfigTest(cros_test_lib.TestCase):
   def testGetUpdateChrootArgs(self):
     """Test the update chroot args conversion method."""
     # False/0/None tests.
-    instance = sysroot.SetupBoardRunConfig(usepkg=False, jobs=None,
-                                           update_toolchain=False)
+    instance = sysroot.SetupBoardRunConfig(
+        usepkg=False, jobs=None, update_toolchain=False)
     args = instance.GetUpdateChrootArgs()
     self.assertIn('--nousepkg', args)
     self.assertIn('--skip_toolchain_update', args)
@@ -41,8 +41,8 @@ class SetupBoardRunConfigTest(cros_test_lib.TestCase):
     self.assertNotIn('--jobs', args)
 
     # True/set values tests.
-    instance = sysroot.SetupBoardRunConfig(usepkg=True, jobs=1,
-                                           update_toolchain=True)
+    instance = sysroot.SetupBoardRunConfig(
+        usepkg=True, jobs=1, update_toolchain=True)
     args = instance.GetUpdateChrootArgs()
     self.assertIn('--usepkg', args)
     self.assertIn('--jobs', args)
@@ -63,8 +63,8 @@ class SetupBoardTest(cros_test_lib.MockTestCase):
     sysroot and install the toolchain by default.
     """
     target_sysroot = sysroot_lib.Sysroot('/build/board')
-    create_mock = self.PatchObject(sysroot, 'Create',
-                                   return_value=target_sysroot)
+    create_mock = self.PatchObject(
+        sysroot, 'Create', return_value=target_sysroot)
     install_toolchain_mock = self.PatchObject(sysroot, 'InstallToolchain')
 
     sysroot.SetupBoard(build_target_lib.BuildTarget('board'))
@@ -75,8 +75,8 @@ class SetupBoardTest(cros_test_lib.MockTestCase):
   def testRegenConfigs(self):
     """Test the regen configs install prevention."""
     target_sysroot = sysroot_lib.Sysroot('/build/board')
-    create_mock = self.PatchObject(sysroot, 'Create',
-                                   return_value=target_sysroot)
+    create_mock = self.PatchObject(
+        sysroot, 'Create', return_value=target_sysroot)
     install_toolchain_mock = self.PatchObject(sysroot, 'InstallToolchain')
 
     target = build_target_lib.BuildTarget('board')
@@ -183,23 +183,23 @@ class CreateSimpleChromeSysrootTest(cros_test_lib.MockTempDirTestCase):
     self.chroot = chroot_lib.Chroot(path=self.chroot_path)
     self.build_target = build_target_lib.BuildTarget('target')
 
-
-
   def testCreateSimpleChromeSysroot(self):
     # Mock the artifact copy.
     tar_dest = os.path.join(self.output_dir, constants.CHROME_SYSROOT_TAR)
     self.PatchObject(shutil, 'copy', return_value=tar_dest)
     # Call service, verify arguments passed to run.
-    sysroot.CreateSimpleChromeSysroot(self.chroot, None,
-                                      self.build_target, self.output_dir)
+    sysroot.CreateSimpleChromeSysroot(self.chroot, None, self.build_target,
+                                      self.output_dir)
 
-    self.run_mock.assert_called_with(
-        ['cros_generate_sysroot', '--out-dir', mock.ANY, '--board',
-         self.build_target.name, '--deps-only', '--package',
-         'chromeos-base/chromeos-chrome'], enter_chroot=True,
-         cwd=self.source_root, chroot_args=mock.ANY, extra_env=mock.ANY
-    )
-
+    self.run_mock.assert_called_with([
+        'cros_generate_sysroot', '--out-dir', mock.ANY, '--board',
+        self.build_target.name, '--deps-only', '--package',
+        'chromeos-base/chromeos-chrome'
+    ],
+                                     enter_chroot=True,
+                                     cwd=self.source_root,
+                                     chroot_args=mock.ANY,
+                                     extra_env=mock.ANY)
 
 
 class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
@@ -231,8 +231,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     self.chrome_v2_dir = os.path.join(chrome_cat_dir, chrome_v2)
 
     # Directory tuple for verifying the result archive contents.
-    self.expected_archive_contents = cros_test_lib.Directory('./',
-                                                             'environment')
+    self.expected_archive_contents = cros_test_lib.Directory(
+        './', 'environment')
 
     # Create a environment.bz2 file to put into folders.
     env_file = os.path.join(self.tempdir, 'environment')
@@ -255,8 +255,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     """Test a successful single-version run."""
     self._CreateChromeDir(self.chrome_v1_dir)
 
-    created = sysroot.CreateChromeEbuildEnv(
-      self.chroot, self.sysroot, None, self.output_dir)
+    created = sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
+                                            self.output_dir)
 
     self.assertStartsWith(created, self.output_dir)
     cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
@@ -268,8 +268,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     self._CreateChromeDir(self.chrome_v1_dir, populate=False)
     self._CreateChromeDir(self.chrome_v2_dir)
 
-    created = sysroot.CreateChromeEbuildEnv(
-      self.chroot, self.sysroot, None, self.output_dir)
+    created = sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
+                                            self.output_dir)
 
     self.assertStartsWith(created, self.output_dir)
     cros_test_lib.VerifyTarball(created, self.expected_archive_contents)
@@ -277,8 +277,8 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
   def testNoChrome(self):
     """Test no version of chrome present."""
     self.assertIsNone(
-      sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
-        self.output_dir))
+        sysroot.CreateChromeEbuildEnv(self.chroot, self.sysroot, None,
+                                      self.output_dir))
 
 
 class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase):
@@ -295,12 +295,12 @@ class GenerateArchiveTest(cros_test_lib.MockTempDirTestCase):
 
     # Call service, verify arguments passed to run.
     sysroot.GenerateArchive(self.chroot_path, target, pkg_list)
-    self.run_mock.assert_called_with(
-        ['cros_generate_sysroot', '--out-file', constants.TARGET_SYSROOT_TAR,
-         '--out-dir', mock.ANY, '--board', target,
-         '--package', 'virtual/target-fuzzers'],
-        cwd=constants.SOURCE_ROOT
-    )
+    self.run_mock.assert_called_with([
+        'cros_generate_sysroot', '--out-file', constants.TARGET_SYSROOT_TAR,
+        '--out-dir', mock.ANY, '--board', target, '--package',
+        'virtual/target-fuzzers'
+    ],
+                                     cwd=constants.SOURCE_ROOT)
 
 
 class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
@@ -364,9 +364,8 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   def testGetBuildPackagesDefaultArgs(self):
     """Test the build_packages args building for empty/false/0 values."""
     # Test False/None/0 values.
-    instance = sysroot.BuildPackagesRunConfig(usepkg=False,
-                                              install_debug_symbols=False,
-                                              packages=None)
+    instance = sysroot.BuildPackagesRunConfig(
+        usepkg=False, install_debug_symbols=False, packages=None)
 
     args = instance.GetBuildPackagesArgs()
     self.AssertHasRequiredArgs(args)
@@ -412,16 +411,20 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     pkg_indexes = [
         binpkg.PackageIndexInfo(
             build_target=build_target_lib.BuildTarget('board'),
-            snapshot_sha='A', location='AAAA'),
+            snapshot_sha='A',
+            location='AAAA'),
         binpkg.PackageIndexInfo(
             build_target=build_target_lib.BuildTarget('board'),
-            snapshot_sha='B', location='BBBB')]
+            snapshot_sha='B',
+            location='BBBB')
+    ]
 
     instance = sysroot.BuildPackagesRunConfig(package_indexes=pkg_indexes)
 
     env = instance.GetEnv()
-    self.assertEqual(env.get('PORTAGE_BINHOST'),
-                     ' '.join([x.location for x in reversed(pkg_indexes)]))
+    self.assertEqual(
+        env.get('PORTAGE_BINHOST'),
+        ' '.join([x.location for x in reversed(pkg_indexes)]))
 
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
@@ -442,8 +445,10 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
 
     self.build_packages = os.path.join(constants.CROSUTILS_DIR,
                                        'build_packages')
-    self.base_command = [self.build_packages, '--board', self.board,
-                         '--board_root', self.sysroot_path]
+    self.base_command = [
+        self.build_packages, '--board', self.board, '--board_root',
+        self.sysroot_path
+    ]
 
   def testSuccess(self):
     """Test successful run."""
@@ -459,8 +464,7 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
     """Test package failure handling."""
     failed = ['cat/pkg', 'foo/bar']
     cpvs = [package_info.SplitCPV(p, strict=False) for p in failed]
-    self.PatchObject(portage_util, 'ParseDieHookStatusFile',
-                     return_value=cpvs)
+    self.PatchObject(portage_util, 'ParseDieHookStatusFile', return_value=cpvs)
 
     config = sysroot.BuildPackagesRunConfig()
     command = self.base_command + config.GetBuildPackagesArgs()
@@ -494,7 +498,6 @@ some junk
 STACK CFI 1234
 """
 
-
   def createSymbolFile(self, filename, content=FAT_CONTENT, size=0):
     """Create a symbol file using content with minimum size."""
     osutils.SafeMakedirs(os.path.dirname(filename))
@@ -520,8 +523,8 @@ STACK CFI 1234
 
     # Call sysroot.GatherSymbolFiles to find symbol files under self.tempdir
     # and copy them to output_dir.
-    symbol_files = list(sysroot.GatherSymbolFiles(
-        tar_tmp_dir, output_dir, [input_dir]))
+    symbol_files = list(
+        sysroot.GatherSymbolFiles(tar_tmp_dir, output_dir, [input_dir]))
     self.assertEqual(len(symbol_files), 4)
 
   def test_GatherSymbolFiles(self):
@@ -538,8 +541,8 @@ STACK CFI 1234
 
     # Call sysroot.GatherSymbolFiles to find symbol files under self.tempdir
     # and copy them to output_dir.
-    symbol_files = list(sysroot.GatherSymbolFiles(
-        tar_tmp_dir, output_dir, [input_dir]))
+    symbol_files = list(
+        sysroot.GatherSymbolFiles(tar_tmp_dir, output_dir, [input_dir]))
 
     # Construct the expected symbol files. Note that the SymbolFileTuple
     # field source_file_name is the full path to where a symbol file was found,
@@ -563,8 +566,8 @@ STACK CFI 1234
     # Sort symbol_files and expected_output_files by the relative_path
     # attribute.
     symbol_files = sorted(symbol_files, key=attrgetter('relative_path'))
-    expected_symbol_files = sorted(expected_symbol_files,
-                                   key=attrgetter('relative_path'))
+    expected_symbol_files = sorted(
+        expected_symbol_files, key=attrgetter('relative_path'))
     # Compare the files to the expected files. This verifies the size and
     # contents, and on failure shows the full contents.
     self.assertEqual(symbol_files, expected_symbol_files)
@@ -590,8 +593,10 @@ STACK CFI 1234
 
     # Set up test input directory.
     tarball_dir = os.path.join(self.tempdir, 'some/path')
-    files_in_tarball = ['dir1/fileZ.sym', 'dir2/fileY.sym', 'dir2/fileX.sym',
-                        'fileA.sym', 'fileB.sym', 'fileC.sym']
+    files_in_tarball = [
+        'dir1/fileZ.sym', 'dir2/fileY.sym', 'dir2/fileX.sym', 'fileA.sym',
+        'fileB.sym', 'fileC.sym'
+    ]
     for filename in files_in_tarball:
       self.createSymbolFile(os.path.join(tarball_dir, filename))
     temp_tarball_file_path = os.path.join(self.tempdir, 'symfiles.tar')
@@ -604,18 +609,17 @@ STACK CFI 1234
     shutil.move(temp_tarball_file_path, tarball_path)
 
     # Execute sysroot.GatherSymbolFiles where the path contains the tarball.
-    symbol_files = list(sysroot.GatherSymbolFiles(
-        tarball_dir, output_dir, [tarball_path]))
+    symbol_files = list(
+        sysroot.GatherSymbolFiles(tarball_dir, output_dir, [tarball_path]))
 
     self.assertEqual(len(symbol_files), 6)
     # Verify the symbol_file relative_paths.
-    symbol_file_relative_paths = [
-        obj.relative_path for obj in symbol_files
-    ]
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
     symbol_file_relative_paths.sort()
-    self.assertEqual(symbol_file_relative_paths,
-                     ['dir1/fileZ.sym', 'dir2/fileX.sym', 'dir2/fileY.sym',
-                      'fileA.sym', 'fileB.sym', 'fileC.sym'])
+    self.assertEqual(symbol_file_relative_paths, [
+        'dir1/fileZ.sym', 'dir2/fileX.sym', 'dir2/fileY.sym', 'fileA.sym',
+        'fileB.sym', 'fileC.sym'
+    ])
     # Verify the symbol_file source_file_names.
     symbol_file_source_file_names = [
         obj.source_file_name for obj in symbol_files
@@ -655,8 +659,9 @@ STACK CFI 1234
 
     # Set up test input directory.
     tarball_dir = os.path.join(self.tempdir, 'some/path')
-    files_in_tarball = ['dir1/fileU.sym', 'dir1/fileU.txt',
-                        'fileD.sym', 'fileD.txt']
+    files_in_tarball = [
+        'dir1/fileU.sym', 'dir1/fileU.txt', 'fileD.sym', 'fileD.txt'
+    ]
     for filename in files_in_tarball:
       # we don't care about file contents, so we are using createSymbolFile
       # for files whether they end with .sym or not.
@@ -671,13 +676,11 @@ STACK CFI 1234
     shutil.move(temp_tarball_file_path, tarball_path)
 
     # Execute sysroot.GatherSymbolFiles where the path contains the tarball.
-    symbol_files = list(sysroot.GatherSymbolFiles(
-        tarball_dir, output_dir, [tarball_path]))
+    symbol_files = list(
+        sysroot.GatherSymbolFiles(tarball_dir, output_dir, [tarball_path]))
 
     # Verify the symbol_file relative_paths only has .sym files.
-    symbol_file_relative_paths = [
-        obj.relative_path for obj in symbol_files
-    ]
+    symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
     symbol_file_relative_paths.sort()
     self.assertEqual(symbol_file_relative_paths,
                      ['dir1/fileU.sym', 'fileD.sym'])
@@ -697,10 +700,11 @@ STACK CFI 1234
 
     # Call sysroot.GatherSymbolFiles with full paths to files, some of which
     # don't end in .sym, verify that only .sym files get copied to output_dir.
-    symbol_files = list(sysroot.GatherSymbolFiles(
-        tar_tmp_dir, output_dir,
-        [os.path.join(input_dir, 'a_file.sym'),
-         os.path.join(input_dir, 'a_file.txt')]))
+    symbol_files = list(
+        sysroot.GatherSymbolFiles(tar_tmp_dir, output_dir, [
+            os.path.join(input_dir, 'a_file.sym'),
+            os.path.join(input_dir, 'a_file.txt')
+        ]))
 
     # Construct the expected symbol files. Note that the SymbolFileTuple
     # field source_file_name is the full path to where a symbol file was found,
@@ -746,10 +750,10 @@ class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
     # Call the method being tested.
     sysroot.GenerateBreakpadSymbols(chroot, build_target, False)
 
-    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
-                                           '--board=board',
-                                           '--jobs', mock.ANY,
-                                           '--exclude-dir=firmware'],
+    cros_build_lib.run.assert_called_with([
+        'cros_generate_breakpad_symbols', '--board=board', '--jobs', mock.ANY,
+        '--exclude-dir=firmware'
+    ],
                                           enter_chroot=True,
                                           chroot_args=['--chroot', mock.ANY])
 
@@ -762,11 +766,10 @@ class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
     # Call the method being tested.
     sysroot.GenerateBreakpadSymbols(chroot, build_target, True)
 
-    cros_build_lib.run.assert_called_with(['cros_generate_breakpad_symbols',
-                                           '--debug',
-                                           '--board=board',
-                                           '--jobs', mock.ANY,
-                                           '--exclude-dir=firmware'],
+    cros_build_lib.run.assert_called_with([
+        'cros_generate_breakpad_symbols', '--debug', '--board=board', '--jobs',
+        mock.ANY, '--exclude-dir=firmware'
+    ],
                                           enter_chroot=True,
                                           chroot_args=['--chroot', mock.ANY])
 
@@ -785,7 +788,6 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(self.sysroot_path)
     osutils.SafeMakedirs(os.path.join(self.chroot_path, 'tmp'))
 
-
     # Create output dir.
     self.output_dir = os.path.join(self.tempdir, 'output_dir')
     osutils.SafeMakedirs(self.output_dir)
@@ -799,13 +801,17 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     """BundleBreakpadSymbols calls cbuildbot/commands with correct args."""
     # Patch service layer functions.
     generate_breakpad_symbols_patch = self.PatchObject(
-        sysroot, 'GenerateBreakpadSymbols',
+        sysroot,
+        'GenerateBreakpadSymbols',
         return_value=cros_build_lib.CommandResult(returncode=0, output=''))
     gather_symbol_files_patch = self.PatchObject(
-        sysroot, 'GatherSymbolFiles',
-        return_value=[sysroot.SymbolFileTuple(
-            source_file_name='path/to/source/file1.sym',
-            relative_path='file1.sym')])
+        sysroot,
+        'GatherSymbolFiles',
+        return_value=[
+            sysroot.SymbolFileTuple(
+                source_file_name='path/to/source/file1.sym',
+                relative_path='file1.sym')
+        ])
 
     tar_file = sysroot.BundleBreakpadSymbols(self.chroot, self.sysroot,
                                              self.build_target, self.output_dir)
@@ -825,11 +831,12 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     self.PatchObject(os.path, 'isdir', return_value=True)
 
     create_tarball_patch = self.PatchObject(
-        cros_build_lib, 'CreateTarball',
+        cros_build_lib,
+        'CreateTarball',
         return_value=cros_build_lib.CommandResult(returncode=0, output=''))
 
-    tar_file = sysroot.BundleDebugSymbols(self.chroot, self.sysroot,
-                                          None, self.output_dir)
+    tar_file = sysroot.BundleDebugSymbols(self.chroot, self.sysroot, None,
+                                          self.output_dir)
     create_tarball_patch.assert_called()
 
     # Verify response contents.

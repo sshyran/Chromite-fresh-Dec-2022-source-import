@@ -190,18 +190,18 @@ def write_sizes(sizes: dict, required_paths: list, human_readable: bool,
       pformat.json(output, f)
 
 
-@command.CommandDecorator('analyze-image')
+@command.command_decorator('analyze-image')
 class AnalyzeImageCommand(command.CliCommand):
   """Analyze cros images listing large directory and file sizes."""
 
-  def __init__(self, options: commandline.ArgumentNamespace):
-    super().__init__(options)
-
-    if self.options.image:
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.image:
       return
 
-    if not self.options.board or not self.options.version:
-      cros_build_lib.Die('--image or (--board and --version) required')
+    if not options.board or not options.version:
+      parser.error('--image or (--board and --version) required')
 
   def Run(self):
     """Perform the command."""

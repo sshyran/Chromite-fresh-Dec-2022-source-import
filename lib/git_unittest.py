@@ -97,7 +97,7 @@ Change-Id: %s
     self.assertCommandContains(['config', 'core.sparsecheckout', 'true'])
     self.assertCommandContains(['remote', 'add', 'origin', url])
     self.assertCommandContains(['fetch', '--depth=1'])
-    self.assertCommandContains(['pull', 'origin', 'master'])
+    self.assertCommandContains(['pull', 'origin', 'HEAD'])
     self.assertEqual(osutils.ReadFile(sparse_checkout),
                      'dir1/file1\ndir2/file2')
 
@@ -249,6 +249,29 @@ Change-Id: %s
     self.assertExists(objects)
     self.assertExists(other_file)
     self.assertNotExists(fake_lock)
+
+  def testGetUrlFromRemoteOutput(self):
+    """Test that the proper URL is returned from the git remote output."""
+    remote_output = (
+        'remote:\nremote:\nremote:   '
+        'https://example.com/c/some/project/repo/+/123 gerrit: test')
+    url = git.GetUrlFromRemoteOutput(remote_output)
+    self.assertEqual(url, 'https://example.com/c/some/project/repo/+/123')
+
+    remote_output = (
+        'remote:\nremote:\nremote:   '
+        'https://chrome-internal-review.googlesource.com/c/chromeos/'
+        'manifest-internal/+/4298120 LTS: update kernel commit_ids for LTS '
+        'branches [NEW]  ')
+    url = git.GetUrlFromRemoteOutput(remote_output)
+    self.assertEqual(
+        url, 'https://chrome-internal-review.googlesource.com/c/chromeos/'
+        'manifest-internal/+/4298120')
+
+    remote_output = ('remote:\nremote:\nremote:   '
+                     'c/some/project/repo/+/123 gerrit: test')
+    url = git.GetUrlFromRemoteOutput(remote_output)
+    self.assertIsNone(url)
 
 
 class LogTest(cros_test_lib.RunCommandTestCase):

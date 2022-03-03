@@ -41,7 +41,7 @@ class NoAclFileFound(Error):
   """No ACL file could be found."""
 
 
-def _ValidateBinhostConf(path, key):
+def _ValidateBinhostConf(path: str, key: str) -> None:
   """Validates the binhost conf file defines only one environment variable.
 
   This function is effectively a sanity check that ensures unexpected
@@ -70,7 +70,8 @@ def _ValidateBinhostConf(path, key):
     raise KeyError('Did not find key %s in %s' % (key, path))
 
 
-def _ValidatePrebuiltsFiles(prebuilts_root, prebuilts_paths):
+def _ValidatePrebuiltsFiles(prebuilts_root: str,
+                            prebuilts_paths: List[str]) -> None:
   """Validate all prebuilt files exist.
 
   Args:
@@ -86,7 +87,8 @@ def _ValidatePrebuiltsFiles(prebuilts_root, prebuilts_paths):
       raise LookupError('Prebuilt archive %s does not exist' % full_path)
 
 
-def _ValidatePrebuiltsRoot(target, prebuilts_root):
+def _ValidatePrebuiltsRoot(target: 'build_target_lib.BuildTarget',
+                           prebuilts_root: str) -> None:
   """Validate the given prebuilts root exists.
 
   If the root does not exist, it probably means the build target did not build
@@ -330,7 +332,7 @@ def CreateFilteredPackageIndex(package_path: str,
                                package_index_path: str,
                                upload_uri: str,
                                upload_path: str,
-                               sudo: bool = False):
+                               sudo: bool = False) -> None:
   """Create Package file for dev-install process.
 
   The created package file (package_index_path) contains only the
@@ -347,11 +349,11 @@ def CreateFilteredPackageIndex(package_path: str,
     sudo: Whether to write the file as the root user.
   """
 
-  def ShouldFilterPackage(package):
+  def ShouldFilterPackage(package: dict) -> bool:
     """Local func to filter packages not in the devinstall_package_list
 
     Args:
-      package (dict): Dictionary with key 'CPV' and package name as value
+      package: Dictionary with key 'CPV' and package name as value
 
     Returns:
       True (filter) if not in the devinstall_package_list, else False (don't

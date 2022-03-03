@@ -75,6 +75,7 @@ DF_COMMAND = 'df -k %s'
 LACROS_DIR = '/usr/local/lacros-chrome'
 _CONF_FILE = '/etc/chrome_dev.conf'
 _KILL_LACROS_CHROME_CMD = 'pkill -f %(lacros_dir)s/chrome'
+_RESET_LACROS_CHROME_CMD = 'rm -rf /home/chronos/user/lacros'
 MODIFIED_CONF_FILE = f'modified {_CONF_FILE}'
 
 # This command checks if "--enable-features=LacrosSupport" is present in
@@ -228,6 +229,10 @@ class DeployChrome(object):
     """This method kills lacros-chrome on the device, if it's running."""
     self.device.run(_KILL_LACROS_CHROME_CMD %
                     {'lacros_dir': self.options.target_dir}, check=False)
+
+  def _ResetLacrosChrome(self):
+    """Reset Lacros to fresh state by deleting user data dir."""
+    self.device.run(_RESET_LACROS_CHROME_CMD, check=False)
 
   def _KillAshChromeIfNeeded(self):
     """This method kills ash-chrome on the device, if it's running.
@@ -477,6 +482,8 @@ class DeployChrome(object):
       # If this is a lacros build, we only want to restart ash-chrome if needed.
       restart_ui = False
       steps.append(self._KillLacrosChrome)
+      if self.options.reset_lacros:
+        steps.append(self._ResetLacrosChrome)
       if self.options.modify_config_file:
         restart_ui = self._ModifyConfigFileIfNeededForLacros()
 
@@ -609,6 +616,9 @@ def _CreateParser():
                            'binaries.' % _CHROME_TEST_BIN_DIR)
   parser.add_argument('--lacros', action='store_true', default=False,
                       help='Deploys lacros-chrome rather than ash-chrome.')
+  parser.add_argument('--reset-lacros', action='store_true', default=False,
+                      help='Reset Lacros by deleting Lacros user data dir if '
+                           'exists.')
   parser.add_argument('--skip-modifying-config-file', action='store_false',
                       dest='modify_config_file',
                       help='By default, deploying lacros-chrome modifies the '

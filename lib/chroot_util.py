@@ -153,8 +153,8 @@ def SetupBoard(board, update_chroot=True,
   cros_build_lib.run(cmd)
 
 
-def RunUnittests(sysroot, packages, extra_env=None, verbose=False,
-                 retries=None, jobs=None):
+def RunUnittests(sysroot, packages, extra_env=None, keep_going=False,
+                 verbose=False, retries=None, jobs=None):
   """Runs the unit tests for |packages|.
 
   Args:
@@ -162,6 +162,7 @@ def RunUnittests(sysroot, packages, extra_env=None, verbose=False,
     packages: List of packages to test.
     extra_env: Python dictionary containing the extra environment variable to
       pass to the build command.
+    keep_going: Tolerent package failure from parallel_emerge.
     verbose: If True, show the output from emerge, even when the tests succeed.
     retries: Number of time we should retry a failed packages. If None, use
       parallel_emerge's default.
@@ -178,6 +179,10 @@ def RunUnittests(sysroot, packages, extra_env=None, verbose=False,
 
   command = [os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge'),
              '--sysroot=%s' % sysroot]
+
+  if keep_going:
+    command += ['--keep-going=y']
+
   if verbose:
     command += ['--show-output']
 

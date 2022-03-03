@@ -265,12 +265,13 @@ class CalculateRootfsHash(object):
            'hashtree=%s' % self._file.name]
     if salt:
       cmd.append('salt=%s' % salt.value)
-    verity = cros_build_lib.sudo_run(
+    target_template = cros_build_lib.sudo_run(
         cmd, print_cmd=False, capture_output=True, encoding='utf-8').stdout
-    # verity is a templated DmLine string.
-    slave = kernel_cmdline.DmLine(
-        verity.replace('ROOT_DEV', root_dev).replace('HASH_DEV', hash_dev))
-    vroot_dev.rows[0] = slave
+    # target_template is a templated DmLine string.
+    target = kernel_cmdline.DmLine(
+        target_template.replace('ROOT_DEV', root_dev).replace(
+            'HASH_DEV', hash_dev))
+    vroot_dev.rows[0] = target
     self.calculated_dm_config = dm_config
     self.calculated_kernel_cmdline = self.cmd_line
     self.hashtree_filename = self._file.name

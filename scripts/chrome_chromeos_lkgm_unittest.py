@@ -4,14 +4,10 @@
 
 """Unit tests for the chrome_chromeos_lkgm program."""
 
-import os
 from unittest import mock
 import urllib.parse
 
-from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import osutils
-from chromite.lib import partial_mock
 from chromite.scripts import chrome_chromeos_lkgm
 
 
@@ -22,82 +18,62 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
 
   def setUp(self):
     """Common set up method for all tests."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-        'user@test.org', self.tempdir, '1001.0.0')
-    self.lkgm_file = os.path.join(self.tempdir, constants.PATH_TO_CHROME_LKGM)
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1001.0.0')
     self.old_lkgm = None
 
-  def _createOldLkgm(self, *args, **kwargs):  # pylint: disable=unused-argument
-    # Write out an old lkgm file as if we got it from a git fetch.
-    osutils.SafeMakedirs(os.path.join(self.tempdir, '.git', 'info'))
-    osutils.SafeMakedirs(os.path.dirname(self.lkgm_file))
-    osutils.WriteFile(self.lkgm_file, self.old_lkgm)
-
-  def testCheckoutChromeLKGM(self):
-    """Tests that we can read/obtain the old LKGM from mocked out git."""
-    self.old_lkgm = '1234.0.0'
-    self.rc.AddCmdResult(partial_mock.In('remote'), returncode=0,
-                         side_effect=self._createOldLkgm)
-    self.committer.CheckoutChrome()
-
-    self.assertEqual(self.committer.lkgm_file, self.lkgm_file)
-    self.assertEqual(osutils.ReadFile(self.lkgm_file), self.old_lkgm)
-
-  def testCommitNewLKGM(self):
+  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  def testCommitNewLKGM(self, mock_get_file):
     """Tests that we can commit a new LKGM file."""
-    self.old_lkgm = '999.0.0'
-    self.rc.AddCmdResult(partial_mock.In('remote'), returncode=0,
-                         side_effect=self._createOldLkgm)
-    self.committer.CheckoutChrome()
+    mock_get_file.return_value = '999.0.0'
+    with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
+      cg.return_value = mock.MagicMock(gerrit_number=123456)
+      with mock.patch.object(self.committer._gerrit_helper, 'ChangeEdit') as ce:
+        with mock.patch.object(
+            self.committer._gerrit_helper, 'SetReview') as bc:
+          with mock.patch.object(self.committer._gerrit_helper, 'SetHashtags'):
+            self.committer.UpdateLKGM()
+            ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM',
+                                       '1001.0.0')
+            bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
+                                       notify='NONE')
 
-    self.assertEqual(self.committer.lkgm_file, self.lkgm_file)
-
-    self.committer.UpdateLKGM()
-    self.committer.CommitNewLKGM()
-
-    # Check the file was actually written out correctly.
-    self.assertEqual(osutils.ReadFile(self.lkgm_file), self.committer._lkgm)
-    self.assertCommandContains(['git', 'commit'])
-    self.assertEqual(self.committer._old_lkgm, self.old_lkgm)
-
-  def testOlderLKGMFails(self):
+  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  def testOlderLKGMFails(self, mock_get_file):
     """Tests that trying to update to an older lkgm version fails."""
-    self.old_lkgm = '1002.0.0'
-    self.rc.AddCmdResult(partial_mock.In('remote'), returncode=0,
-                         side_effect=self._createOldLkgm)
+    mock_get_file.return_value = '1002.0.0'
+    with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
+      cg.return_value = mock.MagicMock(gerrit_number=123456)
+      with mock.patch.object(self.committer._gerrit_helper, 'ChangeEdit') as ce:
+        self.assertRaises(chrome_chromeos_lkgm.LKGMNotValid,
+                          self.committer.UpdateLKGM)
+        ce.assert_not_called()
 
-    self.committer.CheckoutChrome()
-
-    self.assertRaises(chrome_chromeos_lkgm.LKGMNotValid,
-                      self.committer.UpdateLKGM)
-    self.assertEqual(self.committer._old_lkgm, self.old_lkgm)
-    self.assertEqual(self.committer._lkgm, '1001.0.0')
-    self.assertEqual(osutils.ReadFile(self.lkgm_file), '1002.0.0')
-
-  def testVersionWithChromeBranch(self):
+  @mock.patch('chromite.lib.gob_util.GetFileContentsOnHead')
+  def testVersionWithChromeBranch(self, mock_get_file):
     """Tests passing a version with a chrome branch strips the branch."""
-    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter(
-        'user@test.org', self.tempdir, '1003.0.0-rc2')
+    self.committer = chrome_chromeos_lkgm.ChromeLKGMCommitter('1003.0.0-rc2')
+    mock_get_file.return_value = '1002.0.0'
 
-    self.old_lkgm = '1002.0.0'
-    self.rc.AddCmdResult(partial_mock.In('remote'), returncode=0,
-                         side_effect=self._createOldLkgm)
-
-    self.committer.CheckoutChrome()
-    self.committer.UpdateLKGM()
-    self.committer.CommitNewLKGM()
-
-    # Check the file was actually written out correctly.
-    stripped_lkgm = '1003.0.0'
-    self.assertEqual(osutils.ReadFile(self.lkgm_file), stripped_lkgm)
-    self.assertEqual(self.committer._old_lkgm, self.old_lkgm)
+    with mock.patch.object(self.committer._gerrit_helper, 'CreateChange') as cg:
+      cg.return_value = mock.MagicMock(gerrit_number=123456)
+      with mock.patch.object(self.committer._gerrit_helper, 'ChangeEdit') as ce:
+        with mock.patch.object(
+            self.committer._gerrit_helper, 'SetReview') as bc:
+          with mock.patch.object(self.committer._gerrit_helper, 'SetHashtags'):
+            # Check the file was actually written out correctly.
+            self.committer.UpdateLKGM()
+            ce.assert_called_once_with(123456, 'chromeos/CHROMEOS_LKGM',
+                                       '1003.0.0')
+            bc.assert_called_once_with(123456, labels={'Bot-Commit': 1},
+                                       notify='NONE')
 
   def testCommitMsg(self):
     """Tests format of the commit message."""
     self.committer._PRESUBMIT_BOTS = ['bot1', 'bot2']
     self.committer._buildbucket_id = 'some-build-id'
     commit_msg_lines = self.committer.ComposeCommitMsg().splitlines()
-    self.assertIn('LKGM 1001.0.0 for chromeos.', commit_msg_lines)
+    self.assertIn(
+        'Automated Commit: LKGM 1001.0.0 for chromeos.', commit_msg_lines)
     self.assertIn(
         'Uploaded by https://ci.chromium.org/b/some-build-id', commit_msg_lines)
     self.assertIn('CQ_INCLUDE_TRYBOTS=luci.chrome.try:bot1', commit_msg_lines)
@@ -126,6 +102,10 @@ class ChromeLKGMCommitterTester(cros_test_lib.RunCommandTestCase,
           self.committer.FindAlreadyOpenLKGMRoll)
 
   def testSubmitToCQ(self):
+    self.committer._buildbucket_id = 'some-build-id'
     already_open_issue = 123456
-    with mock.patch.object(self.committer._gerrit_helper, 'SetReview'):
+    with mock.patch.object(
+        self.committer._gerrit_helper, 'SetReview') as mock_review:
       self.committer.SubmitToCQ(already_open_issue)
+    self.assertIn(
+        self.committer._buildbucket_id, mock_review.call_args[1]['msg'])

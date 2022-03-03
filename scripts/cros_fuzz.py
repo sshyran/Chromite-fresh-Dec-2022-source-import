@@ -406,7 +406,9 @@ def GetFuzzExtraEnv(extra_options=None):
     extra_options = {}
 
   # log_path must be set because Chrome OS's patched compiler changes it.
-  options_dict = {'log_path': 'stderr'}
+  # disable odr violation since many fuzzers hit it and it is also disabled on
+  # clusterfuzz.
+  options_dict = {'log_path': 'stderr', 'detect_odr_violation': '0'}
   options_dict.update(extra_options)
   sanitizer_options = ':'.join('%s=%s' % x for x in options_dict.items())
   sanitizers = ('ASAN', 'MSAN', 'UBSAN')
@@ -553,7 +555,7 @@ def IsInstrumentedWithClangCoverage(binary_path):
   """
   with open(binary_path, 'rb') as file_handle:
     elf_file = ELFFile(file_handle)
-    return elf_file.get_section_by_name('__llvm_covmap') is not None
+    return elf_file.get_section_by_name(b'__llvm_covmap') is not None
 
 
 def RunFuzzerAndGenerateCoverageReport(fuzzer, corpus, fuzz_args):

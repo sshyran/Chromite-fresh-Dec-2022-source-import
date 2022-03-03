@@ -346,9 +346,6 @@ def ApplyCustomOverrides(site_config):
           'vm_tests':[],
       },
 
-      'betty-pi-arc-pi-android-pfq':
-          site_config.templates.tast_vm_android_pfq_tests,
-
       # There's no amd64-generic-release builder, so we use amd64-generic-full
       # to validate informational Tast tests on amd64-generic:
       # https://crbug.com/946858
@@ -357,6 +354,7 @@ def ApplyCustomOverrides(site_config):
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
+      'novato-release': site_config.templates.tast_vm_canary_tests,
       'reven-vmtest-release': site_config.templates.tast_vm_canary_tests,
   }
 
@@ -370,30 +368,6 @@ def ApplyCustomOverrides(site_config):
       site_config[config_name].apply(**overrides)
     else:
       logging.warning('ignoring overrides for missing config %s', config_name)
-
-
-
-def IncrementalBuilders(site_config):
-  """Create all incremental test configs.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-  """
-
-  # incremental
-  site_config['amd64-generic-incremental'].apply(
-      site_config.templates.no_vmtest_builder,
-  )
-
-  site_config['betty-incremental'].apply(
-      vm_tests=getInfoVMTest(),
-      vm_tests_override=getInfoVMTest(),
-  )
-
-  site_config['x32-generic-incremental'].apply(
-      site_config.templates.no_vmtest_builder,
-  )
 
 
 def PostsubmitBuilders(site_config):
@@ -474,16 +448,6 @@ def GeneralTemplates(site_config, ge_build_config):
       site_config.templates.default_hw_tests_override,
   )
   # END asan
-
-  # BEGIN Incremental
-  site_config.templates.incremental.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-  site_config.templates.internal_incremental.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-  # END Incremental
 
   # BEGIN Factory
   site_config.templates.factory.apply(
@@ -573,22 +537,6 @@ def GeneralTemplates(site_config, ge_build_config):
   # END x30evb
 
 
-def AndroidTemplates(site_config):
-  """Apply test config to Android specific templates
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-  """
-  site_config.templates.generic_android_pfq.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-  site_config.templates.pi_android_pfq.apply(
-      site_config.templates.default_hw_tests_override,
-  )
-
-
 def ApplyConfig(site_config, boards_dict, ge_build_config):
   """Apply test specific config to site_config
 
@@ -602,8 +550,6 @@ def ApplyConfig(site_config, boards_dict, ge_build_config):
   # Insert default HwTests for tryjobs.
   for build in site_config.values():
     InsertHwTestsOverrideDefaults(build)
-
-  IncrementalBuilders(site_config)
 
   PostsubmitBuilders(site_config)
 

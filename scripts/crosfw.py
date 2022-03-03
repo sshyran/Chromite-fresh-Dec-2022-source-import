@@ -89,13 +89,13 @@ For the -a option here are some useful options:
 --verify --full-erase
 --bootcmd "cros_test sha"
 --gbb-flags -force-dev-switch-on
---bmpblk ~/trunk/src/third_party/u-boot/bmp.bin
+--bmpblk ~/chromiumos/src/third_party/u-boot/bmp.bin
 
 For example: -a "--gbb-flags -force-dev-switch-on"
 
 Note the standard bmpblk is at:
-  /home/$USER/trunk/src/third_party/chromiumos-overlay/sys-boot/
-      chromeos-bootimage/files/bmpblk.bin"
+  ~/chromiumos/src/third_party/chromiumos-overlay/sys-boot/
+      chromeos-bootimage/files/bmpblk.bin
 """
 
 import glob

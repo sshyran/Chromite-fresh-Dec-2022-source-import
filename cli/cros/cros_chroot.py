@@ -11,7 +11,7 @@ from chromite.cli import command
 from chromite.lib import cros_build_lib
 
 
-@command.CommandDecorator('chroot')
+@command.command_decorator('chroot')
 class ChrootCommand(command.CliCommand):
   """Enter the chroot."""
 
@@ -46,7 +46,6 @@ class ChrootCommand(command.CliCommand):
 
   def Run(self):
     """Runs `cros chroot`."""
-    self.options.Freeze()
     cmd = self.options.command
 
     # If -- was used to separate out the command from arguments, ignore it.

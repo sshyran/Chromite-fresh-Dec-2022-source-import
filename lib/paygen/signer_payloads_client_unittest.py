@@ -383,7 +383,7 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
     clean_uri = ('gs://chromeos-releases/test-channel/%s/crostools-client/**' %
                  (cros_build_lib.GetRandomString(),))
 
-    # Cleanup before we start
+    # Cleanup before we start.
     ctx.Remove(clean_uri, ignore_missing=True)
 
     try:
@@ -421,6 +421,54 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
            '6d7a273d9136d5aff5c4d95985d16eeec7380539ef963e0784a0de42b42890df'
            'c83702179f69f5c6eca4630807fbc4ab6241017e0942b15feada0b240e9729bf'
            '33bf456bd419da63302477e147963550a45c6cf60925ff48ad7b309fa158dcb2',))
+
+      expected_sigs = [[base64.b16decode(x[0], True)]
+                       for x in expected_sigs_hex]
+
+      all_signatures = self.client.GetHashSignatures(hashes, keysets)
+
+      self.assertEqual(all_signatures, expected_sigs)
+      self.assertRaises(gs.GSNoSuchKey, ctx.List, clean_uri)
+
+    finally:
+      # Cleanup when we are over.
+      ctx.Remove(clean_uri, ignore_missing=True)
+
+  @cros_test_lib.pytestmark_network_test
+  def testGetHashSignaturesDuplicates(self):
+    """Integration test with real signer with duplicate test hashes."""
+    ctx = gs.GSContext()
+
+    clean_uri = ('gs://chromeos-releases/test-channel/%s/crostools-client/**' %
+                 (cros_build_lib.GetRandomString(),))
+
+    # Cleanup before we start.
+    ctx.Remove(clean_uri, ignore_missing=True)
+
+    try:
+      hashes = [b'0' * 32,
+                b'0' * 32]
+
+      keysets = ['update_signer']
+
+      expected_sigs_hex = (
+          ('ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43'
+           '5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f'
+           '63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f'
+           'b1c4b53209e950ecc721b07a52a41d9c025fd25602340c93d5295211308caa29'
+           'a03ed18516cf61411c508097d5b47620d643ed357b05213b2b9fa3a3f938d6c4'
+           'f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe'
+           '652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716'
+           'aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241',),
+
+          ('ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43'
+           '5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f'
+           '63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f'
+           'b1c4b53209e950ecc721b07a52a41d9c025fd25602340c93d5295211308caa29'
+           'a03ed18516cf61411c508097d5b47620d643ed357b05213b2b9fa3a3f938d6c4'
+           'f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe'
+           '652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716'
+           'aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241',))
 
       expected_sigs = [[base64.b16decode(x[0], True)]
                        for x in expected_sigs_hex]

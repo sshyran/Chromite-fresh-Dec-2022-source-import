@@ -139,7 +139,7 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
       git.Clone(chromeos_config_path,
                 '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
                 depth=1
-      )
+                )
 
     # Only compile the subset we need for the API.
     subdirs = [

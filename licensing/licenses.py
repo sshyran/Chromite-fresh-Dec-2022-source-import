@@ -20,7 +20,7 @@ Recommended build:
   cros_sdk
   export BOARD=x86-alex
   sudo rm -rf /build/$BOARD
-  cd ~/trunk/src/scripts
+  cd ~/chromiumos/src/scripts
   # If you wonder why we need to build Chromium OS just to run
   # `emerge -p -v virtual/target-os` on it, we don't.
   # However, later we run ebuild unpack, and this will apply patches and run
@@ -29,7 +29,7 @@ Recommended build:
   # This will take about 10mn on a Z620.
   ./build_packages --board=$BOARD --nowithautotest --nowithtest --nowithdev \
                    --nowithfactory
-  cd ~/trunk/chromite/licensing
+  cd ~/chromiumos/chromite/licensing
   # This removes left over packages from an earlier build that could cause
   # conflicts.
   eclean-$BOARD packages

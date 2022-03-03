@@ -22,8 +22,11 @@ from chromite.utils import pformat
 
 
 DLC_BUILD_DIR = 'build/rootfs/dlc'
+DLC_FACTORY_INSTALL_DIR = 'unencrypted/dlc-factory-images'
+DLC_GID = 20118
 DLC_IMAGE = 'dlc.img'
 DLC_META_DIR = 'opt/google/dlc'
+DLC_UID = 20118
 DLC_TMP_META_DIR = 'meta'
 EBUILD_PARAMETERS = 'ebuild_parameters.json'
 IMAGELOADER_JSON = 'imageloader.json'
@@ -101,13 +104,15 @@ class EbuildParams(object):
     used_by: (str) The user of this DLC, e.g. "system" or "user"
     days_to_purge: (int) The number of days to keep a DLC after uninstall and
         before it is purged.
+    reserved: (bool) always reserve space for DLC on disk.
+    critical_update: (bool) DLC always updates with the OS.
     fullnamerev: (str) The full package & version name.
   """
 
   def __init__(self, dlc_id, dlc_package, fs_type, pre_allocated_blocks,
                version, name, description, preload, used_by,
-               mount_file_required, fullnamerev, days_to_purge=0,
-               factory_install=False):
+               mount_file_required, fullnamerev, reserved=False,
+               critical_update=False, days_to_purge=0, factory_install=False):
     """Initializes the object.
 
     When adding a new variable in here, always set a default value. The reason
@@ -128,6 +133,8 @@ class EbuildParams(object):
     self.mount_file_required = mount_file_required
     self.fullnamerev = fullnamerev
     self.days_to_purge = days_to_purge
+    self.reserved = reserved
+    self.critical_update = critical_update
 
   def StoreDlcParameters(self, install_root_dir, sudo):
     """Store DLC parameters defined in the ebuild.
@@ -382,9 +389,14 @@ class DlcGenerator(object):
     licensing.LoadPackageInfo()
     licensing.ProcessPackageLicenses()
     license_path = os.path.join(dlc_dir, LICENSE)
+    licenses = licensing.GenerateLicenseText()
     # The first (and only) item contains the values for |self.fullnamerev|.
-    _, license_txt = next(iter(licensing.GenerateLicenseText().items()))
-    osutils.WriteFile(license_path, license_txt)
+    if licenses:
+      _, license_txt = next(iter(licenses.items()))
+      osutils.WriteFile(license_path, license_txt)
+    else:
+      logging.info('LICENSE text is empty. Skipping LICENSE file creation.')
+
 
   def CollectExtraResources(self, dlc_dir):
     """Collect the extra resources needed by the DLC module.
@@ -478,6 +490,8 @@ class DlcGenerator(object):
         'used-by': self.ebuild_params.used_by,
         'days-to-purge': self.ebuild_params.days_to_purge,
         'mount-file-required': self.ebuild_params.mount_file_required,
+        'reserved': self.ebuild_params.reserved,
+        'critical-update': self.ebuild_params.critical_update,
     }
 
   def GenerateVerity(self):
@@ -674,8 +688,9 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
       # Factory install DLCs.
       if (stateful and factory_install and
           IsFactoryInstallAllowed(d_id, dlc_build_dir)):
+        install_stateful_root = os.path.join(stateful, DLC_FACTORY_INSTALL_DIR)
         install_stateful_dir = os.path.join(
-            stateful, 'unencrypted/dlc-factory-images', d_id, d_package)
+            install_stateful_root, d_id, d_package)
         osutils.SafeMakedirs(install_stateful_dir, mode=0o755, sudo=True)
         source_dlc_dir = os.path.join(dlc_build_dir, d_id, d_package)
         for filepath in (os.path.join(source_dlc_dir, fname)
@@ -685,6 +700,13 @@ def InstallDlcImages(sysroot, board, dlc_id=None, install_root_dir=None,
                        filepath, install_stateful_dir)
           cros_build_lib.sudo_run(['cp', filepath, install_stateful_dir],
                                   print_cmd=False, stderr=True)
+
+        # Change the owner + group of factory install directory.
+        # Refer to
+        # http://cs/chromeos_public/src/third_party/eclass-overlay or
+        # DLC/dlcservice related uid + gid.
+        cros_build_lib.sudo_run(['chown', '-R', '%d:%d' % (DLC_UID, DLC_GID),
+                                 install_stateful_root])
 
       # Create metadata directory in rootfs.
       if rootfs:

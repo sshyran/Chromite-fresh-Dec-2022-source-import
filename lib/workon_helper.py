@@ -223,7 +223,7 @@ class WorkonHelper(object):
     self._unmasked_symlink = os.path.join(
         profile, 'package.unmask', 'cros-workon')
     self._keywords_symlink = os.path.join(
-        profile, 'package.keywords', 'cros-workon')
+        profile, 'package.accept_keywords', 'cros-workon')
     self._masked_symlink = os.path.join(
         profile, 'package.mask', 'cros-workon')
 
@@ -263,7 +263,8 @@ class WorkonHelper(object):
       sysroot = sysroot_lib.Sysroot(self._sysroot)
       portdir_overlay = sysroot.GetStandardField('PORTDIR_OVERLAY')
       if portdir_overlay:
-        self._cached_overlays = portdir_overlay.strip().splitlines()
+        self._cached_overlays = [
+            x.strip() for x in portdir_overlay.splitlines()]
       else:
         # This command is exceptionally slow, and we don't expect the list of
         # overlays to change during the lifetime of WorkonHelper.
@@ -584,16 +585,16 @@ class WorkonHelper(object):
     Args:
       atoms: iterable of atoms to ensure are in the manifest.
     """
-    if git.ManifestCheckout.IsFullManifest(self._src_root):
-      # If we're a full manifest, there is nothing to do.
-      return
+    manifest = git.ManifestCheckout.Cached(self._src_root)
 
     should_repo_sync = False
-    for ebuild_path in self._AtomsToEbuilds(atoms):
+    ebuilds = portage_util.FindEbuildsForPackages(atoms, self._sysroot)
+    for ebuild_path in ebuilds.values():
       infos = portage_util.GetRepositoryForEbuild(ebuild_path, self._sysroot)
       for info in infos:
-        if not info.project:
+        if not info.project or manifest.FindCheckouts(info.project):
           continue
+
         cmd = ['loman', 'add', '--workon', info.project]
         cros_build_lib.run(cmd, print_cmd=False)
         should_repo_sync = True
@@ -676,8 +677,8 @@ class WorkonHelper(object):
     if not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
-      logging.info("Started working on '%s' for '%s'",
-                   ' '.join(new_atoms), self._system)
+      logging.notice("Started working on '%s' for '%s'", ' '.join(new_atoms),
+                     self._system)
 
   def StopWorkingOnPackages(self,
                             packages,
@@ -719,8 +720,8 @@ class WorkonHelper(object):
     if stopped_atoms and not quiet:
       # Legacy scripts used single quotes in their output, and we carry on this
       # honorable tradition.
-      logging.info("Stopped working on '%s' for '%s'",
-                   ' '.join(stopped_atoms), self._system)
+      logging.notice("Stopped working on '%s' for '%s'",
+                     ' '.join(stopped_atoms), self._system)
 
   def GetPackageInfo(self, packages, use_all=False, use_workon_only=False):
     """Get information about packages.

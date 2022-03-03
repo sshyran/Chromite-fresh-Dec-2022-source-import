@@ -9,6 +9,7 @@ import os
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
+from chromite.lib import unittest_lib
 from chromite.scripts import install_toolchain
 
 
@@ -35,6 +36,8 @@ class ParseArgsTest(cros_test_lib.TempDirTestCase):
                       'CHOST="%s"' % self.chost_value)
 
     self.sysroot_dir = os.path.join(self.tempdir, 'build/board')
+    # make.conf needs to exist to correctly read back config.
+    unittest_lib.create_stub_make_conf(self.sysroot_dir)
 
   def testInvalidArgs(self):
     """Test invalid argument parsing."""

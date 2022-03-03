@@ -71,28 +71,35 @@ class ChromeEBuild(portage_util.EBuild):
     return '%s-%s' % (self.package, self.version)
 
 
-def get_chrome_version_from_refs(refs):
-  """Get the chrome version to use from the list of provided tags.
+def get_version_from_refs(refs):
+  """Get the version to use from the list of provided tags.
+
+  Version strings are of format "78.0.3876.1".
 
   Args:
-    refs (list[GitRef]): The tags to parse for the best chrome version.
+    refs (list[GitRef]): The tags to parse for the best version.
 
   Returns:
-    str: The chrome version to use.
-  """
-  assert refs
+    str: The version to use.
 
-  # Each tag is a chrome version string, e.g. "78.0.3876.1", so extract the
+  Raises:
+    Exception: if no unstable ebuild exists for Chrome.
+  """
+  if not refs:
+    raise TypeError
+
+  # Each tag is a version string, e.g. "78.0.3876.1", so extract the
   # tag name from the ref, e.g. "refs/tags/78.0.3876.1".
   versions = [ref.ref.split('/')[-1] for ref in refs]
-  return best_chrome_version(versions)
+  return best_version(versions)
 
 
-def best_chrome_version(versions):
+def best_version(versions):
   # Convert each version from a string like "78.0.3876.1" to a list of ints
   # to compare them, find the most recent (max), and then reconstruct the
   # version string.
-  assert versions
+  if not versions:
+    raise TypeError
 
   version = max([int(part) for part in v.split('.')] for v in versions)
   return '.'.join(str(part) for part in version)
@@ -100,9 +107,10 @@ def best_chrome_version(versions):
 
 def best_chrome_ebuild(ebuilds):
   """Determine the best/newest chrome ebuild from a list of ebuilds."""
-  assert ebuilds
+  if not ebuilds:
+    raise TypeError
 
-  version = best_chrome_version(ebuild.chrome_version for ebuild in ebuilds)
+  version = best_version(ebuild.chrome_version for ebuild in ebuilds)
   candidates = [
       ebuild for ebuild in ebuilds if ebuild.chrome_version == version
   ]
@@ -340,9 +348,9 @@ class UprevChromeManager(object):
     # Case 1 - Uprev: self._version = 78.0.0.0, Candidate = 77.0.0.0
     # Case 2 - Uprev: self._version = 78.0.0.0, Candidate = 78.0.0.0
     # Case 3 - Skip:  self._version = 78.0.0.0, Candidate = 79.0.0.0
-    best_version = best_chrome_version(
+    version = best_version(
         [self._version, candidate.chrome_version])
-    if self._version == best_version:
+    if self._version == version:
       # Cases 1 and 2.
       return (True, candidate)
 
@@ -485,7 +493,7 @@ class UprevOverlayManager(object):
 
     Args:
       package_list (list[str]): A list of packages to uprev.
-      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+      force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # Use all found packages if an explicit package_list is not given.
     use_all = not bool(package_list)
@@ -593,7 +601,7 @@ class UprevOverlayManager(object):
         of whether they are in our set of packages.
       package_list (list[str]): A set of the packages we want to gather. If
       use_all is True, this argument is ignored, and should be None.
-      force: Boolean indicating whether or not to consider blacklisted ebuilds.
+      force: Boolean indicating whether or not to consider denylisted ebuilds.
     """
     # See crrev.com/c/1257944 for origins of this.
     root_version = manifest_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
@@ -691,6 +699,21 @@ class UprevVersionedPackageResult(object):
     result = UprevVersionedPackageModifications(new_version, modified_files)
     self.modified.append(result)
     return self
+
+  def extend(self, other: 'UprevVersionedPackageResult'):
+    """Adds another result from an existing result."""
+    self.modified.extend(other.modified)
+
+  def __iadd__(self, other: 'UprevVersionedPackageResult'
+               ) -> 'UprevVersionedPackageResult':
+    """Adds another result from an existing result."""
+    self.extend(other)
+    return self
+
+  def __add__(self, other: 'UprevVersionedPackageResult'
+              ) -> 'UprevVersionedPackageResult':
+    """Adds two result objects to create a new one."""
+    return UprevVersionedPackageResult().extend(self).extend(other)
 
   @property
   def uprevved(self):

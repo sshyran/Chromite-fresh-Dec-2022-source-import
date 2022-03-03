@@ -5,9 +5,11 @@
 """Payload API Service."""
 
 from chromite.api import controller
-from chromite.lib import cros_build_lib
 from chromite.api import faux
 from chromite.api import validate
+from chromite.api.gen.chromite.api import payload_pb2
+from chromite.lib import cros_build_lib
+from chromite.lib.paygen import paygen_payload_lib
 from chromite.service import payload
 
 
@@ -17,6 +19,10 @@ _VALID_IMAGE_PAIRS = (('src_signed_image', 'tgt_signed_image'),
                       ('full_update', 'tgt_unsigned_image'),
                       ('full_update', 'tgt_signed_image'),
                       ('full_update', 'tgt_dlc_image'))
+_VALID_MINIOS_PAIRS = (('src_signed_image', 'tgt_signed_image'),
+                       ('src_unsigned_image', 'tgt_unsigned_image'),
+                       ('full_update', 'tgt_unsigned_image'),
+                       ('full_update', 'tgt_signed_image'))
 
 _DEFAULT_PAYGEN_CACHE_DIR = '.paygen_cache'
 
@@ -63,21 +69,20 @@ def GeneratePayload(input_proto, output_proto, config):
     cros_build_lib.Die('%s and %s are not valid image pairs' %
                        (src_image, tgt_image))
 
+  # Ensure that miniOS payloads are only requested for compatible image types.
+  if input_proto.minios and (src_name, tgt_name) not in _VALID_MINIOS_PAIRS:
+    cros_build_lib.Die('%s and %s are not valid image pairs for miniOS' %
+                       (src_image, tgt_image))
+
   # Find the value of bucket or default to 'chromeos-releases'.
   destination_bucket = input_proto.bucket or 'chromeos-releases'
-
-  if input_proto.dryrun:
-    keyset = ''
-    upload = False
-  else:
-    keyset = input_proto.keyset
-    upload = True
 
   # There's a potential that some paygen_lib library might raise here, but since
   # we're still involved in config we'll keep it before the validate_only.
   payload_config = payload.PayloadConfig(tgt_image, src_image,
-                                         destination_bucket, input_proto.verify,
-                                         keyset, upload,
+                                         destination_bucket, input_proto.minios,
+                                         input_proto.verify,
+                                         upload=not input_proto.dryrun,
                                          cache_dir=_DEFAULT_PAYGEN_CACHE_DIR)
 
   # If configured for validation only we're done here.
@@ -85,10 +90,17 @@ def GeneratePayload(input_proto, output_proto, config):
     return controller.RETURN_CODE_VALID_INPUT
 
   # Do payload generation.
-  local_path, remote_uri = payload_config.GeneratePayload()
-  _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
+  local_path, remote_uri = '', ''
+  try:
+    local_path, remote_uri = payload_config.GeneratePayload()
+  except paygen_payload_lib.PayloadGenerationSkippedException as e:
+    # If paygen was skipped, provide a reason if possible.
+    if isinstance(e, paygen_payload_lib.NoMiniOSPartitionException):
+      reason = payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
+      output_proto.failure_reason = reason
 
-  if remote_uri or not upload and local_path:
+  _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
+  if remote_uri or input_proto.dryrun and local_path:
     return controller.RETURN_CODE_SUCCESS
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY

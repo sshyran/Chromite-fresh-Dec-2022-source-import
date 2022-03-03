@@ -25,7 +25,7 @@ from chromite.lib import moblab_vm
 from chromite.lib import osutils
 
 
-@command.CommandDecorator('moblabvm')
+@command.command_decorator('moblabvm')
 class MoblabvmCommand(command.CliCommand):
   """Manage a moblab VM setup."""
 
@@ -111,7 +111,6 @@ A typical moblabvm session looks so:
 
   def Run(self):
     """The main handler of this CLI."""
-    self.options.Freeze()
     cmd = self.options.moblabvm_command
     if cmd == 'create':
       # Allow the workspace to not exist. This makes the CLI uniform across the

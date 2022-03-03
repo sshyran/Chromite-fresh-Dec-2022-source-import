@@ -51,8 +51,8 @@ from chromite.utils import pformat
 
 
 _PACKAGE_FILE = '%(buildroot)s/src/scripts/cbuildbot_package.list'
-CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s'
-                        '/build/%(board)s/etc/portage/package.keywords/chrome')
+CHROME_KEYWORDS_FILE = ('%(buildroot)s/%(chroot)s/build/%(board)s'
+                        '/etc/portage/package.accept_keywords/chrome')
 CHROME_UNMASK_FILE = ('%(buildroot)s/%(chroot)s'
                       '/build/%(board)s/etc/portage/package.unmask/chrome')
 _CROS_ARCHIVE_URL = 'CROS_ARCHIVE_URL'
@@ -1240,8 +1240,7 @@ def RunSkylabHWTestSuite(
     suite_args=None,
     job_keyvals=None,
     quota_account=None,
-    upload_crashes=False,
-  ):
+    upload_crashes=False):
   """Run the test suite in the Autotest lab using Skylab.
 
   Args:
@@ -1977,6 +1976,23 @@ def MarkAndroidAsStable(buildroot,
   return android_atom
 
 
+def MarkAndroidLKGB(buildroot, android_package, android_version):
+  """Marks the given Android version as LKGB.
+
+  This is to implement Phase 2 migration of go/android-uprev-recipes. The
+  Android PFQ calls this function to update the LKGB file instead of committing
+  uprevs directly.
+  """
+  cmd = [
+      'cros_mark_android_as_stable',
+      '--update_lkgb',
+      '--android_package=%s' % android_package,
+      '--force_version=%s' % android_version,
+  ]
+
+  RunBuildScript(buildroot, cmd, chromite_cmd=True)
+
+
 def MarkChromeAsStable(buildroot,
                        tracking_branch,
                        chrome_rev,
@@ -2699,7 +2715,8 @@ def PushImages(board,
     log_cmd.append('--profile=%s' % profile)
 
   if sign_types:
-    log_cmd.append('--sign-types=%s' % ' '.join(sign_types))
+    log_cmd.append('--sign-types')
+    log_cmd.extend(sign_types)
 
   if buildroot:
     log_cmd.append('--buildroot=%s' % buildroot)
@@ -3062,23 +3079,6 @@ def BuildFullAutotestTarball(buildroot, board, tarball_dir):
   return tarball
 
 
-def BuildUnitTestTarball(buildroot, board, tarball_dir):
-  """Tar up the UnitTest binaries."""
-  tarball = 'unit_tests.tar'
-  tarball_path = os.path.join(tarball_dir, tarball)
-  cwd = os.path.abspath(
-      os.path.join(buildroot, 'chroot', 'build', board,
-                   constants.UNITTEST_PKG_PATH))
-  # UnitTest binaries are already compressed so just create a tar file.
-  BuildTarball(
-      buildroot, ['.'],
-      tarball_path,
-      cwd=cwd,
-      compressed=False,
-      check=False)
-  return tarball
-
-
 def BuildImageZip(archive_dir, image_dir):
   """Build image.zip in archive_dir from contents of image_dir.
 
@@ -3200,11 +3200,13 @@ def BuildStrippedPackagesTarball(buildroot, board, package_globs, archive_dir):
   board_path = os.path.join(chroot_path, 'build', board)
   stripped_pkg_dir = os.path.join(board_path, 'stripped-packages')
   tarball_paths = []
+  strip_package_path = path_util.ToChrootPath(
+      os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'strip_package'))
   for pattern in package_globs:
     packages = portage_util.FindPackageNameMatches(
         pattern, board, buildroot=buildroot)
     for cpv in packages:
-      cmd = ['strip_package', '--board', board, cpv.cpf]
+      cmd = [strip_package_path, '--board', board, cpv.cpf]
       cros_build_lib.run(cmd, cwd=buildroot, enter_chroot=True)
       # Find the stripped package.
       files = glob.glob(os.path.join(stripped_pkg_dir, cpv.cpf) + '.*')

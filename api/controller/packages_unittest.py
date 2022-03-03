@@ -324,67 +324,23 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     return request
 
   def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    builds_chrome = self.PatchObject(
-        packages_service, 'builds', return_value=True)
-    patch_version = self.PatchObject(packages_service,
-                                     'determine_android_version')
-    patch_branch_version = self.PatchObject(packages_service,
-                                            'determine_android_branch')
-    patch_target_version = self.PatchObject(packages_service,
-                                            'determine_android_target')
-    chrome_version = self.PatchObject(packages_service,
-                                      'determine_chrome_version')
-    platform_version = self.PatchObject(packages_service,
-                                        'determine_platform_version')
-    milestone_version = self.PatchObject(packages_service,
-                                         'determine_milestone_version')
-    full_version = self.PatchObject(packages_service,
-                                    'determine_full_version')
+    """Quick check that a validate only call does not execute any logic."""
+    patch_version = self.PatchObject(packages_service, 'get_target_versions')
 
     request = self._GetRequest(board='betty')
     packages_controller.GetTargetVersions(request, self.response,
                                           self.validate_only_config)
     patch_version.assert_not_called()
-    patch_branch_version.assert_not_called()
-    patch_target_version.assert_not_called()
-    builds_chrome.assert_not_called()
-    chrome_version.assert_not_called()
-    platform_version.assert_not_called()
-    milestone_version.assert_not_called()
-    full_version.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
-    builds_chrome = self.PatchObject(
-        packages_service, 'builds', return_value=True)
-    patch_version = self.PatchObject(packages_service,
-                                     'determine_android_version')
-    patch_branch_version = self.PatchObject(packages_service,
-                                            'determine_android_branch')
-    patch_target_version = self.PatchObject(packages_service,
-                                            'determine_android_target')
-    chrome_version = self.PatchObject(packages_service,
-                                      'determine_chrome_version')
-    platform_version = self.PatchObject(packages_service,
-                                        'determine_platform_version')
-    milestone_version = self.PatchObject(packages_service,
-                                         'determine_milestone_version')
-    full_version = self.PatchObject(packages_service,
-                                    'determine_full_version')
+    patch_version = self.PatchObject(packages_service, 'get_target_versions')
 
     request = self._GetRequest(board='betty')
     packages_controller.GetTargetVersions(request, self.response,
                                           self.mock_call_config)
 
     patch_version.assert_not_called()
-    patch_branch_version.assert_not_called()
-    patch_target_version.assert_not_called()
-    builds_chrome.assert_not_called()
-    chrome_version.assert_not_called()
-    platform_version.assert_not_called()
-    milestone_version.assert_not_called()
-    full_version.assert_not_called()
 
     self.assertTrue(self.response.android_version)
     self.assertTrue(self.response.android_branch_version)
@@ -414,9 +370,10 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     self.PatchObject(packages_service, 'determine_android_package',
                      return_value=android_package)
     android_branch = 'android_test_branch'
-    android_branch_mock = self.PatchObject(packages_service,
-                                           'determine_android_branch',
-                                           return_value=android_branch)
+    android_branch_mock = self.PatchObject(
+        packages_service,
+        'determine_android_branch',
+        return_value=android_branch)
     platform_version = '12345.1.2'
     self.PatchObject(packages_service, 'determine_platform_version',
                      return_value=platform_version)
@@ -440,7 +397,7 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
     build_target = build_target_lib.BuildTarget('betty')
     chrome_version_mock.assert_called_with(build_target)
     # Verify call to determine_android_branch passes a board name.
-    android_branch_mock.assert_called_with('betty', package=android_package)
+    android_branch_mock.assert_called_with('betty')
 
   def testGetTargetVersionsWithPackagesSet(self):
     """Verify packages pass through and basic return values."""

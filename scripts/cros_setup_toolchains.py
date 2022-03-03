@@ -69,6 +69,7 @@ HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust-bootstrap',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
+    'dev-embedded/hps-sdk',
     'dev-embedded/ti50-sdk',
 )
 
@@ -100,6 +101,7 @@ TARGET_LLVM_PKGS_ENABLED = (
     'armv7a-cros-linux-gnueabi',
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
+    'i686-cros-linux-gnu',
     'i686-pc-linux-gnu',
     'x86_64-cros-linux-gnu',
 )
@@ -235,12 +237,36 @@ class Crossdev(object):
     """Calls crossdev to initialize a cross target.
 
     Args:
-      targets: The list of targets to initialize using crossdev.
+      targets: The dict of targets to initialize using crossdev.
       usepkg: Copies the commandline opts.
       config_only: Just update.
     """
     configured_targets = cls._CACHE.setdefault('configured_targets', [])
+    started_targets = set()
 
+    # Schedule all of the targets in parallel, and let them run.
+    with parallel.BackgroundTaskRunner(cls._UpdateTarget) as queue:
+      for target_name in targets:
+        # We already started this target in this loop.
+        if target_name in started_targets:
+          continue
+        # The target is already configured.
+        if config_only and target_name in configured_targets:
+          continue
+        queue.put([target_name, targets[target_name], usepkg, config_only])
+        started_targets.add(target_name)
+
+  @classmethod
+  def _UpdateTarget(cls, target_name, target, usepkg, config_only):
+    """Calls crossdev to initialize a cross target.
+
+    Args:
+      target_name: The name of the target to initialize.
+      target: The target info for initializing.
+      usepkg: Copies the commandline opts.
+      config_only: Just update.
+    """
+    configured_targets = cls._CACHE.setdefault('configured_targets', [])
     cmdbase = ['crossdev', '--show-fail-log']
     cmdbase.extend(['--env', 'FEATURES=splitdebug'])
     # Pick stable by default, and override as necessary.
@@ -254,43 +280,36 @@ class Crossdev(object):
     cmdbase.extend(['--overlays', overlays])
     cmdbase.extend(['--ov-output', CROSSDEV_OVERLAY])
 
-    # Build target by the reversed alphabetical order to make sure
-    # armv7a-cros-linux-gnueabihf builds before armv7a-cros-linux-gnueabi
-    # because some dependency issue. This can be reverted once we
-    # migrated to armv7a-cros-linux-gnueabihf. crbug.com/711369
-    for target in sorted(targets, reverse=True):
-      if config_only and target in configured_targets:
-        continue
+    cmd = cmdbase + ['-t', target_name]
 
-      cmd = cmdbase + ['-t', target]
-
-      for pkg in GetTargetPackages(target):
-        if pkg == 'gdb':
-          # Gdb does not have selectable versions.
-          cmd.append('--ex-gdb')
-        elif pkg == 'ex_compiler-rt':
-          cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
-        elif pkg == 'ex_go':
-          # Go does not have selectable versions.
-          cmd.extend(CROSSDEV_GO_ARGS)
-        elif pkg in LLVM_PKGS_TABLE:
-          cmd.extend(LLVM_PKGS_TABLE[pkg])
-        elif pkg in cls.MANUAL_PKGS:
-          pass
-        else:
-          # The first of the desired versions is the "primary" one.
-          version = GetDesiredPackageVersions(target, pkg)[0]
-          cmd.extend(['--%s' % pkg, version])
-
-      cmd.extend(targets[target]['crossdev'].split())
-      if config_only:
-        # In this case we want to just quietly reinit
-        cmd.append('--init-target')
-        cros_build_lib.run(cmd, print_cmd=False, stdout=True)
+    for pkg in GetTargetPackages(target_name):
+      if pkg == 'gdb':
+        # Gdb does not have selectable versions.
+        cmd.append('--ex-gdb')
+      elif pkg == 'ex_compiler-rt':
+        cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
+      elif pkg == 'ex_go':
+        # Go does not have selectable versions.
+        cmd.extend(CROSSDEV_GO_ARGS)
+      elif pkg in LLVM_PKGS_TABLE:
+        cmd.extend(LLVM_PKGS_TABLE[pkg])
+      elif pkg in cls.MANUAL_PKGS:
+        pass
       else:
-        cros_build_lib.run(cmd)
+        # The first of the desired versions is the "primary" one.
+        version = GetDesiredPackageVersions(target_name, pkg)[0]
+        cmd.extend(['--%s' % pkg, version])
 
-      configured_targets.append(target)
+    cmd.extend(target['crossdev'].split())
+
+    if config_only:
+      # In this case we want to just quietly reinit
+      cmd.append('--init-target')
+      cros_build_lib.run(cmd, print_cmd=False, stdout=True)
+    else:
+      cros_build_lib.run(cmd)
+
+    configured_targets.append(target_name)
 
 
 def GetTargetPackages(target):
@@ -347,7 +366,7 @@ def GetStablePackageVersion(atom, installed, root='/'):
   """Extracts the current stable version for a given package.
 
   Args:
-    atom: The target/package to operate on eg. i686-pc-linux-gnu,gcc
+    atom: The target/package to operate on e.g. i686-cros-linux-gnu/gcc
     installed: Whether we want installed packages or ebuilds
     root: The root to use when querying packages.
 
@@ -365,7 +384,7 @@ def VersionListToNumeric(target, package, versions, installed, root='/'):
   Resolving means replacing PACKAGE_STABLE with the actual number.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
     package: The target/package to operate on (e.g. gcc)
     versions: List of versions to resolve
     installed: Query installed packages
@@ -398,7 +417,7 @@ def GetDesiredPackageVersions(target, package):
   mean 'unstable' in most cases.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
     package: The target/package to operate on (e.g. gcc)
 
   Returns:
@@ -418,7 +437,7 @@ def TargetIsInitialized(target):
   preferred, because all packages can be updated in a single pass.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
 
   Returns:
     True if |target| is completely initialized, else False
@@ -443,7 +462,7 @@ def RemovePackageMask(target):
   The pre-existing package.mask files can mess with the keywords.
 
   Args:
-    target: The target to operate on (e.g. i686-pc-linux-gnu)
+    target: The target to operate on (e.g. i686-cros-linux-gnu)
   """
   maskfile = os.path.join('/etc/portage/package.mask', 'cross-' + target)
   osutils.SafeUnlink(maskfile)
@@ -697,6 +716,12 @@ def UpdateToolchains(usepkg, deleteold, hostonly, reconfig,
     # For hostonly, we can skip most of the below logic, much of which won't
     # work on bare systems where this is useful.
     targets = ExpandTargets(targets_wanted)
+
+    # Filter out toolchains that don't (yet) have a binpkg available.
+    if usepkg:
+      for target in list(targets.keys()):
+        if not targets[target]['have-binpkg']:
+          del targets[target]
 
     # Now re-add any targets that might be from this board. This is to
     # allow unofficial boards to declare their own toolchains.
@@ -1176,6 +1201,31 @@ def _CreateMainLibDir(target, output_dir):
   osutils.SafeMakedirs(os.path.join(output_dir, 'usr', target, 'usr/lib'))
 
 
+def _CreateRemoteToolchainFile(output_dir):
+  """Create a remote_toolchain_inputs file for reclient/RBE"""
+  # The inputs file lists all files/shared libraries needed to run clang.
+  # All inputs are relative to location of clang binary and one input
+  # location per line of file e.g.
+  # clang-13.elf
+  # clang++-13.elf
+  # relative/path/to/clang/resource/directory
+
+  clang_path = os.path.join(output_dir, 'usr/bin')
+  # Add needed shared libraries and internal files e.g. allowlists.
+  toolchain_inputs = ['../../lib']
+  clang_shared_dirs = glob.glob(
+      os.path.join(output_dir, 'usr/lib64/clang/*/share'))
+  for clang_dir in clang_shared_dirs:
+    toolchain_inputs.append(os.path.relpath(clang_dir, clang_path))
+
+  # Add actual clang binaries/wrappers.
+  for clang_files in glob.glob(os.path.join(clang_path, 'clang*-[0-9]*')):
+    toolchain_inputs.append(os.path.basename(clang_files))
+
+  with open(os.path.join(clang_path, 'remote_toolchain_inputs'), 'w') as f:
+    f.writelines('%s\n' % line for line in toolchain_inputs)
+
+
 def _ProcessDistroCleanups(target, output_dir):
   """Clean up the tree and remove all distro-specific requirements
 
@@ -1188,6 +1238,7 @@ def _ProcessDistroCleanups(target, output_dir):
   _ProcessSysrootWrappers(target, output_dir, gcc_path)
   _ProcessClangWrappers(target, output_dir)
   _CreateMainLibDir(target, output_dir)
+  _CreateRemoteToolchainFile(output_dir)
 
   osutils.RmDir(os.path.join(output_dir, 'etc'))
 

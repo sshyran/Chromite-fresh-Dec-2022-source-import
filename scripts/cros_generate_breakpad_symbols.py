@@ -262,7 +262,7 @@ def GenerateBreakpadSymbols(board, breakpad_dir=None, strip_cfi=False,
 
       targets.append((os.path.getsize(debug_file), elf_file, debug_file))
 
-  bg_errors = multiprocessing.Value('i')
+  bg_errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
   if file_filter:
     files_not_found = [x for x, found in file_filter.items() if not found]
     bg_errors.value += len(files_not_found)

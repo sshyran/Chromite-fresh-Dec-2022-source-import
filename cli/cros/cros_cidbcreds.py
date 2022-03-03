@@ -53,7 +53,7 @@ def CheckAndGetCIDBCreds(force_update=False, folder=None):
       shutil.rmtree(cidb_dir, ignore_errors=True)
       raise
 
-@command.CommandDecorator('cidbcreds')
+@command.command_decorator('cidbcreds')
 class CidbCredsCommand(command.CliCommand):
   """cros cidbcreds: download the prod_replica_cidb_readonly credentials."""
 
@@ -68,7 +68,6 @@ class CidbCredsCommand(command.CliCommand):
 
   def Run(self):
     """Run cros cidbcreds."""
-    self.options.Freeze()
     cidb_dir = CheckAndGetCIDBCreds(force_update=self.options.force_update,
                                     folder=self.options.folder)
     logging.notice('CIDB credentials at: %s', cidb_dir)

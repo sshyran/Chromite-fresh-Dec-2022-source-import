@@ -7,6 +7,7 @@
 from copy import deepcopy
 import os
 import re
+from typing import Optional, Tuple, Union
 
 from chromite.lib import chroot_util
 from chromite.lib.paygen import gspaths
@@ -32,25 +33,27 @@ class PayloadConfig(object):
   """Value object to hold the GeneratePayload configuration options."""
 
   def __init__(self,
-               tgt_image=None,
-               src_image=None,
-               dest_bucket=None,
-               verify=True,
-               keyset=None,
-               upload=True,
-               cache_dir=None):
+               tgt_image: Optional[Union[payload_pb2.UnsignedImage,
+                                         payload_pb2.SignedImage,
+                                         payload_pb2.DLCImage]] = None,
+               src_image: Optional[Union[payload_pb2.UnsignedImage,
+                                         payload_pb2.SignedImage,
+                                         payload_pb2.DLCImage]] = None,
+               dest_bucket: Optional[str] = None,
+               minios: bool = False,
+               verify: bool = True,
+               upload: bool = True,
+               cache_dir: Optional[str] = None):
     """Init method, sets up all the paths and configuration.
 
     Args:
-      tgt_image (UnsignedImage, SignedImage, or DLCImage):
-          Proto for destination image.
-      src_image (UnsignedImage, SignedImage, DLCImage, or None):
-          Proto for source image.
-      dest_bucket (str): Destination bucket to place the final artifacts in.
-      verify (bool): If delta is made, verify the integrity of the payload.
-      keyset (str): The key to sign the image with.
-      upload (bool): Whether the payload generation results should be uploaded.
-      cache_dir (str): The cache dir for paygen to use or None for default.
+      tgt_image: Proto for destination image.
+      src_image: Proto for source image.
+      dest_bucket: Destination bucket to place the final artifacts in.
+      minios: Whether the payload is for the image's miniOS partition.
+      verify: If delta is made, verify the integrity of the payload.
+      upload: Whether the payload generation results should be uploaded.
+      cache_dir: The cache dir for paygen to use or None for default.
     """
 
     # Set when we call GeneratePayload on this object.
@@ -58,8 +61,8 @@ class PayloadConfig(object):
     self.tgt_image = tgt_image
     self.src_image = src_image
     self.dest_bucket = dest_bucket
+    self.minios = minios
     self.verify = verify
-    self.keyset = keyset
     self.upload = upload
     self.delta_type = 'delta' if self.src_image else 'full'
     self.image_type = _ImageTypeToStr(tgt_image.image_type)
@@ -67,10 +70,12 @@ class PayloadConfig(object):
 
     # This block ensures that we have paths to the correct perm of images.
     src_image_path = None
+    tgt_key = None
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
       tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
       tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
+      tgt_key = self.tgt_image.key
     elif isinstance(self.tgt_image, payload_pb2.DLCImage):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
@@ -81,7 +86,6 @@ class PayloadConfig(object):
       elif isinstance(self.tgt_image, payload_pb2.DLCImage):
         src_image_path = _GenDLCImageGSPath(self.src_image)
 
-
     # Set your output location.
     if self.upload:
       payload_build = deepcopy(tgt_image_path.build)
@@ -89,29 +93,31 @@ class PayloadConfig(object):
       payload_output_uri = gspaths.ChromeosReleases.PayloadUri(
           build=payload_build,
           random_str=None,
-          key=self.keyset,
+          key=tgt_key,
           src_version=src_image_path.build.version if src_image else None,
       )
     else:
       payload_output_uri = None
 
     self.payload = gspaths.Payload(
-        tgt_image=tgt_image_path, src_image=src_image_path,
+        tgt_image=tgt_image_path, src_image=src_image_path, minios=self.minios,
         uri=payload_output_uri)
 
 
-  def GeneratePayload(self):
+  def GeneratePayload(self) -> Tuple[str, str]:
     """Do payload generation (& maybe sign) on Google Storage CrOS images.
 
     Returns:
-      A tuple of (string, string) containing:
+      A tuple of containing:
           The location of the local generated artifact.
             (e.g. /tmp/wdjaio/delta.bin)
           The remote location that the payload was uploaded or None.
             (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
-    """
-    should_sign = self.keyset != ''
 
+    Raises:
+      paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
+          skipped for any reason.
+    """
     # Leave the generated artifact local. This is ok because if we're testing
     # it's likely we want the artifact anyway, and in production this is ran on
     # single shot bots in the context of an overlayfs and will get cleaned up
@@ -120,7 +126,7 @@ class PayloadConfig(object):
       self.paygen = paygen_payload_lib.PaygenPayload(
           self.payload,
           temp_dir,
-          sign=should_sign,
+          sign=True,
           verify=self.verify,
           upload=self.upload,
           cache_dir=self.cache_dir)
@@ -132,30 +138,19 @@ class PayloadConfig(object):
       return (local_path, remote_uri)
 
 
-class GeneratePayloadResult(object):
-  """Value object to report GeneratePayload results."""
-
-  def __init__(self, return_code):
-    """Initialize a GeneratePayloadResult.
-
-    Args:
-      return_code (bool): The return code of the GeneratePayload operation.
-    """
-    self.success = return_code == 0
-
-
-def _ImageTypeToStr(image_type_n):
+def _ImageTypeToStr(image_type_n: int) -> str:
   """The numeral image type enum in proto to lowercase string."""
   ret = common_pb2.ImageType.Name(image_type_n).lower()
   return re.sub('^image_type_', '', ret)
 
 
-def _GenSignedGSPath(image, image_type):
+def _GenSignedGSPath(image: payload_pb2.SignedImage,
+                     image_type: str) -> gspaths.Image:
   """Take a SignedImage_pb2 and return a gspaths.Image.
 
   Args:
-    image (SignedImage_pb2): The build to create the gspath from.
-    image_type (string): The image type, either "recovery" or "base".
+    image: The build to create the gspath from.
+    image_type: The image type, either "recovery" or "base".
 
   Returns:
     A gspaths.Image instance.
@@ -175,12 +170,13 @@ def _GenSignedGSPath(image, image_type):
                        uri=build_uri)
 
 
-def _GenUnsignedGSPath(image, image_type):
+def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
+                       image_type: str) -> gspaths.UnsignedImageArchive:
   """Take an UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
 
   Args:
-    image (UnsignedImage_pb2): The build to create the gspath from.
-    image_type (string): The image type, either "recovery" or "test".
+    image: The build to create the gspath from.
+    image_type: The image type, either "recovery" or "test".
 
   Returns:
     A gspaths.UnsignedImageArchive instance.
@@ -201,11 +197,11 @@ def _GenUnsignedGSPath(image, image_type):
                                       uri=build_uri)
 
 
-def _GenDLCImageGSPath(image):
+def _GenDLCImageGSPath(image: payload_pb2.DLCImage) -> gspaths.DLCImage:
   """Take a DLCImage_pb2 and return a gspaths.DLCImage.
 
   Args:
-    image (DLCImage_pb2): The dlc image to create the gspath from.
+    image: The dlc image to create the gspath from.
 
   Returns:
     A gspaths.DLCImage instance.

@@ -343,52 +343,13 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'asan',
-      site_config.templates.full,
-      profile='asan',
-      # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
-      # re-enable it. It used to work till late 2019.
-      rootfs_verification=False,
-      # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
-      disk_layout='16gb-rootfs',
-      # TODO(deymo): ASan builders generate bigger files, in particular a bigger
-      # Chrome binary, that update_engine can't handle in delta payloads due to
-      # memory limits. Remove the following lines once crbug.com/329248 is
-      # fixed.
-      images=['base', 'test'],
-      chrome_sdk=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-      ],
-      vm_tests_override=None,
-      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-      'TOC-ASAN',
-  )
-
-  site_config.AddTemplate(
-      'ubsan',
-      profile='ubsan',
-      # Need larger rootfs for ubsan builds.
-      disk_layout='16gb-rootfs',
-      images=['base', 'test'],
-      chrome_sdk=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-      ],
-      vm_tests_override=None,
-      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
-      'TOC-ASAN',
-  )
-
-  site_config.AddTemplate(
       'fuzzer',
-      site_config.templates.full,
+      site_config.templates.internal,
       site_config.templates.informational,
       profile='fuzzer',
       chrome_sdk=False,
       sync_chrome=True,
+      usepkg_build_packages=False,
       # Run fuzzer builder specific stages.
       builder_class_name='fuzzer_builders.FuzzerBuilder',
       # Need larger rootfs since fuzzing also enables asan.
@@ -468,7 +429,7 @@ def GeneralTemplates(site_config):
       # Because release builders never use prebuilts, they need the
       # longer timeout.  See crbug.com/938958.
       build_timeout=12 * 60 * 60,
-      useflags=config_lib.append_useflags(['-cros-debug']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto']),
       manifest=constants.OFFICIAL_MANIFEST,
       manifest_version=True,
       images=['base', 'recovery', 'test', 'factory_install'],
@@ -483,20 +444,8 @@ def GeneralTemplates(site_config):
       'chromeos-dev-installer',
       dev_installer_prebuilts=True,
       git_sync=False,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
-          config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
-      ],
-      # Some release builders disable VMTests to be able to build on GCE, but
-      # still want VMTests enabled on trybot builders.
-      vm_tests_override=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke'),
-          config_lib.VMTestConfig(constants.DEV_MODE_TEST_TYPE),
-          config_lib.VMTestConfig(constants.CROS_VM_TEST_TYPE)
-      ],
+      vm_tests=[],
+      vm_tests_override=[],
       paygen=True,
       signer_tests=True,
       hwqual=True,
@@ -610,39 +559,6 @@ def GeneralTemplates(site_config):
 
   # Tast is an alternate system for running integration tests.
 
-  # The expression specified here matches the union of the tast.critical-*
-  # Autotest server tests, which are executed by the bvt-tast-cq suite on real
-  # hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_paladin_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig('tast_vm_paladin',
-                                      ['("group:mainline" && !informational)'])
-      ],
-  )
-  # The expression specified here matches the union of the
-  # tast.critical-{android,chrome} Autotest server tests, which are executed by
-  # the bvt-tast-chrome-pfq suite on real hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_chrome_pfq_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig('tast_vm_chrome_pfq', [
-              '("group:mainline" && !informational && '
-              '("dep:android*" || "dep:chrome"))'
-          ])
-      ],
-  )
-  # The expression specified here matches the tast.critical-android Autotest
-  # server test, which is executed by the bvt-tast-android-pfq suite on real
-  # hardware in the lab.
-  site_config.AddTemplate(
-      'tast_vm_android_pfq_tests',
-      tast_vm_tests=[
-          config_lib.TastVMTestConfig(
-              'tast_vm_android_pfq',
-              ['("group:mainline" && !informational && "dep:android*")'])
-      ],
-  )
   # The expression specified here matches the union of the tast.critical-* and
   # tast.informational-* Autotest server tests, which are executed by the
   # bvt-tast-cq and bvt-tast-informational suites on real hardware in the lab.
@@ -652,6 +568,15 @@ def GeneralTemplates(site_config):
           config_lib.TastVMTestConfig(
               'tast_vm_canary_critical',
               ['("group:mainline" && !informational)'],
+              timeout=2 * 60 * 60),
+      ],
+  )
+  site_config.AddTemplate(
+      'tast_vm_asan_tests',
+      tast_vm_tests=[
+          config_lib.TastVMTestConfig(
+              'tast_vm_asan_critical',
+              ['("group:asan" && !informational)'],
               timeout=2 * 60 * 60),
       ],
   )
@@ -684,6 +609,42 @@ def GeneralTemplates(site_config):
       site_config.templates.full,
       profile='vm-optimized',
   )
+
+  site_config.AddTemplate(
+      'asan',
+      site_config.templates.full,
+      site_config.templates.tast_vm_asan_tests,
+      profile='asan',
+      # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
+      # re-enable it. It used to work till late 2019.
+      rootfs_verification=False,
+      # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
+      disk_layout='16gb-rootfs',
+      # TODO(deymo): ASan builders generate bigger files, in particular a bigger
+      # Chrome binary, that update_engine can't handle in delta payloads due to
+      # memory limits. Remove the following lines once crbug.com/329248 is
+      # fixed.
+      images=['base', 'test'],
+      chrome_sdk=False,
+      vm_tests=[],
+      vm_tests_override=None,
+      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
+      'TOC-ASAN',
+  )
+
+  site_config.AddTemplate(
+      'ubsan',
+      profile='ubsan',
+      # Need larger rootfs for ubsan builds.
+      disk_layout='16gb-rootfs',
+      images=['base', 'test'],
+      chrome_sdk=False,
+      vm_tests=[],
+      vm_tests_override=None,
+      doc='https://dev.chromium.org/chromium-os/build/builder-overview#'
+      'TOC-ASAN',
+  )
+
 
 
 def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
@@ -832,20 +793,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       description='Toolchain Builds (internal)',
   )
   site_config.AddTemplate(
-      'gcc_toolchain',
-      site_config.templates.toolchain,
-      description='Full release build with next minor GCC toolchain revision',
-      useflags=config_lib.append_useflags(['next_gcc']),
-      hw_tests=hw_test_list.ToolchainTestFull(
-          constants.HWTEST_QUOTA_POOL,
-          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
-      ),
-      hw_tests_override=hw_test_list.ToolchainTestFull(
-          constants.HWTEST_QUOTA_POOL,
-          quota_account=constants.HWTEST_QUOTA_ACCOUNT_TOOLCHAIN,
-      ),
-  )
-  site_config.AddTemplate(
       'llvm_toolchain',
       site_config.templates.toolchain,
       description='Full release build with LLVM toolchain',
@@ -873,90 +820,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       'that have been reviewed manually somehow',
   )
 
-  site_config.AddTemplate(
-      'afdo_toolchain',
-      site_config.templates.full,
-      site_config.templates.official,
-      site_config.templates.internal,
-      site_config.templates.no_vmtest_builder,
-      site_config.templates.no_hwtest_builder,
-      git_sync=False,
-      images=[],
-      unittests=False,
-      image_test=False,
-      chrome_sdk=False,
-      paygen=False,
-      signer_tests=False,
-      useflags=config_lib.append_useflags(['-cros-debug']),
-      display_label=config_lib.DISPLAY_LABEL_TOOLCHAIN,
-  )
-
-  site_config.AddTemplate(
-      'afdo_verify',
-      site_config.templates.afdo_toolchain,
-      images=['base', 'test'],
-      image_test=True,
-      unittests=True,
-  )
-  # This build config is dedicated to improve code layout of Chrome. It adopts
-  # the Call-Chain Clustering (C3) approach and other techniques to improve
-  # the code layout. It builds Chrome and generates an orderfile as a result.
-  # The orderfile will be uploaded so Chrome in the future production will use
-  # the orderfile to improve code layout.
-  #
-  # This builder is not a toolchain builder, i.e. it won't build all the
-  # toolchain. Instead, it's a release builder. It's put here because it
-  # belongs to the toolchain team.
-
-  site_config.AddTemplate(
-      'orderfile_generate_toolchain',
-      site_config.templates.afdo_toolchain,
-      orderfile_generate=True,
-      useflags=config_lib.append_useflags(
-          ['orderfile_generate', '-orderfile_use']),
-      description='Build Chrome and generate an orderfile for better layout',
-  )
-
-  site_config.AddTemplate(
-      'orderfile_verify_toolchain',
-      site_config.templates.afdo_verify,
-      orderfile_verify=True,
-      useflags=config_lib.append_useflags([
-          'orderfile_verify', '-reorder_text_sections',
-          'strict_toolchain_checks'
-      ]),
-      description='Verify the most recent orderfile is building correctly',
-  )
-
-  # This build config is used to asynchronously generate benchmark
-  # AFDO profile. It inherites from afdo_toolchain template, i.e.
-  # it is essentially a release builder but doesn't run hwtests, etc.
-  # But it should run a special HWTest "AFDOGenerate" to collect
-  # profiling data on a device. So this template needs to build image.
-  site_config.AddTemplate(
-      'benchmark_afdo_generate',
-      site_config.templates.afdo_toolchain,
-      images=['test'],
-      hw_tests=[hw_test_list.AFDORecordTest()],
-      hw_tests_override=[hw_test_list.AFDORecordTest()],
-      afdo_generate_async=True,
-      # FIXME(tcwang): Might need to revisit this later.
-      # For now, use the same useflags as PFQ AFDO generator:
-      # In other words, it turns off afdo_use, thinlto, cfi compared to
-      # release images.
-      afdo_use=False,
-      useflags=config_lib.append_useflags(
-          ['-transparent_hugepage', '-debug_fission', '-thinlto', '-cfi']),
-      description='Generate AFDO profile based on benchmarks.')
-
-  # This build config is used to verify merged and redacted AFDO profile,
-  # aka. profiles for release, can build packages without any problems.
-  site_config.AddTemplate(
-      'release_afdo_verify',
-      site_config.templates.afdo_verify,
-      description='Verify the most recent AFDO profile for release can '
-      'build Chrome images correctly.')
-
   #
   # Create toolchain tryjob builders.
   #
@@ -983,10 +846,7 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
   site_config.Add(
       'eve-llvm-tot-toolchain',
       site_config.templates.llvm_tot_toolchain,
-      vm_tests=[
-          config_lib.VMTestConfig(
-              constants.VM_SUITE_TEST_TYPE, test_suite='smoke', use_ctest=False)
-      ],
+      vm_tests=[],
       vm_tests_override=TRADITIONAL_VM_TESTS_SUPPORTED,
       boards=['eve'],
   )
@@ -996,455 +856,6 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.no_vmtest_builder,
       boards=['kevin'],
   )
-
-  site_config.Add(
-      'benchmark-afdo-generate',
-      site_config.templates.benchmark_afdo_generate,
-      boards=['chell'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-  )
-
-  def ChromeAFDOPublishBuilders(name, board):
-    site_config.Add(
-        'chrome-' + name + '-release-afdo-verify',
-        site_config.templates.release_afdo_verify,
-        boards=[board],
-        chrome_afdo_verify=True,
-        afdo_use=False,
-        useflags=config_lib.append_useflags(['afdo_verify']),
-        # These builders are now running under recipes.
-        # TODO(crbug/1019868): remove this builder from legacy.
-        # schedule=schedule,
-    )
-
-  # Start at 7 hours after benchmark-afdo-generate, to
-  # give the builder enough time to finish.
-  # Since these builders upload different profiles, we can start
-  # them at the same time, as soon as we might get a new benchmark
-  # profile.
-  ChromeAFDOPublishBuilders('silvermont', 'chell')
-  ChromeAFDOPublishBuilders('airmont', 'snappy')
-  ChromeAFDOPublishBuilders('broadwell', 'eve')
-
-  def KernelAFDOPublishBuilders(name, board, _schedule):
-    site_config.Add(
-        name + '-release-afdo-verify',
-        site_config.templates.release_afdo_verify,
-        boards=[board],
-        kernel_afdo_verify=True,
-        # These builders are now running under recipes.
-        # TODO(crbug/1019868): remove this builder from legacy.
-        # schedule=schedule,
-    )
-
-  # Start at the same time every day. The kernel profiles are
-  # rolled every Monday, but we run these builders daily (instead of
-  # weekly), in case the Monday profile drop is red, or in case
-  # the tree is red for unrelated reasons on Monday.
-  # Schedule these tryjobs 6 hours apart from each other.
-  KernelAFDOPublishBuilders('kernel-3_18', 'chell', '0 17 * * *')
-  KernelAFDOPublishBuilders('kernel-4_4', 'eve', '0 23 * * *')
-  KernelAFDOPublishBuilders('kernel-4_14', 'octopus', '0 5 * * *')
-  KernelAFDOPublishBuilders('kernel-4_19', 'banon', '0 11 * * *')
-
-  site_config.Add(
-      'orderfile-generate-toolchain',
-      site_config.templates.orderfile_generate_toolchain,
-      # The board should not matter much, since we are not running
-      # anything on the board.
-      boards=['terra'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-      # schedule='0 10/12 * * *',
-  )
-
-  site_config.Add(
-      'orderfile-verify-toolchain',
-      site_config.templates.orderfile_verify_toolchain,
-      # Only test on X86 for now.
-      boards=['eve'],
-      # This builder is now running under recipes.
-      # TODO(crbug/1019868): remove this builder from legacy.
-      # schedule='0 2/12 * * *',
-  )
-
-  # This config is manually run when we want to generate a 'release' AFDO
-  # profile, which is a mixture of CWP/benchmark profiles. This is done
-  # manually once per branch, since these are (currently) hand-rolled into
-  # branches for Android and Linux builds of Chrome. See crbug.com/858856 for
-  # context (comment #4 in particular).
-  #
-  # FIXME(gbiv): Ideally, this should be done as a part of the regular AFDO
-  # pipeline if Chrome OS finds these profiles useful.
-  site_config.Add(
-      'release-afdo-profile-generate',
-      # No board is necessary; this just runs a few commands inside of the SDK.
-      boards=[],
-      build_type=constants.TOOLCHAIN_TYPE,
-      builder_class_name='release_profile_builders.ReleaseProfileMergeBuilder',
-      chrome_sdk=False,
-      description='Generates merged AFDO profiles for select Chrome releases',
-      display_label=config_lib.DISPLAY_LABEL_TOOLCHAIN,
-  )
-
-
-def AndroidTemplates(site_config):
-  """Apply Android specific config to site_config
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-  """
-  # Generic template shared by all Android versions.
-  site_config.AddTemplate(
-      'generic_android_pfq',
-      site_config.templates.no_vmtest_builder,
-      build_type=constants.ANDROID_PFQ_TYPE,
-      uprev=False,
-      overlays=constants.BOTH_OVERLAYS,
-      manifest_version=True,
-      sync_chrome=True,
-      android_rev=constants.ANDROID_REV_LATEST,
-      description='Preflight Android Uprev & Build (internal)',
-      luci_builder=config_lib.LUCI_BUILDER_PFQ,
-      # Raise Android PFQ timeout to 8 hours to allow for longer runs to
-      # complete successfully.
-      build_timeout=8 * 60 * 60,
-  )
-
-  # Template for Android Pi.
-  site_config.AddTemplate(
-      'pi_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_PI_ANDROID_PFQ,
-      android_package=constants.ANDROID_PI_PACKAGE,
-      android_import_branch=constants.ANDROID_PI_BUILD_BRANCH,
-  )
-
-  # Template for Android VM Rvc.
-  site_config.AddTemplate(
-      'vmrvc_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
-      android_package=constants.ANDROID_VMRVC_PACKAGE,
-      android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
-  )
-
-  # Template for Android VM Sc.
-  site_config.AddTemplate(
-      'vmsc_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMSC_ANDROID_PFQ,
-      android_package=constants.ANDROID_VMSC_PACKAGE,
-      android_import_branch=constants.ANDROID_VMSC_BUILD_BRANCH,
-  )
-
-  # Template for Android T.
-  site_config.AddTemplate(
-      'vmt_android_pfq',
-      site_config.templates.generic_android_pfq,
-      site_config.templates.internal,
-      display_label=config_lib.DISPLAY_LABEL_VMT_ANDROID_PFQ,
-      android_package=constants.ANDROID_VMT_PACKAGE,
-      android_import_branch=constants.ANDROID_VMT_BUILD_BRANCH,
-  )
-
-  # Mixin for masters.
-  site_config.AddTemplate(
-      'master_android_pfq_mixin',
-      site_config.templates.internal,
-      site_config.templates.no_vmtest_builder,
-      boards=[],
-      master=True,
-      push_overlays=constants.BOTH_OVERLAYS,
-  )
-
-
-def AndroidPfqBuilders(site_config, boards_dict, ge_build_config):
-  """Create all build configs associated with the Android PFQ.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-    boards_dict: A dict mapping board types to board name collections.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
-  """
-  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
-                                             ge_build_config)
-  hw_test_list = HWTestList(ge_build_config)
-  # TODO(b/153392483): Temporarily remove bvt-arc from list of test
-  # suites blocking RVC PFQ.
-  vmrvc_hwtest_list = [
-      hwtest for hwtest in hw_test_list.SharedPoolPFQ()
-      if hwtest.suite != constants.HWTEST_ARC_COMMIT_SUITE
-  ]
-
-  # Android PI master.
-  pi_master_config = site_config.Add(
-      constants.PI_ANDROID_PFQ_MASTER,
-      site_config.templates.pi_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      build_timeout=10 * 60 * 60,
-      schedule='with 60m interval',
-  )
-
-  _pi_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _pi_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _pi_hwtest_boards = _frozen_ge_set(
-      ge_build_config,
-      [
-          # TODO(b/172889735): Temporary disable eve because DUTs are reserved
-          # due to crbug/1141713. Instead, adding rammus to cover x86_64.
-          # 'eve',
-          'coral',
-          'grunt',
-          'kevin',
-          'rammus',
-      ])
-  _pi_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _pi_hwtest_skylab_boards = _frozen_ge_set(
-      ge_build_config,
-      [
-          # 'eve', TODO(b/172889735): See above.
-          'coral',
-          'grunt',
-          'kevin',
-          'rammus',
-      ])
-  _pi_vmtest_boards = _frozen_ge_set(ge_build_config, [
-      'betty-pi-arc',
-  ])
-  _pi_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-
-  # Android VM RVC master.
-  vmrvc_master_config = site_config.Add(
-      constants.VMRVC_ANDROID_PFQ_MASTER,
-      site_config.templates.vmrvc_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 60m interval',
-  )
-
-  _vmrvc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmrvc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmrvc_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'eve-arc-r',
-      'grunt-arc-r',
-      'hatch',
-      'kukui-arc-r',
-      'rammus-arc-r',
-      'zork-arc-r',
-  ])
-  _vmrvc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmrvc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmrvc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-
-  # Android VM SC master.
-  vmsc_master_config = site_config.Add(
-      constants.VMSC_ANDROID_PFQ_MASTER,
-      site_config.templates.vmsc_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 60m interval',
-  )
-
-  _vmsc_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'betty-arc-s',
-      'hatch-arc-s',
-  ])
-  _vmsc_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_vmtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmsc_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-
-  # Android VM T master
-  vmt_master_config = site_config.Add(
-      constants.VMT_ANDROID_PFQ_MASTER,
-      site_config.templates.vmt_android_pfq,
-      site_config.templates.master_android_pfq_mixin,
-      schedule='with 150m interval')
-  _vmt_no_hwtest_boards = _frozen_ge_set(ge_build_config, [
-      'betty-arc-t',
-  ])
-  _vmt_no_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmt_hwtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmt_hwtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-  _vmt_vmtest_boards = _frozen_ge_set(ge_build_config, [])
-  _vmt_vmtest_experimental_boards = _frozen_ge_set(ge_build_config, [])
-
-  # Android PI slaves.
-  pi_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_hwtest_boards - _pi_hwtest_skylab_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_hwtest_skylab_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_no_hwtest_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          important=False,
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          important=False,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_vmtest_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
-      ) + site_config.AddForBoards(
-          'pi-android-pfq',
-          _pi_vmtest_experimental_boards,
-          board_configs,
-          site_config.templates.pi_android_pfq,
-          important=False,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
-      ))
-
-  # Android VMRVC slaves.
-  vmrvc_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmrvc-android-pfq',
-          _vmrvc_hwtest_boards,
-          board_configs,
-          site_config.templates.vmrvc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=vmrvc_hwtest_list,
-      ) + site_config.AddForBoards(
-          'vmrvc-android-pfq',
-          _vmrvc_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmrvc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=vmrvc_hwtest_list,
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmrvc-android-pfq',
-          _vmrvc_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmrvc_android_pfq,
-      ) + site_config.AddForBoards(
-          'vmrvc-android-pfq',
-          _vmrvc_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmrvc_android_pfq,
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmrvc-android-pfq',
-          _vmrvc_vmtest_boards,
-          board_configs,
-          site_config.templates.vmrvc_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
-      ))
-
-  # Android VMSC slaves.
-  vmsc_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_hwtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmsc-android-pfq',
-          _vmsc_vmtest_boards,
-          board_configs,
-          site_config.templates.vmsc_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
-      ))
-
-  # Android VMT slaves.
-  vmt_master_config.AddSlaves(
-      site_config.AddForBoards(
-          'vmt-android-pfq',
-          _vmt_hwtest_boards,
-          board_configs,
-          site_config.templates.vmt_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-      ) + site_config.AddForBoards(
-          'vmt-android-pfq',
-          _vmt_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmt_android_pfq,
-          enable_skylab_hw_tests=True,
-          hw_tests=hw_test_list.SharedPoolPFQ(),
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmt-android-pfq',
-          _vmt_no_hwtest_boards,
-          board_configs,
-          site_config.templates.vmt_android_pfq,
-      ) + site_config.AddForBoards(
-          'vmt-android-pfq',
-          _vmt_no_hwtest_experimental_boards,
-          board_configs,
-          site_config.templates.vmt_android_pfq,
-          important=False,
-      ) + site_config.AddForBoards(
-          'vmt-android-pfq',
-          _vmt_vmtest_boards,
-          board_configs,
-          site_config.templates.vmt_android_pfq,
-          vm_tests=[
-              config_lib.VMTestConfig(
-                  constants.VM_SUITE_TEST_TYPE, test_suite='smoke')
-          ],
-      ))
 
 
 def FullBuilders(site_config, boards_dict, ge_build_config):
@@ -1459,10 +870,13 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
   active_builders = _frozen_ge_set(ge_build_config, [
       'eve',
       'hana',
+      'jacuzzi',
       'kevin',
       'kevin64',
+      'octopus',
       'tael',
       'tatl',
+      'zork',
   ], ('amd64-generic', 'arm-generic', 'arm64-generic'))
 
   # Move the following builders to active_builders once they are consistently
@@ -1526,83 +940,6 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
       prebuilts=constants.PUBLIC)
 
   master_config.AddSlave(vm_config)
-
-
-def IncrementalBuilders(site_config, boards_dict, ge_build_config):
-  """Create all incremental build configs.
-
-  Args:
-    site_config: config_lib.SiteConfig to be modified by adding templates
-                 and configs.
-    boards_dict: A dict mapping board types to board name collections.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
-  """
-  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
-                                             ge_build_config)
-
-  site_config.AddTemplate(
-      'incremental_affinity',
-      build_affinity=True,
-      luci_builder=config_lib.LUCI_BUILDER_INCREMENTAL,
-  )
-
-  master_config = site_config.Add(
-      'master-incremental',
-      site_config.templates.incremental,
-      site_config.templates.internal_incremental,
-      boards=[],
-      master=True,
-      manifest_version=True,
-      slave_configs=[],
-      schedule='with 10m interval',
-  )
-
-  # Build external source, for an internal board.
-  master_config.AddSlave(
-      site_config.Add(
-          'amd64-generic-incremental',
-          site_config.templates.incremental,
-          site_config.templates.incremental_affinity,
-          board_configs['amd64-generic'],
-          manifest_version=True,
-      ))
-
-  master_config.AddSlave(
-      site_config.Add(
-          'betty-incremental',
-          site_config.templates.incremental,
-          site_config.templates.internal_incremental,
-          site_config.templates.incremental_affinity,
-          boards=['betty'],
-          manifest_version=True,
-      ))
-
-  master_config.AddSlave(
-      site_config.Add(
-          'chell-incremental',
-          site_config.templates.incremental,
-          site_config.templates.internal_incremental,
-          site_config.templates.incremental_affinity,
-          boards=['chell'],
-          manifest_version=True,
-      ))
-
-  #
-  # Available, but not regularly scheduled.
-  #
-  site_config.Add(
-      'x32-generic-incremental',
-      site_config.templates.incremental,
-      board_configs['x32-generic'],
-  )
-
-  site_config.Add(
-      'beaglebone-incremental',
-      site_config.templates.incremental,
-      site_config.templates.beaglebone,
-      boards=['beaglebone'],
-      description='Incremental Beaglebone Builder',
-  )
 
 
 def InformationalBuilders(site_config, boards_dict, ge_build_config):
@@ -1779,7 +1116,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
           'setzer', 'banon', 'kefka', 'relm', 'kip'
       ]),
       (MONTHLY, 'factory-veyron-7505.B',
-       ['veyron_tiger', 'veyron_fievel', 'veyron_rialto']),
+       ['veyron_tiger', 'veyron_fievel']),
       (MONTHLY, 'factory-glados-7657.B', ['glados', 'chell']),
       (MONTHLY, 'factory-glados-7828.B',
        ['glados', 'chell', 'lars', 'sentry', 'cave', 'asuka', 'caroline']),
@@ -1813,12 +1150,15 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (WEEKLY, 'factory-trogdor-13443.B', ['trogdor', 'strongbad']),
       (DAILY, 'factory-strongbad-13963.B', ['trogdor', 'strongbad']),
       (WEEKLY, 'factory-volteer-13600.B', ['volteer']),
-      (DAILY, 'factory-dedede-13683.B', ['dedede']),
+      (WEEKLY, 'factory-dedede-13683.B', ['dedede']),
       (DAILY, 'factory-keeby-14162.B', ['keeby']),
       (WEEKLY, 'factory-zork-13700.B', ['zork']),
       (WEEKLY, 'factory-puff-13813.B', ['puff']),
       (WEEKLY, 'factory-asurada-13929.B', ['asurada']),
       (WEEKLY, 'factory-ambassador-14265.B', ['ambassador']),
+      (DAILY, 'factory-kukui-14374.B', ['kukui', 'jacuzzi']),
+      (WEEKLY, 'factory-cherry-14455.B', ['cherry']),
+      (DAILY, 'factory-brya-14517.B', ['brya', 'brask']),
       # This is intended to create master branch tryjobs, NOT for production
       # builds. Update the associated list of boards as needed.
       (None, 'master', [
@@ -1839,7 +1179,8 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       uprev=True,
       overlays=constants.BOTH_OVERLAYS,
       push_overlays=constants.BOTH_OVERLAYS,
-      useflags=config_lib.append_useflags(['-cros-debug', 'chrome_internal']),
+      useflags=config_lib.append_useflags(['-cros-debug', 'thinlto',
+                                           'chrome_internal']),
       builder_class_name='workspace_builders.FactoryBranchBuilder',
       build_timeout=_FACTORYBRANCH_TIMEOUT,
       description='TOT builder to build a factory branch.',
@@ -2370,13 +1711,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1092947',
       },
 
-      # No hw tests for any veyron_rialto builders. See http://b/141387161.
-      'veyron_rialto-release': {
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://b/141387161',
-      },
-
       # No hw_tests for arkham, whirlwind, gale, mistral.  See b/140317527.
       'arkham-release': {
           'hw_tests': [],
@@ -2482,19 +1816,28 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'b/159934902',
       },
-      'brya-release': {
+      'draco-release': {
           'sign_types': ['recovery', 'factory'],
-          # Brya has no DUTs in the lab (b/167721012).
+          # Draco has no DUTs in the lab (b/204940128).
           'hw_tests': [],
           'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'b/167721012',
+          'hw_tests_disabled_bug': 'b/204940128',
+      },
+      'brask-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Brask has no DUTs in the lab (b/207095933).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/207095933',
+      },
+      'brya-release': {
+          'sign_types': ['recovery', 'factory', 'hps_firmware'],
+      },
+      'brya-lvm-stateful-release': {
+          'sign_types': ['recovery', 'factory'],
       },
       'keeby-release': {
           'sign_types': ['recovery', 'factory'],
-          # Keeby has no DUTs in the lab. (b/185377942)
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'b/185377942',
       },
       'aurora-release': {
           'sign_types': ['recovery', 'factory'],
@@ -2505,6 +1848,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       },
       'volteer-release': {
           'sign_types': ['recovery', 'factory'],
+      },
+      'skolas-release': {
+          'sign_types': ['recovery', 'factory'],
+          # Skolas has no DUTs in the lab (b/209282476).
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'b/209282476',
       },
 
       # See go/cros-fingerprint-firmware-branching-and-signing for details on
@@ -2551,6 +1901,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1145306',
+      },
+
+      'cherry-release': {
+          'sign_types': ['recovery', 'factory'],
       },
 
       # --- end from here ---
@@ -2902,7 +2256,7 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
   for board in frozenset.union(chromeos_boards.dustbuster_boards,
                                chromeos_boards.wshwos_boards):
     site_config.Add(
-        '{}-rapid'.format(board),
+        f'{board}-rapid',
         site_config.templates.release,
         site_config.templates.loonix,
         display_label=config_lib.DISPLAY_LABEL_UTILITY,
@@ -2936,20 +2290,6 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       site_config.templates.pre_flight_branch,
       display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
       boards=['hatch'],
-      sync_chrome=True,
-      android_rev=constants.ANDROID_REV_LATEST,
-      android_package=constants.ANDROID_VMRVC_PACKAGE,
-      android_import_branch=constants.ANDROID_VMRVC_BUILD_BRANCH,
-      prebuilts=False,
-      unittests=False,
-  )
-
-  # TODO(b/182520025): Retire once R89 PFQ is gone.
-  site_config.Add(
-      'hatch-arc-r-android-rvc-pre-flight-branch',
-      site_config.templates.pre_flight_branch,
-      display_label=config_lib.DISPLAY_LABEL_VMRVC_ANDROID_PFQ,
-      boards=['hatch-arc-r'],
       sync_chrome=True,
       android_rev=constants.ANDROID_REV_LATEST,
       android_package=constants.ANDROID_VMRVC_PACKAGE,
@@ -3109,7 +2449,7 @@ def BranchScheduleConfig():
   # Do not remove BOT-TAG:* comments. They are used to help parse config.
   # BOT-TAG:RELEASES_START
   RELEASES = [
-      ('release-R96-14268.B',
+      ('release-R100-14526.B',
        ['kevin-android-pi-pre-flight-branch',
         'hatch-android-rvc-pre-flight-branch'],
        '',
@@ -3117,18 +2457,25 @@ def BranchScheduleConfig():
        [],
        config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
-      ('release-R94-14150.B', [
-          'kevin-android-pi-pre-flight-branch',
-          'hatch-android-rvc-pre-flight-branch'
-      ], '', [], [], config_lib.LUCI_BUILDER_LEGACY_RELEASE),
-      ('release-R93-14092.B', [
-          'kevin-android-pi-pre-flight-branch',
-          'hatch-android-rvc-pre-flight-branch'
-      ], '', [], [], config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+      ('release-R99-14469.B',
+       ['kevin-android-pi-pre-flight-branch',
+        'hatch-android-rvc-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
+
+      ('release-R98-14388.B',
+       ['kevin-android-pi-pre-flight-branch',
+        'hatch-android-rvc-pre-flight-branch'],
+       '',
+       [],
+       [],
+       config_lib.LUCI_BUILDER_LEGACY_RELEASE),
 
       # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
       # BOT-TAG:NO_PRUNE
-      ('release-R90-13816.B', [
+      ('release-R96-14268.B', [
           'kevin-android-pi-pre-flight-branch',
           'hatch-android-rvc-pre-flight-branch'
       ], 'chell-chrome-no-afdo-uprev-pre-flight-branch',
@@ -3260,17 +2607,9 @@ def GetConfig():
 
   SpecialtyBuilders(site_config, boards_dict, ge_build_config)
 
-  IncrementalBuilders(site_config, boards_dict, ge_build_config)
-
   InformationalBuilders(site_config, boards_dict, ge_build_config)
 
   FactoryBuilders(site_config, boards_dict, ge_build_config)
-
-  AndroidTemplates(site_config)
-
-  chromeos_test.AndroidTemplates(site_config)
-
-  AndroidPfqBuilders(site_config, boards_dict, ge_build_config)
 
   FullBuilders(site_config, boards_dict, ge_build_config)
 

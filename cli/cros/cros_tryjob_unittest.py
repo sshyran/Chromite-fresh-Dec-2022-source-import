@@ -285,15 +285,15 @@ class TryjobTestParsing(TryjobTest):
     self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
 
-class TryjobTestAdjustOptions(TryjobTest):
-  """Test cros_tryjob.AdjustOptions."""
+class TryjobTestProcessOptions(TryjobTest):
+  """Test cros_tryjob.TryjobCommand.ProcessOptions."""
 
   def testRemote(self):
     """Test default remote buildroot."""
     self.SetupCommandMock(['config'])
     options = self.cmd_mock.inst.options
 
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
 
     self.assertIsNone(options.buildroot)
     self.assertIsNone(options.git_cache_dir)
@@ -303,7 +303,7 @@ class TryjobTestAdjustOptions(TryjobTest):
     self.SetupCommandMock(['--local', 'config'])
     options = self.cmd_mock.inst.options
 
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
 
     self.assertTrue(options.buildroot.endswith('/tryjob'))
     self.assertTrue(options.git_cache_dir.endswith('/tryjob/.git_cache'))
@@ -316,7 +316,7 @@ class TryjobTestAdjustOptions(TryjobTest):
                            'config'])
     options = self.cmd_mock.inst.options
 
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
 
     self.assertEqual(options.buildroot, '/buildroot')
     self.assertEqual(options.git_cache_dir, '/git-cache')
@@ -326,7 +326,7 @@ class TryjobTestAdjustOptions(TryjobTest):
     self.SetupCommandMock(['--cbuildbot', 'config'])
     options = self.cmd_mock.inst.options
 
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
 
     self.assertTrue(options.buildroot.endswith('/cbuild'))
     self.assertTrue(options.git_cache_dir.endswith('/cbuild/.git_cache'))
@@ -339,7 +339,7 @@ class TryjobTestAdjustOptions(TryjobTest):
                            'config'])
     options = self.cmd_mock.inst.options
 
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
 
     self.assertEqual(options.buildroot, '/buildroot')
     self.assertEqual(options.git_cache_dir, '/git-cache')
@@ -562,8 +562,8 @@ class TryjobTestVerifyOptions(TryjobTest):
   def testInvalidHWTestDUTDimensions(self):
     """Test option verification with invalid hw_test_dut_dimensions."""
     self.SetupCommandMock([
-      '--hwtest_dut_dimensions',
-      'label-board:foo-board label-model:foo-model label-pol:foo-typo'])
+        '--hwtest_dut_dimensions',
+        'label-board:foo-board label-model:foo-model label-pol:foo-typo'])
 
     with self.assertRaises(cros_build_lib.DieSystemExit):
       cros_tryjob.VerifyOptions(self.cmd_mock.inst.options, self.site_config)
@@ -612,7 +612,7 @@ class TryjobTestCbuildbotArgs(TryjobTest):
     """
     self.SetupCommandMock(args_in)
     options = self.cmd_mock.inst.options
-    cros_tryjob.AdjustOptions(options)
+    cros_tryjob.TryjobCommand.ProcessOptions(None, options)
     args_out = cros_tryjob.CbuildbotArgs(options)
     return args_out
 

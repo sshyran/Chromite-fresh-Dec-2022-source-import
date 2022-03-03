@@ -630,7 +630,7 @@ class Upgrader(object):
     # Expecting emerge_output to have lines like this:
     #  The following mask changes are necessary to proceed:
     # #required by ... =somecategory/somepackage (some reason)
-    # # /home/mtennant/trunk/src/third_party/chromiumos-overlay/profiles\
+    # # /.../chromiumos/src/third_party/chromiumos-overlay/profiles\
     # /targets/chromeos/package.mask:
     # >=upgraded_cp
     package_mask = None
@@ -976,23 +976,6 @@ class Upgrader(object):
 
       # Update profiles/categories.
       self._UpdateCategories(pinfo)
-
-      # Regenerate the cache.  In theory, this might glob too much, but
-      # in practice, this should be fine for now ...
-      cache_files = 'metadata/md5-cache/%s-[0-9]*' % pinfo.package
-      self._RunGit(self._stable_repo, ['rm', '--ignore-unmatch', '-q', '-f',
-                                       cache_files])
-      cmd = ['egencache', '--update', '--repo=portage-stable', pinfo.package]
-      egen_result = cros_build_lib.run(cmd, print_cmd=False,
-                                       stdout=True,
-                                       stderr=subprocess.STDOUT,
-                                       encoding='utf-8')
-      if egen_result.returncode != 0:
-        raise RuntimeError('Failed to regenerate md5-cache for %r.\n'
-                           'Output of %r:\n%s' %
-                           (pinfo.package, ' '.join(cmd), egen_result.output))
-
-      self._RunGit(self._stable_repo, ['add', cache_files])
 
     return bool(pinfo.upgraded_cpv)
 
@@ -1804,7 +1787,7 @@ def _CreateParser():
   parser.add_argument('--rdeps', action='store_true', default=False,
                       help='Use runtime dependencies only')
   parser.add_argument('--srcroot', type='path',
-                      default='%s/trunk/src' % os.environ['HOME'],
+                      default=os.path.join(constants.SOURCE_ROOT, 'src'),
                       help='Path to root src directory [default: %(default)s]')
   parser.add_argument('--to-csv', dest='csv_file', type='path',
                       default=None, help='File to store csv-formatted results')

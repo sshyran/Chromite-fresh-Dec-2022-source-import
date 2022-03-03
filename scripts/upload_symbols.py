@@ -33,6 +33,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import retry_stats
 from chromite.scripts import cros_generate_breakpad_symbols
+from chromite.utils import timer
 
 
 # Needs to be after chromite imports.
@@ -441,7 +442,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
             return True
           return False
 
-        with cros_build_lib.TimedSection() as timer:
+        with timer.Timer() as t:
           retry_stats.RetryWithStats(
               UPLOAD_STATS, ShouldRetryUpload, MAX_RETRIES,
               UploadSymbolFile,
@@ -450,7 +451,7 @@ def PerformSymbolsFileUpload(symbols, upload_url, api_key):
               log_all_retries=True)
         if s.status != SymbolFile.DUPLICATE:
           logging.info('upload of %s with size %10i bytes took %s',
-                       s.display_name, s.FileSize(), timer.delta)
+                       s.display_name, s.FileSize(), t)
           s.status = SymbolFile.UPLOADED
       except requests.exceptions.RequestException as e:
         logging.warning('could not upload: %s: HTTP error: %s',

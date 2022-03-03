@@ -18,6 +18,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import remote_access
 from chromite.lib import sysroot_lib
+from chromite.lib import unittest_lib
 from chromite.lib.parser import package_info
 
 
@@ -331,6 +332,8 @@ class TestDeploy(cros_test_lib.ProgressBarTestCase,
     # Avoid running the portageq command.
     sysroot_lib.Sysroot(self._sysroot).WriteConfig(
         'ARCH="amd64"\nPORTDIR_OVERLAY="%s"' % '/nothing/here')
+    # make.conf needs to exist to correctly read back config.
+    unittest_lib.create_stub_make_conf(self._sysroot)
 
 
   def testDeployEmerge(self):

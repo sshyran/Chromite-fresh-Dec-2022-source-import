@@ -52,22 +52,26 @@ class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):
   def testMissingExeAndPid(self):
     """Test that command fails when --exe and --pid are not provided."""
     self.SetupCommandMock([self.DEVICE])
-    self.assertRaises(cros_build_lib.DieSystemExit, self.cmd_mock.inst.Run)
+    self.assertRaises(SystemExit, self.cmd_mock.inst.ProcessOptions,
+                      self.cmd_mock.parser, self.cmd_mock.inst.options)
 
   def testListDisallowedWithPid(self):
     """Test that --list is disallowed when --pid is used."""
     self.SetupCommandMock([self.DEVICE, '--list', '--pid', self.PID])
-    self.assertRaises(cros_build_lib.DieSystemExit, self.cmd_mock.inst.Run)
+    self.assertRaises(SystemExit, self.cmd_mock.inst.ProcessOptions,
+                      self.cmd_mock.parser, self.cmd_mock.inst.options)
 
   def testExeDisallowedWithPid(self):
     """Test that --exe is disallowed when --pid is used."""
     self.SetupCommandMock([self.DEVICE, '--exe', self.EXE, '--pid', self.PID])
-    self.assertRaises(cros_build_lib.DieSystemExit, self.cmd_mock.inst.Run)
+    self.assertRaises(SystemExit, self.cmd_mock.inst.ProcessOptions,
+                      self.cmd_mock.parser, self.cmd_mock.inst.options)
 
   def testExeMustBeFullPath(self):
     """Test that --exe only takes full path as a valid argument."""
     self.SetupCommandMock([self.DEVICE, '--exe', 'bash'])
-    self.assertRaises(cros_build_lib.DieSystemExit, self.cmd_mock.inst.Run)
+    self.assertRaises(SystemExit, self.cmd_mock.inst.ProcessOptions,
+                      self.cmd_mock.parser, self.cmd_mock.inst.options)
 
   def testDebugProcessWithPid(self):
     """Test that methods are called correctly when pid is provided."""

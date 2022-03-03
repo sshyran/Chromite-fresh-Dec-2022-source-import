@@ -79,6 +79,7 @@ SUPPORTED_IMAGE_TYPES = {
     common_pb2.IMAGE_TYPE_FIRMWARE: constants.IMAGE_TYPE_FIRMWARE,
     common_pb2.IMAGE_TYPE_ACCESSORY_USBPD: constants.IMAGE_TYPE_ACCESSORY_USBPD,
     common_pb2.IMAGE_TYPE_ACCESSORY_RWSIG: constants.IMAGE_TYPE_ACCESSORY_RWSIG,
+    common_pb2.IMAGE_TYPE_HPS_FIRMWARE: constants.IMAGE_TYPE_HPS_FIRMWARE,
     common_pb2.IMAGE_TYPE_BASE: constants.IMAGE_TYPE_BASE,
     common_pb2.IMAGE_TYPE_GSC_FIRMWARE: constants.IMAGE_TYPE_GSC_FIRMWARE,
 }
@@ -464,13 +465,16 @@ def PushImage(input_proto, _output_proto, config):
         for channel in input_proto.channels
     ]
   try:
-    pushimage.PushImage(
+    channel_to_uris = pushimage.PushImage(
         input_proto.gs_image_dir,
         input_proto.sysroot.build_target.name,
         dry_run=input_proto.dryrun,
         sign_types=sign_types,
         **kwargs)
-    return controller.RETURN_CODE_SUCCESS
   except Exception:
     logging.error('PushImage failed: ', exc_info=True)
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
+  for uris in channel_to_uris.values():
+    for uri in uris:
+      _output_proto.instructions.add().instructions_file_path = uri
+  return controller.RETURN_CODE_SUCCESS

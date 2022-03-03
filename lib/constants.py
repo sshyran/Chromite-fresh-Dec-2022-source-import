@@ -390,12 +390,8 @@ ALL_TARGET_PACKAGES = (
     TARGET_OS_FACTORY_SHIM_PKG,
 )
 
-# Constants for uprevving Chrome
-
-CHROMEOS_BASE = 'chromeos-base'
-
 # Portage category and package name for Chrome.
-CHROME_CN = CHROMEOS_BASE
+CHROME_CN = 'chromeos-base'
 CHROME_PN = 'chromeos-chrome'
 CHROME_CP = '%s/%s' % (CHROME_CN, CHROME_PN)
 
@@ -689,7 +685,7 @@ ENV_PASSTHRU = ('CROS_SUDO_KEEP_ALIVE', SHARED_CACHE_ENVVAR,
 # have sudo export if existent. Anytime this list is modified, a new
 # chroot_version_hooks.d upgrade script that symlinks to 153_rewrite_sudoers.d
 # should be created.
-CHROOT_ENVIRONMENT_WHITELIST = (
+CHROOT_ENVIRONMENT_ALLOWLIST = (
     'CHROMEOS_OFFICIAL',
     'CHROMEOS_VERSION_AUSERVER',
     'CHROMEOS_VERSION_DEVSERVER',
@@ -799,6 +795,8 @@ IMAGE_TYPE_FACTORY = 'factory'
 # This is the image type mapping to the factory image type in build_image.
 IMAGE_TYPE_FACTORY_SHIM = 'factory_install'
 IMAGE_TYPE_FIRMWARE = 'firmware'
+# Firmware for cros hps device src/platform/hps-firmware2.
+IMAGE_TYPE_HPS_FIRMWARE = 'hps_firmware'
 # USB PD accessory microcontroller firmware (e.g. power brick, display dongle).
 IMAGE_TYPE_ACCESSORY_USBPD = 'accessory_usbpd'
 # Standalone accessory microcontroller firmware (e.g. wireless keyboard).
@@ -943,6 +941,15 @@ QUICK_PROVISION_PAYLOAD_KERNEL = 'full_dev_part_KERN.bin.gz'
 QUICK_PROVISION_PAYLOAD_ROOTFS = 'full_dev_part_ROOT.bin.gz'
 QUICK_PROVISION_PAYLOAD_MINIOS = 'full_dev_part_MINIOS.bin.gz'
 
+# Provenance bundle name. This file name should never be changed, since the
+# signer needs to know where to look for provenance.
+# This is generated via the generate_attestations function in build_menu.
+# This archive contains one JSON file per artifact of interest: image,
+# update payload, etc. It ends up in the expected location because
+# the provenance generation function parses the build_api response to ensure
+# that if they exist, the manifests will be uploaded to GCS.
+ARTIFACT_PROVENANCE_MANIFESTS = 'artifact_provenance_manifests.tar'
+
 # Mock build and stage IDs.
 MOCK_STAGE_ID = 313377
 MOCK_BUILD_ID = 31337
@@ -964,7 +971,7 @@ TOPOLOGY_DICT = {
 }
 
 # Percentage of child builders that need to complete to update LKGM
-LKGM_THRESHOLD = 80
+LKGM_THRESHOLD = 50
 
 # Dev key related names.
 VBOOT_DEVKEYS_DIR = os.path.join('/usr/share/vboot/devkeys')

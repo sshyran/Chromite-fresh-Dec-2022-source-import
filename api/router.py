@@ -27,6 +27,7 @@ from chromite.api.gen.chromite.api import build_api_pb2
 from chromite.api.gen.chromite.api import depgraph_pb2
 from chromite.api.gen.chromite.api import firmware_pb2
 from chromite.api.gen.chromite.api import image_pb2
+from chromite.api.gen.chromite.api import metadata_pb2
 from chromite.api.gen.chromite.api import packages_pb2
 from chromite.api.gen.chromite.api import payload_pb2
 from chromite.api.gen.chromite.api import sdk_pb2
@@ -331,6 +332,9 @@ class Router(object):
       # Parse goma.
       chroot.goma = field_handler.handle_goma(input_msg, chroot.path)
 
+      # Parse remoteexec.
+      chroot.remoteexec = field_handler.handle_remoteexec(input_msg)
+
       # Build inside-chroot paths for the input, output, and config messages.
       new_input = os.path.join(tempdir, self.REEXEC_INPUT_FILE)
       chroot_input = '/%s' % os.path.relpath(new_input, chroot.path)
@@ -427,6 +431,7 @@ def RegisterServices(router: Router):
   router.Register(depgraph_pb2)
   router.Register(firmware_pb2)
   router.Register(image_pb2)
+  router.Register(metadata_pb2)
   router.Register(packages_pb2)
   router.Register(payload_pb2)
   router.Register(sdk_pb2)

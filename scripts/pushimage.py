@@ -46,6 +46,7 @@ _SUPPORTED_IMAGE_TYPES = (
     constants.IMAGE_TYPE_FACTORY,
     constants.IMAGE_TYPE_FIRMWARE,
     constants.IMAGE_TYPE_ACCESSORY_USBPD,
+    constants.IMAGE_TYPE_HPS_FIRMWARE,
     constants.IMAGE_TYPE_ACCESSORY_RWSIG,
     constants.IMAGE_TYPE_BASE,
     constants.IMAGE_TYPE_GSC_FIRMWARE,
@@ -400,6 +401,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
     recovery_basename = _ImageNameBase(constants.IMAGE_TYPE_RECOVERY)
     factory_basename = _ImageNameBase(constants.IMAGE_TYPE_FACTORY)
     firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_FIRMWARE)
+    hps_firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_HPS_FIRMWARE)
     acc_usbpd_basename = _ImageNameBase(constants.IMAGE_TYPE_ACCESSORY_USBPD)
     acc_rwsig_basename = _ImageNameBase(constants.IMAGE_TYPE_ACCESSORY_RWSIG)
     gsc_firmware_basename = _ImageNameBase(constants.IMAGE_TYPE_GSC_FIRMWARE)
@@ -417,6 +419,7 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
         (hwqual_tarball, None, None),
         ('stateful.tgz', None, None),
         ('dlc', None, None),
+        (constants.ARTIFACT_PROVENANCE_MANIFESTS, None, None),
         (constants.QUICK_PROVISION_PAYLOAD_KERNEL, None, None),
         (constants.QUICK_PROVISION_PAYLOAD_ROOTFS, None, None),
         (constants.QUICK_PROVISION_PAYLOAD_MINIOS, None, None),
@@ -435,6 +438,9 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
 
         ('firmware_from_source.tar.bz2', firmware_basename, 'tar.bz2',
          constants.IMAGE_TYPE_FIRMWARE),
+
+        ('firmware_from_source.tar.bz2', hps_firmware_basename, 'tar.bz2',
+         constants.IMAGE_TYPE_HPS_FIRMWARE),
 
         ('firmware_from_source.tar.bz2', acc_usbpd_basename, 'tar.bz2',
          constants.IMAGE_TYPE_ACCESSORY_USBPD),
@@ -496,6 +502,12 @@ def PushImage(src_path, board, versionrev=None, profile=None, priority=50,
           _AddToFilesToSign(image_type, dst, suffix)
 
     logging.debug('Files to sign: %s', files_to_sign)
+    unused_sign_types = set(sign_types or []) - set(
+        x for x, _, _ in files_to_sign)
+    if unused_sign_types:
+      logging.warning('Some sign types were unused: %s',
+                      ' '.join(unused_sign_types))
+
     # Now go through the subset for signing.
     for image_type, dst_name, suffix in files_to_sign:
       try:

@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import sys
-from typing import List, Optional, TYPE_CHECKING, Union
+from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING, Union
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -28,9 +28,11 @@ from chromite.lib import portage_util
 from chromite.lib import replication_lib
 from chromite.lib import uprev_lib
 from chromite.lib.parser import package_info
+from chromite.service import android
 
 if TYPE_CHECKING:
   from chromite.lib import build_target_lib
+  from chromite.lib import chroot_lib
 
 if cros_build_lib.IsInsideChroot():
   from chromite.lib import depgraph
@@ -139,13 +141,38 @@ def uprevs_versioned_package(package):
   return register
 
 
-def uprev_android(android_package,
-                  chroot,
-                  build_targets=None,
-                  android_build_branch=None,
-                  android_version=None,
-                  skip_commit=False):
-  """Returns the portage atom for the revved Android ebuild - see man emerge."""
+class UprevAndroidResult(NamedTuple):
+  """Results of an Android uprev."""
+  revved: bool
+  android_atom: str = None
+  modified_files: List[str] = None
+
+
+def uprev_android(
+    android_package: str,
+    chroot: 'chroot_lib.Chroot',
+    build_targets: Optional[List['build_target_lib.BuildTarget']] = None,
+    android_build_branch: Optional[str] = None,
+    android_version: Optional[str] = None,
+    skip_commit: bool = False) -> UprevAndroidResult:
+  """Performs an Android uprev by calling cros_mark_android_as_stable.
+
+  Args:
+    android_package: The Android package to uprev.
+    chroot: The chroot to enter.
+    build_targets: List of build targets to cleanup after uprev.
+    android_build_branch: Override the default Android branch corresponding to
+        the package.
+    android_version: Uprev to the particular version. By default the latest
+        available version is used.
+    skip_commit: Whether to skip committing the change after a successful uprev.
+
+  Returns:
+    The uprev result containing:
+      revved: Whether an uprev happened.
+      android_atom: If revved, the portage atom for the revved Android ebuild.
+      modified_files: If revved, list of files being modified.
+  """
   command = [
       'cros_mark_android_as_stable',
       f'--android_package={android_package}',
@@ -166,13 +193,17 @@ def uprev_android(android_package,
       encoding='utf-8',
       chroot_args=chroot.get_enter_args())
 
-  portage_atom_string = result.stdout.strip()
-  android_atom = None
-  if portage_atom_string:
-    android_atom = portage_atom_string.splitlines()[-1].partition('=')[-1]
-  if not android_atom:
+  # cros_mark_android_as_stable prints the uprev result to stdout as JSON in a
+  # single line. We only take the last line from stdout to make sure no junk
+  # output is included (e.g. messages from bashrc scripts that run upon entering
+  # the chroot.)
+  output = json.loads(result.stdout.strip().splitlines()[-1])
+
+  if not output['revved']:
     logging.info('Found nothing to rev.')
-    return None
+    return UprevAndroidResult(revved=False)
+
+  android_atom = output['android_atom']
 
   for target in build_targets or []:
     # Sanity check: We should always be able to merge the version of
@@ -187,22 +218,83 @@ def uprev_android(android_package,
           'version?', target, android_atom)
       raise AndroidIsPinnedUprevError(android_atom)
 
-  return android_atom
+  return UprevAndroidResult(revved=True,
+                            android_atom=android_atom,
+                            modified_files=output['modified_files'])
 
 
-def uprev_build_targets(build_targets,
-                        overlay_type,
-                        chroot=None,
-                        output_dir=None):
+def uprev_android_lkgb(android_package: str,
+                       build_targets: List['build_target_lib.BuildTarget'],
+                       chroot: 'chroot_lib.Chroot'
+                       ) -> uprev_lib.UprevVersionedPackageResult:
+  """Uprevs an Android package to the version specified in the LKGB file.
+
+  This is the PUpr handler for Android packages, triggered whenever the
+  corresponding LKGB file is being updated.
+
+  PUpr for Android does not test the uprev change in CQ; instead we run separate
+  jobs to test new Android versions, and we write the latest vetted version to
+  the LKGB file. Find the design at go/android-uprev-recipes.
+
+  Args:
+    android_package: The Android package to uprev.
+    build_targets: List of build targets to cleanup after uprev.
+    chroot: The chroot to enter.
+
+  Returns:
+    An uprev_lib.UprevVersionedPackageResult containing the new version and a
+    list of modified files.
+  """
+  android_package_dir = android.GetAndroidPackageDir(android_package)
+  android_version = android.ReadLKGB(android_package_dir)
+
+  result = uprev_lib.UprevVersionedPackageResult()
+  uprev_result = uprev_android(android_package, chroot,
+                               build_targets=build_targets,
+                               android_version=android_version,
+                               skip_commit=True)
+  if not uprev_result.revved:
+    return result
+
+  # cros_mark_android_as_stable returns paths relative to |android.OVERLAY_DIR|.
+  result.add_result(android_version,
+                    [os.path.join(android.OVERLAY_DIR, f)
+                     for f in uprev_result.modified_files])
+  return result
+
+
+def define_uprev_android_lkgb_handlers():
+  """Dynamically define uprev handlers for each Android package"""
+
+  def define_handler(android_package):
+    """Defines the uprev handler for an Android package."""
+    full_package_name = 'chromeos-base/' + android_package
+
+    @uprevs_versioned_package(full_package_name)
+    def _handler(build_targets, _refs, chroot):
+      return uprev_android_lkgb(android_package, build_targets, chroot)
+
+  for android_package in constants.ANDROID_ALL_PACKAGES:
+    define_handler(android_package)
+
+
+define_uprev_android_lkgb_handlers()
+
+
+def uprev_build_targets(
+    build_targets: Optional[List['build_target_lib.BuildTarget']],
+    overlay_type: str,
+    chroot: 'chroot_lib.Chroot' = None,
+    output_dir: Optional[str] = None):
   """Uprev the set provided build targets, or all if not specified.
 
   Args:
-    build_targets (list[build_target_lib.BuildTarget]|None): The build targets
+    build_targets: The build targets
       whose overlays should be uprevved, empty or None for all.
-    overlay_type (str): One of the valid overlay types except None (see
+    overlay_type: One of the valid overlay types except None (see
       constants.VALID_OVERLAYS).
-    chroot (chroot_lib.Chroot|None): The chroot to clean, if desired.
-    output_dir (str|None): The path to optionally dump result files.
+    chroot: The chroot to clean, if desired.
+    output_dir: The path to optionally dump result files.
   """
   # Need a valid overlay, but exclude None.
   assert overlay_type and overlay_type in constants.VALID_OVERLAYS
@@ -220,20 +312,24 @@ def uprev_build_targets(build_targets,
       output_dir=output_dir)
 
 
-def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
+def uprev_overlays(
+    overlays: List[str],
+    build_targets: Optional[List['build_target_lib.BuildTarget']] = None,
+    chroot: Optional['chroot_lib.Chroot'] = None,
+    output_dir: Optional[str] = None) -> List[str]:
   """Uprev the given overlays.
 
   Args:
-    overlays (list[str]): The list of overlay paths.
-    build_targets (list[build_target_lib.BuildTarget]|None): The build targets
+    overlays: The list of overlay paths.
+    build_targets: The build targets
       to clean in |chroot|, if desired. No effect unless |chroot| is provided.
-    chroot (chroot_lib.Chroot|None): The chroot to clean, if desired.
-    output_dir (str|None): The path to optionally dump result files.
+    chroot: The chroot to clean, if desired.
+    output_dir: The path to optionally dump result files.
 
   Returns:
-    list[str] - The paths to all of the modified ebuild files. This includes the
-      new files that were added (i.e. the new versions) and all of the removed
-      files (i.e. the old versions).
+    The paths to all of the modified ebuild files. This includes the new files
+      that were added (i.e. the new versions) and all of the removed files
+      (i.e. the old versions).
   """
   assert overlays
 
@@ -250,18 +346,21 @@ def uprev_overlays(overlays, build_targets=None, chroot=None, output_dir=None):
   return uprev_manager.modified_ebuilds, uprev_manager.revved_packages
 
 
-def uprev_versioned_package(package, build_targets, refs, chroot):
+def uprev_versioned_package(
+    package: package_info.CPV,
+    build_targets: List['build_target_lib.BuildTarget'],
+    refs: List[uprev_lib.GitRef],
+    chroot: 'chroot_lib.Chroot') -> 'uprev_lib.UprevVersionedPackageResult':
   """Call registered uprev handler function for the package.
 
   Args:
-    package (package_info.CPV): The package being uprevved.
-    build_targets (list[build_target_lib.BuildTarget]): The build targets to
-        clean on a successful uprev.
-    refs (list[uprev_lib.GitRef]):
-    chroot (chroot_lib.Chroot): The chroot to enter for cleaning.
+    package: The package being uprevved.
+    build_targets: The build targets to clean on a successful uprev.
+    refs:
+    chroot: The chroot to enter for cleaning.
 
   Returns:
-    UprevVersionedPackageResult: The result.
+    The result.
   """
   assert package
 
@@ -330,21 +429,6 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
   if not uprev_result:
     return result
-  all_changed_files.extend(uprev_result.changed_files)
-
-  # Attempt to uprev drivefs-ipc package.
-  pkg_path = os.path.join(DRIVEFS_PATH_PREFIX, 'drivefs-ipc')
-  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(pkg_path,
-                                                          drivefs_version,
-                                                          chroot,
-                                                          allow_downrev=False)
-
-  if not uprev_result:
-    logging.warning(
-        'drivefs package has changed files %s but drivefs-ipc does not',
-        all_changed_files)
-    return result
-
   all_changed_files.extend(uprev_result.changed_files)
   result.add_result(drivefs_version, all_changed_files)
 
@@ -430,20 +514,32 @@ def uprev_kernel_afdo(*_args, **_kwargs):
 
 
 @uprevs_versioned_package('chromeos-base/termina-dlc')
-def uprev_termina_dlc(_build_targets, _refs, chroot):
-  """Updates shared termina-dlc ebuild - chromeos-base/termina-dlc.
+@uprevs_versioned_package('chromeos-base/termina-tools-dlc')
+def uprev_termina_dlcs(_build_targets, _refs, chroot):
+  """Updates shared termina-dlc and termina-tools-dlc ebuilds.
+
+  termina-dlc - chromeos-base/termina-dlc
+  termina-tools-dlc - chromeos-base/termina-tools-dlc
 
   See: uprev_versioned_package.
   """
-  package = 'termina-dlc'
-  package_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base',
-                              package)
+  termina_dlc_pkg = 'termina-dlc'
+  termina_dlc_pkg_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                                      'chromeos-base', termina_dlc_pkg)
+  tools_dlc_pkg = 'termina-tools-dlc'
+  tools_dlc_pkg_path = os.path.join(constants.CHROMIUMOS_OVERLAY_DIR,
+                                    'chromeos-base', tools_dlc_pkg)
 
-  version_pin_src_path = _get_version_pin_src_path(package_path)
+  # termina-dlc and termina-tools-dlc are pinned to the same version.
+  version_pin_src_path = _get_version_pin_src_path(termina_dlc_pkg_path)
   version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
 
-  return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+  result = uprev_lib.uprev_ebuild_from_pin(termina_dlc_pkg_path, version_no_rev,
+                                           chroot)
+  result += uprev_lib.uprev_ebuild_from_pin(tools_dlc_pkg_path, version_no_rev,
+                                            chroot)
 
+  return result
 
 @uprevs_versioned_package('chromeos-base/chromeos-lacros')
 def uprev_lacros(_build_targets, refs, chroot):
@@ -459,6 +555,39 @@ def uprev_lacros(_build_targets, refs, chroot):
   path = os.path.join(
       constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base', 'chromeos-lacros')
   lacros_version = refs[0].revision
+  uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
+                                                          lacros_version,
+                                                          chroot,
+                                                          allow_downrev=False)
+
+  if not uprev_result:
+    return result
+
+  result.add_result(lacros_version, uprev_result.changed_files)
+  return result
+
+
+@uprevs_versioned_package('chromeos-base/chromeos-lacros-parallel')
+def uprev_lacros_in_parallel(
+    _build_targets: Optional[List['build_target_lib.BuildTarget']],
+    refs: List[uprev_lib.GitRef],
+    chroot: 'chroot_lib.Chroot') -> 'uprev_lib.UprevVersionedPackageResult':
+  """Updates lacros ebuilds in parallel with ash-chrome.
+
+  This handler is going to be used temporarily while lacros transitions to being
+  uprevved atomically with ash-chrome. Unlike a standalone lacros uprev, this
+  handler will not need to look at the QA qualified file. Rather, it will
+  function identical to ash-chrome using git tags.
+
+  See: uprev_versioned_package.
+
+  Returns:
+    UprevVersionedPackageResult: The result.
+  """
+  result = uprev_lib.UprevVersionedPackageResult()
+  path = os.path.join(
+      constants.CHROMIUMOS_OVERLAY_DIR, 'chromeos-base', 'chromeos-lacros')
+  lacros_version = uprev_lib.get_version_from_refs(refs)
   uprev_result = uprev_lib.uprev_workon_ebuild_to_version(path,
                                                           lacros_version,
                                                           chroot,
@@ -532,27 +661,43 @@ def uprev_sludge(_build_targets, _refs, chroot):
   return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
 
 
+@uprevs_versioned_package('chromeos-base/borealis-dlc')
+def uprev_borealis_dlc(_build_targets, _refs, chroot):
+  """Updates shared borealis-dlc ebuild - chromeos-base/borealis-dlc.
+
+  See: uprev_versioned_package.
+  """
+  package_path = os.path.join('src', 'private-overlays',
+                              'chromeos-partner-overlay', 'chromeos-base',
+                              'borealis-dlc')
+
+  version_pin_src_path = _get_version_pin_src_path(package_path)
+  version_no_rev = osutils.ReadFile(version_pin_src_path).strip()
+
+  return uprev_lib.uprev_ebuild_from_pin(package_path, version_no_rev, chroot)
+
+
 def _get_version_pin_src_path(package_path):
   """Returns the path to the VERSION-PIN file for the given package."""
   return os.path.join(constants.SOURCE_ROOT, package_path, 'VERSION-PIN')
 
 
 @uprevs_versioned_package(constants.CHROME_CP)
-def uprev_chrome_from_ref(build_targets, refs, chroot):
+def uprev_chrome_from_ref(build_targets, refs, _chroot):
   """Uprev chrome and its related packages.
 
   See: uprev_versioned_package.
   """
   # Determine the version from the refs (tags), i.e. the chrome versions are the
   # tag names.
-  chrome_version = uprev_lib.get_chrome_version_from_refs(refs)
+  chrome_version = uprev_lib.get_version_from_refs(refs)
   logging.debug('Chrome version determined from refs: %s', chrome_version)
 
-  return uprev_chrome(build_targets, chrome_version, chroot)
+  return uprev_chrome(chrome_version, build_targets, None)
 
 
 def revbump_chrome(
-    build_targets: List['build_target_lib.BuildTarget'],
+    build_targets: List['build_target_lib.BuildTarget'] = None,
     chroot: Optional['chroot_lib.Chroot'] = None
 ) -> uprev_lib.UprevVersionedPackageResult:
   """Attempt to revbump chrome.
@@ -563,12 +708,13 @@ def revbump_chrome(
   ebuild) will result in a revbump to 1.2.3.4_rc-r3.ebuild.
   """
   chrome_version = uprev_lib.get_stable_chrome_version()
-  return uprev_chrome(build_targets, chrome_version, chroot)
+  return uprev_chrome(chrome_version, build_targets, chroot)
 
 
 def uprev_chrome(
-    build_targets: List['build_target_lib.BuildTarget'], chrome_version: str,
-    chroot: Union['chroot_lib.Chroot', None]
+    chrome_version: str,
+    build_targets: Optional[List['build_target_lib.BuildTarget']],
+    chroot: Optional['chroot_lib.Chroot']
 ) -> uprev_lib.UprevVersionedPackageResult:
   """Attempt to uprev chrome and its related packages to the given version."""
   uprev_manager = uprev_lib.UprevChromeManager(
@@ -636,15 +782,16 @@ def _get_latest_version_from_refs(refs_prefix: str,
   return target_version_ref.replace(refs_prefix, '')
 
 
-def _generate_platform_c_files(replication_config, chroot):
+def _generate_platform_c_files(
+    replication_config: replication_config_pb2.ReplicationConfig,
+    chroot: 'chroot_lib.Chroot') -> List[str]:
   """Generates platform C files from a platform JSON payload.
 
   Args:
-    replication_config (replication_config_pb2.ReplicationConfig): A
-      ReplicationConfig that has already been run. If it produced a
-      build_config.json file, that file will be used to generate platform C
-      files. Otherwise, nothing will be generated.
-    chroot (chroot_lib.Chroot): The chroot to use to generate.
+    replication_config: A ReplicationConfig that has already been run. If it
+      produced a build_config.json file, that file will be used to generate
+      platform C files. Otherwise, nothing will be generated.
+    chroot: The chroot to use to generate.
 
   Returns:
     A list of generated files.
@@ -703,12 +850,12 @@ def _generate_platform_c_files(replication_config, chroot):
   return generated_files
 
 
-def _get_private_overlay_package_root(ref, package):
+def _get_private_overlay_package_root(ref: uprev_lib.GitRef, package: str):
   """Returns the absolute path to the root of a given private overlay.
 
   Args:
-    ref (uprev_lib.GitRef): GitRef for the private overlay.
-    package (str): Path to the package in the overlay.
+    ref: GitRef for the private overlay.
+    package: Path to the package in the overlay.
   """
   # There might be a cleaner way to map from package -> path within the source
   # tree. For now, just use string patterns.
@@ -839,18 +986,21 @@ def get_best_visible(
       sysroot=build_target.root if build_target else None)
 
 
-def has_prebuilt(atom, build_target=None, useflags=None):
+def has_prebuilt(
+    atom: str,
+    build_target: 'build_target_lib.BuildTarget' = None,
+    useflags: Union[Iterable[str], str] = None) -> bool:
   """Check if a prebuilt exists.
 
   Args:
-    atom (str): The package whose prebuilt is being queried.
-    build_target (build_target_lib.BuildTarget): The build target whose
-        sysroot should be searched, or the SDK if not provided.
+    atom: The package whose prebuilt is being queried.
+    build_target: The build target whose sysroot should be searched, or the
+        SDK if not provided.
     useflags: Any additional USE flags that should be set. May be a string
         of properly formatted USE flags, or an iterable of individual flags.
 
   Returns:
-    bool: True iff there is an available prebuilt, False otherwise.
+    True if there is an available prebuilt, False otherwise.
   """
   assert atom
 
@@ -944,14 +1094,61 @@ def needs_chrome_source(
   )
 
 
-def determine_chrome_version(build_target):
+class TargetVersions(NamedTuple):
+  """Data class for the info that makes up the "target versions"."""
+  android_version: str
+  android_branch: str
+  android_target: str
+  chrome_version: str
+  platform_version: str
+  milestone_version: str
+  full_version: str
+
+
+def get_target_versions(
+    build_target: 'build_target_lib.BuildTarget',
+    packages: List[package_info.PackageInfo] = None
+) -> TargetVersions:
+  """Aggregate version info for a few key packages and the OS as a whole."""
+  # Android version.
+  android_version = determine_android_version(build_target.name)
+  logging.info('Found android version: %s', android_version)
+  # Android branch version.
+  android_branch = determine_android_branch(build_target.name)
+  logging.info('Found android branch version: %s', android_branch)
+  # Android target version.
+  android_target = determine_android_target(build_target.name)
+  logging.info('Found android target version: %s', android_target)
+
+  # TODO(crbug/1019770): Investigate cases where builds_chrome is true but
+  # chrome_version is None.
+
+  builds_chrome = builds(constants.CHROME_CP, build_target, packages=packages)
+  chrome_version = None
+  if builds_chrome:
+    # Chrome version fetch.
+    chrome_version = determine_chrome_version(build_target)
+    logging.info('Found chrome version: %s', chrome_version)
+
+  # The ChromeOS version info.
+  platform_version = determine_platform_version()
+  milestone_version = determine_milestone_version()
+  full_version = determine_full_version()
+
+  return TargetVersions(android_version, android_branch, android_target,
+                        chrome_version, platform_version, milestone_version,
+                        full_version)
+
+
+def determine_chrome_version(
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns the current Chrome version for the board (or in buildroot).
 
   Args:
-    build_target (build_target_lib.BuildTarget): The board build target.
+    build_target: The board build target.
 
   Returns:
-    str|None: The chrome version if available.
+    The chrome version if available.
   """
   # TODO(crbug/1019770): Long term we should not need the try/catch here once
   # the builds function above only returns True for chrome when
@@ -968,14 +1165,15 @@ def determine_chrome_version(build_target):
   return pkg_info.version.partition('_')[0]
 
 
-def determine_android_package(board):
+@functools.lru_cache()
+def determine_android_package(board: str) -> Optional[str]:
   """Returns the active Android container package in use by the board.
 
   Args:
     board: The board name this is specific to.
 
   Returns:
-    str|None: The android package string if there is one.
+    The android package string if there is one.
   """
   try:
     packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
@@ -993,7 +1191,7 @@ def determine_android_package(board):
   return None
 
 
-def determine_android_version(board, package=None):
+def determine_android_version(board: str, package: str = None):
   """Determine the current Android version in buildroot now and return it.
 
   This uses the typical portage logic to determine which version of Android
@@ -1079,14 +1277,15 @@ def determine_full_version():
   return full_version
 
 
-def find_fingerprints(build_target):
+def find_fingerprints(
+    build_target: 'build_target_lib.BuildTarget') -> List[str]:
   """Returns a list of fingerprints for this build.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    list[str] - List of fingerprint strings.
+    List of fingerprint strings.
   """
   cros_build_lib.AssertInsideChroot()
   fp_file = 'cheets-fingerprint.txt'
@@ -1101,11 +1300,11 @@ def find_fingerprints(build_target):
   return fingerprints
 
 
-def get_all_firmware_versions(build_target):
+def get_all_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Extract firmware version for all models present.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     A dict of FirmwareVersions namedtuple instances by model.
@@ -1118,24 +1317,34 @@ def get_all_firmware_versions(build_target):
   # in the packages_unittest.py for testing get_all_firmware_versions.
   cmd_result = _get_firmware_version_cmd_result(build_target)
 
-  # There is a blank line between the version info for each model.
-  firmware_version_payloads = cmd_result.split('\n\n')
-  for firmware_version_payload in firmware_version_payloads:
-    if 'BIOS' in firmware_version_payload:
-      firmware_version = _find_firmware_versions(firmware_version_payload)
-      result[firmware_version.model] = firmware_version
+  if cmd_result:
+    # There is a blank line between the version info for each model.
+    firmware_version_payloads = cmd_result.split('\n\n')
+    for firmware_version_payload in firmware_version_payloads:
+      if 'BIOS' in firmware_version_payload:
+        firmware_version = _find_firmware_versions(firmware_version_payload)
+        result[firmware_version.model] = firmware_version
   return result
 
 
-FirmwareVersions = collections.namedtuple(
-    'FirmwareVersions', ['model', 'main', 'main_rw', 'ec', 'ec_rw'])
+class FirmwareVersions(NamedTuple):
+  """Tuple to hold firmware versions, with truthiness."""
+  model: Optional[str]
+  main: Optional[str]
+  main_rw: Optional[str]
+  ec: Optional[str]
+  ec_rw: Optional[str]
+
+  def __bool__(self):
+    return bool(
+        self.model or self.main or self.main_rw or self.ec or self.ec_rw)
 
 
-def get_firmware_versions(build_target):
+def get_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Extract version information from the firmware updater, if one exists.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     A FirmwareVersions namedtuple instance.
@@ -1150,11 +1359,12 @@ def get_firmware_versions(build_target):
     return FirmwareVersions(None, None, None, None, None)
 
 
-def _get_firmware_version_cmd_result(build_target):
+def _get_firmware_version_cmd_result(
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Gets the raw result output of the firmware updater version command.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     Command execution result.
@@ -1163,9 +1373,13 @@ def _get_firmware_version_cmd_result(build_target):
                          'usr/sbin/chromeos-firmwareupdate')
   logging.info('Calling updater %s', updater)
   # Call the updater using the chroot-based path.
-  return cros_build_lib.run([updater, '-V'],
-                            capture_output=True, log_output=True,
-                            encoding='utf-8').stdout
+  try:
+    return cros_build_lib.run([updater, '-V'],
+                              capture_output=True, log_output=True,
+                              encoding='utf-8').stdout
+  except cros_build_lib.RunCommandError:
+    # Updater probably doesn't exist (e.g. betty).
+    return None
 
 
 def _find_firmware_versions(cmd_output):
@@ -1215,14 +1429,20 @@ def _find_firmware_versions(cmd_output):
   return FirmwareVersions(model, main, main_rw, ec, ec_rw)
 
 
-MainEcFirmwareVersions = collections.namedtuple(
-    'MainEcFirmwareVersions', ['main_fw_version', 'ec_fw_version'])
+class MainEcFirmwareVersions(NamedTuple):
+  """Tuple to hold main and ec firmware versions, with truthiness."""
+  main_fw_version: Optional[str]
+  ec_fw_version: Optional[str]
 
-def determine_firmware_versions(build_target):
+  def __bool__(self):
+    return bool(self.main_fw_version or self.ec_fw_version)
+
+
+def determine_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
   """Returns a namedtuple with main and ec firmware versions.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
     MainEcFirmwareVersions namedtuple with results.
@@ -1233,14 +1453,16 @@ def determine_firmware_versions(build_target):
 
   return MainEcFirmwareVersions(main_fw_version, ec_fw_version)
 
-def determine_kernel_version(build_target):
+
+def determine_kernel_version(
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns a string containing the kernel version for this build target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
 
   Returns:
-    (str) The kernel versions, or None.
+    The kernel versions, or None.
   """
   try:
     packages = portage_util.GetPackageDependencies(build_target.name,
@@ -1256,14 +1478,16 @@ def determine_kernel_version(build_target):
   return None
 
 
-def get_models(build_target, log_output=True):
+def get_models(
+    build_target: 'build_target_lib.BuildTarget',
+    log_output: bool = True) -> Optional[List[str]]:
   """Obtain a list of models supported by a unified board.
 
   This ignored whitelabel models since GoldenEye has no specific support for
   these at present.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
     log_output: Whether to log the output of the cros_config_host invocation.
 
   Returns:
@@ -1274,15 +1498,17 @@ def get_models(build_target, log_output=True):
                                log_output=log_output)
 
 
-def get_key_id(build_target, model):
+def get_key_id(
+    build_target: 'build_target_lib.BuildTarget',
+    model: str) -> Optional[str]:
   """Obtain the key_id for a model within the build_target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
-    model (str): The model name
+    build_target: The build target.
+    model: The model name
 
   Returns:
-    A key_id (str) or None.
+    A key_id or None.
   """
   model_arg = '--model=' + model
   key_id_list = _run_cros_config_host(
@@ -1294,11 +1520,14 @@ def get_key_id(build_target, model):
   return key_id
 
 
-def _run_cros_config_host(build_target, args, log_output=True):
+def _run_cros_config_host(
+    build_target: 'build_target_lib.BuildTarget',
+    args: List[str],
+    log_output: bool = True) -> Optional[List[str]]:
   """Run the cros_config_host tool.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
+    build_target: The build target.
     args: List of arguments to pass.
     log_output: Whether to log the output of the cros_config_host.
 

@@ -41,6 +41,10 @@ CHROOT_THINPOOL_NAME = 'thinpool'
 _MAX_LVM_RETRIES = 3
 
 
+# Bash completion directory.
+_BASH_COMPLETION_DIR = (
+    f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d')
+
 class Error(Exception):
   """Base cros sdk error class."""
 
@@ -203,8 +207,14 @@ def MountChrootPaths(path: Union[Path, str]):
   osutils.Mount('sysfs', path / 'sys', 'sysfs', defflags)
 
   if 'binfmt_misc' in KNOWN_FILESYSTEMS:
-    osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
-                  'binfmt_misc', defflags)
+    try:
+      osutils.Mount('binfmt_misc', path / 'proc/sys/fs/binfmt_misc',
+                    'binfmt_misc', defflags)
+    except PermissionError:
+      # We're in an environment where we can't mount binfmt_misc (e.g. a
+      # container), so ignore it for now.  We need it for unittests via qemu,
+      # but nothing else currently.
+      pass
 
   if 'configfs' in KNOWN_FILESYSTEMS:
     osutils.Mount('configfs', path / 'sys/kernel/config', 'configfs', defflags)
@@ -565,7 +575,7 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False,
 
   # If we didn't find a mounted VG before but we did find a loopback device,
   # re-check for a VG attached to the loopback.
-  if not vg_name:
+  if not vg_name and chroot_dev:
     vg_name = FindVolumeGroupForDevice(chroot, chroot_dev)
     if vg_name:
       cmd = ['vgs', vg_name]
@@ -690,6 +700,8 @@ class ChrootUpdater(object):
       except ValueError:
         raise InvalidChrootVersionError(
             'Invalid chroot version in %s: %s' % (self._version_file, version))
+      else:
+        logging.debug('Found chroot version %s', self._version)
 
     return self._version
 
@@ -954,28 +966,16 @@ class ChrootCreator:
     (home / 'chromiumos').symlink_to(constants.CHROOT_SOURCE_ROOT)
     (home / 'depot_tools').symlink_to('/mnt/host/depot_tools')
 
-    # Automatically change to scripts directory.
     bash_profile = home / '.bash_profile'
     osutils.Touch(bash_profile)
     data = bash_profile.read_text().rstrip()
     if data:
       data += '\n\n'
+    # Automatically change to scripts directory.
     data += (
-        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n'
+        'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
     )
     bash_profile.write_text(data)
-
-    # Enable bash completion.
-    bashrc = home / '.bashrc'
-    osutils.Touch(bashrc)
-    data = bashrc.read_text().rstrip()
-    if data:
-      data += '\n\n'
-    data += (
-        '# Set up bash autocompletion.\n'
-        '. ~/chromiumos/src/scripts/bash_completion\n'
-    )
-    bashrc.write_text(data)
 
     osutils.Chown(home, user=uid, group=gid, recursive=True)
 
@@ -1026,6 +1026,11 @@ PORTAGE_USERNAME="{user}"
     (profile_d / '50-chromiumos-niceties.sh').symlink_to(
         f'{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/profile.d/'
         '50-chromiumos-niceties.sh')
+
+    # Enable bash completion.
+    bash_completion_d = etc_dir / 'bash_completion.d'
+    bash_completion_d.mkdir(mode=0o755, parents=True, exist_ok=True)
+    (bash_completion_d / 'cros').symlink_to(f'{_BASH_COMPLETION_DIR}/cros')
 
     # Select a small set of locales for the user if they haven't done so
     # already.  This makes glibc upgrades cheap by only generating a small

@@ -7,6 +7,7 @@
 https://gerrit-review.googlesource.com/Documentation/rest-api.html
 """
 
+import base64
 import datetime
 import html.parser
 import http.client
@@ -17,7 +18,9 @@ import os
 import re
 import socket
 import sys
+from typing import Any, Dict, Optional, Tuple, Union
 import urllib.parse
+import urllib.request
 import warnings
 
 from chromite.third_party import httplib2
@@ -174,7 +177,12 @@ def GetCookies(host, path, cookie_paths=None):
   return cookies
 
 
-def CreateHttpConn(host, path, reqtype='GET', headers=None, body=None):
+def CreateHttpConn(
+    host: str,
+    path: str,
+    reqtype: Optional[str] = 'GET',
+    headers: Optional[Dict[str, str]] = None,
+    body: Optional[Union[bytes, str]] = None) -> http.client.HTTPResponse:
   """Opens an https connection to a gerrit service, and sends a request."""
   path = '/a/' + path.lstrip('/')
   headers = headers or {}
@@ -219,7 +227,7 @@ def CreateHttpConn(host, path, reqtype='GET', headers=None, body=None):
     ))
 
   if body:
-    body = json.JSONEncoder().encode(body)
+    body = json.JSONEncoder().encode(body).encode('utf-8')
     headers.setdefault('Content-Type', 'application/json')
   if logging.getLogger().isEnabledFor(logging.DEBUG):
     logging.debug('%s https://%s%s', reqtype, host, path)
@@ -229,16 +237,9 @@ def CreateHttpConn(host, path, reqtype='GET', headers=None, body=None):
       logging.debug('%s: %s', key, val)
     if body:
       logging.debug(body)
-  conn = http.client.HTTPSConnection(host)
-  conn.req_host = host
-  conn.req_params = {
-      'url': path,
-      'method': reqtype,
-      'headers': headers,
-      'body': body,
-  }
-  conn.request(**conn.req_params)
-  return conn
+  request = urllib.request.Request(
+      f'https://{host}{path}', data=body, headers=headers, method=reqtype)
+  return urllib.request.urlopen(request)
 
 
 def _InAppengine():
@@ -269,11 +270,14 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
   """
   @timeout_util.TimeoutDecorator(REQUEST_TIMEOUT_SECONDS)
   def _FetchUrlHelper():
-    err_prefix = 'A transient error occured while querying %s:\n' % (host,)
+    err_prefix = f'A transient error occured while querying {host}/{path}\n'
     try:
-      conn = CreateHttpConn(host, path, reqtype=reqtype, headers=headers,
-                            body=body)
-      response = conn.getresponse()
+      response = CreateHttpConn(host, path, reqtype=reqtype, headers=headers,
+                                body=body)
+    except urllib.error.HTTPError as e:
+      # Any non-HTTP/2xx status is thrown as an exception even though it's the
+      # response.  We handle the actual HTTP codes below.
+      response = e
     except socket.error as ex:
       logging.warning('%s%s', err_prefix, str(ex))
       raise
@@ -285,14 +289,14 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
       raise GOBError(http_status=response.status, reason=response.reason)
     if response.status == 404 and ignore_404:
       return b''
-    elif response.status == 200:
+    elif response.status in (200, 201):
       return response_body
 
     # Bad responses.
     logging.debug('response msg:\n%s', response.msg)
     http_version = 'HTTP/%s' % ('1.1' if response.version == 11 else '1.0')
     msg = ('%s %s %s\n%s %d %s\nResponse body: %r' %
-           (reqtype, conn.req_params['url'], http_version,
+           (reqtype, f'https://{host}/{path}', http_version,
             http_version, response.status, response.reason,
             response_body))
 
@@ -336,11 +340,6 @@ def FetchUrl(host, path, reqtype='GET', headers=None, body=None,
     if response.status >= 400:
       # The 'X-ErrorId' header is set only on >= 400 response code.
       logging_function('X-ErrorId: %s', response.getheader('X-ErrorId'))
-
-    try:
-      logging.warning('conn.sock.getpeername(): %s', conn.sock.getpeername())
-    except AttributeError:
-      logging.warning('peer name unavailable')
 
     if response.status == http.client.CONFLICT:
       # 409 conflict
@@ -499,6 +498,76 @@ def GetChangeReviewers(host, change):
   """
   warnings.warn('GetChangeReviewers is deprecated; use GetReviewers instead.')
   GetReviewers(host, change)
+
+
+def CreateChange(host: str, project: str, branch: str, subject: str,
+                 publish: bool) -> Dict[str, Any]:
+  """Creates an empty change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    project: The name of the Gerrit project for the change.
+    branch: Branch for the change.
+    subject: Initial commit message for the change.
+    publish: If True, will publish the CL after uploading. Stays in WIP mode
+        otherwise.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = 'changes/'
+  body = {'project': project, 'branch': branch, 'subject': subject}
+  if not publish:
+    body['work_in_progress'] = 'true'
+    body['notify'] = 'NONE'
+  return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_404=False)
+
+
+def ChangeEdit(host: str, change: str, filepath: str,
+               contents: str) -> Dict[str, Any]:
+  """Attaches file modifications to an open change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: A Gerrit change number.
+    filepath: Path of the file in the repo to modify.
+    contents: New contents of the file.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/edit/%s' % (
+      _GetChangePath(change), urllib.parse.quote(filepath, ''))
+  contents = contents.encode('utf-8')  # string -> bytes
+  contents = base64.b64encode(contents)  # bytes -> bytes
+  contents = contents.decode('utf-8')  # bytes -> string
+  body = {
+      'binary_content': 'data:text/plain;base64,%s' % contents
+  }
+  try:
+    return FetchUrlJson(host, path, body=body, reqtype='PUT', ignore_204=True)
+  except GOBError as e:
+    if e.http_status != 204:
+      raise
+
+
+def PublishChangeEdit(host: str, change: str) -> Dict[str, Any]:
+  """Publishes any open edits in a change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: A Gerrit change number.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/edit:publish' % _GetChangePath(change)
+  body = {'notify': 'NONE'}
+  try:
+    return FetchUrlJson(host, path, body=body, reqtype='POST', ignore_204=True)
+  except GOBError as e:
+    if e.http_status != 204:
+      raise
 
 
 def ReviewedChange(host, change):
@@ -676,6 +745,57 @@ def MarkReadyForReview(host, change, msg=''):
   return FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
 
 
+def GetAttentionSet(host: str, change: str) -> Optional[Dict[str, Any]]:
+  """Get information about the attention set of a change.
+
+  Args:
+    host: The Gerrit host to interact with.
+    change: The Gerrit change ID.
+
+  Returns:
+    A JSON response dict.
+  """
+  path = '%s/attention' % _GetChangePath(change)
+  return FetchUrlJson(host, path)
+
+
+def AddAttentionSet(host: str, change: str, add: Tuple[str, ...], reason: str,
+                    notify: str = '') -> Optional[Dict[str, Any]]:
+  """Add users to the attention set of a change."""
+  if not add:
+    return
+  body = {}
+  body['reason'] = reason
+  if notify:
+    body['notify'] = notify
+  path = '%s/attention' % _GetChangePath(change)
+  for r in add:
+    body['user'] = r
+    jmsg = FetchUrlJson(host, path, reqtype='POST', body=body, ignore_404=False)
+  # Return the last response. We've run through at least one request if we got
+  # here.
+  return jmsg
+
+
+def RemoveAttentionSet(host: str, change: str, remove: Tuple[str, ...],
+                       reason: str, notify: str = ''):
+  """Remove users from the attention set of a change."""
+  if not remove:
+    return
+  body = {}
+  body['reason'] = reason
+  if notify:
+    body['notify'] = notify
+  for r in remove:
+    path = '%s/attention/%s/delete' % (_GetChangePath(change), r)
+    try:
+      FetchUrl(host, path, reqtype='POST', body=body, ignore_204=True)
+    except GOBError as e:
+      # On success, gerrit returns status 204; anything else is an error.
+      if e.http_status != 204:
+        raise
+
+
 def GetReviewers(host, change):
   """Get information about all reviewers attached to a change.
 
@@ -844,6 +964,25 @@ def GetTipOfTrunkRevision(git_url):
     msg = ('The json returned by https://%s%s has an unfamiliar structure:\n'
            '%s\n' % (parsed_url[1], path, j))
     raise GOBError(reason=msg)
+
+
+def GetFileContentsOnHead(git_url: str, filepath: str) -> str:
+  """Returns the current contents of a file on the default branch.
+
+  Retrieves the contents from Gitiles via its API, not Gerrit's.
+
+  Args:
+    git_url: URL for the repository to get the file contents from.
+    filepath: Path of the file in the repository.
+
+  Returns:
+    The contents of the file as a string.
+  """
+  parsed_url = urllib.parse.urlparse(git_url)
+  path = parsed_url[2].rstrip('/') + f'/+/HEAD/{filepath}?format=TEXT'
+  contents = FetchUrl(parsed_url[1], path, ignore_404=False)
+  contents = base64.b64decode(contents)
+  return contents.decode('utf-8')
 
 
 def GetCommitDate(git_url, commit):

@@ -6,8 +6,8 @@
 
 This module contains two important definitions used by all commands:
   CliCommand: The parent class of all CLI commands.
-  CommandDecorator: Decorator that must be used to ensure that the command shows
-    up in |_commands| and is discoverable.
+  command_decorator: Decorator that must be used to ensure that the command
+    shows up in |_commands| and is discoverable.
 
 Commands can be either imported directly or looked up using this module's
 ListCommands() function.
@@ -45,7 +45,7 @@ def ImportCommand(name):
   """Directly import the specified subcommand.
 
   This method imports the module which must contain the single subcommand.  When
-  the module is loaded, the declared command (those that use CommandDecorator)
+  the module is loaded, the declared command (those that use command_decorator)
   will automatically get added to |_commands|.
 
   Args:
@@ -85,10 +85,10 @@ class InvalidCommandError(Exception):
   """Error that occurs when command class fails sanity checks."""
 
 
-def CommandDecorator(command_name):
+def command_decorator(name):
   """Decorator that sanity checks and adds class to list of usable commands."""
 
-  def InnerCommandDecorator(original_class):
+  def inner_decorator(original_class):
     """Inner Decorator that actually wraps the class."""
     if not hasattr(original_class, '__doc__'):
       raise InvalidCommandError('All handlers must have docstrings: %s' %
@@ -98,12 +98,12 @@ def CommandDecorator(command_name):
       raise InvalidCommandError('All Commands must derive from CliCommand: %s' %
                                 original_class)
 
-    _commands[command_name] = original_class
-    original_class.command_name = command_name
+    _commands[name] = original_class
+    original_class.name = name
 
     return original_class
 
-  return InnerCommandDecorator
+  return inner_decorator
 
 
 class CliCommand(object):
@@ -111,8 +111,8 @@ class CliCommand(object):
 
   This class provides the abstract interface for all CLI commands. When
   designing a new command, you must sub-class from this class and use the
-  CommandDecorator decorator. You must specify a class docstring as that will be
-  used as the usage for the sub-command.
+  command_decorator decorator. You must specify a class docstring as that will
+  be used as the usage for the sub-command.
 
   In addition your command should implement AddParser which is passed in a
   parser that you can add your own custom arguments. See argparse for more
@@ -128,6 +128,12 @@ class CliCommand(object):
   def AddParser(cls, parser):
     """Add arguments for this command to the parser."""
     parser.set_defaults(command_class=cls)
+
+  @classmethod
+  def ProcessOptions(cls,
+                     parser: commandline.ArgumentParser,
+                     options: commandline.ArgumentNamespace) -> None:
+    """Validate & post-process options before freezing."""
 
   @classmethod
   def AddDeviceArgument(cls, parser, schemes=commandline.DEVICE_SCHEME_SSH,

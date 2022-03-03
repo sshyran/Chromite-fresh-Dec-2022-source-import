@@ -28,7 +28,7 @@ from chromite.utils import memoize
 # pylint: disable=line-too-long
 # CIPD client to download.
 #
-# This is version "git_revision:db7a486094873e3944b8e27ab5b23a3ae3c401e7".
+# This is version "git_revision:78137bc2d58ebea680b6d513a3d7f6a8d25aa643".
 #
 # To switch to another version:
 #   1. Find it in CIPD Web UI, e.g.
@@ -37,7 +37,7 @@ from chromite.utils import memoize
 # pylint: enable=line-too-long
 CIPD_CLIENT_PACKAGE = 'infra/tools/cipd/linux-amd64'
 CIPD_CLIENT_SHA256 = (
-    'ea6b7547ddd316f32fd9974f598949c3f8f22f6beb8c260370242d0d84825162')
+    'b431c29c9fa132d4f7d6e86f053af02d490b51d742b4f01ea55618a5365d357d')
 
 CHROME_INFRA_PACKAGES_API_BASE = (
     'https://chrome-infra-packages.appspot.com/prpc/cipd.Repository/')

@@ -26,7 +26,7 @@ class BrilloBuildOperation(operation.ParallelEmergeOperation):
   """
 
 
-@command.CommandDecorator('build')
+@command.command_decorator('build')
 class BuildCommand(command.CliCommand):
   """Build the requested packages."""
 
@@ -146,8 +146,6 @@ To just build a single package:
 
   def Run(self):
     """Run cros build."""
-    self.options.Freeze()
-
     if not self.host:
       if not self.board:
         cros_build_lib.Die('You did not specify a board to build for. '

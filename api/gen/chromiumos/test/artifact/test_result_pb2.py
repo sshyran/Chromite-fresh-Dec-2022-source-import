@@ -12,9 +12,11 @@ _sym_db = _symbol_database.Default()
 
 
 from chromite.api.gen.chromiumos import storage_path_pb2 as chromiumos_dot_storage__path__pb2
+from chromite.api.gen.chromiumos.test.api import provision_state_pb2 as chromiumos_dot_test_dot_api_dot_provision__state__pb2
 from chromite.api.gen.chromiumos.test.api import test_case_pb2 as chromiumos_dot_test_dot_api_dot_test__case__pb2
 from chromite.api.gen.chromiumos.test.api import test_case_metadata_pb2 as chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2
 from chromite.api.gen.chromiumos.test.api import test_case_result_pb2 as chromiumos_dot_test_dot_api_dot_test__case__result__pb2
+from chromite.api.gen.chromiumos.test.api.v1 import plan_pb2 as chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2
 from chromite.api.gen.chromiumos.test.lab.api import dut_pb2 as chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2
 
 
@@ -24,9 +26,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z2go.chromium.org/chromiumos/config/go/test/artifact',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n*chromiumos/test/artifact/test_result.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\x1a#chromiumos/test/api/test_case.proto\x1a,chromiumos/test/api/test_case_metadata.proto\x1a*chromiumos/test/api/test_case_result.proto\x1a!chromiumos/test/lab/api/dut.proto\"\x93\x01\n\nTestResult\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x34\n\ttest_runs\x18\x02 \x03(\x0b\x32!.chromiumos.test.artifact.TestRun\x12>\n\x0e\x63ustom_results\x18\x03 \x03(\x0b\x32&.chromiumos.test.artifact.CustomResult\"\xff\x02\n\x07TestRun\x12\x30\n\ttest_case\x18\x01 \x01(\x0b\x32\x1d.chromiumos.test.api.TestCase\x12\x41\n\x12test_case_metadata\x18\x02 \x01(\x0b\x32%.chromiumos.test.api.TestCaseMetadata\x12=\n\x10test_case_result\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.TestCaseResult\x12\x11\n\tbuild_ids\x18\x04 \x03(\x04\x12:\n\x0c\x64ut_topology\x18\x05 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\x12\x36\n\x0bprimary_dut\x18\x06 \x01(\x0b\x32!.chromiumos.test.artifact.DutInfo\x12\x39\n\x0e\x63ompanion_duts\x18\x07 \x03(\x0b\x32!.chromiumos.test.artifact.DutInfo\"\x9e\x01\n\x07\x44utInfo\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x39\n\x04tags\x18\x02 \x03(\x0b\x32+.chromiumos.test.artifact.DutInfo.TagsEntry\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x8a\x01\n\x0c\x43ustomResult\x12\x30\n\x0fresult_dir_path\x18\x01 \x01(\x0b\x32\x17.chromiumos.StoragePath\x12\x39\n\x03\x63ts\x18\x02 \x01(\x0b\x32*.chromiumos.test.artifact.CustomResult.CtsH\x00\x1a\x05\n\x03\x43tsB\x06\n\x04typeB4Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
+  serialized_pb=b'\n*chromiumos/test/artifact/test_result.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\x1a)chromiumos/test/api/provision_state.proto\x1a#chromiumos/test/api/test_case.proto\x1a,chromiumos/test/api/test_case_metadata.proto\x1a*chromiumos/test/api/test_case_result.proto\x1a!chromiumos/test/api/v1/plan.proto\x1a!chromiumos/test/lab/api/dut.proto\"\xd9\x01\n\nTestResult\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x34\n\ttest_runs\x18\x02 \x03(\x0b\x32!.chromiumos.test.artifact.TestRun\x12>\n\x0e\x63ustom_results\x18\x03 \x03(\x0b\x32&.chromiumos.test.artifact.CustomResult\x12\x44\n\rtest_plan_ids\x18\x04 \x03(\x0b\x32-.chromiumos.test.api.v1.HWTestPlan.TestPlanId\"\xff\x02\n\x07TestRun\x12\x30\n\ttest_case\x18\x01 \x01(\x0b\x32\x1d.chromiumos.test.api.TestCase\x12\x41\n\x12test_case_metadata\x18\x02 \x01(\x0b\x32%.chromiumos.test.api.TestCaseMetadata\x12=\n\x10test_case_result\x18\x03 \x01(\x0b\x32#.chromiumos.test.api.TestCaseResult\x12\x11\n\tbuild_ids\x18\x04 \x03(\x04\x12:\n\x0c\x64ut_topology\x18\x05 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\x12\x36\n\x0bprimary_dut\x18\x06 \x01(\x0b\x32!.chromiumos.test.artifact.DutInfo\x12\x39\n\x0e\x63ompanion_duts\x18\x07 \x03(\x0b\x32!.chromiumos.test.artifact.DutInfo\"\xe2\x01\n\x07\x44utInfo\x12+\n\x02id\x18\x01 \x01(\x0b\x32\x1f.chromiumos.test.lab.api.Dut.Id\x12\x42\n\x12provision_state_id\x18\x03 \x01(\x0b\x32&.chromiumos.test.api.ProvisionState.Id\x12\x39\n\x04tags\x18\x02 \x03(\x0b\x32+.chromiumos.test.artifact.DutInfo.TagsEntry\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x8a\x01\n\x0c\x43ustomResult\x12\x30\n\x0fresult_dir_path\x18\x01 \x01(\x0b\x32\x17.chromiumos.StoragePath\x12\x39\n\x03\x63ts\x18\x02 \x01(\x0b\x32*.chromiumos.test.artifact.CustomResult.CtsH\x00\x1a\x05\n\x03\x43tsB\x06\n\x04typeB4Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
   ,
-  dependencies=[chromiumos_dot_storage__path__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__result__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,])
+  dependencies=[chromiumos_dot_storage__path__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__case__result__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,])
 
 
 
@@ -60,6 +62,13 @@ _TESTRESULT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='test_plan_ids', full_name='chromiumos.test.artifact.TestResult.test_plan_ids', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -72,8 +81,8 @@ _TESTRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=266,
-  serialized_end=413,
+  serialized_start=344,
+  serialized_end=561,
 )
 
 
@@ -146,8 +155,8 @@ _TESTRUN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=416,
-  serialized_end=799,
+  serialized_start=564,
+  serialized_end=947,
 )
 
 
@@ -185,8 +194,8 @@ _DUTINFO_TAGSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=917,
-  serialized_end=960,
+  serialized_start=1133,
+  serialized_end=1176,
 )
 
 _DUTINFO = _descriptor.Descriptor(
@@ -205,7 +214,14 @@ _DUTINFO = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='tags', full_name='chromiumos.test.artifact.DutInfo.tags', index=1,
+      name='provision_state_id', full_name='chromiumos.test.artifact.DutInfo.provision_state_id', index=1,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='tags', full_name='chromiumos.test.artifact.DutInfo.tags', index=2,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -223,8 +239,8 @@ _DUTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=802,
-  serialized_end=960,
+  serialized_start=950,
+  serialized_end=1176,
 )
 
 
@@ -248,8 +264,8 @@ _CUSTOMRESULT_CTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1088,
-  serialized_end=1093,
+  serialized_start=1304,
+  serialized_end=1309,
 )
 
 _CUSTOMRESULT = _descriptor.Descriptor(
@@ -291,12 +307,13 @@ _CUSTOMRESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=963,
-  serialized_end=1101,
+  serialized_start=1179,
+  serialized_end=1317,
 )
 
 _TESTRESULT.fields_by_name['test_runs'].message_type = _TESTRUN
 _TESTRESULT.fields_by_name['custom_results'].message_type = _CUSTOMRESULT
+_TESTRESULT.fields_by_name['test_plan_ids'].message_type = chromiumos_dot_test_dot_api_dot_v1_dot_plan__pb2._HWTESTPLAN_TESTPLANID
 _TESTRUN.fields_by_name['test_case'].message_type = chromiumos_dot_test_dot_api_dot_test__case__pb2._TESTCASE
 _TESTRUN.fields_by_name['test_case_metadata'].message_type = chromiumos_dot_test_dot_api_dot_test__case__metadata__pb2._TESTCASEMETADATA
 _TESTRUN.fields_by_name['test_case_result'].message_type = chromiumos_dot_test_dot_api_dot_test__case__result__pb2._TESTCASERESULT
@@ -305,6 +322,7 @@ _TESTRUN.fields_by_name['primary_dut'].message_type = _DUTINFO
 _TESTRUN.fields_by_name['companion_duts'].message_type = _DUTINFO
 _DUTINFO_TAGSENTRY.containing_type = _DUTINFO
 _DUTINFO.fields_by_name['id'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUT_ID
+_DUTINFO.fields_by_name['provision_state_id'].message_type = chromiumos_dot_test_dot_api_dot_provision__state__pb2._PROVISIONSTATE_ID
 _DUTINFO.fields_by_name['tags'].message_type = _DUTINFO_TAGSENTRY
 _CUSTOMRESULT_CTS.containing_type = _CUSTOMRESULT
 _CUSTOMRESULT.fields_by_name['result_dir_path'].message_type = chromiumos_dot_storage__path__pb2._STORAGEPATH

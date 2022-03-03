@@ -5,6 +5,7 @@
 # TODO: Name the build target.
 
 """{Build Target} configs."""
+from typing import List, Optional
 
 from chromite.lib.firmware import servo_lib
 
@@ -29,22 +30,47 @@ from chromite.lib.firmware import servo_lib
 # DEPLOY_SERVO_FORCE_FLASHROM = False
 
 
-# pylint: disable=unused-argument
-def deploy_extra_flags_futility(servo: servo_lib.Servo) -> str:
-  """Returns extra flags for flashing with futility"""
-  return ''
+def deploy_extra_flags_futility(servo: Optional[servo_lib.Servo]) -> List[str]:
+  """Returns extra flags for flashing with futility.
+
+  Args:
+    servo: The servo connected to the target DUT. Return flags for ssh if None.
+
+  Returns:
+    extra_flags: List of extra flags.
+  """
+  if not servo:
+    # extra flags for flashing with futility directly over ssh
+    return []
+  if servo.is_ccd:
+    # when flashing over CCD, skip verify step
+    return ['--fast']
+  return []
 
 
-def deploy_extra_flags_flashrom(servo: servo_lib.Servo) -> str:
-  """Returns extra flags for flashing with flashrom"""
-  return ''
+def deploy_extra_flags_flashrom(servo: Optional[servo_lib.Servo]) -> List[str]:
+  """Returns extra flags for flashing with flashrom.
+
+  Args:
+    servo: The servo connected to the target DUT. Return flags for ssh if None.
+
+  Returns:
+    extra_flags: List of extra flags.
+  """
+  if not servo:
+    # extra flags for flashing with flashrom directly over ssh
+    return []
+  if servo.is_ccd:
+    # when flashing over CCD, skip verify step
+    return ['-n']
+  return []
 
 
-def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
-  """Get specific flash config for the build target.
+def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
+  """Get DUT controls and programmer argument to flash a build target.
 
   Each board needs specific config including the voltage for Vref, to turn
-  on and turn off the SPI flash. get_config() returns servo_lib.FirmwareConfig
+  on and turn off the SPI flash. get_config() returns servo_lib.ServoConfig
   with settings to flash a servo for a particular build target.
   The voltage for this board needs to be set to 1.8 V.
 
@@ -52,7 +78,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
     servo: The servo connected to the target DUT.
 
   Returns:
-    servo_lib.FirmwareConfig:
+    servo_lib.ServoConfig:
       dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
                                                       ["cmd2", "arg3", "arg4"]]
                             where cmd1 will be run before cmd2.
@@ -74,7 +100,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
     raise servo_lib.UnsupportedServoVersionError('%s not supported' %
                                                  servo.version)
 
-  return servo_lib.FirmwareConfig(dut_control_on, dut_control_off, programmer)
+  return servo_lib.ServoConfig(dut_control_on, dut_control_off, programmer)
 
 
 # End FLASH CONFIGS.

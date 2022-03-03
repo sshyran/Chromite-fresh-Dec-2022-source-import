@@ -6,6 +6,9 @@
 
 import collections
 import logging
+import os
+from pathlib import Path
+import re
 
 from chromite.api import controller
 from chromite.api import faux
@@ -16,8 +19,12 @@ from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import toolchain_util
-from chromite.scripts import tricium_cargo_clippy
+
+if cros_build_lib.IsInsideChroot():
+  # Only used for linting in chroot and requires yaml which is only in chroot
+  from chromite.scripts import tricium_cargo_clippy, tricium_clang_tidy
 
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])
@@ -84,6 +91,8 @@ _TOOLCHAIN_COMMIT_HANDLERS = {
     BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE:
         'VerifiedKernelCwpAfdoFile'
 }
+
+TIDY_BASE_DIR = Path('/tmp/linting_output/clang-tidy')
 
 
 def _GetProfileInfoDict(profile_info):
@@ -192,7 +201,7 @@ def PrepareForBuild(input_proto, output_proto, _config):
 @validate.exists('output_dir')
 @validate.validation_complete
 def BundleArtifacts(input_proto, output_proto, _config):
-  """Bundle toolchain artifacts.
+  """Bundle valid toolchain artifacts.
 
   The handlers (from _TOOLCHAIN_ARTIFACT_HANDLERS above) are called with:
       artifact_name (str): name of the artifact type
@@ -217,20 +226,45 @@ def BundleArtifacts(input_proto, output_proto, _config):
 
   profile_info = _GetProfileInfoDict(input_proto.profile_info)
 
+  output_path = Path(input_proto.output_dir)
+
   for artifact_type in input_proto.artifact_types:
     if artifact_type not in _TOOLCHAIN_ARTIFACT_HANDLERS:
       logging.error('%s not understood', artifact_type)
       return controller.RETURN_CODE_UNRECOVERABLE
+
     handler = _TOOLCHAIN_ARTIFACT_HANDLERS[artifact_type]
-    if handler and handler.bundle:
-      artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
-                                 input_proto.sysroot.build_target.name,
-                                 input_proto.output_dir, profile_info)
-      if artifacts:
-        art_info = output_proto.artifacts_info.add()
-        art_info.artifact_type = artifact_type
-        for artifact in artifacts:
-          art_info.artifacts.add().path = artifact
+    if not handler or not handler.bundle:
+      logging.warning('%s does not have a handler with a bundle function.',
+                      artifact_type)
+      continue
+
+    artifacts = handler.bundle(handler.name, chroot, input_proto.sysroot.path,
+                               input_proto.sysroot.build_target.name,
+                               input_proto.output_dir, profile_info)
+    if not artifacts:
+      continue
+
+    # Filter out artifacts that do not exist or are empty.
+    usable_artifacts = []
+    for artifact in artifacts:
+      artifact_path = output_path / artifact
+      if not artifact_path.exists():
+        logging.warning('%s is not in the output directory.', artifact)
+      elif not artifact_path.stat().st_size:
+        logging.warning('%s is empty.', artifact)
+      else:
+        usable_artifacts.append(artifact)
+
+    if not usable_artifacts:
+      logging.warning('No usable artifacts for artifact type %s', artifact_type)
+      continue
+
+    # Add all usable artifacts.
+    art_info = output_proto.artifacts_info.add()
+    art_info.artifact_type = artifact_type
+    for artifact in usable_artifacts:
+      art_info.artifacts.add().path = artifact
 
 
 def _GetUpdatedFilesResponse(_input_proto, output_proto, _config):
@@ -281,83 +315,105 @@ def GetUpdatedFiles(input_proto, output_proto, _config):
     # No commit footer is added for now. Can add more here if needed
 
 
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-_NAMES_FOR_AFDO_ARTIFACTS = {
-    toolchain_pb2.ORDERFILE: 'orderfile',
-    toolchain_pb2.KERNEL_AFDO: 'kernel_afdo',
-    toolchain_pb2.CHROME_AFDO: 'chrome_afdo'
+@faux.all_empty
+@validate.exists('sysroot.path')
+@validate.require('packages')
+@validate.validation_complete
+def EmergeWithLinting(input_proto, output_proto, _config):
+  """Emerge packages with linter features enabled and retrieves all findings.
+
+  Args:
+    input_proto (LinterRequest): The nput proto with package and sysroot info.
+    output_proto (LinterResponse): The output proto where findings are stored.
+    _config (api_config.ApiConfig): The API call config (unused).
+  """
+  packages = [
+      f'{package.category}/{package.package_name}'
+      for package in input_proto.packages]
+
+  # rm any existing lints from clang tidy
+  osutils.RmDir(TIDY_BASE_DIR, ignore_missing=True, sudo=True)
+  osutils.SafeMakedirs(TIDY_BASE_DIR, 0o777, sudo=True)
+
+  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
+  cros_build_lib.sudo_run(
+      emerge_cmd + packages,
+      preserve_env=True,
+      extra_env={
+          'ENABLE_RUST_CLIPPY': 1,
+          'WITH_TIDY': 'tricium',
+          'FEATURES': 'noclean'
+      }
+  )
+
+  # FIXME(b/195056381): default git-repo should be replaced with logic in
+  # build_linters recipe to detect the repo path for applied patches.
+  # As of 01-05-21 only platform2 is supported so this value works temporarily.
+  git_repo_path = '/mnt/host/source/src/platform2/'
+
+  linter_findings = _fetch_clippy_lints(git_repo_path)
+  linter_findings.extend(_fetch_tidy_lints(git_repo_path))
+  linter_findings = _filter_linter_findings(linter_findings, git_repo_path)
+  output_proto.findings.extend(linter_findings)
+
+
+LINTER_CODES = {
+    'clang_tidy': toolchain_pb2.LinterFinding.CLANG_TIDY,
+    'cargo_clippy': toolchain_pb2.LinterFinding.CARGO_CLIPPY
 }
 
 
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-# Using a function instead of a dict because we need to mock these
-# functions in unittest, and mock doesn't play well with a dict definition.
-def _GetMethodForUpdatingAFDOArtifacts(artifact_type):
-  return {
-      toolchain_pb2.ORDERFILE: toolchain_util.OrderfileUpdateChromeEbuild,
-      toolchain_pb2.KERNEL_AFDO: toolchain_util.AFDOUpdateKernelEbuild,
-      toolchain_pb2.CHROME_AFDO: toolchain_util.AFDOUpdateChromeEbuild
-  }[artifact_type]
+def _filter_linter_findings(findings, git_repo_path):
+  """Filters a findings to keep only those concerning modified lines."""
+  new_findings = []
+  new_lines = _get_added_lines({git_repo_path: 'HEAD'})
+  for finding in findings:
+    for loc in finding.locations:
+      for (addition_start, addition_end) in new_lines.get(loc.filepath, set()):
+        if addition_start <= loc.line_start < addition_end:
+          new_findings.append(finding)
+  return new_findings
 
 
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-def _UpdateEbuildWithAFDOArtifactsResponse(_input_proto, output_proto, _config):
-  """Add successful status to the faux response."""
-  output_proto.status = True
-
-
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-@faux.success(_UpdateEbuildWithAFDOArtifactsResponse)
-@faux.empty_error
-@validate.require('build_target.name')
-@validate.is_in('artifact_type', _NAMES_FOR_AFDO_ARTIFACTS)
-@validate.validation_complete
-def UpdateEbuildWithAFDOArtifacts(input_proto, output_proto, _config):
-  """Update Chrome or kernel ebuild with most recent unvetted artifacts.
+def _get_added_lines(git_repos):
+  """Parses the lines with additions from fit diff for the provided repos.
 
   Args:
-    input_proto (VerifyAFDOArtifactsRequest): The input proto
-    output_proto (VerifyAFDOArtifactsResponse): The output proto
-    _config (api_config.ApiConfig): The API call config.
+    git_repos: a dictionary mapping repo paths to hashes for `git diff`
+
+  Returns:
+    A dictionary mapping modified filepaths to sets of tuples where each
+    tuple is a (start_line, end_line) pair noting which lines were modified.
+    Note that start_line is inclusive, and end_line is exclusive.
   """
-  board = input_proto.build_target.name
-  update_method = _GetMethodForUpdatingAFDOArtifacts(input_proto.artifact_type)
-  output_proto.status = update_method(board)
+  new_lines = {}
+  file_path_pattern = re.compile(r'^\+\+\+ b/(?P<file_path>.*)$')
+  position_pattern = re.compile(
+      r'^@@ -\d+(?:,\d+)? \+(?P<line_num>\d+)(?:,(?P<lines_added>\d+))? @@')
+  for git_repo, git_hash in git_repos.items():
+    cmd = f'git -C {git_repo} diff -U0 {git_hash}^...{git_hash}'
+    diff = cros_build_lib.run(cmd, capture_output=True, shell=True,
+                              encoding='utf-8').output
+    current_file = ''
+    for line in diff.splitlines():
+      file_path_match = re.match(file_path_pattern, str(line))
+      if file_path_match:
+        current_file = file_path_match.group('file_path')
+        continue
+      position_match = re.match(position_pattern, str(line))
+      if position_match:
+        if current_file not in new_lines:
+          new_lines[current_file] = set()
+        line_num = int(position_match.group('line_num'))
+        line_count = position_match.group('lines_added')
+        line_count = int(line_count) if line_count is not None else 1
+        new_lines[current_file].add((line_num, line_num + line_count))
+  return new_lines
 
 
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-def _UploadVettedAFDOArtifactsResponse(_input_proto, output_proto, _config):
-  """Add successful status to the faux response."""
-  output_proto.status = True
-
-
-# TODO(crbug/1019868): Remove legacy code when cbuildbot builders are gone.
-@faux.success(_UploadVettedAFDOArtifactsResponse)
-@faux.empty_error
-@validate.require('build_target.name')
-@validate.is_in('artifact_type', _NAMES_FOR_AFDO_ARTIFACTS)
-@validate.validation_complete
-def UploadVettedAFDOArtifacts(input_proto, output_proto, _config):
-  """Upload a vetted orderfile to GS bucket.
-
-  Args:
-    input_proto (VerifyAFDOArtifactsRequest): The input proto
-    output_proto (VerifyAFDOArtifactsResponse): The output proto
-    _config (api_config.ApiConfig): The API call config.
-  """
-  board = input_proto.build_target.name
-  artifact_type = _NAMES_FOR_AFDO_ARTIFACTS[input_proto.artifact_type]
-  output_proto.status = toolchain_util.UploadAndPublishVettedAFDOArtifacts(
-      artifact_type, board)
-
-
-def _fetch_clippy_lints():
+def _fetch_clippy_lints(git_repo_path):
   """Get lints created by Cargo Clippy during emerge."""
   lints_dir = '/tmp/cargo_clippy'
-  # FIXME(b/195056381): default git-repo should be replaced with logic in
-  # build_linters recipe to detect the repo path for applied patches.
-  # As of 07-29-21 only platform2 is supported so this value works temporarily.
-  git_repo_path = '/mnt/host/source/src/platform2'
   findings = tricium_cargo_clippy.parse_files(lints_dir, git_repo_path)
   findings = tricium_cargo_clippy.filter_diagnostics(findings)
   findings_protos = []
@@ -374,24 +430,46 @@ def _fetch_clippy_lints():
     findings_protos.append(
         toolchain_pb2.LinterFinding(
             message=finding.message,
-            locations=location_protos
+            locations=location_protos,
+            linter=LINTER_CODES['cargo_clippy']
         )
     )
   return findings_protos
 
 
-@validate.exists('sysroot.path')
-@validate.require('packages')
-@validate.validation_complete
-def GetClippyLints(input_proto, output_proto, _config):
-  """Emerges the given packages and retrieves any findings from Cargo Clippy."""
-  emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
-  packages = [
-      f'{package.category}/{package.package_name}'
-      for package in input_proto.packages]
-  cros_build_lib.sudo_run(
-      emerge_cmd + packages,
-      preserve_env=True,
-      extra_env={'ENABLE_RUST_CLIPPY': 1}
-  )
-  output_proto.findings.extend(_fetch_clippy_lints())
+def _fetch_tidy_lints(git_repo_path):
+  """Get lints created by Clang Tidy during emerge."""
+
+  def resolve_file_path(file_path):
+    # Remove git repo from prefix
+    file_path = re.sub('^' + git_repo_path, '/', str(file_path))
+    # Remove ebuild work directories from prefix
+    # Such as: "**/<package>-9999/work/<package>-9999/"
+    #      or: "**/<package>-0.24.52-r9/work/<package>-0.24.52/"
+    return re.sub(r'(.*/)?([^/]+)-[^/]+/work/[^/]+/+', '', file_path)
+
+  lints = set()
+  for filename in os.listdir(TIDY_BASE_DIR):
+    if filename.endswith('.json'):
+      invocation_result = tricium_clang_tidy.parse_tidy_invocation(
+          TIDY_BASE_DIR / filename)
+      meta, complaints = invocation_result
+      assert not meta.exit_code, (
+          f'Invoking clang-tidy on {meta.lint_target} with flags '
+          f'{meta.invocation} exited with code {meta.exit_code}; '
+          f'output:\n{meta.stdstreams}')
+      lints.update(complaints)
+  return [
+      toolchain_pb2.LinterFinding(
+          message=lint.message,
+          locations=[
+              toolchain_pb2.LinterFindingLocation(
+                  filepath=resolve_file_path(lint.file_path),
+                  line_start=lint.line_number,
+                  line_end=lint.line_number
+              )
+          ],
+          linter=LINTER_CODES['clang_tidy']
+      )
+      for lint in tricium_clang_tidy.filter_tidy_lints(None, None, lints)
+  ]

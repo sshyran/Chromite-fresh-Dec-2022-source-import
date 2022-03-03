@@ -12,7 +12,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import remote_access
 
 
-@command.CommandDecorator('shell')
+@command.command_decorator('shell')
 class ShellCommand(command.CliCommand):
   """Opens a remote shell over SSH on the target device.
 
@@ -165,7 +165,6 @@ Quoting can be tricky; the rules are the same as with ssh:
 
   def Run(self):
     """Runs `cros shell`."""
-    self.options.Freeze()
     self._ReadOptions()
     try:
       return self._StartSsh()

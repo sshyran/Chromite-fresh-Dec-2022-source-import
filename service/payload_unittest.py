@@ -41,7 +41,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=src_image,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
@@ -60,7 +59,6 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=src_image,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
@@ -77,17 +75,23 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         src_image=None,
         dest_bucket='test',
         verify=True,
-        keyset=None,
         upload=True)
 
     payload_config.GeneratePayload()
 
-# TODO(crbug/1155212): Fix aliased enum value.
-# class PayloadUtilitiesTest(cros_test_lib.TestCase):
-#   """Test utilities related to payloads."""
-#
-#   def testImageType(self):
-#     """Test _ImageTypeToStr works."""
-#     # pylint: disable=protected-access
-#     self.assertEqual('image_type_base', payload._ImageTypeToStr(1))
-#     # pylint: enable=protected-access
+  def testMiniOS(self):
+    """Test the happy path on a miniOS payload."""
+
+    # Image def.
+    tgt_image = payload_pb2.UnsignedImage(
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
+
+    payload_config = payload.PayloadConfig(
+        tgt_image=tgt_image,
+        src_image=None,
+        dest_bucket='test',
+        minios=True,
+        verify=True,
+        upload=True)
+
+    payload_config.GeneratePayload()

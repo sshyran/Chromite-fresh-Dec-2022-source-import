@@ -4,7 +4,9 @@
 
 """Unittests for gob_util.py"""
 
+import base64
 import http.client
+import json
 import tempfile
 import time
 
@@ -45,23 +47,6 @@ class FakeHTTPResponse(object):
     return tuple(self.headers.items())
 
 
-class FakeHTTPConnection(object):
-  """Enough of a HTTPConnection result for FetchUrl."""
-
-  def __init__(self, req_url='/', req_method='GET', req_headers=None,
-               req_body=None, **kwargs):
-    self.kwargs = kwargs.copy()
-    self.req_params = {
-        'url': req_url,
-        'method': req_method,
-        'headers': req_headers,
-        'body': req_body,
-    }
-
-  def getresponse(self):
-    return FakeHTTPResponse(**self.kwargs)
-
-
 class GobTest(cros_test_lib.MockTestCase):
   """Unittests that use mocks."""
 
@@ -72,11 +57,11 @@ class GobTest(cros_test_lib.MockTestCase):
 
   def testUtf8Response(self):
     """Handle gerrit responses w/UTF8 in them."""
-    self.conn.return_value = FakeHTTPConnection(body=self.UTF8_DATA)
+    self.conn.return_value = FakeHTTPResponse(body=self.UTF8_DATA)
     gob_util.FetchUrl('', '')
 
   def testUtf8Response502(self):
-    self.conn.return_value = FakeHTTPConnection(body=self.UTF8_DATA, status=502)
+    self.conn.return_value = FakeHTTPResponse(body=self.UTF8_DATA, status=502)
 
     with self.assertRaises(gob_util.InternalGOBError):
       gob_util.FetchUrl('', '')
@@ -123,6 +108,32 @@ Too bad..."""
     ep.feed(html_data)
     ep.close()
     self.assertEqual(expected_parsed_data, ep.ParsedDiv())
+
+  def testCreateChange(self):
+    body = json.dumps({'change_num': 123456}).encode()
+    xss_protection_prefix = b")]}'\n"
+    body = xss_protection_prefix + body
+    self.conn.return_value = FakeHTTPResponse(body=body, status=200)
+    change_json = gob_util.CreateChange(
+        'some.git.url', 'project', 'branch', 'subject', True)
+    self.assertEqual(change_json['change_num'], 123456)
+
+  def testChangeEdit(self):
+    self.conn.return_value = FakeHTTPResponse(body={}, status=204)
+    gob_util.ChangeEdit('some.git.url', 123456, 'some/file/path',
+                        'some file contents')
+
+  def testPublishChangeEdit(self):
+    self.conn.return_value = FakeHTTPResponse(body={}, status=204)
+    gob_util.PublishChangeEdit('some.git.url', 123456)
+
+  def testGetFileContents(self):
+    expected_contents = 'some file contents'
+    body = base64.b64encode(expected_contents.encode())
+    self.conn.return_value = FakeHTTPResponse(body=body, status=200)
+    contents = gob_util.GetFileContentsOnHead('some.git.url',
+                                              'some/file/path')
+    self.assertEqual(contents, expected_contents)
 
 
 class GetCookieTests(cros_test_lib.TestCase):

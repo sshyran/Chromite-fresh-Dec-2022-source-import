@@ -8,7 +8,6 @@ import os
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib.build_target_lib import BuildTarget
-from chromite.lib.build_target_lib import InvalidNameError
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
@@ -32,15 +31,16 @@ class BuildTargetTest(cros_test_lib.TempDirTestCase):
     self.assertNotEqual(bt1, bt3)
     self.assertNotEqual(bt1, bt4)
 
-  def testInvalidName(self):
-    """Test invalid name check."""
-    with self.assertRaises(InvalidNameError):
-      BuildTarget('')
+  def testHostTarget(self):
+    """Test host target with empty name."""
+    target = BuildTarget('')
+    self.assertTrue(target.is_host())
 
   def testNormalRoot(self):
     """Test normalized sysroot path."""
     target = BuildTarget('board', build_root=self.sysroot)
     self.assertEqual(self.sysroot, target.root)
+    self.assertFalse(target.is_host())
 
   def testDenormalizedRoot(self):
     """Test a non-normal sysroot path."""

@@ -20,7 +20,7 @@ class PerfUploadTestCase(cros_test_lib.MockTestCase):
 
   def setUp(self):
     presentation_info = perf_uploader.PresentationInfo(
-        master_name='ChromeOSPerf',
+        main_name='ChromeOSPerf',
         test_name='TestName',
     )
     self.PatchObject(perf_uploader, '_GetPresentationInfo',

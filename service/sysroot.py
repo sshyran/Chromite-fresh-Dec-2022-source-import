@@ -10,12 +10,10 @@ import multiprocessing
 import os
 import shutil
 import tempfile
-from typing import List, NamedTuple
+from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING
 import urllib
 
-from chromite.lib import build_target_lib
 from chromite.lib import cache
-from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
@@ -23,6 +21,11 @@ from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
 from chromite.utils import metrics
+
+if TYPE_CHECKING:
+  from chromite.lib import binpkg
+  from chromite.lib import build_target_lib
+  from chromite.lib import chroot_lib
 
 
 class Error(Exception):
@@ -48,28 +51,37 @@ class UpdateChrootError(Error):
 class SetupBoardRunConfig(object):
   """Value object for full setup board run configurations."""
 
-  def __init__(self, set_default=False, force=False, usepkg=True, jobs=None,
-               regen_configs=False, quiet=False, update_toolchain=True,
-               upgrade_chroot=True, init_board_pkgs=True, local_build=False,
-               toolchain_changed=False, package_indexes=None,
-               expanded_binhost_inheritance: bool = False):
+  def __init__(
+      self,
+      set_default: bool = False,
+      force: bool = False,
+      usepkg: bool = True,
+      jobs: Optional[int] = None,
+      regen_configs: bool = False,
+      quiet: bool = False,
+      update_toolchain: bool = True,
+      upgrade_chroot: bool = True,
+      init_board_pkgs: bool = True,
+      local_build: bool = False,
+      toolchain_changed: bool = False,
+      package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
+      expanded_binhost_inheritance: bool = False):
     """Initialize method.
 
     Args:
-      set_default (bool): Whether to set the passed board as the default.
-      force (bool): Force a new sysroot creation when it already exists.
-      usepkg (bool): Whether to use binary packages to bootstrap.
-      jobs (int): Max number of simultaneous packages to build.
-      regen_configs (bool): Whether to only regen the configs.
-      quiet (bool): Whether to print notification when sysroot exists.
-      update_toolchain (bool): Update the toolchain?
-      upgrade_chroot (bool): Upgrade the chroot before building?
-      init_board_pkgs (bool): Emerging packages to sysroot?
-      local_build (bool): Bootstrap only from local packages?
-      toolchain_changed (bool): Has a toolchain change occurred? Implies
-        'force'.
-      package_indexes (list[PackageIndexInfo]): List of information about
-        available prebuilts, youngest first, or None.
+      set_default: Whether to set the passed board as the default.
+      force: Force a new sysroot creation when it already exists.
+      usepkg: Whether to use binary packages to bootstrap.
+      jobs: Max number of simultaneous packages to build.
+      regen_configs: Whether to only regen the configs.
+      quiet: Whether to print notification when sysroot exists.
+      update_toolchain: Update the toolchain?
+      upgrade_chroot: Upgrade the chroot before building?
+      init_board_pkgs: Emerging packages to sysroot?
+      local_build: Bootstrap only from local packages?
+      toolchain_changed: Has a toolchain change occurred? Implies 'force'.
+      package_indexes: List of information about available prebuilts, youngest
+          first, or None.
       expanded_binhost_inheritance: Allow expanded binhost inheritance.
     """
     self.set_default = set_default
@@ -85,11 +97,11 @@ class SetupBoardRunConfig(object):
     self.package_indexes = package_indexes or []
     self.expanded_binhost_inheritance = expanded_binhost_inheritance
 
-  def GetUpdateChrootArgs(self):
+  def GetUpdateChrootArgs(self) -> List[str]:
     """Create a list containing the relevant update_chroot arguments.
 
     Returns:
-      list[str]
+      The list of arguments
     """
     args = []
     if self.usepkg:
@@ -109,34 +121,37 @@ class SetupBoardRunConfig(object):
 class BuildPackagesRunConfig(object):
   """Value object to hold build packages run configs."""
 
-  def __init__(self,
-               usepkg=True,
-               install_debug_symbols=False,
-               packages=None,
-               use_flags=None,
-               use_goma=False,
-               incremental_build=True,
-               package_indexes=None,
-               expanded_binhosts: bool = False,
-               setup_board: bool = True,
-               dryrun: bool = False):
+  def __init__(
+      self,
+      usepkg: bool = True,
+      install_debug_symbols: bool = False,
+      packages: Optional[List[str]] = None,
+      use_flags: Optional[List[str]] = None,
+      use_goma: bool = False,
+      use_remoteexec: bool = False,
+      incremental_build: bool = True,
+      package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
+      expanded_binhosts: bool = False,
+      setup_board: bool = True,
+      dryrun: bool = False):
     """Init method.
 
     Args:
-      usepkg (bool): Whether to use binpkgs or build from source. False
-        currently triggers a local build, which will enable local reuse.
-      install_debug_symbols (bool): Whether to include the debug symbols for all
+      usepkg: Whether to use binpkgs or build from source. False currently
+        triggers a local build, which will enable local reuse.
+      install_debug_symbols: Whether to include the debug symbols for all
         packages.
-      packages (list[str]|None): The list of packages to install, by default
-        install all packages for the target.
-      use_flags (list[str]|None): A list of use flags to set.
-      use_goma (bool): Whether to enable goma.
-      incremental_build (bool): Whether to treat the build as an incremental
-        build or a fresh build. Always treating it as an incremental build is
-        safe, but certain operations can be faster when we know we are doing
-        a fresh build.
-      package_indexes (list[PackageIndexInfo]): List of information about
-        available prebuilts, youngest first, or None.
+      packages: The list of packages to install, by default install all packages
+        for the target.
+      use_flags: A list of use flags to set.
+      use_goma: Whether to enable goma.
+      use_remoteexec: Whether to use RBE for remoteexec.
+      incremental_build: Whether to treat the build as an incremental build or a
+        fresh build. Always treating it as an incremental build is safe, but
+        certain operations can be faster when we know we are doing a fresh
+        build.
+      package_indexes: List of information about available prebuilts, youngest
+        first, or None.
       expanded_binhosts: Whether to enable/disable the expanded binhost
         inheritance feature for the sysroot.
       setup_board: Whether to run setup_board in build_packages.
@@ -147,13 +162,14 @@ class BuildPackagesRunConfig(object):
     self.packages = packages
     self.use_flags = use_flags
     self.use_goma = use_goma
+    self.use_remoteexec = use_remoteexec
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
     self.expanded_binhosts = expanded_binhosts
     self.setup_board = setup_board
     self.dryrun = dryrun
 
-  def GetBuildPackagesArgs(self):
+  def GetBuildPackagesArgs(self) -> List[str]:
     """Get the build_packages script arguments."""
     # Defaults for the builder.
     # TODO(saklein): Parametrize/rework the defaults when build_packages is
@@ -174,6 +190,9 @@ class BuildPackagesRunConfig(object):
     if self.use_goma:
       args.append('--run_goma')
 
+    if self.use_remoteexec:
+      args.append('--run_remoteexec')
+
     if not self.is_incremental:
       args.append('--nowithrevdeps')
 
@@ -193,11 +212,11 @@ class BuildPackagesRunConfig(object):
 
     return args
 
-  def HasUseFlags(self):
+  def HasUseFlags(self) -> bool:
     """Check if we have use flags."""
     return bool(self.use_flags)
 
-  def GetUseFlags(self):
+  def GetUseFlags(self) -> Optional[str]:
     """Get the use flags as a single string."""
     use_flags = self.use_flags
     if use_flags:
@@ -212,7 +231,7 @@ class BuildPackagesRunConfig(object):
 
     return None
 
-  def GetEnv(self):
+  def GetEnv(self) -> Dict[str, str]:
     """Get the env from this config."""
     env = {}
     if self.HasUseFlags():
@@ -221,6 +240,9 @@ class BuildPackagesRunConfig(object):
     if self.use_goma:
       env['USE_GOMA'] = 'true'
 
+    if self.use_remoteexec:
+      env['USE_REMOTEEXEC'] = 'true'
+
     if self.package_indexes:
       env['PORTAGE_BINHOST'] = ' '.join(
           x.location for x in reversed(self.package_indexes))
@@ -228,15 +250,17 @@ class BuildPackagesRunConfig(object):
     return env
 
 
-def SetupBoard(target, accept_licenses=None, run_configs=None):
+def SetupBoard(target: 'build_target_lib.BuildTarget',
+               accept_licenses: Optional[str] = None,
+               run_configs: Optional[SetupBoardRunConfig] = None) -> None:
   """Run the full process to setup a board's sysroot.
 
   This is the entry point to run the setup_board script.
 
   Args:
-    target (build_target_lib.BuildTarget): The build target configuration.
-    accept_licenses (str|None): The additional licenses to accept.
-    run_configs (SetupBoardRunConfig): The run configs.
+    target: The build target configuration.
+    accept_licenses: The additional licenses to accept.
+    run_configs: The run configs.
 
   Raises:
     sysroot_lib.ToolchainInstallError when the toolchain fails to install.
@@ -257,26 +281,27 @@ def SetupBoard(target, accept_licenses=None, run_configs=None):
   InstallToolchain(target, sysroot, run_configs)
 
 
-def Create(target, run_configs, accept_licenses):
+def Create(target: 'build_target_lib.BuildTarget',
+           run_configs: SetupBoardRunConfig,
+           accept_licenses: Optional[str]) -> sysroot_lib.Sysroot:
   """Create a sysroot.
 
   This entry point is the subset of the full setup process that does the
   creation and configuration of a sysroot, including installing portage.
 
   Args:
-    target (build_target.BuildTarget): The build target being installed in the
-      sysroot being created.
-    run_configs (SetupBoardRunConfig): The run configs.
-    accept_licenses (str|None): The additional licenses to accept.
+    target: The build target being installed in the sysroot being created.
+    run_configs: The run configs.
+    accept_licenses: The additional licenses to accept.
   """
   cros_build_lib.AssertInsideChroot()
 
   sysroot = sysroot_lib.Sysroot(target.root)
 
   if sysroot.Exists() and not run_configs.force and not run_configs.quiet:
-    logging.warning('Board output directory already exists: %s\n'
-                    'Use --force to clobber the board root and start again.',
-                    sysroot.path)
+    logging.warning(
+        'Board output directory already exists: %s\n'
+        'Use --force to clobber the board root and start again.', sysroot.path)
 
   # Override regen_configs setting to force full setup run if the sysroot does
   # not exist.
@@ -286,8 +311,10 @@ def Create(target, run_configs, accept_licenses):
   # chroot update is explicitly disabled.
   if run_configs.update_chroot:
     logging.info('Updating chroot.')
-    update_chroot = [os.path.join(constants.CROSUTILS_DIR, 'update_chroot'),
-                     '--toolchain_boards', target.name]
+    update_chroot = [
+        os.path.join(constants.CROSUTILS_DIR, 'update_chroot'),
+        '--toolchain_boards', target.name
+    ]
     update_chroot += run_configs.GetUpdateChrootArgs()
     try:
       cros_build_lib.run(update_chroot)
@@ -332,27 +359,30 @@ def Create(target, run_configs, accept_licenses):
   return sysroot
 
 
-def GenerateArchive(output_dir, build_target_name, pkg_list):
+def GenerateArchive(output_dir: str, build_target_name: str,
+                    pkg_list: List[str]) -> str:
   """Generate a sysroot tarball for informational builders.
 
   Args:
-    output_dir (string): Directory to contain the created the sysroot.
-    build_target_name (string): The build target for the sysroot being created.
-    pkg_list (list[string]|None): List of 'category/package' package strings.
+    output_dir: Directory to contain the created the sysroot.
+    build_target_name: The build target for the sysroot being created.
+    pkg_list: List of 'category/package' package strings.
 
   Returns:
     Path to the sysroot tar file.
   """
-  cmd = ['cros_generate_sysroot',
-         '--out-file', constants.TARGET_SYSROOT_TAR,
-         '--out-dir', output_dir,
-         '--board', build_target_name,
-         '--package', ' '.join(pkg_list)]
+  cmd = [
+      'cros_generate_sysroot', '--out-file', constants.TARGET_SYSROOT_TAR,
+      '--out-dir', output_dir, '--board', build_target_name, '--package',
+      ' '.join(pkg_list)
+  ]
   cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT)
   return os.path.join(output_dir, constants.TARGET_SYSROOT_TAR)
 
 
-def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
+def CreateSimpleChromeSysroot(chroot: 'chroot_lib.Chroot', _sysroot_class,
+                              build_target: 'build_target_lib.BuildTarget',
+                              output_dir: str) -> str:
   """Create a sysroot for SimpleChrome to use.
 
   Args:
@@ -364,10 +394,16 @@ def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
   Returns:
     Path to the sysroot tar file.
   """
-  cmd = ['cros_generate_sysroot', '--out-dir', '/tmp', '--board',
-         build_target.name, '--deps-only', '--package', constants.CHROME_CP]
-  cros_build_lib.run(cmd, cwd=constants.SOURCE_ROOT, enter_chroot=True,
-                     chroot_args=chroot.get_enter_args(), extra_env=chroot.env)
+  cmd = [
+      'cros_generate_sysroot', '--out-dir', '/tmp', '--board',
+      build_target.name, '--deps-only', '--package', constants.CHROME_CP
+  ]
+  cros_build_lib.run(
+      cmd,
+      cwd=constants.SOURCE_ROOT,
+      enter_chroot=True,
+      chroot_args=chroot.get_enter_args(),
+      extra_env=chroot.env)
 
   # Move the artifact out of the chroot.
   sysroot_tar_path = os.path.join(
@@ -376,17 +412,19 @@ def CreateSimpleChromeSysroot(chroot, _sysroot_class, build_target, output_dir):
   return os.path.join(output_dir, constants.CHROME_SYSROOT_TAR)
 
 
-def CreateChromeEbuildEnv(chroot, sysroot_class, _build_target, output_dir):
+def CreateChromeEbuildEnv(chroot: 'chroot_lib.Chroot',
+                          sysroot_class: sysroot_lib.Sysroot, _build_target,
+                          output_dir: str) -> Optional[str]:
   """Generate Chrome ebuild environment.
 
   Args:
     chroot: The chroot class used for these artifacts.
-    sysroot_class (sysroot_lib.Sysroot): The sysroot where the original
-      environment archive can be found.
-    output_dir (str): Where the result should be stored.
+    sysroot_class: The sysroot where the original environment archive can be
+      found.
+    output_dir: Where the result should be stored.
 
   Returns:
-    str: The path to the archive, or None.
+    The path to the archive, or None.
   """
   pkg_dir = chroot.full_path(sysroot_class.path, portage_util.VDB_PATH)
   files = glob.glob(os.path.join(pkg_dir, constants.CHROME_CP) + '-*')
@@ -405,26 +443,25 @@ def CreateChromeEbuildEnv(chroot, sysroot_class, _build_target, output_dir):
     # Convert from bzip2 to tar format.
     bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
     tempdir_tar_path = os.path.join(tempdir, constants.CHROME_ENV_FILE)
-    cros_build_lib.run([bzip2, '-d', env_bzip, '-c'],
-                       stdout=tempdir_tar_path)
+    cros_build_lib.run([bzip2, '-d', env_bzip, '-c'], stdout=tempdir_tar_path)
 
     cros_build_lib.CreateTarball(result_path, tempdir)
 
   return result_path
 
 
-def InstallToolchain(target, sysroot, run_configs):
+def InstallToolchain(target: 'build_target_lib.BuildTarget',
+                     sysroot: sysroot_lib.Sysroot,
+                     run_configs: SetupBoardRunConfig) -> None:
   """Update the toolchain to a sysroot.
 
   This entry point just installs the target's toolchain into the sysroot.
   Everything else must have been done already for this to be successful.
 
   Args:
-    target (build_target_lib.BuildTarget): The target whose toolchain is being
-      installed.
-    sysroot (sysroot_lib.Sysroot): The sysroot where the toolchain is being
-      installed.
-    run_configs (SetupBoardRunConfig): The run configs.
+    target: The target whose toolchain is being installed.
+    sysroot: The sysroot where the toolchain is being installed.
+    run_configs: The run configs.
   """
   cros_build_lib.AssertInsideChroot()
   if not sysroot.Exists():
@@ -440,20 +477,22 @@ def InstallToolchain(target, sysroot, run_configs):
     _InstallToolchain(sysroot, target, local_init=local_init)
 
 
-def BuildPackages(target, sysroot, run_configs):
+def BuildPackages(target: 'build_target_lib.BuildTarget',
+                  sysroot: sysroot_lib.Sysroot,
+                  run_configs: BuildPackagesRunConfig) -> None:
   """Build and install packages into a sysroot.
 
   Args:
-    target (build_target_lib.BuildTarget): The target whose packages are being
-      installed.
-    sysroot (sysroot_lib.Sysroot): The sysroot where the packages are being
-      installed.
-    run_configs (BuildPackagesRunConfig): The run configs.
+    target: The target whose packages are being installed.
+    sysroot: The sysroot where the packages are being installed.
+    run_configs: The run configs.
   """
   cros_build_lib.AssertInsideChroot()
 
-  cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_packages'),
-         '--board', target.name, '--board_root', sysroot.path]
+  cmd = [
+      os.path.join(constants.CROSUTILS_DIR, 'build_packages'), '--board',
+      target.name, '--board_root', sysroot.path
+  ]
   cmd += run_configs.GetBuildPackagesArgs()
 
   extra_env = run_configs.GetEnv()
@@ -472,40 +511,41 @@ def BuildPackages(target, sysroot, run_configs):
           str(e), e.result, exception=e, packages=failed_pkgs)
 
 
-def _CreateSysrootSkeleton(sysroot):
+def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
   """Create the sysroot skeleton.
 
   Dependencies: None.
   Creates the sysroot directory structure and installs the portage hooks.
 
   Args:
-    sysroot (sysroot_lib.Sysroot): The sysroot.
+    sysroot: The sysroot.
   """
   sysroot.CreateSkeleton()
 
 
-def _InstallConfigs(sysroot, target):
+def _InstallConfigs(sysroot: sysroot_lib.Sysroot,
+                    target: 'build_target_lib.BuildTarget') -> None:
   """Install standalone configuration files into the sysroot.
 
   Dependencies: The sysroot exists (i.e. CreateSysrootSkeleton).
   Installs the main, board setup, and user make.conf files.
 
   Args:
-    sysroot (sysroot_lib.Sysroot): The sysroot.
-    target (build_target.BuildTarget): The build target being setup in
-      the sysroot.
+    sysroot: The sysroot.
+    target: The build target being setup in the sysroot.
   """
   sysroot.InstallMakeConf()
   sysroot.InstallMakeConfBoardSetup(target.name)
   sysroot.InstallMakeConfUser()
 
 
-def _InstallPortageConfigs(sysroot,
-                           target,
-                           accept_licenses,
-                           local_build,
-                           package_indexes=None,
-                           expanded_binhost_inheritance: bool = False):
+def _InstallPortageConfigs(
+    sysroot: sysroot_lib.Sysroot,
+    target: 'build_target_lib.BuildTarget',
+    accept_licenses: Optional[str],
+    local_build: bool,
+    package_indexes: List['binpkg.PackageIndexInfo'] = None,
+    expanded_binhost_inheritance: bool = False) -> None:
   """Install portage wrappers and configurations.
 
   Dependencies: make.conf.board_setup (InstallConfigs).
@@ -513,13 +553,12 @@ def _InstallPortageConfigs(sysroot,
   Refresh the workon symlinks to compensate for crbug.com/679831.
 
   Args:
-    sysroot (sysroot_lib.Sysroot): The sysroot.
-    target (build_target.BuildTarget): The build target being installed
-      in the sysroot.
-    accept_licenses (str): Additional accepted licenses as a string.
-    local_build (bool): If the build is a local only build.
-    package_indexes (list[PackageIndexInfo]): List of information about
-      available prebuilts, youngest first, or None.
+    sysroot: The sysroot.
+    target: The build target being installed in the sysroot.
+    accept_licenses: Additional accepted licenses as a string.
+    local_build: If the build is a local only build.
+    package_indexes: List of information about available prebuilts, youngest
+      first, or None.
     expanded_binhost_inheritance: Whether to allow expanded binhost inheritance.
   """
   sysroot.CreateAllWrappers(friendly_name=target.name)
@@ -533,7 +572,9 @@ def _InstallPortageConfigs(sysroot,
       expanded_binhost_inheritance=expanded_binhost_inheritance)
 
 
-def _InstallToolchain(sysroot, target, local_init=True):
+def _InstallToolchain(sysroot: sysroot_lib.Sysroot,
+                      target: 'build_target_lib.BuildTarget',
+                      local_init: bool = True) -> None:
   """Install toolchain and packages.
 
   Dependencies: Portage configs and wrappers have been installed
@@ -541,16 +582,15 @@ def _InstallToolchain(sysroot, target, local_init=True):
   Install the toolchain and the implicit dependencies.
 
   Args:
-    sysroot (sysroot_lib.Sysroot): The sysroot to install to.
-    target (build_target.BuildTarget): The build target whose toolchain is
-      being installed.
-    local_init (bool): Whether to use local packages to bootstrap implicit
+    sysroot: The sysroot to install to.
+    target: The build target whose toolchain is being installed.
+    local_init: Whether to use local packages to bootstrap implicit
       dependencies.
   """
   sysroot.UpdateToolchain(target.name, local_init=local_init)
 
 
-def _RefreshWorkonSymlinks(target, sysroot):
+def _RefreshWorkonSymlinks(target: str, sysroot: sysroot_lib.Sysroot) -> None:
   """Force refresh the workon symlinks.
 
   Create an instance of the WorkonHelper, which will recreate all symlinks
@@ -562,26 +602,27 @@ def _RefreshWorkonSymlinks(target, sysroot):
   instantiated since it refreshes the symlinks in its __init__.
 
   Args:
-    target (str): The build target name.
-    sysroot (sysroot_lib.Sysroot): The board's sysroot.
+    target: The build target name.
+    sysroot: The board's sysroot.
   """
   workon_helper.WorkonHelper(sysroot.path, friendly_name=target)
 
 
-def _ChooseProfile(target, sysroot):
+def _ChooseProfile(target: 'build_target_lib.BuildTarget',
+                   sysroot: sysroot_lib.Sysroot) -> None:
   """Helper function to execute cros_choose_profile.
 
   TODO(saklein) Refactor cros_choose_profile to avoid needing the run
   call here, and by extension this method all together.
 
   Args:
-    target (build_target_lib.BuildTarget): The build target whose profile is
-      being chosen.
-    sysroot (sysroot_lib.Sysroot): The sysroot for which the profile is
-      being chosen.
+    target: The build target whose profile is being chosen.
+    sysroot: The sysroot for which the profile is being chosen.
   """
-  choose_profile = ['cros_choose_profile', '--board', target.name,
-                    '--board-root', sysroot.path]
+  choose_profile = [
+      'cros_choose_profile', '--board', target.name, '--board-root',
+      sysroot.path
+  ]
   if target.profile:
     # Chooses base by default, only override when we have a passed param.
     choose_profile += ['--profile', target.profile]
@@ -594,10 +635,10 @@ def _ChooseProfile(target, sysroot):
     raise e
 
 
-def BundleDebugSymbols(chroot: chroot_lib.Chroot,
+def BundleDebugSymbols(chroot: 'chroot_lib.Chroot',
                        sysroot_class: sysroot_lib.Sysroot,
-                       _build_target: build_target_lib.BuildTarget,
-                       output_dir: str) -> str:
+                       _build_target: 'build_target_lib.BuildTarget',
+                       output_dir: str) -> Optional[str]:
   """Bundle debug symbols into a tarball for importing into GCE.
 
   Bundle the debug symbols found in the sysroot into a .tgz. This assumes
@@ -644,10 +685,10 @@ def BundleDebugSymbols(chroot: chroot_lib.Chroot,
     return None
 
 
-def BundleBreakpadSymbols(chroot: chroot_lib.Chroot,
+def BundleBreakpadSymbols(chroot: 'chroot_lib.Chroot',
                           sysroot_class: sysroot_lib.Sysroot,
-                          build_target: build_target_lib.BuildTarget,
-                          output_dir: str) -> str:
+                          build_target: 'build_target_lib.BuildTarget',
+                          output_dir: str) -> Optional[str]:
   """Bundle breakpad debug symbols into a tarball for importing into GCE.
 
   Call the GenerateBreakpadSymbols function and archive this into a tar.gz.
@@ -676,8 +717,8 @@ def BundleBreakpadSymbols(chroot: chroot_lib.Chroot,
     # materialize and consume all entries so that all are copied to
     # dest dir and complete list of all symbol files is returned.
     sym_file_list = list(
-        GatherSymbolFiles(tempdir=symbol_tmpdir, destdir=dest_tmpdir,
-                          paths=[breakpad_dir]))
+        GatherSymbolFiles(
+            tempdir=symbol_tmpdir, destdir=dest_tmpdir, paths=[breakpad_dir]))
 
     if not sym_file_list:
       logging.warning('No sym files found in %s.', breakpad_dir)
@@ -712,8 +753,8 @@ class SymbolFileTuple(NamedTuple):
   source_file_name: str
 
 
-def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
-                            build_target: build_target_lib.BuildTarget,
+def GenerateBreakpadSymbols(chroot: 'chroot_lib.Chroot',
+                            build_target: 'build_target_lib.BuildTarget',
                             debug: bool) -> cros_build_lib.CommandResult:
   """Generate breakpad (go/breakpad) symbols for debugging.
 
@@ -730,30 +771,28 @@ def GenerateBreakpadSymbols(chroot: chroot_lib.Chroot,
   # and that don't help with breakpad debugging (see https://crbug.com/213670).
   exclude_dirs = ['firmware']
 
-  cmd = [
-      'cros_generate_breakpad_symbols'
-  ]
+  cmd = ['cros_generate_breakpad_symbols']
   if debug:
     cmd += ['--debug']
 
   # Execute for board in parallel with half # of cpus available to avoid
   # starving other parallel processes on the same machine.
   cmd += [
-      '--board=%s' % build_target.name,
-      '--jobs', str(max(1, multiprocessing.cpu_count() // 2))
+      '--board=%s' % build_target.name, '--jobs',
+      str(max(1,
+              multiprocessing.cpu_count() // 2))
   ]
   cmd += ['--exclude-dir=%s' % x for x in exclude_dirs]
 
   logging.info('Generating breakpad symbols: %s.', cmd)
   result = cros_build_lib.run(
-      cmd,
-      enter_chroot=True,
-      chroot_args=chroot.get_enter_args())
+      cmd, enter_chroot=True, chroot_args=chroot.get_enter_args())
   return result
 
 
-def GatherSymbolFiles(tempdir:str, destdir:str,
-                      paths: List[str]) -> List[SymbolFileTuple]:
+def GatherSymbolFiles(
+    tempdir: str, destdir: str,
+    paths: List[str]) -> Generator[SymbolFileTuple, None, None]:
   """Locate symbol files in |paths|
 
   This generator function searches all paths for .sym files and copies them to
@@ -781,8 +820,8 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
   Yields:
     A SymbolFileTuple for every symbol file found in paths.
   """
-  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s',
-               tempdir, destdir, paths)
+  logging.info('GatherSymbolFiles tempdir %s destdir %s paths %s', tempdir,
+               destdir, paths)
   for p in paths:
     o = urllib.parse.urlparse(p)
     if o.scheme:
@@ -804,8 +843,8 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
               # path's dirname before copying.
               os.makedirs(os.path.join(destdir, os.path.dirname(relative_path)))
               shutil.copy(filename, os.path.join(destdir, relative_path))
-            yield SymbolFileTuple(relative_path=relative_path,
-                                  source_file_name=filename)
+            yield SymbolFileTuple(
+                relative_path=relative_path, source_file_name=filename)
 
     elif cros_build_lib.IsTarball(p):
       tardir = tempfile.mkdtemp(dir=tempdir)
@@ -836,7 +875,7 @@ def GatherSymbolFiles(tempdir:str, destdir:str,
       # of the directory.
       if p.endswith('.sym'):
         shutil.copy(p, destdir)
-        yield SymbolFileTuple(relative_path=os.path.basename(p),
-                              source_file_name=p)
+        yield SymbolFileTuple(
+            relative_path=os.path.basename(p), source_file_name=p)
     else:
       raise ValueError('Unexpected input to GatherSymbolFiles: ', p)

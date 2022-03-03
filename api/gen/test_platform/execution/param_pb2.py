@@ -11,6 +11,7 @@ from chromite.third_party.google.protobuf import symbol_database as _symbol_data
 _sym_db = _symbol_database.Default()
 
 
+from chromite.api.gen.chromiumos.build.api import container_metadata_pb2 as chromiumos_dot_build_dot_api_dot_container__metadata__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZAgo.chromium.org/chromiumos/infra/proto/go/test_platform/execution',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#test_platform/execution/param.proto\x12\x17test_platform.execution\"\x1f\n\x05Param\x12\x16\n\x0eupload_crashes\x18\x01 \x01(\x08\x42\x43ZAgo.chromium.org/chromiumos/infra/proto/go/test_platform/executionb\x06proto3'
-)
+  serialized_pb=b'\n#test_platform/execution/param.proto\x12\x17test_platform.execution\x1a-chromiumos/build/api/container_metadata.proto\"g\n\x05Param\x12\x16\n\x0eupload_crashes\x18\x01 \x01(\x08\x12\x46\n\x14\x63ontainer_image_info\x18\x08 \x01(\x0b\x32(.chromiumos.build.api.ContainerImageInfoBCZAgo.chromium.org/chromiumos/infra/proto/go/test_platform/executionb\x06proto3'
+  ,
+  dependencies=[chromiumos_dot_build_dot_api_dot_container__metadata__pb2.DESCRIPTOR,])
 
 
 
@@ -40,6 +42,13 @@ _PARAM = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='container_image_info', full_name='test_platform.execution.Param.container_image_info', index=1,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -52,10 +61,11 @@ _PARAM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=64,
-  serialized_end=95,
+  serialized_start=111,
+  serialized_end=214,
 )
 
+_PARAM.fields_by_name['container_image_info'].message_type = chromiumos_dot_build_dot_api_dot_container__metadata__pb2._CONTAINERIMAGEINFO
 DESCRIPTOR.message_types_by_name['Param'] = _PARAM
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

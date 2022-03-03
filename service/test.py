@@ -15,7 +15,6 @@ from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING
 
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
-from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
@@ -23,10 +22,13 @@ from chromite.lib import image_lib
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
 from chromite.lib import portage_util
-from chromite.lib import sysroot_lib
 from chromite.utils import code_coverage_util
 
 if TYPE_CHECKING:
+  from chromite.cbuildbot import goma_util
+  from chromite.lib import build_target_lib
+  from chromite.lib import chroot_lib
+  from chromite.lib import sysroot_lib
   from chromite.lib.parser import package_info
 
 
@@ -57,35 +59,40 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
-def BuildTargetUnitTest(build_target,
-                        chroot,
-                        packages=None,
-                        blocklist=None,
-                        was_built=True,
-                        code_coverage=False,
-                        testable_packages_optional=False,
-                        filter_only_cros_workon: bool = False):
+def BuildTargetUnitTest(
+    build_target: 'build_target_lib.BuildTarget',
+    chroot: 'chroot_lib.Chroot',
+    packages: Optional[List[str]] = None,
+    blocklist: Optional[List[str]] = None,
+    was_built: bool = True,
+    code_coverage: bool = False,
+    testable_packages_optional: bool = False,
+    filter_only_cros_workon: bool = False) -> BuildTargetUnitTestResult:
   """Run the ebuild unit tests for the target.
 
   Args:
-    build_target (build_target_lib.BuildTarget): The build target.
-    chroot (chroot_lib.Chroot): The chroot where the tests are running.
-    packages (list[str]|None): Packages to be tested. If none, uses all testable
-      packages.
-    blocklist (list[str]|None): Tests to skip.
-    was_built (bool): Whether packages were built.
-    code_coverage (bool): Whether to produce code coverage data.
-    testable_packages_optional (bool): Whether to allow no testable packages to
-      be found.
-    filter_only_cros_workon (bool): Whether to filter out non-cros_workon
-      packages from input package list.
+    build_target: The build target.
+    chroot: The chroot where the tests are running.
+    packages: Packages to be tested. If none, uses all testable packages.
+    blocklist: Tests to skip.
+    was_built: Whether packages were built.
+    code_coverage: Whether to produce code coverage data.
+    testable_packages_optional: Whether to allow no testable packages to be
+      found.
+    filter_only_cros_workon: Whether to filter out non-cros_workon packages from
+      input package list.
 
   Returns:
     BuildTargetUnitTestResult
   """
   # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
-  cmd = ['cros_run_unit_tests', '--board', build_target.name]
+  cmd = ['cros_run_unit_tests']
+
+  if build_target.is_host():
+    cmd.extend(['--host'])
+  else:
+    cmd.extend(['--board', build_target.name])
 
   if packages:
     cmd.extend(['--packages', ' '.join(packages)])
@@ -126,13 +133,18 @@ def BuildTargetUnitTest(build_target,
   return BuildTargetUnitTestResult(result.returncode, failed_pkgs)
 
 
-def BuildTargetUnitTestTarball(chroot, sysroot, result_path):
+def BuildTargetUnitTestTarball(chroot: 'chroot_lib.Chroot',
+                               sysroot: 'sysroot_lib.Sysroot',
+                               result_path: str) -> Optional[str]:
   """Build the unittest tarball.
 
   Args:
-    chroot (chroot_lib.Chroot): Chroot where the tests were run.
-    sysroot (sysroot_lib.Sysroot): The sysroot where the tests were run.
-    result_path (str): The directory where the archive should be created.
+    chroot: Chroot where the tests were run.
+    sysroot: The sysroot where the tests were run.
+    result_path: The directory where the archive should be created.
+
+  Returns:
+    The tarball path or None.
   """
   tarball = 'unit_tests.tar'
   tarball_path = os.path.join(result_path, tarball)
@@ -152,15 +164,17 @@ def BuildTargetUnitTestTarball(chroot, sysroot, result_path):
   return tarball_path if result.returncode == 0 else None
 
 
-def BundleHwqualTarball(board, version, chroot, sysroot, result_path):
+def BundleHwqualTarball(board: str, version: str, chroot: 'chroot_lib.Chroot',
+                        sysroot: 'sysroot_lib.Sysroot',
+                        result_path: str) -> Optional[str]:
   """Build the hwqual tarball.
 
   Args:
-    board (str): The board name.
-    version (str): The version string to use for the image.
-    chroot (chroot_lib.Chroot): Chroot where the tests were run.
-    sysroot (sysroot_lib.Sysroot): The sysroot where the tests were run.
-    result_path (str): The directory where the archive should be created.
+    board: The board name.
+    version: The version string to use for the image.
+    chroot: Chroot where the tests were run.
+    sysroot: The sysroot where the tests were run.
+    result_path: The directory where the archive should be created.
 
   Returns:
     The output path or None.
@@ -204,14 +218,14 @@ def BundleHwqualTarball(board, version, chroot, sysroot, result_path):
   return artifact_path
 
 
-def DebugInfoTest(sysroot_path):
+def DebugInfoTest(sysroot_path: str) -> bool:
   """Run the debug info tests.
 
   Args:
-    sysroot_path (str): The sysroot being tested.
+    sysroot_path: The sysroot being tested.
 
   Returns:
-    bool: True iff all tests passed, False otherwise.
+    True iff all tests passed, False otherwise.
   """
   cmd = ['debug_info_test', os.path.join(sysroot_path, 'usr/lib/debug')]
   result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
@@ -219,11 +233,11 @@ def DebugInfoTest(sysroot_path):
   return result.returncode == 0
 
 
-def ChromiteUnitTest():
+def ChromiteUnitTest() -> bool:
   """Run chromite unittests.
 
   Returns:
-    bool: True iff all tests passed, False otherwise.
+    True iff all tests passed, False otherwise.
   """
   cmd = [
       os.path.join(constants.CHROMITE_DIR, 'run_tests'),
@@ -233,35 +247,37 @@ def ChromiteUnitTest():
   return result.returncode == 0
 
 
-def CreateMoblabVm(workspace_dir, chroot_dir, image_dir):
+def CreateMoblabVm(workspace_dir: str, chroot_dir: str,
+                   image_dir: str) -> moblab_vm.MoblabVm:
   """Create the moblab VMs.
 
   Assumes that image_dir is in exactly the state it was after building
   a test image and then converting it to a VM image.
 
   Args:
-    workspace_dir (str): Workspace for the moblab VM.
-    chroot_dir (str): Directory containing the chroot for the moblab VM.
-    image_dir (str): Directory containing the VM image.
+    workspace_dir: Workspace for the moblab VM.
+    chroot_dir: Directory containing the chroot for the moblab VM.
+    image_dir: Directory containing the VM image.
 
   Returns:
-    MoblabVm: The resulting VM.
+    The resulting VM.
   """
   vms = moblab_vm.MoblabVm(workspace_dir, chroot_dir=chroot_dir)
   vms.Create(image_dir, dut_image_dir=image_dir, create_vm_images=False)
   return vms
 
 
-def PrepareMoblabVmImageCache(vms, builder, payload_dirs):
+def PrepareMoblabVmImageCache(vms: moblab_vm.MoblabVm, builder: str,
+                              payload_dirs: List[str]) -> str:
   """Preload the given payloads into the moblab VM image cache.
 
   Args:
-    vms (MoblabVm): The Moblab VM.
-    builder (str): The builder path, used to name the cache dir.
-    payload_dirs (list[str]): List of payload directories to load.
+    vms: The Moblab VM.
+    builder: The builder path, used to name the cache dir.
+    payload_dirs: List of payload directories to load.
 
   Returns:
-    str: Absolute path to the image cache path.
+    Absolute path to the image cache path.
   """
   with vms.MountedMoblabDiskContext() as disk_dir:
     image_cache_root = os.path.join(disk_dir, 'static/prefetched')
@@ -278,15 +294,17 @@ def PrepareMoblabVmImageCache(vms, builder, payload_dirs):
   return os.path.join('/', 'mnt/moblab', image_cache_rel_dir)
 
 
-def RunMoblabVmTest(chroot, vms, builder, image_cache_dir, results_dir):
+def RunMoblabVmTest(chroot: 'chroot_lib.Chroot', vms: moblab_vm.MoblabVm,
+                    builder: str, image_cache_dir: str,
+                    results_dir: str) -> None:
   """Run Moblab VM tests.
 
   Args:
-    chroot (chroot_lib.Chroot): The chroot in which to run tests.
-    builder (str): The builder path, used to find artifacts on GS.
-    vms (MoblabVm): The Moblab VMs to test.
-    image_cache_dir (str): Path to artifacts cache.
-    results_dir (str): Path to output test results.
+    chroot: The chroot in which to run tests.
+    builder: The builder path, used to find artifacts on GS.
+    vms: The Moblab VMs to test.
+    image_cache_dir: Path to artifacts cache.
+    results_dir: Path to output test results.
   """
   with vms.RunVmsContext():
     # TODO(evanhernandez): Move many of these arguments to test config.
@@ -317,15 +335,16 @@ def RunMoblabVmTest(chroot, vms, builder, image_cache_dir, results_dir):
     )
 
 
-def SimpleChromeWorkflowTest(sysroot_path, build_target_name, chrome_root,
-                             goma):
+def SimpleChromeWorkflowTest(sysroot_path: str, build_target_name: str,
+                             chrome_root: str,
+                             goma: Optional['goma_util.Goma']) -> None:
   """Execute SimpleChrome workflow tests
 
   Args:
-    sysroot_path (str): The sysroot path for testing Chrome.
-    build_target_name (str): Board build target
-    chrome_root (str): Path to Chrome source root.
-    goma (goma_util.Goma): Goma object (or None).
+    sysroot_path: The sysroot path for testing Chrome.
+    build_target_name: Board build target
+    chrome_root: Path to Chrome source root.
+    goma: Goma object or None.
   """
   board_dir = 'out_%s' % build_target_name
 
@@ -345,16 +364,17 @@ def SimpleChromeWorkflowTest(sysroot_path, build_target_name, chrome_root,
     _VMTestChrome(build_target_name, sdk_cmd)
 
 
-def _InitSimpleChromeSDK(tempdir, build_target_name, sysroot_path, chrome_root,
-                         use_goma):
+def _InitSimpleChromeSDK(tempdir: str, build_target_name: str,
+                         sysroot_path: str, chrome_root: str,
+                         use_goma: bool) -> commands.ChromeSDK:
   """Create ChromeSDK object for executing 'cros chrome-sdk' commands.
 
   Args:
-    tempdir (string): Tempdir for command execution.
-    build_target_name (string): Board build target.
-    sysroot_path (string): Sysroot for Chrome to use.
-    chrome_root (string): Path to Chrome.
-    use_goma (bool): Whether to use goma.
+    tempdir: Tempdir for command execution.
+    build_target_name: Board build target.
+    sysroot_path: Sysroot for Chrome to use.
+    chrome_root: Path to Chrome.
+    use_goma: Whether to use goma.
 
   Returns:
     A ChromeSDK object.
@@ -372,11 +392,11 @@ def _InitSimpleChromeSDK(tempdir, build_target_name, sysroot_path, chrome_root,
   return sdk_cmd
 
 
-def _VerifySDKEnvironment(out_board_dir):
+def _VerifySDKEnvironment(out_board_dir: str) -> None:
   """Make sure the SDK environment is set up properly.
 
   Args:
-    out_board_dir (str): Output SDK dir for board.
+    out_board_dir: Output SDK dir for board.
   """
   if not os.path.exists(out_board_dir):
     raise AssertionError('%s not created!' % out_board_dir)
@@ -384,14 +404,15 @@ def _VerifySDKEnvironment(out_board_dir):
                osutils.ReadFile(os.path.join(out_board_dir, 'args.gn')))
 
 
-def _BuildChrome(sdk_cmd, chrome_root, out_board_dir, goma):
+def _BuildChrome(sdk_cmd: commands.ChromeSDK, chrome_root: str,
+                 out_board_dir: str, goma: Optional['goma_util.Goma']) -> None:
   """Build Chrome with SimpleChrome environment.
 
   Args:
-    sdk_cmd (ChromeSDK object): sdk_cmd to run cros chrome-sdk commands.
-    chrome_root (string): Path to Chrome.
-    out_board_dir (string): Path to board directory.
-    goma (goma_util.Goma): Goma object
+    sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+    chrome_root: Path to Chrome.
+    out_board_dir: Path to board directory.
+    goma: Goma object or None
   """
   # Validate fetching of the SDK and setting everything up.
   sdk_cmd.Run(['true'])
@@ -443,12 +464,12 @@ def _BuildChrome(sdk_cmd, chrome_root, out_board_dir, goma):
             str(result.returncode))
 
 
-def _TestDeployChrome(sdk_cmd, out_board_dir):
+def _TestDeployChrome(sdk_cmd: commands.ChromeSDK, out_board_dir: str) -> None:
   """Test SDK deployment.
 
   Args:
-    sdk_cmd (ChromeSDK object): sdk_cmd to run cros chrome-sdk commands.
-    out_board_dir (string): Path to board directory.
+    sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+    out_board_dir: Path to board directory.
   """
   with osutils.TempDir(prefix='chrome-sdk-stage') as tempdir:
     # Use the TOT deploy_chrome.
@@ -465,8 +486,13 @@ def _TestDeployChrome(sdk_cmd, out_board_dir):
           'deploy_chrome did not run successfully! Searched %s' % (chromepath))
 
 
-def _VMTestChrome(board, sdk_cmd):
-  """Run cros_run_test."""
+def _VMTestChrome(board: str, sdk_cmd: commands.ChromeSDK) -> None:
+  """Run cros_run_test.
+
+  Args:
+    board: The name of the board.
+    sdk_cmd: sdk_cmd to run cros chrome-sdk commands.
+  """
   image_dir_symlink = image_lib.GetLatestImageLink(board)
   image_path = os.path.join(image_dir_symlink, constants.VM_IMAGE_BIN)
 
@@ -475,11 +501,11 @@ def _VMTestChrome(board, sdk_cmd):
     sdk_cmd.VMTest(image_path)
 
 
-def ValidateMoblabVmTest(results_dir):
+def ValidateMoblabVmTest(results_dir: str) -> None:
   """Determine if the VM test passed or not.
 
   Args:
-    results_dir (str): Path to directory containing test_that results.
+    results_dir: Path to directory containing test_that results.
 
   Raises:
     failures_lib.TestFailure: If dummy_PassServer did not run or failed.
@@ -494,16 +520,15 @@ def ValidateMoblabVmTest(results_dir):
                                    'not successfully run dummy_PassServer.')
 
 
-def BundleCodeCoverageLlvmJson(chroot: chroot_lib.Chroot,
-                               sysroot_class: sysroot_lib.Sysroot,
-                               output_dir: str):
+def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
+                               sysroot_class: 'sysroot_lib.Sysroot',
+                               output_dir: str) -> Optional[str]:
   """Bundle code coverage llvm json into a tarball for importing into GCE.
 
   Args:
     chroot: The chroot class used for these artifacts.
     sysroot_class: The sysroot class used for these artifacts.
     output_dir: The path to write artifacts to.
-    build_target_name: The build target
 
   Returns:
     A string path to the output code_coverage.tar.xz artifact, or None.
@@ -540,7 +565,8 @@ class GatherCodeCoverageLlvmJsonFileResult(NamedTuple):
 def GatherCodeCoverageLlvmJsonFile(
     destdir: str,
     paths: List[str],
-    output_file_name='coverage.json') -> GatherCodeCoverageLlvmJsonFileResult:
+    output_file_name: str = 'coverage.json'
+) -> GatherCodeCoverageLlvmJsonFileResult:
   """Locate code coverage llvm json files in |paths|.
 
    This function locates all the coverage llvm json files and merges them
@@ -605,8 +631,8 @@ def GatherCodeCoverageLlvmJsonFile(
       joined_file_paths=joined_file_paths)
 
 
-def FindAllMetadataFiles(chroot: chroot_lib.Chroot,
-                         sysroot: sysroot_lib.Sysroot) -> List[str]:
+def FindAllMetadataFiles(chroot: 'chroot_lib.Chroot',
+                         sysroot: 'sysroot_lib.Sysroot') -> List[str]:
   """Find the full paths to all test metadata paths."""
   # Right now there's no use case for this function inside the chroot.
   # If it's useful, we could make the chroot param optional to run in the SDK.
@@ -619,8 +645,8 @@ def FindAllMetadataFiles(chroot: chroot_lib.Chroot,
   ]
 
 
-def _FindAutotestMetadataFile(chroot: chroot_lib.Chroot,
-                              sysroot: sysroot_lib.Sysroot) -> str:
+def _FindAutotestMetadataFile(chroot: 'chroot_lib.Chroot',
+                              sysroot: 'sysroot_lib.Sysroot') -> str:
   """Find the full path to the Autotest test metadata file.
 
   This file is installed during the chromeos-base/autotest ebuild.
@@ -629,8 +655,8 @@ def _FindAutotestMetadataFile(chroot: chroot_lib.Chroot,
       sysroot.Path('usr', 'local', 'build', 'autotest', 'autotest_metadata.pb'))
 
 
-def _FindTastLocalMetadataFile(chroot: chroot_lib.Chroot,
-                               sysroot: sysroot_lib.Sysroot) -> str:
+def _FindTastLocalMetadataFile(chroot: 'chroot_lib.Chroot',
+                               sysroot: 'sysroot_lib.Sysroot') -> str:
   """Find the full path to the Tast local test metadata file.
 
   This file is installed during the tast-bundle eclass.
@@ -639,8 +665,8 @@ def _FindTastLocalMetadataFile(chroot: chroot_lib.Chroot,
       sysroot.Path('usr', 'share', 'tast', 'metadata', 'local', 'cros.pb'))
 
 
-def _FindTastLocalPrivateMetadataFile(chroot: chroot_lib.Chroot,
-                                      sysroot: sysroot_lib.Sysroot) -> str:
+def _FindTastLocalPrivateMetadataFile(chroot: 'chroot_lib.Chroot',
+                                      sysroot: 'sysroot_lib.Sysroot') -> str:
   """Find the full path to the Tast local private test metadata file.
 
   This file is installed during the tast-bundle eclass.
@@ -649,7 +675,7 @@ def _FindTastLocalPrivateMetadataFile(chroot: chroot_lib.Chroot,
       sysroot.Path('build', 'share', 'tast', 'metadata', 'local', 'crosint.pb'))
 
 
-def _FindTastRemoteMetadataFile(chroot: chroot_lib.Chroot) -> str:
+def _FindTastRemoteMetadataFile(chroot: 'chroot_lib.Chroot') -> str:
   """Find the full path to the Tast remote test metadata file.
 
   This file is installed during the tast-bundle eclass.

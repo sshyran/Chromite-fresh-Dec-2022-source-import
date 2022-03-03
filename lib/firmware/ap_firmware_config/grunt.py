@@ -25,11 +25,11 @@ def is_fast_required(use_futility: bool, servo: servo_lib.Servo) -> bool:
   return use_futility and servo.is_v4
 
 
-def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
-  """Get specific flash config for the grunt.
+def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
+  """Get DUT controls and programmer argument to flash the grunt.
 
   Each board needs specific config including the voltage for Vref, to turn
-  on and turn off the SPI flash. get_config() returns servo_lib.FirmwareConfig
+  on and turn off the SPI flash. get_config() returns servo_lib.ServoConfig
   with settings to flash a servo for a particular build target.
   The voltage for this board needs to be set to 1.8 V.
 
@@ -37,7 +37,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
     servo: The servo connected to the target DUT.
 
   Returns:
-    servo_lib.FirmwareConfig:
+    servo_lib.ServoConfig:
       dut_control_{on, off}=2d arrays formatted like [["cmd1", "arg1", "arg2"],
                                                       ["cmd2", "arg3", "arg4"]]
                             where cmd1 will be run before cmd2.
@@ -71,4 +71,4 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.FirmwareConfig:
     raise servo_lib.UnsupportedServoVersionError('%s not supported' %
                                                  servo.version)
 
-  return servo_lib.FirmwareConfig(dut_control_on, dut_control_off, programmer)
+  return servo_lib.ServoConfig(dut_control_on, dut_control_off, programmer)

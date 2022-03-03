@@ -167,7 +167,7 @@ class FirmwareSigner(signer.BaseSigner):
     """Perform one signing based on the given args.
 
     Args:
-      keyset: master keyset used for signing,
+      keyset: keyset directory used for signing,
       shellball_dir: location of extracted shellball
       bios_image: relitive path of bios.bin in shellball
       ec_image: relative path of ec.bin in shellball
@@ -210,7 +210,7 @@ class FirmwareSigner(signer.BaseSigner):
     are signed. Else all bios*.bin in shellball will be signed.
 
     Args:
-      keyset: master keyset, with subkeys[key_id] if defined
+      keyset: keyset directory, with subkeys[key_id] if defined
       input_name: location of extracted shellball
       output_name: unused
 

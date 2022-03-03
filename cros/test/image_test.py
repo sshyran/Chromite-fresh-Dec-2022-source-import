@@ -27,8 +27,9 @@ import unittest
 from chromite.third_party import lddtree
 from chromite.third_party.pyelftools.elftools.common import exceptions
 from chromite.third_party.pyelftools.elftools.elf import elffile
-import magic  # pylint: disable=import-error
+import magic  # pylint: disable=import-error,wrong-import-order
 
+# pylint: disable=ungrouped-imports
 from chromite.cros.test import usergroup_baseline
 from chromite.lib import cros_build_lib
 from chromite.lib import filetype
@@ -694,10 +695,6 @@ class SymlinkTest(image_test_lib.ImageTestCase):
       '/etc/localtime': {'/var/lib/timezone/localtime'},
       '/etc/machine-id': {'/var/lib/dbus/machine-id'},
       '/etc/mtab': {'/proc/mounts'},
-
-      # The kip board has a broken/dangling symlink.  Allow it until we can
-      # rewrite the code.  Or kip goes EOL.
-      '/lib/firmware/elan_i2c.bin': {'/opt/google/touch/firmware/*'},
 
       # Some boards don't set this up properly.  It's not a big deal.
       '/usr/libexec/editor': {'/usr/bin/*'},

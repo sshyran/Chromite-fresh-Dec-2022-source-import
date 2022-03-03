@@ -11,7 +11,7 @@ from chromite.cli import deploy
 from chromite.lib import commandline
 
 
-@command.CommandDecorator('deploy')
+@command.command_decorator('deploy')
 class DeployCommand(command.CliCommand):
   """Deploy the requested packages to the target device.
 
@@ -97,7 +97,6 @@ For more information of cros build usage:
   def Run(self):
     """Run cros deploy."""
     commandline.RunInsideChroot(self)
-    self.options.Freeze()
     deploy.Deploy(
         self.options.device,
         self.options.packages,

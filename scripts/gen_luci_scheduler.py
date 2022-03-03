@@ -106,7 +106,7 @@ job {
   schedule: "%(schedule)s"
   buildbucket: {
     server: "cr-buildbucket.appspot.com"
-    bucket: "luci.chromeos.general"
+    bucket: "general"
     builder: "%(builder)s"
 %(tag_lines)s
 %(prop_lines)s

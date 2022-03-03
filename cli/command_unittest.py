@@ -19,7 +19,7 @@ from chromite.lib import partial_mock
 _COMMAND_NAME = 'superAwesomeCommandOfFunness'
 
 
-@command.CommandDecorator(_COMMAND_NAME)
+@command.command_decorator(_COMMAND_NAME)
 class TestCommand(command.CliCommand):
   """A fake command."""
   def Run(self):
@@ -45,14 +45,14 @@ class TestCommandTest(cros_test_lib.MockTestCase):
     """Tests that our decorator correctly rejects bad test commands."""
     try:
       # pylint: disable=unused-variable
-      @command.CommandDecorator('bad')
+      @command.command_decorator('bad')
       class BadTestCommand(object):
         """A command that wasn't implemented correctly."""
 
     except command.InvalidCommandError:
       pass
     else:
-      self.fail('Invalid command was accepted by the CommandDecorator')
+      self.fail('Invalid command was accepted by @command_decorator')
 
   def testAddDeviceArgument(self):
     """Tests CliCommand.AddDeviceArgument()."""
@@ -81,7 +81,7 @@ class MockCommand(partial_mock.PartialMock):
     self.args = args
     self.rc_mock = cros_test_lib.RunCommandMock()
     self.rc_mock.SetDefaultCmdResult()
-    parser = commandline.ArgumentParser(caching=True)
+    self.parser = parser = commandline.ArgumentParser(caching=True)
     subparsers = parser.add_subparsers()
     subparser = subparsers.add_parser(self.COMMAND, caching=True)
     self.TARGET_CLASS.AddParser(subparser)

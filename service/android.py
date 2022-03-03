@@ -4,10 +4,12 @@
 
 """Provides utility for performing Android uprev."""
 
+import json
 import logging
 import os
 import re
 import time
+from typing import Dict, Optional, Tuple, Union
 
 from chromite.lib import constants
 from chromite.lib import gs
@@ -79,14 +81,33 @@ ARC_BUCKET_ACL_X86 = 'googlestorage_acl_x86.txt'
 ARC_BUCKET_ACL_PUBLIC = 'googlestorage_acl_public.txt'
 
 
-def GetAndroidBranchForPackage(android_package):
+# The overlay that hosts Android packages.
+OVERLAY_DIR = os.path.join(constants.SOURCE_ROOT, 'src', 'private-overlays',
+                           'project-cheets-private')
+
+
+def GetAndroidPackageDir(android_package: str,
+                         overlay_dir: str = OVERLAY_DIR) -> str:
+  """Returns the Portage package directory of the given Android package.
+
+  Args:
+    android_package: the Android package name e.g. 'android-vm-rvc'
+    overlay_dir: specify to override the default overlay.
+
+  Returns:
+    The Portage package directory
+  """
+  return os.path.join(overlay_dir, 'chromeos-base', android_package)
+
+
+def GetAndroidBranchForPackage(android_package: str) -> str:
   """Returns the corresponding Android branch of given Android package.
 
   Args:
-    android_package (str): the Android package name e.g. 'android-vm-rvc'
+    android_package: the Android package name e.g. 'android-vm-rvc'
 
   Returns:
-    str: the corresponding Android branch e.g. 'git_rvc-arc'
+    The corresponding Android branch e.g. 'git_rvc-arc'
   """
   mapping = {
       constants.ANDROID_PI_PACKAGE: constants.ANDROID_PI_BUILD_BRANCH,
@@ -100,7 +121,9 @@ def GetAndroidBranchForPackage(android_package):
     raise ValueError(f'Unknown Android package "{android_package}"')
 
 
-def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
+def IsBuildIdValid(build_branch: str,
+                   build_id: str,
+                   bucket_url: str = ANDROID_BUCKET_URL) -> Optional[dict]:
   """Checks that a specific build_id is valid.
 
   Looks for that build_id for all builds. Confirms that the subpath can
@@ -130,11 +153,12 @@ def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
           'Directory [%s] does not contain any subpath, ignoring it.',
           build_id_path)
       return None
+    # b/215041592: Sometimes there can be multiple subpaths which presumably
+    # contain the exact same artifacts.
     if len(subpaths) > 1:
       logging.warning(
-          'Directory [%s] contains more than one subpath, ignoring it.',
+          'Directory [%s] contains more than one subpath, using the first one.',
           build_id_path)
-      return None
 
     subpath_dir = subpaths[0].url.rstrip('/')
     subpath_name = os.path.basename(subpath_dir)
@@ -155,7 +179,10 @@ def IsBuildIdValid(build_branch, build_id, bucket_url=ANDROID_BUCKET_URL):
   return subpaths_dict
 
 
-def GetLatestBuild(build_branch, bucket_url=ANDROID_BUCKET_URL):
+def GetLatestBuild(
+    build_branch: str,
+    bucket_url: str = ANDROID_BUCKET_URL
+) -> Union[Tuple[None, None], Tuple[str, dict]]:
   """Searches the gs bucket for the latest green build.
 
   Args:
@@ -206,7 +233,7 @@ def GetLatestBuild(build_branch, bucket_url=ANDROID_BUCKET_URL):
   return None, None
 
 
-def _GetAcl(target, package_dir):
+def _GetAcl(target: str, package_dir: str) -> str:
   """Returns the path to ACL file corresponding to target.
 
   Args:
@@ -225,8 +252,9 @@ def _GetAcl(target, package_dir):
   raise ValueError(f'Unknown target {target}')
 
 
-def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
-                    arc_bucket_url, package_dir):
+def CopyToArcBucket(android_bucket_url: str, build_branch: str, build_id: str,
+                    subpaths: Dict[str, str], arc_bucket_url: str,
+                    package_dir: str) -> None:
   """Copies from source Android bucket to ARC++ specific bucket.
 
   Copies each build to the ARC bucket eliminating the subpath.
@@ -294,8 +322,11 @@ def CopyToArcBucket(android_bucket_url, build_branch, build_id, subpaths,
           break
 
 
-def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
-                    package_dir, version=None):
+def MirrorArtifacts(android_bucket_url: str,
+                    android_build_branch: str,
+                    arc_bucket_url: str,
+                    package_dir: str,
+                    version: Optional[str] = None) -> Optional[str]:
   """Mirrors artifacts from Android bucket to ARC bucket.
 
   First, this function identifies which build version should be copied,
@@ -326,3 +357,59 @@ def MirrorArtifacts(android_bucket_url, android_build_branch, arc_bucket_url,
                   arc_bucket_url, package_dir)
 
   return version
+
+
+_LKGB_JSON = 'LKGB.json'
+
+
+class MissingLKGBError(Exception):
+  """LKGB file for the given Android package is missing."""
+
+
+class InvalidLKGBError(Exception):
+  """LKGB file for the given Android package contains invalid content."""
+
+
+def WriteLKGB(android_package_dir: str, build_id: str) -> str:
+  """Writes the LKGB file under the given Android package directory.
+
+  Args:
+    android_package_dir: The Android package directory.
+    build_id: The last known good Android build ID.
+
+  Returns:
+    Path to the updated file.
+  """
+  path = os.path.join(android_package_dir, _LKGB_JSON)
+  lkgb = {'build_id': build_id}
+  with open(path, 'w') as f:
+    json.dump(lkgb, f, indent=2)
+    f.write('\n')
+  return path
+
+
+def ReadLKGB(android_package_dir: str) -> str:
+  """Reads the LKGB file under the given Android package directory.
+
+  Args:
+    android_package_dir: The Android package directory.
+
+  Returns:
+    The last known good Android build ID as described in the file.
+
+  Raises:
+    MissingLKGBError: If the LKGB file is not found under android_package_dir.
+    InvalidLKGBError: If the LKGB file contains invalid content.
+  """
+  path = os.path.join(android_package_dir, _LKGB_JSON)
+  if not os.path.exists(path):
+    raise MissingLKGBError(path)
+
+  try:
+    with open(path, 'r') as f:
+      lkgb = json.load(f)
+    return lkgb['build_id']
+  except json.JSONDecodeError as e:
+    raise InvalidLKGBError('Error decoding LKGB file as JSON: ' + str(e))
+  except KeyError:
+    raise InvalidLKGBError('Field build_id not found in LKGB file')

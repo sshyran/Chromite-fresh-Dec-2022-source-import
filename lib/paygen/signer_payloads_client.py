@@ -345,8 +345,9 @@ versionrev = %(version)s
       # [sig_uri, ...]
       all_signature_uris = []
 
-      # { hash : [sig_uri, ...], ... }
-      hash_signature_uris = dict([(h, []) for h in hashes])
+      # hash[0]           hash[1]
+      # [ [sig_uri, ...], [sig_uri, ... ] ... ]
+      hash_signature_uris = [[] for _ in range(len(hashes))]
 
       # Upload one signing instruction file and signing request for
       # each keyset.
@@ -366,8 +367,8 @@ versionrev = %(version)s
         uris = self._CreateSignatureURIs(hash_names, keyset)
 
         all_signature_uris += uris
-        for h, sig_uri in zip(hashes, uris):
-          hash_signature_uris[h].append(sig_uri)
+        for hash_signature_uri, sig_uri in zip(hash_signature_uris, uris):
+          hash_signature_uri.append(sig_uri)
 
       # Wait for the signer to finish all keysets.
       if not self._WaitForSignatures(all_signature_uris):
@@ -375,7 +376,9 @@ versionrev = %(version)s
         return None
 
       # Download the results.
-      return [self._DownloadSignatures(hash_signature_uris[h]) for h in hashes]
+      return [self._DownloadSignatures(hash_signature_uri)
+              for hash_signature_uri
+              in hash_signature_uris]
 
     finally:
       # Clean up the signature related files from this run.

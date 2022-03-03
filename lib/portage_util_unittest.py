@@ -6,6 +6,7 @@
 
 import json
 import os
+from pathlib import Path
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -1391,6 +1392,13 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
     fake_files = [(f[0], f[1].lstrip('/')) for f in fake_files]
     self.assertEqual(fake_files, lst)
 
+  def testPackageInfo(self):
+    """Verify construction and self consistency of the PackageInfo."""
+    portage_db = portage_util.PortageDB(self.fake_chroot)
+    for pkg in portage_db.InstalledPackages():
+      self.assertEqual(pkg.category, pkg.package_info.category)
+      self.assertEqual(pkg.pf, pkg.package_info.pvr)
+
 
 class InstalledPackageTest(cros_test_lib.TempDirTestCase):
   """InstalledPackage class tests outside a PortageDB."""
@@ -1734,3 +1742,28 @@ class PackageDependenciesTest(cros_test_lib.RunCommandTestCase):
         expected,
         portage_util.GetPackageDependencies(None,
                                             'target-chromium-os-sdk'))
+
+
+class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):
+  """Tests for FindEbuildsForOverlays."""
+
+  def setUp(self):
+    file_layout = (cros_test_lib.Directory('package1/bar1',
+                                           ['bar1-1.0.ebuild']),
+                   cros_test_lib.Directory('package2/bar2',
+                                           ['bar2-2.0.ebuild']))
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
+
+  def testFindEbuildsForOverlaysOutput(self):
+    mock_overlay_paths = [
+        Path(self.tempdir) / 'package1' / 'bar1',
+        Path(self.tempdir) / 'package2' / 'bar2',
+    ]
+    expected_ebuilds = [
+        Path(self.tempdir) / 'package1' / 'bar1' / 'bar1-1.0.ebuild',
+        Path(self.tempdir) / 'package2' / 'bar2' / 'bar2-2.0.ebuild',
+    ]
+
+    ebuilds = yield from portage_util.FindEbuildsForOverlays(mock_overlay_paths)
+
+    self.assertEqual(expected_ebuilds, ebuilds)

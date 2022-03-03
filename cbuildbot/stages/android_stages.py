@@ -63,6 +63,15 @@ class UprevAndroidStage(generic_stages.BuilderStage,
     logging.info('Android branch: %s', android_build_branch)
     logging.info('Android version: %s', android_version or 'LATEST')
 
+    if self._run.config.master and self._run.config.android_update_lkgb:
+      # If android_update_lkgb is set, the master builder publishes a LKGB
+      # update instead of an ebuild uprev. The LKGB update will in turn trigger
+      # the PUpr generator to generate actual Android uprev CLs.
+      commands.MarkAndroidLKGB(buildroot=self._build_root,
+                               android_package=android_package,
+                               android_version=android_version)
+      return
+
     try:
       android_atom_to_build = commands.MarkAndroidAsStable(
           buildroot=self._build_root,

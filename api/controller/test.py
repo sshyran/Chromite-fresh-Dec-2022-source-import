@@ -20,9 +20,6 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
-from chromite.api.gen.chromiumos.test.api import coverage_rule_pb2
-from chromite.api.gen.chromiumos.test.api import dut_attribute_pb2
-from chromite.api.gen.chromiumos.test.api import test_suite_pb2
 from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -36,7 +33,6 @@ from chromite.scripts import cros_set_lsb_release
 from chromite.service import packages as packages_service
 from chromite.service import test
 from chromite.third_party.google.protobuf import json_format
-from chromite.third_party.google.protobuf import text_format
 from chromite.utils import key_value_store
 from chromite.utils import metrics
 
@@ -82,20 +78,18 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
     pkg_info = package_info.parse(pkg)
     pkg_info_msg = output_proto.failed_packages.add()
     controller_util.serialize_package_info(pkg_info, pkg_info_msg)
+    failed_pkg_data_msg = output_proto.failed_package_data.add()
+    controller_util.serialize_package_info(pkg_info, failed_pkg_data_msg.name)
+    failed_pkg_data_msg.log_path.path = '/path/to/%s/log' % pkg
 
 
 @faux.success(_BuildTargetUnitTestResponse)
 @faux.error(_BuildTargetUnitTestFailedResponse)
-@validate.require('build_target.name')
-@validate.exists('result_path')
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
 @metrics.collect_metrics
 def BuildTargetUnitTest(input_proto, output_proto, _config):
   """Run a build target's ebuild unit tests."""
-  # Required args.
-  result_path = input_proto.result_path
-
   # Method flags.
   # An empty sysroot means build packages was not run. This is used for
   # certain boards that need to use prebuilts (e.g. grunt's unittest-only).
@@ -125,6 +119,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   code_coverage = input_proto.flags.code_coverage
 
+  sysroot = sysroot_lib.Sysroot(build_target.root)
+
   result = test.BuildTargetUnitTest(
       build_target,
       chroot,
@@ -136,20 +132,17 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
       filter_only_cros_workon=filter_only_cros_workon)
 
   if not result.success:
-    # Failed to run tests or some tests failed.
-    # Record all failed packages.
-    for pkg_info in result.failed_pkgs:
-      package_info_msg = output_proto.failed_packages.add()
-      controller_util.serialize_package_info(pkg_info, package_info_msg)
+    # Record all failed packages and retrieve log locations.
+    controller_util.retrieve_package_log_paths(
+        sysroot_lib.PackageInstallError('error installing packages',
+                                        cros_build_lib.CommandResult(),
+                                        packages=result.failed_pkgs),
+        output_proto, sysroot)
     if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-  sysroot = sysroot_lib.Sysroot(build_target.root)
-  tarball = test.BuildTargetUnitTestTarball(chroot, sysroot, result_path)
-  if tarball:
-    output_proto.tarball_path = tarball
   deserialize_metrics_log(output_proto.events, prefix=build_target.name)
 
 
@@ -165,6 +158,16 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
         os.path.join(
             PLATFORM_DEV_DIR,
             'test/container/utils/build-dockerimage.sh'
+        ),
+    'cros-test-finder':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'test_finder/docker/build-dockerimage.sh',
+        ),
+    'cros-testplan':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'plan/docker/build-dockerimage.sh',
         ),
 }
 
@@ -200,9 +203,7 @@ def _ValidDockerTag(tag):
   allowed_chars = set(string.ascii_letters+string.digits+'-_.')
   invalid_chars = set(tag) - allowed_chars
   if invalid_chars:
-    return 'saw one or more invalid characters: [{}]'.format(
-        ''.join(invalid_chars),
-    )
+    return f'saw one or more invalid characters: [{"".join(invalid_chars)}]'
 
   # Finally, max tag length is 128 characters
   if len(tag) > 128:
@@ -222,14 +223,12 @@ def _ValidDockerLabelKey(key):
   allowed_chars = set(string.ascii_lowercase+string.digits+'-.')
   invalid_chars = set(key) - allowed_chars
   if invalid_chars:
-    return 'saw one or more invalid characters: [{}]'.format(
-        ''.join(invalid_chars),
-    )
+    return f'saw one or more invalid characters: [{"".join(invalid_chars)}]'
 
   # Repeated . and - aren't allowed
   for char in '.-':
-    if char*2 in key:
-      return "'{}' can\'t be repeated in label key".format(char)
+    if char * 2 in key:
+      return f"'{char}' can\'t be repeated in label key"
 
 
 @faux.success(_BuildTestServiceContainersResponse)
@@ -249,7 +248,7 @@ def BuildTestServiceContainers(
 
   tags = ','.join(input_proto.tags)
   labels = (
-      '{}={}'.format(key, value) for key, value in input_proto.labels.items()
+      f'{key}={value}' for key, value in input_proto.labels.items()
   )
 
   for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():
@@ -260,6 +259,11 @@ def BuildTestServiceContainers(
       # with maintaining stdout hygiene.  Stdout and stderr are combined to
       # form the error log in response to any errors.
       cmd = [build_script, chroot.path, sysroot.path]
+
+      if input_proto.HasField('repository'):
+        cmd += ['--host', input_proto.repository.hostname]
+        cmd += ['--project', input_proto.repository.project]
+
       cmd += ['--tags', tags]
       cmd += ['--output', output_path]
       cmd += labels
@@ -457,68 +461,3 @@ def GetArtifacts(in_proto: common_pb2.ArtifactsByService.Test,
           })
 
   return generated
-
-
-def _GetCoverageRulesResponseSuccess(
-    _input_proto, output_proto: test_pb2.GetCoverageRulesResponse, _config):
-  output_proto.coverage_rules.append(
-      coverage_rule_pb2.CoverageRule(
-          name='kernel:4.4',
-          test_suites=[
-              test_suite_pb2.TestSuite(
-                  test_case_tag_criteria=test_suite_pb2.TestSuite
-                  .TestCaseTagCriteria(tags=['kernel']))
-          ],
-          dut_criteria=[
-              dut_attribute_pb2.DutCriterion(
-                  attribute_id=dut_attribute_pb2.DutAttribute.Id(
-                      value='system_build_target'),
-                  values=['overlayA'],
-              )
-          ],
-      ),)
-
-
-@faux.success(_GetCoverageRulesResponseSuccess)
-@faux.empty_error
-@validate.require('source_test_plans')
-@validate.exists('dut_attribute_list.path', 'build_metadata_list.path',
-                 'flat_config_list.path')
-@validate.validation_complete
-def GetCoverageRules(input_proto: test_pb2.GetCoverageRulesRequest,
-                     output_proto: test_pb2.GetCoverageRulesResponse, _config):
-  """Call the testplan tool to generate CoverageRules."""
-  source_test_plans = input_proto.source_test_plans
-  dut_attribute_list = input_proto.dut_attribute_list
-  build_metadata_list = input_proto.build_metadata_list
-  flat_config_list = input_proto.flat_config_list
-
-  cmd = [
-      'testplan', 'generate', '-dutattributes', dut_attribute_list.path,
-      '-buildmetadata', build_metadata_list.path, '-flatconfiglist',
-      flat_config_list.path, '-logtostderr', '-v', '2'
-  ]
-
-  with osutils.TempDir(prefix='get_coverage_rules_input') as tempdir:
-    # Write all input files required by testplan, and read the output file
-    # containing CoverageRules.
-    for i, plan in enumerate(source_test_plans):
-      plan_path = os.path.join(tempdir, 'source_test_plan_%d.textpb' % i)
-      osutils.WriteFile(plan_path, text_format.MessageToString(plan))
-      cmd.extend(['-plan', plan_path])
-
-    out_path = os.path.join(tempdir, 'out.jsonpb')
-    cmd.extend(['-out', out_path])
-
-    cros_build_lib.run(cmd)
-
-    out_text = osutils.ReadFile(out_path)
-
-  # The output file contains CoverageRules as jsonpb, separated by newlines.
-  coverage_rules = []
-  for out_line in out_text.splitlines():
-    coverage_rule = coverage_rule_pb2.CoverageRule()
-    json_format.Parse(out_line, coverage_rule)
-    coverage_rules.append(coverage_rule)
-
-  output_proto.coverage_rules.extend(coverage_rules)

@@ -7,6 +7,7 @@
 import os
 import shutil
 import urllib.parse
+from typing import TYPE_CHECKING
 
 from chromite.api import controller
 from chromite.api import faux
@@ -19,6 +20,8 @@ from chromite.lib import gs
 from chromite.lib import sysroot_lib
 from chromite.service import binhost
 
+if TYPE_CHECKING:
+  from chromite.api import api_config
 
 _OVERLAY_TYPE_TO_NAME = {
     binhost_pb2.OVERLAYTYPE_PUBLIC: constants.PUBLIC_OVERLAYS,
@@ -87,15 +90,18 @@ def _PrepareBinhostUploadsResponse(_input_proto, output_proto, _config):
 @faux.success(_PrepareBinhostUploadsResponse)
 @faux.empty_error
 @validate.require('uri')
-def PrepareBinhostUploads(input_proto, output_proto, config):
+def PrepareBinhostUploads(
+    input_proto: binhost_pb2.PrepareBinhostUploadsRequest,
+    output_proto: binhost_pb2.PrepareBinhostUploadsResponse,
+    config: 'api_config.ApiConfig'):
   """Return a list of files to upload to the binhost.
 
   See BinhostService documentation in api/proto/binhost.proto.
 
   Args:
-    input_proto (PrepareBinhostUploadsRequest): The input proto.
-    output_proto (PrepareBinhostUploadsResponse): The output proto.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    config: The API call config.
   """
   if input_proto.sysroot.build_target.name:
     build_target_msg = input_proto.sysroot.build_target
@@ -152,16 +158,19 @@ def _PrepareDevInstallBinhostUploadsResponse(_input_proto, output_proto,
 @faux.empty_error
 @validate.require('uri', 'sysroot.path')
 @validate.exists('uploads_dir')
-def PrepareDevInstallBinhostUploads(input_proto, output_proto, config):
+def PrepareDevInstallBinhostUploads(
+    input_proto: binhost_pb2.PrepareDevInstallBinhostUploadsRequest,
+    output_proto: binhost_pb2.PrepareDevInstallBinhostUploadsResponse,
+    config: 'api_config.ApiConfig'):
   """Return a list of files to upload to the binhost"
 
   The files will also be copied to the uploads_dir.
   See BinhostService documentation in api/proto/binhost.proto.
 
   Args:
-    input_proto (PrepareDevInstallBinhostUploadsRequest): The input proto.
-    output_proto (PrepareDevInstallBinhostUploadsResponse): The output proto.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    config: The API call config.
   """
   sysroot_path = input_proto.sysroot.path
 
@@ -211,15 +220,17 @@ def _SetBinhostResponse(_input_proto, output_proto, _config):
 @faux.empty_error
 @validate.require('build_target.name', 'key', 'uri')
 @validate.validation_complete
-def SetBinhost(input_proto, output_proto, _config):
+def SetBinhost(input_proto: binhost_pb2.SetBinhostRequest,
+               output_proto: binhost_pb2.SetBinhostResponse,
+               _config: 'api_config.ApiConfig'):
   """Set the URI for a given binhost key and build target.
 
   See BinhostService documentation in api/proto/binhost.proto.
 
   Args:
-    input_proto (SetBinhostRequest): The input proto.
-    output_proto (SetBinhostResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    _config: The API call config.
   """
   target = input_proto.build_target.name
   key = binhost_pb2.BinhostKey.Name(input_proto.key)
@@ -240,15 +251,17 @@ def _RegenBuildCacheResponse(_input_proto, output_proto, _config):
 @validate.require('overlay_type')
 @validate.is_in('overlay_type', _OVERLAY_TYPE_TO_NAME)
 @validate.validation_complete
-def RegenBuildCache(input_proto, output_proto, _config):
+def RegenBuildCache(input_proto: binhost_pb2.RegenBuildCacheRequest,
+                    output_proto: binhost_pb2.RegenBuildCacheResponse,
+                    _config: 'api_config.ApiConfig'):
   """Regenerate the Build Cache for a build target.
 
   See BinhostService documentation in api/proto/binhost.proto.
 
   Args:
-    input_proto (RegenBuildCacheRequest): The input proto.
-    output_proto (RegenBuildCacheResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    _config: The API call config.
   """
   chroot = controller_util.ParseChroot(input_proto.chroot)
   overlay_type = input_proto.overlay_type

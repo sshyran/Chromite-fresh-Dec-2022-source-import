@@ -646,7 +646,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
           self.chroot_path, None, proc_mounts=proc_mounts)
 
     m.assert_called_with(self.chroot_path)
-    m2.assert_called_with(self.chroot_path, None)
+    m2.assert_not_called()
 
   def testNothingCleanupWithDelete(self):
     m = self.PatchObject(osutils, 'UmountTree')
@@ -668,7 +668,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
           self.chroot_path, None, delete=True, proc_mounts=proc_mounts)
 
     m.assert_called_with(self.chroot_path)
-    m2.assert_called_with(self.chroot_path, None)
+    m2.assert_not_called()
     m3.assert_called_with(self.chroot_img)
     m4.assert_called_with(self.chroot_path, ignore_missing=True, sudo=True)
 
@@ -862,6 +862,8 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     self.assertExists(etc / 'mtab')
     self.assertIn(f'PORTAGE_USERNAME="{TEST_USER}"',
                   (etc / 'env.d' / '99chromiumos').read_text())
+    self.assertEqual('/mnt/host/source/chromite/sdk/etc/bash_completion.d/cros',
+                     os.readlink(etc / 'bash_completion.d' / 'cros'))
     self.assertIn('en_US.UTF-8 UTF-8', (etc / 'locale.gen').read_text())
 
   def testExistingCompatGroup(self):

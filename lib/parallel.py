@@ -61,6 +61,49 @@ def IgnoreSigintAndSigterm():
   signal.signal(signal.SIGTERM, signal.SIG_IGN)
 
 
+def WrapMultiprocessing(callback, *args, **kwargs):
+  """Wraps a callback with a short value of TMPDIR.
+
+  This is intended to wrap calls to multiprocessing to ensure any sockets
+  created during initialization are created under the /tmp tree rather than in a
+  custom temp directory. This is needed because TMPDIR might be really long, and
+  named sockets are limited to 108 characters.
+
+  Examples:
+    errors = WrapMultiprocessing(multiprocessing.Value, 'i')
+
+  Returns:
+    The return value of the callback function with the specified args
+  """
+  # Use a short directory in /tmp. Do not use /tmp directly to keep these
+  # temporary files together and because certain environments do not like too
+  # many top-level paths in /tmp (see crbug.com/945523).
+  # Make it mode 1777 to mirror /tmp, so that we don't have failures when root
+  # calls parallel first, and some other user calls it later.
+  tmp_dir = '/tmp/chromite.parallel.%d' % os.geteuid()
+  osutils.SafeMakedirs(tmp_dir, mode=0o1777)
+  old_tempdir_value, old_tempdir_env = osutils.SetGlobalTempDir(tmp_dir)
+  try:
+    return callback(*args, **kwargs)
+  finally:
+    osutils.SetGlobalTempDir(old_tempdir_value, old_tempdir_env)
+
+
+def _get_sync_manager():
+  """Create a SyncManager for use in Manager below
+
+  This is put into a helper function so it can be used inside
+  WrapMultiprocessing to adjust TMPDIR to avoid paths too long for UNIX sockets.
+  """
+  m = HackTimeoutSyncManager()
+  # SyncManager doesn't handle KeyboardInterrupt exceptions well; pipes get
+  # broken and E_NOENT or E_PIPE errors are thrown from various places. We
+  # can just ignore SIGINT in the SyncManager and things will close properly
+  # when the enclosing with-statement exits.
+  m.start(IgnoreSigintAndSigterm)
+  return m
+
+
 def Manager():
   """Create a background process for managing interprocess communication.
 
@@ -77,24 +120,7 @@ def Manager():
   Returns:
     The return value of multiprocessing.Manager()
   """
-  # Use a short directory in /tmp. Do not use /tmp directly to keep these
-  # temperary files together and because certain environments do not like too
-  # many top-level paths in /tmp (see crbug.com/945523).
-  # Make it mode 1777 to mirror /tmp, so that we don't have failures when root
-  # calls parallel first, and some other user calls it later.
-  tmp_dir = '/tmp/chromite.parallel.%d' % os.geteuid()
-  osutils.SafeMakedirs(tmp_dir, mode=0o1777)
-  old_tempdir_value, old_tempdir_env = osutils.SetGlobalTempDir(tmp_dir)
-  try:
-    m = HackTimeoutSyncManager()
-    # SyncManager doesn't handle KeyboardInterrupt exceptions well; pipes get
-    # broken and E_NOENT or E_PIPE errors are thrown from various places. We
-    # can just ignore SIGINT in the SyncManager and things will close properly
-    # when the enclosing with-statement exits.
-    m.start(IgnoreSigintAndSigterm)
-    return m
-  finally:
-    osutils.SetGlobalTempDir(old_tempdir_value, old_tempdir_env)
+  return WrapMultiprocessing(_get_sync_manager)
 
 
 class BackgroundFailure(failures_lib.CompoundFailure):

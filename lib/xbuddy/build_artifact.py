@@ -413,7 +413,8 @@ class BundledArtifact(Artifact):
     """
     files = super().StagedFiles()
     if self._files_to_extract:
-      return [x for x in files if os.path.basename(x) in self._files_to_extract]
+      return [x for x in files
+              if os.path.relpath(x, self.install_dir) in self._files_to_extract]
     return files
 
   def _RunUnzip(self, list_only):

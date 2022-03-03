@@ -194,7 +194,7 @@ class Builder:
       cmd += ['--noenable_rootfs_verification']
     if boot_args:
       arg_list = kernel_cmdline.KernelArgList(boot_args)
-      cmd += [f'--boot_args="{arg_list.Format()}"']
+      cmd += [f'--boot_args={arg_list.Format()}']
     if serial:
       if not serial.startswith('tty'):
         raise KernelBuildError('Possibly invalid argument for serial port: %s' %

@@ -4,6 +4,7 @@
 
 """Run lint checks on the specified files."""
 
+import fnmatch
 import functools
 import json
 import logging
@@ -11,7 +12,6 @@ import multiprocessing
 import os
 import re
 import sys
-import urllib.parse
 
 from chromite.cli import command
 from chromite.lib import constants
@@ -101,6 +101,14 @@ CPPLINT_OUTPUT_FORMAT_MAP = {
     'parseable': 'emacs',
 }
 
+# Default category filters to pass to cpplint.py when invoked via `cros lint`.
+#
+# `-foo/bar` means "don't show any lints from category foo/bar".
+# See `cpplint.py --help` for more explanation of category filters.
+CPPLINT_DEFAULT_FILTERS = (
+    '-runtime/references',
+)
+
 
 # The mapping between the "cros lint" --output-format flag and shellcheck
 # flags.
@@ -155,6 +163,7 @@ def _WhiteSpaceLintData(path, data):
 def _CpplintFile(path, output_format, debug):
   """Returns result of running cpplint on |path|."""
   cmd = [os.path.join(constants.DEPOT_TOOLS_DIR, 'cpplint.py')]
+  cmd.append('--filter=%s' % ','.join(CPPLINT_DEFAULT_FILTERS))
   if output_format != 'default':
     cmd.append('--output=%s' % CPPLINT_OUTPUT_FORMAT_MAP[output_format])
   cmd.append(path)
@@ -285,29 +294,6 @@ def _ShellLintFile(path, output_format, debug, gentoo_format=False):
 
   lint_result = _LinterRunCommand(cmd, debug)
 
-  # During testing, we don't want to fail the linter for shellcheck errors,
-  # so override the return code.
-  if lint_result.returncode != 0:
-    bug_url = (
-        'https://bugs.chromium.org/p/chromium/issues/entry?' +
-        urllib.parse.urlencode({
-            'template':
-                'Defect report from Developer',
-            'summary':
-                'Bad shellcheck warnings for %s' % os.path.basename(path),
-            'components':
-                'Infra>Client>ChromeOS>Build,',
-            'cc':
-                'bmgordon@chromium.org,vapier@chromium.org',
-            'comment':
-                'Shellcheck output from file:\n%s\n\n<paste output here>\n\n'
-                "What is wrong with shellcheck's findings?\n" % path,
-        }))
-    logging.warning('Shellcheck found problems. These will eventually become '
-                    'errors.  If the shellcheck findings are not useful, '
-                    'please file a bug at:\n%s', bug_url)
-    lint_result.returncode = 0
-
   # Check whitespace.
   if not _WhiteSpaceLintData(path, osutils.ReadFile(path)):
     lint_result.returncode = 1
@@ -322,10 +308,21 @@ def _GentooShellLintFile(path, output_format, debug):
 
 def _SeccompPolicyLintFile(path, _output_format, debug):
   """Run the seccomp policy linter."""
+  dangerous_syscalls = {'bpf', 'setns', 'execveat', 'ptrace', 'swapoff',
+                        'swapon'}
   return _LinterRunCommand(
       [os.path.join(constants.SOURCE_ROOT, 'src', 'aosp', 'external',
-                    'minijail', 'tools', 'seccomp_policy_lint.py'), path],
+                    'minijail', 'tools', 'seccomp_policy_lint.py'),
+       '--dangerous-syscalls', ','.join(dangerous_syscalls),
+       path],
       debug)
+
+
+def _DirMdLintFile(path, _output_format, debug):
+  """Run the dirmd linter."""
+  return _LinterRunCommand(
+      [os.path.join(constants.DEPOT_TOOLS_DIR, 'dirmd'), 'validate', path],
+      debug, capture_output=not debug)
 
 
 def _BreakoutDataByLinter(map_to_return, path):
@@ -371,6 +368,11 @@ _EXT_TO_LINTER_MAP = {
     frozenset({'.policy'}): _SeccompPolicyLintFile,
 }
 
+# Map known filenames to a linter function.
+_FILENAME_PATTERNS_TO_LINTER_MAP = {
+    frozenset({'DIR_METADATA'}): _DirMdLintFile,
+}
+
 
 def _BreakoutFilesByLinter(files):
   """Maps a linter method to the list of files to lint."""
@@ -379,12 +381,17 @@ def _BreakoutFilesByLinter(files):
     extension = os.path.splitext(f)[1]
     for extensions, linter in _EXT_TO_LINTER_MAP.items():
       if extension in extensions:
-        todo = map_to_return.setdefault(linter, [])
-        todo.append(f)
+        map_to_return.setdefault(linter, []).append(f)
         break
     else:
-      if os.path.isfile(f):
-        _BreakoutDataByLinter(map_to_return, f)
+      name = os.path.basename(f)
+      for patterns, linter in _FILENAME_PATTERNS_TO_LINTER_MAP.items():
+        if any(fnmatch.fnmatch(name, x) for x in patterns):
+          map_to_return.setdefault(linter, []).append(f)
+          break
+      else:
+        if os.path.isfile(f):
+          _BreakoutDataByLinter(map_to_return, f)
 
   return map_to_return
 
@@ -397,7 +404,7 @@ def _Dispatcher(errors, output_format, debug, linter, path):
       errors.value += 1
 
 
-@command.CommandDecorator('lint')
+@command.command_decorator('lint')
 class LintCommand(command.CliCommand):
   """Run lint checks on the specified files."""
 
@@ -428,7 +435,7 @@ run other checks (e.g. pyflakes, etc.)
       # they are aware that nothing was linted.
       logging.warning('No files provided to lint.  Doing nothing.')
 
-    errors = multiprocessing.Value('i')
+    errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
     linter_map = _BreakoutFilesByLinter(files)
     dispatcher = functools.partial(_Dispatcher, errors,
                                    self.options.output, self.options.debug)

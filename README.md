@@ -150,7 +150,7 @@ It's the same as `scripts/run_tests`, but in an easier-to-find location.
 Every Python file in Chromite is accompanied by a corresponding `*_unittest.py`
 file. Running a particular file's unit tests is best done via
 ```shell
-~/trunk/chromite $ ./run_tests example_file_unittest.py
+chromite $ ./run_tests example_file_unittest.py
 ```
 
 This script initializes a Python 3 virtualenv with necessary test dependencies
@@ -161,6 +161,15 @@ long time.
 
 Tests will not run in a standalone git checkout of chromite. Use the repo-based
 flow described above to obtain a functional-testing environment.
+
+### Network Tests
+
+By default, any test that reaches out to the network (those wrapped in a
+`@cros_test_lib.pytestmark_network_test` decorator) will not be run. To include
+these tests, add the `--network` option:
+```shell
+~/trunk/chromite $ ./run_tests --network -- ...
+```
 
 ### Writing unit tests
 

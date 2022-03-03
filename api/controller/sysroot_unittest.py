@@ -247,6 +247,12 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     self.sysroot = os.path.join(self.tempdir, 'board')
     self.invalid_sysroot = os.path.join(self.tempdir, 'invalid', 'sysroot')
     osutils.SafeMakedirs(self.sysroot)
+    # Set up portage log directory.
+    self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
+    self.portage_dir = os.path.join(self.tempdir, 'portage_logdir')
+    self.PatchObject(
+        sysroot_lib.Sysroot, 'portage_logdir', new=self.portage_dir)
+    osutils.SafeMakedirs(self.portage_dir)
 
   def _InputProto(self, build_target=None, sysroot_path=None,
                   compile_source=False):
@@ -264,6 +270,22 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
   def _OutputProto(self):
     """Helper to build output proto instance."""
     return sysroot_pb2.InstallToolchainResponse()
+
+  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+    """Creates a log file for testing for individual packages built by Portage.
+
+    Args:
+      log_path (pathlike): the PORTAGE_LOGDIR path
+      pkg_info (PackageInfo): name components for log file.
+      timestamp (datetime): timestamp used to name the file.
+    """
+    path = os.path.join(log_path,
+                        f'{pkg_info.category}:{pkg_info.pvr}:' \
+                        f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
+    osutils.WriteFile(path,
+                      f'Test log file for package {pkg_info.category}/'
+                      f'{pkg_info.package} written to {path}')
+    return path
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
@@ -344,9 +366,19 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     in_proto = self._InputProto(build_target=self.board,
                                 sysroot_path=self.sysroot)
 
-    err_pkgs = ['cat/pkg', 'cat2/pkg2']
+    err_pkgs = ['cat/pkg-1.0-r1', 'cat2/pkg2-1.0-r1']
     err_cpvs = [package_info.parse(pkg) for pkg in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
+
+    new_logs = {}
+    for i, pkg in enumerate(err_pkgs):
+      self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
+                                 datetime.datetime(2021, 6, 9, 13, 37, 0))
+      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
+                                                 datetime.datetime(2021, 6, 9,
+                                                                   16, 20, 0)
+                                                 )
+
     err = sysroot_lib.ToolchainInstallError('Error',
                                             cros_build_lib.CommandResult(),
                                             tc_info=err_cpvs)
@@ -356,6 +388,16 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
                                              self.api_config)
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
     self.assertTrue(out_proto.failed_packages)
+    self.assertTrue(out_proto.failed_package_data)
+    # This needs to return 2 to indicate the available error response.
+    self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
+    for data in out_proto.failed_package_data:
+      package = controller_util.deserialize_package_info(data.name)
+      cat_pkg = (data.name.category, data.name.package_name)
+      self.assertIn(cat_pkg, expected)
+      self.assertEqual(data.log_path.path, new_logs[package.cpvr])
+
+    # TODO(b/206514844): remove when field is deleted
     for package in out_proto.failed_packages:
       cat_pkg = (package.category, package.package_name)
       self.assertIn(cat_pkg, expected)
@@ -372,6 +414,12 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     self.build_target = 'board'
     self.sysroot = os.path.join(self.tempdir, 'build', 'board')
     osutils.SafeMakedirs(self.sysroot)
+    # Set up portage log directory.
+    self.target_sysroot = sysroot_lib.Sysroot(self.sysroot)
+    self.portage_dir = os.path.join(self.tempdir, 'portage_logdir')
+    self.PatchObject(
+        sysroot_lib.Sysroot, 'portage_logdir', new=self.portage_dir)
+    osutils.SafeMakedirs(self.portage_dir)
     # Set up goma directories.
     self.goma_dir = os.path.join(self.tempdir, 'goma_dir')
     osutils.SafeMakedirs(self.goma_dir)
@@ -427,6 +475,21 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     osutils.WriteFile(
         path,
         timestamp.strftime('Goma log file created at: %Y/%m/%d %H:%M:%S'))
+
+  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+    """Creates a log file for testing for individual packages built by Portage.
+
+    Args:
+      log_path (pathlike): the PORTAGE_LOGDIR path
+      pkg_info (PackageInfo): name components for log file.
+      timestamp (datetime): timestamp used to name the file.
+    """
+    path = os.path.join(log_path,
+                        f'{pkg_info.category}:{pkg_info.pvr}:' \
+                        f'{timestamp.strftime("%Y%m%d-%H%M%S")}.log')
+    osutils.WriteFile(path, f'Test log file for package {pkg_info.category}/'
+                      f'{pkg_info.package} written to {path}')
+    return path
 
   def testValidateOnly(self):
     """Sanity check that a validate only call does not execute any logic."""
@@ -553,6 +616,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         ],
         use_flags=[],
         use_goma=False,
+        use_remoteexec=False,
         incremental_build=False,
         setup_board=False,
         dryrun=False)
@@ -684,10 +748,18 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     out_proto = self._OutputProto()
 
     # Failed package info and expected list for verification.
-    err_pkgs = ['cat/pkg', 'cat2/pkg2']
-    err_cpvs = [package_info.SplitCPV(cpv, strict=False) for cpv in err_pkgs]
+    err_pkgs = ['cat/pkg-1.0-r3', 'cat2/pkg2-1.0-r1']
+    err_cpvs = [package_info.parse(cpv) for cpv in err_pkgs]
     expected = [('cat', 'pkg'), ('cat2', 'pkg2')]
 
+    new_logs = {}
+    for i, pkg in enumerate(err_pkgs):
+      self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
+                                 datetime.datetime(2021, 6, 9, 13, 37, 0))
+      new_logs[pkg] = self._CreatePortageLogFile(self.portage_dir, err_cpvs[i],
+                                                 datetime.datetime(2021, 6, 9,
+                                                                   16, 20, 0)
+                                                 )
     # Force error to be raised with the packages.
     error = sysroot_lib.PackageInstallError('Error',
                                             cros_build_lib.CommandResult(),
@@ -698,6 +770,13 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
                                             self.api_config)
     # This needs to return 2 to indicate the available error response.
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
+    for data in out_proto.failed_package_data:
+      package = controller_util.deserialize_package_info(data.name)
+      cat_pkg = (data.name.category, data.name.package_name)
+      self.assertIn(cat_pkg, expected)
+      self.assertEqual(data.log_path.path, new_logs[package.cpvr])
+
+    # TODO(b/206514844): remove when field is deleted
     for package in out_proto.failed_packages:
       cat_pkg = (package.category, package.package_name)
       self.assertIn(cat_pkg, expected)

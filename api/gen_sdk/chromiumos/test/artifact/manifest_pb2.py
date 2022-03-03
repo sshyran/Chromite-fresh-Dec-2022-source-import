@@ -11,6 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from chromite.api.gen_sdk.chromiumos import storage_path_pb2 as chromiumos_dot_storage__path__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -18,8 +19,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='chromiumos.test.artifact',
   syntax='proto3',
   serialized_options=b'Z2go.chromium.org/chromiumos/config/go/test/artifact',
-  serialized_pb=b'\n\'chromiumos/test/artifact/manifest.proto\x12\x18\x63hromiumos.test.artifact\"R\n\x08Manifest\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x35\n\tartifacts\x18\x02 \x03(\x0b\x32\".chromiumos.test.artifact.Artifact\"\x99\x01\n\x08\x41rtifact\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.chromiumos.test.artifact.Artifact.ArtifactType\x12\x0e\n\x06gs_url\x18\x02 \x01(\t\">\n\x0c\x41rtifactType\x12\x1d\n\x19\x41RTIFACT_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n\x0bTEST_RESULT\x10\x01\x42\x34Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
-)
+  serialized_pb=b'\n\'chromiumos/test/artifact/manifest.proto\x12\x18\x63hromiumos.test.artifact\x1a\x1d\x63hromiumos/storage_path.proto\"R\n\x08Manifest\x12\x0f\n\x07version\x18\x01 \x01(\r\x12\x35\n\tartifacts\x18\x02 \x03(\x0b\x32\".chromiumos.test.artifact.Artifact\"\xd9\x01\n\x08\x41rtifact\x12=\n\x04type\x18\x01 \x01(\x0e\x32/.chromiumos.test.artifact.Artifact.ArtifactType\x12-\n\x0cstorage_path\x18\x02 \x01(\x0b\x32\x17.chromiumos.StoragePath\"_\n\x0c\x41rtifactType\x12\x1d\n\x19\x41RTIFACT_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n\x0bTEST_RESULT\x10\x01\x12\x10\n\x0c\x44UT_METADATA\x10\x02\x12\r\n\tTEST_PLAN\x10\x03\x42\x34Z2go.chromium.org/chromiumos/config/go/test/artifactb\x06proto3'
+  ,
+  dependencies=[chromiumos_dot_storage__path__pb2.DESCRIPTOR,])
 
 
 
@@ -37,11 +39,19 @@ _ARTIFACT_ARTIFACTTYPE = _descriptor.EnumDescriptor(
       name='TEST_RESULT', index=1, number=1,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DUT_METADATA', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TEST_PLAN', index=3, number=3,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=245,
-  serialized_end=307,
+  serialized_start=307,
+  serialized_end=402,
 )
 _sym_db.RegisterEnumDescriptor(_ARTIFACT_ARTIFACTTYPE)
 
@@ -79,8 +89,8 @@ _MANIFEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=69,
-  serialized_end=151,
+  serialized_start=100,
+  serialized_end=182,
 )
 
 
@@ -99,9 +109,9 @@ _ARTIFACT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='gs_url', full_name='chromiumos.test.artifact.Artifact.gs_url', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='storage_path', full_name='chromiumos.test.artifact.Artifact.storage_path', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -118,12 +128,13 @@ _ARTIFACT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=154,
-  serialized_end=307,
+  serialized_start=185,
+  serialized_end=402,
 )
 
 _MANIFEST.fields_by_name['artifacts'].message_type = _ARTIFACT
 _ARTIFACT.fields_by_name['type'].enum_type = _ARTIFACT_ARTIFACTTYPE
+_ARTIFACT.fields_by_name['storage_path'].message_type = chromiumos_dot_storage__path__pb2._STORAGEPATH
 _ARTIFACT_ARTIFACTTYPE.containing_type = _ARTIFACT
 DESCRIPTOR.message_types_by_name['Manifest'] = _MANIFEST
 DESCRIPTOR.message_types_by_name['Artifact'] = _ARTIFACT

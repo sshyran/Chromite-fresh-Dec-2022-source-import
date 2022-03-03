@@ -404,7 +404,7 @@ class TerminateRunCommandError(RunCommandError):
   """
 
 
-def sudo_run(cmd, user='root', preserve_env=False, **kwargs):
+def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
   """Run a command via sudo.
 
   Client code must use this rather than coming up with their own run
@@ -608,7 +608,7 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
         check=True, int_timeout=1, kill_timeout=1,
         log_output=False, capture_output=False,
         quiet=False, encoding=None, errors=None, dryrun=False,
-        **kwargs):
+        **kwargs) -> CommandResult:
   """Runs a command.
 
   Args:
@@ -873,25 +873,33 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
                                       kill_timeout, cmd, old_sigterm))
 
     try:
-      (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
-    finally:
-      if use_signals:
-        signal.signal(signal.SIGINT, old_sigint)
-        signal.signal(signal.SIGTERM, old_sigterm)
+      try:
+        (cmd_result.stdout, cmd_result.stderr) = proc.communicate(input)
+      finally:
+        if use_signals:
+          signal.signal(signal.SIGINT, old_sigint)
+          signal.signal(signal.SIGTERM, old_sigterm)
 
-      if (popen_stdout and not isinstance(popen_stdout, int) and
-          not log_stdout_to_file):
-        popen_stdout.seek(0)
-        cmd_result.stdout = popen_stdout.read()
-        popen_stdout.close()
-      elif log_stdout_to_file:
-        popen_stdout.close()
+        if (popen_stdout and not isinstance(popen_stdout, int) and
+            not log_stdout_to_file):
+          popen_stdout.seek(0)
+          cmd_result.stdout = popen_stdout.read()
+          popen_stdout.close()
+        elif log_stdout_to_file:
+          popen_stdout.close()
 
-      if (popen_stderr and not isinstance(popen_stderr, int) and
-          not log_stderr_to_file):
-        popen_stderr.seek(0)
-        cmd_result.stderr = popen_stderr.read()
-        popen_stderr.close()
+        if (popen_stderr and not isinstance(popen_stderr, int) and
+            not log_stderr_to_file):
+          popen_stderr.seek(0)
+          cmd_result.stderr = popen_stderr.read()
+          popen_stderr.close()
+    except TerminateRunCommandError as e:
+      # If we were killed by a signal (like SIGTERM in case of a timeout), don't
+      # swallow the output completely as it can be a huge help for figuring out
+      # why the command failed.
+      e.stdout = e.result.stdout = cmd_result.stdout
+      e.stderr = e.result.stderr = cmd_result.stderr
+      raise
 
     cmd_result.returncode = proc.returncode
 
@@ -1503,13 +1511,13 @@ def BooleanShellValue(sval, default, msg=None):
 
 
 # Suppress whacked complaints about abstract class being unused.
-class MasterPidContextManager(object):
+class PrimaryPidContextManager(object):
   """Allow context managers to restrict their exit to within the same PID."""
 
   # In certain cases we actually want this ran outside
   # of the main pid- specifically in backup processes
   # doing cleanup.
-  ALTERNATE_MASTER_PID = None
+  ALTERNATE_PRIMARY_PID = None
 
   def __init__(self):
     self._invoking_pid = None
@@ -1520,7 +1528,7 @@ class MasterPidContextManager(object):
 
   def __exit__(self, exc_type, exc, exc_tb):
     curpid = os.getpid()
-    if curpid == self.ALTERNATE_MASTER_PID:
+    if curpid == self.ALTERNATE_PRIMARY_PID:
       self._invoking_pid = curpid
     if curpid == self._invoking_pid:
       return self._exit(exc_type, exc, exc_tb)

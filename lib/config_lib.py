@@ -801,6 +801,10 @@ def DefaultSettings():
       # Android package name.
       android_package=None,
 
+      # Update Android LKGB instead of uprevving the Android package. See
+      # Phase 2 migration of go/android-uprev-recipes.
+      android_update_lkgb=False,
+
       # Uprev Chrome, values of 'tot', 'stable_release', or None.
       chrome_rev=None,
 

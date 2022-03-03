@@ -173,7 +173,8 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
 
 
 def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
-                goma_dir, goma_client_json, working_dir, additional_args):
+                goma_dir, goma_client_json, reclient_dir, reproxy_cfg_file,
+                working_dir, additional_args):
   """Enters an existing SDK chroot"""
   st = os.statvfs(os.path.join(chroot_path, 'usr', 'bin', 'sudo'))
   if st.f_flag & os.ST_NOSUID:
@@ -188,6 +189,10 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     cmd.extend(['--goma_dir', goma_dir])
   if goma_client_json:
     cmd.extend(['--goma_client_json', goma_client_json])
+  if reclient_dir:
+    cmd.extend(['--reclient_dir', reclient_dir])
+  if reproxy_cfg_file:
+    cmd.extend(['--reproxy_cfg_file', reproxy_cfg_file])
   if working_dir is not None:
     cmd.extend(['--working_dir', working_dir])
 
@@ -206,14 +211,7 @@ def EnterChroot(chroot_path, cache_dir, chrome_root, chrome_root_mount,
     logging.notice(
         'Raising vm.max_map_count from %s to %s', max_map_count, file_limit)
     open('/proc/sys/vm/max_map_count', 'w').write(f'{file_limit}\n')
-  ret = cros_build_lib.dbg_run(cmd, check=False)
-  # If we were in interactive mode, ignore the exit code; it'll be whatever
-  # they last ran w/in the chroot and won't matter to us one way or another.
-  # Note this does allow chroot entrance to fail and be ignored during
-  # interactive; this is however a rare case and the user will immediately
-  # see it (nor will they be checking the exit code manually).
-  if ret.returncode != 0 and additional_args:
-    raise SystemExit(ret.returncode)
+  return cros_build_lib.dbg_run(cmd, check=False)
 
 
 def _ImageFileForChroot(chroot):
@@ -421,10 +419,10 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
 def _SudoCommand():
   """Get the 'sudo' command, along with all needed environment variables."""
 
-  # Pass in the ENVIRONMENT_WHITELIST and ENV_PASSTHRU variables so that
+  # Pass in the ENVIRONMENT_ALLOWLIST and ENV_PASSTHRU variables so that
   # scripts in the chroot know what variables to pass through.
   cmd = ['sudo']
-  for key in constants.CHROOT_ENVIRONMENT_WHITELIST + constants.ENV_PASSTHRU:
+  for key in constants.CHROOT_ENVIRONMENT_ALLOWLIST + constants.ENV_PASSTHRU:
     value = os.environ.get(key)
     if value is not None:
       cmd += ['%s=%s' % (key, value)]
@@ -703,6 +701,14 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
       type='path',
       help='Service account json file to use goma on bot. '
       'Mounted into the chroot.')
+  parser.add_argument(
+      '--reclient-dir',
+      type='path',
+      help='Reclient installed directory to mount into the chroot.')
+  parser.add_argument(
+      '--reproxy-cfg-file',
+      type='path',
+      help="Config file for re-client's reproxy used for remoteexec.")
 
   # Use type=str instead of type='path' to prevent the given path from being
   # transfered to absolute path automatically.
@@ -1177,7 +1183,9 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
       lock.read_lock()
       if not mounted:
         cros_sdk_lib.MountChrootPaths(options.chroot)
-      EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
-                  options.chrome_root_mount, options.goma_dir,
-                  options.goma_client_json, options.working_dir,
-                  chroot_command)
+      ret = EnterChroot(options.chroot, options.cache_dir, options.chrome_root,
+                        options.chrome_root_mount, options.goma_dir,
+                        options.goma_client_json, options.reclient_dir,
+                        options.reproxy_cfg_file, options.working_dir,
+                        chroot_command)
+      sys.exit(ret.returncode)

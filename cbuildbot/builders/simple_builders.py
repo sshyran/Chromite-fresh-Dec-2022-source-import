@@ -8,10 +8,8 @@ import collections
 import logging
 import traceback
 
-from chromite.cbuildbot import afdo
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import generic_builders
-from chromite.cbuildbot.stages import afdo_stages
 from chromite.cbuildbot.stages import android_stages
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import build_stages
@@ -30,7 +28,6 @@ from chromite.lib import constants
 from chromite.lib import failures_lib
 from chromite.lib import parallel
 from chromite.lib import results_lib
-from chromite.lib import toolchain_util
 
 
 # TODO: SimpleBuilder needs to be broken up big time.
@@ -199,24 +196,6 @@ class SimpleBuilder(generic_builders.Builder):
     if config.moblab_vm_tests:
       stage_list += [[vm_test_stages.MoblabVMTestStage, board]]
 
-    if config.afdo_generate:
-      stage_list += [[afdo_stages.AFDODataGenerateStage, board]]
-
-    if config.afdo_generate_async:
-      stage_list += [[afdo_stages.GenerateBenchmarkAFDOStage, board]]
-
-    if config.orderfile_generate:
-      stage_list += [[afdo_stages.GenerateChromeOrderfileStage, board]]
-
-    if config.orderfile_verify:
-      stage_list += [[afdo_stages.UploadVettedOrderfileStage, board]]
-
-    if config.kernel_afdo_verify:
-      stage_list += [[afdo_stages.UploadVettedKernelAFDOStage, board]]
-
-    if config.chrome_afdo_verify:
-      stage_list += [[afdo_stages.UploadVettedChromeAFDOStage, board]]
-
     stage_list += [
         [release_stages.SignerTestStage, board, archive_stage],
         [release_stages.SigningStage, board],
@@ -333,62 +312,7 @@ class SimpleBuilder(generic_builders.Builder):
     task_runner = self._RunBackgroundStagesForBoardAndMarkAsSuccessful
     with parallel.BackgroundTaskRunner(task_runner) as queue:
       for builder_run, board in tasks:
-        # Skip generate benchmark AFDO if the board is not suitable or
-        # if it's already in the bucket
-        if (builder_run.config.afdo_generate_async and
-            toolchain_util.CanGenerateAFDOData(board) and
-            toolchain_util.CheckAFDOArtifactExists(
-                buildroot=builder_run.buildroot,
-                chrome_root=builder_run.options.chrome_root,
-                board=board,
-                target='benchmark_afdo')):
-          continue
-
-        # Only generate orderfile if Chrome is uprevved since last generation.
-        if (builder_run.config.orderfile_generate and
-            toolchain_util.CheckAFDOArtifactExists(
-                buildroot=builder_run.buildroot,
-                chrome_root=builder_run.options.chrome_root,
-                board=board,
-                target='orderfile_generate')):
-          continue
-
-        # Update Chrome ebuild with unvetted orderfile
-        if builder_run.config.orderfile_verify:
-          # Skip verifying orderfile if it's already verified.
-          if toolchain_util.CheckAFDOArtifactExists(
-              buildroot=builder_run.buildroot,
-              chrome_root=builder_run.options.chrome_root,
-              board=board,
-              target='orderfile_verify'):
-            continue
-          self._RunStage(afdo_stages.OrderfileUpdateChromeEbuildStage,
-                         board, builder_run=builder_run)
-
-        if builder_run.config.kernel_afdo_verify:
-          # Skip verifying kernel AFDO if it's already verified.
-          if toolchain_util.CheckAFDOArtifactExists(
-              buildroot=builder_run.buildroot,
-              chrome_root=builder_run.options.chrome_root,
-              board=board,
-              target='kernel_afdo'):
-            continue
-          self._RunStage(afdo_stages.KernelAFDOUpdateEbuildStage,
-                         board, builder_run=builder_run)
-
-        if builder_run.config.chrome_afdo_verify:
-          # Skip verifying Chrome AFDO if both benchmark and CWP are verified.
-          if toolchain_util.CheckAFDOArtifactExists(
-              buildroot=builder_run.buildroot,
-              chrome_root=builder_run.options.chrome_root,
-              board=board,
-              target='chrome_afdo'):
-            continue
-          self._RunStage(afdo_stages.ChromeAFDOUpdateEbuildStage,
-                         board, builder_run=builder_run)
-
-        # Run BuildPackages in the foreground, generating or using AFDO data
-        # if requested.
+        # Run BuildPackages in the foreground.
         kwargs = {'builder_run': builder_run}
         if builder_run.config.afdo_generate_min:
           kwargs['afdo_generate_min'] = True
@@ -397,29 +321,6 @@ class SimpleBuilder(generic_builders.Builder):
 
         self._RunStage(build_stages.BuildPackagesStage, board,
                        update_metadata=True, **kwargs)
-
-        if (builder_run.config.afdo_generate_min and
-            afdo.CanGenerateAFDOData(board)):
-          # Generate the AFDO data before allowing any other tasks to run.
-          self._RunStage(build_stages.BuildImageStage, board, **kwargs)
-          self._RunStage(artifact_stages.UploadTestArtifactsStage, board,
-                         builder_run=builder_run,
-                         suffix='[afdo_generate_min]')
-          for suite in builder_run.config.hw_tests:
-            self._RunStage(test_stages.SkylabHWTestStage, board, suite,
-                           builder_run=builder_run)
-          self._RunStage(afdo_stages.AFDODataGenerateStage, board,
-                         builder_run=builder_run)
-
-        if (builder_run.config.afdo_generate_min and
-            builder_run.config.afdo_update_chrome_ebuild):
-          self._RunStage(afdo_stages.AFDOUpdateChromeEbuildStage,
-                         builder_run=builder_run)
-
-        if (builder_run.config.afdo_generate_min and
-            builder_run.config.afdo_update_kernel_ebuild):
-          self._RunStage(afdo_stages.AFDOUpdateKernelEbuildStage,
-                         builder_run=builder_run)
 
         # Kick off our background stages.
         queue.put([builder_run, board])
@@ -524,48 +425,35 @@ class DistributedBuilder(SimpleBuilder):
         without completing if it raises ExitEarlyException.
       completion_successful: Whether the compeletion_stage succeeded.
     """
-    try:
-      # When (afdo_update_ebuild and not afdo_generate_min) is True,
-      # if completion_stage passed, need to run
-      # AFDOUpdateChromeEbuildStage to prepare for pushing commits to masters;
-      # if it's a master_chrome_pfq build and compeletion_stage failed,
-      # need to run AFDOUpdateChromeEbuildStage to prepare for pushing commits
-      # to a staging branch.
-      if completion_successful and not self._run.config.afdo_generate_min:
-        if self._run.config.afdo_update_chrome_ebuild:
-          self._RunStage(afdo_stages.AFDOUpdateChromeEbuildStage)
-        if self._run.config.afdo_update_kernel_ebuild:
-          self._RunStage(afdo_stages.AFDOUpdateKernelEbuildStage)
-    finally:
-      if self._run.config.master:
-        self._RunStage(report_stages.SlaveFailureSummaryStage)
+    if self._run.config.master:
+      self._RunStage(report_stages.SlaveFailureSummaryStage)
 
-      if (config_lib.IsCanaryMaster(self._run) or
-          (self._run.config.master and
-           self._run.config.build_type == constants.FULL_TYPE)):
-        if build_finished and not self._run.config.basic_builder:
-          self._RunStage(completion_stages.UpdateChromeosLKGMStage)
-        else:
-          logging.info(
-              'Skipping UpdateChromeosLKGMStage, '
-              'build_successful=%d completion_successful=%d '
-              'build_finished=%d', was_build_successful, completion_successful,
-              build_finished)
+    if (config_lib.IsCanaryMaster(self._run) or
+        (self._run.config.master and
+         self._run.config.build_type == constants.FULL_TYPE)):
+      if build_finished and not self._run.config.basic_builder:
+        self._RunStage(completion_stages.UpdateChromeosLKGMStage)
+      else:
+        logging.info(
+            'Skipping UpdateChromeosLKGMStage, '
+            'build_successful=%d completion_successful=%d '
+            'build_finished=%d', was_build_successful, completion_successful,
+            build_finished)
 
-      if self._run.config.push_overlays:
-        publish = (was_build_successful and completion_successful and
-                   build_finished)
-        # CQ and Master Chrome PFQ no longer publish uprevs. For Master Chrome
-        # PFQ this is because this duty is being transitioned to the Chrome
-        # PUpr in the PCQ world. See http://go/pupr.
-        # There is no easy way to disable this in ChromeOS config,
-        # so hack the check here.
+    if self._run.config.push_overlays:
+      publish = (was_build_successful and completion_successful and
+                 build_finished)
+      # CQ and Master Chrome PFQ no longer publish uprevs. For Master Chrome
+      # PFQ this is because this duty is being transitioned to the Chrome
+      # PUpr in the PCQ world. See http://go/pupr.
+      # There is no easy way to disable this in ChromeOS config,
+      # so hack the check here.
 
-        if publish and config_lib.IsMasterAndroidPFQ(self._run.config):
-          self._RunStage(android_stages.UprevAndroidStage)
-          self._RunStage(android_stages.AndroidMetadataStage)
-        self._RunStage(completion_stages.PublishUprevChangesStage,
-                       self.sync_stage, publish)
+      if publish and config_lib.IsMasterAndroidPFQ(self._run.config):
+        self._RunStage(android_stages.UprevAndroidStage)
+        self._RunStage(android_stages.AndroidMetadataStage)
+      self._RunStage(completion_stages.PublishUprevChangesStage,
+                     self.sync_stage, publish)
 
   def RunStages(self):
     """Runs simple builder logic and publishes information to overlays."""

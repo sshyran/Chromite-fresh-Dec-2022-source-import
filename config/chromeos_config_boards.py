@@ -30,7 +30,6 @@ arm_internal_release_boards = frozenset([
     'tael',
     'veyron_mighty',
     'veyron_minnie',
-    'veyron_rialto',
     'veyron_speedy',
     'viking',
     'viking-poc2',
@@ -148,4 +147,7 @@ builder_incompatible_binaries_boards = frozenset([
     'zork',
     'zork-arc-r',
     'zork-borealis',
+    'skyrim',
+    'skyrim-chausie',
+    'skyrim-kernelnext',
 ])

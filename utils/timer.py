@@ -4,6 +4,7 @@
 
 """Timing utility."""
 
+import contextlib
 import datetime
 import functools
 import logging
@@ -25,34 +26,27 @@ class Timer(object):
     with Timer():
       code_to_be_timed()
 
-    with Timer(): -> logs "{formatted_delta}" at info level
-    with Timer('name'): -> logs "name: {formatted_delta}" at info
-    with Timer('name', print): -> prints "name: {formatted_delta}"
+    with Timer() as t: ->  str(t) == "{formatted_delta}"
+    with Timer('name') as t: -> str(t) == "name: {formatted_delta}"
 
-    If you don't want it to output itself on exit, you can do it manually,
-    e.g. to get an average:
+    To get an average:
 
     timers = []
     for _ in range(10):
-      with Timer(output=None) as t:
-        ...
+      with Timer() as t:
+        code_to_be_timed()
       timers.append(t)
     avg = sum(timers, start=Timer('Average')) / len(times)
     avg.output() -> prints "Average: {formatted_delta}"
   """
 
-  def __init__(self,
-               name: Optional[str] = None,
-               output: Optional[Callable[[str], Any]] = logging.info):
+  def __init__(self, name: Optional[str] = None):
     """Init.
 
     Args:
       name: A string to identify the timer, especially when using multiple.
-      output: A function that takes only a string to output it somewhere.
     """
     self.name = name
-    # Make output always callable, but do nothing when no output.
-    self.output = lambda: output(str(self)) if output else None
     self.start = 0.0
     self.end = 0.0
     self.delta = 0.0
@@ -60,7 +54,7 @@ class Timer(object):
   def __add__(self, other):
     if not isinstance(other, Timer):
       raise NotImplementedError(f'Cannot add {type(other)} to Timer')
-    result = Timer(self.name, self.output)
+    result = Timer(self.name)
     result.delta = self.delta + other.delta
 
     return result
@@ -68,7 +62,7 @@ class Timer(object):
   def __truediv__(self, other):
     if not isinstance(other, int):
       raise NotImplementedError(f'Only int is supported, given {type(other)}')
-    result = Timer(self.name, self.output)
+    result = Timer(self.name)
     result.delta = self.delta / other
 
     return result
@@ -80,24 +74,33 @@ class Timer(object):
   def __exit__(self, *args):
     self.end = time.perf_counter()
     self.delta = self.end - self.start
-    self.output()
 
   def __str__(self):
     name = f'{self.name}: ' if self.name else ''
     return f'{name}{pformat.timedelta(datetime.timedelta(seconds=self.delta))}'
 
 
-def timer(name: Optional[str] = None,
+def timed(name: Optional[str] = None,
           output: Callable[[str], Any] = logging.info):
-  """Timer decorator."""
+  """Timed decorator to add a timer to a function."""
 
   def decorator(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-      with Timer(name, output):
+      with timer(name or func.__name__, output):
         return func(*args, **kwargs)
 
     return wrapper
 
   return decorator
+
+
+@contextlib.contextmanager
+def timer(name: str = None, output: Callable[[str], Any] = logging.info):
+  """Timer context manager to automatically output results."""
+  try:
+    with Timer(name) as t:
+      yield t
+  finally:
+    output(str(t))

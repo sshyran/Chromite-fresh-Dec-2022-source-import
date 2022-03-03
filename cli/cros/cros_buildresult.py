@@ -132,7 +132,7 @@ def ReportJson(build_statuses):
   return json.dumps(report)
 
 
-@command.CommandDecorator('buildresult')
+@command.command_decorator('buildresult')
 class BuildResultCommand(command.CliCommand):
   """Script that looks up results of finished builds."""
 
@@ -150,7 +150,7 @@ Output can be json formatted with:
   cros buildresult --buildbucket-id 1234567890123 --report json
 
 Note:
-  This tool does NOT work for master-*-tryjob, precq-launcher-try, or
+  This tool does NOT work for main-*-tryjob, precq-launcher-try, or
   builds on branches older than CL:942097.
 
 Note:
@@ -193,8 +193,6 @@ Note:
 
   def Run(self):
     """Run cros buildresult."""
-    self.options.Freeze()
-
     commandline.RunInsideChroot(self)
 
     buildstore = BuildStore(_write_to_cidb=False)

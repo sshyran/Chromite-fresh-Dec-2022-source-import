@@ -417,7 +417,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
             '--cache-dir', '/cache',
         ],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -440,7 +440,7 @@ class WorkspaceInitSDKStageTest(WorkspaceStageBase):
             '--chrome_root', '/chrome',
         ],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -469,7 +469,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
             'FEATURES': ' -separatedebug splitdebug',
         },
         cwd=self.workspace,
@@ -492,7 +492,7 @@ class WorkspaceUpdateSDKStageTest(WorkspaceStageBase):
         extra_env={
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
             'FEATURES': ' -separatedebug splitdebug',
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -534,7 +534,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -561,7 +561,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -588,7 +588,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -616,7 +616,7 @@ class WorkspaceSetupBoardStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -657,7 +657,7 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache', '--chrome_root', '/chrome'],
         extra_env={
-            'USE': u'-cros-debug chrome_internal',
+            'USE': u'-cros-debug chrome_internal thinlto',
             'CHROME_ORIGIN': 'LOCAL_SOURCE',
         },
         cwd=self.workspace,
@@ -701,7 +701,7 @@ class WorkspaceUnitTestStageTest(WorkspaceStageBase):
                  '--board=board', '--jobs=10'],
                 enter_chroot=True,
                 chroot_args=['--cache-dir', '/cache'],
-                extra_env={'USE': '-cros-debug chrome_internal'},
+                extra_env={'USE': '-cros-debug chrome_internal thinlto'},
                 cwd=self.workspace,
             ),
         ]
@@ -738,7 +738,7 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -768,7 +768,7 @@ class WorkspaceBuildImageStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace,
     )
@@ -813,7 +813,7 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         enter_chroot=True,
         chroot_args=['--cache-dir', '/cache'],
         extra_env={
-            'USE': '-cros-debug chrome_internal',
+            'USE': '-cros-debug chrome_internal thinlto',
         },
         cwd=self.workspace)
 

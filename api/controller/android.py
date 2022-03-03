@@ -4,6 +4,7 @@
 
 """Android operations."""
 
+import logging
 import os
 from typing import TYPE_CHECKING
 
@@ -81,8 +82,9 @@ def MarkStable(input_proto: android_pb2.MarkStableRequest,
   output_proto.status = android_pb2.MARK_STABLE_STATUS_SUCCESS
   # TODO(crbug/904939): This should move to service/android.py and the port
   # should be finished.
+  android_atom_to_build = None
   try:
-    android_atom_to_build = packages.uprev_android(
+    result = packages.uprev_android(
         android_package=package_name,
         chroot=chroot,
         build_targets=build_targets,
@@ -90,6 +92,8 @@ def MarkStable(input_proto: android_pb2.MarkStableRequest,
         android_version=android_version,
         skip_commit=skip_commit,
     )
+    if result.revved:
+      android_atom_to_build = result.android_atom
   except packages.AndroidIsPinnedUprevError as e:
     # If the uprev failed due to a pin, CI needs to unpin and retry.
     android_atom_to_build = e.new_android_atom
@@ -118,3 +122,37 @@ def UnpinVersion(_input_proto: android_pb2.UnpinVersionRequest,
     _config: The call config.
   """
   osutils.SafeUnlink(ANDROIDPIN_MASK_PATH)
+
+
+def _WriteLKGBResponse(_input_proto, output_proto, _config):
+  """Fake WriteLKGB response."""
+  output_proto.modified_files.append('fake_file')
+
+
+@faux.success(_WriteLKGBResponse)
+@faux.empty_error
+@validate.require('android_package', 'android_version')
+@validate.validation_complete
+def WriteLKGB(input_proto, output_proto, _config):
+  android_package = input_proto.android_package
+  android_version = input_proto.android_version
+  android_package_dir = android.GetAndroidPackageDir(android_package)
+
+  # Attempt to read current LKGB, if available.
+  current_lkgb = None
+  try:
+    current_lkgb = android.ReadLKGB(android_package_dir)
+  except android.MissingLKGBError:
+    logging.info('LKGB file is missing, creating a new one.')
+  except android.InvalidLKGBError:
+    logging.warning('Current LKGB file is invalid, overwriting.')
+
+  # Do nothing if LKGB is already set to the requested version.
+  if current_lkgb == android_version:
+    logging.warning('LKGB of %s is already %s, doing nothing.',
+                    android_package, android_version)
+    return
+
+  # Actually update LKGB.
+  lkgb = android.WriteLKGB(android_package_dir, android_version)
+  output_proto.modified_files.append(lkgb)

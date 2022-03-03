@@ -204,9 +204,6 @@ def main(argv):
   if options.copy_repo:
     repo.PreLoad(options.copy_repo)
 
-  if repository.IsARepoRoot(options.repo_root):
-    repo.BuildRootGitCleanup(prune_all=True)
-
   repo.Sync(local_manifest=local_manifest, detach=True)
 
   if options.gerrit_patches:

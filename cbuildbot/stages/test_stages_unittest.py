@@ -44,8 +44,6 @@ class UnitTestStageTest(generic_stages_unittest.AbstractStageTestCase,
 
   def setUp(self):
     self.rununittests_mock = self.PatchObject(commands, 'RunUnitTests')
-    self.buildunittests_mock = self.PatchObject(
-        commands, 'BuildUnitTestTarball', return_value='unit_tests.tar')
     self.uploadartifact_mock = self.PatchObject(
         generic_stages.ArchivingStageMixin, 'UploadArtifact')
     self.image_dir = os.path.join(
@@ -74,11 +72,6 @@ class UnitTestStageTest(generic_stages_unittest.AbstractStageTestCase,
         blacklist=[],
         extra_env=mock.ANY,
         build_stage=True)
-    self.buildunittests_mock.assert_called_once_with(
-        self.build_root, self._current_board,
-        self._run.GetArchive().archive_path)
-    self.uploadartifact_mock.assert_called_once_with(
-        'unit_tests.tar', archive=False)
 
 
 class HWTestStageTest(generic_stages_unittest.AbstractStageTestCase,
@@ -463,17 +456,20 @@ class HWTestPlanStageTest(cros_test_lib.MockTempDirTestCase):
     """Test TestPlanStage.ModelsToTest with a DUT model override."""
     builder_run = self._initConfig('octopus-release')
     builder_run.options.hwtest_dut_override = test_stages.HWTestDUTOverride(
-      'bar-board', 'bar-model', 'bar-pool')
+        'bar-board', 'bar-model', 'bar-pool')
     stage = test_stages.TestPlanStage(builder_run, self.buildstore, 'octopus')
     models_to_test = stage.ModelsToTest()
     self.assertEqual([model.name for model in models_to_test], ['bar-model'])
 
 
+  @pytest.mark.skip(reason='Test relies on external state: b/215089089')
   def testModelsToTestWithoutDUTOverride(self):
     """Test TestPlanStage.ModelsToTest without a DUT model override."""
     builder_run = self._initConfig('octopus-release')
     stage = test_stages.TestPlanStage(builder_run, self.buildstore, 'octopus')
     models_to_test = stage.ModelsToTest()
-    # Too many models to list them all; just check the first few.
-    self.assertEqual([model.name for model in models_to_test[0:3]],
-                     ['ampton', 'apel', 'apel-e'])
+    # Too many models to list them all; just check a subset
+    model_names = [m.name for m in models_to_test]
+    known_models = ['phaser', 'phaser360', 'sparky']
+    for model in known_models:
+      self.assertIn(model, model_names)

@@ -95,8 +95,6 @@ _MAKE_CONF_BOARD = 'etc/make.conf.board'
 _MAKE_CONF_USER = 'etc/make.conf.user'
 _MAKE_CONF_HOST_SETUP = 'etc/make.conf.host_setup'
 
-_CONFIGURATION_PATH = _MAKE_CONF_BOARD_SETUP
-
 _CACHE_PATH = 'var/cache/edb/chromeos'
 
 _CHROMIUMOS_OVERLAY = '/usr/local/portage/chromiumos'
@@ -274,7 +272,13 @@ class Sysroot(object):
 
   def __init__(self, path):
     self.path = path
-    self._config_file = self.Path(_CONFIGURATION_PATH)
+
+    # Read config from _MAKE_CONF which also pulls in config from
+    # _MAKE_CONF_BOARD_SETUP, but only write any config overrides directly to
+    # _MAKE_CONF_BOARD_SETUP.
+    self._config_file_read = self.Path(_MAKE_CONF)
+    self._config_file_write = self.Path(_MAKE_CONF_BOARD_SETUP)
+
     self._cache_file = self.Path(_CACHE_PATH)
     self._cache_file_lock = self._cache_file + '.lock'
 
@@ -317,8 +321,11 @@ class Sysroot(object):
       field: Field from the standard configuration file to get.
         One of STANDARD_FIELD_* from above.
     """
-    return osutils.SourceEnvironment(self._config_file,
-                                     [field], multiline=True).get(field)
+    # We want to source from within the config's directory as the config
+    # itself may source other scripts using a relative path.
+    with osutils.ChdirContext(Path(self._config_file_read).parent):
+      return osutils.SourceEnvironment(self._config_file_read,
+                                       [field], multiline=True).get(field)
 
   def GetCachedField(self, field):
     """Returns the value of |field| in the sysroot cache file.
@@ -378,7 +385,7 @@ class Sysroot(object):
     return self.GetCachedField(CACHED_FIELD_PROFILE_OVERRIDE) or DEFAULT_PROFILE
 
   @property
-  def build_target_overlays(self) -> List[str]:
+  def board_overlay(self) -> List[str]:
     """The BOARD_OVERLAY standard field as a list.
 
     The BOARD_OVERLAY field is set on creation, and stores the list of overlays
@@ -391,7 +398,43 @@ class Sysroot(object):
     return self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY).split()
 
   @property
-  def overlays(self) -> List[str]:
+  def _build_target_overlays(self) -> List[Path]:
+    """Overlays for the build target itself."""
+    prefix = f'overlay-{self.build_target_name}'
+    return [x for x in self.get_overlays() if x.name.startswith(prefix)]
+
+  @property
+  def build_target_overlay(self) -> Optional[Path]:
+    """The most specific build target overlay for the sysroot."""
+    # Choose the longest as a proxy for the most specific. This should only ever
+    # be choosing between overlay-x and overlay-x-private, but we'll need better
+    # logic here if we have any cases with more than that.
+    overlays = self._build_target_overlays
+    overlay = max(overlays, key=lambda x: len(x.name)) if overlays else None
+    return overlay
+
+  @property
+  def chipset(self) -> Optional[str]:
+    """The chipset for the sysroot's build target."""
+    overlays = [x for x in self.get_overlays() if x.name.startswith('chipset-')]
+    if not overlays:
+      return None
+
+    # Choose the longest as a proxy for the most specific. This should at most
+    # be choosing between chipset-x and chipset-x-private, but we'll need better
+    # logic here if we have any cases with more than that.
+    overlay = max(overlays, key=lambda x: len(x.name))
+    chipset = overlay.name
+
+    # TODO(python 3.9): string.removeprefix & string.removesuffix instead.
+    if chipset.startswith('chipset-'):
+      chipset = chipset[len('chipset-'):]
+    if chipset.endswith('-private'):
+      chipset = chipset[:-len('-private')]
+    return chipset
+
+  @property
+  def portdir_overlay(self) -> List[str]:
     """The PORTDIR_OVERLAY field as a list.
 
     The PORTDIR_OVERLAY field is set on creation, and stores the list of all
@@ -400,8 +443,19 @@ class Sysroot(object):
     return self.GetStandardField(STANDARD_FIELD_PORTDIR_OVERLAY).split()
 
   @property
-  def use_flags(self):
-    return portage_util.PortageqEnvvar('USE', sysroot=self.path)
+  def use_flags(self) -> List[str]:
+    """Get all USE flags for the sysroot."""
+    return portage_util.PortageqEnvvar('USE', sysroot=self.path).split()
+
+  @property
+  def features(self) -> List[str]:
+    """Get all FEATURES for the sysroot."""
+    return portage_util.PortageqEnvvar('FEATURES', sysroot=self.path).split()
+
+  @property
+  def portage_logdir(self) -> str:
+    """Get the PORTAGE_LOGDIR property for this sysroot."""
+    return portage_util.PortageqEnvvar('PORTAGE_LOGDIR', sysroot=self.path)
 
   def get_overlays(self,
                    build_target_only: bool = False,
@@ -418,7 +472,7 @@ class Sysroot(object):
         as absolute paths.
     """
     overlays = (
-        self.build_target_overlays if build_target_only else self.overlays)
+        self.board_overlay if build_target_only else self.portdir_overlay)
     overlay_paths = [Path(x) for x in overlays]
     if relative:
       return [
@@ -536,8 +590,7 @@ class Sysroot(object):
     Args:
       board (str): The name of the board being setup in the sysroot.
     """
-    osutils.WriteFile(self.Path(_MAKE_CONF_BOARD_SETUP),
-                      self.GenerateBoardSetupConfig(board), sudo=True)
+    self.WriteConfig(self.GenerateBoardSetupConfig(board))
 
   def InstallMakeConfUser(self):
     """Make sure the sysroot has the make.conf.user file.
@@ -610,7 +663,7 @@ class Sysroot(object):
     Args:
       config: configuration to use.
     """
-    osutils.WriteFile(self._config_file, config, makedirs=True, sudo=True)
+    osutils.WriteFile(self._config_file_write, config, makedirs=True, sudo=True)
 
   def GenerateBoardMakeConf(self, accepted_licenses=None):
     """Generates the board specific make.conf.
@@ -648,10 +701,8 @@ class Sysroot(object):
                                    'gs_fetch_binpkg')
     gsutil_cmd = '%s \\"${URI}\\" \\"${DISTDIR}/${FILE}\\"' % gs_fetch_binpkg
     config.append('BOTO_CONFIG="%s"' % boto_config)
-    # Retry the fetch if it fails
-    config.append('FETCHCOMMAND_GS="bash -c \''
-                  'export BOTO_CONFIG=%s; %s || %s\'"'
-                  % (boto_config, gsutil_cmd, gsutil_cmd))
+    config.append('FETCHCOMMAND_GS="bash -c \'BOTO_CONFIG=%s %s\'"'
+                  % (boto_config, gsutil_cmd))
     config.append('RESUMECOMMAND_GS="$FETCHCOMMAND_GS"')
 
     if accepted_licenses:
@@ -784,7 +835,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     hook_glob = os.path.join(constants.CROSUTILS_DIR, 'hooks', '*')
     for filename in glob.glob(hook_glob):
       linkpath = self.Path('etc', 'portage', 'hooks',
-                            os.path.basename(filename))
+                           os.path.basename(filename))
       osutils.SafeSymlink(filename, linkpath, sudo=True)
 
   def UpdateToolchain(self, board, local_init=True):

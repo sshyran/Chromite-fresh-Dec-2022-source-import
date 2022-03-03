@@ -20,6 +20,7 @@ import threading
 
 from chromite.third_party.gn_helpers import gn_helpers
 
+from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
@@ -109,7 +110,7 @@ class SDKFetcher(object):
   def __init__(self, cache_dir, board, clear_cache=False, chrome_src=None,
                sdk_path=None, toolchain_path=None, silent=False,
                use_external_config=None,
-               fallback_versions=VERSIONS_TO_CONSIDER):
+               fallback_versions=VERSIONS_TO_CONSIDER, is_lacros=False):
     """Initialize the class.
 
     Args:
@@ -127,6 +128,7 @@ class SDKFetcher(object):
         force usage of the external configuration if both external and internal
         are available.
       fallback_versions: The number of versions to consider.
+      is_lacros: whether it's Lacros-Chrome build or not.
     """
     site_config = config_lib.GetConfig()
 
@@ -150,6 +152,7 @@ class SDKFetcher(object):
     self.toolchain_path = toolchain_path
     self.fallback_versions = fallback_versions
     self.silent = silent
+    self.is_lacros = is_lacros
 
     # For external configs, there is no need to run 'gsutil config', because
     # the necessary files are all accessible to anonymous users.
@@ -235,7 +238,7 @@ class SDKFetcher(object):
 
   @staticmethod
   def GetChromeLKGM(chrome_src_dir=None):
-    """Get ChromeOS LKGM checked into the Chrome tree.
+    """Get the CHROMEOS LKGM checked into the Chrome tree.
 
     Args:
       chrome_src_dir: chrome source directory.
@@ -789,7 +792,7 @@ class GomaError(Exception):
   """Indicates error with setting up Goma."""
 
 
-@command.CommandDecorator(COMMAND_NAME)
+@command.command_decorator(COMMAND_NAME)
 class ChromeSDKCommand(command.CliCommand):
   """Set up an environment for building Chrome on Chrome OS.
 
@@ -966,6 +969,12 @@ class ChromeSDKCommand(command.CliCommand):
     parser.add_argument(
         '--cfi', action='store_true', default=False,
         help='Enable CFI in build.')
+    parser.add_argument(
+        '--is-lacros', action='store_true', default=False,
+        help='Whether it is Lacros-Chrome build or not. This is temporarily '
+             'added to work around a Lacros CrOS toolchain bug due to version '
+             'skew, and should be removed once Lacros is swiched to use '
+             'Chromium toolchain: crbug.com/1275386.')
 
     parser.caching_group.add_argument(
         '--clear-sdk-cache', action='store_true',
@@ -983,6 +992,29 @@ class ChromeSDKCommand(command.CliCommand):
         '--toolchain-url', action='store', default=None,
         help='Override toolchain url format pattern, e.g. '
              '2014/04/%%(target)s-2014.04.23.220740.tar.xz')
+
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if bool(options.board) == bool(options.boards):
+      parser.error('Must specify either one of --board or --boards.')
+
+    if options.boards and options.use_shell:
+      parser.error('Must specify --no-shell when preparing multiple boards.')
+
+    if options.is_lacros and not options.version:
+      parser.error(
+          'Must specify --version for --is-lacros because Lacros-Chrome build '
+          'does not use the CHROMEOS_LKGM version for compilation')
+
+    src_path = options.chrome_src or os.getcwd()
+    checkout = path_util.DetermineCheckout(src_path)
+    if not checkout.chrome_src_dir:
+      parser.error(f'Chrome checkout not found at {src_path}')
+    options.chrome_src = checkout.chrome_src_dir
+
+    if options.boards:
+      options.boards = options.boards.split(':')
 
   def __init__(self, options):
     super().__init__(options)
@@ -1024,9 +1056,10 @@ class ChromeSDKCommand(command.CliCommand):
   def _SaveSharedGnArgs(self, gn_args, board):
     """Saves the new gn args data to the shared location."""
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-
-    file_path = os.path.join(shared_dir, board + '.gni')
-    osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+    if not self.options.is_lacros:
+      file_path = os.path.join(shared_dir, board + '.gni')
+      osutils.WriteFile(file_path, gn_helpers.ToGNString(gn_args))
+      return
 
     # If the board is a generic family, generate -crostoolchain.gni files,
     # too, which is used by Lacros build.
@@ -1149,74 +1182,30 @@ class ChromeSDKCommand(command.CliCommand):
       return os.path.join(tc_path, 'bin', binary)
     return binary
 
-  def _GenerateReclientConfig(self, sdk_ctx, board):
-    """Generate a config and a wrapper for reclient.
+  def _GenerateReclientWrapper(self, board):
+    """Generate a wrapper for reclient.
 
-    This function generates a configuration to be used by rewrapper
-    (rewrapper_<board>.cfg) and a wrapper script for the rewrapper to make it
+    This function generates a wrapper script for the rewrapper to make it
     passed with --gomacc-path (rewrapper_<board>).
-    The configuration is based on the linux configuration, which has already
-    been installed in Chromium repository, and this function adds a flag to
-    preserve symlink and updates inputs so that the configuration can be used
-    for compiling with ChromeOS clang.
+    The wrapper adds a flag to preserve symlinks which are used by CrOS clang.
 
     Args:
-      sdk_ctx: An SDKFetcher.SDKContext namedtuple object for getting toolchain
-               location.
       board: Target board name to be used as a config name and a wrapper name.
 
     Returns:
       Absolute path to the wrapper script to be used as --gomacc-path.
     """
     shared_dir = os.path.join(self.options.chrome_src, self._BUILD_ARGS_DIR)
-    tc_tarball_path = os.path.realpath(
-        sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path)
-    linux_cfg_path = os.path.join(self.options.chrome_src, 'buildtools',
-                                  'reclient_cfgs', 'rewrapper_linux.cfg')
-    linux_cfg = osutils.ReadFile(linux_cfg_path).splitlines()
-
-    # TODO(b:190794287): remove code for inputs.  It will eventually be
-    #                    provided by the file in the toolchain tarball.
-    inputs = [
-        'usr/bin/clang',
-        'usr/bin/clang++',
-        'usr/bin/clang++-13',
-        'usr/bin/clang-13',
-        'usr/bin/clang-13.elf',
-        'usr/bin/clang++-13.elf',
-        'lib/ld-linux-x86-64.so.2',
-        'lib/libc++abi.so.1',
-        'lib/libc++.so.1',
-        'lib/libc.so.6',
-        'lib/libdl.so.2',
-        'lib/libgcc_s.so.1',
-        'lib/libm.so.6',
-        'lib/libpthread.so.0',
-        'lib/libtinfo.so.5',
-        'lib/libz.so.1',
-    ]
-    rel_tc_tarball_path = os.path.relpath(tc_tarball_path,
-                                          self.options.chrome_src)
-    inputs = [os.path.join(rel_tc_tarball_path, i) for i in inputs]
-    cros_cfg = ['preserve_symlink=true']
-    for line in linux_cfg:
-      if line.startswith('inputs='):
-        line = 'inputs=%s' % ','.join(inputs)
-      cros_cfg.append(line)
-    cros_cfg_path = os.path.join(shared_dir, f'rewrapper_{board}.cfg')
-    osutils.WriteFile(cros_cfg_path, '\n'.join(cros_cfg))
-    Log('generated rewrapper_cfg %s', cros_cfg_path, silent=self.silent)
 
     # TODO(b:190741226): remove the wrapper if the compiler wrapper supports
     #                    flags for reclient.
     wrapper_path = os.path.join(shared_dir, 'rewrapper_%s' % board)
     wrapper_content = [
         '#!/bin/sh\n',
-        '%(rewrapper_dir)s/rewrapper -cfg="%(cros_cfg_path)s" '
+        '%(rewrapper_dir)s/rewrapper -preserve_symlink=true '
         '-exec_root="%(chrome_src)s" "$@"\n' % {
             'rewrapper_dir': os.path.join(
                 self.options.chrome_src, 'buildtools', 'reclient'),
-            'cros_cfg_path': cros_cfg_path,
             'chrome_src': self.options.chrome_src},
     ]
     osutils.WriteFile(wrapper_path, wrapper_content, chmod=0o755)
@@ -1278,7 +1267,15 @@ class ChromeSDKCommand(command.CliCommand):
     # Add board and sdk version as gn args so that tests can bind them in
     # test wrappers generated at compile time.
     gn_args['cros_board'] = board
-    gn_args['cros_sdk_version'] = sdk_ctx.version
+
+    if options.is_lacros:
+      # The 'cros_sdk_version' is used by the chromium BUILD files to decide
+      # the runtime dependencies to isolate for swarming based testing, and
+      # given that Lacros uses CHROMEOS_LKGM for testing regardless of the
+      # version used for compilation, so always set the value as CHROME_LKGM.
+      gn_args['cros_sdk_version'] = SDKFetcher.GetChromeLKGM(options.chrome_src)
+    else:
+      gn_args['cros_sdk_version'] = sdk_ctx.version
 
     # Export the board/version info in a more accessible way, so developers can
     # reference them in their chrome_sdk.bashrc files, as well as within the
@@ -1395,8 +1392,7 @@ class ChromeSDKCommand(command.CliCommand):
                    '--gn-extra-args to specify a non default value.',
                    symbol_level)
 
-    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientConfig(
-        sdk_ctx, board)
+    gn_args['rbe_cros_cc_wrapper'] = self._GenerateReclientWrapper(board)
 
     if options.gn_extra_args:
       gn_args.update(gn_helpers.FromGNArgs(options.gn_extra_args))
@@ -1546,13 +1542,6 @@ class ChromeSDKCommand(command.CliCommand):
 
   def Run(self):
     """Perform the command."""
-    if bool(self.options.board) == bool(self.options.boards):
-      cros_build_lib.Die('Must specify either one of --board or --boards.')
-
-    if self.options.boards and self.options.use_shell:
-      cros_build_lib.Die(
-          'Must specify --no-shell when preparing multiple boards.')
-
     if os.environ.get(SDKFetcher.SDK_VERSION_ENV) is not None:
       cros_build_lib.Die('Already in an SDK shell.')
 
@@ -1565,12 +1554,6 @@ class ChromeSDKCommand(command.CliCommand):
         old_config.parent.rmdir()
       except OSError:
         pass
-
-    src_path = self.options.chrome_src or os.getcwd()
-    checkout = path_util.DetermineCheckout(src_path)
-    if not checkout.chrome_src_dir:
-      cros_build_lib.Die('Chrome checkout not found at %s', src_path)
-    self.options.chrome_src = checkout.chrome_src_dir
 
     if self.options.chrome_branding or self.options.internal:
       gclient_path = gclient.FindGclientFile(self.options.chrome_src)
@@ -1603,7 +1586,6 @@ class ChromeSDKCommand(command.CliCommand):
     if self.options.board:
       return self._RunOnceForBoard(self.options.board)
     else:
-      self.options.boards = self.options.boards.split(':')
       for board in self.options.boards:
         start = datetime.datetime.now()
         self._RunOnceForBoard(board)
@@ -1627,7 +1609,8 @@ class ChromeSDKCommand(command.CliCommand):
         toolchain_path=self.options.toolchain_path,
         silent=self.silent,
         use_external_config=self.options.use_external_config,
-        fallback_versions=self.options.fallback_versions
+        fallback_versions=self.options.fallback_versions,
+        is_lacros=self.options.is_lacros
     )
 
     prepare_version = self.options.version
@@ -1637,6 +1620,7 @@ class ChromeSDKCommand(command.CliCommand):
     components = [self.sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR]
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
+      components.append(commands.AUTOTEST_SERVER_PACKAGE)
     if self.options.download_vm:
       components.append(constants.TEST_IMAGE_TAR)
 

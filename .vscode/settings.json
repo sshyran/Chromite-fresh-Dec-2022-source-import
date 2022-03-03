@@ -1,6 +1,6 @@
 {
         "python.autoComplete.extraPaths": [
-                "${workspaceFolder}/third_party",
+                "${workspaceFolder}/third_party"
         ],
         "python.testing.cwd": "${workspaceFolder}",
         "python.testing.unittestArgs": [
@@ -16,7 +16,8 @@
         "python.testing.nosetestsEnabled": false,
         "python.testing.unittestEnabled": true,
         "python.sortImports.args": [
-                "--settings-path=${workspaceFolder}/.vscode/",
+                "--settings-path=${workspaceFolder}/.vscode/"
         ],
         "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "yapf"
 }

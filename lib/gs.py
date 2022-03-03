@@ -322,7 +322,7 @@ class GSContext(object):
   # (1*sleep) the first time, then (2*sleep), continuing via attempt * sleep.
   DEFAULT_SLEEP_TIME = 60
 
-  GSUTIL_VERSION = '4.60'
+  GSUTIL_VERSION = '5.4'
   GSUTIL_TAR = 'gsutil_%s.tar.gz' % GSUTIL_VERSION
   GSUTIL_URL = (PUBLIC_BASE_HTTPS_URL +
                 'chromeos-mirror/gentoo/distfiles/%s' % GSUTIL_TAR)
@@ -365,6 +365,8 @@ class GSContext(object):
       b'socket.error: [Errno 104] Connection reset by peer',
       b'Received bad request from server',
       b"can't start new thread",
+      # See: b/197574857.
+      b'OSError: None',
   )
 
   @classmethod
@@ -1301,9 +1303,12 @@ wheel: <
       # raising errors internally like other commands), we have to look
       # for errors ourselves.  See the related bug report here:
       # https://github.com/GoogleCloudPlatform/gsutil/issues/288
-      # Example line:
+      # Example lines:
       # No URLs matched gs://bucket/file
-      if e.result.error and e.result.error.startswith('No URLs matched'):
+      # Some more msg: No URLs matched gs://bucket/file
+      if (e.result.error and
+          any(x.startswith('No URLs matched')
+              for x in e.result.error.splitlines())):
         raise GSNoSuchKey('Stat Error: No URLs matched %s.' % path)
 
       # No idea what this is, so just choke.

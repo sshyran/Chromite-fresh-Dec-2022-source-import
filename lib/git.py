@@ -552,30 +552,6 @@ class ManifestCheckout(Manifest):
       manifest_path = os.path.join(root, '.repo', 'manifest.xml')
     return root, manifest_path
 
-  @staticmethod
-  def IsFullManifest(checkout_root):
-    """Returns True iff the given checkout is using a full manifest.
-
-    This method should go away as part of the cleanup related to brbug.com/854.
-
-    Args:
-      checkout_root: path to the root of an SDK checkout.
-
-    Returns:
-      True iff the manifest selected for the given SDK is a full manifest.
-      In this context we'll accept any manifest for which there are no groups
-      defined.
-    """
-    manifests_git_repo = os.path.join(checkout_root, '.repo', 'manifests.git')
-    cmd = ['config', '--local', '--get', 'manifest.groups']
-    result = RunGit(manifests_git_repo, cmd, check=False)
-
-    if result.output.strip():
-      # Full layouts don't define groups.
-      return False
-
-    return True
-
   def FindCheckouts(self, project, branch=None):
     """Returns the list of checkouts for a given |project|/|branch|.
 
@@ -822,7 +798,7 @@ def ShallowFetch(git_repo, git_url, sparse_checkout=None):
   RunGit(git_repo, ['fetch', '--depth=1'],
          print_cmd=True, stderr=True, capture_output=False)
   # Pull the files in sparse_checkout.
-  RunGit(git_repo, ['pull', 'origin', 'master'],
+  RunGit(git_repo, ['pull', 'origin', 'HEAD'],
          print_cmd=True, stderr=True, capture_output=False)
   logging.info('ShallowFetch completed in %s.', utcnow() - start)
 
@@ -1517,7 +1493,7 @@ def DeleteStaleLocks(git_repo):
   corruption. Only use this if you are sure that no other git process is
   accessing the repo (such as at the beginning of a fresh build).
 
-  Args"
+  Args:
     git_repo: Directory of git repository.
   """
   git_gitdir = GetGitGitdir(git_repo)
@@ -1529,3 +1505,21 @@ def DeleteStaleLocks(git_repo):
       p = os.path.join(root, filename)
       logging.info('Found stale git lock, removing: %s', p)
       os.remove(p)
+
+
+def GetUrlFromRemoteOutput(remote_output: str) -> str:
+  """Retrieve the change URL from the git remote output.
+
+  The URL must begin with https://.
+
+  Args:
+    remote_output: The git remote output.
+
+  Returns:
+    URL in remote git output, or None if a URL couldn't be found.
+  """
+  match = re.search(
+      r'^remote:\s+(?P<url>https://[^\s]+)', remote_output, flags=re.MULTILINE)
+  if match:
+    return match['url']
+  return None

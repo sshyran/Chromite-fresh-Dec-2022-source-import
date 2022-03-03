@@ -10,13 +10,12 @@ from chromite.cli import command
 from chromite.cli import flash
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import commandline
-from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import path_util
-from chromite.utils import pformat
+from chromite.utils import timer
 
 
-@command.CommandDecorator('flash')
+@command.command_decorator('flash')
 class FlashCommand(command.CliCommand):
   """Update the device with an image.
 
@@ -187,10 +186,8 @@ Examples:
 
   def Run(self):
     """Perform the cros flash command."""
-    self.options.Freeze()
-
     try:
-      with cros_build_lib.TimedSection() as timer:
+      with timer.Timer() as t:
         flash.Flash(
             self.options.device,
             self.options.image,
@@ -205,13 +202,12 @@ Examples:
             ssh_private_key=self.options.private_key,
             ping=self.options.ping,
             disable_rootfs_verification=
-              self.options.disable_rootfs_verification,
+            self.options.disable_rootfs_verification,
             clear_cache=self.options.clear_cache,
             yes=self.options.yes,
             force=self.options.force,
             debug=self.options.debug)
-      logging.notice('cros flash completed successfully in %s',
-                     pformat.timedelta(timer.delta))
+      logging.notice('cros flash completed successfully in %s', t)
     except dev_server_wrapper.ImagePathError:
       logging.error('To get the latest remote image, please run:\n'
                     'cros flash --board=%s %s remote/latest',

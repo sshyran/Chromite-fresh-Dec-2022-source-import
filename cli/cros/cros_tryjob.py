@@ -351,28 +351,7 @@ def RunRemote(site_config, options, patch_pool, infra_testing=False,
     print('Tryjob submitted!')
     print('To view your tryjobs, visit:')
     for r in results:
-      print('{}{}'.format(constants.CHROMEOS_MILO_HOST,
-                                           r.id))
-
-
-def AdjustOptions(options):
-  """Set defaults that require some logic.
-
-  Args:
-    options: Parsed cros tryjob tryjob arguments.
-    site_config: config_lib.SiteConfig containing all config info.
-  """
-  if options.where == CBUILDBOT:
-    options.buildroot = options.buildroot or os.path.join(
-        os.path.dirname(constants.SOURCE_ROOT), 'cbuild')
-
-  if options.where == LOCAL:
-    options.buildroot = options.buildroot or os.path.join(
-        os.path.dirname(constants.SOURCE_ROOT), 'tryjob')
-
-  if options.buildroot:
-    options.git_cache_dir = options.git_cache_dir or os.path.join(
-        options.buildroot, '.git_cache')
+      print(f'{constants.CHROMEOS_MILO_HOST}{r.id}')
 
 
 def VerifyOptions(options, site_config):
@@ -471,7 +450,7 @@ def VerifyOptions(options, site_config):
                          'pool (given %s).' % options.hwtest_dut_dimensions)
 
 
-@command.CommandDecorator('tryjob')
+@command.command_decorator('tryjob')
 class TryjobCommand(command.CliCommand):
   """Schedule a tryjob."""
 
@@ -630,12 +609,12 @@ List Examples:
         '--hwtest', dest='passthrough', action='append_option',
         help='Enable hwlab testing. Default false.')
     test_group.add_argument(
-      '--hwtest_dut_dimensions', action='split_extend', default=None,
-      help='Space-separated list of key:val Swarming bot '
-           'dimensions to run each builders SkylabHWTest '
-           'stages against (this overrides the configured '
-           'DUT dimensions for each test). Requires at least '
-           '"label-board", "label-model", and "label-pool".')
+        '--hwtest_dut_dimensions', action='split_extend', default=None,
+        help='Space-separated list of key:val Swarming bot '
+             'dimensions to run each builders SkylabHWTest '
+             'stages against (this overrides the configured '
+             'DUT dimensions for each test). Requires at least '
+             '"label-board", "label-model", and "label-pool".')
     test_group.add_argument(
         '--notests', dest='passthrough', action='append_option',
         help='Override values from buildconfig, run no '
@@ -668,12 +647,25 @@ List Examples:
         '-l', '--list', action='store_true', dest='list', default=False,
         help='List the trybot configs (adjusted by --production).')
 
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.where == CBUILDBOT:
+      options.buildroot = options.buildroot or os.path.join(
+          os.path.dirname(constants.SOURCE_ROOT), 'cbuild')
+
+    if options.where == LOCAL:
+      options.buildroot = options.buildroot or os.path.join(
+          os.path.dirname(constants.SOURCE_ROOT), 'tryjob')
+
+    if options.buildroot:
+      options.git_cache_dir = options.git_cache_dir or os.path.join(
+          options.buildroot, '.git_cache')
+
   def Run(self):
     """Runs `cros tryjob`."""
     site_config = config_lib.GetConfig()
 
-    AdjustOptions(self.options)
-    self.options.Freeze()
     VerifyOptions(self.options, site_config)
 
     logging.info('Verifying patches...')

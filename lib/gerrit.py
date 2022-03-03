@@ -7,6 +7,7 @@
 import logging
 import operator
 import re
+from typing import Tuple
 
 from chromite.lib import config_lib
 from chromite.lib import constants
@@ -97,6 +98,33 @@ class GerritHelper(object):
         logging.info('Would have made "%s" public', change)
       else:
         gob_util.MarkNotPrivate(self.host, change)
+
+  def SetAttentionSet(self, change: str, add: Tuple[str, ...] = (),
+                      remove: Tuple[str, ...] = (), dryrun: bool = False,
+                      notify: str = 'ALL', message: str = 'gerrit CLI'):
+    """Modify the attention set of a gerrit change.
+
+    Args:
+      change: ChangeId or change number for a gerrit review.
+      add: Sequence of email addresses to add to attention set.
+      remove: Sequence of email addresses to remove from attention set.
+      dryrun: If True, only print what would have been done.
+      notify: A string, parameter controlling gerrit's email generation.
+      message: A string, setting the reason for changing the attention set.
+    """
+    if add:
+      if dryrun:
+        logging.info('Would have added %s to "%s" attention set', add, change)
+      else:
+        gob_util.AddAttentionSet(self.host, change, add, notify=notify,
+                                 reason=message)
+    if remove:
+      if dryrun:
+        logging.info('Would have removed %s from "%s" attention set', remove,
+                     change)
+      else:
+        gob_util.RemoveAttentionSet(self.host, change, remove, notify=notify,
+                                    reason=message)
 
   def SetReviewers(self, change, add=(), remove=(), dryrun=False, notify='ALL'):
     """Modify the list of reviewers on a gerrit change.
@@ -285,6 +313,7 @@ class GerritHelper(object):
       change = None
     elif change and cros_patch.ParseFullChangeID(change):
       change = cros_patch.ParseFullChangeID(change)
+      assert change  # Help the type checker.
       kwargs['change'] = change.change_id
       kwargs['project'] = change.project
       kwargs['branch'] = change.branch
@@ -380,6 +409,38 @@ class GerritHelper(object):
       return change.gerrit_number
 
     return change
+
+  def CreateChange(self, project: str, branch: str, message: str,
+                   publish: bool) -> cros_patch.GerritPatch:
+    """Creates an empty change.
+
+    The change will be empty of any file modifications. Use ChangeEdit below
+    to add file modifications to the change.
+
+    Args:
+      project: The name of the gerrit project for the change.
+      branch: Branch for the change.
+      message: Initial commit message for the change.
+      publish: If True, will publish the CL after uploading. Stays in WIP mode
+          otherwise.
+
+    Returns:
+      A cros_patch.GerritChange for the created change.
+    """
+    resp = gob_util.CreateChange(self.host, project, branch, message, publish)
+    patch_dict = cros_patch.GerritPatch.ConvertQueryResults(resp, self.host)
+    return cros_patch.GerritPatch(patch_dict, self.remote, '')
+
+  def ChangeEdit(self, change: str, path: str, contents: str) -> None:
+    """Attaches file modifications to an open change.
+
+    Args:
+      change: A gerrit change number.
+      path: Path of the file in the repo to modify.
+      contents: New contents of the file.
+    """
+    gob_util.ChangeEdit(self.host, change, path, contents)
+    gob_util.PublishChangeEdit(self.host, change)
 
   def SetReview(self, change, msg=None, labels=None, notify='ALL',
                 reviewers=None, cc=None, ready=None, wip=None, dryrun=False):
@@ -541,8 +602,10 @@ class GerritHelper(object):
 
   def _get_changenumber_from_stdout(self, stdout):
     """Retrieve the change number written in the URL of the git stdout."""
-    match = re.search(r'^remote:\s+[^\s]+/\+/(?P<changenum>[0-9]+)',
-                      stdout,flags=re.MULTILINE)
+    url = git.GetUrlFromRemoteOutput(stdout)
+    if not url:
+      return None
+    match = re.search(r'(?P<changenum>[0-9]+)$', url)
     if match:
       return match['changenum']
     return None
@@ -550,6 +613,9 @@ class GerritHelper(object):
   def CreateGerritPatch(self, cwd, remote, ref, dryrun=False, notify='ALL',
                         **kwargs):
     """Upload a change and retrieve a GerritPatch describing it.
+
+    This requires a copy of the project checked out locally. To create a
+    GerritPatch without a local checkout, use CreateChange() below.
 
     Args:
       cwd: The repository that we are working on.
@@ -570,7 +636,7 @@ class GerritHelper(object):
 
     # Upload the local changes to remote.
     ret = git.RunGit(cwd, ['push', remote,
-                     f'HEAD:refs/for/{ref}%notify={notify}'])
+                           f'HEAD:refs/for/{ref}%notify={notify}'])
     change_number = self._get_changenumber_from_stdout(ret.stdout)
 
     # If we fail to grab a change number from the stdout then fall back to the

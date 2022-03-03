@@ -8,6 +8,7 @@ import glob
 import json
 import logging
 import os
+import re
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
@@ -140,6 +141,9 @@ class SDKPackageStage(generic_stages.BuilderStage,
     board_location = os.path.join(chroot_location, 'build/amd64-host')
     manifest_location = tarball_location + '.Manifest'
 
+    # Cleanup etc/make.conf.board_setup for use in SDK.
+    self.CleanupMakeConfBoardSetup(board_location)
+
     # Create a tarball of the latest SDK.
     CreateTarball(board_location, tarball_location,
                   exclude_paths=PACKAGE_EXCLUDED_PATHS)
@@ -211,6 +215,19 @@ class SDKPackageStage(generic_stages.BuilderStage,
     self._SendPerfValues(self._build_root, sdk_tarball,
                          self.ConstructDashboardURL(), self.sdk_version,
                          self._run.bot_id)
+
+  def CleanupMakeConfBoardSetup(self, board_location):
+    """Cleanup etc/make.conf.board_setup to be usable in the SDK"""
+    board_setup = os.path.join(board_location, 'etc/make.conf.board_setup')
+    lines = osutils.ReadFile(board_setup).splitlines()
+
+    to_remove = re.compile(r'^(ROOT|PKG_CONFIG)=')
+    lines = [x for x in lines if not to_remove.match(x)]
+    data = '\n'.join(lines) + '\n'
+    if '/build/' in data:
+      logging.error('%s content:\n%s', board_setup, data)
+      raise ValueError('/build/ paths must be cleaned from make.conf')
+    osutils.WriteFile(board_setup, data, sudo=True)
 
 
 class SDKPackageToolchainOverlaysStage(generic_stages.BuilderStage):

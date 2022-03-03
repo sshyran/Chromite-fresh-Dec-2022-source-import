@@ -86,6 +86,14 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board])
     self.assertTrue(result.success)
 
+  def testHost(self):
+    """Test host target."""
+    host_build_target = build_target_lib.BuildTarget('')
+    result = test.BuildTargetUnitTest(host_build_target, self.chroot)
+
+    self.assertCommandContains(['cros_run_unit_tests', '--host'])
+    self.assertTrue(result.success)
+
   def testPackages(self):
     """Test the packages argument."""
     packages = ['foo/bar', 'cat/pkg']
@@ -215,14 +223,14 @@ class DebugInfoTestTest(cros_test_lib.RunCommandTestCase):
 class MoblabVmTestCase(cros_test_lib.RunCommandTempDirTestCase):
   """Tests for the SetupBoardRunConfig class."""
 
-  def MockDirectory(self, path):
+  def MockDirectory(self, path: str) -> str:
     """Create an empty directory.
 
     Args:
-      path (str): Relative path for the directory.
+      path: Relative path for the directory.
 
     Returns:
-      str: Path to the directory.
+      Path to the directory.
     """
     path = os.path.join(self.tempdir, path)
     osutils.SafeMakedirs(path)

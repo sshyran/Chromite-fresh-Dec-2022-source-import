@@ -137,7 +137,7 @@ _TEST_GOLO_ARCHIVE_TEST_TARBALL_CONTENT = [
     'autotest/test_suites/control.faft_bios_au_2',
     'autotest/test_suites/control.faft_lv1',
     'autotest/test_suites/control.av_webcam',
-    'autotest/test_suites/control.power_check',
+    'autotest/test_suites/control.power_sanity',
     'autotest/test_suites/control.wificell-pre-cq',
     'autotest/test_suites/control.hotrod',
     'autotest/test_suites/control.skylab_staging_test',
@@ -192,6 +192,7 @@ _TEST_GOLO_ARCHIVE_TEST_TARBALL_CONTENT = [
     'autotest/test_suites/control.cr50_stress',
     'autotest/test_suites/control.cellular_ota_tmobile',
     'autotest/test_suites/control.wifi_interop',
+    'autotest/test_suites/control.arc-unit-test',
     'autotest/test_suites/control.bluestreak-partners',
     'autotest/test_suites/control.chameleon_hdmi_unstable',
     'autotest/test_suites/control.graphics',
@@ -504,3 +505,17 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
     self.assertExists(os.path.join(self.work_dir, artifact.marker_name))
     self.assertFalse(artifact.ArtifactStaged())
     self.assertNotExists(os.path.join(self.work_dir, artifact.marker_name))
+
+  @cros_test_lib.pytestmark_network_test
+  def testStagedFiles(self):
+    """Tests getting the staged files."""
+    files_to_extract = ['config.txt', 'boot_images/vmlinuz']
+    artifact = build_artifact.BundledArtifact(
+        build_artifact.IMAGE_FILE, self.work_dir, _VERSION,
+        files_to_extract=files_to_extract)
+    expected_extracted_files = [os.path.join(self.work_dir, filename)
+                                for filename in files_to_extract]
+    artifact.Process(self.dl, False)
+
+    self.assertTrue(artifact.ArtifactStaged())
+    self.assertEqual(artifact.StagedFiles(), expected_extracted_files)

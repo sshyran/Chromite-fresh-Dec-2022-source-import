@@ -12,22 +12,21 @@ it to the CQ.
 
 import distutils.version  # pylint: disable=import-error,no-name-in-module
 import logging
-import os
 import urllib.parse
 
 from chromite.cbuildbot import manifest_version
-from chromite.lib import chrome_committer
 from chromite.lib import commandline
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import gerrit
-from chromite.lib import osutils
+from chromite.lib import gob_util
 
 
-class LKGMNotValid(chrome_committer.CommitError):
+class LKGMNotValid(Exception):
   """Raised if the LKGM version is unset or not newer than the current value."""
 
 
-class LKGMFileNotFound(chrome_committer.CommitError):
+class LKGMFileNotFound(Exception):
   """Raised if the LKGM file is not found."""
 
 
@@ -41,6 +40,7 @@ class ChromeLKGMCommitter(object):
       'chromeos-betty-pi-arc-chrome',
       'chromeos-eve-chrome',
       'chromeos-kevin-chrome',
+      'chromeos-octopus-chrome',
       'lacros-amd64-generic-chrome',
   ]
   # Files needed in a local checkout to successfully update the LKGM. The OWNERS
@@ -53,14 +53,20 @@ class ChromeLKGMCommitter(object):
       'tools/translation/TRANSLATION_OWNERS',
   ]
   # First line of the commit message for all LKGM CLs.
-  _COMMIT_MSG_HEADER = 'LKGM %(lkgm)s for chromeos.'
+  _COMMIT_MSG_HEADER = 'Automated Commit: LKGM %(lkgm)s for chromeos.'
 
-  def __init__(self, user_email, workdir, lkgm, dryrun=False,
-               buildbucket_id=None):
+  def __init__(self, lkgm, dryrun=False, buildbucket_id=None):
     self._dryrun = dryrun
     self._buildbucket_id = buildbucket_id
-    self._committer = chrome_committer.ChromeCommitter(user_email, workdir)
     self._gerrit_helper = gerrit.GetCrosExternal()
+
+    # We need to use the account used by the builder to upload git CLs when
+    # generating CLs.
+    self._user_email = None
+    if cros_build_lib.HostIsCIBuilder(golo_only=True):
+      self._user_email = 'chromeos-commit-bot@chromium.org'
+    elif cros_build_lib.HostIsCIBuilder(gce_only=True):
+      self._user_email = '3su6n15k.default@developer.gserviceaccount.com'
 
     # Strip any chrome branch from the lkgm version.
     self._lkgm = manifest_version.VersionInfo(lkgm).VersionString()
@@ -77,15 +83,7 @@ class ChromeLKGMCommitter(object):
     if already_open_lkgm_cl:
       self.SubmitToCQ(already_open_lkgm_cl)
     else:
-      self._committer.Cleanup()
-      self._committer.Checkout(self._NEEDED_FILES)
       self.UpdateLKGM()
-      self.CommitNewLKGM()
-      self._committer.Upload()
-
-  def CheckoutChrome(self):
-    """Checks out chrome into tmp checkout_dir."""
-    self._committer.Checkout(self._NEEDED_FILES)
 
   @property
   def lkgm_file(self):
@@ -106,7 +104,7 @@ class ChromeLKGMCommitter(object):
         # Use 'owner' rather than 'uploader' or 'author' since those last two
         # can be overwritten when the gardener resolves a merge-conflict and
         # uploads a new patchset.
-        'owner': self._committer.author,
+        'owner': self._user_email,
     }
     open_issues = self._gerrit_helper.Query(**query_params)
     if not open_issues:
@@ -146,7 +144,7 @@ class ChromeLKGMCommitter(object):
         # Use 'owner' rather than 'uploader' or 'author' since those last two
         # can be overwritten when the gardener resolves a merge-conflict and
         # uploads a new patchset.
-        'owner': self._committer.author,
+        'owner': self._user_email,
         # The value of the LKGM is included in the first line of the commit
         # message. So including that in our query should only return CLs that
         # roll to our LKGM.
@@ -165,15 +163,19 @@ class ChromeLKGMCommitter(object):
       logging.info('Would have applied CQ+2 to %s', already_open_lkgm_cl)
     else:
       logging.info('Applying CQ+2 to %s', already_open_lkgm_cl)
-      self._gerrit_helper.SetReview(already_open_lkgm_cl, labels=labels)
+      msg = None
+      if self._buildbucket_id:
+        msg = 'Applying CQ+2 from build %s' % self._buildbucket_id
+      self._gerrit_helper.SetReview(
+          already_open_lkgm_cl, labels=labels,
+          reviewers=[constants.CHROME_GARDENER_REVIEW_EMAIL],
+          msg=msg, ready=True)
 
   def UpdateLKGM(self):
     """Updates the LKGM file with the new version."""
-    lkgm_file = self.lkgm_file
-    if not os.path.exists(lkgm_file):
-      raise LKGMFileNotFound('%s is an invalid file' % lkgm_file)
-
-    self._old_lkgm = osutils.ReadFile(lkgm_file)
+    self._old_lkgm = gob_util.GetFileContentsOnHead(
+        constants.CHROMIUM_GOB_URL, 'chromeos/CHROMEOS_LKGM')
+    self._old_lkgm = self._old_lkgm.strip()
 
     lv = distutils.version.LooseVersion
     if self._old_lkgm is not None and lv(self._lkgm) <= lv(self._old_lkgm):
@@ -183,13 +185,27 @@ class ChromeLKGMCommitter(object):
 
     logging.info('Updating LKGM version: %s (was %s),',
                  self._lkgm, self._old_lkgm)
-    osutils.WriteFile(lkgm_file, self._lkgm)
+    change = self._gerrit_helper.CreateChange(
+        'chromium/src', 'main', self.ComposeCommitMsg(), False)
+    self._gerrit_helper.ChangeEdit(
+        change.gerrit_number, 'chromeos/CHROMEOS_LKGM', self._lkgm)
+
+    # Apply Bot-Commit here to minimise the gap between uploading the
+    # CL and approving it.
+    labels = {'Bot-Commit': 1}
+    logging.info('Applying Bot-Commit+1')
+    self._gerrit_helper.SetReview(change.gerrit_number, labels=labels,
+                                  notify='NONE')
+    self._gerrit_helper.SetHashtags(change.gerrit_number, ['chrome-lkgm'], [])
 
   def ComposeCommitMsg(self):
     """Constructs and returns the commit message for the LKGM update."""
     commit_msg_template = (
         '%(header)s\n'
         '%(build_link)s'
+        '\nThis CL will remain in WIP until both master-full and '
+        'master-release\nbuilds for this version are finished. This CL '
+        'should not be submitted\nto the CQ until that happens.\n'
         '\n%(cq_includes)s')
     cq_includes = ''
     for bot in self._PRESUBMIT_BOTS:
@@ -202,11 +218,6 @@ class ChromeLKGMCommitter(object):
         header=self._commit_msg_header, cq_includes=cq_includes,
         build_link=build_link)
 
-  def CommitNewLKGM(self):
-    """Commits the new LKGM file using our template commit message."""
-    self._committer.Commit([constants.PATH_TO_CHROME_LKGM],
-                           self.ComposeCommitMsg())
-
 
 def GetOpts(argv):
   """Returns a dictionary of parsed options.
@@ -217,10 +228,9 @@ def GetOpts(argv):
   Returns:
     Dictionary of parsed options.
   """
-  committer_parser = chrome_committer.ChromeCommitter.GetParser()
-  parser = commandline.ArgumentParser(description=__doc__,
-                                      parents=[committer_parser],
-                                      add_help=False, logging=False)
+  parser = commandline.ArgumentParser(description=__doc__, add_help=False)
+  parser.add_argument('--dryrun', action='store_true', default=False,
+                      help="Don't commit changes or send out emails.")
   parser.add_argument('--lkgm', required=True,
                       help='LKGM version to update to.')
   parser.add_argument('--buildbucket-id',
@@ -228,9 +238,9 @@ def GetOpts(argv):
                            'Will be linked in the commit message if specified.')
   return parser.parse_args(argv)
 
+
 def main(argv):
   opts = GetOpts(argv)
-  committer = ChromeLKGMCommitter(opts.user_email, opts.workdir,
-                                  opts.lkgm, opts.dryrun, opts.buildbucket_id)
+  committer = ChromeLKGMCommitter(opts.lkgm, opts.dryrun, opts.buildbucket_id)
   committer.Run()
   return 0

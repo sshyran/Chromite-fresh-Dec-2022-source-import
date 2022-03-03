@@ -2,10 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unittests for GerritHelper."""
+"""Unittests for GerritHelper.
+
+Most of the tests in this file reach out to a staging/test Gerrit server. By
+default, this server is t3st-chr0m3-review.googlesource.com. These tests will
+be skipped unless run_tests is passed the '--network' arg:
+$ ./run_tests --network -- lib/gerrit_unittest.py
+"""
 
 import collections
-import getpass
 import http.client
 import http.cookiejar
 import io
@@ -103,6 +108,10 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
         ['git', 'config', '--global', 'http.cookiefile', gi.cookies_path],
         quiet=True)
 
+    # If you're seeing "does not look like a Netscape format cookies file"
+    # errors here, make sure the first line in your gitcookies file is:
+    # "# HTTP Cookie File"
+    # TODO(b/210490942): Detect and handle this automatically.
     jar = http.cookiejar.MozillaCookieJar(gi.cookies_path)
     jar.load(ignore_expires=True)
 
@@ -161,13 +170,13 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     body = {
         'description': description,
         'submit_type': submit_type,
+        'branches': ['main'],
     }
     if owners is not None:
       body['owners'] = owners
     path = 'projects/%s' % urllib.parse.quote(name, '')
-    conn = gob_util.CreateHttpConn(
+    response = gob_util.CreateHttpConn(
         self.gerrit_instance.gerrit_host, path, reqtype='PUT', body=body)
-    response = conn.getresponse()
     self.assertEqual(201, response.status,
                      'Expected 201, got %s' % response.status)
     s = io.BytesIO(response.read())
@@ -277,23 +286,23 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     return (sha1, change_id)
 
   @staticmethod
-  def _UploadChange(clone_path, branch='master', remote='origin'):
+  def _UploadChange(clone_path, branch='main', remote='origin'):
     cros_build_lib.run(
         ['git', 'push', remote, 'HEAD:refs/for/%s' % branch], cwd=clone_path,
         quiet=True)
 
-  def uploadChange(self, clone_path, branch='master', remote='origin'):
+  def uploadChange(self, clone_path, branch='main', remote='origin'):
     """Create a gerrit CL from the HEAD of a git checkout."""
     clone_path = os.path.join(self.tempdir, clone_path)
     self._UploadChange(clone_path, branch, remote)
 
   @staticmethod
-  def _PushBranch(clone_path, branch='master'):
+  def _PushBranch(clone_path, branch='main'):
     cros_build_lib.run(
         ['git', 'push', 'origin', 'HEAD:refs/heads/%s' % branch],
         cwd=clone_path, quiet=True)
 
-  def pushBranch(self, clone_path, branch='master'):
+  def pushBranch(self, clone_path, branch='main'):
     """Push a branch directly to gerrit, bypassing code review."""
     clone_path = os.path.join(self.tempdir, clone_path)
     self._PushBranch(clone_path, branch)
@@ -314,9 +323,8 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
       if isinstance(groups, str):
         groups = [groups]
       body['groups'] = groups
-    conn = gob_util.CreateHttpConn(
+    response = gob_util.CreateHttpConn(
         self.gerrit_instance.gerrit_host, path, reqtype='PUT', body=body)
-    response = conn.getresponse()
     self.assertEqual(201, response.status)
     s = io.BytesIO(response.read())
     self.assertEqual(b")]}'", s.readline().rstrip())
@@ -344,7 +352,9 @@ class GerritHelperTest(GerritTestCase):
       A GerritPatch object.
     """
     (revision, changeid) = self.createCommit(clone_path, **kwargs)
-    gpatch = self.CreateGerritPatch(clone_path, remote, project=project)
+    helper = self._GetHelper()
+    gpatch = helper.CreateGerritPatch(clone_path, remote, 'main',
+                                      project=project)
     self.assertEqual(gpatch.change_id, changeid)
     self.assertEqual(gpatch.revision, revision)
     return gpatch
@@ -412,25 +422,66 @@ class GerritHelperTest(GerritTestCase):
     project = self.createProject('testProject')
     clone_path = self.cloneProject(project)
     for _ in range(5):
-      (master_sha1, _) = self.createCommit(clone_path)
-    self.pushBranch(clone_path, 'master')
+      (main_sha1, _) = self.createCommit(clone_path)
+    self.pushBranch(clone_path, 'main')
     for _ in range(5):
       (testbranch_sha1, _) = self.createCommit(clone_path)
     self.pushBranch(clone_path, 'testbranch')
     helper = self._GetHelper()
     self.assertEqual(
-        helper.GetLatestSHA1ForBranch(project, 'master'),
-        master_sha1)
+        helper.GetLatestSHA1ForBranch(project, 'main'),
+        main_sha1)
     self.assertEqual(
         helper.GetLatestSHA1ForBranch(project, 'testbranch'),
         testbranch_sha1)
 
+  def testChangeEdit(self):
+    """Verifies that CreateChange & ChangeEdit can create CLs with changes."""
+    project = self.createProject('testProject')
+    # Gerrit returns "Destination branch does not exist" errors if we don't push
+    # something onto the new project's branch.
+    clone_path = self.cloneProject(project)
+    self.createCommit(clone_path)
+    self.pushBranch(clone_path, 'main')
+    helper = self._GetHelper()
+    # There should be no changes in our project that touch some_file.
+    file_path = 'some_file'
+    self.assertEqual(len(helper.Query(project=project, path=file_path)), 0)
+    change = helper.CreateChange(project, 'main', 'Test Change', True)
+    helper.ChangeEdit(change.gerrit_number, file_path, 'some file contents')
+    # After creating the change and adding a file modification, there should be
+    # a single change that touches some_file in our project.
+    self.assertEqual(len(helper.Query(project=project, path=file_path)), 1)
+
   def _ChooseReviewers(self):
-    all_reviewers = set(['dborowitz@google.com', 'sop@google.com',
-                         'jrn@google.com'])
-    ret = list(all_reviewers.difference(['%s@google.com' % getpass.getuser()]))
-    self.assertGreaterEqual(len(ret), 2)
-    return ret
+    # TODO(b/210507794): register some test accounts on test server. This fixed
+    # list of real IDs has a few problems, not limited to the following:
+    #  * Some functions behave differently if the account is inactive;
+    #  * Gerrit doesn't let you add yourself as a reviewer. So these accounts
+    #    can't run the tests correctly. ;)
+    return ['dborowitz@google.com', 'jrn@google.com']
+
+  def testSetAttentionSet(self):
+    """Verify that we can set the attention set on a CL."""
+    project = self.createProject('testProject')
+    clone_path = self.cloneProject(project)
+    gpatch = self.createPatch(clone_path, project)
+    emails = self._ChooseReviewers()
+    helper = self._GetHelper()
+    helper.SetReviewers(gpatch.gerrit_number, add=(
+        emails[0], emails[1]))
+    helper.SetAttentionSet(gpatch.gerrit_number, add=(
+        emails[0], emails[1]))
+    attention = gob_util.GetAttentionSet(helper.host, gpatch.gerrit_number)
+    self.assertEqual(len(attention), 2)
+    self.assertCountEqual(
+        [r['account']['email'] for r in attention],
+        [emails[0], emails[1]])
+    helper.SetAttentionSet(gpatch.gerrit_number,
+                           remove=(emails[0],))
+    attention = gob_util.GetAttentionSet(helper.host, gpatch.gerrit_number)
+    self.assertEqual(len(attention), 1)
+    self.assertEqual(attention[0]['account']['email'], emails[1])
 
   def testSetReviewers(self):
     """Verify that we can set reviewers on a CL."""
@@ -472,7 +523,7 @@ class GerritHelperTest(GerritTestCase):
     clone_path = self.cloneProject(project)
     (sha1, _) = self.createCommit(clone_path)
     (_, changeid) = self.createCommit(clone_path)
-    self.uploadChange(clone_path, 'master')
+    self.uploadChange(clone_path, 'main')
     cros_build_lib.run(
         ['git', 'checkout', sha1], cwd=clone_path, quiet=True)
     self.createCommit(clone_path)
@@ -520,7 +571,7 @@ class GerritHelperTest(GerritTestCase):
 
     # Query to external server by gerrit number and change-id which refer to
     # the same change should return one result.
-    fq_changeid = '~'.join((gpatch.project, 'master', gpatch.change_id))
+    fq_changeid = '~'.join((gpatch.project, 'main', gpatch.change_id))
     patch_info = gerrit.GetGerritPatchInfo([gpatch.gerrit_number, fq_changeid])
     self.assertEqual(len(patch_info), 1)
     self.assertEqual(patch_info[0].gerrit_number, gpatch.gerrit_number)
@@ -585,7 +636,7 @@ class GerritHelperTest(GerritTestCase):
         ['git', 'commit', '--amend', '-m', new_msg], cwd=clone_path, quiet=True)
     self.uploadChange(clone_path)
     gpatch2 = self._GetHelper().QuerySingleRecord(
-        change=gpatch.change_id, project=gpatch.project, branch='master')
+        change=gpatch.change_id, project=gpatch.project, branch='main')
     self.assertNotEqual(gpatch2.approval_timestamp, 0)
     self.assertNotEqual(gpatch2.commit_timestamp, 0)
     self.assertEqual(gpatch2.approval_timestamp, gpatch2.commit_timestamp)
@@ -602,22 +653,23 @@ class GerritParserTest(cros_test_lib.TestCase):
   def testGetChangeFromStdoutPass(self):
     """Test that the proper change number is returned from the git stdout."""
     stdout = ('remote:\nremote:\nremote:   '
-    'https://example.com/c/some/project/repo/+/123 gerrit: test')
+              'https://example.com/c/some/project/repo/+/123 gerrit: test')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:\nremote:   '
-    'https://example.com/c/some/project3/repo/+/123 gerrit: test')
+              'https://example.com/c/some/project3/repo/+/123 gerrit: test')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:   '
-    'https://example.com/c/some/project/repo/+/123 gerrit: test 456')
+              'https://example.com/c/some/project/repo/+/123 gerrit: test 456')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 
     stdout = ('remote:   '
-    'https://example.com/c/some/project/repo/+/123 handle /+/124 in URI')
+              'https://example.com/c/some/project/repo/+/123 '
+              'handle /+/124 in URI')
     changenum = self._GetHelper()._get_changenumber_from_stdout(stdout)
     self.assertEqual(changenum, '123')
 

@@ -8,28 +8,38 @@ import argparse
 import logging
 import os
 from pathlib import Path
-import sys
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib.firmware import ap_firmware
-from chromite.lib.firmware import flash_ap
-from chromite.lib.firmware import servo_lib
-from chromite.utils import file_util
-from chromite.utils import pformat
+from chromite.lib.firmware import dut
+from chromite.lib.firmware import firmware_config
+from chromite.lib.firmware import firmware_lib
 
 
-COMMAND_DUMP_CONFIG = 'dump-config'
-COMMAND_BUILD = 'build'
-COMMAND_FLASH = 'flash'
-COMMAND_READ = 'read'
-COMMAND_CLEAN = 'clean'
+# All known ap subcommands.
+SUBCOMMANDS = {}
 
 
-@command.CommandDecorator('ap')
+def subcommand_decorator(name):
+  """Decorator that validates and registers subcommands."""
+
+  def inner_decorator(original_class):
+    """Inner decorator that actually wraps the class."""
+    assert hasattr(original_class, '__doc__'), f'{name}: missing docstring'
+
+    assert issubclass(original_class, command.CliCommand), (
+        f'{original_class}: subcommands must derive from CliCommand')
+
+    SUBCOMMANDS[name] = original_class
+
+    return original_class
+
+  return inner_decorator
+
+
+@command.command_decorator('ap')
 class APCommand(command.CliCommand):
   """Execute an AP-related command."""
 
@@ -43,75 +53,37 @@ class APCommand(command.CliCommand):
         title='AP subcommands', dest='ap_command')
     subparsers.required = True
 
-    dump_config_parser = _AddSubparser(parser, subparsers, COMMAND_DUMP_CONFIG,
-                                       'Dump the AP Config to a file.')
-    DumpConfigSubcommand.AddParser(dump_config_parser)
+    for name, subcommand_class in SUBCOMMANDS.items():
+      sub_parser = subparsers.add_parser(
+          name,
+          description=subcommand_class.__doc__,
+          caching=parser.caching,
+          help=subcommand_class.__doc__,
+          formatter_class=parser.formatter_class)
+      subcommand_class.AddParser(sub_parser)
 
-    build_parser = _AddSubparser(
-        parser, subparsers, COMMAND_BUILD,
-        'Build the AP Firmware for the requested build target.')
-    BuildSubcommand.AddParser(build_parser)
-
-    flash_parser = _AddSubparser(parser, subparsers, COMMAND_FLASH,
-                                 'Update the AP Firmware on a device.')
-    FlashSubcommand.AddParser(flash_parser)
-
-    read_parser = _AddSubparser(parser, subparsers, COMMAND_READ,
-                                'Read the AP Firmware from a device.')
-    ReadSubcommand.AddParser(read_parser)
-
-    clean_parser = _AddSubparser(parser, subparsers, COMMAND_CLEAN,
-                                 'Clean up dependencies and artifacts '
-                                 'for a given build target.')
-    CleanSubcommand.AddParser(clean_parser)
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    sub_class = SUBCOMMANDS[options.ap_command]
+    sub_class.ProcessOptions(parser, options)
 
   def Run(self):
     """The main handler of this CLI."""
-    if self.options.ap_command == COMMAND_DUMP_CONFIG:
-      subcmd = DumpConfigSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_BUILD:
-      subcmd = BuildSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_FLASH:
-      subcmd = FlashSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_READ:
-      subcmd = ReadSubcommand(self.options)
-    elif self.options.ap_command == COMMAND_CLEAN:
-      subcmd = CleanSubcommand(self.options)
-    subcmd.Run()
+    cls = SUBCOMMANDS[self.options.ap_command]
+    subcmd = cls(self.options)
+    return subcmd.Run()
 
 
-def _AddSubparser(parser, subparsers, name, description):
-  """Adds a subparser to the given parser, with common options.
-
-  Forwards some options from the parser to the new subparser to ensure
-  consistent formatting of output etc.
-
-  Args:
-    parser: The parent parser for this subparser.
-    subparsers: The subparsers group to add this subparser to.
-    name: Name of the new sub-command.
-    description: Description to be used for the sub-command.
-
-  Returns:
-    The new subparser.
-  """
-  return subparsers.add_parser(
-      name,
-      description=description,
-      caching=parser.caching,
-      help=description,
-      formatter_class=parser.formatter_class,
-  )
-
-
+@subcommand_decorator('dump-config')
 class DumpConfigSubcommand(command.CliCommand):
   """Dump the AP Config to a file."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if self.options.output:
-      self.options.output = Path(self.options.output)
-    self.options.Freeze()
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.output:
+      options.output = Path(options.output)
 
   @classmethod
   def AddParser(cls, parser):
@@ -141,71 +113,21 @@ To dump AP config of drallion and dedede boards:
 
   def Run(self):
     """Perform the cros ap dump-config command."""
-    boards = []
+    boards = None
     if self.options.boards:
       boards = self.options.boards
-    else:
-      # Get the board list from config python modules in
-      # chromite/lib/firmware/ap_firmware_config
-      path_to_firmware_configs = (
-          Path(constants.CHROMITE_DIR) / 'lib' / 'firmware' /
-          'ap_firmware_config')
-      for p in path_to_firmware_configs.glob('*.py'):
-        if not p.is_file():
-          continue
-        if p.name.startswith('_'):
-          continue
-        # Remove paths, leaving only filenames, and remove .py suffixes.
-        boards.append(p.with_suffix('').name)
-    boards.sort()
 
-    if self.options.output:
-      output_path = self.options.output
-      logging.info('Dumping AP config to %s', output_path)
-      logging.info('List of boards: %s', ', '.join(boards))
-      logging.info('List of servos: %s', ', '.join(servo_lib.VALID_SERVOS))
-    else:
-      output_path = sys.stdout
-
-    output = {}
-    failed_board_servos = {}
-    for board in boards:
-      module = ap_firmware.get_config_module(board)
-      output[board] = {}
-      for servo_version in servo_lib.VALID_SERVOS:
-        servo = servo_lib.Servo(servo_version, self.options.serial)
-        # get_config() call is expected to fail for some board:servo pairs.
-        # Disable logging to avoid inconsistent error messages from config
-        # modules' get_config() calls.
-        logging.disable(logging.CRITICAL)
-        try:
-          ap_config = module.get_config(servo)
-        except servo_lib.UnsupportedServoVersionError:
-          failed_board_servos.setdefault(board, []).append(servo_version)
-          continue
-        finally:
-          # Reenable logging.
-          logging.disable(logging.DEBUG)
-
-        output[board][servo_version] = {
-            'dut_control_on': ap_config.dut_control_on,
-            'dut_control_off': ap_config.dut_control_off,
-            'programmer': ap_config.programmer,
-        }
-    for board, servos in failed_board_servos.items():
-      logging.notice(f'[{board}] skipping servos ' f'{", ".join(servos)}')
-
-    with file_util.Open(output_path, 'w', encoding='utf-8') as f:
-      pformat.json(output, f)
+    firmware_config.export_config_as_json(boards, self.options.output,
+                                          self.options.serial)
 
 
+@subcommand_decorator('build')
 class BuildSubcommand(command.CliCommand):
   """Build the AP Firmware for the requested build target."""
 
   def __init__(self, options):
     super().__init__(options)
     self.build_target = build_target_lib.BuildTarget(self.options.build_target)
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):
@@ -242,23 +164,24 @@ To build the AP Firmware only for foo-variant:
     commandline.RunInsideChroot(self)
 
     try:
-      ap_firmware.build(
+      firmware_lib.build(
           self.build_target,
           fw_name=self.options.fw_name,
           dry_run=self.options.dry_run)
-    except ap_firmware.Error as e:
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)
 
 
+@subcommand_decorator('read')
 class ReadSubcommand(command.CliCommand):
   """Read the AP Firmware from a device."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if self.options.device is None:
-      cros_build_lib.Die('Specify device using --device argument.')
-    self.options.output_path = Path(self.options.output)
-    self.options.Freeze()
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.device is None:
+      parser.error('Specify device using --device argument.')
+    options.output_path = Path(options.output)
 
   @classmethod
   def AddParser(cls, parser):
@@ -275,10 +198,10 @@ class ReadSubcommand(command.CliCommand):
         dest='build_target',
         help='The name of the build target.')
     parser.add_argument('-r'
-                           '--region',
-                           dest='region',
-                           type=str,
-                           help='Region to read.')
+                        '--region',
+                        dest='region',
+                        type=str,
+                        help='Region to read.')
     parser.add_argument(
         '-o', '--output', type='path', required=True, help='Output file.')
     parser.add_argument(
@@ -323,14 +246,13 @@ To read a specific region from DUT via SERVO on default port(9999):
       region = self.options.region
 
     if ip:
-      flash_ap.ssh_read(self.options.output, self.options.verbose, ip, port,
-                        self.options.dry_run, region)
+      firmware_lib.ssh_read(self.options.output, self.options.verbose, ip, port,
+                            self.options.dry_run, region)
     else:
-      dut_ctl = servo_lib.DutControl(port)
-      servo = servo_lib.get(dut_ctl)
+      dut_ctl = dut.DutControl(port)
+      servo = dut_ctl.get_servo()
 
-      config_module = ap_firmware.get_config_module(build_target.name)
-      ap_config = config_module.get_config(servo)
+      ap_config = firmware_config.get_config(build_target.name, servo)
 
       flashrom_cmd = [
           'flashrom', '-p', ap_config.programmer, '-r', self.options.output
@@ -339,28 +261,29 @@ To read a specific region from DUT via SERVO on default port(9999):
         flashrom_cmd += ['-V']
       if region:
         flashrom_cmd += ['-i', self.options.region]
-      if not flash_ap.servo_run(dut_ctl, ap_config.dut_control_on,
-                                ap_config.dut_control_off, flashrom_cmd,
-                                self.options.verbose, self.options.dry_run):
+      if not dut_ctl.servo_run(ap_config.dut_control_on,
+                               ap_config.dut_control_off, flashrom_cmd,
+                               self.options.verbose, self.options.dry_run):
         logging.error('Unable to read, verify servo connection '
                       'is correct and servod is running in the background.')
 
 
+@subcommand_decorator('flash')
 class FlashSubcommand(command.CliCommand):
   """Update the AP Firmware on a device."""
 
-  def __init__(self, options):
-    super().__init__(options)
-    if not os.path.exists(self.options.image):
-      cros_build_lib.Die(
-          '%s does not exist, verify the path of your build and try '
-          'again.', self.options.image)
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if not os.path.exists(options.image):
+      parser.error(
+          f'{options.image} does not exist, verify the path of your build and '
+          'try again.')
     if options.fast:
-      cros_build_lib.Die(
+      parser.error(
           'Flags such as --fast must be passed directly after --\n'
           'For futility use: cros ap flash ${OTHER_ARGS} -- --fast\n'
           'For flashrom use: cros ap flash --flashrom ${OTHER_ARGS} -- -n')
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):
@@ -431,27 +354,26 @@ e.g.:
 
     build_target = build_target_lib.BuildTarget(self.options.build_target)
     try:
-      ap_firmware.deploy(
+      firmware_lib.deploy(
           build_target,
           self.options.image,
           self.options.device,
           flashrom=self.options.flashrom,
-          fast=False,
           verbose=self.options.verbose,
           dryrun=self.options.dry_run,
           flash_contents=self.options.flash_contents,
           passthrough_args=passthrough_args)
-    except ap_firmware.Error as e:
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)
 
 
+@subcommand_decorator('clean')
 class CleanSubcommand(command.CliCommand):
-  """Clean packages and artifacts for the requested build target."""
+  """Clean up dependencies and artifacts for the requested build target."""
 
   def __init__(self, options):
     super().__init__(options)
     self.build_target = build_target_lib.BuildTarget(self.options.build_target)
-    self.options.Freeze()
 
   @classmethod
   def AddParser(cls, parser):
@@ -480,6 +402,6 @@ This command removes firmware-related packages, including everything in
     commandline.RunInsideChroot(self)
 
     try:
-      ap_firmware.clean(self.build_target, self.options.dry_run)
-    except ap_firmware.Error as e:
+      firmware_lib.clean(self.build_target, self.options.dry_run)
+    except firmware_lib.Error as e:
       cros_build_lib.Die(e)

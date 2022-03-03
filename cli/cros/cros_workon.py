@@ -39,7 +39,7 @@ _action_epilog = '\n'.join(
     '  %s%s' % (a[0].ljust(_fill, ' '), a[1]) for a in _ACTIONS)
 
 
-@command.CommandDecorator('workon')
+@command.command_decorator('workon')
 class WorkonCommand(command.CliCommand):
   """Forces rebuilds of worked on packages from the local source."""
 
@@ -129,15 +129,16 @@ Examples:
 
     return parser
 
-  def Run(self):
-    if self.options.build_target_name:
-      self.options.build_target = build_target_lib.BuildTarget(
-          self.options.build_target_name)
+  @classmethod
+  def ProcessOptions(cls, parser, options):
+    """Post process options."""
+    if options.build_target_name:
+      options.build_target = build_target_lib.BuildTarget(
+          options.build_target_name)
     else:
-      self.options.build_target = None
+      options.build_target = None
 
-    self.options.Freeze()
-
+  def Run(self):
     has_target = self.options.host or self.options.build_target
     needs_target = self.options.action != 'list-all'
     if needs_target and not has_target:

@@ -607,7 +607,7 @@ class BuildImageStageTest(BuildPackagesStageTest):
 class CleanUpStageTest(generic_stages_unittest.StageTestCase):
   """Test CleanUpStage."""
 
-  BOT_ID = 'amd64-generic-incremental'
+  BOT_ID = 'amd64-generic-asan'
 
   def setUp(self):
     self.fake_db = fake_cidb.FakeCIDBConnection()

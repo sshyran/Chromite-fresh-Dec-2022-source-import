@@ -33,8 +33,8 @@ def GetParser():
   parser.add_argument('--boards', help='Colon-separated list of boards.')
   parser.add_argument('--chroot', type='path', help='The chroot path.')
   parser.add_argument('--force', action='store_true',
-                      help='Force the stabilization of blacklisted packages. '
-                           '(only compatible with -p)')
+                      help='Force the stabilization of manually uprevved '
+                           'packages. (only compatible with -p)')
   parser.add_argument('--overlay-type', required=True,
                       choices=['public', 'private', 'both'],
                       help='Populates --overlays based on "public", "private", '
@@ -178,7 +178,7 @@ def _GetOverlayToEbuildsMap(overlays, package_list, force):
   Args:
     overlays: A list of overlays to work on.
     package_list: A list of packages passed from commandline to work on.
-    force (bool): Whether to use packages even if in blacklist.
+    force (bool): Whether to use packages even if in manual uprev list.
 
   Returns:
     A dict mapping each overlay to a list of ebuilds belonging to it.

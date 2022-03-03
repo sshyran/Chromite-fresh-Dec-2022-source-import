@@ -12,7 +12,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
-from chromite.lib import portage_util
 from chromite.service import android
 
 
@@ -69,9 +68,8 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.android_package = constants.ANDROID_PI_PACKAGE
 
     self.tmp_overlay = os.path.join(self.tempdir, 'chromiumos-overlay')
-    self.mock_android_dir = os.path.join(
-        self.tmp_overlay,
-        portage_util.GetFullAndroidPortagePackageName(self.android_package))
+    self.mock_android_dir = android.GetAndroidPackageDir(
+        self.android_package, overlay_dir=self.tmp_overlay)
 
     self.old_version = '25'
     self.old2_version = '50'
@@ -326,7 +324,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     self.assertEqual(subpaths['cheets_x86-user'], 'cheets_x86-user100')
     self.assertEqual(subpaths['cheets_x86_64-user'], 'cheets_x86_64-user100')
     self.assertEqual(subpaths['cheets_arm-userdebug'],
-                    'cheets_arm-userdebug100')
+                     'cheets_arm-userdebug100')
     self.assertEqual(subpaths['cheets_arm64-userdebug'],
                      'cheets_arm64-userdebug100')
     self.assertEqual(subpaths['cheets_x86-userdebug'],
@@ -343,3 +341,36 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     android.CopyToArcBucket(self.bucket_url, self.build_branch,
                             self.new_version, self.new_subpaths,
                             self.arc_bucket_url, self.mock_android_dir)
+
+
+class LKGBTest(cros_test_lib.TempDirTestCase):
+  """Tests ReadLKGB/WriteLKGB."""
+
+  def testWriteReadLGKB(self):
+    android_package_dir = self.tempdir
+    build_id = 'build-id'
+
+    android.WriteLKGB(android_package_dir, build_id)
+    self.assertEqual(android.ReadLKGB(android_package_dir), build_id)
+
+  def testReadLKGBMissing(self):
+    android_package_dir = self.tempdir
+
+    with self.assertRaises(android.MissingLKGBError):
+      android.ReadLKGB(android_package_dir)
+
+  def testReadLKGBNotJSON(self):
+    android_package_dir = self.tempdir
+    with open(os.path.join(android_package_dir, 'LKGB.json'), 'w') as f:
+      f.write('not-a-json-file')
+
+    with self.assertRaises(android.InvalidLKGBError):
+      android.ReadLKGB(android_package_dir)
+
+  def testReadLKGBMissingBuildID(self):
+    android_package_dir = self.tempdir
+    with open(os.path.join(android_package_dir, 'LKGB.json'), 'w') as f:
+      f.write('{"not_build_id": "foo"}')
+
+    with self.assertRaises(android.InvalidLKGBError):
+      android.ReadLKGB(android_package_dir)

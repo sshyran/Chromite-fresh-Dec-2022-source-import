@@ -48,7 +48,7 @@ def GSURLRegexHelper(gsurl):
                   r'(?P<build_name>R\d+-[\d.ab-]+)', gsurl)
 
 
-@command.CommandDecorator('stage')
+@command.command_decorator('stage')
 class StageCommand(command.CliCommand):
   """Remotely stages an image onto a MobLab device or into Google Storage.
 

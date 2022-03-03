@@ -12,6 +12,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 if cros_build_lib.IsInsideChroot():
@@ -88,3 +89,28 @@ class ChrootUtilTest(cros_test_lib.RunCommandTempDirTestCase):
       self.assertStartsWith(tempdir, chroot_tempdir)
     self.assertNotExists(rm_check_dir)
     osutils.RmDir(chroot_tempdir)
+
+  def testRunUnittests(self):
+    """Tests running unit tests invoking emerge with provided flags"""
+
+    sudo_run_mock = self.PatchObject(cros_build_lib, 'sudo_run')
+    chroot_util.RunUnittests(
+        sysroot='/sysroot/',
+        packages=['package1', 'package2'],
+        extra_env={'USE': 'chrome_internal coverage'},
+        keep_going=True
+    )
+    sudo_run_mock.assert_called_once_with(
+        [
+            '/mnt/host/source/chromite/bin/parallel_emerge',
+            '--sysroot=/sysroot/',
+            '--keep-going=y',
+            'package1',
+            'package2'
+        ],
+        extra_env={
+            'USE': 'chrome_internal coverage',
+            'FEATURES': 'test',
+            'PKGDIR': '/sysroot/test-packages'
+        }
+    )
