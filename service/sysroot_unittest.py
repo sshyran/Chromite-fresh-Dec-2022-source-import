@@ -391,14 +391,18 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     # Pretend flag included.
     self.assertIn('--pretend', args)
 
-  def testGetBuildPackagesEnv(self):
-    """Test the build_packages env."""
+  def testGetBuildPackagesExtraEnv(self):
+    """Test the build_packages extra env."""
+    # Test the default config.
     instance = sysroot.BuildPackagesRunConfig()
 
-    # PORTAGE_BINHOST is not set when there are no package_indexes
-    self.assertNotIn('PORTAGE_BINHOST', instance.GetEnv())
+    extra_env = instance.GetExtraEnv()
 
-    # PORTAGE_BINHOST is correctly set when there are package_indexes.
+    self.assertNotIn('USE_GOMA', extra_env)
+    self.assertNotIn('USE_REMOTEEXEC', extra_env)
+    self.assertNotIn('PORTAGE_BINHOST', extra_env)
+
+    # Test when package_indexes are specified.
     pkg_indexes = [
         binpkg.PackageIndexInfo(
             build_target=build_target_lib.BuildTarget('board'),
@@ -409,13 +413,21 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
             snapshot_sha='B',
             location='BBBB')
     ]
-
     instance = sysroot.BuildPackagesRunConfig(package_indexes=pkg_indexes)
 
-    env = instance.GetEnv()
+    extra_env = instance.GetExtraEnv()
+
     self.assertEqual(
-        env.get('PORTAGE_BINHOST'),
+        extra_env.get('PORTAGE_BINHOST'),
         ' '.join([x.location for x in reversed(pkg_indexes)]))
+
+    # Test when use_flags are specified.
+    use_flags = ['flag1', 'flag2']
+    instance = sysroot.BuildPackagesRunConfig(use_flags=use_flags)
+
+    extra_env = instance.GetExtraEnv()
+
+    self.assertEqual(extra_env.get('USE'), instance.GetUseFlags())
 
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase):

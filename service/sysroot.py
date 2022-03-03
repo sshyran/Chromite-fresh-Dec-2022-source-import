@@ -327,30 +327,28 @@ class BuildPackagesRunConfig(object):
 
     return args
 
-  def HasUseFlags(self) -> bool:
-    """Check if we have use flags."""
-    return bool(self.use_flags)
-
   def GetUseFlags(self) -> Optional[str]:
     """Get the use flags as a single string."""
-    use_flags = self.use_flags
-    if use_flags:
-      # We have use flags to set, but we need to append them to any existing
-      # use flags rather than overwrite them completely.
-      # TODO(saklein) Add config for whether to extend or overwrite?
-      existing_flags = os.environ.get('USE', '').split()
-      existing_flags.extend(use_flags)
-      use_flags = existing_flags
+    use_flags = os.environ.get('USE', '').split()
 
-      return ' '.join(use_flags)
+    if self.use_flags:
+      use_flags.extend(self.use_flags)
 
-    return None
+    if self.internal_chrome:
+      use_flags.append('chrome_internal')
 
-  def GetEnv(self) -> Dict[str, str]:
-    """Get the env from this config."""
+    if not self.debug_version:
+      use_flags.append('-cros-debug')
+
+    return ' '.join(use_flags) if use_flags else None
+
+  def GetExtraEnv(self) -> Dict[str, str]:
+    """Get the extra env for this config."""
     env = {}
-    if self.HasUseFlags():
-      env['USE'] = self.GetUseFlags()
+
+    use_flags = self.GetUseFlags()
+    if use_flags:
+      env['USE'] = use_flags
 
     if self.use_goma:
       env['USE_GOMA'] = 'true'
@@ -615,8 +613,7 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   ]
   cmd += run_configs.GetBuildPackagesArgs()
 
-  extra_env = run_configs.GetEnv()
-  extra_env['USE_NEW_PARALLEL_EMERGE'] = '1'
+  extra_env = run_configs.GetExtraEnv()
   with osutils.TempDir() as tempdir:
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
 
