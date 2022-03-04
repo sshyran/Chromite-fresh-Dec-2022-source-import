@@ -366,6 +366,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         'kernel_version': self.kernel_version.replace('_', '.'),
     }
     self.gsc_exists = None
+    self.gsc_ls = None
     self.patch_ebuild = mock.MagicMock()
     self.orderfile_name = (
         'chromeos-chrome-orderfile-field-78-3877.0-1567418235-'
@@ -393,6 +394,8 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
     self.PatchObject(self.obj, '_GetOrderfileName', return_value='orderfile')
     self.gsc_exists = self.PatchObject(
         self.gs_context, 'Exists', return_value=True)
+    self.gsc_ls = self.PatchObject(
+        self.gs_context, 'LS', return_value=['gs://path'])
     if mock_patch:
       self.patch_ebuild = self.PatchObject(
           toolchain_util._CommonPrepareBundle, '_PatchEbuild')
@@ -446,29 +449,79 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                                                    self.orderfile_name)
     self.patch_ebuild.assert_called_once()
 
-  def testPrepareUnverifiedChromeBenchmarkAfdoFile(self):
+  def setupUnverifiedChromeBenchmarkAfdoFileInputProperties(self):
     self.SetUpPrepare(
         'UnverifiedChromeBenchmarkAfdoFile', {
             'UnverifiedChromeBenchmarkPerfFile': ['gs://path/to/perfdata'],
             'UnverifiedChromeBenchmarkAfdoFile': ['gs://path/to/unvetted'],
             'ChromeDebugBinary': ['gs://image-archive/path'],
         })
+
+  def testPrepareUnverifiedChromeBenchmarkAfdoFileExists(self):
+    """Normal flow, build is needed, all artifacts are present."""
+    self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties()
     # Published artifact is missing, debug binary is present, perf.data is
-    # missing.
-    self.gsc_exists.side_effect = (False, True, False)
+    # present.
+    self.gsc_exists.return_value = False
+    self.gsc_ls.side_effect = (['gs://image-archive/path/to/debug'],
+                               ['gs://image-archive/path/to/perf'])
     self.assertEqual(toolchain_util.PrepareForBuildReturn.NEEDED,
                      self.obj.Prepare())
-    expected = [
+    expected_exists = [
         mock.call('gs://path/to/unvetted/'
                   'chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo.bz2'),
+    ]
+    expected_ls = [
         mock.call('gs://image-archive/path/'
-                  'chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug.bz2'),
+                  'chromeos-chrome-amd64-*.debug.bz2'),
         mock.call('gs://path/to/perfdata/'
                   'chromeos-chrome-amd64-78.0.3893.0.perf.data.bz2'),
     ]
-    self.assertEqual(expected, self.gs_context.Exists.call_args_list)
+    self.assertEqual(expected_exists, self.gs_context.Exists.call_args_list)
+    self.assertEqual(expected_ls, self.gs_context.LS.call_args_list)
     # There is no need to patch the ebuild.
     self.patch_ebuild.assert_not_called()
+
+  def testPrepareUnverifiedChromeBenchmarkAfdoFileMissingDebug(self):
+    """Test raised exception when chrome.debug file is missing."""
+    self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties()
+    # Published artifact is missing, debug binary is missing.
+    self.gsc_exists.return_value = False
+    self.gsc_ls.return_value = []
+    with self.assertRaisesRegex(
+        toolchain_util.PrepareForBuildHandlerError,
+        r'Could not find an artifact matching the pattern '
+        r'"chromeos-chrome-amd64-\*.debug.bz2" in '
+        r"\['gs://image-archive/path'\]."):
+      self.obj.Prepare()
+
+  def testPrepareUnverifiedChromeBenchmarkAfdoFileMissingPerf(self):
+    """Test raised exception when perf.data file is missing."""
+    self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties()
+    # Published artifact is missing, debug binary is present,
+    # perf.data is missing.
+    self.gsc_exists.return_value = False
+    self.gsc_ls.side_effect = (['gs://image-archive/path/to/debug'],
+                               [])
+    with self.assertRaisesRegex(
+        toolchain_util.PrepareForBuildHandlerError,
+        r'Could not find "chromeos-chrome-amd64-78.0.3893.0.perf.data.bz2" '
+        r"in \['gs://path/to/perfdata'\]."):
+      self.obj.Prepare()
+
+  def testPrepareUnverifiedChromeBenchmarkAfdoFileMultArtifacts(self):
+    """Test raised exception when there are multiple artifacts of one type."""
+    self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties()
+    # Published artifact is missing, multiple debug binary artifacts.
+    self.gsc_exists.return_value = False
+    self.gsc_ls.return_value = ['gs://image-archive/path/to/debug1',
+                                'gs://image-archive/path/to/debug2']
+    with self.assertRaisesRegex(
+        toolchain_util.PrepareForBuildHandlerError,
+        r"Found \['gs://image-archive/path/to/debug1', "
+        r"'gs://image-archive/path/to/debug2'\] artifacts at "
+        r'gs://image-archive/path. Expected ONE file.'):
+      self.obj.Prepare()
 
   def testCleanupArtifactDirectory(self):
     mock_rmdir = self.PatchObject(osutils, 'RmDir')
