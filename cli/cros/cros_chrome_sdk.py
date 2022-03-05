@@ -1620,7 +1620,7 @@ class ChromeSDKCommand(command.CliCommand):
     components = [self.sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR]
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
-      components.append(commands.AUTOTEST_SERVER_PACKAGE)
+    components.append(commands.AUTOTEST_SERVER_PACKAGE)
     if self.options.download_vm:
       components.append(constants.TEST_IMAGE_TAR)
 
