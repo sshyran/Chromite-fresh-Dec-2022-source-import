@@ -102,6 +102,8 @@ def GeneratePayload(input_proto, output_proto, config):
   _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
   if remote_uri or input_proto.dryrun and local_path:
     return controller.RETURN_CODE_SUCCESS
+  elif output_proto.failure_reason:
+    return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
   else:
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 

@@ -99,6 +99,9 @@ class PayloadApiTests(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     """Test a miniOS paygen request on an image with no miniOS part."""
     patch = self.PatchObject(paygen_payload_lib, 'PaygenPayload')
     patch.side_effect = paygen_payload_lib.NoMiniOSPartitionException
-    payload.GeneratePayload(self.minios_req, self.result, self.api_config)
+    response_code = payload.GeneratePayload(self.minios_req, self.result,
+                                            self.api_config)
     self.assertEqual(self.result.failure_reason,
                      payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE)
+    self.assertEqual(response_code,
+                     controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE)
