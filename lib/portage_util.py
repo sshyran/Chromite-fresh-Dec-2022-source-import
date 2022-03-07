@@ -328,6 +328,26 @@ def GetOverlayName(overlay):
       return None
 
 
+def _GetSysrootTool(
+    tool: str,
+    board: Optional[str] = None,
+    sysroot: Optional[str] = None) -> str:
+  """Return the |tool| to use for a sysroot/board/host."""
+  # If there is no board or sysroot, return the host tool.
+  if sysroot is None and board is None:
+    return tool
+
+  # Prefer the sysroot tool if it exists.
+  if sysroot is None:
+    sysroot = build_target_lib.get_default_sysroot_path(board)
+  tool_path = cros_build_lib.GetSysrootToolPath(sysroot, tool)
+  if os.path.exists(tool_path):
+    return tool_path
+
+  # Fallback to the general PATH wrappers if possible.
+  return tool if board is None else f'{tool}-{board}'
+
+
 class EBuildVersionFormatError(Error):
   """Exception for bad ebuild version string format."""
 
@@ -1856,7 +1876,7 @@ def _EqueryList(
   Returns:
     A cros_build_lib.CommandResult object.
   """
-  cmd = [f'equery-{board}' if board else 'equery']
+  cmd = [_GetSysrootTool('equery', board=board)]
   # Simplify output.
   cmd += ['-Cq']
   cmd += ['list', pkg_str]
@@ -1929,7 +1949,7 @@ def _EqueryWhich(packages_list: List[str],
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'equery'), 'which']
+  cmd = [_GetSysrootTool('equery', sysroot=sysroot), 'which']
   if include_masked:
     cmd += ['--include-masked']
   cmd += packages_list
@@ -2049,7 +2069,7 @@ def _EqueryDepgraph(pkg_str: str,
     result (cros_build_lib.CommandResult)
   """
   cmd = [
-      cros_build_lib.GetSysrootToolPath(sysroot, 'equery'),
+      _GetSysrootTool('equery', sysroot=sysroot),
       '-CNq',
       'depgraph',
       '--depth=%d' % depth,
@@ -2115,7 +2135,7 @@ def _Qlist(
   Returns:
     The command result
   """
-  cmd = [f'qlist-{board}' if board else 'qlist']
+  cmd = [_GetSysrootTool('qlist', board=board)]
   # Simplify output.
   cmd += ['-Cq']
   cmd += args
@@ -2199,7 +2219,7 @@ def _EmergeBoard(
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  emerge = 'emerge-%s' % board if board else 'emerge'
+  emerge = _GetSysrootTool('emerge', board=board)
   cmd = [
       emerge, '-p', '--cols', '--quiet', '--root', '/mnt/empty', '-e', package
   ]
@@ -2263,8 +2283,7 @@ def _EbuildInfo(ebuild_path: str, sysroot: str) -> cros_build_lib.CommandResult:
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  cmd = (cros_build_lib.GetSysrootToolPath(sysroot,
-                                           'ebuild'), ebuild_path, 'info')
+  cmd = (_GetSysrootTool('ebuild', sysroot=sysroot), ebuild_path, 'info')
   return cros_build_lib.run(
       cmd, capture_output=True, print_cmd=False, check=False, encoding='utf-8')
 
@@ -2306,7 +2325,7 @@ def CleanOutdatedBinaryPackages(
   if exclusion_file:
     exclusion_file = Path(exclusion_file)
 
-  cmd = [cros_build_lib.GetSysrootToolPath(sysroot, 'eclean')]
+  cmd = [_GetSysrootTool('eclean', sysroot=sysroot)]
   if deep:
     cmd += ['-d']
   if exclusion_file:
@@ -2420,22 +2439,6 @@ class PortageqError(Error):
   """Portageq command error."""
 
 
-def _GetPortageq(board=None, sysroot=None):
-  """Return the portageq tool to use."""
-  if sysroot is None and board is None:
-    return 'portageq'
-
-  # Prefer the sysroot tool if it exists.
-  if sysroot is None:
-    sysroot = build_target_lib.get_default_sysroot_path(board)
-  tool = cros_build_lib.GetSysrootToolPath(sysroot, 'portageq')
-  if os.path.exists(tool):
-    return tool
-
-  # Fallback to the general PATH wrappers if possible.
-  return 'portageq' if board is None else 'portageq-%s' % board
-
-
 def _Portageq(command, board=None, sysroot=None, **kwargs):
   """Run a portageq command.
 
@@ -2457,7 +2460,8 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
   kwargs.setdefault('encoding', 'utf-8')
   kwargs.setdefault('enter_chroot', True)
 
-  return cros_build_lib.run([_GetPortageq(board, sysroot)] + command, **kwargs)
+  portageq = _GetSysrootTool('portageq', board, sysroot)
+  return cros_build_lib.run([portageq] + command, **kwargs)
 
 
 def PortageqBestVisible(atom: str,
