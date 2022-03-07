@@ -1600,7 +1600,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/misc/foo/foo.ebuild\n'
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo', 'misc/bar'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'misc/bar'],
         output=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'misc/bar'],
@@ -1612,7 +1612,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/misc/foo/foo.ebuild\n'
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo', 'bar'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'bar'],
         output=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'bar'],
@@ -1635,7 +1635,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
         'sys-libs/timezone-data-2018i:0',
     ]
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which'] + packages,
+        ['equery', '--no-color', '--no-pipe', 'which'] + packages,
         output=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(packages,
@@ -1650,7 +1650,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     # Result for package 'bar' is missing.
     equery_output = ('/chromeos-overlay/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo', 'bar'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
         output=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildsForPackages(
         ['foo', 'bar'], sysroot='/build/nami'), {})
@@ -1659,7 +1659,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/bar/bar.ebuild\n'
                      '/chromeos-overlay/foo/foo.ebuild\n')
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo', 'bar'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
         output=equery_output)
     with self.assertRaises(AssertionError):
       portage_util.FindEbuildsForPackages(
@@ -1668,7 +1668,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
   def testFindEbuildForPackageReturnResults(self):
     equery_output = '/chromeos-overlay/misc/foo/foo-9999.ebuild\n'
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'misc/foo'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo'],
         output=equery_output)
     self.assertEqual(
         portage_util.FindEbuildForPackage('misc/foo', sysroot='/build/nami'),
@@ -1677,7 +1677,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
   def testFindEbuildForPackageReturnNone(self):
     equery_output = "Cannot find ebuild for package 'foo'\n"
     self.rc.AddCmdResult(
-        ['/build/nami/build/bin/equery', 'which', 'foo'],
+        ['equery', '--no-color', '--no-pipe', 'which', 'foo'],
         output=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildForPackage(
         'foo', sysroot='/build/nami'), None)

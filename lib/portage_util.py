@@ -1862,6 +1862,51 @@ def IsPackageInstalled(package, sysroot='/'):
   return False
 
 
+def _Equery(
+    module: str,
+    *args: Optional[List[str]],
+    board: Optional[str] = None,
+    sysroot: Optional[str] = None,
+    buildroot: str = constants.SOURCE_ROOT,
+    quiet: bool = True,
+    print_cmd: bool = True,
+    extra_env: Optional[Dict[str, str]] = None,
+    check: bool = True) -> cros_build_lib.CommandResult:
+  """Executes equery commands.
+
+  Args:
+    module: The equery module to run.
+    *args: Arguments to the equery module.
+    board: The board to inspect.
+    sysroot: The root directory being inspected.
+    buildroot: Source root to run commands against.
+    quiet: Whether to run the module in quiet mode.  This is module specific, so
+        consult the documentation for behavior.
+    print_cmd: Whether to print the command before running it.
+    extra_env: Extra environment settings to pass down.
+    check: Whether to throw an exception if the command fails.
+
+  Returns:
+    A cros_build_lib.CommandResult object.
+  """
+  # There is no situation where we want color or pipe detection.
+  cmd = [_GetSysrootTool('equery', board, sysroot), '--no-color', '--no-pipe']
+  if quiet:
+    cmd += ['--quiet']
+  cmd += [module]
+  cmd += args
+
+  return cros_build_lib.run(
+      cmd,
+      enter_chroot=True,
+      cwd=buildroot,
+      print_cmd=print_cmd,
+      capture_output=True,
+      extra_env=extra_env,
+      check=check,
+      encoding='utf-8')
+
+
 def _EqueryList(
     pkg_str: str,
     board: Optional[str] = None,
@@ -1876,18 +1921,7 @@ def _EqueryList(
   Returns:
     A cros_build_lib.CommandResult object.
   """
-  cmd = [_GetSysrootTool('equery', board=board)]
-  # Simplify output.
-  cmd += ['-Cq']
-  cmd += ['list', pkg_str]
-
-  return cros_build_lib.run(
-      cmd,
-      cwd=buildroot,
-      enter_chroot=True,
-      capture_output=True,
-      check=False,
-      encoding='utf-8')
+  return _Equery('list', pkg_str, board=board, buildroot=buildroot, check=False)
 
 
 def FindPackageNameMatches(
@@ -1949,17 +1983,12 @@ def _EqueryWhich(packages_list: List[str],
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  cmd = [_GetSysrootTool('equery', sysroot=sysroot), 'which']
+  args = []
   if include_masked:
-    cmd += ['--include-masked']
-  cmd += packages_list
-  return cros_build_lib.run(
-      cmd,
-      extra_env=extra_env,
-      print_cmd=False,
-      capture_output=True,
-      check=check,
-      encoding='utf-8')
+    args += ['--include-masked']
+  args += packages_list
+  return _Equery('which', *args, sysroot=sysroot, quiet=False,
+                 print_cmd=False, extra_env=extra_env, check=check)
 
 
 def FindEbuildsForPackages(packages_list,
@@ -2068,16 +2097,8 @@ def _EqueryDepgraph(pkg_str: str,
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  cmd = [
-      _GetSysrootTool('equery', sysroot=sysroot),
-      '-CNq',
-      'depgraph',
-      '--depth=%d' % depth,
-  ]
-
-  cmd += [pkg_str]
-  return cros_build_lib.run(
-      cmd, print_cmd=False, capture_output=True, check=True, encoding='utf-8')
+  return _Equery('depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot,
+                 print_cmd=False)
 
 
 def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
