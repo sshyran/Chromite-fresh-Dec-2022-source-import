@@ -1,1 +1,0 @@
-per-file upstart_exceptions.json = file:chromiumos/overlays/chromiumos-overlay:/OWNERS.security
