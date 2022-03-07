@@ -4,6 +4,16 @@
 
 """Run upstart-specific lint checks on the specified .conf files."""
 
+# TODO(b/222119485) build out additional features:
+#  * a flag for build mode when some lints are ignored
+#  * Additional checks:
+#    + require 'oom score'
+#    + no \r characters
+#    + no trailing whitespace on lines
+#    + no leading blank lines
+#    + no trailing blank lines
+#    + require trailing newline
+
 import functools
 import json
 import logging
@@ -12,12 +22,7 @@ import os
 import re
 from typing import Dict, Generator, List
 
-from chromite.lint.linters import whitespace
 
-
-DOC_RESOURCE_URL = (
-    'https://dev.chromium.org/chromium-os/chromiumos-design-docs/'
-    'boot-design#TOC-Runtime-Resource-Limits')
 AUDITED_SHELL_COMMAND_REGEX = re.compile(
     # Match comment lines so they can be excluded.
     r'(?P<comment>^\s*#.*$)|'
@@ -74,23 +79,17 @@ def ExtractCommands(text: str) -> Generator[List[str], None, None]:
 def CheckForRequiredLines(text: str, full_path: Path,
                           tokens_to_find=None) -> bool:
   """Check the upstart config for required clause."""
-  ret = True
   if not tokens_to_find:
     tokens_to_find = {
         'author',
         'description',
-        'oom',
+        # TODO add 'oom' after adding it to missing scripts.
     }
   for line in text.splitlines():
-    tokens = line.split()
     try:
-      token = tokens[0]
+      token = line.split()[0]
     except IndexError:
       continue
-
-    if tokens[0:3] == ['oom', 'score', '-1000']:
-      logging.error('Use "oom score never" instead of "oom score -1000".')
-      ret = False
 
     try:
       tokens_to_find.remove(token)
@@ -98,24 +97,21 @@ def CheckForRequiredLines(text: str, full_path: Path,
       continue
 
     if not tokens_to_find:
-      break
-  if tokens_to_find:
-    logging.error(
-        'Missing clauses from upstart script "%s": %s\nPlease see:\n%s',
-        full_path, ', '.join(tokens_to_find), DOC_RESOURCE_URL)
-    ret = False
-  return ret
+      return True
+  logging.error('Missing clauses from upstart script "%s": %s',
+                full_path, ', '.join(tokens_to_find))
+  return False
 
 
-def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
+def CheckInitConf(full_path: Path) -> bool:
   """Check an upstart conf file for linter errors."""
   ret = True
   text = full_path.read_text(encoding='utf-8')
-  if not CheckForRequiredLines(text, full_path) and not relaxed:
+  if not CheckForRequiredLines(text, full_path):
     ret = False
 
   label = os.path.basename(full_path)
-  ignore_set = set(GetIgnoreLookup().get(label, [])) if relaxed else ()
+  ignore_set = set(GetIgnoreLookup().get(label, []))
 
   found = []
   for cmd in ExtractCommands(text):
@@ -130,8 +126,4 @@ def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
     logging.error('Please use a tmpfiles.d config for the commands or have '
                   'them reviewed by security and add "# croslint: disable:"')
     ret = False
-
-  if not whitespace.LintData(str(full_path), text) and not relaxed:
-    ret = False
-
   return ret
