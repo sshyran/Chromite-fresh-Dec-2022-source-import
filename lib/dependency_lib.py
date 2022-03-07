@@ -157,7 +157,7 @@ def get_source_path_mapping(
   results = {}
 
   packages_to_ebuild_paths = portage_util.FindEbuildsForPackages(
-      packages, sysroot=sysroot_path, check=True)
+      packages, sysroot=sysroot_path, check=True, include_masked=True)
 
   # Source paths which are the directory of ebuild files.
   for package, ebuild_path in packages_to_ebuild_paths.items():
