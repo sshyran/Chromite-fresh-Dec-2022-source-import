@@ -3564,23 +3564,6 @@
       ]
     },
     {
-      "name": "eve-kvm",
-      "reference_board_name": "eve-kvm",
-      "arch": "X86_INTERNAL",
-      "builder": "RELEASE",
-      "experimental": true,
-      "models": [
-        {
-          "board_name": "eve-kvm",
-          "name": "eve",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 329,
-          "is_active": true
-        }
-      ]
-    },
-    {
       "name": "eve-userdebug",
       "reference_board_name": "eve-userdebug",
       "arch": "X86_INTERNAL",
