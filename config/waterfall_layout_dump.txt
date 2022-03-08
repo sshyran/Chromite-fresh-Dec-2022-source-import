@@ -233,6 +233,7 @@
     grunt-release
     guado-macrophage-release
     guado_labstation-release
+    guybrush-kernelnext-release
     guybrush-release
     hana-kernelnext-release
     hana-release
@@ -980,6 +981,12 @@
   guado_labstation-release-tryjob
   guado_labstation-unittest-stress
   guybrush-full-tryjob
+  guybrush-kernelnext-full-tryjob
+  guybrush-kernelnext-llvm-next-toolchain-tryjob
+  guybrush-kernelnext-llvm-toolchain-tryjob
+  guybrush-kernelnext-payloads-tryjob
+  guybrush-kernelnext-release-tryjob
+  guybrush-kernelnext-unittest-stress
   guybrush-llvm-next-toolchain-tryjob
   guybrush-llvm-toolchain-tryjob
   guybrush-payloads-tryjob
@@ -1292,6 +1299,7 @@
     grunt-release-tryjob
     guado-macrophage-release-tryjob
     guado_labstation-release-tryjob
+    guybrush-kernelnext-release-tryjob
     guybrush-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
