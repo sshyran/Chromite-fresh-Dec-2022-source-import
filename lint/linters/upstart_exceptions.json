@@ -1,4 +1,11 @@
 {
+  "adb-homedir-init.conf": [
+    "chown adb:adb \"${ADB_HOME}\"",
+    "chown -R adb:adb \"${ADB_SSH_DIR}\"",
+    "cp /root/.ssh/* \"${ADB_SSH_DIR}\"",
+    "mkdir -p \"${ADB_HOME}\"",
+    "mkdir -p \"${ADB_SSH_DIR}\""
+  ],
   "arc-data-snapshotd-worker.conf": [
     "chown -R arc-data-snapshotd:arc-data-snapshotd /run/arc-data-snapshotd",
     "chown android-root:android-root \"${CHROMEOS_USER_HOME}/android-data\"",
@@ -120,6 +127,10 @@
     "chown chaps:chronos-access /var/lib/chaps",
     "mkdir -p /var/lib/chaps"
   ],
+  "check-rmtfs-early.conf": [
+    "chgrp rmtfs /dev/qcom_rmtfs_mem1",
+    "chmod 0660 /dev/qcom_rmtfs_mem1"
+  ],
   "cleanup-shutdown-logs.conf": [
     "rm -rf \"/var/log/metrics/${log}\" || :"
   ],
@@ -187,6 +198,13 @@
   ],
   "early-failure-cleanup.conf": [
     "rm -vf \"${base}\"* || true"
+  ],
+  "generate_rdc_update.conf": [
+    "chmod 440 \"${DIST_FILE}\"",
+    "chown cras:cras \"${CRAS_RUN_DIR}\"",
+    "chown cras:cras \"${DIST_FILE}\"",
+    "cp \"${DEFAULT_RDC_FILE}\" \"${DIST_FILE}\"",
+    "mkdir -p -m 1770 \"${CRAS_RUN_DIR}\""
   ],
   "hammerd.conf": [
     "chmod 770 \"${sysfs_parent_dir}\"",
@@ -304,6 +322,15 @@
   "resourced.conf": [
     "chown resourced:resourced $CPUFREQ_GLOB"
   ],
+  "rmtfs.conf": [
+    "chmod 0700 \"${RMTFS_BOOT_DIR}\" \"${RMTFS_DIR}\"",
+    "chmod g+w /sys/bus/platform/drivers/qcom-q6v5-mss/[0-9]*/remoteproc/remoteproc*/state",
+    "chown rmtfs:rmtfs \"${RMTFS_BOOT_DIR}\" \"${RMTFS_DIR}\"",
+    "chown rmtfs:rmtfs \"${RMTFS_BOOT_DIR}/${f}\"",
+    "chown rmtfs:rmtfs /sys/bus/platform/drivers/qcom-q6v5-mss/[0-9]*/remoteproc/remoteproc*/state",
+    "mkdir -p \"${RMTFS_BOOT_DIR}\"",
+    "touch \"${RMTFS_BOOT_DIR}/${f}\""
+  ],
   "send-powerwash-metrics.conf": [
     "rm -f \"${POWERWASH_COMPLETE}\" \"${POWERWASH_TIME}\""
   ],
@@ -312,6 +339,9 @@
   ],
   "send-recovery-metrics.conf": [
     "rm -f \"${RECOVERY_HISTOGRAMS}\""
+  ],
+  "send-tpm-firmware-update-metrics.conf": [
+    "rm -f /run/tpm-firmware-updater.status"
   ],
   "seneschal.conf": [
     "mkdir -p /run/arc/sdcard"
