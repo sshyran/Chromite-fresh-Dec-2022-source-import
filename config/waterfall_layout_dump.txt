@@ -237,7 +237,6 @@
     guybrush-release
     hana-kernelnext-release
     hana-release
-    hatch-arc-r-ack-release
     hatch-arc-r-release
     hatch-arc-r-userdebug-release
     hatch-arc-t-release
@@ -1006,12 +1005,6 @@
   hana-release-tryjob
   hana-unittest-stress
   hatch-android-rvc-pre-flight-branch-tryjob
-  hatch-arc-r-ack-full-tryjob
-  hatch-arc-r-ack-llvm-next-toolchain-tryjob
-  hatch-arc-r-ack-llvm-toolchain-tryjob
-  hatch-arc-r-ack-payloads-tryjob
-  hatch-arc-r-ack-release-tryjob
-  hatch-arc-r-ack-unittest-stress
   hatch-arc-r-full-tryjob
   hatch-arc-r-llvm-next-toolchain-tryjob
   hatch-arc-r-llvm-toolchain-tryjob
@@ -1303,7 +1296,6 @@
     guybrush-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
-    hatch-arc-r-ack-release-tryjob
     hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-t-release-tryjob
