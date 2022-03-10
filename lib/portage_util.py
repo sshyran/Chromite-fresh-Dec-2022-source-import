@@ -2142,6 +2142,39 @@ def _ParseDepTreeOutput(equery_output):
   return re.findall(equery_output_regex, equery_output)
 
 
+def GetReverseDependencies(
+    packages: List[str],
+    sysroot: Union[str, os.PathLike] = '/',
+    indirect: bool = False) -> List[Optional[package_info.PackageInfo]]:
+  """List all reverse dependencies for the given list of packages.
+
+  Args:
+    packages: Packages with optional category, version, and slot.
+    sysroot: The root directory being inspected.
+    indirect: If True, search for both the direct and indirect dependencies
+      on the specified packages.
+
+  Returns:
+    List[package_info.PackageInfo]: Packages that depend on the given packages.
+
+  Raises:
+    ValueError when no packages are provided.
+    cros_build_lib.RunCommandError when the equery depends command errors.
+  """
+  if not packages:
+    raise ValueError('Must provide at least one package.')
+
+  sysroot = Path(sysroot)
+
+  args = []
+  if indirect:
+    args += ['--indirect']
+  args += packages
+
+  result = _Equery('depends', *args, sysroot=str(sysroot), print_cmd=False)
+  return [package_info.parse(x) for x in result.output.strip().splitlines()]
+
+
 def _Qlist(
     args: List[str],
     board: Optional[str] = None,

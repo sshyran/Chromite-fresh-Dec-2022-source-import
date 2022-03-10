@@ -1767,3 +1767,46 @@ class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):
     ebuilds = yield from portage_util.FindEbuildsForOverlays(mock_overlay_paths)
 
     self.assertEqual(expected_ebuilds, ebuilds)
+
+
+_EQUERY_DEPENDS_OUTPUT_CORPUS = """\
+app-admin/perl-cleaner-2.20
+app-shells/bash-completion-2.8-r1
+chromeos-base/chromeos-base-1-r11
+sys-apps/portage-3.0.21-r73
+sys-devel/crossdev-20211027-r1
+virtual/target-chromium-os-sdk-1-r219
+"""
+
+
+class GetReverseDependenciesTest(cros_test_lib.RunCommandTestCase):
+  """Tests for GetReverseDependencies."""
+
+  def testGetReverseDependencies(self):
+    expected = [
+        package_info.parse('app-admin/perl-cleaner-2.20'),
+        package_info.parse('app-shells/bash-completion-2.8-r1'),
+        package_info.parse('chromeos-base/chromeos-base-1-r11'),
+        package_info.parse('sys-apps/portage-3.0.21-r73'),
+        package_info.parse('sys-devel/crossdev-20211027-r1'),
+        package_info.parse('virtual/target-chromium-os-sdk-1-r219'),
+    ]
+    self.rc.AddCmdResult(
+        partial_mock.Ignore(), stdout=_EQUERY_DEPENDS_OUTPUT_CORPUS)
+
+    result = portage_util.GetReverseDependencies(['app-shells/bash'])
+
+    self.assertEqual(expected, result)
+
+  def testGetReverseDependenciesNone(self):
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout='\n')
+
+    result = portage_util.GetReverseDependencies(['fake/package'])
+
+    self.assertEqual([], result)
+
+  def testGetReverseDependenciesValueError(self):
+    with self.assertRaises(ValueError) as e:
+      portage_util.GetReverseDependencies([])
+
+      self.assertEqual('Must provide at least one package.', e)
