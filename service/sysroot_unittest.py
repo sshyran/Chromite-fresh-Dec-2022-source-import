@@ -375,7 +375,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         usepkg=True,
         install_debug_symbols=True,
         packages=packages,
-        setup_board=False,
         dryrun=True)
 
     args = instance.GetBuildPackagesArgs()
@@ -384,7 +383,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     self.assertNotIn('--reuse_pkgs_from_local_boards', args)
     # Debug symbols included.
     self.assertIn('--withdebugsymbols', args)
-    self.assertIn('--skip_setup_board', args)
     # Packages included.
     for package in packages:
       self.assertIn(package, args)

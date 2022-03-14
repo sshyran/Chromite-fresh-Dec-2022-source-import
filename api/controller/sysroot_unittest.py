@@ -608,8 +608,6 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
                                             self.api_config)
     self.assertFalse(rc)
     rc_patch.assert_called_with(
-        accept_licenses='@CHROMEOS',
-        upgrade_chroot=False,
         use_any_chrome=False,
         usepkg=True,
         install_debug_symbols=True,
@@ -621,7 +619,6 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         use_goma=False,
         use_remoteexec=False,
         incremental_build=False,
-        setup_board=False,
         dryrun=False)
 
   def testSuccessWithGomaLogs(self):

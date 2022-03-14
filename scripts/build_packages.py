@@ -348,6 +348,15 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
     opts.internal_chrome = True
     opts.use_any_chrome = False
 
+  opts.setup_board_run_config = sysroot.SetupBoardRunConfig(
+      force=opts.cleanbuild,
+      usepkg=opts.usepkg,
+      jobs=opts.jobs,
+      quiet=True,
+      update_toolchain=not opts.skip_toolchain_update,
+      upgrade_chroot=not opts.skip_chroot_upgrade,
+      local_build=opts.reuse_pkgs_from_local_boards,
+      expanded_binhost_inheritance=opts.expandedbinhosts)
   opts.build_run_config = sysroot.BuildPackagesRunConfig(
       usepkg=opts.usepkg,
       install_debug_symbols=opts.withdebugsymbols,
@@ -355,8 +364,6 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
       use_goma=opts.run_goma,
       use_remoteexec=opts.run_remoteexec,
       incremental_build=opts.withrevdeps,
-      expanded_binhosts=opts.expandedbinhosts,
-      setup_board=not opts.skip_setup_board,
       dryrun=opts.pretend,
       usepkgonly=opts.usepkgonly,
       workon=opts.workon,
@@ -369,15 +376,12 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
       clean_build=opts.cleanbuild,
       eclean=opts.eclean,
       rebuild_dep=opts.rebuild,
-      accept_licenses=opts.accept_licenses,
       jobs=opts.jobs,
       local_pkg=opts.reuse_pkgs_from_local_boards,
       dev_image=opts.withdev,
       factory_image=opts.withfactory,
       test_image=opts.withtest,
-      debug_version=opts.withdebug,
-      update_toolchain=not opts.skip_toolchain_update,
-      upgrade_chroot=not opts.skip_chroot_upgrade)
+      debug_version=opts.withdebug)
   opts.Freeze()
   return parser, opts
 
@@ -398,10 +402,13 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
   board_root = sysroot_lib.Sysroot(sysroot_path)
 
   try:
-    # TODO(xcl): Update to conditionally call sysroot.SetupBoard here instead
-    # of having sysroot.BuildPackages call SetupBoard. Also update run_configs
-    # to remove duplicated options and refactor to have a common base set of
-    # configs.
+    # TODO(xcl): Update run_configs to have a common base set of configs for
+    # setup_board and build_packages.
+    if not opts.skip_setup_board:
+      sysroot.SetupBoard(
+          build_target,
+          accept_licenses=opts.accept_licenses,
+          run_configs=opts.setup_board_run_config)
     sysroot.BuildPackages(build_target, board_root, opts.build_run_config)
   except sysroot_lib.PackageInstallError as e:
     try:

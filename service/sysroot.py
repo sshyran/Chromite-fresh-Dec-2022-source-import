@@ -134,8 +134,6 @@ class BuildPackagesRunConfig(object):
       use_remoteexec: bool = False,
       incremental_build: bool = True,
       package_indexes: Optional[List['binpkg.PackageIndexInfo']] = None,
-      expanded_binhosts: bool = False,
-      setup_board: bool = True,
       dryrun: bool = False,
       usepkgonly: bool = False,
       workon: bool = True,
@@ -148,17 +146,12 @@ class BuildPackagesRunConfig(object):
       clean_build: bool = False,
       eclean: bool = True,
       rebuild_dep: bool = True,
-      accept_licenses: Optional[str] = None,
       jobs: Optional[int] = None,
       local_pkg: bool = False,
       dev_image: bool = True,
       factory_image: bool = True,
       test_image: bool = True,
-      debug_version: bool = True,
-      # TODO(rchandrasekar): Below 2 attributes will be removed once
-      # build_packages.py starts to call setupboard directly.
-      update_toolchain: bool = True,
-      upgrade_chroot: bool = True):
+      debug_version: bool = True):
     """Init method.
 
     Args:
@@ -177,9 +170,6 @@ class BuildPackagesRunConfig(object):
         build.
       package_indexes: List of information about available prebuilts, youngest
         first, or None.
-      expanded_binhosts: Whether to enable/disable the expanded binhost
-        inheritance feature for the sysroot.
-      setup_board: Whether to run setup_board in build_packages.
       dryrun: Whether to do a dryrun and not actually build any packages.
       usepkgonly: Only use binary packages to bootstrap; abort if any are
         missing.
@@ -195,15 +185,12 @@ class BuildPackagesRunConfig(object):
         building.
       eclean: Run eclean to delete old binpkgs.
       rebuild_dep: Rebuild dependencies.
-      accept_licenses: Licenses to append to the accepted list.
       jobs: How many packages to build in parallel at maximum.
       local_pkg: Bootstrap from local packages instead of remote packages.
       dev_image: Build useful developer friendly utilities.
       factory_image: Build factory installer.
       test_image: Build packages required for testing.
       debug_version: Build debug versions of Chromium-OS-specific packages.
-      update_toolchain: Update toolchain automatically.
-      upgrade_chroot: Upgrade chroot automatically.
     """
     self.usepkg = usepkg
     self.install_debug_symbols = install_debug_symbols
@@ -213,8 +200,6 @@ class BuildPackagesRunConfig(object):
     self.use_remoteexec = use_remoteexec
     self.is_incremental = incremental_build
     self.package_indexes = package_indexes or []
-    self.expanded_binhosts = expanded_binhosts
-    self.setup_board = setup_board
     self.dryrun = dryrun
     self.usepkgonly = usepkgonly
     self.workon = workon
@@ -227,25 +212,16 @@ class BuildPackagesRunConfig(object):
     self.clean_build = clean_build
     self.eclean = eclean
     self.rebuild_dep = rebuild_dep
-    self.accept_licenses = accept_licenses
     self.jobs = jobs
     self.local_pkg = local_pkg
     self.dev_image = dev_image
     self.factory_image = factory_image
     self.test_image = test_image
     self.debug_version = debug_version
-    self.update_toolchain = update_toolchain
-    self.upgrade_chroot = upgrade_chroot
 
   def GetBuildPackagesArgs(self) -> List[str]:
     """Get the arguments for build_packages script."""
     args = []
-
-    if not self.update_toolchain:
-      args.append('--skip_toolchain_update')
-
-    if not self.upgrade_chroot:
-      args.append('--skip_chroot_upgrade')
 
     if not self.dev_image:
       args.append('--nowithdev')
@@ -264,9 +240,6 @@ class BuildPackagesRunConfig(object):
 
     if self.jobs:
       args.extend(['--jobs', f'{self.jobs}'])
-
-    if self.accept_licenses:
-      args.extend(['--accept_licenses', self.accept_licenses])
 
     if self.rebuild_dep is False:
       args.append('--norebuild')
@@ -315,12 +288,6 @@ class BuildPackagesRunConfig(object):
 
     if not self.is_incremental:
       args.append('--nowithrevdeps')
-
-    if not self.expanded_binhosts:
-      args.append('--noexpandedbinhosts')
-
-    if not self.setup_board:
-      args.append('--skip_setup_board')
 
     if self.packages:
       args.extend(self.packages)
