@@ -209,7 +209,7 @@ def _FilterForTest(artifacts):
           if i.image_type == 'test']
 
 
-def _DefaultPayloadUri(payload, random_str=None):
+def DefaultPayloadUri(payload, random_str=None):
   """Compute the default output URI for a payload.
 
   For a glob that matches all potential URIs for this
@@ -265,7 +265,7 @@ def _FillInPayloadUri(payload, random_str=None):
     random_str: A hook to force a specific random_str. None means generate it.
   """
   if not payload.uri:
-    payload.uri = _DefaultPayloadUri(payload, random_str)
+    payload.uri = DefaultPayloadUri(payload, random_str)
 
 
 def _FilterNonPayloadUris(payload_uris):
@@ -1150,7 +1150,7 @@ class PaygenBuild(object):
     Returns:
       List of URIs for existing payloads that match the default payload pattern.
     """
-    search_uri = _DefaultPayloadUri(payload, random_str='*')
+    search_uri = DefaultPayloadUri(payload, random_str='*')
     return _FilterNonPayloadUris(self._ctx.LS(search_uri))
 
   def CreatePayloads(self):

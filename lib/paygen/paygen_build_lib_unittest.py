@@ -277,16 +277,16 @@ class BasePaygenBuildLibTestWithBuilds(BasePaygenBuildLibTest,
     """Test paygen_payload_lib.DefaultPayloadUri."""
 
     # Test a Full Payload
-    result = paygen_build_lib._DefaultPayloadUri(self.mp_full_payload,
-                                                 random_str='abc123')
+    result = paygen_build_lib.DefaultPayloadUri(self.mp_full_payload,
+                                                random_str='abc123')
     self.assertEqual(
         result,
         'gs://crt/foo-channel/foo-board/1.2.3/payloads/'
         'chromeos_1.2.3_foo-board_foo-channel_full_mp-v2.bin-abc123.signed')
 
     # Test a Delta Payload
-    result = paygen_build_lib._DefaultPayloadUri(self.mp_delta_payload,
-                                                 random_str='abc123')
+    result = paygen_build_lib.DefaultPayloadUri(self.mp_delta_payload,
+                                                random_str='abc123')
     self.assertEqual(
         result,
         'gs://crt/foo-channel/foo-board/1.2.3/payloads/chromeos_1.0.0-1'
@@ -305,7 +305,7 @@ class BasePaygenBuildLibTestWithBuilds(BasePaygenBuildLibTest,
                               key='mp-v3')
     payload = gspaths.Payload(src_image=src_image, tgt_image=tgt_image)
 
-    result = paygen_build_lib._DefaultPayloadUri(payload, random_str='abc123')
+    result = paygen_build_lib.DefaultPayloadUri(payload, random_str='abc123')
     self.assertEqual(
         result,
         'gs://crt/stable-channel/x86-alex-he/3590.0.0/payloads/'
@@ -1014,12 +1014,12 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(MockImageDiscoveryHelper,
             test_full,
             n2n_delta,
             mp_delta_8530, mp_delta_8530_minios, test_delta_8530,
-            mp_delta_8743, mp_delta_8743_minios,  test_delta_8743,
-            mp_delta_8872, mp_delta_8872_minios,  test_delta_8872,
-            mp_delta_9000, mp_delta_9000_minios,  test_delta_9000,
-            mp_delta_9202, mp_delta_9202_minios,  test_delta_9202,
-            mp_delta_9334, mp_delta_9334_minios,  test_delta_9334,
-            mp_delta_9460, mp_delta_9460_minios,  test_delta_9460,
+            mp_delta_8743, mp_delta_8743_minios, test_delta_8743,
+            mp_delta_8872, mp_delta_8872_minios, test_delta_8872,
+            mp_delta_9000, mp_delta_9000_minios, test_delta_9000,
+            mp_delta_9202, mp_delta_9202_minios, test_delta_9202,
+            mp_delta_9334, mp_delta_9334_minios, test_delta_9334,
+            mp_delta_9460, mp_delta_9460_minios, test_delta_9460,
             mp_delta_9460_67, mp_delta_9460_67_minios, test_delta_9460_67,
         ])
 

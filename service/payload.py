@@ -11,6 +11,7 @@ from typing import Optional, Tuple, Union
 
 from chromite.lib import chroot_util
 from chromite.lib.paygen import gspaths
+from chromite.lib.paygen import paygen_build_lib
 from chromite.lib.paygen import paygen_payload_lib
 
 from chromite.api.gen.chromiumos import common_pb2
@@ -70,12 +71,10 @@ class PayloadConfig(object):
 
     # This block ensures that we have paths to the correct perm of images.
     src_image_path = None
-    tgt_key = None
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
       tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
       tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
-      tgt_key = self.tgt_image.key
     elif isinstance(self.tgt_image, payload_pb2.DLCImage):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
@@ -86,23 +85,18 @@ class PayloadConfig(object):
       elif isinstance(self.tgt_image, payload_pb2.DLCImage):
         src_image_path = _GenDLCImageGSPath(self.src_image)
 
-    # Set your output location.
-    if self.upload:
-      payload_build = deepcopy(tgt_image_path.build)
-      payload_build.bucket = dest_bucket
-      payload_output_uri = gspaths.ChromeosReleases.PayloadUri(
-          build=payload_build,
-          random_str=None,
-          key=tgt_key,
-          src_version=src_image_path.build.version if src_image else None,
-      )
-    else:
-      payload_output_uri = None
+    payload_build = deepcopy(tgt_image_path.build)
+    payload_build.bucket = dest_bucket
 
     self.payload = gspaths.Payload(
-        tgt_image=tgt_image_path, src_image=src_image_path, minios=self.minios,
-        uri=payload_output_uri)
+        build=payload_build,
+        tgt_image=tgt_image_path,
+        src_image=src_image_path,
+        minios=self.minios,
+        uri=None)
 
+    if self.upload:
+      self.payload.uri = paygen_build_lib.DefaultPayloadUri(self.payload)
 
   def GeneratePayload(self) -> Tuple[str, str]:
     """Do payload generation (& maybe sign) on Google Storage CrOS images.
