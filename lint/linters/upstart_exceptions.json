@@ -83,6 +83,12 @@
     "mkdir -p -m 0750 \"${BLUETOOTH_LOGDIR}\"",
     "rm -rf \"${BLUETOOTH_LOGDIR}\""
   ],
+  "boot-logging-moblab.conf": [
+    "mkdir -p \"${LOGDIR}\""
+  ],
+  "boot-logging-satlab.conf": [
+    "mkdir -p \"${LOGDIR}\""
+  ],
   "boot-update-firmware.conf": [
     "mkdir -p \"${FP_LOG_DIR}\"",
     "rm -f \"${COLD_BOOT_FILE}\"",
@@ -277,6 +283,33 @@
     "chown -R ml-service:ml-service /var/lib/ml_service",
     "mkdir -m 0755 -p /var/lib/ml_service/metrics"
   ],
+  "mobbase-python-fix-init.conf": [
+    "ln -s /usr/bin/python2.7 \"${PYTHON_LOCAL_LINK}\"",
+    "mkdir -p /usr/local/bin"
+  ],
+  "moblab-compose-down.conf": [
+    "mkdir -p /var/log/bootup/"
+  ],
+  "moblab-compose-up.conf": [
+    "mkdir -p /usr/local/tmp/moblab-dev",
+    "mkdir -p /var/log/bootup/"
+  ],
+  "moblab-dhcp.conf": [
+    "mkdir -p /var/log/bootup/"
+  ],
+  "moblab-dockerd.conf": [
+    "ln -s \"${OLD_DOCKER_DATA_ROOT}/volumes\" \"${DOCKER_DATA_ROOT}/volumes\"",
+    "mkdir -p \"${DOCKER_DATA_ROOT}\"",
+    "mkdir -p /var/log/bootup/",
+    "mkdir -p /var/run/dockerd"
+  ],
+  "moblab-host-server.conf": [
+    "mkdir -p /var/log/bootup/",
+    "mkdir -p /var/log/moblab"
+  ],
+  "moblab-network-init.conf": [
+    "mkdir -p /var/log/bootup/"
+  ],
   "modemfwd.conf": [
     "chown modem:modem /var/cache/modemfwd",
     "chown modem:modem /var/lib/modemfwd",
@@ -330,6 +363,18 @@
     "chown rmtfs:rmtfs /sys/bus/platform/drivers/qcom-q6v5-mss/[0-9]*/remoteproc/remoteproc*/state",
     "mkdir -p \"${RMTFS_BOOT_DIR}\"",
     "touch \"${RMTFS_BOOT_DIR}/${f}\""
+  ],
+  "satlab-compose-down.conf": [
+    "mkdir -p /var/log/bootup/"
+  ],
+  "satlab-compose-up.conf": [
+    "chmod 666 /var/run/docker.sock",
+    "mkdir -p /usr/local/tmp/satlab-dev",
+    "mkdir -p /var/log/bootup/"
+  ],
+  "satlab-remote-access.conf": [
+    "mkdir -p /usr/local/tmp/satlab-dev",
+    "mkdir -p /var/log/bootup/"
   ],
   "send-powerwash-metrics.conf": [
     "rm -f \"${POWERWASH_COMPLETE}\" \"${POWERWASH_TIME}\""
