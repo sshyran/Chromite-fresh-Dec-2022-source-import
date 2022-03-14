@@ -6,13 +6,15 @@
 
 from operator import attrgetter
 import os
+from pathlib import Path
 import shutil
 from unittest import mock
 
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
-from chromite.lib import constants
 from chromite.lib import chroot_lib
+from chromite.lib import constants
+from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -500,7 +502,8 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     self.assertIn('--show-output', flags)
 
 
-class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
+class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
+                        cros_test_lib.LoggingTestCase):
   """Test BuildPackages function."""
 
   def setUp(self):
@@ -516,22 +519,31 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
     self.sysroot_path = '/sysroot/path'
     self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
 
-    self.build_packages = os.path.join(constants.CROSUTILS_DIR,
-                                       'build_packages.sh')
+    self.build_packages = Path(constants.CROSUTILS_DIR) / 'build_packages.sh'
     self.base_command = [
         self.build_packages, '--board', self.board, '--board_root',
         self.sysroot_path
     ]
 
+    # Prevent the test from switching the cpu governor.
+    self.PatchObject(cpupower_helper, 'ModifyCpuGovernor')
+    # Prevent the test from remove files in the system.
+    self.PatchObject(cros_build_lib, 'ClearShadowLocks')
+    self.PatchObject(
+        portage_util, 'PortageqEnvvar', return_value='gs://fake/binhost')
+
   def testSuccess(self):
     """Test successful run."""
     config = sysroot.BuildPackagesRunConfig()
-    sysroot.BuildPackages(self.target, self.sysroot, config)
 
-    # The rest of the command's args we test in BuildPackagesRunConfigTest,
-    # so just make sure we're calling the right command and pass the args not
-    # handled by the run config.
-    self.assertCommandContains(self.base_command)
+    with cros_test_lib.LoggingCapturer() as logs:
+      sysroot.BuildPackages(self.target, self.sysroot, config)
+
+      # The rest of the command's args we test in BuildPackagesRunConfigTest,
+      # so just make sure we're calling the right command and pass the args not
+      # handled by the run config.
+      self.assertCommandContains(self.base_command)
+      self.AssertLogsContain(logs, 'PORTAGE_BINHOST')
 
   def testPackageFailure(self):
     """Test package failure handling."""

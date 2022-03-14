@@ -1918,8 +1918,9 @@ def UnbufferedNamedTemporaryFile(**kwargs):
   return tempfile.NamedTemporaryFile(**kwargs)
 
 
-def ClearShadowLocks(sysroot: os.PathLike = Path('/')) -> None:
+def ClearShadowLocks(sysroot: Union[str, os.PathLike] = '/') -> None:
   """Clears out stale shadow-utils locks in the given sysroot."""
+  sysroot = Path(sysroot)
   logging.info('Clearing shadow-utils lockfiles under %s', sysroot)
   filenames = ('passwd.lock', 'group.lock', 'shadow.lock', 'gshadow.lock')
   etc_path = sysroot / 'etc'

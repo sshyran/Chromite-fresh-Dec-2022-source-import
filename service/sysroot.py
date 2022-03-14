@@ -8,6 +8,7 @@ import logging
 import glob
 import multiprocessing
 import os
+from pathlib import Path
 import shutil
 import tempfile
 from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING
@@ -15,6 +16,7 @@ import urllib
 
 from chromite.lib import cache
 from chromite.lib import constants
+from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
@@ -646,18 +648,29 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     sysroot_lib.PackageInstallError when packages fail to install.
   """
   cros_build_lib.AssertInsideChroot()
+  cros_build_lib.AssertNonRootUser()
 
   cmd = [
       'bash',
-      os.path.join(constants.CROSUTILS_DIR, 'build_packages.sh'),
+      Path(constants.CROSUTILS_DIR) / 'build_packages.sh',
       '--script-is-run-only-by-chromite-and-not-users',
-      '--board', target.name, '--board_root', sysroot.path
+      '--board',
+      target.name,
+      '--board_root',
+      sysroot.path,
   ]
   cmd += run_configs.GetBuildPackagesArgs()
 
   extra_env = run_configs.GetExtraEnv()
-  with osutils.TempDir() as tempdir:
+  with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
+      run_configs.autosetgov, run_configs.autosetgov_sticky):
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
+
+    cros_build_lib.ClearShadowLocks(sysroot.path)
+
+    portage_binhost = portage_util.PortageqEnvvar('PORTAGE_BINHOST',
+                                                  target.name)
+    logging.info('PORTAGE_BINHOST: %s', portage_binhost)
 
     try:
       # REVIEW: discuss which dimensions to flatten into the metric
