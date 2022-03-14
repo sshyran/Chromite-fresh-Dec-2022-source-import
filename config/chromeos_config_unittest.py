@@ -931,7 +931,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
     for build_name, config in self.site_config.items():
       if config.build_type != constants.CANARY_TYPE:
         continue
-      expected = 12 * 60 * 60
+      expected = 18 * 60 * 60
 
       self.assertEqual(
           config.build_timeout, expected,
