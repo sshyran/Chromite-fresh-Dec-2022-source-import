@@ -227,6 +227,7 @@
     fizz-labstation-release
     fizz-moblab-release
     fizz-release
+    ghost-release
     goroh-release
     grunt-arc-r-release
     grunt-kernelnext-release
@@ -929,6 +930,12 @@
   gale-test-ap-tryjob
   gale-unittest-stress
   gandof-factory-auron-6459.B-factorybranch-tryjob
+  ghost-full-tryjob
+  ghost-llvm-next-toolchain-tryjob
+  ghost-llvm-toolchain-tryjob
+  ghost-payloads-tryjob
+  ghost-release-tryjob
+  ghost-unittest-stress
   glados-factory-glados-7657.B-factorybranch-tryjob
   glados-factory-glados-7828.B-factorybranch-tryjob
   glados-full-tryjob
@@ -1286,6 +1293,7 @@
     fizz-labstation-release-tryjob
     fizz-moblab-release-tryjob
     fizz-release-tryjob
+    ghost-release-tryjob
     goroh-release-tryjob
     grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob
