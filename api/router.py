@@ -122,7 +122,7 @@ class Router(object):
         module_name=module_name,
         method_descriptor=method_desc)
 
-  def _get_input_message_instance(self, service_name, method_name):
+  def get_input_message_instance(self, service_name, method_name):
     """Get an empty input message instance for the specified method."""
     method_data = self._get_method_data(service_name, method_name)
     return self._sym_db.GetPrototype(method_data.method_descriptor.input_type)()
@@ -215,7 +215,7 @@ class Router(object):
       ServiceModuleNotFoundError when the service module cannot be imported.
       MethodNotFoundError when the method cannot be retrieved from the module.
     """
-    input_msg = self._get_input_message_instance(service_name, method_name)
+    input_msg = self.get_input_message_instance(service_name, method_name)
     input_handler.read_into(input_msg)
 
     # Get an empty output message instance.
