@@ -459,6 +459,48 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
 
     self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages)
 
+  def testGetEmergeFlags(self):
+    """Test building the emerge flags."""
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--with-test-deps', flags)
+    self.assertIn('--getbinpkg', flags)
+    self.assertIn('--with-bdeps', flags)
+    self.assertIn('--usepkg', flags)
+    self.assertIn('--rebuild-if-new-rev', flags)
+
+    # Test when use_any_chrome is specified.
+    instance = sysroot.BuildPackagesRunConfig(use_any_chrome=True)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--force-remote-binary=chromeos-base/chromeos-chrome', flags)
+    self.assertIn('--force-remote-binary=chromeos-base/chrome-icu', flags)
+
+    # Test when usepkgonly is specified.
+    instance = sysroot.BuildPackagesRunConfig(usepkgonly=True)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--usepkgonly', flags)
+
+    # Test when jobs is specified.
+    instance = sysroot.BuildPackagesRunConfig(jobs=10)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--jobs=10', flags)
+
+    # Test when verbose is specified.
+    instance = sysroot.BuildPackagesRunConfig(verbose=True)
+
+    flags = instance.GetEmergeFlags()
+
+    self.assertIn('--show-output', flags)
+
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
   """Test BuildPackages function."""

@@ -27,6 +27,9 @@ if TYPE_CHECKING:
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
 
+# TODO(xcl): Revisit/remove this after the Lacros launch if no longer needed
+_CHROME_PACKAGES = ('chromeos-base/chromeos-chrome', 'chromeos-base/chrome-icu')
+
 
 class Error(Exception):
   """Base error class for the module."""
@@ -398,6 +401,41 @@ class BuildPackagesRunConfig(object):
     # TODO(xcl): Add base install packages and reverse dependencies
 
     return packages
+
+  def GetEmergeFlags(self) -> List[str]:
+    """Get the emerge flags for this config."""
+    flags = ['-uDNv', '--backtrack=30', '--newrepo', '--with-test-deps', 'y']
+
+    if self.use_any_chrome:
+      for pkg in _CHROME_PACKAGES:
+        flags.append(f'--force-remote-binary={pkg}')
+
+    extra_board_flags = os.environ.get('EXTRA_BOARD_FLAGS', '').split()
+    if extra_board_flags:
+      flags.extend(extra_board_flags)
+
+    if self.dryrun:
+      flags.append('--pretend')
+
+    if self.usepkg or self.local_pkg or self.usepkgonly:
+      # Use binary packages. Include all build-time dependencies, so as to
+      # avoid unnecessary differences between source and binary builds.
+      flags.extend(['--getbinpkg', '--with-bdeps', 'y'])
+      if self.usepkgonly:
+        flags.append('--usepkgonly')
+      else:
+        flags.append('--usepkg')
+
+    if self.jobs:
+      flags.append(f'--jobs={self.jobs}')
+
+    if self.rebuild_dep:
+      flags.append('--rebuild-if-new-rev')
+
+    if self.verbose:
+      flags.append('--show-output')
+
+    return flags
 
 
 def SetupBoard(target: 'build_target_lib.BuildTarget',
