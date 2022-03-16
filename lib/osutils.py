@@ -361,7 +361,7 @@ def ReadFile(path: Union[Path, str],
     return ret
 
 
-def MD5HashFile(path):
+def MD5HashFile(path: Union[str, os.PathLike]) -> str:
   """Calculate the md5 hash of a given file path.
 
   Args:
@@ -370,7 +370,7 @@ def MD5HashFile(path):
   Returns:
     The hex digest of the md5 hash of the file.
   """
-  contents = ReadFile(path, mode='rb')
+  contents = Path(path).read_bytes()
   return hashlib.md5(contents).hexdigest()
 
 
