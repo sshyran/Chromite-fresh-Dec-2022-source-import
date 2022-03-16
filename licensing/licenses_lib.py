@@ -189,7 +189,7 @@ PACKAGE_HOMEPAGES = {
 
 # These are tokens found in LICENSE= in an ebuild that aren't licenses we
 # can actually read from disk.
-# You should not use this to blacklist real licenses.
+# You should not use this to ban real licenses.
 LICENCES_IGNORE = [
     ')',              # Ignore OR tokens from LICENSE="|| ( LGPL-2.1 MPL-1.1 )"
     '(',
@@ -657,7 +657,7 @@ to assign.  Once you've found it, copy the entire license file to:
     """
     # If the total size installed is zero, we installed no content to license.
     if _BuildInfo(build_info_dir, 'SIZE').strip() == '0':
-      # Allow for license generation for the whitelisted empty packages.
+      # Allow for license generation for the exempt empty packages.
       if self.fullname not in SIZE_EXEMPT_PACKAGES:
         logging.debug('Build directory is empty')
         self.skip = True
@@ -1542,11 +1542,6 @@ def ReadUnknownEncodedFile(file_path, logging_text=None):
 
   Returns:
     File content, possibly converted from latin1 to UTF-8.
-
-  Raises:
-    Assertion error: if non-whitelisted illegal XML characters
-      are found in the file.
-    ValueError: returned if we get invalid XML.
   """
   try:
     with codecs.open(file_path, encoding='utf-8') as c:
