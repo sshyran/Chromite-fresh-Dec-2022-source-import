@@ -188,11 +188,11 @@ class EventFileLoggerTest(cros_test_lib.TestCase):
     self.log.shutdown()
 
 
-class EventDummyLogger(cros_test_lib.TestCase):
-  """Test EventDummyLogger class"""
+class EventStubLogger(cros_test_lib.TestCase):
+  """Test EventStubLogger class"""
 
   def setUp(self):
-    self.log = cros_event.EventDummyLogger()
+    self.log = cros_event.EventStubLogger()
 
   def testInit(self):
     self.assertIsInstance(self.log, cros_event.EventLogger)
@@ -209,7 +209,7 @@ class FunctionTest(cros_test_lib.TestCase):
       cros_event.setEventLogger(self._last_root)
 
   def SetEventLoggerTest(self):
-    new_log = cros_event.EventDummyLogger()
+    new_log = cros_event.EventStubLogger()
     cros_event.setEventLogger(new_log)
     self.assertEqual(new_log, cros_event.root)
 

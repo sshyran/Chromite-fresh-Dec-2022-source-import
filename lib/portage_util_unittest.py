@@ -591,7 +591,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         # Just get the last path component so we can specify the file_list
         # without concerning outselves with tempdir
         file_list = [os.path.split(f)[1] for f in file_list]
-        # Return a dummy file if we have changes in any of the listed files.
+        # Return a stub file if we have changes in any of the listed files.
         if set(self.git_files_changed).intersection(file_list):
           return 'somefile'
         return ''

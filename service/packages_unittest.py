@@ -1125,7 +1125,7 @@ def test_uprev_chrome_all_files_already_exist(old_version, new_version,
 
   git_refs = [
       GitRef(
-          path='/foo', ref=f'refs/tags/{new_version}', revision='dummycommit')
+          path='/foo', ref=f'refs/tags/{new_version}', revision='stubcommit')
   ]
   res = packages.uprev_chrome_from_ref(None, git_refs, None)
 

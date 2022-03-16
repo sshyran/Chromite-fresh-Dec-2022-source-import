@@ -184,14 +184,14 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
 
       # Dir exists before & after.
       # File exists, but then doesn't.
-      dummy_file = os.path.join(self.breakpad_dir, 'fooooooooo')
-      osutils.Touch(dummy_file)
+      stub_file = os.path.join(self.breakpad_dir, 'fooooooooo')
+      osutils.Touch(stub_file)
       ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbols(
           self.board, sysroot=self.board_dir, generate_count=1,
           clean_breakpad=True)
       self.assertEqual(ret, 0)
       self.assertEqual(gen_mock.call_count, 2)
-      self.assertNotExists(dummy_file)
+      self.assertNotExists(stub_file)
 
   def testCleaningFalse(self, gen_mock):
     """Verify behavior of clean_breakpad=False"""
@@ -207,14 +207,14 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
 
       # Dir exists before & after.
       # File exists before & after.
-      dummy_file = os.path.join(self.breakpad_dir, 'fooooooooo')
-      osutils.Touch(dummy_file)
+      stub_file = os.path.join(self.breakpad_dir, 'fooooooooo')
+      osutils.Touch(stub_file)
       ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbols(
           self.board, sysroot=self.board_dir, generate_count=1,
           clean_breakpad=False)
       self.assertEqual(ret, 0)
       self.assertEqual(gen_mock.call_count, 2)
-      self.assertExists(dummy_file)
+      self.assertExists(stub_file)
 
   def testExclusionList(self, gen_mock):
     """Verify files in directories of the exclusion list are excluded"""

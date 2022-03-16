@@ -5,7 +5,6 @@
 # See repohooks/README.md for more details.
 
 black.?list
-dummy
 \bhe\b
 \bhis\b
 master

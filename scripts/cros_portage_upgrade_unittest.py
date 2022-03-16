@@ -709,7 +709,7 @@ class CopyUpstreamTest(CpuTestBase):
         for extra_file in extra_upstream_files:
           osutils.Touch(os.path.join(pkg_dir, extra_file))
 
-    # Prepare dummy portage-stable dir, with extra previously
+    # Prepare stub portage-stable dir, with extra previously
     # existing files simulated if requested.
     if existing_files:
       pkg_dir = os.path.join(self.portage_stable, catpkg)

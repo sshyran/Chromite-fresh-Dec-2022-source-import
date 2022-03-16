@@ -98,13 +98,13 @@ class KeysetMock(keys.Keyset):
       contents = '\n'.join(lines) + '\n'
       osutils.WriteFile(os.path.join(self.key_dir, 'loem.ini'), contents)
 
-  def CreateDummyKeys(self):
-    """Creates dummy keys from stored keys."""
+  def CreateStubKeys(self):
+    """Creates stub keys from stored keys."""
     for key in self.keys.values():
-      CreateDummyKeys(key)
+      CreateStubKeys(key)
     for loem in self._root_of_trust_keys.values():
       for key in loem.values():
-        CreateDummyKeys(key)
+        CreateStubKeys(key)
 
 
 class TestKeyPair(cros_test_lib.RunCommandTempDirTestCase):
@@ -251,7 +251,7 @@ class TestKeyPair(cros_test_lib.RunCommandTempDirTestCase):
   def testExistWithPublicKey(self):
     k1 = keys.KeyPair('key1', self.tempdir)
 
-    CreateDummyPublic(k1)
+    CreateStubPublic(k1)
     self.assertTrue(k1.Exists())
     self.assertTrue(k1.Exists(require_public=True))
     self.assertFalse(k1.Exists(require_private=True))
@@ -259,7 +259,7 @@ class TestKeyPair(cros_test_lib.RunCommandTempDirTestCase):
   def testExistsWithPrivateKey(self):
     k1 = keys.KeyPair('key1', self.tempdir)
 
-    CreateDummyPrivateKey(k1)
+    CreateStubPrivateKey(k1)
     self.assertTrue(k1.Exists())
     self.assertTrue(k1.Exists(require_private=True))
     self.assertFalse(k1.Exists(require_public=True))
@@ -268,8 +268,8 @@ class TestKeyPair(cros_test_lib.RunCommandTempDirTestCase):
     """Exists() works correctly when private/public are both required."""
     k1 = keys.KeyPair('key1', self.tempdir)
 
-    CreateDummyPrivateKey(k1)
-    CreateDummyPublic(k1)
+    CreateStubPrivateKey(k1)
+    CreateStubPublic(k1)
     self.assertTrue(k1.Exists())
     self.assertTrue(k1.Exists(require_private=True))
     self.assertTrue(k1.Exists(require_public=True))
@@ -282,7 +282,7 @@ class TestKeyPair(cros_test_lib.RunCommandTempDirTestCase):
 
   def testKeyblockExists(self):
     k1 = keys.KeyPair('key1', self.tempdir)
-    CreateDummyKeyblock(k1)
+    CreateStubKeyblock(k1)
     self.assertTrue(k1.KeyblockExists())
 
   def testGetSha1sumEmpty(self):
@@ -472,7 +472,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
     osutils.WriteFile(os.path.join(self.tempdir, 'key.versions'), contents)
     ks0 = KeysetMock(self.tempdir)
     self.assertEqual('testname', ks0.name)
-    ks0.CreateDummyKeys()
+    ks0.CreateStubKeys()
 
     ks1 = keys.Keyset(self.tempdir)
     self.assertEqual('testname', ks1.name)
@@ -564,7 +564,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
     key_keep = set(['key1', 'key3'])
 
     for key_name in key_keep:
-      CreateDummyKeys(ks0.keys[key_name])
+      CreateStubKeys(ks0.keys[key_name])
 
     ks0.Prune()
     # Only our keepers should have survived.
@@ -582,7 +582,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
 
   def testKeyExistsPublicAndPrivate(self):
     ks0 = self._get_keyset()
-    CreateDummyKeys(ks0.keys['key1'])
+    CreateStubKeys(ks0.keys['key1'])
     self.assertTrue(ks0.KeyExists('key1'), msg='key1 should exist')
     self.assertTrue(ks0.KeyExists('key1', require_public=True),
                     msg='key1 public key should exist')
@@ -595,7 +595,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
 
   def testKeyExistsPrivate(self):
     ks0 = self._get_keyset()
-    CreateDummyPrivateKey(ks0.keys['key2'])
+    CreateStubPrivateKey(ks0.keys['key2'])
     self.assertTrue(ks0.KeyExists('key2'),
                     msg='should pass with only private key')
     self.assertTrue(ks0.KeyExists('key2', require_private=True),
@@ -605,7 +605,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
 
   def testKeyExistsPublic(self):
     ks0 = self._get_keyset()
-    CreateDummyPublic(ks0.keys['key3'])
+    CreateStubPublic(ks0.keys['key3'])
     self.assertTrue(ks0.KeyExists('key3'),
                     msg='should pass with only public key')
     self.assertTrue(ks0.KeyExists('key3', require_public=True),
@@ -620,27 +620,27 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
 
   def testKeyblockExists(self):
     ks0 = self._get_keyset()
-    CreateDummyKeyblock(ks0.keys['key1'])
+    CreateStubKeyblock(ks0.keys['key1'])
     self.assertTrue(ks0.KeyblockExists('key1'), msg="'key1' should exist")
 
 
-def CreateDummyPublic(key):
+def CreateStubPublic(key):
   """Create empty public key file for given key."""
   osutils.Touch(key.public, makedirs=True)
 
 
-def CreateDummyPrivateKey(key):
+def CreateStubPrivateKey(key):
   """Create empty private key for given key."""
   osutils.Touch(key.private, makedirs=True)
 
 
-def CreateDummyKeyblock(key):
+def CreateStubKeyblock(key):
   """Create empty keyblock file for given key."""
   osutils.Touch(key.keyblock, makedirs=True)
 
 
-def CreateDummyKeys(key):
+def CreateStubKeys(key):
   """Create empty key files for given key (or root_of_trust_keys if exist)."""
-  CreateDummyPublic(key)
-  CreateDummyPrivateKey(key)
-  CreateDummyKeyblock(key)
+  CreateStubPublic(key)
+  CreateStubPrivateKey(key)
+  CreateStubKeyblock(key)

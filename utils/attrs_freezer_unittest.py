@@ -11,7 +11,7 @@ from chromite.utils import attrs_freezer
 class FrozenAttributesTest(cros_test_lib.TestCase):
   """Tests FrozenAttributesMixin functionality."""
 
-  class DummyClass(object):
+  class StubClass(object):
     """Any class that does not override __setattr__."""
 
   class SetattrClass(object):
@@ -41,10 +41,10 @@ class FrozenAttributesTest(cros_test_lib.TestCase):
 
   def testFrozenByMetaclass(self):
     """Test attribute freezing with FrozenAttributesClass."""
-    class DummyByMeta(self.DummyClass, metaclass=attrs_freezer.Class):
-      """Class that freezes DummyClass using metaclass construct."""
+    class StubByMeta(self.StubClass, metaclass=attrs_freezer.Class):
+      """Class that freezes StubClass using metaclass construct."""
 
-    self._TestBasics(DummyByMeta)
+    self._TestBasics(StubByMeta)
 
     class SetattrByMeta(self.SetattrClass, metaclass=attrs_freezer.Class):
       """Class that freezes SetattrClass using metaclass construct."""
@@ -53,10 +53,10 @@ class FrozenAttributesTest(cros_test_lib.TestCase):
 
   def testFrozenByMixinFirst(self):
     """Test attribute freezing with Mixin first in hierarchy."""
-    class Dummy(attrs_freezer.Mixin, self.DummyClass):
-      """Class that freezes DummyClass using mixin construct."""
+    class Stub(attrs_freezer.Mixin, self.StubClass):
+      """Class that freezes StubClass using mixin construct."""
 
-    self._TestBasics(Dummy)
+    self._TestBasics(Stub)
 
     class Setattr(attrs_freezer.Mixin, self.SetattrClass):
       """Class that freezes SetattrClass using mixin construct."""
@@ -65,10 +65,10 @@ class FrozenAttributesTest(cros_test_lib.TestCase):
 
   def testFrozenByMixinLast(self):
     """Test attribute freezing with Mixin last in hierarchy."""
-    class Dummy(self.DummyClass, attrs_freezer.Mixin):
-      """Class that freezes DummyClass using mixin construct."""
+    class Stub(self.StubClass, attrs_freezer.Mixin):
+      """Class that freezes StubClass using mixin construct."""
 
-    self._TestBasics(Dummy)
+    self._TestBasics(Stub)
 
     class Setattr(self.SetattrClass, attrs_freezer.Mixin):
       """Class that freezes SetattrClass using mixin construct."""

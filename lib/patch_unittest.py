@@ -805,9 +805,9 @@ class TestApplyAgainstManifest(GitRepoPatchTestCase,
   def testApplyAgainstManifest(self):
     git1, git2, _ = self._CommonGitSetup()
 
-    readme_text = 'Dummy README text.'
+    readme_text = 'Stub README text.'
     readme1 = self.CommitFile(git1, 'README', readme_text)
-    readme_text += ' Even more dummy README text.'
+    readme_text += ' Even more stub README text.'
     readme2 = self.CommitFile(git1, 'README', readme_text)
     readme_text += ' Even more README text.'
     readme3 = self.CommitFile(git1, 'README', readme_text)

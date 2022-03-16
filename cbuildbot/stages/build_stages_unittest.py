@@ -504,7 +504,7 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
     self.PatchObject(
         build_stages.BuildPackagesStage, '_ShouldEnableGoma', return_value=True)
     self._Prepare('amd64-generic-full')
-    # Set dummy dir name to enable goma.
+    # Set stub dir name to enable goma.
     with osutils.TempDir() as goma_dir, \
          tempfile.NamedTemporaryFile() as temp_goma_client_json:
       self._run.options.goma_dir = goma_dir
@@ -528,10 +528,10 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
     self.PatchObject(
         build_stages.BuildPackagesStage, '_ShouldEnableGoma', return_value=True)
     self._Prepare('amd64-generic-full')
-    # Set dummy dir name to enable goma.
+    # Set stub dir name to enable goma.
     with osutils.TempDir() as goma_dir:
       self._run.options.goma_dir = goma_dir
-      self._run.options.goma_client_json = 'dummy-goma-client-json-path'
+      self._run.options.goma_client_json = 'stub-goma-client-json-path'
       self._run.options.chromeos_goma_dir = goma_dir
 
       stage = self.ConstructStage()
@@ -543,7 +543,7 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
         build_stages.BuildPackagesStage, '_ShouldEnableGoma', return_value=True)
     self.PatchObject(cros_build_lib, 'HostIsCIBuilder', return_value=True)
     self._Prepare('amd64-generic-full')
-    # Set dummy dir name to enable goma.
+    # Set stub dir name to enable goma.
     with osutils.TempDir() as goma_dir:
       self._run.options.goma_dir = goma_dir
       stage = self.ConstructStage()

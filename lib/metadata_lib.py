@@ -14,8 +14,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import results_lib
 
 
-class _DummyLock(object):
-  """A Dummy clone of RLock that does nothing."""
+class _StubLock(object):
+  """A Stub clone of RLock that does nothing."""
   def acquire(self, blocking=1):
     pass
 
@@ -53,8 +53,8 @@ class CBuildbotMetadata(object):
       self._cl_action_list = []
       self._per_board_dict = {}
       # If we are not using a manager, then metadata is not expected to be
-      # multiprocess safe. Use a dummy RLock.
-      self._subdict_update_lock = _DummyLock()
+      # multiprocess safe. Use a stub RLock.
+      self._subdict_update_lock = _StubLock()
 
     if metadata_dict:
       self.UpdateWithDict(metadata_dict)

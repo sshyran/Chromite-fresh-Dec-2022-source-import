@@ -225,7 +225,7 @@ class MockedCallResultsTest(cros_test_lib.TestCase):
                                 hook_kwargs=self.KWARGS))
     self.assertEqual(3, self.mr.LookupResult(('test',)))
 
-  class _DummyException(Exception):
+  class _StubException(Exception):
     """A do-nothing exception class for test."""
 
   def testExceptionInstanceRaise(self):
@@ -233,13 +233,13 @@ class MockedCallResultsTest(cros_test_lib.TestCase):
     expected_msg = 'expected exception'
     self.mr.AddResultForParams(
         (partial_mock.In('test'),), 3,
-        side_effect=self._DummyException(expected_msg))
-    with self.assertRaisesRegex(self._DummyException, expected_msg):
+        side_effect=self._StubException(expected_msg))
+    with self.assertRaisesRegex(self._StubException, expected_msg):
       self.mr.LookupResult(('test',))
 
   def testExceptionClassRaise(self):
     """Verify that exception is raised."""
     self.mr.AddResultForParams((partial_mock.In('test'),), 3,
-                               side_effect=self._DummyException)
-    with self.assertRaises(self._DummyException):
+                               side_effect=self._StubException)
+    with self.assertRaises(self._StubException):
       self.mr.LookupResult(('test',))

@@ -14,10 +14,10 @@ from chromite.scripts import build_api
 def testSmoke(tmp_path, monkeypatch):
   """Basic sanity check"""
 
-  def dummy(*_args, **_kwargs):
+  def stub(*_args, **_kwargs):
     return True
 
-  monkeypatch.setattr(router_lib.Router, 'Route', dummy)
+  monkeypatch.setattr(router_lib.Router, 'Route', stub)
 
   input_json = tmp_path / 'input.json'
   output_json = tmp_path / 'output.json'

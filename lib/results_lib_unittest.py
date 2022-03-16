@@ -138,7 +138,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
 
     # Create a class to hold
     class Options(object):
-      """Dummy class to hold option values."""
+      """Stub class to hold option values."""
 
     options = Options()
     options.archive_base = 'gs://dontcare'

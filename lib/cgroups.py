@@ -70,7 +70,7 @@ def EnsureInitialized(functor):
     self.Instantiate()
     return functor(self, *args, **kwargs)
 
-  # Dummy up our wrapper to make it look like what we're wrapping,
+  # Stub up our wrapper to make it look like what we're wrapping,
   # and expose the underlying docstrings.
   f.__name__ = functor.__name__
   f.__doc__ = functor.__doc__

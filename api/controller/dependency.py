@@ -126,13 +126,13 @@ def List(input_proto: depgraph_pb2.ListRequest,
     controller_util.serialize_package_info(package, pkg_info_msg)
 
 
-def _DummyGetToolchainPathsResponse(_input_proto, output_proto, _config):
+def _StubGetToolchainPathsResponse(_input_proto, output_proto, _config):
   """Create a fake successful response for GetToolchainPaths."""
-  dummy_entry = output_proto.paths.add()
-  dummy_entry.path = 'src/third_party/dummy-package'
+  stub_entry = output_proto.paths.add()
+  stub_entry.path = 'src/third_party/stub-package'
 
 
-@faux.success(_DummyGetToolchainPathsResponse)
+@faux.success(_StubGetToolchainPathsResponse)
 @faux.empty_error
 @validate.validation_complete
 def GetToolchainPaths(_input_proto, output_proto, _config):

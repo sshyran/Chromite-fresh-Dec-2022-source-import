@@ -77,7 +77,7 @@ class MainTest(TestImageTest):
     """Verify the CWD is in a temp directory."""
 
     class CwdTest(image_test_lib.ImageTestCase):
-      """A dummy test class to verify current working directory."""
+      """A stub test class to verify current working directory."""
 
       _expected_dir = None
 
@@ -111,7 +111,7 @@ class MainTest(TestImageTest):
     """Verify that "--board", "--test_results_root" are passed to the tests."""
 
     class AttributeTest(image_test_lib.ImageTestCase):
-      """Dummy test class to hold board and directory."""
+      """Stub test class to hold board and directory."""
 
       def testOkay(self):
         pass

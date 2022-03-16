@@ -160,8 +160,8 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
 
   def testReraiseACompoundFailure(self):
     """Tests that the list of ExceptInfo objects are copied over."""
-    tb1 = 'Dummy traceback1'
-    tb2 = 'Dummy traceback2'
+    tb1 = 'Stub traceback1'
+    tb2 = 'Stub traceback2'
     org_infos = (failures_lib.CreateExceptInfo(ValueError('No taco.'), tb1) +
                  failures_lib.CreateExceptInfo(OSError('No salsa'), tb2))
     try:
@@ -221,7 +221,7 @@ class ExceptInfoTest(cros_test_lib.TestCase):
 
   def testConvertToExceptInfo(self):
     """Tests converting an exception to an ExceptInfo object."""
-    traceback = 'Dummy traceback'
+    traceback = 'Stub traceback'
     message = 'Taco is not a valid option!'
     except_infos = failures_lib.CreateExceptInfo(
         ValueError(message), traceback)

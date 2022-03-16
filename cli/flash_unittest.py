@@ -91,13 +91,13 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
   def testConfirmNonRemovableDevice(self):
     """Tests that we ask user to confirm if the device is not removable."""
     with mock.patch.object(cros_build_lib, 'BooleanPrompt') as mock_prompt:
-      flash.Flash(self.Device('/dev/dummy'), self.IMAGE)
+      flash.Flash(self.Device('/dev/stub'), self.IMAGE)
       self.assertTrue(mock_prompt.called)
 
   def testSkipPromptNonRemovableDevice(self):
     """Tests that we skip the prompt for non-removable with --yes."""
     with mock.patch.object(cros_build_lib, 'BooleanPrompt') as mock_prompt:
-      flash.Flash(self.Device('/dev/dummy'), self.IMAGE, yes=True)
+      flash.Flash(self.Device('/dev/stub'), self.IMAGE, yes=True)
       self.assertFalse(mock_prompt.called)
 
   def testChooseRemovableDevice(self):
@@ -117,7 +117,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     """Test that flash.UsbImagerOperation is called when log level <= NOTICE."""
     expected_cmd = ['dd', 'if=foo', 'of=bar', 'bs=4M', 'iflag=fullblock',
                     'oflag=direct', 'conv=fdatasync']
-    usb_imager = flash.USBImager('dummy_device', 'board', 'foo', 'latest')
+    usb_imager = flash.USBImager('stub_device', 'board', 'foo', 'latest')
     run_mock = self.PatchObject(flash.UsbImagerOperation, 'Run')
     self.PatchObject(logging.Logger, 'getEffectiveLevel',
                      return_value=logging.NOTICE)
@@ -132,7 +132,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
     """Test that sudo_run is called when log level > NOTICE."""
     expected_cmd = ['dd', 'if=foo', 'of=bar', 'bs=4M', 'iflag=fullblock',
                     'oflag=direct', 'conv=fdatasync']
-    usb_imager = flash.USBImager('dummy_device', 'board', 'foo', 'latest')
+    usb_imager = flash.USBImager('stub_device', 'board', 'foo', 'latest')
     run_mock = self.PatchObject(cros_build_lib, 'sudo_run')
     self.PatchObject(logging.Logger, 'getEffectiveLevel',
                      return_value=logging.WARNING)

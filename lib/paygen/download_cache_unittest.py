@@ -73,37 +73,37 @@ class DownloadCachePickleTest(cros_test_lib.TempDirTestCase):
 class FetchFuncTest(cros_test_lib.TempDirTestCase):
   """Test getting files with a custom fetch function."""
 
-  dummy_uri = 'dummy URI'
-  dummy_uri2 = 'dummy URI 2'
+  stub_uri = 'stub URI'
+  stub_uri2 = 'stub URI 2'
 
   def testFetchFunc(self):
     """Test getting files with a custome fetch function."""
 
     call_count = [0]
 
-    def dummyFetchFunction(uri, cache_file):
+    def stubFetchFunction(uri, cache_file):
       """Write the uri into the file to have verifiable content"""
       call_count[0] += 1
       osutils.WriteFile(cache_file, uri)
 
     cache = download_cache.DownloadCache(self.tempdir)
     self.assertEqual(call_count[0], 0)
-    cache.GetFileObject(self.dummy_uri, dummyFetchFunction)
+    cache.GetFileObject(self.stub_uri, stubFetchFunction)
     self.assertEqual(call_count[0], 1)
-    with cache.GetFileObject(self.dummy_uri, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri.encode('utf-8'))
     self.assertEqual(call_count[0], 1)
 
-    cache.GetFileObject(self.dummy_uri2, dummyFetchFunction)
+    cache.GetFileObject(self.stub_uri2, stubFetchFunction)
     self.assertEqual(call_count[0], 2)
-    with cache.GetFileObject(self.dummy_uri2, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri2.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri2, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri2.encode('utf-8'))
     self.assertEqual(call_count[0], 2)
 
-    with cache.GetFileObject(self.dummy_uri, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri.encode('utf-8'))
-    with cache.GetFileObject(self.dummy_uri2, dummyFetchFunction) as f:
-      self.assertEqual(f.read(), self.dummy_uri2.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri.encode('utf-8'))
+    with cache.GetFileObject(self.stub_uri2, stubFetchFunction) as f:
+      self.assertEqual(f.read(), self.stub_uri2.encode('utf-8'))
     self.assertEqual(call_count[0], 2)
 
 

@@ -202,7 +202,7 @@ class EventFileLogger(EventLogger):
     self.file_out.close()
 
 
-class EventDummyLogger(EventLogger):
+class EventStubLogger(EventLogger):
   """Event Logger that does not write event to anything"""
 
   def __init__(self):
@@ -213,7 +213,7 @@ class EventDummyLogger(EventLogger):
 
 
 # Default logger to use
-root = EventDummyLogger()
+root = EventStubLogger()
 
 
 def setEventLogger(logger):

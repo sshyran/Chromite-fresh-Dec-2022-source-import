@@ -1155,8 +1155,8 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
   def testExportToGCloudParentKey(self):
     """Test ExportToGCloud with parent_key"""
     build_root = '/buildroot'
-    creds_file = 'dummy.cert'
-    json_file = 'dummy.json'
+    creds_file = 'stub.cert'
+    json_file = 'stub.json'
     parent_key = ('MyParent', 42)
     parent_key_str = repr(parent_key)
     commands.ExportToGCloud(build_root, creds_file, json_file,
@@ -1819,7 +1819,7 @@ class GenerateAFDOArtifactsTests(
                      return_value=self.tempdir)
     input_proto_file = os.path.join(self.tempdir, 'input.json')
     output_proto_file = os.path.join(self.tempdir, 'output.json')
-    # Write dummy outputs to output JSON file
+    # Write stub outputs to output JSON file
     with open(output_proto_file, 'w') as f:
       output_proto = {
           'artifacts': [
@@ -1882,7 +1882,7 @@ class VerifyAFDOArtifactsTests(
                      return_value=self.tempdir)
     input_proto_file = os.path.join(self.tempdir, 'input.json')
     output_proto_file = os.path.join(self.tempdir, 'output.json')
-    # Write dummy outputs to output JSON file
+    # Write stub outputs to output JSON file
     with open(output_proto_file, 'w') as f:
       output_proto = {
           'status': True

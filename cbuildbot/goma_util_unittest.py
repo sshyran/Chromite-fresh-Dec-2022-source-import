@@ -48,7 +48,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
         'BUILDBOT_CLOBBER': '1',
     })
 
-    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'dummy-host-name')
+    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')
     copy_log = []
     self.PatchObject(
         gs.GSContext, 'CopyInto',
@@ -70,13 +70,13 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
     ]))
     self.assertEqual(
         copy_log,
-        [('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+        [('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'compiler_proxy-subproc.host.log.INFO.20170426-120000.000000.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
-         ('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+         ('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'compiler_proxy.host.log.INFO.20170426-120000.000000.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
-         ('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+         ('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'gomacc.host.log.INFO.20170426-120100.000000.tar.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
         ])
@@ -106,7 +106,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
         'GLOG_log_dir': self.tempdir,
     })
 
-    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'dummy-host-name')
+    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')
     copy_log = []
     self.PatchObject(
         gs.GSContext, 'CopyInto',
@@ -135,13 +135,13 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
     expect_builderinfo = json.dumps(builderinfo)
     self.assertEqual(
         copy_log,
-        [('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+        [('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'compiler_proxy-subproc.host.log.INFO.20170426-120000.000000.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
-         ('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+         ('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'compiler_proxy.host.log.INFO.20170426-120000.000000.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
-         ('gs://chrome-goma-log/2017/04/26/dummy-host-name',
+         ('gs://chrome-goma-log/2017/04/26/stub-host-name',
           'gomacc.host.log.INFO.20170426-120100.000000.tar.gz',
           ['x-goog-meta-builderinfo:' + expect_builderinfo]),
         ])
@@ -168,7 +168,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
     osutils.WriteFile(
         os.path.join(self.tempdir, 'ninja_exit'), '0')
 
-    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'dummy-host-name')
+    self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')
     copy_log = []
     self.PatchObject(
         gs.GSContext, 'CopyInto',
@@ -180,15 +180,15 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
 
     username = getpass.getuser()
     pid = os.getpid()
-    upload_filename = 'ninja_log.%s.dummy-host-name.20170821-120000.%d' % (
+    upload_filename = 'ninja_log.%s.stub-host-name.20170821-120000.%d' % (
         username, pid)
     self.assertEqual(
         copy_log,
-        [('gs://chrome-goma-log/2017/08/21/dummy-host-name',
+        [('gs://chrome-goma-log/2017/08/21/stub-host-name',
           'compiler_proxy-subproc.host.log.INFO.20170821-120000.000000.gz'),
-         ('gs://chrome-goma-log/2017/08/21/dummy-host-name',
+         ('gs://chrome-goma-log/2017/08/21/stub-host-name',
           'compiler_proxy.host.log.INFO.20170821-120000.000000.gz'),
-         ('gs://chrome-goma-log/2017/08/21/dummy-host-name',
+         ('gs://chrome-goma-log/2017/08/21/stub-host-name',
           upload_filename + '.gz'),
         ])
 

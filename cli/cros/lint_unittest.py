@@ -113,7 +113,7 @@ class TestNode(object):
 
 
 class StatStub(object):
-  """Dummy object to stand in for stat checks."""
+  """Stub object to stand in for stat checks."""
 
   def __init__(self, size=0, mode=0o644):
     self.st_size = size

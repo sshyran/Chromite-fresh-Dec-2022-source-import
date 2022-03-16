@@ -151,8 +151,8 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
     # Add 'dev_firmware' keys and keyblock
     dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
     ks.AddKey(dev_fw_key)
-    keys_unittest.CreateDummyPrivateKey(dev_fw_key)
-    keys_unittest.CreateDummyKeyblock(dev_fw_key)
+    keys_unittest.CreateStubPrivateKey(dev_fw_key)
+    keys_unittest.CreateStubKeyblock(dev_fw_key)
 
     fw_key = ks.keys['firmware_data_key']
     kernel_key = ks.keys['kernel_subkey']
@@ -178,8 +178,8 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
     # Add 'dev_firmware' keys and keyblock
     dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
     ks.AddKey(dev_fw_key)
-    keys_unittest.CreateDummyPrivateKey(dev_fw_key)
-    keys_unittest.CreateDummyKeyblock(dev_fw_key)
+    keys_unittest.CreateStubPrivateKey(dev_fw_key)
+    keys_unittest.CreateStubKeyblock(dev_fw_key)
 
     args = bs.GetFutilityArgs(ks, bios_bin, bios_out)
 
@@ -270,7 +270,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
     bios_path = os.path.join(shellball_dir, 'bios.bin')
@@ -284,7 +284,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
     ks_subset = ks.GetBuildKeyset('ACME')
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
@@ -303,7 +303,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
     osutils.SafeMakedirs(shellball_dir)
@@ -324,7 +324,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
 
@@ -348,7 +348,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
     fs = firmware.FirmwareSigner()
     keyset_dir = os.path.join(self.tempdir, 'keyset')
     ks = keys_unittest.KeysetMock(keyset_dir, has_loem_ini=False)
-    ks.CreateDummyKeys()
+    ks.CreateStubKeys()
 
     shellball_dir = os.path.join(self.tempdir, 'shellball')
 

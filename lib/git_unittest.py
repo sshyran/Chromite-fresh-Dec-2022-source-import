@@ -627,7 +627,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         default_manifest,
         '<?xml version="1.0" encoding="UTF-8"?><manifest></manifest>')
     git.AddPath(default_manifest)
-    git.Commit(remote_manifests, 'dummy commit', allow_empty=True)
+    git.Commit(remote_manifests, 'stub commit', allow_empty=True)
     git.CreateBranch(remote_manifests, 'default')
     git.CreateBranch(remote_manifests, 'release-R23-2913.B')
     git.CreateBranch(remote_manifests, 'release-R23-2913.B-suffix')

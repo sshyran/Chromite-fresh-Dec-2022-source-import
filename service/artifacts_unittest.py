@@ -469,7 +469,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     paygen_mock.assert_called_once_with(self.target_image, payload_path,
                                         src_image=self.target_image)
 
-  def testGenerateFullDummyDlcTestPayloads(self):
+  def testGenerateFullStubDlcTestPayloads(self):
     """Verifies correctly generating full payloads for sample-dlc."""
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
     self.PatchObject(portage_util, 'GetBoardUseFlags',
@@ -487,7 +487,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
                   os.path.join(self.tempdir, dlc_payload)),
     ])
 
-  def testGenerateDeltaDummyDlcTestPayloads(self):
+  def testGenerateDeltaStubDlcTestPayloads(self):
     """Verifies correctly generating delta payloads for sample-dlc."""
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
     self.PatchObject(portage_util, 'GetBoardUseFlags',
