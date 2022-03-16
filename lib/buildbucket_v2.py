@@ -70,7 +70,7 @@ def GetScheduledBuildDict(scheduled_slave_list):
 
   Args:
     scheduled_slave_list: A list of scheduled builds recorded in the
-                          master metadata. In the format of
+                          orchestrator metadata. In the format of
                           [(build_config, buildbucket_id, created_ts)].
 
   Returns:
@@ -160,7 +160,7 @@ def FetchCurrentSlaveBuilders(config, metadata, builders_array,
       True.
 
   Returns:
-    An updated list of slave build configs for a master build.
+    An updated list of slave build configs for a orchestrator build.
   """
   if config and metadata:
     scheduled_buildbucket_info_dict = GetBuildInfoDict(
@@ -261,7 +261,7 @@ def UpdateSelfCommonBuildProperties(critical=None,
     unibuild: (Optional) Boolean indicating whether build is unibuild.
     suite_scheduling: (Optional)
     killed_child_builds: (Optional) A list of Buildbucket IDs of child builds
-      that were killed by self-destructed master build.
+      that were killed by self-destructed orchestrator build.
     board: (Optional) board of the build.
     main_firmware_version: (Optional) main firmware version of the build.
     ec_firmware_version: (Optional) ec_firmware version of the build.
@@ -407,7 +407,7 @@ class BuildbucketV2(object):
   """Connection to Buildbucket V2 database."""
 
   def __init__(self, test_env=False,
-               access_token_retriever: Optional[Callable[[], str]]=None):
+               access_token_retriever: Optional[Callable[[], str]] = None):
     """Constructor for Buildbucket V2 Build client.
 
     Args:
@@ -635,14 +635,14 @@ class BuildbucketV2(object):
     return self.client.UpdateBuild(update_build_request, **self._client_kwargs)
 
   def GetKilledChildBuilds(self, buildbucket_id):
-    """Get IDs of all the builds killed by self-destructed master build.
+    """Get IDs of all the builds killed by self-destructed orchestrator build.
 
     Args:
-      buildbucket_id: Buildbucket ID of the master build.
+      buildbucket_id: Buildbucket ID of the orchestrator build.
 
     Returns:
       A list of Buildbucket IDs of the child builds that were killed by the
-      master build or None if the query was unsuccessful.
+      orchestrator build or None if the query was unsuccessful.
     """
     properties = 'output.properties'
     try:
@@ -862,7 +862,7 @@ class BuildbucketV2(object):
     """Retrieve statuses of all the child builds.
 
     Args:
-      buildbucket_id: buildbucket_id of the parent/master build.
+      buildbucket_id: buildbucket_id of the orchestrator build.
 
     Returns:
       A list of dictionary corresponding to each child build with keys like
