@@ -92,7 +92,10 @@ def IsSubPath(path, other):
   return path.startswith(other + os.sep)
 
 
-def AllocateFile(path, size, makedirs=False):
+def AllocateFile(
+    path: Union[str, os.PathLike],
+    size: int,
+    makedirs: bool = False) -> None:
   """Allocates a file of a certain |size| in |path|.
 
   Args:
@@ -100,10 +103,11 @@ def AllocateFile(path, size, makedirs=False):
     size: The length, in bytes, of the desired file.
     makedirs: If True, create missing leading directories in the path.
   """
+  path = Path(path)
   if makedirs:
-    SafeMakedirs(os.path.dirname(path))
+    SafeMakedirs(path.parent)
 
-  with open(path, 'w') as out:
+  with path.open('wb') as out:
     out.truncate(size)
 
 
