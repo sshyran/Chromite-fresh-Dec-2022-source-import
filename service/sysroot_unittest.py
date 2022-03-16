@@ -429,6 +429,36 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
 
     self.assertEqual(extra_env.get('USE'), instance.GetUseFlags())
 
+  def testGetPackages(self):
+    """Test getting packages for the config."""
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+
+    packages = instance.GetPackages()
+
+    self.assertIn('virtual/target-os', packages)
+    self.assertIn('virtual/target-os-dev', packages)
+    self.assertIn('virtual/target-os-factory', packages)
+    self.assertIn('virtual/target-os-test', packages)
+    self.assertIn('chromeos-base/autotest-all', packages)
+
+    # Test when packages are specified.
+    test_packages = ['test/package']
+    instance = sysroot.BuildPackagesRunConfig(packages=test_packages)
+
+    packages = instance.GetPackages()
+
+    self.assertEqual(packages, test_packages)
+
+  def testGetForceLocalBuildPackages(self):
+    """Test getting force local build packages for the config."""
+    # Test the default config.
+    instance = sysroot.BuildPackagesRunConfig()
+
+    packages = instance.GetForceLocalBuildPackages()
+
+    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages)
+
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase):
   """Test BuildPackages function."""

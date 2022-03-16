@@ -362,6 +362,43 @@ class BuildPackagesRunConfig(object):
 
     return env
 
+  def GetPackages(self) -> List[str]:
+    """Get the set of packages to build for this config."""
+    if self.packages:
+      return self.packages
+
+    packages = ['virtual/target-os']
+
+    if self.dev_image:
+      packages.append('virtual/target-os-dev')
+
+    if self.factory_image:
+      packages.extend(
+          ['virtual/target-os-factory', 'virtual/target-os-factory-shim'])
+
+    if self.test_image:
+      packages.append('virtual/target-os-test')
+
+    if self.install_auto_test:
+      packages.append('chromeos-base/autotest-all')
+
+    return packages
+
+  def GetForceLocalBuildPackages(self) -> List[Optional[str]]:
+    """Get the set of force local build packages for this config."""
+    packages = []
+
+    if self.test_image:
+      # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
+      # set. We force rebuilding this package from source every time, so that
+      # consecutive builds don't share ssh keys.
+      packages.append('chromeos-base/chromeos-ssh-testkeys')
+
+    # TODO(xcl): Add cros work_on packages and reverse dependencies
+    # TODO(xcl): Add base install packages and reverse dependencies
+
+    return packages
+
 
 def SetupBoard(target: 'build_target_lib.BuildTarget',
                accept_licenses: Optional[str] = None,
