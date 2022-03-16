@@ -1076,11 +1076,12 @@ class PaygenPayload(object):
       if self._upload:
         self._UploadResults()
         ret_uri = self.payload.uri
-    except PayloadGenerationSkippedException:
+    except PayloadGenerationSkippedException as ex:
       if self._verify:
         print('Not verifying payload, because paygen was skipped.')
       if self._upload:
         print('Not uploading payload, because paygen was skipped.')
+      raise ex
 
     end_time = datetime.datetime.now()
     logging.info('* Total elapsed payload generation in %s',

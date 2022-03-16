@@ -839,7 +839,7 @@ class PaygenPayloadLibBasicTest(PaygenPayloadLibTest):
 
     # Run the test.
     with self.assertRaises(paygen_payload_lib.NoMiniOSPartitionException):
-      gen._Create()
+      gen.Run()
 
     # Check expected calls.
     self.assertEqual(prep_image_mock.call_args_list, [
