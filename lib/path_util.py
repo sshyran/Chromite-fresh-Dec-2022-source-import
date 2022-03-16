@@ -145,7 +145,7 @@ class ChrootPathResolver(object):
       ValueError: If |src_root| is a prefix but |dst_root_input| yields None,
         which means we don't have sufficient information to do the translation.
     """
-    if not path.startswith(os.path.join(src_root, '')) and path != src_root:
+    if src_root and not osutils.IsSubPath(path, src_root):
       return None
     dst_root = dst_root_input() if callable(dst_root_input) else dst_root_input
     if dst_root is None:
