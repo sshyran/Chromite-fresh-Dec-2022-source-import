@@ -78,9 +78,10 @@ def IsChildProcess(pid, name=None):
   return match in pstree
 
 
-def ExpandPath(path):
+def ExpandPath(path: Union[str, os.PathLike]) -> Union[str, os.PathLike]:
   """Returns path after passing through realpath and expanduser."""
-  return os.path.realpath(os.path.expanduser(path))
+  ret = Path(path).expanduser().resolve()
+  return str(ret) if isinstance(path, str) else ret
 
 
 def IsSubPath(path, other):
