@@ -21,6 +21,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper
 from chromite.lib import osutils
+from chromite.utils import pformat
 from chromite.utils import timer
 
 
@@ -179,8 +180,22 @@ class CleanCommand(command.CliCommand):
 
     cros_build_lib.AssertOutsideChroot()
 
+    total_size = 0
+
+    def _GetSize(path):
+      """Calculate human size used by |path|."""
+      nonlocal total_size
+      result = cros_build_lib.dbg_run(['du', '--bytes', '--summarize', path],
+                                      check=False, capture_output=True,
+                                      encoding='utf-8')
+      size = int(result.stdout.split()[0])
+      total_size += size
+      return pformat.size(size)
+
     def _LogClean(path):
-      logging.notice('would have cleaned: %s', path)
+      if not os.path.exists(path):
+        return
+      logging.notice('would have cleaned: %s (%s)', path, _GetSize(path))
 
     def Clean(path):
       """Helper wrapper for the dry-run checks"""
@@ -192,7 +207,7 @@ class CleanCommand(command.CliCommand):
     def Empty(path):
       """Helper wrapper for the dry-run checks"""
       if self.options.dry_run:
-        logging.notice('would have emptied: %s', path)
+        logging.notice('would have emptied: %s (%s)', path, _GetSize(path))
       else:
         osutils.EmptyDir(path, ignore_missing=True, sudo=True)
 
@@ -307,3 +322,6 @@ class CleanCommand(command.CliCommand):
         packages_dir = os.path.join(constants.SOURCE_ROOT, 'src', 'third_party',
                                     'autotest', 'files', 'site-packages')
         Clean(packages_dir)
+
+    if total_size:
+      logging.notice('Freed %s (apparent) space', pformat.size(total_size))
