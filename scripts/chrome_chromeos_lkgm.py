@@ -90,9 +90,9 @@ class ChromeLKGMCommitter(object):
     return self._committer.FullPath(constants.PATH_TO_CHROME_LKGM)
 
   def CloseOldLKGMRolls(self):
-    """Closes all open LKGM roll CLs that were last modified >24 hours ago.
+    """Closes all open LKGM roll CLs that were last modified >48 hours ago.
 
-    Any roll that hasn't passed the CQ in 24 hours is likely broken and can be
+    Any roll that hasn't passed the CQ in 48 hours is likely broken and can be
     discarded.
     """
     query_params = {
