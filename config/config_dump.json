@@ -19902,7 +19902,7 @@
         "boards": [],
         "chrome_sdk": false,
         "master": true,
-        "schedule": "  0 2,10,18 * * *",
+        "schedule": "  0 10 * * *",
         "slave_configs": [
             "adlrvp-release",
             "ambassador-release",

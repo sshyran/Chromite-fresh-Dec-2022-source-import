@@ -1263,7 +1263,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   def _CreateMasterConfig(name,
                           template=site_config.templates.release,
-                          schedule='  0 2,10,18 * * *'):
+                          schedule='  0 10 * * *'):
     return site_config.Add(
         name,
         template,
