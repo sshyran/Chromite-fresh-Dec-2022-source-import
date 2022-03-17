@@ -28,7 +28,7 @@ class GitException(Exception):
 
 # remote: git remote name (e.g., 'origin',
 #   'https://chromium.googlesource.com/chromiumos/chromite.git', etc.).
-# ref: git remote/local ref name (e.g., 'refs/heads/master').
+# ref: git remote/local ref name (e.g., 'refs/heads/main').
 # project_name: git project name (e.g., 'chromiumos/chromite'.)
 _RemoteRef = collections.namedtuple(
     '_RemoteRef', ('remote', 'ref', 'project_name'))
@@ -658,9 +658,9 @@ class ManifestCheckout(Manifest):
       The branch name.
     """
     # Suppress the normal "if it ain't refs/heads, we don't want none o' that"
-    # check for the merge target; repo writes the ambigious form of the branch
-    # target for `repo init -u url -b some-branch` usages (aka, 'master'
-    # instead of 'refs/heads/master').
+    # check for the merge target; repo writes the ambiguous form of the branch
+    # target for `repo init -u url -b some-branch` usages (aka, 'main'
+    # instead of 'refs/heads/main').
     path = os.path.join(root, '.repo', 'manifests')
     current_branch = GetCurrentBranch(path)
     if current_branch != 'default':
@@ -736,15 +736,16 @@ def RunGit(git_repo, cmd, **kwargs):
   return cros_build_lib.run(['git'] + cmd, **kwargs)
 
 
-def Init(git_repo):
+def Init(git_repo, branch='main'):
   """Create a new git repository, in the given location.
 
   Args:
     git_repo: Path for where to create a git repo. Directory will be created if
               it doesnt exist.
+    branch: The initial branch name.
   """
   osutils.SafeMakedirs(git_repo)
-  RunGit(git_repo, ['init'])
+  RunGit(git_repo, ['init', '-b', branch])
 
 
 def Clone(dest_path, git_url, reference=None, depth=None, branch=None,
@@ -1006,7 +1007,7 @@ def GetTrackingBranch(git_repo, branch=None, for_checkout=True, fallback=True,
   Assumptions:
    1. We assume the manifest defined upstream is desirable.
    2. No manifest?  Assume tracking if configured is accurate.
-   3. If none of the above apply, you get 'origin', 'master' or None,
+   3. If none of the above apply, you get 'origin', 'main' or None,
       depending on fallback.
 
   Args:
@@ -1016,7 +1017,7 @@ def GetTrackingBranch(git_repo, branch=None, for_checkout=True, fallback=True,
     for_checkout: Whether to return localized refspecs, or the remotes
       view of it.
     fallback: If true and no remote/branch could be discerned, return
-      'origin', 'master'.  If False, you get None.
+      'origin', 'main'.  If False, you get None.
       Note that depending on the remote, the remote may differ
       if for_push is True or set to False.
     for_push: Controls whether the remote and refspec returned is explicitly
@@ -1307,7 +1308,7 @@ def CreatePushBranch(branch, git_repo, sync=True, remote_push_branch=None):
     git_repo: Git repository to create the branch in.
     sync: Update remote before creating push branch.
     remote_push_branch: A RemoteRef to push to. i.e.,
-                        RemoteRef('cros', 'master').  By default it tries to
+                        RemoteRef('cros', 'main').  By default it tries to
                         automatically determine which tracking branch to use
                         (see GetTrackingBranch()).
   """
@@ -1468,8 +1469,8 @@ def GetChromiteTrackingBranch():
       "Chromite checkout at %s isn't controlled by repo, nor is it on a "
       'branch (or if it is, the tracking configuration is missing or broken).  '
       'Falling back to assuming the chromite checkout is derived from '
-      "'master'; this *may* result in breakage." % cwd)
-  return 'master'
+      "'main'; this *may* result in breakage." % cwd)
+  return 'main'
 
 
 def GarbageCollection(git_repo, prune_all=False):
