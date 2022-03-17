@@ -176,7 +176,8 @@ def GetLastBuildState(root):
     state_raw = osutils.ReadFile(state_file)
     state.from_json(state_raw)
   except IOError as e:
-    logging.warning('Unable to read %s: %s', state_file, e)
+    logging.info('Unable to read %s: %s. Expected for first task on bot.',
+                 state_file, e)
     return state
   except ValueError as e:
     logging.warning('Saved state file %s is not valid JSON: %s', state_file, e)
