@@ -406,6 +406,10 @@
   "servod.conf": [
     "mkdir -p /var/lib/servod"
   ],
+  "servod-usb-lock-file.conf": [
+    "chmod 444 \"${SERVOD_USB_LOCK_FILE}\"",
+    "touch \"${SERVOD_USB_LOCK_FILE}\""
+  ],
   "sound_card_init.conf": [
     "chown -R sound_card_init:sound_card_init /var/lib/sound_card_init",
     "mkdir -m 0755 -p /var/lib/sound_card_init/\"${SOUND_CARD_ID}\""
