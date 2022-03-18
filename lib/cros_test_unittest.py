@@ -170,6 +170,34 @@ class CrOSTester(CrOSTesterBase):
       ])
       mock_deploy.assert_called_once()
 
+  def testDeployAshAndLacrosChrome(self):
+    """Tests basic deploy ash and lacros-chrome command."""
+    self._tester.deploy = True
+    self._tester.deploy_lacros = True
+    self._tester.lacros_launcher_script = self.TempFilePath('launcher.py')
+    osutils.Touch(self._tester.lacros_launcher_script)
+    self._tester.build_dir = self.TempFilePath('out/Ash')
+    self._tester.additional_lacros_build_dir = self.TempFilePath('out/Lacros')
+
+    with mock.patch.object(self._tester,
+                           '_DeployLacrosLauncherScript') as mock_deploy:
+      self._tester.Run()
+      self.assertCommandContains([
+        'deploy_chrome', '--force', '--build-dir', self._tester.build_dir,
+        '--process-timeout', '180', '--device',
+        self._tester._device.device + ':9222', '--cache-dir',
+        self._tester.cache_dir, '--board', 'amd64-generic'
+      ])
+      self.assertCommandContains([
+          'deploy_chrome', '--force', '--build-dir',
+          self._tester.additional_lacros_build_dir,
+          '--process-timeout', '180', '--device',
+          self._tester._device.device + ':9222', '--cache-dir',
+          self._tester.cache_dir, '--lacros', '--nostrip',
+          '--skip-modifying-config-file'
+      ])
+      mock_deploy.assert_called_once()
+
 
   def testDeployChromeWithArgs(self):
     """Tests deploy ash-chrome command with additional arguments."""
@@ -709,7 +737,8 @@ class CrOSTesterParser(CrOSTesterBase):
 
     self.CheckParserError(
         ['--deploy-lacros', '--deploy', '--build-dir', build_dir],
-        'Cannot deploy lacros-chrome and ash-chrome at the same time.')
+        'Script will deploy both Ash and Lacros but can not find '
+        'Lacros at ' + build_dir + '/lacros_clang')
 
     self.CheckParserError(
         ['--deploy-lacros', '--build-dir', build_dir],
