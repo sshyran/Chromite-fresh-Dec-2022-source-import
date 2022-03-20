@@ -58,6 +58,8 @@
     grunt-factory-grunt-11164.135.B-factorybranch
   factory-grunt-11164.B-buildspec
     grunt-factory-grunt-11164.B-factorybranch
+  factory-guybrush-14600.B-buildspec
+    guybrush-factory-guybrush-14600.B-factorybranch
   factory-hatch-12692.B-buildspec
     hatch-factory-hatch-12692.B-factorybranch
   factory-keeby-14162.B-buildspec
@@ -797,6 +799,8 @@
     grunt-factory-grunt-11164.135.B-factorybranch-tryjob
   factory-grunt-11164.B-buildspec-tryjob
     grunt-factory-grunt-11164.B-factorybranch-tryjob
+  factory-guybrush-14600.B-buildspec-tryjob
+    guybrush-factory-guybrush-14600.B-factorybranch-tryjob
   factory-hatch-12692.B-buildspec-tryjob
     hatch-factory-hatch-12692.B-factorybranch-tryjob
   factory-keeby-14162.B-buildspec-tryjob
@@ -986,6 +990,7 @@
   guado_labstation-payloads-tryjob
   guado_labstation-release-tryjob
   guado_labstation-unittest-stress
+  guybrush-factory-guybrush-14600.B-factorybranch-tryjob
   guybrush-full-tryjob
   guybrush-kernelnext-full-tryjob
   guybrush-kernelnext-llvm-next-toolchain-tryjob

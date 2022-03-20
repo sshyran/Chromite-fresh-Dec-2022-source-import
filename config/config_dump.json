@@ -10916,6 +10916,28 @@
         ],
         "workspace_branch": "factory-grunt-11164.B"
     },
+    "factory-guybrush-14600.B-buildspec": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "display_label": "factory",
+        "schedule": "with 24h interval",
+        "slave_configs": [
+            "guybrush-factory-guybrush-14600.B-factorybranch"
+        ],
+        "workspace_branch": "factory-guybrush-14600.B"
+    },
+    "factory-guybrush-14600.B-buildspec-tryjob": {
+        "_template": "buildspec",
+        "build_timeout": 43200,
+        "debug": true,
+        "debug_cidb": true,
+        "display_label": "tryjob",
+        "luci_builder": "Try",
+        "slave_configs": [
+            "guybrush-factory-guybrush-14600.B-factorybranch-tryjob"
+        ],
+        "workspace_branch": "factory-guybrush-14600.B"
+    },
     "factory-hatch-12692.B-buildspec": {
         "_template": "buildspec",
         "build_timeout": 43200,
@@ -14161,6 +14183,26 @@
         "useflags": [
             "chrome_internal"
         ]
+    },
+    "guybrush-factory-guybrush-14600.B-factorybranch": {
+        "_template": "factorybranch",
+        "boards": [
+            "guybrush"
+        ],
+        "workspace_branch": "factory-guybrush-14600.B"
+    },
+    "guybrush-factory-guybrush-14600.B-factorybranch-tryjob": {
+        "_template": "factorybranch",
+        "boards": [
+            "guybrush"
+        ],
+        "debug": true,
+        "display_label": "tryjob",
+        "hw_tests_override": null,
+        "luci_builder": "Try",
+        "push_image": false,
+        "suite_scheduling": false,
+        "workspace_branch": "factory-guybrush-14600.B"
     },
     "guybrush-full": {
         "_template": "full",
