@@ -355,7 +355,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
     update_patch.assert_called_with(self.board, local_init=True)
 
 
-class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
+class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase):
   """Tests for the BuildPackagesRunConfig."""
 
   def testGetBuildPackagesArgs(self):
@@ -435,11 +435,37 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   def testGetForceLocalBuildPackages(self):
     """Test getting force local build packages for the config."""
     # Test the default config.
+    test_sysroot_path = '/sysroot/path'
+    test_sysroot = sysroot_lib.Sysroot(test_sysroot_path)
     instance = sysroot.BuildPackagesRunConfig()
+    self.rc.AddCmdResult(
+        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
+        stdout='')
 
-    packages = instance.GetForceLocalBuildPackages()
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
 
-    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages)
+    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages[0])
+
+    # Test when there are cros_workon packages.
+    test_cros_list_modified_packages_output = 'test/package1 test/package2\n'
+    test_reverse_dependencies = [
+        package_info.parse('test/package3-1.0'),
+        package_info.parse('test/package4-2.0-r1'),
+    ]
+    self.rc.AddCmdResult(
+        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
+        stdout=test_cros_list_modified_packages_output)
+    self.PatchObject(
+        portage_util,
+        'GetReverseDependencies',
+        return_value=test_reverse_dependencies)
+
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
+
+    self.assertIn('test/package1', packages[0])
+    self.assertIn('test/package2', packages[0])
+    self.assertIn('test/package3', packages[0])
+    self.assertIn('test/package4', packages[0])
 
   def testGetEmergeFlags(self):
     """Test building the emerge flags."""
@@ -576,7 +602,10 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
 
     result = cros_build_lib.CommandResult(cmd=command, returncode=1)
     error = cros_build_lib.RunCommandError('Error', result)
-    self.PatchObject(cros_build_lib, 'run', side_effect=error)
+    self.PatchObject(
+        cros_build_lib,
+        'run',
+        side_effect=(cros_build_lib.CommandResult(output=''), error))
 
     with self.assertRaises(sysroot_lib.PackageInstallError) as e:
       sysroot.BuildPackages(self.target, self.sysroot, config)

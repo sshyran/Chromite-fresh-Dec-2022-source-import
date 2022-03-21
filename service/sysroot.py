@@ -19,6 +19,7 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Tuple,
     TYPE_CHECKING,
     Union,
 )
@@ -44,6 +45,8 @@ if TYPE_CHECKING:
 
 # TODO(xcl): Revisit/remove this after the Lacros launch if no longer needed
 _CHROME_PACKAGES = ('chromeos-base/chromeos-chrome', 'chromeos-base/chrome-icu')
+
+_PACKAGE_LIST = List[Optional[str]]
 
 
 class Error(Exception):
@@ -238,9 +241,6 @@ class BuildPackagesRunConfig(object):
     if self.clean_build:
       args.append('--cleanbuild')
 
-    if not self.workon:
-      args.append('--noworkon')
-
     if self.use_goma:
       args.append('--run_goma')
 
@@ -312,20 +312,42 @@ class BuildPackagesRunConfig(object):
 
     return packages
 
-  def GetForceLocalBuildPackages(self) -> List[Optional[str]]:
+  def GetForceLocalBuildPackages(
+      self, sysroot: sysroot_lib.Sysroot
+  ) -> Tuple[_PACKAGE_LIST, Optional[_PACKAGE_LIST]]:
     """Get the set of force local build packages for this config."""
-    packages = []
+    packages = set()
 
     if 'virtual/target-os-test' in self.GetPackages():
       # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
       # set. We force rebuilding this package from source every time, so that
       # consecutive builds don't share ssh keys.
-      packages.append('chromeos-base/chromeos-ssh-testkeys')
+      packages.add('chromeos-base/chromeos-ssh-testkeys')
 
-    # TODO(xcl): Add cros work_on packages and reverse dependencies
+    cros_workon_packages = None
+    if self.workon:
+      cros_workon_packages = _GetCrosWorkonPackages(sysroot.path)
+
+      # Any package that directly depends on an active cros_workon package also
+      # needs to be rebuilt in order to be correctly built against the current
+      # set of changes a user may have made to the cros_workon package.
+      if cros_workon_packages:
+        packages.update(cros_workon_packages)
+
+        reverse_dependencies = [
+            x.atom for x in portage_util.GetReverseDependencies(
+                cros_workon_packages, sysroot.path)
+        ]
+        logging.info(
+            'The following packages depend directly on an active cros_workon '
+            'package and will be rebuilt: %s', ' '.join(reverse_dependencies))
+        packages.update(reverse_dependencies)
+
     # TODO(xcl): Add base install packages and reverse dependencies
 
-    return packages
+    # TODO(xcl): Return only packages when base install packages and revdeps
+    # are migrated to Python.
+    return (list(packages), cros_workon_packages)
 
   def GetEmergeFlags(self) -> List[str]:
     """Get the emerge flags for this config."""
@@ -620,8 +642,12 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   extra_env = run_configs.GetExtraEnv()
   # TODO(xcl): Stop passing force local build packages using envvars
   # post-migration.
-  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(
-      run_configs.GetForceLocalBuildPackages())
+  rebuild_pkgs = run_configs.GetForceLocalBuildPackages(sysroot)
+  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(rebuild_pkgs[0])
+  # TODO(xcl): Stop passing cros workon packages using envvars
+  # post-migration.
+  extra_env['BUILD_PACKAGES_CROS_WORKON_PKGS'] = ' '.join(
+      rebuild_pkgs[1]) if rebuild_pkgs[1] else ''
   # TODO(xcl): Stop passing emerge flags using envvars once reverse dependency
   # logic is migrated to Python.
   extra_env['BUILD_PACKAGES_EMERGE_FLAGS'] = ' '.join(
@@ -692,6 +718,30 @@ def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
     f.flush()
     portage_util.CleanOutdatedBinaryPackages(
         sysroot, deep=False, exclusion_file=f.name)
+
+
+def _GetCrosWorkonPackages(
+    sysroot: Union[str, os.PathLike]) -> _PACKAGE_LIST:
+  """Get cros_workon packages.
+
+  Args:
+    sysroot: The sysroot to get cros_workon packages for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  # TODO(xcl): Migrate this to calling an imported Python lib
+  cmd = ['cros_list_modified_packages', '--sysroot', sysroot]
+  result = cros_build_lib.run(
+      cmd, print_cmd=False, capture_output=True, encoding='utf-8')
+  logging.info('Detected cros_workon modified packages: %s',
+               result.output.rstrip())
+  packages = result.output.split()
+
+  if os.environ.get('CHROME_ORIGIN'):
+    packages.extend(_CHROME_PACKAGES)
+
+  return packages
 
 
 def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
