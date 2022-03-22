@@ -27,6 +27,13 @@ The Build API is invoked via the `build_api` script, which takes 4 arguments;
 the name of the endpoint being called (e.g. chromite.api.SdkService/Create), and
 the request, response, and optional config protos, which are provided as paths
 to files containing the respective JSON or protobuf-binary encoded messages.
+e.g.
+```shell
+build_api chromite.api.SdkService/Create \
+    --input-json /tmp/input.json \
+    --output-json /tmp/output.json \
+    --config-json /tmp/config.json
+```
 
 ### Recreating Build API Calls from Builders
 
@@ -132,15 +139,17 @@ recipes.
 When deprecations are made, be sure to leave a comment that has the ToT
 milestone to document when the field can be removed, e.g. `Deprecated in M95`.
 
-### gen/
+### gen/ & gen_sdk/
 
 The generated protobuf messages.
 
-**Do not edit files in this package directly!**
+**Do not edit files in these folders directly!**
 
-The proto can be compiled using the `compile_build_api_proto` script in the api
-directory. The protoc version is locked and fetched from CIPD to ensure
-compatibility with the client library in `third_party/`.
+The proto can be compiled using the `compile_build_api_proto` script
+in the api directory. For `gen/`, the protoc version is locked and
+fetched from CIPD to ensure compatibility with the client library in
+`third_party/`. For `gen_sdk/`, the proto is compiled with the version
+of protobuf in the SDK, i.e. the one installed via the protobuf ebuild.
 
 ### controller/
 
