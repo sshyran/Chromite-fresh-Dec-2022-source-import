@@ -1892,7 +1892,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
 
       # puff-moblab board does not exist in the lab.
       'puff-moblab-release': {
-          'sign_types': ['recovery', 'factory'],
           'hw_tests': [],
           'hw_tests_override': [],
           'hw_tests_disabled_bug': 'https://crbug.com/1145306',

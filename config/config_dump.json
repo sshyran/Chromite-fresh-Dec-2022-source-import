@@ -23580,10 +23580,6 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"puff-moblab\",\n    \"name\": \"wyvern_accelerator\",\n    \"test_suites\": []\n}"
         ],
-        "sign_types": [
-            "recovery",
-            "factory"
-        ],
         "signer_tests": false,
         "vm_tests_override": null
     },
@@ -23611,10 +23607,6 @@
         ],
         "paygen": false,
         "push_image": false,
-        "sign_types": [
-            "recovery",
-            "factory"
-        ],
         "signer_tests": false,
         "suite_scheduling": false,
         "vm_tests_override": null
