@@ -822,8 +822,8 @@ def DefaultSettings():
       # Runs unittests for packages.
       unittests=True,
 
-      # A list of the packages to blacklist from unittests.
-      unittest_blacklist=[],
+      # A list of the packages whose unittests will not be run.
+      unittests_disabled=[],
 
       # Generates AFDO data. Will capture a profile of chrome using a hwtest
       # to run a predetermined set of benchmarks.
