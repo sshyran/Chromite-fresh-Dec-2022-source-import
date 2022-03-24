@@ -351,6 +351,7 @@ def ApplyCustomOverrides(site_config):
       # https://crbug.com/946858
       'amd64-generic-full': site_config.templates.tast_vm_canary_tests,
       'amd64-generic-vm-full': site_config.templates.tast_vm_canary_tests,
+      'betty-arc-r-release': site_config.templates.tast_vm_canary_tests,
       'betty-kernelnext-release': site_config.templates.tast_vm_canary_tests,
       'betty-pi-arc-release': site_config.templates.tast_vm_canary_tests,
       'betty-release': site_config.templates.tast_vm_canary_tests,
