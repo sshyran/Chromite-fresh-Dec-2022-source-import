@@ -278,6 +278,18 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
                                 encoding='utf-8', errors='replace')
     self.assertEqual(result.stdout, u'S\ufffdE\n')
 
+  def testCommandArgsValidTypes(self):
+    """Verify command args can be of known types."""
+    # Support bytes, strings, and Path objects.
+    result = cros_build_lib.run(['echo', b'bytes', Path('path')],
+                                capture_output=True)
+    self.assertEqual(result.stdout, b'bytes path\n')
+
+  def testCommandArgsInvalidTypes(self):
+    """Verify command args with invalid types are rejected."""
+    with self.assertRaises(TypeError):
+      cros_build_lib.run(['echo', 1234], capture_output=True)
+
 
 def _ForceLoggingLevel(functor):
   def inner(*args, **kwargs):

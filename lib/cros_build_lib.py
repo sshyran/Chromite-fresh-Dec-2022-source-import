@@ -803,8 +803,8 @@ def run(cmd, print_cmd=True, stdout=None, stderr=None,
   elif not isinstance(cmd, (list, tuple)):
     raise TypeError('cmd must be list or tuple, not %s: %r' %
                     (type(cmd), repr(cmd)))
-  elif not all(isinstance(x, (bytes, str)) for x in cmd):
-    raise TypeError('All command elements must be bytes/strings: %r' % (cmd,))
+  elif not all(isinstance(x, (bytes, str, os.PathLike)) for x in cmd):
+    raise TypeError(f'All command elements must be bytes/strings/Path: {cmd!r}')
 
   # If we are using enter_chroot we need to use enterchroot pass env through
   # to the final command.
