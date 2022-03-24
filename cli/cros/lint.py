@@ -452,12 +452,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
       # We're going to check the section line itself.
       lineno = section.lineno
       line = section.header
-      want_indent = indent_len + self._indent_len
       line_indent_len = len(line) - len(line.lstrip(' '))
       margs = {
           'offset': lineno,
           'line': line,
-          'want_indent': want_indent,
+          'want_indent': indent_len,
           'curr_indent': line_indent_len,
       }
 
@@ -481,25 +480,37 @@ class DocStringChecker(pylint.checkers.BaseChecker):
 
       # Now check the indentation of subtext in each section.
       saw_exact = False
+      want_indent = indent_len + self._indent_len
+      margs['want_indent'] = want_indent
+      first_item_margs = None
       for i, line in enumerate(section.lines, start=1):
         # Every line should be indented at least the minimum.
         # Always update margs so that if we drop through below, it has
         # reasonable values when generating the message.
         line_indent_len = len(line) - len(line.lstrip(' '))
-        margs.update({
-            'line': line,
-            'offset': lineno + i,
-            'curr_indent': line_indent_len,
-        })
+        if first_item_margs is None:
+          first_item_margs = {
+              **margs,
+              'line': line,
+              'offset': lineno + i,
+              'curr_indent': line_indent_len,
+          }
+
         if line_indent_len == want_indent:
           saw_exact = True
         elif line_indent_len < want_indent:
-          self.add_message('C9015', node=node, line=node.fromlineno, args=margs)
+          self.add_message('C9015', node=node, line=node.fromlineno, args={
+              **margs,
+              'line': line,
+              'offset': lineno + i,
+              'curr_indent': line_indent_len,
+          })
 
       # If none of the lines were indented at the exact level, then something
       # is amiss like they're all incorrectly offset.
-      if not saw_exact:
-        self.add_message('C9015', node=node, line=node.fromlineno, args=margs)
+      if first_item_margs and not saw_exact:
+        self.add_message(
+            'C9015', node=node, line=node.fromlineno, args=first_item_margs)
 
   def _check_all_args_in_doc(self, node, _lines, sections):
     """All function arguments are mentioned in doc"""

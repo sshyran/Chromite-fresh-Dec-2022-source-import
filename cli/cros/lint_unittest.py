@@ -129,6 +129,11 @@ class CheckerTestCase(cros_test_lib.TestCase):
     # We include node.doc here explicitly so the pretty assert message
     # inclues it in the output automatically.
     doc = node.doc if node else ''
+    # Copy args since some functions mutate it after calling `add_message`.
+    # Shallow copies should be fine, since all the values we store are
+    # immutable.
+    if args is not None:
+      args = args.copy()
     self.results.append((msg_id, doc, line, args, col_offset))
 
   def setUp(self):
@@ -651,6 +656,130 @@ class DocStringCheckerTest(CheckerTestCase):
       node = TestNode(doc=dc)
       sections = self.checker._parse_docstring_sections(node, node.lines)
       self.assertEqual(expected, sections)
+
+  def test_check_docstring_section_indent(self):
+    """Check docstring diags are as expected."""
+    # The offset of the below docstrings, in columns.
+    col_offset = 10
+    indent_level = self.checker._indent_len
+    indent = col_offset * ' '
+
+    datasets = (
+        # Success.
+        (
+            """Some docstring
+
+            Args:
+              foo: blah
+            """,
+            [],
+        ),
+        # `Args:` is indented by one too many spaces.
+        (
+            """Some docstring
+
+             Args:
+              foo: blah
+            """,
+            [
+                (
+                    'C9015',
+                    {
+                        'curr_indent': col_offset + indent_level + 1,
+                        'line': f'{indent}   Args:',
+                        'offset': 3,
+                        'want_indent': col_offset + indent_level,
+                    },
+                ),
+            ],
+        ),
+        # `Args:` is indented by one too few spaces.
+        (
+            """Some docstring
+
+           Args:
+              foo: blah
+            """,
+            [
+                (
+                    'C9015',
+                    {
+                        'curr_indent': col_offset + 1,
+                        'line': f'{indent} Args:',
+                        'offset': 3,
+                        'want_indent': col_offset + indent_level,
+                    },
+                ),
+            ],
+        ),
+        # `foo: blah` is indented by one too many spaces.
+        (
+            """Some docstring
+
+            Args:
+               foo: blah
+            """,
+            [
+                (
+                    'C9015',
+                    {
+                        'curr_indent': col_offset + indent_level + 3,
+                        'line': f'{indent}     foo: blah',
+                        'offset': 4,
+                        'want_indent': col_offset + indent_level * 2,
+                    },
+                ),
+            ],
+        ),
+        # `bar: blah` is indented by one too few spaces.
+        (
+            """Some docstring
+
+            Args:
+              foo: blah
+             bar: blah
+            """,
+            [
+                (
+                    'C9015',
+                    {
+                        'curr_indent': col_offset + indent_level + 1,
+                        'line': f'{indent}   bar: blah',
+                        'offset': 5,
+                        'want_indent': col_offset + indent_level * 2,
+                    },
+                ),
+            ],
+        ),
+        # `foo: blah` is indented by one too many spaces.
+        (
+            """Some docstring
+
+            Args:
+               foo: blah
+            """,
+            [
+                (
+                    'C9015',
+                    {
+                        'curr_indent': col_offset + indent_level * 2 + 1,
+                        'line': f'{indent}     foo: blah',
+                        'offset': 4,
+                        'want_indent': col_offset + indent_level * 2,
+                    },
+                ),
+            ],
+        ),
+    )
+
+    for i, (docstring, expected) in enumerate(datasets):
+      self.results = []
+      node = TestNode(display_type=None, col_offset=col_offset, doc=docstring)
+      sections = self.checker._parse_docstring_sections(node, node.lines)
+      self.checker._check_section_lines(
+          node, node.lines, sections, self.checker.VALID_FUNC_SECTIONS)
+      trimmed_results = [(warn_id, d) for warn_id, _, _, d, _ in self.results]
+      self.assertEqual(trimmed_results, expected, f'On datasets[{i}]')
 
 
 class SourceCheckerTest(CheckerTestCase):
