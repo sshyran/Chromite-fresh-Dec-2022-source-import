@@ -283,21 +283,18 @@ class GclientWrappersTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test gclient.Sync() without optional arguments."""
     gclient.Sync(self.fake_gclient, self.cwd)
     self.assertCommandCalled(
-        [self.fake_gclient, 'sync', '--with_branch_heads', '--with_tags',
-         '--nohooks', '--verbose'], cwd=self.cwd)
+        [self.fake_gclient, 'sync', '--nohooks', '--verbose'], cwd=self.cwd)
 
   def testSyncWithOptions(self):
     """Test gclient.Sync() with optional arguments."""
     gclient.Sync(self.fake_gclient, self.cwd, reset=True)
     self.assertCommandCalled(
-        [self.fake_gclient, 'sync', '--with_branch_heads', '--with_tags',
-         '--reset', '--force', '--delete_unversioned_trees',
-         '--nohooks', '--verbose'], cwd=self.cwd)
+        [self.fake_gclient, 'sync', '--reset', '--force',
+         '--delete_unversioned_trees', '--nohooks', '--verbose'], cwd=self.cwd)
 
     gclient.Sync(self.fake_gclient, self.cwd, nohooks=False, verbose=False)
     self.assertCommandCalled(
-        [self.fake_gclient, 'sync', '--with_branch_heads', '--with_tags'],
-        cwd=self.cwd)
+        [self.fake_gclient, 'sync'], cwd=self.cwd)
 
   def testSyncWithRunArgs(self):
     """Test gclient.Sync() with run_args.
@@ -306,6 +303,5 @@ class GclientWrappersTest(cros_test_lib.RunCommandTempDirTestCase):
     """
     gclient.Sync(self.fake_gclient, self.cwd, run_args={'log_output': True})
     self.assertCommandCalled(
-        [self.fake_gclient, 'sync', '--with_branch_heads', '--with_tags',
-         '--nohooks', '--verbose'],
+        [self.fake_gclient, 'sync', '--nohooks', '--verbose'],
         cwd=self.cwd, log_output=True)
