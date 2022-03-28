@@ -8,8 +8,7 @@ import io
 import os
 import pickle
 
-# TODO(vapier): Use ElementTree directly once we're Python 3-only.
-from xml.etree import cElementTree as ElementTree
+from xml.etree import ElementTree
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -67,8 +66,7 @@ class XMLTestCase(cros_test_lib.TestCase):
     """Check that two XML strings are semanitcally equal."""
     def Normalize(xml):
       elem = ElementTree.fromstring(xml)
-      return ElementTree.tostring(
-          elem, encoding=repo_manifest.TOSTRING_ENCODING)
+      return ElementTree.tostring(elem, encoding='unicode')
     self.assertMultiLineEqual(Normalize(xml1), Normalize(xml2))
 
   def ETreeFromString(self, xml_data):

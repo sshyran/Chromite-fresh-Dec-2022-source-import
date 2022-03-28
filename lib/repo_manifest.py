@@ -4,20 +4,7 @@
 
 """Common functions for interacting with repo manifest XML files."""
 
-import sys
-
-# TODO(vapier): Use ElementTree directly once we're Python 3-only.
-from xml.etree import cElementTree as ElementTree
-
-
-# The ElementTree.tostring method is a bit of a mess.  Under Python 2, it
-# returns a string, but Python 3 returns bytes (even though its name says
-# "to string").  In order to get a string, encoding='unicode' is required
-# (encoding='utf-8' still returns bytes).  But Python 2 doesn't recognize
-# "unicode", only "utf-8".
-# https://bugs.python.org/issue10942
-# TODO(vapier): Inline the setting once we're Python 3-only.
-TOSTRING_ENCODING = 'utf-8' if sys.version_info.major < 3 else 'unicode'
+from xml.etree import ElementTree
 
 
 class Error(Exception):
@@ -53,8 +40,7 @@ class Manifest(object):
 
   def __getstate__(self):
     """Return picklable state for this Manifest."""
-    return (ElementTree.tostring(self._etree.getroot(),
-                                 encoding=TOSTRING_ENCODING),
+    return (ElementTree.tostring(self._etree.getroot(), encoding='unicode'),
             self._allow_unsupported_features)
 
   def __setstate__(self, state):
@@ -205,8 +191,7 @@ class _ManifestElement(object):
 
   def __getstate__(self):
     """Return picklable state for this element."""
-    return (self._manifest,
-            ElementTree.tostring(self._el, encoding=TOSTRING_ENCODING))
+    return (self._manifest, ElementTree.tostring(self._el, encoding='unicode'))
 
   def __setstate__(self, state):
     """Set the state from pickle for this element."""
@@ -242,7 +227,7 @@ class _ManifestElement(object):
     return '<%s>' % s
 
   def __repr__(self):
-    return ElementTree.tostring(self._el, encoding=TOSTRING_ENCODING)
+    return ElementTree.tostring(self._el, encoding='unicode')
 
 
 class Remote(_ManifestElement):
@@ -298,6 +283,5 @@ class Project(_ManifestElement):
     """Return a dictionary from annotation key to annotation value."""
     return {
         child.get('name'): child.get('value')
-        for child in self._el
-        if child.tag == 'annotation'
+        for child in self._el if child.tag == 'annotation'
     }

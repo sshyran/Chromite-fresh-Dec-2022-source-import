@@ -12,7 +12,6 @@ from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import repo_manifest
 
 
 class LocalManifest(object):
@@ -65,8 +64,7 @@ class LocalManifest(object):
     # Fix manifest tag text and tail.
     self.nodes.text = '\n  '
     self.nodes.tail = '\n'
-    return ElementTree.tostring(
-        self.nodes, encoding=repo_manifest.TOSTRING_ENCODING)
+    return ElementTree.tostring(self.nodes, encoding='unicode')
 
   def GetProjects(self):
     return list(self.nodes.findall('project'))
