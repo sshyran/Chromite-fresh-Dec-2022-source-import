@@ -12,7 +12,7 @@ from xml.etree import ElementTree
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import repo_manifest
+from chromite.utils import repo_manifest
 
 
 MANIFEST_OUTER_XML = """<?xml version="1.0" encoding="UTF-8"?>

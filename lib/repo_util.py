@@ -13,7 +13,7 @@ import re
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import repo_manifest
+from chromite.utils import repo_manifest
 
 
 # Match `repo` error: "error: project <name> not found"
