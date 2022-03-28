@@ -1636,7 +1636,14 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'hw_tests_disabled_bug': 'https://crbug.com/1011171',
       },
 
-      # No tests for betty-arc-t.
+      # Currently betty-arc-r is VM only.
+      'betty-arc-r-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/998427',
+          'vm_tests': [],
+          'vm_tests_override': []
+      },
       'betty-arc-t-release': {
           'hw_tests': [],
           'hw_tests_override': [],
@@ -1646,11 +1653,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       },
 
       # No hw tests for any betty builders.  See crbug/998427.
-      'betty-arc-r-release': {
-          'hw_tests': [],
-          'hw_tests_override': [],
-          'hw_tests_disabled_bug': 'https://crbug.com/998427',
-      },
       'betty-release': {
           'hw_tests': [],
           'hw_tests_override': [],
