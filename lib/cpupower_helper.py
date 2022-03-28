@@ -89,7 +89,11 @@ def ModifyCpuGovernor(perf_governor: bool, sticky: bool) -> Iterator[None]:
     new_governor = 'performance'
   # Check if performance governor is supported by the CPU.
   governor_path = _CPU_PATH / 'cpu0' / 'cpufreq' / 'scaling_available_governors'
-  governors = governor_path.read_text(encoding='utf-8').split()
+  try:
+    governors = governor_path.read_text(encoding='utf-8').split()
+  except FileNotFoundError as e:
+    logging.warning('Error reading CPU scaling governor file: %s', e)
+    governors = []
 
   try:
     if 'performance' in governors:

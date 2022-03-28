@@ -157,3 +157,32 @@ class TestCpuGovernorSwitch(cros_test_lib.MockTempDirTestCase,
     # pylint: disable=protected-access
     self.assertTempFileContents(self.config_file,
                                 cpupower_helper._AUTO_SET_GOV_CONTENT)
+
+
+class TestNoCpuGovernors(cros_test_lib.MockTempDirTestCase,
+                         cros_test_lib.RunCommandTestCase,
+                         cros_test_lib.LoggingTestCase):
+  """Tests when there are no CPU governors."""
+
+  def setUp(self):
+    D = cros_test_lib.Directory
+    config_dir_name = chromite_config.DIR.name
+    cpu_policy_files = (D(config_dir_name, ()),)
+    cros_test_lib.CreateOnDiskHierarchy(self.tempdir, cpu_policy_files)
+
+    self.config_file = (
+        Path(self.tempdir) / config_dir_name /
+        chromite_config.AUTO_SET_GOV_CONFIG.name)
+    self.PatchObject(
+        chromite_config, 'DIR', new=Path(self.tempdir) / config_dir_name)
+    self.PatchObject(
+        chromite_config, 'AUTO_SET_GOV_CONFIG', new=self.config_file)
+    self.PatchObject(
+        cpupower_helper, '_CPU_PATH', new=Path(self.tempdir) / 'cpu')
+
+  def testNoCpuGovernorFile(self):
+    """Test when the scaling governor path file does not exist."""
+    with cros_test_lib.LoggingCapturer() as logs:
+      with cpupower_helper.ModifyCpuGovernor(perf_governor=True, sticky=True):
+        self.AssertLogsContain(logs, 'Error reading CPU scaling governor file')
+    self.assertFalse(self.rc.called)
