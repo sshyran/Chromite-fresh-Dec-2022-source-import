@@ -1673,6 +1673,37 @@ def RegenCache(overlay, commit_changes=True, chroot=None):
   git.RunGit(overlay, ['commit', '-m', 'regen cache', 'metadata/'])
 
 
+def RegenDependencyCache(
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
+    jobs: Optional[int] = None,
+) -> None:
+  """Regenerate the dependency cache in parallel.
+
+  Use emerge --regen instead of egencache to regenerate metadata caches for all
+  overlays (egencache only updates the cache for specific overlays).
+
+  Args:
+    board: The board to inspect.
+    sysroot: The root directory being inspected.
+    jobs: The number of regeneration jobs to run in parallel.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  logging.info('Rebuilding Portage dependency cache.')
+  cmd = ['parallel_emerge', '--regen', '--quiet']
+
+  if board:
+    cmd.append(f'--board={board}')
+  if sysroot:
+    cmd.append(f'--sysroot={sysroot}')
+  if jobs:
+    cmd.append(f'--jobs={jobs}')
+
+  cros_build_lib.run(cmd, enter_chroot=True)
+
+
 def ParseBashArray(value):
   """Parse a valid bash array into python list."""
   # The syntax for bash arrays is nontrivial, so let's use bash to do the

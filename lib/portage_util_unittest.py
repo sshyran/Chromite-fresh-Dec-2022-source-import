@@ -1810,3 +1810,31 @@ class GetReverseDependenciesTest(cros_test_lib.RunCommandTestCase):
       portage_util.GetReverseDependencies([])
 
       self.assertEqual('Must provide at least one package.', e)
+
+
+class RegenDependencyCacheTest(cros_test_lib.RunCommandTestCase,
+                               cros_test_lib.LoggingTestCase):
+  """Tests for RegenDependencyCache."""
+
+  def testRegenDependencyCache(self):
+    with cros_test_lib.LoggingCapturer() as logs:
+      portage_util.RegenDependencyCache()
+
+      self.AssertLogsContain(logs, 'Rebuilding Portage dependency cache.')
+
+    self.assertCommandContains(['parallel_emerge', '--regen', '--quiet'])
+
+  def testRegenDependencyCacheBoard(self):
+    portage_util.RegenDependencyCache(board='eve')
+
+    self.assertCommandContains(['--board=eve'])
+
+  def testRegenDependencyCacheSysroot(self):
+    portage_util.RegenDependencyCache(sysroot='/build/eve')
+
+    self.assertCommandContains(['--sysroot=/build/eve'])
+
+  def testRegenDependencyCacheJobs(self):
+    portage_util.RegenDependencyCache(jobs=10)
+
+    self.assertCommandContains(['--jobs=10'])
