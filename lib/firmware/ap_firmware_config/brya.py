@@ -58,6 +58,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
+    dut_control_on.append(['ec_uart_cmd:gpioset en_s5_rails 1'])
     dut_control_off.append(['power_state:reset'])
     programmer = ('raiden_debug_spi:target=AP,custom_rst=True,serial=%s' %
                   servo.serial)
