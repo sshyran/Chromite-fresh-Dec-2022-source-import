@@ -18,7 +18,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 
-
 _CIPD_ROOT = os.path.join(constants.CHROMITE_DIR, '.cipd_bin')
 
 # Chromite's protobuf library version (third_party/google/protobuf).
@@ -136,10 +135,10 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
       chromeos_config_path = os.path.join(tempdir, 'config')
 
       logging.info('Creating shallow clone of chromiumos/config')
-      git.Clone(chromeos_config_path,
-                '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
-                depth=1
-                )
+      git.Clone(
+          chromeos_config_path,
+          '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
+          depth=1)
 
     # Only compile the subset we need for the API.
     subdirs = [
@@ -284,17 +283,17 @@ def GetParser():
       action='append_const',
       const=ProtocVersion.CHROMITE,
       help='Generate only the chromite bindings. Generates all by default. The '
-           'chromite bindings are compatible with the version of protobuf in '
-           'chromite/third_party.')
+      'chromite bindings are compatible with the version of protobuf in '
+      'chromite/third_party.')
   standard_group.add_argument(
       '--sdk',
       dest='protoc_version',
       action='append_const',
       const=ProtocVersion.SDK,
       help='Generate only the SDK bindings. Generates all by default. The SDK '
-           'bindings are compiled by protoc in the SDK, and is compatible '
-           'with the version of protobuf in the SDK (i.e. the one installed by '
-           'the ebuild).')
+      'bindings are compiled by protoc in the SDK, and is compatible '
+      'with the version of protobuf in the SDK (i.e. the one installed by '
+      'the ebuild).')
 
   dest_group = parser.add_argument_group(
       'Out of Tree Bindings',
@@ -303,8 +302,8 @@ def GetParser():
       '--destination',
       type='path',
       help='A directory where a single version of the proto should be '
-           'generated. When not given, the proto generates in all default '
-           'locations instead.')
+      'generated. When not given, the proto generates in all default '
+      'locations instead.')
   dest_group.add_argument(
       '--dest-sdk',
       action='store_const',
@@ -312,7 +311,7 @@ def GetParser():
       default=ProtocVersion.CHROMITE,
       const=ProtocVersion.SDK,
       help='Generate the SDK version of the protos in --destination instead of '
-           'the chromite version.')
+      'the chromite version.')
   return parser
 
 
