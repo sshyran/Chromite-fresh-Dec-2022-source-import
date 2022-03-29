@@ -11,6 +11,7 @@ import enum
 import logging
 import os
 import tempfile
+from typing import Iterable, Union
 
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -43,6 +44,34 @@ class ProtocVersion(enum.Enum):
   # CIPD that matches the version of the protobuf library in
   # chromite/third_party/google/protobuf.
   CHROMITE = enum.auto()
+
+
+@enum.unique
+class SubdirectorySet(enum.Enum):
+  """Enum for the subsets of the proto to compile."""
+  ALL = enum.auto()
+  DEFAULT = enum.auto()
+
+  def get_source_dirs(self, source: Union[str, os.PathLike],
+                      chromeos_config_path: Union[str, os.PathLike]
+                     ) -> Union[Iterable[str], Iterable[os.PathLike]]:
+    """Get the directories for the given subdirectory set."""
+    _join = lambda x, y: os.path.join(x, y) if isinstance(x, str) else x / y
+    if self is self.ALL:
+      return [
+          source,
+          _join(chromeos_config_path, 'proto/chromiumos'),
+      ]
+
+    subdirs = [
+        _join(source, 'chromite'),
+        _join(source, 'chromiumos'),
+        _join(source, 'config'),
+        _join(source, 'test_platform'),
+        _join(source, 'device'),
+        _join(chromeos_config_path, 'proto/chromiumos'),
+    ]
+    return subdirs
 
 
 def _get_gen_dir(protoc_version: ProtocVersion):
@@ -114,13 +143,15 @@ def _CleanTargetDirectory(directory: str):
       osutils.SafeUnlink(current)
 
 
-def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
+def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
+                   dir_subset: SubdirectorySet):
   """Generate the proto files from the |source| tree into |output|.
 
   Args:
     source: Path to the proto source root directory.
     output: Path to the output root directory.
     protoc_version: Which protoc to use.
+    dir_subset: The subset of the proto to compile.
   """
   logging.info('Generating files to %s.', output)
   osutils.SafeMakedirs(output)
@@ -140,17 +171,7 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion):
           '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
           depth=1)
 
-    # Only compile the subset we need for the API.
-    subdirs = [
-        os.path.join(source, 'chromite'),
-        os.path.join(source, 'chromiumos'),
-        os.path.join(source, 'client'),
-        os.path.join(source, 'config'),
-        os.path.join(source, 'test_platform'),
-        os.path.join(source, 'device'),
-        os.path.join(chromeos_config_path, 'proto/chromiumos'),
-    ]
-    for basedir in subdirs:
+    for basedir in dir_subset.get_source_dirs(source, chromeos_config_path):
       for dirpath, _dirnames, filenames in os.walk(basedir):
         for filename in filenames:
           if filename.endswith('.proto'):
@@ -250,7 +271,9 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
         cros_build_lib.run(cmd, print_cmd=False)
 
 
-def CompileProto(output: str, protoc_version: ProtocVersion):
+def CompileProto(output: str,
+                 protoc_version: ProtocVersion,
+                 dir_subset: SubdirectorySet = SubdirectorySet.DEFAULT):
   """Compile the Build API protobuf files.
 
   By default this will compile from infra/proto/src to api/gen. The output
@@ -260,13 +283,14 @@ def CompileProto(output: str, protoc_version: ProtocVersion):
   Args:
     output: The output directory.
     protoc_version: Which protoc to use for the compile.
+    dir_subset: What proto to compile.
   """
   source = os.path.join(_get_proto_dir(protoc_version), 'src')
   protoc_version = protoc_version or ProtocVersion.CHROMITE
 
   _InstallProtoc(protoc_version)
   _CleanTargetDirectory(output)
-  _GenerateFiles(source, output, protoc_version)
+  _GenerateFiles(source, output, protoc_version, dir_subset)
   _InstallMissingInits(output)
   _PostprocessFiles(output, protoc_version)
 
@@ -312,6 +336,14 @@ def GetParser():
       const=ProtocVersion.SDK,
       help='Generate the SDK version of the protos in --destination instead of '
       'the chromite version.')
+  dest_group.add_argument(
+      '--all-proto',
+      action='store_const',
+      dest='dir_subset',
+      default=SubdirectorySet.DEFAULT,
+      const=SubdirectorySet.ALL,
+      help='Compile ALL proto instead of just the subset needed for the API. '
+      'Only considered when generating out of tree bindings.')
   return parser
 
 
@@ -333,7 +365,10 @@ def main(argv):
   if opts.destination:
     # Destination set, only compile a single version in the destination.
     try:
-      CompileProto(output=opts.destination, protoc_version=opts.dest_protoc)
+      CompileProto(
+          output=opts.destination,
+          protoc_version=opts.dest_protoc,
+          dir_subset=opts.dir_subset)
     except Error as e:
       cros_build_lib.Die('Error compiling bindings to destination: %s', str(e))
     else:
