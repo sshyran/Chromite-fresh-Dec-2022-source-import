@@ -74,14 +74,16 @@ class PayloadConfig(object):
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
       tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
-      tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type)
+      tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type,
+                                        self.minios)
     elif isinstance(self.tgt_image, payload_pb2.DLCImage):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
       if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
         src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type)
       if isinstance(self.tgt_image, payload_pb2.SignedImage):
-        src_image_path = _GenSignedGSPath(self.src_image, self.image_type)
+        src_image_path = _GenSignedGSPath(self.src_image, self.image_type,
+                                          self.minios)
       elif isinstance(self.tgt_image, payload_pb2.DLCImage):
         src_image_path = _GenDLCImageGSPath(self.src_image)
 
@@ -139,12 +141,14 @@ def _ImageTypeToStr(image_type_n: int) -> str:
 
 
 def _GenSignedGSPath(image: payload_pb2.SignedImage,
-                     image_type: str) -> gspaths.Image:
+                     image_type: str,
+                     minios: bool) -> gspaths.Image:
   """Take a SignedImage_pb2 and return a gspaths.Image.
 
   Args:
     image: The build to create the gspath from.
     image_type: The image type, either "recovery" or "base".
+    minios: Whether or not it's a miniOS image.
 
   Returns:
     A gspaths.Image instance.
@@ -159,9 +163,14 @@ def _GenSignedGSPath(image: payload_pb2.SignedImage,
 
   build.uri = build_uri
 
-  return gspaths.Image(build=build,
-                       image_type=image_type,
-                       uri=build_uri)
+  if minios:
+    return gspaths.MiniOSImage(build=build,
+                               image_type=image_type,
+                               uri=build_uri)
+  else:
+    return gspaths.Image(build=build,
+                         image_type=image_type,
+                         uri=build_uri)
 
 
 def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
