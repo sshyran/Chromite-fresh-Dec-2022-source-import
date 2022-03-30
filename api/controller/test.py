@@ -138,11 +138,8 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   if not result.success:
     # Record all failed packages and retrieve log locations.
-    controller_util.retrieve_package_log_paths(
-        sysroot_lib.PackageInstallError('error installing packages',
-                                        cros_build_lib.CommandResult(),
-                                        packages=result.failed_pkgs),
-        output_proto, sysroot)
+    controller_util.retrieve_package_log_paths(result.failed_pkgs,
+                                               output_proto, sysroot)
     if result.failed_pkgs:
       return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
     else:

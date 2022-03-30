@@ -211,7 +211,8 @@ def InstallToolchain(input_proto, output_proto, _config):
   try:
     sysroot.InstallToolchain(build_target, target_sysroot, run_configs)
   except sysroot_lib.ToolchainInstallError as e:
-    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
+    controller_util.retrieve_package_log_paths(e.failed_toolchain_info,
+                                               output_proto, target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
 
@@ -279,7 +280,8 @@ def InstallPackages(input_proto, output_proto, _config):
       # No packages to report, so just exit with an error code.
       return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
-    controller_util.retrieve_package_log_paths(e, output_proto, target_sysroot)
+    controller_util.retrieve_package_log_paths(e.failed_packages, output_proto,
+                                               target_sysroot)
 
     return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
   finally:

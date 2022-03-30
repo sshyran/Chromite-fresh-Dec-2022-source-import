@@ -7,7 +7,7 @@
 import glob
 import logging
 import os
-from typing import Optional, TYPE_CHECKING, Union
+from typing import Iterable, Optional, TYPE_CHECKING, Union
 
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import test_pb2
@@ -195,7 +195,7 @@ def deserialize_package_info(pkg_info_msg):
   return package_info.parse(PackageInfoToString(pkg_info_msg))
 
 
-def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
+def retrieve_package_log_paths(packages: Iterable[package_info.PackageInfo],
                                output_proto: Union[
                                    sysroot_pb2.InstallPackagesResponse,
                                    sysroot_pb2.InstallToolchainResponse,
@@ -205,12 +205,12 @@ def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
   """Get the path to the log file for each package that failed to build.
 
   Args:
-    error: The error message produced by the build step.
+    packages: A list of packages which failed to build.
     output_proto: The Response message for a given API call. This response proto
       must contain a failed_package_data field.
     target_sysroot: The sysroot used by the build step.
   """
-  for pkg_info in error.failed_packages:
+  for pkg_info in packages:
     # Grab the paths to the log files for each failed package from the
     # sysroot.
     # Logs currently exist within the sysroot in the form of:
