@@ -65,15 +65,16 @@ def GetXbuddyPath(path):
   if parsed.scheme == 'xbuddy':
     return '%s%s' % (parsed.netloc, parsed.path)
   elif parsed.scheme == '':
-    logging.debug('Assuming %s is an xbuddy path.', path)
+    logging.debug('Assuming "%s" is an xbuddy path.', path)
     return path
   elif parsed.scheme == 'gs':
     if parsed.netloc != devserver_constants.GS_IMAGE_BUCKET:
-      raise ValueError('Do not support bucket %s. Only bucket %s is supported.'
-                       % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET))
+      raise ValueError(
+          'Unsupported gs bucket "%s". Only bucket "%s" is supported.'
+          % (parsed.netloc, devserver_constants.GS_IMAGE_BUCKET))
     return '%s%s' % (xbuddy.REMOTE, parsed.path)
   else:
-    raise ValueError('Do not support scheme %s.' % (parsed.scheme,))
+    raise ValueError('Unsupported scheme "%s".' % (parsed.scheme,))
 
 
 def GetImagePathWithXbuddy(path, board, version, static_dir=DEFAULT_STATIC_DIR,
