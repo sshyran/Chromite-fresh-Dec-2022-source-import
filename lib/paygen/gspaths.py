@@ -133,7 +133,10 @@ class DLCImage(Image):
 
   def __str__(self):
     if self.uri:
-      return self.uri.split('/')[-1]
+      delim = '/'
+      # All DLC images have the same image name, so differentiate by printing a
+      # bit more information than the image itself.
+      return delim.join(self.uri.split(delim)[-3:])
     else:
       return '%s %s/%s/%s' % (super().__str__(),
                               self.dlc_id,

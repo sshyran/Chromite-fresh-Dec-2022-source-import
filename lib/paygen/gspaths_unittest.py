@@ -289,6 +289,17 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         dlc_image=gspaths.ChromeosReleases.DLCImageName())
     self.assertEqual(dlc_image, expected_dlc_image)
 
+  def testDLCImageString(self):
+    dlc_image_str = ('%s/%s/%s') % (self.dlc_id, self.dlc_package,
+                                    gspaths.ChromeosReleases.DLCImageName())
+    image_uri = ('gs://chromeos-releases/foo-channel/board-name/1.2.3/dlc/'
+                 '%s') % (dlc_image_str)
+    dlc_image = gspaths.DLCImage(
+        build=self.release_build, key=None, uri=image_uri,
+        dlc_id=self.dlc_id, dlc_package=self.dlc_package,
+        dlc_image=gspaths.ChromeosReleases.DLCImageName())
+    self.assertEqual(str(dlc_image), dlc_image_str)
+
   def testParseUnsignedImageUri(self):
     attr_dict = dict(self.unsigned_image_archive_attrs)
     attr_dict['uri'] = uri = (
