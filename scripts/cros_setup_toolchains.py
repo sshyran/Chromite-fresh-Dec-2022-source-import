@@ -102,7 +102,6 @@ TARGET_LLVM_PKGS_ENABLED = (
     'armv7a-cros-linux-gnueabihf',
     'aarch64-cros-linux-gnu',
     'i686-cros-linux-gnu',
-    'i686-pc-linux-gnu',
     'x86_64-cros-linux-gnu',
 )
 
