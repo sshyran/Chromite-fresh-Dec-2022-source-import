@@ -188,7 +188,9 @@ def _FilterForBasic(artifacts):
 
 def _FilterForUnsignedImageArchives(artifacts):
   """Return only instances of UnsignedImageArchive from a list of artifacts."""
-  return [x for x in artifacts if gspaths.IsUnsignedImageArchive(x)]
+  return [x for x in artifacts
+          if gspaths.IsUnsignedImageArchive(x) or
+          gspaths.IsUnsignedMiniOSImageArchive(x)]
 
 
 def _FilterForImageType(artifacts, image_type):
@@ -248,6 +250,11 @@ def DefaultPayloadUri(payload, random_str=None):
         payload.build, random_str=random_str, key=payload.tgt_image.key,
         image_channel=payload.tgt_image.image_channel,
         image_version=payload.tgt_image.image_version, src_version=src_version)
+  elif gspaths.IsUnsignedMiniOSImageArchive(payload.tgt_image):
+    # Unsigned test MiniOS payload.
+    return gspaths.ChromeosReleases.MiniOSPayloadUri(payload.build,
+                                                     random_str=random_str,
+                                                     src_version=src_version)
   elif gspaths.IsUnsignedImageArchive(payload.tgt_image):
     # Unsigned test payload.
     return gspaths.ChromeosReleases.PayloadUri(payload.build,
@@ -556,11 +563,12 @@ class PaygenBuild(object):
 
   @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
                         sleep=BUILD_DISCOVER_RETRY_SLEEP)
-  def _DiscoverSignedImages(self, build):
+  def _DiscoverSignedImages(self, build, os_type):
     """Return a list of images associated with a given build.
 
     Args:
       build: The build to find images for.
+      os_type: The OS type to parse URI as.
 
     Returns:
       A list of images associated with the build. This may include premp, and mp
@@ -578,7 +586,8 @@ class PaygenBuild(object):
         build, key='*', image_type='*', image_channel='*', image_version='*')
 
     image_uris = self._ctx.LS(search_uri)
-    images = [gspaths.ChromeosReleases.ParseImageUri(uri) for uri in image_uris]
+    images = [gspaths.ChromeosReleases.ParseImageUri(uri, os_type=os_type)
+              for uri in image_uris]
 
     # Unparsable URIs will result in Nones; filter them out.
     images = [i for i in images if i]
@@ -629,11 +638,12 @@ class PaygenBuild(object):
 
   @retry_util.WithRetry(max_retry=3, exception=ImageMissing,
                         sleep=BUILD_DISCOVER_RETRY_SLEEP)
-  def _DiscoverTestImage(self, build):
+  def _DiscoverTestImage(self, build, os_type):
     """Return a list of unsigned image archives associated with a given build.
 
     Args:
       build: The build to find images for.
+      os_type: The OS type to parse URI as.
 
     Returns:
       A gspaths.UnsignedImageArchive instance.
@@ -646,7 +656,8 @@ class PaygenBuild(object):
                                                            image_type='test')
 
     image_uris = self._ctx.LS(search_uri)
-    images = [gspaths.ChromeosReleases.ParseUnsignedImageUri(uri)
+    images = [gspaths.ChromeosReleases.ParseUnsignedImageUri(uri,
+                                                             os_type=os_type)
               for uri in image_uris]
 
     # Unparsable URIs will result in Nones; filter them out.
@@ -802,9 +813,14 @@ class PaygenBuild(object):
     try:
       # When discovering the images for our current build, they might not be
       # discoverable right away (GS eventual consistency). So, we retry.
-      images = self._DiscoverSignedImages(self._build)
-      minios_images = self._DiscoverMiniOSSignedImages(self._build)
-      test_image = self._DiscoverTestImage(self._build)
+      images = self._DiscoverSignedImages(self._build,
+                                          os_type=gspaths.OSType.CROS)
+      minios_images = self._DiscoverSignedImages(self._build,
+                                                 os_type=gspaths.OSType.MINIOS)
+      test_image = self._DiscoverTestImage(self._build,
+                                           os_type=gspaths.OSType.CROS)
+      test_minios_image = self._DiscoverTestImage(self._build,
+                                                  os_type=gspaths.OSType.MINIOS)
       dlc_module_images = self._DiscoverDLCImages(self._build)
 
     except ImageMissing as e:
@@ -814,7 +830,7 @@ class PaygenBuild(object):
       raise BuildNotReady()
 
     _LogList('Images found', images + [test_image] + dlc_module_images +
-             minios_images)
+             minios_images + [test_minios_image])
 
     # Add full payloads for PreMP and MP (as needed).
     for i in images:
@@ -834,11 +850,18 @@ class PaygenBuild(object):
     payload_tests.append(PayloadTest(
         full_test_payload, self._build.channel, self._build.version))
 
+    # Add MiniOS test payload.
+    payloads.append(gspaths.Payload(tgt_image=test_minios_image, minios=True))
+
     # Add n2n test delta.
     if not self._skip_delta_payloads:
       n2n_payload = gspaths.Payload(tgt_image=test_image, src_image=test_image)
       payloads.append(n2n_payload)
       payload_tests.append(PayloadTest(n2n_payload))
+
+      # Add MiniOS n2n test delta.
+      payloads.append(gspaths.Payload(tgt_image=test_minios_image,
+                                      src_image=test_minios_image, minios=True))
 
     # Add in the payloads GE wants us to generate.
     for source in self.GetPaygenJson(self._build.board, self._build.channel):
@@ -858,14 +881,20 @@ class PaygenBuild(object):
         logging.warning('Skipping. Newer than current build.')
         continue
 
-      source_images = self._DiscoverSignedImages(source_build)
-      source_minios_images = self._DiscoverMiniOSSignedImages(source_build)
-      source_test_image = self._DiscoverTestImage(source_build)
+      source_images = self._DiscoverSignedImages(source_build,
+                                                 os_type=gspaths.OSType.CROS)
+      source_minios_images = self._DiscoverSignedImages(
+          source_build, os_type=gspaths.OSType.MINIOS)
+      source_test_image = self._DiscoverTestImage(source_build,
+                                                  os_type=gspaths.OSType.CROS)
+      source_test_minios_image = self._DiscoverTestImage(
+          source_build, os_type=gspaths.OSType.MINIOS)
       source_dlc_module_images = self._DiscoverDLCImages(source_build)
 
       _LogList('Images found (source)', (source_images + [source_test_image] +
                                          source_dlc_module_images +
-                                         source_minios_images))
+                                         source_minios_images +
+                                         [source_test_minios_image]))
 
       applicable_models = source.get('applicable_models', None)
       if not self._skip_delta_payloads and source['generate_delta']:
@@ -885,6 +914,12 @@ class PaygenBuild(object):
         test_payload = gspaths.Payload(
             tgt_image=test_image, src_image=source_test_image)
         payloads.append(test_payload)
+
+        # Generate the test MiniOS delta.
+        payloads.append(
+            gspaths.Payload(tgt_image=test_minios_image,
+                            src_image=source_test_minios_image,
+                            minios=True))
 
         if source['delta_payload_tests']:
           payload_tests.append(PayloadTest(test_payload,

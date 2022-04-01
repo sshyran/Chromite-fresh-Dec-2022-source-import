@@ -251,6 +251,11 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         expected_basic.build.channel, expected_basic.build.board,
         expected_basic.build.version, expected_basic.key,
         expected_basic.image_type)
+    expected_basic_minios = gspaths.MiniOSImage(
+        build=self.build,
+        image_type=self.signed_image_type,
+        key=self.key,
+        uri=uri_basic)
 
     expected_npo = gspaths.Image(build=self.release_build,
                                  key=self.key,
@@ -258,25 +263,49 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
                                  image_channel=npo_channel,
                                  image_version=npo_version,
                                  uri=uri_npo)
+    expected_npo_minios = gspaths.MiniOSImage(build=self.release_build,
+                                              key=self.key,
+                                              image_type=self.signed_image_type,
+                                              image_channel=npo_channel,
+                                              image_version=npo_version,
+                                              uri=uri_npo)
 
     expected_npo_str = gspaths.ChromeosReleases.ImageName(
         expected_npo.image_channel, expected_npo.build.board,
         expected_npo.image_version, expected_npo.key, expected_npo.image_type)
 
-    basic_image = gspaths.ChromeosReleases.ParseImageUri(uri_basic)
+    basic_image = gspaths.ChromeosReleases.ParseImageUri(
+        uri_basic, os_type=gspaths.OSType.CROS)
     self.assertEqual(basic_image, expected_basic)
     self.assertEqual(str(basic_image), expected_basic_str)
 
-    npo_image = gspaths.ChromeosReleases.ParseImageUri(uri_npo)
+    basic_minios_image = gspaths.ChromeosReleases.ParseImageUri(
+        uri_basic, os_type=gspaths.OSType.MINIOS)
+    self.assertEqual(basic_minios_image, expected_basic_minios)
+    # Use the same str as miniOS is derived from the same underlying CrOS image.
+    self.assertTrue(expected_basic_str in str(basic_minios_image))
+
+    npo_image = gspaths.ChromeosReleases.ParseImageUri(
+        uri_npo, os_type=gspaths.OSType.CROS)
     self.assertEqual(npo_image, expected_npo)
     self.assertEqual(str(npo_image), expected_npo_str)
+
+    npo_minios_image = gspaths.ChromeosReleases.ParseImageUri(
+        uri_npo, os_type=gspaths.OSType.MINIOS)
+    self.assertEqual(npo_minios_image, expected_npo_minios)
+    self.assertTrue(expected_npo_str in str(npo_minios_image))
+
 
     signer_output = ('gs://chromeos-releases/dev-channel/link/4537.7.0/'
                      'chromeos_4537.7.1_link_recovery_nplusone-channel_'
                      'mp-v4.bin.1.payload.hash.update_signer.signed.bin')
 
-    bad_image = gspaths.ChromeosReleases.ParseImageUri(signer_output)
+    bad_image = gspaths.ChromeosReleases.ParseImageUri(
+        signer_output, os_type=gspaths.OSType.CROS)
     self.assertEqual(bad_image, None)
+    bad_minios_image = gspaths.ChromeosReleases.ParseImageUri(
+        signer_output, os_type=gspaths.OSType.MINIOS)
+    self.assertEqual(bad_minios_image, None)
 
   def testParseDLCImageUri(self):
     image_uri = ('gs://chromeos-releases/foo-channel/board-name/1.2.3/dlc/'
@@ -309,13 +338,24 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
                                             milestone=self.milestone,
                                             image_type=self.unsigned_image_type,
                                             uri=uri)
+    expected_minios = gspaths.UnsignedMiniOSImageArchive(
+        build=self.build,
+        milestone=self.milestone,
+        image_type=self.unsigned_image_type,
+        uri=uri)
     expected_str = gspaths.ChromeosReleases.UnsignedImageArchiveName(
         expected.build.board, expected.build.version, expected.milestone,
         expected.image_type)
 
-    image = gspaths.ChromeosReleases.ParseUnsignedImageUri(uri)
+    image = gspaths.ChromeosReleases.ParseUnsignedImageUri(
+        uri, os_type=gspaths.OSType.CROS)
     self.assertEqual(image, expected)
     self.assertEqual(str(image), expected_str)
+
+    minios_image = gspaths.ChromeosReleases.ParseUnsignedImageUri(
+        uri, os_type=gspaths.OSType.MINIOS)
+    self.assertEqual(minios_image, expected_minios)
+    self.assertTrue(expected_str in str(image))
 
   def testPayloadNamePreset(self):
     full = gspaths.ChromeosReleases.PayloadName(channel=self.channel,

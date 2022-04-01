@@ -14,6 +14,7 @@ This includes definitions for various build flags:
     gs://chromeos-releases/blah-channel/board-name/1.2.3/payloads/LOCK_flag
 """
 
+from enum import Enum
 import logging
 import os
 import re
@@ -21,6 +22,12 @@ from typing import Optional
 
 from chromite.lib import cros_build_lib
 from chromite.lib.paygen import utils
+
+
+class OSType(Enum):
+  """Define different OS types"""
+  CROS = 1
+  MINIOS = 2
 
 
 class Build(utils.RestrictedAttrDict):
@@ -155,7 +162,7 @@ class MiniOSImage(Image):
 
   def __str__(self):
     if self.uri:
-      return self.uri.split('/')[-1]
+      return '%s (minios)' % self.uri.split('/')[-1]
     else:
       return '%s %r (minios)' % (super().__str__(),
                                  self.minios)
@@ -184,6 +191,22 @@ class UnsignedImageArchive(utils.RestrictedAttrDict):
       return ('Unsigned image archive: %s:%s/%s/%s-%s/%s (no uri)' %
               (self.build.bucket, self.build.board, self.build.channel,
                self.milestone, self.build.version, self.image_type))
+
+
+class UnsignedMiniOSImageArchive(UnsignedImageArchive):
+  """Define a unsigned MiniOS image archive."""
+  _name = 'Unsigned MiniOS image archive definition'
+  _slots = UnsignedImageArchive._slots + ('minios',)
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.minios = True
+
+  def __str__(self):
+    if self.uri:
+      return '%s (minios)' % self.uri.split('/')[-1]
+    else:
+      return '%s %r (minios)' % (super().__str__(), self.minios)
 
 
 class Payload(utils.RestrictedAttrDict):
@@ -446,7 +469,7 @@ class ChromeosReleases(object):
     return Build.BuildValuesFromUri(exp, image_uri)
 
   @classmethod
-  def ParseImageUri(cls, image_uri):
+  def ParseImageUri(cls, image_uri, os_type):
     """Parse the URI of an image into an Image object."""
 
     values = cls._ParseImageUriValues(image_uri)
@@ -457,7 +480,10 @@ class ChromeosReleases(object):
     values['uri'] = image_uri
 
     # Create an Image object using the values we parsed out.
-    return Image(values)
+    return {
+        OSType.CROS: Image,
+        OSType.MINIOS: MiniOSImage,
+    }[os_type](values)
 
   @classmethod
   def ParseMiniOSImageUri(cls, image_uri):
@@ -474,7 +500,7 @@ class ChromeosReleases(object):
     return MiniOSImage(values)
 
   @classmethod
-  def ParseUnsignedImageUri(cls, image_uri):
+  def ParseUnsignedImageUri(cls, image_uri, os_type):
     """Parse the URI of an image into an UnsignedImageArchive object."""
 
     # The named values in this regex must match the arguments to gspaths.Image.
@@ -492,7 +518,10 @@ class ChromeosReleases(object):
     values['uri'] = image_uri
 
     # Create an Image object using the values we parsed out.
-    return UnsignedImageArchive(values)
+    return {
+        OSType.CROS: UnsignedImageArchive,
+        OSType.MINIOS: UnsignedMiniOSImageArchive,
+    }[os_type](values)
 
   @classmethod
   def ParseDLCImageUri(cls, image_uri):
@@ -791,7 +820,6 @@ class ChromeosReleases(object):
       image_version = build.version
 
     return os.path.join(ChromeosReleases.BuildPayloadsUri(build),
-
                         ChromeosReleases.PayloadName(image_channel,
                                                      build.board,
                                                      image_version,
@@ -957,6 +985,18 @@ def IsUnsignedImageArchive(a):
     True if |a| is of UnsignedImageArchive type, False otherwise
   """
   return isinstance(a, UnsignedImageArchive)
+
+
+def IsUnsignedMiniOSImageArchive(a):
+  """Return if the object is of UnsignedMiniOSImageArchive type.
+
+  Args:
+    a: object whose type needs to be checked
+
+  Returns:
+    True if |a| is of UnsignedMiniOSImageArchive type, False otherwise
+  """
+  return isinstance(a, UnsignedMiniOSImageArchive)
 
 
 def IsDLCImage(a):
