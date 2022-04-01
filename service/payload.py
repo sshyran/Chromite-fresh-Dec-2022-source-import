@@ -166,10 +166,12 @@ def _GenSignedGSPath(image: payload_pb2.SignedImage,
   if minios:
     return gspaths.MiniOSImage(build=build,
                                image_type=image_type,
+                               key=image.key,
                                uri=build_uri)
   else:
     return gspaths.Image(build=build,
                          image_type=image_type,
+                         key=image.key,
                          uri=build_uri)
 
 

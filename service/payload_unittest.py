@@ -62,6 +62,8 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
         verify=True,
         upload=True)
 
+    self.assertEqual('cave-mp-v4', payload_config.payload.tgt_image.key)
+
     payload_config.GeneratePayload()
 
   def testFullUpdate(self):
