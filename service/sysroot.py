@@ -258,12 +258,6 @@ class BuildPackagesRunConfig(object):
     if not self.use_any_chrome:
       args.append('--nouse_any_chrome')
 
-    if self.autosetgov:
-      args.append('--autosetgov')
-
-    if self.autosetgov_sticky:
-      args.append('--autosetgov_sticky')
-
     if not self.install_auto_test:
       args.append('--nowithautotest')
 
