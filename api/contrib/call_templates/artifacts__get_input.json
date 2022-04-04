@@ -6,7 +6,7 @@
     }
   },
   "chroot": {
-    "path": "/usr/local/google/home/davidwelling/chromiumos/chroot"
+    "path": "%(chroot)s"
   },
   "result_path": {
     "path": {

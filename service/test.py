@@ -1,17 +1,17 @@
 # Copyright 2019 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Test service.
 
 Handles test related functionality.
 """
-
 import json
 import logging
 import os
 import re
 import shutil
-from typing import Iterable, List, NamedTuple, Optional, TYPE_CHECKING
+from typing import Dict, Iterable, List, NamedTuple, Optional, TYPE_CHECKING
 
 from chromite.cbuildbot import commands
 from chromite.lib import autotest_util
@@ -59,15 +59,15 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
-def BuildTargetUnitTest(
-    build_target: 'build_target_lib.BuildTarget',
-    chroot: 'chroot_lib.Chroot',
-    packages: Optional[List[str]] = None,
-    blocklist: Optional[List[str]] = None,
-    was_built: bool = True,
-    code_coverage: bool = False,
-    testable_packages_optional: bool = False,
-    filter_only_cros_workon: bool = False) -> BuildTargetUnitTestResult:
+def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
+                        chroot: 'chroot_lib.Chroot',
+                        packages: Optional[List[str]] = None,
+                        blocklist: Optional[List[str]] = None,
+                        was_built: bool = True,
+                        code_coverage: bool = False,
+                        testable_packages_optional: bool = False,
+                        filter_only_cros_workon: bool = False
+                       ) -> BuildTargetUnitTestResult:
   """Run the ebuild unit tests for the target.
 
   Args:
@@ -256,10 +256,7 @@ def RulesCrosUnitTest() -> bool:
   cmd = [
       os.path.join(constants.RULES_CROS_PATH, 'run_tests.sh'),
   ]
-  result = cros_build_lib.run(
-      cmd,
-      enter_chroot=True,
-      check=False)
+  result = cros_build_lib.run(cmd, enter_chroot=True, check=False)
 
   return result.returncode == 0
 
@@ -553,13 +550,34 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
   try:
     base_path = chroot.full_path(sysroot_class.path)
 
+    # Gather all LLVM compiler generated coverage data into single coverage.json
+    coverage_dir = os.path.join(base_path, 'build/coverage_data')
+    llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(
+        paths=[coverage_dir])
+
+    # Generate zero coverage for all src files, excluding those which are
+    # already present in llvm_generated_cov_json
+    files_with_cov = code_coverage_util.ExtractFilenames(
+        llvm_generated_cov_json)
+    zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
+        # TODO(b/227649725): Input path_to_src_directories and language specific
+        # src_file_extensions and exclude_line_prefixes from GetArtifact API
+        path_to_src_directories=[
+            os.path.join(constants.SOURCE_ROOT, 'src/platform/'),
+            os.path.join(constants.SOURCE_ROOT, 'src/platform2/')
+        ],
+        src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
+        exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+        exclude_files=files_with_cov)
+    # Merge generated zero coverage data and
+    # llvm compiler generated coverage data.
+    merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(
+        llvm_generated_cov_json, zero_coverage_json)
+
     with chroot.tempdir() as dest_tmpdir:
-      coverage_dir = os.path.join(base_path, 'build/coverage_data')
-      coverage_file = GatherCodeCoverageLlvmJsonFile(
-          destdir=dest_tmpdir, paths=[coverage_dir])
-      if coverage_file is None:
-        logging.warning('No coverage files found in %s.', coverage_dir)
-        return None
+      osutils.WriteFile(
+          os.path.join(dest_tmpdir, constants.CODE_COVERAGE_LLVM_FILE_NAME),
+          json.dumps(merged_coverage_json))
 
       tarball_path = os.path.join(output_dir,
                                   constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR)
@@ -568,7 +586,7 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
         logging.error('Error (%d) when creating tarball %s from %s',
                       result.returncode, tarball_path, dest_tmpdir)
         return None
-    return tarball_path
+      return tarball_path
   except Exception as e:
     logging.error('BundleCodeCoverageLlvmJson failed %s', e)
     return None
@@ -576,35 +594,23 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
 
 class GatherCodeCoverageLlvmJsonFileResult(NamedTuple):
   """Class containing result data of GatherCodeCoverageLlvmJsonFile."""
-  joined_file_paths: List[str]
+  coverage_json: Dict
 
 
-def GatherCodeCoverageLlvmJsonFile(
-    destdir: str,
-    paths: List[str],
-    output_file_name: str = 'coverage.json'
-) -> GatherCodeCoverageLlvmJsonFileResult:
+def GatherCodeCoverageLlvmJsonFile(paths: List[str]):
   """Locate code coverage llvm json files in |paths|.
 
    This function locates all the coverage llvm json files and merges them
    into one file, in the correct llvm json format.
 
   Args:
-    destdir: Where the combined coverage file should be output to.
     paths: A list of input paths to walk.
-    output_file_name: The name of the combined coverage file to output.
 
   Returns:
-    A CodeCoverageFileTuple containing coverage.json file information or None.
+    Code coverage json llvm format.
   """
-  logging.info('GatherCodeCoverageLlvmJsonFile destdir %s paths %s', destdir,
-               paths)
-
   joined_file_paths = []
-  coverage_type = None
-  coverage_version = None
   coverage_data = []
-
   for p in paths:
     if not os.path.exists(p):
       raise NoFilesError('The path did not exist: ', p)
@@ -623,29 +629,11 @@ def GatherCodeCoverageLlvmJsonFile(
 
         # Copy over data from this file.
         joined_file_paths.append(path_to_file)
-        coverage_type = file_data['type']
-        coverage_version = file_data['version']
         for datum in file_data['data']:
           for file_data in datum['files']:
             coverage_data.append(file_data)
 
-  # Make sure some data was processed.
-  if not coverage_type or coverage_version is None or len(coverage_data) <= 0:
-    return None
-
-  # Write out the file
-  osutils.WriteFile(
-      os.path.join(destdir, output_file_name),
-      json.dumps({
-          'data': [{
-              'files': coverage_data
-          }],
-          'type': coverage_type,
-          'version': coverage_version
-      }))
-
-  return GatherCodeCoverageLlvmJsonFileResult(
-      joined_file_paths=joined_file_paths)
+  return code_coverage_util.CreateLlvmCoverageJson(coverage_data)
 
 
 def FindAllMetadataFiles(chroot: 'chroot_lib.Chroot',

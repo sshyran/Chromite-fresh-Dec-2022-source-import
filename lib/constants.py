@@ -769,9 +769,22 @@ TEST_KEY_PUBLIC = 'id_rsa.pub'
 BREAKPAD_DEBUG_SYMBOLS_NAME = 'debug_breakpad'
 BREAKPAD_DEBUG_SYMBOLS_TAR = '%s.tar.xz' % BREAKPAD_DEBUG_SYMBOLS_NAME
 
+# Code coverage related constants
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME = 'code_coverage'
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR = ('%s.tar.xz'
                                        % CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME)
+CODE_COVERAGE_LLVM_FILE_NAME = 'coverage.json'
+ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.h', '.c']
+ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES = (
+    '/*',
+    '#include',
+    '//',
+    '* ',
+    '*/',
+    '\n',
+    '}\n',
+    '};\n',
+    '**/\n')
 
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
