@@ -7,7 +7,7 @@
 import glob
 import logging
 import os
-from typing import TYPE_CHECKING, Union
+from typing import Optional, TYPE_CHECKING, Union
 
 from chromite.api.gen.chromite.api import sysroot_pb2, test_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -30,11 +30,11 @@ class InvalidMessageError(Error):
   """Invalid message."""
 
 
-def ParseChroot(chroot_message):
+def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
   """Create a chroot object from the chroot message.
 
   Args:
-    chroot_message (common_pb2.Chroot): The chroot message.
+    chroot_message: The chroot message.
 
   Returns:
     Chroot: The parsed chroot object.
@@ -68,11 +68,11 @@ def ParseChroot(chroot_message):
   return chroot
 
 
-def ParseSysroot(sysroot_message):
+def ParseSysroot(sysroot_message: sysroot_pb2.Sysroot) -> sysroot_lib.Sysroot:
   """Create a sysroot object from the sysroot message.
 
   Args:
-    sysroot_message (commmon_pb2.Sysroot): The sysroot message.
+    sysroot_message: The sysroot message.
 
   Returns:
     Sysroot: The parsed sysroot object.
@@ -129,12 +129,15 @@ def ParseGomaConfig(goma_message, chroot_path):
                         counterz_filename=counterz_filename)
 
 
-def ParseBuildTarget(build_target_message, profile_message=None):
+def ParseBuildTarget(
+    build_target_message: common_pb2.BuildTarget,
+    profile_message: Optional[sysroot_pb2.Profile] = None
+) -> build_target_lib.BuildTarget:
   """Create a BuildTarget object from a build_target message.
 
   Args:
-    build_target_message (common_pb2.BuildTarget): The BuildTarget message.
-    profile_message (sysroot_pb2.Profile|None): The profile message.
+    build_target_message: The BuildTarget message.
+    profile_message: The profile message.
 
   Returns:
     BuildTarget: The parsed instance.
@@ -248,14 +251,11 @@ def PackageInfoToString(package_info_msg):
   return '%s%s%s' % (c, p, v)
 
 
-def CPVToString(cpv):
+def CPVToString(cpv: package_info.CPV) -> str:
   """Get the most useful string representation from a CPV.
 
   Args:
-    cpv (package_info.CPV): The CPV object.
-
-  Returns:
-    str
+    cpv: The CPV object.
 
   Raises:
     ValueError - when the CPV has no useful fields set.
