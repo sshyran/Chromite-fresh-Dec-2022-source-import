@@ -234,9 +234,6 @@ class BuildPackagesRunConfig(object):
     if not self.test_image:
       args.append('--nowithtest')
 
-    if not self.debug_version:
-      args.append('--nowithdebug')
-
     if self.local_pkg:
       args.append('--reuse_pkgs_from_local_boards')
 
@@ -248,9 +245,6 @@ class BuildPackagesRunConfig(object):
 
     if not self.eclean:
       args.append('--noeclean')
-
-    if self.internal_chrome:
-      args.append('--internal')
 
     if self.clean_build:
       args.append('--cleanbuild')
