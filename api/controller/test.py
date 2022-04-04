@@ -21,11 +21,11 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
-from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import goma_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
@@ -353,7 +353,7 @@ def SimpleChromeWorkflowTest(input_proto, _output_proto, _config):
   """Run SimpleChromeWorkflow tests."""
   if input_proto.goma_config.goma_dir:
     chromeos_goma_dir = input_proto.goma_config.chromeos_goma_dir or None
-    goma = goma_util.Goma(
+    goma = goma_lib.Goma(
         input_proto.goma_config.goma_dir,
         input_proto.goma_config.goma_client_json,
         stage_name='BuildApiTestSimpleChrome',

@@ -11,11 +11,11 @@ from typing import Optional, TYPE_CHECKING, Union
 
 from chromite.api.gen.chromite.api import sysroot_pb2, test_pb2
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.cbuildbot import goma_util
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib.parser import package_info
 from chromite.lib import chroot_lib
+from chromite.lib import goma_lib
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 
@@ -107,26 +107,27 @@ def ParseGomaConfig(goma_message, chroot_path):
   # Parse the goma config.
   chromeos_goma_dir = goma_message.chromeos_goma_dir or None
   if goma_message.goma_approach == common_pb2.GomaConfig.RBE_STAGING:
-    goma_approach = goma_util.GomaApproach('?staging',
-                                           'staging-goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?staging',
+                                          'staging-goma.chromium.org', True)
   elif goma_message.goma_approach == common_pb2.GomaConfig.RBE_PROD:
-    goma_approach = goma_util.GomaApproach('?prod', 'goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?prod', 'goma.chromium.org', True)
   else:
-    goma_approach = goma_util.GomaApproach('?cros', 'goma.chromium.org', True)
+    goma_approach = goma_lib.GomaApproach('?cros', 'goma.chromium.org', True)
 
   # Note that we are not specifying the goma log_dir so that goma will create
   # and use a tmp dir for the logs.
   stats_filename = goma_message.stats_file or None
   counterz_filename = goma_message.counterz_file or None
 
-  return goma_util.Goma(goma_message.goma_dir,
-                        goma_message.goma_client_json,
-                        stage_name='BuildAPI',
-                        chromeos_goma_dir=chromeos_goma_dir,
-                        chroot_dir=chroot_path,
-                        goma_approach=goma_approach,
-                        stats_filename=stats_filename,
-                        counterz_filename=counterz_filename)
+  return goma_lib.Goma(
+      goma_message.goma_dir,
+      goma_message.goma_client_json,
+      stage_name='BuildAPI',
+      chromeos_goma_dir=chromeos_goma_dir,
+      chroot_dir=chroot_path,
+      goma_approach=goma_approach,
+      stats_filename=stats_filename,
+      counterz_filename=counterz_filename)
 
 
 def ParseBuildTarget(

@@ -12,7 +12,6 @@ import sys
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import cbuildbot_run
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.cbuildbot.stages import completion_stages
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import alerts
@@ -21,6 +20,7 @@ from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
+from chromite.lib import goma_lib
 from chromite.lib import gs
 from chromite.lib import metadata_lib
 from chromite.lib import metrics
@@ -178,7 +178,7 @@ def _UploadAndLinkGomaLogIfNecessary(
   if not goma_tmp_dir:
     return
 
-  goma = goma_util.Goma(goma_dir, goma_client_json, goma_tmp_dir=goma_tmp_dir)
+  goma = goma_lib.Goma(goma_dir, goma_client_json, goma_tmp_dir=goma_tmp_dir)
   # Just in case, stop the goma. E.g. In case of timeout, we do not want to
   # keep goma compiler_proxy running.
   goma.Stop()

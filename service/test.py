@@ -25,9 +25,9 @@ from chromite.lib import portage_util
 from chromite.utils import code_coverage_util
 
 if TYPE_CHECKING:
-  from chromite.cbuildbot import goma_util
   from chromite.lib import build_target_lib
   from chromite.lib import chroot_lib
+  from chromite.lib import goma_lib
   from chromite.lib import sysroot_lib
   from chromite.lib.parser import package_info
 
@@ -354,7 +354,7 @@ def RunMoblabVmTest(chroot: 'chroot_lib.Chroot', vms: moblab_vm.MoblabVm,
 
 def SimpleChromeWorkflowTest(sysroot_path: str, build_target_name: str,
                              chrome_root: str,
-                             goma: Optional['goma_util.Goma']) -> None:
+                             goma: Optional['goma_lib.Goma']) -> None:
   """Execute SimpleChrome workflow tests
 
   Args:
@@ -422,7 +422,7 @@ def _VerifySDKEnvironment(out_board_dir: str) -> None:
 
 
 def _BuildChrome(sdk_cmd: commands.ChromeSDK, chrome_root: str,
-                 out_board_dir: str, goma: Optional['goma_util.Goma']) -> None:
+                 out_board_dir: str, goma: Optional['goma_lib.Goma']) -> None:
   """Build Chrome with SimpleChrome environment.
 
   Args:

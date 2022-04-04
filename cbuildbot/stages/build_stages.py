@@ -14,7 +14,6 @@ from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, build
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.cbuildbot import repository
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import test_stages
@@ -26,6 +25,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import failures_lib
 from chromite.lib import git
+from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
@@ -662,8 +662,8 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     # TODO(crbug.com/751010): Revisit to enable DepsCache for non-chrome-pfq
     # bots, too.
     use_goma_deps_cache = self._run.config.name.endswith('chrome-pfq')
-    goma_approach = goma_util.GomaApproach('?cros', 'goma.chromium.org', True)
-    goma = goma_util.Goma(
+    goma_approach = goma_lib.GomaApproach('?cros', 'goma.chromium.org', True)
+    goma = goma_lib.Goma(
         self._run.options.goma_dir,
         self._run.options.goma_client_json,
         stage_name=self.StageNamePrefix() if use_goma_deps_cache else None,

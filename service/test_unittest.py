@@ -14,7 +14,6 @@ from unittest import mock
 from chromite.utils import code_coverage_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import goma_util
 from chromite.lib import autotest_util
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -22,6 +21,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import failures_lib
+from chromite.lib import goma_lib
 from chromite.lib import image_lib
 from chromite.lib import moblab_vm
 from chromite.lib import osutils
@@ -339,7 +339,7 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
     self.sysroot_path = '/chroot/path/sysroot/path'
     self.build_target = 'board'
 
-    self.goma_mock = self.PatchObject(goma_util, 'Goma')
+    self.goma_mock = self.PatchObject(goma_lib, 'Goma')
 
     self.chrome_sdk_run_mock = self.PatchObject(commands.ChromeSDK, 'Run')
 
@@ -359,7 +359,7 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
     osutils.SafeMakedirs(goma_test_dir)
     osutils.SafeMakedirs(chromeos_goma_dir)
     osutils.Touch(goma_test_json_string)
-    goma = goma_util.Goma(
+    goma = goma_lib.Goma(
         goma_config.goma_dir,
         goma_config.goma_client_json,
         stage_name='BuildApiTestSimpleChrome',

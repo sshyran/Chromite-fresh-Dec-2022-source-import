@@ -16,7 +16,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 
 if TYPE_CHECKING:
-  from chromite.cbuildbot import goma_util
+  from chromite.lib import goma_lib
   from chromite.lib import remoteexec_util
 
 
@@ -36,7 +36,7 @@ class Chroot(object):
                cache_dir: Optional[str] = None,
                chrome_root: Optional[str] = None,
                env: Optional[Dict[str, str]] = None,
-               goma: Optional['goma_util.Goma'] = None,
+               goma: Optional['goma_lib.Goma'] = None,
                remoteexec: Optional['remoteexec_util.Remoteexec'] = None):
     """Initialize.
 
