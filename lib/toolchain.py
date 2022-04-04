@@ -294,7 +294,8 @@ class ToolchainInstaller(object):
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error extracting libc: %s' % result.stdout,
+        logging.error('failed to extract libc:\n%s', result.stdout)
+        raise ToolchainInstallError(f'Error extracting libc: {result.stdout}',
                                     result)
 
       # Sync the files to the sysroot to install.
@@ -304,7 +305,8 @@ class ToolchainInstaller(object):
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        raise ToolchainInstallError('Error installing libc: %s' % result.stdout,
+        logging.error('failed to install libc:\n%s', result.stdout)
+        raise ToolchainInstallError(f'Error installing libc: {result.stdout}',
                                     result)
 
       # Make the debug directory.
@@ -316,7 +318,9 @@ class ToolchainInstaller(object):
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
-        logging.warning('libc debug info not copied: %s', result.stdout)
+        logging.error('failed to copy lib debug info:\n%s', result.stdout)
+        raise ToolchainInstallError(
+            f'Error copying libc debug info: {result.stdout}', result)
 
   def _NeedsInstalled(self, sysroot, tc_info):
     """Check if the toolchain installation needs to be run."""
