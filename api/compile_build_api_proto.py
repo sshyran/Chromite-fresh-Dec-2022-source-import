@@ -54,7 +54,7 @@ class SubdirectorySet(enum.Enum):
 
   def get_source_dirs(self, source: Union[str, os.PathLike],
                       chromeos_config_path: Union[str, os.PathLike]
-                     ) -> Union[Iterable[str], Iterable[os.PathLike]]:
+                      ) -> Union[Iterable[str], Iterable[os.PathLike]]:
     """Get the directories for the given subdirectory set."""
     _join = lambda x, y: os.path.join(x, y) if isinstance(x, str) else x / y
     if self is self.ALL:
@@ -273,7 +273,8 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
 
 def CompileProto(output: str,
                  protoc_version: ProtocVersion,
-                 dir_subset: SubdirectorySet = SubdirectorySet.DEFAULT):
+                 dir_subset: SubdirectorySet = SubdirectorySet.DEFAULT,
+                 postprocess: bool = True):
   """Compile the Build API protobuf files.
 
   By default this will compile from infra/proto/src to api/gen. The output
@@ -284,6 +285,7 @@ def CompileProto(output: str,
     output: The output directory.
     protoc_version: Which protoc to use for the compile.
     dir_subset: What proto to compile.
+    postprocess: Whether to run the postprocess step.
   """
   source = os.path.join(_get_proto_dir(protoc_version), 'src')
   protoc_version = protoc_version or ProtocVersion.CHROMITE
@@ -292,7 +294,8 @@ def CompileProto(output: str,
   _CleanTargetDirectory(output)
   _GenerateFiles(source, output, protoc_version, dir_subset)
   _InstallMissingInits(output)
-  _PostprocessFiles(output, protoc_version)
+  if postprocess:
+    _PostprocessFiles(output, protoc_version)
 
 
 def GetParser():
@@ -307,17 +310,17 @@ def GetParser():
       action='append_const',
       const=ProtocVersion.CHROMITE,
       help='Generate only the chromite bindings. Generates all by default. The '
-      'chromite bindings are compatible with the version of protobuf in '
-      'chromite/third_party.')
+           'chromite bindings are compatible with the version of protobuf in '
+           'chromite/third_party.')
   standard_group.add_argument(
       '--sdk',
       dest='protoc_version',
       action='append_const',
       const=ProtocVersion.SDK,
       help='Generate only the SDK bindings. Generates all by default. The SDK '
-      'bindings are compiled by protoc in the SDK, and is compatible '
-      'with the version of protobuf in the SDK (i.e. the one installed by '
-      'the ebuild).')
+           'bindings are compiled by protoc in the SDK, and is compatible '
+           'with the version of protobuf in the SDK (i.e. the one installed by '
+           'the ebuild).')
 
   dest_group = parser.add_argument_group(
       'Out of Tree Bindings',
@@ -326,8 +329,8 @@ def GetParser():
       '--destination',
       type='path',
       help='A directory where a single version of the proto should be '
-      'generated. When not given, the proto generates in all default '
-      'locations instead.')
+           'generated. When not given, the proto generates in all default '
+           'locations instead.')
   dest_group.add_argument(
       '--dest-sdk',
       action='store_const',
@@ -335,7 +338,7 @@ def GetParser():
       default=ProtocVersion.CHROMITE,
       const=ProtocVersion.SDK,
       help='Generate the SDK version of the protos in --destination instead of '
-      'the chromite version.')
+           'the chromite version.')
   dest_group.add_argument(
       '--all-proto',
       action='store_const',
@@ -343,7 +346,14 @@ def GetParser():
       default=SubdirectorySet.DEFAULT,
       const=SubdirectorySet.ALL,
       help='Compile ALL proto instead of just the subset needed for the API. '
-      'Only considered when generating out of tree bindings.')
+           'Only considered when generating out of tree bindings.')
+  dest_group.add_argument(
+      '--skip-postprocessing',
+      action='store_false',
+      dest='postprocess',
+      default=True,
+      help='Skip postprocessing files.'
+  )
   return parser
 
 
@@ -368,7 +378,9 @@ def main(argv):
       CompileProto(
           output=opts.destination,
           protoc_version=opts.dest_protoc,
-          dir_subset=opts.dir_subset)
+          dir_subset=opts.dir_subset,
+          postprocess=opts.postprocess
+      )
     except Error as e:
       cros_build_lib.Die('Error compiling bindings to destination: %s', str(e))
     else:
