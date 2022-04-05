@@ -12,7 +12,7 @@ import functools
 import logging
 import os
 from pathlib import Path
-from typing import List, NamedTuple, Set, Union
+from typing import List, NamedTuple, Set, TYPE_CHECKING, Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -30,6 +30,10 @@ from chromite.service import packages as packages_service
 from chromite.scripts import pushimage
 from chromite.service import image
 from chromite.utils import metrics
+
+if TYPE_CHECKING:
+  from chromite.api import api_config
+  from chromite.api.gen.chromite.api import image_pb2
 
 # The image.proto ImageType enum ids.
 _BASE_ID = common_pb2.IMAGE_TYPE_BASE
@@ -207,13 +211,15 @@ def _CreateResponse(_input_proto, output_proto, _config):
 @validate.require('build_target.name')
 @validate.validation_complete
 @metrics.collect_metrics
-def Create(input_proto, output_proto, _config):
+def Create(input_proto: 'image_pb2.CreateImageRequest',
+           output_proto: 'image_pb2.CreateImageResult',
+           _config: 'api_config.ApiConfig'):
   """Build images.
 
   Args:
-    input_proto (image_pb2.CreateImageRequest): The input message.
-    output_proto (image_pb2.CreateImageResult): The output message.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    _config: The API call config.
   """
   board = input_proto.build_target.name
 
@@ -370,13 +376,15 @@ def _SignerTestResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.exists('image.path')
 @validate.validation_complete
-def SignerTest(input_proto, output_proto, _config):
+def SignerTest(input_proto: 'image_pb2.ImageTestRequest',
+               output_proto: 'image_pb2.ImageTestRequest',
+               _config: 'api_config.ApiConfig'):
   """Run image tests.
 
   Args:
-    input_proto (image_pb2.ImageTestRequest): The input message.
-    output_proto (image_pb2.ImageTestResult): The output message.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    _config: The API call config.
   """
   image_path = input_proto.image.path
 
@@ -398,13 +406,15 @@ def _TestResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.require('build_target.name', 'result.directory')
 @validate.exists('image.path')
-def Test(input_proto, output_proto, config):
+def Test(input_proto: 'image_pb2.ImageTestRequest',
+         output_proto: 'image_pb2.ImageTestResult',
+         config: 'api_config.ApiConfig'):
   """Run image tests.
 
   Args:
-    input_proto (image_pb2.ImageTestRequest): The input message.
-    output_proto (image_pb2.ImageTestResult): The output message.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input message.
+    output_proto: The output message.
+    config: The API call config.
   """
   image_path = input_proto.image.path
   board = input_proto.build_target.name
@@ -429,15 +439,17 @@ def Test(input_proto, output_proto, config):
 @faux.empty_success
 @faux.empty_completed_unsuccessfully_error
 @validate.require('gs_image_dir', 'sysroot.build_target.name')
-def PushImage(input_proto, _output_proto, config):
+def PushImage(input_proto: 'image_pb2.PushImageRequest',
+              _output_proto: 'image_pb2.PushImageResponse',
+              config: 'api.config.ApiConfig'):
   """Push artifacts from the archive bucket to the release bucket.
 
   Wraps chromite/scripts/pushimage.py.
 
   Args:
-    input_proto (PushImageRequest): Input proto.
-    _output_proto (PushImageResponse): Output proto.
-    config (api.config.ApiConfig): The API call config.
+    input_proto: Input proto.
+    _output_proto: Output proto.
+    config: The API call config.
 
   Returns:
     A controller return code (e.g. controller.RETURN_CODE_SUCCESS).
