@@ -470,27 +470,44 @@ def GenerateTestPayloads(target_image_path: str,
   # The path to the target should look something like this:
   # .../link/R37-5952.0.2014_06_12_2302-a1/chromiumos_test_image.bin
   board, os_version = real_target.split('/')[-3:-1]
-  prefix = 'chromeos'
+  cros_prefix = 'chromeos'
+  minios_prefix = 'minios'
   suffix = 'dev.bin'
   generated = []
 
   if full:
     # Names for full payloads look something like this:
-    # chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
-    name = '_'.join([prefix, os_version, board, 'full', suffix])
-    payload_path = os.path.join(archive_dir, name)
-    paygen_payload_lib.GenerateUpdatePayload(target_image_path, payload_path)
-    generated.append(payload_path)
+    # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+    cros_name = '_'.join([cros_prefix, os_version, board, 'full', suffix])
+    cros_payload_path = os.path.join(archive_dir, cros_name)
+    paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, cros_payload_path)
+    generated.append(cros_payload_path)
+
+    minios_name = '_'.join([minios_prefix, os_version, board, 'full', suffix])
+    minios_payload_path = os.path.join(archive_dir, minios_name)
+    paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, minios_payload_path, minios=True)
+    generated.append(minios_payload_path)
 
   if delta:
     # Names for delta payloads look something like this:
-    # chromeos_R37-5952.0.2014_06_12_2302-a1_R37-
+    # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_R37-
     # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
-    name = '_'.join([prefix, os_version, os_version, board, 'delta', suffix])
-    payload_path = os.path.join(archive_dir, name)
+    cros_name = '_'.join(
+        [cros_prefix, os_version, os_version, board, 'delta', suffix])
+    cros_payload_path = os.path.join(archive_dir, cros_name)
     paygen_payload_lib.GenerateUpdatePayload(
-        target_image_path, payload_path, src_image=target_image_path)
-    generated.append(payload_path)
+        target_image_path, cros_payload_path, src_image=target_image_path)
+    generated.append(cros_payload_path)
+
+    minios_name = '_'.join(
+        [minios_prefix, os_version, os_version, board, 'delta', suffix])
+    minios_payload_path = os.path.join(archive_dir, minios_name)
+    paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, minios_payload_path, src_image=target_image_path,
+        minios=True)
+    generated.append(minios_payload_path)
 
   if dlc and 'dlc_test' in portage_util.GetBoardUseFlags(board):
     dlc_prefix = 'dlc'
