@@ -1907,6 +1907,9 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       'cherry-release': {
           'sign_types': ['recovery', 'factory'],
       },
+      'cherry64-release': {
+          'sign_types': ['recovery'],
+      },
 
       # --- end from here ---
 

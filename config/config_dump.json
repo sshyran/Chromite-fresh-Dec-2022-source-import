@@ -7151,6 +7151,9 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"cherry64\",\n    \"name\": \"dojo\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"cherry64\",\n    \"name\": \"tomato\",\n    \"test_suites\": []\n}"
         ],
+        "sign_types": [
+            "recovery"
+        ],
         "vm_tests_override": null
     },
     "cherry64-release-tryjob": {
@@ -7178,6 +7181,9 @@
         ],
         "paygen": false,
         "push_image": false,
+        "sign_types": [
+            "recovery"
+        ],
         "suite_scheduling": false,
         "vm_tests_override": null
     },
