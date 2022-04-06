@@ -225,6 +225,10 @@ def _BundleTestUpdatePayloadsResponse(input_proto, output_proto, _config):
   """Add test payload files to a successful response."""
   output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
                                                    'payload1.bin')
+  output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
+                                                   'payload1.json')
+  output_proto.artifacts.add().path = os.path.join(input_proto.output_dir,
+                                                   'payload1.log')
 
 
 @faux.success(_BundleTestUpdatePayloadsResponse)

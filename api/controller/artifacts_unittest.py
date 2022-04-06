@@ -590,9 +590,13 @@ class BundleTestUpdatePayloadsTest(cros_test_lib.MockTempDirTestCase,
     artifacts.BundleTestUpdatePayloads(self.input_proto, self.output_proto,
                                        self.mock_call_config)
     patch.assert_not_called()
-    self.assertEqual(len(self.output_proto.artifacts), 1)
+    self.assertEqual(len(self.output_proto.artifacts), 3)
     self.assertEqual(self.output_proto.artifacts[0].path,
                      os.path.join(self.archive_root, 'payload1.bin'))
+    self.assertEqual(self.output_proto.artifacts[1].path,
+                     os.path.join(self.archive_root, 'payload1.json'))
+    self.assertEqual(self.output_proto.artifacts[2].path,
+                     os.path.join(self.archive_root, 'payload1.log'))
 
   def testBundleTestUpdatePayloads(self):
     """BundleTestUpdatePayloads calls cbuildbot/commands with correct args."""
