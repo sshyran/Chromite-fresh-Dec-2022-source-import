@@ -4,6 +4,7 @@
 
 """Sysroot service."""
 
+import contextlib
 import logging
 import glob
 import multiprocessing
@@ -11,15 +12,17 @@ import os
 from pathlib import Path
 import shutil
 import tempfile
-from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING, Union
+from typing import Dict, Generator, Iterator, List, NamedTuple, Optional, TYPE_CHECKING, Union
 import urllib
 
 from chromite.lib import cache
 from chromite.lib import constants
 from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
+from chromite.lib import goma_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
+from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
 from chromite.utils import metrics
@@ -1061,3 +1064,51 @@ def GatherSymbolFiles(
             relative_path=os.path.basename(p), source_file_name=p)
     else:
       raise ValueError('Unexpected input to GatherSymbolFiles: ', p)
+
+
+@contextlib.contextmanager
+def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
+  """A context manager to start goma or remoteexec instance.
+
+  The context manager depending on the input argument will decide to start
+  either the goma or remote exec instance.
+
+  Args:
+    use_goma: If true, start the goma instance.
+    use_remoteexec: If true, start the remoteexec instance.
+
+  Yields:
+    Iterator.
+  """
+  goma_dir = Path(os.environ.get('GOMA_DIR', Path.home() / 'goma'))
+  goma_service_json = os.environ.get('GOMA_SERVICE_ACCOUNT_JSON_FILE')
+  reclient_dir = os.environ.get('RECLIENT_DIR')
+  reproxy_cfg_file = os.environ.get('REPROXY_CFG')
+  remoteexec_instance = None
+  goma_instance = None
+
+  try:
+    if use_remoteexec and reclient_dir and reproxy_cfg_file:
+      logging.info('Starting RBE reproxy.')
+      remoteexec_instance = remoteexec_util.Remoteexec(reclient_dir,
+                                                       reproxy_cfg_file)
+    elif use_goma:
+      logging.info('Starting goma compiler_proxy.')
+      goma_instance = goma_lib.Goma(
+          goma_dir, goma_service_json, stage_name='BuildPackages')
+  except ValueError:
+    logging.warning('Remote execution initialization error.')
+
+  try:
+    if remoteexec_instance:
+      remoteexec_instance.Start()
+    elif goma_instance:
+      goma_instance.Restart()
+    yield
+  finally:
+    if remoteexec_instance:
+      logging.info('Stopping RBE reproxy.')
+      remoteexec_instance.Stop()
+    elif goma_instance:
+      logging.info('Stopping goma compiler_proxy.')
+      goma_instance.Stop()
