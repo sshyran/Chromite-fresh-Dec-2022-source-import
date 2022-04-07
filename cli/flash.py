@@ -312,7 +312,7 @@ def Flash(device, image, board=None, version=None,
           no_minios_update=True, clobber_stateful=False, reboot=True,
           ssh_private_key=None, ping=True, disable_rootfs_verification=False,
           clear_cache=False, yes=False, force=False, debug=False,
-          clear_tpm_owner=False):
+          clear_tpm_owner=False, delta=False):
   """Flashes a device, USB drive, or file with an image.
 
   This provides functionality common to `cros flash` and `brillo flash`
@@ -340,6 +340,7 @@ def Flash(device, image, board=None, version=None,
     force: Ignore sanity checks and prompts. Overrides |yes| if True.
     debug: Print additional debugging messages.
     version: Default version.
+    delta: Whether to use delta compression when tranferring image bytes.
 
   Raises:
     FlashError: An unrecoverable error occured.
@@ -374,7 +375,8 @@ def Flash(device, image, board=None, version=None,
           no_reboot=not reboot,
           disable_verification=disable_rootfs_verification,
           clobber_stateful=clobber_stateful,
-          clear_tpm_owner=clear_tpm_owner).Run()
+          clear_tpm_owner=clear_tpm_owner,
+          delta=delta).Run()
   elif device.scheme == commandline.DEVICE_SCHEME_USB:
     path = osutils.ExpandPath(device.path) if device.path else ''
     logging.info('Preparing to image the removable device %s', path)

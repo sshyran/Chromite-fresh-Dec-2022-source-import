@@ -79,7 +79,8 @@ class DeviceImager(object):
                no_reboot: bool = False,
                disable_verification: bool = False,
                clobber_stateful: bool = False,
-               clear_tpm_owner: bool = False):
+               clear_tpm_owner: bool = False,
+               delta: bool = False):
     """Initialize DeviceImager for flashing a Chromium OS device.
 
     Args:
@@ -95,6 +96,7 @@ class DeviceImager(object):
           device.
       clobber_stateful: Whether to do a clean stateful partition.
       clear_tpm_owner: If true, it will clear the TPM owner on reboot.
+      delta: Whether to use delta compression when transferring image bytes.
     """
 
     self._device = device
@@ -112,6 +114,7 @@ class DeviceImager(object):
     self._image_type = None
     self._compression = cros_build_lib.COMP_GZIP
     self._inactive_state = None
+    self._delta = delta
 
   def Run(self):
     """Update the device with image of specific version."""
@@ -137,6 +140,8 @@ class DeviceImager(object):
     # compressed only.
     if self._image_type == ImageType.REMOTE_DIRECTORY:
       self._compression = cros_build_lib.COMP_GZIP
+
+    # TODO(b/228389041): Switch to delta compression if self._delta is True
 
     self._InstallPartitions()
 

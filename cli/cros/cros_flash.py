@@ -165,6 +165,11 @@ Examples:
         '--exp-new-flash', action='store_true', default=True,
         help=('Use the faster version of cros flash (experimental).'),
         deprecated='The new flash mechanism is ON by default.')
+    delta_group = update.add_mutually_exclusive_group()
+    delta_group.add_argument(
+        '--delta', action='store_true', default=False,
+        help='Enable delta compression for image bytes. Default: disabled')
+
 
   def _GetDefaultVersion(self):
     """Get default full SDK version.
@@ -204,6 +209,7 @@ Examples:
             disable_rootfs_verification=
             self.options.disable_rootfs_verification,
             clear_cache=self.options.clear_cache,
+            delta=self.options.delta,
             yes=self.options.yes,
             force=self.options.force,
             debug=self.options.debug)
