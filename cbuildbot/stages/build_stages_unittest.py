@@ -6,6 +6,7 @@
 
 import contextlib
 import os
+from pathlib import Path
 import tempfile
 from unittest import mock
 
@@ -507,15 +508,16 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
     # Set stub dir name to enable goma.
     with osutils.TempDir() as goma_dir, \
          tempfile.NamedTemporaryFile() as temp_goma_client_json:
+      goma_dir = Path(goma_dir)
+      goma_client_json = Path(temp_goma_client_json.name)
       self._run.options.goma_dir = goma_dir
-      self._run.options.goma_client_json = temp_goma_client_json.name
+      self._run.options.goma_client_json = goma_client_json
       self._run.options.chromeos_goma_dir = goma_dir
 
       stage = self.ConstructStage()
       chroot_args = stage._SetupGomaIfNecessary()
       self.assertEqual([
-          '--goma_dir', goma_dir, '--goma_client_json',
-          temp_goma_client_json.name
+          '--goma_dir', goma_dir, '--goma_client_json', goma_client_json,
       ], chroot_args)
       portage_env = stage._portage_extra_env
       self.assertRegex(portage_env.get('GOMA_DIR', ''), '^/home/.*/goma$')
