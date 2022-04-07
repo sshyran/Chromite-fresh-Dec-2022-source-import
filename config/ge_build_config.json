@@ -1784,7 +1784,10 @@
         {
           "board_name": "brya-manatee",
           "name": "primus",
-          "cq_test_enabled": false,
+          "test_suites": [
+            "sanity"
+          ],
+          "cq_test_enabled": true,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
           "is_active": true
