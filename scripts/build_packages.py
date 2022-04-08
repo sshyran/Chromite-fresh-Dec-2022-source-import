@@ -294,10 +294,6 @@ def get_parser() -> commandline.ArgumentParser:
   # is an expected commandline sequence. If you set --run-goma flag while
   # compiler_proxy is already running, the existing compiler_proxy will be
   # stopped.
-  #
-  # TODO(rchandrasekar): Use of env variable as input is not right. Added
-  # options to provide them as input arguments. Migrate users to use these
-  # options and deprecate the '--run-goma' arg.
   build_shell_bool_style_args(
       group,
       'run_goma',
@@ -305,25 +301,15 @@ def get_parser() -> commandline.ArgumentParser:
       'If set to true, (re)starts goma, builds packages, and then stops goma..',
       deprecation_note,
       alternate_name='run-goma')
-  group.add_argument('--goma-dir', type='path', help='Goma directory path.')
-  group.add_argument(
-      '--goma-cfg', type='path', help='Goma service account json file to use.')
   # This option is for building chrome remotely.
   # 1) starts reproxy 2) builds chrome with reproxy and 3) stops reproxy so
   # logs/stats can be collected.
   # Note: RECLIENT_DIR and REPROXY_CFG env var will be deprecated July, 2022.
   # Use --reclient-dir and --reproxy-cfg input options instead.
-  #
-  # TODO(rchandrasekar): Use of env variable as input is not right. Added
-  # options to provide them as input arguments. Migrate users to use these
-  # options and deprecate the '--run-remoteexec' arg.
   build_shell_bool_style_args(
       group, 'run_remoteexec', False,
       'If set to true, starts RBE reproxy, builds packages, and then stops '
       'reproxy.', deprecation_note)
-  group.add_argument('--reclient-dir', type='path', help='Reproxy client path.')
-  group.add_argument(
-      '--reproxy-cfg', type='path', help='Reproxy config file to use.')
 
   parser.add_argument('packages', nargs='*', help='Packages to build.')
   return parser
