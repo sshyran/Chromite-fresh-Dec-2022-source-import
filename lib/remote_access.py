@@ -1268,6 +1268,8 @@ class RemoteDevice(object):
       prog = 'gzip'
     elif compression == cros_build_lib.COMP_BZIP2:
       prog = 'bzip2'
+    elif compression == cros_build_lib.COMP_ZSTD:
+      prog = 'zstd'
     elif compression == cros_build_lib.COMP_NONE:
       return ['cat']
     else:

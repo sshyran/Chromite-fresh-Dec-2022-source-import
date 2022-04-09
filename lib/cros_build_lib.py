@@ -1088,6 +1088,7 @@ COMP_NONE = 0
 COMP_GZIP = 1
 COMP_BZIP2 = 2
 COMP_XZ = 3
+COMP_ZSTD = 4
 
 
 def FindCompressor(
@@ -1116,6 +1117,8 @@ def FindCompressor(
     possible_progs = ['pigz', 'gzip']
   elif compression == COMP_BZIP2:
     possible_progs = ['lbzip2', 'pbzip2', 'bzip2']
+  elif compression == COMP_ZSTD:
+    return 'zstd'
   elif compression == COMP_NONE:
     return 'cat'
   else:
@@ -1149,6 +1152,7 @@ def CompressionStrToType(s):
       'gz': COMP_GZIP,
       'bz2': COMP_BZIP2,
       'xz': COMP_XZ,
+      'zst': COMP_ZSTD,
   }
   if s:
     return _COMP_STR.get(s)
@@ -1173,6 +1177,7 @@ def CompressionExtToType(file_name: Union[Path, str]):
       '.bz2': COMP_BZIP2,
       '.txz': COMP_XZ,
       '.xz': COMP_XZ,
+      '.zst': COMP_ZSTD,
   }
   return _COMP_EXT.get(ext, COMP_NONE)
 

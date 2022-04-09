@@ -418,6 +418,7 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
     self.rsh_mock.AddCmdResult(partial_mock.In('xz'), returncode=0)
     self.rsh_mock.AddCmdResult(partial_mock.In('bzip2'), returncode=0)
     self.rsh_mock.AddCmdResult(partial_mock.In('gzip'), returncode=0)
+    self.rsh_mock.AddCmdResult(partial_mock.In('zstd'), returncode=0)
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.assertEqual(['xz', '--decompress', '--stdout'],
                        device.GetDecompressor(cros_build_lib.COMP_XZ))
@@ -425,6 +426,8 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
                        device.GetDecompressor(cros_build_lib.COMP_BZIP2))
       self.assertEqual(['gzip', '--decompress', '--stdout'],
                        device.GetDecompressor(cros_build_lib.COMP_GZIP))
+      self.assertEqual(['zstd', '--decompress', '--stdout'],
+                       device.GetDecompressor(cros_build_lib.COMP_ZSTD))
       self.assertEqual(['cat'],
                        device.GetDecompressor(cros_build_lib.COMP_NONE))
 
@@ -477,7 +480,7 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
     """Test clearing the TPM owner."""
     with remote_access.ChromiumOSDeviceHandler(remote_access.TEST_IP) as device:
       self.rsh_mock.AddCmdResult(
-        [self.path_env, 'crossystem', 'clear_tpm_owner_request=1'])
+          [self.path_env, 'crossystem', 'clear_tpm_owner_request=1'])
       device.ClearTpmOwner()
 
 
