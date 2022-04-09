@@ -5,6 +5,7 @@
 """SDK chroot operations."""
 
 import os
+from typing import Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -21,13 +22,17 @@ def _ChrootVersionResponse(_input_proto, output_proto, _config):
 
 @faux.success(_ChrootVersionResponse)
 @faux.empty_error
-def Create(input_proto, output_proto, config):
+def Create(input_proto: 'CreateRequest', output_proto: 'CreateResponse',
+           config: 'api_config.ApiConfig') -> Union[int, None]:
   """Chroot creation, includes support for replacing an existing chroot.
 
   Args:
-    input_proto (CreateRequest): The input proto.
-    output_proto (CreateResponse): The output proto.
-    config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    config: The API call config.
+
+  Returns:
+    An error code, None otherwise.
   """
   replace = not input_proto.flags.no_replace
   bootstrap = input_proto.flags.bootstrap
@@ -65,13 +70,14 @@ def Create(input_proto, output_proto, config):
 @faux.empty_error
 @validate.require_each('toolchain_targets', ['name'])
 @validate.validation_complete
-def Update(input_proto, output_proto, _config):
+def Update(input_proto: 'UpdateRequest', output_proto: 'UpdateResponse',
+           _config: 'api_config.ApiConfig'):
   """Update the chroot.
 
   Args:
-    input_proto (UpdateRequest): The input proto.
-    output_proto (UpdateResponse): The output proto.
-    _config (api_config.ApiConfig): The API call config.
+    input_proto: The input proto.
+    output_proto: The output proto.
+    _config: The API call config.
   """
   build_source = input_proto.flags.build_source
   targets = [target.name for target in input_proto.toolchain_targets]
