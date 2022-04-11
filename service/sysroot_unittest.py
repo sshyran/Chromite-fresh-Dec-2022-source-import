@@ -524,6 +524,11 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     self.PatchObject(cros_build_lib, 'ClearShadowLocks')
     self.PatchObject(
         portage_util, 'PortageqEnvvar', return_value='gs://fake/binhost')
+    self.PatchObject(portage_util, 'RegenDependencyCache')
+    self.installed_packages_mock = self.PatchObject(portage_util.PortageDB,
+                                                    'InstalledPackages')
+    self.clean_outdated_binpkgs_mock = self.PatchObject(
+        portage_util, 'CleanOutdatedBinaryPackages')
 
   def testSuccess(self):
     """Test successful run."""
@@ -537,6 +542,28 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
       # handled by the run config.
       self.assertCommandContains(self.base_command)
       self.AssertLogsContain(logs, 'PORTAGE_BINHOST')
+      self.AssertLogsContain(logs, 'Rebuilding Portage cache.')
+      self.AssertLogsContain(logs, 'Cleaning stale binpkgs.')
+
+  def testEcleanBinpkgs(self):
+    """Test that eclean is called with the expected packages."""
+
+    def assert_file_contents(sysroot_path, deep, exclusion_file):
+      contents = osutils.ReadFile(exclusion_file)
+
+      self.assertEqual(self.sysroot_path, sysroot_path)
+      self.assertFalse(deep)
+      self.assertEqual('cross-dev/package', contents)
+
+    self.PatchObject(os.path, 'exists', return_value=True)
+    self.installed_packages_mock.return_value = [
+        portage_util.InstalledPackage(None, '', 'test', 'package-1.0'),
+        portage_util.InstalledPackage(None, '', 'cross-dev', 'package-1.0'),
+    ]
+    self.clean_outdated_binpkgs_mock.side_effect = assert_file_contents
+    config = sysroot.BuildPackagesRunConfig()
+
+    sysroot.BuildPackages(self.target, self.sysroot, config)
 
   def testPackageFailure(self):
     """Test package failure handling."""

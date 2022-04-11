@@ -2391,7 +2391,7 @@ def GetRepositoryForEbuild(ebuild_path, sysroot):
 
 
 def CleanOutdatedBinaryPackages(
-    sysroot: str,
+    sysroot: Union[str, os.PathLike],
     deep: bool = True,
     exclusion_file: Optional[Union[str, os.PathLike]] = None
 ) -> cros_build_lib.CommandResult:
@@ -2406,11 +2406,15 @@ def CleanOutdatedBinaryPackages(
 
   Returns:
     result (cros_build_lib.CommandResult)
+
+  Raises:
+    cros_build_lib.RunCommandError
   """
+  sysroot = Path(sysroot)
   if exclusion_file:
     exclusion_file = Path(exclusion_file)
 
-  cmd = [_GetSysrootTool('eclean', sysroot=sysroot)]
+  cmd = [_GetSysrootTool('eclean', sysroot=str(sysroot))]
   if deep:
     cmd += ['-d']
   if exclusion_file:

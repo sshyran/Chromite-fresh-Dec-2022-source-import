@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 import shutil
 import tempfile
-from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING
+from typing import Dict, Generator, List, NamedTuple, Optional, TYPE_CHECKING, Union
 import urllib
 
 from chromite.lib import cache
@@ -239,9 +239,6 @@ class BuildPackagesRunConfig(object):
 
     if self.rebuild_dep is False:
       args.append('--norebuild')
-
-    if not self.eclean:
-      args.append('--noeclean')
 
     if self.clean_build:
       args.append('--cleanbuild')
@@ -651,6 +648,18 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
                                                   target.name)
     logging.info('PORTAGE_BINHOST: %s', portage_binhost)
 
+    # Before running any emerge operations, regenerate the Portage dependency
+    # cache in parallel.
+    logging.info('Rebuilding Portage cache.')
+    portage_util.RegenDependencyCache(
+        sysroot=sysroot.path, jobs=run_configs.jobs)
+
+    # Clean out any stale binpkgs we've accumulated. This is done immediately
+    # after regenerating the cache in case ebuilds have been removed (e.g. from
+    # a revert).
+    if run_configs.eclean:
+      _CleanStaleBinpkgs(sysroot.path)
+
     try:
       # REVIEW: discuss which dimensions to flatten into the metric
       # name other than target.name...
@@ -660,6 +669,28 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
       failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
       raise sysroot_lib.PackageInstallError(
           str(e), e.result, exception=e, packages=failed_pkgs)
+
+
+def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:
+  """Clean any accumulated stale binpkgs.
+
+  Args:
+    sysroot: The sysroot to clean stale binpkgs for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  logging.info('Cleaning stale binpkgs.')
+  exclude_pkgs = [
+      x.package_info.atom
+      for x in portage_util.PortageDB().InstalledPackages()
+      if x.category.startswith('cross-')
+  ]
+  with tempfile.NamedTemporaryFile(mode='w') as f:
+    f.write('\n'.join(exclude_pkgs))
+    f.flush()
+    portage_util.CleanOutdatedBinaryPackages(
+        sysroot, deep=False, exclusion_file=f.name)
 
 
 def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:
