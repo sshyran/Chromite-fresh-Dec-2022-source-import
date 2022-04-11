@@ -757,6 +757,10 @@
             "adlnrvp"
         ],
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlnrvp\",\n    \"name\": \"adlrvp_n\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlnrvp\",\n    \"name\": \"adlrvp_n_ext_ec\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "adlnrvp-release-tryjob": {
@@ -777,6 +781,10 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlnrvp\",\n    \"name\": \"adlrvp_n\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"adlnrvp\",\n    \"name\": \"adlrvp_n_ext_ec\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,

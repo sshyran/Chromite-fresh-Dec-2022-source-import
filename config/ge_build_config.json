@@ -2,18 +2,6 @@
   "metadata_version": "1.0",
   "boards": [
     {
-      "name": "adlnrvp",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "asuka",
       "configs": [
         {
@@ -607,6 +595,31 @@
   ],
   "release_branch": false,
   "reference_board_unified_builds": [
+    {
+      "name": "adlnrvp",
+      "reference_board_name": "adlnrvp",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "adlnrvp",
+          "name": "adlrvp_n",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7227,
+          "is_active": true
+        },
+        {
+          "board_name": "adlnrvp",
+          "name": "adlrvp_n_ext_ec",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7227,
+          "is_active": true
+        }
+      ]
+    },
     {
       "name": "adlrvp",
       "reference_board_name": "adlrvp",
