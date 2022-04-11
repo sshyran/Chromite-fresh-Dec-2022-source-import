@@ -480,15 +480,19 @@ def GenerateTestPayloads(target_image_path: str,
     # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
     cros_name = '_'.join([cros_prefix, os_version, board, 'full', suffix])
     cros_payload_path = os.path.join(archive_dir, cros_name)
-    paygen_payload_lib.GenerateUpdatePayload(
-        target_image_path, cros_payload_path)
-    generated.append(cros_payload_path)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, cros_payload_path):
+      generated.append(cros_payload_path)
+    else:
+      logging.info('CrOS full payload generation skipped.')
 
     minios_name = '_'.join([minios_prefix, os_version, board, 'full', suffix])
     minios_payload_path = os.path.join(archive_dir, minios_name)
-    paygen_payload_lib.GenerateUpdatePayload(
-        target_image_path, minios_payload_path, minios=True)
-    generated.append(minios_payload_path)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, minios_payload_path, minios=True):
+      generated.append(minios_payload_path)
+    else:
+      logging.info('MiniOS full payload generation skipped.')
 
   if delta:
     # Names for delta payloads look something like this:
@@ -497,17 +501,21 @@ def GenerateTestPayloads(target_image_path: str,
     cros_name = '_'.join(
         [cros_prefix, os_version, os_version, board, 'delta', suffix])
     cros_payload_path = os.path.join(archive_dir, cros_name)
-    paygen_payload_lib.GenerateUpdatePayload(
-        target_image_path, cros_payload_path, src_image=target_image_path)
-    generated.append(cros_payload_path)
+    if paygen_payload_lib.GenerateUpdatePayload(
+        target_image_path, cros_payload_path, src_image=target_image_path):
+      generated.append(cros_payload_path)
+    else:
+      logging.info('CrOS delta payload generation skipped.')
 
     minios_name = '_'.join(
         [minios_prefix, os_version, os_version, board, 'delta', suffix])
     minios_payload_path = os.path.join(archive_dir, minios_name)
-    paygen_payload_lib.GenerateUpdatePayload(
+    if paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, minios_payload_path, src_image=target_image_path,
-        minios=True)
-    generated.append(minios_payload_path)
+        minios=True):
+      generated.append(minios_payload_path)
+    else:
+      logging.info('MiniOS delta payload generation skipped.')
 
   if dlc and 'dlc_test' in portage_util.GetBoardUseFlags(board):
     dlc_prefix = 'dlc'
@@ -522,8 +530,11 @@ def GenerateTestPayloads(target_image_path: str,
       name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, board,
                        'full', suffix])
       payload_path = os.path.join(archive_dir, name)
-      paygen_payload_lib.GenerateUpdatePayload(sample_dlc_image, payload_path)
-      generated.append(payload_path)
+      if paygen_payload_lib.GenerateUpdatePayload(
+          sample_dlc_image, payload_path):
+        generated.append(payload_path)
+      else:
+        logging.info('DLC (%s) full payload generation skipped.', dlc_id)
 
     if delta:
       # Names for delta payloads look something like this:
@@ -532,9 +543,11 @@ def GenerateTestPayloads(target_image_path: str,
       name = '_'.join([dlc_prefix, dlc_id, dlc_package, os_version, os_version,
                        board, 'delta', suffix])
       payload_path = os.path.join(archive_dir, name)
-      paygen_payload_lib.GenerateUpdatePayload(sample_dlc_image, payload_path,
-                                               src_image=sample_dlc_image)
-      generated.append(payload_path)
+      if paygen_payload_lib.GenerateUpdatePayload(
+          sample_dlc_image, payload_path, src_image=sample_dlc_image):
+        generated.append(payload_path)
+      else:
+        logging.info('DLC (%s) delta payload generation skipped.', dlc_id)
 
   if stateful:
     generated.append(

@@ -451,14 +451,73 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
 
   def testGenerateFullTestPayloads(self):
     """Verifies correctly generating full payloads."""
-    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
-    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, full=True)
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, full=True)
+
     cros_payload_path = os.path.join(
         self.tempdir,
         'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
     minios_payload_path = os.path.join(
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    self.assertEqual(generated, [
+        cros_payload_path,
+        minios_payload_path,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload_path),
+        mock.call(self.target_image, minios_payload_path, minios=True),
+    ])
+
+  def testGenerateFullTestPayloadsPartial(self):
+    """Verifies partially generating full payloads."""
+    bools = [
+        True, # Generate CrOS
+        False, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, full=True)
+
+    cros_payload_path = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    minios_payload_path = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    self.assertEqual(generated, [
+        cros_payload_path,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload_path),
+        mock.call(self.target_image, minios_payload_path, minios=True),
+    ])
+
+  def testGenerateFullTestPayloadsSkipped(self):
+    """Verifies skipping generating full payloads."""
+    bools = [
+        False, # Generate CrOS
+        False, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, full=True)
+
+    cros_payload_path = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    minios_payload_path = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    self.assertEqual(generated, [])
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path),
         mock.call(self.target_image, minios_payload_path, minios=True),
@@ -466,8 +525,14 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
 
   def testGenerateDeltaTestPayloads(self):
     """Verifies correctly generating delta payloads."""
-    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
-    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, delta=True)
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(self.target_image,
+                                               self.tempdir, delta=True)
     cros_payload_path = os.path.join(
         self.tempdir,
         'chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
@@ -476,6 +541,66 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_R37-'
         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    self.assertEqual(generated, [
+        cros_payload_path,
+        minios_payload_path,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload_path,
+                  src_image=self.target_image),
+        mock.call(self.target_image, minios_payload_path,
+                  src_image=self.target_image, minios=True),
+    ])
+
+  def testGenerateDeltaTestPayloadsPartial(self):
+    """Verifies partially generating delta payloads."""
+    bools = [
+        True, # Generate CrOS
+        False, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(self.target_image,
+                                               self.tempdir, delta=True)
+
+    cros_payload_path = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
+        '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    minios_payload_path = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_R37-'
+        '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    self.assertEqual(generated, [
+        cros_payload_path,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload_path,
+                  src_image=self.target_image),
+        mock.call(self.target_image, minios_payload_path,
+                  src_image=self.target_image, minios=True),
+    ])
+
+  def testGenerateDeltaTestPayloadsSkipped(self):
+    """Verifies skipping generating delta payloads."""
+    bools = [
+        False, # Generate CrOS
+        False, # Generate MiniOS
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    generated = artifacts.GenerateTestPayloads(self.target_image,
+                                               self.tempdir, delta=True)
+
+    cros_payload_path = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
+        '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    minios_payload_path = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_R37-'
+        '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    self.assertEqual(generated, [])
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path,
                   src_image=self.target_image),
@@ -485,50 +610,150 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
 
   def testGenerateFullStubDlcTestPayloads(self):
     """Verifies correctly generating full payloads for sample-dlc."""
-    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+        True, # Generate DLC
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
                      return_value=['dlc_test'])
-    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, full=True,
-                                   dlc=True)
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, full=True, dlc=True)
 
-    cros_payload = 'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin'
-    minios_payload = 'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin'
-    dlc_payload = ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_'
-                   'full_dev.bin')
+    cros_payload = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    minios_payload = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    dlc_payload = os.path.join(
+        self.tempdir,
+        ('dlc_sample-dlc_package_R37-'
+         '5952.0.2014_06_12_2302-a1_link_full_dev.bin'))
+    self.assertEqual(generated, [
+        cros_payload,
+        minios_payload,
+        dlc_payload,
+    ])
     paygen_mock.assert_has_calls([
-        mock.call(self.target_image,
-                  os.path.join(self.tempdir, cros_payload)),
-        mock.call(self.target_image,
-                  os.path.join(self.tempdir, minios_payload),
-                  minios=True),
-        mock.call(self.sample_dlc_image,
-                  os.path.join(self.tempdir, dlc_payload)),
+        mock.call(self.target_image, cros_payload),
+        mock.call(self.target_image, minios_payload, minios=True),
+        mock.call(self.sample_dlc_image, dlc_payload),
+    ])
+
+  def testGenerateFullStubDlcTestPayloadsSkipped(self):
+    """Verifies skipping generating full payloads for sample-dlc."""
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+        False, # Generate DLC
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    self.PatchObject(portage_util, 'GetBoardUseFlags',
+                     return_value=['dlc_test'])
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, full=True, dlc=True)
+
+    cros_payload = os.path.join(
+        self.tempdir,
+        'chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    minios_payload = os.path.join(
+        self.tempdir,
+        'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
+    dlc_payload = os.path.join(
+        self.tempdir,
+        ('dlc_sample-dlc_package_R37-'
+         '5952.0.2014_06_12_2302-a1_link_full_dev.bin'))
+    self.assertEqual(generated, [
+        cros_payload,
+        minios_payload,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload),
+        mock.call(self.target_image, minios_payload, minios=True),
+        mock.call(self.sample_dlc_image, dlc_payload),
     ])
 
   def testGenerateDeltaStubDlcTestPayloads(self):
     """Verifies correctly generating delta payloads for sample-dlc."""
-    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload')
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+        True, # Generate DLC
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
                      return_value=['dlc_test'])
-    artifacts.GenerateTestPayloads(self.target_image, self.tempdir, delta=True,
-                                   dlc=True)
+    generated = artifacts.GenerateTestPayloads(self.target_image,
+                                               self.tempdir, delta=True,
+                                               dlc=True)
 
-    cros_payload = ('chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
-                    '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    minios_payload = ('minios_R37-5952.0.2014_06_12_2302-a1_R37-'
-                      '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    dlc_payload = ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
-                   '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
+    cros_payload = os.path.join(
+        self.tempdir,
+        ('chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    minios_payload = os.path.join(
+        self.tempdir,
+        ('minios_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    dlc_payload = os.path.join(
+        self.tempdir,
+        ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    self.assertEqual(generated, [
+        cros_payload,
+        minios_payload,
+        dlc_payload,
+    ])
     paygen_mock.assert_has_calls([
-        mock.call(self.target_image,
-                  os.path.join(self.tempdir, cros_payload),
+        mock.call(self.target_image, cros_payload,
                   src_image=self.target_image),
-        mock.call(self.target_image,
-                  os.path.join(self.tempdir, minios_payload),
-                  src_image=self.target_image,
-                  minios=True),
-        mock.call(self.sample_dlc_image,
-                  os.path.join(self.tempdir, dlc_payload),
+        mock.call(self.target_image, minios_payload,
+                  src_image=self.target_image, minios=True),
+        mock.call(self.sample_dlc_image, dlc_payload,
+                  src_image=self.sample_dlc_image),
+    ])
+
+  def testGenerateDeltaStubDlcTestPayloadsSkipped(self):
+    """Verifies skipping generating delta payloads for sample-dlc."""
+    bools = [
+        True, # Generate CrOS
+        True, # Generate MiniOS
+        False, # Generate DLC
+    ]
+    paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
+                                   side_effect=bools)
+    self.PatchObject(portage_util, 'GetBoardUseFlags',
+                     return_value=['dlc_test'])
+    generated = artifacts.GenerateTestPayloads(
+        self.target_image, self.tempdir, delta=True, dlc=True)
+
+    cros_payload = os.path.join(
+        self.tempdir,
+        ('chromeos_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    minios_payload = os.path.join(
+        self.tempdir,
+        ('minios_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    dlc_payload = os.path.join(
+        self.tempdir,
+        ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
+         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
+    self.assertEqual(generated, [
+        cros_payload,
+        minios_payload,
+    ])
+    paygen_mock.assert_has_calls([
+        mock.call(self.target_image, cros_payload,
+                  src_image=self.target_image),
+        mock.call(self.target_image, minios_payload,
+                  src_image=self.target_image, minios=True),
+        mock.call(self.sample_dlc_image, dlc_payload,
                   src_image=self.sample_dlc_image),
     ])
 

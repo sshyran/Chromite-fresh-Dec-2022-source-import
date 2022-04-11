@@ -1123,6 +1123,9 @@ def GenerateUpdatePayload(tgt_image, payload, src_image=None, work_dir=None,
     check: If True, it will check the integrity of the generated payload.
     minios: If True, extract the minios partition instead of root and
         kernel.
+
+  Returns:
+    Returns a Boolean indicating if the payload was generated or not.
   """
   if path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_REPO:
     raise Error('Need a chromeos checkout to generate payloads.')
@@ -1140,6 +1143,9 @@ def GenerateUpdatePayload(tgt_image, payload, src_image=None, work_dir=None,
       paygen.Run()
     except PayloadGenerationSkippedException:
       logging.info('No payload generated.')
+      return False
+
+  return True
 
 
 def GenerateUpdatePayloadPropertiesFile(payload, output=None):
