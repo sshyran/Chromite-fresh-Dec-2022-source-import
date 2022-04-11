@@ -173,6 +173,7 @@
 
 == release ==
   master-release
+    adlnrvp-release
     adlrvp-release
     ambassador-release
     asuka-release
@@ -348,6 +349,12 @@
   luci-scheduler-updater
 
 == tryjob ==
+  adlnrvp-full-tryjob
+  adlnrvp-llvm-next-toolchain-tryjob
+  adlnrvp-llvm-toolchain-tryjob
+  adlnrvp-payloads-tryjob
+  adlnrvp-release-tryjob
+  adlnrvp-unittest-stress
   adlrvp-full-tryjob
   adlrvp-llvm-next-toolchain-tryjob
   adlrvp-llvm-toolchain-tryjob
@@ -1242,6 +1249,7 @@
     eve-release-basic-tryjob
     grunt-release-basic-tryjob
   master-release-tryjob
+    adlnrvp-release-tryjob
     adlrvp-release-tryjob
     ambassador-release-tryjob
     asuka-release-tryjob
