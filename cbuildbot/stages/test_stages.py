@@ -37,8 +37,10 @@ class UnitTestStage(generic_stages.BoardSpecificBuilderStage,
   # under load (e.g. in canary groups).
   #
   # If the processes hang, parallel_emerge will print a status report after 60
-  # minutes, so we picked 90 minutes because it gives us a little buffer time.
-  UNIT_TEST_TIMEOUT = 90 * 60
+  # minutes, so we picked 120 minutes because it gives us a little buffer time.
+  #
+  # Increased to 2 hours because of b/187793223.
+  UNIT_TEST_TIMEOUT = 2 * 60 * 60
 
   def WaitUntilReady(self):
     """Block until UploadTestArtifacts completes.
