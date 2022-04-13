@@ -10,6 +10,7 @@ import logging
 import multiprocessing
 import os
 from pathlib import Path
+import re
 import shutil
 import tempfile
 from typing import (
@@ -19,7 +20,6 @@ from typing import (
     List,
     NamedTuple,
     Optional,
-    Tuple,
     TYPE_CHECKING,
     Union,
 )
@@ -238,17 +238,11 @@ class BuildPackagesRunConfig(object):
     """Get the arguments for build_packages script."""
     args = []
 
-    if self.clean_build:
-      args.append('--cleanbuild')
-
     if self.use_goma:
       args.append('--run_goma')
 
     if self.use_remoteexec:
       args.append('--run_remoteexec')
-
-    if not self.is_incremental:
-      args.append('--nowithrevdeps')
 
     if self.packages:
       args.extend(self.packages)
@@ -312,29 +306,29 @@ class BuildPackagesRunConfig(object):
 
     return packages
 
-  def GetForceLocalBuildPackages(
-      self, sysroot: sysroot_lib.Sysroot
-  ) -> Tuple[_PACKAGE_LIST, Optional[_PACKAGE_LIST]]:
+  def GetForceLocalBuildPackages(self,
+                                 sysroot: sysroot_lib.Sysroot) -> _PACKAGE_LIST:
     """Get the set of force local build packages for this config.
 
     This includes:
       1. Getting packages for a test image.
       2. Getting packages and reverse dependencies for cros workon packages.
+      3. Getting packages and reverse dependencies for base install packages.
 
     Args:
       sysroot: The sysroot to get packages for.
 
     Returns:
-      A tuple containing a list of packages to build from source and a list of
-      cros workon packages.
+      A list of packages to build from source.
 
     Raises:
       cros_build_lib.RunCommandError
     """
     sysroot_path = Path(sysroot.path)
     force_local_build_packages = set()
+    packages = self.GetPackages()
 
-    if 'virtual/target-os-test' in self.GetPackages():
+    if 'virtual/target-os-test' in packages:
       # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
       # set. We force rebuilding this package from source every time, so that
       # consecutive builds don't share ssh keys.
@@ -359,11 +353,55 @@ class BuildPackagesRunConfig(object):
             'package and will be rebuilt: %s', ' '.join(reverse_dependencies))
         force_local_build_packages.update(reverse_dependencies)
 
-    # TODO(xcl): Add base install packages and reverse dependencies
+    # Determine base install packages and reverse dependencies if incremental
+    # build (--withdevdeps) and clean build (--cleanbuild) is not specified or
+    # the sysroot path exists.
+    if self.is_incremental and (not self.clean_build or sysroot_path.exists()):
+      logging.info('Starting reverse dependency calculations...')
 
-    # TODO(xcl): Return only packages when base install packages and revdeps
-    # are migrated to Python.
-    return (list(force_local_build_packages), cros_workon_packages)
+      # Temporarily modify the emerge flags so we can calculate the revdeps on
+      # the modified packages.
+      sim_emerge_flags = self.GetEmergeFlags()
+      sim_emerge_flags.extend([
+          '--pretend',
+          '--columns',
+          f'--reinstall-atoms={" ".join(packages)}',
+          f'--usepkg-exclude={" ".join(packages)}',
+      ])
+
+      # cros-workon packages are always going to be force reinstalled, so we
+      # add the forced reinstall behavior to the modified package calculation.
+      # This is necessary to include when a user has already installed a 9999
+      # ebuild and is now reinstalling that package with additional local
+      # changes, because otherwise the modified package calculation would not
+      # see that a 'new' package is being installed.
+      if cros_workon_packages:
+        sim_emerge_flags.extend([
+            f'--reinstall-atoms={" ".join(cros_workon_packages)}',
+            f'--usepkg-exclude={" ".join(cros_workon_packages)}',
+        ])
+
+      revdeps_packages = _GetBaseInstallPackages(sysroot_path, sim_emerge_flags,
+                                                 packages)
+      if revdeps_packages:
+        force_local_build_packages.update(revdeps_packages)
+        logging.info('Calculating reverse dependencies on packages: %s',
+                     ' '.join(revdeps_packages))
+        r_revdeps_packages = portage_util.GetReverseDependencies(
+            revdeps_packages, sysroot_path, indirect=True)
+
+        exclude_patterns = ['virtual/']
+        exclude_patterns.extend(_CHROME_PACKAGES)
+        reverse_dependencies = [
+            x.atom
+            for x in r_revdeps_packages
+            if not any(p in x.atom for p in exclude_patterns)
+        ]
+        logging.info('Final reverse dependencies that will be rebuilt: %s',
+                     ' '.join(reverse_dependencies))
+        force_local_build_packages.update(reverse_dependencies)
+
+    return list(force_local_build_packages)
 
   def GetEmergeFlags(self) -> List[str]:
     """Get the emerge flags for this config."""
@@ -660,11 +698,7 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   # TODO(xcl): Stop passing force local build packages using envvars
   # post-migration.
   rebuild_pkgs = run_configs.GetForceLocalBuildPackages(sysroot)
-  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(rebuild_pkgs[0])
-  # TODO(xcl): Stop passing cros workon packages using envvars
-  # post-migration.
-  extra_env['BUILD_PACKAGES_CROS_WORKON_PKGS'] = ' '.join(
-      rebuild_pkgs[1]) if rebuild_pkgs[1] else ''
+  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(rebuild_pkgs)
   # TODO(xcl): Stop passing emerge flags using envvars once reverse dependency
   # logic is migrated to Python.
   extra_env['BUILD_PACKAGES_EMERGE_FLAGS'] = ' '.join(
@@ -757,6 +791,52 @@ def _GetCrosWorkonPackages(
     packages.extend(_CHROME_PACKAGES)
 
   return packages
+
+
+def _GetBaseInstallPackages(sysroot: Union[str, os.PathLike], emerge_flags: str,
+                            packages: List[str]) -> List[Optional[str]]:
+  """Get packages to determine reverse dependencies for.
+
+  Args:
+    sysroot: The sysroot to get packages for.
+    emerge_flags: Emerge flags to run the command with.
+    packages: The packages to get dependencies for.
+
+  Raises:
+    cros_build_lib.RunCommandError
+  """
+  # Do a pretend `emerge` command to get a list of what would be built.
+  # Sample output:
+  # [binary N] dev-go/containerd ... to /build/eve/ USE="..."
+  # [ebuild r U] chromeos-base/tast-build-deps ... to /build/eve/ USE="..."
+  # [binary U] chromeos-base/chromeos-chrome ... to /build/eve/ USE="..."
+  cmd = ['parallel_emerge', f'--sysroot={sysroot}', f'--root={sysroot}']
+  result = cros_build_lib.sudo_run(
+      cmd + emerge_flags + packages,
+      capture_output=True,
+      encoding='utf-8')
+
+  # Filter to a heuristic set of packages known to have incorrectly specified
+  # dependencies that will be installed to the board sysroot.
+  # Sample output is filtered to:
+  # [ebuild r U] chromeos-base/tast-build-deps ... to /build/eve/ USE="..."
+  include_patterns = ['coreboot-private-files', 'tast-build-deps']
+
+  # Pattern used to rewrite the line from Portage's full output to only
+  # $CATEGORY/$PACKAGE.
+  pattern = re.compile(r'\[ebuild(.*?)\]\s(.*?)\s')
+
+  # Filter and sort the output and remove any duplicate entries.
+  packages = set()
+  for line in result.output.splitlines():
+    if 'to /build/' in line and any(x in line for x in include_patterns):
+      # Use regex to get substrings that matches a
+      # '[ebuild ...] <some characters> ' pattern. The second matching group
+      # returns the $CATEGORY/$PACKAGE from a line of the emerge output.
+      m = pattern.search(line)
+      if m:
+        packages.add(m.group(2))
+  return sorted(packages)
 
 
 def _CreateSysrootSkeleton(sysroot: sysroot_lib.Sysroot) -> None:

@@ -19,6 +19,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import goma_lib
 from chromite.lib import osutils
+from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
@@ -355,7 +356,8 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
     update_patch.assert_called_with(self.board, local_init=True)
 
 
-class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase):
+class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase,
+                                 cros_test_lib.LoggingTestCase):
   """Tests for the BuildPackagesRunConfig."""
 
   def testGetBuildPackagesArgs(self):
@@ -434,9 +436,12 @@ class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase):
 
   def testGetForceLocalBuildPackages(self):
     """Test getting force local build packages for the config."""
-    # Test the default config.
     test_sysroot_path = '/sysroot/path'
     test_sysroot = sysroot_lib.Sysroot(test_sysroot_path)
+    get_reverse_dependencies_mock = self.PatchObject(portage_util,
+                                                     'GetReverseDependencies')
+
+    # Test the default config.
     instance = sysroot.BuildPackagesRunConfig()
     self.rc.AddCmdResult(
         ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
@@ -444,28 +449,69 @@ class BuildPackagesRunConfigTest(cros_test_lib.RunCommandTestCase):
 
     packages = instance.GetForceLocalBuildPackages(test_sysroot)
 
-    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages[0])
+    self.assertIn('chromeos-base/chromeos-ssh-testkeys', packages)
 
-    # Test when there are cros_workon packages.
+    # Test when there are cros_workon packages and reverse dependencies
+    # but skipping base install packages and their reverse dependencies.
+    instance = sysroot.BuildPackagesRunConfig(incremental_build=False)
     test_cros_list_modified_packages_output = 'test/package1 test/package2\n'
+    self.rc.AddCmdResult(
+        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
+        stdout=test_cros_list_modified_packages_output)
     test_reverse_dependencies = [
         package_info.parse('test/package3-1.0'),
         package_info.parse('test/package4-2.0-r1'),
     ]
-    self.rc.AddCmdResult(
-        ['cros_list_modified_packages', '--sysroot', test_sysroot.path],
-        stdout=test_cros_list_modified_packages_output)
-    self.PatchObject(
-        portage_util,
-        'GetReverseDependencies',
-        return_value=test_reverse_dependencies)
+    get_reverse_dependencies_mock.return_value = test_reverse_dependencies
 
     packages = instance.GetForceLocalBuildPackages(test_sysroot)
 
-    self.assertIn('test/package1', packages[0])
-    self.assertIn('test/package2', packages[0])
-    self.assertIn('test/package3', packages[0])
-    self.assertIn('test/package4', packages[0])
+    self.assertIn('test/package1', packages)
+    self.assertIn('test/package2', packages)
+    self.assertIn('test/package3', packages)
+    self.assertIn('test/package4', packages)
+
+    # Test base install packages and their reverse dependency packages
+    # but skipping cros workon packages and their reverse dependencies.
+    instance = sysroot.BuildPackagesRunConfig(workon=False)
+    test_emerge_output = (
+        '[binary N] test/package1 ... to /build/sysroot/\n'
+        '[ebuild r U] chromeos-base/tast-build-deps ... to /build/sysroot/\n'
+        '[binary U] chromeos-base/chromeos-chrome ... /build/sysroot/')
+    self.rc.AddCmdResult(
+        partial_mock.ListRegex(
+            f'parallel_emerge --sysroot={test_sysroot.path}'),
+        stdout=test_emerge_output)
+    test_reverse_dependencies = [
+        package_info.parse('virtual/package3-1.0'),
+        package_info.parse('test/package4-2.0-r1'),
+    ]
+    get_reverse_dependencies_mock.return_value = test_reverse_dependencies
+
+    packages = instance.GetForceLocalBuildPackages(test_sysroot)
+
+    self.assertIn('chromeos-base/tast-build-deps', packages)
+    self.assertIn('test/package4', packages)
+
+    # Test base install packages and their reverse dependencies are skipped
+    # when --no-withrevdeps is specified.
+    instance = sysroot.BuildPackagesRunConfig(incremental_build=False)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      instance.GetForceLocalBuildPackages(test_sysroot)
+
+      self.AssertLogsContain(
+          logs, 'Starting reverse dependency calculations...', inverted=True)
+
+    # Test base install packages and their reverse dependencies are skipped
+    # when --cleanbuild is specified and the sysroot does not exist.
+    instance = sysroot.BuildPackagesRunConfig(clean_build=True)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      instance.GetForceLocalBuildPackages(test_sysroot)
+
+      self.AssertLogsContain(
+          logs, 'Starting reverse dependency calculations...', inverted=True)
 
   def testGetEmergeFlags(self):
     """Test building the emerge flags."""
@@ -605,7 +651,8 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     self.PatchObject(
         cros_build_lib,
         'run',
-        side_effect=(cros_build_lib.CommandResult(output=''), error))
+        side_effect=(cros_build_lib.CommandResult(output=''),
+                     cros_build_lib.CommandResult(output=''), error))
 
     with self.assertRaises(sysroot_lib.PackageInstallError) as e:
       sysroot.BuildPackages(self.target, self.sysroot, config)
