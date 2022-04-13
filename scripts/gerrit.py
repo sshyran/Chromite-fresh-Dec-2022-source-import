@@ -1172,7 +1172,8 @@ Actions:
 
   site_params = config_lib.GetSiteParams()
   parser = commandline.ArgumentParser(
-      description=description, default_log_level='notice')
+      description=description, default_log_level='notice',
+      epilog='For subcommand help, use `gerrit help <command>`.')
 
   group = parser.add_argument_group('Server options')
   group.add_argument('-i', '--internal', dest='gob', action='store_const',
