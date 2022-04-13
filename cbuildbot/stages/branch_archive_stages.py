@@ -212,7 +212,6 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
 
       self.UploadDummyArtifact(os.path.join(zip_dir, filename))
 
-  # TODO(crbug.com/1037746): This creates GZIP, but filename ends .xz.
   def CreateTestImageTar(self):
     """Create and upload chromiumos_test_image.tar.xz.
 
@@ -227,7 +226,7 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
           inputs=[constants.TEST_IMAGE_BIN],
           cwd=self.GetImageDirSymlink(pointer='latest',
                                       buildroot=self._build_root),
-          compression=cros_build_lib.COMP_GZIP)
+          compression=cros_build_lib.COMP_XZ)
 
       self.UploadDummyArtifact(tarball_path)
 
