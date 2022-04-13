@@ -525,7 +525,7 @@ def GeneralTemplates(site_config):
       paygen=False,
       signer_tests=False,
       sign_types=['factory'],
-      upload_hw_test_artifacts=False,
+      upload_hw_test_artifacts=True,
       upload_symbols=False,
   )
 

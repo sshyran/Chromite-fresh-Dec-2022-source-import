@@ -220,7 +220,6 @@
                 "factory"
             ],
             "suite_scheduling": true,
-            "upload_hw_test_artifacts": false,
             "useflags": [
                 "-cros-debug",
                 "chrome_internal",

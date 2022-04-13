@@ -241,6 +241,32 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
     if os.path.exists(toolkits_src_path):
       self.UploadBranchArtifact(toolkits_src_path)
 
+  def BuildAutotestTarballs(self):
+    """Build the autotest tarballs."""
+    with osutils.TempDir(prefix='cbuildbot-autotest') as tempdir:
+      cwd = os.path.abspath(
+          os.path.join(self._build_root, 'chroot', 'build',
+                       self._current_board, constants.AUTOTEST_BUILD_PATH,
+                       '..'))
+      logging.debug(
+          'Running BuildAutotestTarballsForHWTest root %s cwd %s target %s',
+          self._build_root, cwd, tempdir)
+      for tarball in commands.BuildAutotestTarballsForHWTest(
+          self._build_root, cwd, tempdir):
+        self.UploadBranchArtifact(tarball)
+
+  def BuildTastTarball(self):
+    """Build the tarball containing private Tast test bundles."""
+    with osutils.TempDir(prefix='cbuildbot-tast') as tempdir:
+      cwd = os.path.abspath(
+          os.path.join(self._build_root, 'chroot', 'build',
+                       self._current_board, 'build'))
+      logging.debug('Running commands.BuildTastBundleTarball')
+      tarball = commands.BuildTastBundleTarball(
+          self._build_root, cwd, tempdir)
+      if tarball:
+        self.UploadBranchArtifact(tarball)
+
   def PerformStage(self):
     """Archive and publish the factory build artifacts."""
     logging.info('Factory version: %s', self.branch_version)
@@ -259,3 +285,9 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
     self.CreateTestImageTar()
     self.CreateBranchMetadataJson()
     self.PushBoardImage()
+
+    # Upload any needed HWTest artifacts.
+    if (self._run.ShouldBuildAutotest() and
+        self._run.config.upload_hw_test_artifacts):
+      self.BuildAutotestTarballs()
+      self.BuildTastTarball()

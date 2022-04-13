@@ -73,6 +73,12 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
         return_value='/factory.zip')
     self.create_tar_mock = self.PatchObject(
         cros_build_lib, 'CreateTarball')
+    self.build_autotest_mock = self.PatchObject(
+        commands, 'BuildAutotestTarballsForHWTest',
+        return_value=[])
+    self.build_tast_mock = self.PatchObject(
+        commands, 'BuildTastBundleTarball',
+        return_value=None)
 
   def ConstructStage(self):
     self._run.attrs.version_info = manifest_version.VersionInfo(
@@ -193,6 +199,20 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             board='board'),
     ])
 
+    self.assertEqual(self.build_autotest_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/usr/local/build'),
+            '/tempdir'),
+    ])
+
+    self.assertEqual(self.build_tast_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/build'),
+            '/tempdir'),
+    ])
+
   def testDebug(self):
     """Tests sync command used by default."""
     self._Prepare(
@@ -305,4 +325,18 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
             archive_url=('gs://chromeos-image-archive/'
                          'board-factory-tryjob/R1-1.2.3-bNone'),
             board='board'),
+    ])
+
+    self.assertEqual(self.build_autotest_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/usr/local/build'),
+            '/tempdir'),
+    ])
+
+    self.assertEqual(self.build_tast_mock.call_args_list, [
+        mock.call(
+            self.workspace,
+            os.path.join(self.workspace, 'chroot/build/board/build'),
+            '/tempdir'),
     ])
