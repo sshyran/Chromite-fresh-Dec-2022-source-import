@@ -353,7 +353,10 @@ def EmergeWithLinting(input_proto, output_proto, _config):
 
   linter_findings = _fetch_clippy_lints(git_repo_path)
   linter_findings.extend(_fetch_tidy_lints(git_repo_path))
-  linter_findings = _filter_linter_findings(linter_findings, git_repo_path)
+
+  if input_proto.filter_modified:
+    linter_findings = _filter_linter_findings(linter_findings, git_repo_path)
+
   output_proto.findings.extend(linter_findings)
 
 
@@ -364,7 +367,7 @@ LINTER_CODES = {
 
 
 def _filter_linter_findings(findings, git_repo_path):
-  """Filters a findings to keep only those concerning modified lines."""
+  """Filters findings to keep only those concerning modified lines."""
   new_findings = []
   new_lines = _get_added_lines({git_repo_path: 'HEAD'})
   for finding in findings:

@@ -24,5 +24,6 @@
   },
   "chroot": {
     "path": ""
-  }
+  },
+  "filter_modified": true
 }
