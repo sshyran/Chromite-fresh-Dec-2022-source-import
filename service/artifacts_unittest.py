@@ -449,6 +449,11 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         'link/R37-5952.0.2014_06_12_2302-a1/dlc/sample-dlc/package/dlc.img')
     osutils.Touch(self.sample_dlc_image, makedirs=True)
 
+  def testExtendBuildPaths(self):
+    """Verifies that ExtendBuildPaths adds the correct elements."""
+    self.assertEqual(['a.bin', 'a.bin.json', 'a.bin.log'],
+                     artifacts.ExtendBinPaths('a.bin'))
+
   def testGenerateFullTestPayloads(self):
     """Verifies correctly generating full payloads."""
     bools = [
@@ -466,10 +471,9 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     minios_payload_path = os.path.join(
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
-    self.assertEqual(generated, [
-        cros_payload_path,
-        minios_payload_path,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload_path) +
+                     artifacts.ExtendBinPaths(minios_payload_path))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path),
         mock.call(self.target_image, minios_payload_path, minios=True),
@@ -492,9 +496,8 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     minios_payload_path = os.path.join(
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin')
-    self.assertEqual(generated, [
-        cros_payload_path,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload_path))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path),
         mock.call(self.target_image, minios_payload_path, minios=True),
@@ -541,10 +544,9 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_R37-'
         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    self.assertEqual(generated, [
-        cros_payload_path,
-        minios_payload_path,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload_path) +
+                     artifacts.ExtendBinPaths(minios_payload_path))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path,
                   src_image=self.target_image),
@@ -571,9 +573,8 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         'minios_R37-5952.0.2014_06_12_2302-a1_R37-'
         '5952.0.2014_06_12_2302-a1_link_delta_dev.bin')
-    self.assertEqual(generated, [
-        cros_payload_path,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload_path))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload_path,
                   src_image=self.target_image),
@@ -632,11 +633,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         ('dlc_sample-dlc_package_R37-'
          '5952.0.2014_06_12_2302-a1_link_full_dev.bin'))
-    self.assertEqual(generated, [
-        cros_payload,
-        minios_payload,
-        dlc_payload,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload) +
+                     artifacts.ExtendBinPaths(minios_payload) +
+                     artifacts.ExtendBinPaths(dlc_payload))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload),
         mock.call(self.target_image, minios_payload, minios=True),
@@ -667,10 +667,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         ('dlc_sample-dlc_package_R37-'
          '5952.0.2014_06_12_2302-a1_link_full_dev.bin'))
-    self.assertEqual(generated, [
-        cros_payload,
-        minios_payload,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload) +
+                     artifacts.ExtendBinPaths(minios_payload))
+
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload),
         mock.call(self.target_image, minios_payload, minios=True),
@@ -704,11 +704,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
          '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
-    self.assertEqual(generated, [
-        cros_payload,
-        minios_payload,
-        dlc_payload,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload) +
+                     artifacts.ExtendBinPaths(minios_payload) +
+                     artifacts.ExtendBinPaths(dlc_payload))
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload,
                   src_image=self.target_image),
@@ -744,10 +743,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         self.tempdir,
         ('dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-'
          '5952.0.2014_06_12_2302-a1_link_delta_dev.bin'))
-    self.assertEqual(generated, [
-        cros_payload,
-        minios_payload,
-    ])
+    self.assertEqual(generated,
+                     artifacts.ExtendBinPaths(cros_payload) +
+                     artifacts.ExtendBinPaths(minios_payload))
+
     paygen_mock.assert_has_calls([
         mock.call(self.target_image, cros_payload,
                   src_image=self.target_image),

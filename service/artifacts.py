@@ -447,6 +447,11 @@ def BundleTestUpdatePayloads(image_path: str, output_dir: str) -> List[str]:
   return payloads
 
 
+def ExtendBinPaths(cros_payload_path: str) -> List[str]:
+  """Return an array with corresponding .json and .log for a .bin."""
+  return [cros_payload_path, cros_payload_path + '.json',
+          cros_payload_path + '.log']
+
 def GenerateTestPayloads(target_image_path: str,
                          archive_dir: str,
                          full: bool = False,
@@ -464,7 +469,7 @@ def GenerateTestPayloads(target_image_path: str,
     dlc: Generate sample-dlc payload if available.
 
   Returns:
-    The list of payloads that were generated.
+    The list of artifacts that were generated.
   """
   real_target = os.path.realpath(target_image_path)
   # The path to the target should look something like this:
@@ -482,7 +487,7 @@ def GenerateTestPayloads(target_image_path: str,
     cros_payload_path = os.path.join(archive_dir, cros_name)
     if paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, cros_payload_path):
-      generated.append(cros_payload_path)
+      generated.extend(ExtendBinPaths(cros_payload_path))
     else:
       logging.info('CrOS full payload generation skipped.')
 
@@ -490,7 +495,7 @@ def GenerateTestPayloads(target_image_path: str,
     minios_payload_path = os.path.join(archive_dir, minios_name)
     if paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, minios_payload_path, minios=True):
-      generated.append(minios_payload_path)
+      generated.extend(ExtendBinPaths(minios_payload_path))
     else:
       logging.info('MiniOS full payload generation skipped.')
 
@@ -503,7 +508,7 @@ def GenerateTestPayloads(target_image_path: str,
     cros_payload_path = os.path.join(archive_dir, cros_name)
     if paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, cros_payload_path, src_image=target_image_path):
-      generated.append(cros_payload_path)
+      generated.extend(ExtendBinPaths(cros_payload_path))
     else:
       logging.info('CrOS delta payload generation skipped.')
 
@@ -513,7 +518,7 @@ def GenerateTestPayloads(target_image_path: str,
     if paygen_payload_lib.GenerateUpdatePayload(
         target_image_path, minios_payload_path, src_image=target_image_path,
         minios=True):
-      generated.append(minios_payload_path)
+      generated.extend(ExtendBinPaths(minios_payload_path))
     else:
       logging.info('MiniOS delta payload generation skipped.')
 
@@ -532,7 +537,7 @@ def GenerateTestPayloads(target_image_path: str,
       payload_path = os.path.join(archive_dir, name)
       if paygen_payload_lib.GenerateUpdatePayload(
           sample_dlc_image, payload_path):
-        generated.append(payload_path)
+        generated.extend(ExtendBinPaths(payload_path))
       else:
         logging.info('DLC (%s) full payload generation skipped.', dlc_id)
 
@@ -545,7 +550,7 @@ def GenerateTestPayloads(target_image_path: str,
       payload_path = os.path.join(archive_dir, name)
       if paygen_payload_lib.GenerateUpdatePayload(
           sample_dlc_image, payload_path, src_image=sample_dlc_image):
-        generated.append(payload_path)
+        generated.extend(ExtendBinPaths(payload_path))
       else:
         logging.info('DLC (%s) delta payload generation skipped.', dlc_id)
 
