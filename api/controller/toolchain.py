@@ -335,6 +335,12 @@ def EmergeWithLinting(input_proto, output_proto, _config):
   osutils.RmDir(TIDY_BASE_DIR, ignore_missing=True, sudo=True)
   osutils.SafeMakedirs(TIDY_BASE_DIR, 0o777, sudo=True)
 
+  # rm any existing temporary portage files from builds of affected packages:
+  # this is required to make sure lints are always regenerated
+  for package in packages:
+    cache_files_dir = f'{input_proto.sysroot.path}/var/cache/portage/{package}'
+    osutils.RmDir(cache_files_dir, ignore_missing=True)
+
   emerge_cmd = chroot_util.GetEmergeCommand(input_proto.sysroot.path)
   cros_build_lib.sudo_run(
       emerge_cmd + packages,
