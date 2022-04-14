@@ -139,7 +139,6 @@ class BuildPackagesRunConfig(object):
       dryrun: bool = False,
       usepkgonly: bool = False,
       workon: bool = True,
-      verbose: bool = False,
       install_auto_test: bool = True,
       autosetgov: bool = False,
       autosetgov_sticky: bool = False,
@@ -176,7 +175,6 @@ class BuildPackagesRunConfig(object):
       usepkgonly: Only use binary packages to bootstrap; abort if any are
         missing.
       workon: Force-build workon packages.
-      verbose: Show all output from parallel_emerge.
       install_auto_test: Build autotest client code.
       autosetgov: Automatically set cpu governor to 'performance'.
       autosetgov_sticky: Remember --autosetgov setting for future runs.
@@ -205,7 +203,6 @@ class BuildPackagesRunConfig(object):
     self.dryrun = dryrun
     self.usepkgonly = usepkgonly
     self.workon = workon
-    self.verbose = verbose
     self.install_auto_test = install_auto_test
     self.autosetgov = autosetgov
     self.autosetgov_sticky = autosetgov_sticky
@@ -254,9 +251,6 @@ class BuildPackagesRunConfig(object):
 
     if not self.install_auto_test:
       args.append('--nowithautotest')
-
-    if self.verbose:
-      args.append('--showoutput')
 
     if not self.workon:
       args.append('--noworkon')
@@ -388,9 +382,6 @@ class BuildPackagesRunConfig(object):
 
     if self.rebuild_dep:
       flags.append('--rebuild-if-new-rev')
-
-    if self.verbose:
-      flags.append('--show-output')
 
     return flags
 

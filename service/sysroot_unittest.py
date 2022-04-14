@@ -494,13 +494,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
 
     self.assertIn('--jobs=10', flags)
 
-    # Test when verbose is specified.
-    instance = sysroot.BuildPackagesRunConfig(verbose=True)
-
-    flags = instance.GetEmergeFlags()
-
-    self.assertIn('--show-output', flags)
-
 
 class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
                         cros_test_lib.LoggingTestCase):

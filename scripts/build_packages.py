@@ -131,9 +131,6 @@ def get_parser() -> commandline.ArgumentParser:
       deprecation_note)
   build_shell_bool_style_args(parser, 'workon', True,
                               'Force-build workon packages.', deprecation_note)
-  build_shell_bool_style_args(parser, 'showoutput', False,
-                              'Show all output from parallel_emerge.',
-                              deprecation_note)
   build_shell_bool_style_args(
       parser, 'withrevdeps', True,
       'Calculate reverse dependencies on changed ebuilds.', deprecation_note)
@@ -370,7 +367,6 @@ def parse_args(argv: List[str]) -> Tuple[commandline.ArgumentParser,
       dryrun=opts.pretend,
       usepkgonly=opts.usepkgonly,
       workon=opts.workon,
-      verbose=opts.showoutput,
       install_auto_test=opts.withautotest,
       autosetgov=opts.autosetgov,
       autosetgov_sticky=opts.autosetgov_sticky,
