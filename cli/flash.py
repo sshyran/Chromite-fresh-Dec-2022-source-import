@@ -176,7 +176,7 @@ class USBImager(object):
     devices = osutils.ListBlockDevices()
     removable_devices = []
     for d in devices:
-      if d.TYPE == 'disk' and d.RM == '1':
+      if d.TYPE == 'disk' and (d.RM == '1' or d.HOTPLUG == '1'):
         removable_devices.append(d.NAME)
 
     return removable_devices

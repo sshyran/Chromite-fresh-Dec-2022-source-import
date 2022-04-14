@@ -1211,9 +1211,9 @@ def ListBlockDevices(device_path=None, in_bytes=False):
 
   Returns:
     A list of BlockDevice items with attributes 'NAME', 'RM', 'TYPE',
-    'SIZE' (RM stands for removable).
+    'SIZE', 'HOTPLUG' (RM stands for removable).
   """
-  keys = ['NAME', 'RM', 'TYPE', 'SIZE']
+  keys = ['NAME', 'RM', 'TYPE', 'SIZE', 'HOTPLUG']
   BlockDevice = collections.namedtuple('BlockDevice', keys)
 
   cmd = ['lsblk', '--pairs']

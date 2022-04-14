@@ -889,18 +889,18 @@ class DeviceInfoTests(cros_test_lib.RunCommandTestCase):
   """Tests methods retrieving information about devices."""
 
   FULL_OUTPUT = """
-NAME="sda" RM="0" TYPE="disk" SIZE="128G"
-NAME="sda1" RM="1" TYPE="part" SIZE="100G"
-NAME="sda2" RM="1" TYPE="part" SIZE="28G"
-NAME="sdc" RM="1" TYPE="disk" SIZE="7.4G"
-NAME="sdc1" RM="1" TYPE="part" SIZE="1G"
-NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G"
+NAME="sda" RM="0" TYPE="disk" SIZE="128G" HOTPLUG="0"
+NAME="sda1" RM="1" TYPE="part" SIZE="100G" HOTPLUG="1"
+NAME="sda2" RM="1" TYPE="part" SIZE="28G" HOTPLUG="1"
+NAME="sdc" RM="1" TYPE="disk" SIZE="7.4G" HOTPLUG="1"
+NAME="sdc1" RM="1" TYPE="part" SIZE="1G" HOTPLUG="1"
+NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G" HOTPLUG="1"
 """
 
   PARTIAL_OUTPUT = """
-NAME="sdc" RM="1" TYPE="disk" SIZE="7.4G"
-NAME="sdc1" RM="1" TYPE="part" SIZE="1G"
-NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G"
+NAME="sdc" RM="1" TYPE="disk" SIZE="7.4G" HOTPLUG="0"
+NAME="sdc1" RM="1" TYPE="part" SIZE="1G" HOTPLUG="0"
+NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G" HOTPLUG="0"
 """
 
   def testListBlockDevices(self):
@@ -911,10 +911,12 @@ NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G"
     self.assertEqual(devices[0].RM, '0')
     self.assertEqual(devices[0].TYPE, 'disk')
     self.assertEqual(devices[0].SIZE, '128G')
+    self.assertEqual(devices[0].HOTPLUG, '0')
     self.assertEqual(devices[3].NAME, 'sdc')
     self.assertEqual(devices[3].RM, '1')
     self.assertEqual(devices[3].TYPE, 'disk')
     self.assertEqual(devices[3].SIZE, '7.4G')
+    self.assertEqual(devices[3].HOTPLUG, '1')
 
   def testGetDeviceSize(self):
     """Tests that we can get the size of a device."""
