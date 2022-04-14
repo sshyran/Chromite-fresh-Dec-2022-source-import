@@ -1089,12 +1089,13 @@ wheel: <
     else:
       return [x.url for x in self.List(path, **kwargs)]
 
-  def List(self, path, details=False, **kwargs):
+  def List(self, path, details=False, generation=False, **kwargs):
     """Does a directory listing of the given gs path.
 
     Args:
       path: The path to get a listing of.
       details: Whether to include size/timestamp info.
+      generation: Whether to include metadata info & historical versions.
       kwargs: See options that DoCommand takes.
 
     Returns:
@@ -1105,9 +1106,14 @@ wheel: <
     if self.dry_run:
       return ret
 
+    if generation:
+      details = True
+
     cmd = ['ls']
     if details:
       cmd += ['-l']
+    if generation:
+      cmd += ['-a']
     cmd += ['--']
     if isinstance(path, str):
       cmd.append(path)

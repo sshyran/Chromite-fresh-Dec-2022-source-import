@@ -409,6 +409,16 @@ class UnmockedLSTest(cros_test_lib.TempDirTestCase):
       for f in found:
         l = len(os.path.basename(f.url)) * 10
         self.assertEqual(f.content_length, l)
+        self.assertIsNone(f.generation)
+        self.assertIsNone(f.metageneration)
+
+      # Check the generation listing with multiple paths.
+      found = ctx.List([f'{tempuri}/{x}' for x in files], generation=True)
+      self.assertGreater(len(found), 0)
+
+      for f in found:
+        self.assertGreater(f.generation, 0)
+        self.assertGreater(f.metageneration, 0)
 
 
 class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
