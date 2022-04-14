@@ -115,7 +115,10 @@ def get_parser() -> commandline.ArgumentParser:
   # TODO(rchandrasekar): Check if the board input is set.
   # Don't proceed if not set.
   parser.add_argument(
+      '-b',
       '--board',
+      '--build-target',
+      dest='board',
       default=cros_build_lib.GetDefaultBoard(),
       help='The board to build packages for.')
 
@@ -396,10 +399,9 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
   if not opts.board:
     parser.error('--board is required')
 
-  sysroot_path = opts.sysroot if opts.sysroot else f'/build/{opts.board}'
   build_target = build_target_lib.BuildTarget(
-      opts.board, build_root=sysroot_path)
-  board_root = sysroot_lib.Sysroot(sysroot_path)
+      opts.board, build_root=opts.sysroot)
+  board_root = sysroot_lib.Sysroot(build_target.root)
 
   try:
     # TODO(xcl): Update run_configs to have a common base set of configs for
