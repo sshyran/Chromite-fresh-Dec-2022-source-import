@@ -1699,6 +1699,10 @@
         {
           "board_name": "brya-manatee",
           "name": "anahera",
+          "test_suites": [
+            "sanity",
+            "au"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
@@ -1827,6 +1831,10 @@
         {
           "board_name": "brya-manatee",
           "name": "redrix",
+          "test_suites": [
+            "sanity",
+            "au"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
