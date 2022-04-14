@@ -13,6 +13,7 @@ example, `cros lint` will use the cli/cros/cros_lint.py subcommand.
 See cli/ for actual command implementations.
 """
 
+import argparse
 import logging
 
 from chromite.cli import command
@@ -42,7 +43,7 @@ def GetOptions(cmd_name=None):
       sub_parser = subparsers.add_parser(
           cmd_name, description=class_def.__doc__, epilog=epilog,
           caching=class_def.use_caching_options,
-          formatter_class=commandline.argparse.RawDescriptionHelpFormatter)
+          formatter_class=argparse.RawDescriptionHelpFormatter)
       class_def.AddParser(sub_parser)
     else:
       subparsers.add_parser(subcommand, add_help=False)

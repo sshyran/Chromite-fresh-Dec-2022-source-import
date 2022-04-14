@@ -18,6 +18,7 @@ By default, the script will write to /usr/bin/remote_toolchain_inputs.
 Contact: Chrome OS toolchain team.
 """
 
+import argparse
 import os
 from pathlib import Path
 from typing import List, Optional, Set
@@ -90,7 +91,7 @@ def _GenerateRemoteInputsFile(out_file: str, clang_path: Path) -> None:
       sudo=True)
 
 
-def ParseArgs(argv: Optional[List[str]]) -> commandline.argparse.Namespace:
+def ParseArgs(argv: Optional[List[str]]) -> argparse.Namespace:
   """Parses program arguments."""
   parser = commandline.ArgumentParser(description=__doc__)
 
