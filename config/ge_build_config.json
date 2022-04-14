@@ -1770,6 +1770,10 @@
         {
           "board_name": "brya-manatee",
           "name": "felwinter",
+          "test_suites": [
+            "sanity",
+            "au"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
