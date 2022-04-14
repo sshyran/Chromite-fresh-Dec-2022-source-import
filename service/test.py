@@ -59,20 +59,21 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
-def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
-                        chroot: 'chroot_lib.Chroot',
-                        packages: Optional[List[str]] = None,
-                        blocklist: Optional[List[str]] = None,
-                        was_built: bool = True,
-                        code_coverage: bool = False,
-                        testable_packages_optional: bool = False,
-                        filter_only_cros_workon: bool = False
-                       ) -> BuildTargetUnitTestResult:
+def BuildTargetUnitTest(
+    build_target: 'build_target_lib.BuildTarget',
+    chroot: Optional['chroot_lib.Chroot'],
+    packages: Optional[List[str]] = None,
+    blocklist: Optional[List[str]] = None,
+    was_built: bool = True,
+    code_coverage: bool = False,
+    testable_packages_optional: bool = False,
+    filter_only_cros_workon: bool = False) -> BuildTargetUnitTestResult:
   """Run the ebuild unit tests for the target.
 
   Args:
     build_target: The build target.
-    chroot: The chroot where the tests are running.
+    chroot: The chroot where the tests are running if this function is executed
+      from outside the SDK.
     packages: Packages to be tested. If none, uses all testable packages.
     blocklist: Tests to skip.
     was_built: Whether packages were built.
@@ -109,7 +110,7 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
   if not was_built:
     cmd.append('--assume-empty-sysroot')
 
-  extra_env = chroot.env
+  extra_env = chroot.env if chroot else {}
 
   if code_coverage:
     use_flags = extra_env.get('USE', '').split()
@@ -117,15 +118,17 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
       use_flags.append('coverage')
     extra_env['USE'] = ' '.join(use_flags)
 
+  tmpdir_ctx_mgr = chroot.tempdir if chroot else osutils.TempDir
   # Set up the failed package status file.
-  with chroot.tempdir() as tempdir:
-    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = chroot.chroot_path(tempdir)
+  with tmpdir_ctx_mgr() as tempdir:
+    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = (
+        chroot.chroot_path(tempdir) if chroot else tempdir)
 
     result = cros_build_lib.run(
         cmd,
         enter_chroot=True,
         extra_env=extra_env,
-        chroot_args=chroot.get_enter_args(),
+        chroot_args=chroot.get_enter_args() if chroot else None,
         check=False)
 
     failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
