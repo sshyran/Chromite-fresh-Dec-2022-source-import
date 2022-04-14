@@ -61,7 +61,7 @@ class OverallTest(cros_test_lib.MockTempDirTestCase):
     with mock.patch.object(cros_build_lib, 'IsInsideChroot'):
       cros_build_lib.IsInsideChroot.returnvalue = True
       cros_gen.main(
-          ['--board', BOARD, '--out-dir', self.tempdir,
+          ['--board', BOARD, '--out-dir', str(self.tempdir),
            '--out-file', TAR_NAME, '--package', constants.CHROME_CP])
       self.cg_mock.VerifyTarball(os.path.join(self.tempdir, TAR_NAME))
 
@@ -73,7 +73,7 @@ class InterfaceTest(cros_test_lib.TempDirTestCase):
 
   def _Parse(self, extra_args):
     return cros_gen.ParseCommandLine(
-        ['--board', BOARD, '--out-dir', self.tempdir,
+        ['--board', BOARD, '--out-dir', str(self.tempdir),
          '--package', constants.CHROME_CP] + extra_args)
 
   def testDefaultTargetName(self):
@@ -86,7 +86,7 @@ class InterfaceTest(cros_test_lib.TempDirTestCase):
     """Test getting the right target name with multiple pkgs."""
     pkgs = '%s virtual/target-os' % constants.CHROME_CP
     options = cros_gen.ParseCommandLine(
-        ['--board', BOARD, '--out-dir', self.tempdir,
+        ['--board', BOARD, '--out-dir', str(self.tempdir),
          '--package', pkgs])
 
     self.assertEqual(

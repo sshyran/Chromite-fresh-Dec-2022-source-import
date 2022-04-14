@@ -70,4 +70,4 @@ class CipdCacheTest(cros_test_lib.MockTempDirTestCase):
     path = cipd.GetCIPDFromCache()
     # This is more about making sure the func doesn't crash than inspecting the
     # internal caching logic (which is handled by lib.cache_unittest already).
-    self.assertTrue(path.startswith(self.tempdir))
+    self.assertTrue(path.startswith(str(self.tempdir)))

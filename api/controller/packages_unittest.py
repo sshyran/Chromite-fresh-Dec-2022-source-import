@@ -800,7 +800,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTempDirTestCase, ApiConfigMixin):
     """Helper to build a request."""
     request = packages_pb2.NeedsChromeSourceRequest()
 
-    request.install_request.sysroot.path = self.sysroot
+    request.install_request.sysroot.path = str(self.sysroot)
     request.install_request.sysroot.build_target.name = self.board
     request.install_request.flags.compile_source = compile_source
 

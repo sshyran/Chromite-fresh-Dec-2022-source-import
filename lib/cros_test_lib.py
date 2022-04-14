@@ -9,6 +9,7 @@ import contextlib
 import io
 import logging
 import os
+from pathlib import Path
 import re
 import sys
 import time
@@ -1030,7 +1031,7 @@ class TempDirTestCase(TestCase):
   def setUp(self):
     self._tempdir_obj = osutils.TempDir(prefix='chromite.test', set_global=True,
                                         delete=self.DELETE)
-    self.tempdir = self._tempdir_obj.tempdir
+    self.tempdir = Path(self._tempdir_obj.tempdir)
     # We must use addCleanup here so that inheriting TestCase classes can use
     # addCleanup with the guarantee that the tempdir will be cleand up _after_
     # their addCleanup has run. TearDown runs before cleanup functions.

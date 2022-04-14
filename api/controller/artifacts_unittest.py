@@ -120,7 +120,7 @@ class BundleImageArchivesTest(BundleTestCase):
 
   def testNoBuildTarget(self):
     """Test that no build target fails."""
-    request = self.BuildTargetRequest(output_dir=self.tempdir)
+    request = self.BuildTargetRequest(output_dir=str(self.tempdir))
     with self.assertRaises(cros_build_lib.DieSystemExit):
       artifacts.BundleImageArchives(request, self.response, self.api_config)
 
@@ -874,7 +874,7 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
 
     request = artifacts_pb2.BundleRequest()
     request.build_target.name = 'board'
-    request.output_dir = self.tempdir
+    request.output_dir = str(self.tempdir)
 
     artifacts.ExportCpeReport(request, self.response, self.validate_only_config)
 
@@ -886,7 +886,7 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
 
     request = artifacts_pb2.BundleRequest()
     request.build_target.name = 'board'
-    request.output_dir = self.tempdir
+    request.output_dir = str(self.tempdir)
 
     artifacts.ExportCpeReport(request, self.response, self.mock_call_config)
 
@@ -899,7 +899,7 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
 
   def testNoBuildTarget(self):
     request = artifacts_pb2.BundleRequest()
-    request.output_dir = self.tempdir
+    request.output_dir = str(self.tempdir)
 
     with self.assertRaises(cros_build_lib.DieSystemExit):
       artifacts.ExportCpeReport(request, self.response, self.api_config)
@@ -912,7 +912,7 @@ class ExportCpeReportTest(cros_test_lib.MockTempDirTestCase,
 
     request = artifacts_pb2.BundleRequest()
     request.build_target.name = 'board'
-    request.output_dir = self.tempdir
+    request.output_dir = str(self.tempdir)
 
     artifacts.ExportCpeReport(request, self.response, self.api_config)
 

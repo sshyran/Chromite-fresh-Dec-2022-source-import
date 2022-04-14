@@ -22,10 +22,9 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
   """Tests for the Goma object."""
 
   def setUp(self):
-    tempdir = Path(self.tempdir)
-    self.goma_dir = tempdir / 'goma'
-    self.goma_client_json = tempdir / 'goma_client.json'
-    self.chroot_dir = tempdir / 'chroot'
+    self.goma_dir = self.tempdir / 'goma'
+    self.goma_client_json = self.tempdir / 'goma_client.json'
+    self.chroot_dir = self.tempdir / 'chroot'
     self.chroot_tmp = self.chroot_dir / 'tmp'
     self.log_dir = self.chroot_tmp / 'log_dir'
 

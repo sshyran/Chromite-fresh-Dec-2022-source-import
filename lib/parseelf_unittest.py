@@ -106,7 +106,7 @@ class ELFParsingTest(cros_test_lib.TempDirTestCase):
         if lib[path] is None:
           continue
         self.assertFalse(lib[path].startswith('/'))
-        self.assertFalse(lib[path].startswith(self.tempdir))
+        self.assertFalse(lib[path].startswith(str(self.tempdir)))
         # Linked lib paths should be relative to the working directory or is the
         # ld dynamic loader.
         self.assertTrue(lib[path] == elf['interp'] or

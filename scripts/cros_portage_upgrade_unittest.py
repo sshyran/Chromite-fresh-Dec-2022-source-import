@@ -1601,9 +1601,10 @@ class RunBoardTest(CpuTestBase):
 
     self.assertExists(self.upstream_tmp_repo + '-README')
     mocked_upgrader._RunGit.assert_called_once_with(
-        self.tempdir, ['clone', '--branch', 'master', '--depth', '1',
-                       cpu.Upgrader.PORTAGE_GIT_URL,
-                       os.path.basename(self.upstream_tmp_repo)])
+        str(self.tempdir),
+        ['clone', '--branch', 'master', '--depth', '1',
+         cpu.Upgrader.PORTAGE_GIT_URL,
+         os.path.basename(self.upstream_tmp_repo)])
 
   def _TestRunBoard(self, pinfolist, upgrade=False, staged_changes=False):
     """Test Upgrader.RunBoard."""

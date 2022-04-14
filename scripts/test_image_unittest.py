@@ -103,7 +103,7 @@ class MainTest(TestImageTest):
     self.PatchObject(tempfile, 'mkdtemp', autospec=True,
                      return_value=expected_dir)
 
-    argv = [self.tempdir]
+    argv = [str(self.tempdir)]
     self.assertEqual(0, test_image.main(argv))
     self.assertEqual('/tmp', os.getcwd())
 
@@ -126,7 +126,7 @@ class MainTest(TestImageTest):
         'my-board',
         '--test_results_root',
         'your-root',
-        self.tempdir
+        str(self.tempdir),
     ]
     test_image.main(argv)
     # pylint: disable=protected-access

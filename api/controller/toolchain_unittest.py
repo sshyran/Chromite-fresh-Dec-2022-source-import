@@ -67,7 +67,7 @@ class PrepareForBuildTest(cros_test_lib.MockTempDirTestCase,
                   artifact_types=None,
                   input_artifacts=None,
                   additional_args=None):
-    chroot = common_pb2.Chroot(path=self.tempdir)
+    chroot = common_pb2.Chroot(path=str(self.tempdir))
     sysroot = sysroot_pb2.Sysroot(
         path='/build/board', build_target=common_pb2.BuildTarget(name='board'))
     return toolchain_pb2.PrepareForToolchainBuildRequest(
@@ -206,13 +206,13 @@ class BundleToolchainTest(cros_test_lib.MockTempDirTestCase,
     osutils.Touch(os.path.join(self.tempdir, 'empty'))
 
   def _GetRequest(self, artifact_types=None):
-    chroot = common_pb2.Chroot(path=self.tempdir)
+    chroot = common_pb2.Chroot(path=str(self.tempdir))
     sysroot = sysroot_pb2.Sysroot(
         path='/build/board', build_target=common_pb2.BuildTarget(name='board'))
     return toolchain_pb2.BundleToolchainRequest(
         chroot=chroot,
         sysroot=sysroot,
-        output_dir=self.tempdir,
+        output_dir=str(self.tempdir),
         artifact_types=artifact_types,
     )
 

@@ -6,7 +6,6 @@
 
 import json
 import os
-from pathlib import Path
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -233,7 +232,7 @@ inherit cros-workon superpower
     package_path = os.path.join(self.tempdir, package_name)
     os.makedirs(package_path)
     with self.assertRaises(failures_lib.PackageBuildFailure):
-      portage_util._CheckHasTest(self.tempdir, package_name)
+      portage_util._CheckHasTest(package_name, self.tempdir)
 
   def testEBuildGetAutotestTests(self):
     """Test extraction of test names from IUSE_TESTS variable.
@@ -1755,12 +1754,12 @@ class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):
 
   def testFindEbuildsForOverlaysOutput(self):
     mock_overlay_paths = [
-        Path(self.tempdir) / 'package1' / 'bar1',
-        Path(self.tempdir) / 'package2' / 'bar2',
+        self.tempdir / 'package1' / 'bar1',
+        self.tempdir / 'package2' / 'bar2',
     ]
     expected_ebuilds = [
-        Path(self.tempdir) / 'package1' / 'bar1' / 'bar1-1.0.ebuild',
-        Path(self.tempdir) / 'package2' / 'bar2' / 'bar2-2.0.ebuild',
+        self.tempdir / 'package1' / 'bar1' / 'bar1-1.0.ebuild',
+        self.tempdir / 'package2' / 'bar2' / 'bar2-2.0.ebuild',
     ]
 
     ebuilds = yield from portage_util.FindEbuildsForOverlays(mock_overlay_paths)

@@ -272,7 +272,7 @@ class PrepareMoblabVmImageCacheTest(MoblabVmTestCase):
 
     @contextlib.contextmanager
     def MountedMoblabDiskContextMock(*_args, **_kwargs):
-      yield self.tempdir
+      yield str(self.tempdir)
 
     self.PatchObject(moblab_vm.MoblabVm, 'MountedMoblabDiskContext',
                      MountedMoblabDiskContextMock)

@@ -5,7 +5,6 @@
 """Test the cros_sdk_lib module."""
 
 import os
-from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -780,10 +779,9 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
   """ChrootCreator tests."""
 
   def setUp(self):
-    tempdir = Path(self.tempdir)
-    self.chroot_path = tempdir / 'chroot'
-    self.sdk_tarball = tempdir / 'chroot.tar'
-    self.cache_dir = tempdir / 'cache_dir'
+    self.chroot_path = self.tempdir / 'chroot'
+    self.sdk_tarball = self.tempdir / 'chroot.tar'
+    self.cache_dir = self.tempdir / 'cache_dir'
 
     # We can't really verify these in any useful way atm.
     self.mount_mock = self.PatchObject(osutils, 'Mount')
@@ -792,7 +790,7 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         self.chroot_path, self.sdk_tarball, self.cache_dir)
 
     # Create a minimal tarball to extract during testing.
-    tar_dir = tempdir / 'tar_dir'
+    tar_dir = self.tempdir / 'tar_dir'
     D = cros_test_lib.Directory
     cros_test_lib.CreateOnDiskHierarchy(tar_dir, (
         D('etc', (

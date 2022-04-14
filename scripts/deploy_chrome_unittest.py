@@ -323,7 +323,7 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
     self.build_dir = os.path.join(self.tempdir, 'build_dir')
     self.common_flags = ['--board', _TARGET_BOARD,
                          '--build-dir', self.build_dir, '--staging-only',
-                         '--cache-dir', self.tempdir]
+                         '--cache-dir', str(self.tempdir)]
     self.sdk_mock = self.StartPatcher(cros_chrome_sdk_unittest.SDKFetcherMock())
     self.PatchObject(
         osutils, 'SourceEnvironment', autospec=True,
@@ -367,7 +367,7 @@ class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):
     self.deploy = self._GetDeployChrome(
         list(_REGULAR_TO) + ['--board', _TARGET_BOARD,
                              '--build-dir', self.build_dir, '--staging-only',
-                             '--cache-dir', self.tempdir, '--sloppy'])
+                             '--cache-dir', str(self.tempdir), '--sloppy'])
 
   def getCopyPath(self, source_path):
     """Return a chrome_util.Path or None if not present."""

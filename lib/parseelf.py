@@ -7,6 +7,7 @@
 import io
 import os
 import struct
+from typing import Union
 
 from chromite.third_party import lddtree
 from chromite.third_party.pyelftools.elftools.common import utils
@@ -94,7 +95,9 @@ def ParseELFSymbols(elf):
   return imp, exp
 
 
-def ParseELF(root, rel_path, ldpaths=None, parse_symbols=False):
+def ParseELF(
+    root: Union[str, os.PathLike],
+    rel_path, ldpaths=None, parse_symbols=False):
   """Parse the ELF file.
 
   Loads and parses the passed elf file.
@@ -112,6 +115,9 @@ def ParseELF(root, rel_path, ldpaths=None, parse_symbols=False):
     If the passed file isn't a supported ELF file, returns None. Otherwise,
     returns a dict() with information about the parsed ELF.
   """
+  # TODO(vapier): Convert to Path instead.
+  root = str(root)
+
   # Ensure root has a trailing / so removing the root prefix also removes any
   # / from the beginning of the path.
   root = root.rstrip('/') + '/'

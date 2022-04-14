@@ -9,7 +9,7 @@ functionality that can eventually be centralized here.
 """
 
 import os
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING, Union
 
 from chromite.lib import constants
 from chromite.lib import osutils
@@ -33,7 +33,7 @@ class Chroot(object):
   """Chroot class."""
 
   def __init__(self,
-               path: Optional[str] = None,
+               path: Optional[Union[str, os.PathLike]] = None,
                cache_dir: Optional[str] = None,
                chrome_root: Optional[str] = None,
                env: Optional[Dict[str, str]] = None,
@@ -50,7 +50,9 @@ class Chroot(object):
       remoteexec: Interface for utilizing remoteexec client.
     """
     # Strip trailing / if present for consistency.
-    self._path = (path or constants.DEFAULT_CHROOT_PATH).rstrip('/')
+    # TODO(vapier): Switch this to Path instead of str.
+    self._path = (
+        str(path) if path else constants.DEFAULT_CHROOT_PATH).rstrip('/')
     self._is_default_path = not bool(path)
     self._env = env
     self.goma = goma

@@ -41,7 +41,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
 
     # Set env vars.
     os.environ.update({
-        'GLOG_log_dir': self.tempdir,
+        'GLOG_log_dir': str(self.tempdir),
         'BUILDBOT_BUILDERNAME': 'builder-name',
         'BUILDBOT_MASTERNAME': 'master-name',
         'BUILDBOT_SLAVENAME': 'slave-name',
@@ -103,7 +103,7 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
         del os.environ[env]
 
     os.environ.update({
-        'GLOG_log_dir': self.tempdir,
+        'GLOG_log_dir': str(self.tempdir),
     })
 
     self.PatchObject(cros_build_lib, 'GetHostName', lambda: 'stub-host-name')

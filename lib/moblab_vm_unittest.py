@@ -340,7 +340,7 @@ class MoblabVmTestCase(cros_test_lib.MockTempDirTestCase):
     self.testSuccessfulCreateNoDutDir()
     vmsetup = moblab_vm.MoblabVm(self.workspace)
     with vmsetup.MountedMoblabDiskContext() as mounted_path:
-      self.assertStartsWith(mounted_path, self.tempdir)
+      self.assertStartsWith(mounted_path, str(self.tempdir))
 
 
 class HelperFunctionsTestCase(unittest.TestCase):

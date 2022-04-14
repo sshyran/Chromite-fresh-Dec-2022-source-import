@@ -5,7 +5,6 @@
 """chroot_lib unit tests."""
 
 import os
-from pathlib import Path
 
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
@@ -33,10 +32,9 @@ class ChrootTest(cros_test_lib.MockTempDirTestCase):
     expected = ['--chroot', path, '--cache-dir', cache_dir,
                 '--chrome-root', chrome_root]
 
-    tempdir = Path(self.tempdir)
-    reclient_dir = tempdir / 'cipd' / 'rbe'
+    reclient_dir = self.tempdir / 'cipd' / 'rbe'
     osutils.SafeMakedirs(reclient_dir)
-    reproxy_cfg_file = tempdir / 'reclient_cfgs' / 'reproxy_config.cfg'
+    reproxy_cfg_file = self.tempdir / 'reclient_cfgs' / 'reproxy_config.cfg'
     osutils.Touch(reproxy_cfg_file, makedirs=True)
     remoteexec = remoteexec_util.Remoteexec(
         reclient_dir=reclient_dir,

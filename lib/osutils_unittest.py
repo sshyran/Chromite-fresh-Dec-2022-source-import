@@ -55,7 +55,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
   def testReadWritePath(self):
     """Verify we can write data to a Path, and then read it back."""
-    filename = Path(self.tempdir) / 'foo'
+    filename = self.tempdir / 'foo'
     data = 'alsdkfjasldkfjaskdlfjasdf'
     self.assertEqual(osutils.WriteFile(filename, data), None)
     self.assertEqual(osutils.ReadFile(filename), data)
@@ -247,7 +247,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
   def testSafeMakedirsWithPathObject(self):
     """Test creating directory trees work (existing or not) on |Path|s."""
-    path = Path(self.tempdir) / 'a' / 'b' / 'c' / 'd' / 'e'
+    path = self.tempdir / 'a' / 'b' / 'c' / 'd' / 'e'
     self.assertTrue(osutils.SafeMakedirs(path))
     self.assertExists(path)
     self.assertFalse(osutils.SafeMakedirs(path))
@@ -820,9 +820,8 @@ class FindInPathParentsTest(cros_test_lib.TempDirTestCase):
 
   def testFoundPath(self):
     """Target (Path) is found."""
-    tempdir = Path(self.tempdir)
-    found = osutils.FindInPathParents('.repo', tempdir / self.START_PATH)
-    self.assertEqual(found, tempdir / 'a' / '.repo')
+    found = osutils.FindInPathParents('.repo', self.tempdir / self.START_PATH)
+    self.assertEqual(found, self.tempdir / 'a' / '.repo')
 
   def testNotFoundStr(self):
     """Target is not found."""
@@ -833,7 +832,7 @@ class FindInPathParentsTest(cros_test_lib.TempDirTestCase):
   def testNotFoundPath(self):
     """Target is not found."""
     found = osutils.FindInPathParents(
-        'does.not/exist', Path(self.tempdir) / self.START_PATH)
+        'does.not/exist', self.tempdir / self.START_PATH)
     self.assertEqual(found, None)
 
 
@@ -931,11 +930,11 @@ class ChdirTests(cros_test_lib.MockTempDirTestCase):
   """Tests for ChdirContext."""
 
   def testChdir(self):
-    current_dir = os.getcwd()
-    self.assertNotEqual(self.tempdir, os.getcwd())
+    current_dir = Path.cwd()
+    self.assertNotEqual(self.tempdir, current_dir)
     with osutils.ChdirContext(self.tempdir):
-      self.assertEqual(self.tempdir, os.getcwd())
-    self.assertEqual(current_dir, os.getcwd())
+      self.assertEqual(self.tempdir, Path.cwd())
+    self.assertEqual(current_dir, Path.cwd())
 
 
 class MountOverlayTest(cros_test_lib.MockTempDirTestCase):
@@ -1266,7 +1265,7 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
 
   def testCopyingSymlinksAndFilesWithPathArgs(self):
     """Copying given |Path| arguments works properly for symlinks+files."""
-    in_dir = Path(self.tempdir) / 'input'
+    in_dir = self.tempdir / 'input'
     osutils.SafeMakedirs(in_dir)
 
     tmp_file = in_dir / 'a.txt'
@@ -1274,7 +1273,7 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
     tmp_file_link = tmp_file.with_suffix('.link')
     tmp_file_link.symlink_to(tmp_file)
 
-    out_dir = Path(self.tempdir) / 'output'
+    out_dir = self.tempdir / 'output'
     osutils.SafeMakedirs(out_dir)
     osutils.CopyDirContents(in_dir, out_dir, symlinks=True)
 
@@ -1285,7 +1284,7 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
 
   def testCopyingSubDirWithPathArgs(self):
     """Copying given |Path| arguments works properly for subdirectories."""
-    in_dir = Path(self.tempdir) / 'input'
+    in_dir = self.tempdir / 'input'
     osutils.SafeMakedirs(in_dir)
 
     tmp_file = in_dir / 'subdir' / 'a.txt'
@@ -1293,7 +1292,7 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
 
     tmp_file.write_text('aaa', encoding='utf-8')
 
-    out_dir = Path(self.tempdir) / 'output'
+    out_dir = self.tempdir / 'output'
     osutils.SafeMakedirs(out_dir)
     osutils.CopyDirContents(in_dir, out_dir, symlinks=True)
 

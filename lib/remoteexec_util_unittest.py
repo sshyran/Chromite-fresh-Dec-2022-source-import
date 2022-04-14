@@ -16,9 +16,9 @@ class TestRemoteexecUtil(cros_test_lib.MockTempDirTestCase,
   """Tests for remoteexec_util."""
 
   def setUp(self):
-    tempdir = Path(self.tempdir)
-    self.reclient_dir = tempdir / 'cipd' / 'rbe'
-    self.reproxy_cfg_file = tempdir / 'reclient_cfgs' / 'reproxy_config.cfg'
+    self.reclient_dir = self.tempdir / 'cipd' / 'rbe'
+    self.reproxy_cfg_file = (
+        self.tempdir / 'reclient_cfgs' / 'reproxy_config.cfg')
 
     osutils.SafeMakedirs(self.reclient_dir)
     osutils.SafeMakedirs(self.reproxy_cfg_file)

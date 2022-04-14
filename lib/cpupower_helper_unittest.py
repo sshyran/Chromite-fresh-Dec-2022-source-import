@@ -34,14 +34,12 @@ class TestCpuGovernorSwitch(cros_test_lib.MockTempDirTestCase,
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, cpu_policy_files)
 
     self.config_file = (
-        Path(self.tempdir) / config_dir_name /
+        self.tempdir / config_dir_name /
         chromite_config.AUTO_SET_GOV_CONFIG.name)
-    self.PatchObject(
-        chromite_config, 'DIR', new=Path(self.tempdir) / config_dir_name)
+    self.PatchObject(chromite_config, 'DIR', new=self.tempdir / config_dir_name)
     self.PatchObject(
         chromite_config, 'AUTO_SET_GOV_CONFIG', new=self.config_file)
-    self.PatchObject(
-        cpupower_helper, '_CPU_PATH', new=Path(self.tempdir) / 'cpu')
+    self.PatchObject(cpupower_helper, '_CPU_PATH', new=self.tempdir / 'cpu')
 
     self.cpu0_available_gov = Path(
         'cpu/cpu0/cpufreq/scaling_available_governors')
@@ -171,14 +169,12 @@ class TestNoCpuGovernors(cros_test_lib.MockTempDirTestCase,
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, cpu_policy_files)
 
     self.config_file = (
-        Path(self.tempdir) / config_dir_name /
+        self.tempdir / config_dir_name /
         chromite_config.AUTO_SET_GOV_CONFIG.name)
-    self.PatchObject(
-        chromite_config, 'DIR', new=Path(self.tempdir) / config_dir_name)
+    self.PatchObject(chromite_config, 'DIR', new=self.tempdir / config_dir_name)
     self.PatchObject(
         chromite_config, 'AUTO_SET_GOV_CONFIG', new=self.config_file)
-    self.PatchObject(
-        cpupower_helper, '_CPU_PATH', new=Path(self.tempdir) / 'cpu')
+    self.PatchObject(cpupower_helper, '_CPU_PATH', new=self.tempdir / 'cpu')
 
   def testNoCpuGovernorFile(self):
     """Test when the scaling governor path file does not exist."""

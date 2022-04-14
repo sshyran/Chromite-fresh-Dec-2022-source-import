@@ -22,9 +22,6 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
   """Tests for FindTarget()."""
 
   def setUp(self):
-    # TODO)vapier): Switch tempdir to pathlib.
-    self.tempdir = Path(self.tempdir)
-
     # Create a skeleton chromite layout.
     # tmpdir/
     #   chromite/

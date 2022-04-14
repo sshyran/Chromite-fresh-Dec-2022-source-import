@@ -41,7 +41,7 @@ class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):
   def SetupCommandMock(self, cmd_args):
     """Set up command mock."""
     self.cmd_mock = MockDebugCommand(
-        cmd_args, base_args=['--cache-dir', self.tempdir])
+        cmd_args, base_args=['--cache-dir', str(self.tempdir)])
     self.StartPatcher(self.cmd_mock)
 
   def setUp(self):

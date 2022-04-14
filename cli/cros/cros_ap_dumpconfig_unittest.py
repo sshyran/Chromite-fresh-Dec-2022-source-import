@@ -5,7 +5,6 @@
 """This module tests the cros dump-ap-config command."""
 
 import json
-from pathlib import Path
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -25,7 +24,7 @@ class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
   def testCrosConfigDump(self):
     """Run cros dump-ap-config, read the output, and check validity."""
     allowed_servos = servo_lib.VALID_SERVOS + ('ssh',)
-    output_file = Path(self.tempdir) / 'tmp.json'
+    output_file = self.tempdir / 'tmp.json'
     cmd = ['cros', 'ap', 'dump-config', '-o', str(output_file)]
     cros_build_lib.run(cmd)
     with output_file.open(encoding='utf-8') as fp:

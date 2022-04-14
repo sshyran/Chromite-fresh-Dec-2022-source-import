@@ -1201,7 +1201,7 @@ class TarballTests(cros_test_lib.TempDirTestCase):
     path = Path(path)
     cros_build_lib.CreateTarball(
         path, Path(self.inputDir), inputs=self.inputs)
-    cros_build_lib.ExtractTarball(path, Path(self.tempdir))
+    cros_build_lib.ExtractTarball(path, self.tempdir)
 
   def testExtractFailureWithMissingFile(self):
     """Verify that stderr from tar is printed if in encounters an error."""
@@ -1336,7 +1336,7 @@ class ClearShadowLocksTests(cros_test_lib.TempDirTestCase,
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, file_layout)
 
   def testClearShadowLocksSuccess(self):
-    cros_build_lib.ClearShadowLocks(Path(self.tempdir))
+    cros_build_lib.ClearShadowLocks(self.tempdir)
 
     self.assertTrue(os.path.exists(f'{self.tempdir}/etc/test.lock'))
     self.assertTrue(os.path.exists(f'{self.tempdir}/etc/testfile.txt'))

@@ -195,7 +195,7 @@ class TestSignImage(cros_test_lib.RunCommandTempDirTestCase):
                   extra_env={'PATH': 'path'}),
     ]
     self.assertEqual(expected_rc, self.rc.call_args_list)
-    self.assertTrue(rootfs_dir.startswith(self.tempdir + '/'))
+    self.assertTrue(rootfs_dir.startswith(f'{self.tempdir}/'))
     self.assertTrue(rootfs_dir.endswith('/dir-3'))
     self.assertEqual('/keydir', keyset.key_dir)
     self.uefi_mock.assert_called_once_with(

@@ -506,9 +506,9 @@ class TestWriteSignerNotes(cros_test_lib.RunCommandTempDirTestCase):
     keyset.AddKey(root_key)
 
     sha1sum = keys_unittest.MOCK_SHA1SUM
-    expected_output = ['Signed with keyset in ' + self.tempdir,
-                       'recovery: ' + sha1sum,
-                       'root: ' + sha1sum]
+    expected_output = [f'Signed with keyset in {self.tempdir}',
+                       f'recovery: {sha1sum}',
+                       f'root: {sha1sum}']
 
     version_signer = io.StringIO()
     firmware.WriteSignerNotes(keyset, version_signer)
@@ -532,8 +532,8 @@ class TestWriteSignerNotes(cros_test_lib.RunCommandTempDirTestCase):
       keyset.AddKey(k)
 
     sha1sum = keys_unittest.MOCK_SHA1SUM
-    expected_header = ['Signed with keyset in ' + self.tempdir,
-                       'recovery: ' + sha1sum,
+    expected_header = [f'Signed with keyset in {self.tempdir}',
+                       f'recovery: {sha1sum}',
                        "List sha1sum of all loem/model's signatures:"]
 
     expected_loems = ['loem1: ' + sha1sum,

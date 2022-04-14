@@ -6,7 +6,6 @@
 
 import copy
 import os
-from pathlib import Path
 import shutil
 import threading
 from unittest import mock
@@ -52,9 +51,9 @@ class ParserTest(cros_test_lib.MockTempDirTestCase):
     """Tests that our example parser works normally."""
     with MockChromeSDKCommand(
         ['--board', SDKFetcherMock.BOARD],
-        base_args=['--cache-dir', self.tempdir]) as bootstrap:
+        base_args=['--cache-dir', str(self.tempdir)]) as bootstrap:
       self.assertEqual(bootstrap.inst.options.board, SDKFetcherMock.BOARD)
-      self.assertEqual(bootstrap.inst.options.cache_dir, self.tempdir)
+      self.assertEqual(bootstrap.inst.options.cache_dir, str(self.tempdir))
 
   def testVersion(self):
     """Tests that a platform version is allowed."""
@@ -236,7 +235,8 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     osutils.SafeMakedirs(
         os.path.join(self.chrome_root, 'src', 'build', 'args', 'chromeos'))
 
-    base_args = None if default_cache_dir else ['--cache-dir', self.tempdir]
+    base_args = (None if default_cache_dir else
+                 ['--cache-dir', str(self.tempdir)])
     self.cmd_mock = MockChromeSDKCommand(cmd_args, base_args=base_args)
     self.StartPatcher(self.cmd_mock)
     self.cmd_mock.UnMockAttr('Run')
@@ -255,7 +255,7 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
         external_mocks=[self.rc_mock]))
 
     # This needs to occur before initializing MockChromeSDKCommand.
-    self.bashrc = Path(self.tempdir) / 'bashrc'
+    self.bashrc = self.tempdir / 'bashrc'
     self.PatchObject(chromite_config, 'CHROME_SDK_BASHRC', new=self.bashrc)
 
     self.PatchObject(osutils, 'SourceEnvironment',
@@ -680,7 +680,7 @@ class GomaTest(cros_test_lib.MockTempDirTestCase,
 
     self.cmd_mock = MockChromeSDKCommand(
         ['--board', SDKFetcherMock.BOARD, 'true'],
-        base_args=['--cache-dir', self.tempdir])
+        base_args=['--cache-dir', str(self.tempdir)])
     self.StartPatcher(self.cmd_mock)
 
   def VerifyGomaError(self):

@@ -126,7 +126,7 @@ class PathHandler(object):
 
     self.field = field
     self.destination = destination
-    self.prefix = prefix or ''
+    self.prefix = '' if prefix is None else str(prefix)
     self.delete = delete
     self.tempdir = None
     self.reset = reset

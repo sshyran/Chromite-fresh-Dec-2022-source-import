@@ -7,6 +7,7 @@
 import contextlib
 import datetime
 import os
+from pathlib import Path
 from unittest import mock
 
 from chromite.third_party.google.protobuf import json_format
@@ -131,6 +132,10 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     for pkg in blocklist or []:
       formatted_blocklist.append({'category': pkg.category,
                                   'package_name': pkg.package})
+
+    # Protobufs can't handle Path objects.
+    if isinstance(result_path, Path):
+      result_path = str(result_path)
 
     return test_pb2.BuildTargetUnitTestRequest(
         build_target={'name': board}, result_path=result_path,

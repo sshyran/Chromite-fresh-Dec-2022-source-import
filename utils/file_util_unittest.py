@@ -5,7 +5,6 @@
 """Tests for file_util."""
 
 import os
-from pathlib import Path
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -35,7 +34,7 @@ class OpenTests(cros_test_lib.TempDirTestCase):
 
   def testPath(self):
     """Read/write a file by Path."""
-    path = Path(self.tempdir) / 'test.txt'
+    path = self.tempdir / 'test.txt'
     with file_util.Open(path, mode='w') as fp:
       fp.write('foo')
     with file_util.Open(path, mode='r') as fp:
