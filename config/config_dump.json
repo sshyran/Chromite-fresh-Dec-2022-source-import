@@ -8001,6 +8001,10 @@
         "boards": [
             "corsola"
         ],
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"corsola\",\n    \"name\": \"kingler\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"corsola\",\n    \"name\": \"krabby\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "corsola-release-tryjob": {
@@ -8021,6 +8025,10 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"corsola\",\n    \"name\": \"kingler\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"corsola\",\n    \"name\": \"krabby\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
@@ -14480,8 +14488,13 @@
         "boards": [
             "guybrush-kernelnext"
         ],
-        "chrome_sdk_build_chrome": false,
         "important": false,
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"dewatt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"nipperkin\",\n    \"test_suites\": []\n}"
+        ],
         "vm_tests_override": null
     },
     "guybrush-kernelnext-release-tryjob": {
@@ -14489,7 +14502,6 @@
         "boards": [
             "guybrush-kernelnext"
         ],
-        "chrome_sdk_build_chrome": false,
         "debug": true,
         "display_label": "tryjob",
         "hw_tests": [
@@ -14503,6 +14515,12 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try",
+        "models": [
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"dewatt\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush360\",\n    \"test_suites\": []\n}",
+            "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"nipperkin\",\n    \"test_suites\": []\n}"
+        ],
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
