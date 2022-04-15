@@ -172,6 +172,11 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
             TEST_SERVICE_DIR,
             'plan/docker/build-dockerimage.sh',
         ),
+    'cros-test-cloud':
+        os.path.join(
+            PLATFORM_DEV_DIR,
+            'test/container/utils/cloudbuild-dockerimage.py'
+        ),
 }
 
 
@@ -269,7 +274,10 @@ def BuildTestServiceContainers(
 
       cmd += ['--tags', tags]
       cmd += ['--output', output_path]
-      cmd += labels
+
+      # Labels aren't support yet in cloudbuild script.
+      if human_name != 'cros-test-cloud':
+        cmd += labels
 
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
@@ -288,11 +296,17 @@ def BuildTestServiceContainers(
             )
         )
       else:
-        result.failure.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Failure(
-                error_message=cmd_result.stdout
-            )
-        )
+        # Do not fail on cros-test-cloud as it is experimental.
+        if human_name == 'cros-test-cloud':
+          result.success.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Success()
+          )
+        else:
+          result.failure.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Failure(
+                  error_message=cmd_result.stdout
+              )
+          )
 
       output_proto.results.append(result)
 
