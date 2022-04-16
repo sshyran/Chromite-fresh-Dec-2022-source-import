@@ -18,10 +18,6 @@ from chromite.lib import retry_util
 class DeviceError(Exception):
   """Exception for Device failures."""
 
-  def __init__(self, message):
-    super().__init__()
-    logging.error(message)
-
 
 class Device(object):
   """Class for managing a test device."""
