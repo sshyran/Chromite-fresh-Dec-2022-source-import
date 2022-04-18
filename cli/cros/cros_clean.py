@@ -255,11 +255,25 @@ class CleanCommand(command.CliCommand):
       # TODO: When sdk_lib/enter_chroot.sh is moved to chromite, we should unify
       # with those code paths.
       if not self.options.dry_run:
-        for subdir in ('ccache', 'host', 'target'):
-          osutils.SafeMakedirs(
-              os.path.join(self.options.cache_dir, 'distfiles', subdir))
-        os.chmod(
-            os.path.join(self.options.cache_dir, 'distfiles', 'ccache'), 0o2775)
+        distfiles_dir = os.path.join(self.options.cache_dir, 'distfiles')
+        osutils.SafeMakedirs(distfiles_dir)
+        os.chmod(distfiles_dir, 0o2775)
+
+        # The host & target subdirs aren't used anymore since we unified them,
+        # but if the cache is shared with older branches, we don't want to have
+        # files duplicated in them.  The unification happened in Jul 2020 for
+        # 13360.0.0+ / R86+, so we can prob drop this logic ~Jul 2028?
+        for subdir in ('host', 'target'):
+          subdir = os.path.join(distfiles_dir, subdir)
+          # Recreate the path if it isn't a symlink.
+          if not os.path.islink(subdir):
+            osutils.RmDir(subdir, ignore_missing=True, sudo=True)
+            # Have the subdirs point to the common (parent) dir.
+            os.symlink('.', subdir)
+
+        ccache_dir = os.path.join(distfiles_dir, 'ccache')
+        osutils.SafeMakedirs(ccache_dir)
+        os.chmod(ccache_dir, 0o2775)
 
     if self.options.chromite:
       logging.debug('Clean chromite workdirs.')
