@@ -91,11 +91,11 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
     self.RunStage()
 
     # Validate properties.
-    self.assertEqual(self.stage.dummy_config,
+    self.assertEqual(self.stage.branch_config,
                      'board-factory')
-    self.assertEqual(self.stage.dummy_version,
+    self.assertEqual(self.stage.branch_version,
                      'R1-1.2.3')
-    self.assertEqual(self.stage.dummy_archive_url,
+    self.assertEqual(self.stage.branch_archive_url,
                      'gs://chromeos-image-archive/board-factory/R1-1.2.3')
 
     self.assertEqual(self.build_image_mock.call_args_list, [
@@ -203,11 +203,11 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
     self.RunStage()
 
     # Validate properties.
-    self.assertEqual(self.stage.dummy_config,
+    self.assertEqual(self.stage.branch_config,
                      'board-factory-tryjob')
-    self.assertEqual(self.stage.dummy_version,
+    self.assertEqual(self.stage.branch_version,
                      'R1-1.2.3-bNone')
-    self.assertEqual(self.stage.dummy_archive_url,
+    self.assertEqual(self.stage.branch_archive_url,
                      'gs://chromeos-image-archive/board-factory-tryjob/'
                      'R1-1.2.3-bNone')
 

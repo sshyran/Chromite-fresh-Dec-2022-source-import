@@ -37,22 +37,22 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
                            generic_stages.ArchivingStageMixin):
   """Base class for workspace archive stages.
 
-  The expectation is that the archive stages will be creating a "dummy" upload
+  The expectation is that the archive stages will be creating a "branch" upload
   that looks like an older style branched infrastructure build would have
   generated in addition to a factory branch set of archive results.
   """
-  DUMMY_NAME = 'dummy'
+  BRANCH_NAME = 'branch'
 
   @property
-  def dummy_config(self):
+  def branch_config(self):
     """Uniqify the name across boards."""
     if self._run.options.debug:
-      return '%s-%s-tryjob' % (self._current_board, self.DUMMY_NAME)
+      return '%s-%s-tryjob' % (self._current_board, self.BRANCH_NAME)
     else:
-      return '%s-%s' % (self._current_board, self.DUMMY_NAME)
+      return '%s-%s' % (self._current_board, self.BRANCH_NAME)
 
   @property
-  def dummy_version(self):
+  def branch_version(self):
     """Uniqify the name across boards."""
     workspace_version_info = self.GetWorkspaceVersionInfo()
 
@@ -69,7 +69,7 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
           workspace_version_info.VersionString())
 
   @property
-  def dummy_archive_url(self):
+  def branch_archive_url(self):
     """Uniqify the name across boards."""
     return self.UniqifyArchiveUrl(config_lib.GetSiteParams().ARCHIVE_URL)
 
@@ -82,11 +82,11 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
     Returns:
       The unique archive URL.
     """
-    return os.path.join(archive_url, self.dummy_config, self.dummy_version)
+    return os.path.join(archive_url, self.branch_config, self.branch_version)
 
-  def GetDummyArchiveUrls(self):
-    """Returns upload URLs for dummy artifacts based on artifacts.json."""
-    upload_urls = [self.dummy_archive_url]
+  def GetBranchArchiveUrls(self):
+    """Returns upload URLs for branch artifacts based on artifacts.json."""
+    upload_urls = [self.branch_archive_url]
     artifacts_file = portage_util.ReadOverlayFile(
         'scripts/artifacts.json',
         board=self._current_board,
@@ -97,10 +97,10 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
       upload_urls += [self.UniqifyArchiveUrl(url) for url in extra_upload_urls]
     return upload_urls
 
-  def UploadDummyArtifact(self, path):
-    """Upload artifacts to the dummy build results."""
-    logging.info('UploadDummyArtifact: %s', path)
-    with osutils.TempDir(prefix='dummy') as tempdir:
+  def UploadBranchArtifact(self, path):
+    """Upload artifacts to the branch build results."""
+    logging.info('UploadBranchArtifact: %s', path)
+    with osutils.TempDir(prefix='branch') as tempdir:
       artifact_path = os.path.join(
           tempdir,
           '%s/%s' % (self._current_board, os.path.basename(path)))
@@ -113,14 +113,14 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
       self.UploadArtifact(artifact_path, archive=True)
 
     gs_context = gs.GSContext(dry_run=self._run.options.debug_forced)
-    for url in self.GetDummyArchiveUrls():
-      logging.info('Uploading dummy artifact to %s...', url)
+    for url in self.GetBranchArchiveUrls():
+      logging.info('Uploading branch artifact to %s...', url)
       with timeout_util.Timeout(20 * 60):
-        logging.info('Dummy artifact from: %s', path)
+        logging.info('Branch artifact from: %s', path)
         gs_context.CopyInto(path, url, parallel=True, recursive=True)
 
   def PushBoardImage(self):
-    """Helper method to run push_image against the dummy boards artifacts."""
+    """Helper method to run push_image against the branch boards artifacts."""
     # This helper script is only available on internal manifests currently.
     if not self._run.config['internal']:
       raise UnsafeBuildForPushImage("Can't use push_image on external builds.")
@@ -132,13 +132,13 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
     # This runs TOT pushimage against the build artifacts for the branch.
     commands.PushImages(
         board=self._current_board,
-        archive_url=self.dummy_archive_url,
+        archive_url=self.branch_archive_url,
         dryrun=self._run.options.debug or not self._run.config['push_image'],
         profile=self._run.options.profile or self._run.config['profile'],
         sign_types=self._run.config['sign_types'] or [],
         buildroot=self._build_root)
 
-  def CreateDummyMetadataJson(self):
+  def CreateBranchMetadataJson(self):
     """Create/publish the factory build artifact for the current board."""
     workspace_version_info = self.GetWorkspaceVersionInfo()
 
@@ -146,12 +146,12 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
     board_metadata = self._run.attrs.metadata.GetDict()
     board_metadata['boards'] = [self._current_board]
     board_metadata['branch'] = self._run.config.workspace_branch
-    board_metadata['version_full'] = self.dummy_version
+    board_metadata['version_full'] = self.branch_version
     board_metadata['version_milestone'] = workspace_version_info.chrome_branch
     board_metadata['version_platform'] = workspace_version_info.VersionString()
     board_metadata['version'] = {
         'platform': workspace_version_info.VersionString(),
-        'full': self.dummy_version,
+        'full': self.branch_version,
         'milestone': workspace_version_info.chrome_branch,
     }
 
@@ -171,13 +171,13 @@ class WorkspaceArchiveBase(workspace_stages.WorkspaceStageBase,
       osutils.WriteFile(metadata_path, pformat.json(board_metadata),
                         atomic=True)
 
-      self.UploadDummyArtifact(metadata_path)
+      self.UploadBranchArtifact(metadata_path)
 
 
 class FactoryArchiveStage(WorkspaceArchiveBase):
   """Generates and publishes factory specific build artifacts."""
 
-  DUMMY_NAME = 'factory'
+  BRANCH_NAME = 'factory'
 
   def CreateFactoryZip(self):
     """Create/publish the firmware build artifact for the current board."""
@@ -208,9 +208,9 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
           self._current_board,
           zip_dir,
           factory_install_symlink,
-          self.dummy_version)
+          self.branch_version)
 
-      self.UploadDummyArtifact(os.path.join(zip_dir, filename))
+      self.UploadBranchArtifact(os.path.join(zip_dir, filename))
 
   def CreateTestImageTar(self):
     """Create and upload chromiumos_test_image.tar.xz.
@@ -228,7 +228,7 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
                                       buildroot=self._build_root),
           compression=cros_build_lib.COMP_XZ)
 
-      self.UploadDummyArtifact(tarball_path)
+      self.UploadBranchArtifact(tarball_path)
 
   def CreateFactoryProjectToolkitsZip(self):
     """Create/publish the factory project toolkits for the current board."""
@@ -239,23 +239,23 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
         'project_toolkits',
         commands.FACTORY_PROJECT_PACKAGE)
     if os.path.exists(toolkits_src_path):
-      self.UploadDummyArtifact(toolkits_src_path)
+      self.UploadBranchArtifact(toolkits_src_path)
 
   def PerformStage(self):
     """Archive and publish the factory build artifacts."""
-    logging.info('Factory version: %s', self.dummy_version)
-    logging.info('Archive build as: %s', self.dummy_config)
+    logging.info('Factory version: %s', self.branch_version)
+    logging.info('Archive build as: %s', self.branch_config)
 
-    # Link dummy build artifacts from build.
-    dummy_http_url = gs.GsUrlToHttp(self.dummy_archive_url,
-                                    public=False, directory=True)
+    # Link branch build artifacts from build.
+    branch_http_url = gs.GsUrlToHttp(self.branch_archive_url,
+                                     public=False, directory=True)
 
-    label = '%s factory [%s]' % (self._current_board, self.dummy_version)
-    cbuildbot_alerts.PrintBuildbotLink(label, dummy_http_url)
+    label = '%s factory [%s]' % (self._current_board, self.branch_version)
+    cbuildbot_alerts.PrintBuildbotLink(label, branch_http_url)
 
     # factory_image.zip
     self.CreateFactoryZip()
     self.CreateFactoryProjectToolkitsZip()
     self.CreateTestImageTar()
-    self.CreateDummyMetadataJson()
+    self.CreateBranchMetadataJson()
     self.PushBoardImage()
