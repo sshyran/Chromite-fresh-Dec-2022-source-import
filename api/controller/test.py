@@ -8,6 +8,7 @@ Handles all testing related functionality, it is not itself a test.
 """
 
 import functools
+import logging
 import os
 import string
 import subprocess
@@ -298,6 +299,9 @@ def BuildTestServiceContainers(
       else:
         # Do not fail on cros-test-cloud as it is experimental.
         if human_name == 'cros-test-cloud':
+
+          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                        human_name, cmd_result.stdout, cmd_result.stderr)
           result.success.CopyFrom(
               test_pb2.TestServiceContainerBuildResult.Success()
           )
