@@ -18,11 +18,11 @@ from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import goma_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import sysroot
-from chromite.utils import metrics
 
 
 _ACCEPTED_LICENSES = '@CHROMEOS'
@@ -235,7 +235,7 @@ def InstallToolchain(input_proto, output_proto, _config):
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.require_each('use_flags', ['flag'])
 @validate.validation_complete
-@metrics.collect_metrics
+@metrics_lib.collect_metrics
 def InstallPackages(input_proto, output_proto, _config):
   """Install packages into a sysroot, building as necessary and permitted."""
   compile_source = (

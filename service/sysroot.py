@@ -20,12 +20,12 @@ from chromite.lib import constants
 from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
 from chromite.lib import goma_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
 from chromite.lib import workon_helper
-from chromite.utils import metrics
 
 if TYPE_CHECKING:
   from chromite.lib import binpkg
@@ -666,7 +666,7 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
     try:
       # REVIEW: discuss which dimensions to flatten into the metric
       # name other than target.name...
-      with metrics.timer('service.sysroot.BuildPackages.RunCommand'):
+      with metrics_lib.timer('service.sysroot.BuildPackages.RunCommand'):
         cros_build_lib.run(cmd, extra_env=extra_env)
     except cros_build_lib.RunCommandError as e:
       failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)

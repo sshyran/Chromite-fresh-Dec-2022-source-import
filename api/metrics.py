@@ -11,7 +11,7 @@ module will be creating.
 import collections
 import logging
 
-from chromite.utils import metrics
+from chromite.lib import metrics_lib
 
 
 def deserialize_metrics_log(output_events, prefix=None):
@@ -37,11 +37,11 @@ def deserialize_metrics_log(output_events, prefix=None):
       return name
 
   # Reduce over the input events to append output_events.
-  for input_event in metrics.read_metrics_events():
-    if input_event.op == metrics.OP_START_TIMER:
+  for input_event in metrics_lib.read_metrics_events():
+    if input_event.op == metrics_lib.OP_START_TIMER:
       timers[input_event.arg] = (input_event.name,
                                  input_event.timestamp_epoch_millis)
-    elif input_event.op == metrics.OP_STOP_TIMER:
+    elif input_event.op == metrics_lib.OP_STOP_TIMER:
       # TODO(wbbradley): Drop the None fallback https://crbug.com/1001909.
       timer = timers.pop(input_event.arg, None)
       if timer is None:
@@ -54,28 +54,28 @@ def deserialize_metrics_log(output_events, prefix=None):
         output_event.timestamp_milliseconds = input_event.timestamp_epoch_millis
         output_event.duration_milliseconds = (
             output_event.timestamp_milliseconds - timer[1])
-    elif input_event.op == metrics.OP_NAMED_EVENT:
+    elif input_event.op == metrics_lib.OP_NAMED_EVENT:
       output_event = output_events.add()
       output_event.name = make_name(input_event.name)
       output_event.timestamp_milliseconds = input_event.timestamp_epoch_millis
-    elif input_event.op == metrics.OP_GAUGE:
+    elif input_event.op == metrics_lib.OP_GAUGE:
       output_event = output_events.add()
       output_event.name = make_name(input_event.name)
       output_event.timestamp_milliseconds = input_event.timestamp_epoch_millis
       output_event.gauge = input_event.arg
-    elif input_event.op == metrics.OP_INCREMENT_COUNTER:
+    elif input_event.op == metrics_lib.OP_INCREMENT_COUNTER:
       counters[input_event.name] += input_event.arg
       counter_times[input_event.name] = max(
           input_event.timestamp_epoch_millis,
           counter_times.get(input_event.name, 0))
-    elif input_event.op == metrics.OP_DECREMENT_COUNTER:
+    elif input_event.op == metrics_lib.OP_DECREMENT_COUNTER:
       counters[input_event.name] -= input_event.arg
       counter_times[input_event.name] = max(
           input_event.timestamp_epoch_millis,
           counter_times.get(input_event.name, 0))
     else:
-      raise ValueError('unexpected op "%s" found in metric event: %s' % (
-          input_event.op, input_event))
+      raise ValueError('unexpected op "%s" found in metric event: %s' %
+                       (input_event.op, input_event))
 
   for counter, value in counters.items():
     output_event = output_events.add()

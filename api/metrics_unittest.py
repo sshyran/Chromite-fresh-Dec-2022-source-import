@@ -9,7 +9,7 @@ from unittest import mock
 from chromite.api import metrics as api_metrics
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.lib import cros_test_lib
-from chromite.utils import metrics
+from chromite.lib import metrics_lib
 
 
 class MetricsTest(cros_test_lib.TestCase):
@@ -19,11 +19,13 @@ class MetricsTest(cros_test_lib.TestCase):
     """Test timer math and deserialization into proto objects."""
     response = build_api_test_pb2.TestResultMessage()
     mock_events = [
-        metrics.MetricEvent(600, 'a.b', metrics.OP_START_TIMER, arg='100'),
-        metrics.MetricEvent(1000, 'a.b', metrics.OP_STOP_TIMER, arg='100'),
+        metrics_lib.MetricEvent(
+            600, 'a.b', metrics_lib.OP_START_TIMER, arg='100'),
+        metrics_lib.MetricEvent(
+            1000, 'a.b', metrics_lib.OP_STOP_TIMER, arg='100'),
     ]
     with mock.patch(
-        'chromite.api.metrics.metrics.read_metrics_events',
+        'chromite.api.metrics.metrics_lib.read_metrics_events',
         return_value=mock_events):
       api_metrics.deserialize_metrics_log(response.events)
       self.assertEqual(len(response.events), 1)
@@ -38,11 +40,11 @@ class MetricsTest(cros_test_lib.TestCase):
     """
     response = build_api_test_pb2.TestResultMessage()
     mock_events = [
-        metrics.MetricEvent(
-            1000, 'a.named_event', metrics.OP_NAMED_EVENT, arg=None),
+        metrics_lib.MetricEvent(
+            1000, 'a.named_event', metrics_lib.OP_NAMED_EVENT, arg=None),
     ]
     with mock.patch(
-        'chromite.api.metrics.metrics.read_metrics_events',
+        'chromite.api.metrics.metrics_lib.read_metrics_events',
         return_value=mock_events):
       api_metrics.deserialize_metrics_log(response.events, prefix='prefix')
       self.assertEqual(len(response.events), 1)
@@ -54,10 +56,10 @@ class MetricsTest(cros_test_lib.TestCase):
     """Test deserialization of a gauge."""
     response = build_api_test_pb2.TestResultMessage()
     mock_events = [
-        metrics.MetricEvent(1000, 'a.gauge', metrics.OP_GAUGE, arg=17),
+        metrics_lib.MetricEvent(1000, 'a.gauge', metrics_lib.OP_GAUGE, arg=17),
     ]
     with mock.patch(
-        'chromite.api.metrics.metrics.read_metrics_events',
+        'chromite.api.metrics.metrics_lib.read_metrics_events',
         return_value=mock_events):
       api_metrics.deserialize_metrics_log(response.events)
       self.assertEqual(len(response.events), 1)
@@ -69,17 +71,17 @@ class MetricsTest(cros_test_lib.TestCase):
     """Test deserialization of a counter."""
     response = build_api_test_pb2.TestResultMessage()
     mock_events = [
-        metrics.MetricEvent(
-            1000, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=1),
-        metrics.MetricEvent(
-            1001, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=2),
-        metrics.MetricEvent(
-            1002, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=3),
-        metrics.MetricEvent(
-            1003, 'a.counter', metrics.OP_DECREMENT_COUNTER, arg=4),
+        metrics_lib.MetricEvent(
+            1000, 'a.counter', metrics_lib.OP_INCREMENT_COUNTER, arg=1),
+        metrics_lib.MetricEvent(
+            1001, 'a.counter', metrics_lib.OP_INCREMENT_COUNTER, arg=2),
+        metrics_lib.MetricEvent(
+            1002, 'a.counter', metrics_lib.OP_INCREMENT_COUNTER, arg=3),
+        metrics_lib.MetricEvent(
+            1003, 'a.counter', metrics_lib.OP_DECREMENT_COUNTER, arg=4),
     ]
     with mock.patch(
-        'chromite.api.metrics.metrics.read_metrics_events',
+        'chromite.api.metrics.metrics_lib.read_metrics_events',
         return_value=mock_events):
       api_metrics.deserialize_metrics_log(response.events)
       self.assertEqual(len(response.events), 1)

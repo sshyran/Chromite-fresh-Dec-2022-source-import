@@ -25,11 +25,11 @@ from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
+from chromite.lib import metrics_lib
 from chromite.lib import sysroot_lib
 from chromite.service import packages as packages_service
 from chromite.scripts import pushimage
 from chromite.service import image
-from chromite.utils import metrics
 
 if TYPE_CHECKING:
   from chromite.api import api_config
@@ -210,7 +210,7 @@ def _CreateResponse(_input_proto, output_proto, _config):
 @faux.empty_completed_unsuccessfully_error
 @validate.require('build_target.name')
 @validate.validation_complete
-@metrics.collect_metrics
+@metrics_lib.collect_metrics
 def Create(input_proto: 'image_pb2.CreateImageRequest',
            output_proto: 'image_pb2.CreateImageResult',
            _config: 'api_config.ApiConfig'):

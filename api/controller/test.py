@@ -27,6 +27,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import goma_lib
 from chromite.lib import image_lib
+from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
@@ -35,7 +36,6 @@ from chromite.service import packages as packages_service
 from chromite.service import test
 from chromite.third_party.google.protobuf import json_format
 from chromite.utils import key_value_store
-from chromite.utils import metrics
 
 
 @faux.empty_success
@@ -88,7 +88,7 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
 @faux.error(_BuildTargetUnitTestFailedResponse)
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
-@metrics.collect_metrics
+@metrics_lib.collect_metrics
 def BuildTargetUnitTest(input_proto, output_proto, _config):
   """Run a build target's ebuild unit tests."""
   # Method flags.
