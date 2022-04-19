@@ -64,3 +64,25 @@ class MetricsTest(cros_test_lib.TestCase):
       self.assertEqual(response.events[0].name, 'a.gauge')
       self.assertEqual(response.events[0].timestamp_milliseconds, 1000)
       self.assertEqual(response.events[0].gauge, 17)
+
+  def testDeserializeCounter(self):
+    """Test deserialization of a counter."""
+    response = build_api_test_pb2.TestResultMessage()
+    mock_events = [
+        metrics.MetricEvent(
+            1000, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=1),
+        metrics.MetricEvent(
+            1001, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=2),
+        metrics.MetricEvent(
+            1002, 'a.counter', metrics.OP_INCREMENT_COUNTER, arg=3),
+        metrics.MetricEvent(
+            1003, 'a.counter', metrics.OP_DECREMENT_COUNTER, arg=4),
+    ]
+    with mock.patch(
+        'chromite.api.metrics.metrics.read_metrics_events',
+        return_value=mock_events):
+      api_metrics.deserialize_metrics_log(response.events)
+      self.assertEqual(len(response.events), 1)
+      self.assertEqual(response.events[0].name, 'a.counter')
+      self.assertEqual(response.events[0].timestamp_milliseconds, 1003)
+      self.assertEqual(response.events[0].gauge, 2)

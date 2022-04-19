@@ -14,7 +14,7 @@ import logging
 import os
 import tempfile
 import time
-from typing import NamedTuple, Union
+from typing import List, NamedTuple, Union
 import uuid
 
 from chromite.lib import locking
@@ -26,11 +26,15 @@ OP_START_TIMER = 'start-timer'
 OP_STOP_TIMER = 'stop-timer'
 OP_GAUGE = 'gauge'
 OP_NAMED_EVENT = 'event'
+OP_INCREMENT_COUNTER = 'increment'
+OP_DECREMENT_COUNTER = 'decrement'
 OP_EXPECTS_ARG = {
     OP_START_TIMER: True,
     OP_STOP_TIMER: True,
     OP_NAMED_EVENT: False,
     OP_GAUGE: True,
+    OP_INCREMENT_COUNTER: True,
+    OP_DECREMENT_COUNTER: True,
 }
 VALID_OPS = set(OP_EXPECTS_ARG)
 
@@ -130,6 +134,13 @@ def parse_gauge(terms):
   return MetricEvent(int(terms[0]), terms[1], terms[2], arg=int(terms[3]))
 
 
+def parse_counter(terms: List) -> MetricEvent:
+  """Parse an increment counter."""
+  arg = int(terms[3]) if len(terms) == 4 else 1
+  assert terms[2] in (OP_INCREMENT_COUNTER, OP_DECREMENT_COUNTER)
+  return MetricEvent(int(terms[0]), terms[1], terms[2], arg=arg)
+
+
 def get_metric_parser(op):
   """Return a function which can parse a line with this operator."""
   return {
@@ -137,6 +148,8 @@ def get_metric_parser(op):
       OP_STOP_TIMER: parse_timer,
       OP_NAMED_EVENT: parse_named_event,
       OP_GAUGE: parse_gauge,
+      OP_INCREMENT_COUNTER: parse_counter,
+      OP_DECREMENT_COUNTER: parse_counter,
   }[op]
 
 

@@ -8,6 +8,7 @@ See infra/proto/metrics.proto for a description of the type of record that this
 module will be creating.
 """
 
+import collections
 import logging
 
 from chromite.utils import metrics
@@ -24,6 +25,8 @@ def deserialize_metrics_log(output_events, prefix=None):
     output_events: A chromiumos.MetricEvent protobuf message.
     prefix: A string to prepend to all metric event names.
   """
+  counters = collections.defaultdict(int)
+  counter_times = {}
   timers = {}
 
   def make_name(name):
@@ -60,9 +63,25 @@ def deserialize_metrics_log(output_events, prefix=None):
       output_event.name = make_name(input_event.name)
       output_event.timestamp_milliseconds = input_event.timestamp_epoch_millis
       output_event.gauge = input_event.arg
+    elif input_event.op == metrics.OP_INCREMENT_COUNTER:
+      counters[input_event.name] += input_event.arg
+      counter_times[input_event.name] = max(
+          input_event.timestamp_epoch_millis,
+          counter_times.get(input_event.name, 0))
+    elif input_event.op == metrics.OP_DECREMENT_COUNTER:
+      counters[input_event.name] -= input_event.arg
+      counter_times[input_event.name] = max(
+          input_event.timestamp_epoch_millis,
+          counter_times.get(input_event.name, 0))
     else:
       raise ValueError('unexpected op "%s" found in metric event: %s' % (
           input_event.op, input_event))
+
+  for counter, value in counters.items():
+    output_event = output_events.add()
+    output_event.name = make_name(counter)
+    output_event.gauge = value
+    output_event.timestamp_milliseconds = counter_times[counter]
 
   # This is a sanity-check for unclosed timers.
   # TODO(wbbradley): Turn this back into an assert https://crbug.com/1001909.
