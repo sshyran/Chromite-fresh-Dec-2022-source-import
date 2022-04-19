@@ -8,13 +8,13 @@ See infra/proto/metrics.proto for a description of the type of record that this
 module will be creating.
 """
 
-import collections
 import contextlib
 import functools
 import logging
 import os
 import tempfile
 import time
+from typing import NamedTuple, Union
 import uuid
 
 from chromite.lib import locking
@@ -34,12 +34,19 @@ OP_EXPECTS_ARG = {
 }
 VALID_OPS = set(OP_EXPECTS_ARG)
 
-# MetricEvent stores one of a few different types of metric events. The 'arg'
-# parameter is an overloaded value which is discriminated by the 'op' parameter.
-# Timers utilize 'arg' as a key value for disambiguation, and gauges use the arg
-# as their gauge value.
-MetricEvent = collections.namedtuple('MetricEvent', ('timestamp_epoch_millis',
-                                                     'name', 'op', 'arg'))
+
+class MetricEvent(NamedTuple):
+  """Data class for metric events.
+
+  MetricEvent stores one of a few different types of metric events. The 'arg'
+  parameter is an overloaded value which is discriminated by the 'op' parameter.
+  Timers utilize 'arg' as a key value for disambiguation, and gauges and
+  counters use the arg as their gauge value.
+  """
+  timestamp_epoch_millis: int
+  name: str
+  op: str
+  arg: Union[int, str, None]
 
 
 class Error(Exception):
