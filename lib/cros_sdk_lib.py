@@ -1073,11 +1073,9 @@ $ cros_sdk --delete%s
     """
     logging.notice('Creating chroot. This may take a few minutes...')
 
-    # Unpack the chroot & reset the version.
+    # Unpack the chroot.
     self.chroot_path.mkdir(mode=0o755, parents=True, exist_ok=True)
     cros_build_lib.ExtractTarball(self.sdk_tarball, self.chroot_path)
-    updater = ChrootUpdater(self.chroot_path / CHROOT_VERSION_FILE[1:])
-    updater.SetVersion(0)
 
     self.init_timezone()
     self.init_user(user=user, uid=uid, gid=gid)
