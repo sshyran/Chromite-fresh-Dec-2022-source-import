@@ -14,17 +14,24 @@ from chromite.utils import metrics
 def _get_parser():
   """Create an argument parser for this script."""
   parser = commandline.ArgumentParser(description=__doc__)
-  parser.add_argument('--root', required=True, type='path',
-                      help='Specify the rootfs to investigate.')
-  parser.add_argument('--image-type',
-                      help='Specify the type of image being investigated. '
-                           'e.g. [base, dev, test]')
-  parser.add_argument('--partition-name',
-                      help='Specify the partition name. '
-                           'e.g. [rootfs, stateful]')
-  parser.add_argument('packages', nargs='*',
-                      help='Names of packages to investigate. Must be '
-                           'specified as category/package-version.')
+  parser.add_argument(
+      '--root',
+      required=True,
+      type='path',
+      help='Specify the rootfs to investigate.')
+  parser.add_argument(
+      '--image-type',
+      help='Specify the type of image being investigated. '
+      'e.g. [base, dev, test]')
+  parser.add_argument(
+      '--partition-name',
+      help='Specify the partition name. '
+      'e.g. [rootfs, stateful]')
+  parser.add_argument(
+      'packages',
+      nargs='*',
+      help='Names of packages to investigate. Must be '
+      'specified as category/package-version.')
   return parser
 
 
@@ -38,18 +45,18 @@ def generate_package_size_report(db, root, image_type, partition_name,
   timestamp = metrics.current_milli_time()
   for package_cpv, size in package_sizes:
     results[package_cpv] = size
-    metrics.append_metrics_log(timestamp,
-                               'package_size.%s.%s.%s' % (image_type,
-                                                          partition_name,
-                                                          package_cpv),
-                               metrics.OP_GAUGE,
-                               arg=size)
+    metrics.append_metrics_log(
+        timestamp,
+        'package_size.%s.%s.%s' % (image_type, partition_name, package_cpv),
+        metrics.OP_GAUGE,
+        arg=size)
     total_size += size
 
-  metrics.append_metrics_log(timestamp,
-                             'total_size.%s.%s' % (image_type, partition_name),
-                             metrics.OP_GAUGE,
-                             arg=total_size)
+  metrics.append_metrics_log(
+      timestamp,
+      'total_size.%s.%s' % (image_type, partition_name),
+      metrics.OP_GAUGE,
+      arg=total_size)
   return {'root': root, 'package_sizes': results, 'total_size': total_size}
 
 
@@ -64,8 +71,8 @@ def main(argv):
   db = portage_util.PortageDB(root=opts.root)
 
   if opts.packages:
-    installed_packages = portage_util.GenerateInstalledPackages(db, opts.root,
-                                                                opts.packages)
+    installed_packages = portage_util.GenerateInstalledPackages(
+        db, opts.root, opts.packages)
   else:
     installed_packages = db.InstalledPackages()
 
