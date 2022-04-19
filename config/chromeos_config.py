@@ -1907,6 +1907,10 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'sign_types': ['recovery'],
       },
 
+      'nissa-release': {
+          'sign_types': ['recovery', 'factory'],
+      },
+
       # --- end from here ---
 
       # Enable distributed ThinLTO (crbug/877722) only on nocturne for now.
