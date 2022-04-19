@@ -23,13 +23,14 @@ class MetricsTest(cros_test_lib.TestCase):
         MetricEvent(600, 'a.b', OP_START_TIMER, arg='100'),
         MetricEvent(1000, 'a.b', OP_STOP_TIMER, arg='100'),
     ]
-    with mock.patch('chromite.api.metrics.metrics.read_metrics_events',
-                    return_value=mock_events):
+    with mock.patch(
+        'chromite.api.metrics.metrics.read_metrics_events',
+        return_value=mock_events):
       metrics.deserialize_metrics_log(response.events)
       self.assertEqual(len(response.events), 1)
       self.assertEqual(response.events[0].name, 'a.b')
       self.assertEqual(response.events[0].timestamp_milliseconds, 1000)
-      self.assertEqual(response.events[0].duration_milliseconds, 1000-600)
+      self.assertEqual(response.events[0].duration_milliseconds, 1000 - 600)
 
   def testDeserializeNamedEvent(self):
     """Test deserialization of a named event.
@@ -40,8 +41,9 @@ class MetricsTest(cros_test_lib.TestCase):
     mock_events = [
         MetricEvent(1000, 'a.named_event', OP_NAMED_EVENT, arg=None),
     ]
-    with mock.patch('chromite.api.metrics.metrics.read_metrics_events',
-                    return_value=mock_events):
+    with mock.patch(
+        'chromite.api.metrics.metrics.read_metrics_events',
+        return_value=mock_events):
       metrics.deserialize_metrics_log(response.events, prefix='prefix')
       self.assertEqual(len(response.events), 1)
       self.assertEqual(response.events[0].name, 'prefix.a.named_event')
@@ -54,8 +56,9 @@ class MetricsTest(cros_test_lib.TestCase):
     mock_events = [
         MetricEvent(1000, 'a.gauge', OP_GAUGE, arg=17),
     ]
-    with mock.patch('chromite.api.metrics.metrics.read_metrics_events',
-                    return_value=mock_events):
+    with mock.patch(
+        'chromite.api.metrics.metrics.read_metrics_events',
+        return_value=mock_events):
       metrics.deserialize_metrics_log(response.events)
       self.assertEqual(len(response.events), 1)
       self.assertEqual(response.events[0].name, 'a.gauge')
