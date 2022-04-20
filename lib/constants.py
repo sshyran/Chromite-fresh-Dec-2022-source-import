@@ -774,7 +774,7 @@ CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME = 'code_coverage'
 CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR = ('%s.tar.xz'
                                        % CODE_COVERAGE_LLVM_JSON_SYMBOLS_NAME)
 CODE_COVERAGE_LLVM_FILE_NAME = 'coverage.json'
-ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.h', '.c']
+ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS = ['.cc', '.h', '.c', '.cpp']
 ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES = (
     '/*',
     '#include',
@@ -785,6 +785,15 @@ ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES = (
     '}\n',
     '};\n',
     '**/\n')
+ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES = (
+    # Exclude unit test code from zero coverage
+    'test.c',
+    'test.cc',
+    'tests.c',
+    'tests.cc',
+    'test.cpp',
+    'tests.cpp'
+)
 
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME

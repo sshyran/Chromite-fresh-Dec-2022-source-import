@@ -154,7 +154,9 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         path_to_src_directories=[path_to_src_directory],
         src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
-        exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME])
+        exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
+        exclude_files_suffixes=(),
+        source_root=self.tempdir)
 
     coverage_data = coverageJson['data'][0]['files']
 
@@ -186,6 +188,13 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
     self.assertEqual(usecase_2_cov_data['segments'],
                      USE_CASE_2_EXPECTED_SEGMENTS)
     self.assertEqual(usecase_3_cov_data['segments'], [])
+
+    self.assertEqual(usecase_1_cov_data['filename'],
+                     'src/' + USE_CASE_1_FILE_NAME)
+    self.assertEqual(usecase_2_cov_data['filename'],
+                     'src/' + USE_CASE_2_FILE_NAME)
+    self.assertEqual(usecase_3_cov_data['filename'],
+                     'src/' + USE_CASE_3_FILE_NAME)
 
   def testCreateLlvmCoverageJson(self):
     """Verify that CreateLlvmCoverageJson is returning coverage json."""
@@ -238,3 +247,28 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
     filenames = code_coverage_util.ExtractFilenames(coverage_json)
     self.assertEqual(2, len(filenames))
     self.assertEqual({'abc1', 'abc2'}, set(filenames))
+
+  def testGetLLVMCoverageWithFilesExcluded(self):
+    """Verify GetLLVMCoverageWithFilesExcluded is removing expected files"""
+
+    coverage_json = code_coverage_util.CreateLlvmCoverageJson([{
+        'filename': 'abc1.test.c'
+    }, {
+        'filename': 'abc2.test.cc'
+    }, {
+        'filename': 'abc2.tests.c'
+    }, {
+        'filename': 'a_unit_tests.cc'
+    }, {
+        'filename': 'abc2.test.cpp'
+    }, {
+        'filename': 'unittests.cpp'
+    }, {
+        'filename': 'src_code.cpp'
+    }])
+    coverage_json = code_coverage_util.GetLLVMCoverageWithFilesExcluded(
+        coverage_json, constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES)
+    filenames = code_coverage_util.ExtractFilenames(coverage_json)
+
+    self.assertEqual(1, len(filenames))
+    self.assertEqual('src_code.cpp', filenames[0])

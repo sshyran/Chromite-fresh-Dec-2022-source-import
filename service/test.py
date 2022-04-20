@@ -59,15 +59,15 @@ class BuildTargetUnitTestResult(object):
     return self.return_code == 0 and len(self.failed_pkgs) == 0
 
 
-def BuildTargetUnitTest(
-    build_target: 'build_target_lib.BuildTarget',
-    chroot: Optional['chroot_lib.Chroot'],
-    packages: Optional[List[str]] = None,
-    blocklist: Optional[List[str]] = None,
-    was_built: bool = True,
-    code_coverage: bool = False,
-    testable_packages_optional: bool = False,
-    filter_only_cros_workon: bool = False) -> BuildTargetUnitTestResult:
+def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
+                        chroot: Optional['chroot_lib.Chroot'],
+                        packages: Optional[List[str]] = None,
+                        blocklist: Optional[List[str]] = None,
+                        was_built: bool = True,
+                        code_coverage: bool = False,
+                        testable_packages_optional: bool = False,
+                        filter_only_cros_workon: bool = False
+                       ) -> BuildTargetUnitTestResult:
   """Run the ebuild unit tests for the target.
 
   Args:
@@ -557,6 +557,10 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
     coverage_dir = os.path.join(base_path, 'build/coverage_data')
     llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(
         paths=[coverage_dir])
+    llvm_generated_cov_json = (
+        code_coverage_util.GetLLVMCoverageWithFilesExcluded(
+            llvm_generated_cov_json,
+            constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES))
 
     # Generate zero coverage for all src files, excluding those which are
     # already present in llvm_generated_cov_json
@@ -571,7 +575,9 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
         ],
         src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
-        exclude_files=files_with_cov)
+        exclude_files=files_with_cov,
+        exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
+        source_root=constants.SOURCE_ROOT)
     # Merge generated zero coverage data and
     # llvm compiler generated coverage data.
     merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(

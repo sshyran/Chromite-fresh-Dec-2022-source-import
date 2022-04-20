@@ -7,7 +7,9 @@
 import json
 import logging
 import os
-from typing import List, Dict
+from typing import List, Dict, Tuple
+from pathlib import Path
+
 from chromite.lib import osutils
 
 ZERO_COVERAGE_EXEC_COUNT = 0
@@ -16,7 +18,7 @@ LLVM_COVERAGE_JSON_TYPE = 'llvm.coverage.json.export'
 LLVM_COVERAGE_VERSION = '2.0.1'
 
 
-def _IsInstrumented(line: str, exclude_line_prefixes: tuple) -> bool:
+def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
   """Returns if the input line is instrumented or not.
 
     Method does a simple prefix based check to determine if
@@ -88,8 +90,8 @@ def _ExtractLlvmCoverageData(coverage_json: Dict) -> List:
   return coverage_json['data'][0]['files']
 
 
-def _GenerateZeroCoverageLLVMForFile(file_path: str,
-                                     exclude_line_prefixes: tuple) -> Dict:
+def _GenerateZeroCoverageLLVMForFile(file_path: str, source_root: str,
+                                     exclude_line_prefixes: Tuple[str]) -> Dict:
   """Generates LLVM json formatted zero % coverage for the given file.
 
     Method to identify all the instrumented lines within a file and generate
@@ -100,6 +102,7 @@ def _GenerateZeroCoverageLLVMForFile(file_path: str,
 
   Args:
     file_path: path to the src file.
+    source_root: chromeos source root
     exclude_line_prefixes: Used to determine un-instrumented lines
     in the file.
 
@@ -144,33 +147,71 @@ def _GenerateZeroCoverageLLVMForFile(file_path: str,
           _CreateCloseSegment(line_index, len(lines[line_index - 1])))
 
     file_data = {}
-    file_data['filename'] = file_path
+    file_data['filename'] = str(Path(file_path).relative_to(source_root))
     file_data['segments'] = segments
     # Zoss does not use summary field, so keep it empty
     file_data['summary'] = {}
     return file_data
 
 
-def _ShouldExclude(file: str, exclude_files: List[str]) -> bool:
+def _ShouldExclude(file: str, exclude_files: List[str],
+                   exclude_files_suffixes: Tuple[str]) -> bool:
   """Determine if the filename should be excluded from zero coverage.
 
-    This method iterate over all exclude_files to search for file.
+    This method first does the suffixes based exclude check.
+    Next it iterates over all |exclude_files| to search for |file|.
     Note that LLVM generated file paths are absolute paths, however
-    file argument is relative to src.
+    |file| is relative to src.
 
   Args:
     file: Chromium src root relative file path.
     exclude_files: List of llvm generated file paths to exclude.
+    exclude_files_suffixes: Used to exclude files based on suffixes
 
   Returns:
-    True if a matching file was found in excluded_files,
-    otherwise False.
+    True if a file should be excluded otherwise False.
   """
-  for exclude_file in exclude_files:
-    if file in exclude_file:
-      return True
+  should_exclude = False
+  if file.endswith(exclude_files_suffixes):
+    should_exclude = True
+  else:
+    for exclude_file in exclude_files:
+      if file in exclude_file:
+        should_exclude = True
+        break
 
-  return False
+  if should_exclude:
+    logging.info('Excluding file %s from coverage reports.', file)
+  return should_exclude
+
+
+def GetLLVMCoverageWithFilesExcluded(coverage_json: Dict,
+                                     exclude_files_suffixes: Tuple[str]
+                                    ) -> Dict:
+  """Removes and returns required file entries from coverage json.
+
+     Method to remove file entries in coverage json which ends with one of
+     the suffixes mentioned in |exclude_files_suffixes|.
+
+  Args:
+    coverage_json: llvm coverage json
+    exclude_files_suffixes: Used to remove files based on suffixes
+
+  Returns:
+    llvm coverage json after required entries are removed.
+  """
+  if not exclude_files_suffixes:
+    return coverage_json
+
+  coverage_data = _ExtractLlvmCoverageData(coverage_json)
+  result_coverage_data = []
+  for entry in coverage_data:
+    if not entry['filename'].endswith(exclude_files_suffixes):
+      result_coverage_data.append(entry)
+    else:
+      logging.info('Excluding file %s from coverage reports.',
+                   entry['filename'])
+  return CreateLlvmCoverageJson(result_coverage_data)
 
 
 def MergeLLVMCoverageJson(coverage_json_1: Dict, coverage_json_2: Dict) -> Dict:
@@ -234,9 +275,11 @@ def CreateLlvmCoverageJson(coverage_data: List) -> Dict:
 
 def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
                              src_file_extensions: List[str],
-                             exclude_line_prefixes: tuple,
-                             exclude_files: List[str]) -> Dict:
-  """Generate zero coverage for all src files under  path_to_src_directories.
+                             exclude_line_prefixes: Tuple[str],
+                             exclude_files: List[str],
+                             exclude_files_suffixes: Tuple[str],
+                             source_root: str) -> Dict:
+  """Generate zero coverage for all src files under  |path_to_src_directories|.
 
      More detials on how to generate zero coverage: go/chromeos-zero-coverage.
 
@@ -245,6 +288,8 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
     src_file_extensions: Filter files based on these extensions.
     exclude_line_prefixes: Used to determine un-instrumented code.
     exclude_files: files to exclude from zero coverage.
+    exclude_files_suffixes: Used to exclude files based on suffixes
+    source_root: chromeos source root
 
   Returns:
     llvm format coverage json.
@@ -257,9 +302,11 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
         full_file_path = os.path.join(dirpath, filename)
         relative_file_path = full_file_path.replace(basedir, '')
         if (filename.endswith(tuple(src_file_extensions)) and
-            not _ShouldExclude(relative_file_path, exclude_files)):
+            not _ShouldExclude(relative_file_path, exclude_files,
+                               exclude_files_suffixes)):
 
           zero_cov = _GenerateZeroCoverageLLVMForFile(full_file_path,
+                                                      source_root,
                                                       exclude_line_prefixes)
 
           if zero_cov:
