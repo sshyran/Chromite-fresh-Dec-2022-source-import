@@ -71,6 +71,8 @@ ALGOS = (
     ('xz', ['xz', '-T%(threads)i'], (0, 3, 6, 9)),
     ('xz', ['pixz', '-t', '-p%(threads)i'], (0, 3, 6, 9)),
     ('zst', ['zstd', '-T%(threads)i', '--ultra'], (3, 6, 9, 19, 22)),
+    # NB: Z is an alias for 11 since -11 doesn't work (treated as -1 -1).
+    ('brotli', ['brotli'], (0, 3, 6, 9, 'Z')),
 )
 
 
