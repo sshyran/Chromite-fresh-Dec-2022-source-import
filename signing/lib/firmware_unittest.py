@@ -137,8 +137,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', fw_key.private,
-                          '--devkeyblock', fw_key.keyblock,
                           bios_bin, bios_out])
 
   def testGetCmdArgsWithDevKeys(self):
@@ -147,12 +145,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
 
     bios_bin = os.path.join(self.tempdir, 'bios.bin')
     bios_out = os.path.join(self.tempdir, 'bios.out')
-
-    # Add 'dev_firmware' keys and keyblock
-    dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
-    ks.AddKey(dev_fw_key)
-    keys_unittest.CreateStubPrivateKey(dev_fw_key)
-    keys_unittest.CreateStubKeyblock(dev_fw_key)
 
     fw_key = ks.keys['firmware_data_key']
     kernel_key = ks.keys['kernel_subkey']
@@ -164,8 +156,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', dev_fw_key.private,
-                          '--devkeyblock', dev_fw_key.keyblock,
                           bios_bin, bios_out])
 
   def testGetCmdArgsWithPreamble(self):
@@ -174,12 +164,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
 
     bios_bin = os.path.join(self.tempdir, 'bios.bin')
     bios_out = os.path.join(self.tempdir, 'bios.out')
-
-    # Add 'dev_firmware' keys and keyblock
-    dev_fw_key = keys.KeyPair('dev_firmware_data_key', keydir=self.tempdir)
-    ks.AddKey(dev_fw_key)
-    keys_unittest.CreateStubPrivateKey(dev_fw_key)
-    keys_unittest.CreateStubKeyblock(dev_fw_key)
 
     args = bs.GetFutilityArgs(ks, bios_bin, bios_out)
 
@@ -205,8 +189,6 @@ class TestBiosSigner(cros_test_lib.RunCommandTempDirTestCase):
                           '--keyblock', fw_key.keyblock,
                           '--kernelkey', kernel_key.public,
                           '--version', str(fw_key.version),
-                          '--devsign', fw_key.private,
-                          '--devkeyblock', fw_key.keyblock,
                           '--loemdir', loem_dir,
                           '--loemid', loem_id,
                           bios_bin, loem_dir])

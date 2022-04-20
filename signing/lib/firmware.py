@@ -47,16 +47,13 @@ class BiosSigner(signer.FutilitySigner):
     """
     fw_key = keyset.keys['firmware_data_key']
     kernel_key = keyset.keys['kernel_subkey']
-    dev_fw_key = keyset.keys.get('dev_firmware_data_key', fw_key)
 
     args = ['sign',
             '--type', 'bios',
             '--signprivate', fw_key.private,
             '--keyblock', fw_key.keyblock,
             '--kernelkey', kernel_key.public,
-            '--version', str(fw_key.version),
-            '--devsign', dev_fw_key.private,
-            '--devkeyblock', dev_fw_key.keyblock]
+            '--version', str(fw_key.version)]
 
     if self.preamble_flags is not None:
       args += ['--flags', str(self.preamble_flags)]
