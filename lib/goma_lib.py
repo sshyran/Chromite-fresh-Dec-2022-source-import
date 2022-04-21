@@ -4,7 +4,6 @@
 
 """Module to use goma and archive goma logs."""
 
-import collections
 import datetime
 import getpass
 import glob
@@ -15,21 +14,26 @@ from pathlib import Path
 import shlex
 import shutil
 import tempfile
-from typing import Optional, Union
+from typing import List, NamedTuple, Optional, Union
 
 from chromite.cbuildbot import goma_util
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 
-GomaApproach = collections.namedtuple(
-    'GomaApproach',
-    ['rpc_extra_params', 'server_host', 'arbitrary_toolchain_support'])
 
-# For the ArchivedFiles tuple, log_files is a list of strings. The value of
-# the stats_file and counterz_file entry can be a string or None.
-ArchivedFiles = collections.namedtuple(
-    'ArchivedFiles', ('stats_file', 'counterz_file', 'log_files'))
+class GomaApproach(NamedTuple):
+  """GomaApproach server and rpc details."""
+  rpc_extra_params: str
+  server_host: str
+  arbitrary_toolchain_support: bool
+
+
+class ArchivedFiles(NamedTuple):
+  """Goma files to be archived."""
+  stats_file: Optional[str]
+  counterz_file: Optional[str]
+  log_files: List[str]
 
 
 class SpecifiedFileMissingError(Exception):
