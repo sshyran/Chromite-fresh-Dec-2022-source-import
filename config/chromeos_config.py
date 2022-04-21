@@ -2060,7 +2060,6 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   # Boards to enable GCE image output, to support launching on GCE directly.
   _build_gce_image = frozenset([
       'betty-arc-r-release',
-      'betty-arc-s-release',
       'betty-arc-t-release',
   ])
 
