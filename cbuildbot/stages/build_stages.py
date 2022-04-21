@@ -676,13 +676,14 @@ class BuildPackagesStage(generic_stages.BoardSpecificBuilderStage,
     self._portage_extra_env.update(goma.GetChrootExtraEnv())
 
     # Keep GOMA_TMP_DIR for Report stage to upload logs.
-    self._run.attrs.metadata.UpdateWithDict({'goma_tmp_dir': goma.goma_tmp_dir})
+    self._run.attrs.metadata.UpdateWithDict(
+        {'goma_tmp_dir': str(goma.goma_tmp_dir)})
 
     # Mount goma directory and service account json file (if necessary)
     # into chroot.
-    chroot_args = ['--goma_dir', goma.chromeos_goma_dir]
+    chroot_args = ['--goma_dir', str(goma.chromeos_goma_dir)]
     if goma.goma_client_json:
-      chroot_args.extend(['--goma_client_json', goma.goma_client_json])
+      chroot_args.extend(['--goma_client_json', str(goma.goma_client_json)])
     return chroot_args
 
   def PerformStage(self):
