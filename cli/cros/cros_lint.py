@@ -21,7 +21,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
-from chromite.lint.linters import upstart, whitespace
+from chromite.lint.linters import owners, upstart, whitespace
 
 
 # Extract a script's shebang.
@@ -339,6 +339,14 @@ def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
       debug, capture_output=not debug)
 
 
+def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
+  """Run lints on OWNERS files."""
+  ret = cros_build_lib.CommandResult(f'cros lint "{path}"', returncode=0)
+  if not owners.lint_path(Path(path)):
+    ret.returncode = 1
+  return ret
+
+
 def _BreakoutDataByLinter(map_to_return, path):
   """Maps a linter method to the content of the |path|."""
   # Detect by content of the file itself.
@@ -386,6 +394,7 @@ _EXT_TO_LINTER_MAP = {
 # Map known filenames to a linter function.
 _FILENAME_PATTERNS_TO_LINTER_MAP = {
     frozenset({'DIR_METADATA'}): _DirMdLintFile,
+    frozenset({'OWNERS*'}): _OwnersLintFile,
 }
 
 
