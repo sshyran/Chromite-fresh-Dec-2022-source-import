@@ -8,6 +8,7 @@ import datetime
 import json
 import logging
 import math
+import pathlib
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -230,10 +231,16 @@ class CBuildbotMetadata(object):
       key: Key to return as JSON representation.  If None, returns all
            metadata.  Default: None
     """
+    def _serialize(obj):
+      if isinstance(obj, pathlib.PurePath):
+        return str(obj)
+      return obj
+
     if key:
-      return json.dumps(self.GetValue(key))
+      return json.dumps(self.GetValue(key), default=_serialize)
     else:
-      return json.dumps(self.GetDict(), indent=2, sort_keys=True)
+      return json.dumps(self.GetDict(), default=_serialize, indent=2,
+                        sort_keys=True)
 
   @staticmethod
   def GetReportMetadataDict(builder_run, get_statuses_from_slaves,
