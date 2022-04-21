@@ -16,6 +16,9 @@ def test_missing_file():
 
 GOOD_DATA = (
     'v@e.x\n',
+    # Shared owners includes.
+    f'include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS.foo\n'
+    f'include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS.foo\n'
 )
 
 @pytest.mark.parametrize('data', GOOD_DATA)
@@ -36,6 +39,19 @@ BAD_DATA = (
     '\tv@e.x\n',
     # Leading whitespace.
     '  v@e.x\n',
+    # Shared owners missing branch.
+    'include chromiumos/owners:/OWNERS.foo\n'
+    'include chromeos/owners:/OWNERS.foo\n'
+    # Shared owners bad branch.
+    'include chromiumos/owners:foo:/OWNERS.foo\n'
+    'include chromeos/owners:foo:/OWNERS.foo\n'
+    # Shared owners bad includes.
+    f'include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:OWNERS.foo\n'
+    f'include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:OWNERS.foo\n'
+    f'include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS\n'
+    f'include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS\n'
+    f'include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/foo/OWNERS\n'
+    f'include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/foo/OWNERS\n'
 )
 
 @pytest.mark.parametrize('data', BAD_DATA)
