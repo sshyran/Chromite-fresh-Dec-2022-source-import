@@ -266,20 +266,23 @@ DEFAULT_CTS_APFE_GSURI = 'gs://chromeos-cts-apfe/'
 ANDROID_PI_PACKAGE = 'android-container-pi'
 ANDROID_VMRVC_PACKAGE = 'android-vm-rvc'
 ANDROID_VMSC_PACKAGE = 'android-vm-sc'
-# T uses master until the T branch is cut.
-ANDROID_VMT_PACKAGE = 'android-vm-master'
+ANDROID_VMTM_PACKAGE = 'android-vm-tm'
+# U uses master until the U branch is cut.
+ANDROID_VMUDC_PACKAGE = 'android-vm-master'
 
 ANDROID_ALL_PACKAGES = frozenset([ANDROID_PI_PACKAGE,
                                   ANDROID_VMRVC_PACKAGE,
                                   ANDROID_VMSC_PACKAGE,
-                                  ANDROID_VMT_PACKAGE])
+                                  ANDROID_VMTM_PACKAGE,
+                                  ANDROID_VMUDC_PACKAGE])
 
 # List of supported Android branches. When adding/removing branches make sure
 # the ANDROID_BRANCH_TO_BUILD_TARGETS map is also updated.
 ANDROID_PI_BUILD_BRANCH = 'git_pi-arc'
 ANDROID_VMRVC_BUILD_BRANCH = 'git_rvc-arc'
 ANDROID_VMSC_BUILD_BRANCH = 'git_sc-arc-dev'
-ANDROID_VMT_BUILD_BRANCH = 'git_master-arc-dev'
+ANDROID_VMTM_BUILD_BRANCH = 'git_tm-arc-dev'
+ANDROID_VMUDC_BUILD_BRANCH = 'git_master-arc-dev'
 
 # Supported Android build targets for each branch. Maps from *_TARGET variables
 # in Android ebuilds to Android build targets. Used during Android uprev to fill
@@ -311,7 +314,11 @@ ANDROID_BRANCH_TO_BUILD_TARGETS = {
         'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
-    ANDROID_VMT_BUILD_BRANCH: {
+    ANDROID_VMTM_BUILD_BRANCH: {
+        'ARM64_USERDEBUG_TARGET': 'bertha_arm64-userdebug',
+        'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
+    },
+    ANDROID_VMUDC_BUILD_BRANCH: {
         'X86_64_USERDEBUG_TARGET': 'bertha_x86_64-userdebug',
     },
 }
