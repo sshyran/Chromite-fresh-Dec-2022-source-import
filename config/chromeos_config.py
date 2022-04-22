@@ -2305,35 +2305,6 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
       unittests=False,
   )
 
-  site_config.AddWithoutTemplate(
-      'chromeos-infra-go',
-      site_config.templates.no_hwtest_builder,
-      site_config.templates.no_unittest_builder,
-      site_config.templates.no_vmtest_builder,
-      site_config.templates.infra_builder,
-      boards=[],
-      display_label=config_lib.DISPLAY_LABEL_UTILITY,
-      build_type=constants.GENERIC_TYPE,
-      builder_class_name='infra_builders.InfraGoBuilder',
-      use_sdk=True,
-      prebuilts=constants.PUBLIC,
-      build_timeout=60 * 60,
-      description='Build Chromium OS infra Go binaries',
-      doc='https://goto.google.com/cros-infra-go-packaging',
-      schedule='triggered',
-      triggered_gitiles=[
-          [
-              'https://chromium.googlesource.com/chromiumos/infra/lucifer',
-              ['refs/heads/main']
-          ],
-          [
-              'https://chromium.googlesource.com/chromiumos/infra/'
-              'skylab_inventory',
-              ['refs/heads/main'],
-          ]
-      ],
-  )
-
 
 def TryjobMirrors(site_config):
   """Create tryjob specialized variants of every build config.

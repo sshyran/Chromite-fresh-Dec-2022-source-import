@@ -7519,49 +7519,6 @@
             "chrome_internal"
         ]
     },
-    "chromeos-infra-go": {
-        "boards": [],
-        "build_timeout": 3600,
-        "build_type": "generic",
-        "builder_class_name": "infra_builders.InfraGoBuilder",
-        "description": "Build Chromium OS infra Go binaries",
-        "display_label": "utility",
-        "doc": "https://goto.google.com/cros-infra-go-packaging",
-        "hw_tests_override": [],
-        "luci_builder": "Infra",
-        "prebuilts": "public",
-        "schedule": "triggered",
-        "triggered_gitiles": [
-            [
-                "https://chromium.googlesource.com/chromiumos/infra/lucifer",
-                [
-                    "refs/heads/main"
-                ]
-            ],
-            [
-                "https://chromium.googlesource.com/chromiumos/infra/skylab_inventory",
-                [
-                    "refs/heads/main"
-                ]
-            ]
-        ],
-        "unittests": false,
-        "vm_tests": []
-    },
-    "chromeos-infra-go-tryjob": {
-        "boards": [],
-        "build_timeout": 3600,
-        "build_type": "generic",
-        "builder_class_name": "infra_builders.InfraGoBuilder",
-        "debug": true,
-        "description": "Build Chromium OS infra Go binaries",
-        "display_label": "tryjob",
-        "doc": "https://goto.google.com/cros-infra-go-packaging",
-        "luci_builder": "Try",
-        "prebuilts": "public",
-        "unittests": false,
-        "vm_tests": []
-    },
     "chromiumos-sdk": {
         "archive_build_debug": true,
         "boards": [
