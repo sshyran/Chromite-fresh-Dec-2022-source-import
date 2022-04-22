@@ -316,7 +316,7 @@ class UntarTest(cros_test_lib.RunCommandTestCase):
     @mock.patch("chromite.lib.cros_build_lib.CompressionDetectType")
     def testNoneCompression(self, mock_compression_type):
         """Tests Untar with an uncompressed tarball."""
-        mock_compression_type.return_value = cros_build_lib.COMP_NONE
+        mock_compression_type.return_value = cros_build_lib.CompressionType.NONE
         cache.Untar("/some/tarball.tar.gz", "/")
         self.assertCommandContains(["tar", "-xpf", "/some/tarball.tar.gz"])
 

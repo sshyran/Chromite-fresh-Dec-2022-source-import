@@ -1087,7 +1087,7 @@ def _UploadStagingDir(
     cros_build_lib.CreateTarball(
         staging_tarball_path,
         staging_dir,
-        compression=cros_build_lib.COMP_ZSTD,
+        compression=cros_build_lib.CompressionType.ZSTD,
         extra_env={"ZSTD_CLEVEL": "9"},
     )
     logging.info(

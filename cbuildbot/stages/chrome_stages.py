@@ -225,7 +225,9 @@ class SimpleChromeArtifactsStage(
         env_bzip = os.path.join(chrome_dir, "environment.bz2")
         with osutils.TempDir(prefix="chrome-sdk-stage") as tempdir:
             # Convert from bzip2 to tar format.
-            bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+            bzip2 = cros_build_lib.FindCompressor(
+                cros_build_lib.CompressionType.BZIP2
+            )
             cros_build_lib.run(
                 [bzip2, "-d", env_bzip, "-c"],
                 stdout=os.path.join(tempdir, constants.CHROME_ENV_FILE),

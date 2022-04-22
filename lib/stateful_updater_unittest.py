@@ -58,7 +58,7 @@ class StatefulUpdaterTest(cros_test_lib.MockTempDirTestCase):
         cros_build_lib.CreateTarball(
             self._payload,
             tmp_stateful,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             inputs=stateful_dirs,
         )
         self.assertExists(self._payload)

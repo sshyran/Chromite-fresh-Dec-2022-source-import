@@ -1330,7 +1330,7 @@ class PaygenBuild(object):
         cmd_result = cros_build_lib.CreateTarball(
             tarball_path,
             control_dir,
-            compression=cros_build_lib.COMP_BZIP2,
+            compression=cros_build_lib.CompressionType.BZIP2,
             inputs=[self.CONTROL_FILE_SUBDIR],
         )
         if cmd_result.returncode != 0:

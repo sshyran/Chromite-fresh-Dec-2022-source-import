@@ -1075,7 +1075,7 @@ def BuildAndArchiveTestResultsTarball(src_dir, buildroot):
     cros_build_lib.CreateTarball(
         tarball_path,
         src_dir,
-        compression=cros_build_lib.COMP_GZIP,
+        compression=cros_build_lib.CompressionType.GZIP,
         chroot=chroot,
     )
     return os.path.basename(tarball_path)
@@ -3114,10 +3114,10 @@ def BuildTarball(
     Returns:
       Return value of cros_build_lib.CreateTarball.
     """
-    compressor = cros_build_lib.COMP_NONE
+    compressor = cros_build_lib.CompressionType.NONE
     chroot = None
     if compressed:
-        compressor = cros_build_lib.COMP_BZIP2
+        compressor = cros_build_lib.CompressionType.BZIP2
         chroot = os.path.join(buildroot, "chroot")
     return cros_build_lib.CreateTarball(
         tarball_path,
@@ -3750,7 +3750,7 @@ def BuildGceTarball(archive_dir, image_dir, image):
             tarball_path,
             tempdir,
             inputs=["disk.raw"],
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             extra_args=["--dereference"],
         )
         return os.path.basename(tarball_path)

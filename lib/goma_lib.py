@@ -543,7 +543,7 @@ class LogsArchiver(object):
         cros_build_lib.CreateTarball(
             tarball_path,
             cwd=self._log_dir,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
         )
         return tarball_name
 

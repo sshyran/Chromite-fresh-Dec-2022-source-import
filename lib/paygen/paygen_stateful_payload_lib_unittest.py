@@ -47,7 +47,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
             os.path.join(self.tempdir, "stateful.tgz"),
             ".",
             sudo=True,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             inputs=["dev_image", "var_overlay", "unencrypted"],
             extra_args=[
                 "--selinux",
@@ -80,7 +80,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
             os.path.join(self.tempdir, "stateful.tgz"),
             ".",
             sudo=True,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             inputs=["dev_image", "var_overlay"],
             extra_args=[
                 "--selinux",
@@ -112,7 +112,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
             1,
             ".",
             sudo=True,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             inputs=["dev_image", "var_overlay", "unencrypted"],
             extra_args=[
                 "--selinux",

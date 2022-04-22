@@ -151,7 +151,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
                 mock.call(
                     "/tempdir/chromiumos_test_image.tar.xz",
                     inputs=["chromiumos_test_image.bin"],
-                    compression=cros_build_lib.COMP_XZ,
+                    compression=cros_build_lib.CompressionType.XZ,
                     cwd=os.path.join(
                         self.workspace, "src/build/images/board/latest"
                     ),
@@ -336,7 +336,7 @@ class FactoryArchiveStageTest(BranchArchiveStageTestBase):
                 mock.call(
                     "/tempdir/chromiumos_test_image.tar.xz",
                     inputs=["chromiumos_test_image.bin"],
-                    compression=cros_build_lib.COMP_XZ,
+                    compression=cros_build_lib.CompressionType.XZ,
                     cwd=os.path.join(
                         self.workspace, "src/build/images/board/latest"
                     ),

@@ -346,7 +346,7 @@ def Untar(path, cwd, sudo=False):
     functor = cros_build_lib.sudo_run if sudo else cros_build_lib.run
     comp = cros_build_lib.CompressionDetectType(path)
     cmd = ["tar"]
-    if comp != cros_build_lib.COMP_NONE:
+    if comp != cros_build_lib.CompressionType.NONE:
         extra_comp_args = [cros_build_lib.FindCompressor(comp)]
         if os.path.basename(extra_comp_args[0]) == "pbzip2":
             extra_comp_args.append("--ignore-trailing-garbage=1")

@@ -710,7 +710,7 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
         tar_mock.assert_called_once_with(
             tarball_path=os.path.join(self.output_dir, "stripped-packages.tar"),
             cwd=self.chroot.full_path(self.build_target.root),
-            compression=cros_build_lib.COMP_NONE,
+            compression=cros_build_lib.CompressionType.NONE,
             chroot=self.chroot,
             inputs=stripped_files_list,
         )

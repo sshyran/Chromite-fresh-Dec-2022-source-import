@@ -49,7 +49,7 @@ IMAGE_TARS = {
 }
 
 TAST_BUNDLE_NAME = "tast_bundles.tar.bz2"
-TAST_COMPRESSOR = cros_build_lib.COMP_BZIP2
+TAST_COMPRESSOR = cros_build_lib.CompressionType.BZIP2
 
 CpeResult = collections.namedtuple("CpeResult", ["report", "warnings"])
 
@@ -119,7 +119,7 @@ def BuildFirmwareArchive(
     cros_build_lib.CreateTarball(
         archive_file,
         firmware_root,
-        compression=cros_build_lib.COMP_BZIP2,
+        compression=cros_build_lib.CompressionType.BZIP2,
         chroot=chroot.path,
         inputs=source_list,
     )
@@ -161,7 +161,7 @@ def BundleFpmcuUnittests(
     cros_build_lib.CreateTarball(
         archive_file,
         fpmcu_unittests_root,
-        compression=cros_build_lib.COMP_BZIP2,
+        compression=cros_build_lib.CompressionType.BZIP2,
         chroot=chroot.path,
         inputs=files,
     )
@@ -352,7 +352,7 @@ def ArchiveFilesFromImageDir(images_dir: str, archive_path: str) -> List[str]:
         cros_build_lib.CreateTarball(
             tarball_path,
             image_parent_dir,
-            compression=cros_build_lib.COMP_BZIP2,
+            compression=cros_build_lib.CompressionType.BZIP2,
             inputs=[image_file],
         )
         tar_files.append(tarball_path)
@@ -392,7 +392,9 @@ def ArchiveChromeEbuildEnv(
     result_path = os.path.join(output_dir, constants.CHROME_ENV_TAR)
     with osutils.TempDir() as tempdir:
         # Convert from bzip2 to tar format.
-        bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+        bzip2 = cros_build_lib.FindCompressor(
+            cros_build_lib.CompressionType.BZIP2
+        )
         tempdir_tar_path = os.path.join(tempdir, constants.CHROME_ENV_FILE)
         cros_build_lib.run(
             [bzip2, "-d", env_bzip, "-c"], stdout=tempdir_tar_path
@@ -840,7 +842,7 @@ def BundleGceTarball(output_dir: str, image_dir: str) -> str:
         cros_build_lib.CreateTarball(
             tarball,
             tempdir,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             inputs=("disk.raw",),
             extra_args=["--dereference", "--format=oldgnu"],
         )

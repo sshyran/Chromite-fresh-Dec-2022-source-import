@@ -210,7 +210,7 @@ class GomaLogUploader(object):
             cros_build_lib.CreateTarball(
                 tarball_path,
                 cwd=self._goma_log_dir,
-                compression=cros_build_lib.COMP_GZIP,
+                compression=cros_build_lib.CompressionType.GZIP,
             )
             self._gs_context.CopyInto(
                 tarball_path,

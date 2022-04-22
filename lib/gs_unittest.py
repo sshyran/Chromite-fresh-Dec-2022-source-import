@@ -72,7 +72,7 @@ PreconditionException: 412 Precondition Failed"""
             gsutil_path,
             self.tempdir,
             inputs=[os.path.basename(tempfile)],
-            compression=cros_build_lib.COMP_NONE,
+            compression=cros_build_lib.CompressionType.NONE,
         )
         self.GSUTIL_URL = "file://%s" % gsutil_path
 

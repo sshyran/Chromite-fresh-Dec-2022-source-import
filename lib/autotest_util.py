@@ -170,10 +170,10 @@ class AutotestTarballBuilder(object):
             # efficient than building out a list of files that do exist.
             return None
 
-        compressor = cros_build_lib.COMP_NONE
+        compressor = cros_build_lib.CompressionType.NONE
         chroot = None
         if compressed:
-            compressor = cros_build_lib.COMP_BZIP2
+            compressor = cros_build_lib.CompressionType.BZIP2
             if not cros_build_lib.IsInsideChroot():
                 chroot = path_util.FromChrootPath("/")
 

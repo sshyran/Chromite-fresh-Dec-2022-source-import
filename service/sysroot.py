@@ -709,7 +709,9 @@ def CreateChromeEbuildEnv(
     result_path = os.path.join(output_dir, constants.CHROME_ENV_TAR)
     with osutils.TempDir() as tempdir:
         # Convert from bzip2 to tar format.
-        bzip2 = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+        bzip2 = cros_build_lib.FindCompressor(
+            cros_build_lib.CompressionType.BZIP2
+        )
         tempdir_tar_path = os.path.join(tempdir, constants.CHROME_ENV_FILE)
         cros_build_lib.run(
             [bzip2, "-d", env_bzip, "-c"], stdout=tempdir_tar_path
@@ -1134,7 +1136,7 @@ def BundleDebugSymbols(
         result = cros_build_lib.CreateTarball(
             tarball_path,
             debug_dir,
-            compression=cros_build_lib.COMP_GZIP,
+            compression=cros_build_lib.CompressionType.GZIP,
             sudo=True,
             extra_args=[exclude_breakpad_tar_arg],
         )

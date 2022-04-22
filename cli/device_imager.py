@@ -614,8 +614,12 @@ class RawPartitionUpdater(PartitionUpdaterBase):
         """Returns compression / decompression commands."""
 
         return (
-            [cros_build_lib.FindCompressor(cros_build_lib.COMP_GZIP)],
-            self._device.GetDecompressor(cros_build_lib.COMP_GZIP),
+            [
+                cros_build_lib.FindCompressor(
+                    cros_build_lib.CompressionType.GZIP
+                )
+            ],
+            self._device.GetDecompressor(cros_build_lib.CompressionType.GZIP),
         )
 
     def _WriteToTarget(
@@ -694,7 +698,9 @@ class RawPartitionUpdater(PartitionUpdaterBase):
                     # compressed only.
                     self._WriteToTarget(
                         fp,
-                        self._device.GetDecompressor(cros_build_lib.COMP_GZIP),
+                        self._device.GetDecompressor(
+                            cros_build_lib.CompressionType.GZIP
+                        ),
                     )
             finally:
                 generator.CloseTarget()

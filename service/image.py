@@ -808,7 +808,7 @@ def create_stripped_packages_tar(
     cros_build_lib.CreateTarball(
         tarball_path=tarball_output,
         cwd=tarball_cwd,
-        compression=cros_build_lib.COMP_NONE,
+        compression=cros_build_lib.CompressionType.NONE,
         chroot=chroot,
         inputs=tarball_paths,
     )

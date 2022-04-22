@@ -48,7 +48,7 @@ def GenerateStatefulPayload(image_path, output):
                 output_gz,
                 ".",
                 sudo=True,
-                compression=cros_build_lib.COMP_GZIP,
+                compression=cros_build_lib.CompressionType.GZIP,
                 inputs=inputs,
                 extra_args=[
                     "--selinux",

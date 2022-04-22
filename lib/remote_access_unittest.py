@@ -519,22 +519,23 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
         with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
             self.assertEqual(
                 ["xz", "--decompress", "--stdout"],
-                device.GetDecompressor(cros_build_lib.COMP_XZ),
+                device.GetDecompressor(cros_build_lib.CompressionType.XZ),
             )
             self.assertEqual(
                 ["bzip2", "--decompress", "--stdout"],
-                device.GetDecompressor(cros_build_lib.COMP_BZIP2),
+                device.GetDecompressor(cros_build_lib.CompressionType.BZIP2),
             )
             self.assertEqual(
                 ["gzip", "--decompress", "--stdout"],
-                device.GetDecompressor(cros_build_lib.COMP_GZIP),
+                device.GetDecompressor(cros_build_lib.CompressionType.GZIP),
             )
             self.assertEqual(
                 ["zstd", "--decompress", "--stdout"],
-                device.GetDecompressor(cros_build_lib.COMP_ZSTD),
+                device.GetDecompressor(cros_build_lib.CompressionType.ZSTD),
             )
             self.assertEqual(
-                ["cat"], device.GetDecompressor(cros_build_lib.COMP_NONE)
+                ["cat"],
+                device.GetDecompressor(cros_build_lib.CompressionType.NONE),
             )
 
             with self.assertRaises(ValueError):
@@ -545,7 +546,7 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
         self.rsh_mock.AddCmdResult(partial_mock.In("xz"), returncode=1)
         with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
             with self.assertRaises(remote_access.ProgramNotFoundError):
-                device.GetDecompressor(cros_build_lib.COMP_XZ)
+                device.GetDecompressor(cros_build_lib.CompressionType.XZ)
 
 
 class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):

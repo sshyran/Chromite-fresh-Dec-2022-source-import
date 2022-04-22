@@ -255,7 +255,7 @@ class FactoryArchiveStage(WorkspaceArchiveBase):
                 cwd=self.GetImageDirSymlink(
                     pointer="latest", buildroot=self._build_root
                 ),
-                compression=cros_build_lib.COMP_XZ,
+                compression=cros_build_lib.CompressionType.XZ,
             )
 
             self.UploadBranchArtifact(tarball_path)

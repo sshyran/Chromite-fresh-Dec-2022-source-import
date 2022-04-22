@@ -7,6 +7,7 @@
 import base64
 import datetime
 import email.utils
+import enum
 import errno
 import functools
 import getpass
@@ -1098,11 +1099,14 @@ def HostIsCIBuilder(fq_hostname=None, golo_only=False, gce_only=False):
         return in_golo or in_gce
 
 
-COMP_NONE = 0
-COMP_GZIP = 1
-COMP_BZIP2 = 2
-COMP_XZ = 3
-COMP_ZSTD = 4
+class CompressionType(enum.IntEnum):
+    """Type of compression."""
+
+    NONE = 0
+    GZIP = 1
+    BZIP2 = 2
+    XZ = 3
+    ZSTD = 4
 
 
 def FindCompressor(
@@ -1125,15 +1129,15 @@ def FindCompressor(
     Raises:
       ValueError: If compression is unknown.
     """
-    if compression == COMP_XZ:
+    if compression == CompressionType.XZ:
         return os.path.join(constants.CHROMITE_SCRIPTS_DIR, "xz_auto")
-    elif compression == COMP_GZIP:
+    elif compression == CompressionType.GZIP:
         possible_progs = ["pigz", "gzip"]
-    elif compression == COMP_BZIP2:
+    elif compression == CompressionType.BZIP2:
         possible_progs = ["lbzip2", "pbzip2", "bzip2"]
-    elif compression == COMP_ZSTD:
+    elif compression == CompressionType.ZSTD:
         return "zstd"
-    elif compression == COMP_NONE:
+    elif compression == CompressionType.NONE:
         return "cat"
     else:
         raise ValueError("unknown compression")
@@ -1153,7 +1157,7 @@ def FindCompressor(
     return possible_progs[-1]
 
 
-def CompressionDetectType(path: Union[str, os.PathLike]) -> int:
+def CompressionDetectType(path: Union[str, os.PathLike]) -> CompressionType:
     """Detect the type of compression used by |path| by sniffing its data.
 
     Args:
@@ -1169,18 +1173,18 @@ def CompressionDetectType(path: Union[str, os.PathLike]) -> int:
         data = f.read(6)
 
     MAGIC_TO_TYPE = (
-        (b"BZh", COMP_BZIP2),
-        (b"\x1f\x8b", COMP_GZIP),
-        (b"\xfd\x37\x7a\x58\x5a\x00", COMP_XZ),
-        (b"\x28\xb5\x2f\xfd", COMP_ZSTD),
+        (b"BZh", CompressionType.BZIP2),
+        (b"\x1f\x8b", CompressionType.GZIP),
+        (b"\xfd\x37\x7a\x58\x5a\x00", CompressionType.XZ),
+        (b"\x28\xb5\x2f\xfd", CompressionType.ZSTD),
     )
     for magic, ctype in MAGIC_TO_TYPE:
         if data.startswith(magic):
             return ctype
-    return COMP_NONE
+    return CompressionType.NONE
 
 
-def CompressionStrToType(s):
+def CompressionStrToType(s: str) -> Optional[CompressionType]:
     """Convert a compression string type to a constant.
 
     Args:
@@ -1190,37 +1194,37 @@ def CompressionStrToType(s):
       A constant, or None if the compression type is unknown.
     """
     _COMP_STR = {
-        "gz": COMP_GZIP,
-        "bz2": COMP_BZIP2,
-        "xz": COMP_XZ,
-        "zst": COMP_ZSTD,
+        "gz": CompressionType.GZIP,
+        "bz2": CompressionType.BZIP2,
+        "xz": CompressionType.XZ,
+        "zst": CompressionType.ZSTD,
     }
     if s:
         return _COMP_STR.get(s)
     else:
-        return COMP_NONE
+        return CompressionType.NONE
 
 
-def CompressionExtToType(file_name: Union[Path, str]):
+def CompressionExtToType(file_name: Union[Path, str]) -> CompressionType:
     """Retrieve a compression type constant from a compression file's name.
 
     Args:
       file_name: Name of a compression file.
 
     Returns:
-      A constant, return COMP_NONE if the extension is unknown.
+      A constant, return CompressionType.NONE if the extension is unknown.
     """
     ext = os.path.splitext(file_name)[-1]
     _COMP_EXT = {
-        ".tgz": COMP_GZIP,
-        ".gz": COMP_GZIP,
-        ".tbz2": COMP_BZIP2,
-        ".bz2": COMP_BZIP2,
-        ".txz": COMP_XZ,
-        ".xz": COMP_XZ,
-        ".zst": COMP_ZSTD,
+        ".tgz": CompressionType.GZIP,
+        ".gz": CompressionType.GZIP,
+        ".tbz2": CompressionType.BZIP2,
+        ".bz2": CompressionType.BZIP2,
+        ".txz": CompressionType.XZ,
+        ".xz": CompressionType.XZ,
+        ".zst": CompressionType.ZSTD,
     }
-    return _COMP_EXT.get(ext, COMP_NONE)
+    return _COMP_EXT.get(ext, CompressionType.NONE)
 
 
 def CompressFile(infile, outfile):
@@ -1232,7 +1236,7 @@ def CompressFile(infile, outfile):
                type of suffix of the name specified (e.g.: .bz2).
     """
     comp_type = CompressionExtToType(outfile)
-    assert comp_type and comp_type != COMP_NONE
+    assert comp_type and comp_type != CompressionType.NONE
     comp = FindCompressor(comp_type)
     run([comp, "-c", infile], stdout=outfile)
 
@@ -1246,7 +1250,7 @@ def UncompressFile(infile, outfile):
       outfile: Name of output file.
     """
     comp_type = CompressionExtToType(infile)
-    assert comp_type and comp_type != COMP_NONE
+    assert comp_type and comp_type != CompressionType.NONE
     comp = FindCompressor(comp_type)
     run([comp, "-dc", infile], stdout=outfile)
 
@@ -1263,7 +1267,7 @@ def CreateTarball(
     tarball_path: Union[Path, int, str],
     cwd: Union[Path, str],
     sudo: Optional[bool] = False,
-    compression=COMP_XZ,
+    compression: CompressionType = CompressionType.XZ,
     chroot: Optional[Union[Path, str]] = None,
     inputs: Optional[List[str]] = None,
     timeout: int = 300,
@@ -1418,7 +1422,7 @@ def ExtractTarball(
         comp_type = CompressionDetectType(tarball_path)
     except FileNotFoundError as e:
         raise TarballError(str(e))
-    if comp_type != COMP_NONE:
+    if comp_type != CompressionType.NONE:
         cmd += ["--use-compress-program", FindCompressor(comp_type)]
 
     # If caller requires the list of extracted files, get verbose.

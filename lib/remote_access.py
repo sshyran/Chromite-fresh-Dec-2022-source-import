@@ -1434,7 +1434,7 @@ class RemoteDevice(object):
         """Returns a decompressor command on a remote device.
 
         Args:
-          compression: The type of compression desired. See cros_build_lib.COMP_*.
+          compression: The type of compression desired. See cros_build_lib.CompressionType.*.
 
         Returns:
           command to a decompressor as a string list.
@@ -1443,15 +1443,15 @@ class RemoteDevice(object):
           ValueError: If compression is unknown.
         """
 
-        if compression == cros_build_lib.COMP_XZ:
+        if compression == cros_build_lib.CompressionType.XZ:
             prog = "xz"
-        elif compression == cros_build_lib.COMP_GZIP:
+        elif compression == cros_build_lib.CompressionType.GZIP:
             prog = "gzip"
-        elif compression == cros_build_lib.COMP_BZIP2:
+        elif compression == cros_build_lib.CompressionType.BZIP2:
             prog = "bzip2"
-        elif compression == cros_build_lib.COMP_ZSTD:
+        elif compression == cros_build_lib.CompressionType.ZSTD:
             prog = "zstd"
-        elif compression == cros_build_lib.COMP_NONE:
+        elif compression == cros_build_lib.CompressionType.NONE:
             return ["cat"]
         else:
             raise ValueError(f"Unknown compression: {compression}")
