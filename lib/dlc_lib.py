@@ -43,6 +43,7 @@ _EXTRA_RESOURCES = (UPDATE_ENGINE_CONF,)
 _TEST_BOARDS_ALLOWLIST = (
     'amd64-generic',
     'amd64-generic-koosh',
+    'arm64-generic',
     'arm-generic',
     'galaxy',
 )
