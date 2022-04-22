@@ -10,6 +10,7 @@ import logging
 import os
 import shutil
 import tempfile
+from typing import Optional, Union
 import urllib.parse
 
 from chromite.lib import cros_build_lib
@@ -188,8 +189,13 @@ class DiskCache(object):
   """
   _STAGING_DIR = 'staging'
 
-  def __init__(self, cache_dir, cache_user=None, lock_suffix='.lock'):
-    self._cache_dir = cache_dir
+  def __init__(
+      self,
+      cache_dir: Union[str, os.PathLike],
+      cache_user: Optional[str] = None,
+      lock_suffix: str = '.lock'):
+    # TODO(vapier): Convert this to Path.
+    self._cache_dir = str(cache_dir)
     self._cache_user = cache_user
     self._lock_suffix = lock_suffix
     self.staging_dir = os.path.join(cache_dir, self._STAGING_DIR)
@@ -238,9 +244,10 @@ class DiskCache(object):
       with self._TempDirContext() as tempdir:
         shutil.move(self.GetKeyPath(key), tempdir)
 
-  def GetKey(self, path):
+  def GetKey(self, path: Union[str, os.PathLike]):
     """Returns the key for an item's path in the cache."""
-    if self._cache_dir in path:
+    path = str(path)
+    if path.startswith(self._cache_dir):
       path = os.path.relpath(path, self._cache_dir)
     return tuple(path.split('+'))
 
