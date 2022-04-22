@@ -659,7 +659,7 @@ class RemoteAccess(object):
     if to_local:
       scp_cmd += ['%s:%s' % (target_ssh_url, src), dest]
     else:
-      scp_cmd += glob.glob(src) + ['%s:%s' % (target_ssh_url, dest)]
+      scp_cmd += [src, '%s:%s' % (target_ssh_url, dest)]
 
     rc_func = cros_build_lib.run
     if sudo:
