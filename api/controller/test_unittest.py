@@ -412,7 +412,7 @@ class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
         self.api_config)
     patch.assert_called()
     for result in response.results:
-      if result.name == 'cros-test-cloud':
+      if result.name == 'cros-test':
         self.assertEqual(result.WhichOneof('result'), 'success')
       else:
         self.assertEqual(result.WhichOneof('result'), 'failure')
