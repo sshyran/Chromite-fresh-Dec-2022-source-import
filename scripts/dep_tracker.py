@@ -22,6 +22,7 @@ import logging
 import multiprocessing
 import os
 import stat
+from typing import Union
 
 from chromite.third_party import lddtree
 
@@ -68,7 +69,12 @@ class DepTracker(object):
   in the root image.
   """
 
-  def __init__(self, root, jobs=1):
+  def __init__(
+      self,
+      root: Union[str, os.PathLike],
+      jobs: int = 1):
+    # TODO(vapier): Convert this to Path.
+    root = str(root)
     root_st = os.lstat(root)
     if not stat.S_ISDIR(root_st.st_mode):
       raise Exception('root (%s) must be a directory' % root)
