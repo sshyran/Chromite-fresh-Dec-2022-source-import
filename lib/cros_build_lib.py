@@ -1139,6 +1139,33 @@ def FindCompressor(
   return possible_progs[-1]
 
 
+def CompressionDetectType(path: Union[str, os.PathLike]) -> int:
+  """Detect the type of compression used by |path| by sniffing its data.
+
+  Args:
+    path: The file to sniff.
+
+  Returns:
+    The compression type if we could detect it.
+  """
+  if not isinstance(path, Path):
+    path = Path(path)
+
+  with path.open('rb') as f:
+    data = f.read(6)
+
+  MAGIC_TO_TYPE = (
+      (b'BZh', COMP_BZIP2),
+      (b'\x1f\x8b', COMP_GZIP),
+      (b'\xfd\x37\x7a\x58\x5a\x00', COMP_XZ),
+      (b'\x28\xb5\x2f\xfd', COMP_ZSTD),
+  )
+  for magic, ctype in MAGIC_TO_TYPE:
+    if data.startswith(magic):
+      return ctype
+  return COMP_NONE
+
+
 def CompressionStrToType(s):
   """Convert a compression string type to a constant.
 

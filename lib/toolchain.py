@@ -284,9 +284,12 @@ class ToolchainInstaller(object):
       board_chost: str - The board's CHOST value.
       libc_path: str - The location of the libc archive.
     """
-    compressor = cros_build_lib.FindCompressor(cros_build_lib.COMP_BZIP2)
+    compression = cros_build_lib.CompressionDetectType(libc_path)
+    compressor = cros_build_lib.FindCompressor(compression)
     if compressor.endswith('pbzip2'):
       compressor = '%s --ignore-trailing-garbage=1' % compressor
+    elif compressor.endswith('zstd'):
+      compressor += ' -f'
 
     with osutils.TempDir(sudo_rm=True) as tempdir:
       # Extract to the temporary directory.
