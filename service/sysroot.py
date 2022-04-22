@@ -315,39 +315,55 @@ class BuildPackagesRunConfig(object):
   def GetForceLocalBuildPackages(
       self, sysroot: sysroot_lib.Sysroot
   ) -> Tuple[_PACKAGE_LIST, Optional[_PACKAGE_LIST]]:
-    """Get the set of force local build packages for this config."""
-    packages = set()
+    """Get the set of force local build packages for this config.
+
+    This includes:
+      1. Getting packages for a test image.
+      2. Getting packages and reverse dependencies for cros workon packages.
+
+    Args:
+      sysroot: The sysroot to get packages for.
+
+    Returns:
+      A tuple containing a list of packages to build from source and a list of
+      cros workon packages.
+
+    Raises:
+      cros_build_lib.RunCommandError
+    """
+    sysroot_path = Path(sysroot.path)
+    force_local_build_packages = set()
 
     if 'virtual/target-os-test' in self.GetPackages():
       # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
       # set. We force rebuilding this package from source every time, so that
       # consecutive builds don't share ssh keys.
-      packages.add('chromeos-base/chromeos-ssh-testkeys')
+      force_local_build_packages.add('chromeos-base/chromeos-ssh-testkeys')
 
     cros_workon_packages = None
     if self.workon:
-      cros_workon_packages = _GetCrosWorkonPackages(sysroot.path)
+      cros_workon_packages = _GetCrosWorkonPackages(sysroot_path)
 
       # Any package that directly depends on an active cros_workon package also
       # needs to be rebuilt in order to be correctly built against the current
       # set of changes a user may have made to the cros_workon package.
       if cros_workon_packages:
-        packages.update(cros_workon_packages)
+        force_local_build_packages.update(cros_workon_packages)
 
         reverse_dependencies = [
             x.atom for x in portage_util.GetReverseDependencies(
-                cros_workon_packages, sysroot.path)
+                cros_workon_packages, sysroot_path)
         ]
         logging.info(
             'The following packages depend directly on an active cros_workon '
             'package and will be rebuilt: %s', ' '.join(reverse_dependencies))
-        packages.update(reverse_dependencies)
+        force_local_build_packages.update(reverse_dependencies)
 
     # TODO(xcl): Add base install packages and reverse dependencies
 
     # TODO(xcl): Return only packages when base install packages and revdeps
     # are migrated to Python.
-    return (list(packages), cros_workon_packages)
+    return (list(force_local_build_packages), cros_workon_packages)
 
   def GetEmergeFlags(self) -> List[str]:
     """Get the emerge flags for this config."""
