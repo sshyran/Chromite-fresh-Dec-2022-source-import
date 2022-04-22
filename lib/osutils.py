@@ -649,7 +649,11 @@ def EmptyDir(path, ignore_missing=False, sudo=False, exclude=()):
         SafeUnlink(subpath, sudo)
 
 
-def Which(binary, path=None, mode=os.X_OK, root=None):
+def Which(
+    binary: str,
+    path: Optional[Union[str, os.PathLike]] = None,
+    mode: int = os.X_OK,
+    root: Optional[Union[str, os.PathLike]] = None):
   """Return the absolute path to the specified binary.
 
   Args:
@@ -663,6 +667,9 @@ def Which(binary, path=None, mode=os.X_OK, root=None):
   """
   if path is None:
     path = os.environ.get('PATH', '')
+  else:
+    path = str(path)
+
   for p in path.split(os.pathsep):
     if root and p.startswith('/'):
       # Don't prefix relative paths.  We might want to support this at some
@@ -671,6 +678,7 @@ def Which(binary, path=None, mode=os.X_OK, root=None):
     p = os.path.join(p, binary)
     if os.path.isfile(p) and os.access(p, mode):
       return p
+
   return None
 
 
