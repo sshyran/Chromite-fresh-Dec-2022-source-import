@@ -72,7 +72,8 @@ class PayloadConfig(object):
     # This block ensures that we have paths to the correct perm of images.
     src_image_path = None
     if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
-      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type)
+      tgt_image_path = _GenUnsignedGSPath(self.tgt_image, self.image_type,
+                                          self.minios)
     elif isinstance(self.tgt_image, payload_pb2.SignedImage):
       tgt_image_path = _GenSignedGSPath(self.tgt_image, self.image_type,
                                         self.minios)
@@ -80,7 +81,8 @@ class PayloadConfig(object):
       tgt_image_path = _GenDLCImageGSPath(self.tgt_image)
     if self.delta_type == 'delta':
       if isinstance(self.tgt_image, payload_pb2.UnsignedImage):
-        src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type)
+        src_image_path = _GenUnsignedGSPath(self.src_image, self.image_type,
+                                            self.minios)
       if isinstance(self.tgt_image, payload_pb2.SignedImage):
         src_image_path = _GenSignedGSPath(self.src_image, self.image_type,
                                           self.minios)
@@ -176,12 +178,14 @@ def _GenSignedGSPath(image: payload_pb2.SignedImage,
 
 
 def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
-                       image_type: str) -> gspaths.UnsignedImageArchive:
+                       image_type: str,
+                       minios: bool) -> gspaths.UnsignedImageArchive:
   """Take an UnsignedImage_pb2 and return a gspaths.UnsignedImageArchive.
 
   Args:
     image: The build to create the gspath from.
     image_type: The image type, either "recovery" or "test".
+    minios: Whether or not it's a miniOS image.
 
   Returns:
     A gspaths.UnsignedImageArchive instance.
@@ -196,10 +200,16 @@ def _GenUnsignedGSPath(image: payload_pb2.UnsignedImage,
 
   build.uri = build_uri
 
-  return gspaths.UnsignedImageArchive(build=build,
-                                      milestone=image.milestone,
-                                      image_type=image_type,
-                                      uri=build_uri)
+  if minios:
+    return gspaths.UnsignedMiniOSImageArchive(build=build,
+                                              milestone=image.milestone,
+                                              image_type=image_type,
+                                              uri=build_uri)
+  else:
+    return gspaths.UnsignedImageArchive(build=build,
+                                        milestone=image.milestone,
+                                        image_type=image_type,
+                                        uri=build_uri)
 
 
 def _GenDLCImageGSPath(image: payload_pb2.DLCImage) -> gspaths.DLCImage:

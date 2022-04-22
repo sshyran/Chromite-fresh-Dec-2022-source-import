@@ -82,8 +82,8 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     payload_config.GeneratePayload()
 
-  def testMiniOS(self):
-    """Test the happy path on signed images."""
+  def testSignedMiniOS(self):
+    """Test the happy path on signed minios images."""
 
     # Image defs.
     src_image = payload_pb2.SignedImage(
@@ -101,3 +101,24 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
 
     payload_config.GeneratePayload()
     self.assertTrue(gspaths.IsMiniOSImage(payload_config.payload.tgt_image))
+
+  def testUnsignedMiniOS(self):
+    """Test the happy path on unsigned minios images."""
+
+    # Image defs.
+    src_image = payload_pb2.UnsignedImage(
+        build=self.src_build, image_type='IMAGE_TYPE_BASE', milestone='R79')
+    tgt_image = payload_pb2.UnsignedImage(
+        build=self.tgt_build, image_type='IMAGE_TYPE_BASE', milestone='R80')
+
+    payload_config = payload.PayloadConfig(
+        tgt_image=tgt_image,
+        src_image=src_image,
+        dest_bucket='test',
+        minios=True,
+        verify=True,
+        upload=True)
+
+    payload_config.GeneratePayload()
+    self.assertTrue(gspaths.IsUnsignedMiniOSImageArchive(
+        payload_config.payload.tgt_image))
