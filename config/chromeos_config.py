@@ -1321,6 +1321,7 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
 
   _no_unittest_configs = [
       'grunt-kernelnext-release',
+      'guybrush-kernelnext-release',
       'zork-connectivitynext-release',
       'zork-minios-release',
   ]

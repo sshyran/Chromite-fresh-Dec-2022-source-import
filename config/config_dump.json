@@ -14569,6 +14569,7 @@
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"guybrush360\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"guybrush\",\n    \"name\": \"nipperkin\",\n    \"test_suites\": []\n}"
         ],
+        "unittests": false,
         "vm_tests_override": null
     },
     "guybrush-kernelnext-release-tryjob": {
@@ -14598,6 +14599,7 @@
         "paygen": false,
         "push_image": false,
         "suite_scheduling": false,
+        "unittests": false,
         "vm_tests_override": null
     },
     "guybrush-kernelnext-unittest-stress": {
