@@ -251,6 +251,7 @@
     herobrine-release
     jacuzzi-kernelnext-release
     jacuzzi-release
+    jacuzzi64-release
     kalista-cfm-release
     kalista-kernelnext-release
     kalista-release
@@ -1101,6 +1102,12 @@
   jacuzzi-payloads-tryjob
   jacuzzi-release-tryjob
   jacuzzi-unittest-stress
+  jacuzzi64-full-tryjob
+  jacuzzi64-llvm-next-toolchain-tryjob
+  jacuzzi64-llvm-toolchain-tryjob
+  jacuzzi64-payloads-tryjob
+  jacuzzi64-release-tryjob
+  jacuzzi64-unittest-stress
   jecht-full-tryjob
   jecht-llvm-next-toolchain-tryjob
   jecht-llvm-toolchain-tryjob
@@ -1331,6 +1338,7 @@
     herobrine-release-tryjob
     jacuzzi-kernelnext-release-tryjob
     jacuzzi-release-tryjob
+    jacuzzi64-release-tryjob
     kalista-cfm-release-tryjob
     kalista-kernelnext-release-tryjob
     kalista-release-tryjob
