@@ -50,15 +50,14 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
   dut_control_on.append(['ec_uart_cmd:apshutdown'])
   # Sleep to ensure the SoC rails get chance to discharge enough.
   dut_control_on.append(['sleep:5'])
+  dut_control_on.append(['ec_uart_cmd:gpioset en_s5_rails 1'])
 
   if servo.is_c2d2:
-    dut_control_on.append(['ap_flash_select:on'])
+    dut_control_on.append(['ap_flash_select:off'])
     dut_control_on.append(['spi2_vref:pp3300'])
     dut_control_off.append(['spi2_vref:off'])
-    dut_control_off.append(['ap_flash_select:off'])
     programmer = 'raiden_debug_spi:serial=%s' % servo.serial
   elif servo.is_ccd:
-    dut_control_on.append(['ec_uart_cmd:gpioset en_s5_rails 1'])
     dut_control_off.append(['power_state:reset'])
     programmer = ('raiden_debug_spi:target=AP,custom_rst=True,serial=%s' %
                   servo.serial)
