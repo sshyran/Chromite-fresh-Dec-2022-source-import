@@ -2306,7 +2306,7 @@ def _EmergeBoard(
   """
   emerge = _GetSysrootTool('emerge', board=board)
   cmd = [
-      emerge, '-p', '--cols', '--quiet', '--root', '/mnt/empty', '-e', package
+      emerge, '-p', '--cols', '--quiet', '-e', package
   ]
   return cros_build_lib.run(
       cmd,
