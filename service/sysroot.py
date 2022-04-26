@@ -225,15 +225,6 @@ class BuildPackagesRunConfig(object):
     """Get the arguments for build_packages script."""
     args = []
 
-    if not self.dev_image:
-      args.append('--nowithdev')
-
-    if not self.factory_image:
-      args.append('--nowithfactory')
-
-    if not self.test_image:
-      args.append('--nowithtest')
-
     if self.local_pkg:
       args.append('--reuse_pkgs_from_local_boards')
 
@@ -248,9 +239,6 @@ class BuildPackagesRunConfig(object):
 
     if not self.use_any_chrome:
       args.append('--nouse_any_chrome')
-
-    if not self.install_auto_test:
-      args.append('--nowithautotest')
 
     if not self.workon:
       args.append('--noworkon')
@@ -636,6 +624,9 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
       sysroot.path,
   ]
   cmd += run_configs.GetBuildPackagesArgs()
+  # TODO(xcl): Do not pass in packages directly once cros workon packages
+  # and reverse dependency logic is migrated to Python
+  cmd += run_configs.GetPackages()
 
   extra_env = run_configs.GetExtraEnv()
   with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
