@@ -204,7 +204,7 @@ class ToolchainInstallError(PackageInstallError):
     return self.failed_packages
 
 
-def _CreateWrapper(wrapper_path: str, template: str, **kwargs: Dict) -> None:
+def _CreateWrapper(wrapper_path: str, template: str, **kwargs: Any) -> None:
   """Creates a wrapper from a given template.
 
   Args:
@@ -306,7 +306,7 @@ class Sysroot(object):
 
     return os.path.exists(self.path)
 
-  def Path(self, *args: List[str]) -> str:
+  def Path(self, *args: str) -> str:
     """Helper to build out a path within the sysroot.
 
     Pass args as if calling os.path.join().
@@ -613,7 +613,7 @@ class Sysroot(object):
 
   def _GenerateConfig(self, toolchains: 'toolchain_list.ToolchainList',
                       board_overlays: List[str], portdir_overlays: List[str],
-                      header: str, **kwargs: Dict) -> str:
+                      header: str, **kwargs: Any) -> str:
     """Create common config settings for boards and bricks.
 
     Args:

@@ -1895,7 +1895,7 @@ def IsPackageInstalled(package, sysroot='/'):
 
 def _Equery(
     module: str,
-    *args: Optional[List[str]],
+    *args: str,
     board: Optional[str] = None,
     sysroot: Optional[str] = None,
     buildroot: str = constants.SOURCE_ROOT,
