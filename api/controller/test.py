@@ -292,21 +292,13 @@ def BuildTestServiceContainers(
             )
         )
       else:
-        # Do not fail on cros-test-cloud as it is experimental.
-        if human_name == 'cros-test':
-
-          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
-                        human_name, cmd_result.stdout, cmd_result.stderr)
-          result.success.CopyFrom(
-              test_pb2.TestServiceContainerBuildResult.Success()
-          )
-        else:
-          result.failure.CopyFrom(
-              test_pb2.TestServiceContainerBuildResult.Failure(
-                  error_message=cmd_result.stdout
-              )
-          )
-
+        logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                      human_name, cmd_result.stdout, cmd_result.stderr)
+        result.failure.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Failure(
+                error_message=cmd_result.stdout
+            )
+        )
       output_proto.results.append(result)
 
 
