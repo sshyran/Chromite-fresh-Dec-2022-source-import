@@ -166,7 +166,6 @@
   amd64-generic-msan-fuzzer
   amd64-generic-ubsan
   amd64-generic-ubsan-fuzzer
-  betty-vmtest-informational
 
 == release ==
   master-release
@@ -506,7 +505,6 @@
   betty-pi-arc-unittest-stress
   betty-release-tryjob
   betty-unittest-stress
-  betty-vmtest-informational-tryjob
   bob-factory-gru-9017.B-factorybranch-tryjob
   bob-full-tryjob
   bob-llvm-next-toolchain-tryjob

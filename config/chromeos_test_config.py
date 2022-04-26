@@ -26,20 +26,6 @@ vmtest_boards = frozenset([
 ])
 
 
-def getInfoVMTest():
-  suites = [
-      'vmtest-informational4'
-  ]
-  ret = []
-  for suite in suites:
-    ret.append(config_lib.VMTestConfig(
-        constants.VM_SUITE_TEST_TYPE,
-        test_suite=suite,
-        warn_only=True,
-        timeout=12 * 60 * 60))
-  return ret
-
-
 class HWTestList(object):
   """Container for methods to generate HWTest lists."""
 

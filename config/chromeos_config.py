@@ -10,8 +10,6 @@ import re
 
 from chromite.config import chromeos_config_boards as chromeos_boards
 from chromite.config import chromeos_test_config as chromeos_test
-# TODO(yshaul): Restrict the import when we're done splitting
-from chromite.config.chromeos_test_config import getInfoVMTest
 from chromite.config.chromeos_test_config import HWTestList
 from chromite.config.chromeos_test_config import TRADITIONAL_VM_TESTS_SUPPORTED
 from chromite.lib import config_lib
@@ -2203,22 +2201,6 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
               ['refs/heads/main'], ['generated/luci-scheduler.cfg']
           ]
       ],
-  )
-
-  site_config.Add(
-      'betty-vmtest-informational',
-      site_config.templates.informational,
-      site_config.templates.internal,
-      site_config.templates.no_hwtest_builder,
-      description='VMTest Informational Builder for running long run tests.',
-      build_type=constants.GENERIC_TYPE,
-      boards=['betty'],
-      builder_class_name='test_builders.VMInformationalBuilder',
-      vm_tests=getInfoVMTest(),
-      vm_tests_override=getInfoVMTest(),
-      vm_test_report_to_dashboards=True,
-      # 3 PM UTC is 7 AM PST (no daylight savings).
-      schedule='0 15 * * *',
   )
 
   # Create our unittest stress build configs (used for tryjobs only)

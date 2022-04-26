@@ -278,12 +278,6 @@
             "sync_chrome": true,
             "usepkg_build_packages": false
         },
-        "informational": {
-            "_template": "informational",
-            "description": "Informational Builds",
-            "display_label": "informational",
-            "luci_builder": "Informational"
-        },
         "llvm_next_toolchain": {
             "_template": "llvm_next_toolchain",
             "archive_build_debug": true,
@@ -4552,46 +4546,6 @@
         "overlays": "both",
         "useflags": [
             "chrome_internal"
-        ]
-    },
-    "betty-vmtest-informational": {
-        "_template": "informational",
-        "boards": [
-            "betty"
-        ],
-        "build_type": "generic",
-        "builder_class_name": "test_builders.VMInformationalBuilder",
-        "description": "VMTest Informational Builder for running long run tests.",
-        "hw_tests_override": [],
-        "internal": true,
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "schedule": "0 15 * * *",
-        "vm_test_report_to_dashboards": true,
-        "vm_tests": [
-            "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"vmtest-informational4\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 43200,\n    \"use_ctest\": true,\n    \"warn_only\": true\n}"
-        ],
-        "vm_tests_override": [
-            "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"vmtest-informational4\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 43200,\n    \"use_ctest\": true,\n    \"warn_only\": true\n}"
-        ]
-    },
-    "betty-vmtest-informational-tryjob": {
-        "_template": "informational",
-        "boards": [
-            "betty"
-        ],
-        "build_type": "generic",
-        "builder_class_name": "test_builders.VMInformationalBuilder",
-        "debug": true,
-        "description": "VMTest Informational Builder for running long run tests.",
-        "display_label": "tryjob",
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "vm_test_report_to_dashboards": true,
-        "vm_tests": [
-            "{\n    \"max_retries\": 5,\n    \"retry\": false,\n    \"test_suite\": \"vmtest-informational4\",\n    \"test_type\": \"vm_suite\",\n    \"timeout\": 43200,\n    \"use_ctest\": true,\n    \"warn_only\": true\n}"
         ]
     },
     "bob-factory-gru-9017.B-factorybranch": {
