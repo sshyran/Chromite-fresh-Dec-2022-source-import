@@ -1074,6 +1074,7 @@ class ChromeSDKCommand(command.CliCommand):
           'cros_target_(ar|cc|cxx|ld|nm|readelf|extra_(c|cpp|cxx|ld)flags)',
           'cros_v8_snapshot_(cc|cxx|ld|extra_(c|cpp|cxx|ld)flags)',
           '(custom|host|v8_snapshot)_toolchain',
+          'rbe_cros_cc_wrapper',
           'system_libdir',
           'target_sysroot',
           'arm_(arch|float_abi|use_neon)',

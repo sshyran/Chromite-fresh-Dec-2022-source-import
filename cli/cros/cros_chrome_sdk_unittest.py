@@ -429,6 +429,24 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
     self.assertIn('rbe_cros_cc_wrapper = "%s"' % wrapper_path,
                   self.cmd_mock.env['GN_ARGS'])
 
+  def testUseRBELacros(self):
+    """Verify that we do not add Goma to the PATH."""
+    self.SetupCommandMock(extra_args=['--use-rbe',
+                                      '--is-lacros', '--version=1234.0.0'])
+    lkgm_file = os.path.join(self.chrome_src_dir, constants.PATH_TO_CHROME_LKGM)
+    osutils.Touch(lkgm_file, makedirs=True)
+    osutils.WriteFile(lkgm_file, '5678.0.0')
+
+    self.cmd_mock.inst.Run()
+
+    self.assertIn('use_goma = false', self.cmd_mock.env['GN_ARGS'])
+    self.assertIn('use_rbe = true', self.cmd_mock.env['GN_ARGS'])
+    wrapper_path = os.path.join(
+        self.chrome_root, 'src', 'build', 'args', 'chromeos',
+        'rewrapper_%s' % SDKFetcherMock.BOARD)
+    self.assertIn('rbe_cros_cc_wrapper = "%s"' % wrapper_path,
+                  self.cmd_mock.env['GN_ARGS'])
+
   def testGnArgsStalenessCheckNoMatch(self):
     """Verifies the GN args are checked for staleness with a mismatch."""
     with cros_test_lib.LoggingCapturer() as logs:
