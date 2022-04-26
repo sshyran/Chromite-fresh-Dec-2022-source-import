@@ -624,6 +624,12 @@ def _CreateParser():
                       help='By default, deploying lacros-chrome modifies the '
                            '/etc/chrome_dev.conf file, which interferes with '
                            'automated testing, and this argument disables it.')
+  parser.add_argument('--use-external-config', action='store_true',
+                      help='When identifying the configuration for a board, '
+                           'force usage of the external configuration if both '
+                           'internal and external are available. This only '
+                           'has an effect when stripping Chrome, i.e. when '
+                           '--nostrip is not passed in.')
 
   group = parser.add_argument_group('Advanced Options')
   group.add_argument('-l', '--local-pkg-path', type='path',
@@ -810,7 +816,9 @@ def _StripBinContext(options):
   elif options.strip_bin:
     yield options.strip_bin
   else:
-    sdk = cros_chrome_sdk.SDKFetcher(options.cache_dir, options.board)
+    sdk = cros_chrome_sdk.SDKFetcher(
+        options.cache_dir, options.board,
+        use_external_config=options.use_external_config)
     components = (sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR)
     with sdk.Prepare(components=components, target_tc=options.target_tc,
                      toolchain_url=options.toolchain_url) as ctx:

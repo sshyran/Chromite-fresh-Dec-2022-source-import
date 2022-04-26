@@ -259,6 +259,8 @@ class CrOSTest(object):
         deploy_cmd += ['--nostrip']
       if self.mount:
         deploy_cmd += ['--mount']
+      if self.public_image:
+        deploy_cmd += ['--use-external-config']
 
     cros_build_lib.run(deploy_cmd, dryrun=self.dryrun)
     self._device.WaitForBoot()
