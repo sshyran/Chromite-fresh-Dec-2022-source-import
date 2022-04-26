@@ -235,29 +235,11 @@ class BuildPackagesRunConfig(object):
     """Get the arguments for build_packages script."""
     args = []
 
-    if self.local_pkg:
-      args.append('--reuse_pkgs_from_local_boards')
-
-    if self.jobs:
-      args.extend(['--jobs', f'{self.jobs}'])
-
-    if self.rebuild_dep is False:
-      args.append('--norebuild')
-
     if self.clean_build:
       args.append('--cleanbuild')
 
-    if not self.use_any_chrome:
-      args.append('--nouse_any_chrome')
-
     if not self.workon:
       args.append('--noworkon')
-
-    if self.usepkgonly:
-      args.append('--usepkgonly')
-
-    if not self.usepkg:
-      args.append('--nousepkg')
 
     if self.use_goma:
       args.append('--run_goma')
@@ -270,9 +252,6 @@ class BuildPackagesRunConfig(object):
 
     if self.packages:
       args.extend(self.packages)
-
-    if self.dryrun:
-      args.append('--pretend')
 
     return args
 
@@ -643,6 +622,10 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   # post-migration.
   extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(
       run_configs.GetForceLocalBuildPackages())
+  # TODO(xcl): Stop passing emerge flags using envvars once reverse dependency
+  # logic is migrated to Python.
+  extra_env['BUILD_PACKAGES_EMERGE_FLAGS'] = ' '.join(
+      run_configs.GetEmergeFlags())
   with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
       run_configs.autosetgov, run_configs.autosetgov_sticky):
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir

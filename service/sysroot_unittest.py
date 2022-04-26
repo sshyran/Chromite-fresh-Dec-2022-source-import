@@ -358,18 +358,6 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase):
 class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
   """Tests for the BuildPackagesRunConfig."""
 
-  def testGetBuildPackagesDefaultArgs(self):
-    """Test the build_packages args building for empty/false/0 values."""
-    # Test False/None/0 values.
-    instance = sysroot.BuildPackagesRunConfig(
-        usepkg=False, install_debug_symbols=False, packages=None)
-
-    args = instance.GetBuildPackagesArgs()
-    # Source used.
-    self.assertIn('--nousepkg', args)
-    # Flag removed due to broken logic.  See crbug/1048419.
-    self.assertNotIn('--reuse_pkgs_from_local_boards', args)
-
   def testGetBuildPackagesArgs(self):
     """Test the build_packages args building for non-empty values."""
     packages = ['cat/pkg', 'cat2/pkg2']
@@ -380,14 +368,10 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         dryrun=True)
 
     args = instance.GetBuildPackagesArgs()
-    # Local build not used.
-    self.assertNotIn('--nousepkg', args)
-    self.assertNotIn('--reuse_pkgs_from_local_boards', args)
+
     # Packages included.
     for package in packages:
       self.assertIn(package, args)
-    # Pretend flag included.
-    self.assertIn('--pretend', args)
 
   def testGetBuildPackagesExtraEnv(self):
     """Test the build_packages extra env."""
