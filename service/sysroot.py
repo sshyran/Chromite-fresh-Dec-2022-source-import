@@ -261,9 +261,6 @@ class BuildPackagesRunConfig(object):
     if not self.usepkg:
       args.append('--nousepkg')
 
-    if self.install_debug_symbols:
-      args.append('--withdebugsymbols')
-
     if self.use_goma:
       args.append('--run_goma')
 
@@ -672,6 +669,19 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
       failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
       raise sysroot_lib.PackageInstallError(
           str(e), e.result, exception=e, packages=failed_pkgs)
+
+    if run_configs.install_debug_symbols:
+      logging.info('Fetching the debug symbols.')
+      try:
+        # TODO(xcl): Convert to directly importing and calling a Python lib
+        # instead of calling a binary.
+        cros_build_lib.run([
+            Path(constants.CHROMITE_BIN_DIR) / 'cros_install_debug_syms',
+            f'--board={sysroot.build_target_name}',
+            '--all',
+        ])
+      except cros_build_lib.RunCommandError as e:
+        logging.error('Unable to install debug symbols: %s', e)
 
 
 def _CleanStaleBinpkgs(sysroot: Union[str, os.PathLike]) -> None:

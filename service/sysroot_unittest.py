@@ -365,8 +365,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
         usepkg=False, install_debug_symbols=False, packages=None)
 
     args = instance.GetBuildPackagesArgs()
-    # Debug symbols not included.
-    self.assertNotIn('--withdebugsymbols', args)
     # Source used.
     self.assertIn('--nousepkg', args)
     # Flag removed due to broken logic.  See crbug/1048419.
@@ -385,8 +383,6 @@ class BuildPackagesRunConfigTest(cros_test_lib.TestCase):
     # Local build not used.
     self.assertNotIn('--nousepkg', args)
     self.assertNotIn('--reuse_pkgs_from_local_boards', args)
-    # Debug symbols included.
-    self.assertIn('--withdebugsymbols', args)
     # Packages included.
     for package in packages:
       self.assertIn(package, args)
@@ -511,13 +507,17 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
 
     self.board = 'board'
     self.target = build_target_lib.BuildTarget(self.board)
-    self.sysroot_path = '/sysroot/path'
-    self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+    self.sysroot = sysroot_lib.Sysroot(self.target.root)
+    self.build_target_name_mock = self.PatchObject(
+        sysroot_lib.Sysroot, 'build_target_name', return_value=self.board)
 
     self.build_packages = Path(constants.CROSUTILS_DIR) / 'build_packages.sh'
     self.base_command = [
-        self.build_packages, '--board', self.board, '--board_root',
-        self.sysroot_path
+        self.build_packages,
+        '--board',
+        self.board,
+        '--board_root',
+        self.sysroot.path,
     ]
 
     # Prevent the test from switching the cpu governor.
@@ -553,7 +553,7 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     def assert_file_contents(sysroot_path, deep, exclusion_file):
       contents = osutils.ReadFile(exclusion_file)
 
-      self.assertEqual(self.sysroot_path, sysroot_path)
+      self.assertEqual(self.sysroot.path, sysroot_path)
       self.assertFalse(deep)
       self.assertEqual('cross-dev/package', contents)
 
@@ -566,6 +566,20 @@ class BuildPackagesTest(cros_test_lib.RunCommandTestCase,
     config = sysroot.BuildPackagesRunConfig()
 
     sysroot.BuildPackages(self.target, self.sysroot, config)
+
+  def testInstallDebugSymbols(self):
+    """Test that cros_install_debug_syms is called with the expected args."""
+    config = sysroot.BuildPackagesRunConfig(install_debug_symbols=True)
+
+    with cros_test_lib.LoggingCapturer() as logs:
+      sysroot.BuildPackages(self.target, self.sysroot, config)
+
+      self.assertCommandContains([
+          Path(constants.CHROMITE_BIN_DIR) / 'cros_install_debug_syms',
+          f'--board={self.build_target_name_mock}',
+          '--all',
+      ])
+      self.AssertLogsContain(logs, 'Fetching the debug symbols.')
 
   def testPackageFailure(self):
     """Test package failure handling."""
