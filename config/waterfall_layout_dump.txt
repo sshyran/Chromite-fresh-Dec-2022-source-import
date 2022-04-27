@@ -208,6 +208,7 @@
     coral-kernelnext-release
     coral-release
     corsola-release
+    corsola64-release
     cyan-release
     dedede-release
     draco-release
@@ -643,6 +644,12 @@
   corsola-payloads-tryjob
   corsola-release-tryjob
   corsola-unittest-stress
+  corsola64-full-tryjob
+  corsola64-llvm-next-toolchain-tryjob
+  corsola64-llvm-toolchain-tryjob
+  corsola64-payloads-tryjob
+  corsola64-release-tryjob
+  corsola64-unittest-stress
   cyan-factory-strago-7458.B-factorybranch-tryjob
   cyan-full-tryjob
   cyan-llvm-next-toolchain-tryjob
@@ -1292,6 +1299,7 @@
     coral-kernelnext-release-tryjob
     coral-release-tryjob
     corsola-release-tryjob
+    corsola64-release-tryjob
     cyan-release-tryjob
     dedede-release-tryjob
     draco-release-tryjob
