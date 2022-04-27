@@ -653,7 +653,7 @@ def Which(
     binary: str,
     path: Optional[Union[str, os.PathLike]] = None,
     mode: int = os.X_OK,
-    root: Optional[Union[str, os.PathLike]] = None):
+    root: Optional[Union[str, os.PathLike]] = None) -> Optional[str]:
   """Return the absolute path to the specified binary.
 
   Args:
@@ -682,7 +682,7 @@ def Which(
   return None
 
 
-def FindMissingBinaries(needed_tools):
+def FindMissingBinaries(needed_tools: List[str]) -> List[str]:
   """Verifies that the required tools are present on the system.
 
   This is especially important for scripts that are intended to run
