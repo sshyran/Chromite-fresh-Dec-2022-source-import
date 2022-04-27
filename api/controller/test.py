@@ -271,9 +271,14 @@ def BuildTestServiceContainers(
       cmd += ['--tags', tags]
       cmd += ['--output', output_path]
 
-      # Labels aren't support yet in cloudbuild script.
+      # Label flag is different for cros-test.
       if human_name != 'cros-test':
         cmd += labels
+
+      if human_name == 'cros-test' and labels:
+        # Translate generator to comma separated string.
+        ct_labels = ','.join(labels)
+        cmd += ['--labels', ct_labels]
 
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
