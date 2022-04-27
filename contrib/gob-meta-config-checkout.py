@@ -32,7 +32,8 @@ assert sys.version_info >= (3, 7), 'Python 3.7+ required'
 # pylint: disable=bad-indentation
 
 
-CSI_ERASE_LINE = '\x1b[2K'
+# Terminal escape sequence to erase the current line after the cursor.
+CSI_ERASE_LINE_AFTER = '\x1b[K'
 
 
 class GitConfig:
@@ -206,9 +207,8 @@ def main(argv):
     num_repos = len(repos)
     for (repo, output) in pool.imap_unordered(capture, repos):
         finished += 1
-        print(CSI_ERASE_LINE + '\r', end='')
-        print(f'[{finished}/{num_repos}] {repo}', output,
-              end='\n' if output else '', flush=not output)
+        print(f'\r[{finished}/{num_repos}] {repo}{CSI_ERASE_LINE_AFTER}',
+              output, end='\n' if output else '', flush=not output)
     print()
 
 
