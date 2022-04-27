@@ -156,7 +156,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
         exclude_files_suffixes=(),
-        source_root=self.tempdir)
+        src_prefix_path=self.tempdir)
 
     coverage_data = coverageJson['data'][0]['files']
 

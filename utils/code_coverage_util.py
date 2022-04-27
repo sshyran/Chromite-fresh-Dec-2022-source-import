@@ -90,7 +90,7 @@ def _ExtractLlvmCoverageData(coverage_json: Dict) -> List:
   return coverage_json['data'][0]['files']
 
 
-def _GenerateZeroCoverageLLVMForFile(file_path: str, source_root: str,
+def _GenerateZeroCoverageLLVMForFile(file_path: str, src_prefix_path: str,
                                      exclude_line_prefixes: Tuple[str]) -> Dict:
   """Generates LLVM json formatted zero % coverage for the given file.
 
@@ -102,7 +102,7 @@ def _GenerateZeroCoverageLLVMForFile(file_path: str, source_root: str,
 
   Args:
     file_path: path to the src file.
-    source_root: chromeos source root
+    src_prefix_path: prefix path for source code
     exclude_line_prefixes: Used to determine un-instrumented lines
     in the file.
 
@@ -147,7 +147,7 @@ def _GenerateZeroCoverageLLVMForFile(file_path: str, source_root: str,
           _CreateCloseSegment(line_index, len(lines[line_index - 1])))
 
     file_data = {}
-    file_data['filename'] = str(Path(file_path).relative_to(source_root))
+    file_data['filename'] = str(Path(file_path).relative_to(src_prefix_path))
     file_data['segments'] = segments
     # Zoss does not use summary field, so keep it empty
     file_data['summary'] = {}
@@ -278,7 +278,7 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
                              exclude_line_prefixes: Tuple[str],
                              exclude_files: List[str],
                              exclude_files_suffixes: Tuple[str],
-                             source_root: str) -> Dict:
+                             src_prefix_path: str) -> Dict:
   """Generate zero coverage for all src files under  |path_to_src_directories|.
 
      More detials on how to generate zero coverage: go/chromeos-zero-coverage.
@@ -289,7 +289,7 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
     exclude_line_prefixes: Used to determine un-instrumented code.
     exclude_files: files to exclude from zero coverage.
     exclude_files_suffixes: Used to exclude files based on suffixes
-    source_root: chromeos source root
+    src_prefix_path: prefix path for source code
 
   Returns:
     llvm format coverage json.
@@ -306,7 +306,7 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
                                exclude_files_suffixes)):
 
           zero_cov = _GenerateZeroCoverageLLVMForFile(full_file_path,
-                                                      source_root,
+                                                      src_prefix_path,
                                                       exclude_line_prefixes)
 
           if zero_cov:

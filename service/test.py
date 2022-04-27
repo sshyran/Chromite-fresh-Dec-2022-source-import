@@ -577,7 +577,7 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=files_with_cov,
         exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
-        source_root=constants.SOURCE_ROOT)
+        src_prefix_path=constants.SOURCE_ROOT)
     # Merge generated zero coverage data and
     # llvm compiler generated coverage data.
     merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(
