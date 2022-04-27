@@ -749,28 +749,28 @@ class IteratePathsTest(cros_test_lib.TestCase):
   def testRoot(self):
     """Test iterating from root directory."""
     inp = '/'
-    exp = ['/']
+    exp = [Path('/')]
     self.assertEqual(list(osutils.IteratePaths(inp)), exp)
 
   def testOneDir(self):
     """Test iterating from a directory in a root directory."""
     inp = '/abc'
-    exp = ['/', '/abc']
+    exp = [Path('/'), Path('/abc')]
     self.assertEqual(list(osutils.IteratePaths(inp)), exp)
 
   def testTwoDirs(self):
     """Test iterating two dirs down."""
     inp = '/abc/def'
-    exp = ['/', '/abc', '/abc/def']
+    exp = [Path('/'), Path('/abc'), Path('/abc/def')]
     self.assertEqual(list(osutils.IteratePaths(inp)), exp)
 
   def testNormalize(self):
     """Test argument being normalized."""
     cases = [
-        ('//', ['/']),
-        ('///', ['/']),
-        ('/abc/', ['/', '/abc']),
-        ('/abc//def', ['/', '/abc', '/abc/def']),
+        ('//', [Path('/')]),
+        ('///', [Path('/')]),
+        ('/abc/', [Path('/'), Path('/abc')]),
+        ('/abc//def', [Path('/'), Path('/abc'), Path('/abc/def')]),
     ]
     for inp, exp in cases:
       self.assertEqual(list(osutils.IteratePaths(inp)), exp)

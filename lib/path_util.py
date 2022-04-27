@@ -319,7 +319,8 @@ def DetermineCheckout(cwd=None):
       break
 
   if checkout_type != CHECKOUT_TYPE_UNKNOWN:
-    root = path
+    # TODO(vapier): Change this function to pathlib Path.
+    root = str(path)
 
   # Determine the chrome src directory.
   chrome_src_dir = None

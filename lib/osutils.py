@@ -22,7 +22,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import retry_util
@@ -719,7 +719,7 @@ def IteratePaths(end_path):
   return reversed(list(IteratePathParents(end_path)))
 
 
-def IteratePathParents(start_path):
+def IteratePathParents(start_path: Union[str, os.PathLike]) -> List[Path]:
   """Generator that iterates through a directory's parents.
 
   Args:
@@ -729,14 +729,13 @@ def IteratePathParents(start_path):
     The passed-in path, along with its parents.  i.e.,
     IteratePathParents('/usr/local') would yield '/usr/local', '/usr', and '/'.
   """
-  path = os.path.abspath(start_path)
-  # There's a bug that abspath('//') returns '//'. We need to renormalize it.
-  if path == '//':
-    path = '/'
-  yield path
-  while path.strip('/'):
-    path = os.path.dirname(path)
+  path = Path(start_path).resolve()
+  while True:
     yield path
+    parent = path.parent
+    if path == parent:
+      break
+    path = parent
 
 
 def FindInPathParents(path_to_find, start_path, test_func=None, end_path=None):
