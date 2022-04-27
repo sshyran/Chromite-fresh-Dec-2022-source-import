@@ -818,16 +818,28 @@ class FindInPathParentsTest(cros_test_lib.TempDirTestCase):
   def setUp(self):
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, self.DIR_STRUCT)
 
-  def testFound(self):
-    """Target is found."""
+  def testFoundStr(self):
+    """Target (str) is found."""
     found = osutils.FindInPathParents(
         '.repo', os.path.join(self.tempdir, self.START_PATH))
     self.assertEqual(found, os.path.join(self.tempdir, 'a', '.repo'))
 
-  def testNotFound(self):
+  def testFoundPath(self):
+    """Target (Path) is found."""
+    tempdir = Path(self.tempdir)
+    found = osutils.FindInPathParents('.repo', tempdir / self.START_PATH)
+    self.assertEqual(found, tempdir / 'a' / '.repo')
+
+  def testNotFoundStr(self):
     """Target is not found."""
     found = osutils.FindInPathParents(
         'does.not/exist', os.path.join(self.tempdir, self.START_PATH))
+    self.assertEqual(found, None)
+
+  def testNotFoundPath(self):
+    """Target is not found."""
+    found = osutils.FindInPathParents(
+        'does.not/exist', Path(self.tempdir) / self.START_PATH)
     self.assertEqual(found, None)
 
 

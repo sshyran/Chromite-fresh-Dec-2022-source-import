@@ -22,7 +22,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
-from typing import Iterator, List, Optional, Union
+from typing import Callable, Iterator, List, Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import retry_util
@@ -739,7 +739,12 @@ def IteratePathParents(start_path: Union[str, os.PathLike]) -> List[Path]:
     path = parent
 
 
-def FindInPathParents(path_to_find, start_path, test_func=None, end_path=None):
+def FindInPathParents(
+    path_to_find: str,
+    start_path: Union[str, os.PathLike],
+    test_func: Optional[Callable[[Union[str, os.PathLike]], bool]] = None,
+    end_path: Union[str, os.PathLike] = None,
+) -> Optional[Union[str, os.PathLike]]:
   """Look for a relative path, ascending through parent directories.
 
   Ascend through parent directories of current path looking for a relative
@@ -767,17 +772,20 @@ def FindInPathParents(path_to_find, start_path, test_func=None, end_path=None):
       path to test.  A True return value will cause AscendingLookup to return
       the target.
     end_path: The path to stop searching.
+
+  Returns:
+    The path, if found, with the same type as |start_path|.  Otherwise, None.
   """
   if end_path is not None:
-    end_path = os.path.abspath(end_path)
+    end_path = Path(end_path).resolve()
   if test_func is None:
     test_func = os.path.exists
-  for path in IteratePathParents(start_path):
+  for path in IteratePathParents(Path(start_path)):
     if path == end_path:
       return None
-    target = os.path.join(path, path_to_find)
+    target = path / path_to_find
     if test_func(target):
-      return target
+      return str(target) if isinstance(start_path, str) else target
   return None
 
 
