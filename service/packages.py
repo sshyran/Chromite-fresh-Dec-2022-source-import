@@ -1173,7 +1173,8 @@ def determine_android_package(board: str) -> Optional[str]:
     The android package string if there is one.
   """
   try:
-    packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/target-os', board=board)
   except cros_build_lib.RunCommandError as e:
     # Return None because a command (likely portage) failed when trying to
     # determine the package.
@@ -1462,8 +1463,8 @@ def determine_kernel_version(
     The kernel versions, or None.
   """
   try:
-    packages = portage_util.GetPackageDependencies(build_target.name,
-                                                   'virtual/linux-sources')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/linux-sources', board=build_target.name)
   except cros_build_lib.RunCommandError as e:
     logging.warning('Unable to get package list for metadata: %s', e)
     return None

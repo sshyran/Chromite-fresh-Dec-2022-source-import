@@ -907,8 +907,8 @@ class BuildImageStage(BuildPackagesStage):
   def _FindKernelVersion(self):
     """Returns a string containing the kernel version for this build."""
     try:
-      packages = portage_util.GetPackageDependencies(self._current_board,
-                                                     'virtual/linux-sources')
+      packages = portage_util.GetPackageDependencies(
+          'virtual/linux-sources', board=self._current_board)
     except cros_build_lib.RunCommandError:
       logging.warning('Unable to get package list for metadata.')
       return None

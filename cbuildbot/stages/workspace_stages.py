@@ -728,7 +728,7 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
       String identifier for a package, or None
     """
     packages = portage_util.GetPackageDependencies(
-        self._current_board, 'virtual/target-os',
+        'virtual/target-os', board=self._current_board,
         buildroot=self._build_root)
 
     android_packages = {p for p in packages

@@ -331,7 +331,7 @@ def GetOverlayName(overlay):
 def _GetSysrootTool(
     tool: str,
     board: Optional[str] = None,
-    sysroot: Optional[str] = None) -> str:
+    sysroot: Optional[Union[str, os.PathLike]] = None) -> str:
   """Return the |tool| to use for a sysroot/board/host."""
   # If there is no board or sysroot, return the host tool.
   if sysroot is None and board is None:
@@ -2291,20 +2291,22 @@ def GetBoardUseFlags(board):
 
 
 def _EmergeBoard(
-    board: str,
     package: str,
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
     buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
   """Call emerge board to get dependences of package.
 
   Args:
     board: The board to inspect.
+    sysroot: The root directory being inspected.
     package: The package name with optional category, version, and slot.
     buildroot: Source root to find overlays.
 
   Returns:
     result (cros_build_lib.CommandResult)
   """
-  emerge = _GetSysrootTool('emerge', board=board)
+  emerge = _GetSysrootTool('emerge', board=board, sysroot=sysroot)
   cmd = [
       emerge, '-p', '--cols', '--quiet', '-e', package
   ]
@@ -2316,18 +2318,22 @@ def _EmergeBoard(
       encoding='utf-8')
 
 
-def GetPackageDependencies(board, package, buildroot=constants.SOURCE_ROOT):
+def GetPackageDependencies(
+    package: str,
+    board: Optional[str] = None,
+    sysroot: Optional[Union[str, os.PathLike]] = None,
+    buildroot: str = constants.SOURCE_ROOT) -> List[str]:
   """Returns the depgraph list of packages for a board and package."""
-  emerge_output = _EmergeBoard(board, package, buildroot).stdout.splitlines()
+  output = _EmergeBoard(package, board, sysroot, buildroot).stdout.splitlines()
   packages = []
-  for line in emerge_output:
+  for line in output:
     # The first column is ' NRfUD '
     columns = line[7:].split()
     try:
       package = columns[0] + '-' + columns[1]
       packages.append(package)
     except IndexError:
-      logging.error('Wrong format of output: \n%r', emerge_output)
+      logging.error('Wrong format of output: \n%r', output)
       raise
 
   return packages

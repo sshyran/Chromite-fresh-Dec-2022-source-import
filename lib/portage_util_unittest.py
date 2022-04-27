@@ -1740,8 +1740,7 @@ class PackageDependenciesTest(cros_test_lib.RunCommandTestCase):
                          stdout=_EMERGE_PRETEND_SDK_OUTPUT_CORPUS)
     self.assertEqual(
         expected,
-        portage_util.GetPackageDependencies(None,
-                                            'target-chromium-os-sdk'))
+        portage_util.GetPackageDependencies('target-chromium-os-sdk'))
 
 
 class FindEbuildsForOverlaysTest(cros_test_lib.MockTempDirTestCase):

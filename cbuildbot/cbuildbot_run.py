@@ -871,7 +871,8 @@ class _BuilderRunBase(object):
 
   def DetermineAndroidPackage(self, board):
     """Returns the active Android container package in use by the board."""
-    packages = portage_util.GetPackageDependencies(board, 'virtual/target-os')
+    packages = portage_util.GetPackageDependencies(
+        'virtual/target-os', board=board)
     # We assume there is only one Android package in the depgraph.
     for package in packages:
       if (package.startswith('chromeos-base/android-container-') or
