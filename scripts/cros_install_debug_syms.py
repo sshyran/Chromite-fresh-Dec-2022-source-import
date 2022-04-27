@@ -88,9 +88,12 @@ class DebugSymbolsInstaller(object):
     if not os.path.isfile(archive):
       self._gs_context.Copy(url, archive, debug_level=logging.DEBUG)
 
+    compression = cros_build_lib.CompressionDetectType(archive)
+    compressor = cros_build_lib.FindCompressor(compression)
+
     with osutils.TempDir(sudo_rm=True) as tempdir:
       cros_build_lib.sudo_run(
-          ['tar', '-I', 'bzip2 -q', '-xf', archive, '-C', tempdir], quiet=True)
+          ['tar', '-I', compressor, '-xf', archive, '-C', tempdir], quiet=True)
 
       with open(self._vartree.getpath(cpv, filename='CONTENTS'),
                 'a') as content_file:
