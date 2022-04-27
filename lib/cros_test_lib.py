@@ -12,6 +12,7 @@ import os
 import re
 import sys
 import time
+from typing import List, Union
 import unittest
 from unittest import mock
 
@@ -97,7 +98,10 @@ def CreateOnDiskHierarchy(base_path, dir_struct):
       osutils.Touch(f, makedirs=True)
 
 
-def _VerifyDirectoryIterables(existing, expected):
+def _VerifyDirectoryIterables(
+    existing: List[Union[str, os.PathLike]],
+    expected: List[Union[str, os.PathLike]],
+) -> None:
   """Compare two iterables representing contents of a directory.
 
   Paths in |existing| and |expected| will be compared for exact match.
@@ -113,8 +117,8 @@ def _VerifyDirectoryIterables(existing, expected):
   def FormatPaths(paths):
     return '\n'.join(sorted(paths))
 
-  existing = set(existing)
-  expected = set(expected)
+  existing = set(str(x) for x in existing)
+  expected = set(str(x) for x in expected)
 
   unexpected = existing - expected
   if unexpected:
@@ -137,8 +141,11 @@ def VerifyOnDiskHierarchy(base_path, dir_struct):
     AssertionError when there is any divergence between the on-disk
     structure and the structure specified by 'dir_struct'.
   """
+  # Make sure the arg ends with a / if it's a dir to more reliably assert.
+  existing = [str(x) + '/' if x.is_dir() else str(x)
+              for x in osutils.DirectoryIterator(base_path)]
   expected = _FlattenStructure(base_path, dir_struct)
-  _VerifyDirectoryIterables(osutils.DirectoryIterator(base_path), expected)
+  _VerifyDirectoryIterables(existing, expected)
 
 
 def VerifyTarball(tarball, dir_struct):

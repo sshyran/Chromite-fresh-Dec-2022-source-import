@@ -228,7 +228,7 @@ class Copier(object):
             sub_dest = os.path.join(dest, rel_path)
             if path.IsBlacklisted(rel_path):
               continue
-            if sub_path.endswith('/'):
+            if sub_path.is_dir():
               osutils.SafeMakedirs(sub_dest, mode=self.dir_mode)
             else:
               self._CopyFile(sub_path, sub_dest, path)

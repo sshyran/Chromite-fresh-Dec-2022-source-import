@@ -22,7 +22,7 @@ import shutil
 import stat
 import subprocess
 import tempfile
-from typing import List, Optional, Union
+from typing import Iterator, List, Optional, Union
 
 from chromite.lib import cros_build_lib
 from chromite.lib import retry_util
@@ -698,11 +698,12 @@ def FindMissingBinaries(needed_tools: List[str]) -> List[str]:
   return [binary for binary in needed_tools if Which(binary) is None]
 
 
-def DirectoryIterator(base_path):
+def DirectoryIterator(base_path: Path) -> Iterator[Path]:
   """Iterates through the files and subdirs of a directory."""
   for root, dirs, files in os.walk(base_path):
-    for e in [d + os.sep for d in dirs] + files:
-      yield os.path.join(root, e)
+    root = Path(root)
+    for e in dirs + files:
+      yield root / e
 
 
 def IteratePaths(end_path):
