@@ -159,17 +159,12 @@ def IsCanaryMaster(builder_run):
 
 def IsPFQType(b_type):
   """Returns True if this build type is a PFQ."""
-  return b_type in (constants.PFQ_TYPE, constants.ANDROID_PFQ_TYPE)
+  return b_type in (constants.PFQ_TYPE,)
 
 
 def IsCanaryType(b_type):
   """Returns True if this build type is a Canary."""
   return b_type == constants.CANARY_TYPE
-
-
-def IsMasterAndroidPFQ(config):
-  """Returns True if this build is master Android PFQ type."""
-  return config.build_type == constants.ANDROID_PFQ_TYPE and config.master
 
 
 def GetHWTestEnv(builder_run_config, model_config=None, suite_config=None):

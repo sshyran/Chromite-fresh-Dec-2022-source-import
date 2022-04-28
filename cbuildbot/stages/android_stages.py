@@ -13,7 +13,6 @@ from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
 from chromite.lib import config_lib
 from chromite.lib import constants
-from chromite.lib import failures_lib
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import results_lib
@@ -95,13 +94,6 @@ class UprevAndroidStage(generic_stages.BuilderStage,
       osutils.SafeUnlink(ANDROIDPIN_MASK_PATH)
 
     logging.info('New Android package atom: %s', android_atom_to_build)
-
-    if (not android_atom_to_build and
-        self._run.options.buildbot and
-        self._run.config.build_type == constants.ANDROID_PFQ_TYPE):
-      logging.info('Android already uprevved. Nothing else to do.')
-      raise failures_lib.ExitEarlyException(
-          'UprevAndroidStage finished and exited early.')
 
 
 class AndroidMetadataStage(generic_stages.BuilderStage,

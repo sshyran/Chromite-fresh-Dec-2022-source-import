@@ -8,17 +8,13 @@ import os
 from unittest import mock
 
 from chromite.cbuildbot import commands
-from chromite.cbuildbot import lkgm_manager
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot import repository
 from chromite.cbuildbot import trybot_patch_pool
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sync_stages
-from chromite.lib import cidb
-from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
-from chromite.lib import fake_cidb
 from chromite.lib.buildstore import FakeBuildStore
 
 
@@ -220,58 +216,3 @@ class MockPatch(mock.MagicMock):
 
   def GetDiffStatus(self, _):
     return self.mock_diff_status
-
-
-class MasterSlaveLKGMSyncTest(generic_stages_unittest.StageTestCase):
-  """Unit tests for MasterSlaveLKGMSyncStage"""
-
-  BOT_ID = 'hatch-android-rvc-pre-flight-branch'
-
-  def setUp(self):
-    """Setup"""
-    self.source_repo = 'ssh://source/repo'
-    self.manifest_version_url = 'fake manifest url'
-    self.branch = 'master'
-    self.build_name = self.BOT_ID
-    self.incr_type = 'branch'
-    self.next_version = 'next_version'
-    self.sync_stage = None
-    self.android_package = 'android-package'
-    self.config = config_lib.BuildConfig(android_package=self.android_package,
-                                         master=True)
-
-    self.repo = repository.RepoRepository(self.source_repo, self.tempdir,
-                                          self.branch)
-
-    # Create and set up a fake cidb instance.
-    self.fake_db = fake_cidb.FakeCIDBConnection()
-    self.buildstore = FakeBuildStore(self.fake_db)
-    cidb.CIDBConnectionFactory.SetupMockCidb(self.fake_db)
-
-    self.manager = lkgm_manager.LKGMManager(
-        source_repo=self.repo,
-        manifest_repo=self.manifest_version_url,
-        build_names=[self.build_name],
-        build_type=constants.ANDROID_PFQ_TYPE,
-        incr_type=self.incr_type,
-        force=False,
-        branch=self.branch,
-        config=self.config,
-        buildstore=self.buildstore,
-        dry_run=True)
-
-    self._Prepare()
-
-  # Our API here is not great when it comes to kwargs passing.
-  def _Prepare(self, bot_id=None, **kwargs):  # pylint: disable=arguments-differ
-    super()._Prepare(bot_id, **kwargs)
-
-    self._run.config['manifest_version'] = self.manifest_version_url
-    self.sync_stage = sync_stages.MasterSlaveLKGMSyncStage(
-        self._run, self.buildstore)
-    self.sync_stage.manifest_manager = self.manager
-    self._run.attrs.manifest_manager = self.manager
-
-  def testGetInitializedManager(self):
-    self.sync_stage.repo = self.repo
-    self.sync_stage._GetInitializedManager(True)

@@ -261,25 +261,3 @@ class LKGMManagerTest(cros_test_lib.MockTempDirTestCase):
       self.assertEqual(
           elements[0].getAttribute(lkgm_manager.CHROME_VERSION_ATTR),
           chrome_version)
-
-  def testAndroidPFQManifestPath(self):
-    """Tests if LKGMManager for Android PFQ yields correct manifest path."""
-    config = config_lib.BuildConfig(android_package='android-package',
-                                    master=True)
-    manager = self._LKGMManager(constants.ANDROID_PFQ_TYPE, config)
-    info = lkgm_manager._LKGMCandidateInfo(FAKE_VERSION_STRING, CHROME_BRANCH)
-
-    self.PatchObject(lkgm_manager.LKGMManager, 'CheckoutSourceCode')
-    self.PatchObject(lkgm_manager.LKGMManager, 'GetCurrentVersionInfo',
-                     return_value=info)
-    self.PatchObject(lkgm_manager.LKGMManager, 'RefreshManifestCheckout')
-    self.PatchObject(lkgm_manager.LKGMManager, 'CreateManifest',
-                     return_value='some_manifest')
-    self.PatchObject(lkgm_manager.LKGMManager, 'PublishManifest')
-
-    manifest = manager.GetNextBuildSpec()
-    self.assertEqual(manifest,
-                     os.path.join(self.tmpmandir,
-                                  lkgm_manager.LKGMManager.ANDROID_PFQ_SUBDIR,
-                                  'android-package', 'buildspecs',
-                                  '13', '1.2.4-rc3.xml'))
