@@ -7,10 +7,17 @@
 This takes care of downloading the pinned version we use in chromite.
 """
 
+import logging
+import signal
+
 from chromite.lib import gs
 
 
 def main(argv):
   ctx = gs.GSContext(retries=0)
-  return ctx.DoCommand(
-      argv, print_cmd=False, stderr=None, check=False).returncode
+  try:
+    return ctx.DoCommand(
+        argv, print_cmd=False, stderr=None, check=False).returncode
+  except KeyboardInterrupt:
+    logging.debug('Aborted due to keyboard interrupt.')
+    return 128 + signal.SIGINT
