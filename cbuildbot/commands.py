@@ -71,7 +71,6 @@ _SWARMING_ADDITIONAL_TIMEOUT = 60 * 60
 _DEFAULT_HWTEST_TIMEOUT_MINS = 1440
 _SWARMING_EXPIRATION = 20 * 60
 RUN_SUITE_PATH = '/usr/local/autotest/site_utils/run_suite.py'
-SKYLAB_RUN_SUITE_PATH = '/usr/local/autotest/bin/run_suite_skylab'
 _ABORT_SUITE_PATH = '/usr/local/autotest/site_utils/abort_suite.py'
 _SKYLAB_ABORT_SUITE_PATH = '/usr/local/autotest/bin/abort_suite_skylab'
 _MAX_HWTEST_CMD_RETRY = 10
@@ -3246,22 +3245,6 @@ def BuildEbuildLogsTarball(buildroot, board, archive_dir):
   sysroot = sysroot_lib.Sysroot(os.path.join('build', board))
   chroot = chroot_lib.Chroot(path=os.path.join(buildroot, 'chroot'))
   return artifacts_service.BundleEBuildLogsTarball(chroot, sysroot, archive_dir)
-
-
-def BuildChromeOSConfig(buildroot, board, archive_dir):
-  """Builds the ChromeOS Config JSON payload.
-
-  Args:
-    buildroot: Root directory where the build occurs.
-    board: The board for which ChromeOS Configs payload should be built.
-    archive_dir: The directory to drop the payload in.
-
-  Returns:
-    The file name of the output payload.
-  """
-  sysroot = sysroot_lib.Sysroot(os.path.join('build', board))
-  chroot = chroot_lib.Chroot(path=os.path.join(buildroot, 'chroot'))
-  return artifacts_service.BundleChromeOSConfig(chroot, sysroot, archive_dir)
 
 
 def BuildGceTarball(archive_dir, image_dir, image):
