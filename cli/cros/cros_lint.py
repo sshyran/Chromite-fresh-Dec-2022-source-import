@@ -463,6 +463,10 @@ run other checks (e.g. pyflakes, etc.)
       # they are aware that nothing was linted.
       logging.warning('No files provided to lint.  Doing nothing.')
 
+    # Ignore generated files.  Some tools can do this for us, but not all, and
+    # it'd be faster if we just never spawned the tools in the first place.
+    files = [x for x in self.options.files if not x.endswith('_pb2.py')]
+
     errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
     linter_map = _BreakoutFilesByLinter(files)
     dispatcher = functools.partial(_Dispatcher, errors,
