@@ -1037,23 +1037,34 @@ class DetermineKernelVersionTest(cros_test_lib.RunCommandTempDirTestCase):
   def test_determine_kernel_version(self):
     """Tests that a valid kernel version is returned."""
     package_result = [
+        'sys-kernel/chromeos-kernel-4_4-4.4.223-r2209'
+    ]
+    self.PatchObject(
+        portage_util, 'GetFlattenedDepsForPackage', return_value=package_result)
+
+    result = packages.determine_kernel_version(self.build_target)
+    self.assertEqual(result, '4.4.223-r2209')
+
+  def test_determine_kernel_version_too_many(self):
+    """Tests that an exception is thrown with too many packages."""
+    package_result = [
         'sys-kernel/linux-headers-4.14-r24', 'sys-devel/flex-2.6.4-r1',
         'sys-kernel/chromeos-kernel-4_4-4.4.223-r2209'
     ]
     self.PatchObject(
-        portage_util, 'GetPackageDependencies', return_value=package_result)
+        portage_util, 'GetFlattenedDepsForPackage', return_value=package_result)
 
-    result = packages.determine_kernel_version(self.build_target)
-    self.assertEqual(result, '4.4.223-r2209')
+    with self.assertRaises(packages.KernelVersionError):
+      packages.determine_kernel_version(self.build_target)
 
   def test_determine_kernel_version_exception(self):
     """Tests that portage_util exceptions result in returning None."""
     self.PatchObject(
         portage_util,
-        'GetPackageDependencies',
+        'GetFlattenedDepsForPackage',
         side_effect=cros_build_lib.RunCommandError('error'))
     result = packages.determine_kernel_version(self.build_target)
-    self.assertEqual(result, None)
+    self.assertEqual(result, '')
 
 
 class ChromeVersionsTest(cros_test_lib.MockTestCase):
