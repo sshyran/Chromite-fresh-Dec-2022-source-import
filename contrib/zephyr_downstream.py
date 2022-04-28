@@ -22,6 +22,12 @@ def main(args):
   parser.add_argument('--dry-run',
                       action='store_true',
                       help='Dry run, no updates to Gerrit.')
+  parser.add_argument('--limit',
+                      type=int,
+                      help='How many changes to modify, from the oldest.')
+  parser.add_argument('--stop-at',
+                      type=str,
+                      help='Stop at the specified change number.')
   opts = parser.parse_args(args)
   dry_run = opts.dry_run
 
@@ -32,12 +38,22 @@ def main(args):
                                  raw=True)
   cls_to_downstream.sort(key=lambda patch: patch['number'])
 
+  if opts.limit:
+    cls_to_downstream = cls_to_downstream[:opts.limit]
+
   logging.info('Downstreaming the following CLs:\n%s',
                '\n'.join((patch['number'] for patch in cls_to_downstream)))
 
+  stop_at = opts.stop_at
   # TODO(aaronmassey): Investigate bulk changes from Gerrit lib API instead.
   for i, patch in enumerate(cls_to_downstream):
     change_num = patch['number']
+
+    if stop_at and stop_at == change_num:
+      logging.info('Matched change: %s, stop processing other changes',
+                   change_num)
+      break
+
     logging.info('Downstreaming %s: %d/%d',
                  change_num,
                  i + 1,
