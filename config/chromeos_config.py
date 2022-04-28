@@ -375,18 +375,6 @@ def GeneralTemplates(site_config):
       profile='testbed-ap',
   )
 
-  # Create tryjob build configs to help with stress testing.
-  site_config.AddTemplate(
-      'unittest_stress',
-      display_label=config_lib.DISPLAY_LABEL_TRYJOB,
-      build_type=constants.TRYJOB_TYPE,
-      description='Run Unittests repeatedly to look for flake.',
-      builder_class_name='test_builders.UnittestStressBuilder',
-
-      # Make this available, so we can stress a previous build.
-      manifest_version=True,
-  )
-
   site_config.AddTemplate(
       'release_common',
       site_config.templates.full,
@@ -2046,18 +2034,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
       config.apply(**overrides)
 
 
-def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
+def SpecialtyBuilders(site_config):
   """Add a variety of specialized builders or tryjobs.
 
   Args:
     site_config: config_lib.SiteConfig to be modified by adding templates
                  and configs.
-    boards_dict: A dict mapping board types to board name collections.
-    ge_build_config: Dictionary containing the decoded GE configuration file.
   """
-  board_configs = CreateInternalBoardConfigs(site_config, boards_dict,
-                                             ge_build_config)
-
   site_config.AddWithoutTemplate(
       'success-build',
       site_config.templates.external,
@@ -2169,16 +2152,6 @@ def SpecialtyBuilders(site_config, boards_dict, ge_build_config):
               ['refs/heads/main'], ['generated/luci-scheduler.cfg']
           ]
       ],
-  )
-
-  # Create our unittest stress build configs (used for tryjobs only)
-  site_config.AddForBoards(
-      'unittest-stress',
-      boards_dict['all_boards'],
-      board_configs,
-      site_config.templates.unittest_stress,
-      luci_builder=config_lib.LUCI_BUILDER_TRY,
-      unittests=True,
   )
 
   site_config.AddGroup(
@@ -2533,7 +2506,7 @@ def GetConfig():
 
   PayloadBuilders(site_config, boards_dict)
 
-  SpecialtyBuilders(site_config, boards_dict, ge_build_config)
+  SpecialtyBuilders(site_config)
 
   InformationalBuilders(site_config, boards_dict, ge_build_config)
 

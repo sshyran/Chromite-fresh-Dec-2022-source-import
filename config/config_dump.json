@@ -628,16 +628,6 @@
             "profile": "ubsan",
             "vm_tests": []
         },
-        "unittest_stress": {
-            "_template": "unittest_stress",
-            "build_type": "tryjob",
-            "builder_class_name": "test_builders.UnittestStressBuilder",
-            "description": "Run Unittests repeatedly to look for flake.",
-            "display_label": "tryjob",
-            "hw_tests_override": [],
-            "manifest_version": true,
-            "vm_tests": []
-        },
         "vm": {
             "_template": "vm",
             "archive_build_debug": true,
@@ -783,21 +773,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "adlnrvp-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "adlnrvp"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "adlrvp-full": {
         "_template": "full",
         "boards": [
@@ -924,21 +899,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "adlrvp-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "adlrvp"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "ambassador-factory-ambassador-14265.B-factorybranch": {
         "_template": "factorybranch",
@@ -1086,21 +1046,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "ambassador-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "ambassador"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "amd64-generic-asan": {
         "_template": "asan",
@@ -1412,14 +1357,6 @@
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
-    "amd64-generic-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "amd64-generic"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
     "amd64-generic-vm-full": {
         "_template": "vm",
         "boards": [
@@ -1583,22 +1520,6 @@
         "sync_chrome": false,
         "vm_tests_override": null
     },
-    "arkham-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "arkham"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "arm-generic-full": {
         "_template": "full",
         "boards": [
@@ -1667,14 +1588,6 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "arm-generic-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "arm-generic"
-        ],
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
@@ -1751,14 +1664,6 @@
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
-    "arm64-generic-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "arm64-generic"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
     "arm64-llvmpipe-full": {
         "_template": "full",
         "boards": [
@@ -1825,14 +1730,6 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
-    "arm64-llvmpipe-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "arm64-llvmpipe"
-        ],
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
@@ -1994,21 +1891,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "asuka-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "asuka"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "asurada-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -2133,21 +2015,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "asurada-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "asurada-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "asurada-factory-asurada-13929.B-factorybranch": {
         "_template": "factorybranch",
@@ -2291,21 +2158,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "asurada-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "asurada"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "atlas-blueznext-full": {
         "_template": "full",
         "boards": [
@@ -2427,21 +2279,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "atlas-blueznext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "atlas-blueznext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "atlas-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -2562,21 +2399,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "atlas-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "atlas-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "atlas-factory-atlas-11907.B-factorybranch": {
         "_template": "factorybranch",
@@ -2756,21 +2578,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "atlas-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "atlas-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "atlas-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -2896,21 +2703,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "atlas-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "atlas"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "auron_paine-factory-auron-6459.B-factorybranch": {
         "_template": "factorybranch",
@@ -3133,21 +2925,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "aurora-borealis-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "aurora-borealis"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "aurora-full": {
         "_template": "full",
         "boards": [
@@ -3292,21 +3069,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "aurora-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "aurora"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "banjo-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
@@ -3504,21 +3266,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "banon-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "banon"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "beaglebone-full": {
         "_template": "full",
         "boards": [
@@ -3676,24 +3423,6 @@
         "suite_scheduling": false,
         "sync_chrome": false,
         "vm_tests_override": null
-    },
-    "beaglebone-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "beaglebone"
-        ],
-        "hw_tests_override": null,
-        "images": [],
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "rootfs_verification": false,
-        "sync_chrome": false,
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "beaglebone_servo-full": {
         "_template": "full",
@@ -3853,24 +3582,6 @@
         "sync_chrome": false,
         "vm_tests_override": null
     },
-    "beaglebone_servo-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "beaglebone_servo"
-        ],
-        "hw_tests_override": null,
-        "images": [],
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "rootfs_verification": false,
-        "sync_chrome": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "betty-arc-r-full": {
         "_template": "full",
         "boards": [
@@ -3980,21 +3691,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "betty-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "betty-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "betty-arc-t-full": {
         "_template": "full",
@@ -4108,21 +3804,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "betty-arc-t-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "betty-arc-t"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "betty-asan": {
         "_template": "asan",
@@ -4312,21 +3993,6 @@
         ],
         "vm_tests_override": null
     },
-    "betty-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "betty-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "betty-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -4487,21 +4153,6 @@
         ],
         "vm_tests_override": null
     },
-    "betty-pi-arc-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "betty-pi-arc"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "betty-release": {
         "_template": "release",
         "boards": [
@@ -4532,21 +4183,6 @@
             "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 9000\n}"
         ],
         "vm_tests_override": null
-    },
-    "betty-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "betty"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "bob-factory-gru-9017.B-factorybranch": {
         "_template": "factorybranch",
@@ -4687,21 +4323,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "bob-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "bob"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "brask-factory-brya-14517.B-factorybranch": {
         "_template": "factorybranch",
@@ -4846,21 +4467,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "brask-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brask"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "brya-factory-brya-14517.B-factorybranch": {
         "_template": "factorybranch",
@@ -5084,21 +4690,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "brya-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brya-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "brya-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -5304,21 +4895,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "brya-lvm-stateful-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brya-lvm-stateful"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "brya-manatee-full": {
         "_template": "full",
         "boards": [
@@ -5486,21 +5062,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "brya-manatee-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brya-manatee"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "brya-payloads": {
         "_template": "payloads",
         "boards": [
@@ -5607,21 +5168,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "brya-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brya"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "brya-zephyr-full": {
         "_template": "full",
@@ -5750,21 +5296,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "brya-zephyr-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "brya-zephyr"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "bubs-full": {
         "_template": "full",
         "boards": [
@@ -5878,21 +5409,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "bubs-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "bubs"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "buddy-factory-auron-6459.B-factorybranch": {
         "_template": "factorybranch",
@@ -6131,21 +5647,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "caroline-arc64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "caroline-arc64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "caroline-factory-glados-7828.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -6368,21 +5869,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "caroline-ndktranslation-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "caroline-ndktranslation"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "caroline-payloads": {
         "_template": "payloads",
         "boards": [
@@ -6429,21 +5915,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "caroline-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "caroline"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "caroline-userdebug-full": {
         "_template": "full",
@@ -6561,21 +6032,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "caroline-userdebug-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "caroline-userdebug"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "cave-factory-glados-7828.B-factorybranch": {
         "_template": "factorybranch",
@@ -6737,21 +6193,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "cave-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "cave"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "celes-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -6907,21 +6348,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "celes-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "celes"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "chell-chrome-no-afdo-uprev-pre-flight-branch": {
         "_template": "pre_flight_branch",
@@ -7145,21 +6571,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "chell-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "chell"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "cherry-factory-cherry-14455.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -7312,21 +6723,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "cherry-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "cherry"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "cherry64-full": {
         "_template": "full",
         "boards": [
@@ -7457,21 +6853,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "cherry64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "cherry64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "chromiumos-sdk": {
         "archive_build_debug": true,
@@ -7835,21 +7216,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "coral-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "coral-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "coral-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -7987,21 +7353,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "coral-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "coral"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "corsola-full": {
         "_template": "full",
         "boards": [
@@ -8132,21 +7483,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "corsola-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "corsola"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "corsola64-full": {
         "_template": "full",
         "boards": [
@@ -8263,21 +7599,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "corsola64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "corsola64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "cyan-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
@@ -8432,21 +7753,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "cyan-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "cyan"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "dedede-factory-dedede-13683.B-factorybranch": {
         "_template": "factorybranch",
@@ -8685,21 +7991,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "dedede-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "dedede"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "deltaur-full": {
         "_template": "full",
         "boards": [
@@ -8813,21 +8104,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "deltaur-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "deltaur"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "draco-full": {
         "_template": "full",
@@ -8955,21 +8231,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "draco-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "draco"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "drallion-factory-drallion-13080.B-factorybranch": {
         "_template": "factorybranch",
@@ -9145,21 +8406,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "drallion-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "drallion"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "edgar-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -9316,21 +8562,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "edgar-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "edgar"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "elm-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -9451,21 +8682,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "elm-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "elm-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "elm-factory-oak-8182.B-factorybranch": {
         "_template": "factorybranch",
@@ -9645,21 +8861,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "elm-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "elm-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "elm-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -9742,21 +8943,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "elm-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "elm"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "endeavour-factory-endeavour-13295.B-factorybranch": {
         "_template": "factorybranch",
@@ -9898,21 +9084,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "endeavour-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "endeavour"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "enguarde-factory-rambi-5517.B-factorybranch": {
         "_template": "factorybranch",
@@ -10111,21 +9282,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "eve-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "eve-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "eve-arm64-full": {
         "_template": "full",
         "boards": [
@@ -10246,21 +9402,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "eve-arm64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "eve-arm64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "eve-factory-eve-9667.B-factorybranch": {
         "_template": "factorybranch",
@@ -10463,21 +9604,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "eve-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "eve"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "eve-userdebug-full": {
         "_template": "full",
         "boards": [
@@ -10594,21 +9720,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "eve-userdebug-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "eve-userdebug"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "excelsior-factory-excelsior-12812.B-factorybranch": {
         "_template": "factorybranch",
@@ -10750,21 +9861,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "excelsior-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "excelsior"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "expresso-factory-rambi-5517.B-factorybranch": {
         "_template": "factorybranch",
@@ -12058,21 +11154,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "falco_li-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "falco_li"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "fizz-cfm-full": {
         "_template": "full",
         "boards": [
@@ -12200,21 +11281,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "fizz-cfm-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "fizz-cfm"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "fizz-factory-fizz-10167.B-factorybranch": {
         "_template": "factorybranch",
@@ -12402,21 +11468,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "fizz-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "fizz-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "fizz-labstation-full": {
         "_template": "full",
         "boards": [
@@ -12553,21 +11604,6 @@
         "signer_tests": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "fizz-labstation-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "fizz-labstation"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "fizz-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
@@ -12761,21 +11797,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "fizz-moblab-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "fizz-moblab"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "fizz-payloads": {
         "_template": "payloads",
         "boards": [
@@ -12834,21 +11855,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "fizz-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "fizz"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "gale-factory-gale-8743.19.B-factorybranch": {
         "_template": "factorybranch",
@@ -13041,22 +12047,6 @@
         "hw_tests_override": null,
         "luci_builder": "Try"
     },
-    "gale-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "gale"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "gandof-factory-auron-6459.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -13211,21 +12201,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "ghost-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "ghost"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "glados-factory-glados-7657.B-factorybranch": {
         "_template": "factorybranch",
@@ -13421,21 +12396,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "glados-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "glados"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "gnawty-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -13592,21 +12552,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "goroh-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "goroh"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "gru-factory-gru-9017.B-factorybranch": {
         "_template": "factorybranch",
@@ -13776,21 +12721,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "grunt-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "grunt-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "grunt-factory-grunt-11164.135.B-factorybranch": {
         "_template": "factorybranch",
@@ -14014,21 +12944,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "grunt-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "grunt-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "grunt-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -14184,21 +13099,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "grunt-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "grunt"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "guado-factory-auron-6772.B-factorybranch": {
         "_template": "factorybranch",
@@ -14363,21 +13263,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "guado-macrophage-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "guado-macrophage"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "guado_labstation-full": {
         "_template": "full",
         "boards": [
@@ -14508,21 +13393,6 @@
         "signer_tests": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "guado_labstation-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "guado_labstation"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "guybrush-factory-guybrush-14600.B-factorybranch": {
         "_template": "factorybranch",
@@ -14712,21 +13582,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "guybrush-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "guybrush-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "guybrush-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -14829,21 +13684,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "guybrush-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "guybrush"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "hana-factory-oak-8182.B-factorybranch": {
         "_template": "factorybranch",
@@ -15019,21 +13859,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hana-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hana-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hana-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -15112,21 +13937,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "hana-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hana"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "hatch-android-rvc-pre-flight-branch": {
         "_template": "pre_flight_branch",
@@ -15297,21 +14107,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hatch-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hatch-arc-r-userdebug-full": {
         "_template": "full",
         "boards": [
@@ -15452,21 +14247,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "hatch-arc-r-userdebug-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-arc-r-userdebug"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "hatch-arc-t-full": {
         "_template": "full",
@@ -15613,21 +14393,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hatch-arc-t-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-arc-t"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hatch-blueznext-full": {
         "_template": "full",
         "boards": [
@@ -15768,21 +14533,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "hatch-blueznext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-blueznext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "hatch-borealis-full": {
         "_template": "full",
@@ -15939,21 +14689,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hatch-borealis-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-borealis"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hatch-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -16099,21 +14834,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hatch-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hatch-diskswap-full": {
         "_template": "full",
         "boards": [
@@ -16256,21 +14976,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "hatch-diskswap-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-diskswap"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "hatch-factory-hatch-12692.B-factorybranch": {
         "_template": "factorybranch",
@@ -16470,21 +15175,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "hatch-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "hatch-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -16597,21 +15287,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "hatch-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "hatch"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "heli-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
@@ -16776,21 +15451,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "herobrine-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "herobrine"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "jacuzzi-factory-kukui-12587.B-factorybranch": {
         "_template": "factorybranch",
@@ -17022,21 +15682,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "jacuzzi-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "jacuzzi-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "jacuzzi-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -17157,21 +15802,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "jacuzzi-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "jacuzzi"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "jacuzzi64-full": {
         "_template": "full",
@@ -17324,21 +15954,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "jacuzzi64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "jacuzzi64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "jecht-full": {
         "_template": "full",
         "boards": [
@@ -17452,21 +16067,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "jecht-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "jecht"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kalista-cfm-full": {
         "_template": "full",
@@ -17588,21 +16188,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kalista-cfm-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kalista-cfm"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kalista-factory-nami-10715.B-factorybranch": {
         "_template": "factorybranch",
@@ -17782,21 +16367,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "kalista-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kalista-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "kalista-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -17879,21 +16449,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kalista-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kalista"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "keeby-factory-keeby-14162.B-factorybranch": {
         "_template": "factorybranch",
@@ -18055,21 +16610,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "keeby-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "keeby"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "kefka-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -18225,21 +16765,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kefka-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kefka"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kevin-android-pi-pre-flight-branch": {
         "_template": "pre_flight_branch",
@@ -18448,21 +16973,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "kevin-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kevin-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "kevin-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -18561,21 +17071,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kevin-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kevin"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kevin-userdebug-full": {
         "_template": "full",
@@ -18699,21 +17194,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kevin-userdebug-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kevin-userdebug"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kevin64-full": {
         "_template": "full",
@@ -18839,21 +17319,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kevin64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kevin64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "kip-factory-rambi-5517.B-factorybranch": {
         "_template": "factorybranch",
@@ -19064,21 +17529,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "kukui-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kukui-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "kukui-factory-kukui-12587.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -19285,21 +17735,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "kukui-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kukui-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "kukui-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -19396,21 +17831,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "kukui-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "kukui"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "lars-factory-glados-7828.B-factorybranch": {
         "_template": "factorybranch",
@@ -19606,21 +18026,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "lars-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "lars-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "lars-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -19697,21 +18102,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "lars-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "lars"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "littlejoe-full": {
         "_template": "full",
@@ -19930,26 +18320,6 @@
         "upload_hw_test_artifacts": false,
         "vm_tests_override": null
     },
-    "littlejoe-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "littlejoe"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "luci-scheduler-updater": {
         "boards": [],
         "build_type": "generic",
@@ -20160,21 +18530,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "majolica-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "majolica"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "mancomb-full": {
         "_template": "full",
         "boards": [
@@ -20296,21 +18651,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "mancomb-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "mancomb"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "master-buildspec": {
         "_template": "buildspec",
@@ -20930,14 +19270,6 @@
         "image_test": false,
         "luci_builder": "Try"
     },
-    "moblab-generic-vm-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "moblab-generic-vm"
-        ],
-        "hw_tests_override": null,
-        "luci_builder": "Try"
-    },
     "mushu-full": {
         "_template": "full",
         "boards": [
@@ -21062,21 +19394,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "mushu-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "mushu"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "nami-factory-nami-10715.B-factorybranch": {
         "_template": "factorybranch",
@@ -21272,21 +19589,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "nami-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nami-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "nami-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -21385,21 +19687,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "nami-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nami"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "nautilus-factory-poppy-10504.B-factorybranch": {
         "_template": "factorybranch",
@@ -21542,21 +19829,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "nautilus-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nautilus"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "ninja-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
@@ -21727,21 +19999,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "nissa-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nissa"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "nocturne-factory-nocturne-11066.B-factorybranch": {
         "_template": "factorybranch",
@@ -21921,21 +20178,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "nocturne-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nocturne-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "nocturne-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -22030,21 +20272,6 @@
             "thinlto"
         ],
         "vm_tests_override": null
-    },
-    "nocturne-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nocturne"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "novato-arc64-full": {
         "_template": "full",
@@ -22152,21 +20379,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "novato-arc64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "novato-arc64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "novato-full": {
         "_template": "full",
@@ -22280,21 +20492,6 @@
             "{\n    \"suite_name\": \"tast_vm_canary_critical\",\n    \"test_exprs\": [\n        \"(\\\"group:mainline\\\" && !informational)\"\n    ],\n    \"timeout\": 9000\n}"
         ],
         "vm_tests_override": null
-    },
-    "novato-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "novato"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "nyan_big-full": {
         "_template": "full",
@@ -22410,21 +20607,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "nyan_big-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nyan_big"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "nyan_blaze-full": {
         "_template": "full",
         "boards": [
@@ -22538,21 +20720,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "nyan_blaze-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "nyan_blaze"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "octopus-arc-r-full": {
         "_template": "full",
@@ -22764,21 +20931,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "octopus-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "octopus-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "octopus-factory-octopus-11512.B-factorybranch": {
         "_template": "factorybranch",
@@ -23028,21 +21180,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "octopus-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "octopus-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "octopus-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -23217,21 +21354,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "octopus-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "octopus"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "orco-factory-rambi-6420.B-factorybranch": {
         "_template": "factorybranch",
@@ -23414,21 +21536,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "palkia-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "palkia"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "poppy-full": {
         "_template": "full",
         "boards": [
@@ -23542,21 +21649,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "poppy-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "poppy"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "puff-borealis-full": {
         "_template": "full",
@@ -23708,21 +21800,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "puff-borealis-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "puff-borealis"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "puff-factory-puff-13329.B-factorybranch": {
         "_template": "factorybranch",
@@ -23978,21 +22055,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "puff-macrophage-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "puff-macrophage"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "puff-moblab-factory-puff-13329.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -24153,21 +22215,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "puff-moblab-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "puff-moblab"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "puff-payloads": {
         "_template": "payloads",
         "boards": [
@@ -24240,21 +22287,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "puff-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "puff"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "pyro-factory-reef-8811.B-factorybranch": {
         "_template": "factorybranch",
@@ -24396,21 +22428,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "pyro-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "pyro"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "rammus-arc-r-full": {
         "_template": "full",
         "boards": [
@@ -24534,21 +22551,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "rammus-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "rammus-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "rammus-arc-r-userdebug-full": {
         "_template": "full",
         "boards": [
@@ -24671,21 +22673,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "rammus-arc-r-userdebug-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "rammus-arc-r-userdebug"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "rammus-factory-rammus-11289.B-factorybranch": {
         "_template": "factorybranch",
@@ -24849,21 +22836,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "rammus-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "rammus"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "reef-factory-reef-8811.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -25007,21 +22979,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "reef-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "reef"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "reks-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
@@ -25179,21 +23136,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "reks-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "reks"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "relm-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -25349,21 +23291,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "relm-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "relm"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "reven-full": {
         "_template": "full",
@@ -25523,24 +23450,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "reven-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "reven"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "reven-vmtest-full": {
         "_template": "full",
@@ -25703,24 +23612,6 @@
         ],
         "vm_tests_override": null
     },
-    "reven-vmtest-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "reven-vmtest"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "rex-full": {
         "_template": "full",
         "boards": [
@@ -25835,21 +23726,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "rex-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "rex"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "rikku-factory-auron-6772.B-factorybranch": {
         "_template": "factorybranch",
@@ -26030,21 +23906,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "sand-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "sand"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "sarien-factory-sarien-12033.B-factorybranch": {
         "_template": "factorybranch",
@@ -26230,21 +24091,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "sarien-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "sarien-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "sarien-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -26361,21 +24207,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "sarien-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "sarien"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "scarlet-factory-scarlet-10211.B-factorybranch": {
         "_template": "factorybranch",
@@ -26559,21 +24390,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "scarlet-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "scarlet-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "scarlet-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -26660,21 +24476,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "scarlet-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "scarlet"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "senor-full": {
         "_template": "full",
@@ -26789,21 +24590,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "senor-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "senor"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "sentry-factory-glados-7828.B-factorybranch": {
         "_template": "factorybranch",
@@ -26965,21 +24751,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "sentry-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "sentry"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "setzer-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -27132,21 +24903,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "setzer-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "setzer"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "shadowkeep-full": {
         "_template": "full",
         "boards": [
@@ -27266,21 +25022,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "shadowkeep-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "shadowkeep"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "skolas-full": {
         "_template": "full",
         "boards": [
@@ -27399,21 +25140,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "skolas-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "skolas"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "skyrim-chausie-full": {
         "_template": "full",
@@ -27537,21 +25263,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "skyrim-chausie-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "skyrim-chausie"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "skyrim-full": {
         "_template": "full",
@@ -27717,21 +25428,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "skyrim-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "skyrim-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "skyrim-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -27815,21 +25511,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "skyrim-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "skyrim"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "sludge-full": {
         "_template": "full",
@@ -28099,40 +25780,6 @@
         ],
         "vm_tests_override": null
     },
-    "sludge-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "sludge"
-        ],
-        "disk_layout": "base",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "guest_vm_image": true,
-        "hw_tests_override": null,
-        "images": [
-            "base",
-            "test"
-        ],
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "upload_stripped_packages": [
-            "sys-kernel/*kernel*"
-        ],
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "snappy-factory-reef-8811.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -28315,21 +25962,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "snappy-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "snappy-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "snappy-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -28416,21 +26048,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "snappy-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "snappy"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "soraka-factory-soraka-10323.39.B-factorybranch": {
         "_template": "factorybranch",
@@ -28610,21 +26227,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "soraka-libcamera-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "soraka-libcamera"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "soraka-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -28707,21 +26309,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "soraka-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "soraka"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "strongbad-factory-strongbad-13963.B-factorybranch": {
         "_template": "factorybranch",
@@ -28928,21 +26515,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "strongbad-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "strongbad-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "strongbad-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -29041,21 +26613,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "strongbad-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "strongbad"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "success-build": {
         "boards": [],
@@ -29438,40 +26995,6 @@
         ],
         "vm_tests_override": null
     },
-    "tael-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "tael"
-        ],
-        "disk_layout": "base",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "guest_vm_image": true,
-        "hw_tests_override": null,
-        "images": [
-            "base",
-            "test"
-        ],
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "upload_stripped_packages": [
-            "sys-kernel/*kernel*"
-        ],
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "tatl-full": {
         "_template": "full",
         "boards": [
@@ -29747,40 +27270,6 @@
         ],
         "vm_tests_override": null
     },
-    "tatl-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "tatl"
-        ],
-        "disk_layout": "base",
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "guest_vm_image": true,
-        "hw_tests_override": null,
-        "images": [
-            "base",
-            "test"
-        ],
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "packages": [
-            "virtual/target-os",
-            "virtual/target-os-dev",
-            "virtual/target-os-test"
-        ],
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "upload_stripped_packages": [
-            "sys-kernel/*kernel*"
-        ],
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "terra-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
         "boards": [
@@ -29938,21 +27427,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "terra-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "terra"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "test-ap-group": {
         "_template": "test_ap",
@@ -30188,21 +27662,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "trogdor-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "trogdor-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -30333,21 +27792,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "trogdor-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "trogdor-factory-strongbad-13963.B-factorybranch": {
         "_template": "factorybranch",
@@ -30556,21 +28000,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "trogdor-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "trogdor-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -30671,21 +28100,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "trogdor-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "trogdor-zephyr-full": {
         "_template": "full",
@@ -30809,21 +28223,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "trogdor-zephyr-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor-zephyr"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "trogdor64-full": {
         "_template": "full",
@@ -30963,21 +28362,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "trogdor64-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "trogdor64"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "ultima-factory-strago-7458.B-factorybranch": {
         "_template": "factorybranch",
@@ -31135,21 +28519,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "ultima-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "ultima"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "veyron_mighty-full": {
         "_template": "full",
         "boards": [
@@ -31263,21 +28632,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "veyron_mighty-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "veyron_mighty"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "veyron_minnie-full": {
         "_template": "full",
@@ -31393,21 +28747,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "veyron_minnie-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "veyron_minnie"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "veyron_speedy-full": {
         "_template": "full",
         "boards": [
@@ -31521,21 +28860,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "veyron_speedy-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "veyron_speedy"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "viking-full": {
         "_template": "full",
@@ -31887,26 +29211,6 @@
         "upload_hw_test_artifacts": false,
         "vm_tests_override": null
     },
-    "viking-poc2-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "viking-poc2"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "viking-rapid": {
         "_template": "release",
         "boards": [
@@ -31990,26 +29294,6 @@
         "sync_chrome": false,
         "upload_hw_test_artifacts": false,
         "vm_tests_override": null
-    },
-    "viking-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "viking"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "volteer-borealis-full": {
         "_template": "full",
@@ -32181,21 +29465,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "volteer-borealis-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "volteer-borealis"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "volteer-factory-volteer-13600.B-factorybranch": {
         "_template": "factorybranch",
@@ -32421,21 +29690,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "volteer-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "volteer-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "volteer-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -32623,21 +29877,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "volteer-manatee-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "volteer-manatee"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "volteer-payloads": {
         "_template": "payloads",
         "boards": [
@@ -32742,21 +29981,6 @@
         ],
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "volteer-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "volteer"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "whirlwind-full": {
         "_template": "full",
@@ -32928,22 +30152,6 @@
         ],
         "hw_tests_override": null,
         "luci_builder": "Try"
-    },
-    "whirlwind-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "whirlwind"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "sync_chrome": false,
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "winky-factory-rambi-5517.B-factorybranch": {
         "_template": "factorybranch",
@@ -33140,21 +30348,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "wizpig-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "wizpig"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "wristpin-full": {
         "_template": "full",
@@ -33381,27 +30574,6 @@
         "upload_hw_test_artifacts": false,
         "vm_tests_override": null
     },
-    "wristpin-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "wristpin"
-        ],
-        "factory": false,
-        "factory_install_netboot": false,
-        "factory_toolkit": false,
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "rootfs_verification": false,
-        "sync_chrome": false,
-        "upload_hw_test_artifacts": false,
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "x32-generic-full": {
         "_template": "full",
         "boards": [
@@ -33473,15 +30645,6 @@
         ],
         "debug": true,
         "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "usepkg_toolchain": false
-    },
-    "x32-generic-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "x32-generic"
-        ],
         "hw_tests_override": null,
         "luci_builder": "Try",
         "usepkg_toolchain": false
@@ -33640,21 +30803,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "zork-arc-r-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-arc-r"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "zork-borealis-full": {
         "_template": "full",
@@ -33823,21 +30971,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "zork-borealis-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-borealis"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "zork-connectivitynext-full": {
         "_template": "full",
         "boards": [
@@ -33986,21 +31119,6 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "zork-connectivitynext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-connectivitynext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "zork-factory-zork-13427.B-factorybranch": {
         "_template": "factorybranch",
@@ -34188,21 +31306,6 @@
         "push_image": false,
         "suite_scheduling": false,
         "vm_tests_override": null
-    },
-    "zork-floss-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-floss"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     },
     "zork-full": {
         "_template": "full",
@@ -34392,21 +31495,6 @@
         "suite_scheduling": false,
         "vm_tests_override": null
     },
-    "zork-kernelnext-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-kernelnext"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "zork-llvm-next-toolchain": {
         "_template": "llvm_next_toolchain",
         "boards": [
@@ -34592,21 +31680,6 @@
         "unittests": false,
         "vm_tests_override": null
     },
-    "zork-minios-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork-minios"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
-    },
     "zork-payloads": {
         "_template": "payloads",
         "boards": [
@@ -34693,20 +31766,5 @@
         "suite_scheduling": false,
         "unittests": false,
         "vm_tests_override": null
-    },
-    "zork-unittest-stress": {
-        "_template": "unittest_stress",
-        "boards": [
-            "zork"
-        ],
-        "hw_tests_override": null,
-        "internal": true,
-        "luci_builder": "Try",
-        "manifest": "official.xml",
-        "manifest_repo_url": "https://chrome-internal-review.googlesource.com/chromeos/manifest-internal",
-        "overlays": "both",
-        "useflags": [
-            "chrome_internal"
-        ]
     }
 }

@@ -13,7 +13,6 @@ from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import chrome_stages
 from chromite.cbuildbot.stages import generic_stages
-from chromite.cbuildbot.stages import test_stages
 from chromite.cbuildbot.stages import vm_test_stages
 from chromite.lib import parallel
 
@@ -42,30 +41,6 @@ class FailBuilder(generic_builders.ManifestVersionedBuilder):
   def RunStages(self):
     """Run fail stage!"""
     self._RunStage(FailStage)
-
-
-class UnittestStressBuilder(generic_builders.ManifestVersionedBuilder):
-  """Builder that runs unittests repeatedly to reproduce flake failures."""
-
-  TEST_CYCLES = 20
-
-  def RunStages(self):
-    """Run something after sync/reexec."""
-    assert len(self._run.config.boards) == 1
-    board = self._run.config.boards[0]
-
-    self._RunStage(build_stages.UprevStage)
-    self._RunStage(build_stages.InitSDKStage)
-    self._RunStage(build_stages.UpdateSDKStage)
-    self._RunStage(build_stages.RegenPortageCacheStage)
-    self._RunStage(build_stages.SetupBoardStage, board)
-    self._RunStage(chrome_stages.SyncChromeStage)
-    self._RunStage(android_stages.UprevAndroidStage)
-    self._RunStage(android_stages.AndroidMetadataStage)
-    self._RunStage(build_stages.BuildPackagesStage, board)
-
-    for i in range(self.TEST_CYCLES):
-      self._RunStage(test_stages.UnitTestStage, board, suffix=' - %d' % i)
 
 
 class VMInformationalBuilder(simple_builders.SimpleBuilder):

@@ -503,13 +503,6 @@ def GeneralTemplates(site_config, ge_build_config):
   )
   # END Termina
 
-  # BEGIN Unittest Stress
-  site_config.templates.unittest_stress.apply(
-      site_config.templates.no_vmtest_builder,
-      site_config.templates.no_hwtest_builder,
-  )
-  # END Unittest Stress
-
   # BEGIN Ubsan
   site_config.templates.ubsan.apply(
       site_config.templates.default_hw_tests_override,
