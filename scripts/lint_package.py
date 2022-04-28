@@ -15,9 +15,33 @@ from typing import List
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
+from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.service import toolchain
 from chromite.utils import file_util
+
+
+def parse_packages(board: str,
+                   packages: List[str]) -> List[package_info.PackageInfo]:
+  """Parse packages and insert the category if none is given.
+
+  Args:
+    board: board for sysroot (used with equery to detect categories if needed)
+    packages: user input package names to parse
+
+  Returns:
+    A list of parsed PackageInfo objects
+  """
+  package_infos: List[package_info.PackageInfo] = []
+  for package in packages:
+    parsed = package_info.parse(package)
+    if not parsed.category:
+      # If a category is not specified, we can get it from the ebuild path.
+      ebuild_path = portage_util.FindEbuildForBoardPackage(package, board)
+      ebuild_data = portage_util.EBuild(ebuild_path)
+      parsed = package_info.parse(ebuild_data.package)
+    package_infos.append(parsed)
+  return package_infos
 
 
 def get_arg_parser() -> commandline.ArgumentParser:
@@ -68,7 +92,7 @@ def main(argv: List[str]) -> None:
   cros_build_lib.AssertInsideChroot()
   opts = parse_args(argv)
 
-  packages = [package_info.parse(x) for x in opts.packages]
+  packages = parse_packages(opts.board, opts.packages)
   sysroot = build_target_lib.get_default_sysroot_path(opts.board)
 
   build_linter = toolchain.BuildLinter(packages, sysroot, opts.differential)
