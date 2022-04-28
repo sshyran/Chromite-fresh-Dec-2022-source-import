@@ -27,7 +27,6 @@ from chromite.lib.parser import package_info
 # where yaml may not be there, so we don't error on that since it's not needed
 # in that case.
 try:
-  # pylint: disable=wrong-import-order
   import yaml
 
   class SaferLoader(yaml.SafeLoader):

@@ -72,6 +72,17 @@ def _GetPylintGroups(paths):
   return groups
 
 
+def _GetIsortCfg(path: Union[str, os.PathLike]) -> Path:
+  """Locate isort.cfg file that applies to |path|.
+
+  If not found - use the default.
+  """
+  path = Path(path)
+  end_path = _GetProjectPath(path.parent).parent
+  ret = osutils.FindInPathParents('.isort.cfg', path.parent, end_path=end_path)
+  return ret if ret else Path(constants.CHROMITE_DIR) / '.isort.cfg'
+
+
 def _GetPythonPath(paths):
   """Return the set of Python library paths to use."""
   # Carry through custom PYTHONPATH that the host env has set.
@@ -183,6 +194,20 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
       'PYTHONPATH': ':'.join(_GetPythonPath([path])),
   }
   return _LinterRunCommand(cmd, debug, extra_env=extra_env)
+
+
+def _PyisortFile(path, _output_format, debug, _relaxed: bool):
+  """Returns result of running isort on |path|."""
+  isort = os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'isort')
+  cfg = _GetIsortCfg(path)
+  base_cmd = [isort, f'--settings-file={cfg}']
+  cmd = base_cmd + ['--diff', '--check']
+  cmd.append(path)
+  base_cmd.append(path)
+  result = _LinterRunCommand(cmd, debug)
+  if result.returncode:
+    logging.notice('To fix, run:\n%s', cros_build_lib.CmdToStr(base_cmd))
+  return result
 
 
 def _GolintFile(path, _, debug, _relaxed: bool):
@@ -381,7 +406,7 @@ _EXT_TO_LINTER_MAP = {
     frozenset({'.cc', '.cpp', '.h'}): (_CpplintFile,),
     frozenset({'.conf', '.conf.in'}): (_ConfLintFile,),
     frozenset({'.json'}): (_JsonLintFile,),
-    frozenset({'.py'}): (_PylintFile,),
+    frozenset({'.py'}): (_PylintFile, _PyisortFile),
     frozenset({'.go'}): (_GolintFile,),
     frozenset({'.sh'}): (_ShellLintFile,),
     frozenset({'.ebuild', '.eclass', '.bashrc'}): (_GentooShellLintFile,),

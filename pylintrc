@@ -139,6 +139,8 @@ enable=
 # TODO: Re-enable consider-using-in.
 # TODO: Re-enable try-except-raise.
 # TODO: Re-enable chained-comparison.
+# ungrouped-imports: We let isort handle this.
+# wrong-import-order: We let isort handle this.
 disable=
     broad-except,
     chained-comparison,
@@ -177,8 +179,10 @@ disable=
     too-many-return-statements,
     too-many-statements,
     try-except-raise,
+    ungrouped-imports,
     unnecessary-comprehension,
     useless-object-inheritance,
+    wrong-import-order,
 
 
 [REPORTS]
