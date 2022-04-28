@@ -365,11 +365,11 @@ def _BreakoutDataByLinter(map_to_return, path):
           prog = m.group(3)
         basename = os.path.basename(prog)
         if basename.startswith(b'python'):
-          pylint_list = map_to_return.setdefault(_PylintFile, [])
-          pylint_list.append(path)
+          for linter in _EXT_TO_LINTER_MAP[frozenset({'.py'})]:
+            map_to_return.setdefault(linter, []).append(path)
         elif basename in (b'sh', b'dash', b'bash'):
-          shlint_list = map_to_return.setdefault(_ShellLintFile, [])
-          shlint_list.append(path)
+          for linter in _EXT_TO_LINTER_MAP[frozenset({'.sh'})]:
+            map_to_return.setdefault(linter, []).append(path)
   except IOError as e:
     logging.debug('%s: reading initial data failed: %s', path, e)
 
@@ -378,21 +378,21 @@ def _BreakoutDataByLinter(map_to_return, path):
 _EXT_TO_LINTER_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
-    frozenset({'.cc', '.cpp', '.h'}): _CpplintFile,
-    frozenset({'.conf', '.conf.in'}): _ConfLintFile,
-    frozenset({'.json'}): _JsonLintFile,
-    frozenset({'.py'}): _PylintFile,
-    frozenset({'.go'}): _GolintFile,
-    frozenset({'.sh'}): _ShellLintFile,
-    frozenset({'.ebuild', '.eclass', '.bashrc'}): _GentooShellLintFile,
-    frozenset({'.md'}): _MarkdownLintFile,
-    frozenset({'.policy'}): _SeccompPolicyLintFile,
+    frozenset({'.cc', '.cpp', '.h'}): (_CpplintFile,),
+    frozenset({'.conf', '.conf.in'}): (_ConfLintFile,),
+    frozenset({'.json'}): (_JsonLintFile,),
+    frozenset({'.py'}): (_PylintFile,),
+    frozenset({'.go'}): (_GolintFile,),
+    frozenset({'.sh'}): (_ShellLintFile,),
+    frozenset({'.ebuild', '.eclass', '.bashrc'}): (_GentooShellLintFile,),
+    frozenset({'.md'}): (_MarkdownLintFile,),
+    frozenset({'.policy'}): (_SeccompPolicyLintFile,),
 }
 
 # Map known filenames to a linter function.
 _FILENAME_PATTERNS_TO_LINTER_MAP = {
-    frozenset({'DIR_METADATA'}): _DirMdLintFile,
-    frozenset({'OWNERS*'}): _OwnersLintFile,
+    frozenset({'DIR_METADATA'}): (_DirMdLintFile,),
+    frozenset({'OWNERS*'}): (_OwnersLintFile,),
 }
 
 
@@ -401,15 +401,17 @@ def _BreakoutFilesByLinter(files):
   map_to_return = {}
   for f in files:
     extension = os.path.splitext(f)[1]
-    for extensions, linter in _EXT_TO_LINTER_MAP.items():
+    for extensions, linters in _EXT_TO_LINTER_MAP.items():
       if extension in extensions:
-        map_to_return.setdefault(linter, []).append(f)
+        for linter in linters:
+          map_to_return.setdefault(linter, []).append(f)
         break
     else:
       name = os.path.basename(f)
-      for patterns, linter in _FILENAME_PATTERNS_TO_LINTER_MAP.items():
+      for patterns, linters in _FILENAME_PATTERNS_TO_LINTER_MAP.items():
         if any(fnmatch.fnmatch(name, x) for x in patterns):
-          map_to_return.setdefault(linter, []).append(f)
+          for linter in linters:
+            map_to_return.setdefault(linter, []).append(f)
           break
       else:
         if os.path.isfile(f):
