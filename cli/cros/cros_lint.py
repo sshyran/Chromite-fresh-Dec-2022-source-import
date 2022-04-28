@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import sys
+from typing import Union
 
 from chromite.cli import command
 from chromite.lib import commandline
@@ -28,40 +29,37 @@ from chromite.lint.linters import owners, upstart, whitespace
 SHEBANG_RE = re.compile(br'^#!\s*([^\s]+)(\s+([^\s]+))?')
 
 
-def _GetProjectPath(path):
+def _GetProjectPath(path: Path) -> Path:
   """Find the absolute path of the git checkout that contains |path|."""
   ret = git.FindGitTopLevel(path)
   if ret:
-    return ret
+    return Path(ret)
   else:
     # Maybe they're running on a file outside of a checkout.
     # e.g. cros lint ~/foo.py /tmp/test.py
-    return os.path.dirname(path)
+    return path.parent
 
 
-def _GetPylintrc(path):
+def _GetPylintrc(path: Union[str, os.PathLike]) -> Path:
   """Locate pylintrc or .pylintrc file that applies to |path|.
 
   If not found - use the default.
   """
-  path = os.path.realpath(path)
-  parent = os.path.dirname(path)
-  project_path = _GetProjectPath(parent)
-  while project_path and parent.startswith(project_path):
-    pylintrc = os.path.join(parent, 'pylintrc')
-    dotpylintrc = os.path.join(parent, '.pylintrc')
+  def _test_func(pylintrc):
+    dotpylintrc = pylintrc.with_name('.pylintrc')
     # Only allow one of these to exist to avoid confusing which one is used.
-    if os.path.isfile(pylintrc) and os.path.isfile(dotpylintrc):
+    if pylintrc.exists() and dotpylintrc.exists():
       cros_build_lib.Die('%s: Only one of "pylintrc" or ".pylintrc" is allowed',
-                         parent)
-    if os.path.isfile(pylintrc):
-      return pylintrc
-    if os.path.isfile(dotpylintrc):
-      return dotpylintrc
+                         pylintrc.parent)
+    return pylintrc.exists() or dotpylintrc.exists()
 
-    parent = os.path.dirname(parent)
-
-  return os.path.join(constants.SOURCE_ROOT, 'chromite', 'pylintrc')
+  path = Path(path)
+  end_path = _GetProjectPath(path.parent).parent
+  ret = osutils.FindInPathParents(
+      'pylintrc', path.parent, test_func=_test_func, end_path=end_path)
+  if ret:
+    return ret if ret.exists() else ret.with_name('.pylintrc')
+  return Path(constants.CHROMITE_DIR) / 'pylintrc'
 
 
 def _GetPylintGroups(paths):
