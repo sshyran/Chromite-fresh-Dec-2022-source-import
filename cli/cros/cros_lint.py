@@ -175,7 +175,7 @@ def _CpplintFile(path, output_format, debug, _relaxed: bool):
 
 def _PylintFile(path, output_format, debug, _relaxed: bool):
   """Returns result of running pylint on |path|."""
-  pylint = os.path.join(constants.CHROMITE_DIR, 'cli', 'cros', 'pylint-2')
+  pylint = os.path.join(constants.CHROMITE_SCRIPTS_DIR, 'pylint')
   pylintrc = _GetPylintrc(path)
   cmd = [pylint, '--rcfile=%s' % pylintrc]
   if output_format != 'default':
