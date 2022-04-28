@@ -513,9 +513,9 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     # cause errors in tests that expect their own setUp to run before their own
     # tearDown executes.  By failing in the core funcs, we violate that.
     st = os.stat('/')
-    if st.st_mode & 0o7777 != 0o755:
+    if st.st_mode & 0o007 != 0o005:
       print('%s %s\nError: The root directory has broken permissions: %o\n'
-            'Fix with: sudo chmod 755 /' % (sys.argv[0], msg, st.st_mode),
+            'Fix with: sudo chmod o+rx-w /' % (sys.argv[0], msg, st.st_mode),
             file=sys.stderr)
       sys.exit(1)
     if st.st_uid or st.st_gid:
