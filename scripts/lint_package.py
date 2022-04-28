@@ -16,17 +16,18 @@ from chromite.lib import build_target_lib
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import portage_util
+from chromite.lib import workon_helper
 from chromite.lib.parser import package_info
 from chromite.service import toolchain
 from chromite.utils import file_util
 
 
-def parse_packages(board: str,
+def parse_packages(build_target: build_target_lib.BuildTarget,
                    packages: List[str]) -> List[package_info.PackageInfo]:
   """Parse packages and insert the category if none is given.
 
   Args:
-    board: board for sysroot (used with equery to detect categories if needed)
+    build_target: build_target to find ebuild for
     packages: user input package names to parse
 
   Returns:
@@ -37,7 +38,8 @@ def parse_packages(board: str,
     parsed = package_info.parse(package)
     if not parsed.category:
       # If a category is not specified, we can get it from the ebuild path.
-      ebuild_path = portage_util.FindEbuildForBoardPackage(package, board)
+      ebuild_path = portage_util.FindEbuildForBoardPackage(
+          package, build_target.name, build_target.root)
       ebuild_data = portage_util.EBuild(ebuild_path)
       parsed = package_info.parse(ebuild_data.package)
     package_infos.append(parsed)
@@ -92,12 +94,15 @@ def main(argv: List[str]) -> None:
   cros_build_lib.AssertInsideChroot()
   opts = parse_args(argv)
 
-  packages = parse_packages(opts.board, opts.packages)
-  sysroot = build_target_lib.get_default_sysroot_path(opts.board)
+  build_target = build_target_lib.BuildTarget(opts.board)
+  packages = parse_packages(build_target, opts.packages)
+  package_atoms = [x.atom for x in packages]
 
-  build_linter = toolchain.BuildLinter(packages, sysroot, opts.differential)
-  lints = build_linter.emerge_with_linting(
-      use_clippy=opts.clippy, use_tidy=opts.tidy)
+  with workon_helper.WorkonScope(build_target, package_atoms):
+    build_linter = toolchain.BuildLinter(packages, build_target.root,
+                                         opts.differential)
+    lints = build_linter.emerge_with_linting(
+        use_clippy=opts.clippy, use_tidy=opts.tidy)
 
   with file_util.Open(opts.output, 'w') as output_file:
     json.dump(lints, output_file)
