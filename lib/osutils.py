@@ -720,7 +720,7 @@ def IteratePaths(end_path):
   return reversed(list(IteratePathParents(end_path)))
 
 
-def IteratePathParents(start_path: Union[str, os.PathLike]) -> List[Path]:
+def IteratePathParents(start_path: Union[str, os.PathLike]) -> Iterator[Path]:
   """Generator that iterates through a directory's parents.
 
   Args:
@@ -731,12 +731,8 @@ def IteratePathParents(start_path: Union[str, os.PathLike]) -> List[Path]:
     IteratePathParents('/usr/local') would yield '/usr/local', '/usr', and '/'.
   """
   path = Path(start_path).resolve()
-  while True:
-    yield path
-    parent = path.parent
-    if path == parent:
-      break
-    path = parent
+  yield path
+  yield from path.parents
 
 
 def FindInPathParents(
