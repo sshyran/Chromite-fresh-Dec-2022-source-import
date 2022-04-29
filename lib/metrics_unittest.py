@@ -9,15 +9,12 @@ import tempfile
 import unittest
 from unittest import mock
 
+from chromite.third_party.infra_libs import ts_mon
+
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
 from chromite.lib import parallel
-
-
-if sys.version_info.major >= 3:
-  from chromite.lib import ts_mon_config
-
-from chromite.third_party.infra_libs import ts_mon  # pylint: disable=wrong-import-position
+from chromite.lib import ts_mon_config
 
 
 class FakeException(Exception):

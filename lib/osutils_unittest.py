@@ -9,6 +9,7 @@ import filecmp
 import glob
 import grp
 import os
+from pathlib import Path
 import pwd
 import re
 import stat
@@ -20,10 +21,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-
-
-if sys.version_info.major >= 3:
-  from pathlib import Path
 
 
 class TestOsutils(cros_test_lib.TempDirTestCase):
