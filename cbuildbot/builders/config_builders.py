@@ -8,6 +8,7 @@ from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import config_stages
 
+
 class UpdateConfigBuilder(simple_builders.SimpleBuilder):
   """Create config updater builders."""
 

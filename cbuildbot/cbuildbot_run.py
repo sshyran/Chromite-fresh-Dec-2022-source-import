@@ -29,10 +29,10 @@ import types
 
 from chromite.cbuildbot import archive_lib
 from chromite.lib import buildstore
-from chromite.lib import constants
-from chromite.lib import metadata_lib
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import metadata_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import portage_util

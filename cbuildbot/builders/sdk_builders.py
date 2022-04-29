@@ -6,13 +6,13 @@
 
 import datetime
 
-from chromite.lib import constants
-from chromite.lib import parallel
 from chromite.cbuildbot.builders import simple_builders
 from chromite.cbuildbot.stages import artifact_stages
 from chromite.cbuildbot.stages import build_stages
 from chromite.cbuildbot.stages import chrome_stages
 from chromite.cbuildbot.stages import sdk_stages
+from chromite.lib import constants
+from chromite.lib import parallel
 
 
 class ChrootSdkBuilder(simple_builders.SimpleBuilder):

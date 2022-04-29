@@ -17,7 +17,8 @@ from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import timeout_util
-from chromite.lib.buildstore import FakeBuildStore, BuildIdentifier
+from chromite.lib.buildstore import BuildIdentifier
+from chromite.lib.buildstore import FakeBuildStore
 
 
 FAKE_VERSION = """

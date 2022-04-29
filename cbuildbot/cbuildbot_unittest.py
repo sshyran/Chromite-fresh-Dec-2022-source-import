@@ -13,13 +13,13 @@ import os
 import pytest  # pylint: disable=import-error
 
 from chromite.cbuildbot import cbuildbot_run
-from chromite.lib import cgroups
 from chromite.cbuildbot import commands
-from chromite.lib import config_lib_unittest
-from chromite.lib import constants
 from chromite.cbuildbot import manifest_version
 from chromite.cbuildbot.builders import simple_builders
+from chromite.lib import cgroups
 from chromite.lib import cidb
+from chromite.lib import config_lib_unittest
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils

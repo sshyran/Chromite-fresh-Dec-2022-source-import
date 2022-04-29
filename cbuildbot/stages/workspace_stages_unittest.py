@@ -20,6 +20,7 @@ from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 
+
 # pylint: disable=too-many-ancestors
 # pylint: disable=protected-access
 

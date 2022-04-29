@@ -8,7 +8,11 @@ import logging
 import time
 
 from chromite.third_party.google.protobuf import field_mask_pb2
-from chromite.third_party.infra_libs.buildbucket.proto import builder_pb2, builds_service_pb2, common_pb2
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    builder_pb2,
+    builds_service_pb2,
+    common_pb2,
+)
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot.stages import generic_stages

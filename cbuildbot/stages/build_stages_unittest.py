@@ -10,6 +10,11 @@ from pathlib import Path
 import tempfile
 from unittest import mock
 
+from chromite.third_party.infra_libs.buildbucket.proto import (
+    build_pb2,
+    builds_service_pb2,
+)
+
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import build_stages
@@ -31,7 +36,6 @@ from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.lib import path_util
 from chromite.lib.buildstore import FakeBuildStore
-from chromite.third_party.infra_libs.buildbucket.proto import build_pb2, builds_service_pb2
 
 
 # pylint: disable=too-many-ancestors
