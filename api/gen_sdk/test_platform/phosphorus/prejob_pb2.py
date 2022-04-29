@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='test_platform.phosphorus',
   syntax='proto3',
   serialized_options=b'ZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorus',
-  serialized_pb=b'\n%test_platform/phosphorus/prejob.proto\x12\x18test_platform.phosphorus\x1a\x1fgoogle/protobuf/timestamp.proto\x1a%test_platform/phosphorus/common.proto\x1a\x1btest_platform/request.proto\"\xc0\x07\n\rPrejobRequest\x12\x30\n\x06\x63onfig\x18\x01 \x01(\x0b\x32 .test_platform.phosphorus.Config\x12\x14\n\x0c\x64ut_hostname\x18\x02 \x01(\t\x12\x62\n\x14provisionable_labels\x18\x03 \x03(\x0b\x32@.test_platform.phosphorus.PrejobRequest.ProvisionableLabelsEntryB\x02\x18\x01\x12q\n\x1c\x64\x65sired_provisionable_labels\x18\x04 \x03(\x0b\x32G.test_platform.phosphorus.PrejobRequest.DesiredProvisionableLabelsEntryB\x02\x18\x01\x12O\n\x15software_dependencies\x18\x08 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependency\x12o\n\x1d\x65xisting_provisionable_labels\x18\x05 \x03(\x0b\x32H.test_platform.phosphorus.PrejobRequest.ExistingProvisionableLabelsEntry\x12,\n\x08\x64\x65\x61\x64line\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0f\n\x07use_tls\x18\x07 \x01(\x08\x12R\n\x11\x61\x64\x64tional_targets\x18\t \x03(\x0b\x32\x37.test_platform.phosphorus.PrejobRequest.ProvisionTarget\x1a:\n\x18ProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x41\n\x1f\x44\x65siredProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x42\n ExistingProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1ax\n\x0fProvisionTarget\x12\x14\n\x0c\x64ut_hostname\x18\x01 \x01(\t\x12O\n\x15software_dependencies\x18\x02 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependency\"\xa6\x01\n\x0ePrejobResponse\x12=\n\x05state\x18\x01 \x01(\x0e\x32..test_platform.phosphorus.PrejobResponse.State\"U\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x12\r\n\tTIMED_OUT\x10\x03\x12\x0b\n\x07\x41\x42ORTED\x10\x04\x42\x44ZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
+  serialized_pb=b'\n%test_platform/phosphorus/prejob.proto\x12\x18test_platform.phosphorus\x1a\x1fgoogle/protobuf/timestamp.proto\x1a%test_platform/phosphorus/common.proto\x1a\x1btest_platform/request.proto\"\xf3\x07\n\rPrejobRequest\x12\x30\n\x06\x63onfig\x18\x01 \x01(\x0b\x32 .test_platform.phosphorus.Config\x12\x14\n\x0c\x64ut_hostname\x18\x02 \x01(\t\x12\x62\n\x14provisionable_labels\x18\x03 \x03(\x0b\x32@.test_platform.phosphorus.PrejobRequest.ProvisionableLabelsEntryB\x02\x18\x01\x12q\n\x1c\x64\x65sired_provisionable_labels\x18\x04 \x03(\x0b\x32G.test_platform.phosphorus.PrejobRequest.DesiredProvisionableLabelsEntryB\x02\x18\x01\x12O\n\x15software_dependencies\x18\x08 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependency\x12o\n\x1d\x65xisting_provisionable_labels\x18\x05 \x03(\x0b\x32H.test_platform.phosphorus.PrejobRequest.ExistingProvisionableLabelsEntry\x12,\n\x08\x64\x65\x61\x64line\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0f\n\x07use_tls\x18\x07 \x01(\x08\x12R\n\x11\x61\x64\x64tional_targets\x18\t \x03(\x0b\x32\x37.test_platform.phosphorus.PrejobRequest.ProvisionTarget\x12\x17\n\x0fupdate_firmware\x18\n \x01(\x08\x1a:\n\x18ProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x41\n\x1f\x44\x65siredProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x42\n ExistingProvisionableLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x91\x01\n\x0fProvisionTarget\x12\x14\n\x0c\x64ut_hostname\x18\x01 \x01(\t\x12O\n\x15software_dependencies\x18\x02 \x03(\x0b\x32\x30.test_platform.Request.Params.SoftwareDependency\x12\x17\n\x0fupdate_firmware\x18\x03 \x01(\x08\"\xa6\x01\n\x0ePrejobResponse\x12=\n\x05state\x18\x01 \x01(\x0e\x32..test_platform.phosphorus.PrejobResponse.State\"U\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x12\r\n\tTIMED_OUT\x10\x03\x12\x0b\n\x07\x41\x42ORTED\x10\x04\x42\x44ZBgo.chromium.org/chromiumos/infra/proto/go/test_platform/phosphorusb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,test__platform_dot_phosphorus_dot_common__pb2.DESCRIPTOR,test__platform_dot_request__pb2.DESCRIPTOR,])
 
@@ -56,8 +56,8 @@ _PREJOBRESPONSE_STATE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1213,
-  serialized_end=1298,
+  serialized_start=1264,
+  serialized_end=1349,
 )
 _sym_db.RegisterEnumDescriptor(_PREJOBRESPONSE_STATE)
 
@@ -95,8 +95,8 @@ _PREJOBREQUEST_PROVISIONABLELABELSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=814,
-  serialized_end=872,
+  serialized_start=839,
+  serialized_end=897,
 )
 
 _PREJOBREQUEST_DESIREDPROVISIONABLELABELSENTRY = _descriptor.Descriptor(
@@ -132,8 +132,8 @@ _PREJOBREQUEST_DESIREDPROVISIONABLELABELSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=874,
-  serialized_end=939,
+  serialized_start=899,
+  serialized_end=964,
 )
 
 _PREJOBREQUEST_EXISTINGPROVISIONABLELABELSENTRY = _descriptor.Descriptor(
@@ -169,8 +169,8 @@ _PREJOBREQUEST_EXISTINGPROVISIONABLELABELSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=941,
-  serialized_end=1007,
+  serialized_start=966,
+  serialized_end=1032,
 )
 
 _PREJOBREQUEST_PROVISIONTARGET = _descriptor.Descriptor(
@@ -194,6 +194,13 @@ _PREJOBREQUEST_PROVISIONTARGET = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='update_firmware', full_name='test_platform.phosphorus.PrejobRequest.ProvisionTarget.update_firmware', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -206,8 +213,8 @@ _PREJOBREQUEST_PROVISIONTARGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1009,
-  serialized_end=1129,
+  serialized_start=1035,
+  serialized_end=1180,
 )
 
 _PREJOBREQUEST = _descriptor.Descriptor(
@@ -280,6 +287,13 @@ _PREJOBREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='update_firmware', full_name='test_platform.phosphorus.PrejobRequest.update_firmware', index=9,
+      number=10, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -293,7 +307,7 @@ _PREJOBREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=169,
-  serialized_end=1129,
+  serialized_end=1180,
 )
 
 
@@ -324,8 +338,8 @@ _PREJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1132,
-  serialized_end=1298,
+  serialized_start=1183,
+  serialized_end=1349,
 )
 
 _PREJOBREQUEST_PROVISIONABLELABELSENTRY.containing_type = _PREJOBREQUEST
