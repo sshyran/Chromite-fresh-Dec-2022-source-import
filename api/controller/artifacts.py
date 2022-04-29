@@ -24,6 +24,7 @@ from chromite.lib import sysroot_lib
 from chromite.service import artifacts
 from chromite.service import test
 
+
 if TYPE_CHECKING:
   from chromite.api import api_config
 

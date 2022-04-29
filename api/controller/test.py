@@ -13,14 +13,16 @@ import os
 import string
 import subprocess
 
+from chromite.third_party.google.protobuf import json_format
+
 from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
-from chromite.api.metrics import deserialize_metrics_log
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
+from chromite.api.metrics import deserialize_metrics_log
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -34,7 +36,6 @@ from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import packages as packages_service
 from chromite.service import test
-from chromite.third_party.google.protobuf import json_format
 from chromite.utils import key_value_store
 
 

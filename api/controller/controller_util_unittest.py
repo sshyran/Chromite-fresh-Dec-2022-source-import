@@ -11,10 +11,10 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib.parser import package_info
 from chromite.lib.chroot_lib import Chroot
-from chromite.lib.sysroot_lib import Sysroot
+from chromite.lib.parser import package_info
 from chromite.lib.sysroot_lib import PackageInstallError
+from chromite.lib.sysroot_lib import Sysroot
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):

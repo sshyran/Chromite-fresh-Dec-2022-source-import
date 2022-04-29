@@ -18,6 +18,7 @@ from chromite.lib.parser import package_info
 from chromite.service import android
 from chromite.service import packages
 
+
 if TYPE_CHECKING:
   from chromite.api import api_config
 

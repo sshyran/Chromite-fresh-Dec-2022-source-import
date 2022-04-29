@@ -13,6 +13,7 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import depgraph_pb2
+
 # TODO(crbug/1081828): stop using build_target and drop it from the proto.
 from chromite.lib import build_target_lib
 from chromite.lib.parser import package_info

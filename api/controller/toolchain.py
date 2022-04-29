@@ -22,9 +22,11 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import toolchain_util
 
+
 if cros_build_lib.IsInsideChroot():
   # Only used for linting in chroot and requires yaml which is only in chroot
-  from chromite.scripts import tricium_cargo_clippy, tricium_clang_tidy
+  from chromite.scripts import tricium_cargo_clippy
+  from chromite.scripts import tricium_clang_tidy
 
 
 _Handlers = collections.namedtuple('_Handlers', ['name', 'prepare', 'bundle'])

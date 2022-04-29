@@ -5,6 +5,7 @@
 """compile_build_api_proto tests."""
 
 from chromite.third_party.google import protobuf
+
 from chromite.api import compile_build_api_proto
 
 

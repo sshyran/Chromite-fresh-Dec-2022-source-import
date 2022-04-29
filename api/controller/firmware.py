@@ -22,6 +22,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
+
 def get_fw_loc(fw_loc):
   """Get firmware_builder.py location.
 

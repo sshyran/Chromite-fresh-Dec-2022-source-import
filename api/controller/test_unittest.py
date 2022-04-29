@@ -9,12 +9,14 @@ import datetime
 import os
 from unittest import mock
 
+from chromite.third_party.google.protobuf import json_format
+
 from chromite.api import api_config
 from chromite.api import controller
 from chromite.api.controller import controller_util
 from chromite.api.controller import test as test_controller
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import test_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
@@ -26,7 +28,6 @@ from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
 from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
-from chromite.third_party.google.protobuf import json_format
 from chromite.utils import key_value_store
 
 

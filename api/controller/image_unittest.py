@@ -11,8 +11,8 @@ from chromite.api import api_config
 from chromite.api import controller
 from chromite.api.controller import image as image_controller
 from chromite.api.gen.chromite.api import image_pb2
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib

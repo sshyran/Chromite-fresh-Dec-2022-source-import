@@ -19,6 +19,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 
+
 _CIPD_ROOT = os.path.join(constants.CHROMITE_DIR, '.cipd_bin')
 
 # Chromite's protobuf library version (third_party/google/protobuf).

@@ -38,10 +38,12 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.utils import memoize
 
+
 if TYPE_CHECKING:
+  from chromite.third_party import google
+
   from chromite.api import api_config
   from chromite.api import message_util
-  from chromite.third_party import google
 
 MethodData = collections.namedtuple(
     'MethodData', ('service_descriptor', 'module_name', 'method_descriptor'))

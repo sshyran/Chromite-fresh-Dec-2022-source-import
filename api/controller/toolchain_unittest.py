@@ -12,13 +12,13 @@ from chromite.api.controller import toolchain
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
-from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.api.gen.chromiumos import common_pb2
-
+from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import toolchain_util
+
 
 # pylint: disable=protected-access
 

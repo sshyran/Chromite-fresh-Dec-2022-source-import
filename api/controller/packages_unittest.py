@@ -9,9 +9,9 @@ from unittest import mock
 from chromite.api.api_config import ApiConfigMixin
 from chromite.api.controller import controller_util
 from chromite.api.controller import packages as packages_controller
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.gen.chromite.api import binhost_pb2
 from chromite.api.gen.chromite.api import packages_pb2
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib

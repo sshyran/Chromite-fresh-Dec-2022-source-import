@@ -9,15 +9,17 @@ import logging
 import os
 from typing import Optional, TYPE_CHECKING, Union
 
-from chromite.api.gen.chromite.api import sysroot_pb2, test_pb2
+from chromite.api.gen.chromite.api import sysroot_pb2
+from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
-from chromite.lib import constants
-from chromite.lib.parser import package_info
 from chromite.lib import chroot_lib
+from chromite.lib import constants
 from chromite.lib import goma_lib
 from chromite.lib import remoteexec_util
 from chromite.lib import sysroot_lib
+from chromite.lib.parser import package_info
+
 
 if TYPE_CHECKING:
   from chromite.api.gen.chromiumos.build.api import portage_pb2

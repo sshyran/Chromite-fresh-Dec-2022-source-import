@@ -27,9 +27,10 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import metrics_lib
 from chromite.lib import sysroot_lib
-from chromite.service import packages as packages_service
 from chromite.scripts import pushimage
 from chromite.service import image
+from chromite.service import packages as packages_service
+
 
 if TYPE_CHECKING:
   from chromite.api import api_config
