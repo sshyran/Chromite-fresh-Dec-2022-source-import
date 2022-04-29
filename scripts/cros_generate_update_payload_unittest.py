@@ -7,8 +7,8 @@
 from chromite.lib import cros_test_lib
 from chromite.lib import partial_mock
 from chromite.lib.paygen import paygen_payload_lib
-
 from chromite.scripts import cros_generate_update_payload
+
 
 pytestmark = cros_test_lib.pytestmark_inside_only
 

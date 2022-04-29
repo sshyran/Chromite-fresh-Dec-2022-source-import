@@ -15,6 +15,7 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.scripts import lts_kernel_uprev
 
+
 SAMPLE_MANIFEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <include name="_remotes.xml" />

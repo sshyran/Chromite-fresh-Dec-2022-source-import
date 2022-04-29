@@ -16,6 +16,7 @@ import os
 from chromite.lib import commandline
 from chromite.lib import dot_helper
 
+
 NORMAL_COLOR = 'black'
 BASE_COLORS = ['red', 'green', 'blue']
 

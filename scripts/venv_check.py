@@ -4,8 +4,8 @@
 
 """Try to set up a chromite virtualenv, and print the import path."""
 
-import sys
 import pprint
+import sys
 
 from chromite.lib import commandline
 

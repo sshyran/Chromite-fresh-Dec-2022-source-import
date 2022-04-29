@@ -38,7 +38,17 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import yaml  # pylint: disable=import-error
 

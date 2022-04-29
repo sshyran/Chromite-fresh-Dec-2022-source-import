@@ -7,8 +7,8 @@
 import sys
 
 from chromite.config import chromeos_config
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.utils import pformat
 
 

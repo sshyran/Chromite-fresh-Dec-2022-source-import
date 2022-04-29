@@ -31,6 +31,7 @@ from chromite.lib import parallel
 from chromite.lib import signals
 from chromite.utils import file_util
 
+
 # Elf files that don't exist but have a split .debug file installed.
 ALLOWED_DEBUG_ONLY_FILES = {
     'boot/vmlinux',

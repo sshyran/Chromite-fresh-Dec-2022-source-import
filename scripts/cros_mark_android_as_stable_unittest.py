@@ -17,6 +17,7 @@ from chromite.lib import portage_util
 from chromite.scripts import cros_mark_android_as_stable
 from chromite.service import android
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

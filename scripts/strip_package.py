@@ -14,9 +14,11 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
+
 # The builder module lives in the devserver path.
 sys.path.append('/usr/lib/devserver/')
 import builder
+
 
 _DEFAULT_MASK = 'DEFAULT_INSTALL_MASK'
 

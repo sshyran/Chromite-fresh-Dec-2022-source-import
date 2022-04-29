@@ -7,8 +7,8 @@
 import os
 import unittest
 
-from chromite.lib import constants
 from chromite.lib import commandline
+from chromite.lib import constants
 from chromite.lib import image_lib
 from chromite.lib import image_test_lib
 from chromite.lib import osutils

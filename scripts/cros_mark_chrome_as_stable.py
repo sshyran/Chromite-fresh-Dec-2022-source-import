@@ -32,6 +32,7 @@ from chromite.lib import portage_util
 from chromite.lib import timeout_util
 from chromite.scripts import cros_mark_as_stable
 
+
 # Helper regex's for finding ebuilds.
 _CHROME_VERSION_REGEX = r'\d+\.\d+\.\d+\.\d+'
 _NON_STICKY_REGEX = r'%s[(_rc.*)|(_alpha.*)]+' % _CHROME_VERSION_REGEX

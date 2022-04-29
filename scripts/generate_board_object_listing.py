@@ -20,7 +20,9 @@ import collections
 import json
 import os
 
-from chromite.lib import commandline, cros_build_lib, portage_util
+from chromite.lib import commandline
+from chromite.lib import cros_build_lib
+from chromite.lib import portage_util
 
 
 def get_all_package_objects(board):

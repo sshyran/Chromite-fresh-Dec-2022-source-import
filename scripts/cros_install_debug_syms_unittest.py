@@ -11,6 +11,7 @@ from chromite.lib import cros_test_lib
 from chromite.scripts import cros_install_debug_syms
 from chromite.utils import outcap
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

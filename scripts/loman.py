@@ -4,8 +4,8 @@
 
 """Manage projects in the local manifest."""
 
-import platform
 import os
+import platform
 import xml.etree.ElementTree as ElementTree
 
 from chromite.lib import commandline

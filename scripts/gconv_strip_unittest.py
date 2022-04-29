@@ -10,6 +10,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.scripts import gconv_strip
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

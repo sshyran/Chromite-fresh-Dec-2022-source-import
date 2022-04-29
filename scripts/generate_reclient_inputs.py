@@ -23,10 +23,11 @@ import os
 from pathlib import Path
 from typing import List, Optional, Set
 
+from chromite.third_party import lddtree
+
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-from chromite.third_party import lddtree
 
 
 def _GetSymLinkPath(base_dir: Path, link_path: str) -> Path:

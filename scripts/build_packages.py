@@ -18,9 +18,9 @@ For the fastest builds, use --nowithautotest --noworkon.
 import argparse
 import logging
 import os
+from typing import List, Optional, Tuple
 import urllib.error
 import urllib.request
-from typing import List, Optional, Tuple
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline

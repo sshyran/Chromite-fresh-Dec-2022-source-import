@@ -5,9 +5,9 @@
 """Test gen_luci_scheduler."""
 
 from chromite.config import chromeos_config
-from chromite.lib import cros_test_lib
 from chromite.lib import config_lib
 from chromite.lib import config_lib_unittest
+from chromite.lib import cros_test_lib
 from chromite.scripts import gen_luci_scheduler
 
 

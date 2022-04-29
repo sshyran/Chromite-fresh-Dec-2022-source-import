@@ -5,7 +5,6 @@
 """This module is responsible for generating a stateful update payload."""
 
 from chromite.lib import commandline
-
 from chromite.lib.paygen import paygen_stateful_payload_lib
 
 
