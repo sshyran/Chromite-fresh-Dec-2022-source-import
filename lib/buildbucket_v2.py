@@ -19,7 +19,7 @@ from typing import Callable, Optional
 
 from chromite.third_party.google.protobuf import field_mask_pb2
 from chromite.third_party.infra_libs.buildbucket.proto import (
-    builder_pb2,
+    builder_common_pb2,
     builds_service_pb2,
     builds_service_prpc_pb2,
     common_pb2,
@@ -837,7 +837,7 @@ class BuildbucketV2(object):
       build statuses in descending order (if |reverse| is True, ascending
       order).
     """
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value=build_config)]
     create_time = DateToTimeRange(start_date, end_date)
@@ -873,7 +873,7 @@ class BuildbucketV2(object):
       A list of dictionary corresponding to each child build with keys like
       start_time, end_time, status, version info, critical, build_config, etc.
     """
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(buildbucket_id))
     build_predicate = builds_service_pb2.BuildPredicate(

@@ -11,7 +11,7 @@ import os
 
 from chromite.third_party.google.protobuf import field_mask_pb2
 from chromite.third_party.infra_libs.buildbucket.proto import (
-    builder_pb2,
+    builder_common_pb2,
     builds_service_pb2,
     common_pb2,
 )
@@ -213,7 +213,7 @@ class CleanUpStage(generic_stages.BuilderStage):
           constants.BUILDBUCKET_BUILDER_STATUS_SUCCESS,
       ]:
         build_predicate = builds_service_pb2.BuildPredicate(
-            builder=builder_pb2.BuilderID(
+            builder=builder_common_pb2.BuilderID(
                 project='chromeos',
                 bucket=bucket),
             status=status,
@@ -242,7 +242,7 @@ class CleanUpStage(generic_stages.BuilderStage):
           constants.BUILDBUCKET_BUILDER_STATUS_SCHEDULED,
           constants.BUILDBUCKET_BUILDER_STATUS_STARTED]:
         child_predicate = builds_service_pb2.BuildPredicate(
-            builder=builder_pb2.BuilderID(
+            builder=builder_common_pb2.BuilderID(
                 project='chromeos',
                 bucket=bucket),
             status=status,

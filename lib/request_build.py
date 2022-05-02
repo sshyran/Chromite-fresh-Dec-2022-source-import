@@ -11,7 +11,7 @@ from chromite.third_party.google.protobuf import duration_pb2
 from chromite.third_party.google.protobuf.struct_pb2 import Struct
 from chromite.third_party.infra_libs.buildbucket.proto import (
     build_pb2,
-    builder_pb2,
+    builder_common_pb2,
     common_pb2,
 )
 
@@ -181,9 +181,9 @@ class RequestBuild(object):
         expiration=duration_pb2.Duration(seconds=240))]
     return {
         'request_id': uuid.uuid1(),
-        'builder': builder_pb2.BuilderID(project='chromeos',
-                                      bucket=self.bucket,
-                                      builder=self.luci_builder),
+        'builder': builder_common_pb2.BuilderID(project='chromeos',
+                                                bucket=self.bucket,
+                                                builder=self.luci_builder),
         'properties': properties,
         'tags': tags_proto,
         'dimensions': dimensions if dimensions else None,

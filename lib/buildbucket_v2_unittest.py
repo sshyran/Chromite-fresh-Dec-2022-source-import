@@ -11,7 +11,7 @@ from chromite.third_party.google.protobuf.struct_pb2 import Struct, Value
 from chromite.third_party.google.protobuf.timestamp_pb2 import Timestamp
 from chromite.third_party.infra_libs.buildbucket.proto import (
     build_pb2,
-    builder_pb2,
+    builder_common_pb2,
     builds_service_pb2,
     common_pb2,
     step_pb2,
@@ -163,7 +163,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
   def testBatchSearchBuilds(self):
     fake_batch_request = object()
     bbv2 = buildbucket_v2.BuildbucketV2()
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(1234))
     build_predicate = builds_service_pb2.BuildPredicate(
@@ -264,9 +264,9 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
     self.get_build_function.assert_called_with(fake_get_build_request)
 
   def testScheduleBuild(self):
-    fake_builder = builder_pb2.BuilderID(project='chromeos',
-                                      bucket='general',
-                                      builder='test-builder')
+    fake_builder = builder_common_pb2.BuilderID(project='chromeos',
+                                                bucket='general',
+                                                builder='test-builder')
     fake_field_mask = field_mask_pb2.FieldMask(paths=['properties'])
     fake_tag = common_pb2.StringPair(key='foo',
                                      value='bar')
@@ -466,7 +466,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
   def testSearchBuildExceptionCases(self):
     """Test scenarios where SearchBuild raises an Exception."""
     bbv2 = buildbucket_v2.BuildbucketV2()
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(1234))
     build_predicate = builds_service_pb2.BuildPredicate(
@@ -481,7 +481,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
   def testSearchBuild(self):
     """Test redirection to the underlying RPC call."""
     bbv2 = buildbucket_v2.BuildbucketV2()
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tag = common_pb2.StringPair(key='cbb_master_buildbucket_id',
                                 value=str(1234))
     build_predicate = builds_service_pb2.BuildPredicate(
@@ -497,7 +497,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
     """Test GetBuildHistory ignore_build_id logic."""
     # pylint: disable=unused-variable
     bbv2 = buildbucket_v2.BuildbucketV2()
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value='something-paladin')]
     build_list = [build_pb2.Build(id=1234),
@@ -515,7 +515,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
   def testGetBuildHistoryIgnoreIdWithoutId(self):
     """Test GetBuildHistory ignore_build_id logic when ID is absent."""
     bbv2 = buildbucket_v2.BuildbucketV2()
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value='something-paladin')]
     build_list = [build_pb2.Build(id=1234),
@@ -532,7 +532,7 @@ class BuildbucketV2Test(cros_test_lib.MockTestCase):
 
   def testGetBuildHistoryOtherArgs(self):
     """Test GetBuildHistory's processing of (args - ignore_build_id)."""
-    builder = builder_pb2.BuilderID(project='chromeos', bucket='general')
+    builder = builder_common_pb2.BuilderID(project='chromeos', bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value='something-paladin'),
             common_pb2.StringPair(key='cbb_branch',

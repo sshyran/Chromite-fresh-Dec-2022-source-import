@@ -9,7 +9,7 @@ import time
 
 from chromite.third_party.google.protobuf import field_mask_pb2
 from chromite.third_party.infra_libs.buildbucket.proto import (
-    builder_pb2,
+    builder_common_pb2,
     builds_service_pb2,
     common_pb2,
 )
@@ -38,7 +38,7 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
       logging.info('No buildbucket_client, no bot found.')
       return None
 
-    builder = builder_pb2.BuilderID(project='chromeos',
+    builder = builder_common_pb2.BuilderID(project='chromeos',
                                   bucket='general')
     tags = [common_pb2.StringPair(key='cbb_config',
                                   value=build_config),
