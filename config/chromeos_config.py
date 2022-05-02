@@ -241,12 +241,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'accelerator',
-      sync_chrome=False,
-      chrome_sdk=False,
-  )
-
-  site_config.AddTemplate(
       'brillo',
       sync_chrome=False,
       chrome_sdk=False,
@@ -665,8 +659,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
       board_config.apply(site_config.templates.dustbuster)
     if board in chromeos_boards.moblab_boards:
       board_config.apply(site_config.templates.moblab)
-    if board in chromeos_boards.accelerator_boards:
-      board_config.apply(site_config.templates.accelerator)
     if board in chromeos_boards.termina_boards:
       board_config.apply(site_config.templates.termina)
     if board in chromeos_boards.nofactory_boards:
@@ -1114,7 +1106,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
       (MONTHLY, 'factory-gru-9017.B', ['gru', 'bob']),
       (MONTHLY, 'factory-eve-9667.B', ['eve']),
       (MONTHLY, 'factory-coral-10122.B', ['coral']),
-      (MONTHLY, 'factory-fizz-10167.B', ['fizz', 'fizz-accelerator']),
+      (MONTHLY, 'factory-fizz-10167.B', ['fizz']),
       (MONTHLY, 'factory-scarlet-10211.B', ['scarlet']),
       (MONTHLY, 'factory-soraka-10323.39.B', ['soraka']),
       (MONTHLY, 'factory-poppy-10504.B', ['nautilus']),

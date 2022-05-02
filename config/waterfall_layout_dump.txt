@@ -34,7 +34,6 @@
   factory-excelsior-12812.B-buildspec
     excelsior-factory-excelsior-12812.B-factorybranch
   factory-fizz-10167.B-buildspec
-    fizz-accelerator-factory-fizz-10167.B-factorybranch
     fizz-factory-fizz-10167.B-factorybranch
   factory-gale-8743.19.B-buildspec
     gale-factory-gale-8743.19.B-factorybranch
@@ -790,7 +789,6 @@
   factory-excelsior-12812.B-buildspec-tryjob
     excelsior-factory-excelsior-12812.B-factorybranch-tryjob
   factory-fizz-10167.B-buildspec-tryjob
-    fizz-accelerator-factory-fizz-10167.B-factorybranch-tryjob
     fizz-factory-fizz-10167.B-factorybranch-tryjob
   factory-gale-8743.19.B-buildspec-tryjob
     gale-factory-gale-8743.19.B-factorybranch-tryjob
@@ -905,7 +903,6 @@
   falco_li-payloads-tryjob
   falco_li-release-tryjob
   falco_li-unittest-stress
-  fizz-accelerator-factory-fizz-10167.B-factorybranch-tryjob
   fizz-cfm-full-tryjob
   fizz-cfm-llvm-next-toolchain-tryjob
   fizz-cfm-llvm-toolchain-tryjob

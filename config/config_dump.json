@@ -11114,7 +11114,6 @@
         "display_label": "factory",
         "schedule": "with 720h interval",
         "slave_configs": [
-            "fizz-accelerator-factory-fizz-10167.B-factorybranch",
             "fizz-factory-fizz-10167.B-factorybranch"
         ],
         "workspace_branch": "factory-fizz-10167.B"
@@ -11127,7 +11126,6 @@
         "display_label": "tryjob",
         "luci_builder": "Try",
         "slave_configs": [
-            "fizz-accelerator-factory-fizz-10167.B-factorybranch-tryjob",
             "fizz-factory-fizz-10167.B-factorybranch-tryjob"
         ],
         "workspace_branch": "factory-fizz-10167.B"
@@ -12074,26 +12072,6 @@
         "useflags": [
             "chrome_internal"
         ]
-    },
-    "fizz-accelerator-factory-fizz-10167.B-factorybranch": {
-        "_template": "factorybranch",
-        "boards": [
-            "fizz-accelerator"
-        ],
-        "workspace_branch": "factory-fizz-10167.B"
-    },
-    "fizz-accelerator-factory-fizz-10167.B-factorybranch-tryjob": {
-        "_template": "factorybranch",
-        "boards": [
-            "fizz-accelerator"
-        ],
-        "debug": true,
-        "display_label": "tryjob",
-        "hw_tests_override": null,
-        "luci_builder": "Try",
-        "push_image": false,
-        "suite_scheduling": false,
-        "workspace_branch": "factory-fizz-10167.B"
     },
     "fizz-cfm-full": {
         "_template": "full",

@@ -71,10 +71,6 @@ brillo_boards = frozenset([
     'whirlwind',
 ])
 
-accelerator_boards = frozenset([
-    'fizz-accelerator',
-])
-
 beaglebone_boards = frozenset([
     'beaglebone',
     'beaglebone_servo',
