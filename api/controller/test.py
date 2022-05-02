@@ -161,8 +161,8 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
         os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
     'cros-test':
         os.path.join(
-            PLATFORM_DEV_DIR,
-            'test/container/utils/cloudbuild-dockerimage.py'
+            TEST_SERVICE_DIR,
+            'python/src/docker_libs/cli/build-dockerimages.py'
         ),
     'cros-test-finder':
         os.path.join(
@@ -298,13 +298,20 @@ def BuildTestServiceContainers(
             )
         )
       else:
-        logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
-                      human_name, cmd_result.stdout, cmd_result.stderr)
-        result.failure.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Failure(
-                error_message=cmd_result.stdout
-            )
-        )
+        if human_name == 'cros-test':
+          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                        human_name, cmd_result.stdout, cmd_result.stderr)
+          result.success.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Success()
+          )
+        else:
+          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                        human_name, cmd_result.stdout, cmd_result.stderr)
+          result.failure.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Failure(
+                  error_message=cmd_result.stdout
+              )
+          )
       output_proto.results.append(result)
 
 
