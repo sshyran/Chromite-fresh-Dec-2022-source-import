@@ -254,13 +254,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'lassen',
-      sync_chrome=False,
-      chrome_sdk=False,
-      image_test=False,
-  )
-
-  site_config.AddTemplate(
       'x30evb',
       sync_chrome=False,
       chrome_sdk=False,
@@ -664,8 +657,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
 
     if board in chromeos_boards.brillo_boards:
       board_config.apply(site_config.templates.brillo)
-    if board in chromeos_boards.lassen_boards:
-      board_config.apply(site_config.templates.lassen)
     if board in ['x30evb']:
       board_config.apply(site_config.templates.x30evb)
     if board in chromeos_boards.wshwos_boards:

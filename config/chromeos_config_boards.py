@@ -84,10 +84,6 @@ dustbuster_boards = frozenset([
     'wristpin',
 ])
 
-lassen_boards = frozenset([
-    'lassen',
-])
-
 loonix_boards = frozenset([])
 
 reven_boards = frozenset([
@@ -119,7 +115,7 @@ termina_boards = frozenset([
 ])
 
 nofactory_boards = (
-    termina_boards | lassen_boards | reven_boards | frozenset([
+    termina_boards | reven_boards | frozenset([
         'x30evb',
     ])
 )
@@ -131,9 +127,9 @@ toolchains_from_source = frozenset([
 noimagetest_boards = (termina_boards | scribe_boards
                       | wshwos_boards | dustbuster_boards)
 
-nohwqual_boards = (lassen_boards | termina_boards
-                   | beaglebone_boards | wshwos_boards
-                   | dustbuster_boards | reven_boards)
+nohwqual_boards = (termina_boards | beaglebone_boards
+                   | wshwos_boards | dustbuster_boards
+                   | reven_boards)
 
 base_layout_boards = termina_boards
 
