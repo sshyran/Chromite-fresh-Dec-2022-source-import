@@ -22,7 +22,9 @@ from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
-from chromite.lint.linters import owners, upstart, whitespace
+from chromite.lint.linters import owners
+from chromite.lint.linters import upstart
+from chromite.lint.linters import whitespace
 
 
 # Extract a script's shebang.

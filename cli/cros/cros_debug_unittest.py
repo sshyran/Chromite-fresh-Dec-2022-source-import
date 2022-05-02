@@ -10,6 +10,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import remote_access
 
+
 pytestmark = cros_test_lib.pytestmark_inside_only
 
 

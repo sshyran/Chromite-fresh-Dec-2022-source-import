@@ -11,6 +11,8 @@ import shutil
 import threading
 from unittest import mock
 
+from chromite.third_party.gn_helpers import gn_helpers
+
 from chromite.cli import command_unittest
 from chromite.cli.cros import cros_chrome_sdk
 from chromite.lib import cache
@@ -22,7 +24,6 @@ from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import partial_mock
-from chromite.third_party.gn_helpers import gn_helpers
 
 
 # pylint: disable=protected-access

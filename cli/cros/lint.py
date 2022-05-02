@@ -19,20 +19,25 @@ as many/few checkers as we want in this one module.
 
 import collections
 import itertools
-import tokenize
 import os
 import re
 import sys
+import tokenize
 
 import astroid
+from chromite.third_party.pylint import format_checkers
+
+# pylint: disable=unused-import
+# Can't use per-line suppression due to pylint bug:
+# https://github.com/PyCQA/pylint/issues/6484
+from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
+
+# pylint: enable=unused-import
 import pylint.checkers
 from pylint.config import ConfigurationMixIn
 import pylint.interfaces
 
-from chromite.third_party.pylint import format_checkers
 from chromite.utils import memoize
-# pylint: disable=unused-import
-from chromite.third_party.pylint_quotes.checker import StringQuoteChecker
 
 
 # pylint: disable=too-few-public-methods
