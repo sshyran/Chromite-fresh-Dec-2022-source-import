@@ -74,7 +74,7 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
 
     archs = ['arm', 'arm64', 'x86', 'x86_64']
     build_types = ['user', 'userdebug']
-    runtime_datas = ['gms_core_cache', 'ureadahead_pack']
+    runtime_datas = ['gms_core_cache', 'ureadahead_pack', 'tts_cache']
 
     for arch in archs:
       for build_type in build_types:
@@ -138,6 +138,10 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
              f'userdebug_{android_version}.tar')
     self.gs_mock.AddCmdResult(['stat', '--', path2],
                               stdout=(self.STAT_OUTPUT) % path2)
+    path3 = (f'{self.runtime_artifacts_bucket_url}/tts_cache_arm64_'
+             f'user_{android_version}.tar')
+    self.gs_mock.AddCmdResult(['stat', '--', path3],
+                              stdout=(self.STAT_OUTPUT) % path3)
 
     variables = cros_mark_android_as_stable.UpdateDataCollectorArtifacts(
         android_version,
@@ -149,9 +153,12 @@ class CrosMarkAndroidAsStable(cros_test_lib.MockTempDirTestCase):
                     f'ureadahead_pack_x86_64_user_{version_reference}.tar')
     expectation2 = (f'{self.runtime_artifacts_bucket_url}/'
                     f'gms_core_cache_arm_userdebug_{version_reference}.tar')
+    expectation3 = (f'{self.runtime_artifacts_bucket_url}/'
+                    f'tts_cache_arm64_user_{version_reference}.tar')
     self.assertEqual({
         'X86_64_USER_UREADAHEAD_PACK': expectation1,
         'ARM_USERDEBUG_GMS_CORE_CACHE': expectation2,
+        'ARM64_USER_TTS_CACHE': expectation3
     }, variables)
 
   def testUpdateDataCollectorArtifactsPin(self):
