@@ -248,20 +248,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'x30evb',
-      sync_chrome=False,
-      chrome_sdk=False,
-      signer_tests=False,
-      paygen=False,
-      upload_hw_test_artifacts=False,
-      image_test=False,
-      images=['base', 'test'],
-      packages=[
-          'virtual/target-os', 'virtual/target-os-dev', 'virtual/target-os-test'
-      ],
-  )
-
-  site_config.AddTemplate(
       'termina',
       sync_chrome=False,
       chrome_sdk=False,
@@ -651,8 +637,6 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
 
     if board in chromeos_boards.brillo_boards:
       board_config.apply(site_config.templates.brillo)
-    if board in ['x30evb']:
-      board_config.apply(site_config.templates.x30evb)
     if board in chromeos_boards.wshwos_boards:
       board_config.apply(site_config.templates.wshwos)
     if board in chromeos_boards.dustbuster_boards:

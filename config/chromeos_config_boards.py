@@ -110,11 +110,7 @@ termina_boards = frozenset([
     'tael',
 ])
 
-nofactory_boards = (
-    termina_boards | reven_boards | frozenset([
-        'x30evb',
-    ])
-)
+nofactory_boards = (termina_boards | reven_boards)
 
 toolchains_from_source = frozenset([
     'x32-generic',

@@ -516,12 +516,6 @@ def GeneralTemplates(site_config, ge_build_config):
   )
   # END Ubsan
 
-  # BEGIN x30evb
-  site_config.templates.x30evb.apply(
-      site_config.templates.no_hwtest_builder,
-  )
-  # END x30evb
-
 
 def ApplyConfig(site_config, boards_dict, ge_build_config):
   """Apply test specific config to site_config
