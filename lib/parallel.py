@@ -254,9 +254,8 @@ class _BackgroundTask(multiprocessing.Process):
   )
 
   @classmethod
-  def _DumpDebugPid(cls, log_level, pid):
+  def _DumpDebugPid(cls, log_level: int, pid: str) -> None:
     """Dump debug info about the hanging |pid|."""
-    pid = str(pid)
     commands = (
         ('pstree', '-Apals', pid),
         ('lsof', '-p', pid),
@@ -290,7 +289,7 @@ class _BackgroundTask(multiprocessing.Process):
         ppid = str(self.pid)
         output = self._DebugRunCommand(
             ('pgrep', '-P', ppid), debug_level=log_level, print_cmd=False,
-            check=False, capture_output=True)
+            check=False, capture_output=True, encoding='utf-8')
         for pid in [ppid] + output.splitlines():
           self._DumpDebugPid(log_level, pid)
 
