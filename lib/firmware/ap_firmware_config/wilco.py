@@ -8,6 +8,7 @@ import logging
 
 from chromite.lib.firmware import servo_lib
 
+
 # TODO(b/143241417): Use futility anytime flashing over ssh to avoid failures.
 DEPLOY_SSH_FORCE_FUTILITY = True
 

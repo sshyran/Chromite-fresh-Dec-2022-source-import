@@ -9,7 +9,16 @@ import logging
 import multiprocessing
 import os
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants

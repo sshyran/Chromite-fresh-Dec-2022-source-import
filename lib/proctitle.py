@@ -8,10 +8,12 @@ import os
 
 import __main__ as main
 
+
 # Import the relevant funcs into our namespace for callers.
 try:
   # pylint: disable=unused-import, no-name-in-module
-  from setproctitle import getproctitle, setproctitle
+  from setproctitle import getproctitle
+  from setproctitle import setproctitle
 except ImportError:
   # Module not available -> can't do anything.
   getproctitle = lambda: None

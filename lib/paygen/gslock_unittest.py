@@ -9,7 +9,6 @@ import multiprocessing
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
-
 from chromite.lib.paygen import gslock
 
 

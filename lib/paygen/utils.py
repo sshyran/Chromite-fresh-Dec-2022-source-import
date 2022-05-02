@@ -4,11 +4,11 @@
 
 """Common python commands used by various internal build scripts."""
 
+from collections import namedtuple
+import multiprocessing
 import os
 import time
-import multiprocessing
 
-from collections import namedtuple
 from chromite.utils import key_value_store
 
 

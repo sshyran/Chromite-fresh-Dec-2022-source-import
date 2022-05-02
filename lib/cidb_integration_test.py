@@ -10,11 +10,11 @@ import os
 import random
 import shutil
 
-from chromite.lib import constants
-from chromite.lib import metadata_lib
 from chromite.lib import cidb
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import metadata_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import remote_access

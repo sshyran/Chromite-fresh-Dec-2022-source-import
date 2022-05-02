@@ -9,6 +9,7 @@ import collections
 from chromite.lib import cros_test_lib
 from chromite.lib import kernel_cmdline
 
+
 # pylint: disable=protected-access
 
 

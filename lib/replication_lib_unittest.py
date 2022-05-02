@@ -9,11 +9,16 @@ import os
 import stat
 
 from chromite.third_party.google.protobuf.field_mask_pb2 import FieldMask
-from chromite.api.gen.config.replication_config_pb2 import (
-    ReplicationConfig, FileReplicationRule, StringReplacementRule,
-    FILE_TYPE_JSON, FILE_TYPE_OTHER, REPLICATION_TYPE_COPY,
-    REPLICATION_TYPE_FILTER)
 
+from chromite.api.gen.config.replication_config_pb2 import (
+    FILE_TYPE_JSON,
+    FILE_TYPE_OTHER,
+    FileReplicationRule,
+    REPLICATION_TYPE_COPY,
+    REPLICATION_TYPE_FILTER,
+    ReplicationConfig,
+    StringReplacementRule,
+)
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import replication_lib

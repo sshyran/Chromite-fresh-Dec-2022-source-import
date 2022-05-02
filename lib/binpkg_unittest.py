@@ -14,6 +14,7 @@ from chromite.lib import gs_unittest
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 
+
 PACKAGES_CONTENT = """USE: test
 
 CPV: chromeos-base/shill-0.0.1-r1

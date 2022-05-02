@@ -11,8 +11,8 @@ import urllib.parse
 import urllib.request
 
 from chromite.lib import cros_test_lib
-from chromite.lib import perf_uploader
 from chromite.lib import osutils
+from chromite.lib import perf_uploader
 
 
 class PerfUploadTestCase(cros_test_lib.MockTestCase):

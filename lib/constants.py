@@ -7,6 +7,7 @@
 import itertools
 import os
 
+
 def _FindSourceRoot():
   """Try and find the root check out of the chromiumos tree"""
   source_root = path = os.path.realpath(os.path.join(

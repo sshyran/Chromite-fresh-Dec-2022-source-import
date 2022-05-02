@@ -12,6 +12,7 @@ from chromite.lib import chromite_config
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 
+
 _AUTO_SET_GOV_CONTENT = (
     '# Delete this file to turn off automatic performance governor switch.\n')
 

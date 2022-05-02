@@ -6,8 +6,8 @@
 
 import os
 
-from chromite.lib import cts_helper
 from chromite.lib import cros_test_lib
+from chromite.lib import cts_helper
 from chromite.lib import osutils
 
 

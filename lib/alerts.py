@@ -22,7 +22,9 @@ import traceback
 
 from chromite.third_party import httplib2
 from chromite.third_party.googleapiclient import errors as apiclient_errors
-from chromite.third_party.googleapiclient.discovery import build as apiclient_build
+from chromite.third_party.googleapiclient.discovery import (
+    build as apiclient_build,
+)
 from chromite.third_party.oauth2client import client
 from chromite.third_party.oauth2client import file as oauth_client_fileio
 

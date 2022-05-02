@@ -12,8 +12,8 @@ import time
 
 from chromite.lib import cros_test_lib
 from chromite.lib import locking
-from chromite.lib import parallel
 from chromite.lib import osutils
+from chromite.lib import parallel
 from chromite.lib import process_util
 from chromite.lib import timeout_util
 

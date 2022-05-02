@@ -4,8 +4,8 @@
 
 """A type used to represent a toolchain and its setting overrides."""
 
-import copy
 import collections
+import copy
 import json
 import os
 

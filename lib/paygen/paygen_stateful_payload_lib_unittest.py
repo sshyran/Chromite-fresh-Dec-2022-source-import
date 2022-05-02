@@ -11,7 +11,6 @@ from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import image_lib_unittest
 from chromite.lib import osutils
-
 from chromite.lib.paygen import paygen_stateful_payload_lib
 
 

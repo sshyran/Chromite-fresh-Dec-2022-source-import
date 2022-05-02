@@ -15,6 +15,7 @@ from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.lib import path_util
 
+
 if TYPE_CHECKING:
   from chromite.lib import goma_lib
   from chromite.lib import remoteexec_util

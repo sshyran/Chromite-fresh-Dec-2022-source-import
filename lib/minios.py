@@ -13,6 +13,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import kernel_builder
 
+
 CROS_DEBUG_FLAG = 'cros_debug'
 MINIOS_KERNEL_IMAGE = 'minios_vmlinuz.image'
 KERNEL_FLAGS = ['minios', 'minios_ramfs', 'tpm', 'i2cdev', 'vfat',

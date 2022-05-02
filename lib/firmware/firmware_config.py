@@ -9,14 +9,15 @@ the config from ap_firmware_config modules, and export it into JSON.
 """
 
 import json
-import os
 import logging
+import os
 from pathlib import Path
 import sys
 from typing import List, NamedTuple, Optional
 
-from chromite.lib.firmware import servo_lib
 from chromite.lib.firmware import ap_firmware_config
+from chromite.lib.firmware import servo_lib
+
 
 _CONFIG_BUILD_WORKON_PACKAGES = 'BUILD_WORKON_PACKAGES'
 _CONFIG_BUILD_PACKAGES = 'BUILD_PACKAGES'

@@ -15,7 +15,9 @@ import collections
 from chromite.third_party.google.protobuf import symbol_database
 
 from chromite.lib.luci import net
-from chromite.lib.luci.prpc import codes, encoding
+from chromite.lib.luci.prpc import codes
+from chromite.lib.luci.prpc import encoding
+
 
 _BINARY_MEDIA_TYPE = encoding.Encoding.media_type(encoding.Encoding.BINARY)
 

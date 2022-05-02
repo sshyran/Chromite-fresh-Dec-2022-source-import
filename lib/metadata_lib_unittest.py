@@ -8,8 +8,8 @@ import json
 import multiprocessing
 from pathlib import Path
 
-from chromite.lib import metadata_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import metadata_lib
 from chromite.lib import parallel
 
 

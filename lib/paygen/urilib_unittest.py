@@ -8,7 +8,6 @@ import os
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
-
 from chromite.lib.paygen import filelib
 from chromite.lib.paygen import urilib
 

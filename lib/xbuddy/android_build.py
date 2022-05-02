@@ -6,12 +6,15 @@
 
 import io
 
-from chromite.lib import osutils
-from chromite.lib.xbuddy import retry
 from chromite.third_party import httplib2
 from chromite.third_party.googleapiclient import discovery
 from chromite.third_party.googleapiclient import http
-from chromite.third_party.oauth2client.client import SignedJwtAssertionCredentials  # pylint: disable=line-too-long
+from chromite.third_party.oauth2client.client import (
+    SignedJwtAssertionCredentials,  # pylint: disable=line-too-long
+)
+
+from chromite.lib import osutils
+from chromite.lib.xbuddy import retry
 
 
 CREDENTIAL_SCOPE = 'https://www.googleapis.com/auth/androidbuild.internal'

@@ -6,8 +6,8 @@
 
 import os
 
-from chromite.lib import cros_test_lib
 from chromite.lib import chrome_util
+from chromite.lib import cros_test_lib
 
 
 # Convenience alias

@@ -12,9 +12,9 @@ import json
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import shutil
-from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Union
 
 from chromite.lib import build_target_lib
@@ -26,6 +26,7 @@ from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib.parser import package_info
 from chromite.utils import key_value_store
+
 
 # The parsed output of running `ebuild <ebuild path> info`.
 RepositoryInfoTuple = collections.namedtuple('RepositoryInfoTuple',

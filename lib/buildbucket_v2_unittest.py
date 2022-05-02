@@ -10,7 +10,12 @@ from chromite.third_party.google.protobuf import field_mask_pb2
 from chromite.third_party.google.protobuf.struct_pb2 import Struct, Value
 from chromite.third_party.google.protobuf.timestamp_pb2 import Timestamp
 from chromite.third_party.infra_libs.buildbucket.proto import (
-    build_pb2, builder_pb2, builds_service_pb2, common_pb2, step_pb2)
+    build_pb2,
+    builder_pb2,
+    builds_service_pb2,
+    common_pb2,
+    step_pb2,
+)
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import buildbucket_v2
@@ -18,8 +23,9 @@ from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import metadata_lib
 from chromite.lib.luci.prpc.client import Client
-from chromite.lib.luci.prpc.client import ProtocolError
 from chromite.lib.luci.prpc.client import new_request
+from chromite.lib.luci.prpc.client import ProtocolError
+
 
 SUCCESS_BUILD = {'infra': {
                     'swarming': {

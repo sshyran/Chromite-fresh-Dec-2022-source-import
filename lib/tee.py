@@ -17,6 +17,7 @@ import warnings
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_build_lib
 
+
 warnings.warn('lib/tee.py is deprecated', DeprecationWarning)
 
 # Max amount of data we're hold in the buffer at a given time.

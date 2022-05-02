@@ -4,11 +4,10 @@
 
 """Cros Eventing library, for tracking tasks using a shared eventing system"""
 
-from time import time
-
 import atexit
 import json
 import multiprocessing
+from time import time
 
 from chromite.lib import parallel
 

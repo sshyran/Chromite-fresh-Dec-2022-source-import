@@ -6,6 +6,7 @@
 
 from chromite.lib.firmware import servo_lib
 
+
 BUILD_WORKON_PACKAGES = (
     'chromeos-ec',
     'coreboot',

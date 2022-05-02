@@ -5,8 +5,8 @@
 """Context Manager to ensure cleanup code is run."""
 
 import contextlib
-import os
 import multiprocessing
+import os
 import signal
 import sys
 

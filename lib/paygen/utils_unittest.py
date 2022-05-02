@@ -4,15 +4,15 @@
 
 """Test Utils library."""
 
-import os
-import time
-import threading
 import multiprocessing
+import os
+import threading
+import time
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-
 from chromite.lib.paygen import utils
+
 
 # We access a lot of protected members during testing.
 # pylint: disable=protected-access

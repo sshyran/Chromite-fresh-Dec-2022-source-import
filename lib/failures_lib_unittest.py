@@ -6,10 +6,10 @@
 
 import json
 
-from chromite.lib import failures_lib
-from chromite.lib import failure_message_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import failure_message_lib
+from chromite.lib import failures_lib
 
 
 class StepFailureTests(cros_test_lib.TestCase):

@@ -17,8 +17,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import workon_helper
-from chromite.lib.firmware import firmware_config
 from chromite.lib.firmware import dut
+from chromite.lib.firmware import firmware_config
 from chromite.service import sysroot
 
 

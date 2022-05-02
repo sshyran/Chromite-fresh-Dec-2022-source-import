@@ -4,8 +4,8 @@
 
 """Unittests for annotations module."""
 
-from chromite.lib import cros_test_lib
 from chromite.lib import buildbot_annotations
+from chromite.lib import cros_test_lib
 
 
 class TestAnnotation(cros_test_lib.TestCase):

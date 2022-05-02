@@ -12,6 +12,7 @@ from typing import Union
 
 from chromite.utils import pms
 
+
 # Define data structures for holding PV and CPV objects.
 _PV_FIELDS = ['pv', 'package', 'version', 'version_no_rev', 'rev']
 PV = collections.namedtuple('PV', _PV_FIELDS)

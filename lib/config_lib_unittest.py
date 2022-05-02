@@ -5,11 +5,12 @@
 """Unittests for config."""
 
 import copy
-import pickle
 import json
+import pickle
 
 from chromite.lib import config_lib
 from chromite.lib import cros_test_lib
+
 
 # pylint: disable=protected-access
 

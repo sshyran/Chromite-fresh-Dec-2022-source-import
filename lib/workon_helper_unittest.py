@@ -10,14 +10,14 @@ from typing import Iterable
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import depgraph
 from chromite.lib import dependency_graph
-from chromite.lib.parser import package_info
+from chromite.lib import depgraph
+from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
-from chromite.lib import osutils
-from chromite.lib import workon_helper
 from chromite.lib import unittest_lib
+from chromite.lib import workon_helper
+from chromite.lib.parser import package_info
 
 
 BOARD = 'this_is_a_board_name'

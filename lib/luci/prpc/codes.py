@@ -8,6 +8,7 @@
 
 import collections
 
+
 StatusCodeBase = collections.namedtuple('StatusCodeBase', ['value', 'name'])
 
 
