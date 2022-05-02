@@ -325,7 +325,7 @@ class RemoteCache(DiskCache):
 def Untar(path, cwd, sudo=False):
   """Untar a tarball."""
   functor = cros_build_lib.sudo_run if sudo else cros_build_lib.run
-  comp = cros_build_lib.CompressionExtToType(path)
+  comp = cros_build_lib.CompressionDetectType(path)
   cmd = ['tar']
   if comp != cros_build_lib.COMP_NONE:
     extra_comp_args = [cros_build_lib.FindCompressor(comp)]

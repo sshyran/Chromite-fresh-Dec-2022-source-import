@@ -1369,7 +1369,10 @@ def ExtractTarball(tarball_path: Union[Path, str],
   cmd = ['tar', '--sparse', '-xf', str(tarball_path),
          '--directory', str(install_path)]
 
-  comp_type = CompressionExtToType(tarball_path)
+  try:
+    comp_type = CompressionDetectType(tarball_path)
+  except FileNotFoundError as e:
+    raise TarballError(str(e))
   if comp_type != COMP_NONE:
     cmd += ['--use-compress-program', FindCompressor(comp_type)]
 

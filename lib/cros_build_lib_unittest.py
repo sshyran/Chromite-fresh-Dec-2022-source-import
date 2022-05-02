@@ -1216,9 +1216,7 @@ class TarballTests(cros_test_lib.TempDirTestCase):
       cros_build_lib.ExtractTarball(tarball, self.tempdir)
     except cros_build_lib.TarballError as e:
       # Check to see that tar's error message is printed in the exception.
-      self.assertTrue('Cannot open: No such file or directory' in e.args[0],
-                      ("tar's stderr is missing from the exception.\n%s" %
-                       e.args[0]))
+      self.assertIn('No such file or directory', e.args[0])
 
   def test_IsTarball(self):
     """Test IsTarball helper function."""
