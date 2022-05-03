@@ -14,7 +14,6 @@ import pwd
 import re
 import stat
 import sys
-import unittest
 from unittest import mock
 
 from chromite.lib import cros_build_lib
@@ -246,7 +245,6 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertFalse(osutils.SafeMakedirs(path))
     self.assertExists(path)
 
-  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
   def testSafeMakedirsWithPathObject(self):
     """Test creating directory trees work (existing or not) on |Path|s."""
     path = Path(self.tempdir) / 'a' / 'b' / 'c' / 'd' / 'e'
@@ -310,9 +308,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
   def testRmDir(self):
     """Test that removing dirs work."""
     main_path = os.path.join(self.tempdir, 'a', 'b', 'c', 'd', 'e')
-    paths_to_test = [main_path]
-    if sys.version_info.major >= 3:
-      paths_to_test.append(Path(main_path))
+    paths_to_test = [main_path, Path(main_path)]
 
     for path in paths_to_test:
       self.assertRaises(EnvironmentError, osutils.RmDir, path)
@@ -329,9 +325,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     """Test that removing dirs via sudo works."""
     subpath = os.path.join(self.tempdir, 'a')
     main_path = os.path.join(subpath, 'b', 'c', 'd', 'e')
-    paths_to_test = [main_path]
-    if sys.version_info.major >= 3:
-      paths_to_test.append(Path(main_path))
+    paths_to_test = [main_path, Path(main_path)]
 
     for path in paths_to_test:
       self.assertTrue(osutils.SafeMakedirs(path, sudo=True))
@@ -1270,7 +1264,6 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
         filecmp.cmp(os.path.join(out_dir_symlinks_dir_subdir, 'b.txt'),
                     tmp_subdir_file))
 
-  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
   def testCopyingSymlinksAndFilesWithPathArgs(self):
     """Copying given |Path| arguments works properly for symlinks+files."""
     in_dir = Path(self.tempdir) / 'input'
@@ -1290,7 +1283,6 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
     out_tmp_file_link = out_dir / tmp_file_link.name
     self.assertEqual(Path(os.readlink(out_tmp_file_link)), tmp_file)
 
-  @unittest.skipIf(sys.version_info.major < 3, 'Requires pathlib from py3')
   def testCopyingSubDirWithPathArgs(self):
     """Copying given |Path| arguments works properly for subdirectories."""
     in_dir = Path(self.tempdir) / 'input'
