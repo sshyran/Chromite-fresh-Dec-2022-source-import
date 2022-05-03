@@ -331,6 +331,8 @@ def Untar(path, cwd, sudo=False):
     extra_comp_args = [cros_build_lib.FindCompressor(comp)]
     if os.path.basename(extra_comp_args[0]) == 'pbzip2':
       extra_comp_args.append('--ignore-trailing-garbage=1')
+    elif os.path.basename(extra_comp_args[0]) == 'zstd':
+      extra_comp_args.append('-f')
     cmd += ['-I', ' '.join(extra_comp_args)]
   functor(cmd + ['-xpf', path], cwd=cwd, debug_level=logging.DEBUG, quiet=True)
 
