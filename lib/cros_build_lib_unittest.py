@@ -16,7 +16,6 @@ from pathlib import Path
 import signal
 import socket
 import subprocess
-import sys
 from unittest import mock
 
 from chromite.lib import constants
@@ -113,13 +112,9 @@ class CmdToStrTest(cros_test_lib.TestCase):
     def aux(s):
       return cros_build_lib.ShellUnquote(cros_build_lib.ShellQuote(s))
 
-    if sys.version_info.major < 3:
-      # In Python 2, these roundtrip.
-      tests_quote += bytes_quote
-    else:
-      # In Python 3, we can only go one way bytes->string.
-      self._testData(cros_build_lib.ShellQuote, bytes_quote)
-      self._testData(aux, [(x, x) for x, _ in bytes_quote], False)
+    # We can only go one way bytes->string.
+    self._testData(cros_build_lib.ShellQuote, bytes_quote)
+    self._testData(aux, [(x, x) for x, _ in bytes_quote], False)
 
     self._testData(cros_build_lib.ShellQuote, tests_quote)
     self._testData(cros_build_lib.ShellUnquote, tests_unquote)

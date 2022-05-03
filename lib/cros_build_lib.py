@@ -78,24 +78,11 @@ def ShellQuote(s):
   Returns:
     A safely (possibly quoted) string.
   """
-  if sys.version_info.major < 3:
-    # This is a bit of a hack.  Python 2 will display strings with u prefixes
-    # when logging which makes things harder to work with.  Writing bytes to
-    # stdout will be interpreted as UTF-8 content implicitly.
-    if isinstance(s, str):
-      try:
-        s = s.encode('utf-8')
-      except UnicodeDecodeError:
-        # We tried our best.  Let Python's automatic mixed encoding kick in.
-        pass
-    else:
-      return repr(s)
-  else:
-    # If callers pass down bad types, don't blow up.
-    if isinstance(s, bytes):
-      s = s.decode('utf-8', 'backslashreplace')
-    elif not isinstance(s, str):
-      return repr(s)
+  # If callers pass down bad types, don't blow up.
+  if isinstance(s, bytes):
+    s = s.decode('utf-8', 'backslashreplace')
+  elif not isinstance(s, str):
+    return repr(s)
 
   # See if no quoting is needed so we can return the string as-is.
   for c in s:
@@ -350,11 +337,7 @@ class CalledProcessError(subprocess.CalledProcessError):
     return u'\n'.join(items)
 
   def __str__(self):
-    if sys.version_info.major < 3:
-      # __str__ needs to return ascii, thus force a conversion to be safe.
-      return self.Stringify().encode('ascii', 'xmlcharrefreplace')
-    else:
-      return self.Stringify()
+    return self.Stringify()
 
   def __eq__(self, other):
     return (isinstance(other, type(self)) and
@@ -512,12 +495,8 @@ def _KillChildProcess(proc, int_timeout, kill_timeout, cmd, original_handler,
       logging.warning('Ignoring unhandled exception in _KillChildProcess: %s',
                       e)
 
-    # Ensure our child process has been reaped.
-    kwargs = {}
-    if sys.version_info.major >= 3:
-      # ... but don't wait forever.
-      kwargs['timeout'] = 60
-    proc.wait_lock_breaker(**kwargs)
+    # Ensure our child process has been reaped, but don't wait forever.
+    proc.wait_lock_breaker(timeout=60)
 
   if not signals.RelaySignal(original_handler, signum, frame):
     # Mock up our own, matching exit code for signaling.
@@ -1901,24 +1880,12 @@ def MachineDetails():
 
 def UnbufferedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.TemporaryFile."""
-  assert 'bufsize' not in kwargs
-  assert 'buffering' not in kwargs
-  if sys.version_info.major < 3:
-    kwargs['bufsize'] = 0
-  else:
-    kwargs['buffering'] = 0
-  return tempfile.TemporaryFile(**kwargs)
+  return tempfile.TemporaryFile(buffering=0, **kwargs)
 
 
 def UnbufferedNamedTemporaryFile(**kwargs):
   """Handle buffering changes in tempfile.NamedTemporaryFile."""
-  assert 'bufsize' not in kwargs
-  assert 'buffering' not in kwargs
-  if sys.version_info.major < 3:
-    kwargs['bufsize'] = 0
-  else:
-    kwargs['buffering'] = 0
-  return tempfile.NamedTemporaryFile(**kwargs)
+  return tempfile.NamedTemporaryFile(buffering=0, **kwargs)
 
 
 def ClearShadowLocks(sysroot: Union[str, os.PathLike] = '/') -> None:
