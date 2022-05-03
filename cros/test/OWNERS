@@ -5,4 +5,4 @@ per-file usergroup_baseline.py = set noparent
 # chromiumos/overlays/eclass-overlay:profiles/base/accounts/OWNERS.security
 # here once the 'file' directive works across projects.
 per-file usergroup_baseline.py = allenwebb@chromium.org, jorgelo@chromium.org
-per-file usergroup_baseline.py = mnissler@chromium.org, vapier@chromium.org
+per-file usergroup_baseline.py = vapier@chromium.org
