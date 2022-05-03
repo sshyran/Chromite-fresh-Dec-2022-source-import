@@ -20,7 +20,6 @@ import threading
 
 from chromite.third_party.gn_helpers import gn_helpers
 
-from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
@@ -1646,7 +1645,7 @@ class ChromeSDKCommand(command.CliCommand):
     components = [self.sdk.TARGET_TOOLCHAIN_KEY, constants.CHROME_ENV_TAR]
     if not self.options.chroot:
       components.append(constants.CHROME_SYSROOT_TAR)
-    components.append(commands.AUTOTEST_SERVER_PACKAGE)
+    components.append('autotest_server_package.tar.bz2')
     if self.options.download_vm:
       components.append(constants.TEST_IMAGE_TAR)
 
