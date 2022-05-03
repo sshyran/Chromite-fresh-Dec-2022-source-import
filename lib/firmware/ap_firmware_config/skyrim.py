@@ -8,15 +8,13 @@ from chromite.lib.firmware import servo_lib
 
 
 BUILD_PACKAGES = (
-    'chromeos-ec',
+    'chromeos-zephyr',
     'coreboot',
     'depthcharge',
     'libpayload',
     'vboot_reference',
     'chromeos-bootimage',
-    'coreboot-private-files-board',
     'coreboot-private-files-chipset',
-    'amd-cezanne-fsp',
 )
 
 
