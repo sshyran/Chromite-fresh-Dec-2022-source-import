@@ -304,7 +304,8 @@ class ToolchainInstaller(object):
       # Sync the files to the sysroot to install.
       # Trailing / on source to sync contents instead of the directory itself.
       source = os.path.join(tempdir, 'usr', board_chost)
-      cmd = ['rsync', '--archive', '%s/' % source, '%s/' % sysroot.path]
+      cmd = ['rsync', '--archive', '--hard-links', f'{source}/',
+             f'{sysroot.path}/']
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
@@ -317,7 +318,8 @@ class ToolchainInstaller(object):
       osutils.SafeMakedirs(debug_dir, sudo=True)
       # Sync the debug files to the debug directory.
       source = os.path.join(tempdir, 'usr/lib/debug/usr', board_chost)
-      cmd = ['rsync', '--archive', '%s/' % source, '%s/' % debug_dir]
+      cmd = ['rsync', '--archive', '--hard-links', f'{source}/',
+             f'{debug_dir}/']
       result = cros_build_lib.sudo_run(cmd, check=False, capture_output=True,
                                        stderr=subprocess.STDOUT)
       if result.returncode:
