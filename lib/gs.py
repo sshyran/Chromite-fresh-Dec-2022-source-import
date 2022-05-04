@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from typing import Union
 import urllib.parse
 
 from chromite.lib import cache
@@ -76,9 +77,12 @@ LS_RE = re.compile(r'^\s*(?P<content_length>)(?P<creation_time>)(?P<url>.*)'
 WILDCARD_REGEX = re.compile(r'[*?\[\]]')
 
 
-def PathIsGs(path):
-  """Determine if a path is a Google Storage URI."""
-  return path.startswith(BASE_GS_URL)
+def PathIsGs(path: Union[str, os.PathLike]):
+  """Determine if |path| is a Google Storage URI.
+
+  We accept pathlib objects because our GS APIs handle local filesystem paths.
+  """
+  return isinstance(path, str) and path.startswith(BASE_GS_URL)
 
 
 def CanonicalizeURL(url, strict=False):

@@ -9,6 +9,7 @@ import datetime
 import functools
 import numbers
 import os
+from pathlib import Path
 import string
 import sys
 from unittest import mock
@@ -130,6 +131,20 @@ class CanonicalizeURLTest(cros_test_lib.TestCase):
          'https://storage.cloud.google.com/some/file/t.gz'),
         ('gs://releases/some/'
          'https://storage.cloud.google.com/some/file/t.gz'))
+
+
+class PathIsGsTests(cros_test_lib.TestCase):
+  """Tests for the PathIsGs function."""
+
+  def testString(self):
+    """Test strings!"""
+    self.assertTrue(gs.PathIsGs('gs://foo'))
+    self.assertFalse(gs.PathIsGs('/tmp/f'))
+
+  def testPath(self):
+    """Test Path objects!"""
+    self.assertFalse(gs.PathIsGs(Path.cwd()))
+    self.assertFalse(gs.PathIsGs(Path('gs://foo')))
 
 
 class GsUrlToHttpTest(cros_test_lib.TestCase):
