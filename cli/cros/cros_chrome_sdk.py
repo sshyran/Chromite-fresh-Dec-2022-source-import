@@ -24,6 +24,7 @@ from chromite.cbuildbot import commands
 from chromite.cli import command
 from chromite.lib import cache
 from chromite.lib import chromite_config
+from chromite.lib import cipd
 from chromite.lib import config_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -93,6 +94,7 @@ class SDKFetcher(object):
   SDKContext = collections.namedtuple(
       'SDKContext', ['version', 'target_tc', 'key_map'])
 
+  CIPD_CACHE = 'cipd'
   TARBALL_CACHE = 'tarballs'
   MISC_CACHE = 'misc'
   SYMLINK_CACHE = 'symlinks'
@@ -102,6 +104,8 @@ class SDKFetcher(object):
   SEABIOS_BIN_PATH = 'sys-firmware/seabios'
   TAST_CMD_PATH = 'chromeos-base/tast-cmd'
   TAST_REMOTE_TESTS_PATH = 'chromeos-base/tast-remote-tests-cros'
+  ZSTD_CIPD_PATH = 'infra/3pp/static_libs/libzstd/linux-amd64'
+  ZSTD_CIPD_VER = 'znTYHKuCvEQXnJ16VeZl1-TvGRwrCUBoFDuKLIB_5IIC'
 
   CANARIES_PER_DAY = 3
   DAYS_TO_CONSIDER = 14
@@ -142,6 +146,8 @@ class SDKFetcher(object):
         os.path.join(self.cache_base, self.MISC_CACHE))
     self.symlink_cache = cache.DiskCache(
         os.path.join(self.cache_base, self.SYMLINK_CACHE))
+    self.cipd_cache = cache.DiskCache(
+        os.path.join(self.cache_base, self.CIPD_CACHE))
     self.board = board
     self.config = site_config.FindCanonicalConfigForBoard(
         board, allow_internal=not use_external_config)
@@ -164,6 +170,23 @@ class SDKFetcher(object):
 
     if self.toolchain_path is None:
       self.toolchain_path = 'gs://%s' % constants.SDK_GS_BUCKET
+
+  def _InstallZstdFromCipd(self):
+    """Install zstd from cipd if the system doesn't have it."""
+    if osutils.Which('zstd'):
+      return
+
+    key = (self.ZSTD_CIPD_PATH.replace('/', '-'), self.ZSTD_CIPD_VER)
+    with self.cipd_cache.Lookup(key) as ref:
+      if not ref.Exists(lock=True):
+        Log('SDK: Getting zstd')
+        path = cipd.InstallPackage(cipd.GetCIPDFromCache(),
+                                   self.ZSTD_CIPD_PATH,
+                                   self.ZSTD_CIPD_VER,
+                                   self.cipd_cache.staging_dir)
+        ref.SetDefault(os.path.join(path, 'bin'))
+
+    os.environ['PATH'] += f':{ref.path}'
 
   def _UpdateTarball(self, ref_queue):
     """Worker function to fetch tarballs.
@@ -696,6 +719,8 @@ class SDKFetcher(object):
 
     key_map = {}
     fetch_urls = {}
+
+    self._InstallZstdFromCipd()
 
     if not target_tc or not toolchain_url:
       metadata = self._GetMetadata(version)
