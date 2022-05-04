@@ -15,6 +15,7 @@ import stat
 import subprocess
 import tempfile
 import time
+from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -286,8 +287,12 @@ class RemoteAccess(object):
 
   DEFAULT_USERNAME = ROOT_ACCOUNT
 
-  def __init__(self, remote_host, tempdir, port=None, username=None,
-               private_key=None, debug_level=logging.DEBUG, interactive=True):
+  def __init__(
+      self, remote_host,
+      tempdir: Union[str, os.PathLike],
+      port: int = None,
+      username=None,
+      private_key=None, debug_level=logging.DEBUG, interactive=True):
     """Construct the object.
 
     Args:
@@ -301,7 +306,8 @@ class RemoteAccess(object):
       debug_level: Logging level to use for all run invocations.
       interactive: If set to False, pass /dev/null into stdin for the sh cmd.
     """
-    self.tempdir = tempdir
+    # TODO(vapier): Convert this to Path.
+    self.tempdir = str(tempdir)
     self.remote_host = remote_host
     self.port = port
     self.username = username if username else self.DEFAULT_USERNAME
@@ -540,9 +546,20 @@ class RemoteAccess(object):
       raise RebootError('Reboot has not completed after %s seconds; giving up.'
                         % (timeout_sec,))
 
-  def Rsync(self, src, dest, to_local=False, follow_symlinks=False,
-            recursive=True, inplace=False, verbose=False, sudo=False,
-            remote_sudo=False, compress=True, files_from=None, **kwargs):
+  def Rsync(
+      self,
+      src: Union[str, os.PathLike],
+      dest: Union[str, os.PathLike],
+      to_local: bool = False,
+      follow_symlinks: bool = False,
+      recursive: bool = True,
+      inplace: bool = False,
+      verbose: bool = False,
+      sudo: bool = False,
+      remote_sudo: bool = False,
+      compress: bool = True,
+      files_from: Optional[Union[str, os.PathLike]] = None,
+      **kwargs):
     """Rsync a path to the remote device.
 
     Rsync a path to the remote device. If |to_local| is set True, it
@@ -604,8 +621,15 @@ class RemoteAccess(object):
     """Rsync a path from the remote device to the local machine."""
     return self.Rsync(*args, to_local=kwargs.pop('to_local', True), **kwargs)
 
-  def Scp(self, src, dest, to_local=False, recursive=True, verbose=False,
-          sudo=False, **kwargs):
+  def Scp(
+      self,
+      src: Union[str, os.PathLike],
+      dest: Union[str, os.PathLike],
+      to_local: bool = False,
+      recursive: bool = True,
+      verbose: bool = False,
+      sudo: bool = False,
+      **kwargs):
     """Scp a file or directory to the remote device.
 
     Args:
