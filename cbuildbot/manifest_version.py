@@ -9,9 +9,11 @@ import fnmatch
 import glob
 import logging
 import os
+from pathlib import Path
 import re
 import shutil
 import tempfile
+from typing import Optional, Union
 from xml.dom import minidom
 
 from chromite.cbuildbot import build_status
@@ -220,8 +222,11 @@ class VersionInfo(object):
   KEY_VALUE_PATTERN = r'%s=(\d+)\s*$'
   VALID_INCR_TYPES = ('chrome_branch', 'build', 'branch', 'patch')
 
-  def __init__(self, version_string=None, chrome_branch=None,
-               incr_type='build', version_file=None):
+  def __init__(self,
+               version_string: Optional[str] = None,
+               chrome_branch: Optional[str] = None,
+               incr_type: str = 'build',
+               version_file: Optional[Union[str, os.PathLike]] = None):
     """Initialize.
 
     Args:
@@ -235,6 +240,8 @@ class VersionInfo(object):
       version_file: version file location.
     """
     if version_file:
+      if isinstance(version_file, str):
+        version_file = Path(version_file)
       self.version_file = version_file
       logging.debug('Using VERSION _FILE = %s', version_file)
       self._LoadFromFile()
@@ -249,8 +256,10 @@ class VersionInfo(object):
     self.incr_type = incr_type
 
   @classmethod
-  def from_repo(cls, source_repo, **kwargs):
-    kwargs['version_file'] = os.path.join(source_repo, constants.VERSION_FILE)
+  def from_repo(cls,
+                source_repo: Union[str, os.PathLike],
+                **kwargs):
+    kwargs['version_file'] = Path(source_repo) / constants.VERSION_FILE
     return cls(**kwargs)
 
   def _LoadFromFile(self):
@@ -352,7 +361,7 @@ class VersionInfo(object):
 
       temp_fh.flush()
 
-      repo_dir = os.path.dirname(self.version_file)
+      repo_dir = self.version_file.parent
 
       logging.info('Updating version file to: %s', self.VersionString())
       try:

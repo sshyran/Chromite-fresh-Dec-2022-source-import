@@ -5,6 +5,7 @@
 """Unittests for manifest_version. Needs to be run inside of chroot."""
 
 import os
+from pathlib import Path
 import tempfile
 from unittest import mock
 
@@ -62,6 +63,9 @@ class HelperMethodsTest(cros_test_lib.TempDirTestCase):
 
 class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
   """Test methods testing methods in VersionInfo class."""
+
+  def setUp(self):
+    self.tempdir = Path(self.tempdir)
 
   @classmethod
   def WriteFakeVersionFile(cls, version_file, version=None, chrome_branch=None):
