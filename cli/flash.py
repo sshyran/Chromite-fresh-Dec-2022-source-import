@@ -278,16 +278,8 @@ class USBImager(object):
       raise FlashError('No removable devices detected.')
 
     image_path = self._GetImagePath()
-    device = self.DeviceNameToPath(target)
-
-    device_size_bytes = osutils.GetDeviceSize(device)
-    image_size_bytes = os.path.getsize(image_path)
-    if device_size_bytes < image_size_bytes:
-      raise FlashError(
-          'Removable device %s has less storage (%d) than the image size (%d).'
-          % (device, device_size_bytes, image_size_bytes))
-
     try:
+      device = self.DeviceNameToPath(target)
       self.CopyImageToDevice(image_path, device)
     except cros_build_lib.RunCommandError:
       logging.error('Failed copying image to device %s',

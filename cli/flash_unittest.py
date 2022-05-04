@@ -58,10 +58,8 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
                      return_value=('taco-paladin/R36/chromiumos_test_image.bin',
                                    'remote/taco-paladin/R36/test'))
     self.PatchObject(os.path, 'exists', return_value=True)
-    self.PatchObject(os.path, 'getsize', return_value=200)
     self.isgpt_mock = self.PatchObject(flash, '_IsFilePathGPTDiskImage',
                                        return_value=True)
-    self.PatchObject(osutils, 'GetDeviceSize', return_value=200)
 
   def testLocalImagePathCopy(self):
     """Tests that imaging methods are called correctly."""
@@ -106,11 +104,6 @@ class USBImagerTest(cros_test_lib.MockTempDirTestCase):
     """Tests that we ask user to choose a device if none is given."""
     flash.Flash(self.Device(''), self.IMAGE)
     self.assertTrue(self.imager_mock.patched['ChooseRemovableDevice'].called)
-
-  def testInsufficientRemovableDeviceStorage(self):
-    self.PatchObject(osutils, 'GetDeviceSize', return_value=100)
-    with self.assertRaises(flash.FlashError):
-      flash.Flash(self.Device(''), self.IMAGE)
 
 
 class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
