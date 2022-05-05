@@ -174,6 +174,24 @@ TEST_CONTAINER_BUILD_SCRIPTS = {
             TEST_SERVICE_DIR,
             'plan/docker/build-dockerimage.sh',
         ),
+    'cros-provision-beta':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'python/src/docker_libs/cli/build-dockerimages.py'),
+    'cros-dut-beta':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'python/src/docker_libs/cli/build-dockerimages.py'),
+    'testplan-beta':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'python/src/docker_libs/cli/build-dockerimages.py',
+        ),
+    'cros-test-finder-beta':
+        os.path.join(
+            TEST_SERVICE_DIR,
+            'python/src/docker_libs/cli/build-dockerimages.py',
+        ),
 }
 
 
@@ -273,13 +291,17 @@ def BuildTestServiceContainers(
       cmd += ['--output', output_path]
 
       # Label flag is different for cros-test.
-      if human_name != 'cros-test':
-        cmd += labels
-
-      if human_name == 'cros-test' and labels:
+      if (human_name == 'cros-test' or 'beta' in human_name) and labels:
         # Translate generator to comma separated string.
         ct_labels = ','.join(labels)
         cmd += ['--labels', ct_labels]
+      else:
+        cmd += labels
+
+      if 'beta' in human_name:
+        # All the beta "human_name" are "service" appended with "-beta".
+        service = human_name.split('-beta')[0]
+        cmd += ['--service', service]
 
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
@@ -298,7 +320,7 @@ def BuildTestServiceContainers(
             )
         )
       else:
-        if human_name == 'cros-test':
+        if 'beta' in human_name:
           logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
                         human_name, cmd_result.stdout, cmd_result.stderr)
           result.success.CopyFrom(
