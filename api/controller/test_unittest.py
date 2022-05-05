@@ -200,11 +200,11 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                                              self.mock_error_config)
     patch.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(response.failed_packages)
-    self.assertEqual(response.failed_packages[0].category, 'foo')
-    self.assertEqual(response.failed_packages[0].package_name, 'bar')
-    self.assertEqual(response.failed_packages[1].category, 'cat')
-    self.assertEqual(response.failed_packages[1].package_name, 'pkg')
+    self.assertTrue(response.failed_package_data)
+    self.assertEqual(response.failed_package_data[0].name.category, 'foo')
+    self.assertEqual(response.failed_package_data[0].name.package_name, 'bar')
+    self.assertEqual(response.failed_package_data[1].name.category, 'cat')
+    self.assertEqual(response.failed_package_data[1].name.package_name, 'pkg')
 
   def testInvalidPackageFails(self):
     """Test missing result path fails."""
@@ -244,13 +244,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                                              self.api_config)
 
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(output_msg.failed_packages)
     self.assertTrue(output_msg.failed_package_data)
-    # TODO(b/206514844): remove when field is deleted
-    failed = []
-    for pi in output_msg.failed_packages:
-      failed.append((pi.category, pi.package_name))
-    self.assertCountEqual(expected, failed)
 
     failed_with_logs = []
     for data in output_msg.failed_package_data:
@@ -278,7 +272,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
                                              self.api_config)
 
     self.assertEqual(controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY, rc)
-    self.assertFalse(output_msg.failed_packages)
+    self.assertFalse(output_msg.failed_package_data)
 
   def testBuildTargetUnitTest(self):
     """Test BuildTargetUnitTest successful call."""
@@ -292,7 +286,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     response = self._GetOutput()
     test_controller.BuildTargetUnitTest(input_msg, response,
                                         self.api_config)
-    self.assertFalse(response.failed_packages)
+    self.assertFalse(response.failed_package_data)
 
 
 class DockerConstraintsTest(cros_test_lib.MockTestCase):

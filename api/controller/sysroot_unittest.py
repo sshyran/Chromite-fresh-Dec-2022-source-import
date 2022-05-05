@@ -323,7 +323,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
 
     patch.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(response.failed_packages)
+    self.assertTrue(response.failed_package_data)
 
   def testArgumentValidation(self):
     """Test the argument validation."""
@@ -360,7 +360,7 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallToolchain(in_proto, out_proto,
                                              self.api_config)
     self.assertFalse(rc)
-    self.assertFalse(out_proto.failed_packages)
+    self.assertFalse(out_proto.failed_package_data)
 
 
   def testErrorOutputHandling(self):
@@ -390,7 +390,6 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallToolchain(in_proto, out_proto,
                                              self.api_config)
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(out_proto.failed_packages)
     self.assertTrue(out_proto.failed_package_data)
     # This needs to return 2 to indicate the available error response.
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
@@ -399,11 +398,6 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
       cat_pkg = (data.name.category, data.name.package_name)
       self.assertIn(cat_pkg, expected)
       self.assertEqual(data.log_path.path, new_logs[package.cpvr])
-
-    # TODO(b/206514844): remove when field is deleted
-    for package in out_proto.failed_packages:
-      cat_pkg = (package.category, package.package_name)
-      self.assertIn(cat_pkg, expected)
 
 
 class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
@@ -530,7 +524,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
 
     patch.assert_not_called()
     self.assertEqual(controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE, rc)
-    self.assertTrue(response.failed_packages)
+    self.assertTrue(response.failed_package_data)
 
   def testArgumentValidationAllMissing(self):
     """Test missing all arguments."""
@@ -585,7 +579,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
                                             self.api_config)
     self.assertFalse(rc)
-    self.assertFalse(out_proto.failed_packages)
+    self.assertFalse(out_proto.failed_package_data)
 
   def testSuccessPackageIndexes(self):
     """Test successful call with package_indexes."""
@@ -651,7 +645,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
                                             self.api_config)
     self.assertFalse(rc)
-    self.assertFalse(out_proto.failed_packages)
+    self.assertFalse(out_proto.failed_package_data)
     self.assertCountEqual(out_proto.goma_artifacts.log_files, [
         'compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz',
         'compiler_proxy.host.log.INFO.20180921-120000.000000.gz',
@@ -688,7 +682,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
                                             self.api_config)
     self.assertFalse(rc)
-    self.assertFalse(out_proto.failed_packages)
+    self.assertFalse(out_proto.failed_package_data)
     self.assertCountEqual(out_proto.goma_artifacts.log_files, [
         'compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz',
         'compiler_proxy.host.log.INFO.20180921-120000.000000.gz',
@@ -735,7 +729,7 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     rc = sysroot_controller.InstallPackages(in_proto, out_proto,
                                             self.api_config)
     self.assertFalse(rc)
-    self.assertFalse(out_proto.failed_packages)
+    self.assertFalse(out_proto.failed_package_data)
     self.assertCountEqual(out_proto.goma_artifacts.log_files, [
         'compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz',
         'compiler_proxy.host.log.INFO.20180921-120000.000000.gz',
@@ -781,11 +775,6 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
       cat_pkg = (data.name.category, data.name.package_name)
       self.assertIn(cat_pkg, expected)
       self.assertEqual(data.log_path.path, new_logs[package.cpvr])
-
-    # TODO(b/206514844): remove when field is deleted
-    for package in out_proto.failed_packages:
-      cat_pkg = (package.category, package.package_name)
-      self.assertIn(cat_pkg, expected)
 
   def testNoPackageFailureOutputHandling(self):
     """Test failure handling without packages to report."""

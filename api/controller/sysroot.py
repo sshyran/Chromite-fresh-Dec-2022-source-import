@@ -174,16 +174,6 @@ def GenerateArchive(input_proto, output_proto, _config):
 
 def _MockFailedPackagesResponse(_input_proto, output_proto, _config):
   """Mock error response that populates failed packages."""
-  pkg = output_proto.failed_packages.add()
-  pkg.package_name = 'package'
-  pkg.category = 'category'
-  pkg.version = '1.0.0_rc-r1'
-
-  pkg2 = output_proto.failed_packages.add()
-  pkg2.package_name = 'bar'
-  pkg2.category = 'foo'
-  pkg2.version = '3.7-r99'
-
   fail = output_proto.failed_package_data.add()
   fail.name.package_name = 'package'
   fail.name.category = 'category'

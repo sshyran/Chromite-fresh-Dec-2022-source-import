@@ -211,9 +211,6 @@ def retrieve_package_log_paths(error: sysroot_lib.PackageInstallError,
     target_sysroot: The sysroot used by the build step.
   """
   for pkg_info in error.failed_packages:
-    # TODO(b/206514844): remove when field is deleted
-    package_info_msg = output_proto.failed_packages.add()
-    serialize_package_info(pkg_info, package_info_msg)
     # Grab the paths to the log files for each failed package from the
     # sysroot.
     # Logs currently exist within the sysroot in the form of:
