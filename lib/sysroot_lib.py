@@ -110,9 +110,9 @@ _MAKE_CONF_HOST_SETUP = 'etc/make.conf.host_setup'
 
 _CACHE_PATH = 'var/cache/edb/chromeos'
 
-_CHROMIUMOS_OVERLAY = '/usr/local/portage/chromiumos'
+_CHROMIUMOS_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR)
 _CHROMIUMOS_CONFIG = os.path.join(_CHROMIUMOS_OVERLAY, 'chromeos', 'config')
-_ECLASS_OVERLAY = '/usr/local/portage/eclass-overlay'
 
 _INTERNAL_BINHOST_DIR = os.path.join(
     constants.SOURCE_ROOT, 'src/private-overlays/chromeos-partner-overlay/'

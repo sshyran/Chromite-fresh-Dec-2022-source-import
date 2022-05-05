@@ -35,9 +35,12 @@ if cros_build_lib.IsInsideChroot():
 EMERGE_CMD = os.path.join(constants.CHROMITE_BIN_DIR, 'parallel_emerge')
 PACKAGE_STABLE = '[stable]'
 
-CHROMIUMOS_OVERLAY = '/usr/local/portage/chromiumos'
-ECLASS_OVERLAY = '/usr/local/portage/eclass-overlay'
-STABLE_OVERLAY = '/usr/local/portage/stable'
+CHROMIUMOS_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR)
+ECLASS_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.ECLASS_OVERLAY_DIR)
+STABLE_OVERLAY = os.path.join(
+    constants.CHROOT_SOURCE_ROOT, constants.PORTAGE_STABLE_OVERLAY_DIR)
 CROSSDEV_OVERLAY = '/usr/local/portage/crossdev'
 
 
