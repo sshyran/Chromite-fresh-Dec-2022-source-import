@@ -8,6 +8,7 @@ import contextlib
 import datetime
 import os
 from pathlib import Path
+from typing import Union
 from unittest import mock
 
 from chromite.third_party.google.protobuf import json_format
@@ -149,13 +150,16 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Helper to get an empty output message instance."""
     return test_pb2.BuildTargetUnitTestResponse()
 
-  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+  def _CreatePortageLogFile(self,
+                            log_path: Union[str, os.PathLike],
+                            pkg_info: package_info.PackageInfo,
+                            timestamp: datetime.datetime) -> str:
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      log_path (pathlike): the PORTAGE_LOGDIR path
-      pkg_info (PackageInfo): name components for log file.
-      timestamp (datetime): timestamp used to name the file.
+      log_path: The PORTAGE_LOGDIR path.
+      pkg_info: name components for log file.
+      timestamp: Timestamp used to name the file.
     """
     path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.pvr}:' \
