@@ -16,7 +16,7 @@ from chromite.lib import parallel
 from chromite.lib import patch as cros_patch
 
 
-MAX_PLAN_RECURSION = 150
+MAX_PLAN_RECURSION = 500
 
 
 class PatchRejected(cros_patch.PatchException):
