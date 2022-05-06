@@ -6,6 +6,7 @@
 
 import datetime
 import os
+from typing import Union
 
 from chromite.api import api_config
 from chromite.api import controller
@@ -271,13 +272,15 @@ class InstallToolchainTest(cros_test_lib.MockTempDirTestCase,
     """Helper to build output proto instance."""
     return sysroot_pb2.InstallToolchainResponse()
 
-  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+  def _CreatePortageLogFile(self, log_path: Union[str, os.PathLike],
+                            pkg_info: package_info.PackageInfo,
+                            timestamp: datetime.datetime):
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      log_path (pathlike): the PORTAGE_LOGDIR path
-      pkg_info (PackageInfo): name components for log file.
-      timestamp (datetime): timestamp used to name the file.
+      log_path: The PORTAGE_LOGDIR path.
+      pkg_info: Package name used to name the log file.
+      timestamp: Timestamp used to name the file.
     """
     path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.pvr}:' \
@@ -461,13 +464,14 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
     """Helper to build an empty output proto instance."""
     return sysroot_pb2.InstallPackagesResponse()
 
-  def _CreateGomaLogFile(self, goma_log_dir, name, timestamp):
+  def _CreateGomaLogFile(self, goma_log_dir: Union[str, os.PathLike], name: str,
+                         timestamp: datetime.datetime):
     """Creates a log file for testing.
 
     Args:
-      goma_log_dir (str): Directory where the file will be created.
-      name (str): Log file 'base' name that is combined with the timestamp.
-      timestamp (datetime): timestamp that is written to the file.
+      goma_log_dir: Directory where the file will be created.
+      name: Log file 'base' name that is combined with the timestamp.
+      timestamp: Timestamp that is written to the file.
     """
     path = os.path.join(
         goma_log_dir,
@@ -476,13 +480,15 @@ class InstallPackagesTest(cros_test_lib.MockTempDirTestCase,
         path,
         timestamp.strftime('Goma log file created at: %Y/%m/%d %H:%M:%S'))
 
-  def _CreatePortageLogFile(self, log_path, pkg_info, timestamp):
+  def _CreatePortageLogFile(self, log_path: Union[str, os.PathLike],
+                            pkg_info: package_info.PackageInfo,
+                            timestamp: datetime.datetime):
     """Creates a log file for testing for individual packages built by Portage.
 
     Args:
-      log_path (pathlike): the PORTAGE_LOGDIR path
-      pkg_info (PackageInfo): name components for log file.
-      timestamp (datetime): timestamp used to name the file.
+      log_path: The PORTAGE_LOGDIR path.
+      pkg_info: Package name used to name the log file.
+      timestamp: Timestamp used to name the file.
     """
     path = os.path.join(log_path,
                         f'{pkg_info.category}:{pkg_info.pvr}:' \
