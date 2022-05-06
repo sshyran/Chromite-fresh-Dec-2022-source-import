@@ -2117,14 +2117,12 @@ def FindEbuildsForOverlays(
 
 def _EqueryDepgraph(pkg_str: str,
                     sysroot: str,
-                    board: Optional[str],
                     depth: int = 0) -> cros_build_lib.CommandResult:
   """Executes equery depgraph to find dependencies.
 
   Args:
     pkg_str: The package name with optional category, version, and slot.
     sysroot: The root directory being inspected.
-    board: The board to inspect.
     depth: The depth of the transitive dependency tree to explore. 0 for
       unlimited.
 
@@ -2132,17 +2130,15 @@ def _EqueryDepgraph(pkg_str: str,
     result (cros_build_lib.CommandResult)
   """
   return _Equery('depgraph', f'--depth={depth}', pkg_str, sysroot=sysroot,
-                 print_cmd=False, board=board)
+                 print_cmd=False)
 
 
-def GetFlattenedDepsForPackage(pkg_str, sysroot='/',
-                               board: Optional[str] = None, depth=0):
+def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
   """Returns a depth-limited list of the dependencies for a given package.
 
   Args:
     pkg_str: The package name with optional category, version, and slot.
     sysroot: The root directory being inspected.
-    board: The board being inspected.
     depth: The depth of the transitive dependency tree to explore. 0 for
       unlimited.
 
@@ -2153,7 +2149,7 @@ def GetFlattenedDepsForPackage(pkg_str, sysroot='/',
   if not pkg_str:
     raise ValueError('pkg_str must be non-empty')
 
-  result = _EqueryDepgraph(pkg_str, sysroot, board, depth)
+  result = _EqueryDepgraph(pkg_str, sysroot, depth)
 
   return _ParseDepTreeOutput(result.output)
 

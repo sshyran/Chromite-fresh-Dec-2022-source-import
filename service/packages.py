@@ -67,10 +67,6 @@ class NoAndroidTargetError(Error):
   """An error occurred while trying to determine the android target."""
 
 
-class KernelVersionError(Error):
-  """An error occurred while trying to determine the kernel version."""
-
-
 class AndroidIsPinnedUprevError(UprevError):
   """Raised when we try to uprev while Android is pinned."""
 
@@ -1458,32 +1454,27 @@ def determine_firmware_versions(build_target: 'build_target_lib.BuildTarget'):
 
 
 def determine_kernel_version(
-    build_target: 'build_target_lib.BuildTarget') -> str:
+    build_target: 'build_target_lib.BuildTarget') -> Optional[str]:
   """Returns a string containing the kernel version for this build target.
 
   Args:
     build_target: The build target.
 
   Returns:
-    The kernel versions, or empty string.
+    The kernel versions, or None.
   """
   try:
-    packages = portage_util.GetFlattenedDepsForPackage(
-        'virtual/linux-sources', board=build_target.name, depth=1)
+    packages = portage_util.GetPackageDependencies(
+        'virtual/linux-sources', board=build_target.name)
   except cros_build_lib.RunCommandError as e:
     logging.warning('Unable to get package list for metadata: %s', e)
-    return ''
-  if not packages:
-    raise KernelVersionError('No package found in FlattenedDepsForPackage')
-  if len(packages) != 1:
-    raise KernelVersionError(
-        'Too many packages found in FlattenedDepsForPackage (%s)' %
-        ''.join(packages)
-    )
-  package = packages[0]
-  kernel_version = package_info.SplitCPV(package).version
-  logging.info('Found active kernel version: %s', kernel_version)
-  return kernel_version
+    return None
+  for package in packages:
+    if package.startswith('sys-kernel/chromeos-kernel-'):
+      kernel_version = package_info.SplitCPV(package).version
+      logging.info('Found active kernel version: %s', kernel_version)
+      return kernel_version
+  return None
 
 
 def get_models(
