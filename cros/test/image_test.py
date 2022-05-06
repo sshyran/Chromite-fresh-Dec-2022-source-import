@@ -745,6 +745,14 @@ class SymlinkTest(image_test_lib.ImageTestCase):
           '/usr/local/usr/lib/python-exec',
           '/usr/local/lib/python-exec',
       },
+      '/usr/lib/python*': {
+          '/usr/local/usr/lib/python*',
+          '/usr/local/lib/python*',
+      },
+      '/usr/lib64/python*': {
+          '/usr/local/usr/lib64/python*',
+          '/usr/local/lib64/python*',
+      },
       '/usr/lib/debug': {'/usr/local/usr/lib/debug'},
       # Used by `file` and libmagic.so when the package is in /usr/local.
       '/usr/share/misc/magic.mgc': {'/usr/local/share/misc/magic.mgc'},
