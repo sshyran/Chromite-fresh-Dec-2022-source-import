@@ -1014,7 +1014,7 @@ class PaygenBuild(object):
     # plus these extensions. Skip these files.
     NOT_PAYLOAD = ('.json', '.log')
     full_test_payloads = [u for u in payload_candidate
-                          if not any([u.endswith(n) for n in NOT_PAYLOAD])]
+                          if not any(u.endswith(n) for n in NOT_PAYLOAD)]
     # Store in cache.
     self._version_to_full_test_payloads[(channel, version)] = full_test_payloads
     return full_test_payloads

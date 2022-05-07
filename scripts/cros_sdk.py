@@ -162,9 +162,9 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
   ignored_prefixes = [prefix for prefix in all_prefixes if prefix != my_prefix]
   for filename in os.listdir(storage_dir):
     if (filename == tarball_name or
-        any([(filename.startswith(p) and
-              not (len(my_prefix) > len(p) and filename.startswith(my_prefix)))
-             for p in ignored_prefixes])):
+        any((filename.startswith(p) and
+             not (len(my_prefix) > len(p) and filename.startswith(my_prefix)))
+            for p in ignored_prefixes)):
       continue
     logging.info('Cleaning up old tarball: %s', filename)
     osutils.SafeUnlink(os.path.join(storage_dir, filename))

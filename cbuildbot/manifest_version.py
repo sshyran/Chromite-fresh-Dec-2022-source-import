@@ -1098,7 +1098,7 @@ def FilterManifest(manifest, whitelisted_remotes=None, whitelisted_groups=None):
                      project_remote not in whitelisted_remotes)
 
     filter_group = (whitelisted_groups and
-                    not any([g in groups for g in whitelisted_groups]))
+                    not any(g in groups for g in whitelisted_groups))
 
     if filter_remote or filter_group:
       filtered_projects.add(project)

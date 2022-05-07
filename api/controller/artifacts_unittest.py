@@ -1032,5 +1032,5 @@ class FetchMetadataTestCase(cros_test_lib.MockTempDirTestCase,
     artifacts.FetchMetadata(request, response, self.api_config)
     actual_filepaths = [fp.path.path for fp in response.filepaths]
     self.assertEqual(sorted(actual_filepaths), sorted(self.expected_filepaths))
-    self.assertTrue(all([fp.path.location == common_pb2.Path.OUTSIDE
-                         for fp in response.filepaths]))
+    self.assertTrue(all(fp.path.location == common_pb2.Path.OUTSIDE
+                        for fp in response.filepaths))

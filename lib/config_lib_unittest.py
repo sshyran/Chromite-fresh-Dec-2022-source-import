@@ -67,7 +67,7 @@ def AssertSiteIndependentParameters(site_config):
   ]
 
   site_params = site_config.params
-  return all([x in site_params for x in site_independent_params])
+  return all(x in site_params for x in site_independent_params)
 
 
 class _CustomObject(object):

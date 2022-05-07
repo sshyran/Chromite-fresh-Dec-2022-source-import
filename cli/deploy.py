@@ -291,12 +291,12 @@ print(json.dumps(pkg_info))
           # Make the first available choice the default, for use in case that
           # no option is installed.
           if (not default_deps and avail_db is not None and
-              all([cls._InDB(cp, slot, avail_db) for cp, slot in sub_deps])):
+              all(cls._InDB(cp, slot, avail_db) for cp, slot in sub_deps)):
             default_deps = sub_deps
 
           # If not all sub-deps are installed, then don't consider them.
-          if not all([cls._InDB(cp, slot, installed_db)
-                      for cp, slot in sub_deps]):
+          if not all(cls._InDB(cp, slot, installed_db)
+                     for cp, slot in sub_deps):
             sub_deps = set()
 
         deps.update(sub_deps)
