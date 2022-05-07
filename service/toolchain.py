@@ -5,9 +5,8 @@
 """Toolchain-related operations."""
 
 import os
-import re
-
 from pathlib import Path
+import re
 from typing import Dict, List, NamedTuple, Text, Tuple
 
 from chromite.lib import chroot_util
@@ -15,10 +14,12 @@ from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib.parser import package_info
 
+
 if cros_build_lib.IsInsideChroot():
   # Only used for linting in chroot and requires yaml which is only in chroot
   from chromite.scripts import tricium_cargo_clippy
   from chromite.scripts import tricium_clang_tidy
+
   # TODO(b/229665884): Move the implementation details for parsing lints to
   # a new lib module. Scripts should not have to import scripts.
 

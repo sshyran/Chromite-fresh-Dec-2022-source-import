@@ -18,6 +18,7 @@ from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
 from chromite.lib import toolchain_util
 from chromite.service import toolchain
 
+
 # TODO(b/229665884): Move the implementation details for most/all endpoints to:
 #   chromite/services/toolchain.py
 # This migration has been done for linting endpoints but not yet for others.
