@@ -40,7 +40,8 @@ from chromite.lib import toolchain
 from chromite.utils import key_value_store
 
 
-COMPRESSION_PREFERENCE = ('xz', 'bz2')
+# Which compression algos the SDK tarball uses.  We've used xz since 2012.
+COMPRESSION_PREFERENCE = ('xz',)
 
 # TODO(zbehan): Remove the dependency on these, reimplement them in python
 ENTER_CHROOT = [
@@ -83,7 +84,7 @@ MAX_UNUSED_IMAGE_GBS = 20
 
 def GetArchStageTarballs(version):
   """Returns the URL for a given arch/version"""
-  extension = {'bz2': 'tbz2', 'xz': 'tar.xz'}
+  extension = {'xz': 'tar.xz'}
   return [
       toolchain.GetSdkURL(
           suburl='cros-sdk-%s.%s' % (version, extension[compressor]))
@@ -91,13 +92,12 @@ def GetArchStageTarballs(version):
   ]
 
 
-def FetchRemoteTarballs(storage_dir, urls, desc):
+def FetchRemoteTarballs(storage_dir, urls):
   """Fetches a tarball given by url, and place it in |storage_dir|.
 
   Args:
     storage_dir: Path where to save the tarball.
     urls: List of URLs to try to download. Download will stop on first success.
-    desc: A string describing what tarball we're downloading (for logging).
 
   Returns:
     Full path to the downloaded file.
@@ -105,14 +105,13 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
   Raises:
     ValueError: None of the URLs worked.
   """
-
   # Note we track content length ourselves since certain versions of curl
   # fail if asked to resume a complete file.
   # https://sourceforge.net/tracker/?func=detail&atid=100976&aid=3482927&group_id=976
-  logging.notice('Downloading %s tarball...', desc)
   status_re = re.compile(br'^HTTP/[0-9]+(\.[0-9]+)? 200')
   # pylint: disable=undefined-loop-variable
   for url in urls:
+    logging.notice('Downloading tarball %s ...', urls[0].rsplit('/', 1)[-1])
     parsed = urllib.parse.urlparse(url)
     tarball_name = os.path.basename(parsed.path)
     if parsed.scheme in ('', 'file'):
@@ -157,17 +156,11 @@ def FetchRemoteTarballs(storage_dir, urls, desc):
   # Cleanup old tarballs now since we've successfull fetched; only cleanup
   # the tarballs for our prefix, or unknown ones. This gets a bit tricky
   # because we might have partial overlap between known prefixes.
-  my_prefix = tarball_name.rsplit('-', 1)[0] + '-'
-  all_prefixes = ('stage3-amd64-', 'cros-sdk-', 'cros-sdk-overlay-')
-  ignored_prefixes = [prefix for prefix in all_prefixes if prefix != my_prefix]
-  for filename in os.listdir(storage_dir):
-    if (filename == tarball_name or
-        any((filename.startswith(p) and
-             not (len(my_prefix) > len(p) and filename.startswith(my_prefix)))
-            for p in ignored_prefixes)):
+  for p in Path(storage_dir).glob('cros-sdk-*'):
+    if p.name == tarball_name:
       continue
-    logging.info('Cleaning up old tarball: %s', filename)
-    osutils.SafeUnlink(os.path.join(storage_dir, filename))
+    logging.info('Cleaning up old tarball: %s', p)
+    osutils.SafeUnlink(p)
 
   return tarball_dest
 
@@ -1160,8 +1153,7 @@ snapshots will be unavailable).""" % ', '.join(missing_image_tools))
 
     if options.download:
       lock.write_lock()
-      sdk_tarball = FetchRemoteTarballs(
-          sdk_cache, urls, 'stage3' if options.bootstrap else 'SDK')
+      sdk_tarball = FetchRemoteTarballs(sdk_cache, urls)
 
     mounted = False
     if options.create:
