@@ -337,7 +337,7 @@ class BuildPackagesRunConfig(object):
     """Get the set of force local build packages for this config."""
     packages = []
 
-    if self.test_image:
+    if 'virtual/target-os-test' in self.GetPackages():
       # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
       # set. We force rebuilding this package from source every time, so that
       # consecutive builds don't share ssh keys.
