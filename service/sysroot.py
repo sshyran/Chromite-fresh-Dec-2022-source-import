@@ -639,6 +639,10 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
   cmd += run_configs.GetPackages()
 
   extra_env = run_configs.GetExtraEnv()
+  # TODO(xcl): Stop passing force local build packages using envvars
+  # post-migration.
+  extra_env['BUILD_PACKAGES_FORCE_LOCAL_BUILD_PKGS'] = ' '.join(
+      run_configs.GetForceLocalBuildPackages())
   with osutils.TempDir() as tempdir, cpupower_helper.ModifyCpuGovernor(
       run_configs.autosetgov, run_configs.autosetgov_sticky):
     extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
