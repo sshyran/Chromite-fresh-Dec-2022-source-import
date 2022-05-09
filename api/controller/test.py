@@ -155,39 +155,25 @@ SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
 PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
 TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
 TEST_CONTAINER_BUILD_SCRIPTS = {
-    'cros-provision':
-        os.path.join(TEST_SERVICE_DIR, 'provision/docker/build-dockerimage.sh'),
-    'cros-dut':
-        os.path.join(TEST_SERVICE_DIR, 'dut/docker/build-dockerimage.sh'),
     'cros-test':
         os.path.join(
             TEST_SERVICE_DIR,
             'python/src/docker_libs/cli/build-dockerimages.py'
         ),
-    'cros-test-finder':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'test_finder/docker/build-dockerimage.sh',
-        ),
-    'cros-testplan':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'plan/docker/build-dockerimage.sh',
-        ),
-    'cros-provision-beta':
+    'cros-provision':
         os.path.join(
             TEST_SERVICE_DIR,
             'python/src/docker_libs/cli/build-dockerimages.py'),
-    'cros-dut-beta':
+    'cros-dut':
         os.path.join(
             TEST_SERVICE_DIR,
             'python/src/docker_libs/cli/build-dockerimages.py'),
-    'testplan-beta':
+    'testplan':
         os.path.join(
             TEST_SERVICE_DIR,
             'python/src/docker_libs/cli/build-dockerimages.py',
         ),
-    'cros-test-finder-beta':
+    'cros-test-finder':
         os.path.join(
             TEST_SERVICE_DIR,
             'python/src/docker_libs/cli/build-dockerimages.py',
@@ -290,18 +276,11 @@ def BuildTestServiceContainers(
       cmd += ['--tags', tags]
       cmd += ['--output', output_path]
 
-      # Label flag is different for cros-test.
-      if (human_name == 'cros-test' or 'beta' in human_name) and labels:
-        # Translate generator to comma separated string.
-        ct_labels = ','.join(labels)
-        cmd += ['--labels', ct_labels]
-      else:
-        cmd += labels
+      # Translate generator to comma separated string.
+      ct_labels = ','.join(labels)
+      cmd += ['--labels', ct_labels]
 
-      if 'beta' in human_name:
-        # All the beta "human_name" are "service" appended with "-beta".
-        service = human_name.split('-beta')[0]
-        cmd += ['--service', service]
+      cmd += ['--service', human_name]
 
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
@@ -320,20 +299,13 @@ def BuildTestServiceContainers(
             )
         )
       else:
-        if 'beta' in human_name:
-          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
-                        human_name, cmd_result.stdout, cmd_result.stderr)
-          result.success.CopyFrom(
-              test_pb2.TestServiceContainerBuildResult.Success()
-          )
-        else:
-          logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
-                        human_name, cmd_result.stdout, cmd_result.stderr)
-          result.failure.CopyFrom(
-              test_pb2.TestServiceContainerBuildResult.Failure(
-                  error_message=cmd_result.stdout
-              )
-          )
+        logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                      human_name, cmd_result.stdout, cmd_result.stderr)
+        result.failure.CopyFrom(
+            test_pb2.TestServiceContainerBuildResult.Failure(
+                error_message=cmd_result.stdout
+            )
+        )
       output_proto.results.append(result)
 
 
