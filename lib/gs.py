@@ -371,6 +371,7 @@ class GSContext(object):
       b"can't start new thread",
       # See: b/197574857.
       b'OSError: None',
+      b'cannot read from timed out object',
   )
 
   @classmethod
