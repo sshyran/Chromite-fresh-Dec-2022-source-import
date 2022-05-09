@@ -52,13 +52,13 @@ class Error(Exception):
 class ChrootDeprecatedError(Error):
   """Raised when the chroot is too old to update."""
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, version):
     # Message defined here because it's long and gives specific instructions.
-    msg = ('Upgrade hook missing for your chroot version.\n'
-           'Your chroot is so old that some updates have been deprecated and'
-           'it will need to be recreated. A fresh chroot can be built with:\n'
-           '    cros_sdk --replace\n')
-    super().__init__(msg, *args, **kwargs)
+    super().__init__(
+        f'Upgrade hook missing for your chroot version {version}.\n'
+        'Your chroot is so old that some updates have been deprecated and it '
+        'will need to be recreated. A fresh chroot can be built with:\n'
+        '    cros_sdk --replace')
 
 
 class ChrootUpdateError(Error):
@@ -759,7 +759,7 @@ class ChrootUpdater(object):
       # chroot's current version and the most recent, then the chroot must be
       # recreated.
       if version not in hooks:
-        raise ChrootDeprecatedError()
+        raise ChrootDeprecatedError(self.GetVersion())
 
       updates.append((hooks[version], version))
 
