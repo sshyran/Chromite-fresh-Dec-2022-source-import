@@ -417,6 +417,7 @@ class BuildTestServiceContainers(cros_test_lib.RunCommandTempDirTestCase,
     patch.assert_called()
     for result in response.results:
       self.assertEqual(result.WhichOneof('result'), 'failure')
+      self.assertEqual(result.name, 'Service Builder')
 
 class ChromiteUnitTestTest(cros_test_lib.MockTestCase,
                            api_config.ApiConfigMixin):

@@ -151,31 +151,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 SRC_DIR = os.path.join(constants.SOURCE_ROOT, 'src')
 PLATFORM_DEV_DIR = os.path.join(SRC_DIR, 'platform/dev')
 TEST_SERVICE_DIR = os.path.join(PLATFORM_DEV_DIR, 'src/chromiumos/test')
-TEST_CONTAINER_BUILD_SCRIPTS = {
-    'cros-test':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'python/src/docker_libs/cli/build-dockerimages.py'
-        ),
-    'cros-provision':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'python/src/docker_libs/cli/build-dockerimages.py'),
-    'cros-dut':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'python/src/docker_libs/cli/build-dockerimages.py'),
-    'testplan':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'python/src/docker_libs/cli/build-dockerimages.py',
-        ),
-    'cros-test-finder':
-        os.path.join(
-            TEST_SERVICE_DIR,
-            'python/src/docker_libs/cli/build-dockerimages.py',
-        ),
-}
 
 
 def _BuildTestServiceContainersResponse(input_proto, output_proto, _config):
@@ -257,53 +232,72 @@ def BuildTestServiceContainers(
       f'{key}={value}' for key, value in input_proto.labels.items()
   )
 
-  for human_name, build_script in TEST_CONTAINER_BUILD_SCRIPTS.items():
-    with osutils.TempDir(prefix='test_container') as tempdir:
-      output_path = os.path.join(tempdir, 'metadata.jsonpb')
+  build_script = os.path.join(
+      TEST_SERVICE_DIR, 'python/src/docker_libs/cli/build-dockerimages.py')
+  human_name = 'Service Builder'
 
-      # Note that we use an output file instead of stdout to avoid any issues
-      # with maintaining stdout hygiene.  Stdout and stderr are combined to
-      # form the error log in response to any errors.
-      cmd = [build_script, chroot.path, sysroot.path]
+  with osutils.TempDir(prefix='test_container') as tempdir:
+    result_file = 'metadata.jsonpb'
+    output_path = os.path.join(tempdir, result_file)
+    # Note that we use an output file instead of stdout to avoid any issues
+    # with maintaining stdout hygiene.  Stdout and stderr are combined to
+    # form the error log in response to any errors.
+    cmd = [build_script, chroot.path, sysroot.path]
 
-      if input_proto.HasField('repository'):
-        cmd += ['--host', input_proto.repository.hostname]
-        cmd += ['--project', input_proto.repository.project]
+    if input_proto.HasField('repository'):
+      cmd += ['--host', input_proto.repository.hostname]
+      cmd += ['--project', input_proto.repository.project]
 
-      cmd += ['--tags', tags]
-      cmd += ['--output', output_path]
+    cmd += ['--tags', tags]
+    cmd += ['--output', output_path]
 
-      # Translate generator to comma separated string.
-      ct_labels = ','.join(labels)
-      cmd += ['--labels', ct_labels]
+    # Translate generator to comma separated string.
+    ct_labels = ','.join(labels)
+    cmd += ['--labels', ct_labels]
+    cmd += ['--build_all']
+    cmd += ['--upload']
 
-      cmd += ['--service', human_name]
+    cmd_result = cros_build_lib.run(cmd, check=False,
+                                    stderr=subprocess.STDOUT,
+                                    stdout=True)
 
+    if cmd_result.returncode != 0:
+      # When failing, just record a fail response with the builder name.
+      logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
+                    human_name, cmd_result.stdout, cmd_result.stderr)
       result = test_pb2.TestServiceContainerBuildResult()
       result.name = human_name
-
-      cmd_result = cros_build_lib.run(cmd, check=False,
-                                      stderr=subprocess.STDOUT,
-                                      stdout=True)
-      if cmd_result.returncode == 0:
-        # Read the ContainerImageInfo message produced by the container build.
-        image_info = container_metadata_pb2.ContainerImageInfo()
-        json_format.Parse(osutils.ReadFile(output_path), image_info)
-
-        result.success.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Success(
-                image_info=image_info
-            )
-        )
-      else:
-        logging.debug('%s build failed.\nStdout:\n%s\nStderr:\n%s',
-                      human_name, cmd_result.stdout, cmd_result.stderr)
-        result.failure.CopyFrom(
-            test_pb2.TestServiceContainerBuildResult.Failure(
-                error_message=cmd_result.stdout
-            )
-        )
+      image_info = container_metadata_pb2.ContainerImageInfo()
+      result.failure.CopyFrom(
+          test_pb2.TestServiceContainerBuildResult.Failure(
+              error_message=cmd_result.stdout
+          )
+      )
       output_proto.results.append(result)
+
+    else:
+      logging.debug('%s build succeeded.\nStdout:\n%s\nStderr:\n%s',
+                    human_name, cmd_result.stdout, cmd_result.stderr)
+      files = os.listdir(tempdir)
+      # Iterate through the tempdir to output metadata files.
+      for file in files:
+        if result_file in file:
+          output_path = os.path.join(tempdir, file)
+
+          # build-dockerimages.py will append the service name to outputfile
+          # with an underscore.
+          human_name = file.split('_')[-1]
+
+          result = test_pb2.TestServiceContainerBuildResult()
+          result.name = human_name
+          image_info = container_metadata_pb2.ContainerImageInfo()
+          json_format.Parse(osutils.ReadFile(output_path), image_info)
+          result.success.CopyFrom(
+              test_pb2.TestServiceContainerBuildResult.Success(
+                  image_info=image_info
+              )
+          )
+          output_proto.results.append(result)
 
 
 @faux.empty_success
