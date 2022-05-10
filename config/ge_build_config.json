@@ -98,18 +98,6 @@
       ]
     },
     {
-      "name": "brya-hibernate",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": false,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "bubs",
       "configs": [
         {
@@ -1472,6 +1460,199 @@
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 459,
+          "is_active": true
+        }
+      ]
+    },
+    {
+      "name": "brya-hibernate",
+      "reference_board_name": "brya-hibernate",
+      "arch": "X86_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "brya-hibernate",
+          "name": "anahera",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "anahera4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "banshee",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "brya",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "brya4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "brya4esti50",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "crota",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "crota360",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "felwinter",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "gimble",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "gimble4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "primus",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "primus4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "redrix",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "redrix4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "taeko",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "taeko4es",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "taniks",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "tarlo",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "vell",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "volmar",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
+          "name": "zavala",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
           "is_active": true
         }
       ]
