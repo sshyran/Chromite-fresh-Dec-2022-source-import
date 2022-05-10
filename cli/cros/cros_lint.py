@@ -391,7 +391,7 @@ def _BreakoutDataByLinter(map_to_return, path):
         if prog == b'/usr/bin/env':
           prog = m.group(3)
         basename = os.path.basename(prog)
-        if basename.startswith(b'python'):
+        if basename.startswith(b'python') or basename.startswith(b'vpython'):
           for linter in _EXT_TO_LINTER_MAP[frozenset({'.py'})]:
             map_to_return.setdefault(linter, []).append(path)
         elif basename in (b'sh', b'dash', b'bash'):
