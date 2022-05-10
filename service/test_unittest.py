@@ -558,7 +558,6 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
         os.path.join(self.output_dir,
                      constants.CODE_COVERAGE_LLVM_JSON_SYMBOLS_TAR), result)
 
-
 class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
   """GatherCodeCoverageLlvmJsonFile Tests."""
 
@@ -593,7 +592,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     self.writeCodeCoverageLlvm(
         os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
 
-    coverage_json = test.GatherCodeCoverageLlvmJsonFile([input_dir])
+    coverage_json = test.GatherCodeCoverageLlvmJsonFile(input_dir)
     all_files = coverage_json['data'][0]['files']
     self.assertEqual(len(all_files), 4)
 
@@ -609,7 +608,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     self.writeCodeCoverageLlvm(
         os.path.join(input_dir, 'a/b/c/d/e/coverage.json'))
 
-    test.GatherCodeCoverageLlvmJsonFile([input_dir])
+    test.GatherCodeCoverageLlvmJsonFile(input_dir)
     self.assertEqual(get_llvm_json_coverage_data_if_valid_mock.call_count, 4)
 
   def testWritesCombinedFileToOutputDir(self):
@@ -625,7 +624,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
     self.writeCodeCoverageLlvm(
         os.path.join(input_dir, 'a/invalid/invalid.json'), 'INVALID')
 
-    coverage_json = test.GatherCodeCoverageLlvmJsonFile([input_dir])
+    coverage_json = test.GatherCodeCoverageLlvmJsonFile(input_dir)
     all_files = coverage_json['data'][0]['files']
 
     # Verify the contents of each valid file appear in the output.
@@ -636,6 +635,13 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
         1, len([x for x in all_files if x['filename'] == '/src2/b.txt']))
     self.assertEqual(
         1, len([x for x in all_files if x['filename'] == '/firmware/c.txt']))
+
+  def testShouldEmptyCoverageIfPathDoesNotExists(self):
+    """Test empty coverage returned when path does not exist."""
+
+    coverage_json = test.GatherCodeCoverageLlvmJsonFile('/invalid/path')
+    all_files = coverage_json['data'][0]['files']
+    self.assertEqual(0, len(all_files))
 
 
 class FindMetadataTestCase(cros_test_lib.MockTestCase):

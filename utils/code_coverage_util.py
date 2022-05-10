@@ -210,7 +210,7 @@ def GetLLVMCoverageWithFilesExcluded(coverage_json: Dict,
     if not entry['filename'].endswith(exclude_files_suffixes):
       result_coverage_data.append(entry)
     else:
-      logging.info('Excluding file %s from coverage reports.',
+      logging.info('skipping file %s from zero coverage.',
                    entry['filename'])
   return CreateLlvmCoverageJson(result_coverage_data)
 
