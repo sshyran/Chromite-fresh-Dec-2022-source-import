@@ -23,7 +23,7 @@ CPV = collections.namedtuple('CPV', _CPV_FIELDS)
 
 # Package matching regexp, as dictated by package manager specification:
 # https://www.gentoo.org/proj/en/qa/pms.xml
-_pkg = r'(?P<package>' + r'[\w+][\w+-]*)'
+_pkg = r'(?P<package>[\w+][\w+-]*)'
 _ver = (r'(?P<version>'
         r'(?P<version_no_rev>(\d+)((\.\d+)*)([a-z]?)'
         r'((_(pre|p|beta|alpha|rc)\d*)*))'
