@@ -26,6 +26,7 @@ _EXT_TOOL_MAP = {
     frozenset({'.json'}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
+    frozenset({'.rs'}): (formatters.rust.Data,),
     frozenset({'.cfg', '.conf', '.txt'}): (formatters.whitespace.Data,),
 }
 

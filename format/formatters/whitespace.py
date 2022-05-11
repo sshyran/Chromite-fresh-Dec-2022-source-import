@@ -9,7 +9,6 @@ def Data(data: str) -> str:
   """Clean up basic whitespace problems in |data|.
 
   Args:
-    path: The name of the file (for diagnostics).
     data: The file content to lint.
 
   Returns:
