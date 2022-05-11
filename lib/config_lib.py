@@ -1912,6 +1912,7 @@ def GetNonUniBuildLabBoardName(board):
       '-arc-r',  #
       '-arc-r-userdebug',  #
       '-arc-s',  #
+      '-arc-t',  #
       '-arcnext',  #
       '-arcvm',  #
       '-connectivitynext',  #
