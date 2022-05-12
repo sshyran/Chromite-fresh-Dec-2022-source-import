@@ -97,7 +97,7 @@ class EnforcedCleanupSection(cros_build_lib.PrimaryPidContextManager):
           pass
       os._exit(0)
 
-    # Allow masterpid context managers to run in this case, since we're
+    # Allow primary PID context managers to run in this case, since we're
     # explicitly designed for this cleanup.
     cros_build_lib.PrimaryPidContextManager.ALTERNATE_PRIMARY_PID = os.getpid()
 
