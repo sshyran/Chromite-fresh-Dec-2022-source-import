@@ -27,6 +27,7 @@ _EXT_TOOL_MAP = {
     # TODO(build): Add a formatter for this.
     frozenset({'.md'}): (formatters.whitespace.Data,),
     frozenset({'.rs'}): (formatters.rust.Data,),
+    frozenset({'.xml'}): (formatters.xml.Data,),
     frozenset({'.cfg', '.conf', '.txt'}): (formatters.whitespace.Data,),
 }
 
@@ -100,8 +101,10 @@ def _Dispatcher(
   elif diff:
     path = str(path).lstrip('/')
     print('\n'.join(difflib.unified_diff(
-        old_data.splitlines(), new_data.splitlines(), fromfile=f'a/{path}',
-        tofile=f'b/{path}', lineterm='')))
+        old_data.splitlines(), new_data.splitlines(),
+        fromfile=f'a/{path}', tofile=f'b/{path}',
+        fromfiledate='(original)', tofiledate='(formatted)',
+        lineterm='')))
     return 1
   elif inplace:
     logging.debug('Updating %s', path)
