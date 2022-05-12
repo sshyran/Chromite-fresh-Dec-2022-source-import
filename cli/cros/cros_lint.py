@@ -134,7 +134,7 @@ SHLINT_OUTPUT_FORMAT_MAP = {
 }
 
 
-def _LinterRunCommand(cmd, debug, **kwargs):
+def _ToolRunCommand(cmd, debug, **kwargs):
   """Run the linter with common run args set as higher levels expect."""
   return cros_build_lib.run(cmd, check=False, print_cmd=debug,
                             debug_level=logging.NOTICE, **kwargs)
@@ -180,7 +180,7 @@ def _CpplintFile(path, output_format, debug, _relaxed: bool):
   if output_format != 'default':
     cmd.append('--output=%s' % CPPLINT_OUTPUT_FORMAT_MAP[output_format])
   cmd.append(path)
-  return _LinterRunCommand(cmd, debug)
+  return _ToolRunCommand(cmd, debug)
 
 
 def _PylintFile(path, output_format, debug, _relaxed: bool):
@@ -194,7 +194,7 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
   extra_env = {
       'PYTHONPATH': ':'.join(_GetPythonPath([path])),
   }
-  return _LinterRunCommand(cmd, debug, extra_env=extra_env)
+  return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
 
 def _PyisortFile(path, _output_format, debug, _relaxed: bool):
@@ -205,7 +205,7 @@ def _PyisortFile(path, _output_format, debug, _relaxed: bool):
   cmd = base_cmd + ['--diff', '--check']
   cmd.append(path)
   base_cmd.append(path)
-  result = _LinterRunCommand(cmd, debug)
+  result = _ToolRunCommand(cmd, debug)
   if result.returncode:
     logging.notice('To fix, run:\n%s', cros_build_lib.CmdToStr(base_cmd))
   return result
@@ -216,7 +216,7 @@ def _GolintFile(path, _, debug, _relaxed: bool):
   # Try using golint if it exists.
   try:
     cmd = ['golint', '-set_exit_status', path]
-    return _LinterRunCommand(cmd, debug)
+    return _ToolRunCommand(cmd, debug)
   except cros_build_lib.RunCommandError:
     logging.notice('Install golint for additional go linting.')
     return cros_build_lib.CommandResult('gofmt "%s"' % path,
@@ -280,7 +280,7 @@ def _ShellLintFile(path, output_format, debug, _relaxed: bool,
     A CommandResult object.
   """
   # TODO: Try using `checkbashisms`.
-  syntax_check = _LinterRunCommand(['bash', '-n', path], debug)
+  syntax_check = _ToolRunCommand(['bash', '-n', path], debug)
   if syntax_check.returncode != 0:
     return syntax_check
 
@@ -320,7 +320,7 @@ def _ShellLintFile(path, output_format, debug, _relaxed: bool,
     cmd.append('--shell=bash')
   cmd.append(path)
 
-  lint_result = _LinterRunCommand(cmd, debug)
+  lint_result = _ToolRunCommand(cmd, debug)
 
   # Check whitespace.
   if not whitespace.LintData(path, osutils.ReadFile(path)):
@@ -339,7 +339,7 @@ def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
   """Run the seccomp policy linter."""
   dangerous_syscalls = {'bpf', 'setns', 'execveat', 'ptrace', 'swapoff',
                         'swapon'}
-  return _LinterRunCommand(
+  return _ToolRunCommand(
       [os.path.join(constants.SOURCE_ROOT, 'src', 'aosp', 'external',
                     'minijail', 'tools', 'seccomp_policy_lint.py'),
        '--dangerous-syscalls', ','.join(dangerous_syscalls),
@@ -358,7 +358,7 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
 
 def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
   """Run the dirmd linter."""
-  return _LinterRunCommand(
+  return _ToolRunCommand(
       [os.path.join(constants.DEPOT_TOOLS_DIR, 'dirmd'), 'validate', path],
       debug, capture_output=not debug)
 
@@ -371,8 +371,8 @@ def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
   return ret
 
 
-def _BreakoutDataByLinter(map_to_return, path):
-  """Maps a linter method to the content of the |path|."""
+def _BreakoutDataByTool(map_to_return, path):
+  """Maps a tool method to the content of the |path|."""
   # Detect by content of the file itself.
   try:
     with open(path, 'rb') as fp:
@@ -391,17 +391,17 @@ def _BreakoutDataByLinter(map_to_return, path):
           prog = m.group(3)
         basename = os.path.basename(prog)
         if basename.startswith(b'python') or basename.startswith(b'vpython'):
-          for linter in _EXT_TO_LINTER_MAP[frozenset({'.py'})]:
-            map_to_return.setdefault(linter, []).append(path)
+          for tool in _EXT_TOOL_MAP[frozenset({'.py'})]:
+            map_to_return.setdefault(tool, []).append(path)
         elif basename in (b'sh', b'dash', b'bash'):
-          for linter in _EXT_TO_LINTER_MAP[frozenset({'.sh'})]:
-            map_to_return.setdefault(linter, []).append(path)
+          for tool in _EXT_TOOL_MAP[frozenset({'.sh'})]:
+            map_to_return.setdefault(tool, []).append(path)
   except IOError as e:
     logging.debug('%s: reading initial data failed: %s', path, e)
 
 
-# Map file extensions to a linter function.
-_EXT_TO_LINTER_MAP = {
+# Map file extensions to a tool function.
+_EXT_TOOL_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
     frozenset({'.cc', '.cpp', '.h'}): (_CpplintFile,),
@@ -415,40 +415,41 @@ _EXT_TO_LINTER_MAP = {
     frozenset({'.policy'}): (_SeccompPolicyLintFile,),
 }
 
-# Map known filenames to a linter function.
-_FILENAME_PATTERNS_TO_LINTER_MAP = {
+# Map known filenames to a tool function.
+_FILENAME_PATTERNS_TOOL_MAP = {
     frozenset({'DIR_METADATA'}): (_DirMdLintFile,),
     frozenset({'OWNERS*'}): (_OwnersLintFile,),
 }
 
 
-def _BreakoutFilesByLinter(files):
-  """Maps a linter method to the list of files to lint."""
+def _BreakoutFilesByTool(files):
+  """Maps a tool method to the list of files to process."""
   map_to_return = {}
+
   for f in files:
     extension = os.path.splitext(f)[1]
-    for extensions, linters in _EXT_TO_LINTER_MAP.items():
+    for extensions, tools in _EXT_TOOL_MAP.items():
       if extension in extensions:
-        for linter in linters:
-          map_to_return.setdefault(linter, []).append(f)
+        for tool in tools:
+          map_to_return.setdefault(tool, []).append(f)
         break
     else:
       name = os.path.basename(f)
-      for patterns, linters in _FILENAME_PATTERNS_TO_LINTER_MAP.items():
+      for patterns, tools in _FILENAME_PATTERNS_TOOL_MAP.items():
         if any(fnmatch.fnmatch(name, x) for x in patterns):
-          for linter in linters:
-            map_to_return.setdefault(linter, []).append(f)
+          for tool in tools:
+            map_to_return.setdefault(tool, []).append(f)
           break
       else:
         if os.path.isfile(f):
-          _BreakoutDataByLinter(map_to_return, f)
+          _BreakoutDataByTool(map_to_return, f)
 
   return map_to_return
 
 
-def _Dispatcher(output_format, debug, relaxed: bool, linter, path):
-  """Call |linter| on |path| and take care of coalescing exit codes/output."""
-  result = linter(path, output_format, debug, relaxed)
+def _Dispatcher(output_format, debug, relaxed: bool, tool, path):
+  """Call |tool| on |path| and take care of coalescing exit codes/output."""
+  result = tool(path, output_format, debug, relaxed)
   return 1 if result.returncode else 0
 
 
@@ -459,15 +460,15 @@ class LintCommand(command.CliCommand):
   EPILOG = """
 Supported file formats: %s
 Supported file names: %s
-""" % (' '.join(sorted(itertools.chain(*_EXT_TO_LINTER_MAP))),
-       ' '.join(sorted(itertools.chain(*_FILENAME_PATTERNS_TO_LINTER_MAP))))
+""" % (' '.join(sorted(itertools.chain(*_EXT_TOOL_MAP))),
+       ' '.join(sorted(itertools.chain(*_FILENAME_PATTERNS_TOOL_MAP))))
 
   # The output formats supported by cros lint.
   OUTPUT_FORMATS = ('default', 'colorized', 'msvs', 'parseable')
 
   @classmethod
   def AddParser(cls, parser: commandline.ArgumentParser):
-    super(LintCommand, cls).AddParser(parser)
+    super().AddParser(parser)
     parser.add_argument('files', help='Files to lint', nargs='*')
     parser.add_argument('--output', default='default',
                         choices=LintCommand.OUTPUT_FORMATS,
@@ -487,27 +488,30 @@ Supported file names: %s
       # simple, but print a warning so that if someone runs this manually
       # they are aware that nothing was linted.
       logging.warning('No files provided to lint.  Doing nothing.')
+      return 0
 
     # Ignore generated files.  Some tools can do this for us, but not all, and
     # it'd be faster if we just never spawned the tools in the first place.
     files = [x for x in self.options.files if not x.endswith('_pb2.py')]
 
-    linter_map = _BreakoutFilesByLinter(files)
+    tool_map = _BreakoutFilesByTool(files)
     dispatcher = functools.partial(_Dispatcher,
                                    self.options.output, self.options.debug,
                                    self.options.relaxed)
 
-    # Special case one file as it's common -- faster to avoid parallel startup.
+    # If we filtered out all files, do nothing.
+    # Special case one file (or fewer) as it's common -- faster to avoid the
+    # parallel startup penalty.
     tasks = []
-    for linter, files in linter_map.items():
-      tasks.extend([linter, x] for x in files)
+    for tool, files in tool_map.items():
+      tasks.extend([tool, x] for x in files)
     if not tasks:
       return 0
     elif len(tasks) == 1:
-      linter, files = next(iter(linter_map.items()))
-      ret = dispatcher(linter, files[0])
+      tool, files = next(iter(tool_map.items()))
+      ret = dispatcher(tool, files[0])
     else:
-      # Run the linter in parallel on the files.
+      # Run the tool in parallel on the files.
       ret = sum(parallel.RunTasksInProcessPool(dispatcher, tasks))
 
     if ret:
