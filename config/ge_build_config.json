@@ -3841,7 +3841,7 @@
       "reference_board_name": "draco",
       "arch": "X86_INTERNAL",
       "builder": "RELEASE",
-      "experimental": true,
+      "experimental": false,
       "models": [
         {
           "board_name": "draco",

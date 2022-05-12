@@ -8362,7 +8362,6 @@
         "hw_tests": [],
         "hw_tests_disabled_bug": "b/204940128",
         "hw_tests_override": [],
-        "important": false,
         "models": [
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"draco\",\n    \"name\": \"agah\",\n    \"test_suites\": []\n}",
             "{\n    \"enable_skylab\": true,\n    \"lab_board_name\": \"draco\",\n    \"name\": \"draco\",\n    \"test_suites\": []\n}"
