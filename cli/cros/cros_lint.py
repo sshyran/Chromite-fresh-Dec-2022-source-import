@@ -9,11 +9,9 @@ import functools
 import itertools
 import json
 import logging
-import multiprocessing
 import os
 from pathlib import Path
 import re
-import sys
 from typing import Union
 
 from chromite.cli import command
@@ -448,12 +446,10 @@ def _BreakoutFilesByLinter(files):
   return map_to_return
 
 
-def _Dispatcher(errors, output_format, debug, relaxed: bool, linter, path):
+def _Dispatcher(output_format, debug, relaxed: bool, linter, path):
   """Call |linter| on |path| and take care of coalescing exit codes/output."""
   result = linter(path, output_format, debug, relaxed)
-  if result.returncode:
-    with errors.get_lock():
-      errors.value += 1
+  return 1 if result.returncode else 0
 
 
 @command.command_decorator('lint')
@@ -496,25 +492,25 @@ Supported file names: %s
     # it'd be faster if we just never spawned the tools in the first place.
     files = [x for x in self.options.files if not x.endswith('_pb2.py')]
 
-    errors = parallel.WrapMultiprocessing(multiprocessing.Value, 'i')
     linter_map = _BreakoutFilesByLinter(files)
-    dispatcher = functools.partial(_Dispatcher, errors,
+    dispatcher = functools.partial(_Dispatcher,
                                    self.options.output, self.options.debug,
                                    self.options.relaxed)
 
     # Special case one file as it's common -- faster to avoid parallel startup.
-    if not linter_map:
+    tasks = []
+    for linter, files in linter_map.items():
+      tasks.extend([linter, x] for x in files)
+    if not tasks:
       return 0
-    elif sum(len(x) for x in linter_map.values()) == 1:
+    elif len(tasks) == 1:
       linter, files = next(iter(linter_map.items()))
-      dispatcher(linter, files[0])
+      ret = dispatcher(linter, files[0])
     else:
       # Run the linter in parallel on the files.
-      with parallel.BackgroundTaskRunner(dispatcher) as q:
-        for linter, files in linter_map.items():
-          for path in files:
-            q.put([linter, path])
+      ret = sum(parallel.RunTasksInProcessPool(dispatcher, tasks))
 
-    if errors.value:
-      logging.error('Found lint errors in %i files.', errors.value)
-      sys.exit(1)
+    if ret:
+      logging.error('Found lint errors in %i files.', ret)
+
+    return 1 if ret else 0
