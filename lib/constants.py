@@ -865,16 +865,6 @@ CHROME_GARDENER = 'chrome'
 # assign to the current gardener.
 CHROME_GARDENER_REVIEW_EMAIL = 'chrome-os-gardeners-reviews@google.com'
 
-# Useful config targets.
-CANARY_MASTER = 'master-release'
-PFQ_MASTER = 'master-chromium-pfq'
-PI_ANDROID_PFQ_MASTER = 'master-pi-android-pfq'
-VMRVC_ANDROID_PFQ_MASTER = 'master-vmrvc-android-pfq'
-VMSC_ANDROID_PFQ_MASTER = 'master-vmsc-android-pfq'
-VMT_ANDROID_PFQ_MASTER = 'master-vmt-android-pfq'
-TOOLCHAIN_MASTTER = 'master-toolchain'
-
-
 # Email validation regex. Not quite fully compliant with RFC 2822, but good
 # approximation.
 EMAIL_REGEX = r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}'
