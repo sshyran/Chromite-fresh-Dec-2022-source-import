@@ -86,7 +86,7 @@ def _Dispatcher(
     inplace: bool,
     _debug: bool,
     diff: bool,
-    check: bool,
+    dryrun: bool,
     tool: Callable,
     path: Union[str, os.PathLike]) -> int:
   """Call |tool| on |path| and take care of coalescing exit codes."""
@@ -95,7 +95,7 @@ def _Dispatcher(
   if new_data == old_data:
     return 0
 
-  if check:
+  if dryrun:
     logging.warning('%s: needs formatting', path)
     return 1
   elif diff:
@@ -128,7 +128,8 @@ Supported file names: %s
   @classmethod
   def AddParser(cls, parser):
     super().AddParser(parser)
-    parser.add_argument('--check', action='store_true',
+    parser.add_argument('-n', '--dry-run', '--check', dest='dryrun',
+                        action='store_true',
                         help='Display unformatted files & exit non-zero')
     parser.add_argument('--diff', action='store_true',
                         help='Display diff instead of formatted content')
@@ -150,7 +151,7 @@ Supported file names: %s
     tool_map = _BreakoutFilesByTool(files)
     dispatcher = functools.partial(
         _Dispatcher, self.options.inplace, self.options.debug,
-        self.options.diff, self.options.check)
+        self.options.diff, self.options.dryrun)
 
     # If we filtered out all files, do nothing.
     # Special case one file (or fewer) as it's common -- faster to avoid the

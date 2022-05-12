@@ -83,10 +83,11 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
     """Check behavior with --check file."""
     file = self.tempdir / 'foo.txt'
     file.write_text(' ')
-    opts = self.parser.parse_args(['--check', str(file)])
-    cmd = cros_format.FormatCommand(opts)
-    self.assertEqual(1, cmd.Run())
-    self.assertEqual(' ', file.read_text())
+    for arg in ('-n', '--dry-run', '--check'):
+      opts = self.parser.parse_args([arg, str(file)])
+      cmd = cros_format.FormatCommand(opts)
+      self.assertEqual(1, cmd.Run())
+      self.assertEqual(' ', file.read_text())
 
   def testStdoutFile(self):
     """Check behavior with --stdout file."""
