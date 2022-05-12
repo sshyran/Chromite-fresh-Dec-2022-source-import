@@ -7,7 +7,6 @@
 The image related API endpoints should generally be found here.
 """
 
-import copy
 import functools
 import logging
 import os
@@ -229,10 +228,8 @@ def Create(input_proto: 'image_pb2.CreateImageRequest',
 
   image_types = _ParseImagesToCreate(to_build)
   build_config = _ParseCreateBuildConfig(input_proto)
-  factory_build_config = copy.copy(build_config)
-  build_config.symlink = LOCATION_CORE
-  factory_build_config.symlink = LOCATION_FACTORY
-  factory_build_config.output_dir_suffix = LOCATION_FACTORY
+  factory_build_config = build_config._replace(
+      symlink=LOCATION_FACTORY, output_dir_suffix=LOCATION_FACTORY)
 
   # Try building the core and factory images.
   # Sorted isn't really necessary here, but it's much easier to test.
@@ -364,6 +361,7 @@ def _ParseCreateBuildConfig(input_proto):
       version=version,
       disk_layout=disk_layout,
       builder_path=builder_path,
+      symlink=LOCATION_CORE,
   )
 
 

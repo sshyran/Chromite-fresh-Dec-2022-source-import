@@ -83,25 +83,29 @@ class BuildConfigTest(cros_test_lib.MockTestCase):
     self.assertEqual([], config.GetArguments())
 
     # Make sure each arg produces the correct argument individually.
-    config.builder_path = 'test'
+    config = image.BuildConfig(builder_path='test')
     self.assertEqual(['--builder_path', 'test'], config.GetArguments())
-    config.builder_path = None
 
-    config.disk_layout = 'disk'
+    config = image.BuildConfig(disk_layout='disk')
     self.assertEqual(['--disk_layout', 'disk'], config.GetArguments())
-    config.disk_layout = None
 
-    config.enable_rootfs_verification = False
+    config = image.BuildConfig(enable_rootfs_verification=False)
     self.assertEqual(['--noenable_rootfs_verification'], config.GetArguments())
-    config.enable_rootfs_verification = True
 
-    config.replace = True
+    config = image.BuildConfig(replace=True)
     self.assertEqual(['--replace'], config.GetArguments())
-    config.replace = False
 
-    config.version = 'version'
+    config = image.BuildConfig(version='version')
     self.assertEqual(['--version', 'version'], config.GetArguments())
-    config.version = None
+
+    config = image.BuildConfig(build_attempt=1)
+    self.assertEqual(['--build_attempt', 1], config.GetArguments())
+
+    config = image.BuildConfig(symlink='test')
+    self.assertEqual(['--symlink', 'test'], config.GetArguments())
+
+    config = image.BuildConfig(output_dir_suffix='test')
+    self.assertEqual(['--output_suffix', 'test'], config.GetArguments())
 
 
 class CreateVmTest(cros_test_lib.RunCommandTestCase):
