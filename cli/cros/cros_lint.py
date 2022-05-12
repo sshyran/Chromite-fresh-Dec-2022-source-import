@@ -6,6 +6,7 @@
 
 import fnmatch
 import functools
+import itertools
 import json
 import logging
 import multiprocessing
@@ -460,9 +461,10 @@ class LintCommand(command.CliCommand):
   """Run lint checks on the specified files."""
 
   EPILOG = """
-Right now, only supports cpplint and pylint. We may also in the future
-run other checks (e.g. pyflakes, etc.)
-"""
+Supported file formats: %s
+Supported file names: %s
+""" % (' '.join(sorted(itertools.chain(*_EXT_TO_LINTER_MAP))),
+       ' '.join(sorted(itertools.chain(*_FILENAME_PATTERNS_TO_LINTER_MAP))))
 
   # The output formats supported by cros lint.
   OUTPUT_FORMATS = ('default', 'colorized', 'msvs', 'parseable')
