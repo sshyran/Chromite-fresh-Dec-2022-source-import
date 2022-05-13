@@ -1535,7 +1535,9 @@ def IsMounted(path):
   return False
 
 
-def ResolveSymlinkInRoot(file_name, root):
+def ResolveSymlinkInRoot(
+    file_name: Union[str, os.PathLike],
+    root: Optional[Union[str, os.PathLike]] = None) -> str:
   """Resolve a symlink |file_name| relative to |root|.
 
   This can be used to resolve absolute symlinks within an alternative root
@@ -1548,8 +1550,8 @@ def ResolveSymlinkInRoot(file_name, root):
     relative_symlink will be resolved to ROOT-A/a/relative/path
 
   Args:
-    file_name (str): A path to the file.
-    root (str|None): A path to the root directory.
+    file_name: A path to the file.
+    root: A path to the root directory.
 
   Returns:
     |file_name| if |file_name| is not a symlink. Otherwise, the ultimate path
@@ -1568,20 +1570,22 @@ def ResolveSymlinkInRoot(file_name, root):
   return file_name
 
 
-def ResolveSymlink(file_name):
+def ResolveSymlink(
+    file_name: Union[str, os.PathLike]) -> Union[str, os.PathLike]:
   """Resolve a symlink |file_name| to an absolute path.
 
   This is similar to ResolveSymlinkInRoot, but does not resolve absolute
   symlinks to an alternative root, and normalizes the path before returning.
 
   Args:
-    file_name (str): The symlink.
+    file_name: The symlink.
 
   Returns:
     str - |file_name| if |file_name| is not a symlink. Otherwise, the ultimate
     path that |file_name| points to.
   """
-  return os.path.realpath(ResolveSymlinkInRoot(file_name, None))
+  ret = os.path.realpath(ResolveSymlinkInRoot(file_name, None))
+  return ret if isinstance(file_name, str) else Path(ret)
 
 
 def IsInsideVm():

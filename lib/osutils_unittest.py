@@ -1053,6 +1053,12 @@ class ResolveSymlinkInRootTest(cros_test_lib.TempDirTestCase):
     os.symlink('target', 'link')
     self.assertEqual(osutils.ResolveSymlinkInRoot('link', '/root'), 'target')
 
+  def testRelativeLinkPath(self):
+    """Verify Path objects work."""
+    os.symlink('target', 'link')
+    self.assertEqual(
+        osutils.ResolveSymlinkInRoot(Path('link'), Path('/root')), 'target')
+
   def testAbsoluteLink(self):
     os.symlink('/target', 'link')
     self.assertEqual(osutils.ResolveSymlinkInRoot('link', '/root'),
@@ -1073,8 +1079,8 @@ class ResolveSymlinkTest(cros_test_lib.TempDirTestCase):
   """Tests for ResolveSymlink."""
 
   def setUp(self):
-    self.file_path = os.path.join(self.tempdir, 'file')
-    self.dir_path = os.path.join(self.tempdir, 'directory')
+    self.file_path = self.tempdir / 'file'
+    self.dir_path = self.tempdir / 'directory'
     osutils.Touch(self.file_path)
     osutils.SafeMakedirs(self.dir_path)
 
@@ -1084,24 +1090,38 @@ class ResolveSymlinkTest(cros_test_lib.TempDirTestCase):
     osutils.SafeSymlink(self.dir_path, 'abs_dir_symlink')
     osutils.SafeSymlink('./directory', 'rel_dir_symlink')
 
-    self.abs_file_symlink = os.path.join(self.tempdir, 'abs_file_symlink')
-    self.rel_file_symlink = os.path.join(self.tempdir, 'rel_file_symlink')
-    self.abs_dir_symlink = os.path.join(self.tempdir, 'abs_dir_symlink')
-    self.rel_dir_symlink = os.path.join(self.tempdir, 'rel_dir_symlink')
+    self.abs_file_symlink = self.tempdir / 'abs_file_symlink'
+    self.rel_file_symlink = self.tempdir / 'rel_file_symlink'
+    self.abs_dir_symlink = self.tempdir / 'abs_dir_symlink'
+    self.rel_dir_symlink = self.tempdir / 'rel_dir_symlink'
 
   def testAbsoluteResolution(self):
-    """Test absolute path resolutions."""
+    """Test absolute path resolutions using Path objects."""
     self.assertEqual(self.file_path,
                      osutils.ResolveSymlink(self.abs_file_symlink))
     self.assertEqual(self.dir_path,
                      osutils.ResolveSymlink(self.abs_dir_symlink))
 
+  def testAbsoluteResolutionStr(self):
+    """Test absolute path resolutions using strings."""
+    self.assertEqual(str(self.file_path),
+                     osutils.ResolveSymlink(str(self.abs_file_symlink)))
+    self.assertEqual(str(self.dir_path),
+                     osutils.ResolveSymlink(str(self.abs_dir_symlink)))
+
   def testRelativeResolution(self):
-    """Test relative path resolutions."""
+    """Test relative path resolutions using Path objects."""
     self.assertEqual(self.file_path,
                      osutils.ResolveSymlink(self.rel_file_symlink))
     self.assertEqual(self.dir_path,
                      osutils.ResolveSymlink(self.rel_dir_symlink))
+
+  def testRelativeResolutionStr(self):
+    """Test relative path resolutions using strings."""
+    self.assertEqual(str(self.file_path),
+                     osutils.ResolveSymlink(str(self.rel_file_symlink)))
+    self.assertEqual(str(self.dir_path),
+                     osutils.ResolveSymlink(str(self.rel_dir_symlink)))
 
 
 class IsInsideVmTest(cros_test_lib.MockTempDirTestCase):
