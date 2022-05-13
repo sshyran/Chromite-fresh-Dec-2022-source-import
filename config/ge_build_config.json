@@ -14,18 +14,6 @@
       ]
     },
     {
-      "name": "banon",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "beaglebone",
       "configs": [
         {
@@ -158,18 +146,6 @@
       ]
     },
     {
-      "name": "celes",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "chell",
       "configs": [
         {
@@ -190,30 +166,6 @@
           "leader_board": false,
           "board_group": "corsola",
           "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "cyan",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": true,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "edgar",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
         }
       ]
     },
@@ -290,18 +242,6 @@
       ]
     },
     {
-      "name": "kefka",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "lars",
       "configs": [
         {
@@ -362,30 +302,6 @@
       ]
     },
     {
-      "name": "reks",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "relm",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "reven",
       "configs": [
         {
@@ -430,18 +346,6 @@
           "leader_board": true,
           "board_group": "",
           "arch": "ARM_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "setzer",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
         }
       ]
     },
@@ -530,30 +434,6 @@
       ]
     },
     {
-      "name": "terra",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
-      "name": "ultima",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
-        }
-      ]
-    },
-    {
       "name": "unknown"
     },
     {
@@ -565,18 +445,6 @@
           "leader_board": false,
           "board_group": "veyron",
           "arch": "UNKNOWN"
-        }
-      ]
-    },
-    {
-      "name": "wizpig",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": false,
-          "leader_board": false,
-          "board_group": "strago",
-          "arch": "X86_INTERNAL"
         }
       ]
     }
