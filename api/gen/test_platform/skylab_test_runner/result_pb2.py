@@ -12,6 +12,7 @@ _sym_db = _symbol_database.Default()
 
 
 from chromite.api.gen.test_platform.common import task_pb2 as test__platform_dot_common_dot_task__pb2
+from chromite.third_party.google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -20,9 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n-test_platform/skylab_test_runner/result.proto\x12 test_platform.skylab_test_runner\x1a\x1ftest_platform/common/task.proto\"\xb8\t\n\x06Result\x12L\n\x0f\x61utotest_result\x18\x01 \x01(\x0b\x32\x31.test_platform.skylab_test_runner.Result.AutotestH\x00\x12?\n\x06prejob\x18\x02 \x01(\x0b\x32/.test_platform.skylab_test_runner.Result.Prejob\x12\x33\n\x08log_data\x18\x03 \x01(\x0b\x32!.test_platform.common.TaskLogData\x12J\n\x0cstate_update\x18\x04 \x01(\x0b\x32\x34.test_platform.skylab_test_runner.Result.StateUpdate\x12W\n\x10\x61utotest_results\x18\x06 \x03(\x0b\x32=.test_platform.skylab_test_runner.Result.AutotestResultsEntry\x1a\xfc\x02\n\x08\x41utotest\x12N\n\ntest_cases\x18\x01 \x03(\x0b\x32:.test_platform.skylab_test_runner.Result.Autotest.TestCase\x12\x12\n\nincomplete\x18\x02 \x01(\x08\x1a\xeb\x01\n\x08TestCase\x12\x0c\n\x04name\x18\x01 \x01(\t\x12S\n\x07verdict\x18\x02 \x01(\x0e\x32\x42.test_platform.skylab_test_runner.Result.Autotest.TestCase.Verdict\x12\x1e\n\x16human_readable_summary\x18\x03 \x01(\t\"\\\n\x07Verdict\x12\x15\n\x11VERDICT_UNDEFINED\x10\x00\x12\x10\n\x0cVERDICT_PASS\x10\x01\x12\x10\n\x0cVERDICT_FAIL\x10\x02\x12\x16\n\x12VERDICT_NO_VERDICT\x10\x03J\x04\x08\x03\x10\x04R\x18synchronous_log_data_url\x1a\x98\x02\n\x06Prejob\x12\x42\n\x04step\x18\x01 \x03(\x0b\x32\x34.test_platform.skylab_test_runner.Result.Prejob.Step\x1a\xc9\x01\n\x04Step\x12\x0c\n\x04name\x18\x01 \x01(\t\x12M\n\x07verdict\x18\x02 \x01(\x0e\x32<.test_platform.skylab_test_runner.Result.Prejob.Step.Verdict\x12\x1e\n\x16human_readable_summary\x18\x03 \x01(\t\"D\n\x07Verdict\x12\x15\n\x11VERDICT_UNDEFINED\x10\x00\x12\x10\n\x0cVERDICT_PASS\x10\x01\x12\x10\n\x0cVERDICT_FAIL\x10\x02\x1a \n\x0bStateUpdate\x12\x11\n\tdut_state\x18\x01 \x01(\t\x1ai\n\x14\x41utotestResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12@\n\x05value\x18\x02 \x01(\x0b\x32\x31.test_platform.skylab_test_runner.Result.Autotest:\x02\x38\x01\x42\t\n\x07harnessJ\x04\x08\x05\x10\x06R\rasync_resultsBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
+  serialized_pb=b'\n-test_platform/skylab_test_runner/result.proto\x12 test_platform.skylab_test_runner\x1a\x1ftest_platform/common/task.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbd\n\n\x06Result\x12L\n\x0f\x61utotest_result\x18\x01 \x01(\x0b\x32\x31.test_platform.skylab_test_runner.Result.AutotestH\x00\x12?\n\x06prejob\x18\x02 \x01(\x0b\x32/.test_platform.skylab_test_runner.Result.Prejob\x12\x33\n\x08log_data\x18\x03 \x01(\x0b\x32!.test_platform.common.TaskLogData\x12J\n\x0cstate_update\x18\x04 \x01(\x0b\x32\x34.test_platform.skylab_test_runner.Result.StateUpdate\x12W\n\x10\x61utotest_results\x18\x06 \x03(\x0b\x32=.test_platform.skylab_test_runner.Result.AutotestResultsEntry\x1a\x81\x04\n\x08\x41utotest\x12N\n\ntest_cases\x18\x01 \x03(\x0b\x32:.test_platform.skylab_test_runner.Result.Autotest.TestCase\x12\x12\n\nincomplete\x18\x02 \x01(\x08\x1a\xf0\x02\n\x08TestCase\x12\x0c\n\x04name\x18\x01 \x01(\t\x12S\n\x07verdict\x18\x02 \x01(\x0e\x32\x42.test_platform.skylab_test_runner.Result.Autotest.TestCase.Verdict\x12\x1e\n\x16human_readable_summary\x18\x03 \x01(\t\x12.\n\nstart_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"\x82\x01\n\x07Verdict\x12\x15\n\x11VERDICT_UNDEFINED\x10\x00\x12\x10\n\x0cVERDICT_PASS\x10\x01\x12\x10\n\x0cVERDICT_FAIL\x10\x02\x12\x16\n\x12VERDICT_NO_VERDICT\x10\x03\x12\x11\n\rVERDICT_ERROR\x10\x04\x12\x11\n\rVERDICT_ABORT\x10\x05J\x04\x08\x03\x10\x04R\x18synchronous_log_data_url\x1a\x98\x02\n\x06Prejob\x12\x42\n\x04step\x18\x01 \x03(\x0b\x32\x34.test_platform.skylab_test_runner.Result.Prejob.Step\x1a\xc9\x01\n\x04Step\x12\x0c\n\x04name\x18\x01 \x01(\t\x12M\n\x07verdict\x18\x02 \x01(\x0e\x32<.test_platform.skylab_test_runner.Result.Prejob.Step.Verdict\x12\x1e\n\x16human_readable_summary\x18\x03 \x01(\t\"D\n\x07Verdict\x12\x15\n\x11VERDICT_UNDEFINED\x10\x00\x12\x10\n\x0cVERDICT_PASS\x10\x01\x12\x10\n\x0cVERDICT_FAIL\x10\x02\x1a \n\x0bStateUpdate\x12\x11\n\tdut_state\x18\x01 \x01(\t\x1ai\n\x14\x41utotestResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12@\n\x05value\x18\x02 \x01(\x0b\x32\x31.test_platform.skylab_test_runner.Result.Autotest:\x02\x38\x01\x42\t\n\x07harnessJ\x04\x08\x05\x10\x06R\rasync_resultsBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
   ,
-  dependencies=[test__platform_dot_common_dot_task__pb2.DESCRIPTOR,])
+  dependencies=[test__platform_dot_common_dot_task__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
 
 
@@ -53,11 +54,21 @@ _RESULT_AUTOTEST_TESTCASE_VERDICT = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='VERDICT_ERROR', index=4, number=4,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='VERDICT_ABORT', index=5, number=5,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=745,
-  serialized_end=837,
+  serialized_start=873,
+  serialized_end=1003,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT_AUTOTEST_TESTCASE_VERDICT)
 
@@ -86,8 +97,8 @@ _RESULT_PREJOB_STEP_VERDICT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=745,
-  serialized_end=813,
+  serialized_start=873,
+  serialized_end=941,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT_PREJOB_STEP_VERDICT)
 
@@ -121,6 +132,20 @@ _RESULT_AUTOTEST_TESTCASE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='start_time', full_name='test_platform.skylab_test_runner.Result.Autotest.TestCase.start_time', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='end_time', full_name='test_platform.skylab_test_runner.Result.Autotest.TestCase.end_time', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -134,8 +159,8 @@ _RESULT_AUTOTEST_TESTCASE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=602,
-  serialized_end=837,
+  serialized_start=635,
+  serialized_end=1003,
 )
 
 _RESULT_AUTOTEST = _descriptor.Descriptor(
@@ -172,8 +197,8 @@ _RESULT_AUTOTEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=489,
-  serialized_end=869,
+  serialized_start=522,
+  serialized_end=1035,
 )
 
 _RESULT_PREJOB_STEP = _descriptor.Descriptor(
@@ -218,8 +243,8 @@ _RESULT_PREJOB_STEP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=951,
-  serialized_end=1152,
+  serialized_start=1117,
+  serialized_end=1318,
 )
 
 _RESULT_PREJOB = _descriptor.Descriptor(
@@ -249,8 +274,8 @@ _RESULT_PREJOB = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=872,
-  serialized_end=1152,
+  serialized_start=1038,
+  serialized_end=1318,
 )
 
 _RESULT_STATEUPDATE = _descriptor.Descriptor(
@@ -280,8 +305,8 @@ _RESULT_STATEUPDATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1154,
-  serialized_end=1186,
+  serialized_start=1320,
+  serialized_end=1352,
 )
 
 _RESULT_AUTOTESTRESULTSENTRY = _descriptor.Descriptor(
@@ -318,8 +343,8 @@ _RESULT_AUTOTESTRESULTSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1188,
-  serialized_end=1293,
+  serialized_start=1354,
+  serialized_end=1459,
 )
 
 _RESULT = _descriptor.Descriptor(
@@ -382,11 +407,13 @@ _RESULT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=117,
-  serialized_end=1325,
+  serialized_start=150,
+  serialized_end=1491,
 )
 
 _RESULT_AUTOTEST_TESTCASE.fields_by_name['verdict'].enum_type = _RESULT_AUTOTEST_TESTCASE_VERDICT
+_RESULT_AUTOTEST_TESTCASE.fields_by_name['start_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_RESULT_AUTOTEST_TESTCASE.fields_by_name['end_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _RESULT_AUTOTEST_TESTCASE.containing_type = _RESULT_AUTOTEST
 _RESULT_AUTOTEST_TESTCASE_VERDICT.containing_type = _RESULT_AUTOTEST_TESTCASE
 _RESULT_AUTOTEST.fields_by_name['test_cases'].message_type = _RESULT_AUTOTEST_TESTCASE
