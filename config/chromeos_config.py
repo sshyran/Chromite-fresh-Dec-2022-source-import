@@ -1602,6 +1602,13 @@ def ApplyCustomOverrides(site_config, ge_build_config):
           'vm_tests': [],
           'vm_tests_override': []
       },
+      'betty-arc-u-release': {
+          'hw_tests': [],
+          'hw_tests_override': [],
+          'hw_tests_disabled_bug': 'https://crbug.com/998427',
+          'vm_tests': [],
+          'vm_tests_override': []
+      },
 
       # No hw tests for any betty builders.  See crbug/998427.
       'betty-release': {
@@ -2015,6 +2022,7 @@ def ApplyCustomOverrides(site_config, ge_build_config):
   _build_gce_image = frozenset([
       'betty-arc-r-release',
       'betty-arc-t-release',
+      'betty-arc-u-release',
   ])
 
   for config_name in _build_gce_image:
