@@ -24,6 +24,7 @@ from chromite.lib import parallel
 from chromite.lint.linters import owners
 from chromite.lint.linters import upstart
 from chromite.lint.linters import whitespace
+from chromite.utils import timer
 
 
 # Extract a script's shebang.
@@ -481,7 +482,7 @@ Supported file names: %s
                              'cases like builds where a more permissive '
                              'behavior is desired.')
 
-  def Run(self):
+  def _Run(self):
     files = self.options.files
     if not files:
       # Running with no arguments is allowed to make the repo upload hook
@@ -509,12 +510,15 @@ Supported file names: %s
       return 0
     elif len(tasks) == 1:
       tool, files = next(iter(tool_map.items()))
-      ret = dispatcher(tool, files[0])
+      return dispatcher(tool, files[0])
     else:
       # Run the tool in parallel on the files.
-      ret = sum(parallel.RunTasksInProcessPool(dispatcher, tasks))
+      return sum(parallel.RunTasksInProcessPool(dispatcher, tasks))
 
+  def Run(self):
+    with timer.Timer() as t:
+      ret = self._Run()
     if ret:
-      logging.error('Found lint errors in %i files.', ret)
+      logging.error('Found lint errors in %i files in %s.', ret, t)
 
     return 1 if ret else 0
