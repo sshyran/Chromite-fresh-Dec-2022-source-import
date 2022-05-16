@@ -38,7 +38,9 @@ def timedelta(delta):
   return formated_delta
 
 
-def json(obj, fp: Optional[Union[str, os.PathLike, TextIO]] = None,
+def json(obj,
+         fp: Optional[Union[str, os.PathLike, TextIO]] = None,
+         cls: Optional[mod_json.JSONEncoder] = None,
          compact: bool = False) -> Optional[str]:
   """Convert an object to JSON with the right format.
 
@@ -53,6 +55,7 @@ def json(obj, fp: Optional[Union[str, os.PathLike, TextIO]] = None,
     A string if |fp| is not specified, else None.
   """
   kwargs = {
+      'cls': cls,
       # JSON style guide says Uunicode characters are fully allowed.
       'ensure_ascii': False,
       # We use 2 space indent to match JSON style guide.

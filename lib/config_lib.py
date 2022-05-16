@@ -13,6 +13,7 @@ import os
 from chromite.lib import constants
 from chromite.lib import osutils
 from chromite.utils import memoize
+from chromite.utils import pformat
 
 
 GS_PATH_DEFAULT = 'default'  # Means gs://chromeos-image-archive/ + bot_id
@@ -1978,12 +1979,7 @@ class ObjectJSONEncoder(json.JSONEncoder):
 
 def PrettyJsonDict(dictionary):
   """Returns a pretty-ified json dump of a dictionary."""
-  return json.dumps(
-      dictionary,
-      cls=ObjectJSONEncoder,
-      sort_keys=True,
-      indent=4,
-      separators=(',', ': ')) + '\n'
+  return pformat.json(dictionary, cls=ObjectJSONEncoder)
 
 
 def LoadConfigFromFile(config_file=constants.CHROMEOS_CONFIG_FILE):
