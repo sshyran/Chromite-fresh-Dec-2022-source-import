@@ -4,6 +4,7 @@
 
 """Test the partition_lib module."""
 
+import logging
 import os
 
 from chromite.lib import cgpt
@@ -38,13 +39,12 @@ class PartitionLibTest(cros_test_lib.RunCommandTempDirTestCase):
     block_size = 4096
     block_count = 123
 
-    self.PatchObject(cros_build_lib, 'run',
-                     return_value=cros_build_lib.CommandResult(output="""
-Block size: %d
+    self.rc.AddCmdResult(['/sbin/dumpe2fs', '-h', '/dev/null'], output=f"""
+Block size: {block_size}
 Other thing: 123456798
 Not an integer: cdsad132csda
-Block count: %d
-""" % (block_size, block_count)))
+Block count: {block_count}
+""")
 
     size = partition_lib.Ext2FileSystemSize('/dev/null')
     self.assertEqual(size, block_size * block_count)
@@ -78,12 +78,12 @@ Block count: %d
     self.PatchObject(path_util, 'ToChrootPath', side_effect=lambda x: x)
     image = '/foo/image'
     self.assertTrue(partition_lib.IsSquashfsImage(image))
-    self.assertCommandCalled(['unsquashfs', '-s', image], enter_chroot=True,
-                             stdout=True)
+    cmd = ['unsquashfs', '-s', image]
+    self.assertCommandCalled(cmd, enter_chroot=True, stdout=True,
+                             debug_level=logging.DEBUG)
 
     # Tests failure to identify.
-    self.PatchObject(cros_build_lib, 'run',
-                     side_effect=cros_build_lib.RunCommandError('error'))
+    self.rc.AddCmdResult(cmd, returncode=1)
     self.assertFalse(partition_lib.IsSquashfsImage(image))
 
   def testIsExt4Image(self):
@@ -94,13 +94,12 @@ Block count: %d
     self.PatchObject(path_util, 'ToChrootPath', side_effect=lambda x: x)
     image = '/foo/image'
     self.assertTrue(partition_lib.IsExt4Image(image))
-    self.assertCommandCalled(['sudo', '--', 'tune2fs', '-l', image],
-                             enter_chroot=True,
-                             stdout=True)
+    cmd = ['sudo', '--', 'tune2fs', '-l', image]
+    self.assertCommandCalled(cmd, enter_chroot=True, stdout=True,
+                             debug_level=logging.DEBUG)
 
     # Tests failure to identify.
-    self.PatchObject(cros_build_lib, 'run',
-                     side_effect=cros_build_lib.RunCommandError('error'))
+    self.rc.AddCmdResult(cmd, returncode=1)
     self.assertFalse(partition_lib.IsExt4Image(image))
 
   def testIsGptImage(self):

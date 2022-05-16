@@ -45,9 +45,9 @@ def Ext2FileSystemSize(ext2_file):
     ext2_file: The path to the ext2 file.
   """
   # dumpe2fs is normally installed in /sbin but doesn't require root.
-  dump = cros_build_lib.run(['/sbin/dumpe2fs', '-h', ext2_file],
-                            print_cmd=False, capture_output=True,
-                            encoding='utf-8').stdout
+  dump = cros_build_lib.dbg_run(
+      ['/sbin/dumpe2fs', '-h', ext2_file], capture_output=True,
+      encoding='utf-8').stdout
   fs_blocks = 0
   fs_blocksize = 0
   for line in dump.split('\n'):
@@ -134,9 +134,10 @@ def ExtractMiniOS(image, minios_out):
 
 def IsSquashfsImage(image):
   """Returns true if the image is detected to be Squashfs."""
+  logging.debug('Checking if image is squashfs: %s', image)
   try:
     # -s: Display file system superblock.
-    cros_build_lib.run(
+    cros_build_lib.dbg_run(
         ['unsquashfs', '-s', path_util.ToChrootPath(image)],
         stdout=True,
         enter_chroot=True)
@@ -147,11 +148,12 @@ def IsSquashfsImage(image):
 
 def IsExt4Image(image):
   """Returns true if the image is detected to be ext2/ext3/ext4."""
+  logging.debug('Checking if image is ext2/3/4: %s', image)
   try:
     # -l: Listing the content of the superblock structure.
     cros_build_lib.sudo_run(
         ['tune2fs', '-l', path_util.ToChrootPath(image)], stdout=True,
-        enter_chroot=True)
+        enter_chroot=True, debug_level=logging.DEBUG)
     return True
   except cros_build_lib.RunCommandError:
     return False

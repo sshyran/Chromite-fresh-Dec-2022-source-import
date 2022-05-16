@@ -650,7 +650,7 @@ def GetImageDiskPartitionInfo(image_path):
 
   # The 'I' input tells parted to ignore its supposed concern about overlapping
   # partitions. Cgpt simply ignores the input.
-  lines = cros_build_lib.run(
+  lines = cros_build_lib.dbg_run(
       cmd,
       extra_env={'PATH': '/sbin:%s' % os.environ['PATH'], 'LC_ALL': 'C'},
       capture_output=True,
