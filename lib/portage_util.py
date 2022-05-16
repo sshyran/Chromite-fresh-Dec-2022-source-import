@@ -2206,7 +2206,8 @@ def GetReverseDependencies(
     args += ['--indirect']
   args += packages
 
-  result = _Equery('depends', *args, sysroot=str(sysroot), print_cmd=False)
+  result = _Equery(
+      'depends', *args, sysroot=str(sysroot), print_cmd=False, check=False)
   return [package_info.parse(x) for x in result.output.strip().splitlines()]
 
 
