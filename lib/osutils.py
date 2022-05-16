@@ -338,7 +338,8 @@ def ReadFile(path: Union[Path, str],
              mode: str = 'r',
              encoding: Optional[str] = None,
              errors: Optional[str] = None,
-             size: Optional[int] = None) -> Union[bytes, str]:
+             size: Optional[int] = None,
+             seek: Optional[int] = None) -> Union[bytes, str]:
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.
@@ -349,7 +350,12 @@ def ReadFile(path: Union[Path, str],
       following settings) and 'rb' is for binary files.
     encoding: The encoding of the file content.  Text files default to 'utf-8'.
     errors: How to handle encoding errors.  Text files default to 'strict'.
-    size: How many bytes to return.  Defaults to the entire file.
+    size: How many bytes to return.  Defaults to the entire file.  If this is
+      larger than the number of available bytes, an error is not thrown, you'll
+      just get back a short read.
+    seek: How many bytes to skip from the beginning.  By default, none.  If this
+      is larger than the file itself, an error is not thrown, you'll just get
+      back a short read.
 
   Returns:
     The content of the file, either as bytes or a string (with the specified
@@ -365,6 +371,8 @@ def ReadFile(path: Union[Path, str],
       errors = 'strict'
 
   with open(path, mode=mode, encoding=encoding, errors=errors) as f:
+    if seek:
+      f.seek(seek)
     return f.read(size)
 
 
