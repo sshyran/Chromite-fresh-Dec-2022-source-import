@@ -339,7 +339,8 @@ def ReadFile(path: Union[Path, str],
              encoding: Optional[str] = None,
              errors: Optional[str] = None,
              size: Optional[int] = None,
-             seek: Optional[int] = None) -> Union[bytes, str]:
+             seek: Optional[int] = None,
+             sudo: Optional[bool] = False) -> Union[bytes, str]:
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.
@@ -356,6 +357,7 @@ def ReadFile(path: Union[Path, str],
     seek: How many bytes to skip from the beginning.  By default, none.  If this
       is larger than the file itself, an error is not thrown, you'll just get
       back a short read.
+    sudo: If True, read the file as root.
 
   Returns:
     The content of the file, either as bytes or a string (with the specified
@@ -370,10 +372,28 @@ def ReadFile(path: Union[Path, str],
     if errors is None:
       errors = 'strict'
 
-  with open(path, mode=mode, encoding=encoding, errors=errors) as f:
-    if seek:
-      f.seek(seek)
-    return f.read(size)
+  # Try to read w/out permission first.
+  try:
+    with open(path, mode=mode, encoding=encoding, errors=errors) as f:
+      if seek:
+        f.seek(seek)
+      return f.read(size)
+  except PermissionError:
+    if not sudo:
+      raise
+
+  # If in sudo mode, use dd to extract.  We'll read in chunks of 1MiB for better
+  # perf than the default of 512 bytes.
+  cmd = ['dd', 'status=none', 'iflag=count_bytes,skip_bytes',
+         f'bs={1024 * 1024}', f'if={path}']
+  if seek:
+    cmd += [f'skip={seek}']
+  if size:
+    cmd += [f'count={size}']
+  result = cros_build_lib.sudo_run(
+      cmd, capture_output=True, encoding=encoding, errors=errors,
+      debug_level=logging.DEBUG)
+  return result.stdout
 
 
 def MD5HashFile(path: Union[str, os.PathLike]) -> str:

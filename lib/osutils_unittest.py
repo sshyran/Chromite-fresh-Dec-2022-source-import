@@ -120,6 +120,60 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertEqual(osutils.WriteFile(filename, data, mode='wb'), None)
     self.assertEqual(osutils.ReadFile(filename, mode='rb'), b''.join(data))
 
+  def testReadSudo(self):
+    """Verify we can read data as root (in a world-readable dir)."""
+    # First read a non-root file.
+    filename = self.tempdir / 'foo'
+    data = b'alsdkfjasldkfjaskdlfjasdf'
+    sdata = data.decode('utf-8')
+    filename.write_bytes(data)
+    self.assertEqual(osutils.ReadFile(filename, mode='r', sudo=True), sdata)
+    self.assertEqual(osutils.ReadFile(filename, mode='rb', sudo=True), data)
+
+    with osutils.TempDir(sudo_rm=True) as tempdir:
+      # Create a file only root can read.
+      filename = os.path.join(tempdir, 'file')
+      osutils.WriteFile(filename, data, mode='wb', chmod=0o600, sudo=True)
+
+      # Read a root file w/out sudo should fail.
+      self.assertRaises(IOError, osutils.ReadFile, filename)
+      # Read a root file w/sudo as text.
+      self.assertEqual(osutils.ReadFile(filename, mode='r', sudo=True), sdata)
+      # Read a root file w/sudo as bytes.
+      self.assertEqual(osutils.ReadFile(filename, mode='rb', sudo=True), data)
+      # Read a root file w/partial reads.
+      self.assertEqual(osutils.ReadFile(filename, mode='r', sudo=True, size=3),
+                       sdata[:3])
+      self.assertEqual(osutils.ReadFile(filename, mode='rb', sudo=True, size=3),
+                       data[:3])
+      # Read a root file w/seeks & partial reads.
+      self.assertEqual(
+          osutils.ReadFile(filename, mode='r', sudo=True, seek=3, size=3),
+          sdata[3:6])
+      self.assertEqual(
+          osutils.ReadFile(filename, mode='rb', sudo=True, seek=3, size=3),
+          data[3:6])
+
+  def testReadSudoSubdir(self):
+    """Verify we can read data as root in a subdir."""
+    data = b'alsdkfjasldkfjaskdlfjasdf'
+    sdata = data.decode('utf-8')
+
+    with osutils.TempDir(sudo_rm=True) as tempdir:
+      # Create a file only root can read.
+      tempdir = Path(tempdir)
+      subdir = tempdir / 'subdir'
+      self.assertTrue(osutils.SafeMakedirs(subdir, mode=0o700, sudo=True))
+      filename = subdir / 'file'
+      osutils.WriteFile(filename, data, mode='wb', chmod=0o600, sudo=True)
+
+      # Read a root file w/out sudo should fail.
+      self.assertRaises(IOError, osutils.ReadFile, filename)
+      # Read a root file w/sudo as text.
+      self.assertEqual(osutils.ReadFile(filename, mode='r', sudo=True), sdata)
+      # Read a root file w/sudo as bytes.
+      self.assertEqual(osutils.ReadFile(filename, mode='rb', sudo=True), data)
+
   def testSudoWrite(self):
     """Verify that we can write a file as sudo."""
     with osutils.TempDir(sudo_rm=True) as tempdir:
