@@ -348,22 +348,14 @@ def ReadFile(path: Union[Path, str],
   if mode not in ('r', 'rb'):
     raise ValueError('mode may only be "r" or "rb", not %r' % (mode,))
 
-  if 'b' in mode:
-    if encoding is not None or errors is not None:
-      raise ValueError('binary mode does not use encoding/errors')
-  else:
+  if 'b' not in mode:
     if encoding is None:
       encoding = 'utf-8'
     if errors is None:
       errors = 'strict'
 
-  with open(path, 'rb') as f:
-    # TODO(vapier): We can merge encoding/errors into the open call once we are
-    # Python 3 only.  Until then, we have to handle it ourselves.
-    ret = f.read()
-    if 'b' not in mode:
-      ret = ret.decode(encoding, errors)
-    return ret
+  with open(path, mode=mode, encoding=encoding, errors=errors) as f:
+    return f.read()
 
 
 def MD5HashFile(path: Union[str, os.PathLike]) -> str:
