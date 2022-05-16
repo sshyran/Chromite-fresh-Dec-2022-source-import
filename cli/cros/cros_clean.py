@@ -124,7 +124,7 @@ class CleanCommand(command.CliCommand):
 
     group = parser.add_argument_group(
         'Advanced Customization',
-        description='Advanced options that are rarely be needed.')
+        description='Advanced options that are rarely needed.')
     group.add_argument(
         '--sdk-path',
         type='path',
