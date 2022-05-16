@@ -67,6 +67,14 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertEqual(osutils.WriteFile(filename, data, mode='wb'), None)
     self.assertEqual(osutils.ReadFile(filename, mode='rb'), data)
 
+  def testReadSize(self):
+    """Verify we can read partial data."""
+    filename = self.tempdir / 'foo'
+    data = b'alsdkfjasldkfjaskdlfjasdf'
+    filename.write_bytes(data)
+    self.assertEqual(osutils.ReadFile(filename, mode='rb', size=3), b'als')
+    self.assertEqual(osutils.ReadFile(filename, mode='r', size=3), 'als')
+
   def testWriteFileStringIter(self):
     """Verify that we can write an iterable of strings."""
     filename = os.path.join(self.tempdir, 'foo')

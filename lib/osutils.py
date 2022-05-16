@@ -329,7 +329,8 @@ def Chown(path: Union[Path, str],
 def ReadFile(path: Union[Path, str],
              mode: str = 'r',
              encoding: Optional[str] = None,
-             errors: Optional[str] = None):
+             errors: Optional[str] = None,
+             size: Optional[int] = None) -> Union[bytes, str]:
   """Read a given file on disk.  Primarily useful for one off small files.
 
   The defaults are geared towards reading UTF-8 encoded text.
@@ -340,6 +341,7 @@ def ReadFile(path: Union[Path, str],
       following settings) and 'rb' is for binary files.
     encoding: The encoding of the file content.  Text files default to 'utf-8'.
     errors: How to handle encoding errors.  Text files default to 'strict'.
+    size: How many bytes to return.  Defaults to the entire file.
 
   Returns:
     The content of the file, either as bytes or a string (with the specified
@@ -355,7 +357,7 @@ def ReadFile(path: Union[Path, str],
       errors = 'strict'
 
   with open(path, mode=mode, encoding=encoding, errors=errors) as f:
-    return f.read()
+    return f.read(size)
 
 
 def MD5HashFile(path: Union[str, os.PathLike]) -> str:
