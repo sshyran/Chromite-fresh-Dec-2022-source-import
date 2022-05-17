@@ -1087,7 +1087,7 @@ class ChromeSDKCommand(command.CliCommand):
 
     # If the board is a generic family, generate -crostoolchain.gni files,
     # too, which is used by Lacros build.
-    if board in ('amd64-generic', 'arm-generic'):
+    if board.endswith('-generic'):
       toolchain_key_pattern = re.compile(r'^(%s)$' % '|'.join([
           'cros_board',
           'cros_sdk_version',

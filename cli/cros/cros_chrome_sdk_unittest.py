@@ -125,7 +125,9 @@ class SDKFetcherMock(partial_mock.PartialMock):
 }"""
 
   BOARD = 'eve'
-  BOARDS = ['amd64-generic', 'arm-generic']
+  # These are boards that Lacros is currently supporting.
+  # Specifically, *-crostoolchain.gni files need to be generated for them.
+  BOARDS = ['amd64-generic', 'arm-generic', 'arm64-generic']
   VERSION = '4567.8.9'
 
   def __init__(self, external_mocks=None):
@@ -295,8 +297,6 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       board_arg_file = os.path.join(
           self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
       self.assertExists(board_arg_file)
-      # Because board is either amd64-generic or arm-generic,
-      # it is a target to create -crostoolchain.gni files, too.
       board_crostoolchain_arg_file = os.path.join(
           self.chrome_src_dir,
           'build/args/chromeos/%s-crostoolchain.gni' % board)
@@ -317,8 +317,6 @@ class RunThroughTest(cros_test_lib.MockTempDirTestCase,
       board_arg_file = os.path.join(
           self.chrome_src_dir, 'build/args/chromeos/%s.gni' % board)
       self.assertNotExists(board_arg_file)
-      # Because board is either amd64-generic or arm-generic,
-      # it is a target to create -crostoolchain.gni files, too.
       board_crostoolchain_arg_file = os.path.join(
           self.chrome_src_dir,
           'build/args/chromeos/%s-crostoolchain.gni' % board)
