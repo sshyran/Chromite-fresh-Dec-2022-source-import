@@ -116,8 +116,7 @@ def ExtractRoot(image, root_out, truncate=True):
 
   root_out_size = Ext2FileSystemSize(root_out)
   if root_out_size:
-    with open(root_out, 'ab') as root:
-      root.truncate(root_out_size)
+    os.truncate(root_out, root_out_size)
     logging.info('Truncated root to %d bytes.', root_out_size)
   else:
     raise IOError('Error truncating the rootfs to filesystem size.')
