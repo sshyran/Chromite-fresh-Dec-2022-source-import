@@ -87,11 +87,10 @@ def ExtractKernel(image, kern_out):
     kern_out: The output kernel file.
   """
   ExtractPartition(image, constants.PART_KERN_B, kern_out)
-  with open(kern_out, 'rb') as kern:
-    if not any(kern.read(65536)):
-      logging.warning('%s: Kernel B is empty, patching kernel A.', image)
-      ExtractPartition(image, constants.PART_KERN_A, kern_out)
-      PatchKernel(image, kern_out)
+  if not any(osutils.ReadFile(kern_out, 'rb', size=65536)):
+    logging.warning('%s: Kernel B is empty, patching kernel A.', image)
+    ExtractPartition(image, constants.PART_KERN_A, kern_out)
+    PatchKernel(image, kern_out)
 
 
 def ExtractRoot(image, root_out, truncate=True):
