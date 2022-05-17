@@ -4,7 +4,6 @@
 
 """Test the partition_lib module."""
 
-import logging
 import os
 
 from chromite.lib import cgpt
@@ -12,7 +11,6 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib.paygen import partition_lib
 
 
@@ -48,6 +46,20 @@ class PartitionLibTest(cros_test_lib.MockTempDirTestCase):
         ['mke2fs', root],
         extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
     self.assertEqual(partition_lib.Ext2FileSystemSize(root), 1024 * 1024)
+
+  def testIsSquashfsImageFails(self):
+    """Test SquashFS identification on non-images."""
+    image = self.tempdir / 'img.squashfs'
+    osutils.AllocateFile(image, 1024 * 1024)
+    self.assertFalse(partition_lib.IsSquashfsImage(image))
+
+  def testIsSquashfsImage(self):
+    """Tests we correctly identify a SquashFS image."""
+    image = self.tempdir / 'img.squashfs'
+    root = self.tempdir / 'root'
+    root.mkdir()
+    cros_build_lib.run(['mksquashfs', root.name, image.name], cwd=self.tempdir)
+    self.assertTrue(partition_lib.IsSquashfsImage(image))
 
   def testIsExt4Image(self):
     """Tests we correctly identify an Ext4 image."""
@@ -88,23 +100,6 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
 
     partition_lib.ExtractPartition(image, 'PART-A', part_a)
     self.assertEqual(osutils.ReadFile(part_a), part_a_bin)
-
-  def testIsSquashfsImage(self):
-    """Tests we correctly identify a SquashFS image."""
-    # Tests correct arguments are passed and SquashFS image is correctly
-    # identified.
-    # Don't need to test the path util functionality, make it just give us the
-    # image path back.
-    self.PatchObject(path_util, 'ToChrootPath', side_effect=lambda x: x)
-    image = '/foo/image'
-    self.assertTrue(partition_lib.IsSquashfsImage(image))
-    cmd = ['unsquashfs', '-s', image]
-    self.assertCommandCalled(cmd, enter_chroot=True, stdout=True,
-                             debug_level=logging.DEBUG)
-
-    # Tests failure to identify.
-    self.rc.AddCmdResult(cmd, returncode=1)
-    self.assertFalse(partition_lib.IsSquashfsImage(image))
 
   def testIsGptImage(self):
     """Tests we correctly identify an Gpt image."""

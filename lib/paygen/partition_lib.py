@@ -13,7 +13,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib.paygen import filelib
 
 
@@ -135,16 +134,11 @@ def ExtractMiniOS(image, minios_out):
 
 def IsSquashfsImage(image):
   """Returns true if the image is detected to be Squashfs."""
+  MAGIC = b'\x68\x73\x71\x73'
+
   logging.debug('Checking if image is squashfs: %s', image)
-  try:
-    # -s: Display file system superblock.
-    cros_build_lib.dbg_run(
-        ['unsquashfs', '-s', path_util.ToChrootPath(image)],
-        stdout=True,
-        enter_chroot=True)
-    return True
-  except cros_build_lib.RunCommandError:
-    return False
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(image, mode='rb', size=len(MAGIC), sudo=True) == MAGIC
 
 
 def IsExt4Image(image):
