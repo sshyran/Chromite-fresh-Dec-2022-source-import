@@ -16,38 +16,58 @@ from chromite.lib import path_util
 from chromite.lib.paygen import partition_lib
 
 
-class PartitionLibTest(cros_test_lib.RunCommandTempDirTestCase):
-  """Test partition_lib functions."""
+class PartitionLibTest(cros_test_lib.MockTempDirTestCase):
+  """Test partition_lib functions with no mocks by default."""
 
   def testTruncate(self):
     """Test truncating on extraction."""
-    root = os.path.join(self.tempdir, 'root.bin')
+    root = self.tempdir / 'root.bin'
 
-    content = '0123456789'
-    osutils.WriteFile(root, content)
+    # Create a small fs first.
+    osutils.AllocateFile(root, 1024 * 1024)
+    cros_build_lib.run(
+        ['mke2fs', root],
+        extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
+
+    # Then enlarge it.
+    os.truncate(root, 10 * 1024 * 1024)
+
     self.PatchObject(partition_lib, 'ExtractPartition')
-    self.PatchObject(partition_lib, 'Ext2FileSystemSize', return_value=2)
 
     partition_lib.ExtractRoot(None, root, truncate=False)
-    self.assertEqual(osutils.ReadFile(root), content)
+    self.assertEqual(root.stat().st_size, 10 * 1024 * 1024)
 
     partition_lib.ExtractRoot(None, root)
-    self.assertEqual(osutils.ReadFile(root), content[:2])
+    self.assertEqual(root.stat().st_size, 1024 * 1024)
 
   def testExt2FileSystemSize(self):
     """Test getting filesystem size on a simple output."""
-    block_size = 4096
-    block_count = 123
+    root = self.tempdir / 'root.bin'
+    osutils.AllocateFile(root, 1024 * 1024)
+    cros_build_lib.run(
+        ['mke2fs', root],
+        extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
+    self.assertEqual(partition_lib.Ext2FileSystemSize(root), 1024 * 1024)
 
-    self.rc.AddCmdResult(['/sbin/dumpe2fs', '-h', '/dev/null'], output=f"""
-Block size: {block_size}
-Other thing: 123456798
-Not an integer: cdsad132csda
-Block count: {block_count}
-""")
+  def testIsExt4Image(self):
+    """Tests we correctly identify an Ext4 image."""
+    for ver in (2, 3, 4):
+      image = self.tempdir / f'rootfs.ext{ver}'
+      # 2 MiB is big enough for ext3/ext4 specific features.
+      osutils.AllocateFile(image, 2 * 1024 * 1024)
 
-    size = partition_lib.Ext2FileSystemSize('/dev/null')
-    self.assertEqual(size, block_size * block_count)
+      # Tests failure to identify.
+      self.assertFalse(partition_lib.IsExt4Image(image))
+
+      # Make a real ext2/ext3/ext4 images.
+      cros_build_lib.run(
+          [f'mkfs.ext{ver}', image],
+          extra_env={'PATH': '/sbin:/usr/sbin:%s' % os.environ['PATH']})
+      self.assertTrue(partition_lib.IsExt4Image(image))
+
+
+class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
+  """Test partition_lib functions with run() mocked."""
 
   def testExtractPartition(self):
     """Tests extraction on a simple image."""
@@ -85,22 +105,6 @@ Block count: {block_count}
     # Tests failure to identify.
     self.rc.AddCmdResult(cmd, returncode=1)
     self.assertFalse(partition_lib.IsSquashfsImage(image))
-
-  def testIsExt4Image(self):
-    """Tests we correctly identify an Ext4 image."""
-    # Tests correct arguments are passed and Ext4 image is correctly identified.
-    # Don't need to test the path util functionality, make it just give us the
-    # image path back.
-    self.PatchObject(path_util, 'ToChrootPath', side_effect=lambda x: x)
-    image = '/foo/image'
-    self.assertTrue(partition_lib.IsExt4Image(image))
-    cmd = ['sudo', '--', 'tune2fs', '-l', image]
-    self.assertCommandCalled(cmd, enter_chroot=True, stdout=True,
-                             debug_level=logging.DEBUG)
-
-    # Tests failure to identify.
-    self.rc.AddCmdResult(cmd, returncode=1)
-    self.assertFalse(partition_lib.IsExt4Image(image))
 
   def testIsGptImage(self):
     """Tests we correctly identify an Gpt image."""

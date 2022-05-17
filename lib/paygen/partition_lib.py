@@ -12,6 +12,7 @@ from chromite.lib import cgpt
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
+from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib.paygen import filelib
 
@@ -148,15 +149,13 @@ def IsSquashfsImage(image):
 
 def IsExt4Image(image):
   """Returns true if the image is detected to be ext2/ext3/ext4."""
+  MAGIC = b'\x53\xef'
+  SB_OFFSET = 0x438
+
   logging.debug('Checking if image is ext2/3/4: %s', image)
-  try:
-    # -l: Listing the content of the superblock structure.
-    cros_build_lib.sudo_run(
-        ['tune2fs', '-l', path_util.ToChrootPath(image)], stdout=True,
-        enter_chroot=True, debug_level=logging.DEBUG)
-    return True
-  except cros_build_lib.RunCommandError:
-    return False
+  # Read the magic number in the file's superblock.
+  return osutils.ReadFile(
+      image, mode='rb', seek=SB_OFFSET, size=len(MAGIC), sudo=True) == MAGIC
 
 
 def IsGptImage(image):
@@ -178,7 +177,7 @@ def LookupImageType(image):
   """
   if IsGptImage(image):
     return CROS_IMAGE
-  elif IsSquashfsImage(image) or IsExt4Image(image):
+  elif IsExt4Image(image) or IsSquashfsImage(image):
     return DLC_IMAGE
 
   return None
