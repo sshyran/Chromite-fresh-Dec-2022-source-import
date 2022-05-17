@@ -15,6 +15,10 @@ from chromite.lib import config_lib
 from chromite.lib import gerrit
 
 
+# Gerrit will merge a max of 240 dependencies. Leave some room
+# for dependencies from the platform/ec repo.
+MAX_GERRIT_CHANGES = 225
+
 def main(args):
   """Downstream Zephyr CLs."""
   # TODO(aaronmassey): Add option to rebase CLs.
@@ -51,6 +55,12 @@ def main(args):
 
     if stop_at and stop_at == change_num:
       logging.info('Matched change: %s, stop processing other changes',
+                   change_num)
+      break
+
+    if i + 1 > MAX_GERRIT_CHANGES:
+      logging.info('Maximum Gerrit limit reached at change: %s,'
+                   ' stop processing other changes',
                    change_num)
       break
 
