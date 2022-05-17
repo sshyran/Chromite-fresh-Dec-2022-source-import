@@ -37,14 +37,26 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     self.assertFalse(osutils.IsSubPath('/ab', '/a/b'))
     self.assertFalse(osutils.IsSubPath('/a/bcde', '/a/b'))
 
-  def testAllocateFile(self):
+  def testAllocateNewFile(self):
     """Verify we can allocate a file of a certain length."""
-    filename = os.path.join(self.tempdir, 'foo')
+    filename = self.tempdir / 'foo'
     size = 1234
     osutils.AllocateFile(filename, size)
 
     self.assertExists(filename)
     self.assertEqual(size, os.path.getsize(filename))
+
+  def testAllocateExistingFile(self):
+    """Verify we can allocate an existing file of a certain length."""
+    file = self.tempdir / 'foo'
+    file.write_text('abcd')
+
+    size = 1234
+    osutils.AllocateFile(file, size)
+    self.assertEqual(size, os.path.getsize(file))
+
+    # Content should be reset.
+    self.assertEqual(osutils.ReadFile(file, 'rb', size=4), b'\0\0\0\0')
 
   def testReadWriteFile(self):
     """Verify we can write data to a file, and then read it back."""

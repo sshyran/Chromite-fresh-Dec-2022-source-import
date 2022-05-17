@@ -99,6 +99,14 @@ def AllocateFile(
     makedirs: bool = False) -> None:
   """Allocates a file of a certain |size| in |path|.
 
+  This is intended to be used with new files as it will create the path (and
+  optionally, the parent dirs) for you.
+
+  If used on an existing file, existing content is automatically zeroed out.
+
+  If you want to truncate an existing file and preserve content, use the
+  os.truncate() API instead.
+
   Args:
     path: Path to allocate the file.
     size: The length, in bytes, of the desired file.
