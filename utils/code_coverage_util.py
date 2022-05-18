@@ -8,7 +8,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 
 from chromite.lib import osutils
 
@@ -156,7 +156,8 @@ def _GenerateZeroCoverageLLVMForFile(file_path: str, src_prefix_path: str,
 
 
 def _ShouldExclude(file: str, exclude_files: List[str],
-                   exclude_files_suffixes: Tuple[str]) -> bool:
+                   exclude_files_suffixes: Tuple[str],
+                   extensions_to_remove_exclusion_check: Iterable[str]) -> bool:
   """Determine if the filename should be excluded from zero coverage.
 
     This method first does the suffixes based exclude check.
@@ -164,10 +165,27 @@ def _ShouldExclude(file: str, exclude_files: List[str],
     Note that LLVM generated file paths are absolute paths, however
     |file| is relative to src.
 
+    In cases where src files have llvm code coverage, but corresponding
+    header files does not have llvm coverage, we need to exclude
+    those header files from zero coverage. For checking if these header file
+    are covered by llvm cov reports or not, rather than checking directly the
+    filepath, remove the header extension and then check for the filepath
+    presence in llvm cov reports.|extensions_to_remove_exclusion_check|
+    contains these extensions such as header extension.
+
+    Consider following example
+    Assume LLVM cov contains reports for foo/google.cc but not for foo/google.h
+    For deciding if zero cov should be generated for foo/google.h, don't just
+    check if foo/google.h is included in llvm cov. Rather check if filename
+    like foo/google is present in reports or not. If present, then don't
+    generate zero cov for foo/google.h
+
   Args:
     file: Chromium src root relative file path.
     exclude_files: List of llvm generated file paths to exclude.
     exclude_files_suffixes: Used to exclude files based on suffixes
+    extensions_to_remove_exclusion_check: Iterable of extensions to remove
+      from a file path before exclusion check.
 
   Returns:
     True if a file should be excluded otherwise False.
@@ -176,13 +194,20 @@ def _ShouldExclude(file: str, exclude_files: List[str],
   if file.endswith(exclude_files_suffixes):
     should_exclude = True
   else:
+    temp_file = file
+
+    for extension in extensions_to_remove_exclusion_check:
+      if file.endswith(extension):
+        temp_file = file[:-len(extension)]
+        break
+
     for exclude_file in exclude_files:
-      if file in exclude_file:
+      if temp_file in exclude_file:
         should_exclude = True
         break
 
   if should_exclude:
-    logging.info('Excluding file %s from coverage reports.', file)
+    logging.info('Excluding file %s from zero coverage generation.', file)
   return should_exclude
 
 
@@ -274,12 +299,14 @@ def CreateLlvmCoverageJson(coverage_data: List) -> Dict:
   return coverage_json
 
 
-def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
-                             src_file_extensions: List[str],
-                             exclude_line_prefixes: Tuple[str],
-                             exclude_files: List[str],
-                             exclude_files_suffixes: Tuple[str],
-                             src_prefix_path: str) -> Dict:
+def GenerateZeroCoverageLlvm(
+    path_to_src_directories: List[str],
+    src_file_extensions: List[str],
+    exclude_line_prefixes: Tuple[str],
+    exclude_files: List[str],
+    exclude_files_suffixes: Tuple[str],
+    src_prefix_path: str,
+    extensions_to_remove_exclusion_check: Iterable[str]) -> Dict:
   """Generate zero coverage for all src files under  |path_to_src_directories|.
 
      More detials on how to generate zero coverage: go/chromeos-zero-coverage.
@@ -291,6 +318,8 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
     exclude_files: files to exclude from zero coverage.
     exclude_files_suffixes: Used to exclude files based on suffixes
     src_prefix_path: prefix path for source code
+    extensions_to_remove_exclusion_check: Iterable of extensions to remove
+      from a file path before exclusion check.
 
   Returns:
     llvm format coverage json.
@@ -304,7 +333,8 @@ def GenerateZeroCoverageLlvm(path_to_src_directories: List[str],
         relative_file_path = full_file_path.replace(basedir, '')
         if (filename.endswith(tuple(src_file_extensions)) and
             not _ShouldExclude(relative_file_path, exclude_files,
-                               exclude_files_suffixes)):
+                               exclude_files_suffixes,
+                               extensions_to_remove_exclusion_check)):
 
           zero_cov = _GenerateZeroCoverageLLVMForFile(full_file_path,
                                                       src_prefix_path,

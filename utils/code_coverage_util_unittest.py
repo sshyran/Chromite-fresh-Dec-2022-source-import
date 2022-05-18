@@ -60,12 +60,14 @@ FILE_CONTENT_USE_CASE_3 = """
 FILE_CONTENT_USE_CASE_4 = ''
 
 FILE_CONTENT_USE_CASE_5 = 'int main(){ }'
+HEADER_FILE_CONTENT_USE_CASE_5 = 'namespace AwesomeNamespace {}'
 
 USE_CASE_1_FILE_NAME = 'USE_CASE_1.cc'
 USE_CASE_2_FILE_NAME = 'USE_CASE_2.cc'
 USE_CASE_3_FILE_NAME = 'USE_CASE_3.cc'
 USE_CASE_4_FILE_NAME = 'USE_CASE_4.cc'
 USE_CASE_5_FILE_NAME = 'USE_CASE_5.cc'
+USE_CASE_5_HEADER_FILE_NAME = 'USE_CASE_5.h'
 PYTHON_FILE_NAME = 'USE_CASE_3.py'
 
 
@@ -158,7 +160,8 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
         exclude_files_suffixes=(),
-        src_prefix_path=self.tempdir)
+        src_prefix_path=self.tempdir,
+        extensions_to_remove_exclusion_check=['.h'])
 
     coverage_data = coverageJson['data'][0]['files']
 
@@ -274,3 +277,55 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
     self.assertEqual(1, len(filenames))
     self.assertEqual('src_code.cpp', filenames[0])
+
+  def testExtensionsToRemoveExclusionCheck(self):
+    """Verify that header files are properly excluded"""
+
+    path_to_src_directory = os.path.join(self.tempdir, 'src')
+    osutils.SafeMakedirs(path_to_src_directory)
+
+    codeBase = [{
+        'file': USE_CASE_1_FILE_NAME,
+        'content': FILE_CONTENT_USE_CASE_1,
+    }, {
+        'file': USE_CASE_5_FILE_NAME,
+        'content': FILE_CONTENT_USE_CASE_5,
+    }, {
+        'file': USE_CASE_5_HEADER_FILE_NAME,
+        'content': HEADER_FILE_CONTENT_USE_CASE_5,
+    }]
+    for code in codeBase:
+      file = os.path.join(path_to_src_directory, code['file'])
+      osutils.WriteFile(file, code['content'])
+
+    osutils.SafeMakedirs(os.path.join(self.tempdir, 'zero-coverage'))
+
+    coverageJson = code_coverage_util.GenerateZeroCoverageLlvm(
+        path_to_src_directories=[path_to_src_directory],
+        src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS,
+        exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
+        exclude_files=['/build/code_coverage/' + USE_CASE_5_FILE_NAME],
+        exclude_files_suffixes=(),
+        src_prefix_path=self.tempdir,
+        extensions_to_remove_exclusion_check=['.h'])
+
+    coverage_data = coverageJson['data'][0]['files']
+
+    self.assertEqual(1, len(coverage_data))
+
+    usecase_1_cov_data = self.extractCovDataForFile(USE_CASE_1_FILE_NAME,
+                                                    coverage_data)
+    usecase_5_cov_data = self.extractCovDataForFile(USE_CASE_5_FILE_NAME,
+                                                    coverage_data)
+    usecase_5_header_cov_data = self.extractCovDataForFile(
+        USE_CASE_5_HEADER_FILE_NAME,
+        coverage_data)
+
+    self.assertIsNotNone(usecase_1_cov_data,
+                         'Zero cov should be generated for usercase 1')
+
+    self.assertIsNone(usecase_5_cov_data,
+                      'Zero cov should not be generated for excluded src file')
+    self.assertIsNone(usecase_5_header_cov_data,
+                      str('Zero cov should not be generated for'
+                          'corresponding excluded header file'))

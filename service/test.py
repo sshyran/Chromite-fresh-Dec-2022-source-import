@@ -551,6 +551,7 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
   Returns:
     A string path to the output code_coverage.tar.xz artifact, or None.
   """
+
   try:
     base_path = chroot.full_path(sysroot_class.path)
 
@@ -578,7 +579,9 @@ def BundleCodeCoverageLlvmJson(chroot: 'chroot_lib.Chroot',
         exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES,
         exclude_files=files_with_cov,
         exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
-        src_prefix_path=constants.SOURCE_ROOT)
+        src_prefix_path=constants.SOURCE_ROOT,
+        extensions_to_remove_exclusion_check
+                =(constants.EXTENSIONS_TO_REMOVE_EXCLUSION_CHECK))
     # Merge generated zero coverage data and
     # llvm compiler generated coverage data.
     merged_coverage_json = code_coverage_util.MergeLLVMCoverageJson(

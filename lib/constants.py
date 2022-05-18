@@ -799,6 +799,10 @@ ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES = (
     'tests.cpp'
 )
 
+# For more details see code_coverage_util.py's _ShouldExclude
+# method.
+EXTENSIONS_TO_REMOVE_EXCLUSION_CHECK = ('.h',)
+
 DEBUG_SYMBOLS_NAME = 'debug'
 DEBUG_SYMBOLS_TAR = '%s.tgz' % DEBUG_SYMBOLS_NAME
 
