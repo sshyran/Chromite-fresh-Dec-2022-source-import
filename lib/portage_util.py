@@ -2299,7 +2299,8 @@ def _EmergeBoard(
     package: str,
     board: Optional[str] = None,
     sysroot: Optional[Union[str, os.PathLike]] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> cros_build_lib.CommandResult:
+    buildroot: str = constants.SOURCE_ROOT,
+    set_empty_root: bool = False) -> cros_build_lib.CommandResult:
   """Call emerge board to get dependences of package.
 
   Args:
@@ -2307,14 +2308,18 @@ def _EmergeBoard(
     sysroot: The root directory being inspected.
     package: The package name with optional category, version, and slot.
     buildroot: Source root to find overlays.
+    set_empty_root: Set the --root argument to /mnt/empty. This is a
+      workaround for an issue for portage versions before 2.3.75.
 
   Returns:
     result (cros_build_lib.CommandResult)
   """
   emerge = _GetSysrootTool('emerge', board=board, sysroot=sysroot)
-  cmd = [
-      emerge, '-p', '--cols', '--quiet', '-e', package
-  ]
+  cmd = [emerge, '-p', '--cols', '--quiet', '-e']
+  if set_empty_root:
+    cmd += ['--root', '/mnt/empty']
+  cmd.append(package)
+
   return cros_build_lib.run(
       cmd,
       cwd=buildroot,
@@ -2327,9 +2332,11 @@ def GetPackageDependencies(
     package: str,
     board: Optional[str] = None,
     sysroot: Optional[Union[str, os.PathLike]] = None,
-    buildroot: str = constants.SOURCE_ROOT) -> List[str]:
+    buildroot: str = constants.SOURCE_ROOT,
+    set_empty_root: bool = False) -> List[str]:
   """Returns the depgraph list of packages for a board and package."""
-  output = _EmergeBoard(package, board, sysroot, buildroot).stdout.splitlines()
+  output = _EmergeBoard(package, board, sysroot, buildroot,
+                        set_empty_root).stdout.splitlines()
   packages = []
   for line in output:
     # The first column is ' NRfUD '

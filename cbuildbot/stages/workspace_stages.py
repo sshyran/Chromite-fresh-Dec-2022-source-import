@@ -50,6 +50,7 @@ CROS_RUN_UNITTESTS = '6773.0.0'
 BUILD_IMAGE_BUILDER_PATH = '8183.0.0'
 BUILD_IMAGE_ECLEAN_FLAG = '8318.0.0'
 ANDROID_BREAKPAD = '9667.0.0'
+PORTAGE_2_3_75_UPDATE = '12693.0.0'
 SETUP_BOARD_PORT_COMPLETE = '11802.0.0'
 USE_TOOLCHAINS_BOARDS = '6480.0.0'
 
@@ -728,8 +729,10 @@ class WorkspaceDebugSymbolsStage(WorkspaceStageBase,
       String identifier for a package, or None
     """
     packages = portage_util.GetPackageDependencies(
-        'virtual/target-os', board=self._current_board,
-        buildroot=self._build_root)
+        'virtual/target-os',
+        board=self._current_board,
+        buildroot=self._build_root,
+        set_empty_root=not self.AfterLimit(PORTAGE_2_3_75_UPDATE))
 
     android_packages = {p for p in packages
                         if p.startswith('chromeos-base/android-container-') or

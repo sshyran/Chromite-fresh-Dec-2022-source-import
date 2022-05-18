@@ -802,6 +802,11 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         site_config=workspace_builders_unittest.CreateMockSiteConfig(),
         extra_cmd_args=['--cache-dir', '/cache'])
 
+    pkg_dep_patch = self.PatchObject(
+        portage_util,
+        'GetPackageDependencies',
+        return_value=[])
+
     self.RunStage()
 
     self.rc.assertCommandCalled(
@@ -818,6 +823,11 @@ class WorkspaceDebugSymbolsStageTest(WorkspaceStageBase):
         },
         cwd=self.workspace)
 
+    # Verify set_empty_root is True when using an old version.
+    pkg_dep_patch.assert_called_with(mock.ANY,
+                                     board=mock.ANY,
+                                     buildroot=mock.ANY,
+                                     set_empty_root=True)
     self.assertEqual(
         self.tarball_mock.call_args_list,
         [
