@@ -210,7 +210,7 @@ class BuildLinter:
       locations = []
       for location in finding.locations:
         locations.append(
-            BuildLinter.CodeLocation(
+            CodeLocation(
                 filepath=location.file_path,
                 line_start=location.line_start,
                 line_end=location.line_end))
