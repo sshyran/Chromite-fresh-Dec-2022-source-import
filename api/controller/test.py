@@ -117,10 +117,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
   testable_packages_optional = input_proto.flags.testable_packages_optional
 
   build_target = controller_util.ParseBuildTarget(input_proto.build_target)
-  if cros_build_lib.IsOutsideChroot():
-    chroot = controller_util.ParseChroot(input_proto.chroot)
-  else:
-    chroot = None
 
   code_coverage = input_proto.flags.code_coverage
 
@@ -128,7 +124,6 @@ def BuildTargetUnitTest(input_proto, output_proto, _config):
 
   result = test.BuildTargetUnitTest(
       build_target,
-      chroot,
       packages=packages,
       blocklist=blocklist,
       was_built=was_built,

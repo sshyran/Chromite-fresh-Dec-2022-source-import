@@ -75,14 +75,10 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def setUp(self):
     self.board = 'board'
     self.build_target = build_target_lib.BuildTarget(self.board)
-    self.chroot = chroot_lib.Chroot(path=self.tempdir)
-    # Make the chroot's tmp directory, used for the parallel emerge status file.
-    tempdir = os.path.join(self.tempdir, 'tmp')
-    osutils.SafeMakedirs(tempdir)
 
   def testSuccess(self):
     """Test simple success case."""
-    result = test.BuildTargetUnitTest(self.build_target, self.chroot)
+    result = test.BuildTargetUnitTest(self.build_target)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board])
     self.assertTrue(result.success)
@@ -90,7 +86,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testHost(self):
     """Test host target."""
     host_build_target = build_target_lib.BuildTarget('')
-    result = test.BuildTargetUnitTest(host_build_target, self.chroot)
+    result = test.BuildTargetUnitTest(host_build_target)
 
     self.assertCommandContains(['cros_run_unit_tests', '--host'])
     self.assertTrue(result.success)
@@ -98,26 +94,23 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testPackages(self):
     """Test the packages argument."""
     packages = ['foo/bar', 'cat/pkg']
-    test.BuildTargetUnitTest(self.build_target, self.chroot, packages=packages)
+    test.BuildTargetUnitTest(self.build_target, packages=packages)
     self.assertCommandContains(['--packages', 'foo/bar cat/pkg'])
 
   def testBlocklist(self):
     """Test the blocklist argument."""
     blocklist = ['foo/bar', 'cat/pkg']
-    test.BuildTargetUnitTest(
-        self.build_target, self.chroot, blocklist=blocklist)
+    test.BuildTargetUnitTest(self.build_target, blocklist=blocklist)
     self.assertCommandContains(['--skip-packages', 'foo/bar cat/pkg'])
 
   def testTestablePackagesOptional(self):
     """Test the testable packages optional argument."""
-    test.BuildTargetUnitTest(
-        self.build_target, self.chroot, testable_packages_optional=True)
+    test.BuildTargetUnitTest(self.build_target, testable_packages_optional=True)
     self.assertCommandContains(['--no-testable-packages-ok'])
 
   def testFilterOnlyCrosWorkon(self):
     """Test the filter packages argument."""
-    test.BuildTargetUnitTest(
-        self.build_target, self.chroot, filter_only_cros_workon=True)
+    test.BuildTargetUnitTest(self.build_target, filter_only_cros_workon=True)
     self.assertCommandContains(['--filter-only-cros-workon'])
 
   def testFailure(self):
@@ -128,7 +121,7 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
     expected_rc = 1
     self.rc.SetDefaultCmdResult(returncode=expected_rc)
 
-    result = test.BuildTargetUnitTest(self.build_target, self.chroot)
+    result = test.BuildTargetUnitTest(self.build_target)
 
     self.assertFalse(result.success)
     self.assertEqual(expected_rc, result.return_code)
@@ -136,8 +129,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testCodeCoverage(self):
     """Test adding use flags for coverage when requested."""
-    result = test.BuildTargetUnitTest(
-        self.build_target, self.chroot, code_coverage=True)
+    self.PatchObject(os, 'environ', new={})
+    result = test.BuildTargetUnitTest(self.build_target, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'coverage'))
@@ -145,9 +138,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testCodeCoverageExistingFlags(self):
     """Test adding use flags for coverage when existing flags."""
-    chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'foo bar'})
-    result = test.BuildTargetUnitTest(
-        self.build_target, chroot, code_coverage=True)
+    self.PatchObject(os, 'environ', new={'USE': 'foo bar'})
+    result = test.BuildTargetUnitTest(self.build_target, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'foo bar coverage'))
@@ -155,9 +147,8 @@ class BuildTargetUnitTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
   def testCodeCoverageExistingCoverageFlag(self):
     """Test adding use flags for coverage when already has coverage flag."""
-    chroot = chroot_lib.Chroot(path=self.tempdir, env={'USE': 'coverage bar'})
-    result = test.BuildTargetUnitTest(
-        self.build_target, chroot, code_coverage=True)
+    self.PatchObject(os, 'environ', new={'USE': 'coverage bar'})
+    result = test.BuildTargetUnitTest(self.build_target, code_coverage=True)
 
     self.assertCommandContains(['cros_run_unit_tests', '--board', self.board],
                                extra_env=PartialDict('USE', 'coverage bar'))

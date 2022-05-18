@@ -61,7 +61,6 @@ class BuildTargetUnitTestResult(object):
 
 
 def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
-                        chroot: Optional['chroot_lib.Chroot'],
                         packages: Optional[List[str]] = None,
                         blocklist: Optional[List[str]] = None,
                         was_built: bool = True,
@@ -73,8 +72,6 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
 
   Args:
     build_target: The build target.
-    chroot: The chroot where the tests are running if this function is executed
-      from outside the SDK.
     packages: Packages to be tested. If none, uses all testable packages.
     blocklist: Tests to skip.
     was_built: Whether packages were built.
@@ -87,6 +84,7 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
   Returns:
     BuildTargetUnitTestResult
   """
+  cros_build_lib.AssertInsideChroot()
   # TODO(saklein) Refactor commands.RunUnitTests to use this/the API.
   # TODO(crbug.com/960805) Move cros_run_unit_tests logic here.
   cmd = ['cros_run_unit_tests']
@@ -111,25 +109,20 @@ def BuildTargetUnitTest(build_target: 'build_target_lib.BuildTarget',
   if not was_built:
     cmd.append('--assume-empty-sysroot')
 
-  extra_env = chroot.env if chroot else {}
-
+  extra_env = {}
   if code_coverage:
-    use_flags = extra_env.get('USE', '').split()
+    use_flags = os.environ.get('USE', '').split()
     if 'coverage' not in use_flags:
       use_flags.append('coverage')
     extra_env['USE'] = ' '.join(use_flags)
 
-  tmpdir_ctx_mgr = chroot.tempdir if chroot else osutils.TempDir
   # Set up the failed package status file.
-  with tmpdir_ctx_mgr() as tempdir:
-    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = (
-        chroot.chroot_path(tempdir) if chroot else tempdir)
+  with osutils.TempDir() as tempdir:
+    extra_env[constants.CROS_METRICS_DIR_ENVVAR] = tempdir
 
     result = cros_build_lib.run(
         cmd,
-        enter_chroot=True,
         extra_env=extra_env,
-        chroot_args=chroot.get_enter_args() if chroot else None,
         check=False)
 
     failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
