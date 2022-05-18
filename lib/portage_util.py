@@ -2499,7 +2499,7 @@ def ParseDieHookStatusFile(metrics_dir: str) -> List[package_info.CPV]:
   with open(file_path) as failed_pkgs_file:
     failed_pkgs = []
     for line in failed_pkgs_file:
-      cpv, _phase = line.strip().split()
+      cpv, _phase = line.split()
       failed_pkgs.append(package_info.parse(cpv))
     return failed_pkgs
 
