@@ -4,11 +4,9 @@
 
 """The test controller tests."""
 
-import contextlib
 import datetime
 import os
 from typing import Union
-from unittest import mock
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -23,13 +21,10 @@ from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
-from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.scripts import cros_set_lsb_release
 from chromite.service import test as test_service
-from chromite.utils import key_value_store
 
 
 class DebugInfoTestTest(cros_test_lib.MockTempDirTestCase,
@@ -713,105 +708,6 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
 
     test_controller.VmTest(request, response, self.api_config)
     patch.assert_called()
-
-
-class MoblabVmTestTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
-  """Test the MoblabVmTest endpoint."""
-
-  @staticmethod
-  def _Payload(path):
-    return test_pb2.MoblabVmTestRequest.Payload(path=common_pb2.Path(path=path))
-
-  @staticmethod
-  def _Output():
-    return test_pb2.MoblabVmTestResponse()
-
-  def _Input(self):
-    return test_pb2.MoblabVmTestRequest(
-        chroot=common_pb2.Chroot(path=self.chroot_dir),
-        image_payload=self._Payload(self.image_payload_dir),
-        cache_payloads=[self._Payload(self.autotest_payload_dir)])
-
-  def setUp(self):
-    self.chroot_dir = '/chroot'
-    self.chroot_tmp_dir = '/chroot/tmp'
-    self.image_payload_dir = '/payloads/image'
-    self.autotest_payload_dir = '/payloads/autotest'
-    self.builder = 'moblab-generic-vm/R12-3.4.5-67.890'
-    self.image_cache_dir = '/mnt/moblab/cache'
-    self.image_mount_dir = '/mnt/image'
-
-    self.PatchObject(chroot_lib.Chroot, 'tempdir', osutils.TempDir)
-
-    self.mock_create_moblab_vms = self.PatchObject(test_service,
-                                                   'CreateMoblabVm')
-    self.mock_prepare_moblab_vm_image_cache = self.PatchObject(
-        test_service,
-        'PrepareMoblabVmImageCache',
-        return_value=self.image_cache_dir)
-    self.mock_run_moblab_vm_tests = self.PatchObject(test_service,
-                                                     'RunMoblabVmTest')
-    self.mock_validate_moblab_vm_tests = self.PatchObject(
-        test_service, 'ValidateMoblabVmTest')
-
-    @contextlib.contextmanager
-    def MockLoopbackPartitions(*_args, **_kwargs):
-      mount = mock.MagicMock()
-      mount.Mount.return_value = [self.image_mount_dir]
-      yield mount
-
-    self.PatchObject(image_lib, 'LoopbackPartitions', MockLoopbackPartitions)
-
-  def testValidateOnly(self):
-    """Sanity check that a validate only call does not execute any logic."""
-    test_controller.MoblabVmTest(self._Input(), self._Output(),
-                                 self.validate_only_config)
-    self.mock_create_moblab_vms.assert_not_called()
-
-  def testMockCall(self):
-    """Test mock call does not execute any logic."""
-    patch = self.PatchObject(key_value_store, 'LoadFile')
-
-    # MoblabVmTest does not return a value, checking mocked value is flagged by
-    # lint.
-    test_controller.MoblabVmTest(self._Input(), self._Output(),
-                                 self.mock_call_config)
-    patch.assert_not_called()
-
-  def testImageContainsBuilder(self):
-    """MoblabVmTest calls service with correct args."""
-    request = self._Input()
-    response = self._Output()
-
-    self.PatchObject(
-        key_value_store,
-        'LoadFile',
-        return_value={cros_set_lsb_release.LSB_KEY_BUILDER_PATH: self.builder})
-
-    test_controller.MoblabVmTest(request, response, self.api_config)
-
-    self.assertEqual(
-        self.mock_create_moblab_vms.call_args_list,
-        [mock.call(mock.ANY, self.chroot_dir, self.image_payload_dir)])
-    self.assertEqual(
-        self.mock_prepare_moblab_vm_image_cache.call_args_list,
-        [mock.call(mock.ANY, self.builder, [self.autotest_payload_dir])])
-    self.assertEqual(self.mock_run_moblab_vm_tests.call_args_list, [
-        mock.call(mock.ANY, mock.ANY, self.builder, self.image_cache_dir,
-                  mock.ANY)
-    ])
-    self.assertEqual(self.mock_validate_moblab_vm_tests.call_args_list,
-                     [mock.call(mock.ANY)])
-
-  def testImageMissingBuilder(self):
-    """MoblabVmTest dies when builder path not found in lsb-release."""
-    request = self._Input()
-    response = self._Output()
-
-    self.PatchObject(key_value_store, 'LoadFile', return_value={})
-
-    with self.assertRaises(cros_build_lib.DieSystemExit):
-      test_controller.MoblabVmTest(request, response, self.api_config)
 
 
 class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
