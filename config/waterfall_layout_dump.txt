@@ -180,7 +180,6 @@
     atlas-release
     aurora-borealis-release
     aurora-release
-    beaglebone-release
     betty-arc-r-release
     betty-arc-t-release
     betty-arc-u-release
@@ -1134,7 +1133,6 @@
     atlas-release-tryjob
     aurora-borealis-release-tryjob
     aurora-release-tryjob
-    beaglebone-release-tryjob
     betty-arc-r-release-tryjob
     betty-arc-t-release-tryjob
     betty-arc-u-release-tryjob
