@@ -65,6 +65,7 @@ class SubdirectorySet(enum.Enum):
       ]
 
     subdirs = [
+        _join(source, 'analysis_service'),
         _join(source, 'chromite'),
         _join(source, 'chromiumos'),
         _join(source, 'config'),
