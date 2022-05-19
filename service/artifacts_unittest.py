@@ -619,7 +619,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
                                    side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
-                     return_value=['dlc_test'])
+                     return_value=['dlc'])
     generated = artifacts.GenerateTestPayloads(
         self.target_image, self.tempdir, full=True, dlc=True)
 
@@ -653,7 +653,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
                                    side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
-                     return_value=['dlc_test'])
+                     return_value=['dlc'])
     generated = artifacts.GenerateTestPayloads(
         self.target_image, self.tempdir, full=True, dlc=True)
 
@@ -687,7 +687,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
                                    side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
-                     return_value=['dlc_test'])
+                     return_value=['dlc'])
     generated = artifacts.GenerateTestPayloads(self.target_image,
                                                self.tempdir, delta=True,
                                                dlc=True)
@@ -727,7 +727,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
     paygen_mock = self.PatchObject(paygen_payload_lib, 'GenerateUpdatePayload',
                                    side_effect=bools)
     self.PatchObject(portage_util, 'GetBoardUseFlags',
-                     return_value=['dlc_test'])
+                     return_value=['dlc'])
     generated = artifacts.GenerateTestPayloads(
         self.target_image, self.tempdir, delta=True, dlc=True)
 

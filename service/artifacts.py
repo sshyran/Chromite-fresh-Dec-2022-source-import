@@ -523,7 +523,7 @@ def GenerateTestPayloads(target_image_path: str,
     else:
       logging.info('MiniOS delta payload generation skipped.')
 
-  if dlc and 'dlc_test' in portage_util.GetBoardUseFlags(board):
+  if dlc and 'dlc' in portage_util.GetBoardUseFlags(board):
     dlc_prefix = 'dlc'
     dlc_id = 'sample-dlc'
     dlc_package = 'package'
