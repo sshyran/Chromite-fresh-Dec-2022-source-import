@@ -4,6 +4,8 @@
 
 """Module to manage a setup of moblab and its DUT VMs."""
 
+# TODO(b/230013833) Only usages are in CBB, delete.
+
 import collections
 import contextlib
 import json
