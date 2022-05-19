@@ -119,7 +119,8 @@ def GenerateBreakpadSymbol(elf_file, debug_file=None, breakpad_dir=None,
       else:
         cmd_args = [elf_file, os.path.dirname(debug_file)]
 
-      result = _DumpIt(cmd_args)
+      # -d enables inline records which can drastically increase output size.
+      result = _DumpIt(['-d'] + cmd_args)
 
       if result.returncode:
         # Sometimes dump_syms can crash because there's too much info.
