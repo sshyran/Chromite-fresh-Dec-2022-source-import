@@ -13,6 +13,7 @@ from chromite.cli.cros import cros_chrome_sdk_unittest
 from chromite.lib import chrome_util
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
@@ -320,6 +321,9 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
 
   def setUp(self):
     self.staging_dir = os.path.join(self.tempdir, 'staging')
+    osutils.SafeMakedirs(self.staging_dir)
+    self.staging_tarball_path = os.path.join(
+        self.tempdir, deploy_chrome._CHROME_DIR_STAGING_TARBALL_ZSTD)
     self.build_dir = os.path.join(self.tempdir, 'build_dir')
     self.common_flags = ['--board', _TARGET_BOARD,
                          '--build-dir', self.build_dir, '--staging-only',
@@ -350,6 +354,33 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
     osutils.Touch(os.path.join(self.build_dir, 'chrome'), makedirs=True)
     deploy_chrome._PrepareStagingDir(options, self.tempdir, self.staging_dir,
                                      chrome_util._COPY_PATHS_CHROME)
+
+  @cros_test_lib.pytestmark_network_test
+  def testUploadStagingDir(self):
+    """Upload staging directory."""
+    mockGsCopy = self.PatchObject(gs.GSContext, 'Copy')
+    staging_upload = 'gs://some-path'
+    options = _ParseCommandLine(
+        self.common_flags + ['--staging-upload', staging_upload])
+    osutils.Touch(os.path.join(self.build_dir, 'chrome'), makedirs=True)
+    deploy_chrome._UploadStagingDir(options, self.tempdir, self.staging_dir)
+    self.assertEqual(mockGsCopy.call_args_list, [
+        mock.call(self.staging_tarball_path, staging_upload, acl=''),
+    ])
+
+  @cros_test_lib.pytestmark_network_test
+  def testUploadStagingPublicReadACL(self):
+    """Upload staging directory with public-read ACL."""
+    mockGsCopy = self.PatchObject(gs.GSContext, 'Copy')
+    staging_upload = 'gs://some-path'
+    options = _ParseCommandLine(
+        self.common_flags +
+        ['--staging-upload', staging_upload, '--public-read'])
+    osutils.Touch(os.path.join(self.build_dir, 'chrome'), makedirs=True)
+    deploy_chrome._UploadStagingDir(options, self.tempdir, self.staging_dir)
+    self.assertEqual(mockGsCopy.call_args_list, [
+        mock.call(self.staging_tarball_path, staging_upload, acl='public-read'),
+    ])
 
 
 class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):

@@ -60,6 +60,7 @@ _ANDROID_DIR_EXTRACT_PATH = 'system/chrome/*'
 
 _CHROME_DIR = '/opt/google/chrome'
 _CHROME_DIR_MOUNT = '/mnt/stateful_partition/deploy_rootfs/opt/google/chrome'
+_CHROME_DIR_STAGING_TARBALL_ZSTD = 'chrome.tar.zst'
 _CHROME_TEST_BIN_DIR = '/usr/local/libexec/chrome-binary-tests'
 
 _UMOUNT_DIR_IF_MOUNTPOINT_CMD = (
@@ -683,6 +684,12 @@ def _CreateParser():
   # Only prepare the staging directory, and skip deploying to the device.
   parser.add_argument('--staging-only', action='store_true', default=False,
                       help=argparse.SUPPRESS)
+  # Uploads the compressed staging directory to the given gs:// path URI.
+  parser.add_argument('--staging-upload', type='gs_path',
+                      help='GS path to upload the compressed staging files to.')
+  # Used alongside --staging-upload to upload with public-read ACL.
+  parser.add_argument('--public-read', action='store_true', default=False,
+                      help='GS path to upload the compressed staging files to.')
   # Path to a binutil 'strip' tool to strip binaries with.  The passed-in path
   # is used as-is, and not normalized.  Used by the Chrome ebuild to skip
   # fetching the SDK toolchain.
@@ -830,6 +837,30 @@ def _StripBinContext(options):
       yield strip_bin
 
 
+def _UploadStagingDir(options: commandline.ArgumentNamespace, tempdir: str,
+                      staging_dir: str) -> None:
+  """Uploads the compressed staging directory.
+
+  Args:
+    options: options object.
+    tempdir: Scratch space.
+    staging_dir: Directory staging chrome files.
+  """
+  staging_tarball_path = os.path.join(tempdir, _CHROME_DIR_STAGING_TARBALL_ZSTD)
+  logging.info('Compressing staging dir (%s) to (%s)',
+               staging_dir, staging_tarball_path)
+  cros_build_lib.CreateTarball(
+      staging_tarball_path,
+      staging_dir,
+      compression=cros_build_lib.COMP_ZSTD,
+      extra_env={'ZSTD_CLEVEL': '9'})
+  logging.info('Uploading staging tarball (%s) into %s',
+               staging_tarball_path, options.staging_upload)
+  ctx = gs.GSContext()
+  ctx.Copy(staging_tarball_path, options.staging_upload,
+           acl='public-read' if options.public_read else '')
+
+
 def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
                        chrome_dir=None):
   """Place the necessary files in the staging directory.
@@ -873,6 +904,9 @@ def _PrepareStagingDir(options, tempdir, staging_dir, copy_paths=None,
           ['tar', '--strip-components', '4', '--extract',
            '--preserve-permissions', '--file', pkg_path, '.%s' % chrome_dir],
           cwd=staging_dir)
+
+  if options.staging_upload:
+    _UploadStagingDir(options, tempdir, staging_dir)
 
 
 def main(argv):
