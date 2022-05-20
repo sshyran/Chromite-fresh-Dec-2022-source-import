@@ -42,7 +42,8 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         os.path.join(self.tempdir, 'stateful.tgz'), '.', sudo=True,
         compression=cros_build_lib.COMP_GZIP,
         inputs=['dev_image', 'var_overlay', 'unencrypted'],
-        extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
+        extra_args=['--selinux',
+                    '--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
                     '--transform=s,^dev_image,dev_image_new,',
                     '--transform=s,^var_overlay,var_new,'])
 
@@ -65,7 +66,8 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         os.path.join(self.tempdir, 'stateful.tgz'), '.', sudo=True,
         compression=cros_build_lib.COMP_GZIP,
         inputs=['dev_image', 'var_overlay'],
-        extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
+        extra_args=['--selinux',
+                    '--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
                     '--transform=s,^dev_image,dev_image_new,',
                     '--transform=s,^var_overlay,var_new,'])
 
@@ -88,6 +90,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         1, '.', sudo=True,
         compression=cros_build_lib.COMP_GZIP,
         inputs=['dev_image', 'var_overlay', 'unencrypted'],
-        extra_args=['--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
+        extra_args=['--selinux',
+                    '--directory=%s' % os.path.join(self.tempdir, 'dir-1'),
                     '--transform=s,^dev_image,dev_image_new,',
                     '--transform=s,^var_overlay,var_new,'])
