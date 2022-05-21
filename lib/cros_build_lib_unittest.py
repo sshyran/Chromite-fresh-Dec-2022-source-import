@@ -125,6 +125,7 @@ class CmdToStrTest(cros_test_lib.TestCase):
 
   def testShellQuoteOjbects(self):
     """Test objects passed to ShellQuote."""
+    self.assertEqual('/', cros_build_lib.ShellQuote(Path('/')))
     self.assertEqual('None', cros_build_lib.ShellQuote(None))
     self.assertNotEqual('', cros_build_lib.ShellQuote(object))
 

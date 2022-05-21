@@ -14,6 +14,7 @@ import inspect
 import logging
 import operator
 import os
+import pathlib
 from pathlib import Path
 import re
 import signal
@@ -82,6 +83,8 @@ def ShellQuote(s):
   # If callers pass down bad types, don't blow up.
   if isinstance(s, bytes):
     s = s.decode('utf-8', 'backslashreplace')
+  elif isinstance(s, pathlib.PurePath):
+    return str(s)
   elif not isinstance(s, str):
     return repr(s)
 
