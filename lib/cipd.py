@@ -12,8 +12,10 @@ import hashlib
 import json
 import logging
 import os
+from pathlib import Path
 import pprint
 import tempfile
+from typing import Union
 import urllib.parse
 
 from chromite.third_party import httplib2
@@ -173,7 +175,7 @@ def GetInstanceID(cipd_path, package, version, service_account_json=None):
 def InstallPackage(cipd_path,
                    package,
                    version,
-                   destination,
+                   destination: Union[os.PathLike, str] = None,
                    service_account_json=None):
   """Installs a package at a given destination using cipd.
 
@@ -188,7 +190,12 @@ def InstallPackage(cipd_path,
   Returns:
     The path of the package.
   """
-  destination = os.path.join(destination, package)
+  if not destination:
+    # GetCacheDir does a non-trivial amount of work, too much for a constant.
+    # If needed elsewhere, a memoized function would be a good alternative.
+    destination = Path(path_util.GetCacheDir()).absolute() / 'cipd' / 'packages'
+
+  destination = Path(destination) / package
 
   service_account_flag = []
   if service_account_json:

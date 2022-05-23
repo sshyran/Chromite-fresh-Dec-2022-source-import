@@ -1210,11 +1210,9 @@ def _InstallSkylabTool():
   Returns:
     the path of installed skylab tool.
   """
-  cache_dir = os.path.join(path_util.GetCacheDir(), 'cipd/packages')
   path = cipd.InstallPackage(cipd.GetCIPDFromCache(),
                              constants.CIPD_SKYLAB_PACKAGE,
-                             constants.CIPD_SKYLAB_INSTANCE_ID,
-                             cache_dir)
+                             constants.CIPD_SKYLAB_INSTANCE_ID)
   return os.path.join(path, 'skylab')
 
 

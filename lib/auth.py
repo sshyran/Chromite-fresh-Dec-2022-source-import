@@ -10,7 +10,6 @@ from chromite.third_party import httplib2
 
 from chromite.lib import cipd
 from chromite.lib import cros_build_lib
-from chromite.lib import path_util
 from chromite.lib import retry_util
 
 
@@ -26,12 +25,10 @@ class AccessTokenError(Exception):
 
 def _GetCipdBinary(pkg_name, bin_name, instance_id):
   """Returns a local path to the given binary fetched from cipd."""
-  cache_dir = os.path.join(path_util.GetCacheDir(), 'cipd', 'packages')
   path = cipd.InstallPackage(
       cipd.GetCIPDFromCache(),
       pkg_name,
-      instance_id,
-      destination=cache_dir)
+      instance_id)
 
   return os.path.join(path, bin_name)
 

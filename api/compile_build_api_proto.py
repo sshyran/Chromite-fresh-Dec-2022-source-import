@@ -12,7 +12,7 @@ import logging
 import os
 from pathlib import Path
 import tempfile
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 from chromite.lib import cipd
 from chromite.lib import commandline
@@ -20,7 +20,6 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
-from chromite.lib import path_util
 
 
 # Chromite's protobuf library version (third_party/google/protobuf).
@@ -28,8 +27,6 @@ PROTOC_VERSION = '3.13.0'
 
 _CIPD_PACKAGE = 'infra/tools/protoc/linux-amd64'
 _CIPD_PACKAGE_VERSION = f'protobuf_version:v{PROTOC_VERSION}'
-_CIPD_DESINATION = (
-    Path(path_util.GetCacheDir()).absolute() / 'cipd' / 'packages')
 
 
 class Error(Exception):
@@ -51,6 +48,14 @@ class ProtocVersion(enum.Enum):
   # CIPD that matches the version of the protobuf library in
   # chromite/third_party/google/protobuf.
   CHROMITE = enum.auto()
+
+  def get_protoc_command(self, cipd_root: Optional[Path] = None) -> Path:
+    """Get protoc command path."""
+    assert self is ProtocVersion.SDK or cipd_root
+    if self is ProtocVersion.SDK:
+      return Path('protoc')
+    elif cipd_root:
+      return cipd_root / 'protoc'
 
 
 @enum.unique
@@ -90,28 +95,20 @@ def _get_gen_dir(protoc_version: ProtocVersion):
     return os.path.join(constants.CHROMITE_DIR, 'api', 'gen')
 
 
-def _get_protoc_command(protoc_version: ProtocVersion, cipd_root: Path = None):
-  """Get the protoc command for the target protoc."""
-  if protoc_version is ProtocVersion.SDK:
-    return 'protoc'
-  elif cipd_root:
-    return str(cipd_root / 'protoc')
-
-
 def _get_proto_dir(_protoc_version):
   """Get the proto directory for the target protoc."""
   return os.path.join(constants.CHROMITE_DIR, 'infra', 'proto')
 
 
-def InstallProtoc(protoc_version: ProtocVersion) -> str:
+def InstallProtoc(protoc_version: ProtocVersion) -> Path:
   """Install protoc from CIPD."""
   if protoc_version is not ProtocVersion.CHROMITE:
     cipd_root = None
   else:
     cipd_root = Path(
         cipd.InstallPackage(cipd.GetCIPDFromCache(), _CIPD_PACKAGE,
-                            _CIPD_PACKAGE_VERSION, _CIPD_DESINATION))
-  return _get_protoc_command(protoc_version, cipd_root)
+                            _CIPD_PACKAGE_VERSION))
+  return protoc_version.get_protoc_command(cipd_root)
 
 
 def _CleanTargetDirectory(directory: str):
@@ -140,7 +137,7 @@ def _CleanTargetDirectory(directory: str):
 
 
 def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
-                   dir_subset: SubdirectorySet, protoc_bin_path: str):
+                   dir_subset: SubdirectorySet, protoc_bin_path: Path):
   """Generate the proto files from the |source| tree into |output|.
 
   Args:
