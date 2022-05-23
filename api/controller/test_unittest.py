@@ -7,7 +7,6 @@
 import contextlib
 import datetime
 import os
-from pathlib import Path
 from typing import Union
 from unittest import mock
 
@@ -116,7 +115,6 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
 
   def _GetInput(self,
                 board=None,
-                result_path=None,
                 chroot_path=None,
                 cache_dir=None,
                 empty_sysroot=None,
@@ -136,13 +134,8 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
           'package_name': pkg.package
       })
 
-    # Protobufs can't handle Path objects.
-    if isinstance(result_path, Path):
-      result_path = str(result_path)
-
     return test_pb2.BuildTargetUnitTestRequest(
         build_target={'name': board},
-        result_path=result_path,
         chroot={
             'path': chroot_path,
             'cache_dir': cache_dir
@@ -178,7 +171,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Sanity check that a validate only call does not execute any logic."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     test_controller.BuildTargetUnitTest(input_msg, self._GetOutput(),
                                         self.validate_only_config)
     patch.assert_not_called()
@@ -187,19 +180,17 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     response = self._GetOutput()
     test_controller.BuildTargetUnitTest(input_msg, response,
                                         self.mock_call_config)
     patch.assert_not_called()
-    self.assertEqual(response.tarball_path,
-                     os.path.join(input_msg.result_path, 'unit_tests.tar'))
 
   def testMockError(self):
     """Test that a mock error does not execute logic, returns error."""
     patch = self.PatchObject(test_service, 'BuildTargetUnitTest')
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     response = self._GetOutput()
     rc = test_controller.BuildTargetUnitTest(input_msg, response,
                                              self.mock_error_config)
@@ -215,8 +206,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     """Test missing result path fails."""
     # Missing result_path.
     pkg = package_info.PackageInfo(package='bar')
-    input_msg = self._GetInput(
-        board='board', result_path=self.tempdir, packages=[pkg])
+    input_msg = self._GetInput(board='board', packages=[pkg])
     output_msg = self._GetOutput()
     with self.assertRaises(cros_build_lib.DieSystemExit):
       test_controller.BuildTargetUnitTest(input_msg, output_msg,
@@ -241,7 +231,7 @@ class BuildTargetUnitTestTest(cros_test_lib.MockTempDirTestCase,
     result.failed_pkgs = [package_info.parse(p) for p in pkgs]
     self.PatchObject(test_service, 'BuildTargetUnitTest', return_value=result)
 
-    input_msg = self._GetInput(board='board', result_path=self.tempdir)
+    input_msg = self._GetInput(board='board')
     output_msg = self._GetOutput()
 
     rc = test_controller.BuildTargetUnitTest(input_msg, output_msg,

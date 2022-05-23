@@ -67,12 +67,6 @@ def DebugInfoTest(input_proto, _output_proto, config):
     return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
 
-def _BuildTargetUnitTestResponse(input_proto, output_proto, _config):
-  """Add tarball path to a successful response."""
-  output_proto.tarball_path = os.path.join(input_proto.result_path,
-                                           'unit_tests.tar')
-
-
 def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
   """Add failed packages to a failed response."""
   packages = ['foo/bar', 'cat/pkg']
@@ -85,7 +79,7 @@ def _BuildTargetUnitTestFailedResponse(_input_proto, output_proto, _config):
     failed_pkg_data_msg.log_path.path = '/path/to/%s/log' % pkg
 
 
-@faux.success(_BuildTargetUnitTestResponse)
+@faux.empty_success
 @faux.error(_BuildTargetUnitTestFailedResponse)
 @validate.require_each('packages', ['category', 'package_name'])
 @validate.validation_complete
