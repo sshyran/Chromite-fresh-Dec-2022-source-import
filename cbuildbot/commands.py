@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from typing import Dict
 
 from chromite.third_party.google.protobuf import json_format
 
@@ -408,19 +409,19 @@ def LegacySetupBoard(buildroot,
       chroot_args=chroot_args)
 
 
-def BuildSDKBoard(buildroot,
-                  board,
-                  force=False,
-                  extra_env=None,
-                  chroot_args=None):
+def BuildSDKBoard(buildroot: str,
+                  board: str,
+                  force: bool = False,
+                  extra_env: Dict[str, str] = None,
+                  chroot_args: Dict = None):
   """Wrapper around setup_host_board.
 
   Args:
-    board (str): The name of the board.
-    buildroot (str): The buildroot of the current build.
-    force (bool): Whether to remove existing sysroot if it exists.
-    extra_env (dict): A dictionary of environment variables to set.
-    chroot_args (dict): The args to the chroot.
+    board: The name of the board.
+    buildroot: The buildroot of the current build.
+    force: Whether to remove existing sysroot if it exists.
+    extra_env: A dictionary of environment variables to set.
+    chroot_args: The args to the chroot.
   """
   cmd = ['./build_sdk_board', '--board', board]
   if force:
@@ -3323,13 +3324,15 @@ def BuildFpmcuUnittestsArchive(buildroot,
   return artifacts_service.BundleFpmcuUnittests(
       chroot, sysroot, tarball_dir)
 
-def CallBuildApiWithInputProto(buildroot, build_api_command, input_proto):
+
+def CallBuildApiWithInputProto(buildroot: str, build_api_command: str,
+                               input_proto: Dict):
   """Call BuildApi with the input_proto and buildroot.
 
   Args:
     buildroot: Root directory where build occurs.
     build_api_command: Service (command) to execute.
-    input_proto (dict): The input proto as a dict.
+    input_proto: The input proto as a dict.
 
   Returns:
     The json-encoded output proto.
