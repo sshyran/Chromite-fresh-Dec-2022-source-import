@@ -18,6 +18,7 @@ from typing import List, NamedTuple, Union
 import uuid
 
 from chromite.lib import locking
+from chromite.utils import timer as timer_util
 
 
 UTILS_METRICS_LOG_ENVVAR = 'BUILD_API_METRICS_LOG'
@@ -240,11 +241,26 @@ def timer(name):
   # Timer events use a |arg| to disambiguate in case of multiple concurrent or
   # overlapping timers with the same name.
   key = uuid.uuid4()
-  try:
-    append_metrics_log(current_milli_time(), name, OP_START_TIMER, arg=key)
-    yield
-  finally:
-    append_metrics_log(current_milli_time(), name, OP_STOP_TIMER, arg=key)
+  with timer_util.timer(name) as t:
+    try:
+      append_metrics_log(current_milli_time(), name, OP_START_TIMER, arg=key)
+      yield t
+    finally:
+      append_metrics_log(current_milli_time(), name, OP_STOP_TIMER, arg=key)
+
+
+def timed(name):
+  """Decorator to add a metrics timer to a function."""
+
+  def decorator(func):
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+      with timer(name):
+        return func(*args, **kwargs)
+    return wrapper
+
+  return decorator
 
 
 def event(name):
