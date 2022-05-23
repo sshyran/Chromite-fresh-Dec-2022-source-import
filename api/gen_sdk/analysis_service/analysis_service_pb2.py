@@ -28,7 +28,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='analysis_service',
   syntax='proto3',
   serialized_options=b'Z7go.chromium.org/chromiumos/infra/proto/analysis_service',
-  serialized_pb=b'\n\'analysis_service/analysis_service.proto\x12\x10\x61nalysis_service\x1a\x1c\x63hromite/api/artifacts.proto\x1a\x1a\x63hromite/api/binhost.proto\x1a\x1b\x63hromite/api/depgraph.proto\x1a\x1b\x63hromite/api/firmware.proto\x1a\x18\x63hromite/api/image.proto\x1a\x1b\x63hromite/api/packages.proto\x1a\x16\x63hromite/api/sdk.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromite/api/test.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"i\n\x13StepExecutionResult\x12\x0f\n\x07retcode\x18\x01 \x01(\x05\x12\x13\n\x0bhad_timeout\x18\x02 \x01(\x08\x12\x15\n\rhad_exception\x18\x03 \x01(\x08\x12\x15\n\rwas_cancelled\x18\x04 \x01(\x08\"\xd4\x1e\n\x14\x41nalysisServiceEvent\x12\x10\n\x08\x62uild_id\x18* \x01(\x03\x12\x11\n\tstep_name\x18+ \x01(\t\x12\x30\n\x0crequest_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\rresponse_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06stdout\x18\x32 \x01(\t\x12\x0e\n\x06stderr\x18\x33 \x01(\t\x12\x44\n\x15step_execution_result\x18\x34 \x01(\x0b\x32%.analysis_service.StepExecutionResult\x12H\n\x18install_packages_request\x18\x01 \x01(\x0b\x32$.chromite.api.InstallPackagesRequestH\x00\x12\x35\n\x0e\x62undle_request\x18\x05 \x01(\x0b\x32\x1b.chromite.api.BundleRequestH\x00\x12\x45\n\x17\x62undle_vm_files_request\x18\x07 \x01(\x0b\x32\".chromite.api.BundleVmFilesRequestH\x00\x12>\n\x13\x62inhost_get_request\x18\x08 \x01(\x0b\x32\x1f.chromite.api.BinhostGetRequestH\x00\x12\x38\n\x10\x61\x63l_args_request\x18\n \x01(\x0b\x32\x1c.chromite.api.AclArgsRequestH\x00\x12U\n\x1fprepare_binhost_uploads_request\x18\x0c \x01(\x0b\x32*.chromite.api.PrepareBinhostUploadsRequestH\x00\x12>\n\x13set_binhost_request\x18\x0e \x01(\x0b\x32\x1f.chromite.api.SetBinhostRequestH\x00\x12I\n\x19regen_build_cache_request\x18\x10 \x01(\x0b\x32$.chromite.api.RegenBuildCacheRequestH\x00\x12Z\n\"get_build_dependency_graph_request\x18\x12 \x01(\x0b\x32,.chromite.api.GetBuildDependencyGraphRequestH\x00\x12@\n\x14\x63reate_image_request\x18\x14 \x01(\x0b\x32 .chromite.api.CreateImageRequestH\x00\x12<\n\x12test_image_request\x18\x16 \x01(\x0b\x32\x1e.chromite.api.TestImageRequestH\x00\x12\x35\n\x0e\x63reate_request\x18\x18 \x01(\x0b\x32\x1b.chromite.api.CreateRequestH\x00\x12\x35\n\x0eupdate_request\x18\x1a \x01(\x0b\x32\x1b.chromite.api.UpdateRequestH\x00\x12\x44\n\x16sysroot_create_request\x18\x1c \x01(\x0b\x32\".chromite.api.SysrootCreateRequestH\x00\x12J\n\x19install_toolchain_request\x18\x1e \x01(\x0b\x32%.chromite.api.InstallToolchainRequestH\x00\x12R\n\x1e\x62uild_target_unit_test_request\x18  \x01(\x0b\x32(.chromite.api.BuildTargetUnitTestRequestH\x00\x12K\n\x1a\x63hromite_unit_test_request\x18\" \x01(\x0b\x32%.chromite.api.ChromiteUnitTestRequestH\x00\x12\x45\n\x17\x64\x65\x62ug_info_test_request\x18$ \x01(\x0b\x32\".chromite.api.DebugInfoTestRequestH\x00\x12\x36\n\x0fvm_test_request\x18& \x01(\x0b\x32\x1b.chromite.api.VmTestRequestH\x00\x12\x43\n\x16moblab_vm_test_request\x18( \x01(\x0b\x32!.chromite.api.MoblabVmTestRequestH\x00\x12\x44\n\x16uprev_packages_request\x18, \x01(\x0b\x32\".chromite.api.UprevPackagesRequestH\x00\x12G\n\x18get_best_visible_request\x18. \x01(\x0b\x32#.chromite.api.GetBestVisibleRequestH\x00\x12K\n\x1aget_chrome_version_request\x18\x30 \x01(\x0b\x32%.chromite.api.GetChromeVersionRequestH\x00\x12O\n\x1cget_builder_metadata_request\x18\x35 \x01(\x0b\x32\'.chromite.api.GetBuilderMetadataRequestH\x00\x12K\n\x1a\x62uild_all_firmware_request\x18\x37 \x01(\x0b\x32%.chromite.api.BuildAllFirmwareRequestH\x00\x12I\n\x19test_all_firmware_request\x18\x39 \x01(\x0b\x32$.chromite.api.TestAllFirmwareRequestH\x00\x12J\n\x19install_packages_response\x18\x02 \x01(\x0b\x32%.chromite.api.InstallPackagesResponseH\x01\x12\x37\n\x0f\x62undle_response\x18\x06 \x01(\x0b\x32\x1c.chromite.api.BundleResponseH\x01\x12@\n\x14\x62inhost_get_response\x18\t \x01(\x0b\x32 .chromite.api.BinhostGetResponseH\x01\x12:\n\x11\x61\x63l_args_response\x18\x0b \x01(\x0b\x32\x1d.chromite.api.AclArgsResponseH\x01\x12W\n prepare_binhost_uploads_response\x18\r \x01(\x0b\x32+.chromite.api.PrepareBinhostUploadsResponseH\x01\x12@\n\x14set_binhost_response\x18\x0f \x01(\x0b\x32 .chromite.api.SetBinhostResponseH\x01\x12K\n\x1aregen_build_cache_response\x18\x11 \x01(\x0b\x32%.chromite.api.RegenBuildCacheResponseH\x01\x12\\\n#get_build_dependency_graph_response\x18\x13 \x01(\x0b\x32-.chromite.api.GetBuildDependencyGraphResponseH\x01\x12>\n\x13\x63reate_image_result\x18\x15 \x01(\x0b\x32\x1f.chromite.api.CreateImageResultH\x01\x12:\n\x11test_image_result\x18\x17 \x01(\x0b\x32\x1d.chromite.api.TestImageResultH\x01\x12\x37\n\x0f\x63reate_response\x18\x19 \x01(\x0b\x32\x1c.chromite.api.CreateResponseH\x01\x12\x37\n\x0fupdate_response\x18\x1b \x01(\x0b\x32\x1c.chromite.api.UpdateResponseH\x01\x12\x46\n\x17sysroot_create_response\x18\x1d \x01(\x0b\x32#.chromite.api.SysrootCreateResponseH\x01\x12L\n\x1ainstall_toolchain_response\x18\x1f \x01(\x0b\x32&.chromite.api.InstallToolchainResponseH\x01\x12T\n\x1f\x62uild_target_unit_test_response\x18! \x01(\x0b\x32).chromite.api.BuildTargetUnitTestResponseH\x01\x12M\n\x1b\x63hromite_unit_test_response\x18# \x01(\x0b\x32&.chromite.api.ChromiteUnitTestResponseH\x01\x12G\n\x18\x64\x65\x62ug_info_test_response\x18% \x01(\x0b\x32#.chromite.api.DebugInfoTestResponseH\x01\x12\x38\n\x10vm_test_response\x18\' \x01(\x0b\x32\x1c.chromite.api.VmTestResponseH\x01\x12\x45\n\x17moblab_vm_test_response\x18) \x01(\x0b\x32\".chromite.api.MoblabVmTestResponseH\x01\x12\x46\n\x17uprev_packages_response\x18- \x01(\x0b\x32#.chromite.api.UprevPackagesResponseH\x01\x12I\n\x19get_best_visible_response\x18/ \x01(\x0b\x32$.chromite.api.GetBestVisibleResponseH\x01\x12M\n\x1bget_chrome_version_response\x18\x31 \x01(\x0b\x32&.chromite.api.GetChromeVersionResponseH\x01\x12Q\n\x1dget_builder_metadata_response\x18\x36 \x01(\x0b\x32(.chromite.api.GetBuilderMetadataResponseH\x01\x12M\n\x1b\x62uild_all_firmware_response\x18\x38 \x01(\x0b\x32&.chromite.api.BuildAllFirmwareResponseH\x01\x12K\n\x1atest_all_firmware_response\x18: \x01(\x0b\x32%.chromite.api.TestAllFirmwareResponseH\x01\x42\t\n\x07requestB\n\n\x08responseB9Z7go.chromium.org/chromiumos/infra/proto/analysis_serviceb\x06proto3'
+  serialized_pb=b'\n\'analysis_service/analysis_service.proto\x12\x10\x61nalysis_service\x1a\x1c\x63hromite/api/artifacts.proto\x1a\x1a\x63hromite/api/binhost.proto\x1a\x1b\x63hromite/api/depgraph.proto\x1a\x1b\x63hromite/api/firmware.proto\x1a\x18\x63hromite/api/image.proto\x1a\x1b\x63hromite/api/packages.proto\x1a\x16\x63hromite/api/sdk.proto\x1a\x1a\x63hromite/api/sysroot.proto\x1a\x17\x63hromite/api/test.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"i\n\x13StepExecutionResult\x12\x0f\n\x07retcode\x18\x01 \x01(\x05\x12\x13\n\x0bhad_timeout\x18\x02 \x01(\x08\x12\x15\n\rhad_exception\x18\x03 \x01(\x08\x12\x15\n\rwas_cancelled\x18\x04 \x01(\x08\"\xd4\x1d\n\x14\x41nalysisServiceEvent\x12\x10\n\x08\x62uild_id\x18* \x01(\x03\x12\x11\n\tstep_name\x18+ \x01(\t\x12\x30\n\x0crequest_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x31\n\rresponse_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06stdout\x18\x32 \x01(\t\x12\x0e\n\x06stderr\x18\x33 \x01(\t\x12\x44\n\x15step_execution_result\x18\x34 \x01(\x0b\x32%.analysis_service.StepExecutionResult\x12H\n\x18install_packages_request\x18\x01 \x01(\x0b\x32$.chromite.api.InstallPackagesRequestH\x00\x12\x35\n\x0e\x62undle_request\x18\x05 \x01(\x0b\x32\x1b.chromite.api.BundleRequestH\x00\x12\x45\n\x17\x62undle_vm_files_request\x18\x07 \x01(\x0b\x32\".chromite.api.BundleVmFilesRequestH\x00\x12>\n\x13\x62inhost_get_request\x18\x08 \x01(\x0b\x32\x1f.chromite.api.BinhostGetRequestH\x00\x12\x38\n\x10\x61\x63l_args_request\x18\n \x01(\x0b\x32\x1c.chromite.api.AclArgsRequestH\x00\x12U\n\x1fprepare_binhost_uploads_request\x18\x0c \x01(\x0b\x32*.chromite.api.PrepareBinhostUploadsRequestH\x00\x12>\n\x13set_binhost_request\x18\x0e \x01(\x0b\x32\x1f.chromite.api.SetBinhostRequestH\x00\x12I\n\x19regen_build_cache_request\x18\x10 \x01(\x0b\x32$.chromite.api.RegenBuildCacheRequestH\x00\x12Z\n\"get_build_dependency_graph_request\x18\x12 \x01(\x0b\x32,.chromite.api.GetBuildDependencyGraphRequestH\x00\x12@\n\x14\x63reate_image_request\x18\x14 \x01(\x0b\x32 .chromite.api.CreateImageRequestH\x00\x12<\n\x12test_image_request\x18\x16 \x01(\x0b\x32\x1e.chromite.api.TestImageRequestH\x00\x12\x35\n\x0e\x63reate_request\x18\x18 \x01(\x0b\x32\x1b.chromite.api.CreateRequestH\x00\x12\x35\n\x0eupdate_request\x18\x1a \x01(\x0b\x32\x1b.chromite.api.UpdateRequestH\x00\x12\x44\n\x16sysroot_create_request\x18\x1c \x01(\x0b\x32\".chromite.api.SysrootCreateRequestH\x00\x12J\n\x19install_toolchain_request\x18\x1e \x01(\x0b\x32%.chromite.api.InstallToolchainRequestH\x00\x12R\n\x1e\x62uild_target_unit_test_request\x18  \x01(\x0b\x32(.chromite.api.BuildTargetUnitTestRequestH\x00\x12K\n\x1a\x63hromite_unit_test_request\x18\" \x01(\x0b\x32%.chromite.api.ChromiteUnitTestRequestH\x00\x12\x45\n\x17\x64\x65\x62ug_info_test_request\x18$ \x01(\x0b\x32\".chromite.api.DebugInfoTestRequestH\x00\x12\x36\n\x0fvm_test_request\x18& \x01(\x0b\x32\x1b.chromite.api.VmTestRequestH\x00\x12\x44\n\x16uprev_packages_request\x18, \x01(\x0b\x32\".chromite.api.UprevPackagesRequestH\x00\x12G\n\x18get_best_visible_request\x18. \x01(\x0b\x32#.chromite.api.GetBestVisibleRequestH\x00\x12K\n\x1aget_chrome_version_request\x18\x30 \x01(\x0b\x32%.chromite.api.GetChromeVersionRequestH\x00\x12O\n\x1cget_builder_metadata_request\x18\x35 \x01(\x0b\x32\'.chromite.api.GetBuilderMetadataRequestH\x00\x12K\n\x1a\x62uild_all_firmware_request\x18\x37 \x01(\x0b\x32%.chromite.api.BuildAllFirmwareRequestH\x00\x12I\n\x19test_all_firmware_request\x18\x39 \x01(\x0b\x32$.chromite.api.TestAllFirmwareRequestH\x00\x12J\n\x19install_packages_response\x18\x02 \x01(\x0b\x32%.chromite.api.InstallPackagesResponseH\x01\x12\x37\n\x0f\x62undle_response\x18\x06 \x01(\x0b\x32\x1c.chromite.api.BundleResponseH\x01\x12@\n\x14\x62inhost_get_response\x18\t \x01(\x0b\x32 .chromite.api.BinhostGetResponseH\x01\x12:\n\x11\x61\x63l_args_response\x18\x0b \x01(\x0b\x32\x1d.chromite.api.AclArgsResponseH\x01\x12W\n prepare_binhost_uploads_response\x18\r \x01(\x0b\x32+.chromite.api.PrepareBinhostUploadsResponseH\x01\x12@\n\x14set_binhost_response\x18\x0f \x01(\x0b\x32 .chromite.api.SetBinhostResponseH\x01\x12K\n\x1aregen_build_cache_response\x18\x11 \x01(\x0b\x32%.chromite.api.RegenBuildCacheResponseH\x01\x12\\\n#get_build_dependency_graph_response\x18\x13 \x01(\x0b\x32-.chromite.api.GetBuildDependencyGraphResponseH\x01\x12>\n\x13\x63reate_image_result\x18\x15 \x01(\x0b\x32\x1f.chromite.api.CreateImageResultH\x01\x12:\n\x11test_image_result\x18\x17 \x01(\x0b\x32\x1d.chromite.api.TestImageResultH\x01\x12\x37\n\x0f\x63reate_response\x18\x19 \x01(\x0b\x32\x1c.chromite.api.CreateResponseH\x01\x12\x37\n\x0fupdate_response\x18\x1b \x01(\x0b\x32\x1c.chromite.api.UpdateResponseH\x01\x12\x46\n\x17sysroot_create_response\x18\x1d \x01(\x0b\x32#.chromite.api.SysrootCreateResponseH\x01\x12L\n\x1ainstall_toolchain_response\x18\x1f \x01(\x0b\x32&.chromite.api.InstallToolchainResponseH\x01\x12T\n\x1f\x62uild_target_unit_test_response\x18! \x01(\x0b\x32).chromite.api.BuildTargetUnitTestResponseH\x01\x12M\n\x1b\x63hromite_unit_test_response\x18# \x01(\x0b\x32&.chromite.api.ChromiteUnitTestResponseH\x01\x12G\n\x18\x64\x65\x62ug_info_test_response\x18% \x01(\x0b\x32#.chromite.api.DebugInfoTestResponseH\x01\x12\x38\n\x10vm_test_response\x18\' \x01(\x0b\x32\x1c.chromite.api.VmTestResponseH\x01\x12\x46\n\x17uprev_packages_response\x18- \x01(\x0b\x32#.chromite.api.UprevPackagesResponseH\x01\x12I\n\x19get_best_visible_response\x18/ \x01(\x0b\x32$.chromite.api.GetBestVisibleResponseH\x01\x12M\n\x1bget_chrome_version_response\x18\x31 \x01(\x0b\x32&.chromite.api.GetChromeVersionResponseH\x01\x12Q\n\x1dget_builder_metadata_response\x18\x36 \x01(\x0b\x32(.chromite.api.GetBuilderMetadataResponseH\x01\x12M\n\x1b\x62uild_all_firmware_response\x18\x38 \x01(\x0b\x32&.chromite.api.BuildAllFirmwareResponseH\x01\x12K\n\x1atest_all_firmware_response\x18: \x01(\x0b\x32%.chromite.api.TestAllFirmwareResponseH\x01\x42\t\n\x07requestB\n\n\x08responseJ\x04\x08(\x10)J\x04\x08)\x10*B9Z7go.chromium.org/chromiumos/infra/proto/analysis_serviceb\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_artifacts__pb2.DESCRIPTOR,chromite_dot_api_dot_binhost__pb2.DESCRIPTOR,chromite_dot_api_dot_depgraph__pb2.DESCRIPTOR,chromite_dot_api_dot_firmware__pb2.DESCRIPTOR,chromite_dot_api_dot_image__pb2.DESCRIPTOR,chromite_dot_api_dot_packages__pb2.DESCRIPTOR,chromite_dot_api_dot_sdk__pb2.DESCRIPTOR,chromite_dot_api_dot_sysroot__pb2.DESCRIPTOR,chromite_dot_api_dot_test__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -277,224 +277,210 @@ _ANALYSISSERVICEEVENT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='moblab_vm_test_request', full_name='analysis_service.AnalysisServiceEvent.moblab_vm_test_request', index=26,
-      number=40, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='uprev_packages_request', full_name='analysis_service.AnalysisServiceEvent.uprev_packages_request', index=27,
+      name='uprev_packages_request', full_name='analysis_service.AnalysisServiceEvent.uprev_packages_request', index=26,
       number=44, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_best_visible_request', full_name='analysis_service.AnalysisServiceEvent.get_best_visible_request', index=28,
+      name='get_best_visible_request', full_name='analysis_service.AnalysisServiceEvent.get_best_visible_request', index=27,
       number=46, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_chrome_version_request', full_name='analysis_service.AnalysisServiceEvent.get_chrome_version_request', index=29,
+      name='get_chrome_version_request', full_name='analysis_service.AnalysisServiceEvent.get_chrome_version_request', index=28,
       number=48, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_builder_metadata_request', full_name='analysis_service.AnalysisServiceEvent.get_builder_metadata_request', index=30,
+      name='get_builder_metadata_request', full_name='analysis_service.AnalysisServiceEvent.get_builder_metadata_request', index=29,
       number=53, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='build_all_firmware_request', full_name='analysis_service.AnalysisServiceEvent.build_all_firmware_request', index=31,
+      name='build_all_firmware_request', full_name='analysis_service.AnalysisServiceEvent.build_all_firmware_request', index=30,
       number=55, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='test_all_firmware_request', full_name='analysis_service.AnalysisServiceEvent.test_all_firmware_request', index=32,
+      name='test_all_firmware_request', full_name='analysis_service.AnalysisServiceEvent.test_all_firmware_request', index=31,
       number=57, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='install_packages_response', full_name='analysis_service.AnalysisServiceEvent.install_packages_response', index=33,
+      name='install_packages_response', full_name='analysis_service.AnalysisServiceEvent.install_packages_response', index=32,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='bundle_response', full_name='analysis_service.AnalysisServiceEvent.bundle_response', index=34,
+      name='bundle_response', full_name='analysis_service.AnalysisServiceEvent.bundle_response', index=33,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='binhost_get_response', full_name='analysis_service.AnalysisServiceEvent.binhost_get_response', index=35,
+      name='binhost_get_response', full_name='analysis_service.AnalysisServiceEvent.binhost_get_response', index=34,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='acl_args_response', full_name='analysis_service.AnalysisServiceEvent.acl_args_response', index=36,
+      name='acl_args_response', full_name='analysis_service.AnalysisServiceEvent.acl_args_response', index=35,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='prepare_binhost_uploads_response', full_name='analysis_service.AnalysisServiceEvent.prepare_binhost_uploads_response', index=37,
+      name='prepare_binhost_uploads_response', full_name='analysis_service.AnalysisServiceEvent.prepare_binhost_uploads_response', index=36,
       number=13, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='set_binhost_response', full_name='analysis_service.AnalysisServiceEvent.set_binhost_response', index=38,
+      name='set_binhost_response', full_name='analysis_service.AnalysisServiceEvent.set_binhost_response', index=37,
       number=15, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='regen_build_cache_response', full_name='analysis_service.AnalysisServiceEvent.regen_build_cache_response', index=39,
+      name='regen_build_cache_response', full_name='analysis_service.AnalysisServiceEvent.regen_build_cache_response', index=38,
       number=17, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_build_dependency_graph_response', full_name='analysis_service.AnalysisServiceEvent.get_build_dependency_graph_response', index=40,
+      name='get_build_dependency_graph_response', full_name='analysis_service.AnalysisServiceEvent.get_build_dependency_graph_response', index=39,
       number=19, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='create_image_result', full_name='analysis_service.AnalysisServiceEvent.create_image_result', index=41,
+      name='create_image_result', full_name='analysis_service.AnalysisServiceEvent.create_image_result', index=40,
       number=21, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='test_image_result', full_name='analysis_service.AnalysisServiceEvent.test_image_result', index=42,
+      name='test_image_result', full_name='analysis_service.AnalysisServiceEvent.test_image_result', index=41,
       number=23, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='create_response', full_name='analysis_service.AnalysisServiceEvent.create_response', index=43,
+      name='create_response', full_name='analysis_service.AnalysisServiceEvent.create_response', index=42,
       number=25, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='update_response', full_name='analysis_service.AnalysisServiceEvent.update_response', index=44,
+      name='update_response', full_name='analysis_service.AnalysisServiceEvent.update_response', index=43,
       number=27, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sysroot_create_response', full_name='analysis_service.AnalysisServiceEvent.sysroot_create_response', index=45,
+      name='sysroot_create_response', full_name='analysis_service.AnalysisServiceEvent.sysroot_create_response', index=44,
       number=29, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='install_toolchain_response', full_name='analysis_service.AnalysisServiceEvent.install_toolchain_response', index=46,
+      name='install_toolchain_response', full_name='analysis_service.AnalysisServiceEvent.install_toolchain_response', index=45,
       number=31, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='build_target_unit_test_response', full_name='analysis_service.AnalysisServiceEvent.build_target_unit_test_response', index=47,
+      name='build_target_unit_test_response', full_name='analysis_service.AnalysisServiceEvent.build_target_unit_test_response', index=46,
       number=33, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='chromite_unit_test_response', full_name='analysis_service.AnalysisServiceEvent.chromite_unit_test_response', index=48,
+      name='chromite_unit_test_response', full_name='analysis_service.AnalysisServiceEvent.chromite_unit_test_response', index=47,
       number=35, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='debug_info_test_response', full_name='analysis_service.AnalysisServiceEvent.debug_info_test_response', index=49,
+      name='debug_info_test_response', full_name='analysis_service.AnalysisServiceEvent.debug_info_test_response', index=48,
       number=37, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='vm_test_response', full_name='analysis_service.AnalysisServiceEvent.vm_test_response', index=50,
+      name='vm_test_response', full_name='analysis_service.AnalysisServiceEvent.vm_test_response', index=49,
       number=39, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='moblab_vm_test_response', full_name='analysis_service.AnalysisServiceEvent.moblab_vm_test_response', index=51,
-      number=41, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='uprev_packages_response', full_name='analysis_service.AnalysisServiceEvent.uprev_packages_response', index=52,
+      name='uprev_packages_response', full_name='analysis_service.AnalysisServiceEvent.uprev_packages_response', index=50,
       number=45, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_best_visible_response', full_name='analysis_service.AnalysisServiceEvent.get_best_visible_response', index=53,
+      name='get_best_visible_response', full_name='analysis_service.AnalysisServiceEvent.get_best_visible_response', index=51,
       number=47, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_chrome_version_response', full_name='analysis_service.AnalysisServiceEvent.get_chrome_version_response', index=54,
+      name='get_chrome_version_response', full_name='analysis_service.AnalysisServiceEvent.get_chrome_version_response', index=52,
       number=49, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='get_builder_metadata_response', full_name='analysis_service.AnalysisServiceEvent.get_builder_metadata_response', index=55,
+      name='get_builder_metadata_response', full_name='analysis_service.AnalysisServiceEvent.get_builder_metadata_response', index=53,
       number=54, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='build_all_firmware_response', full_name='analysis_service.AnalysisServiceEvent.build_all_firmware_response', index=56,
+      name='build_all_firmware_response', full_name='analysis_service.AnalysisServiceEvent.build_all_firmware_response', index=54,
       number=56, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='test_all_firmware_response', full_name='analysis_service.AnalysisServiceEvent.test_all_firmware_response', index=57,
+      name='test_all_firmware_response', full_name='analysis_service.AnalysisServiceEvent.test_all_firmware_response', index=55,
       number=58, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -519,7 +505,7 @@ _ANALYSISSERVICEEVENT = _descriptor.Descriptor(
       index=1, containing_type=None, fields=[]),
   ],
   serialized_start=450,
-  serialized_end=4374,
+  serialized_end=4246,
 )
 
 _ANALYSISSERVICEEVENT.fields_by_name['request_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
@@ -544,7 +530,6 @@ _ANALYSISSERVICEEVENT.fields_by_name['build_target_unit_test_request'].message_t
 _ANALYSISSERVICEEVENT.fields_by_name['chromite_unit_test_request'].message_type = chromite_dot_api_dot_test__pb2._CHROMITEUNITTESTREQUEST
 _ANALYSISSERVICEEVENT.fields_by_name['debug_info_test_request'].message_type = chromite_dot_api_dot_test__pb2._DEBUGINFOTESTREQUEST
 _ANALYSISSERVICEEVENT.fields_by_name['vm_test_request'].message_type = chromite_dot_api_dot_test__pb2._VMTESTREQUEST
-_ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_request'].message_type = chromite_dot_api_dot_test__pb2._MOBLABVMTESTREQUEST
 _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_request'].message_type = chromite_dot_api_dot_packages__pb2._UPREVPACKAGESREQUEST
 _ANALYSISSERVICEEVENT.fields_by_name['get_best_visible_request'].message_type = chromite_dot_api_dot_packages__pb2._GETBESTVISIBLEREQUEST
 _ANALYSISSERVICEEVENT.fields_by_name['get_chrome_version_request'].message_type = chromite_dot_api_dot_packages__pb2._GETCHROMEVERSIONREQUEST
@@ -569,7 +554,6 @@ _ANALYSISSERVICEEVENT.fields_by_name['build_target_unit_test_response'].message_
 _ANALYSISSERVICEEVENT.fields_by_name['chromite_unit_test_response'].message_type = chromite_dot_api_dot_test__pb2._CHROMITEUNITTESTRESPONSE
 _ANALYSISSERVICEEVENT.fields_by_name['debug_info_test_response'].message_type = chromite_dot_api_dot_test__pb2._DEBUGINFOTESTRESPONSE
 _ANALYSISSERVICEEVENT.fields_by_name['vm_test_response'].message_type = chromite_dot_api_dot_test__pb2._VMTESTRESPONSE
-_ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_response'].message_type = chromite_dot_api_dot_test__pb2._MOBLABVMTESTRESPONSE
 _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_response'].message_type = chromite_dot_api_dot_packages__pb2._UPREVPACKAGESRESPONSE
 _ANALYSISSERVICEEVENT.fields_by_name['get_best_visible_response'].message_type = chromite_dot_api_dot_packages__pb2._GETBESTVISIBLERESPONSE
 _ANALYSISSERVICEEVENT.fields_by_name['get_chrome_version_response'].message_type = chromite_dot_api_dot_packages__pb2._GETCHROMEVERSIONRESPONSE
@@ -633,9 +617,6 @@ _ANALYSISSERVICEEVENT.fields_by_name['debug_info_test_request'].containing_oneof
 _ANALYSISSERVICEEVENT.oneofs_by_name['request'].fields.append(
   _ANALYSISSERVICEEVENT.fields_by_name['vm_test_request'])
 _ANALYSISSERVICEEVENT.fields_by_name['vm_test_request'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['request']
-_ANALYSISSERVICEEVENT.oneofs_by_name['request'].fields.append(
-  _ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_request'])
-_ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_request'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['request']
 _ANALYSISSERVICEEVENT.oneofs_by_name['request'].fields.append(
   _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_request'])
 _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_request'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['request']
@@ -708,9 +689,6 @@ _ANALYSISSERVICEEVENT.fields_by_name['debug_info_test_response'].containing_oneo
 _ANALYSISSERVICEEVENT.oneofs_by_name['response'].fields.append(
   _ANALYSISSERVICEEVENT.fields_by_name['vm_test_response'])
 _ANALYSISSERVICEEVENT.fields_by_name['vm_test_response'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['response']
-_ANALYSISSERVICEEVENT.oneofs_by_name['response'].fields.append(
-  _ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_response'])
-_ANALYSISSERVICEEVENT.fields_by_name['moblab_vm_test_response'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['response']
 _ANALYSISSERVICEEVENT.oneofs_by_name['response'].fields.append(
   _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_response'])
 _ANALYSISSERVICEEVENT.fields_by_name['uprev_packages_response'].containing_oneof = _ANALYSISSERVICEEVENT.oneofs_by_name['response']
