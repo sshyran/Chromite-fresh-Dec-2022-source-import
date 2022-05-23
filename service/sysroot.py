@@ -625,6 +625,7 @@ def InstallToolchain(target: 'build_target_lib.BuildTarget',
     _InstallToolchain(sysroot, target, local_init=local_init)
 
 
+@metrics_lib.timed('service.sysroot.BuildPackages.RunCommand')
 def BuildPackages(target: 'build_target_lib.BuildTarget',
                   sysroot: sysroot_lib.Sysroot,
                   run_configs: BuildPackagesRunConfig) -> None:
@@ -691,10 +692,8 @@ def BuildPackages(target: 'build_target_lib.BuildTarget',
       _CleanStaleBinpkgs(sysroot.path)
 
     try:
-      # REVIEW: discuss which dimensions to flatten into the metric
-      # name other than target.name...
-      with metrics_lib.timer('service.sysroot.BuildPackages.RunCommand'):
-        cros_build_lib.run(cmd, extra_env=extra_env)
+      cros_build_lib.run(cmd, extra_env=extra_env)
+      logging.info('Builds complete.')
     except cros_build_lib.RunCommandError as e:
       failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
       raise sysroot_lib.PackageInstallError(
