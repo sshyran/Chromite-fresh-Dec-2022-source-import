@@ -10,20 +10,26 @@ Install proto using CIPD to ensure a consistent protoc version.
 import enum
 import logging
 import os
+from pathlib import Path
 import tempfile
 from typing import Iterable, Union
 
+from chromite.lib import cipd
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
+from chromite.lib import path_util
 
-
-_CIPD_ROOT = os.path.join(constants.CHROMITE_DIR, '.cipd_bin')
 
 # Chromite's protobuf library version (third_party/google/protobuf).
 PROTOC_VERSION = '3.13.0'
+
+_CIPD_PACKAGE = 'infra/tools/protoc/linux-amd64'
+_CIPD_PACKAGE_VERSION = f'protobuf_version:v{PROTOC_VERSION}'
+_CIPD_DESINATION = (
+    Path(path_util.GetCacheDir()).absolute() / 'cipd' / 'packages')
 
 
 class Error(Exception):
@@ -84,12 +90,12 @@ def _get_gen_dir(protoc_version: ProtocVersion):
     return os.path.join(constants.CHROMITE_DIR, 'api', 'gen')
 
 
-def _get_protoc_command(protoc_version: ProtocVersion):
+def _get_protoc_command(protoc_version: ProtocVersion, cipd_root: Path = None):
   """Get the protoc command for the target protoc."""
   if protoc_version is ProtocVersion.SDK:
     return 'protoc'
-  else:
-    return os.path.join(_CIPD_ROOT, 'protoc')
+  elif cipd_root:
+    return str(cipd_root / 'protoc')
 
 
 def _get_proto_dir(_protoc_version):
@@ -97,27 +103,15 @@ def _get_proto_dir(_protoc_version):
   return os.path.join(constants.CHROMITE_DIR, 'infra', 'proto')
 
 
-def InstallProtoc(protoc_version: ProtocVersion):
+def InstallProtoc(protoc_version: ProtocVersion) -> str:
   """Install protoc from CIPD."""
   if protoc_version is not ProtocVersion.CHROMITE:
-    return
-
-  logging.info('Installing protoc.')
-  cmd = ['cipd', 'ensure']
-  # Clean up the output.
-  cmd.extend(['-log-level', 'warning'])
-  # Set the install location.
-  cmd.extend(['-root', _CIPD_ROOT])
-
-  ensure_content = ('infra/tools/protoc/${platform} '
-                    'protobuf_version:v%s' % PROTOC_VERSION)
-  with osutils.TempDir() as tempdir:
-    ensure_file = os.path.join(tempdir, 'cipd_ensure_file')
-    osutils.WriteFile(ensure_file, ensure_content)
-
-    cmd.extend(['-ensure-file', ensure_file])
-
-    cros_build_lib.dbg_run(cmd, cwd=constants.CHROMITE_DIR)
+    cipd_root = None
+  else:
+    cipd_root = Path(
+        cipd.InstallPackage(cipd.GetCIPDFromCache(), _CIPD_PACKAGE,
+                            _CIPD_PACKAGE_VERSION, _CIPD_DESINATION))
+  return _get_protoc_command(protoc_version, cipd_root)
 
 
 def _CleanTargetDirectory(directory: str):
@@ -146,7 +140,7 @@ def _CleanTargetDirectory(directory: str):
 
 
 def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
-                   dir_subset: SubdirectorySet):
+                   dir_subset: SubdirectorySet, protoc_bin_path: str):
   """Generate the proto files from the |source| tree into |output|.
 
   Args:
@@ -154,6 +148,7 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
     output: Path to the output root directory.
     protoc_version: Which protoc to use.
     dir_subset: The subset of the proto to compile.
+    protoc_bin_path: The protoc command to use.
   """
   logging.info('Generating files to %s.', output)
   osutils.SafeMakedirs(output)
@@ -181,7 +176,7 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
             targets.append(os.path.join(dirpath, filename))
 
     cmd = [
-        _get_protoc_command(protoc_version),
+        protoc_bin_path,
         '-I',
         os.path.join(chromeos_config_path, 'proto'),
         '--python_out',
@@ -292,9 +287,9 @@ def CompileProto(output: str,
   source = os.path.join(_get_proto_dir(protoc_version), 'src')
   protoc_version = protoc_version or ProtocVersion.CHROMITE
 
-  InstallProtoc(protoc_version)
+  protoc_bin_path = InstallProtoc(protoc_version)
   _CleanTargetDirectory(output)
-  _GenerateFiles(source, output, protoc_version, dir_subset)
+  _GenerateFiles(source, output, protoc_version, dir_subset, protoc_bin_path)
   _InstallMissingInits(output)
   if postprocess:
     _PostprocessFiles(output, protoc_version)
