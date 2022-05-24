@@ -21,8 +21,8 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
   """Build Image tests."""
 
   def setUp(self):
-    osutils.Touch(os.path.join(self.tempdir,
-                               image.PARALLEL_EMERGE_STATUS_FILE_NAME))
+    osutils.Touch(
+        os.path.join(self.tempdir, image.PARALLEL_EMERGE_STATUS_FILE_NAME))
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
 
   def testInsideChrootCommand(self):
@@ -61,8 +61,11 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     self.assertCommandContains([constants.IMAGE_TYPE_DEV])
 
     # Multiple should all be passed.
-    multi = [constants.IMAGE_TYPE_BASE, constants.IMAGE_TYPE_DEV,
-             constants.IMAGE_TYPE_TEST]
+    multi = [
+        constants.IMAGE_TYPE_BASE,
+        constants.IMAGE_TYPE_DEV,
+        constants.IMAGE_TYPE_TEST,
+    ]
     image.Build('board', multi)
     self.assertCommandContains(multi)
 
@@ -141,8 +144,8 @@ class CreateVmTest(cros_test_lib.RunCommandTestCase):
   def testResultPath(self):
     """Test the path building."""
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value='/tmp')
-    self.assertEqual(os.path.join('/tmp', constants.VM_IMAGE_BIN),
-                     image.CreateVm('board'))
+    self.assertEqual(
+        os.path.join('/tmp', constants.VM_IMAGE_BIN), image.CreateVm('board'))
 
 
 class BuildRecoveryTest(cros_test_lib.RunCommandTestCase):
@@ -178,19 +181,15 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
                                           'inside/build/board/latest')
 
     D = cros_test_lib.Directory
-    filesystem = (
-        D('outside', (
-            D('results', ()),
-            D('inside', (
-                D('results_inside', ()),
-                D('build', (
-                    D('board', (
-                        D('latest', ('%s.bin' % constants.BASE_IMAGE_NAME,)),
-                    )),
-                )),
-            )),
+    filesystem = (D('outside', (
+        D('results', ()),
+        D('inside', (
+            D('results_inside', ()),
+            D('build', (D('board',
+                          (D('latest',
+                             ('%s.bin' % constants.BASE_IMAGE_NAME,)),)),)),
         )),
-    )
+    )),)
 
     cros_test_lib.CreateOnDiskHierarchy(self.tempdir, filesystem)
 
@@ -208,14 +207,18 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
   def testTestInsideChrootAllProvided(self):
     """Test behavior when inside the chroot and all paths provided."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
-    image.Test(self.board, self.outside_result_dir,
-               image_dir=self.image_dir_inside)
+    image.Test(
+        self.board, self.outside_result_dir, image_dir=self.image_dir_inside)
 
     # Inside chroot shouldn't need to do any path manipulations, so we should
     # see exactly what we called it with.
-    self.assertCommandContains(['--board', self.board,
-                                '--test_results_root', self.outside_result_dir,
-                                self.image_dir_inside])
+    self.assertCommandContains([
+        '--board',
+        self.board,
+        '--test_results_root',
+        self.outside_result_dir,
+        self.image_dir_inside,
+    ])
 
   def testTestInsideChrootNoImageDir(self):
     """Test image dir generation inside the chroot."""
@@ -224,9 +227,14 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(image_lib, 'GetLatestImageLink', return_value=mocked_dir)
     image.Test(self.board, self.outside_result_dir)
 
-    self.assertCommandContains(['--board', self.board,
-                                '--test_results_root', self.outside_result_dir,
-                                mocked_dir])
+    self.assertCommandContains([
+        '--board',
+        self.board,
+        '--test_results_root',
+        self.outside_result_dir,
+        mocked_dir,
+    ])
+
 
 class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
   """Unittests for create_factory_image_zip."""
@@ -241,7 +249,7 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     # Create appropriate sysroot structure.
     osutils.SafeMakedirs(self.sysroot_path)
     factory_bundle_path = self.chroot.full_path(self.sysroot.path, 'usr',
-      'local','factory', 'bundle')
+                                                'local', 'factory', 'bundle')
     osutils.SafeMakedirs(factory_bundle_path)
     osutils.Touch(os.path.join(factory_bundle_path, 'bundle_foo'))
 
@@ -261,23 +269,25 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     """create_factory_image_zip calls cbuildbot/commands with correct args."""
     version = '1.2.3.4'
     output_file = image.create_factory_image_zip(self.chroot, self.sysroot,
-      Path(self.factory_shim_path), version, self.output_dir)
+                                                 Path(self.factory_shim_path),
+                                                 version, self.output_dir)
 
     # Check that all expected files are present.
     zip_contents = cros_build_lib.run(['zipinfo', '-1', output_file],
-                                      cwd=self.output_dir,  stdout=True)
+                                      cwd=self.output_dir,
+                                      stdout=True)
     zip_files = sorted(zip_contents.output.decode('UTF-8').strip().split('\n'))
     expected_files = sorted([
-      'factory_shim_dir/netboot/',
-      'factory_shim_dir/netboot/bar',
-      'factory_shim_dir/factory_install.bin',
-      'factory_shim_dir/partition',
-      'bundle_foo',
-      'BUILD_VERSION',
+        'factory_shim_dir/netboot/',
+        'factory_shim_dir/netboot/bar',
+        'factory_shim_dir/factory_install.bin',
+        'factory_shim_dir/partition',
+        'bundle_foo',
+        'BUILD_VERSION',
     ])
     self.assertListEqual(zip_files, expected_files)
 
     # Check contents of BUILD_VERSION.
     cmd = ['unzip', '-p', output_file, 'BUILD_VERSION']
-    version_file = cros_build_lib.run(cmd, cwd=self.output_dir,  stdout=True)
+    version_file = cros_build_lib.run(cmd, cwd=self.output_dir, stdout=True)
     self.assertEqual(version_file.output.decode('UTF-8').strip(), version)
