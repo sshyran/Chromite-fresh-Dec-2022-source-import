@@ -30,13 +30,13 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
     image.Build('board', [constants.IMAGE_TYPE_BASE])
     self.assertCommandContains(
-        [os.path.join(constants.CROSUTILS_DIR, 'build_image')])
+        [os.path.join(constants.CROSUTILS_DIR, 'build_image.sh')])
 
   def testOutsideChrootCommand(self):
     """Test the build_image command when called from outside the chroot."""
     self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
     image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(['./build_image'])
+    self.assertCommandContains(['./build_image.sh'])
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
@@ -80,32 +80,73 @@ class BuildConfigTest(cros_test_lib.MockTestCase):
   def testGetArguments(self):
     """GetArguments tests."""
     config = image.BuildConfig()
-    self.assertEqual([], config.GetArguments())
+    self.assertIn('--script-is-run-only-by-chromite-and-not-users',
+                  config.GetArguments())
 
     # Make sure each arg produces the correct argument individually.
-    config = image.BuildConfig(builder_path='test')
-    self.assertEqual(['--builder_path', 'test'], config.GetArguments())
+    config = image.BuildConfig(builder_path='test_builder_path')
+    self.assertIn('--builder_path', config.GetArguments())
+    self.assertIn('test_builder_path', config.GetArguments())
 
     config = image.BuildConfig(disk_layout='disk')
-    self.assertEqual(['--disk_layout', 'disk'], config.GetArguments())
+    self.assertIn('--disk_layout', config.GetArguments())
+    self.assertIn('disk', config.GetArguments())
 
     config = image.BuildConfig(enable_rootfs_verification=False)
-    self.assertEqual(['--noenable_rootfs_verification'], config.GetArguments())
+    self.assertIn('--noenable_rootfs_verification', config.GetArguments())
 
     config = image.BuildConfig(replace=True)
-    self.assertEqual(['--replace'], config.GetArguments())
+    self.assertIn('--replace', config.GetArguments())
 
-    config = image.BuildConfig(version='version')
-    self.assertEqual(['--version', 'version'], config.GetArguments())
+    config = image.BuildConfig(version='build_version')
+    self.assertIn('--version', config.GetArguments())
+    self.assertIn('build_version', config.GetArguments())
 
-    config = image.BuildConfig(build_attempt=1)
-    self.assertEqual(['--build_attempt', 1], config.GetArguments())
+    config = image.BuildConfig(build_attempt=12)
+    self.assertIn('--build_attempt', config.GetArguments())
+    self.assertIn('12', config.GetArguments())
 
-    config = image.BuildConfig(symlink='test')
-    self.assertEqual(['--symlink', 'test'], config.GetArguments())
+    config = image.BuildConfig(symlink='test_symlink')
+    self.assertIn('--symlink', config.GetArguments())
+    self.assertIn('test_symlink', config.GetArguments())
 
-    config = image.BuildConfig(output_dir_suffix='test')
-    self.assertEqual(['--output_suffix', 'test'], config.GetArguments())
+    config = image.BuildConfig(output_dir_suffix='test_output_suffix')
+    self.assertIn('--output_suffix', config.GetArguments())
+    self.assertIn('test_output_suffix', config.GetArguments())
+
+    config = image.BuildConfig(adjust_partition='ROOT-A:+1G')
+    self.assertIn('--adjust_part', config.GetArguments())
+    self.assertIn('ROOT-A:+1G', config.GetArguments())
+
+    config = image.BuildConfig(boot_args='initrd')
+    self.assertIn('--boot_args', config.GetArguments())
+    self.assertIn('initrd', config.GetArguments())
+
+    config = image.BuildConfig(enable_bootcache=True)
+    self.assertIn('--enable_bootcache', config.GetArguments())
+
+    config = image.BuildConfig(output_root='test/output/dir')
+    self.assertIn('--output_root', config.GetArguments())
+    self.assertIn('test/output/dir', config.GetArguments())
+
+    config = image.BuildConfig(build_root='test/build/dir')
+    self.assertIn('--build_root', config.GetArguments())
+    self.assertIn('test/build/dir', config.GetArguments())
+
+    config = image.BuildConfig(enable_serial='ttyS1')
+    self.assertIn('--enable_serial', config.GetArguments())
+    self.assertIn('ttyS1', config.GetArguments())
+
+    config = image.BuildConfig(kernel_loglevel=4)
+    self.assertIn('--loglevel', config.GetArguments())
+    self.assertIn('4', config.GetArguments())
+
+    config = image.BuildConfig(jobs=40)
+    self.assertIn('--jobs', config.GetArguments())
+    self.assertIn('40', config.GetArguments())
+
+    config = image.BuildConfig(eclean=False)
+    self.assertIn('--noeclean', config.GetArguments())
 
 
 class CreateVmTest(cros_test_lib.RunCommandTestCase):

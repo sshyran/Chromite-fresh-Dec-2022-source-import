@@ -37,6 +37,7 @@ CHROMITE_SCRIPTS_DIR = os.path.join(CHROMITE_DIR, 'scripts')
 PATH_TO_CBUILDBOT = os.path.join(CHROMITE_BIN_SUBDIR, 'cbuildbot')
 DEFAULT_CHROOT_DIR = 'chroot'
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
+DEFAULT_BUILD_ROOT = os.path.join(SOURCE_ROOT, 'src/build')
 TERMINA_TOOLS_DIR = os.path.join(
     CHROOT_SOURCE_ROOT, 'src/platform/container-guest-tools/termina')
 RULES_CROS_PATH = os.path.join(CHROOT_SOURCE_ROOT, 'src/platform/rules_cros')

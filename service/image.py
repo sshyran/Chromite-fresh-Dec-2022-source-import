@@ -50,38 +50,73 @@ class BuildConfig(NamedTuple):
     replace: Whether to replace existing output if any exists.
     version: The version string to use for the image.
     build_attempt: The build_attempt number to pass to build_image.
-    symlink: Symlink name.
+    symlink: Symlink name (defaults to "latest").
     output_dir_suffix: String to append to the image build directory.
+    adjust_partition: Adjustments to apply to partition table (LABEL:[+-=]SIZE)
+      e.g. ROOT-A:+1G
+    boot_args: Additional boot arguments to pass to the commandline.
+    enable_bootcache: Enable bootloaders to use boot cache.
+    output_root: Directory in which to place image result directories.
+    build_root: Directory in which to compose the image, before copying it to
+      output_root.
+    enable_serial: Enable serial port for printks. Example values: ttyS0
+    kernel_loglevel: The loglevel to add to the kernel command line.
+    jobs: Number of packages to process in parallel at maximum.
+    eclean: Call eclean before building the image.
   """
   builder_path: Optional[str] = None
   disk_layout: Optional[str] = None
   enable_rootfs_verification: bool = True
   replace: bool = False
   version: Optional[str] = None
-  build_attempt: Optional[int] = None
-  symlink: Optional[str] = None
+  build_attempt: int = 1
+  symlink: str = 'latest'
   output_dir_suffix: Optional[str] = None
+  adjust_partition: Optional[str] = None
+  boot_args: str = 'noinitrd'
+  enable_bootcache: bool = False
+  output_root: Union[str, os.PathLike] = Path(
+      constants.DEFAULT_BUILD_ROOT) / 'images'
+  build_root: Union[str, os.PathLike] = Path(
+      constants.DEFAULT_BUILD_ROOT) / 'images'
+  enable_serial: Optional[str] = None
+  kernel_loglevel: int = 7
+  jobs: int = os.cpu_count()
+  # TODO(rchandrasekar): eclean will not be needed by build_image, after we move
+  # all the kernel emerging operations into build_packages.
+  eclean: bool = True
 
   def GetArguments(self):
     """Get the build_image arguments for the configuration."""
-    args = []
+    args = ['--script-is-run-only-by-chromite-and-not-users']
 
     if self.builder_path:
       args.extend(['--builder_path', self.builder_path])
-    if self.disk_layout:
-      args.extend(['--disk_layout', self.disk_layout])
     if not self.enable_rootfs_verification:
       args.append('--noenable_rootfs_verification')
     if self.replace:
       args.append('--replace')
     if self.version:
       args.extend(['--version', self.version])
-    if self.build_attempt:
-      args.extend(['--build_attempt', self.build_attempt])
-    if self.symlink:
-      args.extend(['--symlink', self.symlink])
     if self.output_dir_suffix:
       args.extend(['--output_suffix', self.output_dir_suffix])
+    if self.adjust_partition:
+      args.extend(['--adjust_part', self.adjust_partition])
+    if self.enable_bootcache:
+      args.append('--enable_bootcache')
+    if self.enable_serial:
+      args.extend(['--enable_serial', self.enable_serial])
+    if not self.eclean:
+      args.append('--noeclean')
+    args.extend(
+        ['--disk_layout', self.disk_layout if self.disk_layout else 'default'])
+    args.extend(['--build_attempt', f'{self.build_attempt}'])
+    args.extend(['--symlink', self.symlink])
+    args.extend(['--boot_args', self.boot_args])
+    args.extend(['--output_root', self.output_root])
+    args.extend(['--build_root', self.build_root])
+    args.extend(['--loglevel', f'{self.kernel_loglevel}'])
+    args.extend(['--jobs', f'{self.jobs}'])
 
     return args
 
@@ -179,12 +214,12 @@ def Build(board: str,
   config = config or BuildConfig()
 
   if cros_build_lib.IsInsideChroot():
-    cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_image')]
+    cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_image.sh')]
   else:
-    cmd = ['./build_image']
+    cmd = ['./build_image.sh']
 
-  cmd.extend(['--board', board])
   cmd.extend(config.GetArguments())
+  cmd.extend(['--board', board])
   cmd.extend(images)
 
   extra_env_local = extra_env.copy() if extra_env else {}
