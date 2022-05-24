@@ -8,6 +8,7 @@ from collections import namedtuple
 import multiprocessing
 import os
 import time
+from typing import Callable, Optional, Tuple
 
 from chromite.utils import key_value_store
 
@@ -151,31 +152,28 @@ class MemoryConsumptionSemaphore(object):
   """
   SYSTEM_POLLING_INTERVAL_SECONDS = 0.5
 
-  def __init__(self, system_available_buffer_bytes=None,
-               single_proc_max_bytes=None,
-               quiescence_time_seconds=None,
-               unchecked_acquires=0,
-               total_max=10,
-               clock=time.time):
+  def __init__(self, system_available_buffer_bytes: Optional[int] = None,
+               single_proc_max_bytes: Optional[int] = None,
+               quiescence_time_seconds: Optional[float] = None,
+               unchecked_acquires: int = 0,
+               total_max: int = 10,
+               clock: Callable = time.time):
     """Create a new MemoryConsumptionSemaphore.
 
     Args:
-      system_available_buffer_bytes (int): The number of bytes to reserve
-        on the system as a buffer against moving into swap (or OOM).
-      single_proc_max_bytes (int): The number of bytes we expect a process
-        to consume on the system.
-      quiescence_time_seconds (float): The number of seconds to wait at a
-        minimum between acquires. The purpose is to ensure the subprocess
-        begins to consume a stable amount of memory.
-      unchecked_acquires (int): The number acquires to allow without checking
+      system_available_buffer_bytes: The number of bytes to reserve on the
+        system as a buffer against moving into swap (or OOM).
+      single_proc_max_bytes: The number of bytes we expect a process to
+        consume on the system.
+      quiescence_time_seconds: The number of seconds to wait at a minimum
+        between acquires. The purpose is to ensure the subprocess begins to
+        consume a stable amount of memory.
+      unchecked_acquires: The number acquires to allow without checking
         available memory. This is to allow users to supply a mandatory minimum
         even if the semaphore would otherwise not allow it (because of the
         current available memory being to low).
-      total_max (int): The upper bound of maximum concurrent runs (default 10).
-      clock (fn): Function that gets float time.
-
-    Returns:
-      A new MemoryConsumptionSemaphore.
+      total_max: The upper bound of maximum concurrent runs (default 10).
+      clock: Function that gets float time.
     """
     self.quiescence_time_seconds = quiescence_time_seconds
     self.unchecked_acquires = unchecked_acquires
@@ -242,18 +240,18 @@ class MemoryConsumptionSemaphore(object):
     else:
       return True
 
-  def acquire(self, timeout):
+  def acquire(self, timeout: float) -> Tuple[bool, str]:
     """Block until enough available memory, or timeout.
 
     Polls the system every SYSTEM_POLLING_INTERVAL_SECONDS and determines
     if there is enough available memory to proceed, or potentially timeout.
 
     Args:
-      timeout (float): Time to block for available memory before return.
+      timeout: Time to block for available memory before return.
 
     Returns:
-      A tuple (bool, string) bool flags if you should go, and string is a text
-      representation of the reason for the acquire result.
+      True if you should go, and a text representation of the reason for the
+      acquire result.
     """
 
     # Remeasure the base.
