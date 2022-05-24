@@ -9,10 +9,9 @@ Install proto using CIPD to ensure a consistent protoc version.
 
 import enum
 import logging
-import os
 from pathlib import Path
 import tempfile
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional
 
 from chromite.lib import cipd
 from chromite.lib import commandline
@@ -49,6 +48,17 @@ class ProtocVersion(enum.Enum):
   # chromite/third_party/google/protobuf.
   CHROMITE = enum.auto()
 
+  def get_gen_dir(self) -> Path:
+    """Get the chromite/api directory path."""
+    if self is ProtocVersion.SDK:
+      return Path(constants.CHROMITE_DIR) / 'api' / 'gen_sdk'
+    else:
+      return Path(constants.CHROMITE_DIR) / 'api' / 'gen'
+
+  def get_proto_dir(self) -> Path:
+    """Get the proto directory for the target protoc."""
+    return Path(constants.CHROMITE_DIR) / 'infra' / 'proto'
+
   def get_protoc_command(self, cipd_root: Optional[Path] = None) -> Path:
     """Get protoc command path."""
     assert self is ProtocVersion.SDK or cipd_root
@@ -64,40 +74,25 @@ class SubdirectorySet(enum.Enum):
   ALL = enum.auto()
   DEFAULT = enum.auto()
 
-  def get_source_dirs(self, source: Union[str, os.PathLike],
-                      chromeos_config_path: Union[str, os.PathLike]
-                      ) -> Union[Iterable[str], Iterable[os.PathLike]]:
+  def get_source_dirs(self, source: Path,
+                      chromeos_config_path: Path) -> Iterable[Path]:
     """Get the directories for the given subdirectory set."""
-    _join = lambda x, y: os.path.join(x, y) if isinstance(x, str) else x / y
     if self is self.ALL:
       return [
           source,
-          _join(chromeos_config_path, 'proto/chromiumos'),
+          chromeos_config_path / 'proto' / 'chromiumos',
       ]
 
     subdirs = [
-        _join(source, 'analysis_service'),
-        _join(source, 'chromite'),
-        _join(source, 'chromiumos'),
-        _join(source, 'config'),
-        _join(source, 'test_platform'),
-        _join(source, 'device'),
-        _join(chromeos_config_path, 'proto/chromiumos'),
+        source / 'analysis_service',
+        source / 'chromite',
+        source / 'chromiumos',
+        source / 'config',
+        source / 'test_platform',
+        source / 'device',
+        chromeos_config_path / 'proto' / 'chromiumos',
     ]
     return subdirs
-
-
-def _get_gen_dir(protoc_version: ProtocVersion):
-  """Get the chromite/api directory path."""
-  if protoc_version is ProtocVersion.SDK:
-    return os.path.join(constants.CHROMITE_DIR, 'api', 'gen_sdk')
-  else:
-    return os.path.join(constants.CHROMITE_DIR, 'api', 'gen')
-
-
-def _get_proto_dir(_protoc_version):
-  """Get the proto directory for the target protoc."""
-  return os.path.join(constants.CHROMITE_DIR, 'infra', 'proto')
 
 
 def InstallProtoc(protoc_version: ProtocVersion) -> Path:
@@ -111,7 +106,7 @@ def InstallProtoc(protoc_version: ProtocVersion) -> Path:
   return protoc_version.get_protoc_command(cipd_root)
 
 
-def _CleanTargetDirectory(directory: str):
+def _CleanTargetDirectory(directory: Path):
   """Remove any existing generated files in the directory.
 
   This clean only removes the generated files to avoid accidentally destroying
@@ -124,19 +119,16 @@ def _CleanTargetDirectory(directory: str):
     directory: Path to be cleaned up.
   """
   logging.info('Cleaning old files from %s.', directory)
-  for dirpath, _dirnames, filenames in os.walk(directory):
-    old = [os.path.join(dirpath, f) for f in filenames if f.endswith('_pb2.py')]
+  for current in directory.rglob('*_pb2.py'):
+    # Remove old generated files.
+    current.unlink()
+  for current in directory.rglob('__init__.py'):
     # Remove empty init files to clean up otherwise empty directories.
-    if '__init__.py' in filenames:
-      init = os.path.join(dirpath, '__init__.py')
-      if not osutils.ReadFile(init):
-        old.append(init)
-
-    for current in old:
-      osutils.SafeUnlink(current)
+    if not current.stat().st_size:
+      current.unlink()
 
 
-def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
+def _GenerateFiles(source: Path, output: Path, protoc_version: ProtocVersion,
                    dir_subset: SubdirectorySet, protoc_bin_path: Path):
   """Generate the proto files from the |source| tree into |output|.
 
@@ -152,12 +144,12 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
 
   targets = []
 
-  chromeos_config_path = os.path.realpath(
-      os.path.join(constants.SOURCE_ROOT, 'src/config'))
+  chromeos_config_path = (
+      Path(constants.SOURCE_ROOT) / 'src' / 'config')
 
   with tempfile.TemporaryDirectory() as tempdir:
-    if not os.path.exists(chromeos_config_path):
-      chromeos_config_path = os.path.join(tempdir, 'config')
+    if not chromeos_config_path.exists():
+      chromeos_config_path = Path(tempdir) / 'config'
 
       logging.info('Creating shallow clone of chromiumos/config')
       git.Clone(
@@ -165,17 +157,13 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
           '%s/chromiumos/config' % constants.EXTERNAL_GOB_URL,
           depth=1)
 
-    for basedir in dir_subset.get_source_dirs(source, chromeos_config_path):
-      for dirpath, _dirnames, filenames in os.walk(basedir):
-        for filename in filenames:
-          if filename.endswith('.proto'):
-            # We have a match, add the file.
-            targets.append(os.path.join(dirpath, filename))
+    for src_dir in dir_subset.get_source_dirs(source, chromeos_config_path):
+      targets.extend(list(src_dir.rglob('*.proto')))
 
     cmd = [
         protoc_bin_path,
         '-I',
-        os.path.join(chromeos_config_path, 'proto'),
+        chromeos_config_path / 'proto',
         '--python_out',
         output,
         '--proto_path',
@@ -183,10 +171,9 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
     ]
     cmd.extend(targets)
 
-    result = cros_build_lib.run(
+    result = cros_build_lib.dbg_run(
         cmd,
         cwd=source,
-        print_cmd=False,
         check=False,
         enter_chroot=protoc_version is ProtocVersion.SDK)
 
@@ -195,15 +182,15 @@ def _GenerateFiles(source: str, output: str, protoc_version: ProtocVersion,
                             'message.')
 
 
-def _InstallMissingInits(directory):
+def _InstallMissingInits(directory: Path):
   """Add any __init__.py files not present in the generated protobuf folders."""
   logging.info('Adding missing __init__.py files in %s.', directory)
-  for dirpath, _dirnames, filenames in os.walk(directory):
-    if '__init__.py' not in filenames:
-      osutils.Touch(os.path.join(dirpath, '__init__.py'))
+  # glob ** returns only directories.
+  for current in directory.rglob('**'):
+    (current / '__init__.py').touch()
 
 
-def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
+def _PostprocessFiles(directory: Path, protoc_version: ProtocVersion):
   """Do postprocessing on the generated files.
 
   Args:
@@ -256,17 +243,14 @@ def _PostprocessFiles(directory: str, protoc_version: ProtocVersion):
     ]
     seds.append(google_protobuf_sed)
 
-  for dirpath, _dirnames, filenames in os.walk(directory):
-    # Update the imports in the generated files.
-    pb2 = [os.path.join(dirpath, f) for f in filenames if f.endswith('_pb2.py')]
-    if pb2:
-      for sed in seds:
-        cmd = sed + pb2
-        cros_build_lib.run(cmd, print_cmd=False)
+  pb2 = list(directory.rglob('*_pb2.py'))
+  if pb2:
+    for sed in seds:
+      cros_build_lib.dbg_run(sed + pb2)
 
 
-def CompileProto(output: str,
-                 protoc_version: ProtocVersion,
+def CompileProto(protoc_version: ProtocVersion,
+                 output: Optional[Path] = None,
                  dir_subset: SubdirectorySet = SubdirectorySet.DEFAULT,
                  postprocess: bool = True):
   """Compile the Build API protobuf files.
@@ -281,8 +265,10 @@ def CompileProto(output: str,
     dir_subset: What proto to compile.
     postprocess: Whether to run the postprocess step.
   """
-  source = os.path.join(_get_proto_dir(protoc_version), 'src')
   protoc_version = protoc_version or ProtocVersion.CHROMITE
+  source = protoc_version.get_proto_dir() / 'src'
+  if not output:
+    output = protoc_version.get_gen_dir()
 
   protoc_bin_path = InstallProtoc(protoc_version)
   _CleanTargetDirectory(output)
@@ -359,6 +345,9 @@ def _ParseArguments(argv):
   if not opts.protoc_version:
     opts.protoc_version = [ProtocVersion.CHROMITE, ProtocVersion.SDK]
 
+  if opts.destination:
+    opts.destination = Path(opts.destination)
+
   opts.Freeze()
   return opts
 
@@ -370,8 +359,8 @@ def main(argv):
     # Destination set, only compile a single version in the destination.
     try:
       CompileProto(
-          output=opts.destination,
           protoc_version=opts.dest_protoc,
+          output=opts.destination,
           dir_subset=opts.dir_subset,
           postprocess=opts.postprocess
       )
@@ -383,9 +372,7 @@ def main(argv):
   if ProtocVersion.CHROMITE in opts.protoc_version:
     # Compile the chromite bindings.
     try:
-      CompileProto(
-          output=_get_gen_dir(ProtocVersion.CHROMITE),
-          protoc_version=ProtocVersion.CHROMITE)
+      CompileProto(protoc_version=ProtocVersion.CHROMITE)
     except Error as e:
       cros_build_lib.Die('Error compiling chromite bindings: %s', str(e))
 
@@ -394,17 +381,14 @@ def main(argv):
     if not cros_build_lib.IsInsideChroot():
       # Rerun inside of the SDK instead of trying to map all of the paths.
       cmd = [
-          os.path.join(constants.CHROOT_SOURCE_ROOT, 'chromite', 'api',
-                       'compile_build_api_proto'),
+          (Path(constants.CHROOT_SOURCE_ROOT) / 'chromite' / 'api' /
+           'compile_build_api_proto'),
           '--sdk',
       ]
-      result = cros_build_lib.run(
-          cmd, print_cmd=False, enter_chroot=True, check=False)
+      result = cros_build_lib.dbg_run(cmd, enter_chroot=True, check=False)
       return result.returncode
     else:
       try:
-        CompileProto(
-            output=_get_gen_dir(ProtocVersion.SDK),
-            protoc_version=ProtocVersion.SDK)
+        CompileProto(protoc_version=ProtocVersion.SDK)
       except Error as e:
         cros_build_lib.Die('Error compiling SDK bindings: %s', str(e))
