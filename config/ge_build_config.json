@@ -1445,6 +1445,14 @@
         },
         {
           "board_name": "brya-hibernate",
+          "name": "osiris",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7229,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-hibernate",
           "name": "primus",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
@@ -1615,6 +1623,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "gimble",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -1631,6 +1650,25 @@
         {
           "board_name": "brya-kernelnext",
           "name": "kano",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7230,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-kernelnext",
+          "name": "osiris",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -1655,6 +1693,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "redrix",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -1824,6 +1873,14 @@
         {
           "board_name": "brya-lvm-stateful",
           "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7214,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-lvm-stateful",
+          "name": "osiris",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7214,
@@ -2046,6 +2103,14 @@
         {
           "board_name": "brya-manatee",
           "name": "kano",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7187,
+          "is_active": true
+        },
+        {
+          "board_name": "brya-manatee",
+          "name": "osiris",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7187,
