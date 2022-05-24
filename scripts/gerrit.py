@@ -225,8 +225,11 @@ def PrettyPrintCl(opts, cl, lims=None, show_approvals=True):
         functor = green
       status += functor('%s:%2s ' % (cat, approvs[cat]))
 
-  print('%s %s%-*s %s' % (blue('%-*s' % (lims['url'], cl['url'])), status,
-                          lims['project'], cl['project'], cl['subject']))
+  if opts.markdown:
+    print('* %s - %s' % (uri_lib.ShortenUri(cl['url']), cl['subject']))
+  else:
+    print('%s %s%-*s %s' % (blue('%-*s' % (lims['url'], cl['url'])), status,
+                            lims['project'], cl['project'], cl['subject']))
 
   if show_approvals and opts.verbose:
     for approver in cl['currentPatchSet'].get('approvals', []):
@@ -1192,6 +1195,8 @@ Actions:
                       help='Return raw results (suitable for scripting)')
   parser.add_argument('--json', default=False, action='store_true',
                       help='Return results in JSON (suitable for scripting)')
+  parser.add_argument('--markdown', default=False, action='store_true',
+                      help='Return results in markdown (for pasting in a bug)')
   return parser
 
 
