@@ -458,7 +458,7 @@ class ActionDeps(_ActionSearchQuery):
       # when CQ-DEPEND uses a Gerrit Change-Id, but that Change-Id shows up
       # across multiple repos/branches.  We blindly check all of them in the
       # hopes that all open ones are what the user wants, but then again the
-      # CQ-DEPEND syntax itself is unable to differeniate.  *shrug*
+      # CQ-DEPEND syntax itself is unable to differentiate.  *shrug*
       if len(changes) > 1:
         logging.warning('CL %s has an ambiguous CQ dependency %s',
                         cl, dep.ToGerritQueryText())
@@ -519,7 +519,7 @@ class _ActionLabeler(UserAction):
   @classmethod
   def __call__(cls, opts):
     """Implement the action."""
-    # Convert user friendly command line option into a gerrit parameter.
+    # Convert user-friendly command line option into a gerrit parameter.
     def task(arg):
       helper, cl = GetGerrit(opts, arg)
       helper.SetReview(cl, labels={cls.LABEL: opts.value[0]}, msg=opts.msg,
@@ -867,7 +867,7 @@ class ActionUnignore(_ActionSimpleParallelCLs):
 
 
 class ActionCherryPick(UserAction):
-  """Cherry pick CLs to branches."""
+  """Cherry-pick CLs to branches."""
 
   COMMAND = 'cherry-pick'
 
