@@ -709,9 +709,6 @@ class ChrootUpdater(object):
     """Set and store the chroot version."""
     self._version = version
     osutils.WriteFile(self._version_file, str(version), sudo=True)
-    # TODO(saklein) Verify if this chown is necessary. The version file
-    # is in /etc, so it's reasonable to expect root would own it, but the bash
-    # version had the chown for many years before the conversion.
     osutils.Chown(self._version_file)
 
   def IsInitialized(self):
