@@ -1,6 +1,9 @@
-#### api/gen
+#### api/gen_sdk
 
-Generated protobuf messages.
+Generated protobuf messages for use with the protobuf library installed in
+the SDK. These bindings are **not** compatible with the protobuf library in
+`chromite/third_party`, all code using chromite's vendored protobuf library
+should be using `api/gen` instead.
 
 **Do not edit any files in this package directly.**
 
