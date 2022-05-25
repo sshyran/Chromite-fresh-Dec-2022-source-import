@@ -404,7 +404,8 @@ class TerminateRunCommandError(RunCommandError):
   """
 
 
-def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
+def sudo_run(cmd, user='root', preserve_env: bool = False, **kwargs
+            ) -> CommandResult:
   """Run a command via sudo.
 
   Client code must use this rather than coming up with their own run
@@ -415,7 +416,7 @@ def sudo_run(cmd, user='root', preserve_env=False, **kwargs) -> CommandResult:
     cmd: The command to run.  See run for rules of this argument: sudo_run
          purely prefixes it with sudo.
     user: The user to run the command as.
-    preserve_env (bool): Whether to preserve the environment.
+    preserve_env: Whether to preserve the environment.
     kwargs: See run() options, it's a direct pass thru to it.
           Note that this supports a 'strict' keyword that defaults to True.
           If set to False, it'll suppress strict sudo behavior.
@@ -1799,11 +1800,11 @@ def GetDefaultBoard():
   return default_board
 
 
-def SetDefaultBoard(board):
+def SetDefaultBoard(board: str):
   """Set the default board.
 
   Args:
-    board (str): The name of the board to save as the default.
+    board: The name of the board to save as the default.
 
   Returns:
     bool - True if successfully wrote default, False otherwise.
