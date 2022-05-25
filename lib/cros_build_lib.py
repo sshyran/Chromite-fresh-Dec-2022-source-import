@@ -23,6 +23,7 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
+import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -238,8 +239,20 @@ class CommandResult(CompletedProcess):
   # The linter is confused by the getattr usage above.
   # TODO(vapier): Drop this once we're Python 3-only and we drop getattr.
   # pylint: disable=bad-option-value,super-on-old-class
-  def __init__(self, cmd=None, error=None, output=None, returncode=None,
-               args=None, stdout=None, stderr=None):
+  def __init__(self, cmd=None, returncode=None, args=None, stdout=None,
+               stderr=None, **kwargs):
+    # Handle deprecated arguments for now.
+    output = error = None
+    if 'output' in kwargs:
+      warnings.warn('output= is deprecated -- use stdout=', DeprecationWarning)
+      output = kwargs.pop('output')
+    if 'error' in kwargs:
+      warnings.warn('error= is deprecated -- use stderr=', DeprecationWarning)
+      error = kwargs.pop('error')
+    if kwargs:
+      raise TypeError(
+          f'got an unexpected keyword arguments {sorted(kwargs.keys())}')
+
     if args is None:
       args = cmd
     elif cmd is not None:
@@ -259,11 +272,13 @@ class CommandResult(CompletedProcess):
   @property
   def output(self):
     """Backwards compat API."""
+    warnings.warn('CommandResult.output is now .stdout', DeprecationWarning)
     return self.stdout
 
   @property
   def error(self):
     """Backwards compat API."""
+    warnings.warn('CommandResult.error is now .stderr', DeprecationWarning)
     return self.stderr
 
 

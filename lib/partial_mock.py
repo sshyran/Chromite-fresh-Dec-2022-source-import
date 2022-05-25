@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from unittest import mock
+import warnings
 
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
@@ -590,20 +591,28 @@ class PartialCmdMock(PartialMock):
 
   # TODO(crbug.com/1006587): Drop redundant arguments & backwards compat APIs.
   @CheckAttr
-  def SetDefaultCmdResult(self, returncode=0, output=None, error=None,
-                          stdout=None, stderr=None,
-                          side_effect=None, mock_attr=None):
+  def SetDefaultCmdResult(self, returncode=0, stdout=None, stderr=None,
+                          side_effect=None, mock_attr=None, **kwargs):
     """Specify the default command result if no command is matched.
 
     Args:
       returncode: See AddCmdResult.
-      output: (Deprecated) Alias to stdout.
-      error: (Deprecated) Alias to stderr.
       stdout: See AddCmdResult.
       stderr: See AddCmdResult.
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
+    # TODO(b/187789262): Handle deprecated arguments for now.
+    output = error = None
+    if 'output' in kwargs:
+      warnings.warn('output= is deprecated -- use stdout=', DeprecationWarning)
+      output = kwargs.pop('output')
+    if 'error' in kwargs:
+      warnings.warn('error= is deprecated -- use stderr=', DeprecationWarning)
+      error = kwargs.pop('error')
+    if kwargs:
+      raise TypeError(f'got an unexpected keyword arguments {kwargs.keys()}')
+
     if stdout is None:
       stdout = output
     elif output is not None:
@@ -639,6 +648,11 @@ class PartialCmdMock(PartialMock):
       side_effect: See MockedCallResults.AddResultForParams
       mock_attr: Which attributes's mock is being referenced.
     """
+    if output is not None:
+      warnings.warn('output= is deprecated -- use stdout=', DeprecationWarning)
+    if error is not None:
+      warnings.warn('error= is deprecated -- use stderr=', DeprecationWarning)
+
     if stdout is None:
       stdout = output
     elif output is not None:
