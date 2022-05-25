@@ -842,7 +842,7 @@ class GenerateCpeExportTest(cros_test_lib.RunCommandTempDirTestCase):
     # Set up warning output and the file the command would be making.
     report = 'Report.'
     warnings = 'Warnings.'
-    self.rc.SetDefaultCmdResult(returncode=0, output=report, error=warnings)
+    self.rc.SetDefaultCmdResult(returncode=0, stdout=report, stderr=warnings)
 
     result = artifacts.GenerateCpeReport(self.chroot, self.sysroot,
                                          self.output_dir)

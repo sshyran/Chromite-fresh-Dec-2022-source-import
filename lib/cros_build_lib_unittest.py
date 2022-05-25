@@ -220,7 +220,7 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
     """Verify input argument when it is a file object."""
     result = cros_build_lib.run(['cat'], input=open('/dev/null'),
                                 capture_output=True)
-    self.assertEqual(result.output, b'')
+    self.assertEqual(result.stdout, b'')
 
     with open(__file__) as f:
       result = cros_build_lib.run(['cat'], input=f, capture_output=True)
@@ -232,7 +232,7 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
     with open('/dev/null') as f:
       result = cros_build_lib.run(['cat'], input=f.fileno(),
                                   capture_output=True)
-      self.assertEqual(result.output, b'')
+      self.assertEqual(result.stdout, b'')
 
     with open(__file__) as f:
       result = cros_build_lib.run(['cat'], input=f.fileno(),
@@ -314,8 +314,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
 
     # Mock the return value of Popen().
     self.stdin = None
-    self.error = b'test error'
-    self.output = b'test output'
+    self.stderr = b'test error'
+    self.stdout = b'test output'
     self.proc_mock = mock.MagicMock(
         returncode=0,
         communicate=self._Communicate)
@@ -335,7 +335,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     This allows us to capture what was passed on input.
     """
     self.stdin = stdin
-    return self.output, self.error
+    return self.stdout, self.stderr
 
   @contextlib.contextmanager
   def _MockChecker(self, cmd, **kwargs):
@@ -452,9 +452,9 @@ class TestRunCommand(cros_test_lib.MockTestCase):
     stdout = None
     stderr = None
     if rc_kv.get('stdout') or rc_kv.get('capture_output'):
-      stdout = self.output
+      stdout = self.stdout
     if rc_kv.get('stderr') or rc_kv.get('capture_output'):
-      stderr = self.error
+      stderr = self.stderr
 
     expected_result = cros_build_lib.CommandResult(
         args=real_cmd, stdout=stdout, stderr=stderr,
@@ -743,14 +743,14 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     log = os.path.join(self.tempdir, 'output')
     ret = cros_build_lib.run(['echo', 'monkeys'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     os.unlink(log)
     ret = cros_build_lib.run(
         ['sh', '-c', 'echo monkeys3 >&2'],
         stdout=log, stderr=True)
-    self.assertEqual(ret.error, b'monkeys3\n')
+    self.assertEqual(ret.stderr, b'monkeys3\n')
     self.assertExists(log)
     self.assertEqual(os.path.getsize(log), 0)
 
@@ -758,8 +758,8 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     ret = cros_build_lib.run(
         ['sh', '-c', 'echo monkeys4; echo monkeys5 >&2'],
         stdout=log, stderr=subprocess.STDOUT)
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
     self.assertEqual(osutils.ReadFile(log), 'monkeys4\nmonkeys5\n')
 
   @_ForceLoggingLevel
@@ -775,21 +775,21 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     log = os.path.join(self.tempdir, 'output')
     ret = cros_build_lib.run(['echo', 'monkeys'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     # Without append
     ret = cros_build_lib.run(['echo', 'monkeys2'], stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys2\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
     # With append
     ret = cros_build_lib.run(
         ['echo', 'monkeys3'], append_to_file=True, stdout=log)
     self.assertEqual(osutils.ReadFile(log), 'monkeys2\nmonkeys3\n')
-    self.assertIs(ret.output, None)
-    self.assertIs(ret.error, None)
+    self.assertIs(ret.stdout, None)
+    self.assertIs(ret.stderr, None)
 
   def testOutputFileHandle(self):
     """Verify writing to existing file handles."""
@@ -817,8 +817,8 @@ class TestRunCommandOutput(cros_test_lib.TempDirTestCase,
     """Tests that stderr is captured when run raises."""
     with self.assertRaises(cros_build_lib.RunCommandError) as cm:
       cros_build_lib.run(['cat', '/'], stderr=True)
-    self.assertIsNotNone(cm.exception.result.error)
-    self.assertNotEqual('', cm.exception.result.error)
+    self.assertIsNotNone(cm.exception.result.stderr)
+    self.assertNotEqual('', cm.exception.result.stderr)
 
   def _CaptureLogOutput(self, cmd, **kwargs):
     """Capture logging output of run."""

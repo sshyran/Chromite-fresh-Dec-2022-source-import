@@ -935,7 +935,7 @@ class TempDir(object):
               ['mount'], stdout=True, stderr=subprocess.STDOUT,
               check=False)
           logging.error('Mounts were:')
-          logging.error('  %s', mount_results.output)
+          logging.error('  %s', mount_results.stdout)
 
       else:
         # If there was not an exception from the context, raise ours.
@@ -1203,7 +1203,7 @@ def SourceEnvironment(script, allowlist, ifs=',', env=None, multiline=False):
     env = None
   output = cros_build_lib.run(['bash'], env=env, capture_output=True,
                               print_cmd=False, encoding='utf-8',
-                              input='\n'.join(dump_script)).output
+                              input='\n'.join(dump_script)).stdout
   return key_value_store.LoadData(output, multiline=multiline)
 
 

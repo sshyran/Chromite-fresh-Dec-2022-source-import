@@ -401,12 +401,12 @@ class EBuild(object):
   def _RunCommand(cls, command, **kwargs):
     kwargs.setdefault('capture_output', True)
     kwargs.setdefault('encoding', 'utf-8')
-    return cros_build_lib.run(command, print_cmd=cls.VERBOSE, **kwargs).output
+    return cros_build_lib.run(command, print_cmd=cls.VERBOSE, **kwargs).stdout
 
   @classmethod
   def _RunGit(cls, cwd, command, **kwargs):
     result = git.RunGit(cwd, command, print_cmd=cls.VERBOSE, **kwargs)
-    return None if result is None else result.output
+    return None if result is None else result.stdout
 
   def IsSticky(self):
     """Returns True if the ebuild is sticky."""
@@ -998,12 +998,12 @@ class EBuild(object):
         check=False,
         encoding='utf-8')
 
-    output = result.output.strip()
+    output = result.stdout.strip()
     if result.returncode or not output:
       raise Error(
           'Package %s has a chromeos-version.sh script but failed:\n'
           'return code = %s\nstdout = %s\nstderr = %s\n' %
-          (self.pkgname, result.returncode, result.output, result.error))
+          (self.pkgname, result.returncode, result.stdout, result.stderr))
 
     # Sanity check: disallow versions that will be larger than the 9999 ebuild
     # used by cros-workon.
@@ -1665,7 +1665,7 @@ def RegenCache(overlay: str,
   _Egencache(repo_name, overlay, chroot_args)
   # If there was nothing new generated, then let's just bail.
   result = git.RunGit(overlay, ['status', '-s', 'metadata/'])
-  if not result.output:
+  if not result.stdout:
     return
 
   if not commit_changes:
@@ -1977,7 +1977,7 @@ def FindPackageNameMatches(
 
   matches = []
   if result.returncode == 0:
-    matches = [package_info.parse(x) for x in result.output.splitlines()]
+    matches = [package_info.parse(x) for x in result.stdout.splitlines()]
 
   return matches
 
@@ -2057,7 +2057,7 @@ def FindEbuildsForPackages(packages_list,
   if result.returncode:
     return {}
 
-  ebuilds_results = result.output.strip().splitlines()
+  ebuilds_results = result.stdout.strip().splitlines()
   # Asserting the directory name of the ebuild matches the package name.
   mismatches = []
   ret = dict(zip(packages_list, ebuilds_results))
@@ -2154,7 +2154,7 @@ def GetFlattenedDepsForPackage(pkg_str, sysroot='/', depth=0):
 
   result = _EqueryDepgraph(pkg_str, sysroot, depth)
 
-  return _ParseDepTreeOutput(result.output)
+  return _ParseDepTreeOutput(result.stdout)
 
 
 def _ParseDepTreeOutput(equery_output):
@@ -2208,7 +2208,7 @@ def GetReverseDependencies(
 
   result = _Equery(
       'depends', *args, sysroot=str(sysroot), print_cmd=False, check=False)
-  return [package_info.parse(x) for x in result.output.strip().splitlines()]
+  return [package_info.parse(x) for x in result.stdout.strip().splitlines()]
 
 
 def _Qlist(
@@ -2256,7 +2256,7 @@ def GetInstalledPackageUseFlags(pkg_str,
   result = _Qlist(['-U', pkg_str], board, buildroot)
   use_flags = {}
   if result.returncode == 0:
-    for line in result.output.splitlines():
+    for line in result.stdout.splitlines():
       tokens = line.split()
       use_flags[tokens[0]] = tokens[1:]
 
@@ -2405,7 +2405,7 @@ def GetRepositoryForEbuild(ebuild_path, sysroot):
     list of RepositoryInfoTuples.
   """
   result = _EbuildInfo(ebuild_path, sysroot)
-  return GetRepositoryFromEbuildInfo(result.output)
+  return GetRepositoryFromEbuildInfo(result.stdout)
 
 
 def CleanOutdatedBinaryPackages(
@@ -2601,7 +2601,7 @@ def PortageqBestVisible(atom: str,
     raise NoVisiblePackageError(
         f'No best visible package for "{atom}" could be found.') from e
 
-  return package_info.parse(result.output.strip())
+  return package_info.parse(result.stdout.strip())
 
 
 def PortageqEnvvar(variable, board=None, sysroot=None, allow_undefined=False):
@@ -2671,12 +2671,12 @@ def PortageqEnvvars(variables, board=None, sysroot=None, allow_undefined=False):
     elif not allow_undefined:
       # Error for undefined variable.
       raise PortageqError('One or more variables undefined: %s' %
-                          e.result.output)
+                          e.result.stdout)
     else:
       # Undefined variable but letting it slide.
       result = e.result
 
-  return key_value_store.LoadData(result.output, multiline=True)
+  return key_value_store.LoadData(result.stdout, multiline=True)
 
 
 def PortageqHasVersion(category_package, board=None, sysroot=None):
@@ -2721,7 +2721,7 @@ def PortageqMatch(atom, board=None, sysroot=None):
   if sysroot is None:
     sysroot = build_target_lib.get_default_sysroot_path(board)
   result = _Portageq(['match', sysroot, atom], board=board, sysroot=sysroot)
-  return package_info.parse(result.output.strip()) if result.output else None
+  return package_info.parse(result.stdout.strip()) if result.stdout else None
 
 
 class PackageNotFoundError(Error):

@@ -109,13 +109,13 @@ Change-Id: %s
     test_hash = '5' * 40
     self.rc.AddCmdResult(partial_mock.In('symbolic-ref'), returncode=1)
     self.rc.AddCmdResult(
-        partial_mock.In('rev-parse'), output='%s\n' % test_hash)
+        partial_mock.In('rev-parse'), stdout='%s\n' % test_hash)
     self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), test_hash)
     self.assertCommandContains(['rev-parse', 'HEAD'])
 
   def testGetCurrentBranchOrId_OnBranch(self):
     self.rc.AddCmdResult(
-        partial_mock.In('symbolic-ref'), output='refs/heads/branch\n')
+        partial_mock.In('symbolic-ref'), stdout='refs/heads/branch\n')
     self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), 'branch')
     self.assertCommandContains(['symbolic-ref', '-q', 'HEAD'])
 
@@ -139,7 +139,7 @@ Change-Id: %s
     self.assertCommandContains([self.fake_file])
 
   def testCommit(self):
-    self.rc.AddCmdResult(partial_mock.In('log'), output=self.COMMIT_LOG)
+    self.rc.AddCmdResult(partial_mock.In('log'), stdout=self.COMMIT_LOG)
     git.Commit(self.fake_git_dir, 'bar')
     self.assertCommandContains(['--amend'], expected=False)
     cid = git.Commit(self.fake_git_dir, 'bar', amend=True)
@@ -322,7 +322,7 @@ Compare the Change-Id printed by the python code with that shown
 
 Change-Id: Ia7b712c42ff83c52c0fb5d88d1ef6c62f49da88d
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CommandResult(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -347,7 +347,7 @@ Reviewed-by: Mike Frysinger <vapier@chromium.org>
 Commit-Queue: François Degros <fdegros@chromium.org>
 Tested-by: François Degros <fdegros@chromium.org>
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CommandResult(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path', sha)
@@ -373,7 +373,7 @@ TEST=Start python3
 $ git show
 Compare the Change-Id printed by the python code with that shown
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CommandResult(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -398,7 +398,7 @@ until I fix the code to handle the pathological cases.
 Cq-Depend: chromium:2041804
 Change-Id: Ib71696f76dc80f1a76b8e7a73493c6c2668e2c6f
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CommandResult(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     self.assertRaises(ValueError, git.GetChangeId, 'git/repo/path')
@@ -421,7 +421,7 @@ until I fix the code to handle the pathological cases.
 Cq-Depend: chromium:2041804
 Change-Id: Ib71696f76dc80f1a76b8e7a73493c6c2668e2c6f
 """
-    result = cros_build_lib.CommandResult(output=log_output)
+    result = cros_build_lib.CommandResult(stdout=log_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     changeid = git.GetChangeId('git/repo/path')
@@ -465,7 +465,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 :100644 100644 70d6e94... 821c642... M\tchromeos-base/chromeos-chrome/chromeos-chrome-9999.ebuild
 :100644 100644 be445f9... be445f9... R100\tchromeos-base/chromium-source/chromium-source-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromium-source/chromium-source-40.0.2197.2_rc-r1.ebuild
 """
-    result = cros_build_lib.CommandResult(output=diff_output)
+    result = cros_build_lib.CommandResult(stdout=diff_output)
     self.PatchObject(git, 'RunGit', return_value=result)
 
     entries = git.RawDiff('foo', 'bar')
@@ -488,7 +488,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 
   def testEmptyDiff(self):
     """Verify an empty diff doesn't crash."""
-    result = cros_build_lib.CommandResult(output='\n')
+    result = cros_build_lib.CommandResult(stdout='\n')
     self.PatchObject(git, 'RunGit', return_value=result)
     entries = git.RawDiff('foo', 'bar')
     self.assertEqual([], entries)
@@ -565,14 +565,14 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
   def testNonFFPush(self):
     """Non fast-forward push error propagates to the caller."""
     self.rc.AddCmdResult(partial_mock.In('push'), returncode=128,
-                         error=self.NON_FF_PUSH_ERROR)
+                         stderr=self.NON_FF_PUSH_ERROR)
     self.assertRaises(cros_build_lib.RunCommandError, self._RunGitPush)
 
   def testPersistentTransientError(self):
     """GitPush fails if transient error occurs multiple times."""
     for error in self.TRANSIENT_ERRORS:
       self.rc.AddCmdResult(partial_mock.In('push'), returncode=128,
-                           error=error)
+                           stderr=error)
       self.assertRaises(cros_build_lib.RunCommandError, self._RunGitPush)
 
 

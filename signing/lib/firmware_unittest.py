@@ -72,10 +72,10 @@ def MockDumpFmap(rc, ec_ro=True):
     ec_output += 'KEY_RO 130112 1024'
 
   rc.AddCmdResult(partial_mock.ListRegex('futility dump_fmap -p .*bios.bin'),
-                  output=bios_output)
+                  stdout=bios_output)
 
   rc.AddCmdResult(partial_mock.ListRegex('futility dump_fmap -p .*ec.bin'),
-                  output=ec_output)
+                  stdout=ec_output)
 
 def MockBiosSigner(rc):
   """Add Bios Signing Mocks to |rc|."""

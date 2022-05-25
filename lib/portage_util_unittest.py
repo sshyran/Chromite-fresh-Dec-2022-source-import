@@ -803,7 +803,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
                      return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='1122', error='STDERR'))
+                         returncode=0, stdout='1122', stderr='STDERR'))
     self.assertEqual('1122', self.m_ebuild.GetVersion(None, None, '1234'))
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -818,7 +818,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
 
     # Reject no output.
     run.return_value = cros_build_lib.CommandResult(
-        returncode=0, output='', error='STDERR')
+        returncode=0, stdout='', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -827,7 +827,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
 
     # Reject simple output.
     run.return_value = cros_build_lib.CommandResult(
-        returncode=0, output='\n', error='STDERR')
+        returncode=0, stdout='\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -836,7 +836,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
 
     # Reject error.
     run.return_value = cros_build_lib.CommandResult(
-        returncode=1, output='FAIL\n', error='STDERR')
+        returncode=1, stdout='FAIL\n', stderr='STDERR')
     self.assertRaises(portage_util.Error,
                       self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
@@ -850,7 +850,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
                      return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='999999', error='STDERR'))
+                         returncode=0, stdout='999999', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -863,7 +863,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                          projects=None, srcdirs=[], subdirs=[], subtrees=[]))
     self.PatchObject(cros_build_lib, 'run',
                      return_value=cros_build_lib.CommandResult(
-                         returncode=0, output='abcd', error='STDERR'))
+                         returncode=0, stdout='abcd', stderr='STDERR'))
     self.assertRaises(ValueError, self.m_ebuild.GetVersion, None, None, '1234')
     # Sanity check.
     self.assertEqual(exists.call_count, 1)
@@ -880,7 +880,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         cros_build_lib,
         'run',
         return_value=cros_build_lib.CommandResult(
-            returncode=0, output='4.4.21_baseline', error='STDERR'))
+            returncode=0, stdout='4.4.21_baseline', stderr='STDERR'))
     with self.assertRaises(portage_util.EbuildVersionError):
       self.m_ebuild.GetVersion(None, None, '1234')
     # Sanity check.
@@ -1470,7 +1470,7 @@ class PortageqBestVisibleTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid outputs."""
     expected = package_info.PackageInfo('cat', 'pkg', '1.0')
-    result = cros_build_lib.CommandResult(output=expected.cpvr, returncode=0)
+    result = cros_build_lib.CommandResult(stdout=expected.cpvr, returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     result = portage_util.PortageqBestVisible('cat/pkg')
@@ -1482,7 +1482,7 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
 
   def testValidEnvvar(self):
     """Test valid variables."""
-    result = cros_build_lib.CommandResult(output='TEST=value\n', returncode=0)
+    result = cros_build_lib.CommandResult(stdout='TEST=value\n', returncode=0)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     envvar1 = portage_util.PortageqEnvvar('TEST')
@@ -1494,7 +1494,7 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
   def testUndefinedEnvvars(self):
     """Test undefined variable handling."""
     # The variable exists in the command output even when not actually defined.
-    result = cros_build_lib.CommandResult(output='DOES_NOT_EXIST=\n',
+    result = cros_build_lib.CommandResult(stdout='DOES_NOT_EXIST=\n',
                                           returncode=1)
     success_error = cros_build_lib.RunCommandError('', result)
     self.PatchObject(portage_util, '_Portageq', side_effect=success_error)
@@ -1512,7 +1512,7 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
     with self.assertRaises(portage_util.PortageqError):
       portage_util.PortageqEnvvars(['DOES_NOT_EXIST'])
 
-    run_error = cros_build_lib.CommandResult(output='\n', returncode=2)
+    run_error = cros_build_lib.CommandResult(stdout='\n', returncode=2)
     failure_error = cros_build_lib.RunCommandError('', run_error)
     self.PatchObject(portage_util, '_Portageq', side_effect=failure_error)
 
@@ -1575,7 +1575,7 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
     """
     output_str = 'cat-1/pkg-one-1.0\ncat-2/pkg-two-2.1.3-r45\n'
     result = cros_build_lib.CommandResult(returncode=0,
-                                          output=output_str)
+                                          stdout=output_str)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     with self.assertRaises(ValueError):
@@ -1584,7 +1584,7 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
   def testValidPackage(self):
     """Test valid package produces the corresponding PackageInfo."""
     cpvr = 'cat/pkg-1.0-r1'
-    result = cros_build_lib.CommandResult(returncode=0, output=cpvr)
+    result = cros_build_lib.CommandResult(returncode=0, stdout=cpvr)
     self.PatchObject(portage_util, '_Portageq', return_value=result)
 
     pkg = portage_util.PortageqMatch('cat/pkg')
@@ -1600,7 +1600,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'misc/bar'],
-        output=equery_output)
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'misc/bar'],
                                             sysroot='/build/nami'),
@@ -1612,7 +1612,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
                      '/chromeos-overlay/misc/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo', 'bar'],
-        output=equery_output)
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(['misc/foo', 'bar'],
                                             sysroot='/build/nami'),
@@ -1635,7 +1635,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     ]
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which'] + packages,
-        output=equery_output)
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildsForPackages(packages,
                                             sysroot='/build/nami'),
@@ -1650,7 +1650,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = ('/chromeos-overlay/bar/bar.ebuild\n')
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
-        output=equery_output, returncode=1)
+        stdout=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildsForPackages(
         ['foo', 'bar'], sysroot='/build/nami'), {})
 
@@ -1659,7 +1659,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
                      '/chromeos-overlay/foo/foo.ebuild\n')
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'foo', 'bar'],
-        output=equery_output)
+        stdout=equery_output)
     with self.assertRaises(AssertionError):
       portage_util.FindEbuildsForPackages(
           ['foo', 'bar'], sysroot='/build/nami')
@@ -1668,7 +1668,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = '/chromeos-overlay/misc/foo/foo-9999.ebuild\n'
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'misc/foo'],
-        output=equery_output)
+        stdout=equery_output)
     self.assertEqual(
         portage_util.FindEbuildForPackage('misc/foo', sysroot='/build/nami'),
         '/chromeos-overlay/misc/foo/foo-9999.ebuild')
@@ -1677,7 +1677,7 @@ class FindEbuildTest(cros_test_lib.RunCommandTestCase):
     equery_output = "Cannot find ebuild for package 'foo'\n"
     self.rc.AddCmdResult(
         ['equery', '--no-color', '--no-pipe', 'which', 'foo'],
-        output=equery_output, returncode=1)
+        stdout=equery_output, returncode=1)
     self.assertEqual(portage_util.FindEbuildForPackage(
         'foo', sysroot='/build/nami'), None)
 

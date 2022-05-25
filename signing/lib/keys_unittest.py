@@ -27,7 +27,7 @@ def MockVbutilKey(rc, sha1sum=MOCK_SHA1SUM):
     Key sha1sum:       """ + sha1sum)
 
   rc.AddCmdResult(partial_mock.ListRegex('vbutil_key --unpack .*'),
-                  output=cmd_output)
+                  stdout=cmd_output)
 
 
 class KeysetMock(keys.Keyset):

@@ -72,7 +72,7 @@ def IsSubmoduleCheckoutRoot(path, remote, url):
     remote_url = cros_build_lib.run(
         ['git', '--git-dir', path, 'config', 'remote.%s.url' % remote],
         stdout=True, debug_level=logging.DEBUG,
-        check=False, encoding='utf-8').output.strip()
+        check=False, encoding='utf-8').stdout.strip()
     if remote_url == url:
       return True
   return False
@@ -164,7 +164,7 @@ def GetGitRepoRevision(cwd, branch='HEAD', short=False):
   cmd = ['rev-parse', branch]
   if short:
     cmd.insert(1, '--short')
-  return RunGit(cwd, cmd).output.strip()
+  return RunGit(cwd, cmd).stdout.strip()
 
 
 def IsReachable(cwd, to_ref, from_ref):
@@ -212,14 +212,14 @@ def DoesCommitExistInRepo(cwd, commit):
 def GetCurrentBranchOrId(cwd):
   """Returns current branch of a repo, commit ID if repo is on detached HEAD."""
   return GetCurrentBranch(cwd) or RunGit(cwd,
-                                         ['rev-parse', 'HEAD']).output.strip()
+                                         ['rev-parse', 'HEAD']).stdout.strip()
 
 
 def GetCurrentBranch(cwd):
   """Returns current branch of a repo, and None if repo is on detached HEAD."""
   try:
     ret = RunGit(cwd, ['symbolic-ref', '-q', 'HEAD'])
-    return StripRefsHeads(ret.output.strip(), False)
+    return StripRefsHeads(ret.stdout.strip(), False)
   except cros_build_lib.RunCommandError as e:
     if e.result.returncode != 1:
       raise
@@ -809,14 +809,14 @@ def FindGitTopLevel(path):
   """Returns the top-level directory of the given git working tree path."""
   try:
     ret = RunGit(path, ['rev-parse', '--show-toplevel'])
-    return ret.output.strip()
+    return ret.stdout.strip()
   except cros_build_lib.RunCommandError:
     return None
 
 
 def GetProjectUserEmail(git_repo):
   """Get the email configured for the project."""
-  output = RunGit(git_repo, ['var', 'GIT_COMMITTER_IDENT']).output
+  output = RunGit(git_repo, ['var', 'GIT_COMMITTER_IDENT']).stdout
   m = re.search(r'<([^>]*)>', output.strip())
   return m.group(1) if m else None
 
@@ -832,7 +832,7 @@ def MatchBranchName(git_repo, pattern, namespace=''):
   Returns:
     List of matching branch names (with |namespace| trimmed).
   """
-  output = RunGit(git_repo, ['ls-remote', git_repo, namespace + '*']).output
+  output = RunGit(git_repo, ['ls-remote', git_repo, namespace + '*']).stdout
   branches = [x.split()[1] for x in output.splitlines()]
   branches = [x[len(namespace):] for x in branches if x.startswith(namespace)]
 
@@ -898,7 +898,7 @@ def GetTrackingBranchViaGitConfig(git_repo, branch, for_checkout=True,
   try:
     cmd = ['config', '--get-regexp',
            r'branch\.%s\.(remote|merge)' % re.escape(branch)]
-    data = RunGit(git_repo, cmd).output.splitlines()
+    data = RunGit(git_repo, cmd).stdout.splitlines()
 
     prefix = 'branch.%s.' % (branch,)
     data = [x.split() for x in data]
@@ -1102,7 +1102,7 @@ def GetObjectAtRev(git_repo, obj, rev, binary=False):
   """
   rev_obj = '%s:%s' % (rev, obj)
   encoding = None if binary else 'utf-8'
-  return RunGit(git_repo, ['show', rev_obj], encoding=encoding).output
+  return RunGit(git_repo, ['show', rev_obj], encoding=encoding).stdout
 
 
 def RevertPath(git_repo, filename, rev):
@@ -1236,7 +1236,7 @@ def RawDiff(path, target):
   entries = []
 
   cmd = ['diff', '-M', '--raw', target]
-  diff = RunGit(path, cmd).output
+  diff = RunGit(path, cmd).stdout
   diff_lines = diff.strip().splitlines()
   for line in diff_lines:
     match = DIFF_RE.match(line)

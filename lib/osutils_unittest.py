@@ -546,7 +546,7 @@ class TestProcess(cros_test_lib.RunCommandTestCase):
   def testIsChildProcess(self):
     """Test IsChildProcess with no name."""
     mock_pstree_output = 'a(1)-+-b(2)\n\t|-c(3)\n\t|-foo(4)-bar(5)'
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=mock_pstree_output)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=mock_pstree_output)
     self.assertTrue(osutils.IsChildProcess(4))
     self.assertTrue(osutils.IsChildProcess(4, name='foo'))
     self.assertFalse(osutils.IsChildProcess(5, name='foo'))
@@ -907,7 +907,7 @@ NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G" HOTPLUG="0"
 
   def testListBlockDevices(self):
     """Tests that we can list all block devices correctly."""
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.FULL_OUTPUT)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.FULL_OUTPUT)
     devices = osutils.ListBlockDevices()
     self.assertEqual(devices[0].NAME, 'sda')
     self.assertEqual(devices[0].RM, '0')
@@ -922,7 +922,7 @@ NAME="sdc2" RM="1" TYPE="part" SIZE="6.4G" HOTPLUG="0"
 
   def testGetDeviceSize(self):
     """Tests that we can get the size of a device."""
-    self.rc.AddCmdResult(partial_mock.Ignore(), output=self.PARTIAL_OUTPUT)
+    self.rc.AddCmdResult(partial_mock.Ignore(), stdout=self.PARTIAL_OUTPUT)
     self.assertEqual(osutils.GetDeviceSize('/dev/sdc'), '7.4G')
 
 

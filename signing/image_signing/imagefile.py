@@ -62,7 +62,7 @@ def GetKernelConfig(loop_kern, check=True):
       check=check, encoding='utf-8')
   if ret.returncode:
     return None
-  return ret.output.strip()
+  return ret.stdout.strip()
 
 
 def _GetKernelCmdLine(loop_kern, check=True):

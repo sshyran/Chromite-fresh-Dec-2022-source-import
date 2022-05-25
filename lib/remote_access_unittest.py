@@ -122,7 +122,7 @@ class RemoteShMock(partial_mock.PartialCmdMock):
     # Run the real RemoteSh with run mocked out.
     rc_mock = cros_test_lib.RunCommandMock()
     rc_mock.AddCmdResult(
-        partial_mock.Ignore(), result.returncode, result.output, result.error)
+        partial_mock.Ignore(), result.returncode, result.stdout, result.stderr)
 
     with rc_mock:
       result = self.backup['RemoteSh'](inst, cmd, *args, **kwargs)
@@ -208,19 +208,19 @@ class RemoteShTest(RemoteAccessTest):
     self.assertRaises(remote_access.SSHConnectionError, self.host.RemoteSh,
                       self.TEST_CMD, **kwargs)
 
-  def SetRemoteShResult(self, returncode=RETURN_CODE, output=OUTPUT,
-                        error=ERROR):
+  def SetRemoteShResult(self, returncode=RETURN_CODE, stdout=OUTPUT,
+                        stderr=ERROR):
     """Sets the RemoteSh command results."""
     self.rsh_mock.AddCmdResult(self.TEST_CMD, returncode=returncode,
-                               output=output, error=error)
+                               stdout=stdout, stderr=stderr)
 
   def testNormal(self):
     """Test normal functionality."""
     self.SetRemoteShResult()
     result = self.host.RemoteSh(self.TEST_CMD)
     self.assertEqual(result.returncode, self.RETURN_CODE)
-    self.assertEqual(result.output.strip(), self.OUTPUT)
-    self.assertEqual(result.error.strip(), self.ERROR)
+    self.assertEqual(result.stdout.strip(), self.OUTPUT)
+    self.assertEqual(result.stderr.strip(), self.ERROR)
 
   def testShell(self):
     """Test normal functionality with shell=True."""
@@ -266,22 +266,22 @@ class CheckIfRebootedTest(RemoteAccessTest):
   _OLD_BOOT_ID = '1234'
   _NEW_BOOT_ID = '5678'
 
-  def _SetCheckRebootResult(self, returncode=0, output='', error=''):
+  def _SetCheckRebootResult(self, returncode=0, stdout='', stderr=''):
     """Sets the result object fields to mock a specific ssh command.
 
     The command is the one used to fetch the boot ID (cat /proc/sys/...)
     """
     self.rsh_mock.AddCmdResult(partial_mock.ListRegex('/proc/sys/.*'),
                                returncode=returncode,
-                               output=output, error=error)
+                               stdout=stdout, stderr=stderr)
   def testSuccess(self):
     """Test the case of successful reboot."""
-    self._SetCheckRebootResult(returncode=0, output=self._NEW_BOOT_ID)
+    self._SetCheckRebootResult(returncode=0, stdout=self._NEW_BOOT_ID)
     self.assertTrue(self.host.CheckIfRebooted(self._OLD_BOOT_ID))
 
   def testFailure(self):
     """Test case of failed reboot (boot ID did not change)."""
-    self._SetCheckRebootResult(0, output=self._OLD_BOOT_ID)
+    self._SetCheckRebootResult(0, stdout=self._OLD_BOOT_ID)
     self.assertFalse(self.host.CheckIfRebooted(self._OLD_BOOT_ID))
 
   def testSshFailure(self):
@@ -313,13 +313,13 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
     """Tests simple run() and BaseRunCommand() usage."""
     command = ['echo', 'foo']
     expected_output = 'foo'
-    self.rsh_mock.AddCmdResult(command, output=expected_output)
+    self.rsh_mock.AddCmdResult(command, stdout=expected_output)
     self._SetupRemoteTempDir()
 
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.assertEqual(expected_output, device.run(['echo', 'foo']).stdout)
       self.assertEqual(expected_output,
-                       device.BaseRunCommand(['echo', 'foo']).output)
+                       device.BaseRunCommand(['echo', 'foo']).stdout)
 
   def testCommandsExtraEnv(self):
     """Tests simple RunCommand() usage with extra_env arg."""
@@ -360,12 +360,12 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
     """Tests base_dir=None."""
     command = ['echo', 'foo']
     expected_output = 'foo'
-    self.rsh_mock.AddCmdResult(command, output=expected_output)
+    self.rsh_mock.AddCmdResult(command, stdout=expected_output)
 
     with remote_access.RemoteDeviceHandler(
         remote_access.TEST_IP, base_dir=None) as device:
       self.assertEqual(expected_output,
-                       device.BaseRunCommand(['echo', 'foo']).output)
+                       device.BaseRunCommand(['echo', 'foo']).stdout)
 
   def testDelayedRemoteDirs(self):
     """Tests the delayed creation of base_dir/work_dir."""
@@ -393,13 +393,13 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
     with remote_access.RemoteDeviceHandler(remote_access.TEST_IP) as device:
       self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
-          returncode=0, output='1')
+          returncode=0, stdout='1')
       self.assertEqual(device.IsSELinuxAvailable(), True)
       self.assertEqual(device.IsSELinuxEnforced(), True)
 
       self.rsh_mock.AddCmdResult(
           partial_mock.ListRegex('cat /sys/fs/selinux/enforce'),
-          returncode=0, output='0')
+          returncode=0, stdout='0')
       self.assertEqual(device.IsSELinuxAvailable(), True)
       self.assertEqual(device.IsSELinuxEnforced(), False)
 
@@ -447,7 +447,7 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
 
   def setUp(self):
     self.rsh_mock = self.StartPatcher(RemoteShMock())
-    self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), output='')
+    self.rsh_mock.AddCmdResult(partial_mock.In('${PATH}'), stdout='')
     self.path_env = 'PATH=%s:' % remote_access.DEV_BIN_PATHS
 
   def testRun(self):

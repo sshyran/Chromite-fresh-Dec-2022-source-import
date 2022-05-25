@@ -238,7 +238,7 @@ class _BackgroundTask(multiprocessing.Process):
     log_level = kwargs['debug_level']
     try:
       with timeout_util.Timeout(cls.DEBUG_CMD_TIMEOUT):
-        return cros_build_lib.run(cmd, **kwargs).output
+        return cros_build_lib.run(cmd, **kwargs).stdout
     except (cros_build_lib.RunCommandError, timeout_util.TimeoutError) as e:
       logging.log(log_level, 'Running %s failed: %s', cmd[0], str(e))
       return ''

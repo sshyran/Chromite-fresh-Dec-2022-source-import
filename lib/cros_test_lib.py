@@ -1487,8 +1487,8 @@ class PopenMock(partial_mock.PartialCmdMock):
     # to use the same encoding with the mocks.
     def _MaybeEncode(src):
       return src.encode('utf-8') if isinstance(src, str) else src
-    osutils.WriteFile(stdout, _MaybeEncode(result.output), mode='wb')
-    osutils.WriteFile(stderr, _MaybeEncode(result.error), mode='wb')
+    osutils.WriteFile(stdout, _MaybeEncode(result.stdout), mode='wb')
+    osutils.WriteFile(stderr, _MaybeEncode(result.stderr), mode='wb')
     osutils.WriteFile(
         script,
         ['#!/bin/bash\n', 'cat %s\n' % stdout, 'cat %s >&2\n' % stderr,
@@ -1523,7 +1523,7 @@ class RunCommandMock(partial_mock.PartialCmdMock):
 
     popen_mock = PopenMock()
     popen_mock.AddCmdResult(partial_mock.Ignore(), result.returncode,
-                            result.output, result.error)
+                            stdout=result.stdout, stderr=result.stderr)
     with popen_mock:
       return self.backup['run'](cmd, *args, **kwargs)
 

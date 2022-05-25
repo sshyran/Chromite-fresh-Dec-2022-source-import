@@ -139,7 +139,7 @@ class RepoSyncTests(cros_test_lib.TempDirTestCase, cros_test_lib.MockTestCase):
     """Test Sync retry on repo network sync failure"""
     # Return value here isn't super important.
     result = cros_build_lib.CommandResult(
-        cmd=['cmd'], returncode=0, error='error')
+        cmd=['cmd'], returncode=0, stderr='error')
     ex = cros_build_lib.RunCommandError('msg', result)
 
     run_cmd_mock = self.PatchObject(cros_build_lib, 'run', side_effect=ex)
@@ -175,7 +175,7 @@ gpg: Can't check signature: public key not found
 
 warning: Skipped upgrade to unverified version
 """
-    cmd_result = cros_build_lib.CommandResult(error=warnning_stderr)
+    cmd_result = cros_build_lib.CommandResult(stderr=warnning_stderr)
     self.PatchObject(cros_build_lib, 'run', return_value=cmd_result)
     with mock.patch.object(osutils, 'RmDir') as mock_rm:
       self.repo._RepoSelfupdate()
