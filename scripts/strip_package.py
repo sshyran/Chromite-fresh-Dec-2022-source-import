@@ -16,6 +16,7 @@ from chromite.lib import osutils
 
 
 # The builder module lives in the devserver path.
+# pylint: disable=import-error,wrong-import-position
 sys.path.append('/usr/lib/devserver/')
 import builder
 
