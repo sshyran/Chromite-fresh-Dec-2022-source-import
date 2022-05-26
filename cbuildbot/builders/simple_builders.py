@@ -189,13 +189,6 @@ class SimpleBuilder(generic_builders.Builder):
 
     stage_list += [[chrome_stages.SimpleChromeArtifactsStage, board]]
 
-    if config.gce_tests:
-      stage_list += [[generic_stages.RetryStage, constants.VM_NUM_RETRIES,
-                      vm_test_stages.GCETestStage, board]]
-
-    if config.moblab_vm_tests:
-      stage_list += [[vm_test_stages.MoblabVMTestStage, board]]
-
     stage_list += [
         [release_stages.SignerTestStage, board, archive_stage],
         [release_stages.SigningStage, board],

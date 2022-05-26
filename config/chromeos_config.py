@@ -541,13 +541,6 @@ def GeneralTemplates(site_config):
   )
 
   site_config.AddTemplate(
-      'moblab_vm_tests',
-      moblab_vm_tests=[
-          config_lib.MoblabVMTestConfig(constants.MOBLAB_VM_SMOKE_TEST_TYPE)
-      ],
-  )
-
-  site_config.AddTemplate(
       'buildspec',
       site_config.templates.workspace,
       site_config.templates.internal,

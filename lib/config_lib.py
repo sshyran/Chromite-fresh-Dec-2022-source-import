@@ -907,10 +907,6 @@ def DefaultSettings():
       # If true, uploads individual image tarballs.
       upload_standalone_images=True,
 
-      # A list of GCETestConfig objects to use. Currently only some lakitu
-      # builders run gce tests.
-      gce_tests=[],
-
       # Whether to run CPEExport stage. This stage generates portage depgraph
       # data that is used for bugs reporting (see go/why-cpeexport). Only
       # release builders should run this stage.
@@ -924,10 +920,6 @@ def DefaultSettings():
       # A list of TastVMTestConfig objects describing Tast-based test suites
       # that should be run in a VM.
       tast_vm_tests=[],
-
-      # Default to not run moblab tests. Currently the blessed moblab board runs
-      # these tests.
-      moblab_vm_tests=[],
 
       # List of patterns for portage packages for which stripped binpackages
       # should be uploaded to GS. The patterns are used to search for packages
@@ -2063,9 +2055,7 @@ def _DeserializeConfigs(build_dict):
   _DeserializeConfig(build_dict, 'hw_tests', HWTestConfig)
   _DeserializeConfig(
       build_dict, 'hw_tests_override', HWTestConfig, preserve_none=True)
-  _DeserializeConfig(build_dict, 'gce_tests', GCETestConfig)
   _DeserializeConfig(build_dict, 'tast_vm_tests', TastVMTestConfig)
-  _DeserializeConfig(build_dict, 'moblab_vm_tests', MoblabVMTestConfig)
   _DeserializeConfig(build_dict, 'notification_configs', NotificationConfig)
 
 

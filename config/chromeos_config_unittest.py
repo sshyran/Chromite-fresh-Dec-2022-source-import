@@ -485,19 +485,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
               vm_test.test_suite is not None,
               'Config %s: has unexpected vm test suite value.' % build_name)
 
-  def testValidGCETestType(self):
-    """Verify gce_tests has an expected value"""
-    for build_name, config in self.site_config.items():
-      if config['gce_tests'] is None:
-        continue
-      for gce_test in config['gce_tests']:
-        self.assertTrue(
-            gce_test.test_type == constants.GCE_SUITE_TEST_TYPE,
-            'Config %s: has unexpected gce test type value.' % build_name)
-        self.assertTrue(
-            gce_test.test_suite in constants.VALID_GCE_TEST_SUITES,
-            'Config %s: has unexpected gce test suite value.' % build_name)
-
   def testImageTestMustHaveBaseImage(self):
     """Verify image_test build is only enabled with 'base' in images."""
     for build_name, config in self.site_config.items():
@@ -1055,9 +1042,6 @@ class BoardConfigsTest(ChromeosConfigTestBase):
       self.assertFalse(
           'vm_tests_override' in template and template.vm_tests_override,
           'Per-board template for %s defining vm_tests_override' % board)
-      self.assertFalse(
-          'gce_tests' in template and template.gce_tests,
-          'Per-board template for %s defining gce_tests' % board)
       self.assertFalse(
           'hw_tests' in template and template.hw_tests,
           'Per-board template for %s defining hw_tests' % board)

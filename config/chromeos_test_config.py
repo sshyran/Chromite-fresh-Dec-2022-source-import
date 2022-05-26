@@ -401,9 +401,7 @@ def GeneralTemplates(site_config, ge_build_config):
       'no_vmtest_builder',
       vm_tests=[],
       vm_tests_override=None,
-      gce_tests=[],
       tast_vm_tests=[],
-      moblab_vm_tests=[],
   )
 
   site_config.AddTemplate(

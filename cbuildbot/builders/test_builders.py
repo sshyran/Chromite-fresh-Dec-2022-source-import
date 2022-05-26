@@ -7,14 +7,7 @@
 import logging
 
 from chromite.cbuildbot.builders import generic_builders
-from chromite.cbuildbot.builders import simple_builders
-from chromite.cbuildbot.stages import android_stages
-from chromite.cbuildbot.stages import artifact_stages
-from chromite.cbuildbot.stages import build_stages
-from chromite.cbuildbot.stages import chrome_stages
 from chromite.cbuildbot.stages import generic_stages
-from chromite.cbuildbot.stages import vm_test_stages
-from chromite.lib import parallel
 
 
 class SuccessStage(generic_stages.BuilderStage):
@@ -41,33 +34,3 @@ class FailBuilder(generic_builders.ManifestVersionedBuilder):
   def RunStages(self):
     """Run fail stage!"""
     self._RunStage(FailStage)
-
-
-class VMInformationalBuilder(simple_builders.SimpleBuilder):
-  """Builder that runs vm test for informational purpose."""
-  def _RunDebugSymbolStages(self, builder_run, board):
-    self._RunStage(android_stages.DownloadAndroidDebugSymbolsStage,
-                   board, builder_run=builder_run)
-    self._RunStage(artifact_stages.DebugSymbolsStage, board,
-                   builder_run=builder_run)
-
-  def RunStages(self):
-    assert len(self._run.config.boards) == 1
-    board = self._run.config.boards[0]
-
-    self._RunStage(build_stages.UprevStage)
-    self._RunStage(build_stages.InitSDKStage)
-    self._RunStage(build_stages.UpdateSDKStage)
-    self._RunStage(build_stages.RegenPortageCacheStage)
-    self._RunStage(build_stages.SetupBoardStage, board)
-    self._RunStage(chrome_stages.SyncChromeStage)
-    self._RunStage(android_stages.UprevAndroidStage)
-    self._RunStage(android_stages.AndroidMetadataStage)
-    self._RunStage(build_stages.BuildPackagesStage, board)
-    self._RunStage(build_stages.BuildImageStage, board)
-
-    parallel_stages = [
-        lambda: self._RunDebugSymbolStages(self._run, board),
-        lambda: self._RunStage(vm_test_stages.VMTestStage, board)
-    ]
-    parallel.RunParallelSteps(parallel_stages)
