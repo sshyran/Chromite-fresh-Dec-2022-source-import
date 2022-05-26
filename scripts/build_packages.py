@@ -113,8 +113,6 @@ def get_parser() -> commandline.ArgumentParser:
   deprecation_note = 'Argument will be removed July, 2022. Use %s instead.'
   parser = commandline.ArgumentParser(description=__doc__)
 
-  # TODO(rchandrasekar): Check if the board input is set.
-  # Don't proceed if not set.
   parser.add_argument(
       '-b',
       '--board',
