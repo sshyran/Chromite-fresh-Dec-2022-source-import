@@ -85,26 +85,16 @@ def _GetIsortCfg(path: Union[str, os.PathLike]) -> Path:
   return ret if ret else Path(constants.CHROMITE_DIR) / '.isort.cfg'
 
 
-def _GetPythonPath(paths):
+def _GetPythonPath():
   """Return the set of Python library paths to use."""
   # Carry through custom PYTHONPATH that the host env has set.
   return os.environ.get('PYTHONPATH', '').split(os.pathsep) + [
-      # Add the Portage installation inside the chroot to the Python path.
-      # This ensures that scripts that need to import portage can do so.
-      os.path.join(constants.SOURCE_ROOT, 'chroot', 'usr', 'lib', 'portage',
-                   'pym'),
-
-      # Allow platform projects to be imported by name (e.g. crostestutils).
-      os.path.join(constants.SOURCE_ROOT, 'src', 'platform'),
-
       # Ideally we'd modify meta_path in pylint to handle our virtual chromite
       # module, but that's not possible currently.  We'll have to deal with
       # that at some point if we want `cros lint` to work when the dir is not
       # named 'chromite'.
       constants.SOURCE_ROOT,
-
-      # Also allow scripts to import from their current directory.
-  ] + list(set(os.path.dirname(x) for x in paths))
+  ]
 
 
 # The mapping between the "cros lint" --output-format flag and cpplint.py
@@ -193,7 +183,7 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
     cmd.append('--output-format=%s' % output_format)
   cmd.append(path)
   extra_env = {
-      'PYTHONPATH': ':'.join(_GetPythonPath([path])),
+      'PYTHONPATH': ':'.join(_GetPythonPath()),
   }
   return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
