@@ -1279,9 +1279,6 @@
     zork-release-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-master-factorybranch-tryjob
-  moblab-generic-vm-full-tryjob
-  moblab-generic-vm-llvm-next-toolchain-tryjob
-  moblab-generic-vm-llvm-toolchain-tryjob
   mushu-full-tryjob
   mushu-llvm-next-toolchain-tryjob
   mushu-llvm-toolchain-tryjob

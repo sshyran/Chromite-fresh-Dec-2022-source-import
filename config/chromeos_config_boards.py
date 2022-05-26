@@ -59,7 +59,6 @@ x86_internal_release_boards = frozenset([
 
 x86_external_boards = frozenset([
     'amd64-generic',
-    'moblab-generic-vm',
     'x32-generic',
 ])
 
@@ -96,7 +95,6 @@ wshwos_boards = frozenset([
 moblab_boards = frozenset([
     'puff-moblab',
     'fizz-moblab',
-    'moblab-generic-vm',
 ])
 
 scribe_boards = frozenset([
