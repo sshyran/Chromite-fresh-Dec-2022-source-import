@@ -11,12 +11,14 @@ import os
 import stat
 from unittest import mock
 
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import git
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.lib import portage_util
 from chromite.lib import retry_util
 
 
@@ -585,3 +587,81 @@ EEC571FFB6E1)
     part_dict = {p.name: p for p in partitions}
     self.assertEqual(part_dict['STATE'].start, 983564288)
     self.assertEqual(part_dict['STATE'].size, 1073741824)
+
+
+class GetImagesToBuildTests(cros_test_lib.MockTestCase):
+  """Tests the GetImagesToBuild function."""
+
+  def testExpectedInput(self):
+    """Pass in all the expected image type and check the expected image name."""
+    for k in constants.IMAGE_TYPE_TO_NAME:
+      image = image_lib.GetImagesToBuild([k])
+      self.assertEqual(len(image), 1)
+      self.assertTrue(constants.IMAGE_TYPE_TO_NAME[k] in image)
+
+  def testInvalidInput(self):
+    """Pass in an invalid image type and check for ValueError."""
+    with self.assertRaises(ValueError):
+      image_lib.GetImagesToBuild([constants.IMAGE_TYPE_DEV, 'invalid'])
+
+
+class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
+  """Tests the GetBuildImageEnvvars function."""
+
+  def setUp(self):
+    self.use_flag_mock = self.PatchObject(
+        portage_util, 'GetBoardUseFlags', return_value='')
+
+  def testStandardImage(self):
+    """Test with standard base/dev/test image name."""
+    expected_envvar = {
+        'INSTALL_MASK': ('\n'.join(constants.DEFAULT_INSTALL_MASK) + '\n' +
+                         '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
+    }
+    image_to_test = [
+        constants.BASE_IMAGE_BIN, constants.DEV_IMAGE_BIN,
+        constants.TEST_IMAGE_BIN
+    ]
+    for image in image_to_test:
+      envar = image_lib.GetBuildImageEnvvars(set([image]), 'test_board')
+      self.assertDictEqual(envar, expected_envvar)
+
+    # Validate scenario with systemd in USE flag
+    self.use_flag_mock.return_value = 'cros_debug systemd'
+    expected_envvar['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
+    for image in image_to_test:
+      envar = image_lib.GetBuildImageEnvvars(set([image]), 'test_board')
+      self.assertDictEqual(envar, expected_envvar)
+
+  def testFactoryImage(self):
+    """Test with factory image name."""
+    expected_envvar = {
+        'INSTALL_MASK': ('\n'.join(constants.FACTORY_SHIM_INSTALL_MASK) + '\n' +
+                         '\n'.join(constants.SYSTEMD_INSTALL_MASK)),
+        'USE': image_lib._FACTORY_SHIM_USE_FLAGS,
+    }
+    envar = image_lib.GetBuildImageEnvvars(
+        set([constants.FACTORY_IMAGE_BIN]), 'betty')
+    self.assertDictEqual(envar, expected_envvar)
+
+    # Validate scenario with systemd in USE flag
+    self.use_flag_mock.return_value = 'cros_debug systemd'
+    expected_envvar['INSTALL_MASK'] = '\n'.join(
+        constants.FACTORY_SHIM_INSTALL_MASK)
+    envar.clear()
+    envar = image_lib.GetBuildImageEnvvars(
+        set([constants.FACTORY_IMAGE_BIN]), 'betty')
+    print(envar)
+    self.assertDictEqual(envar, expected_envvar)
+
+    # Validate if extra environment variable is passed
+    extra_env = {
+        'USE': 'test test1',
+        'ENV': 'TEST_VALUE',
+    }
+    expected_envvar['USE'] = extra_env['USE'] + ' ' + expected_envvar['USE']
+    expected_envvar['ENV'] = extra_env['ENV']
+    envar.clear()
+    envar = image_lib.GetBuildImageEnvvars(
+        set([constants.FACTORY_IMAGE_BIN]), 'betty', extra_env)
+    self.assertDictEqual(envar, expected_envvar)

@@ -9,12 +9,13 @@ import glob
 import logging
 import os
 import re
-from typing import Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import signing
 
@@ -26,7 +27,7 @@ _SECURITY_CHECKS = {
     'secure_kernelparams': True,
     'not_ASAN': False,
 }
-
+_FACTORY_SHIM_USE_FLAGS = 'fbconsole vtconsole factory_shim_ramfs i2cdev vfat'
 
 class Error(Exception):
   """Base image_lib error class."""
@@ -656,3 +657,57 @@ def GetImageDiskPartitionInfo(image_path):
       encoding='utf-8',
       input=b'I').stdout.splitlines()
   return func(lines)
+
+
+def GetImagesToBuild(image_types: List[str]) -> Set[str]:
+  """Construct the images to build from the image type.
+
+  Args:
+    image_types: list of image types.
+
+  Returns:
+    A list of image name to build.
+
+  Raises:
+    ValueError if an invalid image type is given as input.
+  """
+  image_names = set()
+
+  for image in image_types:
+    if image not in constants.IMAGE_TYPE_TO_NAME:
+      raise ValueError(f'Invalid image type : {image}')
+    image_names.add(constants.IMAGE_TYPE_TO_NAME[image])
+
+  return image_names
+
+
+def GetBuildImageEnvvars(
+    image_names: Set[str],
+    board: str,
+    env_var_init: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+  """Get the environment variables required to build the given images.
+
+  Args:
+    image_names: The list of images to build.
+    board: The board for which the images will be built.
+    env_var_init: Initial environment variables to use.
+
+  Returns:
+    A dictionary of environment variables.
+  """
+  if not env_var_init:
+    env_var_init = {}
+  env_var_init['INSTALL_MASK'] = '\n'.join(constants.DEFAULT_INSTALL_MASK)
+
+  if constants.FACTORY_IMAGE_BIN in image_names:
+    env_var_init['INSTALL_MASK'] = '\n'.join(
+        constants.FACTORY_SHIM_INSTALL_MASK)
+    env_var_init['USE'] = (env_var_init.get('USE', '') + ' ' +
+                           _FACTORY_SHIM_USE_FLAGS).strip()
+
+  # Mask systemd directories if this is not a systemd image.
+  if 'systemd' not in portage_util.GetBoardUseFlags(board):
+    env_var_init['INSTALL_MASK'] += '\n' + '\n'.join(
+        constants.SYSTEMD_INSTALL_MASK)
+
+  return env_var_init
