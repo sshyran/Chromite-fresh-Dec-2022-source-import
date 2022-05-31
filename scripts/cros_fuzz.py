@@ -646,19 +646,17 @@ def BuildPackage(package, board, build_type):
 
   logging.info('Building %s using %s.', package, build_type)
   extra_env = GetBuildExtraEnv(build_type)
-  build_packages_path = os.path.join(constants.SOURCE_ROOT, 'src', 'scripts',
-                                     'build_packages')
   command = [
-      build_packages_path,
+      'build_packages',
       '--board',
       board,
-      '--skip_chroot_upgrade',
+      '--skip-chroot-upgrade',
       package,
   ]
-  # For msan builds, always use "--nousepkg" since all package needs to be
+  # For msan builds, always use "--no-usepkg" since all package needs to be
   # instrumented with msan.
   if build_type == BuildType.MSAN:
-    command += ['--nousepkg']
+    command += ['--no-usepkg']
 
   # Print the output of the build command. Do this because it is familiar to
   # devs and we don't want to leave them not knowing about the build's progress
