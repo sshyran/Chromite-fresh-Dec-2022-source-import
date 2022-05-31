@@ -1440,6 +1440,8 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
 class UnmockedTests(cros_test_lib.TempDirTestCase):
   """Test cases which really run tests, instead of using mocks."""
 
+  _TEST_BOARD = 'board'
+
   def testBuildFirmwareArchive(self):
     """Verifies that the archiver creates a tarfile with the expected files."""
     # Set of files to tar up
@@ -1483,15 +1485,13 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'bloonchipper/test_rsa.bin',
         'dartmonkey/test_utils.bin',
     )
-    board = 'hatch'
     unittest_files_root = os.path.join(
         self.tempdir,
-        'chroot/build/%s/firmware/chromeos-fpmcu-unittests' % board)
+        f'chroot/build/{self._TEST_BOARD}/firmware/chromeos-fpmcu-unittests')
     cros_test_lib.CreateOnDiskHierarchy(unittest_files_root, unittest_files)
 
-    returned_archive_name = commands.BuildFpmcuUnittestsArchive(self.tempdir,
-                                                                board,
-                                                                self.tempdir)
+    returned_archive_name = commands.BuildFpmcuUnittestsArchive(
+        self.tempdir, self._TEST_BOARD, self.tempdir)
     self.assertEqual(
         returned_archive_name,
         os.path.join(self.tempdir, constants.FPMCU_UNITTESTS_ARCHIVE_NAME))
@@ -1721,15 +1721,15 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
     tarred_files = [os.path.join('logs', x) for x in log_files]
-    board = 'hatch'
-    log_files_root = os.path.join(self.tempdir,
-                                  'chroot/build/%s/tmp/portage/logs' % board)
+    log_files_root = os.path.join(
+        self.tempdir, f'chroot/build/{self._TEST_BOARD}/tmp/portage/logs')
     # Generate a representative set of log files produced by a typical build.
     cros_test_lib.CreateOnDiskHierarchy(log_files_root, log_files)
     # Create an archive from the simulated logs directory
-    tarball = os.path.join(self.tempdir,
-                           commands.BuildEbuildLogsTarball(self.tempdir, board,
-                                                           self.tempdir))
+    tarball = os.path.join(
+        self.tempdir,
+        commands.BuildEbuildLogsTarball(self.tempdir, self._TEST_BOARD,
+                                        self.tempdir))
     # Verify the tarball contents.
     cros_test_lib.VerifyTarball(tarball, tarred_files)
 
@@ -1750,21 +1750,21 @@ class UnmockedTests(cros_test_lib.TempDirTestCase):
         'x11-proto:xproto-7.0.31:20170816-174849.log',
     )
 
-    board = 'hatch'
     # Create a malformed directory name.
-    log_files_root = os.path.join(self.tempdir,
-                                  '%s/tmp/portage/wrong_dir_name' % board)
+    log_files_root = os.path.join(
+        self.tempdir, f'{self._TEST_BOARD}/tmp/portage/wrong_dir_name')
     # Generate a representative set of log files produced by a typical build.
     cros_test_lib.CreateOnDiskHierarchy(log_files_root, log_files)
 
     # Create an archive from the simulated logs directory
-    wrong_board = 'chell'
+    wrong_board = 'wrongboard'
     tarball_rel_path = commands.BuildEbuildLogsTarball(self.tempdir,
                                                        wrong_board,
                                                        self.tempdir)
     self.assertEqual(tarball_rel_path, None)
     tarball_rel_path = commands.BuildEbuildLogsTarball(self.tempdir,
-                                                       board, self.tempdir)
+                                                       self._TEST_BOARD,
+                                                       self.tempdir)
     self.assertEqual(tarball_rel_path, None)
 
 
