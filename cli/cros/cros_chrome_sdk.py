@@ -1361,7 +1361,7 @@ class ChromeSDKCommand(command.CliCommand):
     # is done with 'use_debug_fission'.
 
     if options.use_rbe:
-      gn_args['use_rbe'] = True
+      gn_args['use_remoteexec'] = True
 
     # Enable goma if requested.
     if not options.goma or options.use_rbe:
