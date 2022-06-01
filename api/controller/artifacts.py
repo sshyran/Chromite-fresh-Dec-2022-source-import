@@ -17,7 +17,6 @@ from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.controller import test as test_controller
 from chromite.api.gen.chromite.api import artifacts_pb2
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import sysroot_lib
@@ -391,37 +390,30 @@ def _BundleFirmwareResponse(input_proto, output_proto, _config):
 
 @faux.success(_BundleFirmwareResponse)
 @faux.empty_error
-@validate.require('output_dir', 'sysroot.path')
+@validate.require('sysroot.path')
 @validate.exists('output_dir')
 @validate.validation_complete
-def BundleFirmware(
-    input_proto: artifacts_pb2.BundleRequest,
-    output_proto: artifacts_pb2.BundleResponse,
-    _config: 'api_config.ApiConfig'):
-  """Tar the firmware images for a build target.
-
-  Args:
-    input_proto: The input proto.
-    output_proto: The output proto.
-    _config: The API call config.
-  """
+def BundleFirmware(input_proto: artifacts_pb2.BundleRequest,
+                   output_proto: artifacts_pb2.BundleResponse,
+                   _config: 'api_config.ApiConfig') -> None:
+  """Tar the firmware images for a build target."""
   output_dir = input_proto.output_dir
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  sysroot_path = input_proto.sysroot.path
-  sysroot = sysroot_lib.Sysroot(sysroot_path)
+  sysroot = controller_util.ParseSysroot(input_proto.sysroot)
 
   if not chroot.exists():
-    cros_build_lib.Die('Chroot does not exist: %s', chroot.path)
+    logging.warning('Chroot does not exist: %s', chroot.path)
+    return
   elif not sysroot.Exists(chroot=chroot):
-    cros_build_lib.Die('Sysroot does not exist: %s',
-                       chroot.full_path(sysroot.path))
+    logging.warning('Sysroot does not exist: %s', sysroot.path)
+    return
 
   archive = artifacts.BuildFirmwareArchive(chroot, sysroot, output_dir)
 
-  if archive is None:
+  if not archive:
     logging.warning(
         'Could not create firmware archive. No firmware found for %s.',
-        sysroot_path)
+        sysroot.path)
     return
 
   output_proto.artifacts.add().path = archive
@@ -435,13 +427,12 @@ def _BundleFpmcuUnittestsResponse(input_proto, output_proto, _config):
 
 @faux.success(_BundleFpmcuUnittestsResponse)
 @faux.empty_error
-@validate.require('output_dir', 'sysroot.path')
+@validate.require('sysroot.path')
 @validate.exists('output_dir')
 @validate.validation_complete
-def BundleFpmcuUnittests(
-    input_proto: artifacts_pb2.BundleRequest,
-    output_proto: artifacts_pb2.BundleResponse,
-    _config: 'api_config.ApiConfig'):
+def BundleFpmcuUnittests(input_proto: artifacts_pb2.BundleRequest,
+                         output_proto: artifacts_pb2.BundleResponse,
+                         _config: 'api_config.ApiConfig') -> None:
   """Tar the fingerprint MCU unittest binaries for a build target.
 
   Args:
@@ -451,20 +442,19 @@ def BundleFpmcuUnittests(
   """
   output_dir = input_proto.output_dir
   chroot = controller_util.ParseChroot(input_proto.chroot)
-  sysroot_path = input_proto.sysroot.path
-  sysroot = sysroot_lib.Sysroot(sysroot_path)
+  sysroot = controller_util.ParseSysroot(input_proto.sysroot)
 
   if not chroot.exists():
-    cros_build_lib.Die('Chroot does not exist: %s', chroot.path)
+    logging.warning('Chroot does not exist: %s', chroot.path)
+    return
   elif not sysroot.Exists(chroot=chroot):
-    cros_build_lib.Die('Sysroot does not exist: %s',
-                       chroot.full_path(sysroot.path))
+    logging.warning('Sysroot does not exist: %s', sysroot.path)
+    return
 
   archive = artifacts.BundleFpmcuUnittests(chroot, sysroot, output_dir)
 
-  if archive is None:
-    logging.warning(
-        'No fpmcu unittests found for %s.', sysroot_path)
+  if not archive:
+    logging.warning('No fpmcu unittests found for %s.', sysroot.path)
     return
 
   output_proto.artifacts.add().path = archive
@@ -512,34 +502,22 @@ def _BundleChromeOSConfigResponse(input_proto, output_proto, _config):
 
 @faux.success(_BundleChromeOSConfigResponse)
 @faux.empty_error
+@validate.require('sysroot.path')
 @validate.exists('output_dir')
 @validate.validation_complete
 def BundleChromeOSConfig(
     input_proto: artifacts_pb2.BundleRequest,
     output_proto: artifacts_pb2.BundleResponse,
-    _config: 'api_config.ApiConfig'):
-  """Output the ChromeOS Config payload for a build target.
-
-  Args:
-    input_proto: The input proto.
-    output_proto: The output proto.
-    _config: The API call config.
-  """
+    _config: 'api_config.ApiConfig') -> None:
+  """Output the ChromeOS Config payload for a build target."""
   output_dir = input_proto.output_dir
-  sysroot_path = input_proto.sysroot.path
   chroot = controller_util.ParseChroot(input_proto.chroot)
+  sysroot = controller_util.ParseSysroot(input_proto.sysroot)
 
-  # TODO(mmortensen) Cleanup legacy handling after it has been switched over.
-  target = input_proto.build_target.name
-  if target:
-    # Legacy handling.
-    build_root = constants.SOURCE_ROOT
-    chroot = chroot_lib.Chroot(path=os.path.join(build_root, 'chroot'))
-    sysroot_path = os.path.join('/build', target)
-
-  sysroot = sysroot_lib.Sysroot(sysroot_path)
   chromeos_config = artifacts.BundleChromeOSConfig(chroot, sysroot, output_dir)
+
   if not chromeos_config:
+    logging.warning('Could not create ChromeOS Config for %s.', sysroot.path)
     return
 
   output_proto.artifacts.add().path = os.path.join(output_dir, chromeos_config)

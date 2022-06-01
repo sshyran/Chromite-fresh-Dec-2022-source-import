@@ -439,40 +439,26 @@ class BundleChromeOSConfigTest(BundleTestCase):
   def testValidateOnly(self):
     """Quick check that a validate only call does not execute any logic."""
     patch = self.PatchObject(artifacts_svc, 'BundleChromeOSConfig')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
+    artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.validate_only_config)
     patch.assert_not_called()
 
   def testMockCall(self):
     """Test that a mock call does not execute logic, returns mocked value."""
     patch = self.PatchObject(artifacts_svc, 'BundleChromeOSConfig')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
+    artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.mock_call_config)
     patch.assert_not_called()
     self.assertEqual(len(self.response.artifacts), 1)
     self.assertEqual(self.response.artifacts[0].path,
                      os.path.join(self.output_dir, 'config.yaml'))
 
-  def testBundleChromeOSConfigCallWithSysroot(self):
-    """Call with a request that sets sysroot."""
+  def testBundleChromeOSConfigSuccess(self):
+    """Test standard success case."""
     bundle_chromeos_config = self.PatchObject(
         artifacts_svc, 'BundleChromeOSConfig', return_value='config.yaml')
     artifacts.BundleChromeOSConfig(self.sysroot_request, self.response,
                                    self.api_config)
-    self.assertEqual(
-        [artifact.path for artifact in self.response.artifacts],
-        [os.path.join(self.output_dir, 'config.yaml')])
-
-    self.assertEqual(bundle_chromeos_config.call_args_list,
-                     [mock.call(mock.ANY, self.sysroot, self.output_dir)])
-
-  def testBundleChromeOSConfigCallWithBuildTarget(self):
-    """Call with a request that sets build_target."""
-    bundle_chromeos_config = self.PatchObject(
-        artifacts_svc, 'BundleChromeOSConfig', return_value='config.yaml')
-    artifacts.BundleChromeOSConfig(self.target_request, self.response,
-                                   self.api_config)
-
     self.assertEqual(
         [artifact.path for artifact in self.response.artifacts],
         [os.path.join(self.output_dir, 'config.yaml')])
