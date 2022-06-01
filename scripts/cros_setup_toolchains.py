@@ -53,6 +53,8 @@ CROSSDEV_OVERLAY = '/usr/local/portage/crossdev'
 # want crossdev managing /etc/portage config files for the sdk
 HOST_PACKAGES = (
     'dev-lang/go',
+    'dev-lang/rust-bootstrap',
+    'dev-lang/rust-host',
     'dev-libs/elfutils',
     'sys-devel/binutils',
     'sys-devel/gcc',
@@ -69,7 +71,6 @@ HOST_PACKAGES = (
 # build), so we have to delay their installation.
 HOST_POST_CROSS_PACKAGES = (
     'dev-lang/rust',
-    'dev-lang/rust-bootstrap',
     'virtual/target-sdk-post-cross',
     'dev-embedded/coreboot-sdk',
     'dev-embedded/hps-sdk',
