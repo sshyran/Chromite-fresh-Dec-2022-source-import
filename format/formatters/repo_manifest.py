@@ -206,6 +206,11 @@ def Data(data: str) -> str:
             if not first and node.nodeName not in ONE_LINE_NODES:
               buffer.write('\n' + attr_indent)
             first = False
+            # No attributes currently need leading/trailing whitespace.
+            value = value.strip()
+            # No attributes currently use embedded whitespace.  This might
+            # change, but enforce it for now until someone complains.
+            value = re.sub(r'\s+', '', value)
             buffer.write(f' {name}="{value}"')
 
         # Close the tag.
