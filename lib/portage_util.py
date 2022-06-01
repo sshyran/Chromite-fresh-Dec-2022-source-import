@@ -1761,40 +1761,6 @@ def WorkonEBuildGenerator(buildroot, overlay_type):
       yield ebuild
 
 
-def BuildFullWorkonPackageDictionary(buildroot, overlay_type, manifest):
-  """Scans all cros_workon ebuilds and build a dictionary.
-
-  Args:
-    buildroot: Path to source root to find overlays.
-    overlay_type: The type of overlay to use (one of
-      constants.VALID_OVERLAYS).
-    manifest: git.ManifestCheckout object.
-
-  Returns:
-    A dictionary mapping (project, branch) to a list of packages.
-    E.g., {('chromiumos/third_party/kernel', 'chromeos-3.14'):
-           ['sys-kernel/chromeos-kernel-3_14']}.
-  """
-  # we want (project, branch) -> package (CP or P?)
-  directory_src = os.path.join(buildroot, 'src')
-
-  pkg_map = dict()
-  for ebuild in WorkonEBuildGenerator(buildroot, overlay_type):
-    if ebuild.is_manually_uprevved:
-      continue
-    package = ebuild.package
-    paths = ebuild.GetSourceInfo(directory_src, manifest).srcdirs
-    for path in paths:
-      checkout = manifest.FindCheckoutFromPath(path)
-      project = checkout['name']
-      branch = git.StripRefs(checkout['tracking_branch'])
-      pkg_list = pkg_map.get((project, branch), [])
-      pkg_list.append(package)
-      pkg_map[(project, branch)] = pkg_list
-
-  return pkg_map
-
-
 def GetWorkonProjectMap(overlay, subdirectories):
   """Get a mapping of cros_workon ebuilds to projects and source paths.
 
