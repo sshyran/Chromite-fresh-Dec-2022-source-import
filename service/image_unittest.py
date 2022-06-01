@@ -4,6 +4,7 @@
 
 """Image API unittests."""
 
+import errno
 import os
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
 from chromite.service import image
 
@@ -24,19 +26,13 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
     osutils.Touch(
         os.path.join(self.tempdir, image.PARALLEL_EMERGE_STATUS_FILE_NAME))
     self.PatchObject(osutils.TempDir, '__enter__', return_value=self.tempdir)
+    self.PatchObject(portage_util, 'GetBoardUseFlags', return_value='')
 
-  def testInsideChrootCommand(self):
-    """Test the build_image command when called from inside the chroot."""
-    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=True)
+  def testCommand(self):
+    """Test the build_image command."""
     image.Build('board', [constants.IMAGE_TYPE_BASE])
     self.assertCommandContains(
-        [os.path.join(constants.CROSUTILS_DIR, 'build_image.sh')])
-
-  def testOutsideChrootCommand(self):
-    """Test the build_image command when called from outside the chroot."""
-    self.PatchObject(cros_build_lib, 'IsInsideChroot', return_value=False)
-    image.Build('board', [constants.IMAGE_TYPE_BASE])
-    self.assertCommandContains(['./build_image.sh'])
+        [Path(constants.CROSUTILS_DIR) / 'build_image.sh'])
 
   def testBuildBoardHandling(self):
     """Test the argument handling."""
@@ -58,7 +54,8 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
 
     # Should be using the argument when passed.
     image.Build('board', [constants.IMAGE_TYPE_DEV])
-    self.assertCommandContains([constants.IMAGE_TYPE_DEV])
+    self.assertCommandContains(
+        [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_DEV]])
 
     # Multiple should all be passed.
     multi = [
@@ -67,11 +64,19 @@ class BuildImageTest(cros_test_lib.RunCommandTempDirTestCase):
         constants.IMAGE_TYPE_TEST,
     ]
     image.Build('board', multi)
-    self.assertCommandContains(multi)
+    for x in multi:
+      self.assertCommandContains([constants.IMAGE_TYPE_TO_NAME[x]])
 
     # Building RECOVERY only should cause base to be built.
     image.Build('board', [constants.IMAGE_TYPE_RECOVERY])
-    self.assertCommandContains([constants.IMAGE_TYPE_BASE])
+    self.assertCommandContains(
+        [constants.IMAGE_TYPE_TO_NAME[constants.IMAGE_TYPE_BASE]])
+
+  def testInvalidBuildImageTypes(self):
+    """Test the image type handling with invalid input."""
+    build_result = image.Build(
+        'board', [constants.IMAGE_TYPE_BASE, constants.FACTORY_IMAGE_BIN])
+    self.assertEqual(build_result.return_code, errno.EINVAL)
 
 
 class BuildConfigTest(cros_test_lib.MockTestCase):

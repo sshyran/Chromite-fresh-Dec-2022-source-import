@@ -669,7 +669,8 @@ def GetImagesToBuild(image_types: List[str]) -> Set[str]:
     A list of image name to build.
 
   Raises:
-    ValueError if an invalid image type is given as input.
+    ValueError if an invalid image type is given as input or if factory shim
+    image is requested along with any other image type.
   """
   image_names = set()
 
@@ -677,6 +678,10 @@ def GetImagesToBuild(image_types: List[str]) -> Set[str]:
     if image not in constants.IMAGE_TYPE_TO_NAME:
       raise ValueError(f'Invalid image type : {image}')
     image_names.add(constants.IMAGE_TYPE_TO_NAME[image])
+
+  if constants.FACTORY_IMAGE_BIN in image_names and len(image_names) > 1:
+    raise ValueError(
+        f"Can't build {constants.FACTORY_IMAGE_BIN} with any other image.")
 
   return image_names
 

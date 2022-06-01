@@ -604,6 +604,12 @@ class GetImagesToBuildTests(cros_test_lib.MockTestCase):
     with self.assertRaises(ValueError):
       image_lib.GetImagesToBuild([constants.IMAGE_TYPE_DEV, 'invalid'])
 
+  def testInvalidImageCombination(self):
+    """Pass in an invalid image type combination and check for ValueError."""
+    with self.assertRaises(ValueError):
+      image_lib.GetImagesToBuild([constants.IMAGE_TYPE_DEV,
+                                  constants.FACTORY_IMAGE_BIN])
+
 
 class GetBuildImageEnvvarTests(cros_test_lib.MockTestCase):
   """Tests the GetBuildImageEnvvars function."""

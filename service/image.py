@@ -4,6 +4,7 @@
 
 """The Image API is the entry point for image functionality."""
 
+import errno
 import logging
 import os
 from pathlib import Path
@@ -207,24 +208,31 @@ def Build(board: str,
   Returns:
     BuildResult
   """
+  cros_build_lib.AssertInsideChroot()
+
   if not board:
     raise InvalidArgumentError('A build target name is required.')
 
   build_result = BuildResult(images[:])
   if not images:
     return build_result
+
   config = config or BuildConfig()
+  try:
+    image_names = image_lib.GetImagesToBuild(images)
+  except ValueError:
+    logging.error('Invalid image types requested: %s', ' '.join(images))
+    build_result.return_code = errno.EINVAL
+    return build_result
+  logging.info('The following images will be built %s', ' '.join(image_names))
 
-  if cros_build_lib.IsInsideChroot():
-    cmd = [os.path.join(constants.CROSUTILS_DIR, 'build_image.sh')]
-  else:
-    cmd = ['./build_image.sh']
-
+  cmd = [Path(constants.CROSUTILS_DIR) / 'build_image.sh']
   cmd.extend(config.GetArguments())
   cmd.extend(['--board', board])
-  cmd.extend(images)
+  cmd.extend(image_names)
 
-  extra_env_local = extra_env.copy() if extra_env else {}
+  extra_env_local = image_lib.GetBuildImageEnvvars(image_names, board,
+                                                   extra_env)
 
   with osutils.TempDir() as tempdir:
     status_file = os.path.join(tempdir, PARALLEL_EMERGE_STATUS_FILE_NAME)
