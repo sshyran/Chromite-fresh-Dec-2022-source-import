@@ -650,7 +650,6 @@ def GenerateCpeReport(chroot: 'chroot_lib.Chroot',
   # Call cros_extract_deps to create the report that the export produced.
   # We'll assume the basename for the board name to match how these were built
   # out in the old system.
-  # TODO(saklein): Can we remove the board name from the report file names?
   build_target = os.path.basename(sysroot.path)
   report_path = os.path.join(output_dir,
                              CPE_RESULT_FILE_TEMPLATE % build_target)

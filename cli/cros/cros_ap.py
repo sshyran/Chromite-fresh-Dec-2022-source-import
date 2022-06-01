@@ -145,7 +145,6 @@ class BuildSubcommand(command.CliCommand):
         dest='fw_name',
         help='Sets the FW_NAME environment variable. Set to build only the '
         "specified variant's firmware.")
-    # TODO(saklein): Remove when added to base parser.
     parser.add_argument(
         '-n',
         '--dry-run',
@@ -384,7 +383,6 @@ class CleanSubcommand(command.CliCommand):
         default=cros_build_lib.GetDefaultBoard(),
         required=not bool(cros_build_lib.GetDefaultBoard()),
         help='The build target whose artifacts should be cleaned.')
-    # TODO(saklein): Remove when added to base parser.
     parser.add_argument(
         '-n',
         '--dry-run',

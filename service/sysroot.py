@@ -452,7 +452,6 @@ def SetupBoard(target: 'build_target_lib.BuildTarget',
     sysroot_lib.ToolchainInstallError when the toolchain fails to install.
   """
   if not cros_build_lib.IsInsideChroot():
-    # TODO(saklein) switch to build out command and run inside chroot.
     raise NotInChrootError('SetupBoard must be run from inside the chroot')
 
   # Make sure we have valid run configs setup.

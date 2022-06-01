@@ -166,9 +166,6 @@ class BlockedTest(image_test_lib.ImageTestCase):
     """Fail if any blocked files exist."""
     for path in self.BLOCKED_FILES:
       full_path = os.path.join(image_test_lib.ROOT_A, path.lstrip(os.sep))
-      # TODO(saklein) Convert ImageTestCase to extend cros_build_lib.unittest
-      # and change to an assertNotExists. Currently produces an error importing
-      # mox on at least some builders.
       self.assertFalse(os.path.exists(full_path),
                        'Path exists but should not: %s' % full_path)
 
