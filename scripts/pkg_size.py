@@ -4,11 +4,13 @@
 
 """The Package Size Reporting CLI entry point."""
 
-import json
-
 from chromite.lib import commandline
 from chromite.lib import metrics_lib
 from chromite.lib import portage_util
+from chromite.utils import pformat
+
+
+_PARTITION_NAMES = ['rootfs', 'stateful']
 
 
 def _get_parser():
@@ -25,6 +27,7 @@ def _get_parser():
       'e.g. [base, dev, test]')
   parser.add_argument(
       '--partition-name',
+      choices=_PARTITION_NAMES,
       help='Specify the partition name. '
       'e.g. [rootfs, stateful]')
   parser.add_argument(
@@ -57,7 +60,11 @@ def generate_package_size_report(db, root, image_type, partition_name,
       'total_size.%s.%s' % (image_type, partition_name),
       metrics_lib.OP_GAUGE,
       arg=total_size)
-  return {'root': root, 'package_sizes': results, 'total_size': total_size}
+  return {'root': root,
+          'package_sizes': results,
+          'total_size': total_size,
+          'package_database_path': db.db_path,
+          'package_install_path': db.package_install_path}
 
 
 def main(argv):
@@ -68,7 +75,13 @@ def main(argv):
   opts = parser.parse_args(argv)
   opts.Freeze()
 
-  db = portage_util.PortageDB(root=opts.root)
+  vdb = package_install_path = ''
+  if opts.partition_name == 'stateful':
+    vdb = 'var_overlay/db/pkg'
+    package_install_path = 'dev_image'
+  db = portage_util.PortageDB(root=opts.root,
+                              vdb=vdb,
+                              package_install_path=package_install_path)
 
   if opts.packages:
     installed_packages = portage_util.GenerateInstalledPackages(
@@ -79,4 +92,4 @@ def main(argv):
   results = generate_package_size_report(db, opts.root, opts.image_type,
                                          opts.partition_name,
                                          installed_packages)
-  print(json.dumps(results))
+  print(pformat.json(results))

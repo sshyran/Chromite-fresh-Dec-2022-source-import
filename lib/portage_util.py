@@ -1268,14 +1268,21 @@ class PortageDBError(Error):
 class PortageDB(object):
   """Wrapper class to access the portage database located in var/db/pkg."""
 
-  def __init__(self, root='/'):
+  def __init__(self, root: os.PathLike = '/', vdb: Optional[os.PathLike] = None,
+               package_install_path: Optional[os.PathLike] = None):
     """Initialize the internal structure for the database in the given root.
 
     Args:
       root: The path to the root to inspect, for example "/build/foo".
+      vdb: Known path to package database in the partition. Defaults to
+        VDB_PATH.
+      package_install_path: The subdirectory path from the root where installed
+        files are stored. e.g. for stateful partitions on test images,
+        'dev_image'.
     """
     self.root = root
-    self.db_path = os.path.join(root, VDB_PATH)
+    self.package_install_path = os.path.join(root, package_install_path or '')
+    self.db_path = os.path.join(root, vdb or VDB_PATH)
     self._ebuilds = {}
 
   def GetInstalledPackage(self, category, pv):
@@ -2726,7 +2733,7 @@ def GeneratePackageSizes(db, root, installed_packages):
                                  (package_cpv, root))
     for content_type, path in installed_package.ListContents():
       if content_type == InstalledPackage.OBJ:
-        filename = os.path.join(db.root, path)
+        filename = os.path.join(db.package_install_path, path)
         try:
           filesize = os.path.getsize(filename)
         except OSError as e:
