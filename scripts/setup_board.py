@@ -37,7 +37,8 @@ def GetParser():
   parser.add_argument('--usepkg', action='store_true', default=True,
                       dest='usepkg', help='Use binary packages to bootstrap.')
   parser.add_argument('--nousepkg', action='store_false', default=True,
-                      dest='usepkg', help='Use binary packages to bootstrap.')
+                      dest='usepkg',
+                      help='Do not use binary packages to bootstrap.')
 
   advanced = parser.add_argument_group('Advanced Options')
   advanced.add_argument('--accept-licenses',
